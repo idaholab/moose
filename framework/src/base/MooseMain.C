@@ -31,16 +31,26 @@ addMainCommandLineParams(InputParameters & params)
       "Specify one or multiple input files. Multiple files get merged into a single simulation "
       "input.");
 
-  input_param.addCommandLineParam<std::string>(
+  params.addCommandLineParam<std::string>(
       "application_type", "Application/type=<app_type>", "Specify the application type.");
+}
 
-  command_line->addCommandLineOptionsFromParams(input_param);
+std::shared_ptr<MooseApp>
+createMooseApp(const std::string & default_app_name, int argc, char * argv[])
+{
+  auto command_line = std::make_shared<CommandLine>(argc, argv);
 
-  std::vector<std::string> input_filename;
+  {
+    auto input_param = emptyInputParameters();
+    addMainCommandLineParams(input_param);
+    command_line->addCommandLineOptionsFromParams(input_param);
+  }
+
+  std::vector<std::string> input_filenames;
   std::string cl_app_type;
 
   // Get command line arguments
-  command_line->search("input_file", input_filename);
+  command_line->search("input_file", input_filenames);
   command_line->search("application_type", cl_app_type);
 
   // loop over all the command line arguments and error out when the user uses Application block for
@@ -59,14 +69,15 @@ addMainCommandLineParams(InputParameters & params)
     parser->parse();
 
   // Check whether the application name given in [Application] block is registered or not
-  auto app_type = front_parser->getAppType();
+  auto app_type = parser->getAppType();
   if (!cl_app_type.empty())
     app_type = cl_app_type;
+  std::cout << "app_type: " << app_type << std::endl;
   if (!app_type.empty())
     if (!AppFactory::instance().isRegistered(app_type))
       mooseError("'", app_type, "' is not a registered application name.\n");
-}
+
 // Create an instance of the application and store it in a smart pointer for easy cleanup
-return AppFactory::createAppShared(default_app_name, argc, argv, std::move(front_parser));
+  return AppFactory::createAppShared(default_app_name, argc, argv, std::move(parser));
 }
 }

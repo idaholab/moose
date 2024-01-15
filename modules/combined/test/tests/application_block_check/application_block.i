@@ -14,5 +14,3 @@
   type = Steady
 []
 
-[Application]
-[]

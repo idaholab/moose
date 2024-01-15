@@ -165,15 +165,16 @@ public:
    */
   std::filesystem::path getLastInputFilePath() const { return getLastInputFileName(); }
 
-  /// The app types extracted from [Application] block
-  std::string _app_type;
-
 private:
   /// The root node, which owns the whole tree
   std::unique_ptr<hit::Node> _root;
 
   /// The input file names
   const std::vector<std::string> _input_filenames;
+
   /// The optional input text (to augment reading a single input with the MooseServer)
   const std::optional<std::string> _input_text;
+
+  /// The app types extracted from [Application] block
+  std::string _app_type;
 };
