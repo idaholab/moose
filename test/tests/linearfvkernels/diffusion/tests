@@ -1,0 +1,11 @@
+[Tests]
+  design = 'LinearFVDiffusionKernel.md'
+  issues = '#25722'
+  [mms-diffusion-1d-cd]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestDiffusion1D
+    requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain.'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]

@@ -2,7 +2,7 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 16
+    nx = 2
   []
 []
 
@@ -62,7 +62,11 @@
 []
 
 [Postprocessors]
-  [l2error]
+  [h]
+    type = AverageElementSize
+    execute_on = FINAL
+  []
+  [error]
     type = ElementL2FunctorError
     approximate = u
     exact = analytic_solution
