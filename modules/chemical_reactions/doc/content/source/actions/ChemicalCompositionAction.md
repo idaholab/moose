@@ -1,4 +1,4 @@
-# ChemicalComposition
+# ChemicalComposition Action
 
 !alert note title=For Use with Thermochimica
 This action is designed for use with the thermochemistry library Thermochimica [!cite](piro2013). Check out the corresponding submodule by running `git submodule update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
@@ -49,13 +49,13 @@ The names of scalar variables listed in `phases` vector and created using `Chemi
 The format for entries in `output_species` must be `phase_name:species_name` or `ALL`, and both must match the specified thermodynamic database.
 
 !alert note
-The format for entries in `output_element_potentials` must be `any_string:element_name`  or `ALL`.
+The format for entries in `output_element_potentials` must be `mu:element_name`  or `ALL`.
 
 !alert note
-The format for entries in `output_vapor_pressures` must be `any_string:gas_phase_name:species_name`  or `ALL`. The phase name must correspond to the gas phase in the thermodynamic database.
+The format for entries in `output_vapor_pressures` must be `vp:gas_phase_name:species_name`  or `ALL`. The phase name must correspond to the gas phase in the thermodynamic database.
 
 !alert note
-The format for entries in `output_element_phases` must be `any_string:phase_name:element_name`  or `ALL`.
+The format for entries in `output_element_phases` must be `ep:phase_name:element_name`  or `ALL`.
 
 The variables created by this action will be used by the UserObject `ThermochimicaNodalData` (or, more likely, a derived class specific to the application) to generate arrays in which to store the indices of the requested phases in Thermochimica calculation results, and to store the corresponding concentration values.
 

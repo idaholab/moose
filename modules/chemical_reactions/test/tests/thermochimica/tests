@@ -47,13 +47,13 @@
     required_submodule = 'contrib/thermochimica'
   []
 
-  [MoRu_block-restrict]
+  [MoRu_subblock]
     type = Exodiff
-    input = MoRu_block-restrict.i
-    exodiff = MoRu_block-restrict_out.e
+    input = MoRu_subblock.i
+    exodiff = MoRu_subblock_out.e
     design = 'ChemicalCompositionAction.md '
-    issues = '#26346'
-    requirement = 'The system shall be able to run Thermochimica on only the specified blocks'
+    issues = '#26376'
+    requirement = 'The system shall be able to run different instances of Thermochimica on different sub-blocks'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
