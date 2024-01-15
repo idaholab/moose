@@ -15,6 +15,10 @@
 
 #include "libmesh/mesh_tools.h"
 
+const std::string MeshGeneratorSystem::data_driven_generator_param = "data_driven_generator";
+const std::string MeshGeneratorSystem::allow_data_driven_param =
+    "allow_data_driven_mesh_generation";
+
 MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
@@ -330,15 +334,23 @@ MeshGeneratorSystem::executeMeshGenerators()
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
   std::set<const MeshGenerator *> data_only_generators;
   if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
-      moose_mesh->isParamValid("data_driven_generator"))
+      moose_mesh->isParamValid(data_driven_generator_param))
   {
+    if (!hasDataDrivenAllowed())
+      moose_mesh->paramError(
+          data_driven_generator_param,
+          "This application does not support data-driven mesh generation.\n\nThis generation is an "
+          "advanced feature and must be enabled on the application via the '",
+          allow_data_driven_param,
+          "' parameter.");
+
     mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
                 "Assumption for mesh type is now invalid");
 
     const auto & data_driven_generator_name =
-        moose_mesh->parameters().get<std::string>("data_driven_generator");
+        moose_mesh->parameters().get<std::string>(data_driven_generator_param);
     if (!hasMeshGenerator(data_driven_generator_name))
-      moose_mesh->paramError("data_driven_generator",
+      moose_mesh->paramError(data_driven_generator_param,
                              "The data driven generator '",
                              data_driven_generator_name,
                              "' does not exist");
@@ -350,14 +362,14 @@ MeshGeneratorSystem::executeMeshGenerators()
       if (generator.isChildMeshGenerator(data_driven_generator_name, false))
       {
         if (!generator.hasGenerateData())
-          moose_mesh->paramError("data_driven_generator",
+          moose_mesh->paramError(data_driven_generator_param,
                                  "The generator '",
                                  data_driven_generator_name,
                                  "' cannot be used in data-driven mode because the parent ",
                                  generator.typeAndName(),
                                  " does not support data-driven generation");
         if (generator.hasSaveMesh())
-          moose_mesh->paramError("data_driven_generator",
+          moose_mesh->paramError(data_driven_generator_param,
                                  "The generator '",
                                  data_driven_generator_name,
                                  "' cannot be used in data-driven mode because the parent ",
@@ -626,4 +638,10 @@ bool
 MeshGeneratorSystem::appendingMeshGenerators() const
 {
   return _app.actionWarehouse().getCurrentTaskName() == "append_mesh_generator";
+}
+
+bool
+MeshGeneratorSystem::hasDataDrivenAllowed() const
+{
+  return _app.parameters().get<bool>(allow_data_driven_param);
 }

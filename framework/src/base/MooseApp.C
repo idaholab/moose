@@ -337,6 +337,11 @@ MooseApp::validParams()
       true,
       "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
 
+  params.addParam<bool>(
+      MeshGeneratorSystem::allow_data_driven_param,
+      false,
+      "Set true to enable data-driven mesh generation, which is an experimental feature");
+
   MooseApp::addAppParam(params);
 
   return params;

@@ -9,6 +9,8 @@
 
 #include "MeshGeneratorMesh.h"
 
+#include "MeshGeneratorSystem.h"
+
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
 
@@ -22,7 +24,7 @@ MeshGeneratorMesh::validParams()
 
   params.addParam<std::string>("final_generator",
                                "The name of the mesh generator output to use for the final Mesh");
-  params.addParam<std::string>("data_driven_generator",
+  params.addParam<std::string>(MeshGeneratorSystem::data_driven_generator_param,
                                "Set to make all dependencies of this mesh generator run in data "
                                "driven mode, where a mesh is not generated");
 
