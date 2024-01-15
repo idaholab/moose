@@ -1,6 +1,6 @@
 [Tests]
-  design = 'TO DO'
-  issues = 'TO DO'
+  design = 'MeshGenerator.md'
+  issues = '#26295'
 
   [test]
     type = 'Exodiff'
@@ -10,6 +10,46 @@
     exodiff_opts = '-pedantic'
     recover = false
 
-    requirement = 'TO DO'
+    requirement = 'The system shall support the generation of meshes in a data-driven mode, where not each step in the generation tree is required to produce a physical mesh and can instead only produce metadata'
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when generating a mesh with data-driven capabilities when'
+
+    [missing]
+      type = RunException
+      input = 'data_driven.i'
+      detail = 'the specified data-driven generator does not exist'
+      cli_args = 'Mesh/data_driven_generator=ski_tha_ghee'
+      expect_err = "The data driven generator \'ski_tha_ghee\' does not exist"
+    []
+    [parent_unsupported]
+      type = RunException
+      input = 'data_driven.i'
+      detail = 'the specified data-driven generator does not exist'
+      cli_args = 'Mesh/ny/type=GeneratedMeshGenerator
+                  Mesh/ny/dim=2'
+      expect_err = "The generator \'mesh\' cannot be used in data-driven mode because the parent GeneratedMeshGenerator \"ny\" does not support data\-driven generation"
+    []
+    [parent_save_with_name]
+      type = RunException
+      input = 'data_driven.i'
+      detail = 'the specified data-driven generator does not exist'
+      cli_args = 'Mesh/ny/save_with_name=altabird'
+      expect_err = "The generator \'mesh\' cannot be used in data-driven mode because the parent TestDataDrivenGenerator \"ny\" has \'save_with_name\' set"
+    []
+    [unimplimented]
+      type = RunException
+      input = 'unimplimented.i'
+      detail = 'a mesh generator is requested to generate data that does not have a data generation implementation'
+      expect_err = "This MeshGenerator does not have a generateData\(\) implementation."
+    []
+    [disabled]
+      type = RunException
+      input = 'data_driven.i'
+      cli_args = '--disallow-test-objects'
+      detail = 'the application does not allow data-driven generation'
+      expect_err = "This application does not support data-driven mesh generation."
+    []
   []
 []

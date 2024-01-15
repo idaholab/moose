@@ -20,3 +20,11 @@
   []
   data_driven_generator = mesh
 []
+
+[Problem]
+  solve = false
+[]
+
+[Executioner]
+  type = Steady
+[]
