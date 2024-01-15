@@ -22,7 +22,7 @@
     thermofile = Kaye_NobleMetals.dat
     output_phases = 'BCCN HCPN'
     output_species = 'BCCN:Mo'
-    temperature = T
+    is_fv = false
     output_species_unit = mole_fraction
   []
   [block_1]
@@ -31,7 +31,6 @@
     thermofile = FeTiVO.dat
     output_phases = 'gas_ideal'
     output_species = 'SlagBsoln:Fe2O3'
-    temperature = T
     output_species_unit = moles
   []
 []
@@ -53,13 +52,13 @@
     type = FunctionIC
     variable = O
     function = '2.0*(1-x)+1.6*x'
-    # block = '1'
+    block = '1'
   []
   [Fe]
     type = FunctionIC
     variable = Fe
     function = '0.5*(1-x)+0.25*x'
-    # block = '1'
+    block = '1'
   []
 []
 

@@ -88,7 +88,7 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
     _action(*parameters.getCheckedPointerParam<ChemicalCompositionAction *>(
         "_chemical_composition_action")),
     _el_ids(_action.elementIDs()),
-    _reinit((_action.reinitializationType()).getEnum<ReinitializationType>()),
+    _reinit(parameters.get<MooseEnum>("reinit_type").getEnum<ReinitializationType>()),
     _ph_names(_action.phases()),
     _element_potentials(_action.elementPotentials()),
     _species_phase_pairs(_action.speciesPhasePairs()),
@@ -102,7 +102,7 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
     _vp(_n_vapor_species),
     _el_pot(_n_potentials),
     _el_ph(_n_phase_elements),
-    _output_mass_unit((_action.outputSpeciesUnit()).getEnum<OutputMassUnit>())
+    _output_mass_unit(parameters.get<MooseEnum>("output_species_unit").getEnum<OutputMassUnit>())
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 

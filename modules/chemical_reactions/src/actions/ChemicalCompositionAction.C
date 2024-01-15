@@ -39,7 +39,8 @@ ChemicalCompositionAction::validParams()
                                           "thermochemistry solve using Thermochimica.");
 
   // Required variables
-  params.addParam<std::vector<std::string>>("elements", "List of chemical elements (or ALL)");
+  params.addParam<std::vector<std::string>>(
+      "elements", {"ALL"}, "List of chemical elements (or ALL)");
   params.addCoupledVar("temperature", "Name of temperature variable");
   params.addCoupledVar("pressure", "Name of pressure variable");
   MooseEnum reinit_type("none time nodal", "nodal");
@@ -48,18 +49,19 @@ ChemicalCompositionAction::validParams()
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
-  MooseEnum tUnit("K C F R");
+  MooseEnum tUnit("K C F R", "K");
   params.addParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
-  MooseEnum pUnit("atm psi bar Pa kPa");
+  MooseEnum pUnit("atm psi bar Pa kPa", "atm");
   params.addParam<MooseEnum>("punit", pUnit, "Pressure Unit");
   MooseEnum mUnit(
-      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds");
+      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds",
+      "moles");
   params.addParam<MooseEnum>("munit", mUnit, "Mass Unit");
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>(
       "execute_on", exec_enum, "When to execute the ThermochimicaData UO");
-  params.addParam<bool>("is_fv", "Should the variables set up by action be of FV type");
+  params.addParam<bool>("is_fv", false, "Should the variables set up by action be of FV type");
 
   params.addParam<std::vector<std::string>>("output_phases", {}, "List of phases to be output");
   params.addParam<std::vector<std::string>>(
@@ -84,54 +86,28 @@ ChemicalCompositionAction::validParams()
   return params;
 }
 
-ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & params)
-  : Action(params),
-    _combined_params(emptyInputParameters()),
-    _common_action(_awh.getActions<CommonChemicalCompositionAction>().empty()
-                       ? nullptr
-                       : *_awh.getActions<CommonChemicalCompositionAction>().begin())
+ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & parameters)
+  : Action(parameters)
 {
-  _combined_params += _common_action->parameters();
-  _combined_params.applyParameters(params);
+  const auto & params = _app.getInputParameterWarehouse().getInputParameters();
+  InputParameters & pars(*(params.find(uniqueActionName())->second.get()));
 
-  if (isParamValid("elements"))
-    _combined_params.set<std::vector<std::string>>("elements") =
-        getParam<std::vector<std::string>>("elements");
-  else if ((_combined_params.get<std::vector<std::string>>("elements"))[0] != "ALL")
-    paramWarning("elements", "Using common elements set for ChemicalComposition action");
-  else
-    paramWarning("elements", "Elements not set. Using option 'ALL'");
+  // check if a container block with common parameters is found
+  auto action = _awh.getActions<CommonChemicalCompositionAction>();
+  if (action.size() == 1)
+    pars.applyParameters(action[0]->parameters());
 
-  if (isParamValid("temperature"))
-    _combined_params.set<std::vector<VariableName>>("temperature") =
-        getParam<std::vector<VariableName>>("temperature");
-  else if (_combined_params.isParamValid("temperature"))
-  {
-  }
-  else
+  if (!isParamValid("temperature"))
     paramError("temperature",
                "Temperature variable must be specified for this object to be constructed");
-
-  if (isParamValid("pressure"))
-    _combined_params.set<std::vector<VariableName>>("pressure") =
-        getParam<std::vector<VariableName>>("pressure");
-  else if (_combined_params.isParamValid("pressure"))
-  {
-  }
-  else
-    paramWarning("pressure", "Pressure variable not specified. Using default values");
 
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
 #ifdef THERMOCHIMICA_ENABLED
   // Initialize database in Thermochimica
-  if (_combined_params.isParamValid("thermofile"))
+  if (isParamValid("thermofile"))
   {
-    const auto thermo_file = _combined_params.get<FileName>("thermofile");
-
-    // // check if file exists, otherwise.. NOT paramError, but
-    // auto param_prefix = paramErrorPrefix(_combined_params, "thermofile");
-    // mooseError(param_prefix, "File not found");
+    const auto thermo_file = getParam<FileName>("thermofile");
 
     if (thermo_file.length() > 1024)
       paramError("thermofile",
@@ -151,21 +127,21 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   }
 
   // Set thermochimica units
-  auto tunit = Moose::stringify(_combined_params.get<MooseEnum>("tunit"));
+  auto tunit = Moose::stringify(getParam<MooseEnum>("tunit"));
   Thermochimica::checkTemperature(tunit);
   Thermochimica::setUnitTemperature(tunit);
   int idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
     paramError("tunit", "Cannot set temperature unit in Thermochimica", idbg);
 
-  auto punit = Moose::stringify(_combined_params.get<MooseEnum>("punit"));
+  auto punit = Moose::stringify(getParam<MooseEnum>("punit"));
   Thermochimica::checkPressure(punit);
   Thermochimica::setUnitPressure(punit);
   idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
     paramError("punit", "Cannot set pressure unit in Thermochimica", idbg);
 
-  auto munit = Moose::stringify(_combined_params.get<MooseEnum>("munit"));
+  auto munit = Moose::stringify(getParam<MooseEnum>("munit"));
   std::replace(munit.begin(), munit.end(), '_', ' ');
   Thermochimica::checkMass(munit);
   Thermochimica::setUnitMass(munit);
@@ -173,7 +149,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   if (idbg != 0)
     paramError("munit", "Cannot set mass unit in Thermochimica", idbg);
 
-  _elements = _combined_params.get<std::vector<std::string>>("elements");
+  _elements = getParam<std::vector<std::string>>("elements");
   if (_elements.size() == 1 && _elements[0] == "ALL")
   {
     _elements.resize(Thermochimica::getNumberElementsDatabase());
@@ -205,7 +181,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   Thermochimica::setup();
 
-  if (_combined_params.isParamValid("output_phases"))
+  if (isParamValid("output_phases"))
   {
     _phases = getParam<std::vector<std::string>>("output_phases");
     if (_phases.size() == 1 && _phases[0] == "ALL")
@@ -225,9 +201,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
-  if (_combined_params.isParamValid("output_species"))
+  if (isParamValid("output_species"))
   {
-    auto species = _combined_params.get<std::vector<std::string>>("output_species");
+    auto species = getParam<std::vector<std::string>>("output_species");
     auto db_phases = Thermochimica::getPhaseNamesSystem();
     auto n_db_species = Thermochimica::getNumberSpeciesSystem();
     auto db_species = Thermochimica::getSpeciesSystem();
@@ -249,8 +225,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
       species.clear();
       _tokenized_species.clear();
-      for (const auto i : index_range(db_species))
-        for (const auto j : index_range(species[i]))
+      for (const auto i : index_range(db_phases))
+        for (const auto j : index_range(db_species[i]))
         {
           species.push_back(db_phases[i] + ":" + db_species[i][j]);
           _tokenized_species.push_back(std::make_pair(db_phases[i], db_species[i][j]));
@@ -283,10 +259,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       }
   }
 
-  if (_combined_params.isParamValid("output_element_potentials"))
+  if (isParamValid("output_element_potentials"))
   {
-    auto element_potentials =
-        _combined_params.get<std::vector<std::string>>("output_element_potentials");
+    auto element_potentials = getParam<std::vector<std::string>>("output_element_potentials");
     if (element_potentials.size() == 1 && element_potentials[0] == "ALL")
     {
       _tokenized_element_potentials.resize(_elements.size());
@@ -320,9 +295,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
-  if (_combined_params.isParamValid("output_vapor_pressures"))
+  if (isParamValid("output_vapor_pressures"))
   {
-    auto vapor_pressures = _combined_params.get<std::vector<std::string>>("output_vapor_pressures");
+    auto vapor_pressures = getParam<std::vector<std::string>>("output_vapor_pressures");
     if (!Thermochimica::isPhaseGas(0))
       paramError("output_vapor_pressures",
                  "No gas phase found in the simulation. Cannot output vapor pressures.");
@@ -371,9 +346,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
-  if (_combined_params.isParamValid("output_element_phases"))
+  if (isParamValid("output_element_phases"))
   {
-    auto element_phases = _combined_params.get<std::vector<std::string>>("output_element_phases");
+    auto element_phases = getParam<std::vector<std::string>>("output_element_phases");
     auto db_phases = Thermochimica::getPhaseNamesSystem();
     if (element_phases.size() == 1 && element_phases[0] == "ALL")
     {
@@ -433,12 +408,11 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_aux_variable")
   {
-
     auto aux_var_type = AddVariableAction::variableType(
         FEType(Utility::string_to_enum<Order>(_problem->mesh().hasSecondOrderElements() ? "SECOND"
                                                                                         : "FIRST"),
                Utility::string_to_enum<FEFamily>("LAGRANGE")),
-        /* is_fv = */ _combined_params.get<bool>("is_fv"),
+        /* is_fv = */ getParam<bool>("is_fv"),
         /* is_array = */ false);
     auto params = _factory.getValidParams(aux_var_type);
 
@@ -453,18 +427,19 @@ ChemicalCompositionAction::act()
           aux_var_type, Moose::stringify(_tokenized_species[i], /* delim = */ ":"), params);
 
     for (const auto i : index_range(_tokenized_element_potentials))
-      _problem->addAuxVariable(
-          aux_var_type,
-          Moose::stringify(_tokenized_element_potentials[i], /* delim = */ ":"),
-          params);
+      _problem->addAuxVariable(aux_var_type, "mu:" + _tokenized_element_potentials[i], params);
 
     for (const auto i : index_range(_tokenized_vapor_species))
-      _problem->addAuxVariable(
-          aux_var_type, Moose::stringify(_tokenized_vapor_species[i], /* delim = */ ":"), params);
+      _problem->addAuxVariable(aux_var_type,
+                               "vp:" +
+                                   Moose::stringify(_tokenized_vapor_species[i], /* delim = */ ":"),
+                               params);
 
     for (const auto i : index_range(_tokenized_phase_elements))
       _problem->addAuxVariable(
-          aux_var_type, Moose::stringify(_tokenized_phase_elements[i], /* delim = */ ":"), params);
+          aux_var_type,
+          "ep:" + Moose::stringify(_tokenized_phase_elements[i], /* delim = */ ":"),
+          params);
   }
 
   //
@@ -488,13 +463,13 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_user_object")
   {
-    std::string uo_name = _combined_params.get<std::string>("uo_name");
+    std::string uo_name = getParam<std::string>("uo_name");
 
-    if (_combined_params.isParamValid("block") && !isParamSetByUser("uo_name"))
+    if (isParamValid("block") && !isParamSetByUser("uo_name"))
       uo_name += "_" + Moose::stringify(getParam<std::vector<SubdomainName>>("block"));
 
     const auto uo_type =
-        _combined_params.get<bool>("is_fv") ? "ThermochimicaElementData" : "ThermochimicaNodalData";
+        getParam<bool>("is_fv") ? "ThermochimicaElementData" : "ThermochimicaNodalData";
 
     auto uo_params = _factory.getValidParams(uo_type);
 
@@ -502,52 +477,64 @@ ChemicalCompositionAction::act()
               _elements.end(),
               std::back_inserter(uo_params.set<std::vector<VariableName>>("elements")));
 
-    if (_combined_params.isParamValid("output_phases"))
+    if (isParamValid("output_phases"))
       std::copy(_phases.begin(),
                 _phases.end(),
                 std::back_inserter(uo_params.set<std::vector<VariableName>>("output_phases")));
 
-    if (_combined_params.isParamValid("output_species"))
+    if (isParamValid("output_species"))
     {
-      auto species = _combined_params.get<std::vector<std::string>>("output_species");
+      std::vector<std::string> species;
+      for (auto token : _tokenized_species)
+        species.push_back(Moose::stringify(token, ":"));
       uo_params.set<std::vector<VariableName>>("output_species")
           .insert(uo_params.set<std::vector<VariableName>>("output_species").end(),
                   species.begin(),
                   species.end());
     }
 
-    if (_combined_params.isParamValid("output_element_potentials"))
+    if (isParamValid("output_element_potentials"))
     {
-      auto element_potentials =
-          _combined_params.get<std::vector<std::string>>("output_element_potentials");
+      std::vector<std::string> element_potentials;
+      for (auto token : _tokenized_element_potentials)
+        element_potentials.push_back("mu:" + token);
       uo_params.set<std::vector<VariableName>>("output_element_potentials")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_potentials").end(),
                   element_potentials.begin(),
                   element_potentials.end());
     }
 
-    if (_combined_params.isParamValid("output_vapor_pressures"))
+    if (isParamValid("output_vapor_pressures"))
     {
-      auto vapor_pressures =
-          _combined_params.get<std::vector<std::string>>("output_vapor_pressures");
+      std::vector<std::string> vapor_pressures;
+      for (auto token : _tokenized_vapor_species)
+        vapor_pressures.push_back("vp:" + Moose::stringify(token, ":"));
       uo_params.set<std::vector<VariableName>>("output_vapor_pressures")
           .insert(uo_params.set<std::vector<VariableName>>("output_vapor_pressures").end(),
                   vapor_pressures.begin(),
                   vapor_pressures.end());
     }
 
-    if (_combined_params.isParamValid("output_element_phases"))
+    if (isParamValid("output_element_phases"))
     {
-      auto element_phases = _combined_params.get<std::vector<std::string>>("output_element_phases");
+      std::vector<std::string> element_phases;
+      for (auto token : _tokenized_phase_elements)
+        element_phases.push_back("ep:" + Moose::stringify(token, ":"));
       uo_params.set<std::vector<VariableName>>("output_element_phases")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_phases").end(),
                   element_phases.begin(),
                   element_phases.end());
     }
+    uo_params.set<std::vector<VariableName>>("temperature") =
+        getParam<std::vector<VariableName>>("temperature");
 
     uo_params.set<ChemicalCompositionAction *>("_chemical_composition_action") = this;
 
-    uo_params.set<FileName>("thermofile") = _combined_params.get<FileName>("thermofile");
+    uo_params.set<FileName>("thermofile") = getParam<FileName>("thermofile");
+
+    uo_params.set<MooseEnum>("reinit_type") = getParam<MooseEnum>("reinitialization_type");
+
+    uo_params.set<MooseEnum>("output_species_unit") = getParam<MooseEnum>("output_species_unit");
 
     uo_params.applyParameters(parameters());
 
@@ -560,7 +547,7 @@ ChemicalCompositionAction::act()
 void
 ChemicalCompositionAction::readCSV()
 {
-  const auto & filename = _combined_params.get<FileName>("initial_values");
+  const auto & filename = getParam<FileName>("initial_values");
   std::ifstream file(filename.c_str());
   if (!file.good())
     paramError("initial_values", "Error opening file '", filename, "'.");
