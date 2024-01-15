@@ -1,25 +1,34 @@
 # DO NOT CHANGE THIS TEST
 # this test is documented as an example in forceInv_pointLoads.md
 # if this test is changed, the figures will need to be updated.
+measurement_points = '0.5 0.28 0
+   0.5 0.6 0
+   0.5 0.8 0
+   0.5 1.1 0'
+measurement_values = '293 304 315 320'
 [Optimization]
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = 'parameter_results'
   num_values = '3'
-  measurement_points = '0.5 0.28 0
-                        0.5 0.6 0
-                        0.5 0.8 0
-                        0.5 1.1 0'
-  measurement_values = '293 304 315 320'
+[]
+
+[Reporters]
+  [main]
+    type = OptimizationData
+    measurement_points = ${measurement_points}
+    measurement_values = ${measurement_values}
+  []
 []
 
 [Executioner]
   type = Optimize
-  tao_solver=taonls
-  petsc_options_iname='-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
-  petsc_options_value='1e-5 10 none cg'
+  tao_solver = taonls
+  petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
+  petsc_options_value = '1e-5 10 none cg'
   verbose = true
 []
 
@@ -46,11 +55,11 @@
   [toForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/parameter_results'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -62,8 +71,9 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    # Note: We are transferring the misfit values into main misfit
+    from_reporters = 'measure_data/objective_value measure_data/misfit_values'
+    to_reporters = 'OptimizationReporter/objective_value main/misfit_values'
   []
 
   # ADJOINT transfers
@@ -71,11 +81,11 @@
   [toAdjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/misfit_values'
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/misfit_values'
     to_reporters = 'misfit/measurement_xcoord
                     misfit/measurement_ycoord
                     misfit/measurement_zcoord
@@ -94,11 +104,11 @@
     type = MultiAppReporterTransfer
     multi_app = homogeneousForward
     direction = to_multiapp
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/parameter_results'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -111,8 +121,10 @@
     type = MultiAppReporterTransfer
     multi_app = homogeneousForward
     direction = from_multiapp
+    # Note: We are transferring the simulation values into misfit
+    # this has to be done when using general opt and homogenous forward.
     from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    to_reporters = 'main/misfit_values'
   []
 []
 
