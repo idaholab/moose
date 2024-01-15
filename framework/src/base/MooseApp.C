@@ -1181,7 +1181,8 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(search);
     _builder.buildJsonSyntaxTree(tree);
 
-    Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
+    outputMachineReadableData(
+        "json", "**START JSON DATA**\n", "\n**END JSON DATA**", tree.getRoot().dump(2));
     _early_exit_param = "--json";
     _ready_to_exit = true;
   }
@@ -1190,10 +1191,10 @@ MooseApp::setupOptions()
     _perf_graph.disableLivePrint();
 
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
-    Moose::out << "**START SYNTAX DATA**\n";
+    std::stringstream ss;
     for (const auto & it : syntax)
-      Moose::out << it.first << "\n";
-    Moose::out << "**END SYNTAX DATA**\n" << std::endl;
+      ss << it.first << "\n";
+    outputMachineReadableData("syntax", "**START SYNTAX DATA**\n", "**END SYNTAX DATA**", ss.str());
     _early_exit_param = "--syntax";
     _ready_to_exit = true;
   }
@@ -1208,8 +1209,10 @@ MooseApp::setupOptions()
   else if (getParam<bool>("show_capabilities"))
   {
     _perf_graph.disableLivePrint();
-
-    Moose::out << "**START JSON DATA**\n" << Moose::Capabilities::dump() << "\n**END JSON DATA**\n";
+    outputMachineReadableData("show_capabilities",
+                              "**START JSON DATA**\n",
+                              "\n**END JSON DATA**",
+                              Moose::Capabilities::dump());
     _ready_to_exit = true;
   }
   else if (!getInputFileNames().empty())
@@ -1401,11 +1404,11 @@ MooseApp::runInputFile()
     // TODO: ask multiapps for their constructed objects
     _early_exit_param = "--list-constructed-objects";
     _ready_to_exit = true;
-    std::vector<std::string> obj_list = _factory.getConstructedObjects();
-    Moose::out << "**START OBJECT DATA**\n";
-    for (const auto & name : obj_list)
-      Moose::out << name << "\n";
-    Moose::out << "**END OBJECT DATA**\n" << std::endl;
+    std::stringstream ss;
+    for (const auto & obj : _factory.getConstructedObjects())
+      ss << obj << '\n';
+    outputMachineReadableData(
+        "list_constructed_objects", "**START OBJECT DATA**\n", "\n**END OBJECT DATA**", ss.str());
   }
 }
 
@@ -3204,3 +3207,30 @@ MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
   return torch::kCPU;
 }
 #endif
+
+void
+MooseApp::outputMachineReadableData(const std::string & param const,
+                                    std::string & start_marker,
+                                    const std::string & end_marker,
+                                    const std::string & data) const
+{
+  // Bool parameter, just to streen
+  if (_pars.have_parameter<bool>(param))
+  {
+    Moose::out << start_marker << data << end_marker << std::endl;
+    return;
+  }
+
+  // String parameter, to file
+  const auto & filename = getParam<std::string>(param);
+  // write to file
+  std::ofstream out(filename.c_str());
+  if (out.is_open())
+  {
+    std::ofstream out(filename.c_str());
+    out << data << std::flush;
+    out.close();
+  }
+  else
+    mooseError("Unable to open file `", filename, "` for writing ", param, " data to it.");
+}
