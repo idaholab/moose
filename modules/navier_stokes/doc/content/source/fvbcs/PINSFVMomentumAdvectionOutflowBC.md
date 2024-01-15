@@ -6,7 +6,7 @@
 
 This object implements the $\rho \dfrac{1}{\epsilon} \left(\vec u_d \cdot\nabla\right)\vec u_d$ component
 term of the incompressible porous media Navier Stokes momentum equation along a domain boundary,
-with $u_d$ the interstitial or Darcy velocity.
+with $u_d$ the superficial or Darcy velocity.
 It simultaneously requires that the normal gradient of each superficial velocity component at
 the boundary be zero.
 
