@@ -7,7 +7,7 @@ This object is
 only meant to be used with `LAGRANGE_VEC` vector variables, and hence the
 auxiliary variable should be of type `LAGRANGE`.
 
-## Example Inpute Syntax
+## Example Input Syntax
 
 !listing test/tests/auxkernels/vector_variable_nodal/vector_variable_nodal.i block=AuxKernels
 

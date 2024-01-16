@@ -4,7 +4,7 @@
 
 # Porous Flow Tutorial Page 04.  Adding solid mechanics
 
-In this Page, solid mechanics is added to the thermo-hydro simulation of preious Pages.  The equations are discussed in [governing equations](porous_flow/governing_equations.md).  Only quasi-static solid mechanics is considered here, without gravity, so the equations read
+In this Page, solid mechanics is added to the thermo-hydro simulation of previous Pages.  The equations are discussed in [governing equations](porous_flow/governing_equations.md).  Only quasi-static solid mechanics is considered here, without gravity, so the equations read
 \begin{equation}
 \sigma_{ij}^{\mathrm{eff}}  = \sigma_{ij}^{\mathrm{tot}} + \alpha_{B}\delta_{ij}P
 \end{equation}

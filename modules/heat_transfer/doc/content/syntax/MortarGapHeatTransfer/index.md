@@ -8,7 +8,7 @@ are timely called from `ModularGapConductanceConstraint` to build residual vecto
 
 This action can be used in two separate modes. On the one hand, the user may choose to build the physics-modeling user objects in the input. As such, the user will list
  the user objects in the `user_created_gap_flux_models` input parameter. Alternatively, the user may elect to add conduction or radiation (or both contributions simultaneously) physics 
- via the enumeration intput parameter `gap_flux_options`. 
+ via the enumeration input parameter `gap_flux_options`. 
 
 The action can be expanded with more accurate or additional physics, which, according to this design pattern, must 
 be implemented in `InterfaceUserObject`s.

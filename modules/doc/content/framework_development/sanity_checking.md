@@ -12,7 +12,7 @@ not occur inside any section names, nor parameter names. When the parser runs, s
 
 # Missing and incorrect parameters
 
-MOOSE will report errors when requirement parameters are missing. MOOSE will also report warning when unknown (mispelled) parameters
+MOOSE will report errors when required parameters are missing. MOOSE will also report warning when unknown (misspelled) parameters
 are supplied but are not used. As a developer you should use `paramError()` or `paramWarning()`, when creating error messages
 related to input file parameters. These "param" type errors will be used by the parser to generate line number information for the
 offending problematic parameters.

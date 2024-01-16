@@ -1,7 +1,7 @@
 # InterfaceQpValueUserObject
 
 ## IMPORTANT NOTES
-*** This userobejct only support multiprocessing. Threading is not supported at this time  ***
+*** This userobject only support multiprocessing. Threading is not supported at this time  ***
 
 
 ## Description

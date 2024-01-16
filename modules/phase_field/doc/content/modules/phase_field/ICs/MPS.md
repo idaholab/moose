@@ -70,7 +70,7 @@ The output file containing centroids is stored in `maximal_sample.dat`. The firs
 
 ## Use the centroids to generate Voronoi tessellation in Phase field
 
-The [`PolycrystalVoronoi`](/PolycrystalVoronoi.md) can read grain centroids from a text file and performs a Voronoi tesslation to produce a grain structure. The syntax is
+The [`PolycrystalVoronoi`](/PolycrystalVoronoi.md) can read grain centroids from a text file and performs a Voronoi tessellation to produce a grain structure. The syntax is
 
 ```text
 [UserObjects]

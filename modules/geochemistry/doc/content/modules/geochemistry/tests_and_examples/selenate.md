@@ -43,7 +43,7 @@ m_{\mathrm{SorbedSelenate}} = \frac{M_{\mathrm{SorbingSite}}}{n_{w}} \frac{r}{1 
 \end{equation}
 where $r = m_{\mathrm{Selenate}}/K$.
 
-The analysis of the preceeding paragraph fairly accurately describes the current situation because the ionic strength is close to zero, so the activities are all close to unity.  The MOOSE input file uses the `molal_SorbedSelenate` AuxVariable produced by the [TimeIndependentReactionSolver](actions/AddTimeIndependentReactionSolverAction.md) to obtain the moles of sorbed selenate per gram of dry soil:
+The analysis of the preceding paragraph fairly accurately describes the current situation because the ionic strength is close to zero, so the activities are all close to unity.  The MOOSE input file uses the `molal_SorbedSelenate` AuxVariable produced by the [TimeIndependentReactionSolver](actions/AddTimeIndependentReactionSolverAction.md) to obtain the moles of sorbed selenate per gram of dry soil:
 
 !listing modules/geochemistry/test/tests/sorption_and_surface_complexation/selenate.i start=[AuxVariables] end=[Outputs]
 

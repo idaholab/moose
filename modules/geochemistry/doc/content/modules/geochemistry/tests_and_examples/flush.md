@@ -1,6 +1,6 @@
 # Flushing minerals
 
-Chapter 13.3 of [!cite](bethke_2007) describes a "flush" process, in which a specified solution is added to the system, and at the same time an equal volume of the equilibrium solution, consisting of solvent water, primary aqueous species, disolved minerals and disolved gases, is removed.  In the code, this is achieved by altering $M_{w}$, $M_{i}$, $M_{k}$ and $M_{m}$ appropriately.
+Chapter 13.3 of [!cite](bethke_2007) describes a "flush" process, in which a specified solution is added to the system, and at the same time an equal volume of the equilibrium solution, consisting of solvent water, primary aqueous species, dissolved minerals and dissolved gases, is removed.  In the code, this is achieved by altering $M_{w}$, $M_{i}$, $M_{k}$ and $M_{m}$ appropriately.
 
 Section 30.2 of [!cite](bethke_2007) describes an example of this involving alkali flooding of a petroleum reservoir.  It is assumed that quartz dissolves and precipitates with rate
 \begin{equation}
@@ -82,7 +82,7 @@ The equivalent [Geochemists Workbench](https://www.gwb.com/) input file is
 
 !listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.rea
 
-Note the different initial molality specified for Ca$^{2+}$.  In this case it makes no noticable difference to the result, but users desiring an exact correspondance between the two software packages should understand [the differences](theory/gwb_diff.md).
+Note the different initial molality specified for Ca$^{2+}$.  In this case it makes no noticeable difference to the result, but users desiring an exact correspondence between the two software packages should understand [the differences](theory/gwb_diff.md).
 
 ## Results
 

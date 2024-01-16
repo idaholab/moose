@@ -29,7 +29,7 @@ A [TimeDependentReactionSolver](actions/AddTimeDependentReactionSolverAction.md)
 
 !listing modules/geochemistry/test/tests/solubilities_and_activities/gypsum_solubility.i block=TimeDependentReactionSolver
 
-The time-stepping and output are defined in the usual MOOSE way.  In this case, a `FunctionDT` timestepper is used to capture the nonlinear behaviour at the beginning of the sinulation:
+The time-stepping and output are defined in the usual MOOSE way.  In this case, a `FunctionDT` timestepper is used to capture the nonlinear behaviour at the beginning of the simulation:
 
 !listing modules/geochemistry/test/tests/solubilities_and_activities/gypsum_solubility.i block=Executioner
 

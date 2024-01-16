@@ -56,11 +56,11 @@ Always specify the two files you wish to perform a differentiation on, before an
 | `--comparison-file or -c` | *comparison file* | Use specified comparison file while performing differentiations |
 | `--ignore-fields` | *str* | A list of space separated fields to ignore when performing differentiations |
 | `--diff-fields` | *str* | A list of space separated fields to include when performing differentiations |
-| `--abs-zero` | *str float* | A scientific notiation or float value representing zero (the floor). Any values lower than this amount will be considered zero. (default: 1e-11) |
+| `--abs-zero` | *str float* | A scientific notation or float value representing zero (the floor). Any values lower than this amount will be considered zero. (default: 1e-11) |
 | `--relative-tolerance` | *str float* | A float or scientific notation value representing an acceptable degree of tolerance between two opposing values. Any float comparison which falls within this tolerance will be considered the same number. (default 5.5e-6) |
 | `--custom-columns` | *str* | Space separated list of custom field IDs to compare |
-| `--custom-abs-zero` | *str float* | Space separated list of scientific notations or floats for absolute zero, corresponding to the values in --custom-colums |
-| `--custom-rel-err` | *str float* | Space separated list of scientific notations or floats for relative tolerance, corresponding to the values in --custom-colums |
+| `--custom-abs-zero` | *str float* | Space separated list of scientific notations or floats for absolute zero, corresponding to the values in --custom-columns |
+| `--custom-rel-err` | *str float* | Space separated list of scientific notations or floats for relative tolerance, corresponding to the values in --custom-columns |
 
 ## Comparison File
 
@@ -72,7 +72,7 @@ a comparison file from our csv file, and redirect the output to a file named `a.
 
 ```
 > echo -e "x\n0" > a
-> moose/scripts/csvdiff.py --sumary a > a.cmp
+> moose/scripts/csvdiff.py --summary a > a.cmp
 > cat a.cmp
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0
 

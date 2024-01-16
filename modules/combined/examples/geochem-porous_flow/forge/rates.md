@@ -8,7 +8,7 @@ where
 - $M$ \[g\] is the mass of the mineral.  This is the number of moles multiplied by the molar weight.
 - $S$ \[cm$^{2}$.g$^{-1}$\] is the specific surface area of the mineral
 - $k$ \[mol.s$^{-1}$.m$^{-2}$\] is the reaction's intrinsic rate constant
-- $E_{a}$ \[J.mol$^{-1}$\] is the reaction's activiation area
+- $E_{a}$ \[J.mol$^{-1}$\] is the reaction's activation area
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is the temperature 
 

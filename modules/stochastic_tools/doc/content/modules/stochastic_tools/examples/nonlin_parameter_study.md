@@ -29,8 +29,8 @@ To use this kernel, the user has to add an additional argument for the
 Stochastic Tools executioner as follows:
 
 ```
-cd moose/modules/stocastic_tools/examples/parameter_study/nonlin_diff_react
-../../../stocastic_tools-opt -i nonlin_diff_react_sub.i --allow-test-objects
+cd moose/modules/stochastic_tools/examples/parameter_study/nonlin_diff_react
+../../../stochastic_tools-opt -i nonlin_diff_react_sub.i --allow-test-objects
 ```
 
 The second atypical block is `Controls` which is necessary to set up a channel
@@ -88,8 +88,8 @@ To run the parent application, it is still necessary to enable test objects usin
 command
 
 ```
-cd moose/modules/stocastic_tools/examples/parameter_study/nonlin_diff_react
-../../../stocastic_tools-opt -i nonlin_diff_react_parent_uniform.i --allow-test-objects
+cd moose/modules/stochastic_tools/examples/parameter_study/nonlin_diff_react
+../../../stochastic_tools-opt -i nonlin_diff_react_parent_uniform.i --allow-test-objects
 ```
 
 

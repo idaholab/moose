@@ -217,8 +217,8 @@ refer to the [hpcweb.hpc.inl.gov](https://hpcweb.hpc.inl.gov/home/) for a list o
 systems.
 
 The second portion provides the commands to be executed. The `cd $PBS_O_WORKDIR` changes to the
-directory that was used when the job was submitted (the environment variables is defined with the
-leter "O"). The commands that follow enable the "module" command and then load the required modules
+directory that was used when the job was submitted (the environment variables are defined with the
+letter "O"). The commands that follow enable the "module" command and then load the required modules
 for the problem. Finally, the "mpirun" command is followed by the application executable and the
 input file to execute. This example file is very simple, so the mesh is refined extensively to make
 the problem a bit more suited for 48 cores.

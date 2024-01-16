@@ -205,7 +205,7 @@ Some of interesting features are:
 - Initially the roof holds up before suddenly collapsing at around 100m of excavation.
 
 - After this point, there is some periodicity in the plastic strains and vertical stresses, although
-  this may be an artificat of the mesh rather than anything physical.
+  this may be an artifact of the mesh rather than anything physical.
 
 - The minimum vertical displacement is actually $u_{z}=-3.3\,$m in the region where the sudden
   collapse occurs towards the start of the panel.  The StickyBC are not sufficient to prevent this.
@@ -216,7 +216,7 @@ Some of interesting features are:
 - There is significant rock fracture, indicated by the Mohr-Coulomb plastic strains of greater than
   $0.1$% in the immediate 10$\,$m of the roof.
 
-- Mohr-Coulomb shear failure is much more prevelant than Mohr-Coulomb tensile failure throughout the
+- Mohr-Coulomb shear failure is much more prevalent than Mohr-Coulomb tensile failure throughout the
   model.
 
 - Mohr-Coulomb shear failure also occurs in the unexcavated material close to the panel (the ribs and

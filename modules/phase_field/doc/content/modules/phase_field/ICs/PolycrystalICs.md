@@ -13,7 +13,7 @@ extend the PolycrystalUserObjectBase class.
 !media media/phase_field/voronoi_flood.png
        caption=Grain structure with associated neighbor graph overlaid.
 
-Extentions of this class must begin by providing reporting the number of grains in the initial
+Extensions of this class must begin by providing reporting the number of grains in the initial
 condition.
 
 !listing modules/phase_field/include/userobjects/PolycrystalUserObjectBase.h line=getNumGrains()

@@ -17,7 +17,7 @@ The friction factor is given by:
       f_{i} = \frac{C_{i}}{(Re_{i})^n},
 \end{equation}
 
-where the subscript $i$ indicates the subchannel type, and the constant $n$ is equal to 1 for laminar flows and 0.18 for tubulent flows. The Reynolds number is calculated as
+where the subscript $i$ indicates the subchannel type, and the constant $n$ is equal to 1 for laminar flows and 0.18 for turbulent flows. The Reynolds number is calculated as
 
 \begin{equation}
   Re_i = \frac{\rho v D_{h,i}}{\mu},

@@ -32,7 +32,7 @@ The `RankFourAux` takes as arguments the values of the `index_i`, `index_j`, `in
   \end{aligned}
 \end{equation}
 [eq:rank4tensor_aux_indices] shows the index values for a linear hyperelastic stiffness tensor with
-21 indepent material parameters; the various available elasticity tensor symmetry options is
+21 independent material parameters; the various available elasticity tensor symmetry options is
 discussed in the material [ComputeElasticityTensor](/ComputeElasticityTensor.md)
 documentation.
 

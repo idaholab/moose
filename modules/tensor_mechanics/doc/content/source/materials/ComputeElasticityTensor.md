@@ -79,8 +79,8 @@ which shows the expected order of the elasticity tensor components in the input 
 ## Orthotropic Symmetry
 
 The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
-[!citep](malvern1969introduction), and is often used for simulations of anistropic materials such as
-cubic crystals.  The enginering elasticity tensor notation, [eq:rank4tensor_aux_indices],
+[!citep](malvern1969introduction), and is often used for simulations of anisotropic materials such as
+cubic crystals.  The engineering elasticity tensor notation, [eq:rank4tensor_aux_indices],
 for an orthotropic material is given in [eq:symmetric9_fill_method]
 \begin{equation}
 \label{eq:symmetric9_fill_method}
@@ -195,7 +195,7 @@ expects the elasticity components in the order `C_ijkl = '1111 1122 1133 2211 22
 ## Cosserat Elasticity Specific Fill Methods
 
 The following fill methods are available within `ComputeElasticityTensor`, but the use cases for
-these methods fall within the Cosserat applications which do not preserve the equilibruim of angular
+these methods fall within the Cosserat applications which do not preserve the equilibrium of angular
 momentum.
 
 ### General Isotropic Symmetry
@@ -220,7 +220,7 @@ symmetries shown in [eq:antisymmetric_symmetries] are used to create the complet
 \label{eq:antisymmetric_symmetries}
 C_{ijkl} = - C_{jikl} = - C_{ijlk} = C_{klij}
 \end{equation}
-and the engineering notation representation of the anitsymmetric elasticity tensor is given in
+and the engineering notation representation of the antisymmetric elasticity tensor is given in
 [eq:antisymmetric_fill_method].
 \begin{equation}
 \label{eq:antisymmetric_fill_method}

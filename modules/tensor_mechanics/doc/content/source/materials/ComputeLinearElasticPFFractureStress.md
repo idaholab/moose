@@ -98,7 +98,7 @@ The approach is based on the orthogonal decomposition of the linearized strain t
 \begin{equation}
 \varepsilon = \varepsilon_S + \varepsilon_D,~~~~\varepsilon_D = \frac{1}{n}tr(\varepsilon)I,~~~~\varepsilon_D = \varepsilon - \frac{1}{n}tr(\varepsilon)I
 \end{equation}
-werhe $I$ deontes the n-dimensional identity tensor.
+where $I$ denotes the n-dimensional identity tensor.
 
 $\psi^{+}$ and $\psi^{-}$ is defined as
 \begin{equation}
@@ -127,7 +127,7 @@ $\psi^{+}$ and $\psi^{-}$ is defined as
 \psi^{-} = \frac{1}{2} \boldsymbol{\sigma}^{-} : \boldsymbol{\varepsilon}.
 \end{equation}
 
-The compressive and tensile parts of the stress are computed from postive and negative projection tensors (computed from the spectral decomposition) according to
+The compressive and tensile parts of the stress are computed from positive and negative projection tensors (computed from the spectral decomposition) according to
 \begin{equation}
 	\boldsymbol{\sigma}^+ = \mathbf{P}^+ \boldsymbol{\sigma}_0
 \end{equation}

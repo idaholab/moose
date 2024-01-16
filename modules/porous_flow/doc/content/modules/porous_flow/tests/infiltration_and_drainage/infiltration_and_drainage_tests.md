@@ -182,9 +182,9 @@ and the bottom is held at $P=0$ to cause water to drain via the action
 of gravity.  [rd01_result_fig] and [rd02_result_fig] show the agreement between
 MOOSE and the published result.
 
-!media infiltration_and_drainage/rd01.png style=width:50%;margin-left:10px caption=Saturation profile in the caisson after 4.16 days of infiltration.  Note that the HYDRUS results are only approximate they were extrated by hand from online graphics.  id=rd01_result_fig
+!media infiltration_and_drainage/rd01.png style=width:50%;margin-left:10px caption=Saturation profile in the caisson after 4.16 days of infiltration.  Note that the HYDRUS results are only approximate they were extracted by hand from online graphics.  id=rd01_result_fig
 
-!media infiltration_and_drainage/rd02.png style=width:50%;margin-left:10px caption=Saturation profiles in the caisson after drainage from an initially-saturated simulation (4 days and 100 days profiles).  Note that the HYDRUS results are only approximate they were extrated by hand from online graphics.  id=rd02_result_fig
+!media infiltration_and_drainage/rd02.png style=width:50%;margin-left:10px caption=Saturation profiles in the caisson after drainage from an initially-saturated simulation (4 days and 100 days profiles).  Note that the HYDRUS results are only approximate they were extracted by hand from online graphics.  id=rd02_result_fig
 
 Experiment 1 and the first 4 simulation days of experiment 2 are
 marked as "heavy" in the PorousFlow test suite since the simulations

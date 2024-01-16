@@ -73,7 +73,7 @@ This means that the material's temperature should increase as
 \begin{equation}
 c_{R}\rho_{R}\dot{T} = c \ \ \ \mathrm{for } t>1\ \  \ ,
 \end{equation}
-with no temperature incraese for for $t\leq 1$.
+with no temperature increase for $t\leq 1$.
 
 This result is reproduced exactly by PorousFlow.
 

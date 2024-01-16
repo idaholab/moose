@@ -52,7 +52,7 @@ Finally, the user can select two possible methods for correcting for volume forc
 -  `pressure-consistent`, which deactivates the Rhie-Chow correaction on faces in which the pressure
   correction is inconsistent due to the volume forces
 -  `force-consistent`, which deactivates the Rhie-Chow correction in the regions with localized
-  volume forces since the pressure-velocity system is alredy linked by the volume force in these regions.
+  volume forces since the pressure-velocity system is already linked by the volume force in these regions.
 
 The latter method is the default and is generally preferred due to its lower computational cost.
 

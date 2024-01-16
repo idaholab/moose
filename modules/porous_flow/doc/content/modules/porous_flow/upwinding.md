@@ -9,7 +9,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
-Numerical stabilization is necessary in scenarios with nonlinear advection, such as the physics modelled by PorousFlow.  One such stabilization is upwinding [!citep](huyakorn1978, Dalen1979, helmig1998). For multi-phase situations many upwinding schemes can lead to disaster as the algorithm attempts to withdraw fluid from a node where there is no fluid.  In situations where one phase disappears, or almost disappears, full upwinding is often advantageous, since it prevents such attempted withdrawls, and hence PorousFlow employs full upwinding by default.
+Numerical stabilization is necessary in scenarios with nonlinear advection, such as the physics modelled by PorousFlow.  One such stabilization is upwinding [!citep](huyakorn1978, Dalen1979, helmig1998). For multi-phase situations many upwinding schemes can lead to disaster as the algorithm attempts to withdraw fluid from a node where there is no fluid.  In situations where one phase disappears, or almost disappears, full upwinding is often advantageous, since it prevents such attempted withdrawals, and hence PorousFlow employs full upwinding by default.
 
 The [`PorousFlowBasicAdvection`](PorousFlowBasicAdvection.md) kernel
 implements a very naive non-upwinded version of advection.  Its use is
@@ -53,7 +53,7 @@ g_{j}) = m I_{a} \ .
 $\tilde{R}$ is not exactly $R$, but note:
 
 - the original $R_{a}$ is the mass flux flowing out of node $a$;
-- so $I_{a}$ is thereby intepreted as a measure of fluid flow out of
+- so $I_{a}$ is thereby interpreted as a measure of fluid flow out of
   node $a$.
 
 This leads to the following definition of upwinding:
@@ -86,7 +86,7 @@ or other related nasty artefacts).
 
 Prescribed sinks, either from the boundary or from internal objects such as
 wellbores, are also fully-upwinded in PorousFlow since they also potentially
-suffer from phase-disappearence problems.
+suffer from phase-disappearance problems.
 
 
 !bibtex bibliography

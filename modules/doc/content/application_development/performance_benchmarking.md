@@ -3,7 +3,7 @@
 Utilities for doing performance benchmarking of MOOSE-based applications are included in the main
 MOOSE repository.  These utilities provide functionality for benchmarking and tracking MOOSE
 performance.  They can be used to run benchmarks, generate trend visualizations, and look at stats
-comparing bencharks between various revisions.  The following sections describe how to setup a
+comparing benchmarks between various revisions.  The following sections describe how to setup a
 benchmark machine and use it to run benchmarks and visualize results.
 
 ## Tuning a Benchmarking Machine

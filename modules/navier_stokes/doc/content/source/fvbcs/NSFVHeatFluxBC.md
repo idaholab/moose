@@ -5,7 +5,7 @@
 # Description
 
 Boundary condition splitting a constant heat flux among a two-phase fluid and solid domain
-based on a number of different models. There is no general consenus on the best boundary
+based on a number of different models. There is no general consensus on the best boundary
 condition for all flows, and virtually all models for splitting a constant heat flux
 among multiple phases are quite crude [!citep](alazmi).
 

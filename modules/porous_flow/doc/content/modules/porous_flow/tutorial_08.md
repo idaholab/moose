@@ -34,7 +34,7 @@ Try to run the simulation with `use_relperm = false` and you'll see very poor co
 
 The simulation may be promoted to a full THMC simulation using the approach used in [Page 03](porous_flow/tutorial_03.md), [Page 04](porous_flow/tutorial_04.md) and [Page 06](porous_flow/tutorial_06.md).  The arguments made about scaling the variables must be modified to take into account the fluid density appearing in the fluid equation (see [Page 06](porous_flow/tutorial_06.md)) so the scaling will be approximately $10^{-5}$ for the temperature and $10^{-7}$ for the displacement variables.  The [porosity](/porous_flow/porosity.md) may depend on porepressure, temperature, volumetric strain and chemistry.
 
-The simulation described so far uses [full upwinding](upwinding.md), which is the default in PorousFlow.  [TVD stabilization](kt.md) (see also [numerical diffusion](numerical_diffusion.md) and [a worked example of KT stablization](kt_worked.md)) may be used instead by simply changing the `PorousFlowUnsaturated` block to:
+The simulation described so far uses [full upwinding](upwinding.md), which is the default in PorousFlow.  [TVD stabilization](kt.md) (see also [numerical diffusion](numerical_diffusion.md) and [a worked example of KT stabilization](kt_worked.md)) may be used instead by simply changing the `PorousFlowUnsaturated` block to:
 
 !listing modules/porous_flow/examples/tutorial/08_KT.i start=[PorousFlowUnsaturated] end=[BCs]
 

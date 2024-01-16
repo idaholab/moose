@@ -16,7 +16,7 @@ To compute statistics from a [PolynomialChaos.md] surrogate, use the [!param](/R
 
 ### Sobol Sensitivity
 
-Setting the [!param](/Reporters/PolynomialChaosReporter/include_sobol) to `true` will compute sobol indices from the inputted polynomial chaos models. The alogrithm is based on computations described in [!cite](sudret2008global). The object will compute total, first-, and second-order indices. The output is largely indentical to [SobolReporter.md].
+Setting the [!param](/Reporters/PolynomialChaosReporter/include_sobol) to `true` will compute sobol indices from the inputted polynomial chaos models. The algorithm is based on computations described in [!cite](sudret2008global). The object will compute total, first-, and second-order indices. The output is largely identical to [SobolReporter.md].
 
 !listing poly_chaos/sobol.i block=Reporters
 

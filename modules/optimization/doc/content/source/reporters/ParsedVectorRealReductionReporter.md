@@ -6,7 +6,7 @@
 
 `ParsedVectorRealReductionReporter` performs a reduction on the elements of a vector in a reporter using a [parsed function expression](MooseParsedFunction.md) containing only two variables, `reduction_value` and `indexed_value`.  `reduction_value` is the variable containing the reduced value and is initialized by [!param](/Reporters/ParsedVectorRealReductionReporter/initial_value).  `indexed_value` is the current vector element being operated on by the parsed function.
 
-Different intial conditions and [parsed function expressions](MooseParsedFunction.md) will provide a vector sum, vector multiplication, vector sum of squares, and max as shown in [vectorMath].
+Different initial conditions and [parsed function expressions](MooseParsedFunction.md) will provide a vector sum, vector multiplication, vector sum of squares, and max as shown in [vectorMath].
 
 !listing modules/optimization/test/tests/reporters/vector_math/vectorMath.i id=vectorMath block=Reporters/vec_d Reporters/vector_sum Reporters/vector_sqsum Reporters/vector_multiply Reporters/vector_max
 

@@ -11,7 +11,7 @@ cross terms of the form
 
 where $\eta_i$ is the non-linear variable the kernel is acting on, $\eta_j$ (`etas`
 are all non-conserved order parameters in the system, $\kappa_{ij}$ (`kappa_name`)
-are the gradient energy coefficents, and $L_i$ (`mob_name`) is the scalar (isotropic)
+are the gradient energy coefficients, and $L_i$ (`mob_name`) is the scalar (isotropic)
 mobility associated with the $\eta_i$ order parameter.
 
 ## Derivation

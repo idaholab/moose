@@ -28,7 +28,7 @@ $h_0^\alpha$ and $m^\alpha$ are hardening parameters.
 Like for the others crystal plasticity routines values of all the parameters can
 be specified by groups of slip systems.
 
-This UseroOject assumes that slip systems are provided in a well defined order
+This UserObject assumes that slip systems are provided in a well defined order
 and are grouped by planes (see
 `modules/tensor_mechanics/test/tests/cp_user_object/input_slip_sys_bcc48.txt` for
 BCC crystals and

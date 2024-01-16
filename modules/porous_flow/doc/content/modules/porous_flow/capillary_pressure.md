@@ -18,7 +18,7 @@ surface of the porous medium, and $r_c$ is the radius of curvature at the interf
 [!cite](bear1972).
 
 Due to the difficulty in measuring $\gamma$ and $\theta$ in real porous rocks, empirical and
-semi-impirical formulations for capillary pressure have been proposed that relate capillary pressure
+semi-empirical formulations for capillary pressure have been proposed that relate capillary pressure
 to effective saturation.
 
 Several capillary pressure formulations are available in the Porous Flow module suitable for either

@@ -45,7 +45,7 @@ If the [Ray.md] intersects an external boundary and is not set to be killed and 
 
 ## Setting Ray Data
 
-For more advanced use, one can also register [Ray.md] data/auxiliary data and initialize it as desired. It is important that this is not necessary when using [RayKernels/index.md] that contribute to residuals or integrate along lones, as the [Ray.md] data mangement in those cases is handled under the hood.
+For more advanced use, one can also register [Ray.md] data/auxiliary data and initialize it as desired. It is important that this is not necessary when using [RayKernels/index.md] that contribute to residuals or integrate along lines, as the [Ray.md] data management in those cases is handled under the hood.
 
 !syntax parameters /UserObjects/RepeatableRayStudy
   visible=Required Trajectory

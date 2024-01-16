@@ -14,7 +14,7 @@ In addition to defining the base classes that enable modeling arbitrary material
 
 !template! item key=system-purpose
 !! system-purpose-begin
-The purpose of the [!ac](MOOSE) Tensor Mechanics module is to provide the foundational capabilities for computing mechanical deformation of solids and structures. It computes strains and stresses, and solves for the displacement field that satisfies equlibrium. It is intended to both provide a basic set of capabilities and also be readily extensible by applications based on it to represent specialized material behavior.
+The purpose of the [!ac](MOOSE) Tensor Mechanics module is to provide the foundational capabilities for computing mechanical deformation of solids and structures. It computes strains and stresses, and solves for the displacement field that satisfies equilibrium. It is intended to both provide a basic set of capabilities and also be readily extensible by applications based on it to represent specialized material behavior.
 !! system-purpose-finish
 !template-end!
 

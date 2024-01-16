@@ -12,7 +12,7 @@ The following is an example of using StochasticMatrix to output sampler data and
 
 !listing modules/stochastic_tools/test/tests/reporters/stochastic_matrix/stochastic_matrix.i block=Samplers MultiApps
 
-The parameters are transferred via a [SamplerParameterTransfer.md] and the results are tranferred back with a [SamplerReporterTransfer.md]. This transfers the results in to the StochasticMatrix object named `matrix`.
+The parameters are transferred via a [SamplerParameterTransfer.md] and the results are transferred back with a [SamplerReporterTransfer.md]. This transfers the results in to the StochasticMatrix object named `matrix`.
 
 !listing modules/stochastic_tools/test/tests/reporters/stochastic_matrix/stochastic_matrix.i block=Transfers Reporters
 

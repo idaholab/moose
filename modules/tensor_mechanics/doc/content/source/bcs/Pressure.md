@@ -64,7 +64,7 @@ p^T = \begin{bmatrix}
       x^T_1 & x^T_2 & ... & x^T_n
       \end{bmatrix}
 \end{equation}
-$x_i = X_i + u_i$ where $X_i$ is the vector of coordinates for node $i$ and $u_i$ is the vector of displacments for node $i$.
+$x_i = X_i + u_i$ where $X_i$ is the vector of coordinates for node $i$ and $u_i$ is the vector of displacements for node $i$.
 
 \begin{equation}
 \begin{aligned}

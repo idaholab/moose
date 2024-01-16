@@ -20,7 +20,7 @@ of the environment temperature. Furthermore, we assume the following:
 
 - The density of the air is: $\rho = 1.184~\frac{kg}{m^3}$
 - The specific heat of the air is: $c_p = 1000 \frac{J}{kg~K}$
-- The effective thermal condictivity (increased to account for mixing effects) is: $k = 0.5 \frac{W}{m~K}$
+- The effective thermal conductivity (increased to account for mixing effects) is: $k = 0.5 \frac{W}{m~K}$
 - The environment temperature is handled as a Dirichlet boundary condition applied 
   to the right and left walls with a value of:
   $T_\mathrm{env}(t)~[K]=273+15*\sin{\left(\frac{\pi t}{86400}\right)}$

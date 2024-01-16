@@ -31,7 +31,7 @@ implemented in the MOOSE heat transfer module as `ADHeatConduction`.
 
 !---
 
-The ADHeatCondution Kernel in conjunction with a `GenericConstantMaterial` is all that is needed
+The ADHeatConduction Kernel in conjunction with a `GenericConstantMaterial` is all that is needed
 to perform a steady state heat conduction solve (with $T=350$ at the inlet and $T=300$ at the
 outlet).
 

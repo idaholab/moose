@@ -4,7 +4,7 @@
 
 ## Description
 
-This is a interface material (boudary restricted material) specifically for application to [SideSetHeatTransferKernel](SideSetHeatTransferKernel.md). Material properties generated:
+This is an interface material (boundary restricted material) specifically for application to [SideSetHeatTransferKernel](SideSetHeatTransferKernel.md). Material properties generated:
 
   - `gap_conductance`: $C_{\mathrm{gap}} = k_{\mathrm{gap}} / \delta$
 

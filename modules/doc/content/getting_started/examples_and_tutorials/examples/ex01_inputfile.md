@@ -83,7 +83,7 @@ custom boundary conditions derived from the existing objects within MOOSE.
 
 The type of problem to solve and the method for solving it is defined within the `Executioner`
 block.  This problem is steady-state and will use the `Steady` Executioner and will use the
-default solving method Preconditioned Jacobain Free Newton Krylov.
+default solving method Preconditioned Jacobian Free Newton Krylov.
 
 !listing examples/ex01_inputfile/ex01.i block=Executioner
 

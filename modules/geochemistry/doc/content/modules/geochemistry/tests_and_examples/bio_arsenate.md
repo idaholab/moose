@@ -26,7 +26,7 @@ The standard MOOSE geochemical database contains the information:
     },
 ```
 
-This appears in the `redox couples` section, but it could equally appear in the `mineral species` section.  The main [biogeochemistry](theory/biogeochemistry.md) page discusses this further.  If this entry did not appear in the database, it could be manually entered, but the equilibrium constants would have to be derived from those already in the database (or from experimental measurements).  This is easily done by using the [GeochemicalModelInterogator](GeochemicalModelInterrogator.md):
+This appears in the `redox couples` section, but it could equally appear in the `mineral species` section.  The main [biogeochemistry](theory/biogeochemistry.md) page discusses this further.  If this entry did not appear in the database, it could be manually entered, but the equilibrium constants would have to be derived from those already in the database (or from experimental measurements).  This is easily done by using the [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md):
 
 !listing modules/geochemistry/test/tests/kinetics/bio_arsenate0.i block=GeochemicalModelInterrogator
 

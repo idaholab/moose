@@ -8,7 +8,7 @@ This model computes the eigenstrain tensor resulting from isotropic thermal expa
 temperature-dependent thermal expansion is defined by a user-supplied function that describes the
 mean thermal expansion coefficient $\bar{\alpha}$ as a function of temperature, $T$. This function is
 defined relative to a reference temperature, $T_{ref}$, such that the total expansion at a given
-temperature relative to the refererence temperature is $\bar{\alpha}(T-T_{ref})$.  Following the
+temperature relative to the reference temperature is $\bar{\alpha}(T-T_{ref})$.  Following the
 notation of [!cite](niffenegger2012proper), $\bar{\alpha}_{(T_{ref},T)}$ is defined as:
 
 \begin{equation}

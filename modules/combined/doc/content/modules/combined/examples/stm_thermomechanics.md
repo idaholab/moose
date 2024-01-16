@@ -11,7 +11,7 @@ The problem of interest involves a steady-state thermomechanics model. The geome
 !table caption=Material Properties for Thermomechanics Cylinder id=tab:mat_prop
 | Property | Symbol | Value | Units  |
 | :- | :- | -: | -: |
-| Half Cyliner Height | $L$ | 3 | m |
+| Half Cylinder Height | $L$ | 3 | m |
 | Inner Radius | $R$ | 1.0 | m |
 | Inner Ring Width | $r_1$ | 0.1 | m |
 | Outer Ring Width | $r_2$ | 0.1 | m |
@@ -104,7 +104,7 @@ Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics 
 
 ### Statistics
 
-[tab:stat] shows the statistical results of sampling the thermomechanis model and the polynomial chaos surrogate. $\mu$ and $\sigma$ represent the mean and standard deviation of the QoI, and CI is the confidence interval. Note that the confidence interval for the polynomial chaos statistics is not relevant since these values were found analytically using integration techniques. [fig:hist_temp] to [fig:hist_dispz] compares several of the probability distributions of the QoIs between sampling the full-order model and the polynomial chaos surrogate.
+[tab:stat] shows the statistical results of sampling the thermomechanics model and the polynomial chaos surrogate. $\mu$ and $\sigma$ represent the mean and standard deviation of the QoI, and CI is the confidence interval. Note that the confidence interval for the polynomial chaos statistics is not relevant since these values were found analytically using integration techniques. [fig:hist_temp] to [fig:hist_dispz] compares several of the probability distributions of the QoIs between sampling the full-order model and the polynomial chaos surrogate.
 
 !table caption=Statistics Results id=tab:stat
 | QoI | $\mu$ | 95% CI | $\sigma$ | 95% CI | PC -- $\mu$ | PC -- $\sigma$ |
@@ -132,7 +132,7 @@ Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics 
 
 ### Sobol Sensitivities
 
-Sobol sensitivities, or Sobol indicies, are a metric to compare the global sensitivity a parameter has on a QoI. This examples demonstrates several different types of the sensitivities. The first is total sensitivity, which measure the total sensitivity from a parameter, [fig:sobol_total] shows these values for each QoI and parameter. The second is a correlative sensitivity, which measures the sensitivity due to a combination of parameters, [fig:heat_temp] to [fig:heat_dispz] show heat maps of these values for several QoIs.
+Sobol sensitivities, or Sobol indices, are a metric to compare the global sensitivity a parameter has on a QoI. This examples demonstrates several different types of the sensitivities. The first is total sensitivity, which measure the total sensitivity from a parameter, [fig:sobol_total] shows these values for each QoI and parameter. The second is a correlative sensitivity, which measures the sensitivity due to a combination of parameters, [fig:heat_temp] to [fig:heat_dispz] show heat maps of these values for several QoIs.
 
 !media combined/sobol_total.png caption=Total Sobol sensitivities id=fig:sobol_total style=width:100%
 
@@ -148,7 +148,7 @@ Sobol sensitivities, or Sobol indicies, are a metric to compare the global sensi
 
 ## Supplementary Figures
 
-### Probablity Distributions for All QoIs
+### Probability Distributions for All QoIs
 
 !gallery! large=6
 !card combined/temp_center_inner_hist.png title=$T_{1,c}$

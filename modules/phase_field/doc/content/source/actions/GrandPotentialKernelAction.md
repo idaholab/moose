@@ -45,7 +45,7 @@ These define the behavior of the chemical potential variables.
 
 ### Primary Set of Order Parameter Functions
 
-Inputs affecting a group of auto-generated variables using the PolycrystalVarible
+Inputs affecting a group of auto-generated variables using the PolycrystalVariables
 action. These typically represent grains in a polycrystal system.
 
 - `op_num`: Number of order parameters auto-generated in Variable block.
@@ -79,7 +79,7 @@ and coupled it with chemical potential from the Grand Potential model.
 - 'mass_conservation' : set this to "true" to choose strict mass conservation formulation
 - 'concentrations' : Vector of concentration variables used in the model.
 - 'h_c_min' : Vector of coefficients for the BodyForce kernel in concentration-chemical potential coupling which indicates the minima of the parabolic free energy functions
-- 'h_over_kVa' : Vector of coefficients for the MatReaction kernel in concentration-chemical potential coupling which is related to the coefficients of the parabolic free enegy functions
+- 'h_over_kVa' : Vector of coefficients for the MatReaction kernel in concentration-chemical potential coupling which is related to the coefficients of the parabolic free energy functions
 
 The following kernels are generated for each concentration variables:
 

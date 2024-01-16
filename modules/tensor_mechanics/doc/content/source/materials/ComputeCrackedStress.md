@@ -18,7 +18,7 @@ In the model, the uncracked stress $\sigma_0$ is provided by another material. I
 \begin{equation}
 \boldsymbol{\sigma}_0 = \boldsymbol{Q} \boldsymbol{\Lambda} \boldsymbol{Q}^T,
 \end{equation}
-The compressive and tensile parts of the stress are computed from postive and negative projection tensors (computed from the spectral decomposition) according to
+The compressive and tensile parts of the stress are computed from positive and negative projection tensors (computed from the spectral decomposition) according to
 \begin{equation}
 	\boldsymbol{\sigma}^+ = \mathbf{P}^+ \boldsymbol{\sigma}_0
 \end{equation}

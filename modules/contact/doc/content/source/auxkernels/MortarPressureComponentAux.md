@@ -14,7 +14,7 @@ In the local coordinate system, the definition of LM variable is
 \begin{equation}
 \boldsymbol{z}_j = (z_n)_j \boldsymbol{n}_j + (z_\tau^{1})_j \boldsymbol{\tau}^{1}_j + (z_\tau^{2})_j \boldsymbol{\tau}^{2}_j ,
 \end{equation}
-where $z_n$ is the component that is normal to the contact surface,  $\boldsymbol{n}$ is the local normal vector. For frictional problems in two dimnsions, the $z_\tau^{1}$ is the tangential component that is aligned with the contact surface, $\boldsymbol{\tau}^{1}$ is the corresponding tangential vector. In three-dimensional frictional problems, an additional component, $z_\tau^{2}$ exist along the contact surface, which is associated with the second tangential vector $\boldsymbol{\tau}^{2}$.
+where $z_n$ is the component that is normal to the contact surface,  $\boldsymbol{n}$ is the local normal vector. For frictional problems in two dimensions, the $z_\tau^{1}$ is the tangential component that is aligned with the contact surface, $\boldsymbol{\tau}^{1}$ is the corresponding tangential vector. In three-dimensional frictional problems, an additional component, $z_\tau^{2}$ exist along the contact surface, which is associated with the second tangential vector $\boldsymbol{\tau}^{2}$.
 
 
 !syntax parameters /AuxKernels/MortarPressureComponentAux

@@ -49,7 +49,7 @@ The UEL plugin entry function signature is defined in the `AbaqusUserElement.h` 
 The UEL routine sets `RHS`, `AMATRX`, `SVARS`, `ENERGY`, and `PNEWDT`
 
 - `RHS` is the residual contribution for the DOFs associated with the current element
-- `AMATRIX` are the Jacobian contributions for the DOFs associated with the current element
+- `AMATRX` are the Jacobian contributions for the DOFs associated with the current element
 - `SVARS` are stateful properties (persistent across timesteps) that are managed by the user object similar to stateful material properties in MOOSE
 - `ENERGY` array of 6 energy quantities (currently not used by MOOSE)
 
@@ -59,7 +59,7 @@ The UEL routine sets `RHS`, `AMATRX`, `SVARS`, `ENERGY`, and `PNEWDT`
   4. Plastic dissipation.
   5. Viscous dissipation.
   6. Artificial strain energy stemming from e.g. artificial stiffness to control singular modes
-  7. Electroststic energy
+  7. Electrostatic energy
   8. Incremental work done by loads applied through the UEL routine
 
 - `PNEWDT` is a new recommended simulation time step (currently not used by MOOSE)

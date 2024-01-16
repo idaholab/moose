@@ -84,7 +84,7 @@ To save time and computational resources, [`IterationAdaptiveDT`](IterationAdapt
 
 !listing modules/porous_flow/examples/solute_tracer_transport/solute_tracer_transport.i block=Executioner
 
-### Auxilary kernels and variables (optional)
+### Auxiliary kernels and variables (optional)
 
 This section is optional since these kernels and variables do not affect the calculation of the desired variable. In this example, we want to know the Darcy velocity in the x direction thus we will add an auxkernel and an auxvariable for it.
 

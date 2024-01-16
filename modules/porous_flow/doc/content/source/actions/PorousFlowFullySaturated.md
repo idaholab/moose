@@ -33,14 +33,14 @@ This `Action` simulates the $N_{f}$ [fluid equations](porous_flow/governing_equa
 \label{eq:full_sat}
 0 = \frac{\partial}{\partial t} \phi(\rho) \chi^{\kappa} + \phi(\rho) \chi^{\kappa}\nabla\cdot \mathrm{v}_{s} - \nabla_{i} \left(\chi^{\kappa}(\rho)\frac{k_{ij}}{\mu}(\nabla P_{j} - \rho g_{j}) \right) \ .
 \end{equation}
-In this equation, the fluid density, $\rho$, appears in parenthases, because the user has the option of including it or not using the `multiply_by_density` flag.
+In this equation, the fluid density, $\rho$, appears in parentheses, because the user has the option of including it or not using the `multiply_by_density` flag.
 
 !alert note
 Think carefully before you use `multiply_by_density = false`.  When not multiply by density, in many situations the sum of [eq:full_sat] will imply a Laplace equation such $0 = \nabla (k(\nabla P - \rho g))$, that is a steady-state distribution for the porepressure.  In addition, care must be taken when using other parts of PorousFlow, for instance, the [`PorousFlowMass`](PorousFlowFluidMass.md) Postprocessor is coded to record fluid mass, not fluid volume.  New users should set `multiply_by_density = true` to avoid confusion, even at the expense of extra computational cost.
 
 ### Kernels added
 
-To represent the $\frac{\partial}{\partial t} \phi(\rho) \chi^{\kappa}$ term (which only appears in `transient` simulations) the `Action` adds a [PorousFlowMasstimeDerivative](PorousFlowMassTimeDerivative.md) Kernel for each fluid component.  These Kernels lump the fluid-component mass to the nodes to ensure superior [numerical stabilization](stabilization.md).
+To represent the $\frac{\partial}{\partial t} \phi(\rho) \chi^{\kappa}$ term (which only appears in `transient` simulations) the `Action` adds a [PorousFlowMassTimeDerivative](PorousFlowMassTimeDerivative.md) Kernel for each fluid component.  These Kernels lump the fluid-component mass to the nodes to ensure superior [numerical stabilization](stabilization.md).
 
 To represent the $\phi(\rho) \chi^{\kappa}\nabla\cdot \mathrm{v}_{s}$ term (which only appears in `transient` simulations with mechanical `coupling_type`) the `Action` adds a [PorousFlowMassVolumetricExpansion](PorousFlowMassVolumetricExpansion.md) Kernel for each fluid component.  These Kernels lump the fluid-component mass to the nodes to ensure superior [numerical stabilization](stabilization.md).
 
@@ -91,7 +91,7 @@ The [static conservation of momentum equation](governing_equations.md) is associ
 These equations are represented by a set of `StressDivergenceTensors` Kernels (or `StressDivergenceRZTensors` Kernels in the case of RZ coordinates), including thermal-eigenstrain coupling if `coupling_type = HydroThermoMechanical`, and `Gravity` Kernels.  These Kernels are added automatically and are part of the Tensor-Mechanics module.  The $\alpha_{B}\nabla_{j}P_{f}$ term is represented by a [PorousFlowEffectiveStressCoupling](PorousFlowEffectiveStressCoupling.md) Kernel.
 
 It is assumed that the *effective stress not the total stress* enters into the
-consitutive law (as above), and any plasticity, and any insitu stresses, and
+constitutive law (as above), and any plasticity, and any insitu stresses, and
 almost everywhere else.  One exception is specifying Neumann boundary conditions
 for the displacements where the total stresses are being specified, as can be
 seen from [eq:cons_mom].  Therefore, MOOSE uses effective stress, and not total stress, internally.  If one needs to input or output total stress, one must subtract $\alpha_{B}P$ from MOOSE's stress.
@@ -137,9 +137,9 @@ Various important `Materials` are not added by this Action, so must be added by 
 
 ## AuxVariables
 
-- If `add_darcy_aux = true` then the `Action` adds `constant monomial` auxillary variables with the names `darcy_vel_x`, `darcy_vel_y` and `darcy_vel_z` that record the Darcy velocity by using [PorousFlowDarcyVelocityComponent](PorousFlowDarcyVelocityComponent.md) AuxKernels.
+- If `add_darcy_aux = true` then the `Action` adds `constant monomial` auxiliary variables with the names `darcy_vel_x`, `darcy_vel_y` and `darcy_vel_z` that record the Darcy velocity by using [PorousFlowDarcyVelocityComponent](PorousFlowDarcyVelocityComponent.md) AuxKernels.
 
-- If `add_stress_aux = true` and the `coupling_type` includes "Mechanical", then the `Action` adds `constant monomial` auxillary variables with the name `stress_xx`, `stress_xy`, `stress_xz`, `stress_yx`, `stress_yy`, `stress_yz`, `stress_zx`, `stress_zy` and `stress_zz` that record the effective stress using a `RankTwoAux`.  As mentioned above, this is the effective stress: if you require total stress you need to subtract $\alpha_{B}P$, as in $\sigma_{ij}^{\mathrm{total}} = \sigma^{\mathrm{eff}}_{ij} - \delta_{ij}\alpha_{B}P$
+- If `add_stress_aux = true` and the `coupling_type` includes "Mechanical", then the `Action` adds `constant monomial` auxiliary variables with the name `stress_xx`, `stress_xy`, `stress_xz`, `stress_yx`, `stress_yy`, `stress_yz`, `stress_zx`, `stress_zy` and `stress_zz` that record the effective stress using a `RankTwoAux`.  As mentioned above, this is the effective stress: if you require total stress you need to subtract $\alpha_{B}P$, as in $\sigma_{ij}^{\mathrm{total}} = \sigma^{\mathrm{eff}}_{ij} - \delta_{ij}\alpha_{B}P$
 
 
 

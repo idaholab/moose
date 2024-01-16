@@ -47,7 +47,7 @@ coplanar slip system groups, that is a total of six slip systems
 [!citep](kalidindi1992).
 
 In this class, the  crystal strain and stress response with response to the
-residual calculated by the second Piola-Kirchoff stress increment. In contrast,
+residual calculated by the second Piola-Kirchhoff stress increment. In contrast,
 in [FiniteStrainCPSlipRateRes](FiniteStrainCPSlipRateRes.md) the convergence of
 the crystal plasticity strain and stress response is determined with respect to
 the slip rate on each slip system of the crystal plasticity model.

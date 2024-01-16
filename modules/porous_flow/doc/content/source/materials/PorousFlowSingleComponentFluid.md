@@ -36,7 +36,7 @@ Using Pascals rather than kilograms is a different convention to most other phys
 
 This is quite annoying, however, for if something has a mass of 10$\,$kg, and you want to employ MPa instead of Pa, strictly you should write the mass as 10$^{-5}\,$MPa.m.s$^{2}$.  Similar remarks hold for density (kg.m$^{-3}$), enthalpy and internal energy (J.kg$^{-1}$), heat capacity (J.kg$^{-1}$.K$^{-1}$), and mass fluxes (kg.m$^{-3}$.s$^{-1}$).  Everything gets changed!
 
-Fortuately, density appears as a multiplicative factor almost everywhere, so scaling it by a constant amount (eg, multiplying by 10$^{-6}$ when using MPa instead of Pa) leads to the same equations.  For consider the fluid equations:
+Fortunately, density appears as a multiplicative factor almost everywhere, so scaling it by a constant amount (eg, multiplying by 10$^{-6}$ when using MPa instead of Pa) leads to the same equations.  For consider the fluid equations:
 \begin{equation}
 0 = \frac{\partial}{\partial t}\phi S \rho  + \phi S \rho \nabla\cdot \mathbf{v}_{\mathrm{s}} + \nabla \cdot \rho \mathbf{v}_{\mathrm{Darcy}} + \nabla\cdot \rho D \nabla \chi - q \ .
 \end{equation}
@@ -112,7 +112,7 @@ No changes to the input or output of the FluidProperties module are required
 
 ### Temperature in Celsius
 
-Choosing the temperature unit to be Celcius means that 273.15 is added to all PorousFlow temperatures before feeding them to the FluidProperties module.
+Choosing the temperature unit to be Celsius means that 273.15 is added to all PorousFlow temperatures before feeding them to the FluidProperties module.
 
 Other input-file objects that may need to be specified in Celsius are boundary conditions, initial conditions, [PorousFlowSinks](PorousFlowSink.md), etc.
 

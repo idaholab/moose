@@ -18,7 +18,7 @@ Mortar-based mechanical contact can be defined through the contact action. Here,
 
 !media contact/2d_indenter.mp4 style=float:right;width:47% caption=Fig. 1: Spherical indenter.
 
-For frictionless contact in two dimensions, three blocks need to be defined. First, the `NormalNodalLMMechanicalContact` constraint is used to enforce the Karush-Kuhn-Tucker contact conditions. Then, `NormalMortarMechanicalContact` enforces contact constaints in an integral or weak sense in both problem dimensions.
+For frictionless contact in two dimensions, three blocks need to be defined. First, the `NormalNodalLMMechanicalContact` constraint is used to enforce the Karush-Kuhn-Tucker contact conditions. Then, `NormalMortarMechanicalContact` enforces contact constraints in an integral or weak sense in both problem dimensions.
 
 !listing modules/contact/examples/2d_indenter/indenter_rz_fine.i start=[Constraints] end=[../]
 
@@ -33,7 +33,7 @@ The problem is axisymmetric [ComputeAxisymmetricRZFiniteStrain.md] and symmetric
 
 ### Numerical results
 
-The resulting force exerted as material resistance on the indenter may be plotted against the vertical displacement. In this problem, the base material is a monocrystal with body-centered cubic (bcc) unit cell with arbitrary parameters. Platic deformation causes the piling up of the base material's contact surface, as shown in the animation in Fig. 1.
+The resulting force exerted as material resistance on the indenter may be plotted against the vertical displacement. In this problem, the base material is a monocrystal with body-centered cubic (bcc) unit cell with arbitrary parameters. Plastic deformation causes the piling up of the base material's contact surface, as shown in the animation in Fig. 1.
 
 !media contact/mortar_ld.png style=width:60%; caption=Fig. 2: Load-displacement curve.
 

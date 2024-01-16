@@ -15,8 +15,8 @@ Some of the capability at your fingertips:
 * Continuous and Discontinuous Galerkin (DG) (at the same time!)
 * Intuitive parallel multiscale solves (see videos below)
 * Dimension agnostic, parallel geometric search (for contact related applications)
-* Flexible, plugable graphical user interface
-* ~30 plugable interfaces allow specialization of every part of the solve
+* Flexible, pluggable graphical user interface
+* ~30 pluggable interfaces allow specialization of every part of the solve
 
 More Information
 ================

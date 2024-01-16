@@ -88,14 +88,14 @@ The constitutive model needs to provide the Cauchy stress and the derivative of
 that stress with respect to the increment in the spatial velocity gradient.
 However, the [material system](tensor_mechanics/NewMaterialSystem.md)
 provides a common interface to define the constitutive model with any stress and strain
-measures that are convient, translating the user-defined stress and Jacobian to the correct
+measures that are convenient, translating the user-defined stress and Jacobian to the correct
 form automatically.
 Note that if the model is rotationally invariant then
 \begin{equation}
       \Delta l_{kl} = \Delta d_{kl}
 \end{equation}
 where $\Delta d_{kl}$ is the increment in the material deformation rate, equal to the increment
-in the logarthmic strain [!cite](freed2014).
+in the logarithmic strain [!cite](freed2014).
 
 The kernel is compatible with the [$\bar{\boldsymbol{F}}$ modification](/tensor_mechanics/Stabilization.md) of the
 strains to stabilize the problem for incompressible or nearly incompressible deformation.
@@ -125,7 +125,7 @@ The `stabilize_strain` flag controls if the kernel modifies the Jacobian to acco
 
 ## `use_displaced_mesh`
 
-The `UpdatedLagrangianStressDiverence` kernel is the only object in the new, Lagrangian Tensor Mechanics system
+The `UpdatedLagrangianStressDivergence` kernel is the only object in the new, Lagrangian Tensor Mechanics system
 that requires `use_displaced_mesh` to be set.  The `use_displaced_mesh` flag should be set to `true` if and only
 if `large_kinematics` is also `true`.  The kernel enforces this condition with an error.
 

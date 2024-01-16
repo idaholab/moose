@@ -1,6 +1,6 @@
 # GeochemicalModelDefinition
 
-Defines the geochemical system.  This extracts information from the geochemistry database and stores information pertinent to the model in computationally-efficient datastructures, eliminating all extraneous information.
+Defines the geochemical system.  This extracts information from the geochemistry database and stores information pertinent to the model in computationally-efficient data structures, eliminating all extraneous information.
 
 !alert note
 All `geochemistry` models must contain a `GeochemicalModelDefinition` userobject
@@ -32,7 +32,7 @@ During simulation, the user can compute the [saturation index](geochemistry_nome
 
 These minerals can be [swapped](swap.md) into the basis if desired (or required during the numerical solve).  For simple examples of this swap, see [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md).  If the user performs a manual "swap" then an initial condition must be provided for the mineral.
 
-The user choose whether these minerals are allowed to precipitate or not --- that is, they can be "supressed".
+The user chooses whether these minerals are allowed to precipitate or not --- that is, they can be "suppressed".
 
 This list, along with the kinetic_minerals list, comprises the entire list of minerals in the problem: all others are eliminated from consideration.
 
@@ -57,7 +57,7 @@ This is a list of minerals that whose dynamics are governed by a [rate law](theo
 - If a mineral is also a "sorbing mineral" in the [database](geochemistry/database/index.md) then their [sorption sites](equilibrium.md) must consist of the basis_speices only.
 - No members of this list must be in the minerals list.
 
-These minerals can never be [swapped](swap.md) into the basis, nor can they be "supressed".
+These minerals can never be [swapped](swap.md) into the basis, nor can they be "suppressed".
 
 
 ## kinetic_redox

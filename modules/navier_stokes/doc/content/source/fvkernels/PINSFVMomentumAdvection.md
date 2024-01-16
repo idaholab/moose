@@ -8,8 +8,8 @@ velocity. The nonlinear variables used in PINSFV correspond to the superficial v
 
 An average or Rhie-Chow interpolation can be used for the advecting velocity interpolation.
 An average or upwind interpolation can be used for the advected quantity, which in this
-case is the momentum component $\rho u_{di}$ where $u_{i}$ denotes the x, y, or z
-component of the intersitial velocity in Cartesian coordinates, or the r or z component of
+case is the momentum component $\rho u_{di}$ where $u_{di}$ denotes the x, y, or z
+component of the superficial velocity in Cartesian coordinates, or the r or z component of
 the velocity in RZ coordinates.
 
 !syntax parameters /FVKernels/PINSFVMomentumAdvection

@@ -10,7 +10,7 @@ importance region; and (2) regular Monte Carlo sampling from the importance regi
 when estimating a quantity of interest (QoI; like the failure probability). However, each MCMC or Monte Carlo
 sample is associated with a full model evaluation in the traditional AIS. While AIS considerably reduces the
 computational cost for estimating a QoI compared to a regular Monte Carlo sampler, even more computational gains
-are obtained by integrating active learnign into AIS.
+are obtained by integrating active learning into AIS.
 
 Active learning is based on the Gaussian process (GP) surrogate; see [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md).
 Once the GP is trained with a few outputs from the full model, for every new input sample from either MCMC or

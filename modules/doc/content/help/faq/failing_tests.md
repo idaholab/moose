@@ -99,7 +99,7 @@ If the test did fail, chances are your test and our test is failing for the same
 
   - If your tests fail due to timeout errors, it is most likely you have a good installation, but a
     slow machine (or slow filesystem). You can adjust the amount of time that the TestHarness allows
-    a test to run before timing out, by adding a paramater to your test file:
+    a test to run before timing out, by adding a parameter to your test file:
 
     ```pre
     [Tests]

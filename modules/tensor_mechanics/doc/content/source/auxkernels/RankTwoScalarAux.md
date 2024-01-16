@@ -4,7 +4,7 @@
 
 ## Description
 
-This AuxKernal uses a set of functions to compute scalar quantities such as
+This AuxKernel uses a set of functions to compute scalar quantities such as
 invariants and components in specified directions from rank-2 tensors such as
 stress or strain.  See [RankTwoScalarTools](RankTwoScalarTools.md) for further
 information.

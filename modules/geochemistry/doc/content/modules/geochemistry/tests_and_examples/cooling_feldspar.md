@@ -2,7 +2,7 @@
 
 This page follows section 14.1 of [!cite](bethke_2007) and involves computing the equilibrium system as a solution in contact with feldspars is cooled.
 
-The initial composition of the water is shown in [table:composition].  In addition, the "albite low" mineral is supressed (its precipitation is disallowed).  The system is initialised at 300$^{\circ}$C and slowly cooled to 25$^{\circ}$C.
+The initial composition of the water is shown in [table:composition].  In addition, the "albite low" mineral is suppressed (its precipitation is disallowed).  The system is initialised at 300$^{\circ}$C and slowly cooled to 25$^{\circ}$C.
 
 !table id=table:composition caption=Initial composition
 | Species | Concentration |

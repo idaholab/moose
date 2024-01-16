@@ -16,7 +16,7 @@ A phase is a region of space that is physically distinct, mechanically separable
 
 ### Components
 
-Components are useful abstractions.  They might or might not be real things, so can even have negative mass.  For instance, consider an alkaline solution (more OH$^{-}$ than H$^{+}$).  Choose H$_{2}$O and H$^{+}$ to be the component basis set.  Each hydroxyl ion, $\mathrm{H}_{2}\mathrm{O} - \mathrm{H}^{+} \rightarrow \mathrm{OH}^{-}$, is made up of a water molecule less a hydrogen ion.  Since this is an alkaline solution, the overall composition has a positive amount of water and a negative amount of H$^{+}$.  The molality of the the H$^{+}$ speices is positive, however.
+Components are useful abstractions.  They might or might not be real things, so can even have negative mass.  For instance, consider an alkaline solution (more OH$^{-}$ than H$^{+}$).  Choose H$_{2}$O and H$^{+}$ to be the component basis set.  Each hydroxyl ion, $\mathrm{H}_{2}\mathrm{O} - \mathrm{H}^{+} \rightarrow \mathrm{OH}^{-}$, is made up of a water molecule less a hydrogen ion.  Since this is an alkaline solution, the overall composition has a positive amount of water and a negative amount of H$^{+}$.  The molality of the the H$^{+}$ species is positive, however.
 
 A complete set of components forms a *basis* for the reaction system.
 
@@ -96,7 +96,7 @@ $\mathrm{SI} = \log_{10}(Q/K)$, where $Q$ is the activity product and $K$ is the
 
 ### Redox reaction
 
-This involves the transfer of electrons.  For instance $\mathrm{Fe}^{2+} + 0.25\mathrm{O}_{2} + \mathrm{H}^{+} \rightleftharpoons \mathrm{Fe}^{3+} + 0.5\mathrm{H}_{2}\mathrm{O}$, where an electron is transfered between Fe$^{2+}$ and Fe$^{3+}$.  Fe$^{2+}$ has lost an electron: it is oxidised.  The electron donor and electron receptor are called a *redox couple*.  Often these reactions are split into *half reactions* that show the release/gain of an electron, eg $\mathrm{Fe}^{2+} \rightarrow \mathrm{Fe}^{3+} + \mathrm{e}^{-}$.
+This involves the transfer of electrons. For instance $\mathrm{Fe}^{2+} + 0.25\mathrm{O}_{2} + \mathrm{H}^{+} \rightleftharpoons \mathrm{Fe}^{3+} + 0.5\mathrm{H}_{2}\mathrm{O}$, where charge is transferred between $\mathrm{Fe}^{2+}$ and $\mathrm{O}_{2}$. $\mathrm{Fe}^{2+}$ has lost an electron: it is oxidised. Often these reactions are split into *half reactions* that show the release/gain of an electron, e.g. $\mathrm{Fe}^{2+} \rightarrow \mathrm{Fe}^{3+} + \mathrm{e}^{-}$. A *redox couple* is a reduced species and its corresponding oxidised form, e.g. $\mathrm{Fe}^{2+}$ / $\mathrm{Fe}^{3+}$.
 
 ### Nernst potential
 
@@ -123,7 +123,7 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | $A_{\bar{l}}$ | - | Label for all minerals that are kinetically controlled.
 | $A_{m}$ | - | Label for gases of known fugacity, so these will appear in the [basis](basis.md).
 | $A_{n}$ | - | Label for all gases.
-| $A_{q}$ | - | Label for sorbed species in equilibrium with the aqueous solution.  These are combintations of basis species that have adsorbed onto sorbing sites on minerals, making a surface complex.  The mass-action equations can be more complicated than for $A_{j}$ and $A_{l}$.  These do not get transported. |
+| $A_{q}$ | - | Label for sorbed species in equilibrium with the aqueous solution.  These are combinations of basis species that have adsorbed onto sorbing sites on minerals, making a surface complex.  The mass-action equations can be more complicated than for $A_{j}$ and $A_{l}$.  These do not get transported. |
 | $A_{\bar{q}}$ | - | Label for sorbed species that are kinetically controlled. |
 | $A_{p}$ | - | Label for sorbing sites, so these appear in the basis.  In the Langmuir approach there is just one of these, and all sorbing species compete to sorb.  In the surface-complexation approach there are $N_{p}\geq 1$ of these.
 | $a$ | - | Activity.  For species in equilibrium reactions $a = \gamma m/m_{\mathrm{ref}}$, where $\gamma$ is the activity coefficient, $m$ is the molality, and $m_{\mathrm{ref}}=1\,$mol.kg$^{-1}$. |
@@ -135,7 +135,7 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | $\phi$ | - | Porosity of porous skeleton.  Its dynamics (if any) are not controlled by the `geochemistry` module |
 | $\gamma$ | - | [Activity coefficient](activity_coefficients.md) |
 | $I$ | mol.kg$^{-1}$ | Ionic strength: $I = \frac{1}{2}\sum_{i}m_{i}z_{i}^{2}$, where the sum runs over the free ions in the solution, so neutral complexes are not counted. |
-| $I_{s}$ | mol.kg$^{-1}$ | Stiochiometric ionic strength: $I_{s} = \frac{1}{2}\sum_{i}m_{i}z_{i}^{2}$.  Here, complete dissociation of complexes is assumed, and then the sum runs over all ions in the hypothetical solution. |
+| $I_{s}$ | mol.kg$^{-1}$ | Stoichiometric ionic strength: $I_{s} = \frac{1}{2}\sum_{i}m_{i}z_{i}^{2}$.  Here, complete dissociation of complexes is assumed, and then the sum runs over all ions in the hypothetical solution. |
 | $K$ | - | Equilibrium constant for a reaction |
 | $m$ | mol.kg$^{-1}$ | Molality.  The molality of unoccupied sorption sites is $m_{p}$. |
 | $M$ | mol | Moles of a component |

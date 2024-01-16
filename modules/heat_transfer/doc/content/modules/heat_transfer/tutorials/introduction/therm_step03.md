@@ -10,7 +10,7 @@ typically used for heat transfer within a solid or stationary fluid is:
   \rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q} ~\text{for}~\vec{x} \in \Omega,
 \end{equation}
 
-where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinatess, $\rho$ is the density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source, and $\Omega$ is the solution domain.
+where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source, and $\Omega$ is the solution domain.
 
 The first step will be to add the time derivative term to this equation, and
 then in a subsequent step, a volumetric heating term will be added.
@@ -24,7 +24,7 @@ then in a subsequent step, a volumetric heating term will be added.
 The first change necessary to convert this from a quasi-steady-state problem to
 a transient problem is to define a reasonable initial condition for the
 temperature variable. The default initial value of variables is 0, which did
-not affect the steady-state solution in the previous step, but has a signficant
+not affect the steady-state solution in the previous step, but has a significant
 effect on the transient solution. The `initial_condition` parameter is set
 for the `T` variable to 300. Units of Kelvin are used here, and this is close
 to room temperature.
@@ -89,7 +89,7 @@ have the expected effect after re-running the model.
 
 A Python script called `therm_soln_compare.py` in this directory is set up to
 plot the results of the problems from steps 2a, 3, and 3a to show a side-by-side
-comparison of the temperature profiles at the end of the analyis for these
+comparison of the temperature profiles at the end of the analysis for these
 cases. This script depends on having the `matplotlib` and `pandas` libraries
 available in your Python installation. It is executed by typing:
 

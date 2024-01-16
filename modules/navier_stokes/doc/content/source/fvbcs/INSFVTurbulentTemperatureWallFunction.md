@@ -13,7 +13,7 @@ boundary layer are identified as follows:
 - Logarithmic region: $y^+ \ge 30$
 
 For the procedure of determining the non-dimensional wall distance as $y^+$
-and the friction velocity $u_{\tau}$ plese see
+and the friction velocity $u_{\tau}$ please see
 [INSFVTurbulentViscosityWallFunction](INSFVTurbulentViscosityWallFunction.md).
 
 For the sub-laminar and logarithmic layer, the thermal diffusivity is defined

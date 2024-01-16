@@ -39,4 +39,4 @@ monomial with
 
 If you load the result into paraview you will notice that for higher order
 monomials paraview automatically averages the results at the nodes. Nodal patch
-recovery is available to perform such a projection more acurately inside MOOSE.
+recovery is available to perform such a projection more accurately inside MOOSE.

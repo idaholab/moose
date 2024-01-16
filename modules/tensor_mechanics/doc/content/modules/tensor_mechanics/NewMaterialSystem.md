@@ -97,7 +97,7 @@ for `large_kinematics = false`, leaving only the strain tensors defined.
 
 The strains are defined incrementally in terms of the inverse incremental deformation gradient (or the increment in the gradient for small displacement kinematics).
 The calculator [stabilizes](/tensor_mechanics/Stabilization.md) the deformation gradient adds any homogenization gradient from the [homogenization system](tensor_mechanics/Homogenization.md)
-before calculating the incremental and accumualted strains, and so these modifications propogate through all the available kinematic measures.
+before calculating the incremental and accumulated strains, and so these modifications propagate through all the available kinematic measures.
 However, the eigenstrains are currently defined incrementally and so they will not affect the deformation gradient, the inverse deformation gradient,
 and the incremental deformation gradient.
 

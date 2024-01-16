@@ -34,7 +34,7 @@ It is often useful to define the minimum processors to use when running sub-appl
 Typically this is done for large models in batch mode to avoid excessive memory usage.
 The [!param](/MultiApps/SamplerFullSolveMultiApp/min_procs_per_app) will utilize this
 capability, however it is +required+ that the [!param](/Samplers/MonteCarlo/min_procs_per_row)
-parameter in the `Samplers` block be set to the same value. This is to enusre that
+parameter in the `Samplers` block be set to the same value. This is to ensure that
 the sampler partitioning is equivalent to the multiapp partitioning.
 
 !! min_procs_end

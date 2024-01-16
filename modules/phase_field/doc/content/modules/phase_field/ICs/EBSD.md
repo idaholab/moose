@@ -4,7 +4,7 @@ To read experimental [electron backscatter diffraction (EBSD)](https://en.wikipe
 data three components are needed
 
 - [`EBSDMesh`](/EBSDMesh.md) Mesh object
-- [`EBSDReader`](/EBSDReader.md) UserObjcet
+- [`EBSDReader`](/EBSDReader.md) UserObject
 - Initial conditions (such as the `ReconVarIC` action provides)
 
 !media media/phase_field/EBSDReader_stress.png
@@ -107,7 +107,7 @@ _centerpoints[gr] = d.p;
 !media media/phase_field/RGB_plot.png
        style=width:30%;margin-left:20px;float:right;
        caption=Reconstructed microstructure with the color representation of the inverse polefigure
-               description of the crystyal orientations. Image created using the phase_field module
+               description of the crystal orientations. Image created using the phase_field module
                example file `IN100-111grn.i`.
 
 It is common to use an inverse pole figure representation of the crystal orientations

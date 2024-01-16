@@ -6,7 +6,7 @@ Some surrogate models allow for a covariance function (often referred to as kern
 
 ## Creating a Covariance Function
 
-A covariance function is created by inheriting from `CovarainceFunctionBase` and overriding the methods in the base class.
+A covariance function is created by inheriting from `CovarianceFunctionBase` and overriding the methods in the base class.
 
 ## Using a Covariance Function
 

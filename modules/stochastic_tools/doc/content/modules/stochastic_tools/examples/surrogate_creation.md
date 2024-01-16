@@ -36,7 +36,7 @@ The member variables `_sample_points`, `_sample_results`, and `_predictor_row` a
 
 ### preTrain
 
-`preTrain()` is called before the sampler loop. This is typically used to initialize variables and allocate memory. For [NearestPointTrainer.md], we will explicitly clear `_sample_points` and `_sample_results`. This is done because the implementation of $k$-fold cross-valdiation used in `SurrogateTrainer` requires that `preTrain()` resets the state of the trainer and clears any essential data related to prior training sets (for further details, see [Trainers System](Trainers/index.md)).
+`preTrain()` is called before the sampler loop. This is typically used to initialize variables and allocate memory. For [NearestPointTrainer.md], we will explicitly clear `_sample_points` and `_sample_results`. This is done because the implementation of $k$-fold cross-validation used in `SurrogateTrainer` requires that `preTrain()` resets the state of the trainer and clears any essential data related to prior training sets (for further details, see [Trainers System](Trainers/index.md)).
 
 !listing NearestPointTrainer.C re=void\sNearestPointTrainer::preTrain.*?^}
 

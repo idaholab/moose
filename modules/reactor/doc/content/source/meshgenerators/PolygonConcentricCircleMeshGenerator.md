@@ -64,7 +64,7 @@ When [!param](/Mesh/PolygonConcentricCircleMeshGenerator/num_sides) is set as 6,
 The option for ring and sector reporting IDs can be turned on by defining the input parameters [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_id_name) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/sector_id_name), respectively.
 
 For the ring reporting IDs, each annular blocks defined by [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_radii) has its own ID values by default.
-The default may be overriden by unique ID values by setting [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_id_assign_type) as `ring_wise`, if both [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_radii) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_intervals) are specified.
+The default may be overridden by unique ID values by setting [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_id_assign_type) as `ring_wise`, if both [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_radii) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/ring_intervals) are specified.
 
 ## Other Information
 

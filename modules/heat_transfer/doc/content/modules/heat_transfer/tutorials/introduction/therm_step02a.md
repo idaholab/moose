@@ -7,7 +7,7 @@ varies linearly as a function of the $x$ coordinate.
 
 The variation of the solution as stored in the Exodus file can be visualized
 along a line using tools like Paraview, but MOOSE also offers a way of directly
-outputing values sampled along a line to a comma-separate value (CSV) file. 
+outputting values sampled along a line to a comma-separate value (CSV) file. 
 Benefits of doing this include:
 
  - If a calculation is repeated many times, plotting of key quantities can

@@ -1,6 +1,6 @@
 # Cold CO$_{2}$ injection into a reactive, elastic reservoir - a multi-phase THMC problem
 
-[Another example](thm_example.md) describes cold CO$_{2}$ injection into a warmer, elastic reservoir, and the MOOSE results were benchmarked against analytical solutions.  This page extends that example by assuming the reservoir is chemically reactive to demonstrate how to solve thermal-hydrualic-mechanical-chemical (THMC) problems.  There are two possibilities for including geochemical reactions in such a model:
+[Another example](thm_example.md) describes cold CO$_{2}$ injection into a warmer, elastic reservoir, and the MOOSE results were benchmarked against analytical solutions.  This page extends that example by assuming the reservoir is chemically reactive to demonstrate how to solve thermal-hydraulic-mechanical-chemical (THMC) problems.  There are two possibilities for including geochemical reactions in such a model:
 
 1. use the simple chemical-reactions functionality built into the PorousFlow module, as described in this page;
 2. couple with the Geochemistry module for more sophisticated geochemical modelling functionality

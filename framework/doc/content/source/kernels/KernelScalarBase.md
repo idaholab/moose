@@ -76,7 +76,7 @@ value. Examples of the source codes below demonstrate this fact.
 
 !alert note title=Parallelization of scalar contributions
 While these quadrature loops are convenient for implementation in a single object, the speed of 
-parallel execution may be slower due to the sequential assembly needed from each element assemblying
+parallel execution may be slower due to the sequential assembly needed from each element assembling
 to the same scalar variable `_kappa`. For greater speed, the developer may instead implement the
 terms for `computeScalarQpResidual()` and `computeScalarQpJacobian()` through a derived class of `ElementIntegralUserObject` as discussed at [ScalarKernels/index.md#couple-spatial].
 

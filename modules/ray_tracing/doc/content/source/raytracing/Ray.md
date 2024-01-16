@@ -9,7 +9,7 @@ The discussion of how to use and interact with a `Ray` is summarized into the fo
 - [Using Ray Data](#using-ray-data): How to best access and use the data stored on the `Ray`.
 - [Getting a Ray](#getting-a-ray): How to obtain a `Ray` to be used for tracing.
 
-Useful member variables avaiable on the `Ray` are:
+Useful member variables available on the `Ray` are:
 
 - `currentPoint()` - The current point of the `Ray`. Before being traced, this is the starting point. While being traced, this is the furthest point that the `Ray` has travelled (during RayKernel execution, this is the end of the segment). After being traced, this is the point where the `Ray` was killed.
 - `currentElem()` - The current element that the `Ray` is in. Before being traced, this is the starting element of the `Ray`. During tracing during [RayKernel](RayKernels/index.md) execution, this is the element that the segment is in. During tracing during [RayBC](RayBCs/index.md) execution, this is the element that the [RayBC](RayBCs/index.md) is being applied to. At the end of tracing, this is the element that the `Ray` died in.

@@ -12,7 +12,7 @@ With a linearized interface, the weak form is
 \left( \kappa_i \nabla \phi_i, \nabla (L_i \zeta_m ) \right) = \left( \kappa_i \nabla \psi_i \frac{\partial \phi_i}{\partial \psi_i}, \nabla (L_i \zeta_m ) \right),
 \end{equation}
 
-where $\kappa_i$ (`kappa_name`) is the gradient energy coefficent, $\phi_i$ the
+where $\kappa_i$ (`kappa_name`) is the gradient energy coefficient, $\phi_i$ the
 non-conserved non-linear order parameter variable, $\psi_i$ is the transformed variable the kernel is acting on, $L_i$
 (`mob_name`) is the scalar (isotropic) mobility associated with the order
 parameter, and $\zeta_m$ is the test function. The derivative of the change of variable function $\frac{\partial \phi_i}{\partial \psi_i}$ is defined using a derivative parsed material such as [LinearizedInterfaceFunction](/LinearizedInterfaceFunction.md).

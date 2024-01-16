@@ -3,7 +3,7 @@
 ## Description
 
 `ADMatHeatSource` implements a force term in thermal transport to represent a
-heat source. The strong form, given adomain $\Omega$ is defined as
+heat source. The strong form, given a domain $\Omega$ is defined as
 
 \begin{equation}
 \underbrace{-f}_{\textrm{BodyForce}} + \sum_{i=1}^n \beta_i = 0 \in \Omega

@@ -20,7 +20,7 @@ mesh dimensions `1 x 2` must have the unit meters, the time must be specified in
 seconds.
 
 !alert note
-MOOSE provides a system to convert quanities between units right in the input
+MOOSE provides a system to convert quantities between units right in the input
 file. A list of supported units can be found [here](utils/Units.md). Try using
 `youngs_modulus = ${units 145037.74 lbs/in^2 -> Pa}` in the input file, for an
 explicit conversion from pounds per square inch to Pascal.

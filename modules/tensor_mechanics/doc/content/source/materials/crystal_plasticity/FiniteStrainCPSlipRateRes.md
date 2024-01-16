@@ -14,7 +14,7 @@ and stress response is determined with respect to the slip rate on each slip
 system of the crystal plasticity model. In contrast, in the material
 [FiniteStrainCrystalPLasticity](/FiniteStrainCrystalPlasticity.md) determines
 the crystal strain and stress response with response to the residual calculated
-by the second Piola-Kirchoff stress increment.
+by the second Piola-Kirchhoff stress increment.
 
 ### Constitutive Model Definition
 

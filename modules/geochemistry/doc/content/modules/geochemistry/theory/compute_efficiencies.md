@@ -1,6 +1,6 @@
 ## Compute efficiencies
 
-`Geochemistry` simulations use a large amount of memory since they store information about a complete geochemical system at each finite-element node, and, optionally, populate a huge number of AuxVariables with useful information.  On the other hand, ignoring transport, they are almost embarrasingly parallel, so may be solved efficiently using a large number of processors.
+`Geochemistry` simulations use a large amount of memory since they store information about a complete geochemical system at each finite-element node, and, optionally, populate a huge number of AuxVariables with useful information.  On the other hand, ignoring transport, they are almost embarrassingly parallel, so may be solved efficiently using a large number of processors.
 
 This page explores computational aspects of the [2D GeoTES simulation](geotes_2D.md), the [Weber-Tensleep GeoTES simulation](geotes_weber_tensleep.md) and the [FORGE geothermal simulation](forge.md) which are coupled porous-flow + geochemistry simulations.
 
@@ -42,9 +42,9 @@ The results are summarised in the approximate formula
 \end{equation}
 where $N$ is the number of nodes, $S$ the number of species ($S=6$ and $S=201$ in the two examples) and $A$ the number of AuxVariables.
 
-1. The first term is largely indepdendent of `geochemistry` so is not too important here.
+1. The first term is largely independent of `geochemistry` so is not too important here.
 2. The second term depends on the size of the geochemical system, $S$, and quantifies the cost of keeping track of an entire geochemical at each node, which is approximately $350S$ bytes per node.  Recall that $S$ is the total number of species in the geochemical model.
-3. The third term depends on the size of the Auxillary system, which is approximately $70A$ bytes per node.  Recall that this is about $4S$ if all the default AuxVariables are added by the Action.
+3. The third term depends on the size of the Auxiliary system, which is approximately $70A$ bytes per node.  Recall that this is about $4S$ if all the default AuxVariables are added by the Action.
 
 Of course, the memory consumption will be dependent on the compiler and architecture, but the above formula should provide an approximate guide.
 
@@ -100,7 +100,7 @@ The [FORGE](forge.md) `porous_flow.i` input file is used with mesh defined by
 
 This leads to 197472 DoFs, which splits nicely over 20 processors to yield about 10000 DoFs per processor.  The simulation is run for 20 time-steps, most of which converge in 2 Nonlinear iterations.  [table:pre_ksp] shows that there are a variety of solver and preconditioner choices that provide fairly comparable performance, but that there are some that are quite poor.  The results are for only one 2D model, but it is useful to note that hypre, FSP, ASM + ILU and bjacobi all perform similarly, and that complicated features such as the `asm_overlap`, `asm_shift_type`, `diagonal_scale` and `diagonal_scale_fix`, and very strong preconditioners like MUMPS are not beneficial in these types of simulations, in contrast to multi-phase PorousFlow models.
 
-!table id=table:pre_ksp caption=Compute time (s) for 20 time-steps of the 2D `porous_flow.i` simulations run over 20 processors with about 10000 DoFs per processor.  Note that the time required is only accurate to within about 5% due to the vageries of HPC.
+!table id=table:pre_ksp caption=Compute time (s) for 20 time-steps of the 2D `porous_flow.i` simulations run over 20 processors with about 10000 DoFs per processor.  Note that the time required is only accurate to within about 5% due to the vagaries of HPC.
 | Time required (s) | Preconditioner | Notes |
 | --- | --- | --- |
 | 51 | hypre | Using the boomeramg type with default options |
@@ -166,7 +166,7 @@ The [FORGE](forge.md) `porous_flow.i` input file used with mesh defined by
 
 This leads to 161172 DoFs, which splits nicely over 20 processors to yield about 10000 DoFs per processor.  The simulation is run for 10 time-steps, most of which converge in 2 Nonlinear iterations.  [table:pre_ksp_3D] shows that there are a variety of solver and preconditioner choices that provide fairly comparable performance, but some are quite poor.    The results are for only one 3D model, but it is useful to note that hypre is the best by a significant margin, followed by FSP + hypre + gmres and ASM + ILU.  Complicated features such as the `asm_overlap`, `asm_shift_type`, `diagonal_scale` and `diagonal_scale_fix`, and strong preconditioners like ASM + LU or MUMPS add extra overhead in these types of simulations, in contrast to multi-phase PorousFlow models.
 
-!table id=table:pre_ksp_3D caption=Compute time (s) for 10 time-steps of the 3D `porous_flow.i` simulations run over 20 processors with about 10000 DoFs per processor.  Each simulation uses the GMRES KSP method with `restart = 300`.  Note that the time required is only accurate to within about 5% due to the vageries of HPC.
+!table id=table:pre_ksp_3D caption=Compute time (s) for 10 time-steps of the 3D `porous_flow.i` simulations run over 20 processors with about 10000 DoFs per processor.  Each simulation uses the GMRES KSP method with `restart = 300`.  Note that the time required is only accurate to within about 5% due to the vagaries of HPC.
 | Time required (s) | Preconditioner | Notes |
 | --- | --- | --- |
 | 100 | hypre | Using the boomeramg type with default options |

@@ -16,7 +16,7 @@ UserObjects have already been migrated.  In the new architecture there is only a
 instance (TheWarehouse) through which all object queries can be made.
 
 TheWarehouse is a class that holds and manages memory for MooseObjects - allowing flexible
-querying to select subsets of objects.  TheWarehouse stores customizeable meta-data for each
+querying to select subsets of objects.  TheWarehouse stores customizable meta-data for each
 object that queries operate on. In general, meta-data is treated as static and not updated after
 objects have been added.  Results are cached and reused for repeated identical queries. For more
 information on the API and usage, see the doxygen documentation

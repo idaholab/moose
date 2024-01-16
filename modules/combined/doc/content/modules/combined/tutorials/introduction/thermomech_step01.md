@@ -50,7 +50,7 @@ in the heat equation.
 This block automates the process of setting up multiple objects related to solution of
 a mechanics problem. The objects set up by this block include the Variables and
 Kernels for the displacement solution, the Material that computes the strain, and
-objects associated with outputing stresses. In addition to simplifying the input,
+objects associated with outputting stresses. In addition to simplifying the input,
 this ensures that a consistent set of options are selected for the desired formulation.
 
 !listing modules/combined/tutorials/introduction/thermal_mechanical/thermomech_step01.i block=Modules/TensorMechanics/Master/all

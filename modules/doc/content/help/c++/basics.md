@@ -62,7 +62,7 @@
   if (a && b && f()) { e = a; }
   ```
   !alert note
-  Operators && and || use "short-circuiting," so "b" and "f()" in the example ab  ove may not get evaluated.
+  Operators && and || use "short-circuiting," so "b" and "f()" in the example above may not get evaluated.
 
 - Scope resolution operator:
 
@@ -158,14 +158,14 @@ default:
   - headers (*.h)
   - bodies (*.C)
 
-- Headers genrally contain declarations
+- Headers generally contain declarations
 
   - Our statement of the types we will use
   - Given names to our types
 
 - Bodies generally contain definitions
 
-  - Our descriptions of those types, including what they do or how they ae built
+  - Our descriptions of those types, including what they do or how they are built
   - Memory consumed
   - The operations functions perform
 
@@ -293,12 +293,12 @@ g++ -I/home/permcj/include -L/home/permcj/lib -lutils -Wall -o myExec myExec.o
     - Linux
 
         - ldd
-        - $LDLIBRARYPATH
+        - $LD_LIBRARY_PATH
 
     - Mac
 
         - otool
-        - $DYLDLIBRARYPATH
+        - $DYLD_LIBRARY_PATH
 
 ## Recall Addition Example
 

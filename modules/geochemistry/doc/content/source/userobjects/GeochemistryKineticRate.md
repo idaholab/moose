@@ -39,7 +39,7 @@ This is a rather complicated equation, and simple examples are given below.  In 
   - `death`: $D=1$ irrespective of $Q$ and $K$.  This means dissolution will occur if $k>0$, while precipitation will occur if $k<0$.  In addition, no reactants will be consumed or produced by the kinetic reaction: only the mass of the kinetic species will change.  This is used to model the death of microbes in biologically-catalysed scenarios.
   
 
-In addition, there are auxillary inputs that do not impact the rate directly, but impact the resulting products:
+In addition, there are auxiliary inputs that do not impact the rate directly, but impact the resulting products:
 
 - `non_kinetic_biological_catalyst` is a primary or secondary species that may be created or destroyed in addition to the reactants and products in the kinetic reaction [gen_kin_react_eqn].  This is usually a biological species, hence the name "biological catalyst".  An example is the [sulfate reducer](bio_sulfate.md) model.
 - `non_kinetic_biological_efficiency` is the number of moles of the `non_kinetic_biological_catalyst` that are created per mole of [gen_kin_react_eqn] reaction turnover

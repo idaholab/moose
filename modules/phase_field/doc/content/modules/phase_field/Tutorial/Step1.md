@@ -4,7 +4,7 @@ The input file for this step can be found here: [s1_testmodel.i](https://github.
 
 ## Input File Blocks
 
-We are going to start with the simplest input file we can. We will add on more features and make the model more accurate as we go. We will be using the [Split Cahn-Hilliard](Phase_Field_Equations.md) method because it converges faster than the direct method. The basic blocks we need are: Mesh, Variables, ICs, BCs, Kernels, Materials, Precoditioning, Executioner, and Outputs.
+We are going to start with the simplest input file we can. We will add on more features and make the model more accurate as we go. We will be using the [Split Cahn-Hilliard](Phase_Field_Equations.md) method because it converges faster than the direct method. The basic blocks we need are: Mesh, Variables, ICs, BCs, Kernels, Materials, Preconditioning, Executioner, and Outputs.
 
 ### Mesh
 

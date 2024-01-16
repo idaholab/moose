@@ -10,7 +10,7 @@ Here are some tips to estimate the global convergence criterion.
 
 ## Fluids
 
-Determine an appopriate tolerance on what you mean by *steadystate*.  For
+Determine an appropriate tolerance on what you mean by *steadystate*.  For
 instance, in a single-phase simulation with reasonably large constant fluid bulk
 modulus, and gravity acting in the $-z$ direction, the steadystate solution is
 $P = -\rho_{0}gz$ (up to a constant).  In the case of water, this reads
@@ -41,7 +41,7 @@ V|\kappa|\rho_{0}\epsilon/\mu \ .
 For water, this gives $R \approx V|\kappa|\times 10^{6}\epsilon$, using standard
 values for $\rho_{0}$ and $\mu$.
 
-In the previous step, an appropriate tolernace on the residual was given as
+In the previous step, an appropriate tolerance on the residual was given as
 $V|\kappa|\rho_{0}\epsilon/\mu$.  Now the volume of interest, $V$, must be
 specified.  Often this is not the entire mesh, but a small region where most of
 the interesting dynamics occurs, and the remainder of the mesh exists just to
@@ -86,7 +86,7 @@ $\nabla\sigma^{\mathrm{tot}} = 0$.  Determine the error in $\nabla\sigma$ that
 you are willing to accept, and label it $|\epsilon|$.  For instance $\epsilon =
 1$ Pa.m$^{-1}$ might be appropriate for your problem.  You may determine
 $\epsilon$ from consideration of stresses directly, or you may wish to consider
-what the accpetable error in strains or displacements would be, and then use the
+what the acceptable error in strains or displacements would be, and then use the
 elasticity tensor to find $\epsilon$.
 
 The nonlinear residual will be

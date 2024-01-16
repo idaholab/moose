@@ -24,7 +24,7 @@ relative to the user specified axis of rotation origin and direction.
 where $\mathcal{f}$ is the applied reaction force vector, $P_c$ is the current node position, $P_o$
 is the origin of the axis of rotation, and $d$ is the direction vector of the axis of rotation.  The
 component of the torque acting along the user specified axis of rotation vector, $\tau_c$ is
-calcuated as [eq:calculate_torque_component]:
+calculated as [eq:calculate_torque_component]:
 \begin{equation}
 \label{eq:calculate_torque_component}
   \tau_c = \frac{\boldsymbol{\tau} \cdot d}{|d|^2} \ cdot d

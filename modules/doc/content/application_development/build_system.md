@@ -74,7 +74,7 @@ There are two main build optimizations: "header symlinking" and "unity builds":
 MOOSE and MOOSE-based application's include directories are organized into sub-directories for each
 system (such as `kernels`, `bcs`, `auxkernels`, etc.).  There are currently ~30 different MOOSE
 systems, meaning that each application could potentially have 30+ directories to search for include
-files.  In addition, applications can compose/use eachother and use the physics modules.  Each time
+files.  In addition, applications can compose/use each other and use the physics modules.  Each time
 you add another application/module you're gaining another 30+ include directories.
 
 This can lead to an "explosion" of include directory paths (application + 4 modules + framework = 180
@@ -207,7 +207,7 @@ when building MOOSE or a MOOSE-based application.
 - `framework/include/base/MooseConfig.h.in` - This file is auto-generated from running `autoheader`.
 
 - `framework/conf_var.mk.in` - This file is where you put your new expansion expressions. Typically these
-  are in the form of "@VARAIBLE@".
+  are in the form of "@VARIABLE@".
 
 ### Make Install
 

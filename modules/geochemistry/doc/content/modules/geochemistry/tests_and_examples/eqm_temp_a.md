@@ -2,7 +2,7 @@
 
 This page follows Chapter 11 of [!cite](bethke_2007).
 
-The `geochemistry` module can be used to provide equilibrium temperature or activity.  For instance, using the standard GWB database and anydrite instead of Ca$^{2+}$ as a component (using a [swap](swap.md)), the reaction
+The `geochemistry` module can be used to provide equilibrium temperature or activity.  For instance, using the standard GWB database and anhydrite instead of Ca$^{2+}$ as a component (using a [swap](swap.md)), the reaction
 \begin{equation}
 \mathrm{gypsum}\rightleftharpoons \mathrm{anhydrite} + 2\mathrm{H}_{2}\mathrm{O} \ ,
 \end{equation}
@@ -27,7 +27,7 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The output yields the desired information:
 
 ```
-Not enough activites known to compute equilibrium temperature for reaction
+Not enough activities known to compute equilibrium temperature for reaction
   Gypsum = 2\*H2O \+ 1\*Ca\+\+ \+ 1\*SO4--  .  log10\(K\) = -4.451
 Gypsum.  T = 43.6625degC
 ```

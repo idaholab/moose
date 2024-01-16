@@ -1,6 +1,6 @@
 # Example 8 : Material Properties
 
-MOOSE includes built-in support for creating and sharing material properties thorughout your
+MOOSE includes built-in support for creating and sharing material properties throughout your
 simulation calculations. Material property calculations are run/updated by MOOSE automatically for
 every quadrature point. Kernels, Postprocessors, and other objects all have convenient access to
 these properties.  This example demonstrates a convection-diffusion problem with kernels that

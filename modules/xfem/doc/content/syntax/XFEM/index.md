@@ -50,14 +50,14 @@ Next, the class types created when using crack tip enrichment are detailed:
 When crack tip enrichment is used, `enrichment_displacements` are added as first-order, Lagrange
 Variables. Next, a `CrackTipEnrichmentStressDivergenceTensors` kernel is added for each enrichment
 displacement variable. Each kernel uses the `crack_front_definition`, `enrichment_displacements`,
-and `diplacements` provided in the XFEM Action. All enrichment displacement variables also have an
+and `displacements` provided in the XFEM Action. All enrichment displacement variables also have an
 associated `CrackTipEnrichmentCutOffBC` object added by the action from user specified parameters
 (`UserObject` `crack_front_definition`, the vector of `BoundaryName` variables `cut_off_boundary`,
 and respective `Real` value `cut_off_radius`).
 
 ## Example Input File Syntax
 
-Many input files only utilize the `qule` and `output_cut_plane` variables:
+Many input files only utilize the `qrule` and `output_cut_plane` variables:
 
 !listing modules/xfem/test/tests/bimaterials/glued_bimaterials_2d.i block=XFEM
 

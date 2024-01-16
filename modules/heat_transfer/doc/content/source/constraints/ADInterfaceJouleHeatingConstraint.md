@@ -6,11 +6,11 @@
 
 The `ADInterfaceJouleHeatingConstraint` class is intended to calculate and add the heat source due to Joule Heating which results from the electric potential drop across an interface.
 The heat source is then added to the temperature field variable  in a coupled electro-thermal simulation.
-This class is intended to be used in conjunction with [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) and [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md), which enforce the closed gap interface requirement by checking for a postive normal pressure.
+This class is intended to be used in conjunction with [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) and [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md), which enforce the closed gap interface requirement by checking for a positive normal pressure.
 As such, the `ADInterfaceJouleHeatingConstraint` takes as a required argument the name of the Lagrange Multiplier variable used in the electrical contact.
 
 !alert note title=Employ Consistency in Primary and Secondary Designations
-Consistency in the selection of the primary boundary and secondary boundary among the electrical, thermal, and interface Joule Heating mortar contact input file compoments is recommended.
+Consistency in the selection of the primary boundary and secondary boundary among the electrical, thermal, and interface Joule Heating mortar contact input file components is recommended.
 
 The heat source is calculated as a function of the electric potential change across the interface, as determined from the associated Lagrange multiplier $\lambda_{\phi}$,
 \begin{equation}
@@ -59,7 +59,7 @@ Under steady state analysis assumptions, the temperature at the interface in the
 \begin{equation}
   T_{interface} = \frac{l}{k_{primary}} q_{primary} + T_{edge}
 \end{equation}
-where $l$ is the length of the block, $k_{primary}$ is the thermal conductivity, and $T_{edge}$ is the prescribed temeprature boundary condition at the edge of the material block.
+where $l$ is the length of the block, $k_{primary}$ is the thermal conductivity, and $T_{edge}$ is the prescribed temperature boundary condition at the edge of the material block.
 
 Similarly, the interface temperature in the secondary block material is given as
 \begin{equation}

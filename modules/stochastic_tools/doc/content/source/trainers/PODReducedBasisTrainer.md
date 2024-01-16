@@ -129,7 +129,7 @@ which consists of the following four steps for each variable:
    \Phi_{i,k}=\frac{1}{\sqrt{\lambda_{i,k}}}\sum\limits_{j=1}^{N_s}\textbf{V}_{i,k,j}S_{i,j},
 
    where $\Phi_{i,k}$ is the $k$-th ($k=1,...,r_i$) basis function of the reduced subspace for
-   variable $\textbf{u}_i$. Moreover, $\textbf{V}_{i,k,j}$ denottes the $j$-th element of
+   variable $\textbf{u}_i$. Moreover, $\textbf{V}_{i,k,j}$ denotes the $j$-th element of
    the $k$-th eigenvector of correlation matrix $\textbf{C}_i$. It is important to remember that
    $\Phi_{i,k}$ has a global support in space, and shall not be mistaken for the local
    basis functions ($\phi$) of the finite element approximation. The global basis vectors can be
@@ -261,7 +261,7 @@ snapshots is large (above ~2000).
 To get the snapshots, four essential blocks have to be added the main input file.
 First, a sampler has to be defined in `Samplers` to generate realizations for $\boldsymbol{\mu}$.
 These samples are then fed into a [PODFullSolveMultiApp.md] (defined
-in the `MultApps` block) which is capable of running simulations for each parameter.
+in the `MultiApps` block) which is capable of running simulations for each parameter.
 The solution vectors (snapshots) for each run are added to the trainer by a
 [PODSamplerSolutionTransfer.md] defined in the `Transfers` block. It is important to mention
 that the multiapp and transfer objects need to know about the trainer. This can be
@@ -291,7 +291,7 @@ a source term needs to be added as well ([!param](/Trainers/PODReducedBasisTrain
 | op | Operator that acts on the solution vector (i.e. a matrix). |
 | src | Operator that does not act on the solution vector (i.e. a source vector). |
 | op_dir | Dirichlet operator that acts on the solution vector (i.e. Dirichlet penalty matrix). |
-| src_dir | Dirichlet operator that does not act on the solution vector (i.e. Dirichlet pensalty source vector). |
+| src_dir | Dirichlet operator that does not act on the solution vector (i.e. Dirichlet penalty source vector). |
 
 To specify the allowed error in the snapshot reconstruction
 for reach variable ($\tau_i$), one needs to specify [!param](/Trainers/PODReducedBasisTrainer/error_res).

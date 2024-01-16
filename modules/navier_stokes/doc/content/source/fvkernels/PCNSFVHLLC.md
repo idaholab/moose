@@ -49,7 +49,7 @@ p \nabla \epsilon\\
 \end{bmatrix}
 \end{equation}
 
-Armed with these definitions we can write the Euler equations succintly as
+Armed with these definitions we can write the Euler equations succinctly as
 
 \begin{equation}
 \label{eq:general_euler}
@@ -170,7 +170,7 @@ and the right wave
 \end{equation}
 
 The star fluxes can be written $\bm{F}_{*K}$ = $\bm{F}\left(\bm{U}_{*K}\right)$,
-where $K$ denots $L$ or $R$ and preliminarily we will write
+where $K$ denotes $L$ or $R$ and preliminarily we will write
 
 \begin{equation}
 \label{eq:unknown_u}
