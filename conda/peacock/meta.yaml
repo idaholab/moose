@@ -31,7 +31,7 @@ requirements:
     - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
   # Python min/max constraints
   run_constrained:
-    - python <{{3.11}}
+    - python <{{3.12}}
 
 test:
   imports:
