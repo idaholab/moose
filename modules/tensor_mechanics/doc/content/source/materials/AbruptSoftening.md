@@ -30,10 +30,10 @@ stress retained after softening, $\sigma_{res}$, and is given as
 \end{equation}
 where the calculated stress, $\sigma$ is the principle stress along the direction
 of the crack, $\sigma_c$ is the stress threshold beyond which cracking occurs,
-$E$ is the Youngs' modulus value, and $\epsilon_c^{init}$ is the strain in
+$E$ is the Young's modulus value, and $\epsilon_c^{init}$ is the strain in
 direction of the crack when crack initiation occurred.
 The ratio of the current stiffness to the original material stiffness is
-similiarly determined based on the value of the residual stress
+similarly determined based on the value of the residual stress
 \begin{equation}
   \label{eqn:abrupt_stiffness_ratio}
   R = \begin{cases}
@@ -42,7 +42,7 @@ similiarly determined based on the value of the residual stress
        \end{cases}
 \end{equation}
 where $\sigma$ is the principle stress along the direction of the crack,
-$E$ is the Youngs' modulus value, and $\epsilon_c^{max}$ is the maximum strain
+$E$ is the Young's modulus value, and $\epsilon_c^{max}$ is the maximum strain
 in the direction of crack.
 The stiffness ratio is passed back to the
 [ComputeSmearedCrackingStress](/ComputeSmearedCrackingStress.md)

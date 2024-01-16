@@ -19,7 +19,7 @@ the sections below provide various examples of using some of these settings.
 ## Local Listing Content
 
 It is possible to create a listing using local content. This is done by using the `!listing` command
-without any agruments with the desired content following the command, see [command.md] for details
+without any arguments with the desired content following the command, see [command.md] for details
 to how content is defined. The available settings for this command are given in
 [listing-local-settings].
 

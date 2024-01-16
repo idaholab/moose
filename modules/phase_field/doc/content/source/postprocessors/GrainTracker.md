@@ -2,7 +2,7 @@
 
 The Grain Tracker is a utility that may be used in phase-field simulations to reduce the number of
 order parameters needed to model a large polycrystal system. The GrainTracker utilizes the
-[FeatureFloodCount](/FeatureFloodCount.md) object for indentifying and extracting individual grains
+[FeatureFloodCount](/FeatureFloodCount.md) object for identifying and extracting individual grains
 from a solution field. Once the FeatureFloodCount object has identified all grains, the GrainTracker
 does two things:
 

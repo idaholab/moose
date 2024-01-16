@@ -11,7 +11,7 @@
 
 - Variables have a lifetime
 - When a variable goes out of scope, its destructor is called
-- Dynamically-allocated (via new) memory *is not* automaticaly freed at the end of the scope
+- Dynamically-allocated (via new) memory *is not* automatically freed at the end of the scope
 
 [](---)
 
@@ -74,11 +74,11 @@
 - Pointers hold the location of another variable or object in memory
 - Pointers are useful in avoiding expensive copies of large objects
 
-  - Ex : Functions are passed ponters to large objects, rather than the objects themselves
+  - Ex : Functions are passed pointers to large objects, rather than the objects themselves
 
 - Pointers also facilitate shared memory
 
-  - Ex : one object "owns" the memory essociated with some data, and allows other objects access through a pointer
+  - Ex : one object "owns" the memory associated with some data, and allows other objects access through a pointer
 
 [](---)
 
@@ -176,7 +176,7 @@ std::cout << &r << "\n";  // prints address of a
 
 ## Summary : Pointers and References
 
-- A pointer is a variable that holds a memory address to anither variable
+- A pointer is a variable that holds a memory address to another variable
 
   ```cpp
   int *iPtr;  // Declaration

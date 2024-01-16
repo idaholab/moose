@@ -2,9 +2,9 @@
 
 ## Overview
 
-`Function`s are used to define functions depending only on spatial position and
-time: $f(x,y,z,t)$. These objects can serve a wide variety of purposes, including
-(but not limited to) the following:
+`Function`s are used to define functions depending only on time and spatial
+position: $f(t,x,y,z)$. These objects can serve a wide variety of purposes,
+including (but not limited to) the following:
 
 - defining initial conditions,
 - defining residual contributions (sources, boundary conditions, etc.), and

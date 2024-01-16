@@ -45,7 +45,7 @@ MOOSE also gives the total mass as 0.237638643\,kg.
 
 ## Single-phase, two-components
 
-This is similar to the previous section, but has two fluid ocmponents
+This is similar to the previous section, but has two fluid
 components.  The mass fraction is fixed at
 \begin{equation}
 \chi_{{\mathrm{ph}}=0}^{{\mathrm{sp}}=0} = x^{2} \ .

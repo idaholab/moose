@@ -11,7 +11,7 @@ This material assumes symmetry about the $z$-axis.
 This 'strain calculator' material computes the strain within the cylindrical
 coordinate system and relies on the specialized
 [Axisymmetric RZ kernel](/StressDivergenceRZTensors.md) to handle the stress
-divergence calcuation.
+divergence calculation.
 
 !alert warning title=Symmetry Assumed About the $z$-axis
 The axis of symmetry must lie along the $z$-axis in a $\left(r, z, \theta \right)$
@@ -31,7 +31,7 @@ The definition of a small total linearized strain is
   \label{eqn:def_small_total_strain}
   \epsilon_{ij} = \frac{1}{2} \left( u_{i,j} + u_{j,i}  \right)
 \end{equation}
-In this asixymmetric 1D formulation, the strain tensor is diagonal. [eqn:def_small_total_strain]
+In this axisymmetric 1D formulation, the strain tensor is diagonal. [eqn:def_small_total_strain]
 is therefore implemented in a straight-forward manner as
 \begin{equation}
   \label{eqn:1d_axisym_strain}
@@ -76,7 +76,7 @@ this type of simulation uses the scalar strain variables
 
 !listing modules/tensor_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Materials/strain
 
-which uses a scalar variable for the coupled out-of-plane strain; the arguement
+which uses a scalar variable for the coupled out-of-plane strain; the argument
 for the `scalar_out_of_plane_strain` parameter is the name of the scalar strain
 variable:
 

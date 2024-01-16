@@ -12,7 +12,7 @@ Rank-2 tensor component specified by the user.
 \end{equation}
 where $S^{avg}$ is the computed volume average quantity and $T_{ij}$ is the
 tensor component selected by the user.
-The tensor component indicies, $i$ and $j$, range from 0 to 2 as shown in the
+The tensor component indices, $i$ and $j$, range from 0 to 2 as shown in the
 reference tensor
 \begin{equation}
   \label{eqn:ref_tensor}

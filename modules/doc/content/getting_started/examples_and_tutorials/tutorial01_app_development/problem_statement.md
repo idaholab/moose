@@ -4,7 +4,7 @@
 
 # Problem Statement
 
-Consider a system containing two pressure vessels at differing temperatures as in the experiments presented by [!cite](pamuk2012friction). The vessels are connected via a pipe that contains a filter consisting of close-packed steel spheres as shown in [problem-schematic]. Predict the velocity and temperature of the fluid inside the filter. The pipe is 0.304 m in length and 0.0514 m in diameter. The fluid inside the system is liquid water at approximately 30 degrees Celcius. Each of the steel spheres are 1 mm in diameter.
+Consider a system containing two pressure vessels at differing temperatures as in the experiments presented by [!cite](pamuk2012friction). The vessels are connected via a pipe that contains a filter consisting of close-packed steel spheres as shown in [problem-schematic]. Predict the velocity and temperature of the fluid inside the filter. The pipe is 0.304 m in length and 0.0514 m in diameter. The fluid inside the system is liquid water at approximately 30 degrees Celsius. Each of the steel spheres are 1 mm in diameter.
 
 !media tutorial01_app_development/problem_schematic.png
        style=width:80%;margin-left:auto;margin-right:auto;

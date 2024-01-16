@@ -27,7 +27,7 @@ like so:
 \end{equation}
 
 where $\lambda$ is the value of the Lagrange multiplier. The corresponding LM
-equation will be a nonlinear complimentarity problem (NCP) function of the form
+equation will be a nonlinear complementarity problem (NCP) function of the form
 
 \begin{equation}
 \text{min}\left(\lambda, u\right)

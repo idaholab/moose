@@ -37,7 +37,7 @@ Two cases are explored: "conforming" and "nonconforming".   In the conforming ca
 
 The conforming case is explored using a non-MultiApp approach and a MultiApp approach, while the nonconforming case can only be explored using a MultiApp approach.
 
-In all cases, the finite-element mesh dictates the spatial resolution of the numerical solution, and the analysis that follows ignores this by using the same spatial resolution in each model.  However, it is important to remember that in practice, the use of finite elements means the solution is never "exact".  For instance, using large matrix elements will probably lead to poor results.  Further discussion may be found in the [small fracture network](multiapp_fracture_flow_PorousFlow_3D.md) example.  Large elements also produce more noticable overshoots and undershoots in the solution, which may be observed in the current models if the matrix `ny` is too small.
+In all cases, the finite-element mesh dictates the spatial resolution of the numerical solution, and the analysis that follows ignores this by using the same spatial resolution in each model.  However, it is important to remember that in practice, the use of finite elements means the solution is never "exact".  For instance, using large matrix elements will probably lead to poor results.  Further discussion may be found in the [small fracture network](multiapp_fracture_flow_PorousFlow_3D.md) example.  Large elements also produce more noticeable overshoots and undershoots in the solution, which may be observed in the current models if the matrix `ny` is too small.
 
 ## Physics
 
@@ -74,7 +74,7 @@ In the MultiApp approach, $H$ is generated as an `AuxVariable` by the `fracture`
 
 The boundary conditions are "no flow", except for the very left-hand side of the fracture domain, where temperature is fixed at $T_{f} = 1$.  The initial conditions are $T_{m} = 0 = T_{f}$.
 
-Each of the heat capacities are unity, $c_{m} = 1 = c_{f}$, the conductivity in the fracture is $\lambda_{f} = 1.0$, and is $\lambda_{m} = 10^{-3}$ in the matrix.  The fracure has aperture $a=10^{-2}$.
+Each of the heat capacities are unity, $c_{m} = 1 = c_{f}$, the conductivity in the fracture is $\lambda_{f} = 1.0$, and is $\lambda_{m} = 10^{-3}$ in the matrix.  The fracture has aperture $a=10^{-2}$.
 
 Assume that $h_{s} = 0.02$.  This is the heat-transfer coefficient to use in the conforming case, since the matrix nodes align exactly with the fracture.  [eqn.suggested.h] may be used for the nonconforming case.  In this situation $L_{\mathrm{left}} = 0.1 = L_{\mathrm{right}}$ and $\lambda_{m}^{nn} = 10^{-3}$, so $h = 0.01$.
 

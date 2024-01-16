@@ -1,4 +1,4 @@
-# Bayesian Ucertainty Quantification (UQ) on a 1D Diffusion Problem
+# Bayesian Uncertainty Quantification (UQ) on a 1D Diffusion Problem
 
 This example demonstrates how to infer unknown model parameters given experimental observations. Uncertainties of the model parameters are inversely quantified through the Bayesian framework, which makes use of samplers including [IndependentGaussianMH.md], [AffineInvariantStretchSampler.md] or [AffineInvariantDES.md].
 
@@ -10,7 +10,7 @@ Given experimental measurements $\pmb{\mathcal{D}}$ of the computational model a
 !equation
 f(\pmb{\theta}, \sigma | \pmb{\Theta}, \mathcal{M}, \pmb{\mathcal{D}}) \propto \mathcal{L}(\pmb{\theta}, \sigma | \pmb{\Theta}, \mathcal{M}, \pmb{\mathcal{D}})~f(\pmb{\theta}, \sigma)
 
-where $\mathcal{L}(\pmb{\theta}, \sigma | \pmb{\Theta}, \mathcal{M}, \pmb{\mathcal{D}})$ is the [Likelihood](Likelihood/index.md) function. [Gaussian](Gaussian.md) and [TruncatedGaussian.md] distributions are the most popular choices for the likelihood function. Variance of the Guassian or truncated Gaussian, which describes the sum of the model discrepancy and measurement error (referred to as $\sigma$ term herein), can be either fixed apriori or inferred from the experimental measurements $\pmb{\mathcal{D}}$. The goal of Bayesian UQ is to infer the unknown parameters $\pmb{\theta}$ (and $\sigma$ if needed) given experimental measurements $\pmb{\mathcal{D}}$, i.e., the posterior distributions $f(\pmb{\theta}, \sigma | \pmb{\Theta}, \mathcal{M}, \pmb{\mathcal{D}})$.
+where $\mathcal{L}(\pmb{\theta}, \sigma | \pmb{\Theta}, \mathcal{M}, \pmb{\mathcal{D}})$ is the [Likelihood](Likelihood/index.md) function. [Gaussian](Gaussian.md) and [TruncatedGaussian.md] distributions are the most popular choices for the likelihood function. Variance of the Guassian or truncated Gaussian, which describes the sum of the model discrepancy and measurement error (referred to as $\sigma$ term herein), can be either fixed a priori or inferred from the experimental measurements $\pmb{\mathcal{D}}$. The goal of Bayesian UQ is to infer the unknown parameters $\pmb{\theta}$ (and $\sigma$ if needed) given experimental measurements $\pmb{\mathcal{D}}$, i.e., the posterior distributions $f(\pmb{\theta}, \sigma | \pmb{\Theta}, \mathcal{M}, \pmb{\mathcal{D}})$.
 
 The code architecture for performing Markov Chain Monte Carlo (MCMC) sampling in a parallelized fashion is presented in [moose_mcmc]. There are three steps for performing the sampling: proposal, model evaluation, and decision making. These three steps and the respective code objects are discussed below:
 
@@ -44,7 +44,7 @@ u(t=0, x) = 0
         u(t, x=L) = u_{\mathrm{right}}
 \end{aligned}
 
-where $u(t, x)$ defines the solution field. The experiments measure the average solution field across the entire domain length $L$ at the end of time $T$. Experimental measurements are pre-generated at eight configuration points $L=1.0, 2.0, ..., 8.0$. A Gaussian noise with standard deviation of 0.05 is added to simulate the measurement error. The goal is to infer the lefthandside and righthandside Dirichilet boundary conditions, i.e., $u(x=0)$ and $u(x=L)$, referred to as $u_{\mathrm{left}}$ and $u_{\mathrm{right}}$ for conciseness. It is worth pointing out that the $\sigma$ term, which is the variance of the sum of the experimental measurement and model deviations, can also be inferred during the Bayesian UQ process. This tutorial will first demonstrate the inference of true boundary values by assuming a fixed variance term for the experimental error, followed by the inference of the boundary values together with variance term. 
+where $u(t, x)$ defines the solution field. The experiments measure the average solution field across the entire domain length $L$ at the end of time $T$. Experimental measurements are pre-generated at eight configuration points $L=1.0, 2.0, ..., 8.0$. A Gaussian noise with standard deviation of 0.05 is added to simulate the measurement error. The goal is to infer the lefthandside and righthandside Dirichlet boundary conditions, i.e., $u(x=0)$ and $u(x=L)$, referred to as $u_{\mathrm{left}}$ and $u_{\mathrm{right}}$ for conciseness. It is worth pointing out that the $\sigma$ term, which is the variance of the sum of the experimental measurement and model deviations, can also be inferred during the Bayesian UQ process. This tutorial will first demonstrate the inference of true boundary values by assuming a fixed variance term for the experimental error, followed by the inference of the boundary values together with variance term.
 
 ## Inferring Calibration Parameters Only (Fixed $\sigma$ Term)
 
@@ -90,15 +90,15 @@ The main application, with respect to the [MultiApps](MultiApps/index.md) system
 
 !listing modules/stochastic_tools/test/tests/samplers/mcmc/main_des.i block=MultiApps
 
-6. Under the [Transfers](Transfers/index.md) block, [SamplerReporterTransfer](/SamplerReporterTransfer.md) is utilized to transfer data from [Reporters](Reporters/index.md) on the sub-aplication to a [StochasticReporter](/StochasticReporter.md) on the main application. In this example, the value of a postprocessor named `average`, as defined in the sub-application, is transferred to a [StochasticReporter](/StochasticReporter.md) named `constant` in the main application.
+6. Under the [Transfers](Transfers/index.md) block, [SamplerReporterTransfer](/SamplerReporterTransfer.md) is utilized to transfer data from [Reporters](Reporters/index.md) on the sub-application to a [StochasticReporter](/StochasticReporter.md) on the main application. In this example, the value of a postprocessor named `average`, as defined in the sub-application, is transferred to a [StochasticReporter](/StochasticReporter.md) named `constant` in the main application.
 
 !listing modules/stochastic_tools/test/tests/samplers/mcmc/main_des.i block=Transfers
 
-7. The [Controls](Controls/index.md) block makes use of [MultiAppSamplerControl](MultiAppSamplerControl.md) to pass command line arguments from the main application to the sub-applications. In this example, three arguments are passed from the main application to the sub-spplications, i.e.,
+7. The [Controls](Controls/index.md) block makes use of [MultiAppSamplerControl](MultiAppSamplerControl.md) to pass command line arguments from the main application to the sub-applications. In this example, three arguments are passed from the main application to the sub-applications, i.e.,
 
 - `left_bc`: the Dirichlet boundary condition at the lefthandside of the domain. 
-- `right_bc`: the Dirichlet boundary condition at the lefthandside of the domain.
-- `mesh1`: the domain length, which is controled by the configuration parameters in the [Samplers](Samplers/index.md) block.
+- `right_bc`: the Dirichlet boundary condition at the righthandside of the domain.
+- `mesh1`: the domain length, which is controlled by the configuration parameters in the [Samplers](Samplers/index.md) block.
 
 !listing modules/stochastic_tools/test/tests/samplers/mcmc/main_des.i block=Controls
 
@@ -117,7 +117,7 @@ The main application, with respect to the [MultiApps](MultiApps/index.md) system
 
 Currently, multiple parallel MCMC samplers have been implemented in stochastic tools module, including [IndependentGaussianMH](/IndependentGaussianMH.md), [AffineInvariantStretchSampler](/AffineInvariantStretchSampler.md), and [AffineInvariantDES](/AffineInvariantDES.md). The above example is demonstrated on [AffineInvariantDES](/AffineInvariantDES.md). Switching to a different MCMC sampler only requires minor changes in the [Samplers](Samplers/index.md) block and the [Reporters](Reporters/index.md) block in the main input file, while the input syntax for the sub-application remains the same. Three available MCMC samplers are explained below respectively:
 
-- [IndependentGaussianMH](IndependentGaussianMH.md)(IMH): Performs Metropolis-Hastings MCMC sampling with independent Gaussian propoposals. Under the [Samplers](Samplers/index.md) block, `std_prop` specifies the standard deviations of the independent Gaussian proposals for making the next proposal. `seed_inputs` takes in a reporter named `mcmc_reporter` which reports seed inputs values for the next proposals. The `mcmc_reporter` is defined under the [Reporters](Reporters/index.md) block of type [IndependentMHDecision](reporters/IndependentMHDecision.md), which performs decision making for independent Metropolis-Hastings MCMC [!citep](calderhead2014general).
+- [IndependentGaussianMH](IndependentGaussianMH.md)(IMH): Performs Metropolis-Hastings MCMC sampling with independent Gaussian proposals. Under the [Samplers](Samplers/index.md) block, `std_prop` specifies the standard deviations of the independent Gaussian proposals for making the next proposal. `seed_inputs` takes in a reporter named `mcmc_reporter` which reports seed inputs values for the next proposals. The `mcmc_reporter` is defined under the [Reporters](Reporters/index.md) block of type [IndependentMHDecision](reporters/IndependentMHDecision.md), which performs decision making for independent Metropolis-Hastings MCMC [!citep](calderhead2014general).
 
 !listing modules/stochastic_tools/test/tests/samplers/mcmc/main_imh.i block=Samplers
 
@@ -156,7 +156,7 @@ In addition to inferring the model parameters, the variance term can also be inf
 
 ## Result and Analysis
 
-The output JSON file contains samples across different processors at different timesteps. Practically, all MCMC samples are generated with serial auto-correlations. Therefore, it is essential to diagnoze the sample auto-correlation for predictable UQ quality. Two primary diagnostics are presented here for analyzing the sample quality: the integrated auto-correlation time ($\tau_p$), and the effective sample size (ESS) [!cite](dhulipala2023massively). $\tau_p$ describes the interval after which a sample can be considered independent given a current sample index, and ESS describes the number of "effective" samples after taking into consideration the sample auto-correlation. To obtain "independent" samples from the Markov chains, the first 100 samples are discarded for "burn-in", with the remaining samples thinned by $\tau_p/2$. The ESS of the generated samples are calculated based on the thinned samples. As presented in [metrics_case1], $\tau_p$ for IMH, SS and DES decreases, and ESS for the three algorithms increases correspondingly, indicating the best sampling qualify by DES, followed by SS, then IMH. 
+The output JSON file contains samples across different processors at different timesteps. Practically, all MCMC samples are generated with serial auto-correlations. Therefore, it is essential to diagnose the sample auto-correlation for predictable UQ quality. Two primary diagnostics are presented here for analyzing the sample quality: the integrated auto-correlation time ($\tau_p$), and the effective sample size (ESS) [!cite](dhulipala2023massively). $\tau_p$ describes the interval after which a sample can be considered independent given a current sample index, and ESS describes the number of "effective" samples after taking into consideration the sample auto-correlation. To obtain "independent" samples from the Markov chains, the first 100 samples are discarded for "burn-in", with the remaining samples thinned by $\tau_p/2$. The ESS of the generated samples are calculated based on the thinned samples. As presented in [metrics_case1], $\tau_p$ for IMH, SS and DES decreases, and ESS for the three algorithms increases correspondingly, indicating the best sampling qualify by DES, followed by SS, then IMH. 
 
 !table id=metrics_case1
         caption=Integrated autocorrelation time ($\tau_p$) and effective sample size (ESS) when inferring model parameters
@@ -179,7 +179,7 @@ When inferring only the boundary conditions, all three samplers are applied, wit
         id=case1_inference_results
         caption=Posterior distributions for the diffusion time derivative problem when inferring only the model parameters. (a), (b) and (c) are the $u_{\mathrm{left}}$ posteriors using IMH, SS, and DES samplers, respectively. (d), (e) and (f) are the $u_{\mathrm{right}}$ posteriors using IMH, SS, and DES samplers, respectively.
 
-When inferring both boundary conditions and the $\sigma$ term, only the SS and DES samplers are considerend given the poor performance of the IMH sampler evidenced from the above case. Again, 1,000 serial steps are simulated with 5 parallel proposals per step. Sampling diagnostics are presented for the two samplers in [metrics_case2]. The $\tau_p$ for both samplers are comparable, and the $\tau_p$ for DES increased compared to the previous case of inferring only model parameters, possible caused by the increased problem complexity due to the inclusion of the $\sigma$ term. For the ESS, the DES shows a three time enhancement compared to SS, due to the higher residual sample autocorrelation upon chain thinning.
+When inferring both boundary conditions and the $\sigma$ term, only the SS and DES samplers are considered given the poor performance of the IMH sampler evidenced from the above case. Again, 1,000 serial steps are simulated with 5 parallel proposals per step. Sampling diagnostics are presented for the two samplers in [metrics_case2]. The $\tau_p$ for both samplers are comparable, and the $\tau_p$ for DES increased compared to the previous case of inferring only model parameters, possible caused by the increased problem complexity due to the inclusion of the $\sigma$ term. For the ESS, the DES shows a three time enhancement compared to SS, due to the higher residual sample autocorrelation upon chain thinning.
 
 !table id=metrics_case2
         caption=Integrated autocorrelation time ($\tau_p$) and effective sample size (ESS) when inferring both model parameters and the $\sigma$ term.

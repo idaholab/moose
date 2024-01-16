@@ -9,7 +9,7 @@ The ideas behind software testing have been constantly evolving since the beginn
 Within MOOSE there are three different testing ideas:
 
 1.  The "tests": which are typically "Regression Tests" consisting of input files and known good outputs ("gold" files).
-2.  Unit tests that test the funcationality of small seperable pieces
+2.  Unit tests that test the functionality of small separable pieces
 3.  The TestHarness: a piece of software that was written to _run_ tests and aggregate the results.
 
 MOOSE uses tests to do both continuous integration (CI) and continuous deployment (CD).  Each and every change to MOOSE is tested across multiple operating systems, in parallel, with threads, in debug, with Valgrind and several other configurations.  On average, our testing clusters are running ~5 Million tests every week as we develop the Framework and applications

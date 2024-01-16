@@ -19,7 +19,7 @@ Any different combination of extra element integer IDs is considered a unique de
 
 For example, one can set up pin-by-pin and axial layer-by-layer arrangement of depletion zone by specifying those three reporting IDs: pin, assembly and plane IDs.
 
-An alterantive extra element integer ID name for the material ID can be optionally specified in [!param](/Mesh/DepletionIDGenerator/material_id_name). Its default value is set to  material_id.
+An alternative extra element integer ID name for the material ID can be optionally specified in [!param](/Mesh/DepletionIDGenerator/material_id_name). Its default value is set to  material_id.
 
 A list of extra element integer ID can be provided in [!param](/Mesh/DepletionIDGenerator/exclude_id_name) and [!param](/Mesh/DepletionIDGenerator/exclude_id_value) to exclude certain domains from being assigned depletion IDs.
 For those domains specified in [!param](/Mesh/DepletionIDGenerator/exclude_id_name) and [!param](/Mesh/DepletionIDGenerator/exclude_id_value), the depletion ID is set to zero because the depletion ID must be assigned for every mesh element even if not used in the actual depletion calculation.

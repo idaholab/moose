@@ -6,7 +6,7 @@
 
 This object provides the total Lagrangian stress equilibrium kernel and corresponding
 Jacobian for the homogenization system.  It is identical to the [`TotalLagrangianStressDivergence`](TotalLagrangianStressDivergence.md)
-class except it also provides the correct off-diagonal Jacobinan
+class except it also provides the correct off-diagonal Jacobian
 terms for the [Lagrangian kernel homogenization system](Homogenization.md).
 
 The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can add this object

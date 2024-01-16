@@ -11,7 +11,7 @@ This material assumes symmetry about the $z$-axis.
 This 'strain calculator' material computes the strain within the cylindrical
 coordinate system and relies on the specialized
 [Axisymmetric RZ kernel](/StressDivergenceRZTensors.md) to handle the stress
-divergence calcuation.
+divergence calculation.
 
 !alert warning title=Symmetry Assumed About the $z$-axis
 The axis of symmetry must lie along the $z$-axis in a $\left(r, z, \theta \right)$
@@ -89,7 +89,7 @@ this type of simulation uses the scalar strain variables
 
 !listing modules/tensor_mechanics/test/tests/1D_axisymmetric/axisymm_gps_finite.i block=Materials/strain
 
-which uses a scalar variable for the coupled out-of-plane strain; the arguement
+which uses a scalar variable for the coupled out-of-plane strain; the argument
 for the `scalar_out_of_plane_strain` parameter is the name of the scalar strain
 variable:
 

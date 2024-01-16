@@ -144,7 +144,7 @@ The following options are available for tuning the hyperparameters:
 
 - +Adaptive moment estimation (Adam)+
 
-  Relies on the psuedocode provied in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
+  Relies on the pseudocode provided in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
 
 !syntax parameters /Trainers/GaussianProcessTrainer
 

@@ -106,7 +106,7 @@ theories.  The user can switch between them by setting the
 `false` for small deformation theory.  This flag applies to the kernels,
 the [strain calculator](materials/lagrangian/ComputeLagrangianStrain.md), the
 [homogenization system](/tensor_mechanics/Homogenization.md), and
-for many models, the [constiutive](tensor_mechanics/NewMaterialSystem.md) models for calculating the stress.
+for many models, the [constitutive](tensor_mechanics/NewMaterialSystem.md) models for calculating the stress.
  As such, it is often convenient to set it in the `GlobalParams` section
  of the input file so that you can easily switch between the two.
 

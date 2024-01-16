@@ -18,7 +18,7 @@ Following [!citep](bucker2009cfl), we recognize and implement three methods.
 
 The user must make a method choice, between `SER`, `EXP` and `RDM`, which are implemented as listed below. 
 All methods require a parameter [!param](/Postprocessors/PseudoTimestep/alpha), which controls how sensitive the timestep should be with respect to residual changes, and [!param](/Postprocessors/PseudoTimestep/initial_dt) to provide a first timestep length. 
-If nothing is known about the problem we recommend `initial_dt = 1` and `alpha = 2`, keeping in mind that a high [!param](/Postprocessors/PseudoTimestep/alpha) corresponds to a higher sensitivity to residual changes. More specific choices for fluid dynamics problems are available in [!citep](bucker2009cfl) or [!citep](ceze2013pseudo). The parameter [!param](/Postprocessors/PseudoTimestep/alpha) is always larger than 0, noting that for some versions of Pseudo Timestep Continuation methods it can be lower than 1. We refer the user to the literature, or to perfrom a preliminary study for their specific problem.
+If nothing is known about the problem we recommend `initial_dt = 1` and `alpha = 2`, keeping in mind that a high [!param](/Postprocessors/PseudoTimestep/alpha) corresponds to a higher sensitivity to residual changes. More specific choices for fluid dynamics problems are available in [!citep](bucker2009cfl) or [!citep](ceze2013pseudo). The parameter [!param](/Postprocessors/PseudoTimestep/alpha) is always larger than 0, noting that for some versions of Pseudo Timestep Continuation methods it can be lower than 1. We refer the user to the literature, or to perform a preliminary study for their specific problem.
 
 Methods supported include:
 

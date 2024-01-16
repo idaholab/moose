@@ -18,7 +18,7 @@ The first column denotes the discretization algorithm used for applying the
 frictionless contact constraints. Nodal denotes use of a `NodeFaceConstraint`;
 `Mortar` denotes use of a `MortarConstraint`. The second column denotes the
 discretization used for applying the contact forces to the displacement
-residuals. The third column denotes the type of non-linear complimentarity
+residuals. The third column denotes the type of non-linear complementarity
 problem (NCP) function used to ensure that the contact constraints are
 satisfied. Min indicates the canonical min function (see
 [std::min](https://en.cppreference.com/w/cpp/algorithm/min)); FB represents the

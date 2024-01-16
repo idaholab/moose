@@ -44,7 +44,7 @@ solution for the temperature field at time $t=0.6$ s, together with the points w
 !media large_media/optimization/material_transient_solution.png
        style=width:40%;margin:auto;padding-top:2.5%;background-color: white;color: black;
        id=solution
-       caption=Snaphot of the forward simulation at the end of the sixth time step (0.6 s). The
+       caption=Snapshot of the forward simulation at the end of the sixth time step (0.6 s). The
        spatially varying thermal conductivity in [diff_parameter] is optimized to minimize the
        difference between the measured and simulated temperature values at the locations shown by
        the yellow x's.
@@ -89,7 +89,7 @@ These nonlinear systems are inputs to an executioner that drives the simulation 
 For material inversion, the derivative of the objective function with respect to the material
 parameters needs to be computed. This quantity is problem-dependent.
 
-For this thermal problem, the vector posprocessor [ElementOptimizationDiffusionCoefFunctionInnerProduct](ElementOptimizationDiffusionCoefFunctionInnerProduct.md) computes the gradient of the objective with respect
+For this thermal problem, the vector postprocessor [ElementOptimizationDiffusionCoefFunctionInnerProduct](ElementOptimizationDiffusionCoefFunctionInnerProduct.md) computes the gradient of the objective with respect
 to the controllable parameter by computing the inner
 product between the gradient of the adjoint variable and the gradient of the primal variables and the function
 computing the derivative of the material property with respect to the controllable parameter.

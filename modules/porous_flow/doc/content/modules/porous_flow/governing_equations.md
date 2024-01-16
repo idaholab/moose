@@ -110,7 +110,7 @@ directions) but is most often treated as a scalar, since it's hard to
 get parameters for the tensorial case.  In the PorousFlow module it is
 treated as a scalar
 
-In some cirumstances $K_{ij}\nabla_{j}T$ is added to the above Darcy flux to
+In some circumstances $K_{ij}\nabla_{j}T$ is added to the above Darcy flux to
 model thermo-osmosis (with some $K_{ij}$ tensor parameterising its strength),
 i.e. a gradient of temperature induces fluid flow.
 
@@ -239,7 +239,7 @@ Here $\lambda$ is the tensorial thermal conductivity of the rock-fluid
 system, which is a function of the thermal conductivities of
 rock and fluid phases.  Usually $\lambda$ will be diagonal but in
 anisotropic porous materials it may not be.
-The specificy enthalpy of phase $\beta$ is denoted by $h_{\beta}$, and
+The specific enthalpy of phase $\beta$ is denoted by $h_{\beta}$, and
 $\mathbf{F}_{\beta}$ is the advective Darcy flux.
 
 ## Solid mechanics
@@ -319,7 +319,7 @@ each phase is identical to the velocity of the solid skeleton
 the left-hand side).
 
 It is assumed that the *effective stress not the total stress* enters into the
-consitutive law (as above), and the plasticity, and the insitu stresses, and
+constitutive law (as above), and the plasticity, and the insitu stresses, and
 almost everywhere else.  One exception is specifying Neumann boundary conditions
 for the displacements where the total stresses are being specified, as can be
 seen from [eq:cons_mom].  Therefore, MOOSE will use effective stress,
@@ -337,7 +337,7 @@ Aqueous equilibrium chemistry and precipitation/dissolution kinetic chemistry ha
 
 The fluid mass [eq:msph] contains
 contributions from adsorped species: $C^{\kappa}$ is the mass of
-absorped species per volume of solid rock-grain material.  Its
+adsorped species per volume of solid rock-grain material.  Its
 dynamics involves no advective flux terms, as PorousFlow assumes that
 the adsorped species are trapped in the solid matrix.  The governing
 equation is

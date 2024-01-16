@@ -95,9 +95,9 @@ date.
 
   If the above build fails, and you have the correct Conda environment loaded
   (`conda activate moose`), then something is failing beyond the scope of this document, and you
-  should now contact us via the [disussion forum](faq/discussion_forum.md).
+  should now contact us via the [discussion forum](faq/discussion_forum.md).
 
-  If the build was successfull, attempt to execute the hello word example:
+  If the build was successful, attempt to execute the hello word example:
 
   ```bash
   mpiexec -n 4 /tmp/a.out

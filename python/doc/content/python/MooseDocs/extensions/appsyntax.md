@@ -42,7 +42,7 @@ the MOOSE input file syntax for the object as in [appsyntax-description].
 
 The `parameters` sub-command provides a means for displaying the default input file syntax for an
 object as shown in [appsyntax-parameters-example]. The available settings for the parameters
-commaond are shown in [appsyntax-parameters-settings].
+command are shown in [appsyntax-parameters-settings].
 
 !devel settings module=MooseDocs.extensions.appsyntax
                 object=SyntaxParametersCommand

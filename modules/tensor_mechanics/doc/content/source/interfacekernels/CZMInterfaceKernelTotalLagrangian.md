@@ -4,7 +4,7 @@
 
 ## Description
 
-This class assembles the integrated first Piola-Kirchoff traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelTotalLagrangian` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
+This class assembles the integrated first Piola-Kirchhoff traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelTotalLagrangian` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
 The `CZMInterfaceKernelTotalLagrangian` uses the PK1 traction and its derivatives provided by a [CZM Compute Global Traction Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md)  to impose the appropriate residual and to provide the appropriate Jacobian.
 This kernel accounts for both interface area changes and rotations.
 
@@ -14,7 +14,7 @@ The strong form of the force equilibrium equation in vector form can be written 
 \begin{equation}
   F^- -F^+ = \int_{A^-}{T^- dA^-} - \int_{A^+}{T^+ dA^+} = 0
 \end{equation}
-where superscripts $+$ and $-$ identify the primary and secondary surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the first Piola-Kirchoff traction, and $A$ the undeformed area.
+where superscripts $+$ and $-$ identify the primary and secondary surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the first Piola-Kirchhoff traction, and $A$ the undeformed area.
 The primary surface is the one where the interface normal is computed.
 
 By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium equation can be written as  

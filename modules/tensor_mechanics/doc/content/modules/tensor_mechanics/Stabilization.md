@@ -36,9 +36,9 @@ explains the two approaches in the context of small deformations.
 $\bar{F}$ alters the definition of the strain being fed into the
 constitutive models to produce the stress, subsequently used by the kernel
 to calculate the stress equilibrium residual.  The theory modifies
-the strains so that the dilitational part of the
+the strains so that the dilatational part of the
 strain at each quadrature point is set equal to the volume-average 
-dilitation strain.  Mathematically,
+dilatation strain.  Mathematically,
 \begin{equation}
       \bar{\varepsilon}_{ij}=\frac{1}{v}\int_{v}\varepsilon_{ij}dv
 \end{equation}
@@ -46,8 +46,8 @@ dilitation strain.  Mathematically,
       \varepsilon_{ij}^\prime=\varepsilon_{ij}+\frac{1}{3}\left(\bar{\varepsilon}_{kk}-\varepsilon_{kk}\right)\delta_{ij}
 \end{equation}
 where $\varepsilon_{ij}$ is the strain calculated from the displacement gradient.
-This method then stabilizes the problem by replacing the linear-varying dilitational strain with 
-a constant dilitational strain over each element.
+This method then stabilizes the problem by replacing the linear-varying dilatational strain with 
+a constant dilatational strain over each element.
 Notionally, in MOOSE the $\bar{F}$ only alters the material model, though in fact it also changes the
 definition of the Jacobian (but not the residual) in the [Kernel](Kernel.md).
 

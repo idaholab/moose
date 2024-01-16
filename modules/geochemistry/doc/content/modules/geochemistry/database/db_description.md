@@ -83,7 +83,7 @@ The `Header` field must include information about the temperatures and pressures
 
 The temperatures are in $^{\circ}$C, and the pressures --- in bars (1 bar $= 10^{5}\,$Pa) --- lie along the steam saturation curve at the temperatures defined above.
 
-The [activity](activity_coefficients.md) and [fugactity](fugacity.md) models must be defined in the `Header`, along with the appropriate coefficients (at the temperatures specified above):
+The [activity](activity_coefficients.md) and [fugacity](fugacity.md) models must be defined in the `Header`, along with the appropriate coefficients (at the temperatures specified above):
 
 ```
 "Header": {

@@ -1,7 +1,7 @@
 # AuxKernels System
 
 The AuxKernel system mimics the [syntax/Kernels/index.md] but compute values that can be defined
-explicitly with a known function. There are two main use cases for AuxKerenel system: computing
+explicitly with a known function. There are two main use cases for the AuxKernel system: computing
 a quantity that varies with space and time for postprocessing purposes or for decoupling systems
 of equations. Examples for both of these use cases shall be discussed further in the following
 sections.

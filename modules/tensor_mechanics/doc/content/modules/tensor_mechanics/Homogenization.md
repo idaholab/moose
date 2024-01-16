@@ -79,7 +79,7 @@ measures and calculating the resulting stress.
 \end{equation}
 The framework represents the constant field $G_{iJ}$ with a MOOSE [scalar variable](ScalarVariable.md).
 
-The system implements the constrains by imposing a scalar residual equation for each specificed constraint:
+The system implements the constrains by imposing a scalar residual equation for each specified constraint:
 \begin{equation}
       R=\int_{V}\left(X-\hat{X}\right)dV=0
 \end{equation}

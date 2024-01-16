@@ -20,9 +20,9 @@ Inside your `ADRayKernel` class, you have access to several member variables for
 - `_current_elem`: pointer to the current element being operated on.
 
 Also available for override is `precalculateResidual()`,
-which is an insertion point immedtiately before computing the residual. This can be useful when computing cached values that are valid for all quadrature points.
+which is an insertion point immediately before computing the residual. This can be useful when computing cached values that are valid for all quadrature points.
 
 Many other useful member variables exist that describe the [Ray.md] segment. For more information, see [syntax/RayKernels/index.md#using-a-raykernel].
 
 !alert note
-`RZ` and `RSPEHRICAL` coordinate changes are not valid for a `RayKernel`. This is because said coordinate systems have no way to represent a line source---one would end up with a plane/surface source or a volumetric source, respectively. This is why `_coord[_qp]` is not utilized in `RayKernel`.
+`RZ` and `RSPHERICAL` coordinate changes are not valid for a `RayKernel`. This is because said coordinate systems have no way to represent a line source---one would end up with a plane/surface source or a volumetric source, respectively. This is why `_coord[_qp]` is not utilized in `RayKernel`.

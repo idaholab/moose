@@ -10,7 +10,7 @@ arbitrary Lagrangian-Eulerian (ALE) frame, the following equation should be used
 \vec{c}_{\tau} \nabla\phi_{\tau}
 \end{equation}
 
-where $\phi$ is an arbitray quantity we are taking the time derivative of,
+where $\phi$ is an arbitrary quantity we are taking the time derivative of,
 $\tau$ denotes the ALE frame at a given time point, and $\vec{c}$ denotes the
 mesh velocity or rate of change of coordinates in the ALE frame; this is
 equivalent to $\partial\vec{d}/\partial t$, e.g. the partial derivative of the

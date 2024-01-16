@@ -26,7 +26,7 @@ x_i & y_i & z_i & s_i\delta_{t_i, t_{\mathrm{sim}}}
 \end{bmatrix},\quad
 i=1,...,N.
 
-For maximum flexibility, the coordinates and values can change during the simulation based on the evaluation of these vectors in the [Reporter](Reporters/index.md) or [VectorPostprocessor](VectorPostprocessors/index.md). As such, $\mathbf{S}$ can depend on time ($\mathbf{S}(t)$). So [!eqref](eq:coord_value) can be representated as:
+For maximum flexibility, the coordinates and values can change during the simulation based on the evaluation of these vectors in the [Reporter](Reporters/index.md) or [VectorPostprocessor](VectorPostprocessors/index.md). As such, $\mathbf{S}$ can depend on time ($\mathbf{S}(t)$). So [!eqref](eq:coord_value) can be represented as:
 
 !equation
 \vec{S}_i(t_{\mathrm{sim}}) = 

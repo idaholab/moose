@@ -4,10 +4,10 @@
 
 ## Description
 
-The AuxKernel `CylindricalRankTwoAux` transforms a Rank-2 tensor, $T$, into cylinderical coordinates,
+The AuxKernel `CylindricalRankTwoAux` transforms a Rank-2 tensor, $T$, into cylindrical coordinates,
 where the cylindrical rotation axis is along the Cartesian $\hat{z}$ axis and the user-defined center
 point lies within the Cartesian $\hat{x}$-$\hat{y}$ plane, as shown in [eq:cylindrical_rank_two_aux].
-The AuxKernel will save the component of the tranformed Rank-2 tensor, $T^R$, as defined by the
+The AuxKernel will save the component of the transformed Rank-2 tensor, $T^R$, as defined by the
 arguments for the `index_i` and `index_j` parameters.
 \begin{equation}
 \label{eq:cylindrical_rank_two_aux}

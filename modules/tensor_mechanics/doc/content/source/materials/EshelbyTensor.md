@@ -11,7 +11,7 @@ used in fracture integral calculations:
 \end{equation}
 where W is the strain energy density in the original configuration, $\boldsymbol{I}$
 is the identity matrix, $\boldsymbol{H}$ is the displacement gradient, and
-$\boldsymbol{P}$ is the first Piola-Kirchoff stress tensor.
+$\boldsymbol{P}$ is the first Piola-Kirchhoff stress tensor.
 
 It is necessary to include this material within the input file when computing
 fracture integrals.

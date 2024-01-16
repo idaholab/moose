@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `CZMComputeGlobalTractionTotalLagrangian` uses the local traction, $\hat{t}$, and the derivatives w.r.t. to interface displacement jump, $\partial \hat{t} / \partial \llbracket \hat{u} \rrbracket$, calculated from any cohesive zone constitutive model, to computes the first Piola-Kirchoff traction in global coordinates, $T$, and its derivatives.
+The `CZMComputeGlobalTractionTotalLagrangian` uses the local traction, $\hat{t}$, and the derivatives w.r.t. to interface displacement jump, $\partial \hat{t} / \partial \llbracket \hat{u} \rrbracket$, calculated from any cohesive zone constitutive model, to computes the first Piola-Kirchhoff traction in global coordinates, $T$, and its derivatives.
 This object computes the following partial derivatives: $\partial T / \partial \llbracket \hat{u} \rrbracket$ and $\partial T / \partial F$ , assuming the two are independent.
 This object assumes finite strain and does account for the interface rotation and area changes caused by deformations and/or rigid body motion.
 
@@ -22,7 +22,7 @@ Using the multiplicative decomposition we can define :
 F = R U
 \end{equation}
 where $R$ is the rotation matrix transforming from the undeformed to the current configuration, and $U$ is the corresponding stretch.
-Let's define $N$ as the midplane unit normal in global coordinates in the undeforemd configuration and $n$ as the midplane normal in global coordinates in the current configuration.
+Let's define $N$ as the midplane unit normal in global coordinates in the undeformed configuration and $n$ as the midplane normal in global coordinates in the current configuration.
 The two normals are related by the rotation $R$ as follows:
 \begin{equation} \label{eq:nN}
 n = R N
@@ -33,9 +33,9 @@ One can define the total rotation matrix which transform from the interface coor
 Q = R Q_0
 \end{equation}
 
-### First Piola-Kirchoff Traction
+### First Piola-Kirchhoff Traction
 
-By definition the first Piola-Kirchoff traction is the Cauchy traction, $t$, acting on the reference area $dA$. Hence, using force equilibrium we can write:
+By definition the first Piola-Kirchhoff traction is the Cauchy traction, $t$, acting on the reference area $dA$. Hence, using force equilibrium we can write:
 \begin{equation} \label{eq:T_t}
 T = \frac{da}{dA} t
 \end{equation}
@@ -57,7 +57,7 @@ T = \frac{da}{dA} Q \hat{t}
 
 The [CZM Interface Kernel Total Lagrangian](CZMInterfaceKernelTotalLagrangian.md) uses the total PK1 traction computed using equation [eq:T_that].
 
-### First Piola-Kirchoff Traction derivatives
+### First Piola-Kirchhoff Traction derivatives
 
 Using the chain rule, we can decompose the derivative of the traction w.r.t. the discrete displacements as
 \begin{equation} \label{eq:dT_du}

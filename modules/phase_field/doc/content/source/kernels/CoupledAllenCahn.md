@@ -11,7 +11,7 @@ $F$ is the free energy functional of the system that is defined as $F=\int f(\et
 
 $\eta$ (`v`) is a coupled non-conserved order parameter, $L$ (`mob_name`) its associated mobility,
 $f$ (`f_name`) is a free energy density provided by a [function material](../../introduction/FunctionMaterials), and
-$a,b,\dots$ (`args`) are additional variable dependencied of the mobility and free energy density.
+$a,b,\dots$ (`args`) are additional variable dependencies of the mobility and free energy density.
 
 ## See also
 

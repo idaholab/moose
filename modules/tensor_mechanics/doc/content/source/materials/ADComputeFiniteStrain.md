@@ -61,7 +61,7 @@ stretch tensor, $\boldsymbol{\hat{U}}$
 where $\boldsymbol{\hat{R}}$ is a proper orthogonal rotation tensor and the
 stretch tensor, $\boldsymbol{\hat{U}}$, is symmetric and positive definite. The
 incremental right Cauchy-Green deformation tensor, $\boldsymbol{\hat{C}}$, can
-be given in terms of $\boldsymbol{\hat{U}}$ by subsituting
+be given in terms of $\boldsymbol{\hat{U}}$ by substituting
 [eqn:polar_decomposition_deform_grad] into the definition for
 $\boldsymbol{\hat{C}}$ from [!cite](malvern1969introduction):
 
@@ -81,7 +81,7 @@ $\boldsymbol{\hat{C}}$ as
 
 which can be evaluated by performing a spectral decomposition of
 $\boldsymbol{\hat{C}}$. Once $\boldsymbol{\hat{U}}$ has been computed, the
-multiplicative decomposition of the deformation graidient is used to find the
+multiplicative decomposition of the deformation gradient is used to find the
 incremental rotation tensor $\boldsymbol{\hat{R}}$ and the stretching rate
 $\boldsymbol{D}$. Following [!cite](rashid1993incremental), the stretching rate
 tensor can be expressed in terms of the 'incremental' right Cauchy-Green
@@ -92,7 +92,7 @@ deformation tensor
   \boldsymbol{D} = \frac{1}{\Delta t}\log({\hat{\boldsymbol{C}}^{1/2}})
 \end{equation}
 
-This incremental streteching rate tensor can then be used as the work conjugate
+This incremental stretching rate tensor can then be used as the work conjugate
 for a stress measure, or used to compute another strain measure. The most
 computationally expensive part of this procedure is the spectral decomposition
 of $\boldsymbol{\hat{C}}$ to find $\boldsymbol{\hat{U}}$. This decomposition can
@@ -179,7 +179,7 @@ When directly using `ADComputeFiniteStrain` in an input file as shown above, the
 [ADStressDivergenceTensors](/ADStressDivergenceTensors.md) kernel must be modified
 from the default by setting the parameter `use_displaced_mesh = true`. This setting
 is required to maintain consistency in the test function gradients and the
-strain formulation. For a complete discussion of the stress diveregence kernel
+strain formulation. For a complete discussion of the stress divergence kernel
 settings and the corresponding strain classes, see the section on
 [Consistency Between Stress and Strain](/tensor_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
 in the TensorMechanics module overview. In addition, be aware of the loading

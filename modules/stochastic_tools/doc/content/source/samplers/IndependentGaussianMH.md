@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `proposeSamples` function from the [PMCMCBase](PMCMCBase.md) parent class is overriden. This proposal is a simple independent Metropolis-Hastings (M-H) using a Gaussian proposal centered on a seed state. The scale (standard deviation) of this Gaussian is user-specified for each model parameter. Note that the `IndependentGaussianMH` assumes that the noise variance (i.e., uncertainty due to model inadequacy plus experimental noise) is specified by the user. Expanding `IndependentGaussianMH` to infer the noise variance term will be considered in the future. If lower and upper bounds to the parameters are specified, the proposals are generated using a truncated Gaussian. Specifically, the new $p^{\text{th}}$ parallel proposal is given by:
+The `proposeSamples` function from the [PMCMCBase](PMCMCBase.md) parent class is overridden. This proposal is a simple independent Metropolis-Hastings (M-H) using a Gaussian proposal centered on a seed state. The scale (standard deviation) of this Gaussian is user-specified for each model parameter. Note that the `IndependentGaussianMH` assumes that the noise variance (i.e., uncertainty due to model inadequacy plus experimental noise) is specified by the user. Expanding `IndependentGaussianMH` to infer the noise variance term will be considered in the future. If lower and upper bounds to the parameters are specified, the proposals are generated using a truncated Gaussian. Specifically, the new $p^{\text{th}}$ parallel proposal is given by:
 
 \begin{equation}
 \label{eqn:imh_1}

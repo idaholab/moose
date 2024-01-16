@@ -47,7 +47,7 @@ X-ray diffraction suggests the composition of the FORGE granite is as shown in [
 | Epidote | trace |
 | Calcite | trace |
 
-[!cite](vivek) interpret Plagioclase as a 9:1 mix of Albite and Anorthite, while Stuart Simmons suggests that Biotite could be Phlogopite.  Further correspondance with Stuart Simmons has identified a set of representative minerals to be used in the simulations, and they are shown in [table:model_mineralogy]
+[!cite](vivek) interpret Plagioclase as a 9:1 mix of Albite and Anorthite, while Stuart Simmons suggests that Biotite could be Phlogopite.  Further correspondence with Stuart Simmons has identified a set of representative minerals to be used in the simulations, and they are shown in [table:model_mineralogy]
 
 !table id=table:model_mineralogy caption=Mineralogy used in the simulations
 | Mineral | Weight % |
@@ -137,13 +137,13 @@ where
 - $M$ \[g\] is the mass of the mineral.  This is the number of moles multiplied by the molar weight.
 - $S$ \[cm$^{2}$.g$^{-1}$\] is the specific surface area of the mineral
 - $k$ \[mol.s$^{-1}$.m$^{-2}$\] is the reaction's intrinsic rate constant
-- $E_{a}$ \[J.mol$^{-1}$\] is the reaction's activiation area
+- $E_{a}$ \[J.mol$^{-1}$\] is the reaction's activation area
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is the temperature 
 
 [!cite](palandri) list parameters for a wide number of minerals.  In many cases these are based on limited experimental data, so may be subject to large errors.  
 
-!table id=table:kinetic_rates caption=Rates of the mineral species used in this presentation.  $S$ \[cm$^{2}$.g$^{-1}$\] is the specific surface area of the mineral, $k$ \[mol.s$^{-1}$.m$^{-2}$\] is the reaction's intrinsic rate constant and $E_{a}$ \[J.mol$^{-1}$\] is the reaction's activiation area
+!table id=table:kinetic_rates caption=Rates of the mineral species used in this presentation.  $S$ \[cm$^{2}$.g$^{-1}$\] is the specific surface area of the mineral, $k$ \[mol.s$^{-1}$.m$^{-2}$\] is the reaction's intrinsic rate constant and $E_{a}$ \[J.mol$^{-1}$\] is the reaction's activation area
 | Species | Palandri reference | Assumed S | k | E$_{a}$ |
 | --- | --- | --- | --- | --- |
 | Albite | page8, neutral mechanism | 10 | $10^{-17}$ | 69800 |
@@ -180,7 +180,7 @@ Results are shown in [natural_reservoir.fig], [natural_reservoir_percentage.fig]
 - The small amount of Calcite dissolves entirely within $10^{-2}$ years
 - About 25% of the small amount of Anhydrite dissolves rapidly, but after 100 years it returns to its original volume
 - Between 1 and 100 years after the simulation commences, all Anorthite, Chalcedony and Clinochl-7A dissolve
-- Between 1 and 100 years after the simulation commences, Zoisite, Illite, Paragony and Quartz increase in volume.  Laumonite increases slightly too, before returning to its original small value.
+- Between 1 and 100 years after the simulation commences, Zoisite, Illite, Paragony and Quartz increase in volume.  Laumontite increases slightly too, before returning to its original small value.
 - The pH drops to around 4.8 during the course of the first 100 years before rebounding to 5.8.
 - The solvent water mass roughly halves during the first 100 years, corresponding to small porosity decreases.
 

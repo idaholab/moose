@@ -14,7 +14,7 @@ v_y &= -\sin^2(\pi y) \sin(2\pi x)
 \end{aligned}
 \end{equation}
 
-There are two methods defined for reversing the velocity direction ("instantenous" and "cosine"). The
+There are two methods defined for reversing the velocity direction ("instantaneous" and "cosine"). The
 former simply switches the sine of the velocity at mid-point of the provided reversal time. The later
 applies a cosine multiplier so that the reversal is smooth.
 

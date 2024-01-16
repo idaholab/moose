@@ -40,7 +40,7 @@ in [fig:area-compare].
 
 ## Level Set Equation with Reinitialization
 
-Adding reinitializtion, in this case the scheme proposed by [!cite](olsson2007conservative), requires
+Adding reinitialization, in this case the scheme proposed by [!cite](olsson2007conservative), requires
 the use of the MOOSE [MultiApp](/MultiApps/index.md). The enable reinitialization two input files are
 required: a parent and sub-application.
 

@@ -1,7 +1,7 @@
 # INSADTauMaterial
 
 This object computes the stabilization parameter $\tau$ for use in
-pressure-stablized and streamline-upwind kernels.
+pressure-stabilized and streamline-upwind kernels.
 
 !syntax description /Materials/INSADTauMaterial
 

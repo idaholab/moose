@@ -6,7 +6,7 @@
 
 AIS is used for estimating small failure probabilities ($P_f$) using computationally expensive
 finite element models efficiently. When implemented correctly, AIS can result in
-2-3 orders of mangitude reduction to the number of calls to the model when compared to
+2-3 orders of magnitude reduction to the number of calls to the model when compared to
  crude Monte Carlo simulations. For example, if crude Monte Carlo requires 1e6 calls
 to the model to estimate $P_f$ with a coefficient of variation (COV) of 10 percent, AIS could
 require only about 1e4 calls to the model for the same COV. AIS has two phases:
@@ -37,7 +37,7 @@ where, $N(.)$ is a standard Normal distribution. The proposed sample is then acc
 with probability $\alpha$. In this manner, sufficient samples are generated from the
 failure region.
 
-Once enough samples that result in model failure have been simulated, an imporatance
+Once enough samples that result in model failure have been simulated, an importance
  distribution is fit to these samples. A Normal distribution is fit to each
 input parameter independently and sampling from this importance distribution is made.
 The use of an independent Normal distribution is different from the work by [!cite](au1999new),

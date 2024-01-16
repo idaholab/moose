@@ -7,7 +7,7 @@ scenarios to be modelled. There are two classes of boundary conditions:
 1. Those based on [PorousFlowSink](PorousFlowSink.md).  These are typically used to add or remove fluid or heat-energy through the boundary.  The basic sink adds/removes a fixed flux, but more elaborate sources/sinks add time-dependent fluxes, or fluxes dependent on fluid pressure or temperature, fluid mobility, enthalpy, etc.  These boundary conditions may also be used to control porepressure, temperature, or mass fractions on the boundary by adding/removing fluid or heat through interaction with an external environment.  It is often physically more correct and numerically advantageous to use these boundary conditions instead of [DirichletBC](DirichletBC.md).
 2. Those based on [PorousFlowOutflowBC](PorousFlowOutflowBC.md), which is an "outflow" boundary condition that removes fluid components or heat energy as they flow to the boundary.  This models a "free" boundary that is "invisible" to the simulation.  Please see below for more description and warnings.
 
-This page may be read in conjuction with the [description of some of the tests of the PorousFlow sinks](tests/sinks/sinks_tests.md).
+This page may be read in conjunction with the [description of some of the tests of the PorousFlow sinks](tests/sinks/sinks_tests.md).
 
 ## Class 1: Basic sink formulation
 
@@ -227,7 +227,7 @@ Below are shown some outputs.  Evidently the boundary condition satisfies the re
 The theoretical background concerning boundary fluxes is developed in
 this section.  The initial part of the presentation is general and not specific to Porous
 Flow.  The variable $u$ may represent temperature, fluid mass,
-mass-densty of a species, number-density of a species, etc.  The flux
+mass-density of a species, number-density of a species, etc.  The flux
 quantified below has units depending on the physical meaning of $u$:
 if $u$ is temperature then the flux has units J.s$^{-1}$; if $u$ is
 fluid mass then the flux has units kg.s$^{-1}$, etc.  For sake or
@@ -353,7 +353,7 @@ Inclusion of a BC for porepressure or mass fraction in a MOOSE input file will s
 
 - A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value, $h$, (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid species, and MOOSE will find the solution that has ${\mathbf{n}}\cdot \mathbf{F}^{\kappa} = -h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
 
-- Any of the [PorousFlowSink](PorousFlowSink.md) variants mentioned above act in the same way as the [NeumannBC](NeumannBC.md) by adding a value to the Residual and integrating it over the boundary, thereby allowing flux through the boundary to be specified.  However, the [PorousflowSink](PorousFlowSink.md) variants are much more flexible than any of the NeumannBC variants that are coded into the MOOSE framework, so should be preferred in PorousFlow simulations.
+- Any of the [PorousFlowSink](PorousFlowSink.md) variants mentioned above act in the same way as the [NeumannBC](NeumannBC.md) by adding a value to the Residual and integrating it over the boundary, thereby allowing flux through the boundary to be specified.  However, the [PorousFlowSink](PorousFlowSink.md) variants are much more flexible than any of the NeumannBC variants that are coded into the MOOSE framework, so should be preferred in PorousFlow simulations.
 
 - Fixing the porepressure or mass fraction with a [DirichletBC](DirichletBC.md) is also possible.  This corresponds to adding/removing fluid species to keep the porepressure or mass fraction fixed, which can lead to severe numerical problems (for instance, trying to remove a fluid species that has zero mass fraction) so DirichletBC should be used with caution in PorousFlow simulations.  Instead, one of the PorousFlowSink variants should usually be used, as described in detail above.
 

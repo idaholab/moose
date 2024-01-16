@@ -23,7 +23,7 @@
 [!state text=$l(v) \leftarrow \infty$]
 [!for!end]
 [!state text=$l(u) \leftarrow 0$]
-[!while!begin condition=$changed$ comment=Intial is $changed \leftarrow \text{True}$]
+[!while!begin condition=$changed$ comment=Initial is $changed \leftarrow \text{True}$]
 [!for!begin condition=$i \leftarrow 1, n$]
 [!state text=$min \leftarrow l(v_i)$]
 [!for!begin condition=$j \leftarrow 1, n$]

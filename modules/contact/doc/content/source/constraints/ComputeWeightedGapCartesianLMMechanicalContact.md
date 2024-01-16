@@ -10,7 +10,7 @@ g\lambda &= 0
 \end{aligned}
 \end{equation}
 
-where $g$ is the gap and $\lambda$ is the contact pressure, a Lagrange multipler
+where $g$ is the gap and $\lambda$ is the contact pressure, a Lagrange multiplier
 variable living on the secondary face. Per [!citep](wohlmuth2011variationally)
 and [!citep](popp2014dual), the variationally consistent, discretized version of
 the KKT conditions are:
@@ -34,7 +34,7 @@ where $\gamma_c^{(1)}$ denotes the secondary contact interface, $\Phi_j$ is the
 j'th lagrange multiplier test function, and $g_{n,h}$ is the discretized version
 of the gap function.
 
-The KKT conditions are enforced using a nonlinear complimentarity problem (NCP) function, in this case the most
+The KKT conditions are enforced using a nonlinear complementarity problem (NCP) function, in this case the most
 simple such function, $min(c(\tilde{g}_n)_j, (\lambda_n)_j)$, where $c$ (implemented with the input
 parameter `c`) is used to balance the size of the gap
 and the normal contact pressure. If the contact pressure is of order 10000, and the

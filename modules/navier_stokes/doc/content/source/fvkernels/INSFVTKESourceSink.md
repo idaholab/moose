@@ -21,7 +21,7 @@ where:
 
 The turbulent kinetic energy dissipation rate $\epsilon$ is generally coming from a coupled
 transport equation for $\epsilon$.
-However, for canonical or meassured cases, e.g., isotropic decaying turbulece,
+However, for canonical or measured cases, e.g., isotropic decaying turbulence,
 the user can utilize predefined fields through functors in MOOSE.
 
 ## Wall formulation:
@@ -97,7 +97,7 @@ In other words, there is no need to impose boundary conditions for $k$ when the 
 is specified in his kernel.
 
 !alert note
-When using near-wall treatment, we assume that the $\mu_t$ funtor is computed by an object
+When using near-wall treatment, we assume that the $\mu_t$ functor is computed by an object
 that performs near-wall treatment.
 Otherwise, the results obtained won't not physically correct
 

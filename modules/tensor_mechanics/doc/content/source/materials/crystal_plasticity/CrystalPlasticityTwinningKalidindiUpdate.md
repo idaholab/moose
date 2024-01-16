@@ -13,12 +13,12 @@ Additionally `CrystalPlasticityTwinningKalidindiUpdate` is intended to be used w
 a constitutive model for dislocation glide or slip: combining this twinning model
 with [CrystalPlasticityKalidindiUpdate](/CrystalPlasticityKalidindiUpdate.md) will
 replicate the coupling of the two constitutive models through the plastic velocity
-gradient calcualtion as presented in [!cite](kalidindi2001).
+gradient calculation as presented in [!cite](kalidindi2001).
 
 ## Constitutive Model Definition
 
 Proposed by Kalidindi, this straight-forward twinning propagation model computes
-the plastic shear increment due to twinning with a power law constiutive model:
+the plastic shear increment due to twinning with a power law constitutive model:
 \begin{equation}
   \Delta \gamma^{\beta} = \gamma_o \left| \frac{\tau^{\beta}}{g^{\beta}}  \right|^{1/m} \quad if \quad \tau^{\beta} > 0, \quad f_{total} < f_{limit}
 \end{equation}
@@ -43,7 +43,7 @@ systems [!citep](kalidindi2001).
 \begin{equation}
 \Delta g^{\beta} = \gamma_{tw} \left[ h_{nc}\left( f_{total} \right)^b \sum_{nc}^k \dot{f}^k + h_{cp}\left( f_{total} \right) \sum_{cp}^k \dot{f}^k \right]
 \end{equation}
-where h$_{nc}$ is the user-defined non-coplanar hardening coefficent, b is the
+where h$_{nc}$ is the user-defined non-coplanar hardening coefficient, b is the
 hardening exponent for non-coplanar twin systems, and h$_{cp}$ is the user-defined
 coplanar hardening coefficient.
 

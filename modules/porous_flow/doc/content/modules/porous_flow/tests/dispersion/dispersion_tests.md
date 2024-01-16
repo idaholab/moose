@@ -13,7 +13,7 @@ This concentration profile has a well-known similarity solution given by
 \begin{equation}
 C(u) = \mathrm{erfc}\,(u),
 \end{equation}
-where $\mathrm{erfc}(u)$ is the complentary error function, and $u = x/(2 \sqrt{D t})$ is the
+where $\mathrm{erfc}(u)$ is the complementary error function, and $u = x/(2 \sqrt{D t})$ is the
 similarity solution, $x$ is distance, $t$ is time, and $D$ is the diffusion coefficient.
 
 The comparison between PorousFlow and this analytical solution is presented in [fig:diff], where we observe a very good agreement between the two solutions.

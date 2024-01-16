@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `PeripheralTriangleMeshGenerator` utilizes the general purpose [`XYDelaunayGenerator`](XYDelaunayGenerator.md) triangulation mesh generator and the [`PolyLineMeshGenerator`](PolyLineMeshGenerator.md) to create a circural periphery region around a reactor core. The outer circle properties are specified with the [!param](/Mesh/PeripheralTriangleMeshGenerator/peripheral_ring_radius) and [!param](/Mesh/PeripheralTriangleMeshGenerator/peripheral_ring_num_segments) input parameters.
+The `PeripheralTriangleMeshGenerator` utilizes the general purpose [`XYDelaunayGenerator`](XYDelaunayGenerator.md) triangulation mesh generator and the [`PolyLineMeshGenerator`](PolyLineMeshGenerator.md) to create a circular periphery region around a reactor core. The outer circle properties are specified with the [!param](/Mesh/PeripheralTriangleMeshGenerator/peripheral_ring_radius) and [!param](/Mesh/PeripheralTriangleMeshGenerator/peripheral_ring_num_segments) input parameters.
 
 Optionally, triangle refinement parameters can be used to improve the quality of the triangles in the periphery region. These are specified with either [!param](/Mesh/PeripheralTriangleMeshGenerator/desired_area), which specifies a single desired maximum triangle area, and [!param](/Mesh/PeripheralTriangleMeshGenerator/desired_area_func), which specifies the desired maximum triangle area as a function of x,y. input parameters. See the full documentation for [`XYDelaunayGenerator`](XYDelaunayGenerator.md) for more details on the area refinement options.
 

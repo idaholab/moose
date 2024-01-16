@@ -44,7 +44,7 @@ and the computation of their gradients on faces is specific to the treatment of 
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=Variables
 
-The porous media Navier Stokes equation are implemented by using `FVKernels` which correspond to
+The porous media Navier Stokes equations are implemented by using `FVKernels` which correspond to
 each term of the equations. In the following example, the first kernel is the mass advection kernel.
 This kernel corresponds to the conservation of mass. It acts on the pressure non-linear variable which
 appears in the mass equation through the Rhie Chow interpolation of the mass fluxes on the element faces, and

@@ -29,7 +29,7 @@ The meshes and the `CEI` data structures are shown in [healing_recut_1], [healin
        style=width:100%;padding:20px;
        caption=The *healing-and-re-cut* algorithm at time step 1. For demonstration purposes, the `CEI`s are denoted using element IDs and the cut ID, while in the actual implementation pointers are used to store these information.
 
-During the first solve in the first time step, the mesh is not yet cut by XFEM, and the `CEI`s are empty. Therefore, nothing happens during function call `XFEM::healMesh()`. The cut marks element 1 for cutting, and it is cut into children elements 3 and 4 during the function call `XFEM::cutMeshWithEFA(...)`. When child element 3 is created, its parent element (1), the correponding cut (1), and its cut subdomain (1) are stored into the current `CEI`, denoted here as $\{3,1,1,1\}$. Similarly, a `CEI` entry $\{4,1,1,2\}$ is stored for child element 4. The system is solved again after the interface has been introduced.
+During the first solve in the first time step, the mesh is not yet cut by XFEM, and the `CEI`s are empty. Therefore, nothing happens during function call `XFEM::healMesh()`. The cut marks element 1 for cutting, and it is cut into children elements 3 and 4 during the function call `XFEM::cutMeshWithEFA(...)`. When child element 3 is created, its parent element (1), the corresponding cut (1), and its cut subdomain (1) are stored into the current `CEI`, denoted here as $\{3,1,1,1\}$. Similarly, a `CEI` entry $\{4,1,1,2\}$ is stored for child element 4. The system is solved again after the interface has been introduced.
 
 !media media/xfem/healing_recut_2.png
        id=healing_recut_2

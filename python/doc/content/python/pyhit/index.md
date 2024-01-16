@@ -40,7 +40,7 @@ After this node is located it is modified in two ways: the "x_max" parameter is 
 the comment for this parameter is changed to note the alteration.
 
 Finally, the modified output is written to a new file using the `pyhit.write` function. The
-modifyied content (the "Mesh" block) is shown in [pyhit-output].
+modified content (the "Mesh" block) is shown in [pyhit-output].
 
 
 !listing id=pyhit-output caption=The modified "Mesh" block that is output to the "input_modified.i" file.

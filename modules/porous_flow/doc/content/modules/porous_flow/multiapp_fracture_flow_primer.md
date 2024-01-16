@@ -15,7 +15,7 @@ PorousFlow can be used to simulate flow through fractured porous media in the ca
 
 ## Primer using the diffusion equation with no fractures
 
-Before considering porous flow in a mixed-dimensional fracture-matrix system, consider the simpler situation involving two coupled diffusion equations in 1D.  Hence there is *no* "fracture" and "matrix" in this section: the labels "f" and "m" simply distinguish two different variables, and the dimensionality is all one dimensional.  Assume physical parameters have been chosen appropriately so that (see the [page desribing mathematics and physics of heat transfer](multiapp_fracture_flow_equations.md))
+Before considering porous flow in a mixed-dimensional fracture-matrix system, consider the simpler situation involving two coupled diffusion equations in 1D.  Hence there is *no* "fracture" and "matrix" in this section: the labels "f" and "m" simply distinguish two different variables, and the dimensionality is all one dimensional.  Assume physical parameters have been chosen appropriately so that (see the [page describing mathematics and physics of heat transfer](multiapp_fracture_flow_equations.md))
 
 \begin{equation}
 \begin{aligned}
@@ -67,7 +67,7 @@ The system is coupled when $h\neq 0$.  A MultiApp approach is not strictly neede
 
 !listing diffusion_multiapp/two_vars.i
 
-The result for $T_{f}$ depends on the spatial and temporal discretisation.  The temporal-discretisation dependence is shown in [diffusion_two_vars].  Notice that the matrix has removed heat from the fracture, so the temperature is decreased compared with the $h=0$ case (i.e. $T_{f}(x=0)\approx0.02$ in [diffusion_two_vars] which is lower than it was for the uncoulpled case with $h=0$ shown in [diffusion_single_var] where $T_{f}(x=0)\approx0.03$).
+The result for $T_{f}$ depends on the spatial and temporal discretisation.  The temporal-discretisation dependence is shown in [diffusion_two_vars].  Notice that the matrix has removed heat from the fracture, so the temperature is decreased compared with the $h=0$ case (i.e. $T_{f}(x=0)\approx0.02$ in [diffusion_two_vars] which is lower than it was for the uncoupled case with $h=0$ shown in [diffusion_single_var] where $T_{f}(x=0)\approx0.03$).
 
 !media porous_flow/examples/multiapp_flow/diffusion_two_vars.png
 	style=width:60%;margin:auto;padding-top:2.5%;

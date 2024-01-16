@@ -30,7 +30,7 @@ Solve failed and timestep already at or below dtmin, cannot continue!
 
 Your solve may be failing for various reasons. First you should identify if it is the nonlinear or the (nested) linear solve that is
 failing. Failed linear solves can make the nonlinear solver fail. Similarly, a failing nonlinear solve can take the current
-solution vectors in a domain where the linear solve is completely untractable. Therefore it is really important to
+solution vectors in a domain where the linear solve is completely intractable. Therefore it is really important to
 identify the pathway to non-convergence using the [Debug](Debug/index.md) and [Outputs](Outputs/index.md) options.
 
 The following snippets show how to obtain detailed prints of the residual convergence during the linear and nonlinear solves.

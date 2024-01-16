@@ -86,7 +86,7 @@ For the equality constraints, a gradient of the constraint with respect to the
 parameters is needed for TAO. The gradient is analytically computed for the
 current radii.
 
-Using postprocesors, the objective and constraint functions can be calculated.
+Using postprocessors, the objective and constraint functions can be calculated.
 The objective in this case is to minimize the maximum temperature. Also the
 current volume is calculated and how much that volume violates the constraint.
 These values are now able to be transferred to the main application for the

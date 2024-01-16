@@ -32,10 +32,10 @@ stress state. These inelastic models must derive from the `ADStressUpdateBase` c
 
 !alert note title=Compatible Inelastic `ADStressUpdate` Material Models
 All of the inelastic material models that are compatible with
-`ADComputeMultipleInelasicStress` follow the nomenclature convention of `StressUpdate`
+`ADComputeMultipleInelasticStress` follow the nomenclature convention of `StressUpdate`
 as a suffix to the class name.
 
-`ADComputeMultipleInelasticStress` can accomodate as few as zero inelastic
+`ADComputeMultipleInelasticStress` can accommodate as few as zero inelastic
 models (in which case the algorithm from
 [ADComputeFiniteStrainElasticStress](/ADComputeFiniteStrainElasticStress.md) is
 applied) to as many inelastic material models as is required by the physics. If
@@ -52,7 +52,7 @@ models inherit from the same base class.
                strains and stresses for multiple inelastic material models. (Note that
                computation of the consistent tangent operator is not performed in this
                version of the class. An exact Jacobian is guaranteed through automatic
-               differention)
+               differentiation)
 
 The algorithm used to compute the stress for multiple inelastic models is shown
 in [fig:multiple_materials].
@@ -134,7 +134,7 @@ Material Time Step Limiter section, the time step size involves a post processor
 to ensure that the current time step size is reasonable for each of the
 inelastic material models used in the simulation.
 
-At the end of the alogrithm, the final value of the elastic and inelastic
+At the end of the algorithm, the final value of the elastic and inelastic
 strain tensors are calculated as shown in the last element of [fig:multiple_materials].
 
 ## Single Inelastic Model
@@ -155,7 +155,7 @@ iterations from [fig:multiple_materials] are removed from the algorithm in
 [fig:single_material].
 
 The initial elastic strain increment guess is assumed to be the initial
-mechanical strian increment, and the trial stress for the single inelastic model
+mechanical strain increment, and the trial stress for the single inelastic model
 is calculated from that elastic strain increment as in [eqn:trial_stress]. These
 stress and strain values are passed directly to the inelastic material model.
 
@@ -192,7 +192,7 @@ In some cases, particularly in creep, limits on the time step are required by th
 material model formulation. Each inelastic material model is responsible for
 calculating the maximum time step allowable for that material model.
 The [MaterialTimeStepPostprocessor](/MaterialTimeStepPostprocessor.md)
-finds the minumum time step size limits from the entire simulation domain. The
+finds the minimum time step size limits from the entire simulation domain. The
 postprocessor then interfaces with the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 to restrict the time step size based on the limit calculated in the previous
 time step.
@@ -200,12 +200,12 @@ time step.
 ## Example Input Files
 
 The input settings for multiple inelastic material models and a single inelastic
-model are similiar, and examples of both are shown below.
+model are similar, and examples of both are shown below.
 
 ### Multiple Inelastic Models
 
 For multiple inelastic models, all of the inelastic material
-model names must be listed as arguements to the `inelastic_models` parameter.
+model names must be listed as arguments to the `inelastic_models` parameter.
 The inelastic material blocks must also be present.
 
 !listing modules/tensor_mechanics/test/tests/combined_creep_plasticity/combined_creep_plasticity.i block=Materials

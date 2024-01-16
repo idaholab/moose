@@ -44,7 +44,7 @@ for example, implement maps that realize different nucleus shapes than the
 smooth interface spheres provided by
 [`DiscreteNucleationMap`](/DiscreteNucleationMap.md).
 
-Multiple options exist for applyting the nucleus data to the variable fields in
+Multiple options exist for applying the nucleus data to the variable fields in
 the simulation.
 
 ### Free energy penalty based nucleation

@@ -57,7 +57,7 @@ Adds an input file parameter, of type `int`, that includes a default value of 19
 params.addParam<int>("year", 1980, "Provide the year you were born.");
 ```
 
-Here the default is overriden by a user-provided value
+Here the default is overridden by a user-provided value
 
 ```text
 [UserObjects]

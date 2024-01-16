@@ -24,7 +24,7 @@ The FeatureFloodCount object is a utility that inspects solution fields looking 
 
 
 <br/>
-The algorithm for identifying portions of connected components begins by running a [Flood Fill](https://en.wikipedia.org/wiki/Flood_fill) algorthim on each processor that recursively visits neighboring elements on the unstructured mesh while the connecting criteria is met. [unstructured1] illustrates the identification of a new region on a processor. The dark shaded element represents an element that was identified whose variable value exceeds a given threshold. The lightly shaded elements surronding the dark element represent the current "halo" markings of the region. These halo markings always extend one neighbor beyond the currently shaded region. They are used for both the connected component algorithm and for identifying potential collisions among disjoint regions.
+The algorithm for identifying portions of connected components begins by running a [Flood Fill](https://en.wikipedia.org/wiki/Flood_fill) algorithm on each processor that recursively visits neighboring elements on the unstructured mesh while the connecting criteria is met. [unstructured1] illustrates the identification of a new region on a processor. The dark shaded element represents an element that was identified whose variable value exceeds a given threshold. The lightly shaded elements surrounding the dark element represent the current "halo" markings of the region. These halo markings always extend one neighbor beyond the currently shaded region. They are used for both the connected component algorithm and for identifying potential collisions among disjoint regions.
 
 
 !row!

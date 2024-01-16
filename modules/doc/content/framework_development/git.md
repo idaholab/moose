@@ -14,7 +14,7 @@ beginners tutorial.
 
 ## Downloading a single PR from Github
 
-If you want to try out somebody elses code, you can always add a new remote to pull in their repository. If you do this a lot
+If you want to try out somebody else's code, you can always add a new remote to pull in their repository. If you do this a lot
 however, you might find yourself with a huge number of remotes that you don't really care about. There is a better way:
 [https://help.github.com/articles/checking-out-pull-requests-locally/](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
@@ -45,7 +45,7 @@ Assuming your prompt is just '$ ', adding this line to your `.bash_profile` will
 
 #### Using the zsh shell
 
-If your machine uses the zsh shell, two files are required for bash completition. Within the `~/.zsh` directory, download both the git bash completion script and the zsh completion wrapper
+If your machine uses the zsh shell, two files are required for bash completion. Within the `~/.zsh` directory, download both the git bash completion script and the zsh completion wrapper
 
 ```zsh
 curl -o git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
