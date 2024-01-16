@@ -202,32 +202,53 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
     vec[i] = obj;
   }
 
-  if (sort && !vec.empty() && dynamic_cast<DependencyResolverInterface *>(vec[0]))
+  if (sort)
   {
+#ifndef NDEBUG
+    // Make a copy for sanity checking at the end
+    const auto vec_copy = vec;
+#endif
+
+    // We'll move the independent objects to the beginning, that way we can
+    // put those that we get from the dependency resolver at the end without
+    // any extraneous allocation
+    std::size_t fill_i = 0;
     std::vector<DependencyResolverInterface *> dependers;
+    dependers.reserve(vec.size()); // we usually have all dependers
     for (auto obj : vec)
+      if (auto dri = dynamic_cast<DependencyResolverInterface *>(obj))
+        dependers.push_back(dri);
+      else
+        vec[fill_i++] = obj;
+
+    // Sort the dependencies that we do have
+    if (dependers.size())
     {
-      auto d = dynamic_cast<DependencyResolverInterface *>(obj);
-      if (!d)
+      try
       {
-        dependers.clear();
-        break;
+        DependencyResolverInterface::sort(dependers);
       }
-      dependers.push_back(d);
+      catch (CyclicDependencyException<DependencyResolverInterface *> & e)
+      {
+        DependencyResolverInterface::cyclicDependencyError<UserObject *>(
+            e, "Cyclic dependency detected in object ordering");
+      }
+
+      // Move the dependent objects to the end of the vector
+      for (auto depender : dependers)
+        vec[fill_i++] = dynamic_cast<MooseObject *>(depender);
+
+      mooseAssert(fill_i == vec_copy.size(), "Invalid fill");
     }
 
-    try
+#ifndef NDEBUG
+    for (const auto other_obj : vec_copy)
     {
-      DependencyResolverInterface::sort(dependers);
+      const auto count = std::count(vec.begin(), vec.end(), other_obj);
+      mooseAssert(count == 1,
+                  other_obj->typeAndName() + " count after sort 1 != " + std::to_string(count));
     }
-    catch (CyclicDependencyException<DependencyResolverInterface *> & e)
-    {
-      DependencyResolverInterface::cyclicDependencyError<UserObject *>(
-          e, "Cyclic dependency detected in object ordering");
-    }
-
-    for (unsigned int i = 0; i < dependers.size(); i++)
-      vec[i] = dynamic_cast<MooseObject *>(dependers[i]);
+#endif
   }
 
   return query_id;
