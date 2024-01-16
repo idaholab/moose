@@ -22,8 +22,8 @@ ParsedVectorReporter::validParams()
 
 ParsedVectorReporter::ParsedVectorReporter(const InputParameters & parameters)
   : ParsedReporterBase(parameters),
-    _output_reporter(declareValueByName<std::vector<Real>>(getParam<std::string>("name"),
-                                                           REPORTER_MODE_REPLICATED))
+    _output_reporter(
+        declareValueByName<std::vector<Real>>(getParam<std::string>("name"), REPORTER_MODE_ROOT))
 {
   // get reporters to operate on
   const std::vector<ReporterName> reporter_names(
@@ -38,8 +38,8 @@ ParsedVectorReporter::ParsedVectorReporter(const InputParameters & parameters)
 
   _reporter_data.resize(reporter_names.size());
   for (const auto rep_index : index_range(_reporter_data))
-    _reporter_data[rep_index] = &getReporterValueByName<std::vector<Real>>(
-        reporter_names[rep_index], REPORTER_MODE_REPLICATED);
+    _reporter_data[rep_index] =
+        &getReporterValueByName<std::vector<Real>>(reporter_names[rep_index], REPORTER_MODE_ROOT);
 }
 
 void

@@ -22,8 +22,7 @@ ParsedScalarReporter::validParams()
 
 ParsedScalarReporter::ParsedScalarReporter(const InputParameters & parameters)
   : ParsedReporterBase(parameters),
-    _output_reporter(
-        declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_REPLICATED))
+    _output_reporter(declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_ROOT))
 {
   // get reporters to operate on
   const std::vector<ReporterName> reporter_names(
@@ -39,7 +38,7 @@ ParsedScalarReporter::ParsedScalarReporter(const InputParameters & parameters)
   _reporter_data.resize(reporter_names.size());
   for (const auto rep_index : index_range(_reporter_data))
     _reporter_data[rep_index] =
-        &getReporterValueByName<Real>(reporter_names[rep_index], REPORTER_MODE_REPLICATED);
+        &getReporterValueByName<Real>(reporter_names[rep_index], REPORTER_MODE_ROOT);
 }
 
 void

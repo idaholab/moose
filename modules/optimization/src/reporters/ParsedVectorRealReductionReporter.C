@@ -37,8 +37,7 @@ ParsedVectorRealReductionReporter::ParsedVectorRealReductionReporter(
     _initial_value(getParam<Real>("initial_value")),
     _reporter_data(
         getReporterValueByName<std::vector<Real>>(getParam<ReporterName>("reporter_name"))),
-    _output_reporter(
-        declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_REPLICATED))
+    _output_reporter(declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_ROOT))
 {
   // parse function
   std::string function = getParam<std::string>("expression");
