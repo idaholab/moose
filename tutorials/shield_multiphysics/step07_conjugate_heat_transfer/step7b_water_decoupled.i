@@ -36,12 +36,12 @@ mu_multiplier = 1e3
     location = OUTSIDE
   []
 
-  # [refine_water]
-  #   type = RefineBlockGenerator
-  #   input = add_outer_water
-  #   refinement = '1'
-  #   block = 'water'
-  # []
+  [refine_water]
+    type = RefineBlockGenerator
+    input = add_outer_water
+    refinement = '1'
+    block = 'water'
+  []
   # second_order = true
 []
 
@@ -51,7 +51,7 @@ mu_multiplier = 1e3
     block = 'concrete'
     [InitialCondition]
       type = FunctionIC
-      function = '300 + 400*16 - 200*(x-4)^2*(y-6.5)^2*(z-3)^2'
+      function = '400'
     []
   []
 []
@@ -60,7 +60,6 @@ mu_multiplier = 1e3
   [velocity]
     family = LAGRANGE_VEC
     block = 'water'
-    # order = SECOND
   []
   [p]
     block = 'water'
@@ -68,7 +67,6 @@ mu_multiplier = 1e3
   [T_water]
     initial_condition = 300
     block = 'water'
-    # order = SECOND
   []
 []
 
@@ -274,6 +272,7 @@ mu_multiplier = 1e3
   type = Transient
   solve_type = NEWTON
   automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -281,7 +280,6 @@ mu_multiplier = 1e3
   # petsc_options_iname = '-pc_type -pc_factor_shift_type'
   # petsc_options_value = 'lu NONZERO'
 
-  l_abs_tol = 1e-9
   nl_abs_tol = 1e-8
 
   end_time = 100
