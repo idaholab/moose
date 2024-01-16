@@ -1,6 +1,13 @@
+# Things we learn from experimenting in 2D
+# - mesh refinement needed in the fluid
+# - time step size can be ~6s
+# - very high Ra number. Realistic system would be easier,
+#   but to get a solution now we need to up the viscosity
+# - solver parameters: scaling notably, preconditioner
+
 cp_multiplier = 1e-6
 cp_water_multiplier = 1e-1
-step_multiplier = 5
+step_multiplier = 25
 
 # this is in lieu of a turbulence model for simplicity
 mu_multiplier = 1e3
@@ -92,9 +99,16 @@ ny = '${fparse 32 * mult}'
   # [refine_water]
   #   type = RefineBlockGenerator
   #   input = pin_node
-  #   refinement = '1'
+  #   refinement = '3'
   #   block = 'water'
   # []
+  [refine_water_side]
+    type = RefineSidesetGenerator
+    input = pin_node
+    refinement = '2'
+    boundaries = 'water_boundary'
+  []
+  uniform_refine = 1
   # second_order = true
 []
 
@@ -150,10 +164,10 @@ ny = '${fparse 32 * mult}'
     variable = p
     block = 'water'
   []
-  # [mass_pspg]
-  #   type = INSADMassPSPG
-  #   variable = p
-  # []
+  [mass_pspg]
+    type = INSADMassPSPG
+    variable = p
+  []
 
   # # Fluid flow: momentum
   [momentum_time]
@@ -322,6 +336,7 @@ ny = '${fparse 32 * mult}'
   type = Transient
   solve_type = NEWTON
   automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
 
   # petsc_options_iname = '-pc_type -pc_hypre_type'
   # petsc_options_value = 'hypre boomeramg'
@@ -329,7 +344,6 @@ ny = '${fparse 32 * mult}'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
 
-  l_abs_tol = 1e-9
   nl_abs_tol = 1e-8
 
   end_time = 1000
@@ -351,3 +365,35 @@ ny = '${fparse 32 * mult}'
 # [Debug]
 #   show_var_residual_norms = true
 # []
+
+[Postprocessors]
+  [T_max]
+    type = ElementExtremeValue
+    variable = T_water
+    value_type = 'max'
+    block = 'water'
+  []
+  [T_min]
+    type = ElementExtremeValue
+    variable = T_water
+    value_type = 'min'
+    block = 'water'
+  []
+  [Ra]
+    type = RayleighNumber
+    beta = 2.9e-3
+    T_hot = T_max
+    T_cold = T_min
+    l = 4
+    mu_ave = '${fparse mu_multiplier * 7.98e-4}'
+    cp_ave = '${fparse cp_water_multiplier * 4181}'
+    k_ave = 0.6
+    gravity_magnitude = 9.81
+    rho_ave = 955.7
+  []
+[]
+
+[AuxVariables]
+  [velocity_z]
+  []
+[]

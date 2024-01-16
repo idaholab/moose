@@ -1,5 +1,9 @@
 cp_multiplier = 1e-6
 cp_water_multiplier = 1e-6
+step_multiplier = 25
+
+# this is in lieu of a turbulence model for simplicity
+mu_multiplier = 1e3
 
 [Mesh]
   [fmg]
@@ -7,6 +11,7 @@ cp_water_multiplier = 1e-6
     file = '../../step03_boundary_conditions/inputs/mesh_in.e'
   []
 
+  # Add a nodeset to pin the pressure (incompressible flow)
   [pin_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
@@ -14,31 +19,9 @@ cp_water_multiplier = 1e-6
     input = fmg
   []
 
-  [add_inner_water]
-    type = SideSetsFromBoundingBoxGenerator
-    input = pin_node
-    boundaries_old = 'water_boundary'
-    boundary_new = water_boundary_inner
-    bottom_left = '2.5 2.5 1'
-    top_right = '6.6 10.5 5'
-    location = INSIDE
-  []
-  [add_outer_water]
-    type = SideSetsFromBoundingBoxGenerator
-    input = add_inner_water
-    boundaries_old = 'water_boundary'
-    boundary_new = water_boundary_outer
-    bottom_left = '2.5 2.5 1'
-    top_right = '6.6 10.5 5'
-    location = OUTSIDE
-  []
-
-  [refine_water]
-    type = RefineBlockGenerator
-    input = add_outer_water
-    refinement = '0'
-    block = 'water'
-  []
+  # From 2D simulation, we saw this much is necessary
+  # Unfortunately, we cannot afford this much on my laptop
+  uniform_refine = 2
 []
 
 [Variables]
@@ -175,7 +158,7 @@ cp_water_multiplier = 1e-6
     type = ADGenericConstantMaterial
     block = 'water'
     prop_names = 'rho    k     cp      mu alpha_wall'
-    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} 7.98e-4 30'
+    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse mu_multiplier * 7.98e-4} 30'
   []
   [boussinesq_params]
     type = ADGenericConstantMaterial
@@ -254,6 +237,7 @@ cp_water_multiplier = 1e-6
   type = Transient
   solve_type = NEWTON
   automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -261,11 +245,9 @@ cp_water_multiplier = 1e-6
   # petsc_options_iname = '-pc_type -pc_factor_shift_type'
   # petsc_options_value = 'lu NONZERO'
 
-  l_abs_tol = 1e-9
   nl_abs_tol = 1e-8
 
   end_time = 100
-  dt = 0.25
   start_time = -1
 
   # steady_state_tolerance = 1e-5
@@ -273,7 +255,7 @@ cp_water_multiplier = 1e-6
 
   [TimeStepper]
     type = FunctionDT
-    function = 'if(t<0,0.1,0.25)'
+    function = 'if(t<0,0.1,${fparse step_multiplier * 0.25})'
   []
 []
 
