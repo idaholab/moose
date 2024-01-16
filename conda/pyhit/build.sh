@@ -1,8 +1,7 @@
 #!/bin/bash
 set -eu
 
-git clean -xfd
-git submodule update --init moose
+mkdir -p $SP_DIR
 cp -R pyhit $SP_DIR/
 cd src
 make bindings
