@@ -37,3 +37,6 @@ Additionally, equality and inequality constraints can be defined by
 respectively.
 
 
+!syntax parameters /OptimizationReporter/GeneralOptimization
+
+!syntax inputs /OptimizationReporter/GeneralOptimization
