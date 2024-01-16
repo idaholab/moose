@@ -12,7 +12,7 @@ The following known log revisions exist for the {{module}} module:
 !table
 | MOOSE Commit | Incorrect Referenced Issue | Correct Referenced Issue |
 | - | - | - |
-| [48db61](https://github.com/idaholab/moose/commit/48db61307ed87b58a96e944215f13378138cf7bc) | idaholab/sockeye#19845 | [idaholab/moose#19845](https://github.com/idaholab/moose/pull/19845) |
+| [48db61](https://github.com/idaholab/moose/commit/48db61307ed87b58a96e944215f13378138cf7bc) | idaholab/sockeye#19845 | [idaholab/sockeye#130](https://github.inl.gov/ncrc/sockeye/issues/130) |
 
 !template-end!
 
