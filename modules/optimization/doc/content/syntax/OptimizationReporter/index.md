@@ -25,9 +25,6 @@ group using [!param](/OptimizationReporter/GeneralOptimization/lower_bounds) and
          block=OptimizationReporter
          id=optRep
 
-!syntax parameters /OptimizationReporter/OptimizationReporter
-
-!syntax inputs /OptimizationReporter/OptimizationReporter
 
 !syntax list /OptimizationReporter objects=True actions=False subsystems=False groups=OptimizationApp
 
