@@ -125,9 +125,7 @@ DM_Moose::checkChildSize(DM child, const PetscInt child_size, const std::string 
 }
 
 PetscErrorCode
-DMMooseGetContacts(DM dm,
-                   std::vector<std::pair<std::string, std::string>> & contact_names,
-                   std::vector<PetscBool> & displaced)
+DMMooseValidityCheck(DM dm)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -142,6 +140,19 @@ DMMooseGetContacts(DM dm,
                      "Got DM of type %s, not of type %s",
                      ((PetscObject)dm)->type_name,
                      DMMOOSE);
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+DMMooseGetContacts(DM dm,
+                   std::vector<std::pair<std::string, std::string>> & contact_names,
+                   std::vector<PetscBool> & displaced)
+{
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  ierr = DMMooseValidityCheck(dm);
+  CHKERRQ(ierr);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_contact_names))
   {
@@ -157,18 +168,10 @@ DMMooseGetUnContacts(DM dm,
                      std::vector<PetscBool> & displaced)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_uncontact_names))
   {
@@ -182,18 +185,10 @@ PetscErrorCode
 DMMooseGetSides(DM dm, std::vector<std::string> & side_names)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_side_ids))
     side_names.push_back(it.first);
@@ -204,18 +199,10 @@ PetscErrorCode
 DMMooseGetUnSides(DM dm, std::vector<std::string> & side_names)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_unside_ids))
     side_names.push_back(it.first);
@@ -226,18 +213,10 @@ PetscErrorCode
 DMMooseGetBlocks(DM dm, std::vector<std::string> & block_names)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_block_ids))
     block_names.push_back(it.first);
@@ -248,18 +227,10 @@ PetscErrorCode
 DMMooseGetVariables(DM dm, std::vector<std::string> & var_names)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   for (const auto & it : *(dmm->_var_ids))
     var_names.push_back(it.first);
@@ -270,18 +241,10 @@ PetscErrorCode
 DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(((PetscObject)dm)->comm,
             PETSC_ERR_ARG_WRONGSTATE,
@@ -295,18 +258,10 @@ PetscErrorCode
 DMMooseSetName(DM dm, const std::string & dm_name)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(((PetscObject)dm)->comm,
             PETSC_ERR_ARG_WRONGSTATE,
@@ -320,18 +275,10 @@ PetscErrorCode
 DMMooseSetParentDM(DM dm, DM_Moose * parent)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(((PetscObject)dm)->comm,
             PETSC_ERR_ARG_WRONGSTATE,
@@ -347,18 +294,10 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_vars)
@@ -386,18 +325,10 @@ DMMooseSetBlocks(DM dm, const std::set<std::string> & blocks)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_blocks)
@@ -411,18 +342,10 @@ DMMooseSetSides(DM dm, const std::set<std::string> & sides)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_sides)
@@ -436,22 +359,14 @@ DMMooseSetUnSides(DM dm, const std::set<std::string> & unsides)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
-  if (dmm->_sides)
-    delete dmm->_sides;
+  if (dmm->_unsides)
+    delete dmm->_unsides;
   dmm->_unsides = new std::set<std::string>(unsides);
   PetscFunctionReturn(0);
 }
@@ -461,24 +376,14 @@ DMMooseSetUnSideByVar(DM dm, const std::set<std::string> & unside_by_var)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
-  if (dmm->_sides)
-    delete dmm->_sides;
-  if (dmm->_unsides)
-    delete dmm->_unsides;
+  if (dmm->_unside_by_var)
+    delete dmm->_unside_by_var;
   dmm->_unside_by_var = new std::set<std::string>(unside_by_var);
   PetscFunctionReturn(0);
 }
@@ -490,18 +395,10 @@ DMMooseSetContacts(DM dm,
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (contacts.size() != displaced.size())
@@ -530,18 +427,10 @@ DMMooseSetUnContacts(DM dm,
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)dm->data;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(PETSC_COMM_SELF,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (uncontacts.size() != displaced.size())
@@ -568,18 +457,10 @@ PetscErrorCode
 DMMooseGetNonlinearSystem(DM dm, NonlinearSystemBase *& nl)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   nl = dmm->_nl;
   PetscFunctionReturn(0);
@@ -589,18 +470,10 @@ PetscErrorCode
 DMMooseSetSplitNames(DM dm, const std::vector<std::string> & split_names)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
 
   if (dmm->_splits)
@@ -638,18 +511,10 @@ PetscErrorCode
 DMMooseGetSplitNames(DM dm, std::vector<std::string> & split_names)
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "Got DM oftype %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   if (!dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
@@ -1378,17 +1243,10 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "DM of type %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
@@ -1435,18 +1293,11 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
-  PetscBool ismoose;
   MatType type;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "DM of type %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   ierr = DMGetMatType(dm, &type);
@@ -1632,17 +1483,10 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "DM of type %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
@@ -1662,17 +1506,10 @@ DMSetUp_Moose_Pre(DM dm)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "DM of type %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
@@ -1927,8 +1764,8 @@ PetscErrorCode
 DMMooseReset(DM dm)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose *)(dm->data);
   PetscBool ismoose;
+  DM_Moose * dmm = (DM_Moose *)(dm->data);
 
   PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
@@ -1959,17 +1796,10 @@ DMSetUp_Moose(DM dm)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
-  PetscBool ismoose;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "DM of type %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   if (dmm->_print_embedding)
@@ -2036,18 +1866,11 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #endif
 {
   PetscErrorCode ierr;
-  PetscBool ismoose;
   DM_Moose * dmm = (DM_Moose *)dm->data;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  ierr = DMMooseValidityCheck(dm);
   CHKERRQ(ierr);
-  if (!ismoose)
-    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
-                     PETSC_ERR_ARG_WRONG,
-                     "DM of type %s, not of type %s",
-                     ((PetscObject)dm)->type_name,
-                     DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 // PETSc changed macro definitions in 3.18; the former correct usage

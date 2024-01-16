@@ -95,7 +95,7 @@ private:
 
   /// This will end up being the same length as \p _schur_fs_index. Let's give an example of what
   /// this data member means. If the user sets "schur_fs_index = '1'", then this means the Schur
-  /// complement field split is nested within another field split, and the Schr complement field
+  /// complement field split is nested within another field split, and the Schur complement field
   /// split is at the 1st index of the top split (some other set of degrees of freedom take up the
   /// 0th index of the top split). So in this example \p _index_sets will be of length 1, and the
   /// Index Set (IS) held by this container will hold all the Schur complement field split degrees

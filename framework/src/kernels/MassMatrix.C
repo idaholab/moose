@@ -27,4 +27,8 @@ MassMatrix::validParams()
   return params;
 }
 
-MassMatrix::MassMatrix(const InputParameters & parameters) : Reaction(parameters) {}
+MassMatrix::MassMatrix(const InputParameters & parameters) : Reaction(parameters)
+{
+  if (!isParamValid("matrix_tags") && !isParamValid("extra_matrix_tags"))
+    mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
+}

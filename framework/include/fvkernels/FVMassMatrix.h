@@ -27,5 +27,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// Elemental weighting functor
   const Moose::Functor<Real> & _density;
 };

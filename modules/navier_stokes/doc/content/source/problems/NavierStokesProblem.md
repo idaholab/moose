@@ -4,7 +4,8 @@ The `NavierStokesProblem` solves the saddle point incompressible Navier-Stokes
 equations using Schur complement field split preconditioning. It focuses on the
 Least Squares Commutator (LSC) preconditioner, also known as the BFBt
 preconditioner, developed by Elman in [!citep](elman1999preconditioning) and
-[!citep](elman2006block).
+[!citep](elman2006block). The PETSc manual page on the LSC preconditioner can be
+found [here](https://petsc.org/release/manualpages/PC/PCLSC/).
 
 A linearized version of the incompressible Navier-Stokes equations discretized
 with stable finite element pairings may be written as:

@@ -32,6 +32,8 @@ FVMassMatrix::validParams()
 FVMassMatrix::FVMassMatrix(const InputParameters & parameters)
   : FVElementalKernel(parameters), _density(getFunctor<Real>("density"))
 {
+  if (!isParamValid("matrix_tags") && !isParamValid("extra_matrix_tags"))
+    mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
 }
 
 void
