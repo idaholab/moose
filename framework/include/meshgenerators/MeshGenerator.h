@@ -138,12 +138,18 @@ public:
   /**
    * @returns Whether or not the MeshGenerator with the name \p name is a parent of this
    * MeshGenerator.
+   *
+   * If \p direct = true, check only immediate parents of this generator. Otherwise, check
+   * all parents.
    */
   bool isParentMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
 
   /**
    * @returns Whether or not the MeshGenerator with the name \p name is a child of this
    * MeshGenerator.
+   *
+   * If \p direct = true, check only immediate parents of this generator. Otherwise, check
+   * all parents.
    */
   bool isChildMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
 
