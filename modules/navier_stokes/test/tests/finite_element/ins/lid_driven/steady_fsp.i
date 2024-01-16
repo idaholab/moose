@@ -58,7 +58,7 @@ n=64
     component = 0
   []
   [momentum_x_mass]
-    type = MassKernel
+    type = MassMatrix
     variable = vel_x
     density = ${rho}
     matrix_tags = 'mass'
@@ -72,7 +72,7 @@ n=64
     component = 1
   []
   [momentum_y_mass]
-    type = MassKernel
+    type = MassMatrix
     variable = vel_y
     density = ${rho}
     matrix_tags = 'mass'

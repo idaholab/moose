@@ -14,12 +14,12 @@
 /**
  * Computes a finite element mass matrix meant for use in preconditioning schemes which require one
  */
-class MassKernel : public Reaction
+class MassMatrix : public Reaction
 {
 public:
   static InputParameters validParams();
 
-  MassKernel(const InputParameters & parameters);
+  MassMatrix(const InputParameters & parameters);
 
   virtual void computeResidual() override {}
 };

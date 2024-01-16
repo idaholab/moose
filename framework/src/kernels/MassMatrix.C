@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MassKernel.h"
+#include "MassMatrix.h"
 
-registerMooseObject("MooseApp", MassKernel);
+registerMooseObject("MooseApp", MassMatrix);
 
 InputParameters
-MassKernel::validParams()
+MassMatrix::validParams()
 {
   InputParameters params = Reaction::validParams();
   params.addClassDescription("Computes a finite element mass matrix meant for use in "
@@ -27,4 +27,4 @@ MassKernel::validParams()
   return params;
 }
 
-MassKernel::MassKernel(const InputParameters & parameters) : Reaction(parameters) {}
+MassMatrix::MassMatrix(const InputParameters & parameters) : Reaction(parameters) {}

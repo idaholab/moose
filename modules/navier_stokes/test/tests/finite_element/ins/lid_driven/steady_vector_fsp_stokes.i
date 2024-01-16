@@ -38,7 +38,7 @@ n=8
     variable = p
   []
   [mass_kernel]
-    type = MassKernel
+    type = MassMatrix
     variable = p
     matrix_tags = 'mass'
   []

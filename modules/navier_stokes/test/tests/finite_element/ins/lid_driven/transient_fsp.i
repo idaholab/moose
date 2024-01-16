@@ -67,7 +67,7 @@ mu=2e-3
     component = 0
   []
   [x_mass]
-    type = MassKernel
+    type = MassMatrix
     variable = vel_x
     matrix_tags = 'mass'
   []
@@ -85,7 +85,7 @@ mu=2e-3
     component = 1
   []
   [y_mass]
-    type = MassKernel
+    type = MassMatrix
     variable = vel_y
     matrix_tags = 'mass'
   []
