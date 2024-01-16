@@ -187,20 +187,19 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
     conds.push_back(std::move(sorted_attrib));
 
   std::lock_guard<std::mutex> lock(_obj_cache_mutex);
-  _obj_cache.push_back({});
-  auto query_id = _obj_cache.size() - 1;
-  auto & vec = _obj_cache.back();
+  auto & vec = _obj_cache.emplace_back(obj_ids.size());
+  const auto query_id = _obj_cache.size() - 1;
   {
     std::lock_guard<std::mutex> lock(_query_cache_mutex);
     _query_cache[std::move(conds)] = query_id;
   }
 
   std::lock_guard<std::mutex> o_lock(_obj_mutex);
-  for (auto & id : obj_ids)
+  for (const auto i : index_range(obj_ids))
   {
-    mooseAssert(std::find(vec.begin(), vec.end(), _objects[id].get()) == vec.end(),
-                "Duplicate object");
-    vec.push_back(_objects[id].get());
+    auto obj = _objects[obj_ids[i]].get();
+    mooseAssert(std::find(vec.begin(), vec.end(), obj) == vec.end(), "Duplicate object");
+    vec[i] = obj;
   }
 
   if (sort && !vec.empty() && dynamic_cast<DependencyResolverInterface *>(vec[0]))
