@@ -54,6 +54,7 @@ MooseTestApp::validParams()
 
   params.set<bool>("automatic_automatic_scaling") = false;
   params.set<bool>("use_legacy_material_output") = false;
+  params.set<bool>(MeshGeneratorSystem::allow_data_driven_param) = true;
 
   return params;
 }
@@ -65,6 +66,8 @@ MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parame
 
   if (getParam<bool>("test_getRestartableDataMap_error"))
     getRestartableDataMap("slaughter");
+  if (getParam<bool>("disallow_test_objects"))
+    _pars.set<bool>(MeshGeneratorSystem::allow_data_driven_param) = false;
 }
 
 MooseTestApp::~MooseTestApp() {}

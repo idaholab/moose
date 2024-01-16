@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ReactorTestApp.h"
 #include "ReactorApp.h"
 #include "Moose.h"
@@ -16,6 +17,9 @@ InputParameters
 ReactorTestApp::validParams()
 {
   InputParameters params = ReactorApp::validParams();
+
+  params.set<bool>(MeshGeneratorSystem::allow_data_driven_param) = true;
+
   return params;
 }
 
