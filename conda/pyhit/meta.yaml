@@ -21,7 +21,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ moose_wasp }}
-
+    - make
   run:
     - {{ moose_wasp }}
     - setuptools
