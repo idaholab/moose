@@ -1265,6 +1265,14 @@ relativepath(const std::string & path, const std::string & start)
 
   vecpath = split(path, "/");
   vecstart = split(realpath(start), "/");
+
+  mooseAssert(vecpath.back() != ".",
+              "We don't support passing in the current directory to the 'path' argument");
+  if (vecstart.back() == ".")
+    // Erase the current directory designation so that we have fair starting points for the two
+    // vectors
+    vecstart.pop_back();
+
   if (vecstart.size() < vecpath.size())
     index_size = vecstart.size();
   else
