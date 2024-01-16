@@ -82,7 +82,10 @@ public:
         }
       }
       if (ismatch)
+      {
+        mooseAssert(std::find(ids.begin(), ids.end(), i) == ids.end(), "Duplicate object");
         ids.push_back(i);
+      }
     }
     return ids;
   }
@@ -117,6 +120,9 @@ TheWarehouse::add(std::shared_ptr<MooseObject> obj)
   std::size_t obj_id = 0;
   {
     std::lock_guard<std::mutex> lock(_obj_mutex);
+
+    mooseAssert(!_obj_ids.count(obj.get()), obj->typeAndName() + " has already been added");
+
     _objects.push_back(obj);
     obj_id = _objects.size() - 1;
     _obj_ids[obj.get()] = obj_id;
@@ -191,7 +197,11 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 
   std::lock_guard<std::mutex> o_lock(_obj_mutex);
   for (auto & id : obj_ids)
+  {
+    mooseAssert(std::find(vec.begin(), vec.end(), _objects[id].get()) == vec.end(),
+                "Duplicate object");
     vec.push_back(_objects[id].get());
+  }
 
   if (sort && !vec.empty() && dynamic_cast<DependencyResolverInterface *>(vec[0]))
   {
