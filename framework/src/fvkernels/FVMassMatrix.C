@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVMass.h"
+#include "FVMassMatrix.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", FVMass);
+registerMooseObject("MooseApp", FVMassMatrix);
 
 InputParameters
-FVMass::validParams()
+FVMassMatrix::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
@@ -29,18 +29,18 @@ FVMass::validParams()
   return params;
 }
 
-FVMass::FVMass(const InputParameters & parameters)
+FVMassMatrix::FVMassMatrix(const InputParameters & parameters)
   : FVElementalKernel(parameters), _density(getFunctor<Real>("density"))
 {
 }
 
 void
-FVMass::computeResidual()
+FVMassMatrix::computeResidual()
 {
 }
 
 ADReal
-FVMass::computeQpResidual()
+FVMassMatrix::computeQpResidual()
 {
   const auto elem = makeElemArg(_current_elem);
   const auto state = determineState();

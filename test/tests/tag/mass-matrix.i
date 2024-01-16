@@ -26,7 +26,7 @@
     coeff = 1
   []
   [mass]
-    type = FVMass
+    type = FVMassMatrix
     variable = u
     matrix_tags = 'mass'
   []

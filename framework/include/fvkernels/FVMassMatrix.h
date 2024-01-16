@@ -15,12 +15,12 @@
  * Computes a 'mass matrix', which will just be a diagonal matrix for the finite volume method,
  * meant for use in preconditioning schemes which require one
  */
-class FVMass : public FVElementalKernel
+class FVMassMatrix : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
 
-  FVMass(const InputParameters & parameters);
+  FVMassMatrix(const InputParameters & parameters);
 
   virtual void computeResidual() override;
 
