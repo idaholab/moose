@@ -46,13 +46,24 @@ finite elements for velocity and pressure.'
     requirement = 'The system shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
   []
   [steady_lid_driven_fsp_low_Re]
-    type = 'Exodiff'
-    input = 'steady_fsp.i'
-    exodiff = 'fsp_steady_low_Re.e'
-    custom_cmp = 'fsp.cmp'
+    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of unity, and'
     issues = '#24548'
-    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of unity.'
-    cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_steady_low_Re"
+    [mass_matrix_scaling]
+      type = 'Exodiff'
+      input = 'steady_fsp.i'
+      exodiff = 'fsp_steady_low_Re.e'
+      custom_cmp = 'fsp.cmp'
+      cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_steady_low_Re"
+      detail = 'using the velocity mass matrix for scaling within the Least Squares Commutator preconditioner, or'
+    []
+    [a_digonal_scaling]
+      type = 'Exodiff'
+      input = 'steady_fsp_diagonal_of_a_for_scaling.i'
+      exodiff = 'steady_fsp_diagonal_of_a_for_scaling_exo.e'
+      custom_cmp = 'fsp.cmp'
+      cli_args = "n=8 mu=1"
+      detail = 'using the diagonal of the velocity-velocity block for scaling within the Least Squares Commutator preconditioner.'
+    []
   []
   [steady_lid_driven_fsp_high_Re]
     type = 'Exodiff'
