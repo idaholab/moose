@@ -3,6 +3,13 @@
   <UnstructuredGrid>
     <Piece NumberOfPoints="25" NumberOfCells="4">
       <PointData RationalWeights="RationalWeights">
+        <DataArray type="Int32" Name="libmesh_node_id" format="ascii" RangeMin="16" RangeMax="40">
+          16 17 18 19 20 21
+          22 23 24 25 26 27
+          28 29 30 31 32 33
+          34 35 36 37 38 39
+          40
+        </DataArray>
         <DataArray type="Float64" Name="RationalWeights" format="ascii" RangeMin="0.8535533905941428" RangeMax="1.000000000000019">
           1.000000000000002 0.8535533905941428 0.8535533905941497 1.000000000000005 0.8535533905941461 0.8535533905941527
           1.000000000000012 0.8535533905941521 0.8535533905941588 0.8535533905941567 1.000000000000002 0.8535533905941592
