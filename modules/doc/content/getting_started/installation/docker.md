@@ -41,7 +41,7 @@ docker volume create projects
 docker run -it -v projects:/projects idaholab/moose:latest
 cd /projects
 moose-opt --copy-inputs electromagnetics
-cd combined/electromagnetics
+cd moose/electromagnetics
 moose-opt --run -j 4
 ```
 
