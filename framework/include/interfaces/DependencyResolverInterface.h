@@ -107,7 +107,10 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
     }
 
   const auto & sorted = graph.dfs();
-  mooseAssert(sorted.size() == vector.size(), "Size mismatch");
+
+  // The set here gets unique objects, as it's valid to pass in duplicates
+  mooseAssert(sorted.size() == std::set<T>(vector.begin(), vector.end()).size(), "Size mismatch");
+
   vector = sorted;
 }
 
