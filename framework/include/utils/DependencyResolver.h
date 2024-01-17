@@ -156,6 +156,8 @@ protected:
   std::map<T, std::list<T>, Compare> _inv_adj;
   /// vector of visited nodes
   std::map<T, bool, Compare> _visited;
+  /// number of visited nodes; used to avoid iterating through _visited
+  std::size_t _num_visited = 0;
   /// recursive stack
   std::map<T, bool, Compare> _rec_stack;
   /// "sorted" vector of nodes
@@ -258,6 +260,7 @@ DependencyResolver<T, Compare>::dfs()
 {
   _sorted_vector.clear();
   _visited.clear();
+  _num_visited = 0;
   _rec_stack.clear();
   _circular_node = T{};
 
@@ -268,6 +271,7 @@ DependencyResolver<T, Compare>::dfs()
   }
 
   bool is_cyclic = false;
+
   // If there are no adjacencies, then all nodes are both roots and leaves
   bool roots_found = _adj.empty();
   for (auto & n : _insertion_order)
@@ -279,20 +283,23 @@ DependencyResolver<T, Compare>::dfs()
         break;
     }
 
-  // At this point, if we have any sub-graphs that are cyclic that do not have any
-  // roots _and_ we have found one more or more separate sub-graphs with a root,
-  // we will have never visited the afformentioned cyclic sub-graphs. Therefore,
-  // at this point if we haven't visited something it's a part of a cyclic sub-graph
-  for (const auto & [n, visited] : _visited)
-    if (!visited)
+  if (roots_found)
+  {
+    // At this point, if we have any sub-graphs that are cyclic that do not have any
+    // roots _and_ we have found one more or more separate sub-graphs with a root,
+    // we will have never visited the afformentioned cyclic sub-graphs. Therefore,
+    // at this point if we haven't visited something it's a part of a cyclic sub-graph
+    if (!is_cyclic && _num_visited != _insertion_order.size())
     {
-      is_cyclic = dfsFromNode(n);
-      mooseAssert(is_cyclic, "Must be cyclic");
-      break;
-    }
+      for (const auto & [n, visited] : _visited)
+        if (!visited && (is_cyclic = dfsFromNode(n)))
+          break;
 
+      mooseAssert(is_cyclic, "Should have found a cyclic dependency");
+    }
+  }
   // Didn't find any roots
-  if (!roots_found)
+  else
   {
     is_cyclic = true;
     // Create a cycle graph
@@ -304,7 +311,8 @@ DependencyResolver<T, Compare>::dfs()
   if (is_cyclic)
     throw CyclicDependencyException<T, Compare>("cyclic graph detected", *this);
 
-  mooseAssert(_sorted_vector.size() == _insertion_order.size(), "Unexpected size");
+  mooseAssert(_sorted_vector.size() == _insertion_order.size(), "Unexpected sorted size");
+  mooseAssert(_num_visited == _insertion_order.size(), "Did not visit all nodes");
 
   return _sorted_vector;
 }
@@ -421,7 +429,12 @@ bool
 DependencyResolver<T, Compare>::dfsFromNode(const T & root)
 {
   bool cyclic = false;
-  _visited[root] = true;
+  auto & visited = _visited.at(root);
+  if (!visited)
+  {
+    ++_num_visited;
+    visited = true;
+  }
   _rec_stack[root] = true;
 
   for (auto & i : _inv_adj[root])
