@@ -304,6 +304,8 @@ DependencyResolver<T, Compare>::dfs()
   if (is_cyclic)
     throw CyclicDependencyException<T, Compare>("cyclic graph detected", *this);
 
+  mooseAssert(_sorted_vector.size() == _insertion_order.size(), "Unexpected size");
+
   return _sorted_vector;
 }
 
