@@ -85,8 +85,6 @@ NEML2_SRC            := $(shell find $(NEML2_DIR)/src -name "*.cxx")
 NEML2_OBJ            := $(patsubst %.cxx,%.$(obj-suffix),$(NEML2_SRC))
 NEML2_LIB            := $(NEML2_DIR)/libNEML2-$(METHOD).la
 
-$(APPLICATION_DIR)/lib/libtensor_mechanics-$(METHOD).la: $(NEML2_LIB)
-
 $(NEML2_LIB): $(NEML2_OBJ)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
@@ -101,8 +99,6 @@ $(NEML2_DIR)/src/%.$(obj-suffix) : $(NEML2_DIR)/src/%.cxx
 ADDITIONAL_INCLUDES  += -iquote$(NEML2_INCLUDE)
 ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED -DDTYPE=Float64
 ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD)
-ifeq ($(compilertype),gcc)
-ADDITIONAL_LIBS      += -lstdc++fs
-endif
+ADDITIONAL_DEPEND_LIBS += $(NEML2_LIB)
 
 endif

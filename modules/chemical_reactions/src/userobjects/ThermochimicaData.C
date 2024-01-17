@@ -233,7 +233,8 @@ template <typename T>
 void
 ThermochimicaDataBase<is_nodal>::notify(T send_msg)
 {
-  write(_socket, &send_msg, sizeof(T));
+  if (write(_socket, &send_msg, sizeof(T)) != sizeof(T))
+    mooseError("Failed to notify thermochimica library child process.");
 }
 
 template <bool is_nodal>
