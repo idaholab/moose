@@ -22,6 +22,7 @@ make -j 4
 ./run_tests -j 4
 ```
 
+!alert note
 If you are building another image from this one, you may need to source the file at `/environment` first to obtain the proper environment.
 
 This image is versioned based on a script in the MOOSE repository that hashes it based on the state of the dependencies. To obtain the proper version of `moose-dev` to use given the current state of moose, you can run (within MOOSE):
@@ -45,4 +46,4 @@ cd moose/electromagnetics
 moose-opt --run -j 4
 ```
 
-This imaged is versioned based on the master hash of MOOSE that it was compiled with.
+This image is versioned based on the master hash of MOOSE that it was compiled with.
