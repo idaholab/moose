@@ -226,6 +226,7 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
           e, "Cyclic dependency detected in object ordering");
     }
 
+    mooseAssert(dependers.size() == vec.size(), "Dependency resolution size mismatch");
     for (unsigned int i = 0; i < dependers.size(); i++)
       vec[i] = dynamic_cast<MooseObject *>(dependers[i]);
   }
