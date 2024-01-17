@@ -287,7 +287,7 @@ DependencyResolver<T, Compare>::dfs()
   {
     // At this point, if we have any sub-graphs that are cyclic that do not have any
     // roots _and_ we have found one more or more separate sub-graphs with a root,
-    // we will have never visited the afformentioned cyclic sub-graphs. Therefore,
+    // we will have never visited the aforementioned cyclic sub-graphs. Therefore,
     // at this point if we haven't visited something it's a part of a cyclic sub-graph
     if (!is_cyclic && _num_visited != _insertion_order.size())
     {

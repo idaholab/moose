@@ -83,7 +83,7 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
   for (auto & v : vector)
   {
     // Whether or not this object supplies something, we will always
-    // add it as node because we want to make sure that it gets returned
+    // add it as a node because we want to make sure that it gets returned
     graph.addNode(v);
 
     for (const auto & supplied_item : v->getSuppliedItems())
