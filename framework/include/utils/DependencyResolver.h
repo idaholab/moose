@@ -429,7 +429,7 @@ bool
 DependencyResolver<T, Compare>::dfsFromNode(const T & root)
 {
   bool cyclic = false;
-  auto & visited = _visited.at(root);
+  auto & visited = libmesh_map_find(_visited, root);
   if (!visited)
   {
     ++_num_visited;
