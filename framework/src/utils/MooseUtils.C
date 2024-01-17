@@ -1255,44 +1255,6 @@ realpath(const std::string & path)
   return dummy;
 }
 
-std::string
-relativepath(const std::string & path, const std::string & start)
-{
-  std::vector<std::string> vecpath;
-  std::vector<std::string> vecstart;
-  size_t index_size;
-  unsigned int same_size(0);
-
-  vecpath = split(path, "/");
-  vecstart = split(realpath(start), "/");
-  if (vecstart.size() < vecpath.size())
-    index_size = vecstart.size();
-  else
-    index_size = vecpath.size();
-
-  for (unsigned int i = 0; i < index_size; ++i)
-  {
-    if (vecstart[i] != vecpath[i])
-    {
-      same_size = i;
-      break;
-    }
-  }
-
-  std::string relative_path("");
-  for (unsigned int i = 0; i < (vecstart.size() - same_size); ++i)
-    relative_path += "../";
-
-  for (unsigned int i = same_size; i < vecpath.size(); ++i)
-  {
-    relative_path += vecpath[i];
-    if (i < (vecpath.size() - 1))
-      relative_path += "/";
-  }
-
-  return relative_path;
-}
-
 BoundingBox
 buildBoundingBox(const Point & p1, const Point & p2)
 {
