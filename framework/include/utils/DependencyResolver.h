@@ -278,6 +278,20 @@ DependencyResolver<T, Compare>::dfs()
       if (is_cyclic)
         break;
     }
+
+  // At this point, if we have any sub-graphs that are cyclic that do not have any
+  // roots _and_ we have found one more or more separate sub-graphs with a root,
+  // we will have never visited the afformentioned cyclic sub-graphs. Therefore,
+  // at this point if we haven't visited something it's a part of a cyclic sub-graph
+  for (const auto & [n, visited] : _visited)
+    if (!visited)
+    {
+      is_cyclic = dfsFromNode(n);
+      mooseAssert(is_cyclic, "Must be cyclic");
+      break;
+    }
+
+  // Didn't find any roots
   if (!roots_found)
   {
     is_cyclic = true;
