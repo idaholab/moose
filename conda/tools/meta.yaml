@@ -25,9 +25,6 @@ requirements:
   build:
     - {{ moose_python }}
     - setuptools
-  host:
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a # [osx]
   run:
     - beautifulsoup4
     - {{ clang_format }}
@@ -59,8 +56,6 @@ requirements:
     - tabulate
     - xmltodict
     - yaml
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
 test:
   commands:
     - clang-format --version
