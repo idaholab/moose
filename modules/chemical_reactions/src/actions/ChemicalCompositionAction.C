@@ -225,7 +225,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
       species.clear();
       _tokenized_species.clear();
-      for (const auto i : index_range(db_phases))
+      for (const auto i : make_range(db_species.size()))
         for (const auto j : index_range(db_species[i]))
         {
           species.push_back(db_phases[i] + ":" + db_species[i][j]);
