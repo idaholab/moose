@@ -147,27 +147,22 @@ FileOutput::setFileBaseInternal(const std::string & file_base)
   }
 
   // Check the file directory of file_base and create if needed
-  // Check if _file_base is an absolute path
-  std::string base;
-  if (_file_base.find_first_of("/", 0) == 0)
-    base = "./" + MooseUtils::relativepath(_file_base);
-  else
-    base = "./" + _file_base;
-  base = base.substr(0, base.find_last_of('/'));
+  std::filesystem::path directory_base = _file_base;
+  directory_base.remove_filename();
+  if (directory_base.empty())
+    directory_base = ".";
+  // ensure relative path
+  directory_base = std::filesystem::relative(std::filesystem::absolute(directory_base));
 
-  if (_app.processor_id() == 0 && access(base.c_str(), W_OK) == -1)
+  std::filesystem::path possible_dir_to_make;
+  for (auto it = directory_base.begin(); it != directory_base.end(); ++it)
   {
-    // Directory does not exist. Loop through incremental directories and create as needed.
-    std::vector<std::string> path_names;
-    MooseUtils::tokenize(base, path_names);
-    std::string inc_path = path_names[0];
-    for (unsigned int i = 1; i < path_names.size(); ++i)
-    {
-      inc_path += '/' + path_names[i];
-      if (access(inc_path.c_str(), W_OK) == -1)
-        if (Utility::mkdir(inc_path.c_str()) == -1)
-          mooseError("Could not create directory: " + inc_path + " for file base: " + _file_base);
-    }
+    possible_dir_to_make = possible_dir_to_make / *it;
+    const auto dir_string = possible_dir_to_make.generic_string();
+    if (_app.processor_id() == 0 && access(dir_string.c_str(), F_OK) == -1)
+      // Directory does not exist. Create
+      if (Utility::mkdir(dir_string.c_str()) == -1)
+        mooseError("Could not create directory: " + dir_string + " for file base: " + _file_base);
   }
 }
 

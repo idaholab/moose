@@ -49,6 +49,37 @@ TEST_F(DependencyResolverTest, ptrTest)
   EXPECT_EQ(sorted[2], &mat3);
 }
 
+TEST_F(DependencyResolverTest, independentAndCyclicTest)
+{
+  DependencyResolver<int> resolver;
+
+  resolver.addItem(0);
+  resolver.addItem(1);
+  resolver.addItem(2);
+  resolver.addEdge(1, 2); // these add
+  resolver.addEdge(2, 1); // a cyclic dep
+
+  try
+  {
+    resolver.dfs();
+    FAIL() << "missing expected exception";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("cyclic graph") != std::string::npos);
+  }
+
+  // remove one of the deps, should work now
+  resolver.removeEdge(2, 1);
+  const auto & sorted = resolver.dfs();
+
+  EXPECT_EQ(sorted.size(), 3);
+  EXPECT_EQ(sorted[0], 0);
+  EXPECT_EQ(sorted[1], 1);
+  EXPECT_EQ(sorted[2], 2);
+}
+
 TEST_F(DependencyResolverTest, simpleTest)
 {
   DependencyResolver<int> resolver;

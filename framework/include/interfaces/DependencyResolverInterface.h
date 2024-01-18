@@ -82,35 +82,36 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
   std::multimap<std::string, T> suppliers_map;
   for (auto & v : vector)
   {
+    // Whether or not this object supplies something, we will always
+    // add it as a node because we want to make sure that it gets returned
+    graph.addNode(v);
+
     for (const auto & supplied_item : v->getSuppliedItems())
-    {
       suppliers_map.emplace(supplied_item, v);
-      graph.addNode(v);
-    }
   }
 
   // build the dependency graph
   for (auto & v : vector)
-  {
     for (const auto & requested_item : v->getRequestedItems())
     {
       const auto & [begin_it, end_it] = suppliers_map.equal_range(requested_item);
-      if (begin_it == end_it)
-        graph.addNode(v);
-      else
-        for (const auto & [supplier_name, supplier_object] : as_range(begin_it, end_it))
-        {
-          libmesh_ignore(supplier_name);
-          if (supplier_object == v)
-            // We allow an object to have a circular dependency within itself; e.g. we choose to
-            // trust a developer knows what they are doing within a single object
-            continue;
-          graph.addEdge(supplier_object, v);
-        }
-    }
-  }
+      for (const auto & [supplier_name, supplier_object] : as_range(begin_it, end_it))
+      {
+        libmesh_ignore(supplier_name);
 
-  vector = graph.dfs();
+        // We allow an object to have a circular dependency within itself; e.g. we choose to
+        // trust a developer knows what they are doing within a single object
+        if (supplier_object != v)
+          graph.addEdge(supplier_object, v);
+      }
+    }
+
+  const auto & sorted = graph.dfs();
+
+  // The set here gets unique objects, as it's valid to pass in duplicates
+  mooseAssert(sorted.size() == std::set<T>(vector.begin(), vector.end()).size(), "Size mismatch");
+
+  vector = sorted;
 }
 
 template <typename T, typename T2>

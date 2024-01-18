@@ -82,7 +82,10 @@ public:
         }
       }
       if (ismatch)
+      {
+        mooseAssert(std::find(ids.begin(), ids.end(), i) == ids.end(), "Duplicate object");
         ids.push_back(i);
+      }
     }
     return ids;
   }
@@ -117,6 +120,9 @@ TheWarehouse::add(std::shared_ptr<MooseObject> obj)
   std::size_t obj_id = 0;
   {
     std::lock_guard<std::mutex> lock(_obj_mutex);
+
+    mooseAssert(!_obj_ids.count(obj.get()), obj->typeAndName() + " has already been added");
+
     _objects.push_back(obj);
     obj_id = _objects.size() - 1;
     _obj_ids[obj.get()] = obj_id;
@@ -181,17 +187,20 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
     conds.push_back(std::move(sorted_attrib));
 
   std::lock_guard<std::mutex> lock(_obj_cache_mutex);
-  _obj_cache.push_back({});
-  auto query_id = _obj_cache.size() - 1;
-  auto & vec = _obj_cache.back();
+  auto & vec = _obj_cache.emplace_back(obj_ids.size());
+  const auto query_id = _obj_cache.size() - 1;
   {
     std::lock_guard<std::mutex> lock(_query_cache_mutex);
     _query_cache[std::move(conds)] = query_id;
   }
 
   std::lock_guard<std::mutex> o_lock(_obj_mutex);
-  for (auto & id : obj_ids)
-    vec.push_back(_objects[id].get());
+  for (const auto i : index_range(obj_ids))
+  {
+    auto obj = _objects[obj_ids[i]].get();
+    mooseAssert(std::find(vec.begin(), vec.end(), obj) == vec.end(), "Duplicate object");
+    vec[i] = obj;
+  }
 
   if (sort && !vec.empty() && dynamic_cast<DependencyResolverInterface *>(vec[0]))
   {
@@ -217,6 +226,7 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
           e, "Cyclic dependency detected in object ordering");
     }
 
+    mooseAssert(dependers.size() == vec.size(), "Dependency resolution size mismatch");
     for (unsigned int i = 0; i < dependers.size(); i++)
       vec[i] = dynamic_cast<MooseObject *>(dependers[i]);
   }
