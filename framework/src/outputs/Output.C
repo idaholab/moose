@@ -40,8 +40,11 @@ Output::validParams()
       "use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
   // Output intervals and timing
-  params.addParam<unsigned int>(
-      "time_step_interval", 1, "The interval (number of time steps) at which output occurs");
+  params.addParam<unsigned int>("time_step_interval",
+                                1,
+                                "The interval (number of time steps) at which output occurs. "
+                                "Unless explicitly set, the default value of this parameter is set "
+                                "to infinity if the wall_time_interval is explicitly set.");
   params.addDeprecatedParam<unsigned int>(
       "interval",
       "The interval (number of time steps) at which output occurs",
