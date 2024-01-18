@@ -8,6 +8,13 @@
     requirement = 'The system shall be able to simulate natural convection by adding the Boussinesq approximation to the incompressible Navier-Stokes equations.'
     valgrind = HEAVY
   []
+  [constants]
+    type = Exodiff
+    input = boussinesq_square_constant_names.i
+    exodiff = boussinesq_square_constant_names_out.e
+    requirement = 'The system shall support passing constants for material property names to a kernel which passes its parameters to a material.'
+    valgrind = HEAVY
+  []
   [threaded_exo]
     type = Exodiff
     input = boussinesq_square.i
