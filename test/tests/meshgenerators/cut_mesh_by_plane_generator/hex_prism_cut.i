@@ -16,7 +16,7 @@
                        10 13 15 18'
   []
   [cut]
-    type = XYZMeshPlaneCutter
+    type = CutMeshByPlaneGenerator
     input = extrude
     plane_point = '0 0 1.2'
     plane_normal = '1.0 1.0 2.0'

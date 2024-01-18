@@ -21,7 +21,7 @@
     block_id = 2
   []
   [cut]
-    type = XYZMeshPlaneCutter
+    type = CutMeshByPlaneGenerator
     input = block_2
     plane_point = '0.5 0.5 0.3'
     plane_normal = '1.0 0.9 0.8'

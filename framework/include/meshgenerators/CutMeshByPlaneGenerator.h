@@ -13,16 +13,16 @@
 #include "libmesh/face_tri3.h"
 
 /**
- * This XYZMeshPlaneCutter object is designed to trim the input mesh by removing all the elements on
- * one side of a given plane with special processing on the elements crossed by the cutting
- * line to ensure a smooth cross-section. The output mesh only consists of TET4 elements.
+ * This CutMeshByPlaneGenerator object is designed to trim the input mesh by removing all the
+ * elements on one side of a given plane with special processing on the elements crossed by the
+ * cutting line to ensure a smooth cross-section. The output mesh only consists of TET4 elements.
  */
-class XYZMeshPlaneCutter : public MeshGenerator
+class CutMeshByPlaneGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  XYZMeshPlaneCutter(const InputParameters & parameters);
+  CutMeshByPlaneGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
