@@ -10,6 +10,8 @@
       cli_args = '--mesh-only simple_hex_cut_in.e 
                   Mesh/gmg/elem_type=HEX8'
       allow_warnings = true
+      mesh_mode = 'REPLICATED'
+      recover = false
       detail ='cut a 3D mesh purely with HEX8 elements.'
     []
     [simple_prism_cut]
@@ -19,6 +21,8 @@
       cli_args = '--mesh-only simple_prism_cut_in.e 
                   Mesh/gmg/elem_type=PRISM6'
       allow_warnings = true
+      mesh_mode = 'REPLICATED'
+      recover = false
       detail ='cut a 3D mesh purely with PRISM6 elements.'
     []
     [simple_pyramid_cut]
@@ -28,6 +32,8 @@
       cli_args = '--mesh-only simple_pyramid_cut_in.e 
                   Mesh/gmg/elem_type=PYRAMID5'
       allow_warnings = true
+      mesh_mode = 'REPLICATED'
+      recover = false
       detail ='cut a 3D mesh purely with PYRAMID5 elements.'
     []
     [simple_tet_cut]
@@ -37,6 +43,8 @@
       cli_args = '--mesh-only simple_tet_cut_in.e 
                   Mesh/gmg/elem_type=TET4'
       allow_warnings = true
+      mesh_mode = 'REPLICATED'
+      recover = false
       detail ='cut a 3D mesh purely with TET4 elements.'
     []
     [hex_prism_cut]
@@ -45,6 +53,8 @@
       exodiff = 'hex_prism_cut_in.e'
       cli_args = '--mesh-only'
       allow_warnings = true
+      mesh_mode = 'REPLICATED'
+      recover = false
       detail ='cut a 3D mesh with mixed type of elements.'
     []
   []
@@ -58,6 +68,7 @@
                   Mesh/gmg/elem_type=HEX8 
                   Mesh/parallel_type=distributed'
       expect_err = 'Input is not a replicated mesh'
+      mesh_mode = 'REPLICATED'
       detail = 'if the input mesh is not a replicated mesh.'
     []
     [err_non_3d]
@@ -67,6 +78,7 @@
                   Mesh/final_generator=cut
                   Mesh/cut/input=accg'
       expect_err = 'Only 3D meshes are supported'
+      mesh_mode = 'REPLICATED'
       detail = 'if the input mesh is not a 3D mesh.'
     []
     [err_high_order]
@@ -75,6 +87,7 @@
       cli_args = '--mesh-only simple_cut_err.e
                   Mesh/gmg/elem_type=HEX20'
       expect_err = 'Only first order elements are supported for cutting'
+      mesh_mode = 'REPLICATED'
       detail = 'if the input mesh contains high-order elements.'
     []
   []
