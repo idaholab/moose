@@ -113,32 +113,30 @@ public:
 
   void addGeometricCut(GeometricCutUserObject * geometric_cut);
 
+  // BWS TODO check if this is only applicable to the branching code
   /**
-   * Mark a new element for cutting based on the physical state of the model, cracks only propagate
-   * from existing intersections
-   * @param elem_id   The id of the element to be cut
-   * @param normal A vector of normal Vectors containing the direction normal to cut for each cut
+   * Mark a new element for cutting based on the physical state of the model
+   * @param elem_id ID of the element to be cut
+   * @param normals Vector containing the direction normal vector for each cut
    */
-  void addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & normal);
+  void addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & normals);
 
   /**
-   * Mark a new element for cutting based on the physical state of the model, cracks only propagate
-   * from existing intersections
-   * @param elem_id   The id of the element to be cut
-   * @param normal A vector of normal Vectors containing the direction normal to cut for each cut
-   * @param marked_side id of element side that is cut
+   * Mark a new element for cutting based on the physical state of the model
+   * @param elem_id     ID of the element to be cut
+   * @param normals     Vector containing the direction normal vector for each cut
+   * @param marked_side ID of element side that is cut
    */
   void addStateMarkedElem(unsigned int elem_id,
-                          std::vector<RealVectorValue> & normal,
+                          std::vector<RealVectorValue> & normals,
                           unsigned int marked_side);
 
   /**
-   * Mark a new fragment for cutting based on the physical state of the model, cracks only propagate
-   * from existing intersections
-   * @param elem_id   The id of the element to be cut
-   * @param normal A vector of normal Vectors containing the direction normal to cut for each cut
+   * Mark a new fragment for cutting based on the physical state of the model
+   * @param elem_id ID of the element to be cut
+   * @param normals Vector containing the direction normal vector for each cut
    */
-  void addStateMarkedFrag(unsigned int elem_id, std::vector<RealVectorValue> & normal);
+  void addStateMarkedFrag(unsigned int elem_id, std::vector<RealVectorValue> & normals);
 
   void clearStateMarkedElems();
 
@@ -359,8 +357,16 @@ private:
 
   // std::map<const Elem*, Point> _crack_propagation_direction_map;
 
+  /// Elements marked for cutting based on solution state. Stored as a map
+  /// of Elem * to vectors of normal vectors for the cuts made to them.
   std::map<const Elem *, std::vector<RealVectorValue>> _state_marked_elems;
+
   std::set<const Elem *> _state_marked_frags;
+
+  // TODO BWS -- should it be a vector of sides?
+  // Sides of elements marked for cutting based on solution state for whic cracks
+  // are designated to initiate at a specific side.
+  // Stored as a map of Elem * to side indices
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 
   /// Data structure for storing information about all 2D elements to be cut by geometry

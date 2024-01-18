@@ -38,7 +38,7 @@ protected:
    * @param direction Normal direction of crack if it is cracked
    * @return bool true if element cracks
    */
-  virtual bool doesElementCrack(RealVectorValue & direction);
+  virtual bool doesElementCrack(RealVectorValue & direction) = 0;
 
 private:
   MooseMesh & _mesh;

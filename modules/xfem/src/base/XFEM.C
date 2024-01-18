@@ -108,27 +108,27 @@ XFEM::getCrackTipOrigin(std::map<unsigned int, const Elem *> & elem_id_crack_tip
 }
 
 void
-XFEM::addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & normal)
+XFEM::addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & normals)
 {
   Elem * elem = _mesh->elem_ptr(elem_id);
   std::map<const Elem *, RealVectorValue>::iterator mit;
-  _state_marked_elems[elem] = normal;
+  _state_marked_elems[elem] = normals;
 }
 
 void
 XFEM::addStateMarkedElem(unsigned int elem_id,
-                         std::vector<RealVectorValue> & normal,
+                         std::vector<RealVectorValue> & normals,
                          unsigned int marked_side)
 {
-  addStateMarkedElem(elem_id, normal);
+  addStateMarkedElem(elem_id, normals);
   Elem * elem = _mesh->elem_ptr(elem_id);
   _state_marked_elem_sides[elem] = marked_side;
 }
 
 void
-XFEM::addStateMarkedFrag(unsigned int elem_id, std::vector<RealVectorValue> & normal)
+XFEM::addStateMarkedFrag(unsigned int elem_id, std::vector<RealVectorValue> & normals)
 {
-  addStateMarkedElem(elem_id, normal);
+  addStateMarkedElem(elem_id, normals);
   Elem * elem = _mesh->elem_ptr(elem_id);
   _state_marked_frags.insert(elem);
 }

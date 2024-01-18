@@ -17,7 +17,6 @@
 #include "EFAFaceNode.h"
 #include "EFAFuncs.h"
 #include "EFAError.h"
-#include "XFEMFuncs.h"
 
 #include <iostream>
 
@@ -220,6 +219,7 @@ EFAFragment2D::combineTipEdges()
     EFAEdge * full_edge = new EFAEdge(node1, node2);
     full_edge->addIntersection(position, emb_node, node1);
     _host_elem->addNodeToCutPlaneIdx(emb_node, _host_elem->getCurrentCutPlaneIdx());
+    // BWS TODO Delete this comment or make it more clear
     // TODO::add cut plane id here for combineTipEdges
 
     // combine the two original fragment edges
@@ -343,6 +343,7 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
                      std::vector<unsigned int> frag_cut_plane_idx,
                      std::vector<std::vector<EFANode *>> frag_cut_plane_nodes)
 {
+  // BWS TODO Move comments like this to .h file
   // For 2D only not working in 3D
   // This method will split one existing fragment into multiple
   // new fragments and return them.
@@ -431,24 +432,24 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
         if (_boundary_edges[iedge]->numEmbeddedNodes() > 1)
         {
           std::vector<double> node0Position = {};
-          _host_elem->getNodeParametricCoordinate(_boundary_edges[iedge]->getNode(0),
-                                                  node0Position);
+          _host_elem->getNodeParametricCoordinates(_boundary_edges[iedge]->getNode(0),
+                                                   node0Position);
           for (unsigned int iembeddedNode = 1;
                iembeddedNode < _boundary_edges[iedge]->numEmbeddedNodes();
                ++iembeddedNode)
           {
             std::vector<double> iNodePosition = {};
-            _host_elem->getNodeParametricCoordinate(
+            _host_elem->getNodeParametricCoordinates(
                 _boundary_edges[iedge]->getEmbeddedNode(iembeddedNode), iNodePosition);
             for (unsigned int position = 0; position < orderedEmbeddedNodes.size(); ++position)
             {
               // insert edge nodes based on distance from edge node [0] so it
               // is easy to add them correctly to each fragment
               std::vector<double> current_node_pos;
-              _host_elem->getNodeParametricCoordinate(orderedEmbeddedNodes[iembeddedNode],
-                                                      current_node_pos);
-              if (distanceBetweenPoints(iNodePosition, node0Position) <
-                  distanceBetweenPoints(current_node_pos, node0Position))
+              _host_elem->getNodeParametricCoordinates(orderedEmbeddedNodes[iembeddedNode],
+                                                       current_node_pos);
+              if (Efa::distanceBetweenPoints2D(iNodePosition, node0Position) <
+                  Efa::distanceBetweenPoints2D(current_node_pos, node0Position))
               {
                 orderedEmbeddedNodes.insert(orderedEmbeddedNodes.begin() + position,
                                             _boundary_edges[iedge]->getEmbeddedNode(iembeddedNode));
@@ -512,8 +513,8 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
       if (cut_plane_node_pairs[ipair].size() == 2)
         other_pairs = true;
 
-    // add secondary interior embedded nodes here with intersectsegmentwithcutline function against
-    // the chosen cut plane first get chosen cut node locations
+    // add secondary interior embedded nodes here at the intersection point of the two
+    // cut lines
     if (chosen_cut_plane_pair.size() == 2 &&
         other_pairs) // if the chosen cut plane id is only one node don't check for interior
                      // intersections
@@ -522,7 +523,7 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
       for (unsigned int node = 0; node < chosen_cut_plane_pair.size();
            ++node) // set chosen cutting pair coordinates
       {
-        if (_host_elem->getNodeParametricCoordinate(chosen_cut_plane_pair[node], para_point_coor))
+        if (_host_elem->getNodeParametricCoordinates(chosen_cut_plane_pair[node], para_point_coor))
         {
           chosen_cut_plane_pair_points.push_back(para_point_coor);
         }
@@ -536,9 +537,10 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
         if (cut_plane_node_pairs[pair].size() == 2)
           for (unsigned int node = 0; node < 2; ++node) // for each node in the pair
           {
+            // BWS TODO get rid of the 999s
             para_point_coor = {-999, -999};
-            if (_host_elem->getNodeParametricCoordinate(cut_plane_node_pairs[pair][node],
-                                                        para_point_coor))
+            if (_host_elem->getNodeParametricCoordinates(cut_plane_node_pairs[pair][node],
+                                                         para_point_coor))
             {
               cut_plane_node_pair_points[pair].push_back(para_point_coor);
             }
@@ -553,11 +555,11 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
         // see if current node pair intersect the chosen cut plane node pair
         intersection_point = {-999, -999};
         if (cut_plane_node_pair_points[id].size() == 2)
-          if (IntersectSegmentWithCutLine(cut_plane_node_pair_points[id][0],
-                                          cut_plane_node_pair_points[id][1],
-                                          chosen_cut_plane_pair_points[0],
-                                          chosen_cut_plane_pair_points[1],
-                                          intersection_point))
+          if (Efa::IntersectionPointTwoLineSegments2D(cut_plane_node_pair_points[id][0],
+                                                      cut_plane_node_pair_points[id][1],
+                                                      chosen_cut_plane_pair_points[0],
+                                                      chosen_cut_plane_pair_points[1],
+                                                      intersection_point))
           {
             unsigned int new_node_id = Efa::getNewID(EmbeddedNodes);
             EFANode * embedded_node = new EFANode(new_node_id, EFANode::N_CATEGORY_EMBEDDED);
@@ -599,8 +601,9 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
                 std::vector<double> current_node_pos = {
                     allIntersectionFaceNodes[position]->getParametricCoordinates(0),
                     allIntersectionFaceNodes[position]->getParametricCoordinates(1)};
-                if (distanceBetweenPoints(intersection_point, chosen_cut_plane_pair_points[0]) <
-                    distanceBetweenPoints(current_node_pos, chosen_cut_plane_pair_points[0]))
+                if (Efa::distanceBetweenPoints2D(intersection_point,
+                                                 chosen_cut_plane_pair_points[0]) <
+                    Efa::distanceBetweenPoints2D(current_node_pos, chosen_cut_plane_pair_points[0]))
                 {
                   allIntersectionFaceNodes.insert(allIntersectionFaceNodes.begin() + position,
                                                   intersectionFaceNode);
@@ -700,86 +703,6 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
   }
 
   return final_fragments;
-}
-
-bool
-EFAFragment2D::IntersectSegmentWithCutLine(const std::vector<double> & segment_point1,
-                                           const std::vector<double> & segment_point2,
-                                           const std::vector<double> & cutting_line_point1,
-                                           const std::vector<double> & cutting_line_point2,
-                                           std::vector<double> & intersect_Point)
-{
-  // Use the algorithm described here to determine whether a line segment is intersected
-  // by a cutting line, and to compute the fraction along that line where the intersection
-  // occurs:
-  // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
-  // additionally modified for the specific use here
-  intersect_Point.resize(2, 0.0);
-  bool cut_segment = false;
-  std::vector<double> seg_dir = {0, 0};
-  seg_dir[0] = segment_point2[0] - segment_point1[0];
-  seg_dir[1] = segment_point2[1] - segment_point1[1];
-  std::vector<double> cut_dir = {0, 0};
-  cut_dir[0] = cutting_line_point2[0] - cutting_line_point1[0];
-  cut_dir[1] = cutting_line_point2[1] - cutting_line_point1[1];
-  std::vector<double> cut_start_to_seg_start = {0, 0};
-  cut_start_to_seg_start[0] = segment_point1[0] - cutting_line_point1[0];
-  cut_start_to_seg_start[1] = segment_point1[1] - cutting_line_point1[1];
-
-  double cut_dir_cross_seg_dir = crossProduct2D(cut_dir, seg_dir);
-
-  if (std::abs(cut_dir_cross_seg_dir) > Xfem::tol)
-  {
-    // Fraction of the distance along the cutting segment where it intersects the edge segment
-    double cut_int_frac = crossProduct2D(cut_start_to_seg_start, seg_dir) / cut_dir_cross_seg_dir;
-
-    if (cut_int_frac >= 0.0 && cut_int_frac <= 1)
-    { // Cutting segment intersects the line of the edge segment, but the intersection point may
-      // be
-      // outside the segment
-      double int_frac = crossProduct2D(cut_start_to_seg_start, cut_dir) / cut_dir_cross_seg_dir;
-      if (int_frac >= 0.0 &&
-          int_frac <= 1.0) // TODO: revisit end cases for intersections with corners
-      {
-        cut_segment = true;
-      }
-    }
-  }
-
-  if (cut_segment)
-  {
-    // line of segment_point1/segment_point2 is a1x + b1x = c1
-    double a = segment_point2[1] - segment_point1[1];
-    double b = segment_point1[0] - segment_point2[0];
-    double c = a * (segment_point1[0]) + b * (segment_point1[1]);
-    // line of cutting_line_points as a2x + b2y = c2
-    double a1 = cutting_line_point2[1] - cutting_line_point1[1];
-    double b1 = cutting_line_point1[0] - cutting_line_point2[0];
-    double c1 = a1 * (cutting_line_point1[0]) + b1 * (cutting_line_point1[1]);
-    double det = a * b1 - a1 * b;
-    if (det == 0)
-      cut_segment = false;
-    else
-    {
-      intersect_Point[0] = (b1 * c - b * c1) / det;
-      intersect_Point[1] = (a * c1 - a1 * c) / det;
-    }
-  }
-  return cut_segment;
-}
-
-double
-EFAFragment2D::crossProduct2D(const std::vector<double> & point_a,
-                              const std::vector<double> & point_b) const
-{
-  return (point_a[0] * point_b[1] - point_b[0] * point_a[1]);
-}
-
-double
-EFAFragment2D::distanceBetweenPoints(const std::vector<double> & point_a,
-                                     const std::vector<double> & point_b) const
-{
-  return std::sqrt(std::pow(point_b[0] - point_a[0], 2) + std::pow(point_b[1] - point_a[1], 2));
 }
 
 std::vector<EFAFragment2D *>
@@ -894,13 +817,13 @@ EFAFragment2D::branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes)
   if (three_nodes.size() != 3)
     EFAError("three_nodes.size() != 3, size is ", three_nodes.size());
 
-  // get the parent coords of the braycenter of the three nodes
+  // get the parent coords of the barycenter of the three nodes
   // TODO: may need a better way to compute this "branching point"
   std::vector<double> center_xi(2, 0.0);
   for (unsigned int i = 0; i < 3; ++i)
   {
     std::vector<double> xi_2d(2, 0.0);
-    _host_elem->getEdgeNodeParametricCoordinate(three_nodes[i], xi_2d);
+    _host_elem->getEdgeNodeParametricCoordinates(three_nodes[i], xi_2d);
     center_xi[0] += xi_2d[0];
     center_xi[1] += xi_2d[1];
   }

@@ -2237,6 +2237,7 @@ EFAElement3D::getCommonNodes(const EFAElement3D * other_elem) const
   return common_nodes;
 }
 
+// BWS TODO: I think we should just get rid of this
 unsigned int
 EFAElement3D::getNewCutPlaneIdx()
 {
