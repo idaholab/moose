@@ -470,7 +470,7 @@ protected:
    * This method was required to avoid a compiler problem with the template
    * getMaterialProperty method
    */
-  void checkMaterialProperty(const std::string & name, const unsigned int state);
+  virtual void checkMaterialProperty(const std::string & name, const unsigned int state);
 
   /**
    * A proxy method for _mi_feproblem.markMatPropRequested(name)

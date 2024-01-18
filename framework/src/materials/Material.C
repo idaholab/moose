@@ -174,3 +174,11 @@ Material::resolveOptionalProperties()
   for (auto & proxy : _optional_property_proxies)
     proxy->resolve(*this);
 }
+
+void
+Material::checkMaterialProperty(const std::string & name, const unsigned int state)
+{
+  // Avoid performing duplicate checks for triple block/face/neighbor materials
+  if (boundaryRestricted() || !_bnd)
+    MaterialPropertyInterface::checkMaterialProperty(name, state);
+}
