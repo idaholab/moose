@@ -522,6 +522,28 @@ public:
   bool halfTransient() const { return _half_transient; }
 
   /**
+   *  Set the passed variable's value to that of the named command line parameter (if valid)
+   *
+   * @param variable_to_set The variable whose value is to be modified
+   * @param cli_param_name The name of the command line parameter used to set variable_to_set
+   *
+   * @return variable_value_changed Whether the passed variable was changed (whether cli_param_name is valid)
+   */
+  template <typename T>
+  bool setVariableToCommandLineParam(T& variable_to_set, const std::string& cli_param_name) const
+  {
+    bool variable_value_changed = false;
+
+    if (isParamValid(cli_param_name))
+    {
+      variable_to_set = getParam<T>(cli_param_name);
+      variable_value_changed = true;
+    }
+
+    return variable_value_changed;
+  }
+
+  /**
    * Store a map of outputter names and file numbers
    * The MultiApp system requires this to get the file numbering to propagate down through the
    * Multiapps.

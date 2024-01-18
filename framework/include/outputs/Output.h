@@ -167,6 +167,13 @@ protected:
    */
   virtual bool onInterval();
 
+  /**
+   * Function to set the wall time interval based on value of command line parameter.
+   * @param cli_param_name The name of the command line parameter to set the wall time interval to
+   *
+   */
+  void setWallTimeIntervalFromCommandLineParam();
+
   /// Pointer the the FEProblemBase object for output object (use this)
   FEProblemBase * _problem_ptr;
 
@@ -214,8 +221,11 @@ protected:
   /// The number of outputs written
   unsigned int _num;
 
+  /// Whether time step interval is set by AddParam
+  const bool _time_step_interval_set_by_addparam;
+
   /// The output time step interval
-  const unsigned int _time_step_interval;
+  unsigned int _time_step_interval;
 
   /// Minimum simulation time between outputs
   const Real _min_simulation_time_interval;
@@ -224,7 +234,7 @@ protected:
   const Real _simulation_time_interval;
 
   /// Target wall time between outputs in seconds
-  const Real _wall_time_interval;
+  Real _wall_time_interval;
 
   /// Sync times for this outputter
   std::set<Real> _sync_times;

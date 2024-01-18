@@ -129,10 +129,11 @@ Output::Output(const InputParameters & parameters)
     _dt(_problem_ptr->dt()),
     _dt_old(_problem_ptr->dtOld()),
     _num(0),
+    _time_step_interval_set_by_addparam(parameters.isParamSetByAddParam("time_step_interval")),
     // If wall_time_interval is user-specified and time_step_interval is not,
     // override default value of time_step_interval so output does not occur
     // after every time step.
-    _time_step_interval((parameters.isParamSetByUser("wall_time_interval") && parameters.isParamSetByAddParam("time_step_interval")) ? std::numeric_limits<unsigned int>::max() : getParam<unsigned int>("time_step_interval")),
+    _time_step_interval((parameters.isParamSetByUser("wall_time_interval") && _time_step_interval_set_by_addparam) ? std::numeric_limits<unsigned int>::max() : getParam<unsigned int>("time_step_interval")),
     _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
     _simulation_time_interval(getParam<Real>("simulation_time_interval")),
     _wall_time_interval(getParam<Real>("wall_time_interval")),
@@ -311,6 +312,18 @@ Output::onInterval()
 
   // Return the output status
   return output;
+}
+
+void Output::setWallTimeIntervalFromCommandLineParam()
+{
+  // Below function returns true if --output-wall-time-interval value was provided on command line
+  const bool set_by_user = _app.setVariableToCommandLineParam<Real>(_wall_time_interval, "output_wall_time_interval");
+
+  // If default value of _wall_time_interval was just overriden and user did not
+  // explicitly specify _time_step_interval, override default value of
+  // _time_step_interval so output does not occur after every time step
+  if (set_by_user && _time_step_interval_set_by_addparam)
+    _time_step_interval = std::numeric_limits<unsigned int>::max();
 }
 
 Real

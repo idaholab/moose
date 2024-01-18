@@ -100,6 +100,13 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
                "INITIAL, TIMESTEP_END, and FINAL, not '",
                execute_on,
                "'.");
+
+  // The following updates the value of _wall_time_interval if the
+  // '--output-wall-time-interval' command line parameter is used.
+  // If it is not used, _wall_time_interval keeps its current value.
+  // 'The --output-wall-time-interval parameter is necessary for testing
+  // and should only be used in the test suite.
+  Output::setWallTimeIntervalFromCommandLineParam();
 }
 
 std::string

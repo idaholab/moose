@@ -1,5 +1,4 @@
 [Tests]
-  issues = '#1927'
   design = 'outputs/Checkpoint.md'
 
   [interval]
@@ -67,6 +66,7 @@
     requirement = "The system shall support outputting of checkpoint files, using a simplified input "
                   "format:"
     [recover_half_transient]
+      issues = '#1927'
       type = CheckFiles
       input = checkpoint.i
       cli_args = 'Outputs/checkpoint=true --half-transient'
@@ -105,6 +105,7 @@
     []
     [recover]
       # Gold for this test was created using checkpoint.i without any recover options
+      issues = '#1927'
       type = Exodiff
       input = checkpoint.i
       exodiff = checkpoint_out.e
@@ -117,6 +118,33 @@
       expect_out = 'checkpoint_out_cp/0005 for recovery'
       detail = "be capable of restarting a simulation from the output data."
     []
+
+    [wall_time_interval]
+      type = RunApp
+      input = checkpoint.i
+      recover = false
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --output-wall-time-interval 0.02'
+      detail = "at specified wall time intervals"
+    []
+    [wall_time_interval_recover]
+      type = Exodiff
+      input = checkpoint.i
+      exodiff = checkpoint_wall_time_interval_out.e
+      recover = false
+      prereq = 'default/wall_time_interval'
+      delete_output_before_running = false
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --recover'
+      expect_out = 'Using checkpoint_wall_time_interval_out_cp/\d+ for recovery'
+      detail = "be capable of restarting a simulation from the wall time checkpoint."
+    []
+
+    [output_wall_time_interval_error]
+      type = 'RunException'
+      input = 'checkpoint.i'
+      cli_args = '--output-wall-time-interval -1'
+      expect_err = 'output-wall-time-interval must be greater than zero.'
+      detail = ', catching invalid values of output-wall-time-interval.'
+    []
   []
 
   [block]
@@ -124,6 +152,7 @@
                   "block:"
     [recover_with_checkpoint_block_half_transient]
       # Tests that recover works when defining as a Output sub-block
+      issues = '#1927'
       type = CheckFiles
       input = checkpoint_block.i
       cli_args = '--half-transient'
@@ -161,6 +190,7 @@
     []
     [recover_with_checkpoint_block]
       # Gold for this test was created using checkpoint_block.i without any recover options
+      issues = '#1927'
       type = Exodiff
       input = checkpoint_block.i
       exodiff = checkpoint_block_out.e
@@ -173,13 +203,40 @@
       expect_out = 'checkpoint_block_out_cp/0005 for recovery'
       detail = "be capable of restarting a simulation from the output data."
     []
+
+    [wall_time_interval]
+      type = RunApp
+      input = checkpoint_block.i
+      recover = false
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --output-wall-time-interval 0.02'
+      detail = "at specified wall time intervals"
+    []
+    [wall_time_interval_recover]
+      type = Exodiff
+      input = checkpoint_block.i
+      exodiff = checkpoint_block_wall_time_interval_out.e
+      recover = false
+      prereq = 'block/wall_time_interval'
+      delete_output_before_running = false
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --recover'
+      expect_out = 'Using checkpoint_block_wall_time_interval_out_cp/\d+ for recovery'
+      detail = "be capable of restarting a simulation from the wall time checkpoint."
+    []
+
     [execute_on_param_error]
       type = 'RunException'
       input = 'checkpoint_block.i'
       cli_args = 'Outputs/out/execute_on=TIMESTEP_BEGIN'
       expect_err = 'The checkpoint system may only be used with execute_on values INITIAL, TIMESTEP_END, and FINAL'
-      detail = 'invalid value of execute_on'
-      mesh_mode = 'REPLICATED'
+      detail = 'catching invalid values of execute_on'
     []
+  []
+  [multiple_checkpoints_error]
+    issues = '#13562'
+    requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined'
+    type = 'RunException'
+    input = 'checkpoint_block.i'
+    cli_args = 'Outputs/checkpoint=true'
+    expect_err = 'Multiple checkpoints are not allowed.'
   []
 []

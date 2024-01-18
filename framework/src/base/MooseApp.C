@@ -238,6 +238,14 @@ MooseApp::validParams()
                                    "timesteps).  This is useful for testing "
                                    "recovery and restart");
 
+  params.addCommandLineParam<Real>("output_wall_time_interval",
+                                   "--output-wall-time-interval [interval]",
+                                   "The target wall time interval (in seconds) at "
+                                   "which to write to output. "
+                                   "USE FOR TEST SUITE PROBLEMS ONLY, FOR ALL OTHER USES "
+                                   "SEE THE wall_time_interval IN DERIVED Output OBJECTS."
+                                   );
+
   // No default on these two options, they must not both be valid
   params.addCommandLineParam<bool>(
       "trap_fpe",
@@ -692,6 +700,13 @@ MooseApp::setupOptions()
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
   _half_transient = getParam<bool>("half_transient");
+
+  if (isParamValid("output_wall_time_interval"))
+  {
+    const auto output_wall_time_interval = getParam<Real>("output_wall_time_interval");
+    if (output_wall_time_interval <= 0)
+      mooseError("output-wall-time-interval must be greater than zero.");
+  }
 
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
