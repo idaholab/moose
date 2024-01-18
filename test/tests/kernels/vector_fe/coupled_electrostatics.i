@@ -86,11 +86,18 @@ k = asin(1)
 []
 
 [BCs]
-  [sides]
+  active = weak
+  [weak]
     type = VectorDivPenaltyDirichletBC
     variable = u
     function = f
     penalty = 1e8
+    boundary = 'top bottom left right front back'
+  []
+  [strong]
+    type = VectorDivDirichletBC
+    variable = u
+    function = f
     boundary = 'top bottom left right front back'
   []
 []
