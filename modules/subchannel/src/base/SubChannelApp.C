@@ -70,6 +70,7 @@ void
 SubChannelApp::registerApps()
 {
   registerApp(SubChannelApp);
+  ModulesApp::registerApps();
 #ifdef BISON_ENABLED
   BisonApp::registerApps();
 #endif
