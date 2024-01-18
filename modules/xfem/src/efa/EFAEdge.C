@@ -409,6 +409,7 @@ EFAEdge::removeEmbeddedNode(EFANode * node)
   }
 }
 
+// BWS TODO Delete this?
 bool
 EFAEdge::hasNode(EFANode * node)
 {

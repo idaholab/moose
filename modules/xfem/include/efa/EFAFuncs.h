@@ -16,6 +16,7 @@
 
 namespace Efa
 {
+static const double tol = 1.0e-10;
 
 template <typename T>
 bool
@@ -81,5 +82,38 @@ double linearTriShape2D(unsigned int node_id, std::vector<double> & xi_2d);
 double linearHexShape3D(unsigned int node_id, std::vector<double> & xi_3d);
 
 double linearTetShape3D(unsigned int node_id, std::vector<double> & xi_3d);
+
+/**
+ * Determine the intersection point between two 2D line segments specified
+ * by the coordinates of their end points.
+ * @param segment1_point1 coordinates of point 1 of line segment 1
+ * @param segment1_point2 coordinates of point 2 of line segment 1
+ * @param segment2_point1 coordinates of point 1 of line segment 2
+ * @param segment2_point2 coordinates of point 2 of line segment 2
+ * @param intersect_point computed coordinates of intersection point if it exists
+ * @return bool indicating if line segments intersect
+ */
+bool IntersectionPointTwoLineSegments2D(const std::vector<double> & segment1_point1,
+                                        const std::vector<double> & segment1_point2,
+                                        const std::vector<double> & segment2_point1,
+                                        const std::vector<double> & segment2_point2,
+                                        std::vector<double> & intersect_point);
+
+/**
+ * Determine the cross product of two 2D vectors
+ * @param two length vector with coordinates of point a
+ * @param two length vector with coordinates of point b
+ * @return double of cross product
+ */
+double crossProduct2D(const std::vector<double> & point_a, const std::vector<double> & point_b);
+
+/**
+ * Determine the distance between two points
+ * @param two length vector with coordinates of point a
+ * @param two length vector with coordinates of point b
+ * @return double of distance between points a and b
+ */
+double distanceBetweenPoints2D(const std::vector<double> & point_a,
+                               const std::vector<double> & point_b);
 
 } // namespace Efa

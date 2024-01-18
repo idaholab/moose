@@ -574,17 +574,19 @@ EFAElement2D::initCrackTip(std::set<EFAElement *> & CrackTipElements)
             _edge_neighbors[edge_iter][1]->overlaysElement(this))
           EFAError("Element has a neighbor that overlays itself");
 
-        // Make sure the current elment hasn't been flagged as a tip element, commented out to allow
-        // branching from a single element
-        //        if (_crack_tip_split_element)
-        //          EFAError("crack_tip_split_element already flagged.  In elem: ",
-        //                   _id,
-        //                   " flags: ",
-        //                   _crack_tip_split_element,
-        //                   " ",
-        //                   _edge_neighbors[edge_iter][0]->isCrackTipSplit(),
-        //                   " ",
-        //                   _edge_neighbors[edge_iter][1]->isCrackTipSplit());
+        // Make sure the current elment hasn't been flagged as a tip element
+        // BWS TODO this error needs to be commented out for branching
+        // from a single element to work
+        // Commented out to allow branching from a single element
+        // if (_crack_tip_split_element)
+        //  EFAError("crack_tip_split_element already flagged.  In elem: ",
+        //           _id,
+        //           " flags: ",
+        //           _crack_tip_split_element,
+        //           " ",
+        //           _edge_neighbors[edge_iter][0]->isCrackTipSplit(),
+        //           " ",
+        //           _edge_neighbors[edge_iter][1]->isCrackTipSplit());
 
         _edge_neighbors[edge_iter][0]->setCrackTipSplit();
         _edge_neighbors[edge_iter][1]->setCrackTipSplit();
@@ -954,6 +956,7 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
                " should be equal to n_old_frag_edges+1 which is ",
                n_old_frag_edges + 1);
   }
+  // BWS TODO: Do we really want to comment out these checks?
   //  else if (n_old_frag_cuts == 2)
   //  {
   //    if (_fragments.size() != 2 ||
@@ -1432,9 +1435,9 @@ EFAElement2D::getEdgeNodes(unsigned int edge_id) const
 }
 
 bool
-EFAElement2D::getEdgeNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const
+EFAElement2D::getEdgeNodeParametricCoordinates(EFANode * node,
+                                               std::vector<double> & para_coor) const
 {
-  // get the parametric coords of a node in an element edge
   unsigned int edge_id = std::numeric_limits<unsigned int>::max();
   bool edge_found = false;
   for (unsigned int i = 0; i < _num_edges; ++i)
@@ -1797,6 +1800,7 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
       }
       else
       {
+        // BWS TODO: Get rid of warning?
         // EFAWarning("attempting to add new cut to a cut fragment edge");
         add2elem = true; // Add anyway since multiple cuts are allowed
       }
@@ -1933,8 +1937,8 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
       // must solve this issue for 3D!
       std::vector<double> node1_para_coor(2, 0.0);
       std::vector<double> node2_para_coor(2, 0.0);
-      if (getEdgeNodeParametricCoordinate(edge_node1, node1_para_coor) &&
-          getEdgeNodeParametricCoordinate(edge_node2, node2_para_coor))
+      if (getEdgeNodeParametricCoordinates(edge_node1, node1_para_coor) &&
+          getEdgeNodeParametricCoordinates(edge_node2, node2_para_coor))
       {
         double xi = (1.0 - position) * node1_para_coor[0] + position * node2_para_coor[0];
         double eta = (1.0 - position) * node1_para_coor[1] + position * node2_para_coor[1];
@@ -1986,7 +1990,7 @@ EFAElement2D::branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes)
   for (unsigned int i = 0; i < 3; ++i)
   {
     std::vector<double> xi_2d(2, 0.0);
-    getEdgeNodeParametricCoordinate(three_nodes[i], xi_2d);
+    getEdgeNodeParametricCoordinates(three_nodes[i], xi_2d);
     center_xi[0] += xi_2d[0];
     center_xi[1] += xi_2d[1];
   }
@@ -2140,7 +2144,7 @@ EFAElement2D::getFaceNode(EFANode * node) const
 }
 
 bool
-EFAElement2D::getNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const
+EFAElement2D::getNodeParametricCoordinates(EFANode * node, std::vector<double> & para_coor) const
 {
   para_coor.resize(2, 0.0);
   if (isInteriorNode(node))
@@ -2151,7 +2155,7 @@ EFAElement2D::getNodeParametricCoordinate(EFANode * node, std::vector<double> & 
     return true;
   }
   else // get the parametric coords of a node in an element edge
-    return getEdgeNodeParametricCoordinate(node, para_coor);
+    return getEdgeNodeParametricCoordinates(node, para_coor);
 }
 
 void
@@ -2367,7 +2371,8 @@ EFAElement2D::addNodeCutToNeighbors(EFANode * cut_node)
 
     // find which neighbors edges contain the cut_node, then note that neighbor of the edge
     for (unsigned int iedge = 0; iedge < current_neighbor->_edges.size(); ++iedge)
-      if (current_neighbor->_edges[iedge]->hasNode(cut_node))
+      // BWS TODO Verify that calling containsNode does what we want here
+      if (current_neighbor->_edges[iedge]->containsNode(cut_node))
         node_edges.push_back(iedge);
 
     // add all direct node neighbors to node_neighbors and check it hasnt been added previously

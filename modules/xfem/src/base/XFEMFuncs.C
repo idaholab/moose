@@ -1028,4 +1028,4 @@ isInsideCutPlane(const std::vector<Point> & vertices, const Point & p)
   return inside;
 }
 
-} // namespace XFEM
+} // namespace Xfem
