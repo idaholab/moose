@@ -42,11 +42,16 @@ Output::validParams()
   // Output intervals and timing
   params.addParam<unsigned int>(
       "time_step_interval", 1, "The interval (number of time steps) at which output occurs");
-  params.addDeprecatedParam<unsigned int>("interval", "The interval (number of time steps) at which output occurs", "Deprecated, use time_step_interval");
+  params.addDeprecatedParam<unsigned int>(
+      "interval",
+      "The interval (number of time steps) at which output occurs",
+      "Deprecated, use time_step_interval");
   params.deprecateParam("interval", "time_step_interval", "02/01/2025");
   params.addParam<Real>(
       "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
-  params.addDeprecatedParam<Real>("minimum_time_interval", "The minimum simulation time between output steps", "Deprecated, use min_simulation_time_interval");
+  params.addDeprecatedParam<Real>("minimum_time_interval",
+                                  "The minimum simulation time between output steps",
+                                  "Deprecated, use min_simulation_time_interval");
   params.deprecateParam("minimum_time_interval", "min_simulation_time_interval", "02/01/2025");
   params.addParam<Real>("simulation_time_interval",
                         std::numeric_limits<Real>::max(),
@@ -83,10 +88,11 @@ Output::validParams()
   params.addParamNamesToGroup("execute_on additional_execute_on", "Execution scheduling");
 
   // 'Timing' group
-  params.addParamNamesToGroup(
-      "time_tolerance time_step_interval sync_times sync_times_object sync_only start_time end_time "
-      "start_step end_step min_simulation_time_interval simulation_time_interval wall_time_interval",
-      "Timing and frequency of output");
+  params.addParamNamesToGroup("time_tolerance time_step_interval sync_times sync_times_object "
+                              "sync_only start_time end_time "
+                              "start_step end_step min_simulation_time_interval "
+                              "simulation_time_interval wall_time_interval",
+                              "Timing and frequency of output");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
@@ -133,7 +139,10 @@ Output::Output(const InputParameters & parameters)
     // If wall_time_interval is user-specified and time_step_interval is not,
     // override default value of time_step_interval so output does not occur
     // after every time step.
-    _time_step_interval((parameters.isParamSetByUser("wall_time_interval") && _time_step_interval_set_by_addparam) ? std::numeric_limits<unsigned int>::max() : getParam<unsigned int>("time_step_interval")),
+    _time_step_interval(
+        (parameters.isParamSetByUser("wall_time_interval") && _time_step_interval_set_by_addparam)
+            ? std::numeric_limits<unsigned int>::max()
+            : getParam<unsigned int>("time_step_interval")),
     _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
     _simulation_time_interval(getParam<Real>("simulation_time_interval")),
     _wall_time_interval(getParam<Real>("wall_time_interval")),
@@ -156,8 +165,8 @@ Output::Output(const InputParameters & parameters)
     _allow_output(true),
     _is_advanced(false),
     _advanced_execute_on(_execute_on, parameters),
-    _last_output_simulation_time(
-        declareRestartableData<Real>("last_output_simulation_time", std::numeric_limits<Real>::lowest())),
+    _last_output_simulation_time(declareRestartableData<Real>("last_output_simulation_time",
+                                                              std::numeric_limits<Real>::lowest())),
     _last_output_wall_time(std::chrono::steady_clock::now())
 {
   if (_use_displaced)
@@ -298,7 +307,8 @@ Output::onInterval()
     output = true;
 
   // check if enough simulation time has passed between outputs
-  if (_time > _last_output_simulation_time && _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
+  if (_time > _last_output_simulation_time &&
+      _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
     output = false;
 
   // check if enough wall time has passed between outputs
@@ -306,7 +316,8 @@ Output::onInterval()
   // count below returns an interger type, so lets express on a millisecond
   // scale and convert to seconds for finer resolution
   _wall_time_since_last_output =
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_output_wall_time).count() / 1000.0;
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_output_wall_time).count() /
+      1000.0;
   if (_wall_time_since_last_output >= _wall_time_interval)
     output = true;
 
@@ -314,10 +325,12 @@ Output::onInterval()
   return output;
 }
 
-void Output::setWallTimeIntervalFromCommandLineParam()
+void
+Output::setWallTimeIntervalFromCommandLineParam()
 {
   // Below function returns true if --output-wall-time-interval value was provided on command line
-  const bool set_by_user = _app.setVariableToCommandLineParam<Real>(_wall_time_interval, "output_wall_time_interval");
+  const bool set_by_user =
+      _app.setVariableToCommandLineParam<Real>(_wall_time_interval, "output_wall_time_interval");
 
   // If default value of _wall_time_interval was just overriden and user did not
   // explicitly specify _time_step_interval, override default value of

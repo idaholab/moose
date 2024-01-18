@@ -47,8 +47,8 @@ Checkpoint::validParams()
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
   // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
-  params.addParam<Real>("wall_time_interval", 600,
-                        "The target wall time interval (in seconds) at which to output");
+  params.addParam<Real>(
+      "wall_time_interval", 600, "The target wall time interval (in seconds) at which to output");
 
   // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END

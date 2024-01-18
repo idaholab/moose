@@ -243,8 +243,7 @@ MooseApp::validParams()
                                    "The target wall time interval (in seconds) at "
                                    "which to write to output. "
                                    "USE FOR TEST SUITE PROBLEMS ONLY, FOR ALL OTHER USES "
-                                   "SEE THE wall_time_interval IN DERIVED Output OBJECTS."
-                                   );
+                                   "SEE THE wall_time_interval IN DERIVED Output OBJECTS.");
 
   // No default on these two options, they must not both be valid
   params.addCommandLineParam<bool>(

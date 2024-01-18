@@ -527,10 +527,11 @@ public:
    * @param variable_to_set The variable whose value is to be modified
    * @param cli_param_name The name of the command line parameter used to set variable_to_set
    *
-   * @return variable_value_changed Whether the passed variable was changed (whether cli_param_name is valid)
+   * @return variable_value_changed Whether the passed variable was changed (whether cli_param_name
+   * is valid)
    */
   template <typename T>
-  bool setVariableToCommandLineParam(T& variable_to_set, const std::string& cli_param_name) const
+  bool setVariableToCommandLineParam(T & variable_to_set, const std::string & cli_param_name) const
   {
     bool variable_value_changed = false;
 
