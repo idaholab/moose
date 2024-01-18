@@ -48,8 +48,8 @@ SubChannelTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool
 void
 SubChannelTestApp::registerApps()
 {
-  registerApp(SubChannelApp);
   registerApp(SubChannelTestApp);
+  SubChannelApp::registerApps();
 }
 
 /***************************************************************************************************
