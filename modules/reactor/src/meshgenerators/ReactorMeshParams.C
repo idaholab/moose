@@ -80,7 +80,6 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::mesh_dimensions, int(_dim));
   this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
-  this->declareMeshProperty("name_id_map", _name_id_map);
 
   // Option to bypass mesh generation depends on existence of Mesh/data_driven_generator parameter
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
@@ -88,6 +87,10 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
       moose_mesh->parameters().get<std::string>("data_driven_generator");
   const bool bypass_meshgen = (data_driven_generator != "");
   this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);
+
+  // Declare name id map only if RGMB is outputting a mesh
+  if (!bypass_meshgen)
+    this->declareMeshProperty("name_id_map", _name_id_map);
 
   if (isParamValid("top_boundary_id"))
   {
