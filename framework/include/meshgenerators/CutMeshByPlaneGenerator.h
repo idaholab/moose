@@ -26,6 +26,14 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  /// An enum class for style of input polygon size
+  enum class PointPlaneRelationIndex : short int
+  {
+    plane_normal_side = 1,
+    opposite_plane_normal_side = -1,
+    on_plane = 0
+  };
+
 protected:
   /// Name of the input mesh
   const MeshGeneratorName _input_name;
@@ -73,11 +81,11 @@ protected:
    * @param point The point of interest to be determined
    * @param plane_point A point on the plane of interest
    * @param plane_normal The normal vector of the plane of interest
-   * @return an index indicating the relation between the point and the plane
+   * @return an enum indicating the relation between the point and the plane
    */
-  short int pointPlaneRelation(const Point & point,
-                               const Point & plane_point,
-                               const Point & plane_normal) const;
+  PointPlaneRelationIndex pointPlaneRelation(const Point & point,
+                                             const Point & plane_point,
+                                             const Point & plane_normal) const;
 
   /**
    * Calculate the intersection point of a plane and a line segment defined by two points separated
@@ -125,14 +133,6 @@ protected:
                                  const Point new_point);
 
   /**
-   * Check if two points overlap.
-   * @param point1 The first point
-   * @param point2 The second point
-   * @return true if the two points overlap
-   */
-  bool pointsOverlap(const Point & point1, const Point & point2) const;
-
-  /**
    * Rotate a HEX8 element's nodes to ensure that the node with the minimum id is the first node;
    * and the node among its three neighboring nodes with the minimum id is the second node.
    * @param min_id_index The index of the node with the minimum id
@@ -149,12 +149,13 @@ protected:
    * @param min_id_index The index of the node with the minimum id
    * @return a vector of the three neighboring nodes
    */
-  std::vector<unsigned int> nodeIndicesHEX8(unsigned int min_id_index) const;
+  std::vector<unsigned int> neighborNodeIndicesHEX8(unsigned int min_id_index) const;
 
   /**
-   * For a vector of rotated nodes that can form a HEX8 element, create a series of four-node set that can
-   * form TET4 elements to replace the original HEX8 element. All the QUAD4 face of the HEX8 element
-   * will be split by the diagonal line that involves the node with the minimum id of that face.
+   * For a vector of rotated nodes that can form a HEX8 element, create a series of four-node set
+   * that can form TET4 elements to replace the original HEX8 element. All the QUAD4 face of the
+   * HEX8 element will be split by the diagonal line that involves the node with the minimum id of
+   * that face.
    * @param hex_nodes A vector of pointers to the nodes that can form a HEX8 element
    * @param rotated_tet_face_indices A vector of vectors of the original face indices of the HEX8
    * element corresponding to the faces of the newly created TET4 elements
@@ -170,7 +171,7 @@ protected:
    * @param hex_nodes A vector of pointers to the nodes that can form a HEX8 element
    * @return a vector of boolean values indicating the direction of the diagonal line of each face
    */
-  std::vector<bool> quadFaceDiagnalDirectionsHex(std::vector<Node *> & hex_nodes) const;
+  std::vector<bool> quadFaceDiagonalDirectionsHex(std::vector<Node *> & hex_nodes) const;
 
   /**
    * For a QUAD4 element, determine the direction of the diagonal line that involves the node with
@@ -178,19 +179,19 @@ protected:
    * @param quad_nodes A vector of pointers to the nodes that can form a QUAD4 element
    * @return a boolean value indicating the direction of the diagonal line
    */
-  bool quadFaceDiagnalDirection(std::vector<Node *> & quad_nodes) const;
+  bool quadFaceDiagonalDirection(std::vector<Node *> & quad_nodes) const;
 
   /**
    * Creates sets of four nodes indices that can form TET4 elements to replace the original HEX8
    * element.
-   * @param diagnal_directions A vector of boolean values indicating the direction of the diagonal
+   * @param diagonal_directions A vector of boolean values indicating the direction of the diagonal
    * line of each face
    * @param tet_face_indices A vector of vectors of the original face indices of the HEX8 element
    * corresponding to the faces of the newly created TET4 elements
    * @return a vector of vectors of node indices that can form TET4 elements
    */
   std::vector<std::vector<unsigned int>>
-  tetNodesForHex(const std::vector<bool> diagnal_directions,
+  tetNodesForHex(const std::vector<bool> diagonal_directions,
                  std::vector<std::vector<unsigned int>> & tet_face_indices) const;
 
   /**
@@ -219,14 +220,14 @@ protected:
   /**
    * Creates sets of four nodes indices that can form TET4 elements to replace the original PRISM6
    * element.
-   * @param diagnal_direction A boolean value indicating the direction of the diagonal line of Face
+   * @param diagonal_direction A boolean value indicating the direction of the diagonal line of Face
    * 2
    * @param tet_face_indices A vector of vectors of the original face indices of the PRISM6 element
    * corresponding to the faces of the newly created TET4 elements
    * @return a vector of vectors of node indices that can form TET4 elements
    */
   std::vector<std::vector<unsigned int>>
-  tetNodesForPrism(const bool diagnal_direction,
+  tetNodesForPrism(const bool diagonal_direction,
                    std::vector<std::vector<unsigned int>> & tet_face_indices) const;
 
   /**

@@ -84,9 +84,11 @@ CutMeshByPlaneGenerator::generate()
     unsigned short elem_vertices_counter_2(0);
     for (unsigned int i = 0; i < n_vertices; i++)
     {
-      if (pointPlaneRelation((*(*elem_it)->node_ptr(i)), _plane_point, _plane_normal) == 1)
+      if (pointPlaneRelation((*(*elem_it)->node_ptr(i)), _plane_point, _plane_normal) ==
+          PointPlaneRelationIndex::plane_normal_side)
         elem_vertices_counter_1++;
-      if (pointPlaneRelation((*(*elem_it)->node_ptr(i)), _plane_point, _plane_normal) != -1)
+      if (pointPlaneRelation((*(*elem_it)->node_ptr(i)), _plane_point, _plane_normal) !=
+          PointPlaneRelationIndex::opposite_plane_normal_side)
         elem_vertices_counter_2++;
     }
     if (elem_vertices_counter_2 == n_vertices)
@@ -168,18 +170,18 @@ CutMeshByPlaneGenerator::generate()
   return std::move(_input);
 }
 
-short int
+CutMeshByPlaneGenerator::PointPlaneRelationIndex
 CutMeshByPlaneGenerator::pointPlaneRelation(const Point & point,
                                             const Point & plane_point,
                                             const Point & plane_normal) const
 {
   const Real dist = plane_normal * (point - plane_point);
   if (MooseUtils::absoluteFuzzyLessThan(dist, 0.0))
-    return -1;
+    return PointPlaneRelationIndex::opposite_plane_normal_side;
   else if (MooseUtils::absoluteFuzzyGreaterThan(dist, 0.0))
-    return 1;
+    return PointPlaneRelationIndex::plane_normal_side;
   else
-    return 0;
+    return PointPlaneRelationIndex::on_plane;
 }
 
 Point
@@ -207,20 +209,11 @@ CutMeshByPlaneGenerator::nonDuplicateNodeCreator(ReplicatedMesh & mesh,
 {
   for (const auto & new_on_plane_node : new_on_plane_nodes)
   {
-    if (pointsOverlap(*new_on_plane_node, new_point))
+    if (MooseUtils::absoluteFuzzyEqual((*new_on_plane_node - new_point).norm(), 0.0))
       return new_on_plane_node;
   }
   new_on_plane_nodes.push_back(mesh.add_point(new_point));
   return new_on_plane_nodes.back();
-}
-
-bool
-CutMeshByPlaneGenerator::pointsOverlap(const Point & point1, const Point & point2) const
-{
-  if (MooseUtils::absoluteFuzzyEqual((point1 - point2).norm(), 0.0))
-    return true;
-  else
-    return false;
 }
 
 std::vector<unsigned int>
@@ -259,7 +252,7 @@ CutMeshByPlaneGenerator::nodeRotationHEX8(unsigned int min_id_index,
 }
 
 std::vector<unsigned int>
-CutMeshByPlaneGenerator::nodeIndicesHEX8(unsigned int min_id_index) const
+CutMeshByPlaneGenerator::neighborNodeIndicesHEX8(unsigned int min_id_index) const
 {
   const std::vector<std::vector<unsigned int>> preset_indices = {
       {1, 3, 4}, {0, 2, 5}, {3, 1, 6}, {2, 0, 7}, {5, 7, 0}, {4, 6, 1}, {7, 5, 2}, {6, 4, 3}};
@@ -281,7 +274,7 @@ CutMeshByPlaneGenerator::hexNodeOptimizer(
 
   const unsigned int min_node_id_index = std::distance(
       std::begin(node_ids), std::min_element(std::begin(node_ids), std::end(node_ids)));
-  const auto neighbor_node_indices = nodeIndicesHEX8(min_node_id_index);
+  const auto neighbor_node_indices = neighborNodeIndicesHEX8(min_node_id_index);
 
   const auto neighbor_node_ids = {node_ids[neighbor_node_indices[0]],
                                   node_ids[neighbor_node_indices[1]],
@@ -296,10 +289,10 @@ CutMeshByPlaneGenerator::hexNodeOptimizer(
   for (unsigned int i = 0; i < 8; i++)
     rotated_hex_nodes.push_back(hex_nodes[rotated_indices[i]]);
 
-  const auto diagnal_directions = quadFaceDiagnalDirectionsHex(rotated_hex_nodes);
+  const auto diagonal_directions = quadFaceDiagonalDirectionsHex(rotated_hex_nodes);
 
   std::vector<std::vector<unsigned int>> tet_face_indices;
-  const auto tet_nodes_set = tetNodesForHex(diagnal_directions, tet_face_indices);
+  const auto tet_nodes_set = tetNodesForHex(diagonal_directions, tet_face_indices);
   for (const auto & tet_face_index : tet_face_indices)
   {
     rotated_tet_face_indices.push_back(std::vector<unsigned int>());
@@ -324,25 +317,25 @@ CutMeshByPlaneGenerator::hexNodeOptimizer(
 }
 
 std::vector<bool>
-CutMeshByPlaneGenerator::quadFaceDiagnalDirectionsHex(std::vector<Node *> & hex_nodes) const
+CutMeshByPlaneGenerator::quadFaceDiagonalDirectionsHex(std::vector<Node *> & hex_nodes) const
 {
   // Bottom/Top; Front/Back; Right/Left
   const std::vector<std::vector<unsigned int>> face_indices = {
       {0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4}, {2, 3, 7, 6}, {1, 2, 6, 5}, {3, 0, 4, 7}};
-  std::vector<bool> diagnal_directions;
+  std::vector<bool> diagonal_directions;
   for (const auto & face_index : face_indices)
   {
     std::vector<Node *> quad_nodes = {hex_nodes[face_index[0]],
                                       hex_nodes[face_index[1]],
                                       hex_nodes[face_index[2]],
                                       hex_nodes[face_index[3]]};
-    diagnal_directions.push_back(quadFaceDiagnalDirection(quad_nodes));
+    diagonal_directions.push_back(quadFaceDiagonalDirection(quad_nodes));
   }
-  return diagnal_directions;
+  return diagonal_directions;
 }
 
 bool
-CutMeshByPlaneGenerator::quadFaceDiagnalDirection(std::vector<Node *> & quad_nodes) const
+CutMeshByPlaneGenerator::quadFaceDiagonalDirection(std::vector<Node *> & quad_nodes) const
 {
   const std::vector<dof_id_type> node_ids = {
       quad_nodes[0]->id(), quad_nodes[1]->id(), quad_nodes[2]->id(), quad_nodes[3]->id()};
@@ -356,7 +349,7 @@ CutMeshByPlaneGenerator::quadFaceDiagnalDirection(std::vector<Node *> & quad_nod
 
 std::vector<std::vector<unsigned int>>
 CutMeshByPlaneGenerator::tetNodesForHex(
-    const std::vector<bool> diagnal_directions,
+    const std::vector<bool> diagonal_directions,
     std::vector<std::vector<unsigned int>> & tet_face_indices) const
 {
   const std::vector<std::vector<bool>> possible_inputs = {{true, true, true, true, true, false},
@@ -369,7 +362,7 @@ CutMeshByPlaneGenerator::tetNodesForHex(
 
   const unsigned int input_index = std::distance(
       std::begin(possible_inputs),
-      std::find(std::begin(possible_inputs), std::end(possible_inputs), diagnal_directions));
+      std::find(std::begin(possible_inputs), std::end(possible_inputs), diagonal_directions));
 
   switch (input_index)
   {
@@ -522,10 +515,10 @@ CutMeshByPlaneGenerator::prismNodeOptimizer(
                                         rotated_prism_nodes[5],
                                         rotated_prism_nodes[4]};
 
-  const bool diagnal_direction = quadFaceDiagnalDirection(key_quad_nodes);
+  const bool diagonal_direction = quadFaceDiagonalDirection(key_quad_nodes);
 
   std::vector<std::vector<unsigned int>> tet_face_indices;
-  const auto tet_nodes_set = tetNodesForPrism(diagnal_direction, tet_face_indices);
+  const auto tet_nodes_set = tetNodesForPrism(diagonal_direction, tet_face_indices);
   for (const auto & tet_face_index : tet_face_indices)
   {
     rotated_tet_face_indices.push_back(std::vector<unsigned int>());
@@ -551,10 +544,10 @@ CutMeshByPlaneGenerator::prismNodeOptimizer(
 
 std::vector<std::vector<unsigned int>>
 CutMeshByPlaneGenerator::tetNodesForPrism(
-    const bool diagnal_direction, std::vector<std::vector<unsigned int>> & tet_face_indices) const
+    const bool diagonal_direction, std::vector<std::vector<unsigned int>> & tet_face_indices) const
 {
 
-  if (diagnal_direction)
+  if (diagonal_direction)
   {
     tet_face_indices = {{4, 3, 5, 1}, {2, 1, 5, 5}, {2, 5, 3, 0}};
     return {{3, 5, 4, 0}, {1, 4, 5, 0}, {1, 5, 2, 0}};
@@ -793,7 +786,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
     }
   }
 
-  std::vector<short> node_plane_relation(4);
+  std::vector<PointPlaneRelationIndex> node_plane_relation(4);
   std::vector<Node *> tet4_nodes(4);
   std::vector<Node *> tet4_nodes_on_plane;
   std::vector<Node *> tet4_nodes_outside_plane;
@@ -802,9 +795,9 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
   {
     tet4_nodes[i] = mesh.elem_ptr(elem_id)->node_ptr(i);
     node_plane_relation[i] = pointPlaneRelation(*tet4_nodes[i], plane_point, plane_normal);
-    if (node_plane_relation[i] == 0)
+    if (node_plane_relation[i] == PointPlaneRelationIndex::on_plane)
       tet4_nodes_on_plane.push_back(tet4_nodes[i]);
-    else if (node_plane_relation[i] == 1)
+    else if (node_plane_relation[i] == PointPlaneRelationIndex::plane_normal_side)
       tet4_nodes_outside_plane.push_back(tet4_nodes[i]);
     else
       tet4_nodes_inside_plane.push_back(tet4_nodes[i]);
