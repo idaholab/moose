@@ -133,7 +133,7 @@ protected:
   bool pointsOverlap(const Point & point1, const Point & point2) const;
 
   /**
-   * Rotate a HEX8 element nodes to ensure that the node with the minimum id is the first node;
+   * Rotate a HEX8 element's nodes to ensure that the node with the minimum id is the first node;
    * and the node among its three neighboring nodes with the minimum id is the second node.
    * @param min_id_index The index of the node with the minimum id
    * @param sec_min_pos The position of the node among its three neighboring nodes with the minimum
@@ -152,7 +152,7 @@ protected:
   std::vector<unsigned int> nodeIndicesHEX8(unsigned int min_id_index) const;
 
   /**
-   * For a rotated nodes that can form a HEX8 element, create a series of four-node set that can
+   * For a vector of rotated nodes that can form a HEX8 element, create a series of four-node set that can
    * form TET4 elements to replace the original HEX8 element. All the QUAD4 face of the HEX8 element
    * will be split by the diagonal line that involves the node with the minimum id of that face.
    * @param hex_nodes A vector of pointers to the nodes that can form a HEX8 element

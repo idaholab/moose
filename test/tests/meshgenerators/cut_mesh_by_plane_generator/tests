@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/XYZMeshPlaneCutter.md'
+  design = 'meshgenerators/CutMeshByPlaneGenerator.md'
   issues = '#26579'
   [test]
     requirement = "The system shall be able to "
@@ -12,7 +12,7 @@
       allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh purely with HEX8 elements.'
+      detail ='cut a 3D mesh consisting of only HEX8 elements.'
     []
     [simple_prism_cut]
       type = 'Exodiff'
@@ -23,7 +23,7 @@
       allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh purely with PRISM6 elements.'
+      detail ='cut a 3D mesh consisting of only PRISM6 elements.'
     []
     [simple_pyramid_cut]
       type = 'Exodiff'
@@ -34,7 +34,7 @@
       allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh purely with PYRAMID5 elements.'
+      detail ='cut a 3D mesh consisting of only PYRAMID5 elements.'
     []
     [simple_tet_cut]
       type = 'Exodiff'
@@ -45,7 +45,7 @@
       allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh purely with TET4 elements.'
+      detail ='cut a 3D mesh consisting of only TET4 elements.'
     []
     [hex_prism_cut]
       type = 'Exodiff'
@@ -55,7 +55,7 @@
       allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh with mixed type of elements.'
+      detail ='cut a 3D mesh with mixed element types.'
     []
   []
 
@@ -79,7 +79,7 @@
                   Mesh/cut/input=accg'
       expect_err = 'Only 3D meshes are supported'
       mesh_mode = 'REPLICATED'
-      detail = 'if the input mesh is not a 3D mesh.'
+      detail = 'if the input mesh contains non-3D elements.'
     []
     [err_high_order]
       type = 'RunException'
