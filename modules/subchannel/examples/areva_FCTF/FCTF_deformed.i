@@ -1,6 +1,6 @@
 # Following Benchmark Specifications and Data Requirements for the AREVA heated-bundle test in its Fuel Cooling Test Facility (FCTF)
-# as part of a U.S. DOE funded project: Towards a Longer-Life Core. In partnership with TerraPower, TAMU and ANL, 
-# AREVA NP tested a wire-wrapped rod bundle. The bundle consists of electrically heated pins and non-heated pins. 
+# as part of a U.S. DOE funded project: Towards a Longer-Life Core. In partnership with TerraPower, TAMU and ANL,
+# AREVA NP tested a wire-wrapped rod bundle. The bundle consists of electrically heated pins and non-heated pins.
 # This test collected measurements to evaluate thermal hydraulic performance of a wire wrapped bundle, useful for CFD and other software validation.
 # Available at: https://www.osti.gov/servlets/purl/1346027/
 ###################################################
@@ -8,23 +8,31 @@
 # Thermal-hydraulics parameters
 ###################################################
 T_in = ??? #Kelvin
-Total_Surface_Area = ??? #m2
-mass_flux_in = ???? #kg/m2
-Re = 20000 # [-]
+Total_Surface_Area = 0.002808 #m2
+Dh = 0.004535 #m
+Re = 20300 # [-] (17000 20100 17000 20300)
+# mdot_average (12.01 9.533 11.996 9.576)
 P_out = 827371 # Pa
-Power = ??? # Watt
+Power = ??? # Watt Each heater rod had a max power of 30kW
+# Heater 17 (12) not working.
+# test:05 power = 22643 22845 22747 22801 [W], Total Power = 91036 [W], mdot_average = 12.01 [kg/s], Re = 17000
+# test:19 power = 22612 22610 22754 22663 [W], Total Power = 90639 [W], mdot_average = 9.576 [kg/s], Re = 20300
+# Index of heated pins per silicon controled rectifiers (Areva notation):2 3 6 7 || 4 5 11 15 ||1 9 19 40 60 || 13 44 48 52 56
+# Index of heated pins per silicon controled rectifiers (SC notation): 2 1 4 3 || 6 5 18 14 || 0 8 10 39 43 || 16 59 55 51 47
+mass_flux_in = mdot_average / Total_Surface_Area #kg/m2
 ###################################################
 # Geometric parameters
 ###################################################
-fuel_pin_pitch = 
+# Total heater lehgth : 5.08 m
+fuel_pin_pitch = 0.01125 #m
 fuel_pin_diameter = 0.0095 #m
 wire_z_spacing = 0.285 #m
 wire_diameter = 0.00172 #m
-inner_duct_in = 
+inner_duct_in = 0.09164 #m
 n_rings = 5
-unheated_length_entry = 
-heated_length = 
-unheated_length_exit = 
+unheated_length_entry = 1.95 #m
+heated_length = 1.71 #m
+unheated_length_exit = 1.42 #m
 ###################################################
 
 [TriSubChannelMesh]
@@ -70,17 +78,17 @@ unheated_length_exit =
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    value = '0.446 * (pi/2)*sin(pi*z/L)'
+    value = '(0.4*pi/(pi-2))*sin(pi*z/L) + 1.4 - (0.4*pi/(pi-2))'
     vars = 'L'
     vals = '${heated_length}'
   []
 
-  # [axial_heat_rate]
-  #   type = ParsedFunction
-  #   value = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
-  #   vars = 'L alpha'
-  #   vals = '${heated_length} 1.8012'
-  # []
+  [duct_deformation]
+    type = ParsedFunction
+    value = '0.001064*sin(pi*z/L)'
+    vars = 'L'
+    vals = '${heated_length}'
+  []
 []
 
 [AuxVariables]
@@ -161,9 +169,9 @@ unheated_length_exit =
   [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = ${Power_initial}
+    power = ${Power}
     filename = "pin_power_profile61.txt"
-    # axial_heat_rate = axial_heat_rate
+    axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -218,6 +226,12 @@ unheated_length_exit =
     type = ConstantIC
     variable = mdot
     value = 0.0
+  []
+
+  [displacement_ic]
+    type = ConstantIC
+    variable = displacement
+    value =
   []
 []
 

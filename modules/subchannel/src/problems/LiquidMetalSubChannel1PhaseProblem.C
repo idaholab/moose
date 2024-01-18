@@ -186,7 +186,7 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
             {
               auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
               auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-              if (subch_type == EChannelType::CENTER || subch_type == EChannelType::CORNER)
+              if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
               {
                 displacement += (*_displacement_soln)(node);
                 counter += 1.0;

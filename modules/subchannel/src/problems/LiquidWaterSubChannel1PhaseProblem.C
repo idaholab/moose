@@ -52,9 +52,10 @@ void
 LiquidWaterSubChannel1PhaseProblem::initializeSolution()
 {
   auto pin_mesh_exist = _subchannel_mesh.pinMeshExist();
-  if (pin_mesh_exist)
+  auto duct_mesh_exist = _subchannel_mesh.ductMeshExist();
+  if (pin_mesh_exist || duct_mesh_exist)
   {
-    Real standard_area, additional_area, wetted_perimeter;
+    Real standard_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
     auto gap = _subchannel_mesh.getGap();
     auto z_blockage = _subchannel_mesh.getZBlockage();
@@ -79,24 +80,29 @@ LiquidWaterSubChannel1PhaseProblem::initializeSolution()
         if (subch_type == EChannelType::CORNER)
         {
           standard_area = 0.25 * pitch * pitch;
+          displaced_area = (2 * gap + pitch) * (*_displacement_soln)(node) / sqrt(2) +
+                           (*_displacement_soln)(node) * (*_displacement_soln)(node) / 2;
           additional_area = pitch * gap + gap * gap;
-          wetted_perimeter = rod_perimeter + pitch + 2 * gap;
+          wetted_perimeter =
+              rod_perimeter + pitch + 2 * gap + 2 * (*_displacement_soln)(node) / sqrt(2);
         }
         else if (subch_type == EChannelType::EDGE)
         {
           standard_area = 0.5 * pitch * pitch;
           additional_area = pitch * gap;
+          displaced_area = pitch * (*_displacement_soln)(node);
           wetted_perimeter = rod_perimeter + pitch;
         }
         else
         {
           standard_area = pitch * pitch;
+          displaced_area = 0.0;
           additional_area = 0.0;
           wetted_perimeter = rod_perimeter;
         }
 
         /// Calculate subchannel area
-        auto subchannel_area = standard_area + additional_area - rod_area;
+        auto subchannel_area = displaced_area + standard_area + additional_area - rod_area;
 
         /// Apply area reduction on subchannels affected by blockage
         auto index = 0;
@@ -123,10 +129,23 @@ LiquidWaterSubChannel1PhaseProblem::initializeSolution()
         auto pin_2 = gap_pins.second;
         auto * pin_node_1 = _subchannel_mesh.getPinNode(pin_1, iz);
         auto * pin_node_2 = _subchannel_mesh.getPinNode(pin_2, iz);
-
         if (pin_1 == pin_2) // Corner or edge gap
         {
-          _subchannel_mesh._gij_map[iz][i_gap] = (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap;
+          auto displacement = 0.0;
+          auto counter = 0.0;
+          for (auto i_ch : _subchannel_mesh.getPinChannels(pin_1))
+          {
+            auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+            auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+            if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+            {
+              displacement += (*_displacement_soln)(node);
+              counter += 1.0;
+            }
+          }
+          displacement = displacement / counter;
+          _subchannel_mesh._gij_map[iz][i_gap] =
+              (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap + displacement;
         }
         else // center gap
         {
