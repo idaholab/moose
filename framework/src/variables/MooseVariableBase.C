@@ -105,7 +105,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
     _use_dual(getParam<bool>("use_dual")),
-    _is_array(getParam<bool>("array"))
+    _is_array(getParam<bool>("array")),
+    _is_lower_d(blocksMaxDimension() < _mesh.dimension())
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));

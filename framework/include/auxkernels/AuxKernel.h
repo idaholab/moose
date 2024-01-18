@@ -116,6 +116,11 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
+  /**
+   * Insert the just computed values into the auxiliary solution vector
+   */
+  void insert();
+
 protected:
   /**
    * Compute and return the value of the aux variable.
@@ -213,6 +218,12 @@ protected:
 
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
+
+  /// The current lower dimensional element
+  const Elem * const & _current_lower_d_elem;
+
+  /// Whether we are doing a lower dimensional calculation
+  const bool _lower_d_calc;
 
   /// Quadrature point index
   unsigned int _qp;

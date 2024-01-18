@@ -8348,3 +8348,12 @@ FEProblemBase::setVerboseProblem(bool verbose)
   _verbose_setup = verbose;
   _verbose_multiapps = verbose;
 }
+
+void
+FEProblemBase::setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid)
+{
+  SubProblem::setCurrentLowerDElem(lower_d_elem, tid);
+  if (_displaced_problem)
+    _displaced_problem->setCurrentLowerDElem(
+        lower_d_elem ? _displaced_mesh->elemPtr(lower_d_elem->id()) : nullptr, tid);
+}
