@@ -29,6 +29,7 @@ build:
     - vtk_friendly_version={{ vtk_friendly_version }}
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
 
 requirements:
   build:
