@@ -74,6 +74,28 @@ DomainIntegralAction::validParams()
       "functionally_graded_youngs_modulus",
       "Spatially varying elasticity modulus variable. This input is required when "
       "using the functionally graded material capability.");
+  params.addCoupledVar("additional_eigenstrain_00",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 00 or XX).");
+  params.addCoupledVar("additional_eigenstrain_01",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 01 or XY).");
+  params.addCoupledVar("additional_eigenstrain_11",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 11 or YY).");
+  params.addCoupledVar("additional_eigenstrain_22",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 22 or ZZ).");
+  params.addCoupledVar("additional_eigenstrain_02",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 02 or XZ).");
+  params.addCoupledVar("additional_eigenstrain_12",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 12 or XZ).");
+  params.addParamNamesToGroup(
+      "additional_eigenstrain_00 additional_eigenstrain_01 additional_eigenstrain_11 "
+      "additional_eigenstrain_22 additional_eigenstrain_02 additional_eigenstrain_12",
+      "Generic eigenstrains for the computation of the interaction integral.");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",
@@ -717,6 +739,19 @@ DomainIntegralAction::act()
       else
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
 
+      if (isParamValid("additional_eigenstrain_00") && isParamValid("additional_eigenstrain_01") &&
+          isParamValid("additional_eigenstrain_11") && isParamValid("additional_eigenstrain_22"))
+      {
+        params.set<CoupledName>("additional_eigenstrain_00") =
+            getParam<CoupledName>("additional_eigenstrain_00");
+        params.set<CoupledName>("additional_eigenstrain_01") =
+            getParam<CoupledName>("additional_eigenstrain_01");
+        params.set<CoupledName>("additional_eigenstrain_11") =
+            getParam<CoupledName>("additional_eigenstrain_11");
+        params.set<CoupledName>("additional_eigenstrain_22") =
+            getParam<CoupledName>("additional_eigenstrain_22");
+      }
+
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<std::vector<SubdomainName>>("block") = {_blocks};
@@ -886,7 +921,9 @@ DomainIntegralAction::act()
 
     for (auto ime : integral_moose_enums)
     {
-      if (ime == "JIntegral" || ime == "CIntegral" || ime == "KFromJIntegral")
+      if (ime == "JIntegral" || ime == "CIntegral" || ime == "KFromJIntegral" ||
+          ime == "InteractionIntegralKI" || ime == "InteractionIntegralKII" ||
+          ime == "InteractionIntegralKIII" || ime == "InteractionIntegralT")
         have_j_integral = true;
 
       if (ime == "CIntegral")
