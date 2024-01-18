@@ -1,45 +1,49 @@
 # Docker
 
-## Minimum System Requirements
+We produce two Docker images, one that is a development environment (the `moose-dev` image) for MOOSE-based applications and one with an installed MOOSE application (the `moose` image) with all modules enabled.
 
-- Some flavor of Linux, MacOS, or Windows with Docker installed
-- Memory: 16 GBs (debug builds)
-- Processor: 64-bit x86
-- Disk: 3 GB (image size)
+If you are modifying a MOOSE-based application, you should use the `moose-dev` image described in [#development-image]. Otherwise, you should use the `moose` image described in [#installed-image].
 
-## Obtaining MOOSE and Running Tests
+These images are hosted on Docker Hub in the [idaholab](https://hub.docker.com/r/idaholab) organization and are based on [rockylinux:[!package!apptainer_rockylinux]](https://hub.docker.com/_/rockylinux) with GCC [!package!apptainer_gcc] and MPICH [!package!apptainer_mpich].
 
-Containers of MOOSE are currently hosted on Docker Hub in the repository [idaholab/moose](https://hub.docker.com/r/idaholab/moose) for Ubuntu 20.04. The tag "latest" is kept current with the master branch of the repository, and the other tags are commit hashes to be used by codes with MOOSE as a Git submodule.  As the Docker image already has the framework compiled, it is possible to go from no extant, local copy of MOOSE to running the tests with a single command.
+## Development image
 
-```bash
-docker run -ti idaholab/moose:latest /bin/bash -c 'cd test; ./run_tests'
-```
+The [idaholab/moose-dev](https://hub.docker.com/r/idaholab/moose-dev) image contains all of the dependencies needed to build a MOOSE-based application. This includes a compiler, MPI, PETSc, libMesh, and the necessary python tools.
 
-## Extending the Image With MOOSE Apps
-
-With the fully configured MOOSE framework in a Docker image, the next logical step is to extend this image with whichever MOOSE app is of interest.  For example, consider another open sourced INL code, Blackbear. To build an image of Blackbear, start with a Dockerfile as follows:
-
-```docker
-FROM idaholab/moose:latest
-
-WORKDIR /opt
-
-RUN git clone -b master https://github.com/idaholab/blackbear.git ; \
-cd blackbear ; \
-git submodule update --init ; \
-make -j $(grep -c ^processor /proc/cpuinfo)
-
-WORKDIR /opt/blackbear
-```
-
-The first line of this file tells Docker to use MOOSE as a base image.  The tag "latest" is used, because Blackbear does not have MOOSE as a submodule.  If it did, a commit hash would be used as the tag instead.  From here, the ```RUN``` instruction handles the cloning, submodule checkout, and building steps.  Last of all, to support end-use, the working directory is set to the root of the image's Blackbear repository.  To build an image using this Dockerfile, run the following.
+How you use this image is dependent on your development style, but a simple example that includes creating a volume, cloning, building, and then testing the MOOSE framework follows:
 
 ```bash
-docker build -t blackbear .
+docker volume create projects
+docker run -it -v projects:/projects idaholab/moose-dev:latest
+cd /projects
+git clone https://github.com/idaholab/moose.git
+cd moose/test
+make -j 4
+./run_tests -j 4
 ```
 
-After this, like before, the tests can be ran with a single command.
+!alert note
+If you are building another image from this one, you may need to source the file at `/environment` first to obtain the proper environment.
+
+This image is versioned based on a script in the MOOSE repository that hashes it based on the state of the dependencies. To obtain the proper version of `moose-dev` to use given the current state of moose, you can run (within MOOSE):
 
 ```bash
-docker run -ti blackbear ./run_tests
+./scripts/versioner.py moose-dev
 ```
+
+## Installed image
+
+The [idaholab/moose](https://hub.docker.com/r/idaholab/moose) is based on [idaholab/moose-dev](https://hub.docker.com/r/idaholab/moose-dev), and also contains a fully installed version of MOOSE compiled with all of the modules in `/opt/moose`. The executable is `moose-opt`, which is located in the path.
+
+An example of running the electromagnetics module tests with this image is as follows:
+
+```
+docker volume create projects
+docker run -it -v projects:/projects idaholab/moose:latest
+cd /projects
+moose-opt --copy-inputs electromagnetics
+cd moose/electromagnetics
+moose-opt --run -j 4
+```
+
+This image is versioned based on the master hash of MOOSE that it was compiled with.
