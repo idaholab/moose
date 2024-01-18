@@ -85,7 +85,7 @@ Ray::Ray(const Ray * const other, const ConstructRayKey & key)
     if (!other->invalidDirection())
       setStartingDirection(other->_direction);
     if (other->maxDistanceSet())
-      setStartingMaxDistance(other->_max_distance);
+      _max_distance = other->_max_distance;
   }
 
   std::copy(other->_data.begin(), other->_data.end(), _data.begin());
@@ -317,6 +317,17 @@ Ray::setStartingMaxDistance(const Real starting_max_distance)
         "Cannot use Ray::setStartingMaxDistance() after Ray::setStartingEndPoint().");
 
   _max_distance = starting_max_distance;
+}
+
+void
+Ray::setStationary()
+{
+  errorIfTracing("Cannot use Ray::setStationary()");
+  if (invalidCurrentPoint())
+    errorWhenInitializing("Cannot use Ray::setStationary() before Ray::setStart().");
+  if (!invalidDirection())
+    errorWhenInitializing("Cannot use Ray::setStationary() with Ray::setDirection()");
+  _max_distance = 0;
 }
 
 void

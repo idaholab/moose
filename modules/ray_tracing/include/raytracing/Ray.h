@@ -362,6 +362,15 @@ public:
    * Can only be called before a Ray has started to be traced!
    */
   void setStartingMaxDistance(const Real starting_max_distance);
+  /**
+   * Sets the Ray to be stationary (max distance = 0).
+   *
+   * This MUST be called after setStart(). It cannot be used with
+   * setStartingEndPoint(). It cannot be called after a Ray has began tracing.
+   *
+   * Can only be called before a Ray has started to be traced!
+  */
+  void setStationary();
 
   /**
    * Invalidates a Ray's starting element.
