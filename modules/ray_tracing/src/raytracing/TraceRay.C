@@ -1114,6 +1114,7 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     // Stationary ray
     if (ray->intersections() == 0 && ray->maxDistance() == 0)
     {
+      mooseAssert(ray->invalidDirection(), "Should have an invalid direction");
       _exits_elem = true;
       _intersection_point = _incoming_point;
       _intersected_extrema = _last_intersected_extrema;

@@ -47,7 +47,6 @@ LotsOfRaysRayStudy::validParams()
                         false,
                         "Enable generation of rays from boundary element centroids in the "
                         "direction of angular quadrature.");
-  params.addParam<bool>("stationary", false, "Generate all rays as stationary");
 
   params.addRangeCheckedParam<unsigned int>(
       "polar_quad_order",
@@ -92,7 +91,6 @@ LotsOfRaysRayStudy::LotsOfRaysRayStudy(const InputParameters & parameters)
     _edge_to_edge(getParam<bool>("edge_to_edge")),
     _side_aq(getParam<bool>("side_aq")),
     _centroid_aq(getParam<bool>("centroid_aq")),
-    _stationary(getParam<bool>("stationary")),
     _compute_expected_distance(getParam<bool>("compute_expected_distance")),
     _polar_quad_order(getParam<unsigned int>("polar_quad_order")),
     _azimuthal_quad_order(getParam<unsigned int>("azimuthal_quad_order")),
@@ -190,11 +188,8 @@ LotsOfRaysRayStudy::defineRays()
           const Point edge_centroid = elem->build_edge_ptr(edge)->vertex_average();
           for (const auto edge_to : elem->edge_index_range())
             if (edge != edge_to)
-              defineRay(elem,
-                        side,
-                        edge_centroid,
-                        elem->build_edge_ptr(edge_to)->vertex_average(),
-                        false);
+              defineRay(
+                  elem, side, edge_centroid, elem->build_edge_ptr(edge_to)->vertex_average(), false);
         }
 
     if (_side_aq)
@@ -244,11 +239,7 @@ LotsOfRaysRayStudy::defineRay(const Elem * starting_elem,
   ray->setStart(
       p1, starting_elem, _set_incoming_side ? incoming_side : RayTracingCommon::invalid_side);
 
-  if (_stationary)
-  {
-    ray->setStationary();
-  }
-  else if (ends_within_mesh)
+  if (ends_within_mesh)
   {
     ray->setStartingEndPoint(p2);
 

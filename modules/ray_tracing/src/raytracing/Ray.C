@@ -324,9 +324,11 @@ Ray::setStationary()
 {
   errorIfTracing("Cannot use Ray::setStationary()");
   if (invalidCurrentPoint())
-    errorWhenInitializing("Cannot use Ray::setStationary() before Ray::setStart().");
+    errorWhenInitializing("Cannot use Ray::setStationary() before Ray::setStart()");
+  if (_end_set)
+    errorWhenInitializing("Cannot use Ray::setStationary() after Ray::setStartingEndPoint()");
   if (!invalidDirection())
-    errorWhenInitializing("Cannot use Ray::setStationary() with Ray::setDirection()");
+    errorWhenInitializing("Cannot use Ray::setStationary() with Ray::setStartingDirection()");
   _max_distance = 0;
 }
 
