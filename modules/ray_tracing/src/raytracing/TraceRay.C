@@ -52,7 +52,7 @@ TraceRay::TraceRay(RayTracingStudy & study, const THREAD_ID tid)
     _tid(tid),
     _backface_culling(false),
     _current_normals(nullptr),
-    _results(FAILED_TRACES + 1)
+    _results(ENDED_STATIONARY + 1)
 {
 }
 
