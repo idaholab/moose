@@ -8,6 +8,7 @@
     xmax = 10 # m
     ymax = 13 # m
     zmax = 8 # m
+    output = true
   []
 
   [create_inner_water]

@@ -9,6 +9,7 @@
 [Adaptivity]
   marker = jump_threshold
   max_h_level = 2
+  steps = 3
   [Indicators]
     [temperature_jump]
       type = GradientJumpIndicator
@@ -21,7 +22,7 @@
       type = ValueThresholdMarker
       coarsen = 0.3
       variable = temperature_jump
-      refine = 5
+      refine = 3
       block = 'concrete'
     []
   []
@@ -40,10 +41,10 @@
     variable = T
     coef = 2.25
   []
-  [time_derivative]
-    type = TimeDerivative
-    variable = T
-  []
+  # [time_derivative]
+  #   type = TimeDerivative
+  #   variable = T
+  # []
 []
 
 [BCs]
@@ -85,8 +86,8 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 4
+  type = Steady
+  # num_steps = 4
   solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
   petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
   petsc_options_value = 'hypre boomeramg'

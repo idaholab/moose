@@ -10,6 +10,7 @@
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete'
+    initial_condition = 300
   []
 []
 
@@ -87,6 +88,7 @@
     type = ElementAverageValue
     variable = T
     block = 'concrete'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [water_heat_flux]
     type = ADSideDiffusiveFluxIntegral

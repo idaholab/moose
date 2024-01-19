@@ -15,7 +15,7 @@ cp_water_multiplier = 1e-6
   []
 []
 
-[AuxVariables]
+[Variables]
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete'
@@ -129,7 +129,7 @@ cp_water_multiplier = 1e-6
   [water_convection]
     type = ADConvectiveHeatFluxBC
     variable = T
-    boundary = 'water_boundary'
+    boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
     heat_transfer_coefficient = 30

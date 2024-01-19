@@ -1,14 +1,18 @@
+k_concrete = 2.25
+
 [Mesh]
   [fmg]
     type = FileMeshGenerator
     file = 'mesh_in.e'
   []
+  second_order = true
 []
 
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete'
+    order = SECOND
   []
 []
 
@@ -16,7 +20,7 @@
   [diffusion_concrete]
     type = CoefDiffusion
     variable = T
-    coef = 2.25
+    coef = ${k_concrete}
   []
 []
 

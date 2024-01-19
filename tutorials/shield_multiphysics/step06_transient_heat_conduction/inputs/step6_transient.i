@@ -76,14 +76,14 @@ cp_multiplier = 1e-6
   []
   [diff_flux_y]
     type = DiffusionFluxAux
-    variable = heat_flux_x
+    variable = heat_flux_y
     diffusion_variable = T
     diffusivity = 'thermal_conductivity'
     component = 'y'
   []
   [diff_flux_z]
     type = DiffusionFluxAux
-    variable = heat_flux_x
+    variable = heat_flux_z
     diffusion_variable = T
     diffusivity = 'thermal_conductivity'
     component = 'z'
@@ -111,12 +111,12 @@ cp_multiplier = 1e-6
     type = DirichletBC
     variable = T
     value = 300
-    boundary = 'back'
+    boundary = 'ground'
   []
   [water_convection]
     type = ADConvectiveHeatFluxBC
     variable = T
-    boundary = 'water_boundary'
+    boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
     heat_transfer_coefficient = 30
@@ -133,9 +133,12 @@ cp_multiplier = 1e-6
 [Executioner]
   type = Transient
   num_steps = 10
+  dt = 1
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+
+  scheme = 'bdf2'
 []
 
 [Outputs]

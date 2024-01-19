@@ -20,15 +20,15 @@
   [diffusion_concrete]
     type = CoefDiffusion
     variable = T
-    coef = 2.25
+    coef = 2.25 # W / m / K
   []
 []
 
 [BCs]
   [left]
-    type = DirichletBC  # Simple u=value BC
-    variable = T        # Variable to be set
-    boundary = left     # Name of a sideset in the mesh
+    type = DirichletBC # Simple u=value BC
+    variable = T # Variable to be set
+    boundary = left # Name of a sideset in the mesh
     value = 330
   []
   [right]
@@ -40,11 +40,11 @@
 []
 
 [Problem]
-  type = FEProblem  # This is the "normal" type of Finite Element Problem in MOOSE
+  type = FEProblem # This is the "normal" type of Finite Element Problem in MOOSE
 []
 
 [Executioner]
-  type = Steady       # Steady state problem
+  type = Steady # Steady state problem
   solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
   petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
   petsc_options_value = 'hypre boomeramg'
