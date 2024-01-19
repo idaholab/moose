@@ -200,17 +200,17 @@ protected:
                                    unsigned int jvar,
                                    const DenseMatrix<Number> & k);
 
-  /**
-   * Nonlocal Jacobian blocks  will be appended by adding the current nonlocal kernel Jacobian.
-   * It should be called after the nonlocal element matrix has been computed.
-   */
-  void accumulateTaggedNonlocalMatrix();
-
   void accumulateTaggedLocalMatrix(Assembly & assembly,
                                    unsigned int ivar,
                                    unsigned int jvar,
                                    Moose::DGJacobianType type,
                                    const DenseMatrix<Number> & k);
+
+  /**
+   * Nonlocal Jacobian blocks  will be appended by adding the current nonlocal kernel Jacobian.
+   * It should be called after the nonlocal element matrix has been computed.
+   */
+  void accumulateTaggedNonlocalMatrix();
 
   /**
    * Local Jacobian blocks will assigned as the current local kernel Jacobian.
