@@ -37,6 +37,81 @@
     order = FIRST
     family = LAGRANGE
   []
+  [irradiation_eigenstrain_00]
+  []
+  [irradiation_eigenstrain_01]
+  []
+  [irradiation_eigenstrain_11]
+  []
+  [irradiation_eigenstrain_22]
+  []
+[]
+
+
+[UserObjects]
+  [irradiation_eigenstrain_00_uo]
+    type = NodalPatchRecoveryMaterialProperty
+    property = thermal_expansion
+    patch_polynomial_order = first
+    component = '0 0'
+    block = 1
+    execute_on = 'TIMESTEP_END'
+  []
+  [irradiation_eigenstrain_11_uo]
+    type = NodalPatchRecoveryMaterialProperty
+    property = thermal_expansion
+    patch_polynomial_order = first
+    component = '1 1'
+    block = 1
+    execute_on = 'TIMESTEP_END'
+  []
+  [irradiation_eigenstrain_22_uo]
+    type = NodalPatchRecoveryMaterialProperty
+    property = thermal_expansion
+    patch_polynomial_order = first
+    component = '2 2'
+    block = 1
+    execute_on = 'TIMESTEP_END'
+  []
+  [irradiation_eigenstrain_01_uo]
+    type = NodalPatchRecoveryMaterialProperty
+    property = thermal_expansion
+    component = '0 1'
+    patch_polynomial_order = first
+    block = 1
+    execute_on = 'TIMESTEP_END'
+  []
+[]
+
+[AuxKernels]
+  [irradiation_eigenstrain_00]
+    type = NodalPatchRecoveryAux
+    nodal_patch_recovery_uo = irradiation_eigenstrain_00_uo
+    variable = irradiation_eigenstrain_00
+    execute_on = 'TIMESTEP_END'
+    block = 1
+  []
+  [irradiation_eigenstrain_11]
+    type = NodalPatchRecoveryAux
+    nodal_patch_recovery_uo = irradiation_eigenstrain_11_uo
+    variable = irradiation_eigenstrain_11
+    execute_on = 'TIMESTEP_END'
+    block = 1
+  []
+  [irradiation_eigenstrain_22]
+    type = NodalPatchRecoveryAux
+    nodal_patch_recovery_uo = irradiation_eigenstrain_22_uo
+    variable = irradiation_eigenstrain_22
+    execute_on = 'TIMESTEP_END'
+    block = 1
+  []
+  [irradiation_eigenstrain_01]
+    type = NodalPatchRecoveryAux
+    nodal_patch_recovery_uo = irradiation_eigenstrain_01_uo
+    variable = irradiation_eigenstrain_01
+    execute_on = 'TIMESTEP_END'
+    block = 1
+  []
 []
 
 [Functions]
@@ -62,8 +137,14 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
-  temperature = temp
-  eigenstrain_names = thermal_expansion
+
+  additional_eigenstrain_00 = irradiation_eigenstrain_00
+  additional_eigenstrain_01 = irradiation_eigenstrain_01
+  additional_eigenstrain_11 = irradiation_eigenstrain_11
+  additional_eigenstrain_22 = irradiation_eigenstrain_22
+
+  # temperature = temp
+  # eigenstrain_names = thermal_expansion
 []
 
 [Modules/TensorMechanics/Master]

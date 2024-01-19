@@ -125,6 +125,20 @@ protected:
   std::size_t _ring_index;
   /// Derivative of the total eigenstrain with respect to temperature
   const GenericMaterialProperty<RankTwoTensor, is_ad> * const _total_deigenstrain_dT;
+  /// Whether the user chooses to add other eigenstrain influence (e.g. irradiation-induced)
+  bool _has_additional_eigenstrain;
+  /// Gradient used to add contribution to the interaction integral (XX)
+  const VariableGradient * _additional_eigenstrain_gradient_00;
+  /// Gradient used to add contribution to the interaction integral (XY)
+  const VariableGradient * _additional_eigenstrain_gradient_01;
+  /// Gradient used to add contribution to the interaction integral (YY)
+  const VariableGradient * _additional_eigenstrain_gradient_11;
+  /// Gradient used to add contribution to the interaction integral (ZZ)
+  const VariableGradient * _additional_eigenstrain_gradient_22;
+  /// Gradient used to add contribution to the interaction integral (XZ)
+  const VariableGradient * _additional_eigenstrain_gradient_02;
+  /// Gradient used to add contribution to the interaction integral (YZ)
+  const VariableGradient * _additional_eigenstrain_gradient_12;
   /// Vector of q function values for the nodes in the current element
   std::vector<Real> _q_curr_elem;
   /// Vector of shape function values for the current element
