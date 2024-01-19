@@ -4,12 +4,12 @@
 
 ## Description
 
-This vector postprocessor locates a number of nodes in a structural component and computes their average
-variables along the $X$, $Y$, and $Z$ axes on multiple cross sections. This feature can be used to compute,
-for example, average displacements.
+This computes the average value of specified nodal variables at nodes located within cross-sectional planes
+at user-specified locations along the axis of a mesh.  For example, this is designed to work on bodies whose mesh discretization
+is created by extrusion, so that sets of nodes that make up the mesh lie within planes regularly.
 
 The location of the nodes is given by a direction and an
-associated length. This postprocessor is particularly indicated for structural components that deform in
+associated set of lengths. This postprocessor is particularly indicated for structural components that deform in
 a way analogous to beams, thereby freeing the user from performing additional postprocessing tasks on a
 different software. One use case of this postprocessor is the definition of cross sections in ducts that
 bend or bow (see [disp_cross]).
@@ -22,7 +22,8 @@ bend or bow (see [disp_cross]).
 
 !alert note
 This postprocessor should only be used for regularly meshed geometries as it relies on nodes having the
-same weights on the cross section. This requirement must be considered by the user.
+same weights on the cross section. There is no check within the code for this condition, so the user must
+ensure that the mesh is reasonably uniform.
 
 ## Example Syntax
 

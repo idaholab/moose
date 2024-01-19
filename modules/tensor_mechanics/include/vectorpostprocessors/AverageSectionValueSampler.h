@@ -24,16 +24,16 @@ public:
   virtual void finalize() override;
 
 protected:
-  /// References to the displaced mesh
+  /// Reference to the displaced mesh
   const std::shared_ptr<MooseMesh> & _displaced_mesh;
 
-  /// References to the mesh mesh
+  /// Reference to the mesh
   const std::shared_ptr<MooseMesh> & _mesh;
 
   /// Variables to output
   std::vector<VariableName> _variables;
 
-  /// Output with cross sectional variables
+  /// Vector of outputs, where each entry is the vector of average values for single variable at the selected points along the axis
   std::vector<VectorPostprocessorValue *> _output_vector;
 
   // Block ids over which this postprocessor does the computation
@@ -52,16 +52,21 @@ protected:
   const Real _tolerance;
 
   /// Number of nodes for computing output (local and global). We allow each section to have different
-  /// numbers of nodes (this would allow local, regular refinement in the structural component mesh)
+  /// numbers of nodes (this would allow local, regular refinement in the mesh)
   std::vector<unsigned int> _number_of_nodes;
 
   /// Tolerance to disambiguate cross section locations in different components within the same block
   const Real _cross_section_maximum_radius;
 
 private:
-  /// Axis direction of the structural component
-  Real distancePointPlane(const Node & node,
-                          const Point & axis_direction,
-                          const Point & reference_point,
-                          const Real length) const;
+  /**
+   * Determine the distance of a point from a plane at a specified axial distance from the
+   * component's reference point. If the in-plane distance is greater than the input parameter
+   * cross section maximum radius, return a large number.
+   * @param node The node whose distance from a plane is to be considered
+   * @param reference_point Reference point for the component
+   * @param length Axial position on the component to be considered
+   */
+  Real
+  distancePointToPlane(const Node & node, const Point & reference_point, const Real length) const;
 };

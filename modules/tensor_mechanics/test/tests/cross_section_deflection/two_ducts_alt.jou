@@ -1,21 +1,9 @@
 reset
 
-# Parameters: Dimensions in mm
-#{W = 50}
-#{a = 26.43}
-
-
-# To avoid stress concentration ahead of crack
-#{h = 1.2}
 #{hex_dimension = 1.0}
 #{B = 20*hex_dimension}
 #{hex_dimension_sm = 0.9} # small
 #{offset = 2.1} # small
-#{offset_y = 0.866025 + 0.001} # small
-
-#{value = 0.02}
-#{interval_fine = 10.0}
-#{interval_coarse = 10.0}
 
 # First HEXAGON
 create vertex {hex_dimension} 0 0
@@ -106,4 +94,4 @@ block 1 volume 3
 
 block 1 elem HEX8
 
-export mesh "/Users/marta3/projects3/moose/modules/tensor_mechanics/test/tests/cross_section_deflection/two_ducts.e" overwrite
+export mesh "two_ducts.e" overwrite

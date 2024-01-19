@@ -30,16 +30,19 @@ AverageSectionValueSampler::validParams()
                                  "input parameter 'lengths' applies.");
   params.addParam<Real>("cross_section_maximum_radius",
                         std::numeric_limits<double>::max(),
-                        "Optional parameter to disambiguate cross sections of different structural "
-                        "components when they share the same mesh block.");
-
+                        "Radial distance with respect to the body axis within which nodes are "
+                        "considered to belong to this "
+                        "structural component. Used to disambiguate multiple components that share "
+                        "the same mesh block.");
   params.addRequiredParam<std::vector<VariableName>>(
       "variables", "Variables for the cross section output. These variables must be nodal.");
   params.addRequiredParam<std::vector<Real>>(
-      "lengths", "Distance(s) to cross section from the global origin.");
+      "lengths",
+      "Distance(s) along axis of from reference_point at which to compute average values.");
   params.addParam<Real>("tolerance",
                         1.0e-6,
-                        "Distance tolerance to identify nodes on the user-defined cross section.");
+                        "Maximum axial distance of nodes from the specified axial lengths to "
+                        "consider them in the cross-section average");
   return params;
 }
 
@@ -60,9 +63,7 @@ AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & p
                "dimensional meshes.");
 
   if (!MooseUtils::absoluteFuzzyEqual(_direction.norm_sq(), 1.0))
-    paramError("axis_direction",
-               "Axis diretion must have a norm of one and define the direction along which to "
-               "locate cross sectional nodes.");
+    paramError("axis_direction", "Axis direction must be a unit vector.");
 
   _output_vector.resize(_variables.size());
   for (const auto j : make_range(_variables.size()))
@@ -100,8 +101,7 @@ AverageSectionValueSampler::finalize()
 
   for (const auto li : index_range(_lengths))
     if (_number_of_nodes[li] < 1)
-      mooseError(
-          "No nodes were found in AverageSectionValueSampler postprocessor. Revise your input.");
+      mooseError("No nodes were found in AverageSectionValueSampler postprocessor.");
 
   for (const auto li : index_range(_lengths))
     for (const auto j : make_range(_variables.size()))
@@ -126,13 +126,11 @@ AverageSectionValueSampler::execute()
 
     for (const auto li : index_range(_lengths))
       for (const auto i : _block_ids)
-        // If not contained in user blocks, continue
         if (node_blk_ids.find(i) != node_blk_ids.end())
         {
           // Check if node is close enough to user-prescribed plane
-          if (distancePointPlane(*node, _direction, _reference_point, _lengths[li]) > _tolerance)
+          if (distancePointToPlane(*node, _reference_point, _lengths[li]) > _tolerance)
             continue;
-          // Check node proc id is our processor id
           if ((*node).processor_id() != processor_id())
             continue;
 
@@ -153,24 +151,22 @@ AverageSectionValueSampler::execute()
 }
 
 Real
-AverageSectionValueSampler::distancePointPlane(const Node & node,
-                                               const Point & axis_direction,
-                                               const Point & reference_point,
-                                               const Real length) const
+AverageSectionValueSampler::distancePointToPlane(const Node & node,
+                                                 const Point & reference_point,
+                                                 const Real length) const
 {
   // Compute node location w.r.t. structural component length
   const Point relative_distance{
       node(0) - reference_point(0), node(1) - reference_point(1), node(2) - reference_point(2)};
 
-  const Real axial_distance = axis_direction(0) * relative_distance(0) +
-                              axis_direction(1) * relative_distance(1) +
-                              axis_direction(2) * relative_distance(2);
-  const Real out_of_plane_distance =
-      (relative_distance - relative_distance * axis_direction * axis_direction).norm();
+  const Real axial_distance = _direction * relative_distance;
+  const Real in_plane_distance =
+      (relative_distance - relative_distance * _direction * _direction).norm();
 
-  // If condition below is fulfilled, not in the user-defined structural component
-  if (out_of_plane_distance > _cross_section_maximum_radius)
+  // If the in-plane distance is greater than the specified cross-section radius, the point is not
+  // in this component
+  if (in_plane_distance > _cross_section_maximum_radius)
     return std::numeric_limits<double>::max();
 
-  return std::abs(axial_distance - length) / std::sqrt(axis_direction * axis_direction);
+  return std::abs(axial_distance - length);
 }
