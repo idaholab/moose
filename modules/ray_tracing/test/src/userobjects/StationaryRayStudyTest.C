@@ -33,7 +33,7 @@ StationaryRayStudyTest::defineRays()
 {
   const auto define_ray = [this](const auto elem, const auto & start)
   {
-    auto & ray = *_rays.emplace_back(std::move(acquireRay()));
+    auto & ray = *_rays.emplace_back(acquireRay());
     ray.setStart(start, elem);
     ray.setStationary();
   };
