@@ -67,7 +67,7 @@ For each of the pins listed in `pin_names`, the pin-level metadata is also displ
 
 In addition, the value of the `reactor_params_name` metadata can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 
-For applications where an output mesh does not need to be created and meshing routines can consist entirely of defining reactor-based metadata, the parameter `[Mesh]`/[!param](/Mesh/data_driven_generator) can be set to the mesh generator that would generate an output mesh from RGMB metadata.
+For applications where an output mesh does not need to be created and meshing routines can consist entirely of defining reactor-based metadata, the parameter `[Mesh]`/[!param](/Mesh/MeshGeneratorMesh/data_driven_generator) can be set to the mesh generator that would generate an output mesh from RGMB metadata.
 
 ## Example Syntax
 
