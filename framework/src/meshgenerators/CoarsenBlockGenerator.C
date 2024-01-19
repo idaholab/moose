@@ -55,8 +55,6 @@ CoarsenBlockGenerator::CoarsenBlockGenerator(const InputParameters & parameters)
 {
   if (_block.size() != _coarsening.size())
     paramError("coarsening", "The blocks and coarsening parameter vectors should be the same size");
-  if (processor_id() > 0)
-    mooseError("This mesh generator only supports serial execution");
 }
 
 std::unique_ptr<MeshBase>
@@ -89,6 +87,8 @@ CoarsenBlockGenerator::generate()
 
   // Take ownership of the mesh
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  if (!mesh->is_replicated())
+    paramError("input", "Input mesh must not be distributed");
 
   // Find the element to start from
   auto start_elem = (*mesh->sub_point_locator())(_starting_point);
@@ -162,11 +162,20 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
     auto start_node = start_elem->node_ptr(start_node_index);
     mooseAssert(start_node, "Starting node should exist");
 
+    // Create comparator for ordering of candidates
+    auto cmp = [](std::pair<Elem *, Node *> a, std::pair<Elem *, Node *> b)
+    {
+      // Sweep direction
+      // Potentially a user selectable parameter in the future
+      Point sorting_direction(1, 1, 1);
+      return (a.first->vertex_average() - b.first->vertex_average()) * sorting_direction > 0;
+    };
+
     // This set will keep track of all the 'fine elem' + 'coarse element interior node' pairs
     // we should attempt to form coarse element from
     // TODO: think about the implications of set vs vector. Set might grow to the entire mesh
     // due to sorting. Vector we could insert at the beginning and treat new candidates immediately
-    std::set<std::pair<Elem *, Node *>> candidate_pairs;
+    std::set<std::pair<Elem *, Node *>, decltype(cmp)> candidate_pairs(cmp);
     candidate_pairs.insert(std::make_pair(start_elem, start_node));
 
     // Keep track of the coarse elements created

@@ -11,7 +11,6 @@
                  "single_uniform.e"
       detail = 'for a mesh coarsening test with a uniformly refined mesh,'
       recover = false
-      max_parallel = 1
     []
     [multiple_block_nonuniform]
       type = RunApp
@@ -20,7 +19,6 @@
                  "single_nonuniform.e"
       detail = 'for a mesh coarsening test with a non-uniformly refined mesh,'
       recover = false
-      max_parallel = 1
     []
     [multiple_levels]
       type = RunApp
@@ -29,7 +27,6 @@
                  "double_nonuniform.e"
       detail = 'for a mesh coarsening test with a twice-refined elements,'
       recover = false
-      max_parallel = 1
     []
     [external_refined]
       type = RunApp
@@ -39,7 +36,6 @@
                  "Mesh/refine_side/refinement='1' --mesh-only external_uniform.e"
       detail = 'for a mesh coarsening test with an external boundary refined,'
       recover = false
-      max_parallel = 1
     []
     [internal_refined]
       type = RunApp
@@ -49,7 +45,6 @@
                  "Mesh/refine_side/refinement='1' --mesh-only internal_uniform.e"
       detail = 'and for a mesh coarsening test with an external boundary refined.'
       recover = false
-      max_parallel = 1
     []
   []
 
@@ -63,7 +58,6 @@
       cli_args = '--mesh-only'
       recover = false
       detail = 'elements within a non-uniformly refined meshed,'
-      max_parallel = 1
       mesh_mode = replicated
     []
     [multiple_block_uniform]
@@ -73,7 +67,6 @@
       recover = false
       cli_args = "Mesh/input/file=single_uniform.e Mesh/coarsen/coarsening='1 1 1' --mesh-only"
       detail = 'multiple blocks within a multi-domain mesh,'
-      max_parallel = 1
       mesh_mode = replicated
     []
     [multiple_block_nonuniform]
@@ -83,7 +76,6 @@
       recover = false
       cli_args = "Mesh/input/file=single_nonuniform.e Mesh/coarsen/coarsening='0 1 1' --mesh-only"
       detail = 'multiple blocks, both refined and unrefined, within a multi-domain mesh,'
-      max_parallel = 1
       mesh_mode = replicated
     []
     [multiple_levels]
@@ -94,7 +86,6 @@
       cli_args = "Mesh/input/file=double_nonuniform.e Mesh/coarsen/coarsening='0 1 2' "
                  "Mesh/coarsen/starting_point='2.5 3 0' --mesh-only"
       detail = 'multiple blocks at multiple levels of coarsening within a multi-domain mesh,'
-      max_parallel = 1
       mesh_mode = replicated
     []
     [external_boundary_single]
@@ -105,7 +96,6 @@
       cli_args = "Mesh/input/file=external_uniform.e Mesh/coarsen/coarsening='1 1 1' "
                  "Mesh/coarsen/starting_point='2 5 0' --mesh-only"
       detail = 'elements near a refined external boundary,'
-      max_parallel = 1
       mesh_mode = replicated
     []
     [internal_boundary_single]
@@ -116,7 +106,6 @@
       cli_args = "Mesh/input/file=internal_uniform.e Mesh/coarsen/coarsening='1 1 1' "
                  "Mesh/coarsen/starting_point='3 5 0' --mesh-only"
       detail = 'elements near a refined internal boundary.'
-      max_parallel = 1
       mesh_mode = replicated
     []
   []
@@ -129,7 +118,6 @@
       cli_args = 'Mesh/coarsen/block="missing"'
       expect_err = "The block 'missing' was not found within the mesh"
       detail = "attempting to coarsen a block that does not exist in the mesh, and "
-      max_parallel = 1
     []
     [wrong_size_inputs]
       type = RunException
@@ -138,7 +126,6 @@
       expect_err = "The blocks and coarsening parameter vectors should be the same size"
       detail = "if specifying a vector of coarsening levels that does not match the vector of "
                "subdomains to coarsen,"
-      max_parallel = 1
     []
     [wrong_starting_point]
       type = RunException
@@ -146,7 +133,7 @@
       cli_args = 'Mesh/coarsen/coarsening="2 1 0" --mesh-only'
       expect_err = "The starting element must be in the block set to be coarsened the most"
       detail = "the coarsening starting element is not in the block to coarsen the most."
-      max_parallel = 1
+      mesh_mode = replicated
     []
   []
 []
