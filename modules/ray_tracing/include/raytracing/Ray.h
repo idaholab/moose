@@ -369,7 +369,7 @@ public:
    * setStartingEndPoint(). It cannot be called after a Ray has began tracing.
    *
    * Can only be called before a Ray has started to be traced!
-  */
+   */
   void setStationary();
 
   /**
