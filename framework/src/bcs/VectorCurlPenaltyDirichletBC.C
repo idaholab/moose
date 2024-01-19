@@ -50,11 +50,11 @@ VectorCurlPenaltyDirichletBC::computeQpResidual()
                _function_y.value(_t, _q_point[_qp]),
                _function_z.value(_t, _q_point[_qp])};
   RealVectorValue Ncu = (_u[_qp] - u_exact).cross(_normals[_qp]);
-  return _penalty * Ncu * ((_test[_i][_qp]).cross(_normals[_qp]));
+  return _penalty * Ncu * _test[_i][_qp].cross(_normals[_qp]);
 }
 
 Real
 VectorCurlPenaltyDirichletBC::computeQpJacobian()
 {
-  return _penalty * (_phi[_j][_qp]).cross(_normals[_qp]) * (_test[_i][_qp]).cross(_normals[_qp]);
+  return _penalty * _phi[_j][_qp].cross(_normals[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
 }
