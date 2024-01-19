@@ -94,8 +94,7 @@ Lower-dimensional auxiliary variables may be populated using boundary restricted
 auxiliary kernels. The boundary restriction of the aux kernel should be
 coincident with (a subset of) the lower-dimensional blocks that the
 lower-dimensional variable lives on. Using a boundary restricted auxiliary
-kernel as opposed to a lower-d block-restricted auxiliary kernel (which is not
-supported) allows pulling
+kernel as opposed to a lower-d block-restricted auxiliary kernel allows pulling
 in coincident face evaluations of higher-dimensional variables and material
 properties as well as evaluations of coupled lower-dimensional variables.
 

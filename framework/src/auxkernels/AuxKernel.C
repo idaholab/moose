@@ -141,12 +141,12 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _solution(_aux_sys.solution()),
 
     _current_lower_d_elem(_assembly.lowerDElem()),
-    _lower_d_calc(_bnd && !isNodal() && _var.isLowerD())
+    _coincident_lower_d_calc(_bnd && !isNodal() && _var.isLowerD())
 {
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  if (_bnd && !isNodal() && !_lower_d_calc && _check_boundary_restricted)
+  if (_bnd && !isNodal() && !_coincident_lower_d_calc && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,
     // we need to check that no elements are visited more than once through visiting
@@ -182,11 +182,6 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     paramError("variable",
                "Variable family " + Moose::stringify(type.family) + " is not supported at order " +
                    Moose::stringify(type.order) + " by the AuxKernel system.");
-
-  if (_var.isLowerD() && !_bnd && !isNodal())
-    mooseError("Evaluting lower-dimensional aux variables is currently only supported with "
-               "boundary restricted aux kernels, e.g. on boundary faces of higher-dimensional "
-               "elements that are coincident with lower-dimensional blocks");
 }
 
 template <typename ComputeValueType>
@@ -286,7 +281,7 @@ template <typename ComputeValueType>
 void
 AuxKernelTempl<ComputeValueType>::insert()
 {
-  if (_lower_d_calc)
+  if (_coincident_lower_d_calc)
     _var.insertLower(_aux_sys.solution());
   else
     _var.insert(_aux_sys.solution());
@@ -300,7 +295,7 @@ AuxKernelTempl<ComputeValueType>::compute()
 
   if (isNodal()) /* nodal variables */
   {
-    mooseAssert(!_lower_d_calc,
+    mooseAssert(!_coincident_lower_d_calc,
                 "Nodal evaluations are point evaluations. We don't have to concern ourselves with "
                 "coincidence of lower-d blocks and higher-d faces because they share nodes");
     if (_var.isNodalDefined())
@@ -313,11 +308,11 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
   else /* elemental variables */
   {
-    if (_lower_d_calc && !_current_lower_d_elem)
+    if (_coincident_lower_d_calc && !_current_lower_d_elem)
       mooseError("No lower-dimensional element. Make sure that the loewr-d variable lives on a "
                  "lower-d block that is a superset of the boundary");
 
-    _n_local_dofs = _lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
+    _n_local_dofs = _coincident_lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
     if (_n_local_dofs == 1) /* p0 */
     {
       ComputeValueType value = 0;
@@ -331,7 +326,7 @@ AuxKernelTempl<ComputeValueType>::compute()
         // update the variable data referenced by other kernels.
         // Note that this will update the values at the quadrature points too
         // (because this is an Elemental variable)
-        if (_lower_d_calc)
+        if (_coincident_lower_d_calc)
         {
           _local_sol.resize(1);
           if constexpr (std::is_same<Real, ComputeValueType>::value)
@@ -351,7 +346,7 @@ AuxKernelTempl<ComputeValueType>::compute()
       _local_ke.resize(_n_local_dofs, _n_local_dofs);
       _local_ke.zero();
 
-      const auto & test = _lower_d_calc ? _var.phiLower() : _test;
+      const auto & test = _coincident_lower_d_calc ? _var.phiLower() : _test;
 
       // assemble the local mass matrix and the load
       for (unsigned int i = 0; i < test.size(); i++)
@@ -369,7 +364,7 @@ AuxKernelTempl<ComputeValueType>::compute()
       else
         _local_ke.cholesky_solve(_local_re, _local_sol);
 
-      _lower_d_calc ? _var.setLowerDofValues(_local_sol) : _var.setDofValues(_local_sol);
+      _coincident_lower_d_calc ? _var.setLowerDofValues(_local_sol) : _var.setDofValues(_local_sol);
     }
   }
 }

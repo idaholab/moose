@@ -222,8 +222,9 @@ protected:
   /// The current lower dimensional element
   const Elem * const & _current_lower_d_elem;
 
-  /// Whether we are doing a lower dimensional calculation
-  const bool _lower_d_calc;
+  /// Whether we are computing for a lower dimensional variable using boundary restriction, e.g. a
+  /// variable whose block restriction is coincident with a higher-dimensional boundary face
+  const bool _coincident_lower_d_calc;
 
   /// Quadrature point index
   unsigned int _qp;
