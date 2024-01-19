@@ -351,14 +351,16 @@ AuxKernelTempl<ComputeValueType>::compute()
       _local_ke.resize(_n_local_dofs, _n_local_dofs);
       _local_ke.zero();
 
+      const auto & test = _lower_d_calc ? _var.phiLower() : _test;
+
       // assemble the local mass matrix and the load
-      for (unsigned int i = 0; i < _test.size(); i++)
+      for (unsigned int i = 0; i < test.size(); i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         {
-          ComputeValueType t = _JxW[_qp] * _coord[_qp] * _test[i][_qp];
+          ComputeValueType t = _JxW[_qp] * _coord[_qp] * test[i][_qp];
           _local_re(i) += t * computeValue();
-          for (unsigned int j = 0; j < _test.size(); j++)
-            _local_ke(i, j) += t * _test[j][_qp];
+          for (unsigned int j = 0; j < test.size(); j++)
+            _local_ke(i, j) += t * test[j][_qp];
         }
       // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
       _local_sol.resize(_n_local_dofs);

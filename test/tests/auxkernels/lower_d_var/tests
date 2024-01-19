@@ -1,0 +1,10 @@
+[Tests]
+  design = 'AuxKernels/index.md'
+  issues = '#26592'
+  [csv]
+    type = CSVDiff
+    input = lower-d-aux-var.i
+    csvdiff = lower-d-aux-var_out.csv
+    requirement = 'The system shall allow populating lower-dimensional auxiliary variables using boundary restricted auxiliary kernels.'
+  []
+[]
