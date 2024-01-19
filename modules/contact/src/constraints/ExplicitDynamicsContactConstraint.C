@@ -151,6 +151,7 @@ ExplicitDynamicsContactConstraint::timestepSetup()
   {
     updateContactStatefulData(/* beginning_of_step = */ true);
     _update_stateful_data = false;
+    _dof_to_velocity.clear();
   }
 }
 
@@ -295,8 +296,6 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
   Real mass_contact_pressure(0.0);
 
   Real gap_rate(0.0);
-  // Real gap(0.0);
-  // gap = distance_gap * pinfo->_normal;
 
   mass_contact_pressure =
       density_secondary * _neighbor_density[0] * wave_speed_secondary * _neighbor_wave_speed[0];
@@ -310,7 +309,8 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
 
   auto & u_dot = *_sys.solutionUDot();
   auto & u_old = _sys.solutionOld();
-  auto & u_older = _sys.solutionOlder();
+  // auto & u_older = _sys.solutionOlder();
+  auto & u_old_old_old = _sys.solutionState(3);
 
   // Mass proxy for secondary node.
   const Real mass_proxy = density_secondary * wave_speed_secondary * _dt * nodal_area;
@@ -356,6 +356,7 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
     velocity_z -= _dt / mass_proxy * (pinfo->_normal(2) * (force_increment));
 
     // Let's not modify the neighbor velocity, but apply the corresponding force.
+    // TODO: Update for multi-body impacts
     // n_velocity_x = n_velocity_x;
     // n_velocity_y = n_velocity_y;
     // n_velocity_z = n_velocity_z;
@@ -370,33 +371,32 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
     const Real relative_error = (force_increment - force_increment_old) / force_increment;
     const Real absolute_error = std::abs(force_increment);
 
-    if (std::abs(relative_error) < TOLERANCE || absolute_error < TOLERANCE ||
+    if (std::abs(relative_error) < TOLERANCE * TOLERANCE || absolute_error < TOLERANCE ||
         (gap_rate_old) * (gap_rate) < 0.0)
       is_converged = true;
     else
       iteration_no++;
   }
 
-  const bool print_debug(false);
-  if (print_debug)
-  {
-    _console << "Results of momentun balance iterations for node: " << _current_node->id() << "\n";
-    _console << "Total number of iterations: " << iteration_no << "\n";
-    _console << "Final normal gap rate (dynamic constraint): " << gap_rate << "\n";
-    _console << "Velocity x of secondary node: " << velocity_x << "\n";
-    _console << "Velocity y of secondary node: " << velocity_y << "\n";
-    _console << "Velocity z of secondary node: " << velocity_z << "\n";
-    _console << "Final normal contact force: " << lambda_iteration << "\n";
-  }
-
-  // Set velocities on contact interface according to local, converged solution.
-  // Note: Since MOOSE solves for displacements, we need to back calculate the displacements and
-  // cannot rely on the central difference stepper to operate on rate variables (!)
+  // const bool print_debug(false);
+  // if (print_debug)
+  // {
+  //   _console << "Results of momentun balance iterations for node: " << _current_node->id() <<
+  //   "\n"; _console << "Total number of iterations: " << iteration_no << "\n"; _console << "Final
+  //   normal gap rate (dynamic constraint): " << gap_rate << "\n"; _console << "Velocity x of
+  //   secondary node: " << velocity_x << "\n"; _console << "Velocity y of secondary node: " <<
+  //   velocity_y << "\n"; _console << "Velocity z of secondary node: " << velocity_z << "\n";
+  //   _console << "Final normal contact force: " << lambda_iteration << "\n";
+  // }
 
   // Discount effects of other forces
-  u_old.set(dof_x, u_older(dof_x) + velocity_x * _dt);
-  u_old.set(dof_y, u_older(dof_y) + velocity_y * _dt);
-  u_old.set(dof_z, u_older(dof_z) + velocity_z * _dt);
+  u_old.set(dof_x, u_old_old_old(dof_x) + 2.0 * velocity_x * _dt);
+  u_old.set(dof_y, u_old_old_old(dof_y) + 2.0 * velocity_y * _dt);
+  u_old.set(dof_z, u_old_old_old(dof_z) + 2.0 * velocity_z * _dt);
+
+  _dof_to_velocity[dof_x] = u_old_old_old(dof_x) + 2.0 * velocity_x * _dt;
+  _dof_to_velocity[dof_y] = u_old_old_old(dof_y) + 2.0 * velocity_y * _dt;
+  _dof_to_velocity[dof_z] = u_old_old_old(dof_z) + 2.0 * velocity_z * _dt;
 
   _gap_rate->setNodalValue(gap_rate);
 
@@ -489,4 +489,27 @@ ExplicitDynamicsContactConstraint::getCoupledVarComponent(unsigned int var_num,
 void
 ExplicitDynamicsContactConstraint::residualEnd()
 {
+}
+
+void
+ExplicitDynamicsContactConstraint::overwriteBoundaryVariables(NumericVector<Number> & soln,
+                                                              const Node & secondary_node) const
+{
+  if (_component == 0)
+  {
+    dof_id_type dof_x = secondary_node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
+    dof_id_type dof_y = secondary_node.dof_number(_sys.number(), _var_objects[1]->number(), 0);
+    dof_id_type dof_z = secondary_node.dof_number(_sys.number(), _var_objects[2]->number(), 0);
+
+    if (_dof_to_velocity.find(dof_x) != _dof_to_velocity.end())
+    {
+      const auto & velocity_x = libmesh_map_find(_dof_to_velocity, dof_x);
+      const auto & velocity_y = libmesh_map_find(_dof_to_velocity, dof_y);
+      const auto & velocity_z = libmesh_map_find(_dof_to_velocity, dof_z);
+
+      soln.set(dof_x, velocity_x);
+      soln.set(dof_y, velocity_y);
+      soln.set(dof_z, velocity_z);
+    }
+  }
 }

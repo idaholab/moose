@@ -95,6 +95,9 @@ ActuallyExplicitEuler::solve()
   *_nonlinear_implicit_system->solution = _nl.solutionOld();
   *_nonlinear_implicit_system->solution += _solution_update;
 
+  _nl.overwriteContact(*_nonlinear_implicit_system->solution);
+  _nonlinear_implicit_system->solution->close();
+
   // Enforce contraints on the solution
   DofMap & dof_map = _nonlinear_implicit_system->get_dof_map();
   dof_map.enforce_constraints_exactly(*_nonlinear_implicit_system,

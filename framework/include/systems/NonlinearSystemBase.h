@@ -362,6 +362,12 @@ public:
   virtual void setSolution(const NumericVector<Number> & soln);
 
   /**
+   * Called from explicit time stepping to overwrite boundary positions (explicit dynamics)
+   * @param soln Solution of current time step.
+   */
+  virtual void overwriteContact(NumericVector<Number> & soln);
+
+  /**
    * Update active objects of Warehouses owned by NonlinearSystemBase
    */
   void updateActive(THREAD_ID tid);

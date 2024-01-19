@@ -82,6 +82,9 @@ public:
 
   virtual const std::set<unsigned int> & getMatPropDependencies() const override;
 
+  virtual void overwriteBoundaryVariables(NumericVector<Number> & soln,
+                                          const Node & secondary_node) const override;
+
 protected:
   /**
    * Determine "Lagrange multipliers" from the iterative solution of the impact problem.
@@ -143,6 +146,9 @@ protected:
   const VariableValue & _neighbor_vel_y;
   /// Z component of velocity at the closest point
   const VariableValue & _neighbor_vel_z;
+
+private:
+  std::unordered_map<dof_id_type, Real> _dof_to_velocity;
 };
 
 inline const std::set<unsigned int> &

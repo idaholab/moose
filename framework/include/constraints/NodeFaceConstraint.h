@@ -118,9 +118,15 @@ public:
   virtual const std::set<unsigned int> & getMatPropDependencies() const;
 
   /**
-   * Virtual method to avoid initial setups.
+   * Whether (contact) constraint is of 'explicit dynamics' type.
    */
   virtual bool isExplicitConstraint() const { return false; }
+
+  /**
+   * Allows for overwriting boundary variables (explicit dynamics contact).
+   */
+  virtual void overwriteBoundaryVariables(NumericVector<Number> & /*soln*/,
+                                          const Node & /*secondary_node*/) const {};
 
 protected:
   /**

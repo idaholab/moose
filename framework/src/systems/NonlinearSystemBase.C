@@ -1554,6 +1554,58 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 }
 
 void
+NonlinearSystemBase::overwriteContact(NumericVector<Number> & soln)
+{
+  // Overwrite results from integrator in case we have explicit dynamics contact constraints
+  auto & subproblem = _fe_problem.getDisplacedProblem()
+                          ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                          : static_cast<SubProblem &>(_fe_problem);
+  const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
+
+  for (const auto & it : penetration_locators)
+  {
+    PenetrationLocator & pen_loc = *(it.second);
+
+    std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
+    BoundaryID secondary_boundary = pen_loc._secondary_boundary;
+    BoundaryID primary_boundary = pen_loc._primary_boundary;
+
+    if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, true))
+    {
+      const auto & constraints =
+          _constraints.getActiveNodeFaceConstraints(secondary_boundary, true);
+      for (unsigned int i = 0; i < secondary_nodes.size(); i++)
+      {
+        dof_id_type secondary_node_num = secondary_nodes[i];
+        Node & secondary_node = _mesh.nodeRef(secondary_node_num);
+
+        if (secondary_node.processor_id() == processor_id())
+        {
+          if (pen_loc._penetration_info[secondary_node_num])
+          {
+            for (const auto & nfc : constraints)
+            {
+              if (!nfc->isExplicitConstraint())
+                continue;
+
+              // Return if this constraint does not correspond to the primary-secondary pair
+              // prepared by the outer loops.
+              // This continue statement is required when, e.g. one secondary surface constrains
+              // more than one primary surface.
+              if (nfc->secondaryBoundary() != secondary_boundary ||
+                  nfc->primaryBoundary() != primary_boundary)
+                continue;
+
+              nfc->overwriteBoundaryVariables(soln, secondary_node);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+void
 NonlinearSystemBase::residualSetup()
 {
   TIME_SECTION("residualSetup", 3);

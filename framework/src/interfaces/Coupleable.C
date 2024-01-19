@@ -935,8 +935,6 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
   const auto * br = dynamic_cast<const BlockRestrictable *>(this);
   const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
 
-  //   mooseWarning("This object '", _obj->name(), "'is not of the block restrictable type.");
-
   if (br && !var->hasBlocks(br->blockIDs()))
     mooseError("The variable '",
                var->name(),
