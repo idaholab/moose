@@ -48,13 +48,13 @@ finite elements for velocity and pressure.'
   [steady_lid_driven_fsp_low_Re]
     requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of unity, and'
     issues = '#24548'
-    [mass_matrix_scaling]
+    [velocity_mass_matrix_scaling]
       type = 'Exodiff'
       input = 'steady_fsp.i'
       exodiff = 'fsp_steady_low_Re.e'
       custom_cmp = 'fsp.cmp'
       cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_steady_low_Re"
-      detail = 'using the velocity mass matrix for scaling within the Least Squares Commutator preconditioner, or'
+      detail = 'using the velocity mass matrix for scaling within the Least Squares Commutator preconditioner with a component variable implementation, or'
     []
     [a_digonal_scaling]
       type = 'Exodiff'
@@ -62,7 +62,23 @@ finite elements for velocity and pressure.'
       exodiff = 'steady_fsp_diagonal_of_a_for_scaling_exo.e'
       custom_cmp = 'fsp.cmp'
       cli_args = "n=8 mu=1"
-      detail = 'using the diagonal of the velocity-velocity block for scaling within the Least Squares Commutator preconditioner.'
+      detail = 'using the diagonal of the velocity-velocity block for scaling within the Least Squares Commutator preconditioner with a component variable implementation, or'
+    []
+    [vector_elman]
+      type = 'Exodiff'
+      input = 'steady_vector_fsp_elman.i'
+      exodiff = 'steady_vector_fsp_elman_exo.e'
+      issues = '#24548'
+      detail = 'using the velocity mass matrix for scaling within the Least Squares Commutator preconditioner with a vector variable implementation, or'
+      custom_cmp = 'fsp.cmp'
+    []
+    [vector_olshanskii]
+      type = 'Exodiff'
+      input = 'steady_vector_fsp.i'
+      exodiff = 'fsp_steady_low_Re_olshanskii.e'
+      issues = '#24548'
+      detail = 'commuting operators in the style of Olshanskii with a vector variable implementation.'
+      custom_cmp = 'fsp.cmp'
     []
   []
   [steady_lid_driven_fsp_high_Re]
@@ -73,14 +89,6 @@ finite elements for velocity and pressure.'
     issues = '#24548'
     requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of 500.'
     cli_args = "n=8 -fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_steady_high_Re"
-  []
-  [steady_lid_driven_fsp_low_Re_olshanskii]
-    type = 'Exodiff'
-    input = 'steady_vector_fsp.i'
-    exodiff = 'fsp_steady_low_Re_olshanskii.e'
-    issues = '#24548'
-    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of unity, and commuting operators in the style of Olshanskii.'
-    custom_cmp = 'fsp.cmp'
   []
   [steady_lid_driven_fsp_stokes]
     type = 'Exodiff'
