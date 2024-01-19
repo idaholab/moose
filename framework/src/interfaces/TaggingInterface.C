@@ -396,13 +396,6 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
 }
 
 void
-TaggingInterface::accumulateTaggedNonlocalMatrix()
-{
-  for (auto & ke : _ke_blocks)
-    *ke += _nonlocal_ke;
-}
-
-void
 TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
                                               const unsigned int ivar,
                                               const unsigned int jvar,
@@ -419,6 +412,13 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
               "Passed-in k must match the blocks we are about to sum into");
   for (auto & ke : _ke_blocks)
     *ke += k;
+}
+
+void
+TaggingInterface::accumulateTaggedNonlocalMatrix()
+{
+  for (auto & ke : _ke_blocks)
+    *ke += _nonlocal_ke;
 }
 
 void
