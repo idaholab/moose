@@ -88,6 +88,68 @@ A final option available to users is the [!param](/Problem/NavierStokesProblem/u
 in which case a "standard" preconditioner can be used (e.g. `-pc_type lu`,
 `-pc_type hypre -pc_hypre_type boomeramg`, etc.) as opposed to LSC.
 
+## Which preconditioner to choose
+
+[!citep](zanetti2020scalable) compares the Elman and Olshanskii LSC
+preconditioners for "high" Reynolds numbers. The overarching result from that
+paper is that Olshanskii is better performing, although the largest kinematic
+viscosity explored in that article direclty comparing the two methods is
+$10^{-1}$. The Olshanskii preconditioner is known to be sub-optimal for high
+viscosities. In the limit of Stokes flow in which the advective term is dropped,
+the Schur complement preconditioned with Olshanskii has a condition number that
+is the square of the optimally preconditioned (using the pressure mass matrix)
+Schur complement, which leads roughly to a doubling in iterations for the Schur
+complement solve (see [!citep](olshanskii2007pressure)). Below we compare three
+different preconditioning methods for the Schur complement, Elman LSC,
+Olshanskii LSC, and direct preconditioning of the Schur complement with the
+pressure mass matrix, for three different kinematic viscosities and mesh sizes
+for the lid driven cavity with a peak lid velocity of 1 and mesh dimension 1
+(consequently the Reynolds number is the reciprocal of the kinematic
+viscosity). The values shown in the table are the maximum number of linear
+iterations observed during Krylov solves of the Schur complement during
+the steady Newton solve.  For this test, the Elman preconditioner outperforms Olshanskii at
+high viscosities. However, for low viscosities, Elman shows an iteration count
+that scales with the mesh size whereas Olshanskii iteration counts are
+independent of the mesh size. This is likely due to the better clustering of
+eigenvalues by the Olshanskii preconditioner compared to Elman shown in
+[!citep](zanetti2020scalable). Direct preconditioning with the pressure mass
+matrix is very effective for high viscosities (as theory predicts), but performs
+worse than Olshanskii (and Elman for smaller meshes) for low viscosities. In
+summary, we recommend that users use Elman or the pressure mass matrix directly
+for high viscosities (low Reynolds numbers) and Olshanskii for low viscosities
+(high Reynolds numbers)
+
+Elman:
+
+| $nu$      | n = 20 | n = 40 | n = 80 |
+| ---       | ---    | ---    | ---    |
+| 100       | 5      | 6      | 8      |
+| 1         | 5      | 7      | 8      |
+| $10^{-2}$ | 13     | 16     | 22     |
+
+Olshanskii:
+
+| $nu$      | n = 20 | n = 40 | n = 80 |
+| ---       | ---    | ---    | ---    |
+| 100       | 11     | 12     | 12     |
+| 1         | 11     | 12     | 12     |
+| $10^{-2}$ | 17     | 18     | 17     |
+
+Pressure
+
+| $nu$      | n = 20 | n = 40 | n = 80 |
+| ---       | ---    | ---    | ---    |
+| 100       | 6      | 6      | 6      |
+| 1         | 6      | 6      | 6      |
+| $10^{-2}$ | 21     | 21     | 21     |
+
+The tables above were created by running the `steady_vector_fsp_elman.i`,
+`steady_vector_fsp.i`, and `steady_vector_fsp_stokes.i` inputs respectively. To
+focus the comparison on the preconditioning of the Schur complement itself, all
+multigrid preconditioners were replaced with LU decompositions (`-pc_type lu
+-pc_factor_mat_solver_type mumps`). In the `steady_vector_fsp_stokes.i` input,
+an `INSFVMomentumAdvection` block was added as well.
+
 !syntax parameters /Problem/NavierStokesProblem
 
 !syntax inputs /Problem/NavierStokesProblem
