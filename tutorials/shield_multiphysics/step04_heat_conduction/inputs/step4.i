@@ -8,12 +8,12 @@
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete'
+    block = 'concrete water'
   []
 []
 
 [Kernels]
-  [diffusion_concrete]
+  [diffusion]
     type = ADHeatConduction
     variable = T
   []
@@ -29,6 +29,20 @@
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
     specific_heat = '1170'
   []
+  [water]
+    type = ADHeatConductionMaterial
+    block = 'water'
+    temp = 'T'
+    # we specify a function of time, temperature is passed as the time argument
+    # in the material
+    thermal_conductivity_temperature_function = '0.6'
+  []
+  # [water]
+  #   type = ADParsedMaterial
+  #   expression = '0.6 + 0.002 * T'
+  #   coupled_variables = 'T'
+  #   property_name = 'thermal_conductivity'
+  # []
 []
 
 [BCs]
@@ -53,14 +67,14 @@
     value = 300
     boundary = 'ground'
   []
-  [water_convection]
-    type = ADConvectiveHeatFluxBC
-    variable = T
-    boundary = 'water_boundary_inwards'
-    T_infinity = 300.0
-    # The heat transfer coefficient should be obtained from a correlation
-    heat_transfer_coefficient = 30
-  []
+  # [water_convection]
+  #   type = ADConvectiveHeatFluxBC
+  #   variable = T
+  #   boundary = 'water_boundary_inwards'
+  #   T_infinity = 300.0
+  #   # The heat transfer coefficient should be obtained from a correlation
+  #   heat_transfer_coefficient = 30
+  # []
 []
 
 [Problem]

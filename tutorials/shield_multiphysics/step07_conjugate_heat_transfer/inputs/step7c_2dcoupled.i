@@ -102,13 +102,13 @@ ny = '${fparse 32 * mult}'
   #   refinement = '3'
   #   block = 'water'
   # []
-  [refine_water_side]
-    type = RefineSidesetGenerator
-    input = pin_node
-    refinement = '2'
-    boundaries = 'water_boundary'
-  []
-  uniform_refine = 1
+  # [refine_water_side]
+  #   type = RefineSidesetGenerator
+  #   input = pin_node
+  #   refinement = '2'
+  #   boundaries = 'water_boundary'
+  # []
+  # uniform_refine = 1
   # second_order = true
 []
 
@@ -336,13 +336,13 @@ ny = '${fparse 32 * mult}'
   type = Transient
   solve_type = NEWTON
   automatic_scaling = true
-  off_diagonals_in_auto_scaling = true
+  # off_diagonals_in_auto_scaling = true
 
   # petsc_options_iname = '-pc_type -pc_hypre_type'
   # petsc_options_value = 'hypre boomeramg'
   line_search = none
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  # petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  # petsc_options_value = 'lu NONZERO'
 
   nl_abs_tol = 1e-8
 
@@ -396,4 +396,8 @@ ny = '${fparse 32 * mult}'
 [AuxVariables]
   [velocity_z]
   []
+[]
+
+[Debug]
+  show_var_residual_norms = true
 []

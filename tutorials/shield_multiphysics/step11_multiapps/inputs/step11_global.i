@@ -107,7 +107,6 @@
     from_multi_app = detectors
     postprocessor = T_hdpe_inner
     variable = T_hdpe_inner
-
   []
   [boron_temperature]
     type = MultiAppPostprocessorInterpolationTransfer
