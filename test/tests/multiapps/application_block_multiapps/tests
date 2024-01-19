@@ -9,7 +9,7 @@
     type = 'RunApp'
     input = 'application_block_parent.i'
 
-    detail = "without [Application] block"
+    detail = "without using the Application system input block"
   []
 
   [application_block]
@@ -17,7 +17,7 @@
     input = 'application_block_parent.i'
     cli_args = 'Application/type=MooseTestApp'
 
-    detail = "with explicitly specify application type in [Application] block."
+    detail = "with explicitly specifying application type in the Application system input block."
   []
 []
 [Give_proper_error]
