@@ -1,0 +1,97 @@
+reset
+
+#{hex_dimension = 1.0}
+#{B = 20*hex_dimension}
+#{hex_dimension_sm = 0.9} # small
+#{offset = 2.1} # small
+
+# First HEXAGON
+create vertex {hex_dimension} 0 0
+create vertex {0.5*hex_dimension} {0.866025*hex_dimension} 0
+create vertex {-0.5*hex_dimension} {0.866025*hex_dimension} 0
+create vertex {-1.0*hex_dimension} 0 0
+create vertex {-0.5*hex_dimension} {-0.866025*hex_dimension} 0
+create vertex {0.5*hex_dimension} {-0.866025*hex_dimension} 0
+
+# Create hexagon surface
+create surface vertex 1,2,3,4,5,6
+
+# Additional surface to subtract the geometry
+create vertex {hex_dimension_sm} 0 0
+create vertex {0.5*hex_dimension_sm} {0.866025*hex_dimension_sm} 0
+create vertex {-0.5*hex_dimension_sm} {0.866025*hex_dimension_sm} 0
+create vertex {-1.0*hex_dimension_sm} 0 0
+create vertex {-0.5*hex_dimension_sm} {-0.866025*hex_dimension_sm} 0
+create vertex {0.5*hex_dimension_sm} {-0.866025*hex_dimension_sm} 0
+create surface vertex 7,8,9,10,11,12
+
+subtract 2 from 1
+
+#
+sweep surface 3 vector 0 0 1  distance {B}
+#
+
+surface 3 interval 3
+curve 20 21 23 25 27 29 interval 10
+mesh volume 1
+
+# Pinning BCs
+nodeset 1001 vertex 1 4 14 17 # 10
+
+# Sidesets for loading
+sideset 3 surface 3
+sideset 16 surface 16
+
+# Pressure BCs
+sideset 4 surface 4
+
+block 1 volume 1
+
+
+## SECOND duct_alt
+
+# First HEXAGON
+create vertex {hex_dimension + offset} {offset} 0
+create vertex {0.5*hex_dimension+offset} {0.866025*hex_dimension + offset} 0
+create vertex {-0.5*hex_dimension + offset} {0.866025*hex_dimension + offset} 0
+create vertex {-1.0*hex_dimension + offset} {offset} 0
+create vertex {-0.5*hex_dimension+offset} {-0.866025*hex_dimension+offset} 0
+create vertex {0.5*hex_dimension+offset} {-0.866025*hex_dimension+offset} 0
+
+# Create hexagon surface
+create surface vertex 31,32,33,34,35,36
+
+# Additional surface to subtract the geometry
+create vertex {hex_dimension_sm+ offset} {offset} 0 0
+create vertex {0.5*hex_dimension_sm+ offset} {0.866025*hex_dimension_sm+ offset} 0
+create vertex {-0.5*hex_dimension_sm+ offset} {0.866025*hex_dimension_sm+ offset} 0
+create vertex {-1.0*hex_dimension_sm+ offset} {offset} 0
+create vertex {-0.5*hex_dimension_sm+ offset} {-0.866025*hex_dimension_sm+ offset} 0
+create vertex {0.5*hex_dimension_sm+ offset} {-0.866025*hex_dimension_sm+ offset} 0
+create surface vertex 37,38,39,40,41,42
+
+subtract 4 from 3
+
+#
+sweep surface 19 vector 0 0 1  distance {B}
+#
+
+surface 19 interval 3
+curve 62 63 65 67 69 71 interval 10
+mesh volume 3
+
+# Pinning BCs
+nodeset 21001 vertex 31 34 44 47 # 10
+
+# Sidesets for loading
+sideset 23 surface 19
+sideset 216 surface 32
+
+# Pressure BCs
+sideset 24 surface 20
+
+block 1 volume 3
+
+block 1 elem HEX8
+
+export mesh "two_ducts.e" overwrite
