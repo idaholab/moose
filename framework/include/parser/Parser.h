@@ -153,7 +153,12 @@ public:
   /*
    * Get extracted app type from parser
    */
-  std::string & getAppType() { return _app_type; }
+  const std::string & getAppType() { return _app_type; }
+
+  /*
+   * Set the app type in parser
+   */
+  void setAppType(std::string app_type) { _app_type = app_type; }
 
   /**
    * @return The file name of the last input

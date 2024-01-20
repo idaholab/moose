@@ -926,7 +926,7 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::out << "MooseApp Type: " << type() << std::endl;
+    Moose::out << "MooseApp Type: " << getApptype() << std::endl;
     _ready_to_exit = true;
   }
   else if (getInputFileNames().size())
@@ -1043,6 +1043,13 @@ MooseApp::getLastInputFileName() const
 {
   mooseAssert(_parser, "Parser is not set");
   return _parser->getLastInputFileName();
+}
+
+const std::string &
+MooseApp::getApptype() const
+{
+  mooseAssert(_parser, "Parser is not set");
+  return _parser->getAppType();
 }
 
 std::string
@@ -2786,7 +2793,7 @@ MooseApp::createRecoverablePerfGraph()
   auto perf_graph =
       std::make_unique<RestartableData<PerfGraph>>("perf_graph",
                                                    this,
-                                                   type() + " (" + name() + ')',
+                                                   getApptype() + " (" + name() + ')',
                                                    *this,
                                                    getParam<bool>("perf_graph_live_all"),
                                                    !getParam<bool>("disable_perf_graph_live"));

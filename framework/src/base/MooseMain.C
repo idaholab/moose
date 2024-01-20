@@ -69,9 +69,10 @@ createMooseApp(const std::string & default_app_name, int argc, char * argv[])
     parser->parse();
 
   // Check whether the application name given in [Application] block is registered or not
-  auto app_type = parser->getAppType();
   if (!cl_app_type.empty())
-    app_type = cl_app_type;
+    parser->setAppType(cl_app_type);
+
+  auto app_type = parser->getAppType();
   if (!app_type.empty())
     if (!AppFactory::instance().isRegistered(app_type))
       mooseError("'", app_type, "' is not a registered application name.\n");

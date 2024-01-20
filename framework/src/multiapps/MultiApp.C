@@ -253,7 +253,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     PerfGraphInterface(this, std::string("MultiApp::") + _name),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
-                                       : _fe_problem.getMooseApp().type()),
+                                       : _fe_problem.getMooseApp().getApptype()),
     _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
@@ -1128,6 +1128,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
                  "'. Please double check the [Application] block to make sure the correct "
                  "application is provided. \n");
   }
+
+  if (parser->getAppType().empty())
+    parser->setAppType(_app_type);
 
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
