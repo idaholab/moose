@@ -20,13 +20,13 @@ class INSFVPressureVariable;
 /**
  * This user-object corrects the pressure
  */
-class NSFVPressurePin : public GeneralUserObject,
-                        public BlockRestrictable,
-                        public NonADFunctorInterface
+class NSPressurePin : public GeneralUserObject,
+                      public BlockRestrictable,
+                      public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
-  NSFVPressurePin(const InputParameters & params);
+  NSPressurePin(const InputParameters & params);
 
   virtual void initialSetup() override;
   virtual void initialize() override {}

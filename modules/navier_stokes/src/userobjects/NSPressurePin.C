@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPressurePin.h"
+#include "NSPressurePin.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "NS.h"
@@ -19,10 +19,11 @@
 
 using namespace libMesh;
 
-registerMooseObject("NavierStokesApp", NSFVPressurePin);
+registerMooseObject("NavierStokesApp", NSPressurePin);
+registerMooseObjectRenamed("NavierStokesApp", NSFVPressurePin, "01/19/2025 00:00", NSPressurePin);
 
 InputParameters
-NSFVPressurePin::validParams()
+NSPressurePin::validParams()
 {
   auto params = GeneralUserObject::validParams();
   params += BlockRestrictable::validParams();
@@ -51,7 +52,7 @@ NSFVPressurePin::validParams()
   return params;
 }
 
-NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
+NSPressurePin::NSPressurePin(const InputParameters & params)
   : GeneralUserObject(params),
     BlockRestrictable(this),
     NonADFunctorInterface(this),
@@ -68,7 +69,7 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
 }
 
 void
-NSFVPressurePin::initialSetup()
+NSPressurePin::initialSetup()
 {
   mooseAssert(!Threads::in_threads, "paramError is not safe in threaded mode");
 
@@ -82,7 +83,7 @@ NSFVPressurePin::initialSetup()
 }
 
 void
-NSFVPressurePin::execute()
+NSPressurePin::execute()
 {
   // Get the value of the pin
   Real pin_value = 0;

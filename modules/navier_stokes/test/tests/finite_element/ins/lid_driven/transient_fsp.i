@@ -181,7 +181,7 @@ mu=2e-3
 
 [UserObjects]
   [set_pressure]
-    type = NSFVPressurePin
+    type = NSPressurePin
     pin_type = 'average'
     variable = p
     pressure_average = 'pavg'
