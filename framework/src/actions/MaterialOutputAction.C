@@ -164,12 +164,9 @@ MaterialOutputAction::act()
     {
       // Get all material properties supplied by this material as a starting point
       std::set<std::string> names = mat->getSuppliedItems();
-      if (dynamic_cast<const FunctorMaterial *>(mat.get()))
-      {
-        const auto fmat_ptr = dynamic_cast<const FunctorMaterial *>(mat.get());
+      if (const auto fmat_ptr = dynamic_cast<const FunctorMaterial *>(mat.get()))
         names.insert(fmat_ptr->getSuppliedFunctors().begin(),
                      fmat_ptr->getSuppliedFunctors().end());
-      }
 
       for (const auto & name : names)
       {

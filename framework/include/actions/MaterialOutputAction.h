@@ -51,7 +51,7 @@ protected:
 
   /**
    * Helper method for testing if the functor material property exists
-   * @tparam T The functor property type (e.g., REAL)
+   * @tparam T The functor property type (e.g., Real)
    * @param property_name The name of the property to test
    */
   template <typename T>
@@ -107,7 +107,7 @@ private:
    *
    * @return A vector of names that can be used as AuxVariable names
    *
-   * By default this function produces an mooseError, you must create a specialization for any type
+   * By default this function produces a mooseError, you must create a specialization for any type
    * that you wish to have the automatic output capability. Also, you need to add a test for this
    * type within the act() method.
    */

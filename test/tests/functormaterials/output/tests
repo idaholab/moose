@@ -18,7 +18,7 @@
       input = 'output_ad.i'
       exodiff = 'output_ad_out.e'
 
-      detail = 'outputting a functor property with automatic differentiation, defined within a functor material;'
+      detail = 'outputting a functor property with automatic differentiation, defined within a functor material.'
     []
   []
 []
