@@ -148,7 +148,7 @@ The tables above were created by running the `steady_vector_fsp_elman.i`,
 focus the comparison on the preconditioning of the Schur complement itself, all
 multigrid preconditioners were replaced with LU decompositions (`-pc_type lu
 -pc_factor_mat_solver_type mumps`). In the `steady_vector_fsp_stokes.i` input,
-an `INSFVMomentumAdvection` block was added as well.
+an [INSADMomentumAdvection.md] kernel was added as well.
 
 !syntax parameters /Problem/NavierStokesProblem
 
