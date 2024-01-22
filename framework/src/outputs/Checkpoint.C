@@ -72,22 +72,19 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   std::vector<ExecFlagEnum> valid_execute_on_values(7);
   {
     ExecFlagEnum valid_execute_on_value = execute_on;
-    valid_execute_on_value.clear();
-    valid_execute_on_value += EXEC_INITIAL;
+    valid_execute_on_value = {EXEC_INITIAL};
     valid_execute_on_values[0] = valid_execute_on_value;
-    valid_execute_on_value += EXEC_TIMESTEP_END;
+    valid_execute_on_value = {EXEC_TIMESTEP_END};
     valid_execute_on_values[1] = valid_execute_on_value;
-    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_value = {EXEC_FINAL};
     valid_execute_on_values[2] = valid_execute_on_value;
-    valid_execute_on_value.clear();
-    valid_execute_on_value += EXEC_TIMESTEP_END;
+    valid_execute_on_value = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     valid_execute_on_values[3] = valid_execute_on_value;
-    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_value = {EXEC_TIMESTEP_END, EXEC_FINAL};
     valid_execute_on_values[4] = valid_execute_on_value;
-    valid_execute_on_value.clear();
-    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_value = {EXEC_INITIAL, EXEC_FINAL};
     valid_execute_on_values[5] = valid_execute_on_value;
-    valid_execute_on_value += EXEC_INITIAL;
+    valid_execute_on_value = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_FINAL};
     valid_execute_on_values[6] = valid_execute_on_value;
   }
 
