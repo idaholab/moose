@@ -14,7 +14,7 @@
 registerMooseAction("MooseApp", DiffusionCG, "add_kernel");
 registerMooseAction("MooseApp", DiffusionCG, "add_bc");
 registerMooseAction("MooseApp", DiffusionCG, "add_variable");
-registerDiffusionPhysicsBaseTasks(DiffusionCG);
+registerDiffusionPhysicsBaseTasks("MooseApp", DiffusionCG);
 
 InputParameters
 DiffusionCG::validParams()

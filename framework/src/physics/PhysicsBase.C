@@ -58,11 +58,14 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
   checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
                                         "initial_from_file_timestep");
   prepareCopyNodalVariables();
+  addRequiredPhysicsTask("init_physics");
 }
 
 void
 PhysicsBase::act()
 {
+  mooseDoOnce(checkRequiredTasks());
+
   if (_current_task == "init_physics")
     initializePhysics();
   else if (_current_task == "add_variable")
@@ -232,4 +235,20 @@ PhysicsBase::nonLinearVariableExists(const VariableName & var_name, bool error_i
                "' but it's already defined as auxiliary");
   else
     return false;
+}
+
+void
+PhysicsBase::checkRequiredTasks() const
+{
+  const auto registered_tasks = _action_factory.getTasksByAction(type());
+
+  // Check for missing tasks
+  for (const auto & required_task : _required_tasks)
+    if (!registered_tasks.count(required_task))
+      mooseWarning("Task '" + required_task +
+                   "' has been declared as required by a Physics parent class of derived class '" +
+                   type() +
+                   "' but this task is not registered to the derived class. Registered tasks for "
+                   "this Physics are: " +
+                   Moose::stringify(registered_tasks));
 }

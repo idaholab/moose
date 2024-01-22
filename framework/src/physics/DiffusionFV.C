@@ -14,7 +14,7 @@
 registerMooseAction("MooseApp", DiffusionFV, "add_fv_kernel");
 registerMooseAction("MooseApp", DiffusionFV, "add_fv_bc");
 registerMooseAction("MooseApp", DiffusionFV, "add_variable");
-registerDiffusionPhysicsBaseTasks(DiffusionFV);
+registerDiffusionPhysicsBaseTasks("MooseApp", DiffusionFV);
 
 InputParameters
 DiffusionFV::validParams()

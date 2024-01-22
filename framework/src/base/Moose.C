@@ -96,6 +96,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
   registerMooseObjectTask("read_executor",                Executor,               false);
   registerTask("add_executor", true);
+  registerTask("init_physics", false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -296,6 +297,7 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
+                           "(init_physics)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
@@ -414,14 +416,14 @@ registerActions(Syntax & syntax,
 void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  registerSyntax("DiffusionCG", "Physics/DiffusionCG/*");
-  registerSyntax("DiffusionFV", "Physics/DiffusionFV/*");
-
   /**
    * Note: the optional third parameter is used to differentiate which task is
    * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one task
    */
+  registerSyntax("DiffusionCG", "Physics/DiffusionCG/*");
+  registerSyntax("DiffusionFV", "Physics/DiffusionFV/*");
+
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");

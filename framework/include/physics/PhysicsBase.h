@@ -15,6 +15,9 @@
 #include "FEProblemBase.h"
 #include "Factory.h"
 
+#define registerPhysicsBaseTasks(app_name, derived_name)                                           \
+  registerMooseAction(app_name, derived_name, "init_physics")
+
 /**
  * Base class to help creates an entire physics
  */
@@ -103,6 +106,10 @@ protected:
   /// Check whether a nonlinear variable already exists
   bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
 
+  /// Add a new required task for all physics deriving from this class
+  /// NOTE: This does not register the task, you still need to call registerMooseAction
+  void addRequiredPhysicsTask(const std::string & task) { _required_tasks.insert(task); }
+
   /// System number for the systems owning the variables
   const unsigned int _sys_number;
 
@@ -155,6 +162,9 @@ private:
   virtual void addExecutioner() {}
   virtual void addExecutors() {}
 
+  /// Check the list of required tasks for missing tasks
+  void checkRequiredTasks() const;
+
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
   MooseEnum _is_transient;
@@ -163,8 +173,11 @@ private:
   std::vector<VariableName> _nl_var_names;
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
-  /// NOTE: this is not known at construction time, which is a huge bummer
+  /// NOTE: this is not known at construction time, only after initializePhysics which is a huge bummer
   unsigned int _dim;
+
+  /// Manually keeps track of the tasks required by each physics as tasks cannot be inherited
+  std::set<std::string> _required_tasks;
 };
 
 template <typename T>
