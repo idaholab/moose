@@ -1603,6 +1603,7 @@ NonlinearSystemBase::overwriteContact(NumericVector<Number> & soln)
       }
     }
   }
+  soln.close();
 }
 
 void

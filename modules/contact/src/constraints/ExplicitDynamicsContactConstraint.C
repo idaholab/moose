@@ -53,19 +53,19 @@ ExplicitDynamicsContactConstraint::validParams()
   params.addRequiredCoupledVar("nodal_density", "The nodal density.");
   params.addRequiredCoupledVar("nodal_wave_speed", "The nodal wave speed.");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<Real>(
-      "penalty",
-      1e8,
-      "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("penalty",
+                        1e8,
+                        "The penalty to apply.  Its optimal value can vary depending on the "
+                        "stiffness of the materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<bool>(
-      "normalize_penalty",
-      false,
-      "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
-  params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
+  params.addParam<bool>("overwrite_current_solution",
+                        false,
+                        "Whether to overwrite the position of contact boundaries with the velocity "
+                        "computed with the contact algorithm.");
   params.addClassDescription(
       "Apply non-penetration constraints on the mechanical deformation "
       "using a node on face, primary/secondary algorithm, and multiple options "
@@ -74,8 +74,6 @@ ExplicitDynamicsContactConstraint::validParams()
   return params;
 }
 
-Threads::spin_mutex ExplicitDynamicsContactConstraint::_contact_set_mutex;
-
 ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
@@ -83,7 +81,6 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ExplicitDynamicsContactModel>()),
-    _normalize_penalty(getParam<bool>("normalize_penalty")),
     _update_stateful_data(true),
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
@@ -99,6 +96,7 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _nodal_wave_speed_var(getVar("nodal_wave_speed", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
+    _penalty(getParam<Real>("penalty")),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _residual_copy(_sys.residualGhosted()),
     _neighbor_density(getNeighborMaterialPropertyByName<Real>("density")),
@@ -107,7 +105,8 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _neighbor_vel_x(isCoupled("vel_x") ? coupledNeighborValue("vel_x") : _zero),
     _neighbor_vel_y(isCoupled("vel_y") ? coupledNeighborValue("vel_y") : _zero),
     _neighbor_vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledNeighborValue("vel_z")
-                                                                   : _zero)
+                                                                   : _zero),
+    _overwrite_current_solution(getParam<bool>("overwrite_current_solution"))
 {
   _overwrite_secondary_residual = false;
 
@@ -151,7 +150,7 @@ ExplicitDynamicsContactConstraint::timestepSetup()
   {
     updateContactStatefulData(/* beginning_of_step = */ true);
     _update_stateful_data = false;
-    _dof_to_velocity.clear();
+    _dof_to_position.clear();
   }
 }
 
@@ -309,7 +308,6 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
 
   auto & u_dot = *_sys.solutionUDot();
   auto & u_old = _sys.solutionOld();
-  // auto & u_older = _sys.solutionOlder();
   auto & u_old_old_old = _sys.solutionState(3);
 
   // Mass proxy for secondary node.
@@ -378,32 +376,17 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
       iteration_no++;
   }
 
-  // const bool print_debug(false);
-  // if (print_debug)
-  // {
-  //   _console << "Results of momentun balance iterations for node: " << _current_node->id() <<
-  //   "\n"; _console << "Total number of iterations: " << iteration_no << "\n"; _console << "Final
-  //   normal gap rate (dynamic constraint): " << gap_rate << "\n"; _console << "Velocity x of
-  //   secondary node: " << velocity_x << "\n"; _console << "Velocity y of secondary node: " <<
-  //   velocity_y << "\n"; _console << "Velocity z of secondary node: " << velocity_z << "\n";
-  //   _console << "Final normal contact force: " << lambda_iteration << "\n";
-  // }
+  _gap_rate->setNodalValue(gap_rate);
 
-  // Discount effects of other forces
   u_old.set(dof_x, u_old_old_old(dof_x) + 2.0 * velocity_x * _dt);
   u_old.set(dof_y, u_old_old_old(dof_y) + 2.0 * velocity_y * _dt);
   u_old.set(dof_z, u_old_old_old(dof_z) + 2.0 * velocity_z * _dt);
 
-  _dof_to_velocity[dof_x] = u_old_old_old(dof_x) + 2.0 * velocity_x * _dt;
-  _dof_to_velocity[dof_y] = u_old_old_old(dof_y) + 2.0 * velocity_y * _dt;
-  _dof_to_velocity[dof_z] = u_old_old_old(dof_z) + 2.0 * velocity_z * _dt;
+  _dof_to_position[dof_x] = u_old_old_old(dof_x) + 2.0 * velocity_x * _dt;
+  _dof_to_position[dof_y] = u_old_old_old(dof_y) + 2.0 * velocity_y * _dt;
+  _dof_to_position[dof_z] = u_old_old_old(dof_z) + 2.0 * velocity_z * _dt;
 
-  _gap_rate->setNodalValue(gap_rate);
-
-  if (lambda_iteration < 0.0)
-    pinfo->_contact_force = pinfo->_normal * lambda_iteration;
-  else
-    pinfo->_contact_force = 0.0;
+  pinfo->_contact_force = pinfo->_normal * lambda_iteration;
 }
 
 Real
@@ -415,9 +398,10 @@ ExplicitDynamicsContactConstraint::computeQpSecondaryValue()
 Real
 ExplicitDynamicsContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
+  // We use kinematic contact. But adding the residual helps avoid element inversion.
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   Real resid = pinfo->_contact_force(_component);
-  // Maybe only apply force on the primary since we are kinematically enforcing the secondary.
+
   switch (type)
   {
     case Moose::Secondary:
@@ -464,7 +448,8 @@ ExplicitDynamicsContactConstraint::nodalArea(const Node & node)
 Real
 ExplicitDynamicsContactConstraint::getPenalty(const Node & /*node*/)
 {
-  return 1.0e3;
+  // TODO: Include normalized penalty values.
+  return _penalty;
 }
 
 bool
@@ -487,29 +472,24 @@ ExplicitDynamicsContactConstraint::getCoupledVarComponent(unsigned int var_num,
 }
 
 void
-ExplicitDynamicsContactConstraint::residualEnd()
-{
-}
-
-void
 ExplicitDynamicsContactConstraint::overwriteBoundaryVariables(NumericVector<Number> & soln,
                                                               const Node & secondary_node) const
 {
-  if (_component == 0)
+  if (_component == 0 && _overwrite_current_solution)
   {
     dof_id_type dof_x = secondary_node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
     dof_id_type dof_y = secondary_node.dof_number(_sys.number(), _var_objects[1]->number(), 0);
     dof_id_type dof_z = secondary_node.dof_number(_sys.number(), _var_objects[2]->number(), 0);
 
-    if (_dof_to_velocity.find(dof_x) != _dof_to_velocity.end())
+    if (_dof_to_position.find(dof_x) != _dof_to_position.end())
     {
-      const auto & velocity_x = libmesh_map_find(_dof_to_velocity, dof_x);
-      const auto & velocity_y = libmesh_map_find(_dof_to_velocity, dof_y);
-      const auto & velocity_z = libmesh_map_find(_dof_to_velocity, dof_z);
+      const auto & position_x = libmesh_map_find(_dof_to_position, dof_x);
+      const auto & position_y = libmesh_map_find(_dof_to_position, dof_y);
+      const auto & position_z = libmesh_map_find(_dof_to_position, dof_z);
 
-      soln.set(dof_x, velocity_x);
-      soln.set(dof_y, velocity_y);
-      soln.set(dof_z, velocity_z);
+      soln.set(dof_x, position_x);
+      soln.set(dof_y, position_y);
+      soln.set(dof_z, position_z);
     }
   }
 }

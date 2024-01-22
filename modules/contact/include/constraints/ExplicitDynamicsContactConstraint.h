@@ -31,7 +31,7 @@ public:
 
   virtual void timestepSetup() override;
   virtual void jacobianSetup() override {}
-  virtual void residualEnd() override;
+  virtual void residualEnd() override {}
 
   virtual void updateContactStatefulData(bool beginning_of_step);
   virtual Real computeQpSecondaryValue() override;
@@ -103,7 +103,6 @@ protected:
 
   const unsigned int _component;
   const ExplicitDynamicsContactModel _model;
-  const bool _normalize_penalty;
 
   bool _update_stateful_data;
 
@@ -123,9 +122,9 @@ protected:
 
   SystemBase & _aux_system;
   const NumericVector<Number> * const _aux_solution;
+  const Real _penalty;
 
   const bool _print_contact_nodes;
-  static Threads::spin_mutex _contact_set_mutex;
 
   const static unsigned int _no_iterations;
 
@@ -147,8 +146,11 @@ protected:
   /// Z component of velocity at the closest point
   const VariableValue & _neighbor_vel_z;
 
+  /// Whether to overwrite contact boundary nodal solution
+  const bool _overwrite_current_solution;
+
 private:
-  std::unordered_map<dof_id_type, Real> _dof_to_velocity;
+  std::unordered_map<dof_id_type, Real> _dof_to_position;
 };
 
 inline const std::set<unsigned int> &

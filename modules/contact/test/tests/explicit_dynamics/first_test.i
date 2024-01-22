@@ -192,6 +192,7 @@
     model = frictionless
     primary = base_front
     secondary = ball_back
+    penalty = 1.0e3
   []
 []
 

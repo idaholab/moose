@@ -50,22 +50,20 @@
   []
 []
 
-
 [AuxVariables]
-  [pid]
-    family = MONOMIAL
-    order = CONSTANT
+  [penetration]
   []
 []
 
 [AuxKernels]
-  [pid_aux]
-    type = ProcessorIDAux
-    variable = pid
-    execute_on = 'INITIAL'
+  [penetration]
+    type = PenetrationAux
+    variable = penetration
+    boundary = ball_back
+    paired_boundary = base_front
+    quantity = distance
   []
 []
-
 
 [Variables]
   [disp_x]
@@ -98,6 +96,22 @@
   [strain_zz]
     family = MONOMIAL
     order = CONSTANT
+  []
+  [kinetic_energy_one]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [elastic_energy_one]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [kinetic_energy_two]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [elastic_energy_two]
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
@@ -156,13 +170,40 @@
     displacement = disp_z
     execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
+  [kinetic_energy_one]
+    type = KineticEnergyAux
+    block = '1'
+    variable = kinetic_energy_one
+    newmark_velocity_x = vel_x
+    newmark_velocity_y = vel_y
+    newmark_velocity_z = vel_z
+    density = density
+  []
+  [elastic_energy_one]
+    type = ElasticEnergyAux
+    variable = elastic_energy_one
+    block = '1'
+  []
+  [kinetic_energy_two]
+    type = KineticEnergyAux
+    block = '2'
+    variable = kinetic_energy_two
+    newmark_velocity_x = vel_x
+    newmark_velocity_y = vel_y
+    newmark_velocity_z = vel_z
+    density = density
+  []
+  [elastic_energy_two]
+    type = ElasticEnergyAux
+    variable = elastic_energy_two
+    block = '2'
+  []
 []
 
 [Kernels]
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    volumetric_locking_correction = true
-    stiffness_damping_coefficient = 0.001
+    stiffness_damping_coefficient = 1.0e-3
     generate_output = 'stress_zz strain_zz'
   []
   [inertia_x]
@@ -177,13 +218,10 @@
     type = InertialForce
     variable = disp_z
   []
-[]
-
-[Kernels]
   [gravity]
     type = Gravity
     variable = disp_z
-    value = -981.0
+    value = -98.10
   []
 []
 
@@ -294,8 +332,8 @@
 [Executioner]
   type = Transient
   start_time = -0.01
-  end_time = 0.15
-  dt = 0.0002
+  end_time = 0.04
+  dt = 1.0e-4
   timestep_tolerance = 1e-6
 
   [TimeIntegrator]
@@ -305,10 +343,10 @@
 []
 
 [Outputs]
-  interval = 10
+  interval = 1
   exodus = true
   csv = true
-  execute_on = 'FINAL'
+  execute_on = 'TIMESTEP_END'
 []
 
 [Postprocessors]
@@ -322,11 +360,6 @@
     nodeid = 1
     variable = vel_z
   []
-  [disp_58z]
-    type = NodalVariableValue
-    nodeid = 1
-    variable = disp_z
-  []
   [critical_time_step]
     type = CriticalTimeStep
   []
@@ -335,5 +368,31 @@
     variable = contact_pressure
     block = '1 2'
     value_type = max
+  []
+  [penetration_max]
+    type = NodalExtremeValue
+    variable = penetration
+    block = '1 2'
+    value_type = max
+  []
+  [total_kinetic_energy_one]
+    type = ElementIntegralVariablePostprocessor
+    variable = kinetic_energy_one
+    block = '1'
+  []
+  [total_elastic_energy_one]
+    type = ElementIntegralVariablePostprocessor
+    variable = elastic_energy_one
+    block = '1'
+  []
+  [total_kinetic_energy_two]
+    type = ElementIntegralVariablePostprocessor
+    variable = kinetic_energy_two
+    block = '2'
+  []
+  [total_elastic_energy_two]
+    type = ElementIntegralVariablePostprocessor
+    variable = elastic_energy_two
+    block = '2'
   []
 []
