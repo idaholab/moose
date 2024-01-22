@@ -25,4 +25,7 @@ public:
 protected:
   /// Name of the temperature variable
   const VariableName & _temperature_name;
+
+private:
+  virtual void addPreconditioning() override;
 };

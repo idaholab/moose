@@ -46,6 +46,11 @@ HeatConductionPhysics::validParams()
       "boundary_temperatures",
       "Thermal boundaries");
 
+  // Preconditioning is implemented so let's use it by default
+  MooseEnum pc_options("default none", "default");
+  params.addParam<MooseEnum>(
+      "preconditioning", pc_options, "Which preconditioning to use for this Physics");
+
   return params;
 }
 
@@ -59,4 +64,22 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
                                                               "boundary_temperatures");
   checkVectorParamsNoOverlap<BoundaryName>(
       {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries"});
+
+  addRequiredPhysicsTask("add_preconditioning");
+}
+
+void
+HeatConductionPhysics::addPreconditioning()
+{
+  // Use a multigrid method, known to work for elliptic problems such as diffusion
+  if (_preconditioning == "default")
+  {
+    // We only pass petsc options as that's all that's needed to set up the preconditioner
+    Moose::PetscSupport::PetscOptions & po = _problem->getPetscOptions();
+    const auto option_pair1 =
+        std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_type"), "hypre");
+    const auto option_pair2 =
+        std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_hypre_type"), "boomeramg");
+    processPetscPairs({option_pair1, option_pair2}, _problem->mesh().dimension(), po);
+  }
 }

@@ -20,7 +20,7 @@ InputParameters
 HeatConductionFE::validParams()
 {
   InputParameters params = HeatConductionPhysics::validParams();
-  params.addClassDescription("Add the heat conduction physics discretized with CG");
+  params.addClassDescription("Creates the heat conduction equation discretized with CG");
 
   return params;
 }
@@ -131,10 +131,11 @@ HeatConductionFE::addFEBCs()
 void
 HeatConductionFE::addNonlinearVariables()
 {
-  if (nonLinearVariableExists(_temperature_name, true))
+  if (nonLinearVariableExists(_temperature_name, /*error_if_aux=*/true))
     return;
 
   const std::string variable_type = "MooseVariable";
+  // defaults to linear lagrange FE family
   InputParameters params = getFactory().getValidParams(variable_type);
 
   getProblem().addVariable(variable_type, _temperature_name, params);
