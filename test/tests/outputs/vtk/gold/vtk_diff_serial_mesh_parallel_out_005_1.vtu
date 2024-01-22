@@ -3,6 +3,9 @@
   <UnstructuredGrid>
     <Piece NumberOfPoints="6" NumberOfCells="2">
       <PointData>
+        <DataArray type="Int32" Name="libmesh_node_id" format="ascii" RangeMin="1" RangeMax="8">
+          4 5 8 1 2 6
+        </DataArray>
         <DataArray type="Float64" Name="aux" format="ascii" RangeMin="0" RangeMax="0">
           0 0 0 0 0 0
         </DataArray>
