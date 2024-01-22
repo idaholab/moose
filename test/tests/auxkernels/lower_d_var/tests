@@ -2,9 +2,19 @@
   design = 'AuxKernels/index.md'
   issues = '#26592'
   [csv]
-    type = CSVDiff
-    input = lower-d-aux-var.i
-    csvdiff = lower-d-aux-var_out.csv
-    requirement = 'The system shall allow populating lower-dimensional auxiliary variables using boundary restricted auxiliary kernels.'
+    requirement = 'The system shall allow populating lower-dimensional auxiliary variables using boundary restricted auxiliary kernels on'
+    [uniform]
+      type = CSVDiff
+      input = lower-d-aux-var.i
+      csvdiff = lower-d-aux-var_out.csv
+      detail = 'a mesh with a uniform level of refinement, and'
+    []
+    [some_refined_boundaries]
+      type = CSVDiff
+      input = lower-d-aux-var.i
+      csvdiff = lower-d-aux-var_out.csv
+      detail = 'a mesh with mixed levels of refinement along the boundary.'
+      cli_args = "Mesh/inactive=''"
+    []
   []
 []

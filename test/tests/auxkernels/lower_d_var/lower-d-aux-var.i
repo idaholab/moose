@@ -1,4 +1,5 @@
 [Mesh]
+  inactive = 'refine_left_and_top'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -28,6 +29,13 @@
     input = lower_top
     sidesets = 'bottom'
     new_block_name = 'lower_bottom'
+  []
+  [refine_left_and_top]
+    type = RefineSidesetGenerator
+    boundaries = 'left top'
+    refinement = '1    1'
+    boundary_side = 'primary primary'
+    input = lower_bottom
   []
 []
 
