@@ -190,7 +190,8 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
     object_context = object_context.parent();
   const std::string & object_path = object_context.path();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
-  const std::string & object_type = type_node.is_null() ? "" : type_node.last_as_string();
+  const std::string & object_type =
+      type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
 
   // get set of all parameter and subblock names already specified in input
   std::set<std::string> existing_params, existing_subblocks;
@@ -796,7 +797,8 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
     object_context = object_context.parent();
   const std::string & object_path = object_context.path();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
-  const std::string & object_type = type_node.is_null() ? "" : type_node.last_as_string();
+  const std::string & object_type =
+      type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
 
   // set used to gather all parameters valid from object context of request
   InputParameters valid_params = emptyInputParameters();
@@ -1045,9 +1047,10 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
     int last_line = view_child.last_line() - 1;
     int last_column = view_child.last_column();
     int symbol_kind = getDocumentSymbolKind(view_child);
-    std::string detail = !view_child.first_child_by_name("type").is_null()
-                             ? view_child.first_child_by_name("type").last_as_string()
-                             : "";
+    std::string detail =
+        !view_child.first_child_by_name("type").is_null()
+            ? wasp::strip_quotes(hit::extractValue(view_child.first_child_by_name("type").data()))
+            : "";
 
     // build document symbol object from node child info and push to array
     documentSymbols.push_back(wasp::DataObject());
@@ -1097,9 +1100,10 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
     int last_line = view_child.last_line() - 1;
     int last_column = view_child.last_column();
     int symbol_kind = getDocumentSymbolKind(view_child);
-    std::string detail = !view_child.first_child_by_name("type").is_null()
-                             ? view_child.first_child_by_name("type").last_as_string()
-                             : "";
+    std::string detail =
+        !view_child.first_child_by_name("type").is_null()
+            ? wasp::strip_quotes(hit::extractValue(view_child.first_child_by_name("type").data()))
+            : "";
 
     // build document symbol object from node child info and push to array
     wasp::DataObject & data_child = wasp::lsp::addDocumentSymbolChild(data_parent);
