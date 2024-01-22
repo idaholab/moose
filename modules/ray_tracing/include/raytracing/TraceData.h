@@ -56,6 +56,8 @@ struct TraceData
 
   TracePointData & lastPoint() { return _point_data.back(); }
 
+  bool stationary() const { return _last && _intersections == 0 && _point_data.size() == 1; }
+
   unsigned int numSegments() const
   {
     mooseAssert(!_point_data.empty(), "Should not be empty");
