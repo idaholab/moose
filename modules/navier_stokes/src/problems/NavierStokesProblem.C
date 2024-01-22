@@ -160,13 +160,16 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   if (!is_fs)
     mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
 
-  // The mass matrix
+  // The mass matrix. This will correspond to velocity degrees of freedom for Elman LSC and pressure
+  // degrees of freedom for Olshanskii LSC or when directly using the mass matrix as a
+  // preconditioner for the Schur complement
   Mat global_Q = nullptr;
   if (_have_mass_matrix)
     global_Q =
         static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(massMatrixTagID()))
             .mat();
-  // The Poisson operator matrix
+  // The Poisson operator matrix corresponding to the velocity degrees of freedom. This is only used
+  // and is required for Olshanskii LSC preconditioning
   Mat global_L = nullptr;
   if (_have_L_matrix)
     global_L =
