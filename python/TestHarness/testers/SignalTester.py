@@ -39,15 +39,16 @@ class SignalTester(RunApp):
 
             #first, make a true duplicate of the stdout file so we don't mess with the seek on the actual file
             out_dupe = copy.copy(self.outfile)
-            #go to the beginning of the file and see if its actually started running the binary
-            out_dupe.seek(0)
-            output = out_dupe.read()
+            if not out_dupe.closed:
+                #go to the beginning of the file and see if its actually started running the binary
+                out_dupe.seek(0)
+                output = out_dupe.read()
 
-            #if the output is blank, the moose_test binary hasn't actually started doing anything yet.
-            #if so, sleep briefly and check again.
-            if not output:
-                time.sleep(0.05)
-                continue
+                #if the output is blank, the moose_test binary hasn't actually started doing anything yet.
+                #if so, sleep briefly and check again.
+                if not output:
+                    time.sleep(0.05)
+                    continue
 
             #if the output isn't blank, then we actually sleep for the time specified in sleep_time
             #then we finally send the SIGUSR1 and exit the loop
