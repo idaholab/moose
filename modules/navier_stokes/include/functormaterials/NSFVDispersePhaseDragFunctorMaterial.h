@@ -14,12 +14,12 @@
 /**
  * This is the material class used to compute phase-averaged drag properties of mixtures
  */
-class NSFVDispersePhaseDragMaterial : public FunctorMaterial
+class NSFVDispersePhaseDragFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  NSFVDispersePhaseDragMaterial(const InputParameters & parameters);
+  NSFVDispersePhaseDragFunctorMaterial(const InputParameters & parameters);
 
 protected:
   /// the dimension of the simulation

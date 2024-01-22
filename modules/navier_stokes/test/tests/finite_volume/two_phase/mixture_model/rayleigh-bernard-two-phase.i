@@ -268,7 +268,7 @@ g = -9.81
 
 [Materials]
   [CD]
-    type = NSFVDispersePhaseDragMaterial
+    type = NSFVDispersePhaseDragFunctorMaterial
     rho = 'rho_mixture'
     mu = mu_mixture
     u = 'vel_x'
@@ -352,7 +352,6 @@ g = -9.81
   nl_rel_tol = 1e-03
   nl_abs_tol = 1e-11
   l_max_its = 5
-  residual_and_jacobian_together = true
 []
 
 [Outputs]

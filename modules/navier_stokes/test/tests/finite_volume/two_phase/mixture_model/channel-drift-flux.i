@@ -259,7 +259,7 @@ velocity_interp_method = 'rc'
 
 [Materials]
   [CD]
-    type = NSFVDispersePhaseDragMaterial
+    type = NSFVDispersePhaseDragFunctorMaterial
     rho = 'rho_mixture'
     mu = mu_mixture
     u = 'vel_x'

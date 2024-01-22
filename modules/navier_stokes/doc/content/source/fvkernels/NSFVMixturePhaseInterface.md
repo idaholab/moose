@@ -14,9 +14,8 @@ where:
 - $\phi_2$ is the volume fraction of phase 2
 
 !alert note
-The kernel simultaneously adds to the residual of phases 1 and 2 if the transport
-of both phases are included in the model. So, there is no need to add a separate
-kernel for each phase.
+The kernel adds to the residual for the phase identified in `variable`.
+The complementary kernel for the second phase is needed to preserve the phase fraction.
 
 !syntax parameters /FVKernels/NSFVMixturePhaseInterface
 

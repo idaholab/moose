@@ -1,4 +1,4 @@
-# NSFVDispersePhaseDragMaterial
+# NSFVDispersePhaseDragFunctorMaterial
 
 This material computes the linear drag coefficient for a dispersed
 phase based on the particle Reynolds number $Re_d$.
@@ -28,8 +28,8 @@ dispersed phase is computed as follows [!cite](schiller1933drag):
   \end{cases}
 \end{equation}
 
-!syntax parameters /Materials/NSFVDispersePhaseDragMaterial
+!syntax parameters /Materials/NSFVDispersePhaseDragFunctorMaterial
 
-!syntax inputs /Materials/NSFVDispersePhaseDragMaterial
+!syntax inputs /Materials/NSFVDispersePhaseDragFunctorMaterial
 
-!syntax children /Materials/NSFVDispersePhaseDragMaterial
+!syntax children /Materials/NSFVDispersePhaseDragFunctorMaterial

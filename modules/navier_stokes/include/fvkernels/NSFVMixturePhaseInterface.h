@@ -12,8 +12,7 @@
 #include "FVElementalKernel.h"
 
 /**
- * Implements a heat transfer term with an ambient medium, proportional to the
- * difference between the fluid and ambient temperature.
+ * Implements a phase-to-phase volumetric exchange.
  */
 class NSFVMixturePhaseInterface : public FVElementalKernel
 {

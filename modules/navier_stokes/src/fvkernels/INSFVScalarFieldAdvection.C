@@ -27,10 +27,9 @@ INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & par
     _dim(_subproblem.mesh().dimension()),
     _u_slip(isParamValid("u_slip") ? &getFunctor<ADReal>("u_slip") : nullptr),
     _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),
-    _w_slip(isParamValid("w_slip") ? &getFunctor<ADReal>("w_slip") : nullptr)
+    _w_slip(isParamValid("w_slip") ? &getFunctor<ADReal>("w_slip") : nullptr),
+    _add_slip_model(isParamValid("u_slip") ? true : false)
 {
-  _add_slip_model = isParamValid("u_slip") ? true : false;
-
   if (_add_slip_model)
   {
     if (_dim >= 2 && !_v_slip)
@@ -59,14 +58,12 @@ INSFVScalarFieldAdvection::computeQpResidual()
           _face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
     ADRealVectorValue velocity_slip_vel_vec;
-    if (_dim == 1)
-      velocity_slip_vel_vec = ADRealVectorValue((*_u_slip)(face_arg, state), 0.0, 0.0);
-    else if (_dim == 2)
-      velocity_slip_vel_vec =
-          ADRealVectorValue((*_u_slip)(face_arg, state), (*_v_slip)(face_arg, state), 0.0);
-    else if (_dim == 3)
-      velocity_slip_vel_vec = ADRealVectorValue(
-          (*_u_slip)(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
+    if (_dim >= 1)
+      velocity_slip_vel_vec(0) = (*_u_slip)(face_arg, state);
+    if (_dim >= 2)
+      velocity_slip_vel_vec(1) = (*_v_slip)(face_arg, state);
+    if (_dim >= 3)
+      velocity_slip_vel_vec(2) = (*_w_slip)(face_arg, state);
     advection_velocity += velocity_slip_vel_vec;
   }
 

@@ -28,13 +28,13 @@ protected:
   /// The dimension of the simulation
   const unsigned int _dim;
 
-  /// Boolean to determine if slip velocity is available
-  bool _add_slip_model;
-
   /// slip velocity in direction x
   const Moose::Functor<ADReal> * const _u_slip;
   /// slip velocity in direction y
   const Moose::Functor<ADReal> * const _v_slip;
   /// slip velocity in direction z
   const Moose::Functor<ADReal> * const _w_slip;
+
+  /// Boolean to determine if slip velocity is available
+  bool _add_slip_model;
 };

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22637'
-  design = 'WCNSFV2PSlipVelocityAux.md WCNSFV2PMomentumAdvectionSlip.md WCNSFV2PMomentumDriftFlux.md INSFVScalarFieldAdvection.md NSFVMixturePhaseInterface.md NSFVDispersePhaseDragMaterial.md'
+  design = 'WCNSFV2PSlipVelocityAux.md WCNSFV2PMomentumAdvectionSlip.md WCNSFV2PMomentumDriftFlux.md INSFVScalarFieldAdvection.md NSFVMixturePhaseInterface.md NSFVDispersePhaseDragFunctorMaterial.md'
   [mixture_lid_driven_two_phase]
     type = 'CSVDiff'
     input = 'lid-driven-two-phase.i'

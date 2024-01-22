@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVDispersePhaseDragMaterial.h"
+#include "NSFVDispersePhaseDragFunctorMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVDispersePhaseDragMaterial);
+registerMooseObject("NavierStokesApp", NSFVDispersePhaseDragFunctorMaterial);
 
 InputParameters
-NSFVDispersePhaseDragMaterial::validParams()
+NSFVDispersePhaseDragFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes drag coefficient for dispersed phase.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Continuous phase density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Mixture Density");
   params.addParam<MooseFunctorName>(
@@ -27,7 +27,8 @@ NSFVDispersePhaseDragMaterial::validParams()
   return params;
 }
 
-NSFVDispersePhaseDragMaterial::NSFVDispersePhaseDragMaterial(const InputParameters & parameters)
+NSFVDispersePhaseDragFunctorMaterial::NSFVDispersePhaseDragFunctorMaterial(
+    const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _dim(_subproblem.mesh().dimension()),
     _u_var(getFunctor<ADReal>("u")),
@@ -58,7 +59,7 @@ NSFVDispersePhaseDragMaterial::NSFVDispersePhaseDragMaterial(const InputParamete
                                speed = std::sqrt(speed);
 
                                const ADReal Re_particle = _particle_diameter(r, t) * speed *
-                                                    _rho_mixture(r, t) / _mu_mixture(r, t);
+                                                          _rho_mixture(r, t) / _mu_mixture(r, t);
 
                                if (Re_particle <= 1000)
                                  return 1.0 + 0.15 * std::pow(Re_particle, 0.687);

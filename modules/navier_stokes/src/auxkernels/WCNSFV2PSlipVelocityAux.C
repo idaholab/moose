@@ -28,9 +28,9 @@ WCNSFV2PSlipVelocityAux::validParams()
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Gravity acceleration vector");
   params.addParam<Real>("force_value", 0.0, "Coefficient to multiply by the body force term");
-  params.addParam<FunctionName>("force_function", "1", "A function that describes the body force");
+  params.addParam<FunctionName>("force_function", "0", "A function that describes the body force");
   params.addParam<PostprocessorName>(
-      "force_postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
+      "force_postprocessor", 0, "A postprocessor whose value is multiplied by the body force");
   params.addParam<RealVectorValue>(
       "force_direction", RealVectorValue(1, 0, 0), "Gravity acceleration vector");
   params.addParam<MooseFunctorName>(
@@ -92,10 +92,9 @@ WCNSFV2PSlipVelocityAux::computeValue()
   const bool is_transient = _subproblem.isTransient();
   ADRealVectorValue term_advection;
   ADRealVectorValue term_transient;
-  ADRealVectorValue term_gravity(_gravity);
   const ADRealVectorValue term_force(_force_scale * _force_postprocessor *
-                               _force_function.value(_t, _current_elem->vertex_average()) *
-                               _force_direction);
+                                     _force_function.value(_t, _current_elem->vertex_average()) *
+                                     _force_direction);
 
   // Adding transient term
   if (is_transient)
@@ -130,11 +129,11 @@ WCNSFV2PSlipVelocityAux::computeValue()
   const ADReal density_scaling =
       (_rho_d(elem_arg, state) - _rho_mixture(elem_arg, state)) / _rho_d(elem_arg, state);
   const ADReal flux_residual =
-      density_scaling * (-term_transient - term_advection + term_gravity + term_force)(_index);
+      density_scaling * (-term_transient - term_advection + _gravity + term_force)(_index);
 
   const ADReal relaxation_time = _rho_d(elem_arg, state) *
-                           Utility::pow<2>(_particle_diameter(elem_arg, state)) /
-                           (18.0 * _mu_mixture(elem_arg, state));
+                                 Utility::pow<2>(_particle_diameter(elem_arg, state)) /
+                                 (18.0 * _mu_mixture(elem_arg, state));
 
   const ADReal linear_friction_factor = _linear_friction(elem_arg, state) + offset;
 
