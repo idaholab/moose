@@ -82,7 +82,7 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
         _u_slip(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
 
   const auto rho = _rho(face_arg, state) +
-             (_rho_d(face_arg, state) - _rho(face_arg, state)) * _fd(face_arg, state);
+                   (_rho_d(face_arg, state) - _rho(face_arg, state)) * _fd(face_arg, state);
 
   const auto vdotn = _normal * u_slip_vel_vec;
 
