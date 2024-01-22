@@ -21,9 +21,9 @@ WCNSFV2PMomentumDriftFlux::validParams()
 {
   auto params = INSFVFluxKernel::validParams();
   params.addClassDescription("Implements the drift momentum flux source.");
-  params.addRequiredParam<MooseFunctorName>("u_slip", "The velocity in the x direction.");
-  params.addParam<MooseFunctorName>("v_slip", "The velocity in the y direction.");
-  params.addParam<MooseFunctorName>("w_slip", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u_slip", "The slip velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v_slip", "The slip velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
 

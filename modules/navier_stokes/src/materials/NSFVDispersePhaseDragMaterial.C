@@ -57,7 +57,7 @@ NSFVDispersePhaseDragMaterial::NSFVDispersePhaseDragMaterial(const InputParamete
                                  speed += Utility::pow<2>((*_w_var)(r, t));
                                speed = std::sqrt(speed);
 
-                               ADReal Re_particle = _particle_diameter(r, t) * speed *
+                               const ADReal Re_particle = _particle_diameter(r, t) * speed *
                                                     _rho_mixture(r, t) / _mu_mixture(r, t);
 
                                if (Re_particle <= 1000)

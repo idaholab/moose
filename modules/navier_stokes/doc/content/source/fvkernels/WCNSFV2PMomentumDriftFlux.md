@@ -9,7 +9,7 @@ from the drift flux term
 
 where:
 
-- $\alpha_d$ is the fractio of the dispersed phase $d$,
+- $\alpha_d$ is the fraction of the dispersed phase $d$,
 - $\rho_d$ is the density of the dispersed phase $d$,
 - $\bm{v}_{slip,d}$ is the slip velocity of the dispersed phase $d$.
 

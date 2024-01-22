@@ -13,7 +13,7 @@
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
 
-/*
+/**
  * Adds drift flux kernel coming for two-phase mixture model
  */
 class WCNSFV2PMomentumDriftFlux : public INSFVFluxKernel
@@ -36,17 +36,17 @@ protected:
   /// The dimension of the simulation
   const unsigned int _dim;
 
-  /// Dispersed Phase Density
+  /// Dispersed phase density
   const Moose::Functor<ADReal> & _rho_d;
 
-  /// Dispersed Phase Fraction
+  /// Dispersed phase fraction
   const Moose::Functor<ADReal> & _f_d;
 
-  /// x-velocity
+  /// slip velocity in direction x
   const Moose::Functor<ADReal> & _u_slip;
-  /// y-velocity
+  /// slip velocity in direction y
   const Moose::Functor<ADReal> * const _v_slip;
-  /// z-velocity
+  /// slip velocity in direction z
   const Moose::Functor<ADReal> * const _w_slip;
 
   /// The face interpolation method for the density

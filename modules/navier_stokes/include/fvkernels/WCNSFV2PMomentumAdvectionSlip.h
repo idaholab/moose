@@ -12,7 +12,7 @@
 #include "INSFVMomentumAdvection.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 
-/*
+/**
  * Adds momentum kernel coming from the slip velocity in two-phase mixture model
  */
 class WCNSFV2PMomentumAdvectionSlip : public INSFVMomentumAdvection
@@ -30,17 +30,17 @@ protected:
    */
   void computeResidualsAndADataSlip(const FaceInfo & fi);
 
-  /// Dispersed Phase Density
+  /// Dispersed phase density
   const Moose::Functor<ADReal> & _rho_d;
 
   /// the dimension of the simulation
   const unsigned int _dim;
 
-  /// x-velocity
+  /// slip velocity in direction x
   const Moose::Functor<ADReal> & _u_slip;
-  /// y-velocity
+  /// slip velocity in direction y
   const Moose::Functor<ADReal> * const _v_slip;
-  /// z-velocity
+  /// slip velocity in direction z
   const Moose::Functor<ADReal> * const _w_slip;
 
   /// Particle diameter in the dispersed phase

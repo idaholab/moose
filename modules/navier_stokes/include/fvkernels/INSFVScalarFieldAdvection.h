@@ -31,10 +31,10 @@ protected:
   /// Boolean to determine if slip velocity is available
   bool _add_slip_model;
 
-  /// x-velocity
+  /// slip velocity in direction x
   const Moose::Functor<ADReal> * const _u_slip;
-  /// y-velocity
+  /// slip velocity in direction y
   const Moose::Functor<ADReal> * const _v_slip;
-  /// z-velocity
+  /// slip velocity in direction z
   const Moose::Functor<ADReal> * const _w_slip;
 };

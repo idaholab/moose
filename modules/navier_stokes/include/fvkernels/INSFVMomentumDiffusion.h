@@ -53,7 +53,7 @@ protected:
   /// Boolean parameter to include the complete momentum expansion
   const bool _complete_expansion;
 
-  /// Boolean parameter to include the complete momentum expansion
+  /// Boolean parameter to limit interpolation
   const bool _limit_interpolation;
 
   /// dimension

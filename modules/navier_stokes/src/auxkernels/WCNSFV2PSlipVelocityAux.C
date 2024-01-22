@@ -27,7 +27,6 @@ WCNSFV2PSlipVelocityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Mixture Density");
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Gravity acceleration vector");
-  params.addClassDescription("Object for advecting momentum with slip velocity, e.g. rho*u");
   params.addParam<Real>("force_value", 0.0, "Coefficient to multiply by the body force term");
   params.addParam<FunctionName>("force_function", "1", "A function that describes the body force");
   params.addParam<PostprocessorName>(
@@ -90,11 +89,11 @@ WCNSFV2PSlipVelocityAux::computeValue()
   const auto elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
 
-  bool is_transient = _subproblem.isTransient();
+  const bool is_transient = _subproblem.isTransient();
   ADRealVectorValue term_advection;
   ADRealVectorValue term_transient;
   ADRealVectorValue term_gravity(_gravity);
-  ADRealVectorValue term_force(_force_scale * _force_postprocessor *
+  const ADRealVectorValue term_force(_force_scale * _force_postprocessor *
                                _force_function.value(_t, _current_elem->vertex_average()) *
                                _force_direction);
 
@@ -110,34 +109,34 @@ WCNSFV2PSlipVelocityAux::computeValue()
 
   // Adding advection term
   const auto u_velocity = (*_u_var)(elem_arg, state);
-  ADRealVectorValue u_grad = _u_var->gradient(elem_arg, state);
+  const auto u_grad = _u_var->gradient(elem_arg, state);
   term_advection(0) += u_velocity * u_grad(0);
   if (_dim > 1)
   {
     const auto v_velocity = (*_v_var)(elem_arg, state);
-    ADRealVectorValue v_grad = _v_var->gradient(elem_arg, state);
+    const auto v_grad = _v_var->gradient(elem_arg, state);
     term_advection(0) += v_velocity * u_grad(1);
     term_advection(1) += u_velocity * v_grad(0) + v_velocity * v_grad(1);
     if (_dim > 2)
     {
       const auto w_velocity = (*_w_var)(elem_arg, state);
-      ADRealVectorValue w_grad = _w_var->gradient(elem_arg, state);
+      const auto w_grad = _w_var->gradient(elem_arg, state);
       term_advection(0) += w_velocity * u_grad(2);
       term_advection(1) += w_velocity * v_grad(2);
       term_advection(2) += u_velocity * w_grad(0) + v_velocity * w_grad(1) + w_velocity * w_grad(2);
     }
   }
 
-  ADReal density_scaling =
+  const ADReal density_scaling =
       (_rho_d(elem_arg, state) - _rho_mixture(elem_arg, state)) / _rho_d(elem_arg, state);
-  ADReal flux_residual =
+  const ADReal flux_residual =
       density_scaling * (-term_transient - term_advection + term_gravity + term_force)(_index);
 
-  ADReal relaxation_time = _rho_d(elem_arg, state) *
+  const ADReal relaxation_time = _rho_d(elem_arg, state) *
                            Utility::pow<2>(_particle_diameter(elem_arg, state)) /
                            (18.0 * _mu_mixture(elem_arg, state));
 
-  ADReal linear_friction_factor = _linear_friction(elem_arg, state) + offset;
+  const ADReal linear_friction_factor = _linear_friction(elem_arg, state) + offset;
 
   return raw_value(relaxation_time / linear_friction_factor * flux_residual);
 }

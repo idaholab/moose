@@ -32,10 +32,10 @@ protected:
   /// z-velocity
   const Moose::Functor<ADReal> * _w_var;
 
-  /// Continuous Phase Density
+  /// Continuous phase density
   const Moose::Functor<ADReal> & _rho_mixture;
 
-  /// Mixture Density
+  /// Mixture density
   const Moose::Functor<ADReal> & _mu_mixture;
 
   /// Particle diameter in the dispersed phase

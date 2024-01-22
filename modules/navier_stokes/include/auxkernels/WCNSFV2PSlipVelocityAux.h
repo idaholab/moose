@@ -13,7 +13,7 @@
 
 class INSFVVelocityVariable;
 
-/*
+/**
  * Computes the value of slip velocity for the two phase mixture model
  */
 class WCNSFV2PSlipVelocityAux : public AuxKernel
@@ -36,19 +36,19 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
 
-  /// Continuous Phase Density
+  /// Continuous phase density
   const Moose::Functor<ADReal> & _rho_mixture;
 
   /// Dispersed Phase Density
   const Moose::Functor<ADReal> & _rho_d;
 
-  /// Mixture Density
+  /// Mixture density
   const Moose::Functor<ADReal> & _mu_mixture;
 
   // Gravity acceleration vector
   RealVectorValue _gravity;
 
-  /// Force Scale factor
+  /// Force scale factor
   const Real & _force_scale;
 
   /// Force optional function value
@@ -57,7 +57,7 @@ protected:
   /// Optional Force Postprocessor value
   const PostprocessorValue & _force_postprocessor;
 
-  // Gravity acceleration vector
+  /// Force direction vector
   RealVectorValue _force_direction;
 
   /// The linear friction factor, for laminar flow

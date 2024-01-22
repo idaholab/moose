@@ -22,9 +22,9 @@ WCNSFV2PMomentumAdvectionSlip::validParams()
   InputParameters params = INSFVMomentumAdvection::validParams();
   params.addClassDescription(
       "Computes the slip velocity advection kernel for two-phase mixture model.");
-  params.addRequiredParam<MooseFunctorName>("u_slip", "The velocity in the x direction.");
-  params.addParam<MooseFunctorName>("v_slip", "The velocity in the y direction.");
-  params.addParam<MooseFunctorName>("w_slip", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u_slip", "The slip velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v_slip", "The slip velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
   return params;
@@ -74,14 +74,14 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
 
   ADRealVectorValue u_slip_vel_vec;
   if (_dim == 1)
-    u_slip_vel_vec = ADRealVectorValue(_u_slip(face_arg, state), 0.0, 0.0);
+    u_slip_vel_vec(0) = _u_slip(face_arg, state);
   if (_dim == 2)
     u_slip_vel_vec = ADRealVectorValue(_u_slip(face_arg, state), (*_v_slip)(face_arg, state), 0.0);
   if (_dim == 3)
     u_slip_vel_vec = ADRealVectorValue(
         _u_slip(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
 
-  auto rho = _rho(face_arg, state) +
+  const auto rho = _rho(face_arg, state) +
              (_rho_d(face_arg, state) - _rho(face_arg, state)) * _fd(face_arg, state);
 
   const auto vdotn = _normal * u_slip_vel_vec;

@@ -10,7 +10,7 @@ When using a mixture model for multiphase flows, this kernel also allows us
 to add the slip velocity, which is modeled by the following term:
 
 \begin{equation}
-  \nabla \cdot \bm{v}_{slip} \phi \,,
+  \nabla \cdot \bm{v}_{slip,d} \phi \,,
 \end{equation}
 
 where:
