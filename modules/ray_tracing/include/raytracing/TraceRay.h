@@ -68,7 +68,8 @@ public:
     EDGE_NEIGHBOR_BUILDS = 10,      // builds for neighbors on an edge
     EDGE_NEIGHBOR_LOOKUPS = 11,     // lookups for neighborson an edge
     POINT_NEIGHBOR_BUILDS = 12,     // builds for point neighbors (non edge/vertex)
-    FAILED_TRACES = 13              // rays that fail (allowed when _tolerate_failure == true)
+    FAILED_TRACES = 13,             // rays that fail (allowed when _tolerate_failure == true),
+    ENDED_STATIONARY = 14           // rays the end because they are stationary
   };
 
   /**
@@ -258,7 +259,7 @@ private:
     NO_EXIT = 0,    // doesn't exit
     HIT_FACE = 1,   // exits through a face
     HIT_VERTEX = 2, // exits through a vertex
-    HIT_EDGE = 3,   // exits through an edge
+    HIT_EDGE = 3    // exits through an edge
   };
 
   /**
