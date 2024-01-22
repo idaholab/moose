@@ -36,11 +36,11 @@ FlipSidesetGenerator::generate()
   // get boundary info
   BoundaryInfo & boundary_info = _input->get_boundary_info();
   // get id of the input sideset
-  boundary_id_type sideset_id = boundary_info.get_id_by_name(_sideset_name);
+  const auto sideset_id = boundary_info.get_id_by_name(_sideset_name);
 
   // Throw an error if the sideset doesn't exist
   if (sideset_id == libMesh::BoundaryInfo::invalid_id)
-    mooseError("sideset '" + _sideset_name + "' doesn't exist in mesh");
+    paramError("boundary", "The boundary '", _sideset_name, "' was not found");
 
   // get a copy of sideset map to avoid changing the sideset map while looping on it
   std::multimap<const Elem *, std::pair<unsigned short int, boundary_id_type>> sideset_map =
