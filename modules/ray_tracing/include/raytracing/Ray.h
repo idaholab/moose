@@ -499,6 +499,11 @@ public:
   bool maxDistanceSet() const { return _max_distance != std::numeric_limits<Real>::max(); }
 
   /**
+   * @return Whether or not the Ray is set to be stationary
+   */
+  inline bool stationary() const;
+
+  /**
    * Whether or not this Ray should continue
    */
   bool shouldContinue() const { return _should_continue; }
@@ -728,6 +733,15 @@ private:
   friend void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context);
   friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context);
 };
+
+bool
+Ray::stationary() const
+{
+  const bool stationary = _max_distance == 0;
+  if (stationary)
+    mooseAssert(_intersections == 0, "Should be zero");
+  return stationary;
+}
 
 /**
  * The following methods are specializations for using the Parallel::packed_range_* routines

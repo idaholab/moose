@@ -9,33 +9,48 @@
 
 #include "StationaryRayStudyTest.h"
 
+#include "Function.h"
+
 registerMooseObject("RayTracingTestApp", StationaryRayStudyTest);
 
 InputParameters
 StationaryRayStudyTest::validParams()
 {
-  auto params = RepeatableRayStudyBase::validParams();
+  auto params = RayTracingStudy::validParams();
 
-  params.set<bool>("_claim_after_define_rays") = false;
-  params.set<bool>("_define_rays_replicated") = false;
+  params.addParam<std::vector<FunctionName>>(
+      "data_functions", {}, "Functions to use to set the data (if any)");
+  params.addParam<std::vector<FunctionName>>(
+      "aux_data_functions", {}, "Functions to use to set the aux data (if any)");
+
   params.set<bool>("_use_ray_registration") = false;
 
   return params;
 }
 
 StationaryRayStudyTest::StationaryRayStudyTest(const InputParameters & parameters)
-  : RepeatableRayStudyBase(parameters)
+  : RayTracingStudy(parameters)
 {
+  for (const auto & function : getParam<std::vector<FunctionName>>("data_functions"))
+    _data_functions.emplace_back(registerRayData(function), &getFunctionByName(function));
+
+  for (const auto & function : getParam<std::vector<FunctionName>>("aux_data_functions"))
+    _aux_data_functions.emplace_back(registerRayAuxData(function), &getFunctionByName(function));
 }
 
 void
-StationaryRayStudyTest::defineRays()
+StationaryRayStudyTest::generateRays()
 {
   const auto define_ray = [this](const auto elem, const auto & start)
   {
-    auto & ray = *_rays.emplace_back(acquireRay());
-    ray.setStart(start, elem);
-    ray.setStationary();
+    auto ray = acquireRay();
+    ray->setStart(start, elem);
+    ray->setStationary();
+    for (const auto & [i, function] : _data_functions)
+      ray->data(i) = function->value(_t, start);
+    for (const auto & [i, function] : _aux_data_functions)
+      ray->auxData(i) = function->value(_t, start);
+    moveRayToBuffer(ray);
   };
 
   // elem centroids

@@ -68,7 +68,10 @@ RayTracingMeshOutput::RayTracingMeshOutput(const InputParameters & params)
     _intersections_var(invalid_uint),
     _pid_var(invalid_uint),
     _processor_crossings_var(invalid_uint),
-    _trajectory_changes_var(invalid_uint)
+    _trajectory_changes_var(invalid_uint),
+    _data_start_var(invalid_uint),
+    _aux_data_start_var(invalid_uint),
+    _segmented_rays(false)
 {
   if ((_output_data || _output_data_names) && !_study.dataOnCacheTraces())
     mooseError("In order to output Ray data in output '",
@@ -213,7 +216,10 @@ RayTracingMeshOutput::buildIDMap()
     global_ids.emplace(ray_id, std::make_pair(current_node_id, current_elem_id));
 
     current_node_id += max_nodes;
-    current_elem_id += max_nodes - 1;
+    if (max_nodes > 1)
+      current_elem_id += max_nodes - 1;
+    else // stationary
+      current_elem_id += 1;
   }
 
   // Share the max node IDs so that we have a starting point for unique IDs for elems
@@ -261,6 +267,8 @@ RayTracingMeshOutput::buildSegmentMesh()
 {
   TIME_SECTION("buildSegmentMesh", 3, "Building RayTracing Mesh Output");
 
+  _segmented_rays = false;
+
   // Tally nodes and elems for the local mesh ahead of time so we can reserve
   // Each segment requires an element, and we need one more node than elems
   dof_id_type num_nodes = 0;
@@ -268,12 +276,17 @@ RayTracingMeshOutput::buildSegmentMesh()
   for (const auto & entry : _study.getCachedTraces())
   {
     const auto num_segments = entry.numSegments();
-    if (num_segments > 0)
+    num_nodes += num_segments + 1;
+    if (num_segments > 1)
     {
-      num_nodes += num_segments + 1;
+      _segmented_rays = true;
       num_elems += num_segments;
     }
+    else if (entry.stationary())
+      num_elems += 1;
   }
+
+  comm().max(_segmented_rays);
 
   // Build the segment mesh
   mooseAssert(!_segment_mesh, "Not cleared");
@@ -284,7 +297,7 @@ RayTracingMeshOutput::buildSegmentMesh()
     _segment_mesh = std::make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
     _segment_mesh->set_distributed();
   }
-  // We don't need neighbors to just create output
+  // We set neighbor links
   _segment_mesh->allow_find_neighbors(false);
   // Don't renumber so that we can remain consistent between processor counts
   _segment_mesh->allow_renumbering(false);
@@ -303,36 +316,59 @@ RayTracingMeshOutput::buildSegmentMesh()
   {
     // If we have no segments, this is a trace that skimmed the corner of a processor boundary and
     // didn't contribute anything
-    if (trace_data.numSegments() == 0)
+    if (trace_data.numSegments() == 0 && !trace_data.stationary())
       continue;
 
     dof_id_type node_id, elem_id;
     startingIDs(trace_data, node_id, elem_id);
 
     // Add the start point
+    mooseAssert(!_segment_mesh->query_node_ptr(node_id), "Node already exists");
     Node * last_node =
         _segment_mesh->add_point(trace_data._point_data[0]._point, node_id, processor_id());
     last_node->set_unique_id(node_id++);
 
-    // Add a point and element for each segment
-    for (std::size_t i = 1; i < trace_data._point_data.size(); ++i)
+    // Stationary, add a NodeElem
+    if (trace_data.stationary())
     {
-      const auto & point = trace_data._point_data[i]._point;
-
-      // Add next point on the trace
-      mooseAssert(!_segment_mesh->query_node_ptr(node_id), "Node already exists");
-      Node * node = _segment_mesh->add_point(point, node_id, processor_id());
-      node->set_unique_id(node_id++);
-
-      // Build a segment from this point to the last
       mooseAssert(!_segment_mesh->query_elem_ptr(elem_id), "Elem already exists");
-      Elem * elem = _segment_mesh->add_elem(Elem::build_with_id(EDGE2, elem_id));
+      auto elem = _segment_mesh->add_elem(Elem::build_with_id(NODEELEM, elem_id));
       elem->processor_id(processor_id());
       elem->set_unique_id(_max_node_id + elem_id++);
       elem->set_node(0) = last_node;
-      elem->set_node(1) = node;
+    }
+    // Not stationary; add a point and element for each segment
+    else
+    {
+      Elem * last_elem = nullptr;
 
-      last_node = node;
+      for (std::size_t i = 1; i < trace_data._point_data.size(); ++i)
+      {
+        const auto & point = trace_data._point_data[i]._point;
+
+        // Add next point on the trace
+        mooseAssert(!_segment_mesh->query_node_ptr(node_id), "Node already exists");
+        Node * node = _segment_mesh->add_point(point, node_id, processor_id());
+        node->set_unique_id(node_id++);
+
+        // Build a segment from this point to the last
+        mooseAssert(!_segment_mesh->query_elem_ptr(elem_id), "Elem already exists");
+        Elem * elem = _segment_mesh->add_elem(Elem::build_with_id(EDGE2, elem_id));
+        elem->processor_id(processor_id());
+        elem->set_unique_id(_max_node_id + elem_id++);
+        elem->set_node(0) = last_node;
+        elem->set_node(1) = node;
+
+        // Set neighbor links
+        if (last_elem)
+        {
+          elem->set_neighbor(0, last_elem);
+          last_elem->set_neighbor(1, elem);
+        }
+
+        last_elem = elem;
+        last_node = node;
+      }
     }
   }
 
@@ -462,20 +498,23 @@ RayTracingMeshOutput::setupEquationSystem()
   for (auto & prop : _pars.get<MultiMooseEnum>("output_properties"))
     switch (prop)
     {
-      case 0: // ray_id
+      case 0: // ray_id (stationary and segments)
         _ray_id_var = _sys->add_variable("ray_id", CONSTANT, MONOMIAL);
         break;
-      case 1: // intersections
-        _intersections_var = _sys->add_variable("intersections", CONSTANT, MONOMIAL);
+      case 1: // intersections (segments only)
+        if (_segmented_rays)
+          _intersections_var = _sys->add_variable("intersections", CONSTANT, MONOMIAL);
         break;
-      case 2: // pid
+      case 2: // pid (stationary and segments)
         _pid_var = _sys->add_variable("pid", CONSTANT, MONOMIAL);
         break;
-      case 3: // processor_crossings
-        _processor_crossings_var = _sys->add_variable("processor_crossings", CONSTANT, MONOMIAL);
+      case 3: // processor_crossings (segments only)
+        if (_segmented_rays)
+          _processor_crossings_var = _sys->add_variable("processor_crossings", CONSTANT, MONOMIAL);
         break;
-      case 4: // trajectory_changes
-        _trajectory_changes_var = _sys->add_variable("trajectory_changes", CONSTANT, MONOMIAL);
+      case 4: // trajectory_changes (segments only)
+        if (_segmented_rays)
+          _trajectory_changes_var = _sys->add_variable("trajectory_changes", CONSTANT, MONOMIAL);
         break;
       default:
         mooseError("Invalid property");
@@ -531,74 +570,78 @@ RayTracingMeshOutput::fillFields()
 {
   TIME_SECTION("fillFields", 3, "Filling RayTracing MeshOutput Fields");
 
-  const auto sys_num = _sys->number();
-  auto & solution = _sys->solution;
+  // Helper for setting the solution (if enabled)
+  const auto set_solution =
+      [this](const DofObject * const dof, const unsigned int var, const Real value)
+  {
+    mooseAssert(dof, "Nullptr dof");
+    if (var != invalid_uint)
+    {
+      const auto dof_number = dof->dof_number(_sys->number(), var, 0);
+      _sys->solution->set(dof_number, value);
+    }
+  };
+
+  // Helper for filling data and aux data (if enabled)
+  const auto fill_data = [this, &set_solution](const DofObject * const dof,
+                                               const auto & vars,
+                                               const unsigned int start_var,
+                                               const auto & data)
+  {
+    mooseAssert(dof, "Nullptr dof");
+    for (const auto & [data_index, var_num])
+      set_solution(dof, var_num, data[data_index]);
+  };
 
   for (const auto & trace_data : _study.getCachedTraces())
   {
     auto intersection = trace_data._intersections;
 
-    if (!trace_data.numSegments())
+    // No segments and not stationary; means this ray bounced off
+    // this processor and never actually moved on this processor
+    if (!trace_data.numSegments() && !trace_data.stationary())
       continue;
 
     dof_id_type node_id, elem_id;
     startingIDs(trace_data, node_id, elem_id);
 
-    // With linear output data, set the first node's data
-    if (_output_data_nodal && _data_vars.size())
+    const Elem * elem = _segment_mesh->elem_ptr(elem_id);
+
+    // Fill first node's nodal data if we need it; the loop that follows will handle
+    // the rest of the nodes
+    if (_output_data_nodal && _study.hasRayData() && !trace_data.stationary())
+      fill_data(elem->node_ptr(0), _data_vars, trace_data._point_data[0]._data);
+
+    const std::size_t start = trace_data.stationary() ? 0 : 1;
+    for (const auto i : make_range(start, trace_data._point_data.size()))
     {
-      const Node * node = _segment_mesh->node_ptr(node_id++);
-      for (const auto & [data_index, var_num] : _data_vars)
-        solution->set(node->dof_number(sys_num, var_num, 0),
-                      trace_data._point_data[0]._data[data_index]);
-    }
+      mooseAssert(elem, "Nullptr elem");
 
-    // Set data for each segment
-    for (std::size_t i = 1; i < trace_data._point_data.size(); ++i)
-    {
-      const auto point_data = trace_data._point_data[i];
-
-      // Element that represents this segment
-      const Elem * elem = _segment_mesh->elem_ptr(elem_id++);
-      // The starting node for this segment, only needed if we're setting some nodal data
-      const Node * node = _output_data_nodal ? _segment_mesh->node_ptr(node_id++) : nullptr;
-
-      // Fill the property fields
-      if (_ray_id_var != invalid_uint)
-        solution->set(elem->dof_number(sys_num, _ray_id_var, 0), trace_data._ray_id);
-      if (_intersections_var != invalid_uint)
-        solution->set(elem->dof_number(sys_num, _intersections_var, 0), intersection++);
-      if (_pid_var != invalid_uint)
-        solution->set(elem->dof_number(sys_num, _pid_var, 0), processor_id());
-      if (_processor_crossings_var != invalid_uint)
-        solution->set(elem->dof_number(sys_num, _processor_crossings_var, 0),
-                      trace_data._processor_crossings);
-      if (_trajectory_changes_var != invalid_uint)
-        solution->set(elem->dof_number(sys_num, _trajectory_changes_var, 0),
-                      trace_data._trajectory_changes);
-
-      // Fill the primary Ray data fields
-      if (_data_vars.size())
+      // Elemental ID and pid
+      set_solution(elem, _ray_id_var, trace_data._ray_id);
+      set_solution(elem, _pid_var, processor_id());
+      // Elemental properties that only apply to segments
+      if (!trace_data.stationary())
       {
-        mooseAssert(point_data._data.size() == _study.rayDataSize(), "Size mismatch");
-        for (const auto & [i, var_num] : _data_vars)
-          if (_output_data_nodal)
-            solution->set(node->dof_number(sys_num, var_num, 0), point_data._data[i]);
-          else
-            solution->set(elem->dof_number(sys_num, var_num, 0), point_data._data[i]);
+        set_solution(elem, _intersections_var, intersection++);
+        set_solution(elem, _processor_crossings_var, trace_data._processor_crossings);
+        set_solution(elem, _trajectory_changes_var, trace_data._trajectory_changes);
       }
+      // Elemental data fields
+      const auto & point_data = trace_data._point_data[i];
+      fill_data(elem, _data_vars, point_data._data);
+      fill_data(elem, _aux_data_vars, point_data._aux_data);
+      // Nodal data fields
+      if (_output_data_nodal !trace_data.stationary())
+        fill_data(elem->node_ptr(1), _data_vars, point_data._data);
 
-      // Fill the aux Ray data fields
-      if (_aux_data_vars.size())
-      {
-        mooseAssert(point_data._aux_data.size() == _study.rayAuxDataSize(), "Size mismatch");
-        for (const auto & [i, var_num] : _aux_data_vars)
-          solution->set(elem->dof_number(sys_num, var_num, 0), point_data._aux_data[i]);
-      }
+      // Advance to the next element
+      if (!trace_data.stationary())
+        elem = elem->neighbor_ptr(1);
     }
   }
 
-  solution->close();
+  _sys->solution->close();
   _sys->update();
 }
 
@@ -642,13 +685,14 @@ RayTracingMeshOutput::startingIDs(const TraceData & trace_data,
                                   dof_id_type & start_node_id,
                                   dof_id_type & start_elem_id) const
 {
-  const auto pair = _ray_starting_id_map.at(trace_data._ray_id);
-  const dof_id_type begin_node_id = pair.first;
-  const dof_id_type begin_elem_id = pair.second;
+  const auto [begin_node_id, begin_elem_id] = _ray_starting_id_map.at(trace_data._ray_id);
 
-  const auto offset = _study.segmentsOnCacheTraces()
-                          ? trace_data._intersections
-                          : (trace_data._processor_crossings + trace_data._trajectory_changes);
+  const auto offset =
+      trace_data.stationary()
+          ? 1
+          : (_study.segmentsOnCacheTraces()
+                 ? trace_data._intersections
+                 : (trace_data._processor_crossings + trace_data._trajectory_changes));
 
   start_node_id = begin_node_id + offset;
   start_elem_id = begin_elem_id + offset;
@@ -659,7 +703,6 @@ RayTracingMeshOutput::neededNodes(const TraceData & trace_data) const
 {
   if (_study.segmentsOnCacheTraces())
     return trace_data._intersections + trace_data._point_data.size();
-  else
-    return trace_data._processor_crossings + trace_data._trajectory_changes +
-           trace_data._point_data.size();
+  return trace_data._processor_crossings + trace_data._trajectory_changes +
+         trace_data._point_data.size();
 }
