@@ -22,6 +22,8 @@
 #include <sstream>
 #include <memory>
 #include <vector>
+#include <fstream>
+#include <cstdio>
 
 class MooseServerTest : public ::testing::Test
 {
@@ -1571,51 +1573,72 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
 
 TEST_F(MooseServerTest, DocumentFormattingRequest)
 {
+  // put variables file on disk which will be included from base input file
+
+  std::ofstream include_variables("include_variables.i");
+  include_variables << "[Variables]\n  [u]\n  []\n[]\n";
+  include_variables.close();
+
   // didchange test parameters - update input to set up document formatting
 
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int doc_version = 4;
   std::string doc_text_change = R"INPUT(
 
-[./Mesh] type = GeneratedMesh
-       dim =   2         patch_size  =    40
-patch_update_strategy = AUTO
+[Mesh]
+type=GeneratedMesh   dim   =  1
+    []
 
-        displacements = 'disp_x disp_y'
-     parallel_type = REPLICATED   bias_x = 1
+[Functions]
+[./multi_line_indent_increase_01]
+type = PiecewiseConstant
+xy_data = "0 0.0
+           1 1.0
+           10 3.0
+           100 2.0
+           1000 4.0"
+[../]
+[./multi_line_indent_increase_02]
+type = PiecewiseConstant
+xy_data = " 0 0.0
+            1 11.0
+           10 33.0
+          100 22.30
+         1000 42.210"
+[../]
+[./multi_line_indent_decrease_01]
+            type = PiecewiseConstant
+            xy_data = "100 1.0
+                       200 12.0
+                       300 313.0
+                       400 4514.0
+                       500 45615.0"
+[../]
+[./multi_line_indent_decrease_02]
+            type = PiecewiseConstant
+            xy_data = "100 1.0
+  200 12.0
+                       500 45615.0"
 [../]
 
-[./Variables] [u]
-  [../]      [./v] [] [abc]
+[./double_quoted_string_reflowed]
+type = ParsedFunction
+expression = "0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 0.5 * x^4 - 6.0 * 0.6 * x^5 + 7.0 * 0.7 * x^6 - 8.0 * 0.8 * x^7 + 9.0 * 0.9 * x^8 - 10.0 * 1.0 * x^9"
+[../]
+[./single_quoted_string_constant]
+type = ParsedFunction
+expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 0.5 * x^4 - 6.0 * 0.6 * x^5 + 7.0 * 0.7 * x^6 - 8.0 * 0.8 * x^7 + 9.0 * 0.9 * x^8 - 10.0 * 1.0 * x^9'
+[../]
+[]
 
+    !include    include_variables.i    # inline comment 01
 
-    order     = CONSTANT
-    type = MooseVariableConstMonomial
-  []   []
-[AuxVariables]  [aux_name]
-type = MooseVariableBase family =   LAGRANGE
+        # normal comment 01
+   [Problem] solve=  false []
 
-                []       [] [./AuxVariables]
-  [disp_x]   [] [./xyz]
-type  = MooseVariable   family  =   MONOMIAL
-      []
- [disp_y] []    [disp_z]
-    type = MooseVariableBase    [../]
-[../]      [BCs]
-
-    [./all]  type = VacuumBC
-  boundary   =   'left right' variable = abc
-
-   displacements  =  'xyz abc xyz disp_x' []
-[../] [./Executioner]
-type = Transient
-       [../]    [Problem] solve = false   []
-
-
-[./UserObjects] [./term_uo]
-    type =   Terminator expression  = 'expr'
-  error_level = NONE []
-
+[Executioner]        # inline comment 02
+# normal comment 02
+        type   =Transient    # inline comment 03
       [../]
 
 )INPUT";
@@ -1678,68 +1701,75 @@ type = Transient
   // expected textedits with zero-based lines and columns
 
   std::string textedits_expect = R"INPUT(
-textedit_position: [2.0]-[41.11]
+textedit_position: [2.0]-[56.11]
 textedit_new_text:
 [Mesh]
     type = GeneratedMesh
-    dim = 2
-    patch_size = 40
-    patch_update_strategy = AUTO
-    displacements = 'disp_x disp_y'
-    parallel_type = REPLICATED
-    bias_x = 1
+    dim = 1
 []
-[Variables]
-    [u]
+
+[Functions]
+    [multi_line_indent_increase_01]
+        type = PiecewiseConstant
+        xy_data = "0 0.0
+                   1 1.0
+                   10 3.0
+                   100 2.0
+                   1000 4.0"
     []
-    [v]
+    [multi_line_indent_increase_02]
+        type = PiecewiseConstant
+        xy_data = " 0 0.0
+                    1 11.0
+                   10 33.0
+                  100 22.30
+                 1000 42.210"
     []
-    [abc]
-        order = CONSTANT
-        type = MooseVariableConstMonomial
+    [multi_line_indent_decrease_01]
+        type = PiecewiseConstant
+        xy_data = "100 1.0
+                   200 12.0
+                   300 313.0
+                   400 4514.0
+                   500 45615.0"
+    []
+    [multi_line_indent_decrease_02]
+        type = PiecewiseConstant
+        xy_data = "100 1.0
+200 12.0
+                   500 45615.0"
+    []
+
+    [double_quoted_string_reflowed]
+        type = ParsedFunction
+        expression = "0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 0.5 * x^4 - "
+                     "6.0 * 0.6 * x^5 + 7.0 * 0.7 * x^6 - 8.0 * 0.8 * x^7 + 9.0 * 0.9 * x^8 - 10.0 * "
+                     "1.0 * x^9"
+    []
+    [single_quoted_string_constant]
+        type = ParsedFunction
+        expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 0.5 * x^4 - 6.0 * 0.6 * x^5 + 7.0 * 0.7 * x^6 - 8.0 * 0.8 * x^7 + 9.0 * 0.9 * x^8 - 10.0 * 1.0 * x^9'
     []
 []
-[AuxVariables]
-    [aux_name]
-        type = MooseVariableBase
-        family = LAGRANGE
-    []
-    [disp_x]
-    []
-    [xyz]
-        type = MooseVariable
-        family = MONOMIAL
-    []
-    [disp_y]
-    []
-    [disp_z]
-        type = MooseVariableBase
-    []
-[]
-[BCs]
-    [all]
-        type = VacuumBC
-        boundary = 'left right'
-        variable = abc
-        displacements = 'xyz abc xyz disp_x'
-    []
-[]
-[Executioner]
-    type = Transient
-[]
+
+!include include_variables.i # inline comment 01
+
+# normal comment 01
 [Problem]
     solve = false
 []
-[UserObjects]
-    [term_uo]
-        type = Terminator
-        expression = 'expr'
-        error_level = NONE
-    []
+
+[Executioner] # inline comment 02
+    # normal comment 02
+    type = Transient # inline comment 03
 []
 )INPUT";
 
   EXPECT_EQ(textedits_expect, "\n" + textedits_actual.str());
+
+  // remove variables file from disk that was included from base input file
+
+  std::remove("include_variables.i");
 }
 
 TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)

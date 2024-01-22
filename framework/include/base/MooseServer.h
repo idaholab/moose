@@ -239,6 +239,15 @@ private:
                                          bool insert_spaces);
 
   /**
+   * Recursively walk down whole nodeview tree while formatting document.
+   * @param parent - nodeview for recursive tree traversal starting point
+   * @param prev_line - line of last print for blanks and inline comments
+   * @param level - current level in document tree to use for indentation
+   * @return - formatted string that gets appended to each recursive call
+   */
+  std::string formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, std::size_t level);
+
+  /**
    * Gather document symbols - specific to this server implemention.
    * @param documentSymbols - data array of symbols data objects to fill
    * @return - true if the gathering of symbols completed successfully
@@ -324,4 +333,9 @@ private:
    * @brief _type_to_input_paths - map of parameter types to lookup paths
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
+
+  /**
+   * @brief _formatting_tab_size - number of indent spaces for formatting
+   */
+  std::size_t _formatting_tab_size;
 };
