@@ -141,12 +141,6 @@ g = -9.81
     variable = phase_2
     coeff = 1e-3
   []
-  # [phase_2_src]
-  #   type = NSFVMixturePhaseInterface
-  #   variable = phase_2
-  #   phase_coupled = phase_1
-  #   alpha = 0.01
-  # []
 []
 
 [FVBCs]
