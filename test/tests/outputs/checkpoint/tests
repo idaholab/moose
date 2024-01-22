@@ -65,8 +65,9 @@
   [default]
     requirement = "The system shall support outputting of checkpoint files, using a simplified input "
                   "format:"
+    issues = '#1927 #13562'
     [recover_half_transient]
-      issues = '#1927'
+      #issues = '#1927'
       type = CheckFiles
       input = checkpoint.i
       cli_args = 'Outputs/checkpoint=true --half-transient'
@@ -105,7 +106,7 @@
     []
     [recover]
       # Gold for this test was created using checkpoint.i without any recover options
-      issues = '#1927'
+      #issues = '#1927'
       type = Exodiff
       input = checkpoint.i
       exodiff = checkpoint_out.e
@@ -120,6 +121,7 @@
     []
 
     [wall_time_interval]
+      #issues = '#13562'
       type = RunApp
       input = checkpoint.i
       recover = false
@@ -127,6 +129,7 @@
       detail = "at specified wall time intervals"
     []
     [wall_time_interval_recover]
+      #issues = '#13562'
       type = Exodiff
       input = checkpoint.i
       exodiff = checkpoint_wall_time_interval_out.e
@@ -139,6 +142,7 @@
     []
 
     [output_wall_time_interval_error]
+      #issues = '#13562'
       type = 'RunException'
       input = 'checkpoint.i'
       cli_args = '--output-wall-time-interval -1'
@@ -150,9 +154,10 @@
   [block]
     requirement = "The system shall support outputting of checkpoint files, using a complete input "
                   "block:"
+    issues = '#1927 #13562 #25755'
     [recover_with_checkpoint_block_half_transient]
       # Tests that recover works when defining as a Output sub-block
-      issues = '#1927'
+      #issues = '#1927'
       type = CheckFiles
       input = checkpoint_block.i
       cli_args = '--half-transient'
@@ -190,7 +195,7 @@
     []
     [recover_with_checkpoint_block]
       # Gold for this test was created using checkpoint_block.i without any recover options
-      issues = '#1927'
+      #issues = '#1927'
       type = Exodiff
       input = checkpoint_block.i
       exodiff = checkpoint_block_out.e
@@ -205,6 +210,7 @@
     []
 
     [wall_time_interval]
+      #issues = '#13562'
       type = RunApp
       input = checkpoint_block.i
       recover = false
@@ -212,6 +218,7 @@
       detail = "at specified wall time intervals"
     []
     [wall_time_interval_recover]
+      #issues = '#13562'
       type = Exodiff
       input = checkpoint_block.i
       exodiff = checkpoint_block_wall_time_interval_out.e
@@ -224,6 +231,7 @@
     []
 
     [execute_on_param_error]
+      #issues = '#25755'
       type = 'RunException'
       input = 'checkpoint_block.i'
       cli_args = 'Outputs/out/execute_on=TIMESTEP_BEGIN'

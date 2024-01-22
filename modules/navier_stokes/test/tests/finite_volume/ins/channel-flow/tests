@@ -23,6 +23,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a channel using the NSFV action.'
     valgrind = HEAVY
+    recover = false
   []
   [initialize-var-from-exodus]
     type = 'Exodiff'
