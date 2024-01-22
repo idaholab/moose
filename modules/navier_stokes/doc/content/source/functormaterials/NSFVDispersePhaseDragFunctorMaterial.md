@@ -28,8 +28,8 @@ dispersed phase is computed as follows [!cite](schiller1933drag):
   \end{cases}
 \end{equation}
 
-!syntax parameters /Materials/NSFVDispersePhaseDragFunctorMaterial
+!syntax parameters /FunctorMaterials/NSFVDispersePhaseDragFunctorMaterial
 
-!syntax inputs /Materials/NSFVDispersePhaseDragFunctorMaterial
+!syntax inputs /FunctorMaterials/NSFVDispersePhaseDragFunctorMaterial
 
-!syntax children /Materials/NSFVDispersePhaseDragFunctorMaterial
+!syntax children /FunctorMaterials/NSFVDispersePhaseDragFunctorMaterial
