@@ -245,8 +245,8 @@
       type = CSVDiff
       input = coupled_electrostatics.i
       csvdiff = coupled_electrostatics_hex27.csv
-      cli_args = 'Outputs/file_base=coupled_electrostatics_hex27 '
-                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+      cli_args = 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/file_base=coupled_electrostatics_hex27 '
                  'Outputs/exodus=false Outputs/csv=true'
       detail = 'HEX27, '
     []
@@ -255,8 +255,8 @@
       input = coupled_electrostatics.i
       csvdiff = coupled_electrostatics_tet14.csv
       cli_args = 'Mesh/gmg/elem_type=TET14 '
-                 'Outputs/file_base=coupled_electrostatics_tet14 '
                  'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/file_base=coupled_electrostatics_tet14 '
                  'Outputs/exodus=false Outputs/csv=true'
       detail = 'TET14, '
     []
@@ -266,8 +266,8 @@
       csvdiff = coupled_electrostatics_tri6.csv
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI6 '
                  'BCs/sides/boundary="top bottom left right" '
-                 'Outputs/file_base=coupled_electrostatics_tri6 '
                  'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/file_base=coupled_electrostatics_tri6 '
                  'Outputs/exodus=false Outputs/csv=true'
       detail = 'TRI6, '
     []
@@ -277,8 +277,8 @@
       csvdiff = coupled_electrostatics_tri7.csv
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI7 '
                  'BCs/sides/boundary="top bottom left right" '
-                 'Outputs/file_base=coupled_electrostatics_tri7 '
                  'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/file_base=coupled_electrostatics_tri7 '
                  'Outputs/exodus=false Outputs/csv=true'
       detail = 'TRI7, '
     []
@@ -288,8 +288,8 @@
       csvdiff = coupled_electrostatics_quad8.csv
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD8 '
                  'BCs/sides/boundary="top bottom left right" '
-                 'Outputs/file_base=coupled_electrostatics_quad8 '
                  'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/file_base=coupled_electrostatics_quad8 '
                  'Outputs/exodus=false Outputs/csv=true'
       detail = 'QUAD8, '
     []
@@ -299,8 +299,8 @@
       csvdiff = coupled_electrostatics_quad9.csv
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD9 '
                  'BCs/sides/boundary="top bottom left right" '
-                 'Outputs/file_base=coupled_electrostatics_quad9 '
                  'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/file_base=coupled_electrostatics_quad9 '
                  'Outputs/exodus=false Outputs/csv=true'
       detail = 'and QUAD9.'
     []

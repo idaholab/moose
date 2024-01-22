@@ -50,11 +50,11 @@ VectorDivPenaltyDirichletBC::computeQpResidual()
                _function_y.value(_t, _q_point[_qp]),
                _function_z.value(_t, _q_point[_qp])};
 
-  return _penalty * ((_u[_qp] - u_exact) * (_normals[_qp])) * ((_test[_i][_qp]) * (_normals[_qp]));
+  return _penalty * ((_u[_qp] - u_exact) * _normals[_qp]) * (_test[_i][_qp] * _normals[_qp]);
 }
 
 Real
 VectorDivPenaltyDirichletBC::computeQpJacobian()
 {
-  return _penalty * ((_phi[_j][_qp]) * (_normals[_qp])) * ((_test[_i][_qp]) * (_normals[_qp]));
+  return _penalty * (_phi[_j][_qp] * _normals[_qp]) * (_test[_i][_qp] * _normals[_qp]);
 }
