@@ -22,6 +22,26 @@ $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
+ifneq ($(INSTALLABLE_DIRS),)
+    # We need to maintain relative paths to submodules or dependancy directories if we
+    # want to install tests from those directories. To do that, we need to know what
+    # the relative path is from the current dependency relative to its parent
+    relpath = $(shell python -c \
+      'import os; print(os.path.relpath("$(APPLICATION_DIR)", "$(CURDIR)") + os.sep)')
+
+    curr_install_dirs := $(addprefix $(relpath),$(INSTALLABLE_DIRS))
+    # Since we support transforming the installable paths, those destination directories will
+    # need some treatment as well (e.g. test/tests->tests => submodule/test/tests->submodule/tests)
+    # To do this, we need to loop over all the directories (white-space separated items) in the list.
+    # For each of these, we'll look for '->' and if we find it, we'll split it on that token then
+    # insert the "relpath" variable we just got out of our Python one-liner as the destination
+    # directory prefix. If we don't find that character, we just return the unedited item.
+    # Note, Whitespace is important in those subst functions
+    curr_install_dirs := $(foreach dir,$(curr_install_dirs),$(if $(findstring ->,$(dir)),\
+      $(word 1,$(subst ->, ,$(dir)))->$(relpath)$(word 2,$(subst ->, ,$(dir))),$(dir)))
+
+    installable_dirs_all := $(installable_dirs_all) $(curr_install_dirs)
+endif
 # install target related stuff
 share_install_dir := $(share_dir)/$(APPLICATION_NAME)
 docs_install_dir := $(share_install_dir)/doc
@@ -309,12 +329,13 @@ ifneq (,$(MODULE_NAME))
 else
   ifeq ($(BUILD_EXEC),yes)
 
-    # Set a default to install the main application's tests if one isn't set in the Makefile
-    ifndef INSTALLABLE_DIRS
+    # Set a default to install the main application's tests if one isn't set in any of the included
+    # .mk files anywhere.
+    ifeq ($(installable_dirs_all),)
       ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
-        INSTALLABLE_DIRS := test/tests->tests
+        installable_dirs_all := test/tests->tests
       else
-        INSTALLABLE_DIRS := tests
+        installable_dirs_all := tests
       endif
     endif
 
@@ -338,7 +359,7 @@ endif
 # Target-specific Variable Values (See GNU-make manual)
 $(app_HEADER): curr_dir              := $(APPLICATION_DIR)
 $(app_HEADER): curr_app              := $(APPLICATION_NAME)
-$(app_HEADER): curr_installable_dirs := $(INSTALLABLE_DIRS)
+$(app_HEADER): curr_installable_dirs := $(installable_dirs_all)
 $(app_HEADER): all_header_dir        := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
@@ -457,7 +478,7 @@ docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(share_install_dir)/$(notdir $(app_EXEC))
 # Strip the trailing slashes (if provided) and transform into a suitable Makefile targets
-copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
+copy_input_targets := $(foreach dir,$(installable_dirs_all),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
 
 ifeq ($(want_exec),yes)
   install_bin: $(bindst)
