@@ -119,6 +119,9 @@ AdvancedExtruderGenerator::validParams()
                         0,
                         "Pitch for helicoidal extrusion around an axis going through the origin "
                         "following the direction vector");
+
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

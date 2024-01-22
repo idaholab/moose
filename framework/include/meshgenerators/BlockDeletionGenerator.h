@@ -24,6 +24,7 @@ public:
 protected:
   virtual std::unique_ptr<MeshBase> generate() override;
   virtual bool shouldDelete(const Elem * elem) override;
+  void generateData() override{};
 
 private:
   /// Ids of the blocks to be removed

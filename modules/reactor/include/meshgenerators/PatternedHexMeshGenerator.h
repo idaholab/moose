@@ -26,6 +26,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  void generateData() override{};
+
 protected:
   /// The input meshes
   const std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;

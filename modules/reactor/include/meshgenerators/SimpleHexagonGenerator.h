@@ -23,6 +23,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  void generateData() override{};
+
 protected:
   /// Type of elements to build the mesh
   const enum class ElemType { TRI, QUAD, HYBRID } _element_type;

@@ -44,6 +44,9 @@ PeripheralTriangleMeshGenerator::validParams()
   params.addClassDescription("This PeripheralTriangleMeshGenerator object is designed to generate "
                              "a triangulated mesh between a generated outer circle boundary "
                              "and a provided inner mesh.");
+
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

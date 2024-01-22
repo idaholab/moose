@@ -97,6 +97,8 @@ PeripheralRingMeshGenerator::validParams()
   params.addClassDescription("This PeripheralRingMeshGenerator object adds a circular peripheral "
                              "region to the input mesh.");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

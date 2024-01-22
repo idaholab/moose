@@ -25,6 +25,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  void generateData() override{};
+
 protected:
   /// Name of the mesh generator to get the input mesh
   const MeshGeneratorName _input_name;

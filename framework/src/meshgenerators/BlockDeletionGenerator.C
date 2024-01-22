@@ -24,6 +24,8 @@ BlockDeletionGenerator::validParams()
   params.addDeprecatedParam<SubdomainID>(
       "block_id", "The block to be deleted.", "Use block instead");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

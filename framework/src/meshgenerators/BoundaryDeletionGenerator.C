@@ -26,6 +26,8 @@ BoundaryDeletionGenerator::validParams()
   params.addRequiredParam<std::vector<BoundaryName>>("boundary_names",
                                                      "The boundaries to be deleted");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

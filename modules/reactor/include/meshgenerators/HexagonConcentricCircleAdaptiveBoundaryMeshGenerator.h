@@ -23,6 +23,8 @@ public:
 
   HexagonConcentricCircleAdaptiveBoundaryMeshGenerator(const InputParameters & parameters);
 
+  void generateData() override{};
+
 protected:
   /// Name of input mesh generator
   const std::vector<MeshGeneratorName> _input_names;

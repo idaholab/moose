@@ -21,4 +21,6 @@ public:
   static InputParameters validParams();
 
   PolygonConcentricCircleMeshGenerator(const InputParameters & parameters);
+
+  void generateData() override{};
 };

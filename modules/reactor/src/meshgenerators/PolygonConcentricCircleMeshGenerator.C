@@ -28,6 +28,8 @@ PolygonConcentricCircleMeshGenerator::validParams()
   params.addClassDescription("This PolygonConcentricCircleMeshGenerator object is designed to mesh "
                              "a polygon geometry with optional rings centered inside.");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

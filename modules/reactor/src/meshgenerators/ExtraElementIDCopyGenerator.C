@@ -23,6 +23,9 @@ ExtraElementIDCopyGenerator::validParams()
   params.addRequiredParam<std::vector<std::string>>("target_extra_element_ids",
                                                     "The target extra element IDs");
   params.addClassDescription("Copy an extra element ID to other extra element IDs.");
+
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

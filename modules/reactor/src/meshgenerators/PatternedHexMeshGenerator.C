@@ -135,6 +135,8 @@ PatternedHexMeshGenerator::validParams()
       "This PatternedHexMeshGenerator source code assembles hexagonal meshes into a hexagonal grid "
       "and optionally forces the outer boundary to be hexagonal and/or adds a duct.");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

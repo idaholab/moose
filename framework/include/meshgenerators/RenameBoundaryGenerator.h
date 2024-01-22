@@ -23,6 +23,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  void generateData() override{};
+
 protected:
   std::unique_ptr<MeshBase> & _input;
 
