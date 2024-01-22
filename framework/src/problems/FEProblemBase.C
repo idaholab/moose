@@ -7383,7 +7383,7 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
 void
 FEProblemBase::checkProblemIntegrity()
 {
-  TIME_SECTION("notifyWhenMeshChanges", 5);
+  TIME_SECTION("checkProblemIntegrity", 5);
 
   // Check for unsatisfied actions
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();

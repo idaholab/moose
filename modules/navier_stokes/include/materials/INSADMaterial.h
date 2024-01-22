@@ -21,7 +21,8 @@ public:
 
   INSADMaterial(const InputParameters & parameters);
 
-  void subdomainSetup() override;
+  virtual void subdomainSetup() override;
+  virtual void resolveOptionalProperties() override;
 
 protected:
   virtual void computeQpProperties() override;
@@ -106,12 +107,14 @@ protected:
   bool _has_coupled_force;
 
   /// The Boussinesq coefficient
+  std::unordered_map<SubdomainID, const ADMaterialProperty<Real> *> _boussinesq_alphas;
   const ADMaterialProperty<Real> * _boussinesq_alpha;
 
   /// The temperature
   const ADVariableValue * _temperature;
 
   /// The reference temperature
+  std::unordered_map<SubdomainID, const MaterialProperty<Real> *> _ref_temps;
   const MaterialProperty<Real> * _ref_temp;
 
   /// The viscous form of the equations. This is either "laplace" or "traction"
