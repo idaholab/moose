@@ -20,9 +20,6 @@
   [thermo]
     thermofile = Kaye_NobleMetals.dat
     initial_values = ic.csv
-    tunit = K
-    punit = atm
-    munit = moles
     temperature = 2250
     reinitialization_type = nodal
   []

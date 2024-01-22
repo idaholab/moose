@@ -51,7 +51,7 @@
     type = Exodiff
     input = MoRu_subblock.i
     exodiff = MoRu_subblock_out.e
-    design = 'ChemicalCompositionAction.md '
+    design = 'CommonChemicalCompositionAction.md '
     issues = '#26376'
     requirement = 'The system shall be able to run different instances of Thermochimica on different sub-blocks'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
@@ -76,7 +76,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
     requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
-
+    cli_args = 'ChemicalComposition/tunit=K ChemicalComposition/punit=atm ChemicalComposition/munit=moles ChemicalComposition/output_species_unit=moles'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -105,6 +105,55 @@
     cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/csv=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [tunit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "The temperature unit must be specified for Thermochimica objects to be constructed"
+    cli_args = "ChemicalComposition/punit=atm ChemicalComposition/munit=moles "
+               "ChemicalComposition/output_species_unit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the temperature unit is not specified'
+    design = ChemicalCompositionAction.md
+
+    required_submodule = 'contrib/thermochimica'
+  []
+  [punit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "The pressure unit must be specified for Thermochimica objects to be constructed"
+    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/munit=moles "
+               "ChemicalComposition/output_species_unit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the pressure unit is not specified'
+    design = ChemicalCompositionAction.md
+
+    required_submodule = 'contrib/thermochimica'
+  []
+  [munit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "The mass unit must be specified for Thermochimica objects to be constructed"
+    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/punit=atm "
+               "ChemicalComposition/output_species_unit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the mass unit is not specified'
+    design = ChemicalCompositionAction.md
+
+    required_submodule = 'contrib/thermochimica'
+  []
+  [op_munit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "Output mass unit must be specified for Thermochimica user object to be constructed"
+    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/punit=atm "
+               "ChemicalComposition/munit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the output mass unit is not specified when species amount or amount of element in phase is requested'
+    design = ChemicalCompositionAction.md
+
     required_submodule = 'contrib/thermochimica'
   []
 

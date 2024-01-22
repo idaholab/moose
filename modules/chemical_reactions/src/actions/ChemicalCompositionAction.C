@@ -49,13 +49,12 @@ ChemicalCompositionAction::validParams()
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
-  MooseEnum tUnit("K C F R", "K");
+  MooseEnum tUnit("K C F R");
   params.addParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
-  MooseEnum pUnit("atm psi bar Pa kPa", "atm");
+  MooseEnum pUnit("atm psi bar Pa kPa");
   params.addParam<MooseEnum>("punit", pUnit, "Pressure Unit");
   MooseEnum mUnit(
-      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds",
-      "moles");
+      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds");
   params.addParam<MooseEnum>("munit", mUnit, "Mass Unit");
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -66,7 +65,7 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>("output_phases", {}, "List of phases to be output");
   params.addParam<std::vector<std::string>>(
       "output_species", {}, "List species for which concentration in the phases is needed");
-  MooseEnum mUnit_op("moles mole_fraction", "moles");
+  MooseEnum mUnit_op("moles mole_fraction");
   params.addParam<MooseEnum>(
       "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
   params.addParam<std::vector<std::string>>(
@@ -97,9 +96,28 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   if (action.size() == 1)
     pars.applyParameters(action[0]->parameters());
 
+  if (!isParamValid("tunit"))
+    paramError(
+        "tunit",
+        "The temperature unit must be specified for Thermochimica objects to be constructed");
+
+  if (!isParamValid("punit"))
+    paramError("punit",
+               "The pressure unit must be specified for Thermochimica objects to be constructed");
+
+  if (!isParamValid("munit"))
+    paramError("munit",
+               "The mass unit must be specified for Thermochimica objects to be constructed");
+
   if (!isParamValid("temperature"))
     paramError("temperature",
                "Temperature variable must be specified for this object to be constructed");
+
+  if ((isParamValid("output_species") || isParamValid("output_element_phases")) &&
+      !isParamValid("output_species_unit"))
+    paramError(
+        "output_species_unit",
+        "Output mass unit must be specified for Thermochimica user object to be constructed");
 
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
