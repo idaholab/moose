@@ -308,11 +308,18 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
   else /* elemental variables */
   {
-    if (_coincident_lower_d_calc && !_current_lower_d_elem)
-      mooseError("No lower-dimensional element. Make sure that the loewr-d variable lives on a "
-                 "lower-d block that is a superset of the boundary");
-
     _n_local_dofs = _coincident_lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
+
+    if (_coincident_lower_d_calc)
+    {
+      static const std::string lower_error = "Make sure that the lower-d variable lives on a "
+                                             "lower-d block that is a superset of the boundary";
+      if (!_current_lower_d_elem)
+        mooseError("No lower-dimensional element. ", lower_error);
+      if (!_n_local_dofs)
+        mooseError("No degrees of freedom. ", lower_error);
+    }
+
     if (_n_local_dofs == 1) /* p0 */
     {
       ComputeValueType value = 0;
