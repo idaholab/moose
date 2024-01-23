@@ -74,6 +74,21 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
 }
 
 void
+INSADMaterial::resolveOptionalProperties()
+{
+  Material::resolveOptionalProperties();
+
+  for (const auto sub_id : this->blockIDs())
+    if ((_object_tracker->get<bool>("has_boussinesq", sub_id)))
+    {
+      _boussinesq_alphas[sub_id] = &getPossiblyConstantGenericMaterialPropertyByName<Real, true>(
+          _object_tracker->get<MaterialPropertyName>("alpha", sub_id), _material_data, 0);
+      _ref_temps[sub_id] = &getPossiblyConstantGenericMaterialPropertyByName<Real, false>(
+          _object_tracker->get<MaterialPropertyName>("ref_temp", sub_id), _material_data, 0);
+    }
+}
+
+void
 INSADMaterial::subdomainSetup()
 {
   if ((_has_transient = _object_tracker->get<bool>("has_transient", _current_subdomain_id)))
@@ -81,24 +96,20 @@ INSADMaterial::subdomainSetup()
   else
     _velocity_dot = nullptr;
 
-  if ((_has_boussinesq = _object_tracker->get<bool>("has_boussinesq", _current_subdomain_id)))
+  if (auto alpha_it = _boussinesq_alphas.find(_current_subdomain_id);
+      alpha_it != _boussinesq_alphas.end())
   {
-    // Material property retrieval through MaterialPropertyInterface APIs can only happen during
-    // object contruction because we're going to check for material property dependency resolution.
-    // So we have to go through MaterialData here. We already performed the material property
-    // requests through the MaterialPropertyInterface APIs in the INSAD kernels, so we should be
-    // safe for dependencies
-    _boussinesq_alpha = &_material_data.getProperty<Real, true>(
-        _object_tracker->get<MaterialPropertyName>("alpha", _current_subdomain_id), 0, *this);
+    _has_boussinesq = true;
+    _boussinesq_alpha = alpha_it->second;
     auto & temp_var = _subproblem.getStandardVariable(
         _tid, _object_tracker->get<std::string>("temperature", _current_subdomain_id));
     addMooseVariableDependency(&temp_var);
     _temperature = &temp_var.adSln();
-    _ref_temp = &_material_data.getProperty<Real, false>(
-        _object_tracker->get<MaterialPropertyName>("ref_temp", _current_subdomain_id), 0, *this);
+    _ref_temp = libmesh_map_find(_ref_temps, _current_subdomain_id);
   }
   else
   {
+    _has_boussinesq = false;
     _boussinesq_alpha = nullptr;
     _temperature = nullptr;
     _ref_temp = nullptr;

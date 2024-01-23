@@ -218,6 +218,8 @@ public:
   virtual void resolveOptionalProperties() override;
 
 protected:
+  virtual void checkMaterialProperty(const std::string & name, const unsigned int state) override;
+
   virtual const MaterialData & materialData() const override { return _material_data; }
   virtual MaterialData & materialData() override { return _material_data; }
 

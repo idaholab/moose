@@ -132,7 +132,11 @@ OptimizeSolve::taoSolve()
       CHKERRQ(ierr);
       // Need to cancel monitors for ALMM, if not there is a segfault at MOOSE destruction. Setup
       // default constraint monitor.
+#if PETSC_RELEASE_GREATER_EQUALS(3, 21, 0)
+      ierr = TaoMonitorCancel(_tao);
+#else
       ierr = TaoCancelMonitors(_tao);
+#endif
       CHKERRQ(ierr);
       ierr = PetscOptionsSetValue(NULL, "-tao_cmonitor", NULL);
       CHKERRQ(ierr);

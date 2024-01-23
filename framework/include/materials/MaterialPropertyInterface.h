@@ -370,6 +370,17 @@ public:
       const MaterialPropertyName & name, MaterialData & material_data, const unsigned int state);
 
   /**
+   * Retrieve the generic property named "prop_name" without any deduction for the specified \p
+   * material_data for state \p state. This API allows the \p prop_name to be a constant, e.g. it
+   * allows the possibility that \p prop_name is not a name at all
+   */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getPossiblyConstantGenericMaterialPropertyByName(const MaterialPropertyName & prop_name,
+                                                   MaterialData & material_data,
+                                                   const unsigned int state);
+
+  /**
    * Retrieve the property named "name" without any deduction for the specified \p material_data
    *
    * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
@@ -470,7 +481,7 @@ protected:
    * This method was required to avoid a compiler problem with the template
    * getMaterialProperty method
    */
-  void checkMaterialProperty(const std::string & name, const unsigned int state);
+  virtual void checkMaterialProperty(const std::string & name, const unsigned int state);
 
   /**
    * A proxy method for _mi_feproblem.markMatPropRequested(name)
@@ -748,13 +759,9 @@ MaterialPropertyInterface::getGenericOptionalMaterialProperty(const std::string 
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
-MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
-                                                      MaterialData & material_data,
-                                                      const unsigned int state)
+MaterialPropertyInterface::getPossiblyConstantGenericMaterialPropertyByName(
+    const MaterialPropertyName & prop_name, MaterialData & material_data, const unsigned int state)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  const auto prop_name = getMaterialPropertyName(name);
-
   // Check if it's just a constant
   if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))
     return *default_property;
@@ -764,10 +771,23 @@ MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
                " State ",
                state,
                " property for \"",
-               name,
+               prop_name,
                "\" was requested.");
 
   return this->getGenericMaterialPropertyByName<T, is_ad>(prop_name, material_data, state);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
+                                                      MaterialData & material_data,
+                                                      const unsigned int state)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  const auto prop_name = getMaterialPropertyName(name);
+
+  return getPossiblyConstantGenericMaterialPropertyByName<T, is_ad>(
+      prop_name, material_data, state);
 }
 
 template <typename T, bool is_ad>
