@@ -1,4 +1,5 @@
 [Mesh]
+  allow_renumbering = false
   # use these two to re-generate input.e
   [eg]
     type = CartesianMeshGenerator

@@ -12,6 +12,7 @@
 #include "MeshCoarseningUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/mesh_modification.h"
 #include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", CoarsenBlockGenerator);
@@ -110,16 +111,18 @@ CoarsenBlockGenerator::generate()
                  max_c);
 
   // Determine how many times the coarsening will be used
-  int max = *std::max_element(_coarsening.begin(), _coarsening.end());
-  if (max > 0 && !mesh->is_prepared())
+  if (max_c > 0 && !mesh->is_prepared())
     // we prepare for use to make sure the neighbors have been found
     mesh->prepare_for_use();
 
-  auto mesh_ptr = recursive_coarsen(block_ids, mesh, _coarsening, max, /*step=*/0);
+  auto mesh_ptr = recursive_coarsen(block_ids, mesh, _coarsening, max_c, /*step=*/0);
 
   // element neighbors are not valid
-  if (max > 0)
+  if (max_c > 0)
     mesh_ptr->set_isnt_prepared();
+
+  // flip elements as we were not careful to build them with a positive volume
+  MeshTools::Modification::orient_elements(*mesh_ptr);
 
   return mesh_ptr;
 }
@@ -170,7 +173,15 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       // Sweep direction
       // Potentially a user selectable parameter in the future
       Point sorting_direction(1, 1, 1);
-      return (a.first->vertex_average() - b.first->vertex_average()) * sorting_direction > 0;
+      const auto sorting =
+          (a.first->vertex_average() - b.first->vertex_average()) * sorting_direction;
+      if (MooseUtils::absoluteFuzzyGreaterThan(sorting, 0))
+        return 1;
+      else if (MooseUtils::absoluteFuzzyEqual(sorting, 0) &&
+               MooseUtils::absoluteFuzzyGreaterThan((*a.second - *b.second) * sorting_direction, 0))
+        return 1;
+      else
+        return -1;
     };
 
     // This set will keep track of all the 'fine elem' + 'coarse element interior node' pairs
@@ -211,7 +222,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
 
       // Get the nodes to build a coarse element
       std::vector<const Node *> tentative_coarse_nodes;
-      std::set<const Elem *, decltype(cmp)> fine_elements_const(cmp);
+      std::set<const Elem *> fine_elements_const;
       bool success = MeshCoarseningUtils::getFineElementFromInteriorNode(interior_node,
                                                                          ref_node,
                                                                          current_elem,
@@ -243,10 +254,11 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       if (go_to_next_candidate)
         continue;
 
-      // We might delete them so we have to drop the const
-      std::set<Elem *> fine_elements;
+      // We will likely delete the fine elements so we have to drop the const
+      auto cmp_elem = [](Elem * a, Elem * b) { return a->id() - b->id(); };
+      std::set<Elem *, decltype(cmp_elem)> fine_elements(cmp_elem);
       for (const auto elem_ptr : fine_elements_const)
-        fine_elements.insert(const_cast<Elem *>(elem_ptr));
+        fine_elements.insert(mesh_copy->elem_ptr(elem_ptr->id()));
 
       // Form a parent, of a low order type as we only have the extreme vertex nodes
       std::unique_ptr<Elem> parent = Elem::build(Elem::first_order_equivalent_type(elem_type));
@@ -255,6 +267,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       coarse_elems.insert(parent_ptr);
 
       // Set the nodes to the coarse element
+      // They were sorted previously in getFineElementFromInteriorNode
       for (auto i : index_range(tentative_coarse_nodes))
         parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
 
@@ -350,8 +363,9 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         // The mesh should probably be stitched before attempting coarsening
         if (neighbor_coarse_node_index == libMesh::invalid_uint)
         {
-          mooseInfo("Coarse element node " + Moose::stringify(coarse_node) +
-                    " does not seem shared. Is the mesh will stitched?");
+          mooseInfoRepeated("Coarse element node " + Moose::stringify(*coarse_node) +
+                            " does not seem shared with any element other than the coarse element. "
+                            "Is the mesh will stitched? Or are there non-conformalities?");
           continue;
         }
         const auto opposite_node_index = MeshCoarseningUtils::getOppositeNodeIndex(

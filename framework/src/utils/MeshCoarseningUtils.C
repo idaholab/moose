@@ -67,6 +67,12 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     }
   }
 
+  // If the fine elements are not all of the same type, we do not know how to get the opposite node
+  // of the interior node in the fine elements
+  for (auto elem : fine_elements)
+    if (elem && elem->type() != elem_type)
+      return false;
+
   if (elem_type == libMesh::QUAD4 || elem_type == libMesh::QUAD8 || elem_type == libMesh::QUAD9)
   {
     // We need 4 elements around the interior node
@@ -104,10 +110,15 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     tentative_coarse_nodes.resize(4);
 
     // Pick a node (mid-face for the coarse element) to form the base
-    // We use the first fine element, any would have worked
-    // NOTE: this wont be reproducible (in parallel notably) as we are sorting
-    // by pointers
-    const auto one_fine_elem = *fine_elements.begin();
+    // We must use the same element reproducibly, despite the pointers being ordered in the set
+    const Elem * one_fine_elem = nullptr;
+    unsigned int max_id = 0;
+    for (const auto elem_ptr : fine_elements)
+      if (elem_ptr->id() > max_id)
+      {
+        max_id = elem_ptr->id();
+        one_fine_elem = elem_ptr;
+      }
     const auto interior_node_index = one_fine_elem->get_node_index(interior_node);
 
     // Find a side which contains the interior node
@@ -134,7 +145,8 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         continue;
       }
       const auto interior_node_number = neighbor->get_node_index(interior_node);
-      unsigned int opposite_node_index = getOppositeNodeIndex(HEX8, interior_node_number);
+      unsigned int opposite_node_index =
+          getOppositeNodeIndex(neighbor->type(), interior_node_number);
 
       tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
     }
@@ -143,6 +155,10 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     // We could try again on any of the 5 other coarse element faces
     if (neighbor_i != 4 || other_fine_elems.size() != 4)
       return false;
+
+    // Sort the coarse nodes so we are reproducibly picking the same ordering of nodes
+    auto cmp_node = [](const Node * a, const Node * b) { return a->id() < b->id(); };
+    std::sort(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end(), cmp_node);
 
     // Re-order nodes so that they will form a decent quad
     // Pick the reference node for the rotation frame as the face center
@@ -167,7 +183,8 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
       // Find the other fine element opposite that element (shares a side)
       const Elem * fine_neighbor = nullptr;
       for (auto neighbor : other_fine_elems)
-        // Side neighbor?????????
+        // Side neighbor. This requires the mesh to have correct neighbors
+        // For meshes with lost AMR information, this wont work
         if (neighbor->which_neighbor_am_i(fine_elem) != libMesh::invalid_uint)
         {
           if (fine_neighbor)
@@ -182,8 +199,8 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
 
       // Get the coarse node, opposite the interior node in that fine element
       const auto interior_node_index_neighbor = fine_neighbor->get_node_index(interior_node);
-      tentative_coarse_nodes.push_back(
-          fine_neighbor->node_ptr(getOppositeNodeIndex(HEX8, interior_node_index_neighbor)));
+      tentative_coarse_nodes.push_back(fine_neighbor->node_ptr(
+          getOppositeNodeIndex(fine_neighbor->type(), interior_node_index_neighbor)));
     }
 
     // Found 8 fine elements and 8 coarse element nodes as expected
