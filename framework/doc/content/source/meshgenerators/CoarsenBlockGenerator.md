@@ -13,7 +13,7 @@ them.
 
 The user has to provide the ids of the blocks to be modified, as well as the corresponding levels of coarsening for each block. These must match up to the order of the aforementioned block id list, e.g. if the blocks you wish to modify are '0 2 1 4', with 1 coarsening for block 0, 2 for block 2, 3 for block 1, and 4 for block 4, then the coarsening list will need to look like '1 2 3 4'.
 
-The user provides the location of starting point for the coarsening algorithm with the [!param](/Mesh/CoarsenBlockGenerator/starting_point) parameter. The element containing that point is found, then the algorithm attempts to coarsen by selecting each node of that element as the interior node of a coarse element containing that element. Once this element is coarsened, the neighbors of the coarse element
+The user provides the starting point for the coarsening algorithm with the [!param](/Mesh/CoarsenBlockGenerator/starting_point) parameter. The element containing that point is found, then the algorithm attempts to coarsen by selecting each node of that element as the interior node of a coarse element containing that element. Once this element is coarsened, the neighbors of the coarse element
 are considered as targets for the next round of coarsening, until all elements are coarsened once for that round of coarsening. If
 the user has specified more than one round of coarsening, the algorithm is iterated.
 
@@ -40,8 +40,8 @@ format, and then regular [Adaptivity](syntax/Adaptivity/index.md) to coarsen ins
 !alert note
 If the input mesh has non-conformalities due to prior use of adaptive mesh refinement,
 this mesh generator may be able to remove them.
-However if the input mesh is disjoint, this will not be improved. You may try a [MeshRepairGenerator.md]
-to fix disjoint meshes before using a `CoarsenBlockGenerator`.
+However if the input mesh is disjoint (for example, nodes are not stitched together between two neighbor elements), this will not be improved. You may try a [MeshRepairGenerator.md]
+to stitch overlapping nodes before using a `CoarsenBlockGenerator`.
 
 !alert warning
 Sidesets containing sides that were coarsened into a coarser element side will not contain the coarse
