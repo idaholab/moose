@@ -283,6 +283,7 @@
     input = 'stationary.i'
     exodiff = 'stationary_rays.e stationary_rays.e-s0001 stationary_rays.e-s0002'
     allow_test_objects = true
+    design = 'RayTracingMeshOutput.md'
     requirement = 'The system shall support the mesh output of stationary rays'
   []
 []
