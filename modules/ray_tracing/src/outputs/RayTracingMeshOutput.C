@@ -261,7 +261,7 @@ RayTracingMeshOutput::buildSegmentMesh()
   {
     const auto num_segments = entry.numSegments();
     num_nodes += num_segments + 1;
-    if (num_segments > 1)
+    if (num_segments >= 1)
     {
       _segmented_rays = true;
       num_elems += num_segments;
