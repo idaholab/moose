@@ -546,9 +546,8 @@ RayTracingMeshOutput::fillFields()
   };
 
   // Helper for filling data and aux data (if enabled)
-  const auto fill_data = [this, &set_solution](const DofObject * const dof,
-                                               const unsigned int start_var,
-                                               const auto & data)
+  const auto fill_data =
+      [&set_solution](const DofObject * const dof, const unsigned int start_var, const auto & data)
   {
     mooseAssert(dof, "Nullptr dof");
     for (const auto i : index_range(data))
