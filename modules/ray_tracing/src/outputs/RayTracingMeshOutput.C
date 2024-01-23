@@ -477,6 +477,11 @@ RayTracingMeshOutput::setupEquationSystem()
   _sys = &_es->add_system<libMesh::ExplicitSystem>("sys");
 
   // Add variables for the basic properties if enabled
+  _ray_id_var = invalid_uint;
+  _intersections_var = invalid_uint;
+  _pid_var = invalid_uint;
+  _processor_crossings_var = invalid_uint;
+  _trajectory_changes_var = invalid_uint;
   for (auto & prop : _pars.get<MultiMooseEnum>("output_properties"))
     switch (prop)
     {
