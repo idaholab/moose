@@ -503,6 +503,7 @@ install_data_%:
 	@mkdir -p $($@_dst)
 	@cp -r $($@_src) $($@_dst)
 
+$(copy_input_targets): orig_make_dir = $(CURDIR)
 $(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
 	@$(eval source_dir := $(word 1, $(kv)))
@@ -510,16 +511,16 @@ $(copy_input_targets):
 	@echo "Installing inputs from directory \"$(source_dir)\" into $(dest_dir)"
 	@rm -rf $(share_install_dir)/$(dest_dir)
 	@mkdir -p $(share_install_dir)/$(dest_dir)
-	@$(eval abs_source_dir := $(realpath $(APPLICATION_DIR)/$(source_dir)))
+	@$(eval abs_source_dir := $(realpath $(orig_make_dir)/$(source_dir)))
 	@if [ "$(abs_source_dir)" != "" ]; \
 	then \
 		cp -R $(abs_source_dir)/ $(share_install_dir)/$(dest_dir); \
 	else \
-		(echo "ERROR: Source directory $(APPLICATION_DIR)/$(source_dir) does not exist!"; exit 1) \
+		(echo "ERROR: Source directory $(orig_make_dir)/$(source_dir) does not exist!"; exit 1) \
 	fi;
-	@if [ -e $(APPLICATION_DIR)/testroot ]; \
+	@if [ -e $(orig_make_dir)/testroot ]; \
 	then \
-		cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$(dest_dir)/; \
+		cp -f $(orig_make_dir)/testroot $(share_install_dir)/$(dest_dir)/; \
 	elif [ -e $(source_dir)/testroot ]; \
 	then \
 		cp -f $(source_dir)/testroot $(share_install_dir)/$(dest_dir)/; \
