@@ -40,4 +40,13 @@ void reorderNodes(std::vector<const libMesh::Node *> & nodes,
                   const libMesh::Point * origin,
                   const libMesh::Point * clock_start,
                   libMesh::Point & axis);
+
+/**
+ * Utility routine to get the index of the node opposite, in the element, to the node
+ * of interest
+ * @param elem_type type of the element
+ * @param node_index element index of the node of interest
+ * @return element index of the opposite node, with regards to the element
+ */
+unsigned int getOppositeNodeIndex(libMesh::ElemType elem_type, unsigned int node_index);
 }

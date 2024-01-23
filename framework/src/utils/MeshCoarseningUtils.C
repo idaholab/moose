@@ -28,6 +28,10 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
   const auto elem_type = elem->type();
 
   // Add point neighbors of interior node to list of potentially refined elements
+  // NOTE: we could potentially replace this with a simple call to point_neighbors
+  // on a fine element with the interior node. It's not clear which approach is more
+  // resilient to meshes with slits from discarded adaptivity information
+  fine_elements.insert(elem);
   for (const auto neigh : elem->neighbor_ptr_range())
   {
     if (!neigh || neigh == libMesh::remote_elem)
@@ -36,6 +40,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     if (node_index != libMesh::invalid_uint && neigh->is_vertex(node_index))
     {
       // Get the neighbor's neighbors, to catch point non-side neighbors
+      // This is needed in 2D to get all quad neighbors
       fine_elements.insert(neigh);
       for (const auto neigh_two : neigh->neighbor_ptr_range())
       {
@@ -44,8 +49,19 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         const auto node_index_2 = neigh_two->get_node_index(interior_node);
         if (node_index_2 != libMesh::invalid_uint && neigh_two->is_vertex(node_index_2))
         {
-          // Get the neighbor's neighbors once
+          // Get the neighbor's neighbors
           fine_elements.insert(neigh_two);
+
+          // Get the neighbor's neighbors' neighbors, to catch point non-side neighbors
+          // This is needed for 3D to get all hex neighbors
+          for (const auto neigh_three : neigh_two->neighbor_ptr_range())
+          {
+            if (!neigh_three || neigh_three == libMesh::remote_elem)
+              continue;
+            const auto node_index_3 = neigh_three->get_node_index(interior_node);
+            if (node_index_3 != libMesh::invalid_uint && neigh_three->is_vertex(node_index_3))
+              fine_elements.insert(neigh_three);
+          }
         }
       }
     }
@@ -77,12 +93,107 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     reorderNodes(tentative_coarse_nodes, interior_node, reference_node, axis);
     return true;
   }
-  // For hexes we first look at the fine-neighbors of the non-conformality
-  // then the fine elements neighbors of the center 'node' of the potential parent
-  else
+  // For hexes, similar strategy but we need to pick 4 nodes to form a side, then 4 other nodes
+  // facing those initial nodes
+  else if (elem_type == libMesh::HEX8)
   {
-    mooseError("Not implemented for element type " + Moose::stringify(elem_type));
+    // We need 8 elements around the interior node
+    if (fine_elements.size() != 8)
+      return false;
+
+    tentative_coarse_nodes.resize(4);
+
+    // Pick a node (mid-face for the coarse element) to form the base
+    // We use the first fine element, any would have worked
+    // NOTE: this wont be reproducible (in parallel notably) as we are sorting
+    // by pointers
+    const auto one_fine_elem = *fine_elements.begin();
+    const auto interior_node_index = one_fine_elem->get_node_index(interior_node);
+
+    // Find a side which contains the interior node
+    unsigned int an_interior_node_side = 0;
+    for (const auto s : make_range(one_fine_elem->n_sides()))
+      if (one_fine_elem->is_node_on_side(interior_node_index, s))
+      {
+        an_interior_node_side = s;
+        break;
+      }
+    // The node we seek is on the same side, but opposite from the interior node
+    const auto center_face_node_index =
+        one_fine_elem->opposite_node(interior_node_index, an_interior_node_side);
+    const auto center_face_node = one_fine_elem->node_ptr(center_face_node_index);
+
+    // The exterior nodes are the opposite nodes of the interior_node!
+    unsigned int neighbor_i = 0;
+    std::vector<const libMesh::Elem *> other_fine_elems;
+    for (auto neighbor : fine_elements)
+    {
+      if (neighbor->get_node_index(center_face_node) == libMesh::invalid_uint)
+      {
+        other_fine_elems.push_back(neighbor);
+        continue;
+      }
+      const auto interior_node_number = neighbor->get_node_index(interior_node);
+      unsigned int opposite_node_index = getOppositeNodeIndex(HEX8, interior_node_number);
+
+      tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
+    }
+
+    // Center face node was not shared with 4 elements
+    // We could try again on any of the 5 other coarse element faces
+    if (neighbor_i != 4 || other_fine_elems.size() != 4)
+      return false;
+
+    // Re-order nodes so that they will form a decent quad
+    // Pick the reference node for the rotation frame as the face center
+    const libMesh::Point clock_start = *tentative_coarse_nodes[0];
+    libMesh::Point axis = *interior_node - *center_face_node;
+    reorderNodes(tentative_coarse_nodes, center_face_node, &clock_start, axis);
+
+    // Look through the 4 other fine elements to finish the coarse hex element nodes
+    for (const auto coarse_node_index : make_range(4))
+    {
+      // Find the fine element containing each coarse node already found & ordered
+      const Elem * fine_elem = nullptr;
+      for (auto elem : fine_elements)
+        if (elem->get_node_index(tentative_coarse_nodes[coarse_node_index]) !=
+            libMesh::invalid_uint)
+        {
+          fine_elem = elem;
+          break;
+        }
+      mooseAssert(fine_elem, "Search for fine element should have worked");
+
+      // Find the other fine element opposite that element (shares a side)
+      const Elem * fine_neighbor = nullptr;
+      for (auto neighbor : other_fine_elems)
+        // Side neighbor?????????
+        if (neighbor->which_neighbor_am_i(fine_elem) != libMesh::invalid_uint)
+        {
+          if (fine_neighbor)
+            mooseError("Found two neighbors");
+          fine_neighbor = neighbor;
+        }
+      // the fine element in the base of the coarse hex is not a neighbor to any element
+      // in the top part. The mesh is probably slit in the middle of the potential coarse hex
+      // element. We wont support this for now.
+      if (!fine_neighbor)
+        return false;
+
+      // Get the coarse node, opposite the interior node in that fine element
+      const auto interior_node_index_neighbor = fine_neighbor->get_node_index(interior_node);
+      tentative_coarse_nodes.push_back(
+          fine_neighbor->node_ptr(getOppositeNodeIndex(HEX8, interior_node_index_neighbor)));
+    }
+
+    // Found 8 fine elements and 8 coarse element nodes as expected
+    if (tentative_coarse_nodes.size() == 8)
+      return true;
+    else
+      return false;
   }
+  else
+    mooseError("Not implemented for element type " + Moose::stringify(elem_type));
 }
 
 void
@@ -124,5 +235,22 @@ reorderNodes(std::vector<const libMesh::Node *> & nodes,
     new_nodes[old_index] = nodes[nodes_angles[old_index].first];
   for (const auto & index : index_range(nodes))
     nodes[index] = new_nodes[index];
+}
+
+unsigned int
+getOppositeNodeIndex(libMesh::ElemType elem_type, unsigned int node_index)
+{
+  switch (elem_type)
+  {
+    case QUAD4:
+      return (node_index + 2) % 4;
+    case HEX8:
+    {
+      mooseAssert(node_index < 8, "Node index too high: " + std::to_string(node_index));
+      return std::vector<unsigned int>({6, 7, 4, 5, 2, 3, 0, 1})[node_index];
+    }
+    default:
+      mooseError("Unsupported element type for retrieving the opposite node");
+  }
 }
 }
