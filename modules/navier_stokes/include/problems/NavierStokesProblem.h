@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FEProblem.h"
+#include "libmesh/libmesh_config.h"
 #include <petscsnes.h>
 
 class NonlinearSystem;
@@ -25,6 +26,7 @@ public:
 
   NavierStokesProblem(const InputParameters & parameters);
 
+#if PETSC_RELEASE_GREATER_EQUALS(3, 20, 0)
   /**
    * @returns the mass matrix tag ID
    */
@@ -105,4 +107,5 @@ private:
   /// complement at index 1 of the top split handles all non-Dirichlet velocity degrees of freedom
   /// and all pressure degrees of freedom
   std::vector<IS> _index_sets;
+#endif
 };
