@@ -33,10 +33,12 @@ CoarsenBlockGenerator::validParams()
                                  "A point inside the element to start the coarsening from");
 
   // This is a heuristic to be able to coarsen inside blocks that are not uniformly refined
-  params.addParam<Real>("maximum_volume_ratio",
-                        2,
-                        "Maximum allowed volume ratio between two fine elements to propagate "
-                        "the coarsening front through a side");
+  params.addRangeCheckedParam<Real>(
+      "maximum_volume_ratio",
+      2,
+      "maximum_volume_ratio > 0",
+      "Maximum allowed volume ratio between two fine elements to propagate "
+      "the coarsening front through a side");
   params.addParam<bool>(
       "verbose",
       false,
@@ -79,7 +81,7 @@ CoarsenBlockGenerator::generate()
   // Error if it has not been implemented for this element type
   for (const auto & elem : _input->active_subdomain_set_elements_ptr_range(block_ids_set))
     // Only types implemented
-    if (elem->type() != QUAD4)
+    if (elem->type() != QUAD4 && elem->type() != HEX8)
       paramError("block",
                  "The input mesh contains an unsupported element type '" +
                      Moose::stringify(elem->type()) + "' for coarsening in block " +
@@ -209,7 +211,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
 
       // Get the nodes to build a coarse element
       std::vector<const Node *> tentative_coarse_nodes;
-      std::set<const Elem *> fine_elements_const;
+      std::set<const Elem *, decltype(cmp)> fine_elements_const(cmp);
       bool success = MeshCoarseningUtils::getFineElementFromInteriorNode(interior_node,
                                                                          ref_node,
                                                                          current_elem,
@@ -221,21 +223,25 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       if (!success)
         continue;
 
+      bool go_to_next_candidate = false;
       // If the fine elements are not all of the same type, we currently cannot coarsen
       for (auto elem : fine_elements_const)
         if (elem && elem->type() != elem_type)
-          continue;
+          go_to_next_candidate = true;
 
       // We do not coarsen across subdomains for now
       const auto common_subdomain_id = current_elem->subdomain_id();
       for (auto elem : fine_elements_const)
         if (elem && elem->subdomain_id() != common_subdomain_id)
-          continue;
+          go_to_next_candidate = true;
 
       // Check the coarse element nodes gathered
       for (const auto & check_node : tentative_coarse_nodes)
         if (check_node == nullptr)
-          continue;
+          go_to_next_candidate = true;
+
+      if (go_to_next_candidate)
+        continue;
 
       // We might delete them so we have to drop the const
       std::set<Elem *> fine_elements;
@@ -252,7 +258,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       for (auto i : index_range(tentative_coarse_nodes))
         parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
 
-      // Gather targets for the next coarsening
+      // Gather targets / next candidates for the next element coarsening
       // Find the face neighbors, then look for the center node
       for (const auto side_index : make_range(parent_ptr->n_sides()))
       {
@@ -285,7 +291,9 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         // Get the element(s) on the other side of the coarse face
         // We can tentatively support three cases:
         // - 1 element on the other side, coarse as well (towards less refinement).
-        //   In that case, do not do anything. Two elements sitting next to each other is perfect
+        //   In that case, do not do anything. Two coarse elements sitting next to each other is
+        //   perfect. We can detect this case by looking at the element volumes, with a heuristic
+        //   on the ratio of volumes
         // - same number of elements on the other side than the fine elements touching the face
         //   (refinement was uniform on both sides of the face, we have coarsened one side so far)
         // - more elements on the other side than the fine elements touching the face
@@ -298,6 +306,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         // There might be a better way to find this index. Smallest distance should work
         for (const auto side_index : make_range(fine_el->n_sides()))
         {
+          // only two sides (quad), three sides (hex) also own the coarse node
           if (fine_el->side_ptr(side_index)->get_node_index(coarse_node) == libMesh::invalid_uint)
             continue;
           const auto dist =
@@ -336,9 +345,17 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
 
         // Get the interior node for the next tentative coarse element
         // We can just use the index to get it from the next tentative fine element
-        mooseAssert(neighbor_fine_elem->type() == QUAD4, "Only quad4 supported there for now");
-        const auto opposite_node_index =
-            (neighbor_fine_elem->get_node_index(coarse_node) + 2) % neighbor_fine_elem->n_nodes();
+        const auto neighbor_coarse_node_index = neighbor_fine_elem->get_node_index(coarse_node);
+        // Node is not shared between the coarse element and its fine neighbors.
+        // The mesh should probably be stitched before attempting coarsening
+        if (neighbor_coarse_node_index == libMesh::invalid_uint)
+        {
+          mooseInfo("Coarse element node " + Moose::stringify(coarse_node) +
+                    " does not seem shared. Is the mesh will stitched?");
+          continue;
+        }
+        const auto opposite_node_index = MeshCoarseningUtils::getOppositeNodeIndex(
+            neighbor_fine_elem->type(), neighbor_coarse_node_index);
         auto neighbor_interior_node = neighbor_fine_elem->node_ptr(opposite_node_index);
 
         // avoid attempting to coarsen again an element we've already coarsened
@@ -349,20 +366,13 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
           for (const auto i : index_range(block_ids))
             if (block_ids[i] == neighbor_fine_elem->subdomain_id() &&
                 coarsening[i] > max - coarse_step - 1 &&
-                neighbor_fine_elem->volume() < _max_vol_ratio * fine_el_volume)
+                std::abs(neighbor_fine_elem->volume()) < std::abs(_max_vol_ratio * fine_el_volume))
             {
               candidate_pairs.insert(std::make_pair(neighbor_fine_elem, neighbor_interior_node));
               break;
             }
         }
       }
-      // we just added an element. If we delete, we have to prepare for use first
-      // preparing all the time will be expensive.
-      // We definitely need to be adding the coarse elements to the mesh. Otherwise,
-      // the coarsening of other elements wont detect the already coarsened elements
-      // If we do not delete the fine elements, we will also be finding them for coarsening over
-      // and over again
-      mesh_copy->prepare_for_use();
 
       // Delete the elements used to build the coarse element
       bool parent_deleted = false;
@@ -393,8 +403,9 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         }
       }
 
-      // TODO down select which operations are necessary
+      // Contract to remove the elements that were marked for deletion
       mesh_copy->contract();
+      // Prepare for use to refresh the element neighbors
       mesh_copy->prepare_for_use();
     }
 
