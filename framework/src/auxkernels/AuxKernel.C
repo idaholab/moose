@@ -138,12 +138,15 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
 
     _current_node(_assembly.node()),
     _current_boundary_id(_assembly.currentBoundaryID()),
-    _solution(_aux_sys.solution())
+    _solution(_aux_sys.solution()),
+
+    _current_lower_d_elem(_assembly.lowerDElem()),
+    _coincident_lower_d_calc(_bnd && !isNodal() && _var.isLowerD())
 {
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  if (_bnd && !isNodal() && _check_boundary_restricted)
+  if (_bnd && !isNodal() && !_coincident_lower_d_calc && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,
     // we need to check that no elements are visited more than once through visiting
@@ -276,12 +279,25 @@ AuxKernelTempl<RealVectorValue>::setDofValueHelper(const RealVectorValue &)
 
 template <typename ComputeValueType>
 void
+AuxKernelTempl<ComputeValueType>::insert()
+{
+  if (_coincident_lower_d_calc)
+    _var.insertLower(_aux_sys.solution());
+  else
+    _var.insert(_aux_sys.solution());
+}
+
+template <typename ComputeValueType>
+void
 AuxKernelTempl<ComputeValueType>::compute()
 {
   precalculateValue();
 
   if (isNodal()) /* nodal variables */
   {
+    mooseAssert(!_coincident_lower_d_calc,
+                "Nodal evaluations are point evaluations. We don't have to concern ourselves with "
+                "coincidence of lower-d blocks and higher-d faces because they share nodes");
     if (_var.isNodalDefined())
     {
       _qp = 0;
@@ -292,7 +308,18 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
   else /* elemental variables */
   {
-    _n_local_dofs = _var.numberOfDofs();
+    _n_local_dofs = _coincident_lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
+
+    if (_coincident_lower_d_calc)
+    {
+      static const std::string lower_error = "Make sure that the lower-d variable lives on a "
+                                             "lower-d block that is a superset of the boundary";
+      if (!_current_lower_d_elem)
+        mooseError("No lower-dimensional element. ", lower_error);
+      if (!_n_local_dofs)
+        mooseError("No degrees of freedom. ", lower_error);
+    }
+
     if (_n_local_dofs == 1) /* p0 */
     {
       ComputeValueType value = 0;
@@ -302,10 +329,22 @@ AuxKernelTempl<ComputeValueType>::compute()
       if (_var.isFV())
         setDofValueHelper(value);
       else
+      {
         // update the variable data referenced by other kernels.
         // Note that this will update the values at the quadrature points too
         // (because this is an Elemental variable)
-        _var.setNodalValue(value);
+        if (_coincident_lower_d_calc)
+        {
+          _local_sol.resize(1);
+          if constexpr (std::is_same<Real, ComputeValueType>::value)
+            _local_sol(0) = value;
+          else
+            mooseAssert(false, "We should not enter the single dof branch with a vector variable");
+          _var.setLowerDofValues(_local_sol);
+        }
+        else
+          _var.setNodalValue(value);
+      }
     }
     else /* high-order */
     {
@@ -314,14 +353,16 @@ AuxKernelTempl<ComputeValueType>::compute()
       _local_ke.resize(_n_local_dofs, _n_local_dofs);
       _local_ke.zero();
 
+      const auto & test = _coincident_lower_d_calc ? _var.phiLower() : _test;
+
       // assemble the local mass matrix and the load
-      for (unsigned int i = 0; i < _test.size(); i++)
+      for (unsigned int i = 0; i < test.size(); i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         {
-          ComputeValueType t = _JxW[_qp] * _coord[_qp] * _test[i][_qp];
+          ComputeValueType t = _JxW[_qp] * _coord[_qp] * test[i][_qp];
           _local_re(i) += t * computeValue();
-          for (unsigned int j = 0; j < _test.size(); j++)
-            _local_ke(i, j) += t * _test[j][_qp];
+          for (unsigned int j = 0; j < test.size(); j++)
+            _local_ke(i, j) += t * test[j][_qp];
         }
       // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
       _local_sol.resize(_n_local_dofs);
@@ -330,7 +371,7 @@ AuxKernelTempl<ComputeValueType>::compute()
       else
         _local_ke.cholesky_solve(_local_re, _local_sol);
 
-      _var.setDofValues(_local_sol);
+      _coincident_lower_d_calc ? _var.setLowerDofValues(_local_sol) : _var.setDofValues(_local_sol);
     }
   }
 }

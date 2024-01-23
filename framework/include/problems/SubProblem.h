@@ -939,6 +939,11 @@ public:
    */
   [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
 
+  /**
+   * Set the current lower dimensional element. This can be null
+   */
+  virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

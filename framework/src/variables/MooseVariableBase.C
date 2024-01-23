@@ -130,6 +130,22 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     mooseAssert(_count == 1, "component size of normal variable (_count) must be one");
     _var_name = _sys.system().variable(_var_num).name();
   }
+
+  if (!blockRestricted())
+    _is_lower_d = false;
+  else
+  {
+    const auto & blk_ids = blockIDs();
+    mooseAssert(!blk_ids.empty(), "Every variable should have at least one subdomain");
+
+    _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
+#ifdef DEBUG
+    for (auto it = ++blk_ids.begin(); it != blk_ids.end(); ++it)
+      mooseAssert(_is_lower_d == _mesh.isLowerD(*it),
+                  "A user should not specify a mix of lower-dimensional and higher-dimensional "
+                  "blocks for a variable");
+#endif
+  }
 }
 
 const std::vector<dof_id_type> &

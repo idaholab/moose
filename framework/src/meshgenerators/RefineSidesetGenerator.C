@@ -52,6 +52,9 @@ RefineSidesetGenerator::RefineSidesetGenerator(const InputParameters & parameter
   if (_boundaries.size() != _refinement.size())
     paramError("refinement",
                "The boundaries and refinement parameter vectors should be the same size");
+  if (_boundaries.size() != _boundary_side.size())
+    paramError("boundary_side",
+               "The boundaries and boundary_side parameter vectors should be the same size");
 }
 
 std::unique_ptr<MeshBase>
