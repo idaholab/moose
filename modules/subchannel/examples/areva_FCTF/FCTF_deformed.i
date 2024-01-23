@@ -8,24 +8,21 @@
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 305.68 #Kelvin (32.53 C)
-Total_Surface_Area = 0.002808 #m2
-# Dh = 0.004535 #m
-# Re = 17000 # [-] (17000 20100 17000 20300)
-# mdot_average (12.01 9.533 11.996 9.576)
+Total_Surface_Area_SC = 0.00285294 #m2
+Total_Surface_Area_EXP = 0.002808 #m2
 P_out = 829370.355 # Pa (120.29 psia)
 Power = 90640 # Watt Each heater rod had a max power of 30kW
 # Heater 17 (18) not working.
-# test:05 power = 22643 22845 22747 22801 [W], Total Power = 91036 [W], mdot_average = 12.01 [kg/s], Re = 17000
 # test:19 power = 22613 22610 22754 22663 [W], Total Power = 90640 [W], mdot_average = 9.576 [kg/s], Re = 20300
 # Index of heated pins per silicon controled rectifiers (Areva notation):1 3 6 7 || 4 5 11 15 ||2 9 19 40 60 || 13 44 48 52 56 (from bottom to top)
 # Index of heated pins per silicon controled rectifiers (SC notation):0 3 6 1 || 4 5 12 16 || 2 10 8 43 39 || 14 47 51 55 59 (from top to bottom) 38 areva->41 SC
 # Relative power of pin per rectifier: 1.12266659312 || 1.12251765225 || 0.90373345101 || 0.90011915269
-mdot_average = 9.576
-mass_flux_in = '${fparse mdot_average / Total_Surface_Area}' #kg/m2
+mdot_average = '${fparse 9.58 * Total_Surface_Area_SC / Total_Surface_Area_EXP}'
+mass_flux_in = '${fparse mdot_average / Total_Surface_Area_SC}' #kg/m2
 ###################################################
 # Geometric parameters
 ###################################################
-fuel_pin_pitch = 0.01128 #m
+fuel_pin_pitch = 0.01122652 #m
 fuel_pin_diameter = 0.009514 #m
 wire_z_spacing = 0.285 #m
 wire_diameter = 0.0017062 #m
@@ -40,7 +37,7 @@ unheated_length_exit = 0.855 #m
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = ${n_rings}
-    n_cells = 50
+    n_cells = 100
     flat_to_flat = ${inner_duct_in}
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
@@ -57,7 +54,7 @@ unheated_length_exit = 0.855 #m
     type = TriPinMeshGenerator
     input = subchannel
     nrings = ${n_rings}
-    n_cells = 50
+    n_cells = 100
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
     unheated_length_exit = ${unheated_length_exit}
@@ -125,25 +122,26 @@ unheated_length_exit = 0.855 #m
   []
 []
 
-# [Problem]
-#   type = LiquidMetalSubChannel1PhaseProblem
-#   fp = water
-#   n_blocks = 1
-#   P_out = ${P_out}
-#   CT = 2.6
-#   compute_density = true
-#   compute_viscosity = true
-#   compute_power = true
-#   P_tol = 1.0e-4
-#   T_tol = 1.0e-5
-#   implicit = true
-#   segregated = false
-#   interpolation_scheme = 'upwind'
-# []
-
 [Problem]
-  type = NoSolveProblem
+  type = LiquidMetalSubChannel1PhaseProblem
+  fp = water
+  n_blocks = 1
+  P_out = ${P_out}
+  CT = 2.6
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
+  implicit = true
+  segregated = false
+  interpolation_scheme = 'upwind'
+  verbose_subchannel = false
 []
+
+# [Problem]
+#   type = NoSolveProblem
+# []
 
 [ICs]
   [S_IC]
@@ -251,153 +249,80 @@ unheated_length_exit = 0.855 #m
 ### TC's on duct face E correspond to subchannels: 122, 121, 123, 123-124, 124, 125
 ### heights [mm]: 40.2 (centered on A (104-103) & E(123-124)), 2005.2, 2052.7, 2409.0, 3074.0 
 
-# [Postprocessors]
-#   [TC-40-104]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 104
-#     execute_on = 'TIMESTEP_END'
-#     height = 0.0402
-#   []
-#   [TC-40-103]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 103
-#     execute_on = 'TIMESTEP_END'
-#     height = 0.0402
-#   []
-#   ###############################
-#   [TC-2005-122]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 122
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0052
-#   []
-#   [TC-2005-121]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 121
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0052
-#   []
-#   [TC-2005-123]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 123
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0052
-#   []
-#   [TC-2005-124]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 124
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0052
-#   []
-#   [TC-2005-125]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 125
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0052
-#   []
-#   ######################################
-#   [TC-2052-122]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 122
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0527
-#   []
-#   [TC-2052-121]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 121
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0527
-#   []
-#   [TC-2052-123]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 123
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0527
-#   []
-#   [TC-2052-124]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 124
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0527
-#   []
-#   [TC-2052-125]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 125
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.0527
-#   []
-#   ###########################
-#   [TC-2409-121]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 121
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.409
-#   []
-#   [TC-2409-123]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 123
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.409
-#   []
-#   [TC-2409-124]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 124
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.409
-#   []
-#   [TC-2409-125]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 125
-#     execute_on = 'TIMESTEP_END'
-#     height = 2.409
-#   []
-#   ###########################
-#   [TC-3074-121]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 121
-#     execute_on = 'TIMESTEP_END'
-#     height = 3.074
-#   []
-#   [TC-3074-123]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 123
-#     execute_on = 'TIMESTEP_END'
-#     height = 3.074
-#   []
-#   [TC-3074-124]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 124
-#     execute_on = 'TIMESTEP_END'
-#     height = 3.074
-#   []
-#   [TC-3074-125]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 125
-#     execute_on = 'TIMESTEP_END'
-#     height = 3.074
-#   []
-#   ###########################
-# []
+[Postprocessors]
+  ##### -4 pitch from heated entrance 
+  [Pressure_B04_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 0.0
+  []
+  ##### -3 pitch from heated entrance 
+  [Pressure_B03_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 0.285
+  []
+  ##### -2 pitch from heated entrance 
+  [Pressure_B02_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 0.57
+  []
+  ##### -1.5 pitch from heated entrance 
+  [Pressure_B015_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 0.7125
+  []
+  ##### -0.5 pitch from heated entrance 
+  [Pressure_B05_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 0.9975
+  []
+  ##### 0 pitch from heated entrance 
+  [Pressure_B0_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 1.14
+  []
+  #### 3 pitch from heated entrance
+  [Pressure_B3_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  #### 6 pitch from heated entrance
+  [Pressure_B6_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 2.85
+  []
+  #### 8 pitch from heated entrance
+  [Pressure_B8_109]
+    type = SubChannelPointValue
+    variable = P
+    index = 109
+    execute_on = 'TIMESTEP_END'
+    height = 3.42
+  []
+[]
 
 [Executioner]
   type = Steady

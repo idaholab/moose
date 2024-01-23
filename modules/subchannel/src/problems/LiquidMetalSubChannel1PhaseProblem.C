@@ -761,8 +761,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           }
 
           auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
-          auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
-          auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
+          auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
+          auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
           auto shape_factor =
               0.66 * (pitch / rod_diameter) *
               std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / rod_diameter), -0.3);
@@ -781,8 +781,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         // compute the axial heat conduction between current and lower axial node
         auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto * node_in_j = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
-        auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
+        auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
+        auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
         auto Si = (*_S_flow_soln)(node_in_i);
         auto dist_ij = z_grid[iz] - z_grid[iz - 1];
 
@@ -795,8 +795,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         {
           auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz);
           auto * node_in_j = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
-          auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
-          auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
+          auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
+          auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
           auto Si = (*_S_flow_soln)(node_in_i);
           auto dist_ij = z_grid[iz + 1] - z_grid[iz];
           e_cond += 0.5 * (thcon_i + thcon_j) * Si *
@@ -949,18 +949,21 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
 
         /// Axial heat conduction
         auto * node_center = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto K_center = _fp->k_from_p_T((*_P_soln)(node_center), (*_T_soln)(node_center));
-        auto cp_center = _fp->cp_from_p_T((*_P_soln)(node_center), (*_T_soln)(node_center));
+        auto K_center = _fp->k_from_p_T((*_P_soln)(node_center) + _P_out, (*_T_soln)(node_center));
+        auto cp_center =
+            _fp->cp_from_p_T((*_P_soln)(node_center) + _P_out, (*_T_soln)(node_center));
         auto diff_center = K_center / (cp_center + 1e-15);
 
         if (iz == first_node)
         {
           auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
           auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto K_bottom = _fp->k_from_p_T((*_P_soln)(node_bottom), (*_T_soln)(node_bottom));
-          auto K_top = _fp->k_from_p_T((*_P_soln)(node_top), (*_T_soln)(node_top));
-          auto cp_bottom = _fp->cp_from_p_T((*_P_soln)(node_bottom), (*_T_soln)(node_bottom));
-          auto cp_top = _fp->cp_from_p_T((*_P_soln)(node_top), (*_T_soln)(node_top));
+          auto K_bottom =
+              _fp->k_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
+          auto K_top = _fp->k_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
+          auto cp_bottom =
+              _fp->cp_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
+          auto cp_top = _fp->cp_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
           auto diff_bottom = K_bottom / (cp_bottom + 1e-15);
           auto diff_top = K_top / (cp_top + 1e-15);
 
@@ -991,8 +994,10 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         else if (iz == last_node)
         {
           auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto K_bottom = _fp->k_from_p_T((*_P_soln)(node_bottom), (*_T_soln)(node_bottom));
-          auto cp_bottom = _fp->cp_from_p_T((*_P_soln)(node_bottom), (*_T_soln)(node_bottom));
+          auto K_bottom =
+              _fp->k_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
+          auto cp_bottom =
+              _fp->cp_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
           auto diff_bottom = K_bottom / (cp_bottom + 1e-15);
 
           auto dz_down = _z_grid[iz] - _z_grid[iz - 1];
@@ -1021,10 +1026,12 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         {
           auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
           auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto K_bottom = _fp->k_from_p_T((*_P_soln)(node_bottom), (*_T_soln)(node_bottom));
-          auto K_top = _fp->k_from_p_T((*_P_soln)(node_top), (*_T_soln)(node_top));
-          auto cp_bottom = _fp->cp_from_p_T((*_P_soln)(node_bottom), (*_T_soln)(node_bottom));
-          auto cp_top = _fp->cp_from_p_T((*_P_soln)(node_top), (*_T_soln)(node_top));
+          auto K_bottom =
+              _fp->k_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
+          auto K_top = _fp->k_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
+          auto cp_bottom =
+              _fp->cp_from_p_T((*_P_soln)(node_bottom) + _P_out, (*_T_soln)(node_bottom));
+          auto cp_top = _fp->cp_from_p_T((*_P_soln)(node_top) + _P_out, (*_T_soln)(node_top));
           auto diff_bottom = K_bottom / (cp_bottom + 1e-15);
           auto diff_top = K_top / (cp_top + 1e-15);
 
@@ -1189,10 +1196,10 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           }
 
           auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
-          auto K_i = _fp->k_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
-          auto K_j = _fp->k_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
-          auto cp_i = _fp->cp_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
-          auto cp_j = _fp->cp_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
+          auto K_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
+          auto K_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
+          auto cp_i = _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
+          auto cp_j = _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
           auto A_i = K_i / cp_i;
           auto A_j = K_j / cp_j;
           auto harm_A = 2.0 * A_i * A_j / (A_i + A_j);
