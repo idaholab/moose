@@ -1,0 +1,40 @@
+[Tests]
+  issues = '#26591'
+  design = 'RayTracingStudy.md Ray.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'stationary.i'
+    exodiff = 'stationary_out.e'
+    allow_test_objects = true
+    requirement = 'The system shall support the tracing of stationary rays'
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error for creating a stationary ray when'
+    [stationary_before_start]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_stationary_before_start=true'
+      expect_err = 'Cannot use Ray::setStationary\(\) before Ray::setStart\(\)'
+      allow_test_objects = true
+      detail = 'its starting point has not been set yet'
+    []
+    [stationary_with_direction]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_stationary_with_direction=true'
+      expect_err = 'Cannot use Ray::setStationary\(\) with Ray::setStartingDirection\(\)'
+      allow_test_objects = true
+      detail = 'its starting direction has already been set'
+    []
+    [stationary_with_end]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_stationary_with_end=true'
+      expect_err = 'Cannot use Ray::setStationary\(\) after Ray::setStartingEndPoint\(\)'
+      allow_test_objects = true
+      detail = 'its starting end point has already been set'
+    []
+  []
+[]
