@@ -105,8 +105,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
     _use_dual(getParam<bool>("use_dual")),
-    _is_array(getParam<bool>("array")),
-    _is_lower_d(blocksMaxDimension() < _mesh.dimension())
+    _is_array(getParam<bool>("array"))
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
@@ -131,6 +130,16 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     mooseAssert(_count == 1, "component size of normal variable (_count) must be one");
     _var_name = _sys.system().variable(_var_num).name();
   }
+
+  const auto & blk_ids = blockIDs();
+  mooseAssert(!blk_ids.empty(), "Every variable should have at least one subdomain");
+  _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
+#ifndef NDEBUG
+  for (auto it = ++blk_ids.begin(); it != blk_ids.end(); ++it)
+    mooseAssert(
+        _is_lower_d == _mesh.isLowerD(*it),
+        "A variable should not have a mix of lower-dimensional and higher-dimensional blocks");
+#endif
 }
 
 const std::vector<dof_id_type> &

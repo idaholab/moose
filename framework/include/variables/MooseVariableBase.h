@@ -244,7 +244,7 @@ protected:
   const bool _is_array;
 
   /// Whether this variable lives on lower dimensional blocks
-  const bool _is_lower_d;
+  bool _is_lower_d;
 };
 
 inline void
