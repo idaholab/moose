@@ -172,7 +172,7 @@ setSolverOptions(const SolverParams & solver_params)
 }
 
 void
-petscSetupDM(NonlinearSystemBase & nl)
+petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -196,7 +196,7 @@ petscSetupDM(NonlinearSystemBase & nl)
     if (ismoose)
       return;
   }
-  ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
+  ierr = DMCreateMoose(nl.comm().get(), nl, dm_name, &dm);
   CHKERRABORT(nl.comm().get(), ierr);
   ierr = DMSetFromOptions(dm);
   CHKERRABORT(nl.comm().get(), ierr);

@@ -5812,11 +5812,11 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
     _is_petsc_options_inserted = true;
   }
 #endif
+
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
   // Do not worry, DM setup is very cheap
-  if (_current_nl_sys->haveFieldSplitPreconditioner())
-    Moose::PetscSupport::petscSetupDM(*_current_nl_sys);
+  _current_nl_sys->setupDM();
 
   Moose::setSolverDefaults(*this);
 

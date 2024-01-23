@@ -20,25 +20,25 @@ class INSFVPressureVariable;
 /**
  * This user-object corrects the pressure
  */
-class NSFVPressurePin : public GeneralUserObject,
-                        public BlockRestrictable,
-                        public NonADFunctorInterface
+class NSPressurePin : public GeneralUserObject,
+                      public BlockRestrictable,
+                      public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
-  NSFVPressurePin(const InputParameters & params);
+  NSPressurePin(const InputParameters & params);
 
-  void initialSetup() override{};
-  void initialize() override{};
-  void execute() override;
-  void finalize() override{};
+  virtual void initialSetup() override;
+  virtual void initialize() override {}
+  virtual void execute() override;
+  virtual void finalize() override {}
 
 protected:
   /// LibMesh mesh class for the current simulation mesh
   MeshBase & _mesh;
 
   /// The thread 0 copy of the pressure variable
-  INSFVPressureVariable * const _p;
+  const MooseVariableFieldBase & _p;
 
   /// Value of the pressure pin
   const PostprocessorValue & _p0;

@@ -34,6 +34,12 @@ Split::validParams()
       "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
   params.addParam<std::vector<std::string>>(
       "splitting", {}, "The names of the splits (subsystems) in the decomposition of this split");
+  params.addParam<std::vector<BoundaryName>>(
+      "unside_by_var_boundary_name",
+      "A map from boundary name to unside by variable, e.g. only unside for a given variable.");
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "unside_by_var_var_name",
+      "A map from boundary name to unside by variable, e.g. only unside for a given variable.");
 
   MooseEnum SplittingTypeEnum("additive multiplicative symmetric_multiplicative schur", "additive");
   params.addParam<MooseEnum>("splitting_type", SplittingTypeEnum, "Split decomposition type");
@@ -92,6 +98,19 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
   Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
   // prefix
   std::string dmprefix = prefix + "dm_moose_";
+
+  if (isParamValid("unside_by_var_boundary_name"))
+  {
+    const auto & unside_by_var_boundary_name =
+        getParam<std::vector<BoundaryName>>("unside_by_var_boundary_name");
+    const auto & unside_by_var_var_name =
+        getParam<std::vector<NonlinearVariableName>>("unside_by_var_var_name");
+
+    std::vector<std::string> vector_of_pairs;
+    for (const auto i : index_range(unside_by_var_boundary_name))
+      vector_of_pairs.push_back(unside_by_var_boundary_name[i] + ":" + unside_by_var_var_name[i]);
+    po.pairs.emplace_back(dmprefix + "unside_by_var", Moose::stringify(vector_of_pairs, ","));
+  }
 
   // var options
   if (!_vars.empty())

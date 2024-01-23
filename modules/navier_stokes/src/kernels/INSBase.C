@@ -41,6 +41,10 @@ INSBase::validParams()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<bool>("picard",
+                        false,
+                        "Whether we are applying a Picard strategy in which case we will linearize "
+                        "the nonlinear convective term.");
 
   return params;
 }
@@ -54,6 +58,11 @@ INSBase::INSBase(const InputParameters & parameters)
     _v_vel(coupledValue("v")),
     _w_vel(coupledValue("w")),
     _p(coupledValue(NS::pressure)),
+
+    _picard(getParam<bool>("picard")),
+    _u_vel_previous_nl(_picard ? &coupledValuePreviousNL("u") : nullptr),
+    _v_vel_previous_nl(_picard ? &coupledValuePreviousNL("v") : nullptr),
+    _w_vel_previous_nl(_picard ? &coupledValuePreviousNL("w") : nullptr),
 
     // Gradients
     _grad_u_vel(coupledGradient("u")),
@@ -101,12 +110,19 @@ INSBase::INSBase(const InputParameters & parameters)
 
     _rz_radial_coord(_mesh.getAxisymmetricRadialCoord())
 {
+  if (_picard && _disps_provided)
+    paramError("picard",
+               "Picard is not currently supported for ALE-type simulations in which we subtract "
+               "the mesh velocity from the velocity variables");
 }
 
 RealVectorValue
 INSBase::relativeVelocity() const
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  auto U = _picard ? RealVectorValue((*_u_vel_previous_nl)[_qp],
+                                     (*_v_vel_previous_nl)[_qp],
+                                     (*_w_vel_previous_nl)[_qp])
+                   : RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   if (_disps_provided)
     U -= RealVectorValue{_disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]};
   return U;
@@ -115,7 +131,10 @@ INSBase::relativeVelocity() const
 RealVectorValue
 INSBase::convectiveTerm()
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  const auto U = _picard ? RealVectorValue((*_u_vel_previous_nl)[_qp],
+                                           (*_v_vel_previous_nl)[_qp],
+                                           (*_w_vel_previous_nl)[_qp])
+                         : RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   return _rho[_qp] *
          RealVectorValue(U * _grad_u_vel[_qp], U * _grad_v_vel[_qp], U * _grad_w_vel[_qp]);
 }
@@ -123,16 +142,28 @@ INSBase::convectiveTerm()
 RealVectorValue
 INSBase::dConvecDUComp(unsigned comp)
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  RealVectorValue d_U_d_comp(0, 0, 0);
-  d_U_d_comp(comp) = _phi[_j][_qp];
+  if (_picard)
+  {
+    RealVectorValue U(
+        (*_u_vel_previous_nl)[_qp], (*_v_vel_previous_nl)[_qp], (*_w_vel_previous_nl)[_qp]);
+    RealVectorValue convective_term;
+    convective_term(comp) = _rho[_qp] * U * _grad_phi[_j][_qp];
 
-  RealVectorValue convective_term = _rho[_qp] * RealVectorValue(d_U_d_comp * _grad_u_vel[_qp],
-                                                                d_U_d_comp * _grad_v_vel[_qp],
-                                                                d_U_d_comp * _grad_w_vel[_qp]);
-  convective_term(comp) += _rho[_qp] * U * _grad_phi[_j][_qp];
+    return convective_term;
+  }
+  else
+  {
+    RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    RealVectorValue d_U_d_comp(0, 0, 0);
+    d_U_d_comp(comp) = _phi[_j][_qp];
 
-  return convective_term;
+    RealVectorValue convective_term = _rho[_qp] * RealVectorValue(d_U_d_comp * _grad_u_vel[_qp],
+                                                                  d_U_d_comp * _grad_v_vel[_qp],
+                                                                  d_U_d_comp * _grad_w_vel[_qp]);
+    convective_term(comp) += _rho[_qp] * U * _grad_phi[_j][_qp];
+
+    return convective_term;
+  }
 }
 
 RealVectorValue

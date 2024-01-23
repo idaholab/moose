@@ -1660,9 +1660,9 @@ NSFVBase<BaseType>::addINSMassKernels()
     else if (pin_type == "average")
       object_type = "FVIntegralValueConstraint";
     else if (pin_type == "average-uo")
-      object_type = "NSFVPressurePin";
+      object_type = "NSPressurePin";
     else
-      object_type = "NSFVPressurePin";
+      object_type = "NSPressurePin";
 
     // Create the average value postprocessor if needed
     if (pin_type == "average-uo")
