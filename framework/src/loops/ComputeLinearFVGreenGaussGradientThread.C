@@ -41,11 +41,15 @@ ComputeLinearFVGreenGaussGradientThread::operator()(const FaceInfoRange & range)
        _fe_problem.getLinearSystem(_linear_system_number).getVariables(_tid))
   {
     _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
+    const auto & grad_container = _current_var->gradientContainer();
+    for (auto & vec : grad_container)
+    {
+      vec->zero();
+    }
 
     mooseAssert(_current_var,
                 "This should be a linear FV variable, did we somehow add a nonlinear variable to "
                 "the linear system?");
-
     // Iterate over all the elements in the range
     for (const auto & face_info : range)
     {
@@ -79,8 +83,8 @@ ComputeLinearFVGreenGaussGradientThread::onInternalFace(const FaceInfo & face_in
   const auto & grad_container = _current_var->gradientContainer();
   for (const auto i : make_range(_dim))
   {
-    grad_container[i]->add(dof_id_elem, contribution(i));
-    grad_container[i]->add(dof_id_neighbor, -contribution(i));
+    grad_container[i]->add(dof_id_elem, contribution(i) / face_info.elemInfo()->volume());
+    grad_container[i]->add(dof_id_neighbor, -contribution(i) / face_info.neighborInfo()->volume());
   }
 }
 
@@ -94,24 +98,34 @@ ComputeLinearFVGreenGaussGradientThread::onBoundaryFace(const FaceInfo & face_in
     bc_pointer->setCurrentFaceInfo(&face_info, face_type);
 
     dof_id_type dof_id;
+    Real volume;
     if (face_info.neighborInfo())
     {
       if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
+      {
         dof_id =
             face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
+        volume = face_info.elemInfo()->volume();
+      }
       else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+      {
         dof_id =
             face_info.neighborInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
+        volume = face_info.neighborInfo()->volume();
+      }
     }
     else
+    {
       dof_id = face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
+      volume = face_info.elemInfo()->volume();
+    }
 
     const auto contribution = face_info.normal() * face_info.faceArea() * face_info.faceCoord() *
                               bc_pointer->computeBoundaryValue();
 
     const auto & grad_container = _current_var->gradientContainer();
     for (const auto i : make_range(_dim))
-      grad_container[i]->add(dof_id, contribution(i));
+      grad_container[i]->add(dof_id, contribution(i) / volume);
   }
 }
 

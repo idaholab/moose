@@ -33,6 +33,8 @@ public:
   /// Set current face info
   void setCurrentFaceInfo(const FaceInfo * face_info)
   {
+    _cached_matrix_contribution = false;
+    _cached_rhs_contribution = false;
     _current_face_info = face_info;
     _current_face_type =
         _current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number()));
@@ -74,4 +76,12 @@ protected:
 
   /// Face ownership information for the current face
   FaceInfo::VarFaceNeighbors _current_face_type;
+
+  /// If we already built the matrix contribution. This switch can be used to
+  /// check if cached quantities are already available in the kernel.
+  bool _cached_matrix_contribution;
+
+  /// If we already built the rhs contribution. This switch can be used to
+  /// check if cached quantities are already available in the kernel.
+  bool _cached_rhs_contribution;
 };

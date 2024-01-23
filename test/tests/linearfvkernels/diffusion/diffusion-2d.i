@@ -1,8 +1,11 @@
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
-    dim = 1
+    dim = 2
     nx = 2
+    ny = 1
+    ymax = 0.5
+    elem_type = TRI3
   []
 []
 
@@ -23,6 +26,7 @@
     type = LinearFVDiffusionKernel
     variable = u
     diffusion_coeff = coeff_func
+    use_nonorthogonal_correction = true
   []
   [source]
     type = LinearFVSourceKernel
@@ -35,7 +39,7 @@
   [dir]
     type = LinearFVFunctorDirichletBC
     variable = u
-    boundary = "left right"
+    boundary = "left right top bottom"
     functor = analytic_solution
   []
 []
@@ -43,15 +47,15 @@
 [Functions]
   [coeff_func]
     type = ParsedFunction
-    expression = '0.5*x'
+    expression = '1+0.5*x*y'
   []
   [source_func]
     type = ParsedFunction
-    expression = '2*x'
+    expression = '2*(1.5-y*y)+2*x*y*(1.5-y*y)+2*(1.5-x*x)+2*x*y*(1.5-x*x)'
   []
   [analytic_solution]
     type = ParsedFunction
-    expression = '1-x*x'
+    expression = '(1.5-x*x)*(1.5-y*y)'
   []
 []
 
@@ -78,6 +82,10 @@
 [Outputs]
   [csv]
     type = CSV
+    execute_on = FINAL
+  []
+  [exodus]
+    type = Exodus
     execute_on = FINAL
   []
 []

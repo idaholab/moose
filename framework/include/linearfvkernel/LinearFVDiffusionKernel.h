@@ -30,6 +30,24 @@ public:
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc) override;
 
 protected:
+  Real getCorrectionContribution();
+
+  Real computeFluxMatrixContribution();
+
+  Real computeFluxRHSContribution();
+
   /// The functor for the diffusion coefficient
   const Moose::Functor<Real> & _diffusion_coeff;
+
+  /// Switch to enable/disable nonorthogonal correction
+  const bool _use_nonorthogonal_correction;
+
+  Moose::FaceArg _current_face_arg;
+
+  Real _current_face_diffusivity;
+
+  Real _current_delta;
+
+  Real _flux_matrix_contribution;
+  Real _flux_rhs_contribution;
 };

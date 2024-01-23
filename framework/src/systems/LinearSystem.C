@@ -426,7 +426,10 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
-    ComputeLinearFVGreenGaussGradientThread(_fe_problem, _fe_problem.linearSysNum(name()));
+    ComputeLinearFVGreenGaussGradientThread gradient_thread(_fe_problem,
+                                                            _fe_problem.linearSysNum(name()));
+
+    Threads::parallel_reduce(face_info_range, gradient_thread);
 
     ComputeLinearFVElementalThread elem_thread(_fe_problem,
                                                _fe_problem.linearSysNum(name()),

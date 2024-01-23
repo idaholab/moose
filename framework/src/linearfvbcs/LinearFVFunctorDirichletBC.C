@@ -39,12 +39,12 @@ LinearFVFunctorDirichletBC::computeCellToFaceDistance() const
   const auto defined_on_elem =
       is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
   if (is_on_mesh_boundary)
-    return _current_face_info->dCNMag();
+    return std::abs(_current_face_info->dCN() * _current_face_info->normal());
   else
-    return (_current_face_info->faceCentroid() - (defined_on_elem
-                                                      ? _current_face_info->elemCentroid()
-                                                      : _current_face_info->neighborCentroid()))
-        .norm();
+    return std::abs((_current_face_info->faceCentroid() -
+                     (defined_on_elem ? _current_face_info->elemCentroid()
+                                      : _current_face_info->neighborCentroid())) *
+                    _current_face_info->normal());
 }
 
 Real

@@ -2,7 +2,7 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 2
+    nx = 10
   []
 []
 
@@ -61,8 +61,8 @@
 []
 
 [Outputs]
-  [csv]
-    type = CSV
+  [exodus]
+    type = Exodus
     execute_on = FINAL
   []
 []

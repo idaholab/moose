@@ -23,7 +23,9 @@ LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & params)
   : LinearFVKernel(params),
     FaceArgProducerInterface(),
     _current_face_info(nullptr),
-    _current_face_type(FaceInfo::VarFaceNeighbors::NEITHER)
+    _current_face_type(FaceInfo::VarFaceNeighbors::NEITHER),
+    _cached_matrix_contribution(false),
+    _cached_rhs_contribution(false)
 {
 }
 
