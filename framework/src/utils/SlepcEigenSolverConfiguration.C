@@ -33,7 +33,7 @@ SlepcEigenSolverConfiguration::configure_solver()
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
     // Set custom monitors for SNES and KSP
-    _eigen_problem.initPetscOutput();
+    _eigen_problem.initPetscOutputAndSomeSolverSettings();
     // Let us remove extra "eps_power" from SNES since users do not like it
     ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetUpOptionPrefix(_slepc_solver.eps());
     LIBMESH_CHKERR(ierr);

@@ -582,9 +582,10 @@ public:
   void forceOutput();
 
   /**
-   * Reinitialize PETSc output for proper linear/nonlinear iteration display
+   * Reinitialize PETSc output for proper linear/nonlinear iteration display. This also may be used
+   * for some PETSc-related solver settings
    */
-  virtual void initPetscOutput();
+  virtual void initPetscOutputAndSomeSolverSettings();
 
   /**
    * Retrieve a writable reference the PETSc options (used by PetscSupport)
