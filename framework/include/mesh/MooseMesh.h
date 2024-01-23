@@ -1726,10 +1726,11 @@ private:
 
   struct SubdomainData
   {
-    /// neighboring subdomain ids
+    /// Neighboring subdomain ids
     std::set<SubdomainID> neighbor_subs;
 
-    /// the boundary ids that are attached
+    /// The boundary ids that are attached. This set will include any sideset boundary ID that
+    /// is a side of any part of the subdomain
     std::set<BoundaryID> boundary_ids;
 
     /// Whether this subdomain is a lower-dimensional manifold of a higher-dimensional subdomain
