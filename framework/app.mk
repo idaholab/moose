@@ -22,26 +22,6 @@ $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
-ifneq ($(INSTALLABLE_DIRS),)
-    # We need to maintain relative paths to submodules or dependancy directories if we
-    # want to install tests from those directories. To do that, we need to know what
-    # the relative path is from the current dependency relative to its parent
-    relpath = $(shell python -c \
-      'import os; print(os.path.relpath("$(APPLICATION_DIR)", "$(CURDIR)") + os.sep)')
-
-    curr_install_dirs := $(addprefix $(relpath),$(INSTALLABLE_DIRS))
-    # Since we support transforming the installable paths, those destination directories will
-    # need some treatment as well (e.g. test/tests->tests => submodule/test/tests->submodule/tests)
-    # To do this, we need to loop over all the directories (white-space separated items) in the list.
-    # For each of these, we'll look for '->' and if we find it, we'll split it on that token then
-    # insert the "relpath" variable we just got out of our Python one-liner as the destination
-    # directory prefix. If we don't find that character, we just return the unedited item.
-    # Note, Whitespace is important in those subst functions
-    curr_install_dirs := $(foreach dir,$(curr_install_dirs),$(if $(findstring ->,$(dir)),\
-      $(word 1,$(subst ->, ,$(dir)))->$(relpath)$(word 2,$(subst ->, ,$(dir))),$(dir)))
-
-    installable_dirs_all := $(installable_dirs_all) $(curr_install_dirs)
-endif
 # install target related stuff
 share_install_dir := $(share_dir)/$(APPLICATION_NAME)
 docs_install_dir := $(share_install_dir)/doc
@@ -318,6 +298,40 @@ endif
 # Instantiate a new suffix rule for the module loader
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
+ifneq ($(INSTALLABLE_DIRS),)
+    # We need to maintain relative paths to submodules or dependancy directories if we
+    # want to install tests from those directories. To do that, we need to know what
+    # the relative path is from the current dependency relative to its parent
+    relpath =
+    ifneq ($(APPLICATION_DIR),$(CURDIR))
+        relpath = $(shell python -c \
+          'import os; print(os.path.relpath("$(APPLICATION_DIR)", "$(CURDIR)") + os.sep)')
+    endif
+    curr_install_dirs := $(addprefix $(relpath),$(INSTALLABLE_DIRS))
+    # Since we support transforming the installable paths, those destination directories will
+    # need some treatment as well (e.g. test/tests->tests => submodule/test/tests->submodule/tests)
+    # To do this, we need to loop over all the directories (white-space separated items) in the list.
+    # For each of these, we'll look for '->' and if we find it, we'll split it on that token then
+    # insert the "relpath" variable we just got out of our Python one-liner as the destination
+    # directory prefix. If we don't find that character, we just return the unedited item.
+    # Note, Whitespace is important in those subst functions
+    curr_install_dirs := $(foreach dir,$(curr_install_dirs),$(if $(findstring ->,$(dir)),\
+      $(word 1,$(subst ->, ,$(dir)))->$(relpath)$(word 2,$(subst ->, ,$(dir))),$(dir)))
+
+    installable_dirs_all := $(installable_dirs_all) $(curr_install_dirs)
+
+    # Zero this out in case there are more applications included in this compile
+    INSTALLABLE_DIRS :=
+else ifeq ($(BUILD_EXEC),yes)
+    # Set a default to install the main application's tests if one isn't set in any of the included
+    # .mk files anywhere.
+    ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
+      installable_dirs_all += test/tests->tests
+    else
+      installable_dirs_all += tests
+    endif
+endif
+
 # If this is a matching module then build the exec, otherwise fall back and use the variable
 want_exec := $(BUILD_EXEC)
 ifneq (,$(MODULE_NAME))
@@ -328,17 +342,6 @@ ifneq (,$(MODULE_NAME))
   endif
 else
   ifeq ($(BUILD_EXEC),yes)
-
-    # Set a default to install the main application's tests if one isn't set in any of the included
-    # .mk files anywhere.
-    ifeq ($(installable_dirs_all),)
-      ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
-        installable_dirs_all := test/tests->tests
-      else
-        installable_dirs_all := tests
-      endif
-    endif
-
     all: $(app_EXEC)
   else
     all: $(app_LIB)
