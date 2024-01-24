@@ -25,8 +25,6 @@ public:
   virtual void execute();
   virtual void finalize();
 
-  Real nodalDensity(const Node * node) const;
-
 protected:
   virtual Real computeQpIntegral();
 

@@ -452,25 +452,6 @@ ExplicitDynamicsContactConstraint::getPenalty(const Node & /*node*/)
   return _penalty;
 }
 
-bool
-ExplicitDynamicsContactConstraint::getCoupledVarComponent(unsigned int var_num,
-                                                          unsigned int & component)
-{
-  component = std::numeric_limits<unsigned int>::max();
-  bool coupled_var_is_disp_var = false;
-  for (const auto i : make_range(Moose::dim))
-  {
-    if (var_num == _vars[i])
-    {
-      coupled_var_is_disp_var = true;
-      component = i;
-      break;
-    }
-  }
-
-  return coupled_var_is_disp_var;
-}
-
 void
 ExplicitDynamicsContactConstraint::overwriteBoundaryVariables(NumericVector<Number> & soln,
                                                               const Node & secondary_node) const

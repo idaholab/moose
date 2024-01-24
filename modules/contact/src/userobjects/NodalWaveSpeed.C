@@ -89,15 +89,3 @@ NodalWaveSpeed::finalize()
   }
   _aux_solution.close();
 }
-
-Real
-NodalWaveSpeed::nodalWaveSpeed(const Node * node) const
-{
-  std::map<const Node *, Real>::const_iterator it = _node_wave_speeds.find(node);
-  Real retVal(0);
-  if (it != _node_wave_speeds.end())
-  {
-    retVal = it->second;
-  }
-  return retVal;
-}

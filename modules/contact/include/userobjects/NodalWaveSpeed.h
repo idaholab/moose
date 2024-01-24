@@ -25,8 +25,6 @@ public:
   virtual void execute();
   virtual void finalize();
 
-  Real nodalWaveSpeed(const Node * node) const;
-
 protected:
   virtual Real computeQpIntegral();
 

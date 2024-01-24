@@ -92,15 +92,3 @@ NodalDensity::finalize()
   }
   _aux_solution.close();
 }
-
-Real
-NodalDensity::nodalDensity(const Node * node) const
-{
-  std::map<const Node *, Real>::const_iterator it = _node_densities.find(node);
-  Real retVal(0);
-  if (it != _node_densities.end())
-  {
-    retVal = it->second;
-  }
-  return retVal;
-}

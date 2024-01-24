@@ -61,15 +61,6 @@ public:
     return 0.0;
   }
 
-  /**
-   * Determine whether the coupled variable is one of the displacement variables,
-   * and find its component
-   * @param var_num The number of the variable to be checked
-   * @param component The component index computed in this routine
-   * @return bool indicating whether the coupled variable is one of the displacement variables
-   */
-  bool getCoupledVarComponent(unsigned int var_num, unsigned int & component);
-
   bool shouldApply() override;
   void computeContactForce(const Node & node, PenetrationInfo * pinfo, bool update_contact_set);
   virtual bool isExplicitConstraint() const override { return true; }

@@ -172,13 +172,6 @@
 []
 
 [BCs]
-  # [z_front]
-  #   type = FunctionDirichletBC
-  #   variable = disp_z
-  #   boundary = 'ball_front'
-  #   function = dispz
-  #   preset = false
-  # []
   [x_front]
     type = DirichletBC
     variable = disp_x
@@ -252,7 +245,7 @@
     output_properties = __all__
   []
   [strain_block]
-    type = ComputeFiniteStrain # ComputeIncrementalSmallStrain
+    type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []
