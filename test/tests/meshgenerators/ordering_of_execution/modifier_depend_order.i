@@ -4,7 +4,7 @@
     file = square.e
   []
 
-  # Mesh Modifiers
+  # Mesh Generators
   # If no dependencies are defined, the order of execution is not defined (based on pointer locations) so
   # this test case has several dependencies to minimize the chance of getting lucky when things aren't defined properly.
   # Rotations along different axes must occur in a defined order to end up at the right orientation at the end.

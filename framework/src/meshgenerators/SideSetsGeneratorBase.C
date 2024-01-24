@@ -54,7 +54,10 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
 {
   mooseAssert(_fe_face == nullptr, "FE Face has already been initialized");
 
-  unsigned int dim = mesh.mesh_dimension();
+  // To know the dimension of the mesh
+  if (!mesh.is_prepared())
+    mesh.prepare_for_use();
+  const auto dim = mesh.mesh_dimension();
 
   // Setup the FE Object so we can calculate normals
   FEType fe_type(Utility::string_to_enum<Order>("CONSTANT"),
