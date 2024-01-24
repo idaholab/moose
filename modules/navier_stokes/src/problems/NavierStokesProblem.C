@@ -41,8 +41,14 @@ NavierStokesProblem::validParams()
   return params;
 }
 
-NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters)
-  : FEProblem(parameters),
+NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters) : FEProblem(parameters)
+#if PETSC_RELEASE_LESS_THAN(3, 20, 0)
+{
+  mooseError("The preconditioning techniques made available through this class require a PETSc "
+             "version of at least 3.20");
+}
+#else
+    ,
     _commute_lsc(getParam<bool>("commute_lsc")),
     _mass_matrix(getParam<TagName>("mass_matrix")),
     _L_matrix(getParam<TagName>("L_matrix")),
@@ -397,3 +403,5 @@ NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
   ierr = KSPSetPreSolve(ksp, &navierStokesKSPPreSolve, this);
   LIBMESH_CHKERR2(this->comm(), ierr);
 }
+
+#endif
