@@ -43,6 +43,7 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
+  params.addPrivateParam<bool>("_bypass_meshgen", true);
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
 
@@ -85,7 +86,10 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
   const auto data_driven_generator =
       moose_mesh->parameters().get<std::string>("data_driven_generator");
-  const bool bypass_meshgen = (data_driven_generator != "");
+  bool bypass_meshgen = (data_driven_generator != "");
+  // Option to bypass mesh generation can be overriden by setting private "_bypass_meshgen" parameter to false
+  if (!getParam<bool>("_bypass_meshgen"))
+    bypass_meshgen = false;
   this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);
 
   // Declare name id map only if RGMB is outputting a mesh
