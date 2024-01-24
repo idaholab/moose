@@ -70,7 +70,7 @@ TriFlowAreaIC::value(const Point & p)
     standard_area = 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
     rod_area = libMesh::pi * std::pow(rod_diameter, 2.0) / 24.0;
     additional_area = 0.0;
-    wire_area = libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
+    wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 24.0 / std::cos(theta);
   }
 
   /// Calculate subchannel area

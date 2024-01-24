@@ -5,9 +5,9 @@ fuel_pin_pitch = 0.01125 #m
 fuel_pin_diameter = 0.0095 #m
 inner_duct_in = 0.09164 #m
 n_rings = 5
-unheated_length_entry = 1.14 #m 
-heated_length = 1.71 #m 
-unheated_length_exit = 0.855 #m 
+unheated_length_entry = 1.14 #m
+heated_length = 1.71 #m
+unheated_length_exit = 0.855 #m
 ###################################################
 
 [TriSubChannelMesh]

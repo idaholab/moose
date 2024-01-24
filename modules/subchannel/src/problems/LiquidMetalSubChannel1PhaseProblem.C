@@ -287,7 +287,7 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   }
   else if (subch_type == EChannelType::EDGE)
   {
-    if (p_over_d < 1.1)
+    if (w_over_d < 1.1)
     {
       aL = 26.18;
       b1L = 554.5;
@@ -312,7 +312,7 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   }
   else
   {
-    if (p_over_d < 1.1)
+    if (w_over_d < 1.1)
     {
       aL = 26.98;
       b1L = 1636.0;
@@ -347,9 +347,8 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       pw_p = libMesh::pi * rod_diameter / 2.0;
       // wire projected area - center subchannel wire-wrapped bundle
       ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
-      // bare rod bundle center subchannel flow area
-      a_p = std::sqrt(3.0) / 4.0 * std::pow(pitch, 2.0) -
-            libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+      // bare rod bundle center subchannel flow area (normal area + wire area)
+      a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Center subchannel
       cT = cT * (pw_p / w_perim) + wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) *
                                        std::pow((Dh_i / wire_diameter), 0.18);
@@ -361,8 +360,8 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
     {
       // wire projected area - edge subchannel wire-wrapped bundle
       ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
-      // bare rod bundle edge subchannel flow area
-      a_p = S + 0.5 * libMesh::pi * std::pow(wire_diameter, 2) / 4.0 / std::cos(theta);
+      // bare rod bundle edge subchannel flow area (normal area + wire area)
+      a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Edge subchannel
       cT = cT * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
       // laminar friction factor equation constant - Edge subchannel
@@ -372,8 +371,8 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
     {
       // wire projected area - corner subchannel wire-wrapped bundle
       ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
-      // bare rod bundle corner subchannel flow area
-      a_p = S + 1.0 / 6.0 * libMesh::pi / 4.0 * std::pow(wire_diameter, 2) / std::cos(theta);
+      // bare rod bundle corner subchannel flow area (normal area + wire area)
+      a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 24.0 / std::cos(theta);
       // turbulent friction factor equation constant - Corner subchannel
       cT = cT * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
       // laminar friction factor equation constant - Corner subchannel
