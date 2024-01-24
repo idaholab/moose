@@ -17,15 +17,17 @@
 []
 
 [Physics]
-  [DiffusionFV]
-    [diff]
-      source_functor = 2
+  [Diffusion]
+    [FiniteVolume]
+      [diff]
+        source_functor = 2
 
-      # Test all the ways of setting the boundary conditions
-      neumann_boundaries = 'left_to_0 right_to_0 top_to_0 bottom_to_0'
-      boundary_fluxes = '1 flux_pp flux_function flux_variable'
-      dirichlet_boundaries = 'left_to_1 right_to_1 top_to_1 bottom_to_1'
-      boundary_values = '2 value_pp value_function value_variable'
+        # Test all the ways of setting the boundary conditions
+        neumann_boundaries = 'left_to_0 right_to_0 top_to_0 bottom_to_0'
+        boundary_fluxes = '1 flux_pp flux_function flux_variable'
+        dirichlet_boundaries = 'left_to_1 right_to_1 top_to_1 bottom_to_1'
+        boundary_values = '2 value_pp value_function value_variable'
+      []
     []
   []
 []

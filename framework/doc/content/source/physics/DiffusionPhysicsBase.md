@@ -18,9 +18,9 @@ and / or Neumann boundary conditions:
 !equation
 D\dfrac{\partial u}{\partial n} = h
 
-over the boundaries specified by the [!param](/Physics/DiffusionFV/dirichlet_boundaries) and
-[!param](/Physics/DiffusionFV/neumann_boundaries) parameters respectively.
+over the boundaries specified by the [!param](/Physics/Diffusion/FiniteVolume/dirichlet_boundaries) and
+[!param](/Physics/Diffusion/FiniteVolume/neumann_boundaries) parameters respectively.
 
 The values set at the Dirichlet boundary conditions, $g$, and Neumann boundary conditions, $h$,
-are set by the [!param](/Physics/DiffusionFV/boundary_values) and
-[!param](/Physics/DiffusionFV/boundary_fluxes) respectively.
+are set by the [!param](/Physics/Diffusion/FiniteVolume/boundary_values) and
+[!param](/Physics/Diffusion/FiniteVolume/boundary_fluxes) respectively.

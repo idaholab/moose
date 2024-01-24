@@ -8,20 +8,22 @@
 []
 
 [Physics]
-  [HeatConductionFE]
-    [h1]
-      temperature_name = 'T'
-      heat_source_var = 'Q'
+  [HeatConduction]
+    [FiniteElement]
+      [h1]
+        temperature_name = 'T'
+        heat_source_var = 'Q'
 
-      # Thermal properties
-      thermal_conductivity = 'k0'
+        # Thermal properties
+        thermal_conductivity = 'k0'
 
-      # Boundary conditions
-      heat_flux_boundaries = 'left right'
-      boundary_heat_fluxes = '0 500'
-      insulated_boundaries = 'top'
-      fixed_temperature_boundaries = 'bottom'
-      boundary_temperatures = '300'
+        # Boundary conditions
+        heat_flux_boundaries = 'left right'
+        boundary_heat_fluxes = '0 500'
+        insulated_boundaries = 'top'
+        fixed_temperature_boundaries = 'bottom'
+        boundary_temperatures = '300'
+      []
     []
   []
 []

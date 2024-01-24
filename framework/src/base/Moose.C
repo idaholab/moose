@@ -421,8 +421,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
    * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one task
    */
-  registerSyntax("DiffusionCG", "Physics/DiffusionCG/*");
-  registerSyntax("DiffusionFV", "Physics/DiffusionFV/*");
+  registerSyntax("DiffusionCG", "Physics/Diffusion/ContinuousGalerkin/*");
+  registerSyntax("DiffusionFV", "Physics/Diffusion/FiniteVolume/*");
 
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");

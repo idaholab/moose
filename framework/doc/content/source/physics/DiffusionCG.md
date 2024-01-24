@@ -1,6 +1,6 @@
 # DiffusionCG
 
-!syntax description /Physics/DiffusionCG/DiffusionCG
+!syntax description /Physics/Diffusion/ContinuousGalerkin/DiffusionCG
 
 See the [DiffusionPhysicsBase.md] documentation for the diffusion equation solved.
 
@@ -38,12 +38,12 @@ are a few percent faster, depending on the case.
 
 !alert note
 The user may switch between using / not using automatic differentiation for the kernel and boundary
-conditions using the [!param](/Physics/DiffusionCG/automatic_differentiation). This parameter is only
+conditions using the [!param](/Physics/Diffusion/ContinuousGalerkin/automatic_differentiation). This parameter is only
 obeyed if the AD/non-AD object exists for the requested diffusivity / source / boundary value functor etc.
 
 
-!syntax parameters /Physics/DiffusionCG/DiffusionCG
+!syntax parameters /Physics/Diffusion/ContinuousGalerkin/DiffusionCG
 
-!syntax inputs /Physics/DiffusionCG/DiffusionCG
+!syntax inputs /Physics/Diffusion/ContinuousGalerkin/DiffusionCG
 
-!syntax children /Physics/DiffusionCG/DiffusionCG
+!syntax children /Physics/Diffusion/ContinuousGalerkin/DiffusionCG
