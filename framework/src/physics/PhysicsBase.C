@@ -187,7 +187,7 @@ PhysicsBase::initializePhysics()
 }
 
 void
-PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
+PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy)
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {

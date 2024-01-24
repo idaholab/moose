@@ -29,12 +29,12 @@ The Neumann boundary conditions are created using:
 - a [NeumannBC.md] if the flux is set to a number
 - a [FunctionNeumannBC.md] if set to a [Function](syntax/Functions/index.md)
 - a [PostprocessorNeumannBC.md] if set to a [Postprocessor](syntax/Postprocessors/index.md)
-- an [FunctorNeumannBC.md] for any other kind of [functor](syntax/Functors/index.md) for the flux value
+- a [FunctorNeumannBC.md] for any other kind of [functor](syntax/Functors/index.md) for the flux value
 
 
 !alert note
 We could use a [Functor](syntax/Functors/index.md) object to cover every need, but the specialized objects
-are a few per cent faster, depending on the case.
+are a few percent faster, depending on the case.
 
 !alert note
 The user may switch between using / not using automatic differentiation for the kernel and boundary

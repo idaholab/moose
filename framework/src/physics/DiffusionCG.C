@@ -47,7 +47,7 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADMatDiffusion" : "MatDiffusion";
     else if (isParamValid("diffusivity_functor"))
     {
-      const auto d = getParam<MooseFunctorName>("diffusivity_functor");
+      const auto & d = getParam<MooseFunctorName>("diffusivity_functor");
       if (getProblem().hasFunction(d))
         kernel_type = "FunctionDiffusion";
       else
@@ -67,7 +67,7 @@ DiffusionCG::addFEKernels()
       params.set<MaterialPropertyName>("diffusivity") =
           getParam<MaterialPropertyName>("diffusivity_matprop");
 
-    getProblem().addKernel(kernel_type, name() + "_" + _var_name + "_diffusion", params);
+    getProblem().addKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }
 
   // Source term
@@ -110,7 +110,7 @@ DiffusionCG::addFEKernels()
       params.set<std::vector<VariableName>>("v") = {source};
     }
 
-    getProblem().addKernel(kernel_type, name() + "_" + _var_name + "_source", params);
+    getProblem().addKernel(kernel_type, prefix() + _var_name + "_source", params);
   }
 
   // Time derivative term
@@ -119,7 +119,7 @@ DiffusionCG::addFEKernels()
     const std::string kernel_type = _use_ad ? "ADTimeDerivative" : "TimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    getProblem().addKernel(kernel_type, name() + "_" + _var_name + "_time", params);
+    getProblem().addKernel(kernel_type, prefix() + _var_name + "_time", params);
   }
 }
 
@@ -165,7 +165,7 @@ DiffusionCG::addFEBCs()
         params.set<MooseFunctorName>("functor") = bc_flux;
 
       getProblem().addBoundaryCondition(
-          bc_type, name() + "_" + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
+          bc_type, prefix() + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
     }
   }
   if (isParamValid("dirichlet_boundaries"))
@@ -204,7 +204,7 @@ DiffusionCG::addFEBCs()
         params.set<MooseFunctorName>("functor") = bc_value;
 
       getProblem().addBoundaryCondition(
-          bc_type, name() + "_" + _var_name + "_dirichlet_bc_" + _dirichlet_boundaries[i], params);
+          bc_type, prefix() + _var_name + "_dirichlet_bc_" + _dirichlet_boundaries[i], params);
     }
   }
 }

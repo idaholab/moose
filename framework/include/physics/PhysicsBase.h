@@ -33,9 +33,9 @@ public:
   /// - register your action to the new task using
   ///   registerMooseAction("AppName", ActionClass, "task_name");
   /// - override act and add your additional work there
-  void act() override;
+  virtual void act() override final;
 
-  /// Add a new blocks to the Physics
+  /// Add new blocks to the Physics
   void addBlocks(const std::vector<SubdomainName> & blocks);
 
   /// Provide additional parameters for the relationship managers
@@ -53,7 +53,6 @@ protected:
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  Factory & getFactory() { return _factory; }
   Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
@@ -62,7 +61,7 @@ protected:
     mooseAssert(_problem, "Requesting the problem too early");
     return *_problem;
   }
-  virtual FEProblemBase & getProblem() const
+  virtual const FEProblemBase & getProblem() const
   {
     mooseAssert(_problem, "Requesting the problem too early");
     return *_problem;
@@ -71,13 +70,13 @@ protected:
   /// Tell the app if we want to use Exodus restart
   void prepareCopyNodalVariables() const;
   /// Copy variables from the mesh file
-  void copyVariablesFromMesh(std::vector<VariableName> variables_to_copy);
+  void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy);
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
 
   /// Return the list of nonlinear variables in this physics
-  std::vector<VariableName> nonlinearVariableNames() const { return _nl_var_names; };
+  const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
   /// Keep track of the name of a nonlinear variable defined in the Physics
   void saveNonlinearVariableName(const VariableName & var_name)
   {
@@ -88,7 +87,7 @@ protected:
   // These will be replaced by being baked into the validParams() logic, one day
   /// Check in debug mode that this parameter has been added to the validParams
   template <typename T>
-  void assertParamDefined(const std::string & param1) const;
+  void assertParamDefined(const std::string & param) const;
   /// Check that two parameters are either both set or both not set
   void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
   /// Check that a parameter is set only if the first one is set to true
@@ -97,9 +96,10 @@ protected:
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
-  /// Check that there is no overlap between the two vector parameters
+  /// Check that there is no overlap between the items in each vector parameters
+  /// Each vector parameter should also have unique items
   template <typename T>
-  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const;
+  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
 
   // END: parameter checking utilities
 
@@ -110,7 +110,7 @@ protected:
   /// NOTE: This does not register the task, you still need to call registerMooseAction
   void addRequiredPhysicsTask(const std::string & task) { _required_tasks.insert(task); }
 
-  /// System number for the systems owning the variables
+  /// System number for the system owning the variables
   const unsigned int _sys_number;
 
   /// Whether to output additional information
@@ -127,7 +127,7 @@ private:
   /// Gathers additional parameters for the relationship managers from the Physics
   /// then calls the parent Action::addRelationshipManagers with those parameters
   using Action::addRelationshipManagers;
-  void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
@@ -174,7 +174,7 @@ private:
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   /// NOTE: this is not known at construction time, only after initializePhysics which is a huge bummer
-  unsigned int _dim;
+  unsigned int _dim = libMesh::invalid_uint;
 
   /// Manually keeps track of the tasks required by each physics as tasks cannot be inherited
   std::set<std::string> _required_tasks;
@@ -184,8 +184,8 @@ template <typename T>
 const T *
 PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
 {
-  auto all_T_physics = _awh.getActions<T>();
-  for (auto physics : all_T_physics)
+  const auto all_T_physics = _awh.getActions<T>();
+  for (const auto * const physics : all_T_physics)
   {
     if (physics->name() == phys_name)
       return physics;
@@ -199,10 +199,10 @@ PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
 
 template <typename T>
 void
-PhysicsBase::assertParamDefined(const std::string & libmesh_dbg_var(param1)) const
+PhysicsBase::assertParamDefined(const std::string & libmesh_dbg_var(param)) const
 {
-  mooseAssert(parameters().have_parameter<T>(param1),
-              "Parameter '" + param1 + "' is not defined with type '" +
+  mooseAssert(parameters().have_parameter<T>(param),
+              "Parameter '" + param + "' is not defined with type '" +
                   MooseUtils::prettyCppType<T>() + "' in object type '" +
                   MooseUtils::prettyCppType(type()) + "'. Check your code.");
 }

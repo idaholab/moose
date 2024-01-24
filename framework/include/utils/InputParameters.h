@@ -1872,7 +1872,7 @@ InputParameters::transferParam(const InputParameters & source_params,
                                const std::string & new_description)
 {
   const auto name = source_params.checkForRename(std::string(name_in));
-  const auto p_name = (new_name == "") ? name_in : new_name;
+  const auto p_name = new_name.empty() ? name_in : new_name;
   if (!source_params.have_parameter<T>(name) && !source_params.hasCoupledValue(name))
     mooseError("The '",
                name_in,

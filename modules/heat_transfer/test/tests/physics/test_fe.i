@@ -45,11 +45,6 @@
   []
 []
 
-[Debug]
-  show_parser = false
-  show_actions = false
-[]
-
 [Outputs]
   exodus = true
 []

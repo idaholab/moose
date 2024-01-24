@@ -13,7 +13,7 @@
 
 #define registerDiffusionPhysicsBaseTasks(app_name, derived_name)                                  \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
-  registerMooseAction(app_name, derived_name, "add_preconditioning");
+  registerMooseAction(app_name, derived_name, "add_preconditioning")
 
 /**
  * Base class to host all common parameters and attributes of Physics actions to solve the diffusion

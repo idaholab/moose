@@ -23,9 +23,9 @@ public:
   DiffusionCG(const InputParameters & parameters);
 
 private:
-  void addNonlinearVariables() override;
-  void addFEKernels() override;
-  void addFEBCs() override;
+  virtual void addNonlinearVariables() override;
+  virtual void addFEKernels() override;
+  virtual void addFEBCs() override;
 
   /// Whether to use automatic differentiation or not
   const bool _use_ad;

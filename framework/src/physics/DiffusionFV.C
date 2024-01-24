@@ -24,6 +24,9 @@ DiffusionFV::validParams()
       "Add the heat conduction physics discretized with cell-centered finite volume");
   // No kernel implemented in the framework for a material property diffusivity
   params.suppressParameter<MaterialPropertyName>("diffusivity_matprop");
+  params.addParam<unsigned short>(
+      "ghost_layers", 2, "Number of ghosting layers for distributed memory parallel calculations");
+  params.addParamNamesToGroup("ghost_layers", "Advanced");
   return params;
 }
 
@@ -40,9 +43,7 @@ DiffusionFV::addFVKernels()
     params.set<MooseFunctorName>("coeff") = isParamValid("diffusivity_functor")
                                                 ? getParam<MooseFunctorName>("diffusivity_functor")
                                                 : "1";
-    getProblem().addFVKernel(kernel_type, name() + "_" + _var_name + "_diffusion", params);
-    // This should not be necessary but it is.
-    Action::addRelationshipManagers(Moose::RelationshipManagerType::COUPLING, params);
+    getProblem().addFVKernel(kernel_type, prefix() + "_" + _var_name + "_diffusion", params);
   }
   // Source term
   if (isParamValid("source_functor"))
@@ -85,7 +86,7 @@ DiffusionFV::addFVKernels()
       params.set<MooseFunctorName>("v") = {source};
     }
 
-    getProblem().addFVKernel(kernel_type, name() + "_" + _var_name + "_source", params);
+    getProblem().addFVKernel(kernel_type, prefix() + "_" + _var_name + "_source", params);
   }
   // Time derivative
   if (isTransient())
@@ -93,7 +94,7 @@ DiffusionFV::addFVKernels()
     const std::string kernel_type = "FVTimeKernel";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    getProblem().addFVKernel(kernel_type, name() + "_" + _var_name + "_time", params);
+    getProblem().addFVKernel(kernel_type, prefix() + "_" + _var_name + "_time", params);
   }
 }
 
@@ -128,7 +129,7 @@ DiffusionFV::addFVBCs()
         params.set<MooseFunctorName>("functor") = bc_flux;
 
       getProblem().addFVBC(
-          bc_type, name() + "_" + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
+          bc_type, prefix() + "_" + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
     }
   }
 
@@ -159,8 +160,9 @@ DiffusionFV::addFVBCs()
       else
         params.set<MooseFunctorName>("functor") = bc_value;
 
-      getProblem().addFVBC(
-          bc_type, name() + "_" + _var_name + "_dirichlet_bc_" + _dirichlet_boundaries[i], params);
+      getProblem().addFVBC(bc_type,
+                           prefix() + "_" + _var_name + "_dirichlet_bc_" + _dirichlet_boundaries[i],
+                           params);
     }
   }
 }
@@ -175,4 +177,18 @@ DiffusionFV::addNonlinearVariables()
   InputParameters params = getFactory().getValidParams(variable_type);
 
   getProblem().addVariable(variable_type, _var_name, params);
+}
+
+InputParameters
+DiffusionFV::getAdditionalRMParams() const
+{
+  const auto necessary_layers =
+      std::max(getParam<unsigned short>("ghost_layers"), (unsigned short)2);
+
+  // Just an object that has a ghost_layers parameter
+  const std::string kernel_type = "FVDiffusion";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  params.template set<unsigned short>("ghost_layers") = necessary_layers;
+
+  return params;
 }

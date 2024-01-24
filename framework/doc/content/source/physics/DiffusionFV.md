@@ -17,18 +17,18 @@ The source term $f$ is added using:
 The Dirichlet boundary conditions are created using:
 - a [FVDirichletBC.md] if the boundary value is set to a number
 - a [FVFunctionDirichletBC.md] if set to a [Function](syntax/Functions/index.md)
-- an [FVFunctorDirichletBC.md] for any other kind of [functor](syntax/Functors/index.md) for the boundary value
+- a [FVFunctorDirichletBC.md] for any other kind of [functor](syntax/Functors/index.md) for the boundary value
 
 
 The Neumann boundary conditions are created using:
 - a [FVNeumannBC.md] if the flux is set to a number
 - a [FVFunctionNeumannBC.md] if set to a [Function](syntax/Functions/index.md)
-- an [FVFunctorNeumannBC.md] for any other kind of [functor](syntax/Functors/index.md) for the flux value
+- a [FVFunctorNeumannBC.md] for any other kind of [functor](syntax/Functors/index.md) for the flux value
 
 
 !alert note
 We could use a [Functor](syntax/Functors/index.md) object to cover every need, but the specialized objects
-are a few per cent faster, depending on the case.
+are a few percent faster, depending on the case.
 
 !syntax parameters /Physics/DiffusionFV/DiffusionFV
 
