@@ -204,7 +204,7 @@
     expect_err = "No cached trace segments were found in the study 'study'."
 
     design = 'RayTracingMeshOutput.md'
-    requirement = 'The system shall report a warning when rays are requested to be output in a mesh format but cached ray inforamtion is not found.'
+    requirement = 'The system shall report a warning when rays are requested to be output in a mesh format but cached ray information is not found.'
   []
 
   [stationary]

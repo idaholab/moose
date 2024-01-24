@@ -281,7 +281,7 @@ RayTracingMeshOutput::buildSegmentMesh()
     _segment_mesh = std::make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
     _segment_mesh->set_distributed();
   }
-  // We set neighbor links
+  // We set neighbor links ourselves
   _segment_mesh->allow_find_neighbors(false);
   // Don't renumber so that we can remain consistent between processor counts
   _segment_mesh->allow_renumbering(false);
