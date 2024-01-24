@@ -1356,6 +1356,12 @@ public:
    */
   bool isLowerD(const SubdomainID subdomain_id) const;
 
+  /**
+   * @return Whether there are any lower-dimensional blocks that are manifolds of higher-dimensional
+   * block faces
+   */
+  bool hasLowerD() const { return _has_lower_d; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1747,6 +1753,10 @@ private:
   std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
       _higher_d_elem_side_to_lower_d_elem;
   std::unordered_map<const Elem *, unsigned short int> _lower_d_elem_to_higher_d_elem_side;
+
+  /// Whether there are any lower-dimensional blocks that are manifolds of higher-dimensional block
+  /// faces
+  bool _has_lower_d;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;

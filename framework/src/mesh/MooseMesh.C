@@ -212,6 +212,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
         getParam<MooseEnum>("patch_update_strategy").getEnum<Moose::PatchUpdateType>()),
     _regular_orthogonal_mesh(false),
     _is_split(getParam<bool>("_is_split")),
+    _has_lower_d(false),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
     _need_delete(false),
@@ -270,6 +271,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
     _is_split(other_mesh._is_split),
+    _has_lower_d(other_mesh._has_lower_d),
+    _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _need_delete(other_mesh._need_delete),
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
@@ -1205,6 +1208,7 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
+  _has_lower_d = false;
   _sub_to_data.clear();
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
@@ -1264,6 +1268,8 @@ MooseMesh::cacheInfo()
     _communicator.set_union(sub_data.neighbor_subs);
     _communicator.set_union(sub_data.boundary_ids);
     _communicator.max(sub_data.is_lower_d);
+    if (sub_data.is_lower_d)
+      _has_lower_d = true;
     _communicator.set_union(_neighbor_subdomain_boundary_ids[blk_id]);
   }
 }
