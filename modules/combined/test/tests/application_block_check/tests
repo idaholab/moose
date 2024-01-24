@@ -6,16 +6,14 @@
   [no_application_block]
     type = 'RunApp'
     input = 'application_block.i'
-
-    detail = "provide no error when the application type is omitted"
+    detail = "not return an error when the application type is omitted"
   []
 
   [registered_application]
     type = 'RunApp'
     input = 'application_block.i'
     cli_args = 'Application/type=ContactApp'
-
-    detail = "provide no error when the application type is registered correctly"
+    detail = "not return an error when the application type is registered correctly"
   []
 
   [unregistered_application]
@@ -23,7 +21,6 @@
     input = 'application_block.i'
     cli_args = 'Application/type=DummyApp'
     expect_err = "'DummyApp' is not a registered application name."
-
-    detail = "provide an error message when the application type is not registered."
+    detail = "return an error message when the application type is not registered."
   []
 []

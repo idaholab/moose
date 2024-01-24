@@ -2,11 +2,11 @@
 
 ## Description
 
-The `Application` block within an input file is utilized to explicitly specific the application type used for the input file. The application type should be provided using `type` keyword under `Application` block. This block is parsed even before the MOOSE application is actually built. If any mismatch between registered type and given type is detected, the system will immediately throw out an error and stop creating the rest MOOSE objects.
+The `Application` block within an input file is utilized to explicitly specify the application type used for the input file. The application type should be provided using the [!param](/Application/type) parameter in the `Application` block. This block is parsed before the MOOSE application is actually built. If any mismatch between the registered application type and the user-selected type is detected, the system will immediately throw an error and stop the setup of the simulation.
 
 ## Example
 
-The following input file snippet demonstrates the use of `Application` block.
+The following input file snippet demonstrates the use of the `Application` block.
 
 !listing test/tests/multiapps/application_block_multiapps/application_block_sub.i block=Application
 

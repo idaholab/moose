@@ -19,7 +19,7 @@ InputParameters
 CreateApplicationBlockAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addParam<std::string>("type", "MooseTestApp", "The name of the app needs to create.");
+  params.addParam<std::string>("type", "", "The name of the application that should run this input file.");
 
   params.addClassDescription("Adds application and application related parameters.");
 

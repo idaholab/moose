@@ -151,14 +151,14 @@ public:
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
 
   /*
-   * Get extracted app type from parser
+   * Get extracted application type from parser
    */
-  const std::string & getAppType() { return _app_type; }
+  const std::string & getAppType() const { return _app_type; }
 
   /*
-   * Set the app type in parser
+   * Set the application type in parser
    */
-  void setAppType(std::string app_type) { _app_type = app_type; }
+  void setAppType(const std::string & app_type) { _app_type = app_type; }
 
   /**
    * @return The file name of the last input
@@ -180,6 +180,6 @@ private:
   /// The optional input text (to augment reading a single input with the MooseServer)
   const std::optional<std::string> _input_text;
 
-  /// The app types extracted from [Application] block
+  /// The application types extracted from [Application] block
   std::string _app_type;
 };

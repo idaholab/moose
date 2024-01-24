@@ -225,9 +225,10 @@ public:
   /**
    * Get the type of this object as a string. This is a string version of the class name (e.g.
    * MooseTestApp).
-   * @return the App type set in the Parser
+   *
+   * If this is empty, an application type was not provided.
    */
-  const std::string & getApptype() const;
+  const std::string & getAppType() const;
 
   /**
    * Override the selection of the output file base name.

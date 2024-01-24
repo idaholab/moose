@@ -74,7 +74,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 
   // create new application with parameters modified for input check run
   _check_app = AppFactory::instance().createShared(
-      _moose_app.getApptype(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
+      _moose_app.getAppType(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
   bool cached_throw_on_error = Moose::_throw_on_error;

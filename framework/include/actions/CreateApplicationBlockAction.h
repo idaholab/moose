@@ -12,6 +12,11 @@
 // MOOSE includes
 #include "Action.h"
 
+/**
+ * Action that create Application Block. It is noted that most information has already been
+ * parsed before the MOOSE object is built. This action mainly serve the purpose of completing
+ * the action system workflow for MOOSE objects.
+ */
 class CreateApplicationBlockAction : public Action
 {
 public:
@@ -22,5 +27,6 @@ public:
   virtual void act() override;
 
 protected:
-  std::string _type;
+  // The string to store application type
+  const std::string _type;
 };
