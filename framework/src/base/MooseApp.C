@@ -2538,14 +2538,9 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       // "attach_geometric_rm_final = true" inidicate that it is the last chance to attach
       // geometric RMs. Therefore, we need to attach them.
       if (!rm->attachGeometricEarly() && !attach_geometric_rm_final)
-      {
         // Will attach them later (during algebraic). But also, we need to tell the mesh that we
         // shouldn't be deleting remote elements yet
-        if (!mesh->getMeshPtr())
-          mooseError("We should have attached a MeshBase object to the mesh by now");
-
         mesh->allowRemoteElementRemoval(false);
-      }
       else
       {
         MeshBase & undisp_mesh_base = mesh->getMesh();
