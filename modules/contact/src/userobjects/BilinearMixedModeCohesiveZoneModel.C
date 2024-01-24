@@ -44,21 +44,18 @@ BilinearMixedModeCohesiveZoneModel::validParams()
   params.addParam<Real>("viscosity", 0.0, "Viscosity for damage model.");
   params.addParam<MooseEnum>(
       "mixed_mode_criterion", criterion, "Option for mixed mode propagation criterion.");
-
   params.addParam<bool>(
       "lag_displacement_jump",
       false,
       "Whether to use old displacement jumps to compute the effective displacement jump.");
   params.addParam<Real>(
       "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
-  params.addParam<bool>(
-      "use_bilinear_mixed_mode_traction", false, "Whether to bilinear mixed mode traction.");
   params.addRangeCheckedParam<Real>(
       "penalty_stiffness", "penalty_stiffness > 0.0", "Penalty stiffness for CZM.");
   params.addParamNamesToGroup(
       "GI_c GII_c normal_strength shear_strength power_law_parameter viscosity "
       "mixed_mode_criterion lag_displacement_jump regularization_alpha "
-      "use_bilinear_mixed_mode_traction penalty_stiffness",
+      "penalty_stiffness",
       "Bilinear mixed mode traction");
   // End of input parameters for bilinear mixed mode traction.
 
@@ -76,13 +73,11 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     WeightedVelocitiesUserObject(parameters),
     PenaltySimpleCohesiveZoneModel(parameters),
     _ndisp(coupledComponents("displacements")),
-    _use_bilinear_mixed_mode_traction(getParam<bool>("use_bilinear_mixed_mode_traction")),
     _normal_strength(getMaterialProperty<Real>("normal_strength")),
     _shear_strength(getMaterialProperty<Real>("shear_strength")),
     _GI_c(getMaterialProperty<Real>("GI_c")),
     _GII_c(getMaterialProperty<Real>("GII_c")),
-    _penalty_stiffness_czm(_use_bilinear_mixed_mode_traction ? getParam<Real>("penalty_stiffness")
-                                                             : 0.0),
+    _penalty_stiffness_czm(getParam<Real>("penalty_stiffness")),
     _mix_mode_criterion(getParam<MooseEnum>("mixed_mode_criterion").getEnum<MixedModeCriterion>()),
     _power_law_parameter(getParam<Real>("power_law_parameter")),
     _viscosity(getParam<Real>("viscosity")),

@@ -152,18 +152,6 @@
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
     block = '1 2'
   []
-  # [czm]
-  #   type = BiLinearMixedModeTraction
-  #   boundary = 'interface'
-  #   penalty_stiffness = 1e6
-  #   GI_c = 1e3
-  #   GII_c = 1e2
-  #   normal_strength = 1e4
-  #   shear_strength = 1e3
-  #   displacements = 'disp_x disp_y'
-  #   eta = 2.2
-  #   viscosity = 1e-3
-  # []
 []
 
 [Preconditioning]
@@ -218,10 +206,8 @@
     penalty = 0e6
     penalty_friction = 0e4
     use_physical_gap = true
-    # unused
-    use_bilinear_mixed_mode_traction = true
 
-    # bilinear stuff
+    # bilinear model parameters
     normal_strength = 'normal_strength'
     shear_strength = 'shear_strength'
     penalty_stiffness = 200

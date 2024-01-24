@@ -82,9 +82,6 @@ protected:
   /// Number of displacement components
   const unsigned int _ndisp;
 
-  /// Whether to use the bilinear mixed mode traction model
-  const bool _use_bilinear_mixed_mode_traction;
-
   /// Coupled displacement gradients
   std::vector<const GenericVariableGradient<true> *> _grad_disp;
 

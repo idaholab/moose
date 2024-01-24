@@ -191,7 +191,6 @@
     penalty_friction = 1e4
     use_physical_gap = true
 
-    use_bilinear_mixed_mode_traction = true
     correct_edge_dropping = true
     normal_strength = N
     shear_strength = 1e3

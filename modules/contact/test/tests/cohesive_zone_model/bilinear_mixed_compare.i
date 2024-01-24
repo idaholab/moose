@@ -201,10 +201,8 @@
     penalty = 0e6
     penalty_friction = 0e4
     use_physical_gap = true
-    # unused
-    use_bilinear_mixed_mode_traction = true
 
-    # bilinear stuff
+    # bilinear parameters
     normal_strength = 1e4
     shear_strength = 1e3
     penalty_stiffness = 1e6

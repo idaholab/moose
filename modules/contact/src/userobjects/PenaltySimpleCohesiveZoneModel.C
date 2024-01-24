@@ -38,30 +38,6 @@ PenaltySimpleCohesiveZoneModel::validParams()
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
                                 "The friction coefficient ruling Coulomb friction equations.");
-
-  // Input parameters for bilinear mixed mode traction.
-  params.addParam<MaterialPropertyName>("GI_c",
-                                        "Critical energy release rate in normal direction.");
-  params.addParam<MaterialPropertyName>("GII_c",
-                                        "Critical energy release rate in shear direction.");
-  params.addParam<MaterialPropertyName>("normal_strength", "Tensile strength in normal direction.");
-  params.addParam<MaterialPropertyName>("shear_strength", "Tensile strength in shear direction.");
-  params.addParam<Real>("power_law_parameter", "The power law parameter.");
-  MooseEnum criterion("POWER_LAW BK", "BK");
-  params.addParam<Real>("viscosity", 0.0, "Viscosity for damage model.");
-  params.addParam<MooseEnum>(
-      "mixed_mode_criterion", criterion, "Option for mixed mode propagation criterion.");
-  params.addParam<Real>(
-      "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
-  params.addRangeCheckedParam<Real>(
-      "penalty_stiffness", "penalty_stiffness > 0.0", "Penalty stiffness for CZM.");
-  params.addParamNamesToGroup(
-      "GI_c GII_c normal_strength shear_strength power_law_parameter viscosity "
-      "mixed_mode_criterion regularization_alpha "
-      "penalty_stiffness",
-      "Bilinear mixed mode traction");
-  // End of input parameters for bilinear mixed mode traction.
-
   return params;
 }
 

@@ -3,7 +3,7 @@
 ## Description
 
 The `CohesiveZoneMortarUserObjectAux` outputs various cohesive zone quantities that
-are helpful for analyzing or debugging cohesive one or debonding simulation results.
+are helpful for analyzing or debugging cohesive zone or debonding simulation results.
 This auxiliary kernel is to be used in conjunction with mortar cohesive zone user objects, namely
 [BilinearMixedModeCohesiveZoneModel](/BilinearMixedModeCohesiveZoneModel.md).
 
