@@ -55,10 +55,6 @@
                         "type": "bool",
                         "value": false
                     },
-                    "MeshMetaData/amg1/pin_block_name_map": {
-                        "type": "std::map<unsigned short, std::vector<std::vector<std::string>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<std::string>>>>>",
-                        "value": []
-                    },
                     "MeshMetaData/amg1/pin_lattice": {
                         "type": "std::vector<std::vector<int>>",
                         "value": [
@@ -82,10 +78,6 @@
                         "value": [
                             "pin2"
                         ]
-                    },
-                    "MeshMetaData/amg1/pin_region_id_map": {
-                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
-                        "value": []
                     },
                     "MeshMetaData/amg1/pitch": {
                         "type": "double",
@@ -153,10 +145,6 @@
                         "type": "bool",
                         "value": false
                     },
-                    "MeshMetaData/amg2/pin_block_name_map": {
-                        "type": "std::map<unsigned short, std::vector<std::vector<std::string>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<std::string>>>>>",
-                        "value": []
-                    },
                     "MeshMetaData/amg2/pin_lattice": {
                         "type": "std::vector<std::vector<int>>",
                         "value": [
@@ -181,10 +169,6 @@
                             "pin1",
                             "pin3"
                         ]
-                    },
-                    "MeshMetaData/amg2/pin_region_id_map": {
-                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
-                        "value": []
                     },
                     "MeshMetaData/amg2/pitch": {
                         "type": "double",
