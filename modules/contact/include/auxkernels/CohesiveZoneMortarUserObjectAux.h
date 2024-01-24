@@ -21,17 +21,13 @@ class UserObject;
 class BilinearMixedModeCohesiveZoneModel;
 
 /**
- * Auxiliary kernel to output mortar penalty contact quantities of interest
+ * Auxiliary kernel to output mortar cohesive zone model quantities of interest
  */
 class CohesiveZoneMortarUserObjectAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the
-   * constructor.
-   */
   CohesiveZoneMortarUserObjectAux(const InputParameters & parameters);
 
 protected:
@@ -59,9 +55,6 @@ protected:
   /// Definition of the output quantities and
   std::map<CohesiveQuantityEnum, std::tuple<std::string, const void *, std::function<Real(void)>>>
       _outputs;
-
-  /// if true computeValue only performs error checking (used in constructor)
-  bool _check_only;
 
   /// Available cohesive zone model quantities
   static const MooseEnum _cohesive_zone_quantities;

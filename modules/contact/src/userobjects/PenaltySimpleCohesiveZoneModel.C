@@ -38,6 +38,7 @@ PenaltySimpleCohesiveZoneModel::validParams()
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
                                 "The friction coefficient ruling Coulomb friction equations.");
+
   return params;
 }
 

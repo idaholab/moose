@@ -102,21 +102,9 @@ protected:
   virtual void computeQpProperties();
 
   /**
-   * Computes properties that are required for some advanced applications, such as cohesive zone
-   * modeling.
-   */
-  virtual void computeQpPropertiesLocal() {}
-
-  /**
    * Computes properties that are functions both of \p _qp and \p _i, for example the weighted gap
    */
   virtual void computeQpIProperties();
-
-  /**
-   * Computes properties that are functions both of \p _qp and \p _i, for some advanced applications
-   * such as cohesive zone modeling
-   */
-  virtual void computeQpIPropertiesLocal(){};
 
   /**
    * @return The test function associated with the weighted gap

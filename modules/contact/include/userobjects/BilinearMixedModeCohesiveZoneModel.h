@@ -38,8 +38,8 @@ public:
   Real getLocalDisplacementTangential(const Node * const node) const;
 
 protected:
-  virtual void computeQpPropertiesLocal() override;
-  virtual void computeQpIPropertiesLocal() override;
+  virtual void computeQpProperties() override;
+  virtual void computeQpIProperties() override;
 
   virtual bool constrainedByOwner() const override { return false; }
 
@@ -62,22 +62,10 @@ protected:
   /// Compute global traction for mortar application
   virtual void computeGlobalTraction(const Node * const node) override;
 
-  /// Normalize rank two tensor mortar quantities (remove mortar integral scaling)
-  virtual ADRankTwoTensor
-  normalizeRankTwoTensorQuantity(const std::unordered_map<const DofObject *, ADRankTwoTensor> & map,
-                                 const Node * const node);
-
-  /// Normalize real mortar quantities (remove mortar integral scaling)
-  virtual ADReal normalizeRealQuantity(const std::unordered_map<const DofObject *, ADReal> & map,
-                                       const Node * const node);
-
-  /// Normalize real vector mortar quantities (remove mortar integral scaling)
-  virtual ADRealVectorValue
-  normalizeVectorQuantity(const std::unordered_map<const DofObject *, ADRealVectorValue> & map,
-                          const Node * const node);
-
-  /// The stress tensor on the interface
-  // const ADMaterialProperty<RankTwoTensor> & _stress;
+  /// Normalize mortar quantities (remove mortar integral scaling)
+  template <class T>
+  T normalizeQuantity(const std::unordered_map<const DofObject *, T> & map,
+                      const Node * const node);
 
   /// Number of displacement components
   const unsigned int _ndisp;
@@ -160,9 +148,7 @@ protected:
   const Real _regularization_alpha;
 
   /// The global traction
-  ADVariableValue _czm_interpolated_traction_x;
-  ADVariableValue _czm_interpolated_traction_y;
-  ADVariableValue _czm_interpolated_traction_z;
+  std::vector<ADVariableValue> _czm_interpolated_traction;
 
   // @{
   // Strength material properties at the nodes

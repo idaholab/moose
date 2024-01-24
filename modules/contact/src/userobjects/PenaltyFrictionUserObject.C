@@ -267,8 +267,7 @@ PenaltyFrictionUserObject::reinit()
       // capacity)
       ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
 
-      const auto slip_metric = std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(0)) +
-                               std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
+      const auto slip_metric = MetaPhysicL::raw_value(slip_distance).cwiseAbs().norm();
 
       if (slip_metric > _epsilon_tolerance &&
           penalty_friction * slip_distance.norm() >

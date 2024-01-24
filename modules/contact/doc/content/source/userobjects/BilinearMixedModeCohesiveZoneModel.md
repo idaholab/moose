@@ -63,7 +63,9 @@ The mixed mode relative displacement corresponding to the initiation of softenin
 ### Mode mixity Delamination propagation prediction
 
 The new CZM mortar implementation also accounts for two types of delamination propagation models. (1) A power law-based criterion and (2) The Benzeggagh-Kenane (BK) criterion (see, e.g.,[!cite](benzeggagh1996measurement,bui2011modified)).
-\subsubsection{Power law-based delamination criterion}
+
+#### Power law-based delamination criterion
+
 The power law criterion may be described as:
 \begin{equation}
 \left(\frac{G_{I}}{G_{IC}}\right)^{\alpha} + \left(\frac{G_{II}}{G_{IIC}}\right)^{\alpha} = 1.0,
@@ -83,7 +85,7 @@ During the delamination or debonding process, a relative interface displacement 
     \label{eq:mix_mode_decohesion}
 \end{equation}
 
-### Benzeggagh-Kenane (BK) delamination criterion
+#### Benzeggagh-Kenane (BK) delamination criterion
 
 The BK criterion can be written as ([!cite](benzeggagh1996measurement)):
 \begin{equation}
@@ -106,7 +108,7 @@ The mixed-mode total decohesion displacements are, for the BK criterion:
 
 ### Constitutive model
 
-The CZM constitutive models relate the ``weighted'' interface jump components to the interface traction in the local frame of reference. The traction, in the local frame of reference\footnote{The local frame of reference is given by the secondary surface employing an interpolated normal vector.}, can be expressed as:
+The CZM constitutive models relate the weighted interface jump components to the interface traction in the local frame of reference. The traction, in the local frame of reference, can be expressed as:
 \begin{equation}
     \tau_{l} = D_{li} \tilde{\delta}_{i},
 \label{eq:traction}
@@ -122,12 +124,11 @@ where $\tau_{l}$ is the $l$ component of the local traction and $D_{li}$ is an e
 \right.
 \label{eq:constitutive}
 \end{equation}
-where $\tilde{\delta}_{\text{active}}$ represents the CZM weighted interface jump with shear components, i.e. it applies shear stiffness, and normal stiffness only if a gap exists. $\tilde{\delta}_{\text{inactive}}$ applies a normal traction that prevents interpenetration. A few notes about Equation~(\ref{eq:constitutive}):
-\begin{itemize}
-    \item The action of $\delta_{\text{inactive}}$ can potentially be replaced with (mortar) mechanical contact enforcement.
-    \item The local traction $\tau_{l}$ is computed nodally with ``weighted'' quantities, but is interpolated and applied on the primary and secondary surfaces using Lagrange interpolation functions.
-    \item The constitutive model can be expanded as needed in the user object.
-\end{itemize}
+where $\tilde{\delta}_{\text{active}}$ represents the CZM weighted interface jump with shear components, i.e. it applies shear stiffness, and normal stiffness only if a gap exists. $\tilde{\delta}_{\text{inactive}}$ applies a normal traction that prevents interpenetration. A few notes about the previous equation:
+
+  - The action of $\delta_{\text{inactive}}$ can potentially be replaced with (mortar) mechanical contact enforcement. \\
+  - The local traction $\tau_{l}$ is computed nodally with weighted quantities, but is interpolated and applied on the primary and secondary surfaces using Lagrange interpolation functions. \\
+  - The constitutive model can be expanded as needed in the user object.
 
 The damage, $\omega$, is computed as follows (we omit the nodal subscript):
 \begin{equation}
@@ -136,9 +137,9 @@ The damage, $\omega$, is computed as follows (we omit the nodal subscript):
 
 ### Viscous regularization
 
-Sudden degradation of stiffness may be give rise to the appearance of large displacements. To dampen this problematic numerical behavior in quasti-static simulations, we include a term that captures the changes in damage:
+Sudden degradation of stiffness may be give rise to the appearance of large displacements. To alleviate this problematic numerical behavior in quasti-static simulations, we include in the constitutive equations a viscous damage $\omega_{v}$ instead:
 \begin{equation}
-\omega = \frac{\omega + \eta \cdot \frac{\omega_{\text{old}}}{\Delta t}}{\frac{\eta}{\Delta t} + 1.0}.
+\dot{\omega}_{v} = \frac{1}{\mu} \left( \omega - \omega_v\right).
 \end{equation}
 
 

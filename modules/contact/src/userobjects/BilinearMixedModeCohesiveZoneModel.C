@@ -83,6 +83,8 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     _viscosity(getParam<Real>("viscosity")),
     _regularization_alpha(getParam<Real>("regularization_alpha"))
 {
+  _czm_interpolated_traction.resize(_ndisp);
+
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _grad_disp.push_back(&adCoupledGradient("displacements", i));
@@ -107,8 +109,10 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
 }
 
 void
-BilinearMixedModeCohesiveZoneModel::computeQpPropertiesLocal()
+BilinearMixedModeCohesiveZoneModel::computeQpProperties()
 {
+  WeightedVelocitiesUserObject::computeQpProperties();
+
   // Called after computeQpProperties() within the same algorithmic step.
 
   // Compute F and R.
@@ -130,8 +134,10 @@ BilinearMixedModeCohesiveZoneModel::computeQpPropertiesLocal()
 }
 
 void
-BilinearMixedModeCohesiveZoneModel::computeQpIPropertiesLocal()
+BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
 {
+  WeightedVelocitiesUserObject::computeQpIProperties();
+
   // Get the _dof_to_weighted_gap map
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
@@ -145,23 +151,10 @@ BilinearMixedModeCohesiveZoneModel::computeQpIPropertiesLocal()
   _dof_to_GII_c[dof] += (*_test)[_i][_qp] * _GII_c_interpolation;
 }
 
-ADRankTwoTensor
-BilinearMixedModeCohesiveZoneModel::normalizeRankTwoTensorQuantity(
-    const std::unordered_map<const DofObject *, ADRankTwoTensor> & map, const Node * const node)
-{
-  return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
-}
-
-ADReal
-BilinearMixedModeCohesiveZoneModel::normalizeRealQuantity(
-    const std::unordered_map<const DofObject *, ADReal> & map, const Node * const node)
-{
-  return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
-}
-
-ADRealVectorValue
-BilinearMixedModeCohesiveZoneModel::normalizeVectorQuantity(
-    const std::unordered_map<const DofObject *, ADRealVectorValue> & map, const Node * const node)
+template <class T>
+T
+BilinearMixedModeCohesiveZoneModel::normalizeQuantity(
+    const std::unordered_map<const DofObject *, T> & map, const Node * const node)
 {
   return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
 }
@@ -244,8 +237,8 @@ BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
   if (return_boolean)
     return;
 
-  const auto normalized_F = normalizeRankTwoTensorQuantity(_dof_to_F, node);
-  const auto normalized_F_neighbor = normalizeRankTwoTensorQuantity(_dof_to_F_neighbor, node);
+  const auto normalized_F = normalizeQuantity(_dof_to_F, node);
+  const auto normalized_F_neighbor = normalizeQuantity(_dof_to_F_neighbor, node);
 
   // This 'averaging' assumption below can probably be improved upon.
   _dof_to_interface_F[node] = 0.5 * (normalized_F + normalized_F_neighbor);
@@ -286,7 +279,7 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
 
   // Split displacement jump into active and inactive parts
   const auto interface_displacement_jump =
-      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
+      normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
   const ADRealVectorValue delta_active(std::max(interface_displacement_jump(0), 0.0),
                                        interface_displacement_jump(1),
@@ -317,7 +310,7 @@ void
 BilinearMixedModeCohesiveZoneModel::computeModeMixity(const Node * const node)
 {
   const auto interface_displacement_jump =
-      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
+      normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
   if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
@@ -335,14 +328,14 @@ void
 BilinearMixedModeCohesiveZoneModel::computeCriticalDisplacementJump(const Node * const node)
 {
   const auto interface_displacement_jump =
-      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
+      normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
   const auto mixity_ratio = libmesh_map_find(_dof_to_mode_mixity_ratio, node);
 
   const auto delta_normal_knot =
-      normalizeRealQuantity(_dof_to_normal_strength, node) / _penalty_stiffness_czm;
+      normalizeQuantity(_dof_to_normal_strength, node) / _penalty_stiffness_czm;
   const auto delta_shear_knot =
-      normalizeRealQuantity(_dof_to_shear_strength, node) / _penalty_stiffness_czm;
+      normalizeQuantity(_dof_to_shear_strength, node) / _penalty_stiffness_czm;
 
   _dof_to_delta_initial[node] = delta_shear_knot;
 
@@ -360,15 +353,15 @@ void
 BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * const node)
 {
   const auto interface_displacement_jump =
-      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
+      normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
   const auto mixity_ratio = libmesh_map_find(_dof_to_mode_mixity_ratio, node);
 
-  const auto normalized_GI_c = normalizeRealQuantity(_dof_to_GI_c, node);
-  const auto normalized_GII_c = normalizeRealQuantity(_dof_to_GII_c, node);
+  const auto normalized_GI_c = normalizeQuantity(_dof_to_GI_c, node);
+  const auto normalized_GII_c = normalizeQuantity(_dof_to_GII_c, node);
 
   _dof_to_delta_final[node] =
-      std::sqrt(2.0) * 2.0 * normalized_GII_c / normalizeRealQuantity(_dof_to_shear_strength, node);
+      std::sqrt(2.0) * 2.0 * normalized_GII_c / normalizeQuantity(_dof_to_shear_strength, node);
 
   if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
@@ -398,7 +391,7 @@ void
 BilinearMixedModeCohesiveZoneModel::computeEffectiveDisplacementJump(const Node * const node)
 {
   const auto interface_displacement_jump =
-      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
+      normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
   const auto delta_normal_pos =
       MathUtils::regularizedHeavyside(interface_displacement_jump(0), _regularization_alpha) *
@@ -440,15 +433,12 @@ BilinearMixedModeCohesiveZoneModel::reinit()
   // Normal contact pressure with penalty
   PenaltySimpleCohesiveZoneModel::reinit();
 
-  _czm_interpolated_traction_x.resize(_qrule_msm->n_points());
-  _czm_interpolated_traction_y.resize(_qrule_msm->n_points());
-  _czm_interpolated_traction_z.resize(_qrule_msm->n_points());
-
-  for (const auto qp : make_range(_qrule_msm->n_points()))
+  for (const auto i : index_range(_czm_interpolated_traction))
   {
-    _czm_interpolated_traction_x[qp] = 0.0;
-    _czm_interpolated_traction_y[qp] = 0.0;
-    _czm_interpolated_traction_z[qp] = 0.0;
+    _czm_interpolated_traction[i].resize(_qrule_msm->n_points());
+
+    for (const auto qp : make_range(_qrule_msm->n_points()))
+      _czm_interpolated_traction[i][qp] = 0.0;
   }
 
   // iterate over nodes
@@ -463,12 +453,8 @@ BilinearMixedModeCohesiveZoneModel::reinit()
 
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
-    {
-      _czm_interpolated_traction_x[qp] += test_i[qp] * _dof_to_czm_traction[node](0);
-      _czm_interpolated_traction_y[qp] += test_i[qp] * _dof_to_czm_traction[node](1);
-      if (_ndisp == 3)
-        _czm_interpolated_traction_z[qp] += test_i[qp] * _dof_to_czm_traction[node](2);
-    }
+      for (const auto idx : index_range(_czm_interpolated_traction))
+        _czm_interpolated_traction[idx][qp] += test_i[qp] * _dof_to_czm_traction[node](idx);
   }
 }
 
@@ -504,15 +490,10 @@ BilinearMixedModeCohesiveZoneModel::finalize()
 const ADVariableValue &
 BilinearMixedModeCohesiveZoneModel::czmGlobalTraction(const unsigned int i) const
 {
-  if (i >= 3)
-    mooseError("Internal error in czmGlobalTraction.");
+  mooseAssert(i <= 3,
+              "Internal error in czmGlobalTraction. Index exceeds the traction vector size.");
 
-  if (i == 0)
-    return _czm_interpolated_traction_x;
-  else if (i == 1)
-    return _czm_interpolated_traction_y;
-  else
-    return _czm_interpolated_traction_z;
+  return _czm_interpolated_traction[i];
 }
 
 Real

@@ -115,9 +115,6 @@ WeightedGapUserObject::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
-
-  // Call child objects  QpProperties
-  computeQpPropertiesLocal();
 }
 
 void
@@ -133,8 +130,6 @@ WeightedGapUserObject::computeQpIProperties()
   _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
 
   _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
-
-  computeQpIPropertiesLocal();
 }
 
 void
