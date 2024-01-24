@@ -120,6 +120,8 @@ protected:
   const VariableValue * const _gap_conductivity_function_variable;
 
   const Real _stefan_boltzmann;
+  const Real _emissivity_primary;
+  const Real _emissivity_secondary;
   Real _emissivity;
 
   const Real _min_gap;

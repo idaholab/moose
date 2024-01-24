@@ -49,7 +49,7 @@ GapConductance::validParams()
                         "then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
 
-  params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
+  params.addParam<Real>("stefan_boltzmann", 5.670374e-8, "The Stefan-Boltzmann constant");
 
   params.addParam<bool>("use_displaced_mesh",
                         true,
@@ -128,6 +128,8 @@ GapConductance::GapConductance(const InputParameters & parameters)
                                             ? &coupledValue("gap_conductivity_function_variable")
                                             : nullptr),
     _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
+    _emissivity_primary(getParam<Real>("emissivity_primary")),
+    _emissivity_secondary(getParam<Real>("emissivity_secondary")),
     _min_gap(getParam<Real>("min_gap")),
     _min_gap_order(getParam<unsigned int>("min_gap_order")),
     _max_gap(getParam<Real>("max_gap")),
@@ -139,13 +141,8 @@ GapConductance::GapConductance(const InputParameters & parameters)
     _p1(declareRestartableData<Point>("cylinder_axis_point_1", Point(0, 1, 0))),
     _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0)))
 {
-  // Set emissivity but allow legacy naming; legacy names are used if they
-  // are present
-  const auto emissivity_primary = getParam<Real>("emissivity_primary");
-  const auto emissivity_secondary = getParam<Real>("emissivity_secondary");
-
-  _emissivity = emissivity_primary != 0.0 && emissivity_secondary != 0.0
-                    ? 1.0 / emissivity_primary + 1.0 / emissivity_secondary - 1
+  _emissivity = _emissivity_primary != 0.0 && _emissivity_secondary != 0.0
+                    ? 1.0 / _emissivity_primary + 1.0 / _emissivity_secondary - 1
                     : 0.0;
 
   if (_quadrature)
@@ -337,19 +334,35 @@ GapConductance::h_radiation()
   /*
    Gap conductance due to radiation is based on the diffusion approximation:
 
-      qr = sigma*Fe*(Tf^4 - Tc^4) ~ hr(Tf - Tc)
-         where sigma is the Stefan-Boltzmann constant, Fe is an emissivity function, Tf and Tc
-         are the fuel and clad absolute temperatures, respectively, and hr is the radiant gap
-         conductance. Solving for hr,
+      q12 = sigma*Fe*(T1^4 - T2^4) ~ hr(T1 - T2)
+            where sigma is the Stefan-Boltzmann constant, Fe is an emissivity
+            function, T1 and T2 are the temperatures of the two surfaces, and
+            hr is the radiant gap conductance. Solving for hr,
 
-      hr = sigma*Fe*(Tf^4 - Tc^4) / (Tf - Tc)
-         which can be factored to give:
+      hr = sigma*Fe*(T1^4 - T2^4) / (T1 - T2)
+           which can be factored to give:
 
-      hr = sigma*Fe*(Tf^2 + Tc^2) * (Tf + Tc)
+      hr = sigma*Fe*(T1^2 + T2^2) * (T1 + T2)
 
-   Approximating the fuel-clad gap as infinite parallel planes, the emissivity function is given by:
+   Assuming the gap is between infinite parallel planes, the emissivity
+   function is given by:
 
-      Fe = 1 / (1/ef + 1/ec - 1)
+      Fe = 1 / (1/e1 + 1/e2 - 1)
+
+   For cylinders and spheres, see Fundamentals of Heat and Mass Transfer,
+      Sixth Edition, John Wiley & Sons, Table 13.3.
+
+   For cylinders:
+
+      Fe = 1 / (1/e1 + (1/e2 - 1) * (r1/r2))
+
+      q21 = -q12 * (r1/r2)
+
+   For spheres:
+
+      Fe = 1 / (1/e1 + (1/e2 - 1) * (r1/r2)^2)
+
+      q21 = -q12 * (r1/r2)^2
   */
 
   if (_emissivity == 0.0)
@@ -360,9 +373,18 @@ GapConductance::h_radiation()
   Real surface_integration_factor = 1.0;
 
   if (_gap_geometry_type == GapConductance::CYLINDER)
-    surface_integration_factor = 0.5 * (_r1 + _r2) / _radius;
+  {
+    _emissivity = 1.0 / _emissivity_primary + (1.0 / _emissivity_secondary - 1) * _r1 / _r2;
+    if (_r2 == _radius)
+      surface_integration_factor = _r1 / _r2;
+  }
   else if (_gap_geometry_type == GapConductance::SPHERE)
-    surface_integration_factor = 0.25 * (_r1 + _r2) * (_r1 + _r2) / (_radius * _radius);
+  {
+    _emissivity =
+        1.0 / _emissivity_primary + (1.0 / _emissivity_secondary - 1) * _r1 * _r1 / (_r2 * _r2);
+    if (_r2 == _radius)
+      surface_integration_factor = _r1 * _r1 / (_r2 * _r2);
+  }
 
   const Real temp_func =
       (_temp[_qp] * _temp[_qp] + _gap_temp * _gap_temp) * (_temp[_qp] + _gap_temp);
@@ -379,9 +401,18 @@ GapConductance::dh_radiation()
   Real surface_integration_factor = 1.0;
 
   if (_gap_geometry_type == GapConductance::CYLINDER)
-    surface_integration_factor = 0.5 * (_r1 + _r2) / _radius;
+  {
+    _emissivity = 1.0 / _emissivity_primary + (1.0 / _emissivity_secondary - 1) * _r1 / _r2;
+    if (_r2 == _radius)
+      surface_integration_factor = _r1 / _r2;
+  }
   else if (_gap_geometry_type == GapConductance::SPHERE)
-    surface_integration_factor = 0.25 * (_r1 + _r2) * (_r1 + _r2) / (_radius * _radius);
+  {
+    _emissivity =
+        1.0 / _emissivity_primary + (1.0 / _emissivity_secondary - 1) * _r1 * _r1 / (_r2 * _r2);
+    if (_r2 == _radius)
+      surface_integration_factor = _r1 * _r1 / (_r2 * _r2);
+  }
 
   const Real temp_func = 3 * _temp[_qp] * _temp[_qp] + _gap_temp * (2 * _temp[_qp] + _gap_temp);
 
