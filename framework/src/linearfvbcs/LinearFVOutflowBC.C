@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVOutflowBC.h"
-#include "GreenGaussGradient.h"
 
 registerMooseObject("MooseApp", LinearFVOutflowBC);
 
@@ -50,24 +49,20 @@ LinearFVOutflowBC::computeBoundaryValue()
   return boundary_value;
 }
 
-RealVectorValue
-LinearFVOutflowBC::computeCellToFaceVector() const
-{
-  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
-  const auto defined_on_elem =
-      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  if (is_on_mesh_boundary)
-    return _current_face_info->dCN();
-  else
-    return (_current_face_info->faceCentroid() - (defined_on_elem
-                                                      ? _current_face_info->elemCentroid()
-                                                      : _current_face_info->neighborCentroid()));
-}
-
 Real
 LinearFVOutflowBC::computeBoundaryNormalGradient()
 {
-  mooseError("Not implemented yet");
+  Real normal_gradient = 0.0;
+  if (_two_term_expansion)
+  {
+    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+    const auto distance_vector = computeCellToFaceVector();
+    normal_gradient = _var->gradSln(elem_info) * distance_vector /
+                      (distance_vector * _current_face_info->normal());
+  }
+  return normal_gradient;
 }
 
 Real
@@ -82,7 +77,6 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
 
   if (_two_term_expansion)
   {
-
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
@@ -95,11 +89,37 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
 Real
 LinearFVOutflowBC::computeBoundaryGradientMatrixContribution() const
 {
-  mooseError("Not implemented yet");
+  return 0.0;
 }
 
 Real
 LinearFVOutflowBC::computeBoundaryGradientRHSContribution() const
 {
-  mooseError("Not implemented yet");
+  Real contribution = 0.0;
+
+  if (_two_term_expansion)
+  {
+    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+    const auto distance_vector = computeCellToFaceVector();
+    contribution = _var->gradSln(elem_info) * distance_vector /
+                   (distance_vector * _current_face_info->normal());
+  }
+
+  return contribution;
+}
+
+RealVectorValue
+LinearFVOutflowBC::computeCellToFaceVector() const
+{
+  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
+  const auto defined_on_elem =
+      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
+  if (is_on_mesh_boundary)
+    return _current_face_info->dCN();
+  else
+    return (_current_face_info->faceCentroid() - (defined_on_elem
+                                                      ? _current_face_info->elemCentroid()
+                                                      : _current_face_info->neighborCentroid()));
 }
