@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Systems/index.md NonlinearSystemBase.md'
+  issues = '#26616'
+  [test]
+    type = Exodiff
+    requirement = 'The system shall be able to include array variables in automatic scaling calculations.'
+    input = test.i
+    exodiff = test_out.e
+    expect_out = 'Automatic scaling factors:\s+u:\s+0\.3711[0-9]*\s+0\.03284[0-9]*'
+  []
+[]
