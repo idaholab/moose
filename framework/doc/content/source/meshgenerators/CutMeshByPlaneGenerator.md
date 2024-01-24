@@ -12,40 +12,7 @@ The `CutMeshByPlaneGenerator` is basically the 3D version of [`XYMeshLineCutter`
 
 ### Splitting of Non-TET4 Elements
 
-To ensure consistency during cutting, all original mesh elements which are not TET type are first converted into TET elements through splitting. To be specific, each HEX element is split into six TET elements; each PRISM element is split into three TET elements; and each PYRAMID element is split into two TET elements. Details on the splitting approach follow.
-
-!media framework/meshgenerators/hex_split.png
-      style=display: block;margin-left:auto;margin-right:auto;width:32%;float:left;
-      id=hex_split
-      caption=An example of splitting of a HEX element into six TET elements.
-
-!media framework/meshgenerators/prism_split.png
-      style=display: block;margin-left:auto;margin-right:auto;width:32%;float:left;
-      id=prism_split
-      caption=An example of splitting of a PRISM element into three TET elements.
-
-!media framework/meshgenerators/pyramid_split.png
-      style=display: block;margin-left:auto;margin-right:auto;width:36%;float:left;
-      id=pyramid_split
-      caption=An example of splitting of a PYRAMID element into two TET elements.
-
-After this conversion, all the elements become TET elements. In that case, all the subdomain IDs and names can be preserved.
-
-#### Splitting of HEX Elements
-
-There are multiple ways to split one HEX element into multiple TET elements, resulting in either five or six TET elements. Any splitting method must split each of the six quadrilateral faces of a HEX element into two triangles, which can be done in two different ways. As these quadrilateral faces could be shared with neighboring HEX elements, the splitting of the quadrilateral faces on neighboring elements must be performed consistently. To achieve a consistent splitting approach, which will be discussed later in this documentation page, a HEX element needs to be split into six TET elements. An example of this splitting is illustrated in [hex_split]. Note that the splitting approach shown in [hex_split] is not unique and will be discussed later.
-
-#### Splitting of PRISM Elements
-
-A PRISM element can be split into three TET elements. An example of this splitting is illustrated in [prism_split]. Note that the splitting approach shown in [prism_split] is not unique and will be discussed later. Namely, the three quadrilateral faces of a PRISM element need to be split consistently with the neighboring elements.
-
-#### Splitting of PYRAMID Elements
-
-A PYRAMID element can be split into two TET elements. An example of this splitting is illustrated in [pyramid_split]. Note that the splitting approach shown in [pyramid_split] is not unique and will be discussed later. Namely, the one quadrilateral face of a PYRAMID element needs to be split consistently with the neighboring elements.
-
-#### Consistent Splitting for Neighboring Elements
-
-As discussed above, although splitting of non-TET elements into TET elements is not unique, it is crucial to ensure that the splitting of the neighboring elements involves consistent splitting of the quadrilateral faces. To achieve this, the following approach is used. For each quadrilateral face, there are two ways to split it into two triangles, which correspond to the two diagonal lines of the quadrilateral face. Therefore, in order to ensure that one of the two diagonal lines is selected consistently for all the elements, the diagonal line that involves the node with the lowest global node ID among the four nodes of the quadrilateral face is selected.
+The splitting of non-TET4 elements was performed using the same algorithm as described in [`TetrahedralElementsConvertor`](/TetrahedralElementsConvertor.md). Note that only those elements that will be fully or partially retained after the cutting are split.
 
 ### Cutting of TET4 Elements along Plane
 
