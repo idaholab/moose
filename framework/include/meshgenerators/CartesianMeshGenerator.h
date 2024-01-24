@@ -24,8 +24,6 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override{};
-
 protected:
   /// The dimension of the mesh
   MooseEnum _dim;

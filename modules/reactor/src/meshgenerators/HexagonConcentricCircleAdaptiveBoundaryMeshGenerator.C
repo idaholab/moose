@@ -50,8 +50,6 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
       "This HexagonConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate "
       "hexagonal meshes with adaptive boundary to facilitate stitching.");
 
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

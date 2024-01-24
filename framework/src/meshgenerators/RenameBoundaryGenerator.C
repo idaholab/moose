@@ -60,8 +60,6 @@ RenameBoundaryGenerator::validParams()
       "boundaries defined by either boundary ID or boundary name. The "
       "changes are independent of ordering. The merging of boundaries is supported.");
 
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

@@ -87,7 +87,8 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   const auto data_driven_generator =
       moose_mesh->parameters().get<std::string>("data_driven_generator");
   bool bypass_meshgen = (data_driven_generator != "");
-  // Option to bypass mesh generation can be overriden by setting private "_bypass_meshgen" parameter to false
+  // Option to bypass mesh generation can be overriden by setting private "_bypass_meshgen"
+  // parameter to false
   if (!getParam<bool>("_bypass_meshgen"))
     bypass_meshgen = false;
   this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);

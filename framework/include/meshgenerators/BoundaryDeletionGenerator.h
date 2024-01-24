@@ -20,8 +20,6 @@ public:
 
   virtual std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override{};
-
 protected:
   ///The input mesh
   std::unique_ptr<MeshBase> & _input;

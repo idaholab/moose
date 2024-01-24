@@ -25,8 +25,6 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override{};
-
 protected:
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;

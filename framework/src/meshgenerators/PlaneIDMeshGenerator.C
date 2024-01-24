@@ -29,9 +29,6 @@ PlaneIDMeshGenerator::validParams()
   params.addRequiredParam<std::string>("id_name", "Name of extra integer ID set");
   params.addParam<Real>("tolerance", 1.0E-4, "Tolerance for plane coordinate check");
   params.addClassDescription("Adds an extra element integer that identifies planes in a mesh.");
-
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

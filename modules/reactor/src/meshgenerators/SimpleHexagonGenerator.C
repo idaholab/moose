@@ -53,8 +53,6 @@ SimpleHexagonGenerator::validParams()
       "only contains six simple azimuthal triangular elements, two quadrilateral elements, or six "
       "central azimuthal triangular elements plus a several layers of quadrilateral elements.");
 
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 

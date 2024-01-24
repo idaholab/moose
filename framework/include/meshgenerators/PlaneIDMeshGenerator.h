@@ -23,8 +23,6 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override{};
-
 protected:
   /// get plane ID for given plane coordiantes
   int getPlaneID(const Point & p) const;
