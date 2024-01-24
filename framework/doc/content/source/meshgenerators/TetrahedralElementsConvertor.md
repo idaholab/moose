@@ -45,7 +45,7 @@ As discussed above, although splitting of non-TET elements into TET4 elements is
 
 ## Example Syntax
 
-!listing test/tests/meshgenerators/tetrahedral_elements_convertor/simple_conversion.i block=Mesh/convert
+!listing test/tests/meshgenerators/tetrahedral_elements_convertor/simple_convert.i block=Mesh/convert
 
 !syntax parameters /Mesh/TetrahedralElementsConvertor
 

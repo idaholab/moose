@@ -11,6 +11,7 @@
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/enum_order.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
