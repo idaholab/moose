@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "MaterialOutputAction.h"
 #include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 #include "AddOutputAction.h"
 #include "MaterialBase.h"
@@ -17,6 +18,7 @@
 #include "RankFourTensor.h"
 #include "MooseEnum.h"
 #include "MooseVariableConstMonomial.h"
+#include "FunctorMaterial.h"
 
 #include "libmesh/utility.h"
 
@@ -51,6 +53,14 @@ std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADRankTwoTen
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankFourTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
+std::vector<std::string> MaterialOutputAction::functorMaterialOutputHelper<Real>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
+std::vector<std::string> MaterialOutputAction::functorMaterialOutputHelper<RealVectorValue>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 registerMooseAction("MooseApp", MaterialOutputAction, "add_output_aux_variables");
@@ -152,30 +162,33 @@ MaterialOutputAction::act()
     //   (2) If the MaterialBase object itself has set the 'outputs' parameter
     if (outputs_has_properties || outputs.find("none") == outputs.end())
     {
-      // Add the material property for output if the name is contained in the 'output_properties'
-      // list
-      // or if the list is empty (all properties)
-      const std::set<std::string> names = mat->getSuppliedItems();
+      // Get all material properties supplied by this material as a starting point
+      std::set<std::string> names = mat->getSuppliedItems();
+      if (const auto fmat_ptr = dynamic_cast<const FunctorMaterial *>(mat.get()))
+        names.insert(fmat_ptr->getSuppliedFunctors().begin(),
+                     fmat_ptr->getSuppliedFunctors().end());
+
       for (const auto & name : names)
       {
-        // Add the material property for output
+        // Output the property only if the name is contained in the 'output_properties'
+        // list or if the list is empty (all properties)
         if (output_properties.empty() ||
             std::find(output_properties.begin(), output_properties.end(), name) !=
                 output_properties.end())
         {
+          // Add the material property for output
           auto curr_material_names = materialOutput(name, *mat, get_names_only);
           if (curr_material_names.size() == 0)
             unsupported_names.insert(name);
           material_names.insert(curr_material_names.begin(), curr_material_names.end());
         }
-
-        // If the material object has limited outputs, store the variables associated with the
-        // output objects
-        if (!outputs.empty())
-          for (const auto & output_name : outputs)
-            _material_variable_names_map[output_name].insert(_material_variable_names.begin(),
-                                                             _material_variable_names.end());
       }
+      // If the material object has limited outputs, store the variables associated with the
+      // output objects
+      if (!outputs.empty())
+        for (const auto & output_name : outputs)
+          _material_variable_names_map[output_name].insert(_material_variable_names.begin(),
+                                                           _material_variable_names.end());
     }
   }
   if (unsupported_names.size() > 0 && get_names_only)
@@ -265,6 +278,18 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
   else if (hasProperty<RankFourTensor>(property_name))
     names = materialOutputHelper<RankFourTensor>(property_name, material, get_names_only);
 
+  else if (hasFunctorProperty<Real>(property_name))
+    names = functorMaterialOutputHelper<Real>(property_name, material, get_names_only);
+
+  else if (hasFunctorProperty<ADReal>(property_name))
+    names = functorMaterialOutputHelper<Real>(property_name, material, get_names_only);
+
+  else if (hasFunctorProperty<RealVectorValue>(property_name))
+    names = functorMaterialOutputHelper<RealVectorValue>(property_name, material, get_names_only);
+
+  else if (hasFunctorProperty<ADRealVectorValue>(property_name))
+    names = functorMaterialOutputHelper<RealVectorValue>(property_name, material, get_names_only);
+
   return names;
 }
 
@@ -280,7 +305,12 @@ MaterialOutputAction::getParams(const std::string & type,
   // Set the action parameters
   InputParameters params = _factory.getValidParams(type);
 
-  params.set<MaterialPropertyName>("property") = property_name;
+  // Adapt for regular or functor materials
+  if (type.find("Material") != std::string::npos)
+    params.set<MaterialPropertyName>("property") = property_name;
+  else
+    params.set<MooseFunctorName>("functor") = property_name;
+
   params.set<AuxVariableName>("variable") = variable_name;
   if (_output_only_on_timestep_end)
     params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
@@ -488,6 +518,48 @@ MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & p
                 "MaterialRankFourTensorAux", material.name() + oss.str(), params);
           }
         }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::functorMaterialOutputHelper<Real>(const std::string & property_name,
+                                                        const MaterialBase & material,
+                                                        bool get_names_only)
+{
+  std::vector<std::string> names = {property_name + "_out"};
+  if (!get_names_only)
+  {
+    // add a '_out' suffix to avoid name conflicts between the functor property and aux-variable
+    auto params = getParams("FunctorAux", property_name, property_name + "_out", material);
+    _problem->addAuxKernel("FunctorAux", material.name() + property_name, params);
+  }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::functorMaterialOutputHelper<RealVectorValue>(
+    const std::string & property_name, const MaterialBase & material, bool get_names_only)
+{
+  std::array<char, 3> suffix = {{'x', 'y', 'z'}};
+  std::vector<std::string> names(3);
+  for (const auto i : make_range(Moose::dim))
+  {
+    std::ostringstream oss;
+    // add a '_out' suffix to avoid name conflicts between the functor property and aux-variable
+    oss << property_name << "_out_" << suffix[i];
+    names[i] = oss.str();
+
+    if (!get_names_only)
+    {
+      auto params = getParams("FunctorVectorElementalAux", property_name, oss.str(), material);
+      params.set<unsigned int>("component") = i;
+      _problem->addAuxKernel("FunctorVectorElementalAux", material.name() + oss.str(), params);
+    }
+  }
 
   return names;
 }
