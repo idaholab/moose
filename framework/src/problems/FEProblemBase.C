@@ -3857,15 +3857,19 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       var_in_linear = _linear_systems.size();
   }
 
-  mooseAssert(var_in_nl || var_in_linear,
-              "The variable shoulb in either a nonlinear or a linear system!");
+  // If the variable is not in the nonlinear or linear systems, it must be in the aux system.
+  // In this case we just use the first linear or nonlinear system for the auxvariable
+  if (!var_in_nl && !var_in_linear)
+    sys_num = 0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
 
-    if (!var_in_linear)
+    if (var_in_linear)
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseLinear(sys_num);
+    else
       parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(sys_num);
   }
   else

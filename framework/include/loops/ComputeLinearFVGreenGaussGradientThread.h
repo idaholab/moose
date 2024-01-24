@@ -49,4 +49,6 @@ protected:
 
   /// Pointer to the current variable
   MooseLinearVariableFV<Real> * _current_var;
+
+  std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
 };

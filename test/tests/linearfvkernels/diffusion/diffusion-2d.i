@@ -5,7 +5,6 @@
     nx = 2
     ny = 1
     ymax = 0.5
-    elem_type = TRI3
   []
 []
 
@@ -26,7 +25,7 @@
     type = LinearFVDiffusionKernel
     variable = u
     diffusion_coeff = coeff_func
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [source]
     type = LinearFVSourceKernel
@@ -82,10 +81,6 @@
 [Outputs]
   [csv]
     type = CSV
-    execute_on = FINAL
-  []
-  [exodus]
-    type = Exodus
     execute_on = FINAL
   []
 []

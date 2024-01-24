@@ -38,12 +38,14 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
 Real
 LinearFVOutflowBC::computeBoundaryValue()
 {
-
-  auto boundary_value = (*_linear_system.solution)(
-      _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()]);
+  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+  auto boundary_value =
+      (*_linear_system.solution)(elem_info->dofIndices()[_var->sys().number()][_var->number()]);
 
   if (_two_term_expansion)
-    boundary_value += _var->gradSln(_current_face_info->elemInfo()) * computeCellToFaceVector();
+    boundary_value += _var->gradSln(elem_info) * computeCellToFaceVector();
 
   return boundary_value;
 }
@@ -80,21 +82,11 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
 
   if (_two_term_expansion)
   {
-    RealVectorValue gradient;
-    const auto state_arg = determineState();
 
-    if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-    {
-      const auto elem_arg = makeElemArg(_current_face_info->elemPtr());
-      gradient = raw_value(Moose::FV::greenGaussGradient(elem_arg, state_arg, *_var, false, _mesh));
-    }
-    else
-    {
-      const auto elem_arg = makeElemArg(_current_face_info->neighborPtr());
-      gradient = raw_value(Moose::FV::greenGaussGradient(elem_arg, state_arg, *_var, false, _mesh));
-    }
-
-    contribution = gradient * computeCellToFaceVector();
+    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+    contribution = _var->gradSln(elem_info) * computeCellToFaceVector();
   }
 
   return contribution;
