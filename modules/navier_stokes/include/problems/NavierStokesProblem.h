@@ -63,7 +63,7 @@ protected:
   /**
    * Reinitialize PETSc output for proper linear/nonlinear iteration display
    */
-  virtual void initPetscOutput() override;
+  virtual void initPetscOutputAndSomeSolverSettings() override;
 
 private:
   /// Whether to commute operators in the style of Olshanskii. If this is true, then the user must

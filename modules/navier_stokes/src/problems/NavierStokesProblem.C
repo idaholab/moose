@@ -374,9 +374,9 @@ navierStokesKSPPreSolve(KSP root_ksp, Vec /*rhs*/, Vec /*x*/, void * context)
 }
 
 void
-NavierStokesProblem::initPetscOutput()
+NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
 {
-  FEProblem::initPetscOutput();
+  FEProblem::initPetscOutputAndSomeSolverSettings();
 
   if (!_have_mass_matrix)
   {

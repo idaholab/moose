@@ -5818,10 +5818,9 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Do not worry, DM setup is very cheap
   _current_nl_sys->setupDM();
 
-  Moose::setSolverDefaults(*this);
-
-  // Setup the output system for printing linear/nonlinear iteration information
-  initPetscOutput();
+  // Setup the output system for printing linear/nonlinear iteration information and some solver
+  // settings
+  initPetscOutputAndSomeSolverSettings();
 
   possiblyRebuildGeomSearchPatches();
 
@@ -6030,7 +6029,7 @@ FEProblemBase::forceOutput()
 }
 
 void
-FEProblemBase::initPetscOutput()
+FEProblemBase::initPetscOutputAndSomeSolverSettings()
 {
   _app.getOutputWarehouse().solveSetup();
   Moose::PetscSupport::petscSetDefaults(*this);
@@ -7049,7 +7048,7 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
         reinitBecauseOfGhostingOrNewGeomObjects();
 
         // This is needed to reinitialize PETSc output
-        initPetscOutput();
+        initPetscOutputAndSomeSolverSettings();
 
         break;
 
@@ -7079,7 +7078,7 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
         reinitBecauseOfGhostingOrNewGeomObjects();
 
         // This is needed to reinitialize PETSc output
-        initPetscOutput();
+        initPetscOutputAndSomeSolverSettings();
     }
   }
 }

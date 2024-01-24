@@ -181,7 +181,7 @@ public:
   /**
    * Hook up monitors for SNES and KSP
    */
-  virtual void initPetscOutput() override;
+  virtual void initPetscOutputAndSomeSolverSettings() override;
 
   /**
    * Whether or not to output eigenvalue inverse. The inverse is useful for
