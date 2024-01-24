@@ -1,0 +1,18 @@
+[Tests]
+  design = 'LinearFVDiffusionKernel.md'
+  issues = '#25722'
+  [mms-advection-diffusion-reaction-1d-dirichlet]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvectionDiffusionReaction1DDirichlet
+    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a one-dimensional domain.'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [mms-advection-diffusion-reaction-1d-outflow]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvectionDiffusionReaction1DOutflow
+    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary conditions using a linear finite volume system on a one-dimensional domain.'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]
