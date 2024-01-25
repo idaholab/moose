@@ -511,8 +511,7 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  virtual void setDofValues(const DenseVector<OutputData> & values) override;
-  virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
+  void setDofValues(const DenseVector<OutputData> & values) override;
 
   /**
    * Write a nodal value to the passed-in solution vector
@@ -552,23 +551,18 @@ public:
    * @return Variable value
    */
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
-
   /**
    * Set the current local DOF values to the input vector
    */
-  virtual void insert(NumericVector<Number> & vector) override;
-  virtual void insertLower(NumericVector<Number> & vector) override;
-
+  void insert(NumericVector<Number> & residual) override;
   /**
    * Add the current local DOF values to the input vector
    */
-  virtual void add(NumericVector<Number> & vector) override;
-
+  void add(NumericVector<Number> & residual) override;
   /**
    * Add passed in local DOF values onto the current solution
    */
   void addSolution(const DenseVector<Number> & v);
-
   /**
    * Add passed in local neighbor DOF values onto the current solution
    */

@@ -305,12 +305,6 @@ public:
   virtual void setDofValues(const DenseVector<OutputData> & values) = 0;
 
   /**
-   * Set local DOF values for a lower dimensional element and evaluate the values on quadrature
-   * points
-   */
-  virtual void setLowerDofValues(const DenseVector<OutputData> & values) = 0;
-
-  /**
    * Whether or not this variable is actually using the shape function value.
    *
    * Currently hardcoded to true because we always compute the value.

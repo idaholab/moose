@@ -1315,13 +1315,6 @@ SubProblem::doingPRefinement() const
   return mesh().doingPRefinement();
 }
 
-void
-SubProblem::setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid)
-{
-  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-    assembly(tid, nl_sys_num).setCurrentLowerDElem(lower_d_elem);
-}
-
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,

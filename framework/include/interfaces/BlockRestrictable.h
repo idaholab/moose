@@ -106,7 +106,7 @@ public:
    * Note, if this is not block restricted, this function returns all mesh subdomain ids.
    * @return a set of SubdomainIDs that are valid for this object
    */
-  virtual const std::set<SubdomainID> & blockIDs() const;
+  const virtual std::set<SubdomainID> & blockIDs() const;
 
   /**
    * Return the largest mesh dimension of the elements in the blocks for this object

@@ -383,8 +383,7 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  virtual void setDofValues(const DenseVector<OutputData> & values) override;
-  virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
+  void setDofValues(const DenseVector<OutputData> & values) override;
 
   /// Get the current value of this variable on an element
   /// @param[in] elem   Element at which to get value
@@ -402,9 +401,8 @@ public:
   /// @return Variable value
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
 
-  virtual void insert(NumericVector<Number> & vector) override;
-  virtual void insertLower(NumericVector<Number> & vector) override;
-  virtual void add(NumericVector<Number> & vector) override;
+  virtual void insert(NumericVector<Number> & residual) override;
+  virtual void add(NumericVector<Number> & residual) override;
 
   const DoFValue & dofValues() const override;
   const DoFValue & dofValuesOld() const override;
@@ -690,11 +688,6 @@ private:
   /// in \p getDirichletBC
   std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
 
-  /**
-   * Emit an error message for unsupported lower-d ops
-   */
-  [[noreturn]] void lowerDError() const;
-
 protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
@@ -830,14 +823,7 @@ template <typename OutputType>
 const typename MooseVariableFV<OutputType>::FieldVariablePhiValue &
 MooseVariableFV<OutputType>::phiLower() const
 {
-  lowerDError();
-}
-
-template <typename OutputType>
-void
-MooseVariableFV<OutputType>::lowerDError() const
-{
-  mooseError("Lower dimensional element support not implemented for finite volume variables");
+  mooseError("Not defined for finite volume variables");
 }
 
 template <>
