@@ -307,7 +307,7 @@ modules, all of which heavily leverage MOOSE's [!ac](AD) capabilities.
 
 For performance reasons, AD values in MOOSE have a maximum container size, i.e.,
 they have a maximum number of degrees of freedom that each AD quantity may
-depend upon. Currently, MOOSE's default maximum AD container size is 53. If the
+depend upon. Currently, MOOSE's default maximum AD container size is 64. If the
 maximum AD container size is exceeded, then an error will result.
 If a quantity needs to depend on more degrees of freedom than the maximum AD
 container size, then MOOSE needs to be reconfigured: go to the

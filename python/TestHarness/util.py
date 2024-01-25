@@ -20,7 +20,7 @@ TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
-                           'default'   : '50'
+                           'default'   : '64'
     },
 
     'libpng' :    { 're_option' : r'#define\s+MOOSE_HAVE_LIBPNG\s+(\d+)',

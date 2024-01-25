@@ -40,7 +40,7 @@ storage type by running `./configure --with-derivative-type=sparse` in MOOSE's
 framework directory. The underlying derivative storage array size for both
 `NumberArray` and `SemiDynamicSparseNumberArray` can be modified by running
 `configure` with the option `--with-derivative-size=<n>` where `<n>` is the
-desired size of the container. By default, MOOSE is configured `--with-derivative-size=53`.
+desired size of the container. By default, MOOSE is configured `--with-derivative-size=64`.
 
 ## AD-Related Timings id=timings
 
