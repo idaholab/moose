@@ -9,11 +9,11 @@ capabilities.
 ## Overview id=overview
 
 `DualReal` is a MOOSE typedef defined from the
-[`MetaPhysicL`](https://github.com/roystgnr/metaphysicl) template class
+[MetaPhysicL](https://github.com/libMesh/MetaPhysicL) template class
 `DualNumber`. `DualNumber` takes two template arguments `T` and `D`; `T`
 represents the "value" type of the `DualNumber`, e.g. the type of $f(\vec{x})$,
 while `D` represents the derivative type of the `DualNumber`, e.g. the type of
-$\nabla f = \frac{\partial f}{\partial\vec{x}}$. `MetaPhysicL` offers several
+$\nabla f = \frac{\partial f}{\partial\vec{x}}$. MetaPhysicL offers several
 options for `D` types, including:
 
 1. `NumberArray`
