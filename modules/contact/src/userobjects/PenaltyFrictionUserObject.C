@@ -81,7 +81,9 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
     _adaptivity_friction(
-        getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>())
+        getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>()),
+    _epsilon_tolerance(1.0e-40)
+
 {
   if (!_augmented_lagrange_problem == isParamValid("slip_tolerance"))
     paramError("slip_tolerance",
@@ -264,8 +266,12 @@ PenaltyFrictionUserObject::reinit()
       // Modified for implementation in MOOSE: Avoid pingponging on frictional sign (max. 0.4
       // capacity)
       ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
-      if (penalty_friction * slip_distance.norm() >
-          0.4 * _friction_coefficient * std::abs(normal_pressure))
+
+      const auto slip_metric = MetaPhysicL::raw_value(slip_distance).cwiseAbs().norm();
+
+      if (slip_metric > _epsilon_tolerance &&
+          penalty_friction * slip_distance.norm() >
+              0.4 * _friction_coefficient * std::abs(normal_pressure))
       {
         inner_iteration_penalty_friction =
             MetaPhysicL::raw_value(0.4 * _friction_coefficient * std::abs(normal_pressure) /

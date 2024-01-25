@@ -15,17 +15,15 @@
 #include "TwoVector.h"
 
 /**
- * User object that computes tangential pressures due to friction using a penalty approach,
- * following J.C. Simo, T.A. Laursen, An augmented lagrangian treatment of contact problems
- * involving friction, https://doi.org/10.1016/0045-7949(92)90540-G.
+ * User object that interface pressure resulting from a simple traction separation law.
  */
-class PenaltyFrictionUserObject : virtual public PenaltyWeightedGapUserObject,
-                                  virtual public WeightedVelocitiesUserObject
+class PenaltySimpleCohesiveZoneModel : virtual public PenaltyWeightedGapUserObject,
+                                       virtual public WeightedVelocitiesUserObject
 {
 public:
   static InputParameters validParams();
 
-  PenaltyFrictionUserObject(const InputParameters & parameters);
+  PenaltySimpleCohesiveZoneModel(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
@@ -35,30 +33,25 @@ public:
   virtual void reinit() override;
   virtual void timestepSetup() override;
 
-  virtual Real getFrictionalContactPressure(const Node * const node,
-                                            const unsigned int component) const override;
-  virtual Real getAccumulatedSlip(const Node * const node,
-                                  const unsigned int component) const override;
-  virtual Real getTangentialVelocity(const Node * const node,
-                                     const unsigned int component) const override;
-  virtual Real getDeltaTangentialLagrangeMultiplier(const Node * const node,
-                                                    const unsigned int component) const override;
-
-  virtual bool isAugmentedLagrangianConverged() override;
-  virtual void updateAugmentedLagrangianMultipliers() override;
-
 protected:
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
+
+  // Compute CZM kinematics.
+  virtual void prepareJumpKinematicQuantities() {}
+  virtual void computeFandR(const Node * const /*node*/) {}
+
+  /// Encapsulate the CZM constitutive behavior.
+  virtual void computeBilinearMixedModeTraction(const Node * const /*node*/) {}
+
+  /// Compute global traction for mortar application
+  virtual void computeGlobalTraction(const Node * const /*node*/) {}
 
   /// The normal penalty factor
   const Real _penalty;
 
   /// The penalty factor for the frictional constraints
   const Real _penalty_friction;
-
-  /// Acceptable slip distance for augmented Lagrange convergence
-  const Real _slip_tolerance;
 
   /// The friction coefficient
   const Real _friction_coefficient;
@@ -73,6 +66,9 @@ protected:
   std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
       _dof_to_tangential_traction;
 
+  /// Map from degree of freedom to czm normal traction
+  std::unordered_map<const DofObject *, ADReal> _dof_to_czm_normal_traction;
+
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_one;
 
@@ -84,12 +80,6 @@ protected:
 
   /// Map from degree of freedom to local friction penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
-
-  /// Penalty growth factor for augmented Lagrange
-  const Real _penalty_multiplier_friction;
-
-  /// The adaptivity method for the penalty factor at augmentations
-  const enum class AdaptivityFrictionalPenalty { SIMPLE, FRICTION_LIMIT } _adaptivity_friction;
 
   /// Tolerance to avoid NaN/Inf in automatic differentiation operations.
   const Real _epsilon_tolerance;
