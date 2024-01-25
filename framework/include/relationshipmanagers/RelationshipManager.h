@@ -130,7 +130,7 @@ protected:
   bool _inited = false;
 
   /// Pointer to the \p MooseMesh object
-  MooseMesh * const _moose_mesh;
+  MooseMesh * _moose_mesh;
 
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit
