@@ -69,7 +69,7 @@
                   Mesh/parallel_type=distributed'
       expect_err = 'Input is not a replicated mesh'
       mesh_mode = 'REPLICATED'
-      detail = 'if the input mesh is not a replicated mesh.'
+      detail = 'if the input mesh to be cut is not a replicated mesh.'
     []
     [err_non_3d]
       type = 'RunException'
@@ -79,7 +79,7 @@
                   Mesh/cut/input=accg'
       expect_err = 'Only 3D meshes are supported'
       mesh_mode = 'REPLICATED'
-      detail = 'if the input mesh contains non-3D elements.'
+      detail = 'if the input mesh to be cut contains non-3D elements.'
     []
     [err_high_order]
       type = 'RunException'
@@ -88,7 +88,7 @@
                   Mesh/gmg/elem_type=HEX20'
       expect_err = 'Only first order elements are supported for cutting'
       mesh_mode = 'REPLICATED'
-      detail = 'if the input mesh contains high-order elements.'
+      detail = 'if the input mesh to be cut contains high-order elements.'
     []
   []
 []
