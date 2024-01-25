@@ -43,8 +43,7 @@ PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & param
   : Function(parameters),
     _read_prop_user_object(nullptr),
     _column_number(getParam<unsigned int>("column_number")),
-    _read_type(getParam<MooseEnum>("read_type").getEnum<PropertyReadFile::ReadTypeEnum>()),
-    _point_locator(_ti_feproblem.mesh().getPointLocator())
+    _read_type(getParam<MooseEnum>("read_type").getEnum<PropertyReadFile::ReadTypeEnum>())
 {
   if (_column_number < _ti_feproblem.mesh().dimension() &&
       _read_type == PropertyReadFile::ReadTypeEnum::VORONOI)
@@ -55,6 +54,10 @@ PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & param
 void
 PiecewiseConstantFromCSV::initialSetup()
 {
+  // Initialize this here instead of the constructor because of the potential for late deletion of
+  // remote elements
+  _point_locator = _ti_feproblem.mesh().getPointLocator();
+
   // Get a pointer to the PropertyReadFile. A pointer is used because the UserObject is not
   // available during the construction of the function
   _read_prop_user_object = &getUserObject<PropertyReadFile>("read_prop_user_object");
