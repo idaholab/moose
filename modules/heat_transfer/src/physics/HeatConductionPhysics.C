@@ -25,9 +25,8 @@ HeatConductionPhysics::validParams()
                                              "thermal_conductivity");
   params.transferParam<MaterialPropertyName>(HeatConductionTimeDerivative::validParams(),
                                              "specific_heat");
-  params.addParam<MaterialPropertyName>(
-      "density", "density", "Property name of the density material property");
-  params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Material Properties");
+  params.addParam<MaterialPropertyName>("density", "density", "Density material property");
+  params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
 
   // Boundary conditions
   params.addParam<std::vector<BoundaryName>>("heat_flux_boundaries",
@@ -37,10 +36,11 @@ HeatConductionPhysics::validParams()
   params.addParam<std::vector<BoundaryName>>("fixed_temperature_boundaries",
                                              "Boundaries on which to apply a fixed temperature");
   params.addParam<std::vector<MooseFunctorName>>(
-      "boundary_heat_fluxes", "Functors to compute the heat flux on each 'heat_flux' boundary'");
+      "boundary_heat_fluxes",
+      "Functors to compute the heat flux on each boundary in 'heat_flux_boundaries'");
   params.addParam<std::vector<MooseFunctorName>>(
       "boundary_temperatures",
-      "Functors to compute the heat flux on each 'fixed_temperature' boundary'");
+      "Functors to compute the heat flux on each boundary in 'fixed_temperature_boundaries'");
   params.addParamNamesToGroup(
       "heat_flux_boundaries insulated_boundaries fixed_temperature_boundaries boundary_heat_fluxes "
       "boundary_temperatures",

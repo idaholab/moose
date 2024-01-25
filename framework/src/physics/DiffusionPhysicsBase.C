@@ -36,9 +36,9 @@ DiffusionPhysicsBase::validParams()
   params.addParam<std::vector<BoundaryName>>("dirichlet_boundaries",
                                              "Boundaries on which to apply a fixed value");
   params.addParam<std::vector<MooseFunctorName>>(
-      "boundary_fluxes", "Functors to compute the heat flux on each Neumann boundary'");
+      "boundary_fluxes", "Functors to compute the diffusive flux on each Neumann boundary'");
   params.addParam<std::vector<MooseFunctorName>>(
-      "boundary_values", "Functors to compute the heat flux on each Dirichlet boundary'");
+      "boundary_values", "Functors to compute the diffusive flux on each Dirichlet boundary'");
   params.addParamNamesToGroup("neumann_boundaries dirichlet_boundaries boundary_fluxes "
                               "boundary_values",
                               "Boundary conditions");

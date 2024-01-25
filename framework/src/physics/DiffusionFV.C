@@ -20,8 +20,7 @@ InputParameters
 DiffusionFV::validParams()
 {
   InputParameters params = DiffusionPhysicsBase::validParams();
-  params.addClassDescription(
-      "Add the heat conduction physics discretized with cell-centered finite volume");
+  params.addClassDescription("Add diffusion physics discretized with cell-centered finite volume");
   // No kernel implemented in the framework for a material property diffusivity
   params.suppressParameter<MaterialPropertyName>("diffusivity_matprop");
   params.addParam<unsigned short>(
@@ -170,7 +169,7 @@ DiffusionFV::addFVBCs()
 void
 DiffusionFV::addNonlinearVariables()
 {
-  if (nonLinearVariableExists(_var_name, true))
+  if (nonlinearVariableExists(_var_name, true))
     return;
 
   const std::string variable_type = "MooseVariableFVReal";

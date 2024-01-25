@@ -15,12 +15,14 @@ The source term $f$ is added using:
 
 
 The Dirichlet boundary conditions are created using:
+
 - a [FVDirichletBC.md] if the boundary value is set to a number
 - a [FVFunctionDirichletBC.md] if set to a [Function](syntax/Functions/index.md)
 - a [FVFunctorDirichletBC.md] for any other kind of [functor](syntax/Functors/index.md) for the boundary value
 
 
 The Neumann boundary conditions are created using:
+
 - a [FVNeumannBC.md] if the flux is set to a number
 - a [FVFunctionNeumannBC.md] if set to a [Function](syntax/Functions/index.md)
 - a [FVFunctorNeumannBC.md] for any other kind of [functor](syntax/Functors/index.md) for the flux value

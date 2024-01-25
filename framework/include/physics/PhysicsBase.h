@@ -104,7 +104,7 @@ protected:
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
-  bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
+  bool nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
 
   /// Add a new required task for all physics deriving from this class
   /// NOTE: This does not register the task, you still need to call registerMooseAction
@@ -241,8 +241,8 @@ PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_v
 
     for (const auto & value : getParam<std::vector<T>>(param))
       if (!unique_params.insert(value).second)
-        mooseError("Item " + value + "specified in vector parameter " + param +
-                   " is also present in one or more of these other parameters " +
-                   Moose::stringify(param_vec) + ". This is disallowed");
+        mooseError("Item '" + value + "' specified in vector parameter '" + param +
+                   "' is also present in one or more of the parameters '" +
+                   Moose::stringify(param_vec) + "'. This is disallowed.");
   }
 }

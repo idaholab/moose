@@ -130,7 +130,7 @@ HeatConductionFE::addFEBCs()
 void
 HeatConductionFE::addNonlinearVariables()
 {
-  if (nonLinearVariableExists(_temperature_name, /*error_if_aux=*/true))
+  if (nonlinearVariableExists(_temperature_name, /*error_if_aux=*/true))
     return;
 
   const std::string variable_type = "MooseVariable";

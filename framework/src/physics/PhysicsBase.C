@@ -138,7 +138,6 @@ PhysicsBase::prepareCopyNodalVariables() const
 bool
 PhysicsBase::isTransient() const
 {
-  mooseAssert(_problem, "We dont have a problem yet");
   if (_is_transient == "true")
     return true;
   else if (_is_transient == "false")
@@ -181,7 +180,6 @@ PhysicsBase::initializePhysics()
   else
     _dim = _mesh->dimension();
 
-  mooseAssert(_mesh, "We should have a problem to check if it is transient");
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
 }
@@ -205,8 +203,8 @@ PhysicsBase::checkParamsBothSetOrNotSet(const std::string & param1,
 {
   if ((isParamValid(param1) + isParamValid(param2)) % 2 != 0)
     paramError(param1,
-               "Parameters " + param1 + " and " + param2 +
-                   " must be either both set or both not set");
+               "Parameters '" + param1 + "' and '" + param2 +
+                   "' must be either both set or both not set.");
 }
 
 void
@@ -223,7 +221,7 @@ PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
 }
 
 bool
-PhysicsBase::nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const
+PhysicsBase::nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const
 {
   if (_problem->getNonlinearSystemBase(_sys_number).hasVariable(var_name))
     return true;

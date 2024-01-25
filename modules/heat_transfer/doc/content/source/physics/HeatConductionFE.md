@@ -1,4 +1,4 @@
-# Heat Conduction Finite Element
+# HeatConductionFE
 
 This [Physics](syntax/Physics/index.md) object implements the heat conduction equation over a
 volumetric domain using a continuous Galerkin finite element discretization.

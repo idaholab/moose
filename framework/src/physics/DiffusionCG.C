@@ -23,7 +23,7 @@ DiffusionCG::validParams()
   params.addClassDescription(
       "Discretizes a diffusion equation with the continuous Galerkin finite element method");
   params.addParam<bool>(
-      "automatic_differentiation",
+      "use_automatic_differentiation",
       true,
       "Whether to use automatic differentiation for all the terms in the equation");
   params.transferParam<MooseEnum>(MooseVariableBase::validParams(), "order", "variable_order");
@@ -32,7 +32,7 @@ DiffusionCG::validParams()
 }
 
 DiffusionCG::DiffusionCG(const InputParameters & parameters)
-  : DiffusionPhysicsBase(parameters), _use_ad(getParam<bool>("automatic_differentiation"))
+  : DiffusionPhysicsBase(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 }
 
@@ -213,7 +213,7 @@ void
 DiffusionCG::addNonlinearVariables()
 {
   // If the variable was added outside the Physics
-  if (nonLinearVariableExists(_var_name, /*error_if_aux*/ true))
+  if (nonlinearVariableExists(_var_name, /*error_if_aux*/ true))
   {
     if (isParamValid("variable_order"))
       paramError("variable_order",
