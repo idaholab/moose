@@ -15,7 +15,7 @@
 #include "INSFVVelocityVariable.h"
 
 /**
- * Computes the source and sink terms for the turbulent kinetic energy dissipation rate.
+ * Computes the source and sink terms for the v2f elliptic blending function
  */
 class INSFVTFSourceSink : public FVElementalKernel
 {
@@ -64,4 +64,5 @@ protected:
 
   /// Model paramters
   const Real _n;
+  const Real _C_eta;
 };

@@ -24,7 +24,8 @@ v2fViscosityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::TV2, "Coupled turbulent wall normal fluctuations.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
-  params.addParam<Real>("C_mu", 0.22, "Coupled turbulent viscosity closure.");
+  params.addParam<Real>("C_mu_2", 0.22, "Coupled turbulent viscosity closure.");
+  params.addParam<Real>("C_mu", 0.09, "Coupled turbulent viscosity closure.");
   return params;
 }
 
@@ -35,6 +36,7 @@ v2fViscosityAux::v2fViscosityAux(const InputParameters & params)
     _v2(getFunctor<ADReal>(NS::TV2)),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
+    _C_mu_2(getParam<Real>("C_mu_2")),
     _C_mu(getParam<Real>("C_mu"))
 {
 }
@@ -52,8 +54,17 @@ v2fViscosityAux::computeValue()
   const auto mu = _mu(elem_arg, state);
   const auto nu = mu / rho;
 
-  const auto time_scale =
-      std::max(TKE / std::max(TKED, 1e-15), 6 * std::sqrt(nu / std::max(TKED, 1e-15)));
+  const auto time_scale_keps = TKE / TKED;
+  const auto time_scale = std::max(time_scale_keps, 6 * std::sqrt(nu / TKED));
 
-  return raw_value(_C_mu * rho * TV2 * time_scale);
+  const auto mu_t = rho * std::min(_C_mu * TKE * time_scale_keps, _C_mu_2 * TV2 * time_scale);
+
+  // _console << "--------------------------------" << std::endl;
+  // _console << "TKE: " << raw_value(TKE) << std::endl;
+  // _console << "TKED: " << raw_value(TKED) << std::endl;
+  // _console << "TV2: " << raw_value(TV2) << std::endl;
+  // _console << "mu_t: " << raw_value(mu_t) << std::endl;
+  // _console << "--------------------------------" << std::endl;
+
+  return raw_value(mu_t);
 }

@@ -28,6 +28,16 @@ protected:
   ADReal computeQpResidual() override;
 
 protected:
+  /// The dimension of the simulation
+  const unsigned int _dim;
+
+  /// x-velocity
+  const Moose::Functor<ADReal> & _u_var;
+  /// y-velocity
+  const Moose::Functor<ADReal> * _v_var;
+  /// z-velocity
+  const Moose::Functor<ADReal> * _w_var;
+
   /// Turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
 
@@ -37,6 +47,21 @@ protected:
   /// Relaxation function
   const Moose::Functor<ADReal> & _f;
 
-  /// n fitting factor
+  /// Density
+  const Moose::Functor<ADReal> & _rho;
+
+  /// Dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
+
+  /// Turbulent dynamic viscosity
+  const Moose::Functor<ADReal> & _mu_t;
+
+  /// Value of the first epsilon closure coefficient
+  const Real _C1;
+
+  /// Value of the second epsilon closure coefficient
+  const Real _C2;
+
+  /// Model paramters
   const Real _n;
 };

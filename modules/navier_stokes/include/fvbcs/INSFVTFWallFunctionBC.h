@@ -11,35 +11,40 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "FVDirichletBCBase.h"
+#include "FVFluxBC.h"
 
 /**
- * Computes the turbuent viscosity for the k-Epsilon model.
- * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
+ * Applies a wall function to the turbulent pressure distribution function
  */
-class v2fViscosityAux : public AuxKernel
+class INSFVTFWallFunctionBC : public FVDirichletBCBase
 {
 public:
+  INSFVTFWallFunctionBC(const InputParameters & parameters);
+
   static InputParameters validParams();
 
-  v2fViscosityAux(const InputParameters & parameters);
+  ADReal boundaryValue(const FaceInfo & fi) const override;
 
-protected:
-  virtual Real computeValue() override;
-
+private:
   /// Turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
+
   /// Turbulent kinetic energy dissipation rate
   const Moose::Functor<ADReal> & _epsilon;
-  /// Turbulent wall normal
+
+  /// Turbulent normal wall fluctuations
   const Moose::Functor<ADReal> & _v2;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
+
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
 
-  /// C-mu closure coefficient
-  const Real _C_mu_2;
-  const Real _C_mu;
+  /// C_mu turbulent coefficient
+  const Moose::Functor<ADReal> & _C_mu;
+
+  /// Model constants
+  const Real _n;
 };

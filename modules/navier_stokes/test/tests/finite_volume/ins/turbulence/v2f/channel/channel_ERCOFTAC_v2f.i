@@ -29,18 +29,19 @@ C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
 
+epsilon_scaling = 1.0
+
 ### Initial and Boundary Conditions ###
-intensity = 0.01
+intensity = 0.1
 k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
+eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H / epsilon_scaling}'
 
 ### Modeling parameters ###
 non_equilibrium_treatment = true
 bulk_wall_treatment = false
-walls = 'top'
+walls = ''
 max_mixing_length = 1e10
 linearized_yplus_mu_t = false
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
   [gen]
@@ -50,14 +51,14 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     xmax = ${L}
     ymin = 0
     ymax = ${H}
-    nx = 100
-    ny = 10
+    nx = 20
+    ny = 8
     bias_y = 0.7
   []
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
+  nl_sys_names = 'u_system v_system pressure_system TKE_system TKED_system TV2_system TF_system'
   previous_nl_solution_required = true
 []
 
@@ -104,6 +105,16 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = INSFVEnergyVariable
     nl_sys = TKED_system
     initial_condition = ${eps_init}
+  []
+  [TV2]
+    type = INSFVEnergyVariable
+    nl_sys = TV2_system
+    initial_condition = '${fparse 2/3*k_init}'
+  []
+  [TF]
+    type = INSFVEnergyVariable
+    nl_sys = TF_system
+    initial_condition = 0.0
   []
 []
 
@@ -193,7 +204,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [TKE_diffusion_turbulent]
     type = INSFVTurbulentDiffusion
     variable = TKE
-    coeff = 'mu_t'
+    coeff = 'mu_t_v2f'
     scaling_coef = ${sigma_k}
   []
   [TKE_source_sink]
@@ -204,7 +215,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     epsilon = TKED
     rho = ${rho}
     mu = ${mu}
-    mu_t = 'mu_t'
+    mu_t = 'mu_t_v2f'
     walls = ${walls}
     non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
@@ -225,7 +236,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [TKED_diffusion_turbulent]
     type = INSFVTurbulentDiffusion
     variable = TKED
-    coeff = 'mu_t'
+    coeff = 'mu_t_v2f'
     scaling_coef = ${sigma_eps}
     walls = ${walls}
   []
@@ -237,14 +248,62 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     k = TKE
     rho = ${rho}
     mu = ${mu}
-    mu_t = 'mu_t'
+    mu_t = 'mu_t_v2f'
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
     non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
+    v2f_formulation = true
+    v2 = TV2
   []
 
+  [TV2_advection]
+    type = INSFVTurbulentAdvection
+    variable = TV2
+    rho = ${rho}
+  []
+  [TV2_diffusion]
+    type = INSFVTurbulentDiffusion
+    variable = TV2
+    coeff = ${mu}
+  []
+  [TV2_diffusion_turbulent]
+    type = INSFVTurbulentDiffusion
+    variable = TV2
+    coeff = 'mu_t_v2f'
+    scaling_coef = ${sigma_k}
+  []
+  [TV2_source_sink]
+    type = INSFVTV2SourceSink
+    variable = TV2
+    u = vel_x
+    v = vel_y
+    k = TKE
+    epsilon = TKED
+    rho = ${rho}
+    mu = ${mu}
+    mu_t = 'mu_t_v2f'
+    f = TF
+  []
+
+  [TF_diffusion]
+    type = INSFVTurbulentDiffusion
+    variable = TF
+    coeff = 1.0
+  []
+  [TF_source_sink]
+    type = INSFVTFSourceSink
+    variable = TF
+    u = vel_x
+    v = vel_y
+    k = TKE
+    epsilon = TKED
+    v2 = TV2
+    rho = ${rho}
+    mu = ${mu}
+    mu_t = 'mu_t_v2f'
+  []
 []
 
 [FVBCs]
@@ -286,24 +345,67 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     v = vel_y
     intensity = ${intensity}
   []
+  [inlet_TV2]
+    type = INSFVInletIntensityTKEBC
+    boundary = 'left'
+    variable = TV2
+    u = vel_x
+    v = vel_y
+    intensity = '${fparse 2.0/3.0*intensity}'
+  []
   [inlet_TKED]
     type = INSFVMixingLengthTKEDBC
     boundary = 'left'
     variable = TKED
     k = TKE
-    characteristic_length = '${fparse 2*H}'
+    characteristic_length = '${fparse H/epsilon_scaling}'
   []
-  [walls_mu_t]
-    type = INSFVTurbulentViscosityWallFunction
+  [walls_TKE]
+    type = FVDirichletBC
     boundary = 'top'
-    variable = mu_t
+    variable = TKE
+    value = 0.0
+  []
+  [walls_hom_TV2]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = TV2
+    value = 0.0
+  []
+  [walls_func_TV2]
+    type = INSFVTV2WallFunctionBC
+    boundary = 'top'
+    variable = TV2
+    rho = ${rho}
+    mu = ${mu}
+    k = TKE
+  []
+  [walls_hom_TF]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = TF
+    value = 0.0
+  []
+  [walls_func_TF]
+    type = INSFVTFWallFunctionBC
+    boundary = 'top'
+    variable = TF
+    rho = ${rho}
+    mu = ${mu}
+    k = TKE
+    epsilon = TKED
+    v2 = TV2
+  []
+  [walls_TKED]
+    type = INSFVTKEDWallFunctionBC
+    boundary = 'top'
+    variable = TKED
     u = vel_x
     v = vel_y
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
     k = TKE
-    wall_treatment = ${wall_treatment}
   []
   [sym-u]
     type = INSFVSymmetryVelocityBC
@@ -346,6 +448,10 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
     two_term_boundary_expansion = false
   []
+  [mu_t_v2f]
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = false
+  []
 []
 
 [AuxKernels]
@@ -365,6 +471,16 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     non_equilibrium_treatment = ${non_equilibrium_treatment}
     execute_on = 'NONLINEAR'
   []
+  [compute_mu_t_v2f]
+    type = v2fViscosityAux
+    variable = mu_t_v2f
+    k = TKE
+    epsilon = TKED
+    v2 = TV2
+    mu = ${mu}
+    rho = ${rho}
+    execute_on = 'NONLINEAR'
+  []
 []
 
 [Executioner]
@@ -372,16 +488,16 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  turbulence_systems = 'TKED_system TKE_system'
+  turbulence_systems = 'TKED_system TKE_system TF_system TV2_system'
 
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.25 0.25'
-  num_iterations = 100
-  pressure_absolute_tolerance = 1e-12
-  momentum_absolute_tolerance = 1e-12
-  turbulence_absolute_tolerance = '1e-12 1e-12'
+  turbulence_equation_relaxation = '0.5 0.5 0.5 0.5'
+  num_iterations = 1000
+  pressure_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-10
+  turbulence_absolute_tolerance = '1e-10 1e-10 1e-10 1e-10'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -396,10 +512,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
   print_fields = false
-
-  pin_pressure = true
-  pressure_pin_value = 0.0
-  pressure_pin_point = '0.01 0.099 0.0'
 []
 
 [Outputs]

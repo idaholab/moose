@@ -282,6 +282,12 @@ private:
   /// The user-defined relaxation parameter(s) for the turbulence equation(s)
   const std::vector<Real> _turbulence_equation_relaxation;
 
+  /// The user-defined number of iterations to activate the solution of the turbulence field
+  std::vector<unsigned int> _turbulence_iterations_to_activate;
+
+  /// Turbulent decay rate factors
+  std::vector<Real> _turbulence_relaxation_decay_rate;
+
   /// The user-defined absolute tolerance for determining the convergence in momentum
   const Real _momentum_absolute_tolerance;
 

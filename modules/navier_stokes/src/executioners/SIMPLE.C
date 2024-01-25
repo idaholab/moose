@@ -84,6 +84,20 @@ SIMPLE::validParams()
       "equations. (=1 for no relaxation, "
       "diagonal dominance will still be enforced)");
 
+  params.addParam<std::vector<unsigned int>>(
+      "turbulence_iterations_to_activate",
+      std::vector<unsigned int>(),
+      "The number of iterations to activate the solution of each turbulent field. "
+      "Until the iteration number is larger than the number defined in this vector, the turbulent "
+      "field will keep the intial value. ");
+
+  params.addParam<std::vector<Real>>(
+      "turbulence_relaxation_decay_rate",
+      std::vector<Real>(),
+      "The decay rate of the relaxation factors for the turbulence fields. "
+      "The effective relaxation factor is computed as relaxation_factor*(1-exp(-iteration_number / "
+      "decay_rate)). ");
+
   params.addParamNamesToGroup("pressure_variable_relaxation momentum_equation_relaxation "
                               "energy_equation_relaxation passive_scalar_equation_relaxation "
                               "turbulence_equation_relaxation",
@@ -390,6 +404,10 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _passive_scalar_equation_relaxation(
         getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
     _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
+    _turbulence_iterations_to_activate(
+        getParam<std::vector<unsigned int>>("turbulence_iterations_to_activate")),
+    _turbulence_relaxation_decay_rate(
+        getParam<std::vector<Real>>("turbulence_relaxation_decay_rate")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
@@ -462,6 +480,20 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
       paramError("turbulence_absolute_tolerance",
                  "The number of absolute tolerances does not match the number of "
                  "turbulence equations!");
+    if ((_turbulence_iterations_to_activate.size() != turbulence_system_names.size()) &&
+        (_turbulence_iterations_to_activate.size() != 0))
+      paramError("turbulence_iterations_to_activate",
+                 "The number of iterations to activate the solution of turbulence for each field "
+                 "does not match the number of turbulence equations!");
+    else if (_turbulence_iterations_to_activate.size() == 0)
+      _turbulence_iterations_to_activate.assign(turbulence_system_names.size(), 0);
+    if ((_turbulence_relaxation_decay_rate.size() != turbulence_system_names.size()) &&
+        (_turbulence_relaxation_decay_rate.size() != 0))
+      paramError("turbulence_relaxation_decay_rate",
+                 "The number of iterations to activate the solution of turbulence for each field "
+                 "does not match the number of turbulence equations!");
+    else if (_turbulence_relaxation_decay_rate.size() == 0)
+      _turbulence_relaxation_decay_rate.assign(turbulence_system_names.size(), 0.0);
 
     for (auto system_i : index_range(turbulence_system_names))
     {
@@ -610,7 +642,9 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
                                   "turbulence_l_abs_tol",
                                   "turbulence_l_max_its",
                                   "turbulence_equation_relaxation",
-                                  "turbulence_absolute_tolerance"},
+                                  "turbulence_absolute_tolerance",
+                                  "turbulence_iterations_to_activate",
+                                  "_turbulence_relaxation_decay_rate"},
                                  false);
 
   _time = 0;
@@ -1107,6 +1141,9 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
   // We compute the normalization factors based on the fluxes
   Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
+  if (std::isnan(norm_factor))
+    norm_factor = solution.l2_norm();
+
   // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
@@ -1360,19 +1397,29 @@ SIMPLE::execute()
 
         for (auto system_i : index_range(_turbulence_systems))
         {
-          residual_index += 1;
-          ns_residuals[residual_index] =
-              solveAdvectedSystem(_turbulence_system_numbers[system_i],
-                                  *_turbulence_systems[system_i],
-                                  _turbulence_equation_relaxation[system_i],
-                                  _turbulence_linear_control,
-                                  _turbulence_l_abs_tol);
+          if (iteration_counter >= _turbulence_iterations_to_activate[system_i])
+          {
+            residual_index += 1;
+            ns_residuals[residual_index] =
+                solveAdvectedSystem(_turbulence_system_numbers[system_i],
+                                    *_turbulence_systems[system_i],
+                                    _turbulence_equation_relaxation[system_i],
+                                    _turbulence_linear_control,
+                                    _turbulence_l_abs_tol);
 
-          limitSolutionUpdate(*_turbulence_systems[system_i]);
+            // Relax the turbulence update for the next momentum predictor
+            const auto relexation_ratio_factor =
+                (iteration_counter - _turbulence_iterations_to_activate[system_i]) /
+                (_turbulence_relaxation_decay_rate[system_i] + libMesh::TOLERANCE);
+            const auto relaxation_ratio = std::min(relexation_ratio_factor, Real(10.0));
+            const auto local_relaxation_coefficient =
+                _turbulence_equation_relaxation[system_i] *
+                (1.0 + std::sqrt(libMesh::TOLERANCE) - std::exp(-relaxation_ratio));
+            relaxSolutionUpdate(*_turbulence_systems[system_i], local_relaxation_coefficient);
 
-          // Relax the turbulence update for the next momentum predictor
-          relaxSolutionUpdate(*_turbulence_systems[system_i],
-                              _turbulence_equation_relaxation[system_i]);
+            // Limit solution update to avoid non-physical values
+            limitSolutionUpdate(*_turbulence_systems[system_i]);
+          }
         }
       }
 

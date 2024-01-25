@@ -1,0 +1,69 @@
+[Tests]
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#26610'
+  [channel_ERCOFTAC]
+    requirement = 'The system shall be able to solve fluid flow problems with the v2f turbuelnce model for a standard channel, '
+    [result_no_wall_v2f_channel]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC_v2f.i'
+      exodiff = 'channel_ERCOFTAC_v2f_no_walls.e'
+      detail = 'and reach converged results with segregated solvers without specific wall treatment.'
+      abs_zero = 1e-6
+      heavy = true
+      cli_args = "FVBCs/inactive='walls_func_TV2 walls_func_TF' "
+                 "Outputs/file_base=channel_ERCOFTAC_v2f_no_walls"
+    []
+    [result_no_wall_v2f_channel_short]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC_v2f.i'
+      exodiff = 'channel_ERCOFTAC_v2f_no_walls_short.e'
+      detail = 'and pass debugging checks without specific wall treatment.'
+      abs_zero = 1e-6
+      cli_args = "FVBCs/inactive='walls_func_TV2 walls_func_TF' "
+                 "Outputs/file_base=channel_ERCOFTAC_v2f_no_walls_short "
+                 "Executioner/num_iterations=10"
+    []
+    [result_damped_wall_v2f_channel]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC_v2f.i'
+      exodiff = 'channel_ERCOFTAC_v2f_damped_walls.e'
+      detail = 'and reach converged results with segregated solvers with damped wall treatment.'
+      abs_zero = 1e-6
+      heavy = true
+      cli_args = "FVBCs/inactive='walls_hom_TV2 walls_hom_TF walls_hom_TF' "
+                 "Outputs/file_base=channel_ERCOFTAC_v2f_damped_walls"
+    []
+    [result_damped_wall_v2f_channel_short]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC_v2f.i'
+      exodiff = 'channel_ERCOFTAC_v2f_damped_walls_short.e'
+      detail = 'and pass debugging checks with damped wall treatment.'
+      abs_zero = 1e-6
+      cli_args = "FVBCs/inactive='walls_hom_TV2 walls_hom_TF walls_hom_TF' "
+                 "Outputs/file_base=channel_ERCOFTAC_v2f_damped_walls_short "
+                 "Executioner/num_iterations=10"
+    []
+    [result_standard_wall_v2f_channel]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC_v2f.i'
+      exodiff = 'channel_ERCOFTAC_v2f_standard_walls.e'
+      detail = 'and reach converged results with segregated solvers with standard wall treatment.'
+      abs_zero = 1e-6
+      heavy = true
+      cli_args = "FVBCs/inactive='walls_hom_TV2 walls_hom_TF walls_hom_TF' "
+                 "Outputs/file_base=channel_ERCOFTAC_v2f_standard_walls "
+                 "Executioner/turbulence_equation_relaxation='0.1 0.1 0.1 0.1' walls='top'"
+    []
+    [result_standard_wall_v2f_channel_short]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC_v2f.i'
+      exodiff = 'channel_ERCOFTAC_v2f_standard_walls_short.e'
+      detail = 'and pass debugging checks with standard wall treatment.'
+      abs_zero = 1e-6
+      cli_args = "FVBCs/inactive='walls_hom_TV2 walls_hom_TF walls_hom_TF' "
+                 "Outputs/file_base=channel_ERCOFTAC_v2f_standard_walls_short "
+                 "Executioner/turbulence_equation_relaxation='0.1 0.1 0.1 0.1' walls='top' "
+                 "Executioner/num_iterations=10"
+    []
+  []
+[]
