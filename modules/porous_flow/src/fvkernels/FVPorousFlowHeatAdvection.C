@@ -7,43 +7,40 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVPorousFlowAdvectiveFlux.h"
+#include "FVPorousFlowHeatAdvection.h"
 #include "PorousFlowDictator.h"
 
-registerADMooseObject("PorousFlowApp", FVPorousFlowAdvectiveFlux);
+registerADMooseObject("PorousFlowApp", FVPorousFlowHeatAdvection);
 
 InputParameters
-FVPorousFlowAdvectiveFlux::validParams()
+FVPorousFlowHeatAdvection::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   RealVectorValue g(0, 0, -9.81);
   params.addParam<RealVectorValue>("gravity", g, "Gravity vector. Defaults to (0, 0, -9.81)");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator",
                                           "The PorousFlowDictator UserObject");
-  params.addParam<unsigned int>("fluid_component", 0, "The fluid component for this kernel");
   params.set<unsigned short>("ghost_layers") = 2;
-  params.addClassDescription("Advective Darcy flux");
+  params.addClassDescription("Heat flux advected by the fluid");
   return params;
 }
 
-FVPorousFlowAdvectiveFlux::FVPorousFlowAdvectiveFlux(const InputParameters & params)
+FVPorousFlowHeatAdvection::FVPorousFlowHeatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_dictator.numPhases()),
-    _fluid_component(getParam<unsigned int>("fluid_component")),
     _density(getADMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
     _density_neighbor(
         getNeighborADMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
     _viscosity(getADMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp")),
     _viscosity_neighbor(
         getNeighborADMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp")),
+    _enthalpy(getADMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp")),
+    _enthalpy_neighbor(
+        getNeighborADMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp")),
     _relperm(getADMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp")),
     _relperm_neighbor(
         getNeighborADMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp")),
-    _mass_fractions(
-        getADMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp")),
-    _mass_fractions_neighbor(
-        getNeighborADMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp")),
     _permeability(getADMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
     _permeability_neighbor(
         getNeighborADMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
@@ -53,18 +50,10 @@ FVPorousFlowAdvectiveFlux::FVPorousFlowAdvectiveFlux(const InputParameters & par
     _grad_p(getADMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
     _gravity(getParam<RealVectorValue>("gravity"))
 {
-  if (_fluid_component >= _dictator.numComponents())
-    paramError(
-        "fluid_component",
-        "The Dictator proclaims that the maximum fluid component index in this simulation is ",
-        _dictator.numComponents() - 1,
-        " whereas you have used ",
-        _fluid_component,
-        ". Remember that indexing starts at 0. The Dictator does not take such mistakes lightly.");
 }
 
 ADReal
-FVPorousFlowAdvectiveFlux::computeQpResidual()
+FVPorousFlowHeatAdvection::computeQpResidual()
 {
   ADReal flux = 0.0;
   ADRealGradient pressure_grad;
@@ -78,8 +67,8 @@ FVPorousFlowAdvectiveFlux::computeQpResidual()
       const auto & gradp = -_grad_p[_qp][p];
       pressure_grad = gradp + _density[_qp][p] * _gravity;
 
-      mobility = _mass_fractions[_qp][p][_fluid_component] * _relperm[_qp][p] * _permeability[_qp] *
-                 _density[_qp][p] / _viscosity[_qp][p];
+      mobility = _enthalpy[_qp][p] * _relperm[_qp][p] * _permeability[_qp] * _density[_qp][p] /
+                 _viscosity[_qp][p];
     }
     else
     {
@@ -89,12 +78,12 @@ FVPorousFlowAdvectiveFlux::computeQpResidual()
 
       const auto gradp = (p_elem - p_neighbor) * _face_info->eCN() / _face_info->dCNMag();
 
-      const auto mobility_element = _mass_fractions[_qp][p][_fluid_component] * _relperm[_qp][p] *
-                                    _permeability[_qp] * _density[_qp][p] / _viscosity[_qp][p];
+      const auto mobility_element = _enthalpy[_qp][p] * _relperm[_qp][p] * _permeability[_qp] *
+                                    _density[_qp][p] / _viscosity[_qp][p];
 
-      const auto mobility_neighbor = _mass_fractions_neighbor[_qp][p][_fluid_component] *
-                                     _relperm_neighbor[_qp][p] * _permeability_neighbor[_qp] *
-                                     _density_neighbor[_qp][p] / _viscosity_neighbor[_qp][p];
+      const auto mobility_neighbor = _enthalpy_neighbor[_qp][p] * _relperm_neighbor[_qp][p] *
+                                     _permeability_neighbor[_qp] * _density_neighbor[_qp][p] /
+                                     _viscosity_neighbor[_qp][p];
 
       pressure_grad = gradp + _density[_qp][p] * _gravity;
 

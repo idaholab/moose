@@ -12,6 +12,10 @@
 #include "FVTimeKernel.h"
 
 class PorousFlowDictator;
+
+/**
+ * Time derivative of fluid mass
+ */
 class FVPorousFlowMassTimeDerivative : public FVTimeKernel
 {
 public:
@@ -21,16 +25,26 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// UserObject that holds information (number of phases, components, etc)
   const PorousFlowDictator & _dictator;
+  /// Number of fluid phases present
   const unsigned int _num_phases;
+  /// Index of the fluid component this kernel applies to
   const unsigned int _fluid_component;
 
+  /// Porosity
   const ADMaterialProperty<Real> & _porosity;
-  const ADMaterialProperty<std::vector<Real>> & _density;
-  const ADMaterialProperty<std::vector<Real>> & _saturation;
-  const ADMaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
   const MaterialProperty<Real> & _porosity_old;
+
+  /// Fluid density
+  const ADMaterialProperty<std::vector<Real>> & _density;
   const MaterialProperty<std::vector<Real>> & _density_old;
+
+  /// Fluid phase saturation
+  const ADMaterialProperty<std::vector<Real>> & _saturation;
   const MaterialProperty<std::vector<Real>> & _saturation_old;
+
+  /// Mass fraction of fluid components in fluid phases
+  const ADMaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
   const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions_old;
 };

@@ -98,15 +98,19 @@ PorousFlowEnergyTimeDerivative::PorousFlowEnergyTimeDerivative(const InputParame
 Real
 PorousFlowEnergyTimeDerivative::computeQpResidual()
 {
+  /// Porous matrix heat energy
   Real energy = (1.0 - _porosity[_i]) * _rock_energy_nodal[_i];
   Real energy_old = (1.0 - _porosity_old[_i]) * _rock_energy_nodal_old[_i];
-  for (unsigned ph = 0; ph < _num_phases; ++ph)
-  {
-    energy += (*_fluid_density)[_i][ph] * (*_fluid_saturation_nodal)[_i][ph] *
-              (*_energy_nodal)[_i][ph] * _porosity[_i];
-    energy_old += (*_fluid_density_old)[_i][ph] * (*_fluid_saturation_nodal_old)[_i][ph] *
-                  (*_energy_nodal_old)[_i][ph] * _porosity_old[_i];
-  }
+
+  /// Add the fluid heat energy
+  if (_fluid_present)
+    for (unsigned ph = 0; ph < _num_phases; ++ph)
+    {
+      energy += (*_fluid_density)[_i][ph] * (*_fluid_saturation_nodal)[_i][ph] *
+                (*_energy_nodal)[_i][ph] * _porosity[_i];
+      energy_old += (*_fluid_density_old)[_i][ph] * (*_fluid_saturation_nodal_old)[_i][ph] *
+                    (*_energy_nodal_old)[_i][ph] * _porosity_old[_i];
+    }
   const Real strain = (_has_total_strain ? (*_total_strain_old)[_qp].trace() : 0.0);
 
   return _test[_i][_qp] * (1.0 + strain) * (energy - energy_old) / _dt;

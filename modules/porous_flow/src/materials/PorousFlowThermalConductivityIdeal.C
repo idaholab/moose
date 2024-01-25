@@ -10,11 +10,13 @@
 #include "PorousFlowThermalConductivityIdeal.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowThermalConductivityIdeal);
+registerMooseObject("PorousFlowApp", ADPorousFlowThermalConductivityIdeal);
 
+template <bool is_ad>
 InputParameters
-PorousFlowThermalConductivityIdeal::validParams()
+PorousFlowThermalConductivityIdealTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowThermalConductivityBase::validParams();
+  InputParameters params = PorousFlowThermalConductivityBaseTempl<is_ad>::validParams();
   params.addRequiredParam<RealTensorValue>(
       "dry_thermal_conductivity",
       "The thermal conductivity of the rock matrix when the aqueous saturation is zero");
@@ -40,22 +42,26 @@ PorousFlowThermalConductivityIdeal::validParams()
   return params;
 }
 
-PorousFlowThermalConductivityIdeal::PorousFlowThermalConductivityIdeal(
+template <bool is_ad>
+PorousFlowThermalConductivityIdealTempl<is_ad>::PorousFlowThermalConductivityIdealTempl(
     const InputParameters & parameters)
-  : PorousFlowThermalConductivityBase(parameters),
-    _la_dry(getParam<RealTensorValue>("dry_thermal_conductivity")),
+  : PorousFlowThermalConductivityBaseTempl<is_ad>(parameters),
+    _la_dry(this->template getParam<RealTensorValue>("dry_thermal_conductivity")),
     _wet_and_dry_differ(parameters.isParamValid("wet_thermal_conductivity")),
-    _la_wet(_wet_and_dry_differ ? getParam<RealTensorValue>("wet_thermal_conductivity")
-                                : getParam<RealTensorValue>("dry_thermal_conductivity")),
-    _exponent(getParam<Real>("exponent")),
+    _la_wet(_wet_and_dry_differ
+                ? this->template getParam<RealTensorValue>("wet_thermal_conductivity")
+                : this->template getParam<RealTensorValue>("dry_thermal_conductivity")),
+    _exponent(this->template getParam<Real>("exponent")),
     _aqueous_phase(_num_phases > 0),
-    _aqueous_phase_number(getParam<unsigned>("aqueous_phase_number")),
+    _aqueous_phase_number(this->template getParam<unsigned>("aqueous_phase_number")),
     _saturation_qp(_aqueous_phase
-                       ? &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")
+                       ? &this->template getGenericMaterialProperty<std::vector<Real>, is_ad>(
+                             "PorousFlow_saturation_qp")
                        : nullptr),
-    _dsaturation_qp_dvar(_aqueous_phase ? &getMaterialProperty<std::vector<std::vector<Real>>>(
-                                              "dPorousFlow_saturation_qp_dvar")
-                                        : nullptr)
+    _dsaturation_qp_dvar(_aqueous_phase && !is_ad
+                             ? &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                                   "dPorousFlow_saturation_qp_dvar")
+                             : nullptr)
 {
   if (_aqueous_phase && (_aqueous_phase_number >= _num_phases))
     mooseError("PorousFlowThermalConductivityIdeal: Your aqueous phase number, ",
@@ -65,18 +71,25 @@ PorousFlowThermalConductivityIdeal::PorousFlowThermalConductivityIdeal(
                "\n");
 }
 
+template <bool is_ad>
 void
-PorousFlowThermalConductivityIdeal::computeQpProperties()
+PorousFlowThermalConductivityIdealTempl<is_ad>::computeQpProperties()
 {
   _la_qp[_qp] = _la_dry;
   if (_aqueous_phase && _wet_and_dry_differ)
     _la_qp[_qp] +=
         std::pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent) * (_la_wet - _la_dry);
 
-  _dla_qp_dvar[_qp].assign(_num_var, RealTensorValue());
-  if (_aqueous_phase && _wet_and_dry_differ)
-    for (unsigned v = 0; v < _num_var; ++v)
-      _dla_qp_dvar[_qp][v] =
-          _exponent * std::pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent - 1.0) *
-          (*_dsaturation_qp_dvar)[_qp][_aqueous_phase_number][v] * (_la_wet - _la_dry);
+  if constexpr (!is_ad)
+  {
+    (*_dla_qp_dvar)[_qp].assign(_num_var, RealTensorValue());
+    if (_aqueous_phase && _wet_and_dry_differ)
+      for (const auto v : make_range(_num_var))
+        (*_dla_qp_dvar)[_qp][v] =
+            _exponent * std::pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent - 1.0) *
+            (*_dsaturation_qp_dvar)[_qp][_aqueous_phase_number][v] * (_la_wet - _la_dry);
+  }
 }
+
+template class PorousFlowThermalConductivityIdealTempl<false>;
+template class PorousFlowThermalConductivityIdealTempl<true>;
