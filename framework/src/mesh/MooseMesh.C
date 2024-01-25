@@ -1205,7 +1205,8 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
-  _sub_to_data.clear();
+  _sub_to_neighbor_subs.clear();
+  _subdomain_boundary_ids.clear();
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
   _higher_d_elem_side_to_lower_d_elem.clear();
@@ -1217,8 +1218,6 @@ MooseMesh::cacheInfo()
 
     if (ip_elem)
     {
-      if (elem->active())
-        _sub_to_data[elem->subdomain_id()].is_lower_d = true;
       unsigned int ip_side = ip_elem->which_side_am_i(elem);
 
       // For some grid sequencing tests: ip_side == libMesh::invalid_uint
@@ -1240,11 +1239,12 @@ MooseMesh::cacheInfo()
   for (const auto & elem : getMesh().active_local_element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
-    auto & sub_data = _sub_to_data[subdomain_id];
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
-      sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
+      std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
+
+      subdomain_set.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
       if (neig)
@@ -1253,17 +1253,15 @@ MooseMesh::cacheInfo()
                                                                       boundary_ids.end());
         SubdomainID neighbor_subdomain_id = neig->subdomain_id();
         if (neighbor_subdomain_id != subdomain_id)
-          sub_data.neighbor_subs.insert(neighbor_subdomain_id);
+          _sub_to_neighbor_subs[subdomain_id].insert(neighbor_subdomain_id);
       }
     }
   }
 
-  for (const auto blk_id : _mesh_subdomains)
+  for (const auto & blk_id : _mesh_subdomains)
   {
-    auto & sub_data = _sub_to_data[blk_id];
-    _communicator.set_union(sub_data.neighbor_subs);
-    _communicator.set_union(sub_data.boundary_ids);
-    _communicator.max(sub_data.is_lower_d);
+    _communicator.set_union(_sub_to_neighbor_subs[blk_id]);
+    _communicator.set_union(_subdomain_boundary_ids[blk_id]);
     _communicator.set_union(_neighbor_subdomain_boundary_ids[blk_id]);
   }
 }
@@ -3238,12 +3236,13 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 const std::set<BoundaryID> &
 MooseMesh::getSubdomainBoundaryIds(const SubdomainID subdomain_id) const
 {
-  const auto it = _sub_to_data.find(subdomain_id);
+  std::unordered_map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
+      _subdomain_boundary_ids.find(subdomain_id);
 
-  if (it == _sub_to_data.end())
+  if (it == _subdomain_boundary_ids.end())
     mooseError("Unable to find subdomain ID: ", subdomain_id, '.');
 
-  return it->second.boundary_ids;
+  return it->second;
 }
 
 std::set<BoundaryID>
@@ -3263,9 +3262,9 @@ std::set<SubdomainID>
 MooseMesh::getBoundaryConnectedBlocks(const BoundaryID bid) const
 {
   std::set<SubdomainID> subdomain_ids;
-  for (const auto & [sub_id, data] : _sub_to_data)
-    if (data.boundary_ids.find(bid) != data.boundary_ids.end())
-      subdomain_ids.insert(sub_id);
+  for (const auto & it : _subdomain_boundary_ids)
+    if (it.second.find(bid) != it.second.end())
+      subdomain_ids.insert(it.first);
 
   return subdomain_ids;
 }
@@ -3295,12 +3294,12 @@ MooseMesh::getInterfaceConnectedBlocks(const BoundaryID bid) const
 const std::set<SubdomainID> &
 MooseMesh::getBlockConnectedBlocks(const SubdomainID subdomain_id) const
 {
-  const auto it = _sub_to_data.find(subdomain_id);
+  auto it = _sub_to_neighbor_subs.find(subdomain_id);
 
-  if (it == _sub_to_data.end())
+  if (it == _sub_to_neighbor_subs.end())
     mooseError("Unable to find subdomain ID: ", subdomain_id, '.');
 
-  return it->second.neighbor_subs;
+  return it->second;
 }
 
 bool

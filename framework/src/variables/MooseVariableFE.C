@@ -218,23 +218,16 @@ MooseVariableFE<OutputType>::getElementalValueOlder(const Elem * elem, unsigned 
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::insert(NumericVector<Number> & vector)
+MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
 {
-  _element_data->insert(vector);
+  _element_data->insert(residual);
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::insertLower(NumericVector<Number> & vector)
+MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
 {
-  _lower_data->insert(vector);
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::add(NumericVector<Number> & vector)
-{
-  _element_data->add(vector);
+  _element_data->add(residual);
 }
 
 template <typename OutputType>
@@ -707,13 +700,6 @@ void
 MooseVariableFE<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   _element_data->setDofValues(values);
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::setLowerDofValues(const DenseVector<OutputData> & values)
-{
-  _lower_data->setDofValues(values);
 }
 
 template <typename OutputType>

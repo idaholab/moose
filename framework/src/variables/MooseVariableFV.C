@@ -150,13 +150,6 @@ MooseVariableFV<OutputType>::insert(NumericVector<Number> & residual)
 
 template <typename OutputType>
 void
-MooseVariableFV<OutputType>::insertLower(NumericVector<Number> &)
-{
-  lowerDError();
-}
-
-template <typename OutputType>
-void
 MooseVariableFV<OutputType>::add(NumericVector<Number> & residual)
 {
   _element_data->add(residual);
@@ -400,13 +393,6 @@ void
 MooseVariableFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   _element_data->setDofValues(values);
-}
-
-template <typename OutputType>
-void
-MooseVariableFV<OutputType>::setLowerDofValues(const DenseVector<OutputData> &)
-{
-  lowerDError();
 }
 
 template <typename OutputType>

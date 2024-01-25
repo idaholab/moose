@@ -82,7 +82,6 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         _fe_problem.reinitElemFace(elem, side, boundary_id, _tid);
 
         const Elem * lower_d_elem = _fe_problem.mesh().getLowerDElem(elem, side);
-        _fe_problem.setCurrentLowerDElem(lower_d_elem, _tid);
         if (lower_d_elem)
           _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
@@ -127,7 +126,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         for (const auto & aux : iter->second)
         {
           aux->compute();
-          aux->insert();
+          aux->variable().insert(_aux_sys.solution());
         }
 
         if (_need_materials)

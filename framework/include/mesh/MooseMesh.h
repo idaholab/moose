@@ -1349,13 +1349,6 @@ public:
 
   void buildPRefinementAndCoarseningMaps(Assembly * assembly);
 
-  /**
-   * @return Whether the subdomain indicated by \p subdomain_id is a lower-dimensional manifold of
-   * some higher-dimensional subdomain, or in implementation speak, whether the elements of this
-   * subdomain have non-null interior parents
-   */
-  bool isLowerD(const SubdomainID subdomain_id) const;
-
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1724,21 +1717,11 @@ private:
   std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>>
       _elem_type_to_p_coarsening_side_map;
 
-  struct SubdomainData
-  {
-    /// Neighboring subdomain ids
-    std::set<SubdomainID> neighbor_subs;
+  /// Holds a map from subomdain ids to the neighboring subdomain ids
+  std::unordered_map<SubdomainID, std::set<SubdomainID>> _sub_to_neighbor_subs;
 
-    /// The boundary ids that are attached. This set will include any sideset boundary ID that
-    /// is a side of any part of the subdomain
-    std::set<BoundaryID> boundary_ids;
-
-    /// Whether this subdomain is a lower-dimensional manifold of a higher-dimensional subdomain
-    bool is_lower_d;
-  };
-
-  /// Holds a map from subdomain ids to associated data
-  std::unordered_map<SubdomainID, SubdomainData> _sub_to_data;
+  /// Holds a map from subomdain ids to the boundary ids that are attached to it
+  std::unordered_map<SubdomainID, std::set<BoundaryID>> _subdomain_boundary_ids;
 
   /// Holds a map from neighbor subomdain ids to the boundary ids that are attached to it
   std::unordered_map<SubdomainID, std::set<BoundaryID>> _neighbor_subdomain_boundary_ids;
@@ -2107,10 +2090,4 @@ inline const std::unordered_map<std::pair<const Elem *, unsigned short int>, con
 MooseMesh::getLowerDElemMap() const
 {
   return _higher_d_elem_side_to_lower_d_elem;
-}
-
-inline bool
-MooseMesh::isLowerD(const SubdomainID subdomain_id) const
-{
-  return libmesh_map_find(_sub_to_data, subdomain_id).is_lower_d;
 }
