@@ -612,6 +612,8 @@ MooseMesh::buildLowerDMesh()
   // update_parallel_id_counts(), cache_elem_dims(), etc. except partitioning here.
   const bool skip_partitioning_old = mesh.skip_partitioning();
   mesh.skip_partitioning(true);
+  // Finding neighbors is ambiguous for lower-dimensional elements on interior faces
+  mesh.allow_find_neighbors(false);
   mesh.prepare_for_use();
   mesh.skip_partitioning(skip_partitioning_old);
 }
