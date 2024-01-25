@@ -1906,6 +1906,11 @@ public:
    */
   void havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for_families);
 
+  /**
+   * Set the current lower dimensional element. This may be null
+   */
+  void setCurrentLowerDElem(const Elem * const lower_d_elem);
+
 private:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -3152,4 +3157,10 @@ Assembly::assignDisplacements(
     std::vector<std::pair<unsigned int, unsigned short>> && disp_numbers_and_directions)
 {
   _disp_numbers_and_directions = std::move(disp_numbers_and_directions);
+}
+
+inline void
+Assembly::setCurrentLowerDElem(const Elem * const lower_d_elem)
+{
+  _current_lower_d_elem = lower_d_elem;
 }

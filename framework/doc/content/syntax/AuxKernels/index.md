@@ -67,12 +67,12 @@ is done to allow the syntax to be consistent regardless of the AuxKernel flavor:
 
 In order to compute properties in the mortar sense, it is necessary to loop over the mortar segment
 mesh to spatially integrate variables. `MortarNodalAuxKernel`s offer this functionality where these "weighted" variables,
-which intervene in the computation of contact constraints and their residuals, can be coupled to generate the desired output value. 
-Therefore, if postprocessing of mortar quantities is required, nodal mortar auxiliary kernels can be employed. 
+which intervene in the computation of contact constraints and their residuals, can be coupled to generate the desired output value.
+Therefore, if postprocessing of mortar quantities is required, nodal mortar auxiliary kernels can be employed.
 Objects inheriting from `MortarNodalAuxKernel` allow for said operations on the mortar lower-dimensional domains featuring similar
 functionality to other nodal auxiliary kernels, including the possibility of computing quantities in an
 `incremental` manner.
- 
+
 ## Execute Flags
 
 AuxKernel objects inherit from the [SetupInterface.md] so they include the "execute_on" variable.
@@ -87,6 +87,16 @@ residual evaluating the AuxKernel on each linear iteration is not necessary and 
 execution of a simulation. In this case, the `EXEC_LINEAR` flag should be removed. Likely the
 `EXEC_INITIAL` flag should be added to perform the auxiliary variable calculation during the initial
 setup phase as well.
+
+## Populating lower-dimensional auxiliary variables
+
+Lower-dimensional auxiliary variables may be populated using boundary restricted
+auxiliary kernels. The boundary restriction of the aux kernel should be
+coincident with (a subset of) the lower-dimensional blocks that the
+lower-dimensional variable lives on. Using a boundary restricted auxiliary
+kernel as opposed to a lower-d block-restricted auxiliary kernel allows pulling
+in coincident face evaluations of higher-dimensional variables and material
+properties as well as evaluations of coupled lower-dimensional variables.
 
 ## Example A: Post processing with AuxKernel
 
