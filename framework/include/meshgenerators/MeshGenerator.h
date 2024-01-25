@@ -376,8 +376,8 @@ protected:
    */
   void declareNullMeshName(const MeshGeneratorName & name);
 
-  /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
-  const std::shared_ptr<MooseMesh> & _mesh;
+  /// Pointer to the owning mesh
+  MooseMesh * const _mesh;
 
 private:
   /**
