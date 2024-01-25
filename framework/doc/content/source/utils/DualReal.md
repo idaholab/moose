@@ -33,14 +33,13 @@ options for `D` types, including:
     - Avoid looping over the whole size of the std::array by
       maintaining a dynamic size data member
 
-The default configuration in MOOSE uses `NumberArray` for derivative storage
-because it is generally the fastest container (albeit
-inflexible). `SemiDynamicSparseNumberArray` can be selected as the derivative
-storage type by running `./configure --with-derivative-type=sparse` in MOOSE's
-framework directory. The underlying derivative storage array size for both
-`NumberArray` and `SemiDynamicSparseNumberArray` can be modified by running
-`configure` with the option `--with-derivative-size=<n>` where `<n>` is the
-desired size of the container. By default, MOOSE is configured `--with-derivative-size=64`.
+Currently, MOOSE uses `SemiDynamicSparseNumberArray` for derivative storage
+because it is much more flexible than `NumberArray` and more performant than
+`DynamicSparseNumberArray`.
+The underlying derivative storage array size for `SemiDynamicSparseNumberArray`
+can be modified by running `configure` with the option
+`--with-derivative-size=<n>` where `<n>` is the desired size of the container.
+By default, MOOSE is configured `--with-derivative-size=64`.
 
 ## AD-Related Timings id=timings
 
@@ -60,5 +59,5 @@ desired size of the container. By default, MOOSE is configured `--with-derivativ
 
 #### SNESComputeJacobian timing
 
-- MOOSE non-sparse config: 9.61 seconds
-- MOOSE sparse config: 9.22 seconds
+- MOOSE non-sparse config: 9.61 seconds (MOOSE's old config, no longer available)
+- MOOSE sparse config: 9.22 seconds (MOOSE's current config)
