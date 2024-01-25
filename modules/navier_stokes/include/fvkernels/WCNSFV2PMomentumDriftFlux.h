@@ -12,13 +12,15 @@
 #include "MathFVUtils.h"
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
-#include "INSFVVelocityVariable.h"
 
-class INSFVMomentumDiffusion : public INSFVFluxKernel
+/**
+ * Adds drift flux kernel coming for two-phase mixture model
+ */
+class WCNSFV2PMomentumDriftFlux : public INSFVFluxKernel
 {
 public:
   static InputParameters validParams();
-  INSFVMomentumDiffusion(const InputParameters & params);
+  WCNSFV2PMomentumDriftFlux(const InputParameters & params);
   using INSFVFluxKernel::gatherRCData;
   void gatherRCData(const FaceInfo & fi) override final;
 
@@ -31,31 +33,28 @@ protected:
 
   virtual ADReal computeSegregatedContribution() override;
 
-  /// The dynamic viscosity
-  const Moose::Functor<ADReal> & _mu;
+  /// The dimension of the simulation
+  const unsigned int _dim;
 
-  /// The face interpolation method for the viscosity
-  const Moose::FV::InterpMethod _mu_interp_method;
+  /// Dispersed phase density
+  const Moose::Functor<ADReal> & _rho_d;
+
+  /// Dispersed phase fraction
+  const Moose::Functor<ADReal> & _f_d;
+
+  /// slip velocity in direction x
+  const Moose::Functor<ADReal> & _u_slip;
+  /// slip velocity in direction y
+  const Moose::Functor<ADReal> * const _v_slip;
+  /// slip velocity in direction z
+  const Moose::Functor<ADReal> * const _w_slip;
+
+  /// The face interpolation method for the density
+  const Moose::FV::InterpMethod _density_interp_method;
 
   /// The a coefficient for the element
   ADReal _ae = 0;
 
   /// The a coefficient for the neighbor
   ADReal _an = 0;
-
-  /// x-velocity
-  const Moose::Functor<ADReal> * const _u_var;
-  /// y-velocity
-  const Moose::Functor<ADReal> * const _v_var;
-  /// z-velocity
-  const Moose::Functor<ADReal> * const _w_var;
-
-  /// Boolean parameter to include the complete momentum expansion
-  const bool _complete_expansion;
-
-  /// Boolean parameter to limit interpolation
-  const bool _limit_interpolation;
-
-  /// dimension
-  const unsigned int _dim;
 };

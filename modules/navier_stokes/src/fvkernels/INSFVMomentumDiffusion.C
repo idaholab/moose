@@ -40,6 +40,8 @@ INSFVMomentumDiffusion::validParams()
   params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
+  params.addParam<bool>(
+      "limit_interpolation", false, "Flag to limit interpolation to positive values.");
   return params;
 }
 
@@ -52,6 +54,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _complete_expansion(getParam<bool>("complete_expansion")),
+    _limit_interpolation(getParam<bool>("limit_interpolation")),
     _dim(_subproblem.mesh().dimension())
 {
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
@@ -93,11 +96,12 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   // to preserve convergence
   if (face_mu < 0.0)
   {
-    mooseWarning("Negative face viscosity has been encountered. Value ",
-                 raw_value(face_mu),
-                 " at ",
-                 _face_info->faceCentroid(),
-                 " limiting it to 0!");
+    if (!(_limit_interpolation))
+      mooseWarning("Negative face viscosity has been encountered. Value ",
+                   raw_value(face_mu),
+                   " at ",
+                   _face_info->faceCentroid(),
+                   " limiting it to 0!");
     face_mu = 0;
   }
 
