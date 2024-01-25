@@ -35,7 +35,7 @@ public:
   /**
    * Called before this RM is attached
    */
-  void init(const MeshBase & mesh, const DofMap * dof_map = nullptr);
+  void init(MooseMesh & moose_mesh, const MeshBase & mesh, const DofMap * dof_map = nullptr);
 
   /**
    * Whether or not this RM has been inited. NOTE that this just indicates that the \p init method
@@ -129,7 +129,8 @@ protected:
   /// Whether or not this has been initialized
   bool _inited = false;
 
-  /// Pointer to the \p MooseMesh object
+  /// Pointer to the \p MooseMesh object. This must be non-const because we have derived classes
+  /// that call to methods like \p nodeToElemMap which are non-const
   MooseMesh * _moose_mesh;
 
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling

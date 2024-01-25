@@ -152,20 +152,18 @@ RelationshipManager::oneLayerGhosting(Moose::RelationshipManagerType rm_type)
 }
 
 void
-RelationshipManager::init(const MeshBase & mesh, const DofMap * const dof_map)
+RelationshipManager::init(MooseMesh & moose_mesh,
+                          const MeshBase & mesh,
+                          const DofMap * const dof_map)
 {
   mooseAssert(_dof_map ? dof_map == _dof_map : true,
               "Trying to initialize with a different dof map");
 
   _dof_map = dof_map;
-
-  if (_moose_mesh->getMeshPtr() && (_moose_mesh->getMeshPtr() != &mesh))
-  {
-    // This must correspond to a displaced mesh. Update the _moose_mesh to be correct
-    _moose_mesh = _app.actionWarehouse().displacedMesh().get();
-    mooseAssert(_moose_mesh, "The displaced mesh should have been non-null");
-    mooseAssert(_moose_mesh->getMeshPtr() == &mesh, "These meshes should match now");
-  }
+  // During the mesh generation phase we haven't set the mesh base in the moose mesh yet
+  if (moose_mesh.getMeshPtr())
+    mooseAssert(moose_mesh.getMeshPtr() == &mesh, "These should match");
+  _moose_mesh = &moose_mesh;
 
   // It is conceivable that this init method gets called twice, once during early geometric setup
   // and later when we're doing algebraic/coupling (and late geometric) setup. There might be new
