@@ -4302,216 +4302,218 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   for (const auto & uo : uos)
     execution_groups.insert(uo->getParam<int>("execution_order_group"));
 
-  // iterate over execution order groups
-  for (const auto execution_group : execution_groups)
+  try
   {
-    auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
-
-    std::vector<GeneralUserObject *> genobjs;
-    query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
-
-    std::vector<UserObject *> userobjs;
-    query.clone()
-        .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                     Interfaces::InternalSideUserObject |
-                                     Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
-        .queryInto(userobjs);
-
-    std::vector<UserObject *> tgobjs;
-    query.clone()
-        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-        .queryInto(tgobjs);
-
-    std::vector<UserObject *> nodal;
-    query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
-
-    std::vector<MortarUserObject *> mortar;
-    query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
-
-    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
-      continue;
-
-    // Start the timer here since we have at least one active user object
-    std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
-
-    // Perform Residual/Jacobian setups
-    if (type == EXEC_LINEAR)
+    // iterate over execution order groups
+    for (const auto execution_group : execution_groups)
     {
-      for (auto obj : userobjs)
-        obj->residualSetup();
-      for (auto obj : nodal)
-        obj->residualSetup();
-      for (auto obj : mortar)
-        obj->residualSetup();
-      for (auto obj : tgobjs)
-        obj->residualSetup();
-      for (auto obj : genobjs)
-        obj->residualSetup();
-    }
-    else if (type == EXEC_NONLINEAR)
-    {
-      for (auto obj : userobjs)
-        obj->jacobianSetup();
-      for (auto obj : nodal)
-        obj->jacobianSetup();
-      for (auto obj : mortar)
-        obj->jacobianSetup();
-      for (auto obj : tgobjs)
-        obj->jacobianSetup();
-      for (auto obj : genobjs)
-        obj->jacobianSetup();
-    }
+      auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
 
-    for (auto obj : userobjs)
-      obj->initialize();
+      std::vector<GeneralUserObject *> genobjs;
+      query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
 
-    // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
-    if (!userobjs.empty())
-    {
-      // non-nodal user objects have to be run separately before the nodal user objects run
-      // because some nodal user objects (NodalNormal related) depend on elemental user objects
-      // :-(
-      ComputeUserObjectsThread cppt(*this, query);
-      Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+      std::vector<UserObject *> userobjs;
+      query.clone()
+          .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
+                                       Interfaces::InternalSideUserObject |
+                                       Interfaces::InterfaceUserObject |
+                                       Interfaces::DomainUserObject)
+          .queryInto(userobjs);
 
-      // There is one instance in rattlesnake where an elemental user object's finalize depends
-      // on a side user object having been finalized first :-(
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
-      joinAndFinalize(
-          query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
-    }
+      std::vector<UserObject *> tgobjs;
+      query.clone()
+          .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+          .queryInto(tgobjs);
 
-    // if any userobject may have written to variables we need to close the aux solution
-    for (const auto & uo : userobjs)
-      if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
-          euo && euo->hasWritableCoupledVariables())
+      std::vector<UserObject *> nodal;
+      query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
+
+      std::vector<MortarUserObject *> mortar;
+      query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
+
+      if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
+        continue;
+
+      // Start the timer here since we have at least one active user object
+      std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
+
+      // Perform Residual/Jacobian setups
+      if (type == EXEC_LINEAR)
       {
-        _aux->solution().close();
-        _aux->system().update();
-        break;
+        for (auto obj : userobjs)
+          obj->residualSetup();
+        for (auto obj : nodal)
+          obj->residualSetup();
+        for (auto obj : mortar)
+          obj->residualSetup();
+        for (auto obj : tgobjs)
+          obj->residualSetup();
+        for (auto obj : genobjs)
+          obj->residualSetup();
+      }
+      else if (type == EXEC_NONLINEAR)
+      {
+        for (auto obj : userobjs)
+          obj->jacobianSetup();
+        for (auto obj : nodal)
+          obj->jacobianSetup();
+        for (auto obj : mortar)
+          obj->jacobianSetup();
+        for (auto obj : tgobjs)
+          obj->jacobianSetup();
+        for (auto obj : genobjs)
+          obj->jacobianSetup();
       }
 
-    // Execute NodalUserObjects
-    // BISON has an axial reloc elemental user object that has a finalize func that depends on a
-    // nodal user object's prev value. So we can't initialize this until after elemental objects
-    // have been finalized :-(
-    for (auto obj : nodal)
-      obj->initialize();
-    if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
-    {
-      ComputeNodalUserObjectsThread cnppt(*this, query);
-      Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
-    }
-
-    // if any userobject may have written to variables we need to close the aux solution
-    for (const auto & uo : nodal)
-      if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
-          nuo && nuo->hasWritableCoupledVariables())
-      {
-        _aux->solution().close();
-        _aux->system().update();
-        break;
-      }
-
-    // Execute MortarUserObjects
-    {
-      for (auto obj : mortar)
+      for (auto obj : userobjs)
         obj->initialize();
-      if (!mortar.empty())
+
+      // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
+      if (!userobjs.empty())
       {
-        auto create_and_run_mortar_functors = [this, type, &mortar](const bool displaced)
+        // non-nodal user objects have to be run separately before the nodal user objects run
+        // because some nodal user objects (NodalNormal related) depend on elemental user objects
+        // :-(
+        ComputeUserObjectsThread cppt(*this, query);
+        Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+
+        // There is one instance in rattlesnake where an elemental user object's finalize depends
+        // on a side user object having been finalized first :-(
+        joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
+        joinAndFinalize(
+            query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
+        joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
+        joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
+        joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
+      }
+
+      // if any userobject may have written to variables we need to close the aux solution
+      for (const auto & uo : userobjs)
+        if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
+            euo && euo->hasWritableCoupledVariables())
         {
-          // go over mortar interfaces and construct functors
-          const auto & mortar_interfaces = getMortarInterfaces(displaced);
-          for (const auto & mortar_interface : mortar_interfaces)
+          _aux->solution().close();
+          _aux->system().update();
+          break;
+        }
+
+      // Execute NodalUserObjects
+      // BISON has an axial reloc elemental user object that has a finalize func that depends on a
+      // nodal user object's prev value. So we can't initialize this until after elemental objects
+      // have been finalized :-(
+      for (auto obj : nodal)
+        obj->initialize();
+      if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
+      {
+        ComputeNodalUserObjectsThread cnppt(*this, query);
+        Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
+        joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
+      }
+
+      // if any userobject may have written to variables we need to close the aux solution
+      for (const auto & uo : nodal)
+        if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
+            nuo && nuo->hasWritableCoupledVariables())
+        {
+          _aux->solution().close();
+          _aux->system().update();
+          break;
+        }
+
+      // Execute MortarUserObjects
+      {
+        for (auto obj : mortar)
+          obj->initialize();
+        if (!mortar.empty())
+        {
+          auto create_and_run_mortar_functors = [this, type, &mortar](const bool displaced)
           {
-            const auto primary_secondary_boundary_pair = mortar_interface.first;
-            auto mortar_uos_to_execute =
-                getMortarUserObjects(primary_secondary_boundary_pair.first,
-                                     primary_secondary_boundary_pair.second,
-                                     displaced,
-                                     mortar);
-            const auto & mortar_generation_object = mortar_interface.second;
-
-            auto * const subproblem = displaced
-                                          ? static_cast<SubProblem *>(_displaced_problem.get())
-                                          : static_cast<SubProblem *>(this);
-            MortarUserObjectThread muot(mortar_uos_to_execute,
-                                        mortar_generation_object,
-                                        *subproblem,
-                                        *this,
-                                        displaced,
-                                        subproblem->assembly(0, 0));
-
-            auto process_possibly_handleable_exception = [this, type](auto & exception)
+            // go over mortar interfaces and construct functors
+            const auto & mortar_interfaces = getMortarInterfaces(displaced);
+            for (const auto & mortar_interface : mortar_interfaces)
             {
-              // When executing on linear we can turn exceptions into residual domain errors, stop
-              // the solve, and cut the timestep
-              if (type == EXEC_LINEAR)
-                setException(exception.what());
-              else
-                // Otherwise we don't know what to do
-                mooseError(
-                    "We caught an exception during computation of mortar user objects outside of "
-                    "residual evaluation. Unfortunately we don't know how to handle this case, "
-                    "so "
-                    "we will abort.");
-            };
-            try
-            {
+              const auto primary_secondary_boundary_pair = mortar_interface.first;
+              auto mortar_uos_to_execute =
+                  getMortarUserObjects(primary_secondary_boundary_pair.first,
+                                       primary_secondary_boundary_pair.second,
+                                       displaced,
+                                       mortar);
+              const auto & mortar_generation_object = mortar_interface.second;
+
+              auto * const subproblem = displaced
+                                            ? static_cast<SubProblem *>(_displaced_problem.get())
+                                            : static_cast<SubProblem *>(this);
+              MortarUserObjectThread muot(mortar_uos_to_execute,
+                                          mortar_generation_object,
+                                          *subproblem,
+                                          *this,
+                                          displaced,
+                                          subproblem->assembly(0, 0));
+
               muot();
             }
-            catch (MooseException & e)
-            {
-              process_possibly_handleable_exception(e);
-            }
-            catch (libMesh::LogicError & e)
-            {
-              process_possibly_handleable_exception(e);
-            }
-            catch (MetaPhysicL::LogicError & e)
-            {
-              moose::translateMetaPhysicLError(e);
-            }
-            checkExceptionAndStopSolve();
-          }
-        };
+          };
 
-        create_and_run_mortar_functors(false);
-        if (_displaced_problem)
-          create_and_run_mortar_functors(true);
+          create_and_run_mortar_functors(false);
+          if (_displaced_problem)
+            create_and_run_mortar_functors(true);
+        }
+        for (auto obj : mortar)
+          obj->finalize();
       }
-      for (auto obj : mortar)
-        obj->finalize();
+
+      // Execute threaded general user objects
+      for (auto obj : tgobjs)
+        obj->initialize();
+      std::vector<GeneralUserObject *> tguos_zero;
+      query.clone()
+          .condition<AttribThread>(0)
+          .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+          .queryInto(tguos_zero);
+      for (auto obj : tguos_zero)
+      {
+        std::vector<GeneralUserObject *> tguos;
+        auto q = query.clone()
+                     .condition<AttribName>(obj->name())
+                     .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
+        q.queryInto(tguos);
+
+        ComputeThreadedGeneralUserObjectsThread ctguot(*this);
+        Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
+        joinAndFinalize(q);
+      }
+
+      // Execute general user objects
+      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject),
+                      true);
     }
+  }
 
-    // Execute threaded general user objects
-    for (auto obj : tgobjs)
-      obj->initialize();
-    std::vector<GeneralUserObject *> tguos_zero;
-    query.clone()
-        .condition<AttribThread>(0)
-        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-        .queryInto(tguos_zero);
-    for (auto obj : tguos_zero)
-    {
-      std::vector<GeneralUserObject *> tguos;
-      auto q = query.clone()
-                   .condition<AttribName>(obj->name())
-                   .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
-      q.queryInto(tguos);
-
-      ComputeThreadedGeneralUserObjectsThread ctguot(*this);
-      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
-      joinAndFinalize(q);
-    }
-
-    // Execute general user objects
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
+  catch (libMesh::LogicError & e)
+  {
+    setException("The following libMesh::LogicError was raised during UserObject evaluation in "
+                 "FEProblemBase:\n" +
+                 std::string(e.what()));
+  }
+  catch (MooseException & e)
+  {
+    setException(
+        "The following MooseException was raised during UserObject evaluation in FEProblemBase:\n" +
+        std::string(e.what()));
+  }
+  catch (MetaPhysicL::LogicError & e)
+  {
+    moose::translateMetaPhysicLError(e);
+  }
+  try
+  {
+    // Propagate the exception to all processes if we had one
+    checkExceptionAndStopSolve();
+  }
+  catch (MooseException &)
+  {
+    // Just end now. We've inserted our NaN into the residual vector
+    return;
   }
 }
 
@@ -5853,6 +5855,21 @@ FEProblemBase::setException(const std::string & message)
 }
 
 void
+FEProblemBase::setException(const ExecFlagType & type, const std::string & message)
+{
+  if (type == EXEC_LINEAR || type == EXEC_NONLINEAR)
+    // Handle the exception if it occurs at times when it can be handled by forcing the
+    // solve to file, resulting in cutting back the time step
+    setException(message);
+  else
+    // Otherwise we don't know what to do
+    mooseError("The following exception was caught during " + Moose::stringify(type) +
+               " evaluation.\n" + message +
+               "\nBecause this did not occur during residual evaluation, there"
+               " is no way to handle this, so the solution is aborting.\n");
+}
+
+void
 FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 {
   if (_skip_exception_check)
@@ -5872,7 +5889,13 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
     // Print the message
     if (_communicator.rank() == 0 && print_message)
-      Moose::err << _exception_message << std::endl;
+    {
+      Moose::err << "The following exception was caught in FEProblemBase:\n";
+      Moose::err << _exception_message << "\n";
+      Moose::err << "To recover from this the solution will be forced to fail and will be "
+                    "re-attempted with a reduced time step."
+                 << std::endl;
+    }
 
     // Stop the solve -- this entails setting
     // SNESSetFunctionDomainError() or directly inserting NaNs in the
@@ -5889,11 +5912,22 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
     // be skipped).
     _fail_next_nonlinear_convergence_check = true;
 
+    // Reset the state to prepare for the next evaluation
+    resetState();
+
     // Repropagate the exception, so it can be caught at a higher level, typically
     // this is NonlinearSystem::computeResidual().
     throw MooseException(_exception_message);
   }
 }
+
+void
+FEProblemBase::resetState()
+{
+  ADReal::do_derivatives = true;
+  _current_execute_on_flag = EXEC_NONE;
+  clearCurrentResidualVectorTags();
+};
 
 bool
 FEProblemBase::nlConverged(const unsigned int nl_sys_num)
@@ -6254,20 +6288,21 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       _aux->compute(EXEC_PRE_DISPLACE);
       try
       {
-        try
-        {
-          _displaced_problem->updateMesh();
-          if (_mortar_data.hasDisplacedObjects())
-            updateMortarMesh();
-        }
-        catch (libMesh::LogicError & e)
-        {
-          mooseException("We caught a libMesh error in FEProblemBase: ", e.what());
-        }
+        _displaced_problem->updateMesh();
+        if (_mortar_data.hasDisplacedObjects())
+          updateMortarMesh();
+      }
+      catch (libMesh::LogicError & e)
+      {
+        setException("The following libMesh::LogicError was raised during the mortar mesh update "
+                     "in FEProblemBase:\n" +
+                     std::string(e.what()));
       }
       catch (MooseException & e)
       {
-        setException(e.what());
+        setException("The following MooseException was raised during the mortar mesh update in "
+                     "FEProblemBase:\n" +
+                     std::string(e.what()));
       }
       try
       {
@@ -6297,10 +6332,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     }
     catch (MooseException & e)
     {
-      _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
-               << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
-               << std::endl;
-
       // We know the next solve is going to fail, so there's no point in
       // computing anything else after this.  Plus, using incompletely
       // computed AuxVariables in subsequent calculations could lead to
@@ -6484,20 +6515,21 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     _aux->compute(EXEC_PRE_DISPLACE);
     try
     {
-      try
-      {
-        _displaced_problem->updateMesh();
-        if (_mortar_data.hasDisplacedObjects())
-          updateMortarMesh();
-      }
-      catch (libMesh::LogicError & e)
-      {
-        mooseException("We caught a libMesh error in FEProblemBase: ", e.what());
-      }
+      _displaced_problem->updateMesh();
+      if (_mortar_data.hasDisplacedObjects())
+        updateMortarMesh();
+    }
+    catch (libMesh::LogicError & e)
+    {
+      setException("The following libMesh::LogicError was raised during the mortar mesh update in "
+                   "FEProblemBase:\n" +
+                   std::string(e.what()));
     }
     catch (MooseException & e)
     {
-      setException(e.what());
+      setException("The following MooseException was raised during the mortar mesh update in "
+                   "FEProblemBase:\n" +
+                   std::string(e.what()));
     }
     try
     {
@@ -6521,27 +6553,16 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   for (auto & nl : _nl)
     nl->computeTimeDerivatives();
 
-  auto reset_state = [this]()
-  {
-    ADReal::do_derivatives = true;
-    _current_execute_on_flag = EXEC_NONE;
-    clearCurrentResidualVectorTags();
-  };
   try
   {
     _aux->compute(EXEC_LINEAR);
   }
   catch (MooseException & e)
   {
-    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
-             << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
-             << std::endl;
-
     // We know the next solve is going to fail, so there's no point in
     // computing anything else after this.  Plus, using incompletely
     // computed AuxVariables in subsequent calculations could lead to
     // other errors or unhandled exceptions being thrown.
-    reset_state();
     return;
   }
 
@@ -6554,7 +6575,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _safe_access_tagged_vectors = false;
   _current_nl_sys->computeResidualTags(tags);
   _safe_access_tagged_vectors = true;
-  reset_state();
+  resetState();
 }
 
 void
@@ -6758,6 +6779,8 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
   _lower.swap(lower);
   _upper.swap(upper);
 
+  // BWS: In all other cases where this is called, it's within a try/catch to strip
+  // out the exception. Should that be done here too?
   checkExceptionAndStopSolve();
 }
 

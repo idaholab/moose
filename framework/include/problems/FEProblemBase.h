@@ -464,12 +464,24 @@ public:
   ///@}
 
   /**
-   * Set an exception.  Usually this should not be directly called - but should be called through
-   * the mooseException() macro.
+   * Set an exception, which is stored at this point by toggling a member variable in
+   * this class, and which must be followed up with by a call to
+   * checkExceptionAndStopSolve().  Usually this should not be directly called, but
+   * should be called through the mooseException() macro.
    *
-   * @param message The error message about the exception.
+   * @param message The error message describing the exception.
    */
   virtual void setException(const std::string & message);
+
+  /**
+   * Set an exception, as documented in setException(const std::string & message),
+   * only for phases during residual evaluation when the exception can be handled
+   * by causing the solve to fail and cutting the step back. Generate an error otherwise.
+   *
+   * @param type    The ExecFlagType indiciating the current phase of computation
+   * @param message The error message describing the exception.
+   */
+  virtual void setException(const ExecFlagType & type, const std::string & message);
 
   /**
    * Whether or not an exception has occurred.
@@ -478,6 +490,7 @@ public:
 
   /**
    * Check to see if an exception has occurred on any processor and stop the solve.
+   * The exception must be registered by calling setException() prior to calling this.
    *
    * Note: Collective on MPI!  Must be called simultaneously by all processors!
    *
@@ -488,6 +501,13 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
+private:
+  /**
+   * Reset state of this object in preparation for the next evaluation.
+   */
+  virtual void resetState();
+
+public:
   virtual bool nlConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
