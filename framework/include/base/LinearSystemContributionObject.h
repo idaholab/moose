@@ -11,7 +11,6 @@
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
@@ -28,7 +27,6 @@
 class FEProblemBase;
 class MooseMesh;
 class SubProblem;
-class Assembly;
 class MooseVariableBase;
 class MooseVariableFieldBase;
 class InputParameters;
@@ -54,7 +52,6 @@ public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
-   * @param nodal Whether this object is applied to nodes or not
    */
   LinearSystemContributionObject(const InputParameters & parameters);
 
@@ -64,29 +61,10 @@ public:
   /// Add this object's contribution to the system right hand side
   virtual void addRightHandSideContribution() = 0;
 
-  /**
-   * Returns the variable that this object operates on.
-   */
+  /// Returns base class reference of the variable that this object operates on.
   virtual const MooseVariableBase & variable() const = 0;
 
-  /**
-   * Returns a reference to the SubProblem for which this Kernel is active
-   */
-  const SubProblem & subProblem() const { return _subproblem; }
-
 protected:
-  /**
-   * Retrieve the variable object from our system associated with \p jvar_num
-   */
-  const MooseVariableFieldBase & getVariable(unsigned int jvar_num) const
-  {
-    return _sys.getVariable(_tid, jvar_num);
-  }
-
-protected:
-  /// Reference to this object's SubProblem
-  SubProblem & _subproblem;
-
   /// Reference to this object's FEProblemBase
   FEProblemBase & _fe_problem;
 

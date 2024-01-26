@@ -10,35 +10,34 @@
 #pragma once
 
 #include "LinearFVKernel.h"
-#include "ElemInfo.h"
-#include "MooseVariableFV.h"
-#include "MooseVariableInterface.h"
 #include "FaceArgInterface.h"
 
+/**
+ * Finite volume kernel that contributes approximates of discretized face flux terms to the matrix
+ * and right hand side of a linear system.
+ */
 class LinearFVFluxKernel : public LinearFVKernel, public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Class constructor.
+   * @param parameters The InputParameters for the object
+   */
   LinearFVFluxKernel(const InputParameters & params);
 
-  /// Compute this object's contribution to the system matrix
   virtual void addMatrixContribution() override;
 
-  /// Compute this object's contribution to the right hand side
   virtual void addRightHandSideContribution() override;
 
-  /// If the current element is defined on the elem side or neighbor side
-  bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
+  virtual bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
-  /// Set current face info
-  void setCurrentFaceInfo(const FaceInfo * face_info)
-  {
-    _cached_matrix_contribution = false;
-    _cached_rhs_contribution = false;
-    _current_face_info = face_info;
-    _current_face_type =
-        _current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number()));
-  }
+  /**
+   * Set the current FaceInfo object
+   * @param face_info The face info which will be used as current face info
+   */
+  void setCurrentFaceInfo(const FaceInfo * face_info);
 
   /// Computes the system matrix contribution from an element side on an internal face
   virtual Real computeElemMatrixContribution() = 0;
@@ -52,10 +51,16 @@ public:
   /// Computes the right hand side contribution from the neighbor side on an internal face
   virtual Real computeNeighborRightHandSideContribution() = 0;
 
-  /// Computes the system matrix contribution from a boundary face
+  /**
+   * Computes the matrix contribution from a boundary face
+   * @param bc The boundary condition on the given face
+   */
   virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc) = 0;
 
-  /// Computes the right hand side contribution from a boundary face
+  /**
+   * Computes the right hand side contribution from a boundary face
+   * @param bc The boundary condition on the given face
+   */
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc) = 0;
 
 protected:
@@ -81,7 +86,7 @@ protected:
   /// check if cached quantities are already available in the kernel.
   bool _cached_matrix_contribution;
 
-  /// If we already built the rhs contribution. This switch can be used to
+  /// If we already built the right hand side contribution. This switch can be used to
   /// check if cached quantities are already available in the kernel.
   bool _cached_rhs_contribution;
 };

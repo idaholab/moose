@@ -11,10 +11,19 @@
 
 #include "LinearFVElementalKernel.h"
 
+/**
+ * Kernel that adds contributions from a reaction term discretized using the finite volume method to
+ * a linear system.
+ */
 class LinearFVReaction : public LinearFVElementalKernel
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Class constructor.
+   * @param params The InputParameters for the kernel.
+   */
   LinearFVReaction(const InputParameters & params);
 
   virtual Real computeMatrixContribution() override;

@@ -11,8 +11,10 @@
 
 #include "MooseObjectAction.h"
 
-class AddLinearFVBCAction;
-
+/**
+ * Adds a finite volume boundary condition that contributes to a linear system
+ * from the [LinearFVBCs] block in the input file.
+ */
 class AddLinearFVBCAction : public MooseObjectAction
 {
 public:

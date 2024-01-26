@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVFluxKernel.h"
-#include "Assembly.h"
-#include "SubProblem.h"
 
 InputParameters
 LinearFVFluxKernel::validParams()
@@ -123,6 +121,15 @@ LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
                                        const bool correct_skewness) const
 {
   mooseAssert(fi, "FaceInfo should not be null!");
-
   return makeFace(*fi, limiter_type, true, correct_skewness);
+}
+
+void
+LinearFVFluxKernel::setCurrentFaceInfo(const FaceInfo * face_info)
+{
+  _cached_matrix_contribution = false;
+  _cached_rhs_contribution = false;
+  _current_face_info = face_info;
+  _current_face_type =
+      _current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number()));
 }

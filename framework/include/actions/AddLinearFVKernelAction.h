@@ -11,8 +11,10 @@
 
 #include "MooseObjectAction.h"
 
-class AddLinearFVKernelAction;
-
+/**
+ * Adds a finite volume kernel that contributes to a linear system
+ * from the [LinearFVKernels] block in the input file.
+ */
 class AddLinearFVKernelAction : public MooseObjectAction
 {
 public:

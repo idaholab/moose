@@ -11,10 +11,19 @@
 
 #include "LinearFVElementalKernel.h"
 
+/**
+ * Kernel that adds contributions from a external source term discretized using the finite volume
+ * method to a linear system.
+ */
 class LinearFVSource : public LinearFVElementalKernel
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Class constructor.
+   * @param params The InputParameters for the kernel.
+   */
   LinearFVSource(const InputParameters & params);
 
   virtual Real computeMatrixContribution() override;

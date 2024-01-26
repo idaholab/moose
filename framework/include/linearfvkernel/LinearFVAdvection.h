@@ -11,10 +11,19 @@
 
 #include "LinearFVFluxKernel.h"
 
+/**
+ * Kernel that adds contributions from an advection term discretized using the finite volume method
+ * to a linear system.
+ */
 class LinearFVAdvection : public LinearFVFluxKernel
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Class constructor.
+   * @param params The InputParameters for the kernel.
+   */
   LinearFVAdvection(const InputParameters & params);
 
   virtual Real computeElemMatrixContribution() override;

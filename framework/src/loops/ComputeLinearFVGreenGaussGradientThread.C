@@ -104,8 +104,8 @@ ComputeLinearFVGreenGaussGradientThread::onBoundaryFace(const FaceInfo & face_in
         face_info.faceType(std::make_pair(_current_var->number(), _linear_system.number()));
     bc_pointer->setCurrentFaceInfo(&face_info, face_type);
 
-    dof_id_type dof_id;
-    Real volume;
+    dof_id_type dof_id = 0;
+    Real volume = 0;
     if (face_info.neighborInfo())
     {
       if (face_type == FaceInfo::VarFaceNeighbors::ELEM)

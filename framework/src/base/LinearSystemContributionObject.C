@@ -48,7 +48,6 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),

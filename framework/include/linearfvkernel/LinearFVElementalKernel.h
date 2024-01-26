@@ -11,22 +11,30 @@
 
 #include "LinearFVKernel.h"
 #include "ElemInfo.h"
-#include "MooseVariableFV.h"
-#include "MooseVariableInterface.h"
 
+/**
+ * Finite volume kernel that contributes approximates of volumetric integral terms to the matrix and
+ * right hand side of a linear system.
+ */
 class LinearFVElementalKernel : public LinearFVKernel
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Class constructor.
+   * @param parameters The InputParameters for the object
+   */
   LinearFVElementalKernel(const InputParameters & params);
 
-  /// Compute this object's contribution to the system matrix
   virtual void addMatrixContribution() override;
 
-  /// Compute this object's contribution to the right hand side
   virtual void addRightHandSideContribution() override;
 
-  /// Set current element
+  /**
+   * Set the current ElemInfo object.
+   * @param elem_info The new ElemInfo which will be used as the current
+   */
   void setCurrentElemInfo(const ElemInfo * elem_info) { _current_elem_info = elem_info; }
 
   /// Computes the system matrix contribution for the current element

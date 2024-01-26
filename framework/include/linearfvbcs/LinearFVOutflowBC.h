@@ -12,21 +12,23 @@
 #include "LinearFVBoundaryCondition.h"
 
 /**
- * Class implementing a outflow boundary condition for linear finite
+ * Class implementing an outflow boundary condition for linear finite
  * volume variables
  */
 class LinearFVOutflowBC : public LinearFVBoundaryCondition
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
   LinearFVOutflowBC(const InputParameters & parameters);
 
+  /// If this the face value on this boundary is determined using a linear
+  /// extrapolation from the adjacent cell center.
   virtual bool needsExtrapolation() const override { return _two_term_expansion; }
-
-  static InputParameters validParams();
 
   virtual Real computeBoundaryValue() override;
 
@@ -41,7 +43,13 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
+  /// Computes the vector connecting the cell and boundary face centers.
+  /// It is needed because sometimes boundaries can be assigned to internal faces as well.
   RealVectorValue computeCellToFaceVector() const;
+
+  /// Switch for enabling linear extrapolation for the boundary face value
   const bool _two_term_expansion;
+
+  /// The constant advecting velocity on the boundary face
   const RealVectorValue _velocity;
 };
