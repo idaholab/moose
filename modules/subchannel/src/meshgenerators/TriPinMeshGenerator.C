@@ -150,9 +150,9 @@ TriPinMeshGenerator::generate()
   mesh_base->prepare_for_use();
 
   // move the meta data into TriSubChannelMesh
-  std::shared_ptr<TriSubChannelMesh> sch_mesh = std::dynamic_pointer_cast<TriSubChannelMesh>(_mesh);
-  sch_mesh->_pin_nodes = _pin_nodes;
-  sch_mesh->_pin_mesh_exist = true;
+  auto & sch_mesh = static_cast<TriSubChannelMesh &>(*_mesh);
+  sch_mesh._pin_nodes = _pin_nodes;
+  sch_mesh._pin_mesh_exist = true;
 
   return mesh_base;
 }
