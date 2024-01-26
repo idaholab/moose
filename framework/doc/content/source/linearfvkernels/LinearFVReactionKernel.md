@@ -22,7 +22,7 @@ MOOSE, see [Functors/index.md].
 The case below demonstrates the use of `LinearFVReactionKernel` where the reaction coefficient is
 supplied based upon a function form:
 
-!listing test/tests/LinearFVKernels/fv_adapt/fixmeee.i block=LinearFVKernels
+!listing test/tests/linearfvkernels/reaction/reaction-1d.i block=LinearFVKernels
 
 !syntax parameters /LinearFVKernels/LinearFVReactionKernel
 

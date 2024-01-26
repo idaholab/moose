@@ -1,10 +1,10 @@
 # LinearFVBCs System
 
-For an overview of MOOSE FV please see [/linear_fv_design.md].
+For an overview of linear MOOSE FV please see [/linear_fv_design.md].
 
 The difference between `LinearFVBCs` and `FVBCs` is that the boundary quantities
 computed by the former (boundary values, gradients, etc.) are used in routines
-within different kernels. This is due to the fact that boundary conditions may need to be
+within linear FV kernels. This is due to the fact that boundary conditions may need to be
 applied in different manners for different terms in the partial differential equation.
 This means that the `LinearFVBCs` only provide objects to specify these boundary quantities,
 and would not contribute to the system matrix and right hand side directly (only through kernels).
@@ -13,65 +13,46 @@ and would not contribute to the system matrix and right hand side directly (only
 
 FVM boundary conditions are added to simulation input files in the `LinearFVBCs` as in the example below.
 
-!listing test/tests/fvkernels/fixmee/neumann.i
-         block=LinearFVFVBCs
-         id=first_linear_fv_bc_example
+!listing test/tests/linearfvkernels/advection/advection-1d.i
+         block=LinearFVBCs
          caption=Example of the LinearFVBCs block in a MOOSE input file.
 
-In this example input, a diffusion equation with flux boundary conditions on the left and Dirichlet boundary conditions on the right is solved. To understand the differences between
-these two boundary conditions, let's start with the diffusion equation:
+In this example input, an advection equation with Dirichlet boundary on the left and outflow boundary conditions on the right is solved. To understand the differences between
+these two boundary conditions, let's start with the advection equation:
 
 \begin{equation}
-  - \nabla \cdot D \nabla u = 0.
+  \nabla \cdot (\vec{v} u) = S,
 \end{equation}
 
-and the boundary conditions on the left:
+with $\vec{v}$ denoting the velocity vector, $u$ the solution and $S$ a potentially space-dependent
+source term. The boundary conditions on the left can be expressed as:
 
 \begin{equation}
-  - D  \nabla v \cdot \vec{u}= 5,
+  u = f(\vec{r}_b),
 \end{equation}
 
-where $\vec{n}$ is the outward normal and on the right:
+while the outflow boundary on just advects the solution value on the boundary with a
+predefined velocity.
+
+Both boundary conditions can be applied in an integral sense through the discretized
+advection term on the cell adjacent to the boundary:
 
 \begin{equation}
-  u = 10.
+  \int_V_b \nabla \cdot (\vec{v} u) dV approx \left(\sum_i \vec{n}_i \cdot \vec{v}_i u_{f,i}|S_i|\right) + \vec{n}_b \cdot \vec{v}_b u_b |S_b|~,
 \end{equation}
 
-For seeing how the flux boundary condition is applied, the diffusion equation is integrated
-over the extent of an element adjacent to the left boundary and Gauss' theorem is applied:
-
-\begin{equation}
-  -\int\limits_{V} \nabla \cdot D \nabla u dV =
-  -\int_{S_l} D \nabla u \cdot \vec{n} dS
-  -\int_{S_{other}} D \nabla u \cdot \vec{n} dS
-  = 5 |S_l|
-  -\int_{S_{other}} D \nabla u \cdot \vec{n} dS,
-\end{equation}
-
-where $V$ is the element volume, $S_l$ are all faces that belong to the left sideset, $S_{other}$ are all faces of the lement besides the left sideset, and $|S_l|$ is the area of face.
-This means that a $-5 |S_l|$ term goes to the right hand side of the linear system.
-
-The Dirichlet boundary condition is applied differently.
-Let us first write a balance equation for an element that is adjacent to the right boundary:
-
-\begin{equation}
-  -\int_{S_r} D \nabla u \cdot \vec{n} dA
-  -\int_{S_{other}} D \nabla u \cdot \vec{n} dA  =0,
-\end{equation}
-
-In this case, the normal gradient $\nabla u \cdot \vec{n}$ can be expressed as described in
-[LinearFVDiffusionKernel.md]. The dirichlet boundary condition is then applied through the
-normal gradient by:
-
-- Replacing the neighbor value of the variable by the dirichlet boundary value.
-- Replacing the distance between cell centers by the distance of the cell center and boundary face centroid.
-- Only using the cell gradient for the non-orthogonal correction term instead an interpolated gradient.
+where the $i$ index denotes internal faces of the cell, while $b$ denotes the only face on the boundary.
+This means that the only thing we need to supply to this formula is a way to compute the contributions to
+the system matrix and right hand side from the boundary value $u_b$. For example for the Dirichlet boundary
+$u_b = f(\vec{r}_b)$, while for the outflow boundary it can be either the the cell centroid value ($u_b = u_C$)
+or an extrapolated value. While the dirichlet boundary contributes to the right hand side of the system only,
+the outflow boundary condition can contribute to both.
 
 ## Functions to override:
 
 Different linear finite volume kernels might use the quantities provided by these boundary
 conditions differently, but there are some common functionalities which are used more
-frequently between different kernels. The following functions represent this common functionality:
+frequently between these kernels. The following functions represent this common functionality:
 
 - `computeBoundaryValue` computes the boundary value of the field.
 - `computBoundaryNormalGradient` computes the normal gradient of the field on this boundary.
@@ -92,7 +73,6 @@ functor. For more information on the functor system in moose, see [Functors/inde
 !listing framework/src/fvbcs/LinearFVFunctorDirichletBC.C
          start=#include
          end=""
-         id=linear_fv_functor_dirichlet_code
          caption=Example source code for `LinearFVFunctorDirichletBC`.
 
 !syntax list /LinearFVBCs objects=True actions=False subsystems=False

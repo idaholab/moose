@@ -3,7 +3,7 @@
 ## Description
 
 This kernel contributes to the system matrix and the right hand side
-(when boundary conditions are used) of ana system which is solved for a
+(when boundary conditions are used) of a system which is solved for a
 linear finite volume variable [MooseLinearVariableFV.md].
 The contributions can be derived using the numerical integral of the approximated advective flux
 on the faces of the cells:
@@ -19,7 +19,7 @@ technique that can be supplied through the [!param](/LinearFVKernels/LinearFVAdv
 
 ## Example input syntax
 
-!listing test/tests/fvkernels/fixmeee/1d.i
+!listing test/tests/linearfvkernels/advection/advection-2d.i block=LinearFVKernels
 
 !syntax parameters /LinearFVKernels/LinearFVAdvectionKernel
 

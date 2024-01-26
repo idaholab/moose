@@ -22,8 +22,9 @@ As shown above, using these two vectors, the approximate form of the normal-grad
   Hence, it is referred to as an orthogonal contribution. For orthogonal meshes, $|\Delta|$
   is just $\frac{1}{|\vec{r}_{CN}|}$ where $|\vec{r}_{CN}|$ is the distance between the
   current and neighbor cell centroids. This term contributes a ($|\vec{\Delta}||S_f|$) to the diagonal and off-diagonal entries of the system matrix with different signs.
-- On non-orthogonal meshes a correction is needed: $\bar{\nabla u} \cdot \vec{k}$, where
-  $\bar{\nabla u}$ denotes the interpolated gradient at the cell center computed by the cell
+- On non-orthogonal meshes $|\vec{\Delta}| = \frac{1}{|\vec{r}_{CN}*\vec{n}|}$ the a correction
+  is needed: $\bar{\nabla u} \cdot \vec{k}$, where
+  $\bar{\nabla u}$ denotes the interpolated gradient at the face center computed using the cell
   gradients on the current and neighbor cells. This term is treated in an explicit manner
   meaning that it is added to the right hand side vector of the system.
 
@@ -36,7 +37,7 @@ MOOSE, see [Functors/index.md].
 
 ## Example input syntax
 
-!listing test/tests/fvkernels/fixmeee/1d.i
+!listing test/tests/linearfvkernels/diffusion/diffusion-2d.i block=LinearFVKernels
 
 !syntax parameters /LinearFVKernels/LinearFVDiffusionKernel
 

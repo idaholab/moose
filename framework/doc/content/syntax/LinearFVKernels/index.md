@@ -24,9 +24,8 @@ defined by the equation:
 
 The diffusion term is represented by the kernel named `diff`.
 
-!listing test/tests/fixmee/fv_simple_diffusion/transient.i
+!listing test/tests/linearfvkernels/diffusion/diffusion-2d.i
          block=LinearFVKernels
-         id=first_linear_fv_kernel_example
          caption=Example of the LinearFVKernels block in a MOOSE input file.
 
 The `LinearFVSourceKernel` in the example derives from `LinearFVElementalKernel` so it's a
@@ -37,7 +36,7 @@ The `variable` parameter refers to the variable that this kernel is acting on (i
 which equation do the contributions of this term go). This must be a linear finite-volume
 variable in this case.
 
-Boundary conditions are not discussed in these examples. Look at
+Boundary conditions are not discussed in these examples. We recommend visiting
 [syntax files](syntax/LinearFVBCs/index.md) for details about boundary conditions.
 
 !syntax list /LinearFVKernels objects=True actions=False subsystems=False
