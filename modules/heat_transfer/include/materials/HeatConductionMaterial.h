@@ -41,6 +41,7 @@ protected:
 
   GenericMaterialProperty<Real, is_ad> & _specific_heat;
   const Function * const _specific_heat_temperature_function;
+  GenericMaterialProperty<Real, is_ad> * const _specific_heat_dT;
 
   /// Minimum temperature, below which temperature is "clipped" before evaluating functions
   const Real * _min_T;
