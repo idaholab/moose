@@ -1,22 +1,42 @@
 [Tests]
-  [./no_fluid]
+  [no_fluid]
     type = 'CSVDiff'
     input = 'no_fluid.i'
     csvdiff = 'no_fluid.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to simulate heat conduction in a fluid-free environment'
+    requirement = 'The system shall be able to simulate heat conduction in a fluid-free environment.'
     design = 'porous_flow/tests/heat_conduction/heat_conduction_tests.md'
     issues = '#13155'
-  [../]
-  [./two_phase]
+  []
+  [no_fluid_fv]
+    type = 'CSVDiff'
+    input = 'no_fluid_fv.i'
+    csvdiff = 'no_fluid_fv.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'The system shall be able to simulate heat conduction in a fluid-free environment using a finite volume discretization.'
+    design = 'porous_flow/tests/heat_conduction/heat_conduction_tests.md'
+    issues = '#13155 #21275'
+  []
+  [two_phase]
     type = 'CSVDiff'
     input = 'two_phase.i'
     csvdiff = 'two_phase.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to simulate heat conduction for systems containing multi-phase fluids'
+    requirement = 'The system shall be able to simulate heat conduction for systems containing multi-phase fluids.'
     design = 'porous_flow/tests/heat_conduction/heat_conduction_tests.md'
     issues = '#13155'
-  [../]
+  []
+  [two_phase_fv]
+    type = 'CSVDiff'
+    input = 'two_phase_fv.i'
+    csvdiff = 'two_phase_fv.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'The system shall be able to simulate heat conduction for systems containing multi-phase fluids using a finite volume discretization.'
+    design = 'porous_flow/tests/heat_conduction/heat_conduction_tests.md'
+    issues = '#13155 #21275'
+  []
 []

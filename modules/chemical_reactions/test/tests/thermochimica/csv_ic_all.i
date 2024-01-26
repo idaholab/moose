@@ -17,13 +17,16 @@
 []
 
 [ChemicalComposition]
-  thermofile = Kaye_NobleMetals.dat
-  initial_values = ic_all.csv
   tunit = K
   punit = atm
   munit = moles
-  temperature = 2250
-  reinitialization_type = nodal
+  output_species_unit = moles
+  [thermo]
+    thermofile = Kaye_NobleMetals.dat
+    initial_values = ic_all.csv
+    temperature = 2250
+    reinitialization_type = nodal
+  []
 []
 
 [Problem]

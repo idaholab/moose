@@ -12,6 +12,15 @@ parameter.
 The [!param](/MeshDivisions/CylindricalGridDivision/center) should be a point on the axis of the cylinder
 that also corresponds to the reference for the minimal ([!param](/MeshDivisions/CylindricalGridDivision/cylinder_axial_min)) and maximal ([!param](/MeshDivisions/CylindricalGridDivision/cylinder_axial_max)) axial extent of the cylinder.
 
+Using a [Positions](syntax/Positions/index.md) object as the [!param](/MeshDivisions/CylindricalGridDivision/center_positions)
+parameter, multiple cylindrical grids can be created around each position computed by that object. The division index
+of a point is then:
+
+!equation
+\text{division index} = (i - 1) N_{\text{single division}} + \text{division index in cylindrical grid centered around position i}
+
+with $i$ the index in the `Positions` object of the position nearest from the point and $N_{\text{single division}}$ the number of divisions for a single cylindrical grid, based on the number of rings and axial discretization specified.
+
 !alert note
 We have not implemented restrictions in the azimuthal direction so the entire ($0$, $2 \pi$) arc will be split.
 This is a desirable extension of this object.

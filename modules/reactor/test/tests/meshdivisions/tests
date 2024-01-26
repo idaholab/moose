@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#25901'
+  [mesh_div]
+    design = 'HexagonalGridDivision.md'
+    requirement = 'The system shall be able to divide the mesh using'
+    [single_hex]
+      type = CSVDiff
+      input = 'hexagonal_division.i'
+      csvdiff = 'hexagonal_division_out.csv'
+      detail = 'a hexagonal grid,'
+    []
+    [distributed_hexes]
+      type = CSVDiff
+      input = 'hexagonal_division_positions.i'
+      csvdiff = 'hexagonal_division_positions_out.csv'
+      detail = 'hexagonal grids, centered on user-input positions.'
+      # Steady solve
+      recover = false
+    []
+  []
+[]

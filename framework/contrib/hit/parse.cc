@@ -319,18 +319,6 @@ Node::children(NodeType t)
   return nodes;
 }
 
-std::string
-Node::render(int indent, const std::string & indent_text, int maxlen)
-{
-  if (root() != this)
-    indent = -1;
-
-  std::string s;
-  for (auto child : _children)
-    s += child->render(indent + 1, indent_text, maxlen) + "\n";
-  return s;
-}
-
 Node *
 Node::parent()
 {
@@ -490,7 +478,10 @@ Section::render(int indent, const std::string & indent_text, int maxlen)
 {
   std::string s;
 
-  if (!path().empty() && path() != "-")
+  // check if this is document root level in order to skip syntax rendering
+  bool at_root_level = path().empty() || path() == "-";
+
+  if (!at_root_level)
   {
     std::string opening_marks;
     if (_hnv.child_count() > 3 && _hnv.child_at(2).type() == wasp::DECL &&
@@ -501,14 +492,9 @@ Section::render(int indent, const std::string & indent_text, int maxlen)
   }
 
   for (auto child : children())
-  {
-    if (!path().empty() && path() != "-")
-      s += child->render(indent + 1, indent_text, maxlen);
-    else
-      s += child->render(indent, indent_text, maxlen);
-  }
+    s += child->render(indent + (at_root_level ? 0 : 1), indent_text, maxlen);
 
-  if (!path().empty() && path() != "-")
+  if (!at_root_level)
   {
     wasp::HITNodeView term_node = _hnv.first_child_by_name("term");
     std::string term_data = !term_node.is_null() ? term_node.data() : "[]";
@@ -553,18 +539,32 @@ Field::path()
 std::string
 Field::render(int indent, const std::string & indent_text, int maxlen)
 {
-  auto render_field = path();
-  auto render_val = val();
-  auto render_kind = kind();
+  std::string s = "\n" + strRepeat(indent_text, indent) + path() + " = ";
 
-  std::string s = "\n" + strRepeat(indent_text, indent) + render_field + " = ";
-
+  const std::string render_val = val();
+  std::size_t val_column = _hnv.child_count() > 2 ? _hnv.child_at(2).column() : 0;
   size_t prefix_len = s.size() - 1;
+
+  s += formatValue(render_val, val_column, prefix_len, maxlen);
+
+  for (auto child : children())
+    s += child->render(indent + 1, indent_text, maxlen);
+
+  return s;
+}
+
+std::string
+formatValue(const std::string & render_val,
+            std::size_t val_column,
+            std::size_t prefix_len,
+            std::size_t max_length)
+{
+  std::string s;
   auto quote = quoteChar(render_val);
-  int max = maxlen - prefix_len - 1;
+  int max = max_length - prefix_len - 1;
 
   // special rendering logic for double quoted strings that go over maxlen:
-  if (render_kind == Kind::String && quote == "\"" && max > 0)
+  if (quote == "\"" && max > 0)
   {
     if (render_val.find('\n') == std::string::npos)
     {
@@ -612,7 +612,7 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
     }
     else
     {
-      const int delta_indent = _hnv.child_count() > 2 ? prefix_len - _hnv.child_at(2).column() : 0;
+      const int delta_indent = prefix_len - val_column;
 
       // first line is always added as is
       std::size_t start = 0;
@@ -654,9 +654,6 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
     s += "'" + render_val + "'";
   else
     s += render_val;
-
-  for (auto child : children())
-    s += child->render(indent + 1, indent_text, maxlen);
 
   return s;
 }
@@ -745,7 +742,13 @@ Field::setVal(const std::string & value, Kind kind)
 std::string
 Field::val()
 {
-  std::string value = _hnv.data();
+  return extractValue(_hnv.data());
+}
+
+std::string
+extractValue(const std::string & field_data)
+{
+  std::string value = field_data;
 
   size_t equal_index = value.find("=");
   if (equal_index != std::string::npos)
@@ -1208,7 +1211,8 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
         hit_parent->addChild(new Blank());
 
       auto hit_child = new Comment(interpreter, hnv_child);
-      if (hnv_child.line() == previous_line && hit_parent->children().size() > 0)
+      if (hnv_child.node_pool()->stream_name() == previous_file &&
+          hnv_child.line() == previous_line && hit_parent->children().size() > 0)
       {
         hit_child->setInline(true);
         hit_parent->children().back()->addChild(hit_child);

@@ -24,7 +24,7 @@ TagMatrixAux::validParams()
 TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
   : TagAuxBase<AuxKernel>(parameters),
     _v(coupledMatrixTagValue("v", "matrix_tag")),
-    _v_var(*getVar("v", 0))
+    _v_var(*getVarHelper<MooseVariableField<Real>>("v", 0))
 {
   checkCoupledVariable(&_v_var, &_var);
 }

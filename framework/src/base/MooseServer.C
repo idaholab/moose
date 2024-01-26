@@ -30,7 +30,9 @@
 #include <functional>
 
 MooseServer::MooseServer(MooseApp & moose_app)
-  : _moose_app(moose_app), _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this))
+  : _moose_app(moose_app),
+    _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this)),
+    _formatting_tab_size(0)
 {
   // set server capabilities to receive full input text when changed
   server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
@@ -188,7 +190,8 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
     object_context = object_context.parent();
   const std::string & object_path = object_context.path();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
-  const std::string & object_type = type_node.is_null() ? "" : type_node.last_as_string();
+  const std::string & object_type =
+      type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
 
   // get set of all parameter and subblock names already specified in input
   std::set<std::string> existing_params, existing_subblocks;
@@ -794,7 +797,8 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
     object_context = object_context.parent();
   const std::string & object_path = object_context.path();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
-  const std::string & object_type = type_node.is_null() ? "" : type_node.last_as_string();
+  const std::string & object_type =
+      type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
 
   // set used to gather all parameters valid from object context of request
   InputParameters valid_params = emptyInputParameters();
@@ -934,30 +938,18 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
   // return without adding any formatting text edits if parser root is null
   if (!rootIsValid())
     return true;
-  auto & root = getRoot();
 
   // get input root node line and column range to represent entire document
-  wasp::HITNodeView view_root = root.getNodeView();
+  wasp::HITNodeView view_root = getRoot().getNodeView();
   int document_start_line = view_root.line() - 1;
   int document_start_char = view_root.column() - 1;
   int document_last_line = view_root.last_line() - 1;
   int document_last_char = view_root.last_column();
 
-  // lambda that traverses hit tree clearing legacy markers and blank lines
-  std::function<void(hit::Section *)> format_document = [&](hit::Section * section)
-  {
-    section->clearLegacyMarkers();
-    for (auto child : section->children())
-      if (child->type() == hit::NodeType::Blank)
-        delete child;
-      else if (child->type() == hit::NodeType::Section)
-        format_document(static_cast<hit::Section *>(child));
-  };
-
-  // clear legacy markers and blank lines, use tab size to render, and trim
-  format_document(static_cast<hit::Section *>(&root));
-  std::string document_format = root.render(0, std::string(tab_size, ' '));
-  document_format = MooseUtils::trim(document_format);
+  // set number of spaces for indentation and build formatted document text
+  _formatting_tab_size = tab_size;
+  std::size_t starting_line = view_root.line() - 1;
+  std::string document_format = formatDocument(view_root, starting_line, 0);
 
   // add formatted text with whole line and column range to formatting list
   formattingTextEdits.push_back(wasp::DataObject());
@@ -970,6 +962,65 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
                                              document_last_char,
                                              document_format);
   return pass;
+}
+
+std::string
+MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, std::size_t level)
+{
+  // build string of newline and indentation spaces from level and tab size
+  std::string newline_indent = "\n" + std::string(level * _formatting_tab_size, ' ');
+
+  // lambda to format include data by replacing consecutive spaces with one
+  auto collapse_spaces = [](std::string string_copy)
+  {
+    pcrecpp::RE("\\s+").Replace(" ", &string_copy);
+    return string_copy;
+  };
+
+  // formatted string that will be built recursively by appending each call
+  std::string format_string;
+
+  // walk over all children of this node context and build document symbols
+  for (const auto i : make_range(parent.child_count()))
+  {
+    // walk must be index based to catch file include and skip its children
+    wasp::HITNodeView child = parent.child_at(i);
+
+    // add blank line if necessary after previous line and before this line
+    std::string blank = child.line() > prev_line + 1 ? "\n" : "";
+
+    // format include directive with indentation and collapse extra spacing
+    if (wasp::is_nested_file(child))
+      format_string += blank + newline_indent + MooseUtils::trim(collapse_spaces(child.data()));
+
+    // format normal comment with indentation and inline comment with space
+    else if (child.type() == wasp::COMMENT)
+      format_string += (child.line() == prev_line ? " " : blank + newline_indent) +
+                       MooseUtils::trim(child.data());
+
+    // format object recursively with indentation and without legacy syntax
+    else if (child.type() == wasp::OBJECT)
+      format_string += blank + newline_indent + "[" + child.name() + "]" +
+                       formatDocument(child, prev_line, level + 1) + newline_indent + "[]";
+
+    // format keyed value with indentation and calling reusable hit methods
+    else if (child.type() == wasp::KEYED_VALUE || child.type() == wasp::ARRAY)
+    {
+      const std::string prefix = newline_indent + child.name() + " = ";
+
+      const std::string render_val = hit::extractValue(child.data());
+      std::size_t val_column = child.child_count() > 2 ? child.child_at(2).column() : 0;
+      size_t prefix_len = prefix.size() - 1;
+
+      format_string += blank + prefix + hit::formatValue(render_val, val_column, prefix_len);
+    }
+
+    // set previous line reference used for blank lines and inline comments
+    prev_line = child.last_line();
+  }
+
+  // remove leading newline if this is level zero returning entire document
+  return level != 0 ? format_string : format_string.substr(1);
 }
 
 bool
@@ -996,9 +1047,10 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
     int last_line = view_child.last_line() - 1;
     int last_column = view_child.last_column();
     int symbol_kind = getDocumentSymbolKind(view_child);
-    std::string detail = !view_child.first_child_by_name("type").is_null()
-                             ? view_child.first_child_by_name("type").last_as_string()
-                             : "";
+    std::string detail =
+        !view_child.first_child_by_name("type").is_null()
+            ? wasp::strip_quotes(hit::extractValue(view_child.first_child_by_name("type").data()))
+            : "";
 
     // build document symbol object from node child info and push to array
     documentSymbols.push_back(wasp::DataObject());
@@ -1048,9 +1100,10 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
     int last_line = view_child.last_line() - 1;
     int last_column = view_child.last_column();
     int symbol_kind = getDocumentSymbolKind(view_child);
-    std::string detail = !view_child.first_child_by_name("type").is_null()
-                             ? view_child.first_child_by_name("type").last_as_string()
-                             : "";
+    std::string detail =
+        !view_child.first_child_by_name("type").is_null()
+            ? wasp::strip_quotes(hit::extractValue(view_child.first_child_by_name("type").data()))
+            : "";
 
     // build document symbol object from node child info and push to array
     wasp::DataObject & data_child = wasp::lsp::addDocumentSymbolChild(data_parent);
@@ -1084,7 +1137,8 @@ MooseServer::getCompletionItemKind(const InputParameters & valid_params,
 {
   // set up completion item kind value that client may use for icon in list
   auto associated_types = _check_app->syntax().getAssociatedTypes();
-  if (is_param && valid_params.isParamRequired(param_name))
+  if (is_param && valid_params.isParamRequired(param_name) &&
+      !valid_params.isParamValid(param_name))
     return wasp::lsp::m_comp_kind_event;
   else if (param_name == "active" || param_name == "inactive")
     return wasp::lsp::m_comp_kind_class;

@@ -76,7 +76,7 @@ LStableDirk2::solve()
   _n_linear_iterations = 0;
 
   // Compute first stage
-  _fe_problem.initPetscOutput();
+  _fe_problem.initPetscOutputAndSomeSolverSettings();
   _console << "1st stage" << std::endl;
   _stage = 1;
   _fe_problem.time() = time_stage1;
@@ -89,7 +89,7 @@ LStableDirk2::solve()
     return;
 
   // Compute second stage
-  _fe_problem.initPetscOutput();
+  _fe_problem.initPetscOutputAndSomeSolverSettings();
   _console << "2nd stage" << std::endl;
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;

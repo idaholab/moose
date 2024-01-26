@@ -639,7 +639,7 @@ EigenProblem::isNonlinearEigenvalueSolver() const
 }
 
 void
-EigenProblem::initPetscOutput()
+EigenProblem::initPetscOutputAndSomeSolverSettings()
 {
   _app.getOutputWarehouse().solveSetup();
 }

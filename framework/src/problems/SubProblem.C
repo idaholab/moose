@@ -292,7 +292,7 @@ SubProblem::addMatrixTag(TagName tag_name)
 }
 
 bool
-SubProblem::matrixTagExists(const TagName & tag_name)
+SubProblem::matrixTagExists(const TagName & tag_name) const
 {
   auto tag_name_upper = MooseUtils::toUpper(tag_name);
 
@@ -300,13 +300,13 @@ SubProblem::matrixTagExists(const TagName & tag_name)
 }
 
 bool
-SubProblem::matrixTagExists(TagID tag_id)
+SubProblem::matrixTagExists(TagID tag_id) const
 {
   return _matrix_tag_id_to_tag_name.find(tag_id) != _matrix_tag_id_to_tag_name.end();
 }
 
 TagID
-SubProblem::getMatrixTagID(const TagName & tag_name)
+SubProblem::getMatrixTagID(const TagName & tag_name) const
 {
   auto tag_name_upper = MooseUtils::toUpper(tag_name);
 

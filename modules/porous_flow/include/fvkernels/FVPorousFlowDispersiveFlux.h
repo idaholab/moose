@@ -14,6 +14,10 @@
 
 class PorousFlowDictator;
 
+/**
+ * Dispersive flux of component k in fluid phase alpha. Includes the effects
+ * of both molecular diffusion and hydrodynamic dispersion
+ */
 class FVPorousFlowDispersiveFlux : public FVFluxKernel
 {
 public:
@@ -23,30 +27,39 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// UserObject that holds information (number of phases, components, etc)
   const PorousFlowDictator & _dictator;
+  /// Number of fluid phases present
   const unsigned int _num_phases;
+  /// Index of the fluid component this kernel applies to
   const unsigned int _fluid_component;
 
+  /// Fluid density
   const ADMaterialProperty<std::vector<Real>> & _density;
 
+  /// Fluid viscosity
   const ADMaterialProperty<std::vector<Real>> & _viscosity;
   const ADMaterialProperty<std::vector<Real>> & _viscosity_neighbor;
 
+  /// Relative permeability
   const ADMaterialProperty<std::vector<Real>> & _relperm;
   const ADMaterialProperty<std::vector<Real>> & _relperm_neighbor;
 
+  /// Mass fraction of fluid components in fluid phases
   const ADMaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
   const ADMaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions_neighbor;
   const ADMaterialProperty<std::vector<std::vector<RealGradient>>> & _grad_mass_frac;
 
+  /// Permeability
   const ADMaterialProperty<RealTensorValue> & _permeability;
   const ADMaterialProperty<RealTensorValue> & _permeability_neighbor;
 
+  /// Fluid pressure
   const ADMaterialProperty<std::vector<Real>> & _pressure;
   const ADMaterialProperty<std::vector<Real>> & _pressure_neighbor;
   const ADMaterialProperty<std::vector<RealGradient>> & _grad_p;
 
-  /// Porosity at the qps
+  /// Porosity
   const ADMaterialProperty<Real> & _porosity;
   const ADMaterialProperty<Real> & _porosity_neighbor;
 
@@ -58,6 +71,7 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _diffusion_coeff;
   const MaterialProperty<std::vector<std::vector<Real>>> & _diffusion_coeff_neighbor;
 
+  /// Gravity vector
   const RealVectorValue & _gravity;
   const ADRankTwoTensor _identity_tensor;
 

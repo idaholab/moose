@@ -106,7 +106,7 @@ protected:
   const std::vector<std::pair<std::string, std::string>> & _vapor_phase_pairs;
   const std::vector<std::pair<std::string, std::string>> & _phase_element_pairs;
 
-  /// Nodal data (TODO: investigate writing directly to AuxVariables)
+  /// Nodal data (Used only for reinitialization)
   std::unordered_map<dof_id_type, Data> _data;
 
   ///@{ Element chemical potential output

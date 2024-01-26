@@ -102,10 +102,10 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
   std::vector<std::string> symbols(_functor_symbols);
   std::string symbols_str = Moose::stringify(symbols);
   if (Moose::dim == 3)
-    symbols_str += ",x,y,z";
+    symbols_str += symbols_str.empty() ? "x,y,z" : ",x,y,z";
   else
     mooseError("ParsedFunctorMaterial assumes the dimension is always equal to 3.");
-  symbols_str += ",t";
+  symbols_str += symbols_str.empty() ? "t" : ",t";
 
   // Parse the expression
   if (_parsed_function->Parse(_expression, symbols_str) >= 0)

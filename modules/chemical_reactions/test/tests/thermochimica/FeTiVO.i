@@ -15,14 +15,16 @@
 []
 
 [ChemicalComposition]
-  thermofile = FeTiVO.dat
-  tunit = K
-  punit = atm
-  munit = moles
-  temperature = T
-  uo_name = Thermochimica
-  output_species_unit = mole_fraction
-  reinitialization_type = none
+  [thermo]
+    thermofile = FeTiVO.dat
+    tunit = K
+    punit = atm
+    munit = moles
+    temperature = T
+    uo_name = Thermochimica
+    output_species_unit = mole_fraction
+    reinitialization_type = none
+  []
 []
 
 [Variables]

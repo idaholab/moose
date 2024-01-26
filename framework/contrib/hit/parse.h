@@ -137,6 +137,15 @@ std::string pathNorm(const std::string & path);
 /// pathJoin a joined version of the given hit (relative) paths as single hit path.
 std::string pathJoin(const std::vector<std::string> & paths);
 
+/// formatValue reflows double-quoted strings and reindents multi-line data
+std::string formatValue(const std::string & render_val,
+                        std::size_t val_column,
+                        std::size_t prefix_len,
+                        std::size_t max_length = 100);
+
+/// extractValue returns after equal with quoted value merged and unescaped
+std::string extractValue(const std::string & field_data);
+
 /// Node represents an object in a parsed hit tree.  Each node manages the memory for its child
 /// nodes.  It is safe to delete any node in the tree; doing so will also delete that node's
 /// children recursively.  It is not safe to place a single node in multiple trees.  Instead, use
@@ -230,7 +239,7 @@ public:
   /// indent string (repeated once for each level).  maxlen is the maximum line length before
   /// breaking string values.
   virtual std::string
-  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0);
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) = 0;
 
   /// walk does a depth-first traversal of the hit tree starting at this node (it
   /// doesn't visit any nodes that require traversing this node's parent) calling the passed

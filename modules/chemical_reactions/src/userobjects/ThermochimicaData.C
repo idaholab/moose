@@ -62,6 +62,8 @@ ThermochimicaDataBase<is_nodal>::validParams()
     params.set<bool>("unique_node_execute") = true;
 
   params.addPrivateParam<ChemicalCompositionAction *>("_chemical_composition_action");
+  params.addParam<FileName>("thermofile",
+                            "Thermodynamic file to be used for Thermochimica calculations");
   return params;
 }
 
@@ -86,7 +88,7 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
     _action(*parameters.getCheckedPointerParam<ChemicalCompositionAction *>(
         "_chemical_composition_action")),
     _el_ids(_action.elementIDs()),
-    _reinit((_action.reinitializationType()).getEnum<ReinitializationType>()),
+    _reinit(parameters.get<MooseEnum>("reinit_type").getEnum<ReinitializationType>()),
     _ph_names(_action.phases()),
     _element_potentials(_action.elementPotentials()),
     _species_phase_pairs(_action.speciesPhasePairs()),
@@ -100,7 +102,7 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
     _vp(_n_vapor_species),
     _el_pot(_n_potentials),
     _el_ph(_n_phase_elements),
-    _output_mass_unit((_action.outputSpeciesUnit()).getEnum<OutputMassUnit>())
+    _output_mass_unit(parameters.get<MooseEnum>("output_species_unit").getEnum<OutputMassUnit>())
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
@@ -191,6 +193,31 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
     _socket = sockets[0];
     // clean exit upon SIGTERM (mainly for Civet code coverage)
     signal(SIGTERM, ThermochimicaDataBase_handler);
+
+#ifdef THERMOCHIMICA_ENABLED
+    // Initialize database in Thermochimica
+    if (isParamValid("thermofile"))
+    {
+      const auto thermo_file = this->template getParam<FileName>("thermofile");
+
+      if (thermo_file.length() > 1024)
+        this->paramError("thermofile",
+                         "Path exceeds Thermochimica's maximal permissible length of 1024 with ",
+                         thermo_file.length(),
+                         " characters: ",
+                         thermo_file);
+
+      Thermochimica::setThermoFilename(thermo_file);
+
+      // Read in thermodynamics model, only once
+      Thermochimica::parseThermoFile();
+
+      const auto idbg = Thermochimica::checkInfoThermo();
+      if (idbg != 0)
+        this->paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
+    }
+#endif
+
     while (true)
       server();
   }

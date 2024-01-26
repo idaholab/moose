@@ -18,12 +18,13 @@
  * dry_thermal_conductivity),
  * where S is the aqueous saturation.
  */
-class PorousFlowThermalConductivityIdeal : public PorousFlowThermalConductivityBase
+template <bool is_ad>
+class PorousFlowThermalConductivityIdealTempl : public PorousFlowThermalConductivityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowThermalConductivityIdeal(const InputParameters & parameters);
+  PorousFlowThermalConductivityIdealTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -47,8 +48,13 @@ protected:
   const unsigned _aqueous_phase_number;
 
   /// Saturation of the fluid phases at the quadpoints
-  const MaterialProperty<std::vector<Real>> * const _saturation_qp;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _saturation_qp;
 
   /// d(Saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_qp_dvar;
+
+  usingPorousFlowThermalConductivityMembers;
 };
+
+typedef PorousFlowThermalConductivityIdealTempl<false> PorousFlowThermalConductivityIdeal;
+typedef PorousFlowThermalConductivityIdealTempl<true> ADPorousFlowThermalConductivityIdeal;

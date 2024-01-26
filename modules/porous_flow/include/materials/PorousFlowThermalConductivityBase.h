@@ -14,17 +14,26 @@
 /**
  * Base class for materials that provide thermal conducitivity
  */
-class PorousFlowThermalConductivityBase : public PorousFlowMaterialVectorBase
+template <bool is_ad>
+class PorousFlowThermalConductivityBaseTempl : public PorousFlowMaterialVectorBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowThermalConductivityBase(const InputParameters & parameters);
+  PorousFlowThermalConductivityBaseTempl(const InputParameters & parameters);
 
 protected:
   /// Thermal conducitivity at the qps
-  MaterialProperty<RealTensorValue> & _la_qp;
+  GenericMaterialProperty<RealTensorValue, is_ad> & _la_qp;
 
   /// d(thermal conductivity at the qps)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealTensorValue>> & _dla_qp_dvar;
+  MaterialProperty<std::vector<RealTensorValue>> * const _dla_qp_dvar;
 };
+
+#define usingPorousFlowThermalConductivityMembers                                                  \
+  using PorousFlowThermalConductivityBaseTempl<is_ad>::_dictator;                                  \
+  using PorousFlowThermalConductivityBaseTempl<is_ad>::_num_phases;                                \
+  using PorousFlowThermalConductivityBaseTempl<is_ad>::_num_var;                                   \
+  using PorousFlowThermalConductivityBaseTempl<is_ad>::_qp;                                        \
+  using PorousFlowThermalConductivityBaseTempl<is_ad>::_la_qp;                                     \
+  using PorousFlowThermalConductivityBaseTempl<is_ad>::_dla_qp_dvar

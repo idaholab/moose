@@ -117,6 +117,7 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
         _mci_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("secondary_subdomain"))),
     _primary_subdomain_id(
         _mci_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("primary_subdomain"))),
+    _secondary_set({_secondary_id}),
     _interpolate_normals(moose_object->getParam<bool>("interpolate_normals")),
     _phys_points_secondary(_mci_assembly.qPointsFace()),
     _phys_points_primary(_mci_assembly.qPointsFaceNeighbor()),

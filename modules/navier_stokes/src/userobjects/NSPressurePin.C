@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPressurePin.h"
+#include "NSPressurePin.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "NS.h"
@@ -19,10 +19,11 @@
 
 using namespace libMesh;
 
-registerMooseObject("NavierStokesApp", NSFVPressurePin);
+registerMooseObject("NavierStokesApp", NSPressurePin);
+registerMooseObjectRenamed("NavierStokesApp", NSFVPressurePin, "01/19/2025 00:00", NSPressurePin);
 
 InputParameters
-NSFVPressurePin::validParams()
+NSPressurePin::validParams()
 {
   auto params = GeneralUserObject::validParams();
   params += BlockRestrictable::validParams();
@@ -51,13 +52,12 @@ NSFVPressurePin::validParams()
   return params;
 }
 
-NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
+NSPressurePin::NSPressurePin(const InputParameters & params)
   : GeneralUserObject(params),
     BlockRestrictable(this),
     NonADFunctorInterface(this),
     _mesh(UserObject::_subproblem.mesh().getMesh()),
-    _p(dynamic_cast<INSFVPressureVariable *>(
-        &UserObject::_subproblem.getVariable(0, getParam<NonlinearVariableName>("variable")))),
+    _p(UserObject::_subproblem.getVariable(0, getParam<NonlinearVariableName>("variable"))),
     _p0(getPostprocessorValue("phi0")),
     _pressure_pin_type(getParam<MooseEnum>("pin_type")),
     _pressure_pin_point(_pressure_pin_type == "point-value" ? getParam<Point>("point")
@@ -66,8 +66,13 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
         _pressure_pin_type == "average" ? &getPostprocessorValue("pressure_average") : nullptr),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys"))
 {
-  if (!_p)
-    paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
+}
+
+void
+NSPressurePin::initialSetup()
+{
+  mooseAssert(!Threads::in_threads, "paramError is not safe in threaded mode");
+
   // Check execute_on of the postprocessor
   if (_pressure_pin_type == "average" &&
       !_fe_problem.getUserObjectBase(getParam<PostprocessorName>("pressure_average"))
@@ -78,13 +83,13 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
 }
 
 void
-NSFVPressurePin::execute()
+NSPressurePin::execute()
 {
   // Get the value of the pin
   Real pin_value = 0;
   if (_pressure_pin_type == "point-value")
   {
-    Real point_value = _sys.system().point_value(_p->number(), _pressure_pin_point, false);
+    Real point_value = _sys.system().point_value(_p.number(), _pressure_pin_point, false);
 
     /**
      * If we get exactly zero, we don't know if the locator couldn't find an element, or
@@ -113,7 +118,7 @@ NSFVPressurePin::execute()
   // Offset the entire pressure vector by the value of the pin
   NumericVector<Number> & sln = _sys.solution();
   std::set<dof_id_type> local_dofs;
-  _sys.system().local_dof_indices(_p->number(), local_dofs);
+  _sys.system().local_dof_indices(_p.number(), local_dofs);
   for (const auto dof : local_dofs)
     sln.add(dof, pin_value);
   sln.close();

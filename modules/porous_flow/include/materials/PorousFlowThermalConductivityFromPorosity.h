@@ -19,12 +19,14 @@
  * where phi is porosity, and lambda_f, lambda_s are
  * thermal conductivities of the fluid and solid (assumed constant)
  */
-class PorousFlowThermalConductivityFromPorosity : public PorousFlowThermalConductivityBase
+template <bool is_ad>
+class PorousFlowThermalConductivityFromPorosityTempl
+  : public PorousFlowThermalConductivityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowThermalConductivityFromPorosity(const InputParameters & parameters);
+  PorousFlowThermalConductivityFromPorosityTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -36,8 +38,15 @@ protected:
   const RealTensorValue _la_f;
 
   /// Quadpoint porosity
-  const MaterialProperty<Real> & _porosity_qp;
+  const GenericMaterialProperty<Real, is_ad> & _porosity_qp;
 
   /// d(quadpoint porosity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dporosity_qp_dvar;
+
+  usingPorousFlowThermalConductivityMembers;
 };
+
+typedef PorousFlowThermalConductivityFromPorosityTempl<false>
+    PorousFlowThermalConductivityFromPorosity;
+typedef PorousFlowThermalConductivityFromPorosityTempl<true>
+    ADPorousFlowThermalConductivityFromPorosity;

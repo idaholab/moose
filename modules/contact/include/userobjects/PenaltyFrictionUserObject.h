@@ -90,4 +90,7 @@ protected:
 
   /// The adaptivity method for the penalty factor at augmentations
   const enum class AdaptivityFrictionalPenalty { SIMPLE, FRICTION_LIMIT } _adaptivity_friction;
+
+  /// Tolerance to avoid NaN/Inf in automatic differentiation operations.
+  const Real _epsilon_tolerance;
 };
