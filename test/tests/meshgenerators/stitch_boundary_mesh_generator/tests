@@ -1,0 +1,25 @@
+[Tests]
+  [stitched_boundary_mesh_generator]
+    issues = '#26641'
+    design = 'source/meshgenerators/StitchBoundaryMeshGenerator.md'
+    requirement = "The system shall support stitching two interface boundaries"
+    [stitch_2d]
+      type = 'Exodiff'
+      input = 'stitch_2d.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff = 'stitch_2d_in.e'
+      detail = "in 2D, and"
+    []
+    [stitch_3d]
+      type = 'Exodiff'
+      input = 'stitch_3d.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff = 'stitch_3d_in.e'
+      detail = "in 3D."
+    []
+  []
+[]
