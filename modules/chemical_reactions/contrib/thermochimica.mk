@@ -6,6 +6,8 @@ Thermochimica_f90srcfiles := $(shell find $(THERMOCHIMICA_SRC) -name "*.f90" -no
 # object files (from C)
 Thermochimica_objects     := $(patsubst %.C, %.$(obj-suffix), $(Thermochimica_srcfiles))
 
+Thermochimica_LIB := $(THERMOCHIMICA_DIR)/libThermochimica-$(METHOD).la
+
 # the C files depend on MooseConfig.h
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 $(Thermochimica_objects): $(moose_config_symlink)
@@ -24,22 +26,18 @@ Thermochimica_deps := $(patsubst %.C, %.$(obj-suffix).d, $(Thermochimica_srcfile
 # clang static analyzer files
 Thermochimica_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(Thermochimica_srcfiles))
 
-app_LIBS       := $(THERMOCHIMICA_DIR)/lib/libThermochimica-$(METHOD).la $(app_LIBS)
-app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
-
-$(THERMOCHIMICA_DIR)/lib/libThermochimica-$(METHOD).la : $(Thermochimica_objects)
-	@$(shell mkdir -p $(THERMOCHIMICA_DIR)/lib)
+$(Thermochimica_LIB): $(Thermochimica_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXSHAREDFLAG) -o $@ $(Thermochimica_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(THERMOCHIMICA_DIR)/lib
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(THERMOCHIMICA_DIR)/lib
+	  $(libmesh_CXX) $(libmesh_CXXSHAREDFLAG) -o $@ $(Thermochimica_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(THERMOCHIMICA_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(Thermochimica_LIB) $(THERMOCHIMICA_DIR)
 
 # Include dependencies (see note above)
 -include $(Thermochimica_deps)
 
-ADDITIONAL_LIBS += $(THERMOCHIMICA_DIR)/lib/libThermochimica-$(METHOD).la
-
-app_INCLUDES += -I$(THERMOCHIMICA_SRC) -I$(THERMOCHIMICA_SRC)/api -I$(THERMOCHIMICA_SRC)/module
+ADDITIONAL_INCLUDES += -I$(THERMOCHIMICA_SRC) -I$(THERMOCHIMICA_SRC)/api -I$(THERMOCHIMICA_SRC)/module
+ADDITIONAL_LIBS += -L$(THERMOCHIMICA_DIR) -lThermochimica-$(METHOD)
+ADDITIONAL_DEPEND_LIBS += $(Thermochimica_LIB)
 
 # F90 module dependency rules
 $(Thermochimica_f90srcfiles): $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90modfiles))

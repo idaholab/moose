@@ -2078,7 +2078,8 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                  dl_lib_full_path,
                  "\" exists and has proper permissions, but cannot by dynamically loaded.\nThis "
                  "generally means that the loader was unable to load one or more of the "
-                 "dependencies listed in the supplied library (see otool or ldd).\n");
+                 "dependencies listed in the supplied library (see otool or ldd).\n",
+                 dlerror());
 
     DynamicLibraryInfo lib_info;
     lib_info.library_handle = lib_handle;
