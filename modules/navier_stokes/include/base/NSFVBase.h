@@ -55,10 +55,6 @@ public:
   ///@}
 
 protected:
-  /// Type that we use in Actions for declaring coupling between the solutions
-  /// of different physics components
-  typedef std::vector<VariableName> CoupledName;
-
   /// Adds NS variables
   void addNSVariables();
   /// Adds NS initial conditions

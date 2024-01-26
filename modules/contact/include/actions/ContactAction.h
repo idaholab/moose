@@ -111,9 +111,6 @@ protected:
   /// Whether mortar dynamic contact constraints are to be used
   const bool _mortar_dynamics;
 
-  /// Type that we use in Actions for declaring coupling
-  typedef std::vector<VariableName> CoupledName;
-
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact

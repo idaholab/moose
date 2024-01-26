@@ -1057,6 +1057,10 @@ DerivativeStringClass(NonlinearSystemName);
 /// Command line argument, specialized to handle quotes in vector arguments
 DerivativeStringClass(CLIArgString);
 
+/**
+ * additional MOOSE typedefs
+ */
+typedef std::vector<VariableName> CoupledName;
 namespace Moose
 {
 extern const TagName SOLUTION_TAG;
