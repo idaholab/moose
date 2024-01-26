@@ -136,10 +136,9 @@ QuadPinMeshGenerator::generate()
   mesh_base->prepare_for_use();
 
   // move the meta data into QuadSubChannelMesh
-  std::shared_ptr<QuadSubChannelMesh> sch_mesh =
-      std::dynamic_pointer_cast<QuadSubChannelMesh>(_mesh);
-  sch_mesh->_pin_nodes = _pin_nodes;
-  sch_mesh->_pin_mesh_exist = true;
+  auto & sch_mesh = static_cast<QuadSubChannelMesh &>(*_mesh);
+  sch_mesh._pin_nodes = _pin_nodes;
+  sch_mesh._pin_mesh_exist = true;
 
   return mesh_base;
 }

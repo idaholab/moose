@@ -330,34 +330,33 @@ QuadInterWrapperMeshGenerator::generate()
   mesh_base->prepare_for_use();
 
   // move the meta data into QuadInterWrapperMesh
-  std::shared_ptr<QuadInterWrapperMesh> sch_mesh =
-      std::dynamic_pointer_cast<QuadInterWrapperMesh>(_mesh);
-  sch_mesh->_unheated_length_entry = _unheated_length_entry;
+  auto & sch_mesh = static_cast<QuadInterWrapperMesh &>(*_mesh);
+  sch_mesh._unheated_length_entry = _unheated_length_entry;
 
-  sch_mesh->_assembly_pitch = _assembly_pitch;
-  sch_mesh->_assembly_side_x = _assembly_side_x;
-  sch_mesh->_assembly_side_y = _assembly_side_y;
-  sch_mesh->_heated_length = _heated_length;
-  sch_mesh->_unheated_length_exit = _unheated_length_exit;
-  sch_mesh->_z_grid = _z_grid;
-  sch_mesh->_k_grid = _k_grid;
-  sch_mesh->_kij = _kij;
-  sch_mesh->_n_cells = _n_cells;
-  sch_mesh->_nx = _nx;
-  sch_mesh->_ny = _ny;
-  sch_mesh->_side_bypass_length = _side_bypass_length;
-  sch_mesh->_n_channels = _n_channels;
-  sch_mesh->_n_gaps = _n_gaps;
-  sch_mesh->_n_assemblies = _n_assemblies;
-  sch_mesh->_nodes = _nodes;
-  sch_mesh->_gapnodes = _gapnodes;
-  sch_mesh->_gap_to_chan_map = _gap_to_chan_map;
-  sch_mesh->_chan_to_gap_map = _chan_to_gap_map;
-  sch_mesh->_chan_to_pin_map = _chan_to_pin_map;
-  sch_mesh->_pin_to_chan_map = _pin_to_chan_map;
-  sch_mesh->_sign_id_crossflow_map = _sign_id_crossflow_map;
-  sch_mesh->_gij_map = _gij_map;
-  sch_mesh->_subch_type = _subch_type;
+  sch_mesh._assembly_pitch = _assembly_pitch;
+  sch_mesh._assembly_side_x = _assembly_side_x;
+  sch_mesh._assembly_side_y = _assembly_side_y;
+  sch_mesh._heated_length = _heated_length;
+  sch_mesh._unheated_length_exit = _unheated_length_exit;
+  sch_mesh._z_grid = _z_grid;
+  sch_mesh._k_grid = _k_grid;
+  sch_mesh._kij = _kij;
+  sch_mesh._n_cells = _n_cells;
+  sch_mesh._nx = _nx;
+  sch_mesh._ny = _ny;
+  sch_mesh._side_bypass_length = _side_bypass_length;
+  sch_mesh._n_channels = _n_channels;
+  sch_mesh._n_gaps = _n_gaps;
+  sch_mesh._n_assemblies = _n_assemblies;
+  sch_mesh._nodes = _nodes;
+  sch_mesh._gapnodes = _gapnodes;
+  sch_mesh._gap_to_chan_map = _gap_to_chan_map;
+  sch_mesh._chan_to_gap_map = _chan_to_gap_map;
+  sch_mesh._chan_to_pin_map = _chan_to_pin_map;
+  sch_mesh._pin_to_chan_map = _pin_to_chan_map;
+  sch_mesh._sign_id_crossflow_map = _sign_id_crossflow_map;
+  sch_mesh._gij_map = _gij_map;
+  sch_mesh._subch_type = _subch_type;
 
   _console << "Inter-wrapper quad mesh generated" << std::endl;
 
