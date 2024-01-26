@@ -14,8 +14,7 @@
 #include "AuxKernel.h"
 
 /**
- * Computes the turbuent viscosity for the k-Epsilon model.
- * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
+ * Computes the turbuent viscosity for the v2f model.
  */
 class v2fViscosityAux : public AuxKernel
 {

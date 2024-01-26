@@ -15,7 +15,7 @@
 #include "FVFluxBC.h"
 
 /**
- * Applies a wall function to the turbulent pressure distribution function
+ * Applies a wall function to the turbulent elliptic function for the v2f model
  */
 class INSFVTFWallFunctionBC : public FVDirichletBCBase
 {

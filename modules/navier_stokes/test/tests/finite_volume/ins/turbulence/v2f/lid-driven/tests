@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  design = 'INSFVTFSourceSink.md INSFVTKEDSourceSink.md INSFVTV2SourceSink.md INSFVTV2WallFunctionBC.md INSFVTFWallFunctionBC.md v2fViscosityAux.md INSFVTurbulentTemperatureWallFunction.md SIMPLE.md'
   issues = '#26610'
   [lid_driven_v2f_turb_std_wall]
     requirement = 'The system shall be able to run fluid flow with v2f turbulence model in enclosures with standard wall functions, '

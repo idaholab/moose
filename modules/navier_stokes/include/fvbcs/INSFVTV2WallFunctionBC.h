@@ -15,7 +15,7 @@
 #include "FVFluxBC.h"
 
 /**
- * Applies a wall function to the turbulent kinetic energy dissipation rate
+ * Applies a wall function to the wall nornal Reynolds stresses
  */
 class INSFVTV2WallFunctionBC : public FVDirichletBCBase
 {

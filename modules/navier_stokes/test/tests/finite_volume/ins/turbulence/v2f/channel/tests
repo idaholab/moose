@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  design = 'INSFVTFSourceSink.md INSFVTKEDSourceSink.md INSFVTV2SourceSink.md INSFVTV2WallFunctionBC.md INSFVTFWallFunctionBC.md v2fViscosityAux.md SIMPLE.md'
   issues = '#26610'
   [channel_ERCOFTAC]
     requirement = 'The system shall be able to solve fluid flow problems with the v2f turbuelnce model for a standard channel, '

@@ -367,18 +367,6 @@ max_mixing_length = 1e10
     k = TKE
     characteristic_length = '${fparse H}'
   []
-  # [walls_TKE]
-  #   type = FVDirichletBC
-  #   boundary = 'bottom wall-side top'
-  #   variable = TKE
-  #   value = 0.0
-  # []
-  # [walls_hom_TV2]
-  #   type = FVDirichletBC
-  #   boundary = 'bottom wall-side top'
-  #   variable = TV2
-  #   value = 0.0
-  # []
   [walls_func_TV2]
     type = INSFVTV2WallFunctionBC
     boundary = 'bottom wall-side top'
@@ -387,12 +375,6 @@ max_mixing_length = 1e10
     mu = ${mu}
     k = TKE
   []
-  # [walls_hom_TF]
-  #   type = FVDirichletBC
-  #   boundary = 'bottom wall-side top'
-  #   variable = TF
-  #   value = 0.0
-  # []
   [walls_func_TF]
     type = INSFVTFWallFunctionBC
     boundary = 'bottom wall-side top'
@@ -403,17 +385,6 @@ max_mixing_length = 1e10
     epsilon = TKED
     v2 = TV2
   []
-  # [walls_TKED]
-  #   type = INSFVTKEDWallFunctionBC
-  #   boundary = 'bottom wall-side top'
-  #   variable = TKED
-  #   u = vel_x
-  #   v = vel_y
-  #   rho = ${rho}
-  #   mu = ${mu}
-  #   mu_t = 'mu_t_v2f'
-  #   k = TKE
-  # []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
     boundary = 'bottom wall-side top'

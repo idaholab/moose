@@ -18,15 +18,24 @@ InputParameters
 INSFVTV2WallFunctionBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
+
+  // Class description
   params.addClassDescription(
-      "Adds wall boundary condition for turbulent v2 (wall normal fluctuations) variable");
+      "Adds wall boundary condition for turbulent v2 (wall normal stresses) variable");
+
+  // Couple turbulent variables
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
+
+  // Coupled thermophysical properties
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
-  params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
+
+  // Closure parameters
   params.addParam<MooseFunctorName>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>(
       "Bv2", -0.94, "Near wall fitting constant for damping function logarithmic layer.");
   params.addParam<Real>("Cv2", 0.193, "Near wall fitting constant for damping function decay.");
+
   return params;
 }
 
@@ -44,6 +53,7 @@ INSFVTV2WallFunctionBC::INSFVTV2WallFunctionBC(const InputParameters & params)
 ADReal
 INSFVTV2WallFunctionBC::boundaryValue(const FaceInfo & fi) const
 {
+  // Conveninet parameters
   const Real dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
   const auto state = determineState();

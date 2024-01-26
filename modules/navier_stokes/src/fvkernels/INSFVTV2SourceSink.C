@@ -19,22 +19,28 @@ InputParameters
 INSFVTV2SourceSink::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Elemental kernel to compute the production and destruction "
-                             " terms of the velocity fluctations normal to the wall (v2).");
 
+  // Class description
+  params.addClassDescription("Elemental kernel to compute the production and destruction "
+                             " terms of the wall normal stress (v2).");
+
+  // Velocity fields
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
 
+  // Coupled turbulent variables
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation.");
   params.addRequiredParam<MooseFunctorName>(NS::TF, "Coupled turbulent relaxation function.");
 
+  // Coupled thermophysical propeties
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
 
+  // Closure parameters
   params.addParam<Real>("C1", 1.4, "First relaxation function coefficient.");
   params.addParam<Real>("C2", 0.3, "Second relaxation function coefficient.");
   params.addParam<Real>("n", 6.0, "Model parameter.");
@@ -64,6 +70,7 @@ INSFVTV2SourceSink::INSFVTV2SourceSink(const InputParameters & params)
 ADReal
 INSFVTV2SourceSink::computeQpResidual()
 {
+  // Convinient variables
   const auto elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
   const auto TKE = _k(elem_arg, state);
@@ -73,10 +80,10 @@ INSFVTV2SourceSink::computeQpResidual()
   const auto rho = _rho(elem_arg, state);
   const auto nu = mu / rho;
   const auto mu_t = _mu_t(elem_arg, state);
-
   const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto TV2 = _var(elem_arg, old_state);
 
+  // Computing shrear strain rate deformation tensor
   const auto & grad_u = _u_var.gradient(elem_arg, state);
   const auto Sij_xx = 2.0 * grad_u(0);
   ADReal Sij_xy = 0.0;
@@ -132,9 +139,11 @@ INSFVTV2SourceSink::computeQpResidual()
       (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
       (Sij_zz - trace) * grad_zz;
 
+  // Computing TKE production and model timescale
   const auto production_TKE = mu_t * symmetric_strain_tensor_sq_norm / rho;
   const auto time_scale = std::max(TKE / TKED, 6 * std::sqrt(nu / TKED));
 
+  // Computing production and destruction
   const auto v2fdiffusivity = ((_C1 - _n) * TV2 - 2.0 / 3.0 * TKE * (_C1 - 1.0)) / time_scale;
   const auto production = std::min(TKE * TF, _C2 * production_TKE - v2fdiffusivity);
   const auto destruction = _n * TV2 / time_scale;

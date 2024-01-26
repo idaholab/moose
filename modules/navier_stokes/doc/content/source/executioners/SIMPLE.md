@@ -149,6 +149,22 @@ pressure gradient kernels to enable the separation of terms needed in $A^{-1}H$.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=u_pressure v_pressure
 
+## Activation and Dynamic Relaxation for Turbulent Variables
+
+Using the parameter [!param](/Executioner/SIMPLE/turbulence_iterations_to_activate), the user can define the number of iterations at which the solution of the turbulent variables is activated. The solution of the turbulent variables will only be activated when the number of iterations is larger or equal to the number of iterations defined in [!param](/Executioner/SIMPLE/turbulence_iterations_to_activate). Until the solution is activated, the corresponding turbulent field will hold its initial value.
+
+Using the parameter [!param](/Executioner/SIMPLE/turbulence_relaxation_decay_rate), the user can define dynamic relaxation for the turbulent variables with a reciprocal decay rate ($\lambda_d$) defined by this parameter. When using a decay rate, the effective relaxation factor for a turbulent field $t$ at each iteration is defined by
+
+\begin{equation}
+r_{f,t} = r_{f,t}^0 \left( 1 - e^{\frac{i}{\lambda_d}} \right) \,,
+\end{equation}
+
+where:
+
+- $r_{f,t}^0$ is the target relaxation factor as defined by the [!param](/Executioner/SIMPLE/turbulence_equation_relaxation) parameter,
+- $i$ is the iteration number in the SIMPLE algorithm.
+
+
 
 !syntax parameters /Executioner/SIMPLE
 

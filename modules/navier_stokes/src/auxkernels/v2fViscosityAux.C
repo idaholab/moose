@@ -17,13 +17,21 @@ InputParameters
 v2fViscosityAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+
+  // Class description
   params.addClassDescription("Calculates the turbulent viscosity according to the v2f model.");
+
+  // Coupled turbulent variables
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::TV2, "Coupled turbulent wall normal fluctuations.");
+
+  // Coupled thermophysical variables
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
+
+  // Closure parameters
   params.addParam<Real>("C_mu_2", 0.22, "Coupled turbulent viscosity closure.");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent viscosity closure.");
   return params;
@@ -54,17 +62,9 @@ v2fViscosityAux::computeValue()
   const auto mu = _mu(elem_arg, state);
   const auto nu = mu / rho;
 
+  // Surrogate parameters
   const auto time_scale_keps = TKE / TKED;
   const auto time_scale = std::max(time_scale_keps, 6 * std::sqrt(nu / TKED));
 
-  const auto mu_t = rho * std::min(_C_mu * TKE * time_scale_keps, _C_mu_2 * TV2 * time_scale);
-
-  // _console << "--------------------------------" << std::endl;
-  // _console << "TKE: " << raw_value(TKE) << std::endl;
-  // _console << "TKED: " << raw_value(TKED) << std::endl;
-  // _console << "TV2: " << raw_value(TV2) << std::endl;
-  // _console << "mu_t: " << raw_value(mu_t) << std::endl;
-  // _console << "--------------------------------" << std::endl;
-
-  return raw_value(mu_t);
+  return raw_value(rho * std::min(_C_mu * TKE * time_scale_keps, _C_mu_2 * TV2 * time_scale));
 }

@@ -19,19 +19,28 @@ InputParameters
 INSFVTFSourceSink::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
+
+  // Description
   params.addClassDescription(
-      "Elemental kernel to compute the production and destruction for the v2f blending function.");
+      "Elemental kernel to compute the production and destruction for the v2f function.");
+
+  // Coupled velocity fields
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
+
+  // Couupled turbulent variables
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::TV2, "Coupled turbulent wall normal fluctuations.");
+
+  // Coupled thermophysical properties
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
 
+  // Coupled model coefficients
   params.addParam<Real>("C1", 1.4, "First relaxation function coefficient.");
   params.addParam<Real>("C2", 0.3, "Second relaxation function coefficient.");
   params.addParam<Real>("n", 6.0, "Model parameter.");
@@ -63,9 +72,7 @@ INSFVTFSourceSink::INSFVTFSourceSink(const InputParameters & params)
 ADReal
 INSFVTFSourceSink::computeQpResidual()
 {
-  ADReal residual = 0.0;
-  ADReal production = 0.0;
-  ADReal destruction = 0.0;
+  // Convenient variables
   const auto elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
   const auto mu = _mu(elem_arg, state);
@@ -75,6 +82,7 @@ INSFVTFSourceSink::computeQpResidual()
   const auto TKED = _epsilon(elem_arg, state);
   const auto TV2 = _v2(elem_arg, state);
 
+  // Computing turbulent production
   TensorValue<ADReal> Sij;
   const auto & grad_u = _u_var.gradient(elem_arg, state);
   auto trace = grad_u(0) / 3.0;
@@ -116,47 +124,18 @@ INSFVTFSourceSink::computeQpResidual()
   }
 
   const auto symmetric_strain_tensor_sq_norm = 2.0 * Sij.contract(Sij);
+  const auto production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm / rho;
 
-  production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm / rho;
-
-  // const auto production_function = _C2 * production / (TKE + 1e-15);
-
+  // Computing turbulent surrogate variables
   const auto time_scale = std::max(TKE / TKED, 6 * std::sqrt(nu / TKED));
-
-  // const auto fluctuation_function =
-  //     ((_C1 - 1.0) * TV2 / std::max(TKE, 1e-15) - 2. / 3. * (_C1 - 1)) / time_scale;
-
   const auto bulk_scale = std::pow(TKE, 1.5) / TKED;
   const auto kolmogorov_scale = _C_eta * std::pow(std::pow(nu, 3) / TKED, 0.25);
   const auto L2 = Utility::pow<2>(0.23 * std::max(bulk_scale, kolmogorov_scale));
 
-  // const auto fluctuation_function = 1.0 / time_scale * (_C1 - 1.0) * (TV2 / TKE - 2. / 3.) -
-  //                                   _C2 * production / TKE -
-  //                                   5.0 * TKED * TV2 / Utility::pow<2>(TKE);
-
+  // Computing production and destruction
   const auto v2fdiffusivity = ((_C1 - _n) * TV2 - 2.0 / 3.0 * TKE * (_C1 - 1.0)) / time_scale;
   const auto fluctuation_function = (v2fdiffusivity - _C2 * production) / TKE;
-
-  // const auto fluctuation_function =
-  //     _C1 * (2. / 3. - TV2 / TKE) + _C2 * production / TKED + 5.0 * TV2 / TKE;
-
   const auto implicit_term = _var(elem_arg, state);
 
-  // _console << "---------------------------" << std::endl;
-  // _console << "Centroid: " << _current_elem->centroid() << std::endl;
-  // _console << "TKE: " << raw_value(TKE) << std::endl;
-  // _console << "TKED: " << raw_value(TKED) << std::endl;
-  // _console << "TV2: " << raw_value(TV2) << std::endl;
-  // _console << "Time Scale: " << raw_value(time_scale) << std::endl;
-  // _console << "L2: " << raw_value(L2) << std::endl;
-  // _console << "Fluctuation function: " << raw_value(fluctuation_function) << std::endl;
-  // _console << "Implicit term: "
-  //          << raw_value(_var(elem_arg, Moose::StateArg(1,
-  //          Moose::SolutionIterationType::Nonlinear)))
-  //          << std::endl;
-  // _console << "---------------------------" << std::endl;
-
-  // return production_function - fluctuation_function - implicit_term;
-  // return -production_function + implicit_term + fluctuation_function;
   return (implicit_term + fluctuation_function) / L2;
 }

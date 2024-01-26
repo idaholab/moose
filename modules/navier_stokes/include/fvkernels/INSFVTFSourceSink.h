@@ -15,7 +15,7 @@
 #include "INSFVVelocityVariable.h"
 
 /**
- * Computes the source and sink terms for the v2f elliptic blending function
+ * Computes the source and sink terms for the v2f elliptic function
  */
 class INSFVTFSourceSink : public FVElementalKernel
 {

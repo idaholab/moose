@@ -15,7 +15,7 @@
 #include "INSFVVelocityVariable.h"
 
 /**
- * Computes the source and sink terms for the turbulent kinetic energy dissipation rate.
+ * Computes the source and sink terms for the Reynolds wall normal stress.
  */
 class INSFVTV2SourceSink : public FVElementalKernel
 {

@@ -18,17 +18,26 @@ InputParameters
 INSFVTFWallFunctionBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
-  params.addClassDescription("Adds wall boundary condition for turbulent f (pressure distribution "
+
+  // Description
+  params.addClassDescription("Adds wall boundary condition for turbulent f (elliptic distribution "
                              "function or transfer from turbulent "
                              "kinetic energy to wall normal fluctuations) variable");
+
+  // Coupled turbulent variables
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::TV2, "Coupled turbulent wall normal fluctuations.");
+
+  // Coupled thermophysical properties
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
+
+  // Coupled closure parameters
   params.addParam<MooseFunctorName>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("n", 6.0, "Model parameter.");
+
   return params;
 }
 
@@ -47,6 +56,7 @@ INSFVTFWallFunctionBC::INSFVTFWallFunctionBC(const InputParameters & params)
 ADReal
 INSFVTFWallFunctionBC::boundaryValue(const FaceInfo & fi) const
 {
+  // Convenient variables
   const Real dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
   const auto elem_arg = makeElemArg(&_current_elem);
