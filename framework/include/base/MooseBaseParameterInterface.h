@@ -242,7 +242,8 @@ template <typename... Args>
 void
 MooseBaseParameterInterface::paramWarning(const std::string & param, Args... args) const
 {
-  mooseWarning(paramErrorMsg(param, std::forward<Args>(args)...));
+  if (_moose_base->shouldWarn())
+    mooseWarning(paramErrorMsg(param, std::forward<Args>(args)...));
 }
 
 template <typename... Args>

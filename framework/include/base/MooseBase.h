@@ -55,6 +55,11 @@ public:
     return type() + std::string(" \"") + name() + std::string("\"");
   }
 
+  /**
+   * Whether the derived class should issue warning
+   */
+  virtual bool shouldWarn() const { return true; }
+
 protected:
   /// The MOOSE application this is associated with
   MooseApp & _app;

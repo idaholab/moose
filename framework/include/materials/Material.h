@@ -217,6 +217,8 @@ public:
   /// resolve all optional properties
   virtual void resolveOptionalProperties() override;
 
+  virtual bool shouldWarn() const override { return !_bnd || boundaryRestricted(); }
+
 protected:
   virtual void checkMaterialProperty(const std::string & name, const unsigned int state) override;
 

@@ -61,8 +61,9 @@ public:
   template <typename... Args>
   void mooseWarning(Args &&... args) const
   {
-    moose::internal::mooseWarningStream(
-        _console, errorPrefix("warning"), std::forward<Args>(args)...);
+    if (_moose_base->shouldWarn())
+      moose::internal::mooseWarningStream(
+          _console, errorPrefix("warning"), std::forward<Args>(args)...);
   }
 
   /**
