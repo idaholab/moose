@@ -1,4 +1,4 @@
-# LinearFVSourceKernel
+# LinearFVSource
 
 ## Description
 
@@ -11,19 +11,19 @@ is the numerical integral of the source density function ($s(\vec{r})$) in the f
 
 where $\vec{r}_C$ and $V_C$ denote the cell centroid and volume, respectively.
 This integral is added the the corresponding entry of the right hand side of the linear system.
-The source density parameter ([!param](/LinearFVKernels/LinearFVSourceKernel/source_density))
+The source density parameter ([!param](/LinearFVKernels/LinearFVSource/source_density))
 accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
 
 ## Example Syntax
 
-The case below demonstrates the use of `LinearFVSourceKernel` where the force term is
+The case below demonstrates the use of `LinearFVSource` where the force term is
 supplied based upon a function form:
 
 !listing test/tests/linearfvkernels/reaction/reaction-1d.i block=LinearFVKernels
 
-!syntax parameters /LinearFVKernels/LinearFVSourceKernel
+!syntax parameters /LinearFVKernels/LinearFVSource
 
-!syntax inputs /LinearFVKernels/LinearFVSourceKernel
+!syntax inputs /LinearFVKernels/LinearFVSource
 
-!syntax children /LinearFVKernels/LinearFVSourceKernel
+!syntax children /LinearFVKernels/LinearFVSource

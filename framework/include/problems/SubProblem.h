@@ -320,7 +320,7 @@ public:
    */
   virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const = 0;
   virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) = 0;
-    /**
+  /**
    * Return the linear system object as a base class reference given the system number
    */
   virtual const SystemBase & systemBaseLinear(const unsigned int sys_num) const = 0;

@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVSourceKernel.h"
+#include "LinearFVSource.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 
-registerMooseObject("MooseApp", LinearFVSourceKernel);
+registerMooseObject("MooseApp", LinearFVSource);
 
 InputParameters
-LinearFVSourceKernel::validParams()
+LinearFVSource::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
   params.addClassDescription(
@@ -24,19 +24,19 @@ LinearFVSourceKernel::validParams()
   return params;
 }
 
-LinearFVSourceKernel::LinearFVSourceKernel(const InputParameters & params)
+LinearFVSource::LinearFVSource(const InputParameters & params)
   : LinearFVElementalKernel(params), _source_density(getFunctor<Real>("source_density"))
 {
 }
 
 Real
-LinearFVSourceKernel::computeMatrixContribution()
+LinearFVSource::computeMatrixContribution()
 {
   return 0.0;
 }
 
 Real
-LinearFVSourceKernel::computeRightHandSideContribution()
+LinearFVSource::computeRightHandSideContribution()
 {
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   return _source_density(elem_arg, determineState()) * _current_elem_info->volume();

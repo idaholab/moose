@@ -132,6 +132,5 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
 template <typename OutputType>
 std::tuple<const Elem *, const Elem *, bool>
 determineElemOneAndTwo(const FaceInfo & fi, const MooseLinearVariableFV<OutputType> & var);
-
 }
 }

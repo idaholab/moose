@@ -20,23 +20,24 @@
 
 [LinearFVKernels]
   [diffusion]
-    type = LinearFVDiffusionKernel
+    type = LinearFVDiffusion
     variable = u
     diffusion_coeff = diff_coeff_func
+    use_nonorthogonal_correction = false
   []
   [advection]
-    type = LinearFVAdvectionKernel
+    type = LinearFVAdvection
     variable = u
     velocity = "0.5 0 0"
     advected_interp_method = average
   []
   [reaction]
-    type = LinearFVReactionKernel
+    type = LinearFVReaction
     variable = u
     coeff = coeff_func
   []
   [source]
-    type = LinearFVSourceKernel
+    type = LinearFVSource
     variable = u
     source_density = source_func
   []

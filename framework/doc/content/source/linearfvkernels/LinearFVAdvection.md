@@ -1,4 +1,4 @@
-# LinearFVAdvectionKernel
+# LinearFVAdvection
 
 ## Description
 
@@ -13,16 +13,16 @@ on the faces of the cells:
 u_f\vec{v}|S_f|,
 
 where $\vec{v}$ is a pre-defined constant advecting velocity and can be supplied through
-the [!param](/LinearFVKernels/LinearFVAdvectionKernel/velocity) parameter.
+the [!param](/LinearFVKernels/LinearFVAdvection/velocity) parameter.
 The face value of the variable $u_f$ is computed using the user-selected interpolation
-technique that can be supplied through the [!param](/LinearFVKernels/LinearFVAdvectionKernel/advected_interp_method) parameter.
+technique that can be supplied through the [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method) parameter.
 
 ## Example input syntax
 
 !listing test/tests/linearfvkernels/advection/advection-2d.i block=LinearFVKernels
 
-!syntax parameters /LinearFVKernels/LinearFVAdvectionKernel
+!syntax parameters /LinearFVKernels/LinearFVAdvection
 
-!syntax inputs /LinearFVKernels/LinearFVAdvectionKernel
+!syntax inputs /LinearFVKernels/LinearFVAdvection
 
-!syntax children /LinearFVKernels/LinearFVAdvectionKernel
+!syntax children /LinearFVKernels/LinearFVAdvection

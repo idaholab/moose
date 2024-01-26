@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVReactionKernel.md'
+  design = 'LinearFVReaction.md'
   issues = '#25722'
   [reaction-1d]
     type = Exodiff

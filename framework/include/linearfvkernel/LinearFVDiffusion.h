@@ -11,11 +11,11 @@
 
 #include "LinearFVFluxKernel.h"
 
-class LinearFVDiffusionKernel : public LinearFVFluxKernel
+class LinearFVDiffusion : public LinearFVFluxKernel
 {
 public:
   static InputParameters validParams();
-  LinearFVDiffusionKernel(const InputParameters & params);
+  LinearFVDiffusion(const InputParameters & params);
 
   virtual Real computeElemMatrixContribution() override;
 

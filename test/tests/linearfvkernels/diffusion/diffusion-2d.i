@@ -22,13 +22,13 @@
 
 [LinearFVKernels]
   [diffusion]
-    type = LinearFVDiffusionKernel
+    type = LinearFVDiffusion
     variable = u
     diffusion_coeff = coeff_func
     use_nonorthogonal_correction = false
   []
   [source]
-    type = LinearFVSourceKernel
+    type = LinearFVSource
     variable = u
     source_density = source_func
   []

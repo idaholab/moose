@@ -1,4 +1,4 @@
-# LinearFVDiffusionKernel
+# LinearFVDiffusion
 
 ## Description
 
@@ -29,9 +29,9 @@ As shown above, using these two vectors, the approximate form of the normal-grad
   meaning that it is added to the right hand side vector of the system.
 
 For more information on the numerical representation of the diffusion term and the different
-techniques used for applying boundary conditions through this kernel, see [!cite](moukkalled2016finite).
+techniques used for applying boundary conditions through this kernel, see [!cite](moukalled2016finite).
 
-The diffusion coefficient parameter ([!param](/LinearFVKernels/LinearFVDiffusionKernel/diffusion_coeff))
+The diffusion coefficient parameter ([!param](/LinearFVKernels/LinearFVDiffusion/diffusion_coeff))
 accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
 
@@ -39,8 +39,8 @@ MOOSE, see [Functors/index.md].
 
 !listing test/tests/linearfvkernels/diffusion/diffusion-2d.i block=LinearFVKernels
 
-!syntax parameters /LinearFVKernels/LinearFVDiffusionKernel
+!syntax parameters /LinearFVKernels/LinearFVDiffusion
 
-!syntax inputs /LinearFVKernels/LinearFVDiffusionKernel
+!syntax inputs /LinearFVKernels/LinearFVDiffusion
 
-!syntax children /LinearFVKernels/LinearFVDiffusionKernel
+!syntax children /LinearFVKernels/LinearFVDiffusion

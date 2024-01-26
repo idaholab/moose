@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVDiffusionKernel.h"
+#include "LinearFVDiffusion.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVBoundaryCondition.h"
 
-registerMooseObject("MooseApp", LinearFVDiffusionKernel);
+registerMooseObject("MooseApp", LinearFVDiffusion);
 
 InputParameters
-LinearFVDiffusionKernel::validParams()
+LinearFVDiffusion::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of a "
@@ -28,7 +28,7 @@ LinearFVDiffusionKernel::validParams()
   return params;
 }
 
-LinearFVDiffusionKernel::LinearFVDiffusionKernel(const InputParameters & params)
+LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
   : LinearFVFluxKernel(params),
     _diffusion_coeff(getFunctor<Real>("diffusion_coeff")),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
@@ -40,31 +40,31 @@ LinearFVDiffusionKernel::LinearFVDiffusionKernel(const InputParameters & params)
 }
 
 Real
-LinearFVDiffusionKernel::computeElemMatrixContribution()
+LinearFVDiffusion::computeElemMatrixContribution()
 {
   return computeFluxMatrixContribution();
 }
 
 Real
-LinearFVDiffusionKernel::computeNeighborMatrixContribution()
+LinearFVDiffusion::computeNeighborMatrixContribution()
 {
   return -computeFluxMatrixContribution();
 }
 
 Real
-LinearFVDiffusionKernel::computeElemRightHandSideContribution()
+LinearFVDiffusion::computeElemRightHandSideContribution()
 {
   return computeFluxRHSContribution();
 }
 
 Real
-LinearFVDiffusionKernel::computeNeighborRightHandSideContribution()
+LinearFVDiffusion::computeNeighborRightHandSideContribution()
 {
   return -computeFluxRHSContribution();
 }
 
 Real
-LinearFVDiffusionKernel::computeFluxMatrixContribution()
+LinearFVDiffusion::computeFluxMatrixContribution()
 {
   if (!_cached_matrix_contribution)
   {
@@ -81,7 +81,7 @@ LinearFVDiffusionKernel::computeFluxMatrixContribution()
 }
 
 Real
-LinearFVDiffusionKernel::computeFluxRHSContribution()
+LinearFVDiffusion::computeFluxRHSContribution()
 {
   if (_use_nonorthogonal_correction)
     if (!_cached_rhs_contribution)
@@ -109,7 +109,7 @@ LinearFVDiffusionKernel::computeFluxRHSContribution()
 }
 
 Real
-LinearFVDiffusionKernel::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
+LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
 {
   auto grad_contrib = bc->computeBoundaryGradientMatrixContribution();
   if (!bc->includesMaterialPropertyMultiplier())
@@ -122,7 +122,7 @@ LinearFVDiffusionKernel::computeBoundaryMatrixContribution(const LinearFVBoundar
 }
 
 Real
-LinearFVDiffusionKernel::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
+LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
 {
   const auto face_arg = singleSidedFaceArg(_current_face_info);
   auto grad_contrib = bc->computeBoundaryGradientRHSContribution();

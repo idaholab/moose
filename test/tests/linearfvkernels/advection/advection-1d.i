@@ -20,13 +20,13 @@
 
 [LinearFVKernels]
   [advection]
-    type = LinearFVAdvectionKernel
+    type = LinearFVAdvection
     variable = u
     velocity = "0.5 0 0"
     advected_interp_method = upwind
   []
   [source]
-    type = LinearFVSourceKernel
+    type = LinearFVSource
     variable = u
     source_density = source_func
   []

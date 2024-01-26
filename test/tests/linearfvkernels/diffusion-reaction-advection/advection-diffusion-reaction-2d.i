@@ -1,8 +1,10 @@
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
-    dim = 1
+    dim = 2
     nx = 2
+    ny = 1
+    ymax = 0.5
   []
 []
 
@@ -22,7 +24,19 @@
   [diffusion]
     type = LinearFVDiffusion
     variable = u
-    diffusion_coeff = coeff_func
+    diffusion_coeff = diff_coeff_func
+    use_nonorthogonal_correction = false
+  []
+  [advection]
+    type = LinearFVAdvection
+    variable = u
+    velocity = "0.5 0 0"
+    advected_interp_method = upwind
+  []
+  [reaction]
+    type = LinearFVReaction
+    variable = u
+    coeff = coeff_func
   []
   [source]
     type = LinearFVSource
@@ -32,26 +46,38 @@
 []
 
 [LinearFVBCs]
+  inactive = "outflow"
   [dir]
     type = LinearFVFunctorDirichletBC
     variable = u
-    boundary = "left right"
+    boundary = "left right top bottom"
     functor = analytic_solution
+  []
+  [outflow]
+    type = LinearFVOutflowBC
+    variable = u
+    boundary = "right"
+    velocity = "0.5 0 0"
+    use_two_term_expansion = false
   []
 []
 
 [Functions]
+  [diff_coeff_func]
+    type = ParsedFunction
+    expression = '1.0+0.5*x*y'
+  []
   [coeff_func]
     type = ParsedFunction
-    expression = '0.5*x'
+    expression = '1.0+1.0/(1+x*y)'
   []
   [source_func]
     type = ParsedFunction
-    expression = '2*x'
+    expression = '-1.0*x*pi*sin((1/2)*x*pi)*cos(2*y*pi) - 0.25*y*pi*sin(2*y*pi)*cos((1/2)*x*pi) + (1.0 + 1.0/(x*y + 1))*(sin((1/2)*x*pi)*sin(2*y*pi) + 1.5) + (17/4)*pi^2*(0.5*x*y + 1.0)*sin((1/2)*x*pi)*sin(2*y*pi) + 0.25*pi*sin(2*y*pi)*cos((1/2)*x*pi)'
   []
   [analytic_solution]
     type = ParsedFunction
-    expression = '1-x*x'
+    expression = 'sin((1/2)*x*pi)*sin(2*y*pi) + 1.5'
   []
 []
 
@@ -78,6 +104,10 @@
 [Outputs]
   [csv]
     type = CSV
+    execute_on = FINAL
+  []
+  [exo]
+    type = Exodus
     execute_on = FINAL
   []
 []

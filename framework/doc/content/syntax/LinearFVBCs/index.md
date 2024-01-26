@@ -1,7 +1,5 @@
 # LinearFVBCs System
 
-For an overview of linear MOOSE FV please see [/linear_fv_design.md].
-
 The difference between `LinearFVBCs` and `FVBCs` is that the boundary quantities
 computed by the former (boundary values, gradients, etc.) are used in routines
 within linear FV kernels. This is due to the fact that boundary conditions may need to be
@@ -70,7 +68,7 @@ frequently between these kernels. The following functions represent this common 
 `LinearFVFunctorDirichletBC` object assigns a value on a boundary. This value is computed using a moose
 functor. For more information on the functor system in moose, see [Functors/index.md].
 
-!listing framework/src/fvbcs/LinearFVFunctorDirichletBC.C
+!listing framework/src/linearfvbcs/LinearFVFunctorDirichletBC.C
          start=#include
          end=""
          caption=Example source code for `LinearFVFunctorDirichletBC`.

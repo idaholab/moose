@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVReactionKernel.h"
+#include "LinearFVReaction.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 
-registerMooseObject("MooseApp", LinearFVReactionKernel);
+registerMooseObject("MooseApp", LinearFVReaction);
 
 InputParameters
-LinearFVReactionKernel::validParams()
+LinearFVReaction::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
   params.addClassDescription(
@@ -24,13 +24,13 @@ LinearFVReactionKernel::validParams()
   return params;
 }
 
-LinearFVReactionKernel::LinearFVReactionKernel(const InputParameters & params)
+LinearFVReaction::LinearFVReaction(const InputParameters & params)
   : LinearFVElementalKernel(params), _coefficient(getFunctor<Real>("coeff"))
 {
 }
 
 Real
-LinearFVReactionKernel::computeMatrixContribution()
+LinearFVReaction::computeMatrixContribution()
 {
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   return _coefficient(elem_arg, determineState()) * _current_elem_info->volume() *
@@ -38,7 +38,7 @@ LinearFVReactionKernel::computeMatrixContribution()
 }
 
 Real
-LinearFVReactionKernel::computeRightHandSideContribution()
+LinearFVReaction::computeRightHandSideContribution()
 {
   return 0.0;
 }

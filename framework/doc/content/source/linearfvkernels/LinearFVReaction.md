@@ -1,4 +1,4 @@
-# LinearFVReactionKernel
+# LinearFVReaction
 
 ## Description
 
@@ -13,20 +13,20 @@ the field quantity ($u(\vec{r})$) in the following form:
 where $\vec{r}_C$ and $V_C$ denote the cell centroid and volume, respectively.
 This means that the diagonal entry of the system matrix corresponding to cell
 $C$ will be increased by $c(\vec{r}_C) V_C$.
-The reaction coefficient parameter ([!param](/LinearFVKernels/LinearFVReactionKernel/coeff))
+The reaction coefficient parameter ([!param](/LinearFVKernels/LinearFVReaction/coeff))
 accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
 
 ## Example Syntax
 
-The case below demonstrates the use of `LinearFVReactionKernel` where the reaction coefficient is
+The case below demonstrates the use of `LinearFVReaction` where the reaction coefficient is
 supplied based upon a function form:
 
 !listing test/tests/linearfvkernels/reaction/reaction-1d.i block=LinearFVKernels
 
-!syntax parameters /LinearFVKernels/LinearFVReactionKernel
+!syntax parameters /LinearFVKernels/LinearFVReaction
 
-!syntax inputs /LinearFVKernels/LinearFVReactionKernel
+!syntax inputs /LinearFVKernels/LinearFVReaction
 
-!syntax children /LinearFVKernels/LinearFVReactionKernel
+!syntax children /LinearFVKernels/LinearFVReaction
 

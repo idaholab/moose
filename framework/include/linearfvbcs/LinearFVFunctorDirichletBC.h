@@ -39,7 +39,6 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-
   /// Compute the distance for the gradient approximation. We need this because
   /// the sideset associated within this boundary condition might be within the mesh.
   Real computeCellToFaceDistance() const;

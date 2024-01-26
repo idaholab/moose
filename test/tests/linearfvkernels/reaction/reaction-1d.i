@@ -20,12 +20,12 @@
 
 [LinearFVKernels]
   [reaction]
-    type = LinearFVReactionKernel
+    type = LinearFVReaction
     variable = u
     coeff = coeff_func
   []
   [source]
-    type = LinearFVSourceKernel
+    type = LinearFVSource
     variable = u
     source_density = source_func
   []

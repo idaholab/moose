@@ -8,7 +8,7 @@ The value will be determined by a `Functor`
 
 ## Example Syntax
 
-In this example the functor is defined using a [Function.md].
+In this example the functor is defined using a [MooseParsedFunction.md].
 
 !listing test/tests/linearfvkernels/diffusion/diffusion-2d.i block=LinearFVBCs
 

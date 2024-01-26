@@ -1,7 +1,5 @@
 # LinearFVKernels System
 
-For an overview of the linear MOOSE FV please see [/linear_fv_design.md].
-
 For the finite volume method (FVM) when used without Newton's method, `LinearFVKernel` is the base class for `LinearFVFluxKernel` and `LinearFVElementalKernel`. These specialized objects satisfy the following tasks:
 
 * `LinearFVFluxKernel` adds contributions to system matrices and right hand sides coming from flux terms over
@@ -28,8 +26,8 @@ The diffusion term is represented by the kernel named `diff`.
          block=LinearFVKernels
          caption=Example of the LinearFVKernels block in a MOOSE input file.
 
-The `LinearFVSourceKernel` in the example derives from `LinearFVElementalKernel` so it's a
-volumetric contribution to the right hand side, while the `LinearFVDiffusionKernel` is an
+The `LinearFVSource` in the example derives from `LinearFVElementalKernel` so it's a
+volumetric contribution to the right hand side, while the `LinearFVDiffusion` is an
 `LinearFVFluxKernel` and it's a face contribution to the system matrix and right hand side.
 The remaining MOOSE syntax is what you would expect to see in finite element kernel objects.
 The `variable` parameter refers to the variable that this kernel is acting on (i.e. into

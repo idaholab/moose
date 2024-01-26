@@ -1,18 +1,32 @@
 [Tests]
-  design = 'LinearFVDiffusionKernel.md'
+  design = 'LinearFVDiffusion.md'
   issues = '#25722'
-  [mms-advection-diffusion-reaction-1d-dirichlet]
+  [mms-adr-1d-dirichlet]
     type = PythonUnitTest
     input = 'test.py'
-    test_case = TestAdvectionDiffusionReaction1DDirichlet
+    test_case = TestADR1DDirichlet
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
   []
-  [mms-advection-diffusion-reaction-1d-outflow]
+  [mms-adr-1d-outflow]
     type = PythonUnitTest
     input = 'test.py'
-    test_case = TestAdvectionDiffusionReaction1DOutflow
+    test_case = TestADR1DOutflow
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary conditions using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
   []
+  # [mms-adr-2d-dirichlet-orthogonal]
+  #   type = PythonUnitTest
+  #   input = 'test.py'
+  #   test_case = TestADR2DOrthogonalDirichlet
+  #   requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
+  #   required_python_packages = 'pandas matplotlib'
+  # []
+  # [mms-adr-2d-dirichlet-nonorthogonal]
+  #   type = PythonUnitTest
+  #   input = 'test.py'
+  #   test_case = TestADR2DNonorthogonalDirichlet
+  #   requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
+  #   required_python_packages = 'pandas matplotlib'
+  # []
 []

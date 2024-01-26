@@ -11,17 +11,17 @@
 
 #include "LinearFVElementalKernel.h"
 
-class LinearFVReactionKernel : public LinearFVElementalKernel
+class LinearFVSource : public LinearFVElementalKernel
 {
 public:
   static InputParameters validParams();
-  LinearFVReactionKernel(const InputParameters & params);
+  LinearFVSource(const InputParameters & params);
 
   virtual Real computeMatrixContribution() override;
 
   virtual Real computeRightHandSideContribution() override;
 
 protected:
-  /// The functor for the reaction coefficient
-  const Moose::Functor<Real> & _coefficient;
+  /// The functor for the source density
+  const Moose::Functor<Real> & _source_density;
 };

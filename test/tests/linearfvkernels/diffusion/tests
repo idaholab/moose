@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVDiffusionKernel.md'
+  design = 'LinearFVDiffusion.md'
   issues = '#25722'
   [mms-diffusion-1d-cd]
     type = PythonUnitTest

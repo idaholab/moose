@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVAdvectionKernel.h"
+#include "LinearFVAdvection.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVBoundaryCondition.h"
 
-registerMooseObject("MooseApp", LinearFVAdvectionKernel);
+registerMooseObject("MooseApp", LinearFVAdvection);
 
 InputParameters
-LinearFVAdvectionKernel::validParams()
+LinearFVAdvection::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
@@ -25,7 +25,7 @@ LinearFVAdvectionKernel::validParams()
   return params;
 }
 
-LinearFVAdvectionKernel::LinearFVAdvectionKernel(const InputParameters & params)
+LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
   : LinearFVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
 
 {
@@ -33,7 +33,7 @@ LinearFVAdvectionKernel::LinearFVAdvectionKernel(const InputParameters & params)
 }
 
 Real
-LinearFVAdvectionKernel::computeElemMatrixContribution()
+LinearFVAdvection::computeElemMatrixContribution()
 {
   const auto interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
@@ -42,7 +42,7 @@ LinearFVAdvectionKernel::computeElemMatrixContribution()
 }
 
 Real
-LinearFVAdvectionKernel::computeNeighborMatrixContribution()
+LinearFVAdvection::computeNeighborMatrixContribution()
 {
   const auto interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
@@ -51,19 +51,19 @@ LinearFVAdvectionKernel::computeNeighborMatrixContribution()
 }
 
 Real
-LinearFVAdvectionKernel::computeElemRightHandSideContribution()
+LinearFVAdvection::computeElemRightHandSideContribution()
 {
   return 0.0;
 }
 
 Real
-LinearFVAdvectionKernel::computeNeighborRightHandSideContribution()
+LinearFVAdvection::computeNeighborRightHandSideContribution()
 {
   return 0.0;
 }
 
 Real
-LinearFVAdvectionKernel::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
+LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
 {
   auto value_contrib = bc->computeBoundaryValueMatrixContribution();
   return value_contrib * (_velocity * _current_face_info->normal()) *
@@ -71,7 +71,7 @@ LinearFVAdvectionKernel::computeBoundaryMatrixContribution(const LinearFVBoundar
 }
 
 Real
-LinearFVAdvectionKernel::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
+LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
 {
   auto value_contrib = bc->computeBoundaryValueRHSContribution();
   return -value_contrib * (_velocity * _current_face_info->normal()) *
