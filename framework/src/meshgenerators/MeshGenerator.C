@@ -43,6 +43,7 @@ MeshGenerator::validParams()
   params.registerBase("MeshGenerator");
 
   params.addPrivateParam<bool>("_has_generate_data", false);
+  params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
 
   return params;
 }
@@ -50,7 +51,8 @@ MeshGenerator::validParams()
 MeshGenerator::MeshGenerator(const InputParameters & parameters)
   : MooseObject(parameters),
     MeshMetaDataInterface(this),
-    _mesh(_app.actionWarehouse().mesh()),
+    _mesh(getParam<MooseMesh *>("_moose_mesh") ? getParam<MooseMesh *>("_moose_mesh")
+                                               : _app.actionWarehouse().mesh().get()),
     _save_with_name(getParam<std::string>("save_with_name"))
 {
   if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
