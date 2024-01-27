@@ -1400,14 +1400,8 @@ SIMPLE::execute()
           if (iteration_counter >= _turbulence_iterations_to_activate[system_i])
           {
             residual_index += 1;
-            ns_residuals[residual_index] =
-                solveAdvectedSystem(_turbulence_system_numbers[system_i],
-                                    *_turbulence_systems[system_i],
-                                    _turbulence_equation_relaxation[system_i],
-                                    _turbulence_linear_control,
-                                    _turbulence_l_abs_tol);
 
-            // Relax the turbulence update for the next momentum predictor
+            // Compute current relaxation
             const auto relexation_ratio_factor =
                 (iteration_counter - _turbulence_iterations_to_activate[system_i]) /
                 (_turbulence_relaxation_decay_rate[system_i] + libMesh::TOLERANCE);
@@ -1415,6 +1409,16 @@ SIMPLE::execute()
             const auto local_relaxation_coefficient =
                 _turbulence_equation_relaxation[system_i] *
                 (1.0 + std::sqrt(libMesh::TOLERANCE) - std::exp(-relaxation_ratio));
+
+            // Compute solution
+            ns_residuals[residual_index] =
+                solveAdvectedSystem(_turbulence_system_numbers[system_i],
+                                    *_turbulence_systems[system_i],
+                                    local_relaxation_coefficient,
+                                    _turbulence_linear_control,
+                                    _turbulence_l_abs_tol);
+
+            // Relax the turbulence update for the next momentum predictor
             relaxSolutionUpdate(*_turbulence_systems[system_i], local_relaxation_coefficient);
 
             // Limit solution update to avoid non-physical values
