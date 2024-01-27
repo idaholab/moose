@@ -48,7 +48,7 @@ g = -9.81
     pressure = pressure
   []
   [pin_pressure]
-    type = NSFVPressurePin
+    type = NSPressurePin
     variable = pressure
     pin_type = point-value
     point = '0 0 0'
@@ -260,7 +260,7 @@ g = -9.81
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [CD]
     type = NSFVDispersePhaseDragFunctorMaterial
     rho = 'rho_mixture'
@@ -270,7 +270,7 @@ g = -9.81
     particle_diameter = ${dp}
   []
   [mixing_material]
-    type = NSFVMixtureMaterial
+    type = NSFVMixtureFunctorMaterial
     phase_1_names = '${rho_d} ${mu_d}'
     phase_2_names = '${rho} ${mu}'
     prop_names = 'rho_mixture mu_mixture'
@@ -336,16 +336,15 @@ g = -9.81
     type = IterationAdaptiveDT
     optimal_iterations = 7
     iteration_window = 2
-    growth_factor = 2.0
+    growth_factor = 1.5
     cutback_factor = 0.5
     dt = 1e-3
   []
   nl_max_its = 10
-  steady_state_detection = true
-  steady_state_tolerance = 1e-10
   nl_rel_tol = 1e-03
-  nl_abs_tol = 1e-11
+  nl_abs_tol = 1e-9
   l_max_its = 5
+  end_time = 1e8
 []
 
 [Outputs]
