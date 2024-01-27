@@ -104,6 +104,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
+    _scaling_factor(_count, 1.0),
     _use_dual(getParam<bool>("use_dual")),
     _is_array(getParam<bool>("array"))
 {
@@ -171,15 +172,11 @@ MooseVariableBase::componentDofIndices(const std::vector<dof_id_type> & dof_indi
 }
 
 void
-MooseVariableBase::scalingFactor(Real factor)
-{
-  _scaling_factor.assign(_count, factor);
-}
-
-void
 MooseVariableBase::scalingFactor(const std::vector<Real> & factor)
 {
-  _scaling_factor = factor;
+  mooseAssert(factor.size() == _count, "Inconsistent scaling factor size");
+  for (const auto i : make_range(_count))
+    _scaling_factor[i] = factor[i];
 }
 
 void
