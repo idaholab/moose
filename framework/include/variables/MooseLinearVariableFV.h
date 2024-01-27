@@ -139,7 +139,7 @@ public:
    * @param state State argument which describes at what time / solution iteration  state we want to
    * evaluate the variable
    */
-  Real getElemValue(const Elem * elem, const StateArg & state) const;
+  Real getElemValue(const ElemInfo * elem_info, const StateArg & state) const;
 
   /**
    * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
@@ -609,7 +609,8 @@ template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
-  return getElemValue(elem_arg.elem, state);
+  const auto elem_info = &_mesh.elemInfo(elem_arg.elem->id());
+  return getElemValue(elem_info, state);
 }
 
 template <typename OutputType>
@@ -617,14 +618,16 @@ typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemPointArg & elem_point,
                                             const StateArg & state) const
 {
-  return getElemValue(elem_point.elem, state);
+  const auto elem_info = &_mesh.elemInfo(elem_point.elem->id());
+  return getElemValue(elem_info, state);
 }
 
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  return getElemValue(elem_qp.elem, state);
+  const auto elem_info = &_mesh.elemInfo(elem_qp.elem->id());
+  return getElemValue(elem_info, state);
 }
 
 template <typename OutputType>

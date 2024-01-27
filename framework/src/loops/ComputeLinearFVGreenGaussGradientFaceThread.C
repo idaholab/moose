@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeLinearFVGreenGaussGradientThread.h"
+#include "ComputeLinearFVGreenGaussGradientFaceThread.h"
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
 
-ComputeLinearFVGreenGaussGradientThread::ComputeLinearFVGreenGaussGradientThread(
+ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFaceThread(
     FEProblemBase & fe_problem, const unsigned int linear_system_num)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
@@ -21,9 +21,8 @@ ComputeLinearFVGreenGaussGradientThread::ComputeLinearFVGreenGaussGradientThread
 {
 }
 
-// Splitting Constructor
-ComputeLinearFVGreenGaussGradientThread::ComputeLinearFVGreenGaussGradientThread(
-    ComputeLinearFVGreenGaussGradientThread & x, Threads::split /*split*/)
+ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFaceThread(
+    ComputeLinearFVGreenGaussGradientFaceThread & x, Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
     _linear_system_number(x._linear_system_number),
@@ -32,7 +31,7 @@ ComputeLinearFVGreenGaussGradientThread::ComputeLinearFVGreenGaussGradientThread
 }
 
 void
-ComputeLinearFVGreenGaussGradientThread::operator()(const FaceInfoRange & range)
+ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
@@ -41,6 +40,9 @@ ComputeLinearFVGreenGaussGradientThread::operator()(const FaceInfoRange & range)
        _fe_problem.getLinearSystem(_linear_system_number).getVariables(_tid))
   {
     _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
+    mooseAssert(_current_var,
+                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
+                "the linear system?");
     if (_current_var->needsCellGradients())
     {
       auto & grad_container = _current_var->gradientContainer();
@@ -48,9 +50,6 @@ ComputeLinearFVGreenGaussGradientThread::operator()(const FaceInfoRange & range)
       for (auto & vec : grad_container)
         _new_gradient.push_back(vec->zero_clone());
 
-      mooseAssert(_current_var,
-                  "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                  "the linear system?");
       // Iterate over all the elements in the range
       for (const auto & face_info : range)
       {
@@ -74,7 +73,7 @@ ComputeLinearFVGreenGaussGradientThread::operator()(const FaceInfoRange & range)
 }
 
 void
-ComputeLinearFVGreenGaussGradientThread::onInternalFace(const FaceInfo & face_info)
+ComputeLinearFVGreenGaussGradientFaceThread::onInternalFace(const FaceInfo & face_info)
 {
   const auto dof_id_elem =
       face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
@@ -90,13 +89,13 @@ ComputeLinearFVGreenGaussGradientThread::onInternalFace(const FaceInfo & face_in
 
   for (const auto i : make_range(_dim))
   {
-    _new_gradient[i]->add(dof_id_elem, contribution(i) / face_info.elemInfo()->volume());
-    _new_gradient[i]->add(dof_id_neighbor, -contribution(i) / face_info.neighborInfo()->volume());
+    _new_gradient[i]->add(dof_id_elem, contribution(i));
+    _new_gradient[i]->add(dof_id_neighbor, -contribution(i));
   }
 }
 
 void
-ComputeLinearFVGreenGaussGradientThread::onBoundaryFace(const FaceInfo & face_info)
+ComputeLinearFVGreenGaussGradientFaceThread::onBoundaryFace(const FaceInfo & face_info)
 {
   if (auto * bc_pointer = _current_var->getBoundaryCondition(*face_info.boundaryIDs().begin()))
   {
@@ -104,38 +103,22 @@ ComputeLinearFVGreenGaussGradientThread::onBoundaryFace(const FaceInfo & face_in
         face_info.faceType(std::make_pair(_current_var->number(), _linear_system.number()));
     bc_pointer->setCurrentFaceInfo(&face_info, face_type);
 
-    dof_id_type dof_id = 0;
-    Real volume = 0;
-    if (face_info.neighborInfo())
-    {
-      if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
-      {
-        dof_id =
-            face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
-        volume = face_info.elemInfo()->volume();
-      }
-      else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-      {
-        dof_id =
-            face_info.neighborInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
-        volume = face_info.neighborInfo()->volume();
-      }
-    }
-    else
-    {
-      dof_id = face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
-      volume = face_info.elemInfo()->volume();
-    }
+    const auto dof_id =
+        face_type == FaceInfo::VarFaceNeighbors::ELEM
+            ? face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()]
+            : face_info.neighborInfo()
+                  ->dofIndices()[_linear_system.number()][_current_var->number()];
 
     const auto contribution = face_info.normal() * face_info.faceArea() * face_info.faceCoord() *
                               bc_pointer->computeBoundaryValue();
 
     for (const auto i : make_range(_dim))
-      _new_gradient[i]->add(dof_id, contribution(i) / volume);
+      _new_gradient[i]->add(dof_id, contribution(i));
   }
 }
 
 void
-ComputeLinearFVGreenGaussGradientThread::join(const ComputeLinearFVGreenGaussGradientThread & /*y*/)
+ComputeLinearFVGreenGaussGradientFaceThread::join(
+    const ComputeLinearFVGreenGaussGradientFaceThread & /*y*/)
 {
 }

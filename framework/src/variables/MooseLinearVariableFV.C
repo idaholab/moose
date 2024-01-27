@@ -92,16 +92,16 @@ MooseLinearVariableFV<OutputType>::isVector() const
 
 template <typename OutputType>
 Real
-MooseLinearVariableFV<OutputType>::getElemValue(const Elem * const elem,
+MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo * const elem_info,
                                                 const StateArg & state) const
 {
   mooseAssert(
-      this->hasBlocks(elem->subdomain_id()),
+      this->hasBlocks(elem_info->subdomain_id()),
       "The variable should be defined on the element's subdomain! This typically occurs when the "
       "user wants to evaluate the elements right next to the boundary of two variables (block "
       "boundary). The subdomain which is queried: " +
           Moose::stringify(this->activeSubdomains()) + " the subdomain of the element " +
-          std::to_string(elem->subdomain_id()));
+          std::to_string(elem_info->subdomain_id()));
 
   // It's not safe to use solutionState(0) because it returns the libMesh System solution member
   // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
@@ -111,7 +111,7 @@ MooseLinearVariableFV<OutputType>::getElemValue(const Elem * const elem,
                                  ? *this->_sys.currentSolution()
                                  : this->_sys.solutionState(state.state, state.iteration_type);
 
-  return global_soln(_mesh.elemInfo(elem->id()).dofIndices()[_sys.number()][this->number()]);
+  return global_soln(elem_info->dofIndices()[_sys.number()][this->number()]);
 }
 
 template <typename OutputType>
