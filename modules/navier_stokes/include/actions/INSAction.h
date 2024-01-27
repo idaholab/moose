@@ -84,7 +84,4 @@ protected:
   std::set<SubdomainID> _block_ids;
   /// pressure variable name
   const std::string _pressure_variable_name;
-
-  /// Type that we use in Actions for declaring coupling
-  typedef std::vector<VariableName> CoupledName;
 };
