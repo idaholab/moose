@@ -76,7 +76,7 @@ One can elect to sacrifice some computing speed and calculate Jacobians
 automatically using
 [automatic differentiation (AD)](https://en.wikipedia.org/wiki/Automatic_differentiation). MOOSE
 employs the `DualNumber` class from the
-[MetaPhysicL](https://github.com/roystgnr/MetaPhysicL) package in order to
+[MetaPhysicL](https://github.com/libMesh/MetaPhysicL) package in order to
 enable AD. If the application developer wants to make use of AD, they should
 inherit from `ADKernel` as opposed to `Kernel`. Additionally, when coupling in
 variables, the `adCoupled*` methods should be used. For example, to retrieve a

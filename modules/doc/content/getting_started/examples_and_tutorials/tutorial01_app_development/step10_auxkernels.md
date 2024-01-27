@@ -93,7 +93,7 @@ In `include/auxkernels`, create a file name `DarcyVelocity.h` and add the code g
          id=dv-header
          caption=Header file for the `DarcyVelocity` class.
 
-In `src/auxkernels`, create a file name `DarcyVelocity.C` and add the code given in [dv-source]. For the dependencies, the header file for the [`MetaPhysicL` namespace](https://github.com/roystgnr/MetaPhysicL/blob/master/src/numerics/include/metaphysicl/raw_type.h) was included in addition to `DarcyVelocity.h`, because it provides a simple method for accessing the raw values of [!ac](AD) types, which are usually a complex set of containers storing a variable and all of its derivatives. The method will be used to handle the `ADMaterialProperty` data.
+In `src/auxkernels`, create a file name `DarcyVelocity.C` and add the code given in [dv-source]. For the dependencies, the header file for the [MetaPhysicL namespace](https://github.com/libMesh/MetaPhysicL/blob/master/src/numerics/include/metaphysicl/raw_type.h) was included in addition to `DarcyVelocity.h`, because it provides a simple method for accessing the raw values of [!ac](AD) types, which are usually a complex set of containers storing a variable and all of its derivatives. The method will be used to handle the `ADMaterialProperty` data.
 
 The only input that needs to be appended to those defined by `VectorAuxKernel::validParams()` is the name of the nonlinear variable containing the values for $p$. Thus, the `addRequiredCoupledVar()` method was used to define a parameter `"pressure"`. This `InputParameters` member is like `addRequiredParam()`, but the only type of data it accepts is a string identifying the variable object, for which, if not found, will cause an error.
 
