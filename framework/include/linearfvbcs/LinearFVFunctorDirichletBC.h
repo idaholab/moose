@@ -26,9 +26,9 @@ public:
 
   static InputParameters validParams();
 
-  virtual Real computeBoundaryValue() override;
+  virtual Real computeBoundaryValue() const override;
 
-  virtual Real computeBoundaryNormalGradient() override;
+  virtual Real computeBoundaryNormalGradient() const override;
 
   virtual Real computeBoundaryValueMatrixContribution() const override;
 

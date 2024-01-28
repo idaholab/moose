@@ -373,6 +373,14 @@ public:
   {
     mooseError("vectorTagDofValue is not implemented for MooseLinearVariableFV!");
   }
+  virtual const DoFValue & nodalMatrixTagValue(TagID /*tag*/) const override
+  {
+    mooseError("nodalMatrixTagValue is not implemented for MooseLinearVariableFV!");
+  }
+  virtual const FieldVariableValue & matrixTagValue(TagID /*tag*/) const override
+  {
+    mooseError("matrixTagValue is not implemented for MooseLinearVariableFV!");
+  }
   const FieldVariableValue & sln() const override
   {
     mooseError("sln is not implemented for MooseLinearVariableFV!");

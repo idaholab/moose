@@ -35,7 +35,7 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryValue()
+LinearFVOutflowBC::computeBoundaryValue() const
 {
   // We allow internal boundaries too so we need to check which side we are on
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -53,7 +53,7 @@ LinearFVOutflowBC::computeBoundaryValue()
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryNormalGradient()
+LinearFVOutflowBC::computeBoundaryNormalGradient() const
 {
   // By default we assume that the face value is the same as the cell center value so we
   // have a zero gradient.

@@ -85,12 +85,12 @@ public:
   /**
    * Computes the boundary value of this object. This relies on the current solution field.
    */
-  virtual Real computeBoundaryValue() = 0;
+  virtual Real computeBoundaryValue() const = 0;
 
   /**
    * Computes the normal gradient (often used in diffusion terms) on the boundary.
    */
-  virtual Real computeBoundaryNormalGradient() = 0;
+  virtual Real computeBoundaryNormalGradient() const = 0;
 
   /**
    * Computes the boundary value's contribution to the linear system matrix.

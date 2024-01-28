@@ -30,9 +30,9 @@ public:
   /// extrapolation from the adjacent cell center.
   virtual bool needsExtrapolation() const override { return _two_term_expansion; }
 
-  virtual Real computeBoundaryValue() override;
+  virtual Real computeBoundaryValue() const override;
 
-  virtual Real computeBoundaryNormalGradient() override;
+  virtual Real computeBoundaryNormalGradient() const override;
 
   virtual Real computeBoundaryValueMatrixContribution() const override;
 

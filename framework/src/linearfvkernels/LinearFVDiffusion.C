@@ -94,7 +94,7 @@ LinearFVDiffusion::computeFluxRHSContribution()
   if (_use_nonorthogonal_correction && !_cached_rhs_contribution)
   {
     const auto face_arg = makeCDFace(*_current_face_info);
-    const auto state arg = determineState();
+    const auto state_arg = determineState();
 
     // Get the gradients from the adjacent cells
     const auto grad_elem = _var->gradSln(_current_face_info->elemInfo());
@@ -112,7 +112,7 @@ LinearFVDiffusion::computeFluxRHSContribution()
 
     // Cache the matrix contribution
     _flux_rhs_contribution =
-        _diffusion_coeff(face_arg, state arg) *
+        _diffusion_coeff(face_arg, state_arg) *
         (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
         correction_vector * _current_face_info->faceArea() * _current_face_info->faceCoord();
     _cached_rhs_contribution = true;

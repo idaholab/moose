@@ -27,13 +27,13 @@ LinearFVFunctorDirichletBC::LinearFVFunctorDirichletBC(const InputParameters & p
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryValue()
+LinearFVFunctorDirichletBC::computeBoundaryValue() const
 {
   return _functor(singleSidedFaceArg(_current_face_info), determineState());
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryNormalGradient()
+LinearFVFunctorDirichletBC::computeBoundaryNormalGradient() const
 {
   const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                         ? _current_face_info->elemPtr()
