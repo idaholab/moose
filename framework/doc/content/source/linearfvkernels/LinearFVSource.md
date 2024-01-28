@@ -4,12 +4,12 @@
 
 This kernel contributes to the right hand side of a system which is solved for a
 linear finite volume variable [MooseLinearVariableFV.md]. The contribution for each cell
-is the numerical integral of the source density function ($s(\vec{r})$) in the following form:
+is the numerical integral of the source density function ($s$) in the following form:
 
 !equation
-\int\limits_V s(\vec{r})d\vec{r} \approx s(\vec{r}_C) V_C~,
+\int\limits_{V_C} s dV \approx s_C V_C~,
 
-where $\vec{r}_C$ and $V_C$ denote the cell centroid and volume, respectively.
+where $s_C$ and $V_C$ denote the source density at the cell centroid and the cell volume, respectively.
 This integral is added the the corresponding entry of the right hand side of the linear system.
 The source density parameter ([!param](/LinearFVKernels/LinearFVSource/source_density))
 accepts anything that supports functor-based evaluations. For more information on functors in
