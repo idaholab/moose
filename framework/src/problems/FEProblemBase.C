@@ -1579,6 +1579,8 @@ FEProblemBase::setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid)
         (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
       _displaced_problem->assembly(tid, i).setCurrentSubdomainID(did);
   }
+  for (const auto i : index_range(_linear_systems))
+    _assembly[tid][i + _nl.size()]->setCurrentSubdomainID(did);
 }
 
 void

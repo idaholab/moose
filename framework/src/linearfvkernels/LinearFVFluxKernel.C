@@ -102,7 +102,6 @@ LinearFVFluxKernel::addRightHandSideContribution()
                _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
   {
     bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
-
     // We allow internal boundaries too, so we have to check on which side we
     // are on
     if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)

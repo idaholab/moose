@@ -150,7 +150,7 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
-  // this in the boundary condition too. For now we keep it like this.
+  // this in the boundary condition too. For now, however, we keep it like this.
   if (_use_nonorthogonal_correction)
   {
     const auto correction_vector =

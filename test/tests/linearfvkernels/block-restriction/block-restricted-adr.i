@@ -1,10 +1,32 @@
 [Mesh]
-  [gmg]
-    type = GeneratedMeshGenerator
+  [cmg]
+    type = CartesianMeshGenerator
     dim = 2
-    nx = 2
-    ny = 1
-    ymax = 0.5
+    dx = '0.1 1 0.1'
+    dy = '0.1 0.5 0.1'
+    ix = '1 2 1'
+    iy = '1 1 1'
+    subdomain_id = '1 1 1 1 2 3 1 1 1'
+  []
+  [transform]
+    type = TransformGenerator
+    input = cmg
+    transform = TRANSLATE
+    vector_value = '-0.1 -0.1 0.0'
+  []
+  [create_sides]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = transform
+    new_boundary = sides
+    primary_block = 2
+    paired_block = 1
+  []
+  [create_outlet]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = create_sides
+    new_boundary = outlet
+    primary_block = 2
+    paired_block = 3
   []
 []
 
@@ -17,6 +39,7 @@
     type = MooseLinearVariableFVReal
     linear_sys = 'u_sys'
     initial_condition = 1.0
+    block = 2
   []
 []
 
@@ -50,7 +73,7 @@
   [dir]
     type = LinearFVFunctorDirichletBC
     variable = u
-    boundary = "left right top bottom"
+    boundary = "sides outlet"
     functor = analytic_solution
   []
   [outflow]
@@ -85,12 +108,14 @@
   [h]
     type = AverageElementSize
     execute_on = FINAL
+    block = 2
   []
   [error]
     type = ElementL2FunctorError
     approximate = u
     exact = analytic_solution
     execute_on = FINAL
+    block = 2
   []
 []
 

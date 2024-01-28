@@ -66,14 +66,21 @@ Real
 LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
 {
   auto value_contrib = bc->computeBoundaryValueMatrixContribution();
-  return value_contrib * (_velocity * _current_face_info->normal()) *
+
+  // We support internal boundaries too so we have to make sure the normal points always outward
+  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+
+  return value_contrib * factor * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
 Real
 LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
 {
+  // We support internal boundaries too so we have to make sure the normal points always outward
+  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
+
   auto value_contrib = bc->computeBoundaryValueRHSContribution();
-  return -value_contrib * (_velocity * _current_face_info->normal()) *
+  return -value_contrib * factor * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }

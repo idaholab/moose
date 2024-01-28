@@ -36,7 +36,7 @@ class TestADR1DOutflow(unittest.TestCase):
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
-class TestADR2DOrthogonalDirichlet(unittest.TestCase):
+class TestADR2DDirichlet(unittest.TestCase):
     def test(self):
         df1 = mms.run_spatial('advection-diffusion-reaction-2d.i', 6, file_base="advection-diffusion-reaction-2d_csv")
 
@@ -53,9 +53,9 @@ class TestADR2DOrthogonalDirichlet(unittest.TestCase):
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
-class TestADR2DNonorthogonalDirichlet(unittest.TestCase):
+class TestADR2DOutflow(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-diffusion-reaction-2d.i', 6, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/diffusion/use_nonorthogonal_correction=true", file_base="advection-diffusion-reaction-2d_csv")
+        df1 = mms.run_spatial('advection-diffusion-reaction-2d.i', 6, "LinearFVKernels/diffusion/use_nonorthogonal_correction=true LinearFVBCs/inactive='' LinearFVBCs/dir/boundary='left top bottom'", file_base="advection-diffusion-reaction-2d_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

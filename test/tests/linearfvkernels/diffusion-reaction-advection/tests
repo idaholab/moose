@@ -15,18 +15,18 @@
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary conditions using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
   []
-  # [mms-adr-2d-dirichlet-orthogonal]
-  #   type = PythonUnitTest
-  #   input = 'test.py'
-  #   test_case = TestADR2DOrthogonalDirichlet
-  #   requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
-  #   required_python_packages = 'pandas matplotlib'
-  # []
-  # [mms-adr-2d-dirichlet-nonorthogonal]
-  #   type = PythonUnitTest
-  #   input = 'test.py'
-  #   test_case = TestADR2DNonorthogonalDirichlet
-  #   requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
-  #   required_python_packages = 'pandas matplotlib'
-  # []
+  [mms-adr-2d-dirichlet]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestADR2DDirichlet
+    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [mms-adr-2d-outflow]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestADR2DOutflow
+    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with outflow boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
+    required_python_packages = 'pandas matplotlib'
+  []
 []
