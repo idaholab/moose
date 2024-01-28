@@ -24,7 +24,7 @@ HeatConductionTimeDerivative::validParams()
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addParam<MaterialPropertyName>(
-      "specific_heat", "specific_heat", " Name of the specific heat material property");
+      "specific_heat", "specific_heat", "Name of the specific heat material property");
   params.addParam<MaterialPropertyName>(
       "specific_heat_dT",
       "Name of the material property for the derivative of the specific heat with respect "
@@ -46,11 +46,12 @@ HeatConductionTimeDerivative::validParams()
 HeatConductionTimeDerivative::HeatConductionTimeDerivative(const InputParameters & parameters)
   : TimeDerivative(parameters),
     _specific_heat(getMaterialProperty<Real>("specific_heat")),
-    _specific_heat_dT(
-        isParamValid("specific_heat_dT") ? &getMaterialProperty<Real>("specific_heat_dT") : NULL),
+    _specific_heat_dT(isParamValid("specific_heat_dT")
+                          ? &getMaterialProperty<Real>("specific_heat_dT")
+                          : nullptr),
     _density(getMaterialProperty<Real>("density_name")),
     _density_dT(isParamValid("density_name_dT") ? &getMaterialProperty<Real>("density_name_dT")
-                                                : NULL)
+                                                : nullptr)
 {
 }
 
