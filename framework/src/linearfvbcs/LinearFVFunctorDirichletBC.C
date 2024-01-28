@@ -73,14 +73,12 @@ LinearFVFunctorDirichletBC::computeBoundaryValueRHSContribution() const
 Real
 LinearFVFunctorDirichletBC::computeBoundaryGradientMatrixContribution() const
 {
-  const Real distance = computeCellToFaceDistance();
-  return _current_face_info->faceArea() / distance;
+  return 1.0 / computeCellToFaceDistance();
 }
 
 Real
 LinearFVFunctorDirichletBC::computeBoundaryGradientRHSContribution() const
 {
-  const Real distance = computeCellToFaceDistance();
-  return _functor(singleSidedFaceArg(_current_face_info), determineState()) *
-         _current_face_info->faceArea() / distance;
+  return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
+         computeCellToFaceDistance();
 }

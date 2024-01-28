@@ -111,7 +111,8 @@ LinearFVDiffusion::computeFluxRHSContribution()
 Real
 LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
 {
-  auto grad_contrib = bc->computeBoundaryGradientMatrixContribution();
+  auto grad_contrib = bc->computeBoundaryGradientMatrixContribution() *
+                      _current_face_info->faceArea() * _current_face_info->faceCoord();
   if (!bc->includesMaterialPropertyMultiplier())
   {
     const auto face_arg = singleSidedFaceArg(_current_face_info);
@@ -125,7 +126,8 @@ Real
 LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
 {
   const auto face_arg = singleSidedFaceArg(_current_face_info);
-  auto grad_contrib = bc->computeBoundaryGradientRHSContribution();
+  auto grad_contrib = bc->computeBoundaryGradientRHSContribution() *
+                      _current_face_info->faceArea() * _current_face_info->faceCoord();
   if (!bc->includesMaterialPropertyMultiplier())
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
 
