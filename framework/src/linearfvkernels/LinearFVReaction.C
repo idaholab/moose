@@ -32,13 +32,14 @@ LinearFVReaction::LinearFVReaction(const InputParameters & params)
 Real
 LinearFVReaction::computeMatrixContribution()
 {
-  const auto elem_arg = makeElemArg(_current_elem_info->elem());
-  return _coefficient(elem_arg, determineState()) * _current_elem_info->volume() *
-         _current_elem_info->coordFactor();
+  // The matrix contribution is c_C*V_C
+  return _coefficient(makeElemArg(_current_elem_info->elem()), determineState()) *
+         _current_elem_info->volume() * _current_elem_info->coordFactor();
 }
 
 Real
 LinearFVReaction::computeRightHandSideContribution()
 {
+  // We don't have any contributions to the right hand side
   return 0.0;
 }

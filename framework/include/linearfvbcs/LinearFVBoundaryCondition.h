@@ -84,39 +84,33 @@ public:
 
   /**
    * Computes the boundary value of this object. This relies on the current solution field.
-   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face
    */
   virtual Real computeBoundaryValue() = 0;
 
   /**
    * Computes the normal gradient (often used in diffusion terms) on the boundary.
-   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
   virtual Real computeBoundaryNormalGradient() = 0;
 
   /**
    * Computes the boundary value's contribution to the linear system matrix.
-   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
   virtual Real computeBoundaryValueMatrixContribution() const = 0;
 
   /**
    * Computes the boundary value's contribution to the linear system right hand side.
-   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
   virtual Real computeBoundaryValueRHSContribution() const = 0;
 
   /**
    * Computed the boundary gradient's contribution to the linear system matrix. Mostly used for
    * diffusion.
-   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
   virtual Real computeBoundaryGradientMatrixContribution() const = 0;
 
   /**
    * Computed the boundary gradient's contribution to the linear system right hand side.
    * Mostly used for diffusion.
-   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
   virtual Real computeBoundaryGradientRHSContribution() const = 0;
 
@@ -129,6 +123,7 @@ public:
 
   /**
    * Set function for the material property multiplier switch.
+   * @param new_setting what the new setting should be
    */
   void setIncludesMaterialPropertyMultiplier(const bool new_setting)
   {

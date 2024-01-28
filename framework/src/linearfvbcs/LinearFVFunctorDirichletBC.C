@@ -33,21 +33,6 @@ LinearFVFunctorDirichletBC::computeBoundaryValue()
 }
 
 Real
-LinearFVFunctorDirichletBC::computeCellToFaceDistance() const
-{
-  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
-  const auto defined_on_elem =
-      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  if (is_on_mesh_boundary)
-    return std::abs(_current_face_info->dCN() * _current_face_info->normal());
-  else
-    return std::abs((_current_face_info->faceCentroid() -
-                     (defined_on_elem ? _current_face_info->elemCentroid()
-                                      : _current_face_info->neighborCentroid())) *
-                    _current_face_info->normal());
-}
-
-Real
 LinearFVFunctorDirichletBC::computeBoundaryNormalGradient()
 {
   const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -62,23 +47,46 @@ LinearFVFunctorDirichletBC::computeBoundaryNormalGradient()
 Real
 LinearFVFunctorDirichletBC::computeBoundaryValueMatrixContribution() const
 {
+  // Ths will not contribute to the matrix from the value considering that
+  // the value is independent of the solution.
   return 0.0;
 }
+
 Real
 LinearFVFunctorDirichletBC::computeBoundaryValueRHSContribution() const
 {
+  // Fetch the boundary value from the provided functor.
   return _functor(singleSidedFaceArg(_current_face_info), determineState());
 }
 
 Real
 LinearFVFunctorDirichletBC::computeBoundaryGradientMatrixContribution() const
 {
+  // The implicit term from the central difference approximation of the normal
+  // gradient.
   return 1.0 / computeCellToFaceDistance();
 }
 
 Real
 LinearFVFunctorDirichletBC::computeBoundaryGradientRHSContribution() const
 {
+  // The boundary term from the central difference approximation of the
+  // normal gradient.
   return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
          computeCellToFaceDistance();
+}
+
+Real
+LinearFVFunctorDirichletBC::computeCellToFaceDistance() const
+{
+  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
+  const auto defined_on_elem =
+      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
+  if (is_on_mesh_boundary)
+    return std::abs(_current_face_info->dCN() * _current_face_info->normal());
+  else
+    return std::abs((_current_face_info->faceCentroid() -
+                     (defined_on_elem ? _current_face_info->elemCentroid()
+                                      : _current_face_info->neighborCentroid())) *
+                    _current_face_info->normal());
 }

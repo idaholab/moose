@@ -37,12 +37,15 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
 Real
 LinearFVOutflowBC::computeBoundaryValue()
 {
+  // We allow internal boundaries too so we need to check which side we are on
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
-  auto boundary_value =
-      (*_linear_system.solution)(elem_info->dofIndices()[_var->sys().number()][_var->number()]);
 
+  // By default we approximate the boundary value with the neighboring cell value
+  auto boundary_value = _var->getElemValue(elem_info, determineState());
+
+  // If we request linear extrapolation, we add the gradient term as well
   if (_two_term_expansion)
     boundary_value += _var->gradSln(elem_info) * computeCellToFaceVector();
 
@@ -52,7 +55,11 @@ LinearFVOutflowBC::computeBoundaryValue()
 Real
 LinearFVOutflowBC::computeBoundaryNormalGradient()
 {
+  // By default we assume that the face value is the same as the cell center value so we
+  // have a zero gradient.
   Real normal_gradient = 0.0;
+
+  // If we request linear extrapolation, we will have a gradient
   if (_two_term_expansion)
   {
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -70,11 +77,16 @@ LinearFVOutflowBC::computeBoundaryValueMatrixContribution() const
 {
   return 1.0;
 }
+
 Real
 LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
 {
+  // If we approximate the face value with the cell value, we
+  // don't need to add anything to the right hand side
   Real contribution = 0.0;
 
+  // If we have linear extrapolation, we need to add the linear term to
+  // the right hand side.
   if (_two_term_expansion)
   {
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -95,19 +107,7 @@ LinearFVOutflowBC::computeBoundaryGradientMatrixContribution() const
 Real
 LinearFVOutflowBC::computeBoundaryGradientRHSContribution() const
 {
-  Real contribution = 0.0;
-
-  if (_two_term_expansion)
-  {
-    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
-    const auto distance_vector = computeCellToFaceVector();
-    contribution = _var->gradSln(elem_info) * distance_vector /
-                   (distance_vector * _current_face_info->normal());
-  }
-
-  return contribution;
+  return computeBoundaryNormalGradient();
 }
 
 RealVectorValue

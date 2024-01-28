@@ -32,12 +32,14 @@ LinearFVSource::LinearFVSource(const InputParameters & params)
 Real
 LinearFVSource::computeMatrixContribution()
 {
+  // This doesn't contribute to the matrix
   return 0.0;
 }
 
 Real
 LinearFVSource::computeRightHandSideContribution()
 {
-  const auto elem_arg = makeElemArg(_current_elem_info->elem());
-  return _source_density(elem_arg, determineState()) * _current_elem_info->volume();
+  // The contribution to the right hand side is s_C*V_C
+  return _source_density(makeElemArg(_current_elem_info->elem()), determineState()) *
+         _current_elem_info->volume();
 }

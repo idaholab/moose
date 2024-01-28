@@ -66,12 +66,18 @@ LinearFVDiffusion::computeNeighborRightHandSideContribution()
 Real
 LinearFVDiffusion::computeFluxMatrixContribution()
 {
+  // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
   {
     const auto face_arg = makeCDFace(*_current_face_info);
+
+    // If we requested nonorthogonal correction, we use the normal component of the
+    // cell to face vector.
     const auto d = _use_nonorthogonal_correction
                        ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
                        : _current_face_info->dCNMag();
+
+    // Cache the matrix contribution
     _flux_matrix_contribution = _diffusion_coeff(face_arg, determineState()) / d *
                                 _current_face_info->faceArea() * _current_face_info->faceCoord();
     _cached_matrix_contribution = true;
@@ -83,27 +89,34 @@ LinearFVDiffusion::computeFluxMatrixContribution()
 Real
 LinearFVDiffusion::computeFluxRHSContribution()
 {
-  if (_use_nonorthogonal_correction)
-    if (!_cached_rhs_contribution)
-    {
-      const auto face_arg = makeCDFace(*_current_face_info);
-      const auto grad_elem = _var->gradSln(_current_face_info->elemInfo());
-      const auto & grad_neighbor = _var->gradSln(_current_face_info->neighborInfo());
+  // We only have contributions on the right hand side from internal faces
+  // if the nonorthogonal correction is enabled.
+  if (_use_nonorthogonal_correction && !_cached_rhs_contribution)
+  {
+    const auto face_arg = makeCDFace(*_current_face_info);
+    const auto state arg = determineState();
 
-      const auto interp_coeffs = interpCoeffs(
-          Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
+    // Get the gradients from the adjacent cells
+    const auto grad_elem = _var->gradSln(_current_face_info->elemInfo());
+    const auto & grad_neighbor = _var->gradSln(_current_face_info->neighborInfo());
 
-      const auto correction_vector =
-          _current_face_info->normal() -
-          1 / (_current_face_info->normal() * _current_face_info->eCN()) *
-              _current_face_info->eCN();
+    // Interpolate the two gradients to the face
+    const auto interp_coeffs = interpCoeffs(
+        Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
 
-      _flux_rhs_contribution =
-          _diffusion_coeff(face_arg, determineState()) *
-          (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
-          correction_vector * _current_face_info->faceArea() * _current_face_info->faceCoord();
-      _cached_rhs_contribution = true;
-    }
+    // Compute correction vector. Potential optimization: this only depends on the geometry
+    // so we can cache it in FaceInfo at some point.
+    const auto correction_vector =
+        _current_face_info->normal() -
+        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
+
+    // Cache the matrix contribution
+    _flux_rhs_contribution =
+        _diffusion_coeff(face_arg, state arg) *
+        (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
+        correction_vector * _current_face_info->faceArea() * _current_face_info->faceCoord();
+    _cached_rhs_contribution = true;
+  }
 
   return _flux_rhs_contribution;
 }
@@ -113,6 +126,8 @@ LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
 {
   auto grad_contrib = bc->computeBoundaryGradientMatrixContribution() *
                       _current_face_info->faceArea() * _current_face_info->faceCoord();
+  // If the boundary condition does not include the diffusivity contribution then
+  // add it here.
   if (!bc->includesMaterialPropertyMultiplier())
   {
     const auto face_arg = singleSidedFaceArg(_current_face_info);
@@ -128,9 +143,14 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   const auto face_arg = singleSidedFaceArg(_current_face_info);
   auto grad_contrib = bc->computeBoundaryGradientRHSContribution() *
                       _current_face_info->faceArea() * _current_face_info->faceCoord();
+
+  // If the boundary condition does not include the diffusivity contribution then
+  // add it here.
   if (!bc->includesMaterialPropertyMultiplier())
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
 
+  // We add the nonorthogonal corrector for the face here. Potential idea: we could do
+  // this in the boundary condition too. For now we keep it like this.
   if (_use_nonorthogonal_correction)
   {
     const auto correction_vector =

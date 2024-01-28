@@ -27,6 +27,8 @@ LinearFVElementalKernel::LinearFVElementalKernel(const InputParameters & params)
 void
 LinearFVElementalKernel::addMatrixContribution()
 {
+  // These only contribute to the diagonal of the matrix, so we just get
+  // the contribution and insert it immediately.
   const auto dof_id = _current_elem_info->dofIndices()[_var->sys().number()][_var->number()];
   (*_linear_system.matrix).add(dof_id, dof_id, computeMatrixContribution());
 }
@@ -34,6 +36,8 @@ LinearFVElementalKernel::addMatrixContribution()
 void
 LinearFVElementalKernel::addRightHandSideContribution()
 {
+  // These only contribute to one entry of the right hand side, so we just get
+  // the contribution and insert it immediately.
   const auto dof_id = _current_elem_info->dofIndices()[_var->sys().number()][_var->number()];
   (*_linear_system.rhs).add(dof_id, computeRightHandSideContribution());
 }
