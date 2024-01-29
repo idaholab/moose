@@ -456,9 +456,6 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  const auto num_states = storage.numStates();
-  dataStore(stream, num_states, nullptr);
-
   // Store the material property ID -> name map for mapping back
   const auto & registry = storage.getMaterialPropertyRegistry();
   std::vector<std::string> ids_to_names(registry.idsToNamesBegin(), registry.idsToNamesEnd());
@@ -513,15 +510,6 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   storage._restored_materials.clear();
 
   const auto & registry = storage.getMaterialPropertyRegistry();
-
-  decltype(storage.numStates()) num_states;
-  dataLoad(stream, num_states, nullptr);
-  if (num_states != storage.numStates())
-    mooseError("Stateful material properties up to state ",
-               num_states,
-               " were stored in checkpoint/backup,\nbut state ",
-               storage.numStates(),
-               " is now the maximum state requested.\n\nThis mismatch is not currently supported.");
 
   std::vector<std::string> from_prop_ids_to_names;
   dataLoad(stream, from_prop_ids_to_names, nullptr);
@@ -649,6 +637,10 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
           mooseError("The type for the restarted stateful material property '",
                      name,
                      "' in does not match");
+
+        // I'm not sure if we need to enforce this one, but I don't want to think
+        // about it deeply so we'll just make it an error until someone complains
+        // we have time to think
         if (from_record.state != to_record.state)
           mooseError("The number of states for the restarted stateful material property '",
                      name,

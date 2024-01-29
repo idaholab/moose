@@ -20,7 +20,9 @@ RestartStatefulMaterial::validParams()
   params.addParam<std::vector<Real>>(
       "real_values", {}, "The values to set for the real properties");
   params.addParam<std::vector<std::string>>(
-      "real_stateful_names", {}, "The name of the real properties to request as stateful");
+      "real_stateful_names", {}, "The name of the real properties to request as old");
+  params.addParam<std::vector<std::string>>(
+      "real_older_stateful_names", {}, "The name of the real properties to request as older");
   params.addParam<std::vector<std::string>>(
       "int_names", {}, "The name of the int properties to declare");
   return params;
@@ -37,6 +39,8 @@ RestartStatefulMaterial::RestartStatefulMaterial(const InputParameters & paramet
     declareProperty<Real>(name);
   for (const auto & name : getParam<std::vector<std::string>>("real_stateful_names"))
     getMaterialPropertyOld<Real>(name);
+  for (const auto & name : getParam<std::vector<std::string>>("real_older_stateful_names"))
+    getMaterialPropertyOlder<Real>(name);
   for (const auto & name : getParam<std::vector<std::string>>("int_names"))
   {
     declareProperty<int>(name);
