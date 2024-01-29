@@ -36,8 +36,8 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  _subdomain = Moose::INVALID_BLOCK_ID;
-  _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
+  _old_subdomain = Moose::INVALID_BLOCK_ID;
+  _old_neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
   // Iterate over all the elements in the range
   for (const auto & face_info : range)

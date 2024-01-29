@@ -617,7 +617,7 @@ template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
-  const auto elem_info = &_mesh.elemInfo(elem_arg.elem->id());
+  const auto elem_info = &this->_mesh.elemInfo(elem_arg.elem->id());
   return getElemValue(elem_info, state);
 }
 
@@ -626,7 +626,7 @@ typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemPointArg & elem_point,
                                             const StateArg & state) const
 {
-  const auto elem_info = &_mesh.elemInfo(elem_point.elem->id());
+  const auto elem_info = &this->_mesh.elemInfo(elem_point.elem->id());
   return getElemValue(elem_info, state);
 }
 
@@ -634,7 +634,7 @@ template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  const auto elem_info = &_mesh.elemInfo(elem_qp.elem->id());
+  const auto elem_info = &this->_mesh.elemInfo(elem_qp.elem->id());
   return getElemValue(elem_info, state);
 }
 
@@ -651,7 +651,7 @@ typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
                                                     const StateArg & /*state*/) const
 {
-  const auto & elem_info = &_mesh.elemInfo(qp_arg.elem->id());
+  const auto & elem_info = &this->_mesh.elemInfo(qp_arg.elem->id());
   return gradSln(elem_info);
 }
 
@@ -660,7 +660,7 @@ typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg,
                                                     const StateArg & /*state*/) const
 {
-  const auto & elem_info = &_mesh.elemInfo(elem_arg.elem->id());
+  const auto & elem_info = &this->_mesh.elemInfo(elem_arg.elem->id());
   return gradSln(elem_info);
 }
 

@@ -2,9 +2,13 @@ import mms
 import unittest
 from mooseutils import fuzzyEqual
 
+def run_spatial(*args, **kwargs):
+    kwargs['executable'] = "../../../"
+    return mms.run_spatial(*args, **kwargs)
+
 class BlockRestrictedDiffusion(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('block-restricted-diffusion.i', 5, file_base="block-restricted-diffusion_csv")
+        df1 = run_spatial('block-restricted-diffusion.i', 5, file_base="block-restricted-diffusion_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -21,7 +25,7 @@ class BlockRestrictedDiffusion(unittest.TestCase):
 
 class BlockRestrictedADR(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('block-restricted-adr.i', 5, file_base="block-restricted-adr_csv")
+        df1 = run_spatial('block-restricted-adr.i', 5, file_base="block-restricted-adr_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

@@ -44,7 +44,7 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  _subdomain = Moose::INVALID_BLOCK_ID;
+  _old_subdomain = Moose::INVALID_BLOCK_ID;
 
   // Iterate over all the elements in the range
   for (const auto & elem_info : range)
@@ -63,8 +63,6 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
         kernel->addRightHandSideContribution();
     }
   }
-
-  _old_subdomain = _subdomain;
 }
 
 void
@@ -89,6 +87,7 @@ ComputeLinearFVElementalThread::fetchSystemContributionObjects()
     base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
   else
     base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
+  _old_subdomain = _subdomain;
 
   _fv_kernels = std::set<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
 }

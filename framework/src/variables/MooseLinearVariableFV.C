@@ -111,7 +111,7 @@ MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo * const elem_info
                                  ? *this->_sys.currentSolution()
                                  : this->_sys.solutionState(state.state, state.iteration_type);
 
-  return global_soln(elem_info->dofIndices()[_sys.number()][this->number()]);
+  return global_soln(elem_info->dofIndices()[this->_sys.number()][this->number()]);
 }
 
 template <typename OutputType>
@@ -130,8 +130,9 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo * const elem_info) con
   if (_needs_cell_gradients)
   {
     _cell_gradient.zero();
-    for (const auto i : make_range(_mesh.dimension()))
-      _cell_gradient(i) = (*_grad_cache[i])(elem_info->dofIndices()[_sys.number()][this->number()]);
+    for (const auto i : make_range(this->_mesh.dimension()))
+      _cell_gradient(i) =
+          (*_grad_cache[i])(elem_info->dofIndices()[this->_sys.number()][this->number()]);
   }
 
   return _cell_gradient;
@@ -162,10 +163,10 @@ MooseLinearVariableFV<OutputType>::initialSetup()
   if (_needs_cell_gradients)
   {
     _grad_cache.clear();
-    for (const auto i : make_range(_mesh.dimension()))
+    for (const auto i : make_range(this->_mesh.dimension()))
     {
       (void)i;
-      _grad_cache.push_back(_sys.currentSolution()->zero_clone());
+      _grad_cache.push_back(this->_sys.currentSolution()->zero_clone());
     }
   }
 

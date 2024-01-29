@@ -2,9 +2,13 @@ import mms
 import unittest
 from mooseutils import fuzzyEqual
 
+def run_spatial(*args, **kwargs):
+    kwargs['executable'] = "../../../"
+    return mms.run_spatial(*args, **kwargs)
+
 class TestADR1DDirichlet(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-diffusion-reaction-1d.i', 6, file_base="advection-diffusion-reaction-1d_csv")
+        df1 = run_spatial('advection-diffusion-reaction-1d.i', 6, file_base="advection-diffusion-reaction-1d_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -21,7 +25,7 @@ class TestADR1DDirichlet(unittest.TestCase):
 
 class TestADR1DOutflow(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-diffusion-reaction-1d.i', 6, "LinearFVBCs/inactive='' LinearFVBCs/dir/boundary='left'", file_base="advection-diffusion-reaction-1d_csv")
+        df1 = run_spatial('advection-diffusion-reaction-1d.i', 6, "LinearFVBCs/inactive='' LinearFVBCs/dir/boundary='left'", file_base="advection-diffusion-reaction-1d_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -38,7 +42,7 @@ class TestADR1DOutflow(unittest.TestCase):
 
 class TestADR2DDirichlet(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-diffusion-reaction-2d.i', 6, file_base="advection-diffusion-reaction-2d_csv")
+        df1 = run_spatial('advection-diffusion-reaction-2d.i', 6, file_base="advection-diffusion-reaction-2d_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -55,7 +59,7 @@ class TestADR2DDirichlet(unittest.TestCase):
 
 class TestADR2DOutflow(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-diffusion-reaction-2d.i', 6, "LinearFVKernels/diffusion/use_nonorthogonal_correction=true LinearFVBCs/inactive='' LinearFVBCs/dir/boundary='left top bottom'", file_base="advection-diffusion-reaction-2d_csv")
+        df1 = run_spatial('advection-diffusion-reaction-2d.i', 6, "LinearFVKernels/diffusion/use_nonorthogonal_correction=true LinearFVBCs/inactive='' LinearFVBCs/dir/boundary='left top bottom'", file_base="advection-diffusion-reaction-2d_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
