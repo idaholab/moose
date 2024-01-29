@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 #include "DisplacedSystem.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"

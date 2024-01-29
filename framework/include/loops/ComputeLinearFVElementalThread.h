@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "MooseMesh.h"
+#include "MathFVUtils.h"
 
 // libmesh
 #include "libmesh/elem_range.h"

@@ -488,12 +488,6 @@ LinearSystem::setInitialSolution()
 {
 }
 
-void
-LinearSystem::setPredictor(std::shared_ptr<Predictor> predictor)
-{
-  _predictor = predictor;
-}
-
 NumericVector<Number> &
 LinearSystem::getRightHandSideTimeVector()
 {
@@ -568,21 +562,6 @@ LinearSystem::setSolution(const NumericVector<Number> & soln)
 
   if (_serialized_solution.get())
     serializeSolution();
-}
-
-void
-LinearSystem::setPreconditioner(std::shared_ptr<MoosePreconditioner> pc)
-{
-  if (_preconditioner.get() != nullptr)
-    mooseError("More than one active Preconditioner detected");
-
-  _preconditioner = pc;
-}
-
-MoosePreconditioner const *
-LinearSystem::getPreconditioner() const
-{
-  return _preconditioner.get();
 }
 
 void

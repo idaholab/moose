@@ -184,13 +184,6 @@ public:
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) override;
 
-  /**
-   * Sets a preconditioner
-   * @param pc The preconditioner to be set
-   */
-  void setPreconditioner(std::shared_ptr<MoosePreconditioner> pc);
-  MoosePreconditioner const * getPreconditioner() const;
-
   ///@{
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
@@ -200,9 +193,6 @@ public:
    * Return the number of linear iterations
    */
   unsigned int nLinearIterations() const { return _n_linear_iters; }
-
-  void setPredictor(std::shared_ptr<Predictor> predictor);
-  Predictor * getPredictor() { return _predictor.get(); }
 
   void setPCSide(MooseEnum pcs);
 
@@ -283,8 +273,6 @@ protected:
   /// Tag for every contribution to system matrix
   TagID _system_matrix_tag;
 
-  /// Preconditioner
-  std::shared_ptr<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
   Moose::PCSideType _pc_side;
   /// KSP norm type
@@ -293,9 +281,6 @@ protected:
   unsigned int _n_linear_iters;
 
   Real _final_linear_residual;
-
-  /// If predictor is active, this is non-NULL
-  std::shared_ptr<Predictor> _predictor;
 
   LinearImplicitSystem & _linear_implicit_system;
 
