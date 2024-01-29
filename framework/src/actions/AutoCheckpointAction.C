@@ -54,7 +54,8 @@ AutoCheckpointAction::act()
 
     else // num_checkpoints == 1
     {
-      // Use the existing Checkpoint object, since we only need to/should make one object the autosave
+      // Use the existing Checkpoint object, since we only need to/should make one object the
+      // autosave
       _app.getOutputWarehouse().getOutputs<Checkpoint>()[0]->setAutosaveFlag(
           CheckpointType::USER_CREATED);
     }
