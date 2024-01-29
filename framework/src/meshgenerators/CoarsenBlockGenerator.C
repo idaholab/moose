@@ -29,7 +29,7 @@ CoarsenBlockGenerator::validParams()
                                                       "The list of blocks to be coarsened");
   params.addRequiredParam<std::vector<unsigned int>>(
       "coarsening",
-      "Minimum amount of times to coarsen each block, corresponding to their index in 'block'");
+      "Maximum amount of times to coarsen elements in each block. See 'block' for indexing");
   params.addRequiredParam<Point>("starting_point",
                                  "A point inside the element to start the coarsening from");
 
@@ -115,7 +115,7 @@ CoarsenBlockGenerator::generate()
     // we prepare for use to make sure the neighbors have been found
     mesh->prepare_for_use();
 
-  auto mesh_ptr = recursive_coarsen(block_ids, mesh, _coarsening, max_c, /*step=*/0);
+  auto mesh_ptr = recursiveCoarsen(block_ids, mesh, _coarsening, max_c, /*step=*/0);
 
   // element neighbors are not valid
   if (max_c > 0)
@@ -128,11 +128,11 @@ CoarsenBlockGenerator::generate()
 }
 
 std::unique_ptr<MeshBase>
-CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & block_ids,
-                                         std::unique_ptr<MeshBase> & mesh,
-                                         const std::vector<unsigned int> & coarsening,
-                                         unsigned int max,
-                                         unsigned int coarse_step)
+CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & block_ids,
+                                        std::unique_ptr<MeshBase> & mesh,
+                                        const std::vector<unsigned int> & coarsening,
+                                        unsigned int max,
+                                        unsigned int coarse_step)
 {
   if (coarse_step == max)
     return dynamic_pointer_cast<MeshBase>(mesh);
@@ -223,12 +223,8 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       // Get the nodes to build a coarse element
       std::vector<const Node *> tentative_coarse_nodes;
       std::set<const Elem *> fine_elements_const;
-      bool success = MeshCoarseningUtils::getFineElementFromInteriorNode(interior_node,
-                                                                         ref_node,
-                                                                         current_elem,
-                                                                         TOLERANCE,
-                                                                         tentative_coarse_nodes,
-                                                                         fine_elements_const);
+      bool success = MeshCoarseningUtils::getFineElementFromInteriorNode(
+          *interior_node, *ref_node, *current_elem, tentative_coarse_nodes, fine_elements_const);
 
       // For example, not enough fine elements around the node to build a coarse element
       if (!success)
@@ -389,19 +385,10 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       }
 
       // Delete the elements used to build the coarse element
-      bool parent_deleted = false;
       for (auto & fine_elem : fine_elements)
       {
         if (!fine_elem)
           continue;
-
-        // If we are using libmesh h-refinement before coarsening (for testing), we cannot just
-        // leave the parent in the mesh so we delete it too
-        if (fine_elem->parent() && !parent_deleted)
-        {
-          parent_deleted = true;
-          mesh_copy->delete_elem(fine_elem->parent());
-        }
 
         mesh_copy->delete_elem(fine_elem);
 
@@ -441,5 +428,5 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
     _console << "Step " << coarse_step + 1 << " created " << max_num_coarsened
              << " coarsened elements in its most successful attempt." << std::endl;
   coarse_step++;
-  return recursive_coarsen(block_ids, mesh_return, coarsening, max, coarse_step);
+  return recursiveCoarsen(block_ids, mesh_return, coarsening, max, coarse_step);
 }

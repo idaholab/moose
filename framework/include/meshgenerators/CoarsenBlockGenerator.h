@@ -45,20 +45,19 @@ private:
   const bool _verbose;
 
   /**
-   * The actual function coarsening the blocks. This is done recursively in order
-   * to minimize the number of coarsening iterations to as little as possible.
+   * The actual function coarsening the blocks.
    * @param block_ids Vector of block_ids to coarsen
    * @param mesh The mesh to coarsen
    * @param coarsening Vector describing how many times to coarsen each block, corresponding to
    * block_ids
-   * @param max Max value of coarsening param vector
+   * @param max Max value of coarsening param vector / maximum block coarsening requested
    * @param coarse_step Step counter for the recursive function
    * @return Unique pointer to a coarsened MeshBase
    */
   virtual std::unique_ptr<MeshBase>
-  recursive_coarsen(const std::vector<subdomain_id_type> & block_ids,
-                    std::unique_ptr<MeshBase> & mesh,
-                    const std::vector<unsigned int> & coarsening,
-                    const unsigned int max,
-                    unsigned int coarse_step);
+  recursiveCoarsen(const std::vector<subdomain_id_type> & block_ids,
+                   std::unique_ptr<MeshBase> & mesh,
+                   const std::vector<unsigned int> & coarsening,
+                   const unsigned int max,
+                   unsigned int coarse_step);
 };

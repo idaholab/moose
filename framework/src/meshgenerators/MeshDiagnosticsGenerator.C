@@ -681,13 +681,8 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
 
       if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
       {
-        const auto success =
-            MeshCoarseningUtils::getFineElementFromInteriorNode(interior_node,
-                                                                node,
-                                                                elem,
-                                                                _non_conformality_tol,
-                                                                tentative_coarse_nodes,
-                                                                fine_elements);
+        const auto success = MeshCoarseningUtils::getFineElementFromInteriorNode(
+            *interior_node, *node, *elem, tentative_coarse_nodes, fine_elements);
         if (!success)
           continue;
       }
@@ -747,7 +742,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
         Point axis = *interior_node - *node;
         const auto start_circle = elem->vertex_average();
         MeshCoarseningUtils::reorderNodes(
-            tentative_coarse_nodes, interior_node, &start_circle, axis);
+            tentative_coarse_nodes, *interior_node, start_circle, axis);
         tentative_coarse_nodes.resize(8);
 
         // Use the neighbors of the fine elements that contain these nodes to get the vertex

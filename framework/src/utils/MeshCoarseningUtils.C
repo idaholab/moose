@@ -15,28 +15,24 @@
 namespace MeshCoarseningUtils
 {
 bool
-getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
-                               const libMesh::Node * const reference_node,
-                               const libMesh::Elem * const elem,
-                               const libMesh::Real /*non_conformality_tol*/,
+getFineElementFromInteriorNode(const libMesh::Node & interior_node,
+                               const libMesh::Node & reference_node,
+                               const libMesh::Elem & fine_elem,
                                std::vector<const libMesh::Node *> & tentative_coarse_nodes,
                                std::set<const libMesh::Elem *> & fine_elements)
 {
-  mooseAssert(elem, "Should have an elem");
-  mooseAssert(interior_node, "Should have an interior node");
-  mooseAssert(reference_node, "Should have a reference node");
-  const auto elem_type = elem->type();
+  const auto elem_type = fine_elem.type();
 
   // Add point neighbors of interior node to list of potentially refined elements
   // NOTE: we could potentially replace this with a simple call to point_neighbors
   // on a fine element with the interior node. It's not clear which approach is more
   // resilient to meshes with slits from discarded adaptivity information
-  fine_elements.insert(elem);
-  for (const auto neigh : elem->neighbor_ptr_range())
+  fine_elements.insert(&fine_elem);
+  for (const auto neigh : fine_elem.neighbor_ptr_range())
   {
     if (!neigh || neigh == libMesh::remote_elem)
       continue;
-    const auto node_index = neigh->get_node_index(interior_node);
+    const auto node_index = neigh->get_node_index(&interior_node);
     if (node_index != libMesh::invalid_uint && neigh->is_vertex(node_index))
     {
       // Get the neighbor's neighbors, to catch point non-side neighbors
@@ -46,7 +42,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
       {
         if (!neigh_two || neigh_two == libMesh::remote_elem)
           continue;
-        const auto node_index_2 = neigh_two->get_node_index(interior_node);
+        const auto node_index_2 = neigh_two->get_node_index(&interior_node);
         if (node_index_2 != libMesh::invalid_uint && neigh_two->is_vertex(node_index_2))
         {
           // Get the neighbor's neighbors
@@ -58,7 +54,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
           {
             if (!neigh_three || neigh_three == libMesh::remote_elem)
               continue;
-            const auto node_index_3 = neigh_three->get_node_index(interior_node);
+            const auto node_index_3 = neigh_three->get_node_index(&interior_node);
             if (node_index_3 != libMesh::invalid_uint && neigh_three->is_vertex(node_index_3))
               fine_elements.insert(neigh_three);
           }
@@ -70,7 +66,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
   // If the fine elements are not all of the same type, we do not know how to get the opposite node
   // of the interior node in the fine elements
   for (auto elem : fine_elements)
-    if (elem && elem->type() != elem_type)
+    if (elem && fine_elem.type() != elem_type)
       return false;
 
   if (elem_type == libMesh::QUAD4 || elem_type == libMesh::QUAD8 || elem_type == libMesh::QUAD9)
@@ -87,7 +83,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     unsigned int neighbor_i = 0;
     for (auto neighbor : fine_elements)
     {
-      const auto interior_node_number = neighbor->get_node_index(interior_node);
+      const auto interior_node_number = neighbor->get_node_index(&interior_node);
       unsigned int opposite_node_index = (interior_node_number + 2) % 4;
 
       tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
@@ -95,7 +91,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
 
     // Re-order nodes so that they will form a decent quad
     libMesh::Point axis =
-        (elem->vertex_average() - *interior_node).cross(*interior_node - *reference_node);
+        (fine_elem.vertex_average() - interior_node).cross(interior_node - reference_node);
     reorderNodes(tentative_coarse_nodes, interior_node, reference_node, axis);
     return true;
   }
@@ -111,6 +107,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
 
     // Pick a node (mid-face for the coarse element) to form the base
     // We must use the same element reproducibly, despite the pointers being ordered in the set
+    // We use the element id to choose the same element consistently
     const Elem * one_fine_elem = nullptr;
     unsigned int max_id = 0;
     for (const auto elem_ptr : fine_elements)
@@ -119,9 +116,9 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         max_id = elem_ptr->id();
         one_fine_elem = elem_ptr;
       }
-    const auto interior_node_index = one_fine_elem->get_node_index(interior_node);
+    const auto interior_node_index = one_fine_elem->get_node_index(&interior_node);
 
-    // Find a side which contains the interior node
+    // Find any side which contains the interior node
     unsigned int an_interior_node_side = 0;
     for (const auto s : make_range(one_fine_elem->n_sides()))
       if (one_fine_elem->is_node_on_side(interior_node_index, s))
@@ -129,12 +126,14 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         an_interior_node_side = s;
         break;
       }
-    // The node we seek is on the same side, but opposite from the interior node
+    // A node near a face of the coarse element seek is on the same side, but opposite from the
+    // interior node
     const auto center_face_node_index =
         one_fine_elem->opposite_node(interior_node_index, an_interior_node_side);
     const auto center_face_node = one_fine_elem->node_ptr(center_face_node_index);
 
-    // The exterior nodes are the opposite nodes of the interior_node!
+    // We gather the coarse element nodes from the fine elements that share the center face node we
+    // just selected
     unsigned int neighbor_i = 0;
     std::vector<const libMesh::Elem *> other_fine_elems;
     for (auto neighbor : fine_elements)
@@ -144,7 +143,8 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         other_fine_elems.push_back(neighbor);
         continue;
       }
-      const auto interior_node_number = neighbor->get_node_index(interior_node);
+      // The coarse element node is the opposite nodes of the interior_node in a fine element
+      const auto interior_node_number = neighbor->get_node_index(&interior_node);
       unsigned int opposite_node_index =
           getOppositeNodeIndex(neighbor->type(), interior_node_number);
 
@@ -152,7 +152,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     }
 
     // Center face node was not shared with 4 elements
-    // We could try again on any of the 5 other coarse element faces
+    // We could try again on any of the 5 other coarse element faces but we don't insist for now
     if (neighbor_i != 4 || other_fine_elems.size() != 4)
       return false;
 
@@ -163,8 +163,8 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
     // Re-order nodes so that they will form a decent quad
     // Pick the reference node for the rotation frame as the face center
     const libMesh::Point clock_start = *tentative_coarse_nodes[0];
-    libMesh::Point axis = *interior_node - *center_face_node;
-    reorderNodes(tentative_coarse_nodes, center_face_node, &clock_start, axis);
+    libMesh::Point axis = interior_node - *center_face_node;
+    reorderNodes(tentative_coarse_nodes, *center_face_node, clock_start, axis);
 
     // Look through the 4 other fine elements to finish the coarse hex element nodes
     for (const auto coarse_node_index : make_range(4))
@@ -180,7 +180,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         }
       mooseAssert(fine_elem, "Search for fine element should have worked");
 
-      // Find the other fine element opposite that element (shares a side)
+      // Find the other fine element opposite the element containing the node (they share a side)
       const Elem * fine_neighbor = nullptr;
       for (auto neighbor : other_fine_elems)
         // Side neighbor. This requires the mesh to have correct neighbors
@@ -198,7 +198,7 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
         return false;
 
       // Get the coarse node, opposite the interior node in that fine element
-      const auto interior_node_index_neighbor = fine_neighbor->get_node_index(interior_node);
+      const auto interior_node_index_neighbor = fine_neighbor->get_node_index(&interior_node);
       tentative_coarse_nodes.push_back(fine_neighbor->node_ptr(
           getOppositeNodeIndex(fine_neighbor->type(), interior_node_index_neighbor)));
     }
@@ -215,19 +215,17 @@ getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
 
 void
 reorderNodes(std::vector<const libMesh::Node *> & nodes,
-             const libMesh::Point * origin,
-             const libMesh::Point * clock_start,
+             const libMesh::Point & origin,
+             const libMesh::Point & clock_start,
              libMesh::Point & axis)
 {
   mooseAssert(axis.norm() != 0, "Invalid rotation axis when ordering nodes");
   mooseAssert(origin != clock_start, "Invalid starting direction when ordering nodes");
-  mooseAssert(origin, "Should have an origin");
-  mooseAssert(clock_start, "Should have a clock start");
 
   // We'll need to order the coarse nodes based on the clock-wise order of the elements
   // Define a frame in which to compute the angles of the fine elements centers
   // angle 0 is the [interior node, non-conformal node] vertex
-  auto start_clock = *origin - *clock_start;
+  auto start_clock = origin - clock_start;
   start_clock /= start_clock.norm();
   axis /= axis.norm();
 
@@ -235,7 +233,7 @@ reorderNodes(std::vector<const libMesh::Node *> & nodes,
   for (const auto angle_i : index_range(nodes))
   {
     mooseAssert(nodes[angle_i], "Nodes cant be nullptr");
-    auto vec = *nodes[angle_i] - *origin;
+    auto vec = *nodes[angle_i] - origin;
     vec /= vec.norm();
     const auto angle = atan2(vec.cross(start_clock) * axis, vec * start_clock);
     nodes_angles[angle_i] = std::make_pair(angle_i, angle);

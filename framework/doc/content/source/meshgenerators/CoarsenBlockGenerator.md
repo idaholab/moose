@@ -5,10 +5,10 @@
 ## Overview
 
 This MeshGenerator object allows the user to coarsen one or more blocks in a mesh. It has been designed
-to work with previously refined meshes that were saved to a file without the mesh refinement pattern information. For example, refined meshes stored using [Exodus.md] or [VTKOutput.md] file formats do not contain the information needed to recognize parent and children elements from uniform refinement. The heuristic can still work in the general case of non-uniform refinement.
+to work with previously refined meshes that were saved to a file without the mesh refinement pattern information. For example, refined meshes stored using [Exodus.md] or [VTKOutput.md] file formats do not contain the information needed to recognize parent and children elements from uniform refinement. The heuristic can still work in the general case of non-uniform refinement. The heuristic is unlikely to work on a non-previously-refined mesh that we seek to coarsen.
 
 !alert note
-If elements are refined during the mesh generation process, this generator will not be able to coarsen
+If elements are refined, using a [RefineBlockGenerator.md] for example, during the mesh generation process, this generator will not be able to coarsen
 them.
 
 The user has to provide the ids of the blocks to be modified, as well as the corresponding levels of coarsening for each block. These must match up to the order of the aforementioned block id list, e.g. if the blocks you wish to modify are '0 2 1 4', with 1 coarsening for block 0, 2 for block 2, 3 for block 1, and 4 for block 4, then the coarsening list will need to look like '1 2 3 4'.
