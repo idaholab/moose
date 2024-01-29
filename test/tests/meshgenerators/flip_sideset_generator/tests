@@ -15,7 +15,7 @@
     input = 'flux_flip_3D.i'
     csvdiff = 'flux_flip_3D_out.csv'
     recover = false
-    requirement = 'The system shall support switching the normal orientation of a sideset in a two-dimensional mesh'
+    requirement = 'The system shall support switching the normal orientation of a sideset in a three-dimensional mesh'
     mesh_mode = 'replicated'
   []
   
