@@ -186,12 +186,6 @@ g = -9.81
     family = MONOMIAL
     fv = true
   []
-  [vel_slip_x]
-    type = MooseVariableFVReal
-  []
-  [vel_slip_y]
-    type = MooseVariableFVReal
-  []
   [drag_coefficient]
     type = MooseVariableFVReal
   []
@@ -212,30 +206,6 @@ g = -9.81
     variable = U
     x = vel_x
     y = vel_y
-  []
-  [populate_u_slip]
-    type = WCNSFV2PSlipVelocityAux
-    variable = 'vel_slip_x'
-    momentum_component = 'x'
-    u = 'vel_x'
-    v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
-    rho_d = ${rho_d}
-    particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
-  []
-  [populate_v_slip]
-    type = WCNSFV2PSlipVelocityAux
-    variable = 'vel_slip_y'
-    momentum_component = 'y'
-    u = 'vel_x'
-    v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
-    rho_d = ${rho_d}
-    particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
   []
   [populate_cd]
     type = FunctorAux
@@ -276,6 +246,30 @@ g = -9.81
     prop_names = 'rho_mixture mu_mixture'
     phase_1_fraction = 'phase_2'
   []
+  [populate_u_slip]
+    type = WCNSFV2PSlipVelocityFunctorMaterial
+    slip_velocity_name = 'vel_slip_x'
+    momentum_component = 'x'
+    u = 'vel_x'
+    v = 'vel_y'
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+  []
+  [populate_v_slip]
+    type = WCNSFV2PSlipVelocityFunctorMaterial
+    slip_velocity_name = 'vel_slip_y'
+    momentum_component = 'y'
+    u = 'vel_x'
+    v = 'vel_y'
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+  []
 []
 
 [Postprocessors]
@@ -304,13 +298,13 @@ g = -9.81
     value_type = min
   []
   [max_x_slip_velocity]
-    type = ElementExtremeValue
-    variable = 'vel_slip_x'
+    type = ElementExtremeFunctorValue
+    functor = 'vel_slip_x'
     value_type = max
   []
   [max_y_slip_velocity]
-    type = ElementExtremeValue
-    variable = 'vel_slip_y'
+    type = ElementExtremeFunctorValue
+    functor = 'vel_slip_y'
     value_type = max
   []
   [max_drag_coefficient]
@@ -330,21 +324,25 @@ g = -9.81
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_type'
+  petsc_options_value = 'lu       NONZERO               newtontr'
   [TimeStepper]
     type = IterationAdaptiveDT
-    optimal_iterations = 7
+    optimal_iterations = 10
     iteration_window = 2
     growth_factor = 1.5
     cutback_factor = 0.5
     dt = 1e-3
   []
-  nl_max_its = 10
+  nl_max_its = 20
   nl_rel_tol = 1e-03
   nl_abs_tol = 1e-9
   l_max_its = 5
   end_time = 1e8
+  [Predictor]
+    type = SimplePredictor
+    scale = 1
+  []
 []
 
 [Outputs]
