@@ -3,7 +3,7 @@
 ## Introduction
 
 As shown in the
-[Brayton Cycle modelingguide](modules/thermal_hydraulics/modeling_guide/brayton_cycle/brayton_cycle.md),
+[Brayton Cycle modelingguide](modules/thermal_hydraulics/examples/brayton_cycle/brayton_cycle.md),
 and the given input files
 [closed_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/closed_brayton_cycle.i)
 and
@@ -13,7 +13,7 @@ turbine, and generator all coupled by a single shaft.
 
 Detailed descriptions of the compressor and turbine components used in this
 example can be found in the
-[Brayton Cycle modeling guide](modules/thermal_hydraulics/modeling_guide/brayton_cycle/brayton_cycle.md).
+[Brayton Cycle modeling guide](modules/thermal_hydraulics/examples/brayton_cycle/brayton_cycle.md).
 In the aforementioned example, a simplified startup transient with a simplified
 heat source was conducted which demonstrated the Thermal Hydraulics module’s
 capability to produce torque, power, mass flow rate, and pressure ratios for all
@@ -35,7 +35,7 @@ same material and width as the main heat source but only 5 m in length and
 without internal heat generation. Instead, hot exhaust gas leaving the turbine
 transfers heat to the inside of the recuperator, and cooler gas from the
 compressor outlet removes heat from the outer surface. This preheats the gas
-entering the main heat source and improves thermal efficiency of the cycle.  
+entering the main heat source and improves thermal efficiency of the cycle.
 
 ## Transient Description
 
@@ -104,7 +104,7 @@ The Recuperator is modeled as a heat structure without internal heat generation 
 ## Control Logic
 
 One of the main changes from the
-[Brayton Cycle modeling guide](modules/thermal_hydraulics/modeling_guide/brayton_cycle/brayton_cycle.md)
+[Brayton Cycle modeling guide](modules/thermal_hydraulics/examples/brayton_cycle/brayton_cycle.md)
 is the addition of a PID controller to the motor for the start up transient.
 This PID control operates a 3-Phase electric motor which applies torque to the
 shaft to reach a desired speed set by the user, in this case 87,000 RPM. A speed

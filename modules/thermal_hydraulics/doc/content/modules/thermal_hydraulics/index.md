@@ -1,50 +1,35 @@
 !config navigation breadcrumbs=False scrollspy=False
 
-# Thermal Hydraulics Module class=center style=font-size:300%
-
-## The MOOSE-based framework for thermal hydraulics simulations class=center style=font-weight:200;font-size:175%
-
+# THM: The MOOSE Thermal Hydraulics Module class=center style=font-size:300%
 
 !row!
-!col! small=12 medium=7 large=7 icon=storage
+!col! small=6 medium=6 large=6 icon=storage
 
-### Features class=center style=font-weight:400
+### Features Highlights class=center style=font-weight:400
 
-The basic capabilities include:
+- [Components/index.md]: Piecewise system assembly.
+- [ControlLogic/index.md]: A flexible extension to [Controls/index.md].
+- [Closures/index.md]: Closure relations specification.
+- Physics:
 
-- Component-based approach to build thermal-hydraulic simulations.
-- 1-phase, variable-area, inviscid, compressible flow model.
-
-  - with non-condensable vapor mixture.
-
-- 2-D (Cartesian or axisymmetric) heat conduction.
-- 3-D heat conduction.
-- Control logic system.
-- Extensibility:
-
-  - pluggable closure system
-  - pluggable models
-
-- and much more...
+  - Single-phase, variable-area, inviscid, compressible flow.
+  - 2-D and 3-D heat conduction.
 
 !col-end!
 
-!col! small=12 medium=5 large=5 icon=school
+!col! small=6 medium=6 large=6 icon=school
 
-### Academy class=center style=font-weight:400
+### Documentation class=center style=font-weight:400
 
-Get started running your own THM simulations by exploring the introductory tutorial.
-Use the modeling guide to explore how to piece your models together:
+- [Getting started](modules/thermal_hydraulics/getting_started.md)
+- Tutorials:
 
-- [Getting Started](modules/thermal_hydraulics/getting_started.md) -- how to install the code.
-- Tutorials
+  - [tutorials/basics/index.md]: THM execution, input, and output.
+  - [tutorials/single_phase_flow/index.md]: Single-phase flow components.
 
-  - [Basics](tutorials/basics/index.md) -- learn the basics.
-  - [Single-phase flow](tutorials/single_phase_flow/index.md) -- learn about single-phase flow.
-
-- [Modeling Guide](modeling_guide/index.md) -- learn how to build your models.
-- [Verification and Validation](v_and_v/index.md) -- verification and validation tests performed to date.
-- [Syntax Index](syntax/index.md) -- complete syntax listing.
+- [Examples](modules/thermal_hydraulics/examples/index.md)
+- [Test problems](modules/thermal_hydraulics/test_problems/index.md)
+- [Syntax index](modules/thermal_hydraulics/syntax.md)
 
 !col-end!
 
