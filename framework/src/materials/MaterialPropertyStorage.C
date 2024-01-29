@@ -605,9 +605,8 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
       else
       {
         for (const auto & prop : props)
-        {
-          const auto find = from_prop_to_object.find(prop);
-          if (from_prop_to_object.find(prop) != from_prop_to_object.end())
+          if (const auto find = from_prop_to_object.find(prop);
+              from_prop_to_object.find(prop) != from_prop_to_object.end())
             mooseError("The stateful material property '",
                        prop,
                        "' was stored in checkpoint in ",
@@ -615,7 +614,6 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
                        " but is now declared in ",
                        object_string(object),
                        ".\n\nThis is not supported in advanced restart due to ambiguity.\n\n");
-        }
       }
     }
   }
