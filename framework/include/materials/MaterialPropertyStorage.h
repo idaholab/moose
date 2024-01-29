@@ -15,6 +15,8 @@
 #include "MaterialPropertyRegistry.h"
 #include "MaterialData.h"
 
+#include <variant>
+
 // Forward declarations
 class MaterialBase;
 class MaterialData;
@@ -41,6 +43,17 @@ class MaterialPropertyStorage
 {
 public:
   MaterialPropertyStorage(MaterialPropertyRegistry & registry);
+
+  /**
+   * Basic structure for storing information about a property
+   */
+  struct PropRecord
+  {
+    bool stateful() const { return state > 0; }
+    std::variant<const MaterialBase *, std::pair<std::string, std::string>> declarer;
+    std::string type;
+    unsigned int state = 0;
+  };
 
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the
@@ -242,25 +255,32 @@ public:
   bool hasProperty(const std::string & prop_name) const { return _registry.hasProperty(prop_name); }
 
   /**
-   * Adds a property with the name \p prop_name and state \p state (0 = current, 1 = old, etc)
+   * Adds a property with the name \p prop_name, type \p type, and state \p state (0 = current, 1 =
+   * old, etc)
    *
    * This is idempotent - calling multiple times with the same name will provide the same id and
    * works fine.
+   *
+   * \p declarer should be specified by the object declaring the property if it is being declared.
    */
-  unsigned int addProperty(const std::string & prop_name, const unsigned int state);
+  unsigned int addProperty(const std::string & prop_name,
+                           const std::type_info & type,
+                           const unsigned int state,
+                           const MaterialBase * const declarer);
 
   const std::vector<unsigned int> & statefulProps() const { return _stateful_prop_id_to_prop_id; }
-  const std::unordered_map<unsigned int, std::string> & statefulPropNames() const
-  {
-    return _stateful_prop_names;
-  }
 
   const MaterialPropertyRegistry & getMaterialPropertyRegistry() const { return _registry; }
 
-  bool isStatefulProp(const std::string & prop_name) const
-  {
-    return _stateful_prop_names.count(_registry.getID(prop_name));
-  }
+  /**
+   * @return The name of the stateful property with id \p id, if any.
+   */
+  std::optional<std::string> queryStatefulPropName(const unsigned int id) const;
+
+  /**
+   * @returns Whether or not the property \prop_name is stateful
+   */
+  bool isStatefulProp(const std::string & prop_name) const;
 
   /**
    * Remove the property storage and element pointer from internal data structures
@@ -300,14 +320,26 @@ public:
    */
   MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
 
+  /**
+   * Clears the materials that are marked as restored.
+   *
+   * Materials that have been restored do not have initStatefulProperties() called
+   * on them.
+   */
+  void clearRestoredMaterials() { _restored_materials.clear(); }
+
 protected:
   /// The actual storage
   std::array<PropsType, MaterialData::max_state + 1> _storage;
 
-  /// Mapping from stateful property ID to property name
-  std::unordered_map<unsigned int, std::string> _stateful_prop_names;
+  /// Property records indexed by property id (may be null)
+  std::vector<std::optional<PropRecord>> _prop_records;
+
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
+
+  /// The materials that have been restored and should not have initStatefulProperties() called on
+  std::set<const MaterialBase *> _restored_materials;
 
   void sizeProps(MaterialProperties & mp, unsigned int size);
 
@@ -412,3 +444,6 @@ MaterialPropertyStorage::setProps(const unsigned int state)
 {
   return const_cast<MaterialPropertyStorage::PropsType &>(std::as_const(*this).props(state));
 }
+
+void dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void * context);
+void dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void * context);

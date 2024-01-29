@@ -793,10 +793,6 @@ FEProblemBase::initialSetup()
       _app.restore(_app.restartFolderBase(_app.getRestartRecoverFileBase()), _app.isRestarting());
     else
       _app.restoreFromInitialBackup(_app.isRestarting());
-
-    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-        _neighbor_material_props.hasStatefulProperties())
-      _has_initialized_stateful = true;
   }
   else
   {
@@ -7377,6 +7373,11 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
     Threads::parallel_reduce(elem_range, cmt);
   else
     cmt(elem_range, true);
+
+  // Now that we've initialized stateful props, we no longer want to skip initialization of
+  // the materials have been skipped in restart
+  for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
+    props->clearRestoredMaterials();
 }
 
 void
@@ -7553,8 +7554,6 @@ void
 FEProblemBase::checkDependMaterialsHelper(
     const std::map<SubdomainID, std::vector<std::shared_ptr<MaterialBase>>> & materials_map)
 {
-  auto & prop_names = _material_props.statefulPropNames();
-
   for (const auto & it : materials_map)
   {
     /// These two sets are used to make sure that all dependent props on a block are actually supplied
@@ -7567,10 +7566,8 @@ FEProblemBase::checkDependMaterialsHelper(
 
       auto & alldeps = mat1->getMatPropDependencies(); // includes requested stateful props
       for (auto & dep : alldeps)
-      {
-        if (prop_names.count(dep) > 0)
-          block_depend_props.insert(prop_names.at(dep));
-      }
+        if (const auto name = _material_props.queryStatefulPropName(dep))
+          block_depend_props.insert(*name);
 
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)

@@ -12,6 +12,8 @@
 #include "Material.h"
 #include "MaterialData.h"
 #include "MooseMesh.h"
+#include "MaterialBase.h"
+#include "DataIO.h"
 
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
@@ -54,6 +56,21 @@ MaterialPropertyStorage::shallowSwapDataBack(const std::vector<unsigned int> & s
       auto & prop_from = data_from[stateful_prop_ids[i]];
       prop.swap(prop_from);
     }
+}
+
+std::optional<std::string>
+MaterialPropertyStorage::queryStatefulPropName(const unsigned int id) const
+{
+  if (_prop_records.size() > id && _prop_records[id] && _prop_records[id]->stateful())
+    return _registry.getName(id);
+  return {};
+}
+
+bool
+MaterialPropertyStorage::isStatefulProp(const std::string & prop_name) const
+{
+  const auto id = _registry.getID(prop_name);
+  return _prop_records.size() > id && _prop_records[id] && _prop_records[id]->stateful();
 }
 
 void
@@ -250,8 +267,11 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
   // copy from storage to material data
   swap(tid, elem, side);
   // run custom init on properties
+  // we don't call this for properties that we've already restored because that
+  // would overwrite what we've loaded
   for (const auto & mat : mats)
-    mat->initStatefulProperties(n_qpoints);
+    if (!_restored_materials.count(mat.get()))
+      mat->initStatefulProperties(n_qpoints);
 
   swapBack(tid, elem, side);
 
@@ -352,7 +372,10 @@ MaterialPropertyStorage::swapBack(const THREAD_ID tid, const Elem & elem, unsign
 }
 
 unsigned int
-MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsigned int state)
+MaterialPropertyStorage::addProperty(const std::string & prop_name,
+                                     const std::type_info & type,
+                                     const unsigned int state,
+                                     const MaterialBase * const declarer)
 {
   if (state > MaterialData::max_state)
     mooseError("Material property state of ",
@@ -364,16 +387,28 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
   if (maxState() < state)
     _max_state = state;
 
+  // Register the property
   const auto prop_id = _registry.addOrGetID(prop_name, {});
 
-  if (state > 0)
-  {
-    if (std::find(_stateful_prop_id_to_prop_id.begin(),
-                  _stateful_prop_id_to_prop_id.end(),
-                  prop_id) == _stateful_prop_id_to_prop_id.end())
-      _stateful_prop_id_to_prop_id.push_back(prop_id);
-    _stateful_prop_names[prop_id] = prop_name;
-  }
+  // Instantiate the record if needed
+  if (_prop_records.size() < _registry.size())
+    _prop_records.resize(_registry.size());
+  if (!_prop_records[prop_id])
+    _prop_records[prop_id] = PropRecord();
+
+  // Fill the record
+  auto & record = *_prop_records[prop_id];
+  if (declarer)
+    record.declarer = declarer;
+  if (state > record.state)
+    record.state = state;
+  record.type = type.name();
+
+  // Keep track of stateful props by quick access
+  if (state > 0 && std::find(_stateful_prop_id_to_prop_id.begin(),
+                             _stateful_prop_id_to_prop_id.end(),
+                             prop_id) == _stateful_prop_id_to_prop_id.end())
+    _stateful_prop_id_to_prop_id.push_back(prop_id);
 
   return prop_id;
 }
@@ -432,8 +467,8 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
   // Store the stateful ID -> property ID map for mapping back
   dataStore(stream, storage._stateful_prop_id_to_prop_id, nullptr);
 
-  // Store the stateful id -> name map
-  dataStore(stream, storage._stateful_prop_names, nullptr);
+  // Store the prop -> record map
+  dataStore(stream, storage._prop_records, nullptr);
 
   // Store every property
   for (const auto state : storage.stateIndexRange())
@@ -475,6 +510,8 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
+  storage._restored_materials.clear();
+
   const auto & registry = storage.getMaterialPropertyRegistry();
 
   decltype(storage.numStates()) num_states;
@@ -492,67 +529,157 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   decltype(storage._stateful_prop_id_to_prop_id) from_stateful_prop_id_to_prop_id;
   dataLoad(stream, from_stateful_prop_id_to_prop_id, nullptr);
 
-  decltype(storage._stateful_prop_names) from_stateful_prop_names;
-  dataLoad(stream, from_stateful_prop_names, nullptr);
+  decltype(storage._prop_records) from_prop_records;
+  dataLoad(stream, from_prop_records, nullptr);
+
+  // Common type for representing a Material; type and name
+  using MaterialObject = std::pair<std::string, std::string>;
 
   {
-    const auto fill_names = [](const auto & from)
+    // Build maps of material object -> properties and property -> material object
+    const auto build_maps = [](const auto & prop_records, const auto & ids_to_names)
     {
-      std::set<std::string> names;
-      for (const auto & id_name_pair : from)
-        names.insert(id_name_pair.second);
-      return names;
+      std::map<MaterialObject, std::set<std::string>> object_to_props;
+      std::map<std::string, MaterialObject> prop_to_object;
+      for (const auto i : index_range(prop_records))
+        if (prop_records[i] && prop_records[i]->stateful())
+        {
+          const auto & record = *prop_records[i];
+          MaterialObject object;
+          if (const auto material_ptr = std::get_if<const MaterialBase *>(&record.declarer))
+            object = std::make_pair((*material_ptr)->type(), (*material_ptr)->name());
+          else if (const auto material_name = std::get_if<MaterialObject>(&record.declarer))
+            object = *material_name;
+          const auto & name = ids_to_names[i];
+          object_to_props[object].insert(name);
+          prop_to_object.emplace(name, object);
+        }
+
+      return std::make_pair(object_to_props, prop_to_object);
     };
+    // Maps for the current stateful properties
+    const std::vector<std::string> prop_ids_to_names(registry.idsToNamesBegin(),
+                                                     registry.idsToNamesEnd());
+    const auto [object_to_props, prop_to_object] =
+        build_maps(storage._prop_records, prop_ids_to_names);
+    // Maps for the stored stateful properties
+    const auto [from_object_to_props, from_prop_to_object] =
+        build_maps(from_prop_records, from_prop_ids_to_names);
 
-    const auto from_names = fill_names(from_stateful_prop_names);
-    const auto to_names = fill_names(storage.statefulPropNames());
+    // Helper for printing object names in errors
+    const auto object_string = [](const MaterialObject & object)
+    { return object.first + " '" + object.second + "'"; };
 
-    // This requirement currently comes from the fact that now when we do restart/recover,
-    // we do not call initStatefulQpProperties() anymore on each material. Which means that
-    // if you add more stateful properties, they would never be initialized. It seems like
-    // this capability (adding props) isn't currently used, so we're going to make it an
-    // error for now. There are plenty of ways around this, but the priority at the moment
-    // is enabling more flexible restart/recover, and this is one of the costs.
-    // TODO: check types
-    if (from_names != to_names)
+    // Enforce our stateful requirements
+    for (const auto & [object, props] : object_to_props)
     {
-      std::stringstream err;
-      err << "There is a mismatch in the stateful material properties stored during "
-             "checkpoint/backup and declared in restart/recover.\n"
-          << "The current system requires that the stateful properties be equivalent.\n\n";
-      auto add_props = [&err](const auto & names)
+      const auto find_from_object = from_object_to_props.find(object);
+
+      // We have a material object that was stored with the same name that
+      // had stateful material properties. Here, we enforce that the stateful
+      // properties stored match exactly the ones that we have declared in
+      // the new run
+      if (find_from_object != from_object_to_props.end())
       {
-        for (const auto & name : names)
-          err << "  " << name << "\n";
-      };
-      err << "Stored stateful properties:\n";
-      add_props(from_names);
-      err << "\nDeclared stateful properties:\n";
-      add_props(to_names);
-      mooseError(err.str());
+        const auto & from_props = find_from_object->second;
+        if (props != from_props)
+        {
+          std::stringstream error;
+          error << "The stateful material properties in " << object_string(object)
+                << " that are being restarted do not match the stored properties in the same "
+                   "material object from the checkpoint.\n\n";
+          error << "Checkpointed stateful properties:\n";
+          for (const auto & prop : from_props)
+            error << " - " << prop << "\n";
+          error << "\nCurrent stateful properties:\n";
+          for (const auto & prop : props)
+            error << " - " << prop << "\n";
+          error << "\nThis is not supported in advanced restart.";
+          mooseError(error.str());
+        }
+      }
+      // We have not found a material object that was stored with the same name
+      // with stateful material properties. Here, we enforce that no other new
+      // stateful material properties are declared in a new material with the
+      // same name to avoid ambiguity.
+      else
+      {
+        for (const auto & prop : props)
+        {
+          const auto find = from_prop_to_object.find(prop);
+          if (from_prop_to_object.find(prop) != from_prop_to_object.end())
+            mooseError("The stateful material property '",
+                       prop,
+                       "' was stored in checkpoint in ",
+                       object_string(find->second),
+                       " but is now declared in ",
+                       object_string(object),
+                       ".\n\nThis is not supported in advanced restart due to ambiguity.\n\n");
+        }
+      }
     }
   }
 
   std::vector<std::optional<unsigned int>> to_stateful_ids(storage.statefulProps().size());
+
+  auto & to_prop_records = storage._prop_records;
 
   // Fill the mapping from previous ID to current stateful ID
   for (const auto from_stateful_id : index_range(from_stateful_prop_id_to_prop_id))
   {
     const auto from_prop_id = from_stateful_prop_id_to_prop_id[from_stateful_id];
 
+    mooseAssert(from_prop_id < from_prop_records.size(), "Invalid record map");
+    mooseAssert(from_prop_records[from_prop_id], "Not set");
+    const auto & from_record = *from_prop_records[from_prop_id];
+    mooseAssert(from_record.stateful(), "Not stateful");
+
     mooseAssert(from_prop_id < from_prop_ids_to_names.size(), "Invalid ID map");
-    const auto & from_name = from_prop_ids_to_names[from_prop_id];
+    const auto & name = from_prop_ids_to_names[from_prop_id];
 
-    const auto to_prop_id = registry.getID(from_name);
+    if (const auto query_to_prop_id = registry.queryID(name))
+    {
+      const auto to_prop_id = *query_to_prop_id;
 
-    const auto find_prop_id = std::find(storage._stateful_prop_id_to_prop_id.begin(),
-                                        storage._stateful_prop_id_to_prop_id.end(),
-                                        to_prop_id);
-    mooseAssert(find_prop_id != storage._stateful_prop_id_to_prop_id.end(), "Not found");
+      mooseAssert(to_prop_id < to_prop_records.size(), "Invalid record map");
+      mooseAssert(to_prop_records[to_prop_id], "Not set");
+      auto & to_record = *to_prop_records[to_prop_id];
 
-    const std::size_t to_stateful_id =
-        std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
-    to_stateful_ids[from_stateful_id] = to_stateful_id;
+      if (to_record.stateful())
+      {
+        if (from_record.type != to_record.type)
+          mooseError("The type for the restarted stateful material property '",
+                     name,
+                     "' does not match.\n\n",
+                     "Checkpointed type: ",
+                     from_record.type,
+                     "\nCurrent type: ",
+                     to_record.type);
+        if (from_record.state != to_record.state)
+          mooseError("The number of states for the restarted stateful material property '",
+                     name,
+                     "' do not match.\n\n",
+                     "Checkpointed states: ",
+                     from_record.state,
+                     "\nCurrent states: ",
+                     to_record.state);
+
+        const auto find_prop_id = std::find(storage._stateful_prop_id_to_prop_id.begin(),
+                                            storage._stateful_prop_id_to_prop_id.end(),
+                                            to_prop_id);
+        mooseAssert(find_prop_id != storage._stateful_prop_id_to_prop_id.end(), "Not found");
+
+        const std::size_t to_stateful_id =
+            std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
+        to_stateful_ids[from_stateful_id] = to_stateful_id;
+
+        to_record.restored = true;
+
+        const auto material_ptr = std::get_if<const MaterialBase *>(&to_record.declarer);
+        mooseAssert(material_ptr && *material_ptr, "Should have a declarer");
+        storage._restored_materials.insert(*material_ptr);
+      }
+    }
   }
 
   // Load the properties
@@ -585,18 +712,38 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
         auto & props = storage.setProps(elem, side, state);
 
         for (const auto from_stateful_id : make_range(num_props))
-        {
-          const auto to_stateful_id = to_stateful_ids[from_stateful_id];
-          mooseAssert(to_stateful_id, "Skipping not supported");
-
-          // Eventually we should support skipping, and this will be how it's done
-          // if (!to_stateful_id)
-          //   dataLoadSkip(stream);
-          // else
-
-          dataLoadSkippable(stream, props[*to_stateful_id], nullptr);
-        }
+          if (const auto to_stateful_id_ptr = to_stateful_ids[from_stateful_id])
+            dataLoadSkippable(stream, props[*to_stateful_id_ptr], nullptr);
+          else
+            dataLoadSkip(stream);
       }
     }
   }
+}
+
+void
+dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void *)
+{
+  const auto material_ptr = std::get_if<const MaterialBase *>(&record.declarer);
+  mooseAssert(material_ptr, "Should have a material");
+
+  std::string declarer_type = (*material_ptr)->type();
+  dataStore(stream, declarer_type, nullptr);
+  std::string declarer_name = (*material_ptr)->name();
+  dataStore(stream, declarer_name, nullptr);
+
+  dataStore(stream, record.type, nullptr);
+  dataStore(stream, record.state, nullptr);
+}
+
+void
+dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void *)
+{
+  std::pair<std::string, std::string> declarer;
+  dataLoad(stream, declarer.first, nullptr);
+  dataLoad(stream, declarer.second, nullptr);
+  record.declarer = declarer;
+
+  dataLoad(stream, record.type, nullptr);
+  dataLoad(stream, record.state, nullptr);
 }
