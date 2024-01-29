@@ -65,9 +65,7 @@ LinearFVOutflowBC::computeBoundaryNormalGradient() const
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-    const auto distance_vector = computeCellToFaceVector();
-    normal_gradient = _var->gradSln(elem_info) * distance_vector /
-                      (distance_vector * _current_face_info->normal());
+    normal_gradient = _var->gradSln(elem_info) * _current_face_info->normal();
   }
   return normal_gradient;
 }

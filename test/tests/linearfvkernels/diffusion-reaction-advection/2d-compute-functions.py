@@ -9,5 +9,5 @@ c = '1.0+1.0/(1+x*y)'
 
 f_u, e_u = mms.evaluate('div(0.5*e_i*u) - div(mu*grad(u))+c*u', u, variable='u', mu=mu, c=c)
 
-mms.print_hit(e_u, 'exact_u')
-mms.print_hit(f_u, 'forcing_u')
+mms.print_hit(e_u, 'analytic_solution')
+mms.print_hit(f_u, 'source_func')
