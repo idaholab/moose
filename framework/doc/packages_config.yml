@@ -3,11 +3,11 @@ clang: 16.0.6
 minimum_gcc: 7.5.0
 minimum_clang: 10.0.1
 minimum_python: 3.7
-mpich: 4.0.2
+mpich: 4.1.2
 petsc_alt: 3.11.4
-petsc: 3.20.1
-moose_dev: 2024.01.15
-moose_tools: 2024.01.15
+petsc: 3.20.3
+moose_dev: 2024.01.24
+moose_tools: 2024.01.24
 apptainer_rockylinux: 8.8.20230518
 apptainer_mpich: 3.4.3
 apptainer_gcc: 12.2.1
