@@ -32,8 +32,11 @@ public:
   /// If you need more than these:
   /// - register your action to the new task using
   ///   registerMooseAction("AppName", ActionClass, "task_name");
-  /// - override act and add your additional work there
+  /// - override actOnAdditionalTasks and add your additional work there
   virtual void act() override final;
+
+  /// Routine to add additional setup work on additional registered tasks to a Physics
+  virtual void actOnAdditionalTasks() {}
 
   /// Add new blocks to the Physics
   void addBlocks(const std::vector<SubdomainName> & blocks);

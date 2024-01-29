@@ -126,6 +126,9 @@ PhysicsBase::act()
     addExecutioner();
   else if (_current_task == "add_executor")
     addExecutors();
+
+  // Lets a derived Physics class implement additional tasks
+  actOnAdditionalTasks();
 }
 
 void
