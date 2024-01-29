@@ -168,7 +168,7 @@ protected:
   virtual bool onInterval();
 
   /**
-   * Function to set the wall time interval based on value of command line parameter.
+   * Function to set the wall time interval based on value of command line parameter (used for testing only).
    * @param cli_param_name The name of the command line parameter to set the wall time interval to
    *
    */

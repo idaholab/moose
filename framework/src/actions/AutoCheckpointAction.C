@@ -41,22 +41,22 @@ AutoCheckpointAction::act()
   }
 
   // We don't want to set up automatic checkpoints if we are not in the master app
-  else if (!_app.isUltimateMaster())
-    return;
-
-  else if (num_checkpoints == 0)
+  else if (_app.isUltimateMaster())
   {
-    // If there isn't an existing checkpoint, init a new one
-    auto cp_params = _factory.getValidParams("Checkpoint");
-    cp_params.setParameters("checkpoint_type", CheckpointType::SYSTEM_CREATED);
-    cp_params.set<bool>("_built_by_moose") = true;
-    _problem->addOutput("Checkpoint", "checkpoint", cp_params);
-  }
+    if (num_checkpoints == 0)
+    {
+      // If there isn't an existing checkpoint, init a new one
+      auto cp_params = _factory.getValidParams("Checkpoint");
+      cp_params.setParameters("checkpoint_type", CheckpointType::SYSTEM_CREATED);
+      cp_params.set<bool>("_built_by_moose") = true;
+      _problem->addOutput("Checkpoint", "checkpoint", cp_params);
+    }
 
-  else // num_checkpoints == 1
-  {
-    // Use the existing Checkpoint object, since we only need to/should make one object the autosave
-    _app.getOutputWarehouse().getOutputs<Checkpoint>()[0]->setAutosaveFlag(
-        CheckpointType::USER_AND_SYSTEM_CREATED);
+    else // num_checkpoints == 1
+    {
+      // Use the existing Checkpoint object, since we only need to/should make one object the autosave
+      _app.getOutputWarehouse().getOutputs<Checkpoint>()[0]->setAutosaveFlag(
+          CheckpointType::USER_CREATED);
+    }
   }
 }

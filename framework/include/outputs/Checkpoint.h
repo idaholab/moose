@@ -17,19 +17,18 @@
 
 /**
  * Enumerated type for determining what type of checkpoint this is.
- * USER_CREATED: Checkpoint is requested by the user in the input file.
  * SYSTEM_CREATED: This type of checkpoint is created automatically by the
  *   system for the purpose of writing checkpoints at regularly scheduled
  *   walltime intervals or when sent a signal.
- * USER_AND_SYSTEM_CREATED: Checkpoint is requested by the user in the input
- *   file, and modified by the system to also output at walltime intervals or
+ * USER_CREATED: Checkpoint is requested by the user in the input
+ *   file, and can be used by the system to also output at walltime intervals or
  *   when sent a signal.
  */
 enum CheckpointType : unsigned short
 {
   NONE,
   SYSTEM_CREATED,
-  USER_AND_SYSTEM_CREATED
+  USER_CREATED
 };
 
 class MaterialPropertyStorage;
