@@ -100,5 +100,5 @@ protected:
    */
   Node * nonDuplicateNodeCreator(ReplicatedMesh & mesh,
                                  std::vector<Node *> & new_on_plane_nodes,
-                                 const Point new_point);
+                                 const Point & new_point);
 };

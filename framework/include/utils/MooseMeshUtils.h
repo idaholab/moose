@@ -312,7 +312,7 @@ void pyramidElemSplitter(ReplicatedMesh & mesh,
                          std::vector<dof_id_type> & converted_elems_ids);
 
 /**
- * Split a PRISM6 element into three TET4 element to prepare for the cutting ope ration.
+ * Split a PRISM6 element into three TET4 element to prepare for the cutting operation.
  * @param mesh The mesh to be modified
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
@@ -341,8 +341,8 @@ std::vector<unsigned int> nodeRotationHEX8(unsigned int min_id_index,
 std::vector<unsigned int> neighborNodeIndicesHEX8(unsigned int min_id_index);
 
 /**
- * For a vector of rotated nodes that can form a HEX8 element, create a series of four-node set
- * that can form TET4 elements to replace the original HEX8 element. All the QUAD4 face of the
+ * For a vector of rotated nodes that can form a HEX8 element, create a vector of four-node sets
+ * that can form TET4 elements to replace the original HEX8 element. All the QUAD4 faces of the
  * HEX8 element will be split by the diagonal line that involves the node with the minimum id of
  * that face.
  * @param hex_nodes A vector of pointers to the nodes that can form a HEX8 element
@@ -444,7 +444,7 @@ pyramidNodeOptimizer(std::vector<Node *> & pyramid_nodes,
                      std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
 
 /**
- * Convert all the elements in a 3D mesh consisting only linear elemetns into TET4 elements.
+ * Convert all the elements in a 3D mesh consisting only linear elements into TET4 elements.
  * @param mesh The mesh to be converted
  * @param elems_to_process A vector of pairs of element ids and a bool indicating whether the
  * element needs to be fully retained or will be partially cut in the following procedures
@@ -452,7 +452,7 @@ pyramidNodeOptimizer(std::vector<Node *> & pyramid_nodes,
  * procedures
  * @param converted_elems_ids_to_retain A vector of element ids that will be fully retained in
  * the following procedures
- * @param block_id_to_remove The id of the block to be removed
+ * @param block_id_to_remove The id of a new subdomain in the mesh containing all the elements to be removed
  * @param delete_block_to_remove A bool indicating whether the block to be removed will be
  * deleted in this method
  */

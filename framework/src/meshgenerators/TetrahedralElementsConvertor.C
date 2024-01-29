@@ -28,11 +28,11 @@ TetrahedralElementsConvertor::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be trimmed.");
+  params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be converted to tetrahedrals.");
 
   params.addClassDescription(
       "This TetrahedralElementsConvertor object is designed to convert all the elements in a 3D "
-      "mesh consisting only linear elemetns into TET4 elements.");
+      "mesh consisting only linear elements into TET4 elements.");
 
   return params;
 }
