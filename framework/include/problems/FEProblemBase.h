@@ -444,6 +444,12 @@ public:
 
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
+
+  /**
+   * Build and solve a linear system
+   * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
+   * @param po The petsc options for the solve, if not supplied, the defaults are used
+   */
   virtual void solveLinearSystem(const unsigned int linear_sys_num,
                                  const Moose::PetscSupport::PetscOptions * po = nullptr);
 
@@ -669,19 +675,41 @@ public:
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
-  ///@{
+
   /**
-   * Linear system getters
+   * Get non-constant reference to a linear system
+   * @param sys_num The number of the linear system
    */
   LinearSystem & getLinearSystem(unsigned int sys_num);
+
+  /**
+   * Get a constant reference to a linear system
+   * @param sys_num The number of the linear system
+   */
   const LinearSystem & getLinearSystem(unsigned int sys_num) const;
-  void setCurrentLinearSystem(unsigned int nl_sys_num);
+
+  /**
+   * Set the current linear system pointer
+   * @param sys_num The number of linear system
+   */
+  void setCurrentLinearSystem(unsigned int sys_num);
+
+  /// Get a non-constant reference to the current linear system
   LinearSystem & currentLinearSystem();
+  /// Get a constant reference to the current linear system
   const LinearSystem & currentLinearSystem() const;
 
+  /**
+   * Get a constant base class reference to a linear system
+   * @param sys_num The number of the linear system
+   */
   virtual const SystemBase & systemBaseLinear(unsigned int sys_num) const override;
+
+  /**
+   * Get a non-constant base class reference to a linear system
+   * @param sys_num The number of the linear system
+   */
   virtual SystemBase & systemBaseLinear(unsigned int sys_num) override;
-  ///@}
 
   /**
    * Canonical method for adding a non-linear variable
@@ -1349,24 +1377,62 @@ public:
                                     unsigned int ivar,
                                     unsigned int jvar);
 
+  /**
+   * Compute the right hand side of a given linear system.
+   * @param sys The linear system whose right hand side should be computed
+   * @param rhs Reference to the vector which will hold the right hand side
+   */
   virtual void computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys,
                                                    NumericVector<Number> & rhs);
 
+  /**
+   * Compute the system matrix of a given linear system.
+   * @param sys The linear system whosesystem matrix should be computed
+   * @param system_matrix Reference to the sparse matrix which will hold the msystem matrix
+   */
   virtual void computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
                                             SparseMatrix<Number> & system_matrix);
 
+  /**
+   * Compute the right hand side of the current linear system for given vector tags.
+   * @param soln The solution which should be used to compute the right hand side
+   * @param rhs The vector which should hold the right hand side
+   * @param tags The vector tag IDs which should be used to select terms that contribute to the right hand side
+   */
   virtual void computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
                                                     NumericVector<Number> & rhs,
                                                     const std::set<TagID> & tags);
 
+  /**
+   * Compute the system matrix of the current linear system for given matrix tags.
+   * @param soln The solution which should be used to compute the matrix
+   * @param system_matrix The sparse matrix which should hold the system matrix
+   * @param tags The matrix tag IDs which should be used to select terms that contribute to the matrix
+   */
   virtual void computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
                                              SparseMatrix<Number> & system_matrix,
                                              const std::set<TagID> & tags);
 
+  /**
+   * Assemble both the right hand side and the system matrix of a given linear
+   * system.
+   * @param sys The linear system which should be assembled
+   * @param system_matrix The sparse matrix which should hold the system matrix
+   * @param rhs The vector which should hold the right hand side
+   */
   virtual void computeLinearSystemSys(LinearImplicitSystem & sys,
                                       SparseMatrix<Number> & system_matrix,
                                       NumericVector<Number> & rhs);
 
+  /**
+   * Assemble the current linear system given a set of vector and matrix tags.
+   *
+   * @param soln The solution which should be used for the system assembly
+   * @param system_matrix The sparse matrix which should hold the system matrix
+   * @param rhs The vector which should hold the right hand side
+   * @param vector_tags The vector tags for the right hand side
+   * @param matrix_tags The matrix tags for the matrix
+   */
   virtual void computeLinearSystemTags(const NumericVector<Number> & soln,
                                        SparseMatrix<Number> & system_matrix,
                                        NumericVector<Number> & rhs,
@@ -2144,7 +2210,7 @@ public:
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
-   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   * @return the nlinear system number corresponding to the provided \p linear_sys_name
    */
   unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const override;
 
@@ -2277,7 +2343,7 @@ protected:
   /// The number of linear systems
   const std::size_t _num_linear_sys;
 
-  /// The nonlinear systems
+  /// The vector of linear systems
   std::vector<std::shared_ptr<LinearSystem>> _linear_systems;
 
   /// Map from linear system name to number
@@ -2630,9 +2696,9 @@ private:
 
   /**
    * Determine what linear system the provided variable name lies in
-   * @param var_name The name of the variable we are doing nonlinear system lookups for
+   * @param var_name The name of the variable we are doing linear system lookups for
    * @param error_if_not_found Whether to error if the variable name isn't found in any of the
-   * nonlinear systems
+   * linear systems
    * @return A pair in which the first member indicates whether the variable was found in the
    * linear systems and the second member indicates the linear system number in which the
    * variable was found (or an invalid unsigned integer if not found)

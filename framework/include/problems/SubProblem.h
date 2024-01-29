@@ -923,7 +923,7 @@ public:
 
   /**
    * Select the vector tags which belong to a specific system
-   * @param system Reference to the nonlinear system
+   * @param system Reference to the system
    * @param input_vector_tags A vector of vector tags
    * @param selected_tags A set which gets populated by the tag-ids that belong to the system
    */
@@ -933,7 +933,7 @@ public:
 
   /**
    * Select the matrix tags which belong to a specific system
-   * @param system Reference to the nonlinear system
+   * @param system Reference to the system
    * @param input_matrix_tags A map of matrix tags
    * @param selected_tags A set which gets populated by the tag-ids that belong to the system
    */
@@ -1084,6 +1084,12 @@ private:
   virtual std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
 
+  /**
+   * @return whether a given variable name is in the linear systems (reflected the first member
+   * of the returned paired which is a boolean) and if so, what nonlinear system number it is in
+   * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
+   * this will be an invalid unsigned integer)
+   */
   virtual std::pair<bool, unsigned int>
   determineLinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
 
