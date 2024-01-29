@@ -96,6 +96,7 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/diagonal_matrix.h"
+#include "libmesh/fe_interface.h"
 
 #include <ios>
 
@@ -1141,12 +1142,22 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
             std::vector<Point> points;
             points.push_back(info._closest_point);
 
-            // reinit variables on the primary element's face at the contact point
+            // Reinit variables and materials on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+
+            // Reinit material on undisplaced mesh
+            std::vector<Point> reference_points;
+            FEInterface::inverse_map(
+                primary_elem->dim(), FEType(), primary_elem, points, reference_points);
+            Point neighbor_physical_points;
+            _fe_problem.getNeighborPoints(
+                _mesh.elemPtr(primary_elem->id()), &reference_points, neighbor_physical_points);
             _fe_problem.reinitNeighborPhys(
-                _mesh.elemPtr(primary_elem->id()), primary_side, points, 0);
+                _mesh.elemPtr(primary_elem->id()), primary_side, {neighbor_physical_points}, 0);
             _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+
+            // Reinit points for constraint enforcement
+            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
             {
@@ -1308,12 +1319,22 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
             std::vector<Point> points;
             points.push_back(info._closest_point);
 
-            // reinit variables on the primary element's face at the contact point
+            // Reinit variables and materials on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+
+            // Reinit material on undisplaced mesh
+            std::vector<Point> reference_points;
+            FEInterface::inverse_map(
+                primary_elem->dim(), FEType(), primary_elem, points, reference_points);
+            Point neighbor_physical_points;
+            _fe_problem.getNeighborPoints(
+                _mesh.elemPtr(primary_elem->id()), &reference_points, neighbor_physical_points);
             _fe_problem.reinitNeighborPhys(
-                _mesh.elemPtr(primary_elem->id()), primary_side, points, 0);
+                _mesh.elemPtr(primary_elem->id()), primary_side, {neighbor_physical_points}, 0);
             _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+
+            // Reinit points for constraint enforcement
+            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
             {
@@ -2279,10 +2300,23 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
             // reinit variables on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+
+            // Reinit variables and materials on the primary element's face at the contact point
+            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
+
+            // Reinit material on undisplaced mesh
+            std::vector<Point> reference_points;
+            FEInterface::inverse_map(
+                primary_elem->dim(), FEType(), primary_elem, points, reference_points);
+            Point neighbor_physical_points;
+            _fe_problem.getNeighborPoints(
+                _mesh.elemPtr(primary_elem->id()), &reference_points, neighbor_physical_points);
             _fe_problem.reinitNeighborPhys(
-                _mesh.elemPtr(primary_elem->id()), primary_side, points, 0);
+                _mesh.elemPtr(primary_elem->id()), primary_side, {neighbor_physical_points}, 0);
             _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+
+            // Reinit points for constraint enforcement
+            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
             {

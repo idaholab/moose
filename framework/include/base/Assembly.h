@@ -714,6 +714,9 @@ public:
    */
   void reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points);
 
+  /**
+   * Reinitializes the neighbor side using reference coordinates.
+   */
   void reinitNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
   /**

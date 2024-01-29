@@ -216,6 +216,11 @@ public:
   virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes,
                                    const THREAD_ID tid) override;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
+  virtual void getNeighborPoints(const Elem * /*neighbor*/,
+                                 const std::vector<Point> * /*neighbor_reference_points*/,
+                                 Point & /*neighbor_physical_points*/) override
+  {
+  }
 
   /**
    * reinitialize neighbor routine

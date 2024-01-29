@@ -868,6 +868,14 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
 }
 
 void
+SubProblem::getNeighborPoints(const Elem * neighbor,
+                              const std::vector<Point> * neighbor_reference_points,
+                              Point & neighbor_physical_points)
+{
+  neighbor_physical_points = FEMap::map(neighbor->dim(), neighbor, (*neighbor_reference_points)[0]);
+}
+
+void
 SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                   unsigned int neighbor_side,
                                   BoundaryID bnd_id,

@@ -396,6 +396,9 @@ public:
                                   unsigned int neighbor_side,
                                   const std::vector<Point> & physical_points,
                                   const THREAD_ID tid) = 0;
+  virtual void getNeighborPoints(const Elem * neighbor,
+                                 const std::vector<Point> * neighbor_reference_points,
+                                 Point & neighbor_physical_points);
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   const THREAD_ID tid) = 0;
