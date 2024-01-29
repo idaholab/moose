@@ -22,4 +22,11 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
   []
+  [mms-diffusion-2d-rz]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestDiffusion2DRZ
+    requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on an orthogonal mesh in cylindrical coordinate system.'
+    required_python_packages = 'pandas matplotlib'
+  []
 []
