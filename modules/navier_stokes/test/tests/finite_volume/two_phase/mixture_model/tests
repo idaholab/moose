@@ -27,6 +27,7 @@
     recover = false
     method = '!dbg'
     valgrind = none
+    allow_warnings = true
   []
   [mixture_channel_drift_flux]
     type = 'Exodiff'

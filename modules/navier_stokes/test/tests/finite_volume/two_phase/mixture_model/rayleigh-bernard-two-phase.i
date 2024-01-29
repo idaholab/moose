@@ -20,8 +20,8 @@ g = -9.81
     xmax = .1
     ymin = 0
     ymax = .1
-    nx = 10
-    ny = 10
+    nx = 11
+    ny = 11
   []
 []
 
@@ -324,13 +324,13 @@ g = -9.81
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_type'
-  petsc_options_value = 'lu       NONZERO               newtontr'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 10
     iteration_window = 2
-    growth_factor = 1.5
+    growth_factor = 2
     cutback_factor = 0.5
     dt = 1e-3
   []
@@ -339,10 +339,6 @@ g = -9.81
   nl_abs_tol = 1e-9
   l_max_its = 5
   end_time = 1e8
-  [Predictor]
-    type = SimplePredictor
-    scale = 1
-  []
 []
 
 [Outputs]
