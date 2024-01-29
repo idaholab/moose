@@ -40,5 +40,15 @@
       prereq = checkpoint
       detail = 'a stateful object changed names'
     []
+    [different_type]
+      type = RunException
+      input = 'advanced_stateful_material_restart.i'
+      cli_args = "Materials/test/real_names='a'
+                  Materials/test/real_stateful_names='a'
+                  Materials/test/int_names='b'"
+      expect_err = 'The type for the restarted stateful material property \'b\' in does not match'
+      prereq = checkpoint
+      detail = 'the type of a restored stateful property has changed'
+    []
   []
 []

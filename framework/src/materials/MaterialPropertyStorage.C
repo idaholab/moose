@@ -648,11 +648,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
         if (from_record.type != to_record.type)
           mooseError("The type for the restarted stateful material property '",
                      name,
-                     "' does not match.\n\n",
-                     "Checkpointed type: ",
-                     from_record.type,
-                     "\nCurrent type: ",
-                     to_record.type);
+                     "' in does not match");
         if (from_record.state != to_record.state)
           mooseError("The number of states for the restarted stateful material property '",
                      name,
