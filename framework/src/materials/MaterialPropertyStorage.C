@@ -673,8 +673,6 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
             std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
         to_stateful_ids[from_stateful_id] = to_stateful_id;
 
-        to_record.restored = true;
-
         const auto material_ptr = std::get_if<const MaterialBase *>(&to_record.declarer);
         mooseAssert(material_ptr && *material_ptr, "Should have a declarer");
         storage._restored_materials.insert(*material_ptr);
