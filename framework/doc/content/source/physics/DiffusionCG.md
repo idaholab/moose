@@ -42,7 +42,7 @@ are a few percent faster, depending on the case.
 
 !alert note
 The user may switch between using / not using automatic differentiation for the kernel and boundary
-conditions using the [!param](/Physics/Diffusion/ContinuousGalerkin/automatic_differentiation). This parameter is only
+conditions using the [!param](/Physics/Diffusion/ContinuousGalerkin/use_automatic_differentiation). This parameter is only
 obeyed if the AD/non-AD object exists for the requested diffusivity / source / boundary value functor etc.
 
 
