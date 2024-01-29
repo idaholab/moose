@@ -708,13 +708,17 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void *)
 {
-  const auto material_ptr = std::get_if<const MaterialBase *>(&record.declarer);
-  mooseAssert(material_ptr, "Should have a material");
+  const auto declarer_ptr = std::get_if<const MaterialBase *>(&record.declarer);
+  bool has_declarer = declarer_ptr && *declarer_ptr;
+  dataStore(stream, has_declarer, nullptr);
 
-  std::string declarer_type = (*material_ptr)->type();
-  dataStore(stream, declarer_type, nullptr);
-  std::string declarer_name = (*material_ptr)->name();
-  dataStore(stream, declarer_name, nullptr);
+  if (has_declarer)
+  {
+    std::string declarer_type = (*declarer_ptr)->type();
+    dataStore(stream, declarer_type, nullptr);
+    std::string declarer_name = (*declarer_ptr)->name();
+    dataStore(stream, declarer_name, nullptr);
+  }
 
   dataStore(stream, record.type, nullptr);
   dataStore(stream, record.state, nullptr);
@@ -723,10 +727,16 @@ dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, v
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void *)
 {
-  std::pair<std::string, std::string> declarer;
-  dataLoad(stream, declarer.first, nullptr);
-  dataLoad(stream, declarer.second, nullptr);
-  record.declarer = declarer;
+  bool has_declarer;
+  dataLoad(stream, has_declarer, nullptr);
+
+  if (has_declarer)
+  {
+    std::pair<std::string, std::string> declarer;
+    dataLoad(stream, declarer.first, nullptr);
+    dataLoad(stream, declarer.second, nullptr);
+    record.declarer = declarer;
+  }
 
   dataLoad(stream, record.type, nullptr);
   dataLoad(stream, record.state, nullptr);
