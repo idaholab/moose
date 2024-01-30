@@ -80,7 +80,7 @@ std::vector<unsigned int> neighborNodeIndicesHEX8(unsigned int min_id_index);
  */
 std::vector<std::vector<Node *>>
 hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
-                 std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
+                             std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
 
 /**
  * For a HEX8 element, determine the direction of the diagonal line of each face that involves the
@@ -133,7 +133,7 @@ std::vector<unsigned int> nodeRotationPRISM6(unsigned int min_id_index,
  */
 std::vector<std::vector<Node *>>
 prismNodesToTetNodesDeterminer(std::vector<Node *> & prism_nodes,
-                   std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
+                               std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
 
 /**
  * Creates sets of four nodes indices that can form TET4 elements to replace the original PRISM6
@@ -170,7 +170,7 @@ std::vector<unsigned int> nodeRotationPYRAMIND5(unsigned int min_id_index,
  */
 std::vector<std::vector<Node *>>
 pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
-                     std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
+                                 std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
 
 /**
  * Convert all the elements in a 3D mesh consisting only linear elements into TET4 elements.
