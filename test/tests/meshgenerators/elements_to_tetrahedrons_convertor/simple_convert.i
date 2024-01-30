@@ -21,7 +21,7 @@
     block_id = 2
   []
   [convert]
-    type = TetrahedralElementsConvertor
+    type = ElementsToTetrahedronsConverter
     input = block_2
   []
 []

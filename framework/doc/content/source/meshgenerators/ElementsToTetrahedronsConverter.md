@@ -1,14 +1,14 @@
-# TetrahedralElementsConvertor
+# ElementsToTetrahedronsConverter
 
-!syntax description /Mesh/TetrahedralElementsConvertor
+!syntax description /Mesh/ElementsToTetrahedronsConverter
 
 ## Overview
 
-The `TetrahedralElementsConvertor` converts a 3D mesh that consists of first-order elements (e.g., TET4, PYRAMID5, PRISM6, and HEX8) into a mesh that only contains TET4 elements.
+The `ElementsToTetrahedronsConverter` converts a 3D mesh that consists of first-order elements (e.g., TET4, PYRAMID5, PRISM6, and HEX8) into a mesh that only contains TET4 elements.
 
 ## Methods
 
-To ensure consistency during cutting, all original mesh elements which are not TET4 type are first converted into TET4 elements through splitting. To be specific, each HEX8 element is split into six TET4 elements; each PRISM6 element is split into three TET4 elements; and each PYRAMID5 element is split into two TET4 elements. Details on the splitting approach follow.
+All original mesh elements which are not TET4 type are converted into TET4 elements through splitting by this mesh generator. To be specific, each HEX8 element is split into six TET4 elements; each PRISM6 element is split into three TET4 elements; and each PYRAMID5 element is split into two TET4 elements. Details on the splitting approach follow.
 
 !media framework/meshgenerators/hex_split.png
       style=display: block;margin-left:auto;margin-right:auto;width:32%;float:left;
@@ -45,11 +45,11 @@ As discussed above, although splitting of non-TET elements into TET4 elements is
 
 ## Example Syntax
 
-!listing test/tests/meshgenerators/tetrahedral_elements_convertor/simple_convert.i block=Mesh/convert
+!listing test/tests/meshgenerators/elements_to_tetrahedrons_convertor/simple_convert.i block=Mesh/convert
 
-!syntax parameters /Mesh/TetrahedralElementsConvertor
+!syntax parameters /Mesh/ElementsToTetrahedronsConverter
 
-!syntax inputs /Mesh/TetrahedralElementsConvertor
+!syntax inputs /Mesh/ElementsToTetrahedronsConverter
 
-!syntax children /Mesh/TetrahedralElementsConvertor
+!syntax children /Mesh/ElementsToTetrahedronsConverter
 

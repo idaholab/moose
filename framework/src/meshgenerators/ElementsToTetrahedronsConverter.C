@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TetrahedralElementsConvertor.h"
-#include "MooseMeshUtils.h"
+#include "ElementsToTetrahedronsConverter.h"
+#include "MooseMeshElementConversionUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
@@ -21,23 +21,24 @@
 // C++ includes
 #include <cmath>
 
-registerMooseObject("MooseApp", TetrahedralElementsConvertor);
+registerMooseObject("MooseApp", ElementsToTetrahedronsConverter);
 
 InputParameters
-TetrahedralElementsConvertor::validParams()
+ElementsToTetrahedronsConverter::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be converted to tetrahedrals.");
+  params.addRequiredParam<MeshGeneratorName>(
+      "input", "The input mesh that needs to be converted to tetrahedrals.");
 
   params.addClassDescription(
-      "This TetrahedralElementsConvertor object is designed to convert all the elements in a 3D "
+      "This ElementsToTetrahedronsConverter object is designed to convert all the elements in a 3D "
       "mesh consisting only linear elements into TET4 elements.");
 
   return params;
 }
 
-TetrahedralElementsConvertor::TetrahedralElementsConvertor(const InputParameters & parameters)
+ElementsToTetrahedronsConverter::ElementsToTetrahedronsConverter(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
     _input(getMeshByName(_input_name))
@@ -45,7 +46,7 @@ TetrahedralElementsConvertor::TetrahedralElementsConvertor(const InputParameters
 }
 
 std::unique_ptr<MeshBase>
-TetrahedralElementsConvertor::generate()
+ElementsToTetrahedronsConverter::generate()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!replicated_mesh_ptr)
@@ -56,7 +57,7 @@ TetrahedralElementsConvertor::generate()
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
-  MooseMeshUtils::convert3DMeshToAllTet4(mesh);
+  MooseMeshElementConversionUtils::convert3DMeshToAllTet4(mesh);
 
   return std::move(_input);
 }

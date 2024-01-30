@@ -12,7 +12,7 @@ The `CutMeshByPlaneGenerator` is basically the 3D version of [`XYMeshLineCutter`
 
 ### Splitting of Non-TET4 Elements
 
-The splitting of non-TET4 elements was performed using the same algorithm as described in [`TetrahedralElementsConvertor`](/TetrahedralElementsConvertor.md). Note that only those elements that will be fully or partially retained after the cutting are split.
+The splitting of non-TET4 elements was performed using the same algorithm as described in [`ElementsToTetrahedronsConverter`](/ElementsToTetrahedronsConverter.md). Note that only those elements that will be fully or partially retained after the cutting are split.
 
 ### Cutting of TET4 Elements along Plane
 

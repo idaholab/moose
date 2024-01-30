@@ -16,7 +16,7 @@
                        10 13 15 18'
   []
   [convert]
-    type = TetrahedralElementsConvertor
+    type = ElementsToTetrahedronsConverter
     input = extrude
   []
 []

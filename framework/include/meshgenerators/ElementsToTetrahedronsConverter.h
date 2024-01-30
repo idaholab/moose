@@ -11,15 +11,15 @@
 #include "MeshGenerator.h"
 
 /**
- * This TetrahedralElementsConvertor object is designed to convert all the elements in a 3D mesh
+ * This ElementsToTetrahedronsConverter object is designed to convert all the elements in a 3D mesh
  * consisting only linear elements into TET4 elements.
  */
-class TetrahedralElementsConvertor : public MeshGenerator
+class ElementsToTetrahedronsConverter : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TetrahedralElementsConvertor(const InputParameters & parameters);
+  ElementsToTetrahedronsConverter(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

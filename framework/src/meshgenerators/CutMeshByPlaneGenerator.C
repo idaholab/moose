@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CutMeshByPlaneGenerator.h"
-#include "MooseMeshUtils.h"
+#include "MooseMeshElementConversionUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
@@ -61,7 +61,7 @@ CutMeshByPlaneGenerator::generate()
     paramError("input", "Input is not a replicated mesh, which is required");
   if (*(replicated_mesh_ptr->elem_dimensions().begin()) != 3 ||
       *(replicated_mesh_ptr->elem_dimensions().rbegin()) != 3)
-    paramError("input", "Only 3D meshes are supported.");
+    paramError("input", "Only 3D meshes are supported. Use XYMeshLineCutter for 2D meshes.");
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
@@ -105,12 +105,12 @@ CutMeshByPlaneGenerator::generate()
   std::vector<dof_id_type> converted_elems_ids_to_cut;
   std::vector<dof_id_type> converted_elems_ids_to_retain;
   // Then convert these non-TET4 elements into TET4 elements
-  MooseMeshUtils::convert3DMeshToAllTet4(mesh,
-                                         cross_and_remained_elems_pre_convert,
-                                         converted_elems_ids_to_cut,
-                                         converted_elems_ids_to_retain,
-                                         block_id_to_remove,
-                                         false);
+  MooseMeshElementConversionUtils::convert3DMeshToAllTet4(mesh,
+                                                          cross_and_remained_elems_pre_convert,
+                                                          converted_elems_ids_to_cut,
+                                                          converted_elems_ids_to_retain,
+                                                          block_id_to_remove,
+                                                          false);
 
   std::vector<Node *> new_on_plane_nodes;
   // Cut the TET4 Elements
@@ -131,7 +131,7 @@ CutMeshByPlaneGenerator::generate()
     mesh.delete_elem(*elem_it);
 
   mesh.contract();
-  mesh.prepare_for_use();
+  mesh.set_isnt_prepared();
   return std::move(_input);
 }
 
@@ -170,7 +170,7 @@ CutMeshByPlaneGenerator::pointPairPlaneInterception(const Point & point1,
 Node *
 CutMeshByPlaneGenerator::nonDuplicateNodeCreator(ReplicatedMesh & mesh,
                                                  std::vector<Node *> & new_on_plane_nodes,
-                                                 const Point new_point)
+                                                 const Point & new_point)
 {
   for (const auto & new_on_plane_node : new_on_plane_nodes)
   {
@@ -199,7 +199,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
   // need to be assigned the same boundary id
   std::vector<Point> elem_side_normal_list;
   elem_side_normal_list.resize(4);
-  for (unsigned int i = 0; i < 4; i++)
+  for (const auto i : make_range(4))
   {
     auto elem_side = mesh.elem_ptr(elem_id)->side_ptr(i);
     elem_side_normal_list[i] = (*elem_side->node_ptr(1) - *elem_side->node_ptr(0))
@@ -209,7 +209,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
 
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(4);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -233,7 +233,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
     else
       tet4_nodes_inside_plane.push_back(tet4_nodes[i]);
   }
-  std::vector<Elem *> elems_Tet4;
+  std::vector<Elem *> elems_tet4;
   bool new_elements_created(false);
   // No cutting needed if no nodes are outside the plane
   if (tet4_nodes_outside_plane.size() == 0)
@@ -241,7 +241,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
     if (tet4_nodes_on_plane.size() == 3)
     {
       // Record the element for future cross section boundary assignment
-      elems_Tet4.push_back(mesh.elem_ptr(elem_id));
+      elems_tet4.push_back(mesh.elem_ptr(elem_id));
     }
   }
   // Remove the element if all the nodes are outside the plane
@@ -271,12 +271,13 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
             pointPairPlaneInterception(
                 *tet4_node_outside_plane, *tet4_nodes_inside_plane[0], plane_point, plane_normal)));
       }
-      elems_Tet4.push_back(mesh.add_elem(new Tet4));
-      elems_Tet4.back()->set_node(0) = tet4_nodes_inside_plane[0];
-      elems_Tet4.back()->set_node(1) = new_plane_nodes[0];
-      elems_Tet4.back()->set_node(2) = new_plane_nodes[1];
-      elems_Tet4.back()->set_node(3) = new_plane_nodes[2];
-      elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+      auto new_elem_tet4 = std::make_unique<Tet4>();
+      new_elem_tet4->set_node(0) = tet4_nodes_inside_plane[0];
+      new_elem_tet4->set_node(1) = new_plane_nodes[0];
+      new_elem_tet4->set_node(2) = new_plane_nodes[1];
+      new_elem_tet4->set_node(3) = new_plane_nodes[2];
+      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+      elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 2)
     {
@@ -300,17 +301,18 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
                                              new_plane_nodes[2],
                                              new_plane_nodes[0]};
       std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-      auto optimized_node_list =
-          MooseMeshUtils::prismNodeOptimizer(new_elems_nodes, rotated_tet_face_indices);
+      auto optimized_node_list = MooseMeshElementConversionUtils::prismNodesToTetNodesDeterminer(
+          new_elems_nodes, rotated_tet_face_indices);
 
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
-        elems_Tet4.push_back(mesh.add_elem(new Tet4));
-        elems_Tet4.back()->set_node(0) = optimized_node_list[i][0];
-        elems_Tet4.back()->set_node(1) = optimized_node_list[i][1];
-        elems_Tet4.back()->set_node(2) = optimized_node_list[i][2];
-        elems_Tet4.back()->set_node(3) = optimized_node_list[i][3];
-        elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+        auto new_elem_tet4 = std::make_unique<Tet4>();
+        new_elem_tet4->set_node(0) = optimized_node_list[i][0];
+        new_elem_tet4->set_node(1) = optimized_node_list[i][1];
+        new_elem_tet4->set_node(2) = optimized_node_list[i][2];
+        new_elem_tet4->set_node(3) = optimized_node_list[i][3];
+        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+        elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
     else if (tet4_nodes_inside_plane.size() == 3 && tet4_nodes_outside_plane.size() == 1)
@@ -332,17 +334,18 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
                                              new_plane_nodes[1],
                                              new_plane_nodes[2]};
       std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-      auto optimized_node_list =
-          MooseMeshUtils::prismNodeOptimizer(new_elems_nodes, rotated_tet_face_indices);
+      auto optimized_node_list = MooseMeshElementConversionUtils::prismNodesToTetNodesDeterminer(
+          new_elems_nodes, rotated_tet_face_indices);
 
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
-        elems_Tet4.push_back(mesh.add_elem(new Tet4));
-        elems_Tet4.back()->set_node(0) = optimized_node_list[i][0];
-        elems_Tet4.back()->set_node(1) = optimized_node_list[i][1];
-        elems_Tet4.back()->set_node(2) = optimized_node_list[i][2];
-        elems_Tet4.back()->set_node(3) = optimized_node_list[i][3];
-        elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+        auto new_elem_tet4 = std::make_unique<Tet4>();
+        new_elem_tet4->set_node(0) = optimized_node_list[i][0];
+        new_elem_tet4->set_node(1) = optimized_node_list[i][1];
+        new_elem_tet4->set_node(2) = optimized_node_list[i][2];
+        new_elem_tet4->set_node(3) = optimized_node_list[i][3];
+        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+        elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
     else if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 1)
@@ -355,12 +358,13 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
                                                              plane_point,
                                                              plane_normal));
       // A smaller Tet4 is created, this solution is unique
-      elems_Tet4.push_back(mesh.add_elem(new Tet4));
-      elems_Tet4.back()->set_node(0) = new_plane_node;
-      elems_Tet4.back()->set_node(1) = tet4_nodes_on_plane[0];
-      elems_Tet4.back()->set_node(2) = tet4_nodes_on_plane[1];
-      elems_Tet4.back()->set_node(3) = tet4_nodes_inside_plane[0];
-      elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+      auto new_elem_tet4 = std::make_unique<Tet4>();
+      new_elem_tet4->set_node(0) = new_plane_node;
+      new_elem_tet4->set_node(1) = tet4_nodes_on_plane[0];
+      new_elem_tet4->set_node(2) = tet4_nodes_on_plane[1];
+      new_elem_tet4->set_node(3) = tet4_nodes_inside_plane[0];
+      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+      elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 2)
     {
@@ -374,12 +378,13 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
             pointPairPlaneInterception(
                 *tet4_node_outside_plane, *tet4_nodes_inside_plane[0], plane_point, plane_normal)));
       }
-      elems_Tet4.push_back(mesh.add_elem(new Tet4));
-      elems_Tet4.back()->set_node(0) = new_plane_nodes[0];
-      elems_Tet4.back()->set_node(1) = new_plane_nodes[1];
-      elems_Tet4.back()->set_node(2) = tet4_nodes_on_plane[0];
-      elems_Tet4.back()->set_node(3) = tet4_nodes_inside_plane[0];
-      elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+      auto new_elem_tet4 = std::make_unique<Tet4>();
+      new_elem_tet4->set_node(0) = new_plane_nodes[0];
+      new_elem_tet4->set_node(1) = new_plane_nodes[1];
+      new_elem_tet4->set_node(2) = tet4_nodes_on_plane[0];
+      new_elem_tet4->set_node(3) = tet4_nodes_inside_plane[0];
+      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+      elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 1)
     {
@@ -399,17 +404,18 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
                                              new_plane_nodes[0],
                                              tet4_nodes_on_plane[0]};
       std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-      auto optimized_node_list =
-          MooseMeshUtils::pyramidNodeOptimizer(new_elems_nodes, rotated_tet_face_indices);
+      auto optimized_node_list = MooseMeshElementConversionUtils::pyramidNodesToTetNodesDeterminer(
+          new_elems_nodes, rotated_tet_face_indices);
 
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
-        elems_Tet4.push_back(mesh.add_elem(new Tet4));
-        elems_Tet4.back()->set_node(0) = optimized_node_list[i][0];
-        elems_Tet4.back()->set_node(1) = optimized_node_list[i][1];
-        elems_Tet4.back()->set_node(2) = optimized_node_list[i][2];
-        elems_Tet4.back()->set_node(3) = optimized_node_list[i][3];
-        elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+        auto new_elem_tet4 = std::make_unique<Tet4>();
+        new_elem_tet4->set_node(0) = optimized_node_list[i][0];
+        new_elem_tet4->set_node(1) = optimized_node_list[i][1];
+        new_elem_tet4->set_node(2) = optimized_node_list[i][2];
+        new_elem_tet4->set_node(3) = optimized_node_list[i][3];
+        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+        elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
     else
@@ -418,23 +424,23 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
     mesh.elem_ptr(elem_id)->subdomain_id() = block_id_to_remove;
   }
 
-  for (auto & elem_Tet4 : elems_Tet4)
+  for (auto & elem_tet4 : elems_tet4)
   {
     if (new_elements_created)
     {
-      if (elem_Tet4->volume() < 0.0)
+      if (elem_tet4->volume() < 0.0)
       {
-        Node * temp = elem_Tet4->node_ptr(0);
-        elem_Tet4->set_node(0) = elem_Tet4->node_ptr(1);
-        elem_Tet4->set_node(1) = temp;
+        Node * temp = elem_tet4->node_ptr(0);
+        elem_tet4->set_node(0) = elem_tet4->node_ptr(1);
+        elem_tet4->set_node(1) = temp;
       }
     }
     // Find the boundary id of the new element
     for (unsigned int i = 0; i < 4; i++)
     {
       const Point side_normal =
-          (*elem_Tet4->side_ptr(i)->node_ptr(1) - *elem_Tet4->side_ptr(i)->node_ptr(0))
-              .cross(*elem_Tet4->side_ptr(i)->node_ptr(2) - *elem_Tet4->side_ptr(i)->node_ptr(1))
+          (*elem_tet4->side_ptr(i)->node_ptr(1) - *elem_tet4->side_ptr(i)->node_ptr(0))
+              .cross(*elem_tet4->side_ptr(i)->node_ptr(2) - *elem_tet4->side_ptr(i)->node_ptr(1))
               .unit();
       for (unsigned int j = 0; j < 4; j++)
       {
@@ -444,14 +450,14 @@ CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
           {
             for (const auto & side_info : elem_side_list[j])
             {
-              boundary_info.add_side(elem_Tet4, i, side_info);
+              boundary_info.add_side(elem_tet4, i, side_info);
             }
           }
         }
       }
       if (MooseUtils::absoluteFuzzyEqual(side_normal * _plane_normal, 1.0))
       {
-        boundary_info.add_side(elem_Tet4, i, _cut_face_id);
+        boundary_info.add_side(elem_tet4, i, _cut_face_id);
       }
     }
   }

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/TetrahedralElementsConvertor.md'
+  design = 'meshgenerators/ElementsToTetrahedronsConverter.md'
   issues = '#26579'
   [test]
     requirement = "The system shall be able to "
@@ -9,7 +9,6 @@
       exodiff = 'simple_hex_convert_in.e'
       cli_args = '--mesh-only simple_hex_convert_in.e 
                   Mesh/gmg/elem_type=HEX8'
-      allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='convert a 3D mesh consisting of only HEX8 elements.'
@@ -20,7 +19,6 @@
       exodiff = 'simple_prism_convert_in.e'
       cli_args = '--mesh-only simple_prism_convert_in.e 
                   Mesh/gmg/elem_type=PRISM6'
-      allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='convert a 3D mesh consisting of only PRISM6 elements.'
@@ -31,7 +29,6 @@
       exodiff = 'simple_pyramid_convert_in.e'
       cli_args = '--mesh-only simple_pyramid_convert_in.e 
                   Mesh/gmg/elem_type=PYRAMID5'
-      allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='convert a 3D mesh consisting of only PYRAMID5 elements.'
@@ -42,7 +39,6 @@
       exodiff = 'simple_tet_convert_in.e'
       cli_args = '--mesh-only simple_tet_convert_in.e 
                   Mesh/gmg/elem_type=TET4'
-      allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='convert a 3D mesh consisting of only TET4 elements.'
@@ -52,7 +48,6 @@
       input = 'hex_prism_convert.i'
       exodiff = 'hex_prism_convert_in.e'
       cli_args = '--mesh-only'
-      allow_warnings = true
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='convert a 3D mesh with mixed element types.'
