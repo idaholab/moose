@@ -15,11 +15,11 @@
 namespace MeshCoarseningUtils
 {
 bool
-getFineElementFromInteriorNode(const libMesh::Node & interior_node,
-                               const libMesh::Node & reference_node,
-                               const libMesh::Elem & fine_elem,
-                               std::vector<const libMesh::Node *> & tentative_coarse_nodes,
-                               std::set<const libMesh::Elem *> & fine_elements)
+getFineElementsFromInteriorNode(const libMesh::Node & interior_node,
+                                const libMesh::Node & reference_node,
+                                const libMesh::Elem & fine_elem,
+                                std::vector<const libMesh::Node *> & tentative_coarse_nodes,
+                                std::set<const libMesh::Elem *> & fine_elements)
 {
   const auto elem_type = fine_elem.type();
 

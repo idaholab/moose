@@ -17,16 +17,18 @@ namespace MeshCoarseningUtils
  * Utility routine to gather vertex nodes for, and elements contained in, for a coarse QUAD or HEX
  * element
  * @param interior_node the node inside the coarse element
+ * @param reference_node another node used to order the vertex nodes in a clockwise order for QUAD
+ * elements
  * @param elem an element containing the node. Its neighbor lists must be up to date so it
  *        should come from a prepared mesh
  * @param tentative_coarse_nodes nodes to be used to form the coarse element
  * @param fine_elements fine elements that are inside the coarse element
  */
-bool getFineElementFromInteriorNode(const libMesh::Node & interior_node,
-                                    const libMesh::Node & reference_node,
-                                    const libMesh::Elem & elem,
-                                    std::vector<const libMesh::Node *> & tentative_coarse_nodes,
-                                    std::set<const libMesh::Elem *> & fine_elements);
+bool getFineElementsFromInteriorNode(const libMesh::Node & interior_node,
+                                     const libMesh::Node & reference_node,
+                                     const libMesh::Elem & elem,
+                                     std::vector<const libMesh::Node *> & tentative_coarse_nodes,
+                                     std::set<const libMesh::Elem *> & fine_elements);
 
 /**
  * Utility routine to re-order a vector of nodes so that they can form a valid quad element
@@ -44,8 +46,8 @@ void reorderNodes(std::vector<const libMesh::Node *> & nodes,
  * Utility routine to get the index of the node opposite, in the element, to the node
  * of interest
  * @param elem_type type of the element
- * @param node_index element index of the node of interest
- * @return element index of the opposite node, with regards to the element
+ * @param node_index local index of the node of interest
+ * @return local index of the opposite node, with regards to the element
  */
 unsigned int getOppositeNodeIndex(libMesh::ElemType elem_type, unsigned int node_index);
 }

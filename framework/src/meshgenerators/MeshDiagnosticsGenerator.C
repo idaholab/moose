@@ -681,7 +681,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
 
       if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
       {
-        const auto success = MeshCoarseningUtils::getFineElementFromInteriorNode(
+        const auto success = MeshCoarseningUtils::getFineElementsFromInteriorNode(
             *interior_node, *node, *elem, tentative_coarse_nodes, fine_elements);
         if (!success)
           continue;

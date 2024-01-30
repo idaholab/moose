@@ -90,7 +90,7 @@ CoarsenBlockGenerator::generate()
 
   // Take ownership of the mesh
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  if (!mesh->is_replicated())
+  if (!mesh->is_serial())
     paramError("input", "Input mesh must not be distributed");
 
   // Find the element to start from
@@ -131,7 +131,7 @@ std::unique_ptr<MeshBase>
 CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & block_ids,
                                         std::unique_ptr<MeshBase> & mesh,
                                         const std::vector<unsigned int> & coarsening,
-                                        unsigned int max,
+                                        const unsigned int max,
                                         unsigned int coarse_step)
 {
   if (coarse_step == max)
@@ -176,12 +176,13 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
       const auto sorting =
           (a.first->vertex_average() - b.first->vertex_average()) * sorting_direction;
       if (MooseUtils::absoluteFuzzyGreaterThan(sorting, 0))
-        return 1;
+        return true;
       else if (MooseUtils::absoluteFuzzyEqual(sorting, 0) &&
                MooseUtils::absoluteFuzzyGreaterThan((*a.second - *b.second) * sorting_direction, 0))
-        return 1;
+        return true;
       else
-        return -1;
+        // Sorting direction is orthogonal to the two pairs, rely on element ids
+        return a.first->id() > b.first->id();
     };
 
     // This set will keep track of all the 'fine elem' + 'coarse element interior node' pairs
@@ -223,7 +224,7 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
       // Get the nodes to build a coarse element
       std::vector<const Node *> tentative_coarse_nodes;
       std::set<const Elem *> fine_elements_const;
-      bool success = MeshCoarseningUtils::getFineElementFromInteriorNode(
+      bool success = MeshCoarseningUtils::getFineElementsFromInteriorNode(
           *interior_node, *ref_node, *current_elem, tentative_coarse_nodes, fine_elements_const);
 
       // For example, not enough fine elements around the node to build a coarse element
