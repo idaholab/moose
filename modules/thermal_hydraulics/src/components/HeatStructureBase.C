@@ -88,4 +88,30 @@ HeatStructureBase::addMooseObjects()
         comp->connectObject(rho_fn->parameters(), rho_fn->name(), "rho", "value");
     }
   }
+
+  if (isParamValid("solid_properties"))
+  {
+    const auto sp_names = getParam<std::vector<UserObjectName>>("solid_properties");
+    const auto T_ref = getParam<std::vector<Real>>("solid_properties_T_ref");
+    for (unsigned int i = 0; i < sp_names.size(); i++)
+      addConstantDensitySolidPropertiesMaterial(sp_names[i], T_ref[i], i);
+  }
+}
+
+void
+HeatStructureBase::addConstantDensitySolidPropertiesMaterial(const UserObjectName & sp_name,
+                                                             const Real & T_ref,
+                                                             unsigned int i_region) const
+{
+  const auto blocks = getSubdomainNames();
+  const auto region_names = getNames();
+
+  const std::string class_name = "ADConstantDensityThermalSolidPropertiesMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = {blocks[i_region]};
+  params.set<std::vector<VariableName>>("temperature") = {HeatConductionModel::TEMPERATURE};
+  params.set<UserObjectName>("sp") = sp_name;
+  params.set<Real>("T_ref") = T_ref;
+  getTHMProblem().addMaterial(
+      class_name, genName(name(), class_name, region_names[i_region]), params);
 }

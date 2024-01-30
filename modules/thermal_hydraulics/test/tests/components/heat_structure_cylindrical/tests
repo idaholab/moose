@@ -20,6 +20,14 @@
       prereq = 'physics/by_hsmaterials'
       detail = 'in a transient problem, with properties defined by Materials.'
     []
+    [by_solid_properties]
+      type = Exodiff
+      input = 'by_solid_properties.i'
+      exodiff = 'transient.e'
+      custom_cmp = 'transient.exodiff'
+      prereq = 'physics/by_materials'
+      detail = 'in a transient problem, with properties defined by SolidProperties.'
+    []
     [steady]
       type = Exodiff
       input = 'steady.i'

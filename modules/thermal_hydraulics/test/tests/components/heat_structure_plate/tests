@@ -18,5 +18,12 @@
       prereq = 'physics/by_hsmaterials'
       detail = 'with properties defined by Materials.'
     []
+    [by_solid_properties]
+      type = Exodiff
+      input = 'by_solid_properties.i'
+      exodiff = 'transient.e'
+      prereq = 'physics/by_materials'
+      detail = 'with properties defined by SolidProperties.'
+    []
   []
 []
