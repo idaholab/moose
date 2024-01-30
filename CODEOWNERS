@@ -30,7 +30,7 @@
 /framework/*/materials/Material* @roystgnr @loganharbour @lindsayad
 /framework/*/materials/Parsed* @dschwen @lindsayad
 /framework/*/mesh @roystgnr @GiudGiud @lindsayad
-/framework/*/meshgenerators @roystgnr @GiudGiud @lindsayad
+/framework/*/meshgenerators @roystgnr @GiudGiud
 /framework/*/multiapps @GiudGiud @lindsayad
 /framework/*/loops @GiudGiud @lindsayad
 /framework/*/outputs @roystgnr @lindsayad
