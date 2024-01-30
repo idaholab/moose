@@ -7,6 +7,7 @@
     test_case = TestDiffusion1D
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-diffusion-2d-orthogonal]
     type = PythonUnitTest
@@ -14,6 +15,7 @@
     test_case = TestDiffusion2DOrthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-diffusion-2d-nonorthogonal]
     type = PythonUnitTest
@@ -21,6 +23,7 @@
     test_case = TestDiffusion2DNonorthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-diffusion-2d-rz]
     type = PythonUnitTest
@@ -28,5 +31,6 @@
     test_case = TestDiffusion2DRZ
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on an orthogonal mesh in cylindrical coordinate system.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
 []

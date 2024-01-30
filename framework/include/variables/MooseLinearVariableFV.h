@@ -36,8 +36,8 @@ template <typename>
 class NumericVector;
 }
 
-/// This class provides variable solution values for other classes/objects to
-/// bind to when looping over faces or elements.
+/// This class provides variable solution interface for linear
+/// finite volume problems.
 /// This class is designed to store gradient information when enabled.
 template <typename OutputType>
 class MooseLinearVariableFV : public MooseVariableField<OutputType>
@@ -87,69 +87,49 @@ public:
   bool isArray() const override;
   bool isVector() const override;
 
+  /**
+   * Switch to request cell gradient computations.
+   */
   void computeCellGradients() { _needs_cell_gradients = true; }
-  bool needsCellGradients() const { return _needs_cell_gradients; }
-
-  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() { return _grad_cache; }
 
   /**
-   * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
-   * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
-   * some approximation for the boundary face value using the adjacent cell centroid information. In
-   * the base implementation we only inspect the face information object for whether we should
-   * perform extrapolation. However, derived classes may allow discontinuities between + and - side
-   * face values, e.g. one side may have a Dirichlet condition and the other side may perform
-   * extrapolation to determine its value
-   * @param fi The face information object
-   * @param elem An element that can be used to indicate sidedness of the face
-   * @param state The state at which to determine whether the face is extrapolated or not
-   * @return Whether the potentially sided (as indicated by \p elem) \p fi is an extrapolated
-   * boundary face for this variable
+   * Check if cell gradient computations were requested for this variable.
    */
+  bool needsCellGradients() const { return _needs_cell_gradients; }
+
+  /**
+   * Reference to the gradient container.
+   */
+  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() { return _grad_cache; }
+
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                           const Elem * elem,
                                           const Moose::StateArg & state) const override;
 
-  virtual const VectorValue<Real> & gradSln(const ElemInfo * const elem_info) const;
-
-  virtual VectorValue<Real> gradSln(const FaceInfo & fi) const;
+  /**
+   * Get the variable gradient at a cell center.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   */
+  const VectorValue<Real> & gradSln(const ElemInfo * const elem_info) const;
 
   /**
-   * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
-   * uncorrected gradient is a simple linear interpolation between cell gradients computed at the
-   * centers of the two neighboring cells. "Correcting" the face gradient involves weighting the
-   * gradient stencil more heavily on the solution values on the face-neighbor cells than the linear
-   * interpolation process does. This is commonly known as a cross-diffusion correction. Correction
-   * is done in \p adGradSln(const FaceInfo & fi)
-   * @param face The face for which to retrieve the gradient
+   * Compute interpolated gradient on the provided face.
+   * @param face The face for which to retrieve the gradient.
    * @param state State argument which describes at what time / solution iteration  state we want to
    * evaluate the variable
-   * @param correct_skewness Whether to perform skew corrections
    */
-  virtual VectorValue<Real> uncorrectedAdGradSln(const FaceInfo & fi,
-                                                 const StateArg & state,
-                                                 const bool correct_skewness = false) const;
+  VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
 
   virtual void initialSetup() override;
 
   /**
    * Get the solution value for the provided element and seed the derivative for the corresponding
    * dof index
-   * @param elem The element to retrieive the solution value for
+   * @param elem_info The element to retrieive the solution value for
    * @param state State argument which describes at what time / solution iteration  state we want to
    * evaluate the variable
    */
   Real getElemValue(const ElemInfo * elem_info, const StateArg & state) const;
-
-  /**
-   * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
-   * expansion we'll simply return the ajacent element centroid value. If we're doing two terms,
-   * then we will compute the gradient if necessary to help us interpolate from the element centroid
-   * value to the face
-   */
-  Real getBoundaryFaceValue(const FaceInfo & fi,
-                            const StateArg & state,
-                            bool correct_skewness = false) const;
 
   /**
    * Get the boundary condition object which corresponds to the given boundary ID
@@ -181,9 +161,10 @@ private:
 
 public:
   /*---------------------------------------------------------------------------
-   The overridden functions below are necessary to ensure that this variable can still be used with
-  most interfaces but should not be used due to the fact that they are FEM assembly specific
-  ---------------------------------------------------------------------------*/
+   * The overridden functions below are necessary to ensure that this variable can still be used
+   * with most interfaces but should not be used due to the fact that they are FEM and Newton method
+   * assembly specific
+   * ---------------------------------------------------------------------------*/
 
   virtual const std::vector<dof_id_type> & dofIndicesLower() const override final
   {
@@ -592,10 +573,6 @@ private:
   /// cannot safely dereference at that time
   const NumericVector<Number> * const & _solution;
 
-  /// A member used to help determine when we can return cached data as opposed to computing new
-  /// data
-  mutable const Elem * _prev_elem;
-
   /// Map for easily accessing the boundary conditions based on the boundary IDs.
   /// We assume that each boundary has one boundary condition only.
   std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
@@ -603,11 +580,13 @@ private:
 protected:
   usingMooseVariableBaseMembers;
 
+  /// Boolean to check if this variable needs gradient computations.
   bool _needs_cell_gradients;
 
   /// A cache for storing gradients on elements
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_cache;
 
+  /// Temporary storage for the cell gradient to avoid unnecessary allocations.
   mutable RealVectorValue _cell_gradient;
 
   friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
@@ -667,10 +646,10 @@ MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg,
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const FaceArg & face,
-                                                    const StateArg & /*state*/) const
+                                                    const StateArg & state) const
 {
   mooseAssert(face.fi, "We must have a non-null face information");
-  return gradSln(*face.fi);
+  return gradSln(*face.fi, state);
 }
 
 template <>

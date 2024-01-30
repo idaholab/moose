@@ -7,6 +7,7 @@
     test_case = TestAdvection1DUpwind
     requirement = 'The system shall display first-order convergence for advection problems with upwind interpolation solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-1d-linear]
     type = PythonUnitTest
@@ -14,6 +15,7 @@
     test_case = TestAdvection1DLinear
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-2d-upwind]
     type = PythonUnitTest
@@ -21,6 +23,7 @@
     test_case = TestAdvection2DUpwind
     requirement = 'The system shall display first-order convergence for advection problems with upwind interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-2d-linear]
     type = PythonUnitTest
@@ -28,6 +31,7 @@
     test_case = TestAdvection2DLinear
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-2d-upwind-tris]
     type = PythonUnitTest
@@ -35,6 +39,7 @@
     test_case = TestAdvection2DUpwindTris
     requirement = 'The system shall display first-order convergence for advection problems with upwind interpolation solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-2d-linear-tris]
     type = PythonUnitTest
@@ -43,6 +48,7 @@
     requirement = 'The system shall display first-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     # This is first order in the original implementation as well. At some point somebody could take a look at the error terms.
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [mms-2d-rz]
     type = PythonUnitTest
@@ -50,5 +56,6 @@
     test_case = TestAdvection2DRZ
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh in cylindrical coordinate system.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
 []

@@ -675,7 +675,6 @@ public:
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
-
   /**
    * Get non-constant reference to a linear system
    * @param sys_num The number of the linear system
@@ -1397,7 +1396,8 @@ public:
    * Compute the right hand side of the current linear system for given vector tags.
    * @param soln The solution which should be used to compute the right hand side
    * @param rhs The vector which should hold the right hand side
-   * @param tags The vector tag IDs which should be used to select terms that contribute to the right hand side
+   * @param tags The vector tag IDs which should be used to select terms that contribute to the
+   * right hand side
    */
   virtual void computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
                                                     NumericVector<Number> & rhs,
@@ -1407,7 +1407,8 @@ public:
    * Compute the system matrix of the current linear system for given matrix tags.
    * @param soln The solution which should be used to compute the matrix
    * @param system_matrix The sparse matrix which should hold the system matrix
-   * @param tags The matrix tag IDs which should be used to select terms that contribute to the matrix
+   * @param tags The matrix tag IDs which should be used to select terms that contribute to the
+   * matrix
    */
   virtual void computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
                                              SparseMatrix<Number> & system_matrix,

@@ -10,40 +10,13 @@
 #pragma once
 
 #include "SystemBase.h"
-// #include "ConstraintWarehouse.h"
-#include "MooseObjectWarehouse.h"
-#include "MooseObjectTagWarehouse.h"
 #include "PerfGraphInterface.h"
-// #include "ComputeMortarFunctor.h"
-// #include "MooseHashing.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/linear_implicit_system.h"
 #include "libmesh/linear_solver.h"
 
-// Forward declarations
-// class FEProblemBase;
-// class MoosePreconditioner;
-// class JacobianBlock;
-// class TimeIntegrator;
-// class Predictor;
-// class ElementDamper;
-// class NodalDamper;
-// class GeneralDamper;
-// class GeometricSearchData;
-// class IntegratedBCBase;
-// class NodalBCBase;
-// class DirichletBCBase;
-// class ADDirichletBCBase;
 class LinearFVKernel;
-// class InterfaceKernelBase;
-// class ScalarKernelBase;
-// class DiracKernelBase;
-// class NodalKernelBase;
-// class Split;
-// class KernelBase;
-// class BoundaryCondition;
-// class ResidualObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -66,25 +39,8 @@ public:
   virtual ~LinearSystem();
 
   virtual void init() override;
-
   virtual void solve() override;
   virtual void restoreSolutions() override;
-
-  /**
-   * Quit the current solve as soon as possible.
-   */
-  virtual void stopSolve() {}
-
-  virtual LinearSolver<Number> * linearSolver(const unsigned int /*sys_num*/) { return nullptr; }
-
-  // virtual KSP getKSP() { return KSP; }
-
-  // Setup Functions ////
-  virtual void initialSetup() override;
-  virtual void timestepSetup() override;
-  virtual void customSetup(const ExecFlagType & exec_type) override;
-  virtual void residualSetup() override {}
-  virtual void jacobianSetup() override {}
 
   /**
    * Returns the convergence state
@@ -92,56 +48,31 @@ public:
    */
   virtual bool converged() { return false; }
 
-  /**
-   * Add a time integrator
-   * @param type Type of the integrator
-   * @param name The name of the integrator
-   * @param parameters Integrator params
-   */
   void addTimeIntegrator(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
-  void setInitialSolution();
-
   /**
-   * Computes right hand side for a given tag
-   * @param rhs Right hand side is formed in here
-   * @param tag_id tag of kernels for which the residual is to be computed.
-   */
-  void computeRightHandSideTag(NumericVector<Number> & rhs, TagID tag_id);
-
-  /**
-   * Form multiple tag-associated right hand side vectors for all the given tags
+   * Compute the right hand side of the system for given tags.
+   * @param tags The IDs of the vector tags whose contribution should be included
    */
   void computeRightHandSideTags(const std::set<TagID> & tags);
 
+  /**
+   * Compute the right hand side and the system matrix of the system for given tags.
+   * @param vector_tags The IDs of the vector tags whose right hand side contribution should be
+   * included
+   * @param matrix_tags The IDs of the matrix tags whose matrix contribution should be included
+   */
   void computeLinearSystemTags(const std::set<TagID> & vector_tags,
                                const std::set<TagID> & matrix_tags);
 
-  void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                   const std::set<TagID> & matrix_tags);
-
   /**
-   * Form a right hand side vector for a given tag
-   */
-  void computeRightHandSide(NumericVector<Number> & rhs, TagID tag_id);
-
-  /**
-   * Computes multiple (tag associated) system matrices
+   * Compute the system matrix of the system for given tags.
+   * @param matrix_tags The IDs of the matrix tags whose contribution should be included
    */
   void computeSystemMatrixTags(const std::set<TagID> & tags);
-
-  /**
-   * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
-   */
-  void computeSystemMatrix(SparseMatrix<Number> & matrix, const std::set<TagID> & tags);
-
-  /**
-   * Take all tags in the system, and form a matrix for all tags in the system
-   */
-  void computeSystemMatrix(SparseMatrix<Number> & matrix);
 
   /**
    * Return a reference to the stored linear implicit system
@@ -149,16 +80,10 @@ public:
   LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
 
   /**
-   * Called at the beginning of the time step
+   * Set the solution to a given vector.
+   * @param soln The vector which should be treated as the solution.
    */
-  void onTimestepBegin();
-
   virtual void setSolution(const NumericVector<Number> & soln);
-
-  /**
-   * Update active objects of Warehouses owned by LinearSystem
-   */
-  void updateActive(THREAD_ID tid);
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -169,11 +94,6 @@ public:
    * Return a numeric vector that is associated with the nontime tag.
    */
   NumericVector<Number> & getRightHandSideNonTimeVector();
-
-  /**
-   * Return a right hand side vector that is associated with the residual tag.
-   */
-  NumericVector<Number> & rightHandSideVector(TagID tag);
 
   const NumericVector<Number> * const & currentSolution() const override
   {
@@ -194,52 +114,107 @@ public:
    */
   unsigned int nLinearIterations() const { return _n_linear_iters; }
 
+  /**
+   * Set the side on which the preconditioner is applied to.
+   * @param pcs The required preconditioning side
+   */
   void setPCSide(MooseEnum pcs);
 
+  /**
+   * Get the current preconditioner side.
+   */
   Moose::PCSideType getPCSide() { return _pc_side; }
 
+  /**
+   * Set the norm in which the linear convergence will be measured.
+   * @param kspnorm The required norm
+   */
   void setMooseKSPNormType(MooseEnum kspnorm);
 
+  /**
+   * Get the norm in which the linear convergence is measured.
+   */
   Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
+  ///@{
+  /// Accersors of important tag IDs
   TagID rightHandSideTimeVectorTag() const { return _rhs_time_tag; }
   TagID rightHandSideNonTimeVectorTag() const { return _rhs_non_time_tag; }
   TagID rightHandSideVectorTag() const { return _rhs_tag; }
   TagID systemMatrixTag() const override { return _system_matrix_tag; }
+  ///@}
 
   // non-const getters
-  NumericVector<Number> * solutionUDot() override { return nullptr; }
-  NumericVector<Number> * solutionUDotOld() override { return nullptr; }
-  NumericVector<Number> * solutionUDotDot() override { return nullptr; }
-  NumericVector<Number> * solutionUDotDotOld() override { return nullptr; }
+  NumericVector<Number> * solutionUDot() override
+  {
+    mooseError("solutionUDot not implemented in LinearSystem!");
+  }
+  NumericVector<Number> * solutionUDotOld() override
+  {
+    mooseError("solutionUDotOld not implemented in LinearSystem!");
+  }
+  NumericVector<Number> * solutionUDotDot() override
+  {
+    mooseError(" solutionUDotDot not implemented in LinearSystem!");
+  }
+  NumericVector<Number> * solutionUDotDotOld() override
+  {
+    mooseError("solutionUDotDotOld not implemented in LinearSystem!");
+  }
   // const getters
-  const NumericVector<Number> * solutionUDot() const override { return nullptr; }
-  const NumericVector<Number> * solutionUDotOld() const override { return nullptr; }
-  const NumericVector<Number> * solutionUDotDot() const override { return nullptr; }
-  const NumericVector<Number> * solutionUDotDotOld() const override { return nullptr; }
+  const NumericVector<Number> * solutionUDot() const override
+  {
+    mooseError("solutionUDot not implemented in LinearSystem!");
+  }
+  const NumericVector<Number> * solutionUDotOld() const override
+  {
+    mooseError("solutionUDotOld not implemented in LinearSystem!");
+  }
+  const NumericVector<Number> * solutionUDotDot() const override
+  {
+    mooseError(" solutionUDotDot not implemented in LinearSystem!");
+  }
+  const NumericVector<Number> * solutionUDotDotOld() const override
+  {
+    mooseError("solutionUDotDotOld not implemented in LinearSystem!");
+  }
 
-  // serialization
+  /// Serialize the distributed solution vector
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
 
+  /// Reference to the problem
   FEProblemBase & _fe_problem;
+
+  /// Base class reference to the libmesh system
   System & _sys;
+
+  /// The linear iterations needed for convergence
   unsigned int _current_l_its;
 
 protected:
   /**
-   * Compute the right hand side for a given tag
-   * @param tags The tags of kernels for which the residual is to be computed.
+   * Compute the right hand side for given tags.
+   * @param tags The tags of kernels for which the right hand side is to be computed.
    */
   void computeRightHandSideInternal(const std::set<TagID> & tags);
 
   /**
-   * Form multiple matrices for all the tags. Users should not call this func directly.
+   * Compute the system matrix for given tags.
+   * @param tags The tags of kernels for which the matrix is to be computed.
    */
   void computeSystemMatrixInternal(const std::set<TagID> & tags);
+
+  /**
+   * Compute the right hand side and system matrix for given tags
+   * @param vector_tags The tags of kernels for which the right hand side is to be computed.
+   * @param matrix_tags The tags of kernels for which the system matrix is to be computed.
+   */
+  void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
+                                   const std::set<TagID> & matrix_tags);
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 
@@ -261,10 +236,10 @@ protected:
   /// Tag for non-time contribution rhs
   TagID _rhs_non_time_tag;
 
-  /// residual vector for non-time contributions
+  /// right hand side vector for non-time contributions
   NumericVector<Number> * _rhs_non_time;
 
-  /// Used for the residual vector from PETSc
+  /// Used for the right hand side vector from PETSc
   TagID _rhs_tag;
 
   /// Tag for non-time contribution Jacobian
@@ -278,10 +253,13 @@ protected:
   /// KSP norm type
   Moose::MooseKSPNormType _ksp_norm;
 
+  /// Number of linear iterations
   unsigned int _n_linear_iters;
 
+  /// The final linear residual
   Real _final_linear_residual;
 
+  /// Base class reference to the linear implicit system in libmesh
   LinearImplicitSystem & _linear_implicit_system;
 
 private:
@@ -292,5 +270,6 @@ private:
   /// serialized solution is not needed
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
+  /// Boolean to see if solution is invalid
   bool _solution_is_invalid;
 };

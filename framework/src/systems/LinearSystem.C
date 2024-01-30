@@ -11,78 +11,27 @@
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-#include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"
-#include "ThreadedElementLoop.h"
-#include "MaterialData.h"
-#include "ComputeResidualThread.h"
-#include "ComputeResidualAndJacobianThread.h"
-#include "ComputeFVFluxThread.h"
-#include "ComputeJacobianThread.h"
-#include "ComputeJacobianForScalingThread.h"
-#include "ComputeFullJacobianThread.h"
-#include "ComputeJacobianBlocksThread.h"
-#include "ComputeDiracThread.h"
-#include "ComputeElemDampingThread.h"
-#include "ComputeNodalDampingThread.h"
-#include "ComputeNodalKernelsThread.h"
-#include "ComputeNodalKernelBcsThread.h"
-#include "ComputeNodalKernelJacobiansThread.h"
-#include "ComputeNodalKernelBCJacobiansThread.h"
-#include "ComputeLinearFVElementalThread.h"
-#include "ComputeLinearFVFaceThread.h"
 #include "ComputeLinearFVGreenGaussGradientFaceThread.h"
 #include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
-#include "TimeKernel.h"
-#include "BoundaryCondition.h"
-#include "DirichletBCBase.h"
-#include "NodalBCBase.h"
-#include "IntegratedBCBase.h"
-#include "DGKernel.h"
-#include "InterfaceKernelBase.h"
-#include "ElementDamper.h"
-#include "NodalDamper.h"
-#include "GeneralDamper.h"
+#include "ComputeLinearFVElementalThread.h"
+#include "ComputeLinearFVFaceThread.h"
 #include "DisplacedProblem.h"
-#include "NearestNodeLocator.h"
-#include "PenetrationLocator.h"
-#include "NodalConstraint.h"
-#include "NodeFaceConstraint.h"
-#include "NodeElemConstraint.h"
-#include "MortarConstraint.h"
-#include "ElemElemConstraint.h"
-#include "ScalarKernelBase.h"
 #include "Parser.h"
-#include "Split.h"
-#include "FieldSplitPreconditioner.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
-#include "NodalKernelBase.h"
-#include "DiracKernelBase.h"
 #include "TimeIntegrator.h"
-#include "Predictor.h"
 #include "Assembly.h"
-#include "ElementPairLocator.h"
-#include "ODETimeKernel.h"
-#include "AllLocalDofIndicesThread.h"
 #include "FloatingPointExceptionGuard.h"
-#include "ADKernel.h"
-#include "ADDirichletBCBase.h"
 #include "Moose.h"
 #include "ConsoleStream.h"
 #include "MooseError.h"
-#include "FVElementalKernel.h"
 #include "LinearFVKernel.h"
-#include "FVScalarLagrangeMultiplierConstraint.h"
-#include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
-#include "FVFluxKernel.h"
-#include "FVScalarLagrangeMultiplierInterface.h"
 #include "UserObject.h"
-#include "OffDiagonalScalingMatrix.h"
+#include "SolutionInvalidity.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -103,8 +52,6 @@
 #include "libmesh/diagonal_matrix.h"
 
 #include <ios>
-
-#include "petscsnes.h"
 
 namespace Moose
 {
@@ -166,43 +113,11 @@ LinearSystem::restoreSolutions()
 }
 
 void
-LinearSystem::initialSetup()
+LinearSystem::addTimeIntegrator(const std::string & /*type*/,
+                                const std::string & /*name*/,
+                                InputParameters & /*parameters*/)
 {
-  TIME_SECTION("lInitialSetup", 2, "Setting Up Linear System");
-
-  SystemBase::initialSetup();
-
-  {
-    TIME_SECTION("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints");
-  }
-}
-
-void
-LinearSystem::timestepSetup()
-{
-  SystemBase::timestepSetup();
-}
-
-void
-LinearSystem::customSetup(const ExecFlagType & exec_type)
-{
-  SystemBase::customSetup(exec_type);
-}
-
-void
-LinearSystem::addTimeIntegrator(const std::string & type,
-                                const std::string & name,
-                                InputParameters & parameters)
-{
-  parameters.set<SystemBase *>("_sys") = this;
-
-  std::shared_ptr<TimeIntegrator> ti = _factory.create<TimeIntegrator>(type, name, parameters);
-  _time_integrator = ti;
-}
-
-void
-LinearSystem::computeRightHandSideTag(NumericVector<Number> & /*residual*/, TagID /*tag_id*/)
-{
+  mooseError("LinearSystem doesn ot support timeintegrators yet!");
 }
 
 void
@@ -242,8 +157,6 @@ LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
   parallel_object_only();
 
   TIME_SECTION("computeRightHandSideInternal", 3);
-
-  residualSetup();
 
   const auto vector_tag_data = _fe_problem.getVectorTags(tags);
 
@@ -337,8 +250,6 @@ LinearSystem::computeSystemMatrixInternal(const std::set<TagID> & tags)
     }
   }
 
-  jacobianSetup();
-
   PARALLEL_TRY
   {
     TIME_SECTION("LinearFVKernels_systemMatrix", 3 /*, "Computing LinearFVKernels"*/);
@@ -427,9 +338,6 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     }
   }
 
-  residualSetup();
-  jacobianSetup();
-
   // residual contributions from the domain
   PARALLEL_TRY
   {
@@ -478,16 +386,6 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
-void
-LinearSystem::onTimestepBegin()
-{
-}
-
-void
-LinearSystem::setInitialSolution()
-{
-}
-
 NumericVector<Number> &
 LinearSystem::getRightHandSideTimeVector()
 {
@@ -501,28 +399,11 @@ LinearSystem::getRightHandSideNonTimeVector()
 }
 
 void
-LinearSystem::computeSystemMatrix(SparseMatrix<Number> & /*matrix*/)
-{
-}
-
-void
-LinearSystem::computeSystemMatrix(SparseMatrix<Number> & matrix, const std::set<TagID> & tags)
-{
-  associateMatrixToTag(matrix, systemMatrixTag());
-  computeSystemMatrixTags(tags);
-  disassociateMatrixFromTag(matrix, systemMatrixTag());
-}
-
-void
-LinearSystem::updateActive(THREAD_ID /*tid*/)
-{
-}
-
-void
 LinearSystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                               std::vector<dof_id_type> & /*n_nz*/,
                               std::vector<dof_id_type> & /*n_oz*/)
 {
+  mooseError("LinearSystem does not support AugmentSparsity!");
 }
 
 void

@@ -45,7 +45,6 @@ template <typename OutputType>
 MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _solution(this->_sys.currentSolution()),
-    _prev_elem(nullptr),
     _needs_cell_gradients(false)
 {
 }
@@ -55,11 +54,8 @@ bool
 MooseLinearVariableFV<OutputType>::isExtrapolatedBoundaryFace(
     const FaceInfo & /*fi*/, const Elem * const /*elem*/, const Moose::StateArg & /*state*/) const
 {
+  /// This is not used by this variable at this point.
   return false;
-  // mooseAssert(!fi.boundaryIDs().empty(), "We should have a boundary face on this face!");
-  // mooseAssert(this->getBoundaryCondition(*fi.boundaryIDs().begin()),
-  //             "We should have the boundary conditions for the given boundary ID!");
-  // return this->getBoundaryCondition(*fi.boundaryIDs().begin())->needsExtrapolation();
 }
 
 template <typename OutputType>
@@ -115,15 +111,6 @@ MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo * const elem_info
 }
 
 template <typename OutputType>
-Real
-MooseLinearVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & /*fi*/,
-                                                        const StateArg & /*state*/,
-                                                        const bool /*correct_skewness*/) const
-{
-  mooseError("Not implemented yet");
-}
-
-template <typename OutputType>
 const VectorValue<Real> &
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo * const elem_info) const
 {
@@ -140,18 +127,22 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo * const elem_info) con
 
 template <typename OutputType>
 VectorValue<Real>
-MooseLinearVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & /*fi*/,
-                                                        const StateArg & /*state*/,
-                                                        const bool /*correct_skewness*/) const
+MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & /*state*/) const
 {
-  mooseError("Not implemented yet");
-}
+  const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
+  const auto * elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
+  const auto * elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
 
-template <typename OutputType>
-VectorValue<Real>
-MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & /*fi*/) const
-{
-  mooseError("Not implemented yet");
+  const VectorValue<Real> elem_one_grad = gradSln(elem_one);
+
+  // If we have a neighbor then we interpolate between the two to the face.
+  if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
+  {
+    const VectorValue<Real> & elem_two_grad = gradSln(elem_two);
+    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
+  }
+  else
+    return elem_one_grad;
 }
 
 template <typename OutputType>
