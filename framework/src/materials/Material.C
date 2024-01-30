@@ -93,6 +93,11 @@ Material::subdomainSetup()
     for (const auto & prop_id : _supplied_prop_ids)
       props[prop_id].resize(nqp);
 
+    // consider all properties are active
+    _active_prop_ids.clear();
+    for (const auto & id : _supplied_prop_ids)
+      _active_prop_ids.insert(id);
+
     _qp = 0;
     computeQpProperties();
 

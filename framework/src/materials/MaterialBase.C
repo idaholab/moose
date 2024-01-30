@@ -175,6 +175,15 @@ MaterialBase::registerPropName(const std::string & prop_name, bool is_get, const
     _has_stateful_property = true;
 }
 
+void
+MaterialBase::setActiveProperties(const std::set<unsigned int> & needed_props)
+{
+  _active_prop_ids.clear();
+  for (const auto & id : needed_props)
+    if (_supplied_prop_ids.count(id) > 0)
+      _active_prop_ids.insert(id);
+}
+
 std::set<OutputName>
 MaterialBase::getOutputs()
 {

@@ -5377,6 +5377,14 @@ FEProblemBase::setActiveMaterialProperties(const std::unordered_set<unsigned int
                                            const THREAD_ID tid)
 {
   _active_material_property_ids[tid] = mat_prop_ids;
+
+  // mark active properties for materials
+  for (auto & mat : _all_materials.getObjects(tid))
+    mat->setActiveProperties(mat_prop_ids);
+  for (auto & mat : _all_materials[Moose::FACE_MATERIAL_DATA].getObjects(tid))
+    mat->setActiveProperties(mat_prop_ids);
+  for (auto & mat : _all_materials[Moose::NEIGHBOR_MATERIAL_DATA].getObjects(tid))
+    mat->setActiveProperties(mat_prop_ids);
 }
 
 const std::unordered_set<unsigned int> &
