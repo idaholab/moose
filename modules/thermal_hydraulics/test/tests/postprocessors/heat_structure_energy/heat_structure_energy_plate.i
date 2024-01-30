@@ -29,15 +29,15 @@
 # For a test variation using a reference temperature of T_ref = 0.5,
 # rho2 * cp2 * int(T - T_ref) * P = 864.
 
-[HeatStructureMaterials]
+[SolidProperties]
   [region1-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
   []
   [region2-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 5
     rho = 3
@@ -62,7 +62,8 @@
     n_elems = 5
 
     names = 'region1 region2'
-    materials = 'region1-mat region2-mat'
+    solid_properties = 'region1-mat region2-mat'
+    solid_properties_T_ref = '300 300'
     widths = '4.0 3.0'
     n_part_elems = '5 5'
 

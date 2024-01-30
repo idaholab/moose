@@ -5,21 +5,21 @@
   2nd_order_mesh = true
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [fuel-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 3.65
     cp = 288.734
     rho = 1.0412e2
   []
   [gap-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1.084498
     cp = 1.0
     rho = 1.0
   []
   [clad-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 16.48672
     cp = 321.384
     rho = 6.6e1
@@ -42,7 +42,8 @@
     names = 'FUEL GAP CLAD'
     widths = '0.0046955  0.0000955  0.000673'
     n_part_elems = '1 1 1'
-    materials = 'fuel-mat gap-mat clad-mat'
+    solid_properties = 'fuel-mat gap-mat clad-mat'
+    solid_properties_T_ref = '300 300 300'
 
     initial_T = 564.15
   []

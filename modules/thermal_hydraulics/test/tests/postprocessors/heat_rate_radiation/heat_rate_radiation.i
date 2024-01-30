@@ -11,9 +11,9 @@ T_ambient = 350
 sigma = 5.670367e-8
 emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
 
-[HeatStructureMaterials]
+[SolidProperties]
   [region1-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -32,7 +32,8 @@ emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
     depth = ${depth}
 
     names = 'region1'
-    materials = 'region1-mat'
+    solid_properties = 'region1-mat'
+    solid_properties_T_ref = '300'
     widths = '${thickness}'
     n_part_elems = '5'
 

@@ -20,7 +20,12 @@ HeatStructureCylindrical::validParams()
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each radial region [m]");
   params.addRequiredParam<std::vector<unsigned int>>("n_part_elems",
                                                      "Number of elements of each radial region");
-  params.addParam<std::vector<std::string>>("materials", "Material name for each radial region");
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "materials",
+      "Material name for each transverse region",
+      "HeatStructureMaterials are deprecated. Please make corresponding SolidProperties objects "
+      "and replace the heat structure parameter 'materials' with the parameters 'solid_properties' "
+      "and 'solid_properties_T_ref'. See heat structure documentation for more information.");
   params.addParam<std::vector<UserObjectName>>(
       "solid_properties", "Solid properties object name for each radial region");
   params.addParam<std::vector<Real>>(

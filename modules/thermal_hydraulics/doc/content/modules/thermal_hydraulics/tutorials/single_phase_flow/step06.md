@@ -76,7 +76,7 @@ To accomplish this, we define the Prandtl number using an [ADPrandtlNumberMateri
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          start=Pr_mat
-         end=HeatStructureMaterials
+         end=SolidProperties
          link=False
 
 !content pagination previous=tutorials/single_phase_flow/step05.md

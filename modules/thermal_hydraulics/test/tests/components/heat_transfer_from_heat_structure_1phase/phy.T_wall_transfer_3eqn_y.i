@@ -28,9 +28,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [wall-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 100.0
     rho = 100.0
     cp = 100.0
@@ -67,7 +67,8 @@
     length = 1
     n_elems = 50
 
-    materials = 'wall-mat'
+    solid_properties = 'wall-mat'
+    solid_properties_T_ref = '300'
     n_part_elems = 3
     widths = '0.1'
     names = 'wall'

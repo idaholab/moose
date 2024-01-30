@@ -23,9 +23,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [m]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = 1
     cp = 1
     k = 1
@@ -60,7 +60,8 @@
     n_elems = 10
     names = '1 2'
     widths = '0.2 0.3'
-    materials = 'm m'
+    solid_properties = 'm m'
+    solid_properties_T_ref = '300 300'
     n_part_elems = '1 1'
     rotation = 90
   []
@@ -94,7 +95,8 @@
     n_elems = '5 5'
     names = '1 2'
     widths = '0.2 0.3'
-    materials = 'm m'
+    solid_properties = 'm m'
+    solid_properties_T_ref = '300 300'
     n_part_elems = '1 1'
     rotation = 270
   []

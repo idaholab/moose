@@ -29,9 +29,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [mat1]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = 10
     cp = 1
     k = 1
@@ -87,7 +87,8 @@
     names = '0'
     widths = 0.5
     n_part_elems = '1'
-    materials = 'mat1'
+    solid_properties = 'mat1'
+    solid_properties_T_ref = '300'
   []
 []
 

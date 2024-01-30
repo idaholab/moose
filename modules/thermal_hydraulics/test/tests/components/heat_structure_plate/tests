@@ -9,6 +9,7 @@
       type = Exodiff
       input = 'by_hsmaterials.i'
       exodiff = 'transient.e'
+      no_error_deprecated = True
       detail = 'with properties defined by HeatStructureMaterials.'
     []
     [by_materials]

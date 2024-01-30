@@ -88,15 +88,15 @@ cp2 = 600
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs1_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = ${k1}
     rho = ${rho1}
     cp = ${cp1}
   []
   [hs2_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = ${k2}
     rho = ${rho2}
     cp = ${cp2}
@@ -123,7 +123,8 @@ cp2 = 600
     depth = 1
     n_elems = 10
 
-    materials = 'hs1_mat'
+    solid_properties = 'hs1_mat'
+    solid_properties_T_ref = '300'
     n_part_elems = '5'
     widths = '1'
     names = 'solid'
@@ -139,7 +140,8 @@ cp2 = 600
     depth = 1
     n_elems = 10
 
-    materials = 'hs2_mat'
+    solid_properties = 'hs2_mat'
+    solid_properties_T_ref = '300'
     n_part_elems = '5'
     widths = '1'
     names = 'solid'

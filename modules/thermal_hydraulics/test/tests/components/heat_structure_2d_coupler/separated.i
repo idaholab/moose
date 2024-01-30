@@ -22,9 +22,9 @@ power_per_K = 5.0
 L_hs = 0.5
 htc = ${fparse power_per_K / (L_hs * P2)}
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 15
     cp = 500
     rho = 8000
@@ -42,7 +42,8 @@ htc = ${fparse power_per_K / (L_hs * P2)}
     names = 'region1'
     widths = '${R1}'
     n_part_elems = '5'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
 
     initial_T = ${initial_T1}
   []
@@ -57,7 +58,8 @@ htc = ${fparse power_per_K / (L_hs * P2)}
     names = 'region1'
     widths = '${R2}'
     n_part_elems = '5'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
 
     initial_T = ${initial_T2}
   []

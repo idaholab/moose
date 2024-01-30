@@ -21,9 +21,9 @@ htc = ${fparse Q / (S * (T_ambient - T))}
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [region1-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -41,7 +41,8 @@ htc = ${fparse Q / (S * (T_ambient - T))}
     n_elems = 50
 
     names = 'region1'
-    materials = 'region1-mat'
+    solid_properties = 'region1-mat'
+    solid_properties_T_ref = '300'
     widths = '${thickness}'
     n_part_elems = '5'
 
