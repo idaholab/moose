@@ -1,6 +1,6 @@
 !template load
   file=tutorial.index.md.template
-  title=Single Phase Flow
+  title=Single-Phase Flow
   pages=tutorials/single_phase_flow/problem_description.md
     tutorials/single_phase_flow/step01.md
     tutorials/single_phase_flow/step02.md
