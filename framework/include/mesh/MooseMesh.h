@@ -2031,7 +2031,13 @@ MooseMesh::buildTypedMesh(unsigned int dim)
   // then we need to make sure to make our state consistent because other objects, like the periodic
   // boundary condition action, will be querying isDistributedMesh()
   if (_use_distributed_mesh != std::is_same<T, DistributedMesh>::value)
+  {
+    if (getMeshPtr())
+      mooseError("A MooseMesh object is being asked to build a libMesh mesh that is a different "
+                 "parallel type than the libMesh mesh that it wraps. This is not allowed. Please "
+                 "create another MooseMesh object to wrap the new libMesh mesh");
     setParallelType(MeshType<T>::value);
+  }
 
   if (dim == libMesh::invalid_uint)
     dim = getParam<MooseEnum>("dim");
