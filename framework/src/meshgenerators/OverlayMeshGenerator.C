@@ -13,9 +13,6 @@
 #include "InputParameters.h"
 
 // libMesh includes
-#include "libmesh/mesh_generation.h"
-#include "libmesh/unstructured_mesh.h"
-#include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_tools.h"
 
