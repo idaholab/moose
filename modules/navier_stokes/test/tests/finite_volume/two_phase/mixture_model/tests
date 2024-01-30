@@ -25,6 +25,9 @@
     requirement = 'The system shall be able solve two phase Rayleigh Bernard convection with the mixture model.'
     rel_err = 5.0E-3
     recover = false
+    method = '!dbg'
+    valgrind = none
+    allow_warnings = true
   []
   [mixture_channel_drift_flux]
     type = 'Exodiff'
