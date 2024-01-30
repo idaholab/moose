@@ -7,6 +7,8 @@ applied in different manners for different terms in the partial differential equ
 This means that the `LinearFVBCs` only provide objects to specify these boundary quantities,
 and would not contribute to the system matrix and right hand side directly (only through kernels).
 
+For more information on general design choices in this setting [click here](/linear_fv_design.md)
+
 ## LinearFVBCs block
 
 FVM boundary conditions are added to simulation input files in the `LinearFVBCs` as in the example below.

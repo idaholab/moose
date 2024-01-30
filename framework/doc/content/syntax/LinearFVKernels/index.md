@@ -9,6 +9,8 @@ For the finite volume method (FVM) when used without Newton's method, `LinearFVK
 * `LinearFVElementalKernel` adds contributions to system matrices and right hand sides from volumetric integrals.
   Volumetric source terms or reaction terms serve as good examples for these kernels.
 
+For more information on general design choices in this setting [click here](/linear_fv_design.md)
+
 ## LinearFVKernels block
 
 FVM kernels which contribute to systems that are not solved via Newton's method
