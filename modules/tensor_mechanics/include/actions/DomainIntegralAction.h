@@ -160,7 +160,4 @@ protected:
    * is greater than 1
    */
   const bool _used_by_xfem_to_grow_crack;
-
-  /// Type that we use in Actions for declaring coupling
-  typedef std::vector<VariableName> CoupledName;
 };

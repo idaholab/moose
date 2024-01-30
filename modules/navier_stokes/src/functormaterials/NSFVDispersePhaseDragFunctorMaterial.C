@@ -9,6 +9,7 @@
 
 #include "NSFVDispersePhaseDragFunctorMaterial.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", NSFVDispersePhaseDragFunctorMaterial);
 
@@ -51,12 +52,12 @@ NSFVDispersePhaseDragFunctorMaterial::NSFVDispersePhaseDragFunctorMaterial(
   addFunctorProperty<ADReal>("Darcy_coefficient",
                              [this](const auto & r, const auto & t) -> ADReal
                              {
-                               ADReal speed = Utility::pow<2>(_u_var(r, t));
+                               ADRealVectorValue velocity(_u_var(r, t));
                                if (_dim > 1)
-                                 speed += Utility::pow<2>((*_v_var)(r, t));
+                                 velocity(1) = (*_v_var)(r, t);
                                if (_dim > 2)
-                                 speed += Utility::pow<2>((*_w_var)(r, t));
-                               speed = std::sqrt(speed);
+                                 velocity(2) = (*_w_var)(r, t);
+                               const auto speed = NS::computeSpeed(velocity);
 
                                const ADReal Re_particle = _particle_diameter(r, t) * speed *
                                                           _rho_mixture(r, t) / _mu_mixture(r, t);

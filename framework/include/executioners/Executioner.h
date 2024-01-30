@@ -111,7 +111,7 @@ public:
   virtual std::string getTimeIntegratorName() const { return std::string(); }
 
   /**
-   * Can be used by subsclasses to call parentOutputPositionChanged()
+   * Can be used by subclasses to call parentOutputPositionChanged()
    * on the underlying FEProblemBase.
    */
   virtual void parentOutputPositionChanged() {}

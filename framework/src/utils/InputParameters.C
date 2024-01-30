@@ -931,9 +931,9 @@ InputParameters::applyParameter(const InputParameters & common,
   const bool common_priv = allow_private ? false : common.isPrivate(common_name);
   const bool common_valid = common.isParamValid(common_name);
 
-  /* In order to apply common parameter 4 statements must be satisfied
-   * (1) A local parameter must exist with the same name as common parameter
-   * (2) Common parameter must valid and exist
+  /* In order to apply a common parameter 4 statements must be satisfied
+   * (1) A local parameter must exist with the same name as the common parameter
+   * (2) Common parameter must be valid and exist
    * (3) Local parameter must be invalid OR not have been set from its default
    * (4) Both cannot be private
    */

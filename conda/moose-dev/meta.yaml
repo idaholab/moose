@@ -6,7 +6,7 @@
 #   framework/doc/packages_config.yml
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.12.20" %}
+{% set version = "2024.01.23" %}
 
 package:
   name: moose-dev

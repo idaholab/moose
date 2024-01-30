@@ -133,7 +133,7 @@ used for generating manufactured solution tests for increasingly
 complicated physics simulations, when it was discovered that multiple
 symbolic differentiation packages were suffering software failures on
 sufficiently large problems.  Symbolically differentiating
-manufactured solution fields through e.g.\ 3-D Navier-Stokes physics
+manufactured solution fields through e.g. 3-D Navier-Stokes physics
 caused a combinatorial explosion, leading to corresponding forcing
 functions that were hundreds of kilobytes in length, or required many
 man-hours of manual simplification, or failed altogether on some
@@ -150,25 +150,23 @@ correspond to $f(\vec{x})$ and $\nabla f(\vec{x})$ respectively. `value`
 and `derivatives` types are determined by `T` and `D`
 template parameters, where `T` is some floating point type, and
 `D` is equivalent to `T` for single-argument functions or equal to
-some container type for a generic vector of arguments. MetaPhysicL
-overloads binary arithmetic operators (`+,-,*,/`), unary functions
+some container type for a generic vector of arguments (see the next paragraph).
+MetaPhysicL overloads binary arithmetic operators (`+,-,*,/`), unary functions
 (`std::sin, std::cos, std::exp` etc.), and binary functions
 (`std::pow, std::max, std::min` etc.), ensuring that any calculation
 involving a `DualNumber` propagates both the function value and its
 derivatives.
 
-MOOSE leverages one of two MetaPhysicL container class templates depending
-on user configuration. The default MOOSE configuration uses the
+MOOSE used to leverage one of two MetaPhysicL container class templates depending
+on user configuration. The default MOOSE configuration used to be the
 `NumberArray` class template which accepts `std::size_t N` and
 `typename T` template arguments where `N` denotes the length of
 an underlying C-array that holds the `NumberArray` data and `T` is
-the floating-point type held by the C-array. As for `DualNumber`,
-MetaPhysicL provides arithmetic, unary, and binary function overloads for
-manipulation of its container types. `NumberArray` is an ideal derivative
+the floating-point type held by the C-array. `NumberArray` is an ideal derivative
 container choice when there is dense coupling between physics variables; this is because
 operator and function overloads for `NumberArray` operate on the entire
-underlying C-array. The second MetaPhysicL container class leveraged by
-MOOSE is `SemiDynamicSparseNumberArray`, which is a more ideal
+underlying C-array. The second MetaPhysicL container class, and the only one that
+is currently leveraged by MOOSE, is `SemiDynamicSparseNumberArray`, which is a more ideal
 choice for problems in which variable coupling is sparse or when a user wishes
 to solve a variety of problems with a single library configuration. In contrast to
 `NumberArray` which only holds a single C-array of floating-type data,
@@ -178,21 +176,20 @@ additional data member enables sparse operations that may involve only a subset
 of the elements in the underlying floating-point data. As an explicit example of
 when these sparse operations are useful, consider a
 user who may configure MOOSE with an underlying derivative storage container
-size of 81 for solid mechanics simulations on 3D second-order hexagonal finite elements
-(3 displacement variables * 27 degrees of freedom per variable per finite
+size of 81 for solid mechanics simulations on 3D second-order hexahedral finite elements
+(3 displacement variables $\times$ 27 degrees of freedom per variable per finite
 element = 81 local dofs). When running 3D, second-order cases,
-the non-sparse `NumberArray` container would be 100\% efficient. However,
-if the user wishes to run a 2D, second-order case with the same MOOSE
-configuration, they would be performing $81 / 18 = 4.5$ times more work
+the non-sparse `NumberArray` container would have been 100% efficient. However,
+if the user later wished to run a 2D, second-order case
+(2 displacement variables $\times$ 9 degrees of freedom per variable per finite
+element = 18 local dofs) with the same MOOSE
+configuration, they would have been performing $81 / 18 = 4.5$ times more work
 than is necessary if using `NumberArray`. Because
 `SemiDynamicSparseNumberArray` tracks the sparsity pattern, it will only
 initialize and operate on the floating-point array elements that are required,
-e.g. the ``sparse size'' (stored as a `_dynamic_N` data member) of its
+i.e. the "sparse size" (stored as a `_dynamic_N` data member) of its
 data containers will never exceed what is required for the run-time problem,
-e.g. 18 for the 2D second-order solid mechanics example. Of course tracking the
-sparsity pattern has non-zero cost, so if the user knows they will always be
-running a certain kind of problem, they may be best served by configuring with
-non-sparse `NumberArray` container.
+e.g. 18 for the 2D second-order solid mechanics example.
 
 ## AD in MOOSE
 
@@ -307,7 +304,7 @@ modules, all of which heavily leverage MOOSE's [!ac](AD) capabilities.
 
 For performance reasons, AD values in MOOSE have a maximum container size, i.e.,
 they have a maximum number of degrees of freedom that each AD quantity may
-depend upon. Currently, MOOSE's default maximum AD container size is 53. If the
+depend upon. Currently, MOOSE's default maximum AD container size is 64. If the
 maximum AD container size is exceeded, then an error will result.
 If a quantity needs to depend on more degrees of freedom than the maximum AD
 container size, then MOOSE needs to be reconfigured: go to the

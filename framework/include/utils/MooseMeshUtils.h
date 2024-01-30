@@ -268,14 +268,14 @@ bool hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name);
  * @param input mesh over which to determine boundary IDs
  * @param boundary ID
  */
-bool hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id);
+bool hasBoundaryID(const MeshBase & input_mesh, const BoundaryID id);
 
 /**
  * Whether a particular boundary name exists in the mesh
  * @param input mesh over which to determine boundary names
  * @param boundary name
  */
-bool hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name);
+bool hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name);
 
 /**
  * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes

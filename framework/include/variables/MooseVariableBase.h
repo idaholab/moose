@@ -87,7 +87,6 @@ public:
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor);
   void scalingFactor(const std::vector<Real> & factor);
 
   /**

@@ -64,7 +64,7 @@ Factory::reg(std::shared_ptr<RegistryEntryBase> obj)
 }
 
 InputParameters
-Factory::getValidParams(const std::string & obj_name)
+Factory::getValidParams(const std::string & obj_name) const
 {
   const auto it = _name_to_object.find(obj_name);
 
@@ -195,7 +195,7 @@ Factory::parseTime(const std::string t_str)
 }
 
 void
-Factory::deprecatedMessage(const std::string obj_name)
+Factory::deprecatedMessage(const std::string obj_name) const
 {
   const auto time_it = _deprecated_time.find(obj_name);
 

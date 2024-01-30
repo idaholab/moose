@@ -416,7 +416,7 @@ hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name)
 }
 
 bool
-hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id)
+hasBoundaryID(const MeshBase & input_mesh, const BoundaryID id)
 {
   const BoundaryInfo & boundary_info = input_mesh.get_boundary_info();
   std::set<boundary_id_type> boundary_ids = boundary_info.get_boundary_ids();
@@ -430,7 +430,7 @@ hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id)
 }
 
 bool
-hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name)
+hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name)
 {
   const auto id = getBoundaryID(name, input_mesh);
   return hasBoundaryID(input_mesh, id);

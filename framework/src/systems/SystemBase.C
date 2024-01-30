@@ -1426,16 +1426,21 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
   for (MooseIndex(_vars) thread = 0; thread < _vars.size(); ++thread)
   {
     auto & field_variables = _vars[thread].fieldVariables();
-    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i] *
-                                        field_variables[i]->scalingFactor());
+    for (MooseIndex(field_variables) i = 0, p = 0; i < field_variables.size(); ++i)
+    {
+      auto factors = field_variables[i]->arrayScalingFactor();
+      for (unsigned int j = 0; j < field_variables[i]->count(); ++j, ++p)
+        factors[j] /= inverse_scaling_factors[p];
+
+      field_variables[i]->scalingFactor(factors);
+    }
 
     auto offset = field_variables.size();
 
     auto & scalar_variables = _vars[thread].scalars();
     for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-      scalar_variables[i]->scalingFactor(1. / inverse_scaling_factors[offset + i] *
-                                         scalar_variables[i]->scalingFactor());
+      scalar_variables[i]->scalingFactor(
+          {1. / inverse_scaling_factors[offset + i] * scalar_variables[i]->scalingFactor()});
 
     if (thread == 0 && _verbose)
     {
@@ -1446,8 +1451,13 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
       _console.precision(6);
 
       for (const auto & field_variable : field_variables)
-        _console << "  " << field_variable->name() << ": " << field_variable->scalingFactor()
-                 << "\n";
+      {
+        const auto & factors = field_variable->arrayScalingFactor();
+        _console << "  " << field_variable->name() << ":";
+        for (const auto i : make_range(field_variable->count()))
+          _console << " " << factors[i];
+        _console << "\n";
+      }
       for (const auto & scalar_variable : scalar_variables)
         _console << "  " << scalar_variable->name() << ": " << scalar_variable->scalingFactor()
                  << "\n";
