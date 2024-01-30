@@ -321,12 +321,24 @@ public:
   MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
 
   /**
-   * Clears the materials that are marked as restored.
+   * Sets the loading of stateful material properties to recover
    *
-   * Materials that have been restored do not have initStatefulProperties() called
-   * on them.
+   * This enforces the requirement of one-to-one stateful material properties,
+   * disabling advanced restart of stateful properties
    */
-  void clearRestoredMaterials() { _restored_materials.clear(); }
+  void setRecovering() { _recovering = true; }
+
+  /**
+   * Sets the loading of stateful material properties in place
+   *
+   * On init, this cannot be set because we must first call initProps()
+   * to properly initialize the dynamic types within _storage. After
+   * the first sweep through with initProps(), we can then load the stateful
+   * props directly in place into _storage
+   *
+   * Also clears _restartable_map, as it should no longer be needed
+   */
+  void setRestartInPlace();
 
 protected:
   /// The actual storage
@@ -338,22 +350,20 @@ protected:
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
-  /// The materials that have been restored and should not have initStatefulProperties() called on
-  std::set<const MaterialBase *> _restored_materials;
-
   void sizeProps(MaterialProperties & mp, unsigned int size);
 
 private:
   /// Initializes hashmap entries for element and side to proper qpoint and
   /// property count sizes.
-  void initProps(const THREAD_ID tid, const Elem * elem, unsigned int side, unsigned int n_qpoints);
+  std::vector<MaterialProperties *>
+  initProps(const THREAD_ID tid, const Elem * elem, unsigned int side, unsigned int n_qpoints);
 
   /// Initializes just one hashmap's entries
-  void initProps(const THREAD_ID tid,
-                 const unsigned int state,
-                 const Elem * elem,
-                 unsigned int side,
-                 unsigned int n_qpoints);
+  MaterialProperties & initProps(const THREAD_ID tid,
+                                 const unsigned int state,
+                                 const Elem * elem,
+                                 unsigned int side,
+                                 unsigned int n_qpoints);
 
   ///@{
   /**
@@ -396,6 +406,34 @@ private:
 
   /// The threaded material data
   std::vector<MaterialData> _material_data;
+
+  /**
+   * Helper struct for all of the data needed to load stateful property data for a
+   * [state, elem, side, stateful_id] combination later in time in initStatefulProps()
+   *
+   * This is needed beacuse restartable data is loaded in FEProblemBase::initialSetup()
+   * so early. At the point it is loaded, we have yet to call initProps() on any properties
+   * to setup the entries in _storage. As this data is dynamically typed, there's no way
+   * we know its type this early on
+   */
+  struct RestartableEntry
+  {
+    unsigned int stateful_id;
+    unsigned int state;
+    std::size_t num_q_points;
+    std::stringstream data;
+  };
+
+  typedef std::unordered_map<std::pair<const Elem *, unsigned int>, std::vector<RestartableEntry>>
+      RestartableMapType;
+
+  /// The restartable data to be loaded in initStatefulProps() later; see RestartableEntry
+  RestartableMapType _restartable_map;
+
+  /// Whether or not we want to restart stateful properties in place; see RestartableEntry
+  bool _restart_in_place;
+  /// Whether or not we're recovering; enforces a one-to-one mapping of stateful properties
+  bool _recovering;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;

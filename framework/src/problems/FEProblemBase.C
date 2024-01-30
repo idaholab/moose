@@ -786,6 +786,11 @@ FEProblemBase::initialSetup()
     // Only load all of the vectors if we're recovering
     _req.set().setLoadAllVectors(_app.isRecovering());
 
+    // This forces stateful material property loading to be an exact one-to-one match
+    if (_app.isRecovering())
+      for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
+        props->setRecovering();
+
     TIME_SECTION("restore", 3, "Restoring from backup");
 
     // We could have a cached backup when this app is a sub-app and has been given a Backup
@@ -934,7 +939,6 @@ FEProblemBase::initialSetup()
       }
     }
 
-    if (!_has_initialized_stateful)
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
@@ -943,6 +947,16 @@ FEProblemBase::initialSetup()
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
+
+      // setRestartInPlace() is set because the property maps have now been setup and we can
+      // dataLoad() them directly in place
+      // setRecovering() is set because from now on we require a one-to-one mapping of
+      // stateful properties because we shouldn't be declaring any more
+      for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
+      {
+        props->setRestartInPlace();
+        props->setRecovering();
+      }
     }
   }
 
@@ -7373,11 +7387,6 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
     Threads::parallel_reduce(elem_range, cmt);
   else
     cmt(elem_range, true);
-
-  // Now that we've initialized stateful props, we no longer want to skip initialization of
-  // the materials have been skipped in restart
-  for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
-    props->clearRestoredMaterials();
 }
 
 void
