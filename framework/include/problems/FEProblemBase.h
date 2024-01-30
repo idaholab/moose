@@ -2326,11 +2326,23 @@ private:
   /// The EquationSystems object, wrapped for restart
   Restartable::ManagedValue<RestartableEquationSystems> _req;
 
+  /**
+   * Set the subproblem and system parameters for residual objects and log their addition
+   * @param ro_name The type of the residual object
+   * @param name The name of the residual object
+   * @param parameters The residual object parameters
+   * @param nl_sys_num The nonlinear system that the residual object belongs to
+   * @param base_name The base type of the residual object, e.g. Kernel, BoundaryCondition, etc.
+   * @param reinit_displaced A data member indicating whether a geometric concept should be reinit'd
+   * for the displaced problem. Examples of valid data members to pass in are \p
+   * _reinit_displaced_elem and \p _reinit_displaced_face
+   */
   void setResidualObjectParamsAndLog(const std::string & ro_name,
                                      const std::string & name,
                                      InputParameters & params,
-                                     unsigned int nl_sys_num,
-                                     const std::string & base_name);
+                                     const unsigned int nl_sys_num,
+                                     const std::string & base_name,
+                                     bool & reinit_displaced);
 
 protected:
   bool _initialized;
