@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#25642'
+  [cg]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    cli_args = 'Physics/Diffusion/ContinuousGalerkin/diff/use_automatic_differentiation=false Physics/Diffusion/ContinuousGalerkin/diff/source_functor=value_pp'
+    csvdiff = 'diffusion_cg_out_sample_0010.csv'
+    requirement = 'The system shall be able to solve a source-less diffusion equation with a continuous Galerkin discretization with a shorthand syntax.'
+    design = 'DiffusionCG.md'
+  []
+  [cg_ad]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    csvdiff = 'diffusion_cg_out_sample_0010.csv'
+    requirement = 'The system shall be able to solve a source-less diffusion equation with a continuous Galerkin discretization with automatic differentiation with a shorthand syntax.'
+    design = 'DiffusionCG.md'
+  []
+  [fv]
+    type = CSVDiff
+    input = 'diffusion_fv.i'
+    csvdiff = 'diffusion_fv_out_sample_0010.csv'
+    requirement = 'The system shall be able to solve a source-less diffusion equation with a cell-centered finite volume discretization with a shorthand syntax.'
+    design = 'DiffusionFV.md'
+  []
+[]

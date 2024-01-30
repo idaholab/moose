@@ -1,0 +1,75 @@
+# Physics system
+
+The `Physics` system is meant to standardize the process of adding an equation and its discretization
+to a simulation. It is based on the [Action system](source/actions/Action.md), with additional APIs
+defined to support the definition of an equation.
+
+## Interaction with Components
+
+The interaction with Components is one of the main goals of the Physics system. Stay tuned for future developments.
+
+## Implementing your own Physics
+
+If you have *not* created the kernels, boundary conditions, and so on, the `Physics` system is not a good place
+to start. You must start with a working implementation of your equations before attempting to create a `Physics` object.
+
+If you do have a working set of kernels, boundary conditions, and other MOOSE objects, that let you solve an equation in MOOSE, you should consider the following before implementing a `Physics`:
+
+- is user-friendliness a priority for the expansion of my work?
+- is the current workflow unsatisfactory in that regard?
+- would creating objects programmatically reduce the potential for user-error while allowing sufficient flexibility?
+
+If the answer is yes to all three, then you may start implementing a `Physics` object for your equation.
+The simple concepts behind the simulation setup in a `Physics` is that the `add<various MOOSE object>` routines
+are all called on the `Physics` and they are all called at the same time in the setup as with a regular input file.
+
+So for example, to make a `DiffusionPhysics` create a finite element diffusion kernel, one can override `addFEKernels` like this:
+
+```
+void
+DiffusionPhysics::addFEKernels()
+{
+  {
+    const std::string kernel_type = "ADDiffusion";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;  // we saved the name of the variable as a class attribute
+    getProblem().addKernel(kernel_type, name() + "_diffusion", params);
+  }
+}
+```
+
+Notice how we use the `PhysicsBase::getFactory()` routine to get access to the `Factory` that will get the parameters we
+need to fill, and the `PhysicsBase::getProblem()` to get access to the `Problem` which stores the objects created.
+
+If you already have an `Action` defined for your physics, converting it to a `Physics` should be fairly straightforward. The principal advantages of doing so are:
+
+- benefit from new APIs implemented in the `Physics` system
+- future ability to leverage the `Components` system to define a complex system
+
+### Advice on implementation
+
+#### Add a lot of checks
+
+Do as much parameter checking as you can. The `PhysicsBase` class defines utilities such as the ones below
+that let you check that the user inputs to your physics are correct.
+
+```
+  void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
+  template <typename T, typename S>
+  void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
+  template <typename T>
+  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const;
+```
+
+#### Separate the definition of the equation from its discretization
+
+The Physics base class you will create will hold the parameters that are shared between all the
+discretized versions of it.
+
+Physics and spatial discretizations are as separated as we could make them, but they are still very much intertwined. So
+when you are adding a parameter you need to think about:
+
+- is this more tied to the strong form of the equation? If so then it likely belongs in a `XYZPhysicsBase` base class
+- is this more tied to the discretization of the equation? If so then it likely belong in the derived, user-instantiated,
+  `XYZPhysics` class.
+
