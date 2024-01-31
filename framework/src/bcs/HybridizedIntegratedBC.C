@@ -16,6 +16,7 @@ HybridizedIntegratedBC::validParams()
   InputParameters params = IntegratedBCBase::validParams();
   params.suppressParameter<std::vector<AuxVariableName>>("save_in");
   params.suppressParameter<std::vector<AuxVariableName>>("diag_save_in");
+  params.registerBase("HybridizedIntegratedBC");
   return params;
 }
 
