@@ -26,7 +26,7 @@ InputParameters
 HybridizedKernel::validParams()
 {
   InputParameters params = KernelBase::validParams();
-  params.registerBase("Kernel");
+  params.registerBase("HybridizedKernel");
   params.suppressParameter<std::vector<AuxVariableName>>("save_in");
   params.suppressParameter<std::vector<AuxVariableName>>("diag_save_in");
   params.addPrivateParam<MooseObjectWarehouse<HybridizedIntegratedBC> *>("hibc_warehouse");

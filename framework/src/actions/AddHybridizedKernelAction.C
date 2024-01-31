@@ -10,7 +10,7 @@
 #include "AddHybridizedKernelAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddHybridizedKernelAction, "add_kernel");
+registerMooseAction("MooseApp", AddHybridizedKernelAction, "add_hybridized_kernel");
 
 InputParameters
 AddHybridizedKernelAction::validParams()

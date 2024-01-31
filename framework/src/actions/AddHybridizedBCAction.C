@@ -10,7 +10,7 @@
 #include "AddHybridizedBCAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddHybridizedBCAction, "add_bc");
+registerMooseAction("MooseApp", AddHybridizedBCAction, "add_hybridized_integrated_bc");
 
 InputParameters
 AddHybridizedBCAction::validParams()
