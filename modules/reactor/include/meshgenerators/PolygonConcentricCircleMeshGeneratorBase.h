@@ -75,6 +75,8 @@ protected:
   const unsigned int _smoothing_max_it;
   /// Indices of the hexagon sides that need to adapt
   const std::vector<unsigned int> _sides_to_adapt;
+  /// Order of the elements to be generated
+  const unsigned short _order;
   /// Pointers to input mesh pointers
   std::vector<std::unique_ptr<MeshBase> *> _input_ptrs;
   /// MeshMetaData: whether this produced mesh is a general polygon (or a hexagon)

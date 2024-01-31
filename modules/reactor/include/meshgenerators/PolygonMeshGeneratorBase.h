@@ -16,7 +16,9 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/face_quad4.h"
+#include "libmesh/face_quad9.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/face_tri7.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/utility.h"
@@ -133,6 +135,7 @@ protected:
    * @param boundary_id_shift shift of the interface boundary ids
    * @param generate_side_specific_boundaries whether the side-specific external boundaries are
    * generated or not
+   * @param order order of the elements
    * @return a mesh of a polygon slice
    */
   std::unique_ptr<ReplicatedMesh>
@@ -162,7 +165,8 @@ protected:
                    const bool create_inward_interface_boundaries = false,
                    const bool create_outward_interface_boundaries = true,
                    const boundary_id_type boundary_id_shift = 0,
-                   const bool generate_side_specific_boundaries = true);
+                   const bool generate_side_specific_boundaries = true,
+                   const unsigned int order = 1);
 
   /**
    * Creates a mesh of a general polygon slice with a triangular shape and circular regions on one
@@ -276,6 +280,7 @@ protected:
    * length.
    * @param generate_side_specific_boundaries whether the side-specific external boundaries are
    * generated or not
+   * @param order order of the elements
    * @return a mesh of a slice
    */
   std::unique_ptr<ReplicatedMesh>
@@ -306,7 +311,8 @@ protected:
              const bool create_outward_interface_boundaries = true,
              const boundary_id_type boundary_id_shift = 0,
              const Real pitch_scale_factor = 1.0,
-             const bool generate_side_specific_boundaries = true);
+             const bool generate_side_specific_boundaries = true,
+             const unsigned int order = 1);
 
   /**
    * Creates nodes of the very central mesh layer of the polygon for quad central elements.
@@ -405,6 +411,7 @@ protected:
    * @param side_index index of the polygon side (only used if external boundary ids are assigned)
    * @param generate_side_specific_boundaries whether the side-specific external boundaries are
    * generated or not
+   * @param order order of the elements
    */
   void cenQuadElemDef(ReplicatedMesh & mesh,
                       const unsigned int div_num,
@@ -414,7 +421,8 @@ protected:
                       std::vector<std::vector<Node *>> & nodes,
                       const bool assign_external_boundary = false,
                       const unsigned int side_index = 0,
-                      const bool generate_side_specific_boundaries = true) const;
+                      const bool generate_side_specific_boundaries = true,
+                      const unsigned int order = 1) const;
 
   /**
    * Defines triangular elements in the very central region of the polygon.
@@ -430,6 +438,7 @@ protected:
    * @param side_index index of the polygon side (only used if external boundary ids are assigned)
    * @param generate_side_specific_boundaries whether the side-specific external boundaries are
    * generated or not
+   * @param order order of the elements
    */
   void cenTriElemDef(ReplicatedMesh & mesh,
                      const unsigned int num_sectors_per_side,
@@ -439,7 +448,8 @@ protected:
                      const boundary_id_type boundary_id_shift = 0,
                      const bool assign_external_boundary = false,
                      const unsigned int side_index = 0,
-                     const bool generate_side_specific_boundaries = true) const;
+                     const bool generate_side_specific_boundaries = true,
+                     const unsigned int order = 1) const;
 
   /**
    * Defines general quad elements for the polygon.
@@ -458,6 +468,7 @@ protected:
    * @param boundary_id_shift shift of the interface boundary ids
    * @param generate_side_specific_boundaries whether the side-specific external boundaries are
    * generated or not
+   * @param order order of the elements
    */
   void quadElemDef(ReplicatedMesh & mesh,
                    const unsigned int num_sectors_per_side,
@@ -469,7 +480,8 @@ protected:
                    const bool create_inward_interface_boundaries = false,
                    const bool create_outward_interface_boundaries = true,
                    const boundary_id_type boundary_id_shift = 0,
-                   const bool generate_side_specific_boundaries = true) const;
+                   const bool generate_side_specific_boundaries = true,
+                   const unsigned int order = 1) const;
 
   /**
    * Makes radial correction to preserve ring area.

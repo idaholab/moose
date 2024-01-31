@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/AdvancedConcentricCircleGenerator.md'
-  issues = '#24938'
+  issues = '#24938 #26986'
   [test]
     requirement = "The system shall generate "
     [general]
@@ -11,6 +11,16 @@
       exodiff = accg_in.e
       recover = false
       detail = "a volume preserved concentric circles mesh."
+    []
+    [general_quadratic]
+      type = Exodiff
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/order=2
+                  --mesh-only accg_quadratic.e"
+      exodiff = accg_quadratic.e
+      recover = false
+      detail = "a volume preserved concentric circles mesh with quadratic elements."
     []
     [no_volume_preserve]
       type = Exodiff
@@ -30,6 +40,16 @@
       exodiff = accg_custom_azi_in.e
       recover = false
       detail = "a volume preserved concentric circles mesh with custom nodal azimuthal angles."
+    []
+    [custom_azi_quadratic]
+      type = Exodiff
+      input = accg.i
+      cli_args = "Mesh/accg/customized_azimuthal_angles='15 45 80 120 150 200 240 300 345'
+                  Mesh/accg/order=2
+                  --mesh-only accg_custom_azi_quadratic_in.e"
+      exodiff = accg_custom_azi_quadratic_in.e
+      recover = false
+      detail = "a volume preserved concentric circles mesh with custom nodal azimuthal angles and with quadratic elements."
     []
   []
   [error]

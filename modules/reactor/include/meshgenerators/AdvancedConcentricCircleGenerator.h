@@ -27,6 +27,8 @@ protected:
   std::vector<Real> _azimuthal_angles;
   /// Number of azimuthal sectors of the circular mesh to be generated
   const unsigned int _num_sectors;
+  /// Order of the elements to be generated
+  const unsigned short _order;
   /// A virtual sector number list which are 360.0 times inverse of the azimuthal intervals
   std::vector<Real> _virtual_nums_sectors;
 };

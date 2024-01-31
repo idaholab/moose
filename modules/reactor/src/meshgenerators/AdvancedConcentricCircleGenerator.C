@@ -30,6 +30,8 @@ AdvancedConcentricCircleGenerator::validParams()
       "customized_azimuthal_angles",
       "customized_azimuthal_angles>=0&customized_azimuthal_angles<360",
       "List of the user-specified azimuthal angles of the nodes.");
+  params.addRangeCheckedParam<unsigned short>(
+      "order", 1, "order>=1 & order<=2", "The order of the elements to be generated.");
 
   params.addParamNamesToGroup("num_sectors customized_azimuthal_angles", "Azimuthal Mesh Density");
 
@@ -46,7 +48,8 @@ AdvancedConcentricCircleGenerator::AdvancedConcentricCircleGenerator(
                           ? getParam<std::vector<Real>>("customized_azimuthal_angles")
                           : std::vector<Real>()),
     _num_sectors(isParamValid("num_sectors") ? getParam<unsigned int>("num_sectors")
-                                             : _azimuthal_angles.size())
+                                             : _azimuthal_angles.size()),
+    _order(getParam<unsigned short>("order"))
 {
   if (_num_sectors == 0)
     paramError(
@@ -167,7 +170,19 @@ std::unique_ptr<MeshBase>
 AdvancedConcentricCircleGenerator::generate()
 {
   std::vector<Real> ring_radii_corr;
-  const Real corr_factor = _preserve_volumes ? radiusCorrectionFactor(_azimuthal_angles) : 1.0;
+  std::vector<Real> mod_azimuthal_angles;
+
+  for (unsigned int i = 1; i<_azimuthal_angles.size(); i++)
+  {
+    mod_azimuthal_angles.push_back(_azimuthal_angles[i-1]);
+    if (_order == 2)
+      mod_azimuthal_angles.push_back((_azimuthal_angles[i-1] + _azimuthal_angles[i]) / 2.0);
+  }
+  mod_azimuthal_angles.push_back(_azimuthal_angles.back());
+  if (_order == 2)
+    mod_azimuthal_angles.push_back((_azimuthal_angles.back() + _azimuthal_angles.front() + 360.0) / 2.0);
+
+  const Real corr_factor = _preserve_volumes ? radiusCorrectionFactor(mod_azimuthal_angles) : 1.0;
 
   for (const auto & ring_radius : _ring_radii)
     ring_radii_corr.push_back(ring_radius * corr_factor);
@@ -210,7 +225,10 @@ AdvancedConcentricCircleGenerator::generate()
                          /* center_quad_factor */ 0.0,
                          _create_inward_interface_boundaries,
                          _create_outward_interface_boundaries,
-                         _interface_boundary_id_shift);
+                         _interface_boundary_id_shift,
+                         1.0,
+                         true,
+                         _order);
   MeshTools::Modification::rotate(*mesh, -_azimuthal_angles[0], 0, 0);
 
   for (unsigned int i = 1; i < _num_sectors; i++)
@@ -240,7 +258,10 @@ AdvancedConcentricCircleGenerator::generate()
                                /* center_quad_factor */ 0.0,
                                _create_inward_interface_boundaries,
                                _create_outward_interface_boundaries,
-                               _interface_boundary_id_shift);
+                               _interface_boundary_id_shift,
+                               1.0,
+                               true,
+                               _order);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, -_azimuthal_angles[i], 0, 0);

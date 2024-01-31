@@ -129,6 +129,9 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       false,
       "Whether to rotate the generated polygon mesh to ensure that one flat side faces up.");
 
+  params.addRangeCheckedParam<unsigned short>(
+      "order", 1, "order>=1 & order<=2", "The order of the elements to be generated.");
+
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names",
       "Customized Subdomain/Boundary");
@@ -239,6 +242,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _sides_to_adapt(isParamValid("sides_to_adapt")
                         ? getParam<std::vector<unsigned int>>("sides_to_adapt")
                         : std::vector<unsigned int>()),
+    _order(getParam<unsigned short>("order")),
     _node_id_background_meta(declareMeshProperty<dof_id_type>("node_id_background_meta", 0)),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
 {
@@ -507,6 +511,11 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     input[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_input_ptrs[i]));
     if (!input[i])
       mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
+    if ((_order == 1 && (*input[i]->elements_begin())->default_order() != FIRST) ||
+        (_order == 2 && (*input[i]->elements_begin())->default_order() == FIRST))
+      paramError("order",
+                 "the order of the input mesh to be adapted to does not match the order of the "
+                 "mesh to be generated.");
   }
 
   unsigned int mesh_input_counter = 0;
@@ -548,11 +557,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     else
     {
       _azimuthal_angles_array.push_back(std::vector<Real>());
-      for (unsigned int i = 0; i < _num_sectors_per_side[mesh_index]; i++)
+      for (unsigned int i = 0; i < _num_sectors_per_side[mesh_index] * _order; i++)
       {
         azimuthal_list.push_back(
-            std::atan(std::tan(M_PI / _num_sides) *
-                      (2.0 * (Real)i / (Real)_num_sectors_per_side[mesh_index] - 1.0)) *
+            std::atan(
+                std::tan(M_PI / _num_sides) *
+                (2.0 * (Real)i / (Real)_num_sectors_per_side[mesh_index] / (Real)_order - 1.0)) *
                 180.0 / M_PI +
             (Real)mesh_index * (360.0 / (Real)_num_sides) - (180.0 - 180.0 / (Real)_num_sides));
       }
@@ -602,7 +612,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _create_inward_interface_boundaries,
                                 _create_outward_interface_boundaries,
                                 _interface_boundary_id_shift,
-                                _generate_side_specific_boundaries);
+                                _generate_side_specific_boundaries,
+                                _order);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
@@ -632,7 +643,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _create_inward_interface_boundaries,
                                      _create_outward_interface_boundaries,
                                      _interface_boundary_id_shift,
-                                     _generate_side_specific_boundaries);
+                                     _generate_side_specific_boundaries,
+                                     _order);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);
