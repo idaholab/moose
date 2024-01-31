@@ -6,11 +6,10 @@ The parameters
 There are two options for specification of the thermal properties on the heat structure:
 
 - Create a [SolidProperties](syntax/SolidProperties/index.md) object for each unique heat structure material,
-  and then provide [!param](/Components/{{name}}/solid_properties)
-  and [!param](/Components/{{name}}/solid_properties_T_ref), which respectively
-  correspond to the `SolidProperties` object to use in each transverse region
-  (each entry corresponds to the equally indexed entry in [!param](/Components/{{name}}/names))
-  and the density reference temperature to use for each. The latter provides
+  and then provide [!param](/Components/{{name}}/solid_properties) which corresponds 
+  to the `SolidProperties` object to use in each transverse region  (each entry corresponds 
+  to the equally indexed entry in [!param](/Components/{{name}}/names))
+  and [!param](/Components/{{name}}/solid_properties_T_ref), which provides
   the temperatures at which to evaluate the densities, since a constant density
   is to be used in each region, due to heat structures having a non-deformable
   mesh.
