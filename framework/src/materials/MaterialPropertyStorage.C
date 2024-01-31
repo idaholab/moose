@@ -296,7 +296,13 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
     for (auto & entry : it->second)
     {
       if (n_qpoints != entry.num_q_points)
-        mooseError("size mismatch");
+        mooseError("The stateful material '",
+                   _registry.getName(_stateful_prop_id_to_prop_id[entry.stateful_id]),
+                   "' was stored in restart with ",
+                   entry.num_q_points,
+                   " quadrature points but has been initialized with ",
+                   n_qpoints);
+
       dataLoad(entry.data, (*props[entry.state])[entry.stateful_id], nullptr);
       restarted_stateful_props.insert(entry.stateful_id);
     }
