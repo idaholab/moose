@@ -47,4 +47,7 @@ protected:
   VariableName _from_var_name;
   /// Name of variables transferring to
   AuxVariableName _to_var_name;
+
+private:
+  virtual void checkSiblingsTransferSupported() const override;
 };
