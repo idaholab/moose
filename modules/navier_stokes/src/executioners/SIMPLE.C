@@ -946,7 +946,10 @@ SIMPLE::limitSolutionUpdate(NonlinearSystemBase & system_in,
 
   solution_vector.restore_array();
 
-  system_in.setSolution(solution);
+  // We update the ghosted solution based on the values we just computed and delete
+  // the caches if they are still there.
+  system_in.system().update();
+  system_in.setSolution(*(system_in.system().current_local_solution.get()));
   system_in.residualSetup();
 }
 
