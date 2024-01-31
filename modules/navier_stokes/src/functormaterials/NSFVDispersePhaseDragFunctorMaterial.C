@@ -49,22 +49,27 @@ NSFVDispersePhaseDragFunctorMaterial::NSFVDispersePhaseDragFunctorMaterial(
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
 
-  addFunctorProperty<ADReal>("Darcy_coefficient",
-                             [this](const auto & r, const auto & t) -> ADReal
-                             {
-                               ADRealVectorValue velocity(_u_var(r, t));
-                               if (_dim > 1)
-                                 velocity(1) = (*_v_var)(r, t);
-                               if (_dim > 2)
-                                 velocity(2) = (*_w_var)(r, t);
-                               const auto speed = NS::computeSpeed(velocity);
+  addFunctorProperty<ADReal>(
+      "Darcy_coefficient",
+      [this](const auto & r, const auto & t) -> ADReal
+      {
+        ADRealVectorValue velocity(_u_var(r, t));
+        if (_dim > 1)
+          velocity(1) = (*_v_var)(r, t);
+        if (_dim > 2)
+          velocity(2) = (*_w_var)(r, t);
+        const auto speed = NS::computeSpeed(velocity);
 
-                               const ADReal Re_particle = _particle_diameter(r, t) * speed *
-                                                          _rho_mixture(r, t) / _mu_mixture(r, t);
+        const auto Re_particle =
+            _particle_diameter(r, t) * speed * _rho_mixture(r, t) / _mu_mixture(r, t);
 
-                               if (Re_particle <= 1000)
-                                 return 1.0 + 0.15 * std::pow(Re_particle, 0.687);
-                               else
-                                 return 0.0183 * Re_particle;
-                             });
+        if (Re_particle <= 1000)
+        {
+          if (MetaPhysicL::raw_value(Re_particle) < 0)
+            mooseException("Cannot take a non-integer power of a negative number");
+          return 1.0 + 0.15 * std::pow(Re_particle, 0.687);
+        }
+        else
+          return 0.0183 * Re_particle;
+      });
 }

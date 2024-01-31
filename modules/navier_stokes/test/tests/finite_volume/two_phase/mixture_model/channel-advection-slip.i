@@ -179,12 +179,6 @@ velocity_interp_method = 'rc'
     variable = pressure
     function = '0'
   []
-  [inlet_phase_1]
-    type = FVDirichletBC
-    boundary = 'left'
-    variable = phase_1
-    value = '${fparse 1.0 - inlet_phase_2}'
-  []
   [inlet_phase_2]
     type = FVDirichletBC
     boundary = 'left'
@@ -194,12 +188,6 @@ velocity_interp_method = 'rc'
 []
 
 [AuxVariables]
-  [vel_slip_x]
-    type = MooseVariableFVReal
-  []
-  [vel_slip_y]
-    type = MooseVariableFVReal
-  []
   [drag_coefficient]
     type = MooseVariableFVReal
   []
@@ -209,36 +197,9 @@ velocity_interp_method = 'rc'
   [mu_mixture_var]
     type = MooseVariableFVReal
   []
-  [phase_1]
-    type = MooseVariableFVReal
-  []
 []
 
 [AuxKernels]
-  [populate_u_slip]
-    type = WCNSFV2PSlipVelocityAux
-    variable = 'vel_slip_x'
-    momentum_component = 'x'
-    u = 'vel_x'
-    v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
-    rho_d = ${rho_d}
-    particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
-  []
-  [populate_v_slip]
-    type = WCNSFV2PSlipVelocityAux
-    variable = 'vel_slip_y'
-    momentum_component = 'y'
-    u = 'vel_x'
-    v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
-    rho_d = ${rho_d}
-    particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
-  []
   [populate_cd]
     type = FunctorAux
     variable = drag_coefficient
@@ -254,15 +215,45 @@ velocity_interp_method = 'rc'
     variable = mu_mixture_var
     functor = 'mu_mixture'
   []
-  [compute_phase_1]
-    type = ParsedAux
-    variable = phase_1
-    coupled_variables = 'phase_2'
-    expression = '1 - phase_2'
-  []
 []
 
-[Materials]
+[FunctorMaterials]
+  [phase_1]
+    property_name = 'phase_1'
+    type = ADParsedFunctorMaterial
+    functor_names = 'phase_2'
+    expression = '1 - phase_2'
+    outputs = 'out'
+    output_properties = 'phase_1'
+  []
+  [populate_u_slip]
+    type = WCNSFV2PSlipVelocityFunctorMaterial
+    slip_velocity_name = 'vel_slip_x'
+    momentum_component = 'x'
+    u = 'vel_x'
+    v = 'vel_y'
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+    outputs = 'out'
+    output_properties = 'vel_slip_x'
+  []
+  [populate_v_slip]
+    type = WCNSFV2PSlipVelocityFunctorMaterial
+    slip_velocity_name = 'vel_slip_y'
+    momentum_component = 'y'
+    u = 'vel_x'
+    v = 'vel_y'
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+    outputs = 'out'
+    output_properties = 'vel_slip_y'
+  []
   [CD]
     type = NSFVDispersePhaseDragFunctorMaterial
     rho = 'rho_mixture'
@@ -272,7 +263,7 @@ velocity_interp_method = 'rc'
     particle_diameter = ${dp}
   []
   [mixing_material]
-    type = NSFVMixtureMaterial
+    type = NSFVMixtureFunctorMaterial
     phase_2_names = '${rho} ${mu}'
     phase_1_names = '${rho_d} ${mu_d}'
     prop_names = 'rho_mixture mu_mixture'
@@ -296,14 +287,9 @@ velocity_interp_method = 'rc'
 []
 
 [Outputs]
-  print_linear_residuals = true
-  print_nonlinear_residuals = true
   [out]
     type = Exodus
     hide = 'Re lin cum_lin'
-  []
-  [perf]
-    type = PerfGraphOutput
   []
 []
 

@@ -48,7 +48,7 @@ g = -9.81
     pressure = pressure
   []
   [pin_pressure]
-    type = NSFVPressurePin
+    type = NSPressurePin
     variable = pressure
     pin_type = point-value
     point = '0 0 0'
@@ -186,12 +186,6 @@ g = -9.81
     family = MONOMIAL
     fv = true
   []
-  [vel_slip_x]
-    type = MooseVariableFVReal
-  []
-  [vel_slip_y]
-    type = MooseVariableFVReal
-  []
   [drag_coefficient]
     type = MooseVariableFVReal
   []
@@ -199,9 +193,6 @@ g = -9.81
     type = MooseVariableFVReal
   []
   [mu_mixture_var]
-    type = MooseVariableFVReal
-  []
-  [phase_1]
     type = MooseVariableFVReal
   []
 []
@@ -212,30 +203,6 @@ g = -9.81
     variable = U
     x = vel_x
     y = vel_y
-  []
-  [populate_u_slip]
-    type = WCNSFV2PSlipVelocityAux
-    variable = 'vel_slip_x'
-    momentum_component = 'x'
-    u = 'vel_x'
-    v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
-    rho_d = ${rho_d}
-    particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
-  []
-  [populate_v_slip]
-    type = WCNSFV2PSlipVelocityAux
-    variable = 'vel_slip_y'
-    momentum_component = 'y'
-    u = 'vel_x'
-    v = 'vel_y'
-    rho = ${rho}
-    mu = 'mu_mixture'
-    rho_d = ${rho_d}
-    particle_diameter = ${dp}
-    linear_coef_name = 'Darcy_coefficient'
   []
   [populate_cd]
     type = FunctorAux
@@ -252,15 +219,39 @@ g = -9.81
     variable = mu_mixture_var
     functor = 'mu_mixture'
   []
-  [compute_phase_1]
-    type = ParsedAux
-    variable = phase_1
-    coupled_variables = 'phase_2'
-    expression = '1 - phase_2'
-  []
 []
 
-[Materials]
+[FunctorMaterials]
+  [populate_u_slip]
+    type = WCNSFV2PSlipVelocityFunctorMaterial
+    slip_velocity_name = 'vel_slip_x'
+    momentum_component = 'x'
+    u = 'vel_x'
+    v = 'vel_y'
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+  []
+  [populate_v_slip]
+    type = WCNSFV2PSlipVelocityFunctorMaterial
+    slip_velocity_name = 'vel_slip_y'
+    momentum_component = 'y'
+    u = 'vel_x'
+    v = 'vel_y'
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+  []
+  [compute_phase_1]
+    type = ADParsedFunctorMaterial
+    property_name = phase_1
+    functor_names = 'phase_2'
+    expression = '1 - phase_2'
+  []
   [CD]
     type = NSFVDispersePhaseDragFunctorMaterial
     rho = 'rho_mixture'
@@ -270,7 +261,7 @@ g = -9.81
     particle_diameter = ${dp}
   []
   [mixing_material]
-    type = NSFVMixtureMaterial
+    type = NSFVMixtureFunctorMaterial
     phase_1_names = '${rho_d} ${mu_d}'
     phase_2_names = '${rho} ${mu}'
     prop_names = 'rho_mixture mu_mixture'
@@ -304,13 +295,13 @@ g = -9.81
     value_type = min
   []
   [max_x_slip_velocity]
-    type = ElementExtremeValue
-    variable = 'vel_slip_x'
+    type = ElementExtremeFunctorValue
+    functor = 'vel_slip_x'
     value_type = max
   []
   [max_y_slip_velocity]
-    type = ElementExtremeValue
-    variable = 'vel_slip_y'
+    type = ElementExtremeFunctorValue
+    functor = 'vel_slip_y'
     value_type = max
   []
   [max_drag_coefficient]
@@ -341,11 +332,10 @@ g = -9.81
     dt = 1e-3
   []
   nl_max_its = 10
-  steady_state_detection = true
-  steady_state_tolerance = 1e-10
   nl_rel_tol = 1e-03
-  nl_abs_tol = 1e-11
+  nl_abs_tol = 1e-9
   l_max_its = 5
+  end_time = 1e8
 []
 
 [Outputs]

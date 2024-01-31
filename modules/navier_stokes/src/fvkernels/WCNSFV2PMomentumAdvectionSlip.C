@@ -48,7 +48,7 @@ WCNSFV2PMomentumAdvectionSlip::WCNSFV2PMomentumAdvectionSlip(const InputParamete
 }
 
 void
-WCNSFV2PMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
+WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
 {
   mooseAssert(!skipForBoundary(fi),
               "We shouldn't get in here if we're supposed to skip for a boundary");
@@ -192,31 +192,4 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
   _an *= fi.faceArea() * fi.faceCoord();
   _elem_residual *= fi.faceArea() * fi.faceCoord();
   _neighbor_residual *= fi.faceArea() * fi.faceCoord();
-}
-
-void
-WCNSFV2PMomentumAdvectionSlip::computeResidual(const FaceInfo & fi)
-{
-  if (skipForBoundary(fi))
-    return;
-
-  computeResidualsAndADataSlip(fi);
-
-  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    // residual contribution of this kernel to the elem element
-    prepareVectorTag(_assembly, _var.number());
-    _local_re(0) = MetaPhysicL::raw_value(_elem_residual);
-    accumulateTaggedLocalResidual();
-  }
-
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    // residual contribution of this kernel to the neighbor element
-    prepareVectorTagNeighbor(_assembly, _var.number());
-    _local_re(0) = MetaPhysicL::raw_value(_neighbor_residual);
-    accumulateTaggedLocalResidual();
-  }
 }
