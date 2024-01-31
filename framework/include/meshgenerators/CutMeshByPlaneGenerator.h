@@ -83,6 +83,7 @@ protected:
    * cutting plane
    */
   void tet4ElemCutter(ReplicatedMesh & mesh,
+                      const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                       const dof_id_type elem_id,
                       const Point & plane_point,
                       const Point & plane_normal,

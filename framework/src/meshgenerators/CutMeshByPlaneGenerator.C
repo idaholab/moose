@@ -113,10 +113,15 @@ CutMeshByPlaneGenerator::generate()
                                                           false);
 
   std::vector<Node *> new_on_plane_nodes;
+  // We build the sideset information now, as we only need the information of the elements before
+  // cutting
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  const auto bdry_side_list = boundary_info.build_side_list();
   // Cut the TET4 Elements
   for (const auto & converted_elems_id_to_cut : converted_elems_ids_to_cut)
   {
     tet4ElemCutter(mesh,
+                   bdry_side_list,
                    converted_elems_id_to_cut,
                    _plane_point,
                    _plane_normal,
@@ -182,16 +187,17 @@ CutMeshByPlaneGenerator::nonDuplicateNodeCreator(ReplicatedMesh & mesh,
 }
 
 void
-CutMeshByPlaneGenerator::tet4ElemCutter(ReplicatedMesh & mesh,
-                                        const dof_id_type elem_id,
-                                        const Point & plane_point,
-                                        const Point & plane_normal,
-                                        const subdomain_id_type & block_id_to_remove,
-                                        std::vector<Node *> & new_on_plane_nodes)
+CutMeshByPlaneGenerator::tet4ElemCutter(
+    ReplicatedMesh & mesh,
+    const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+    const dof_id_type elem_id,
+    const Point & plane_point,
+    const Point & plane_normal,
+    const subdomain_id_type & block_id_to_remove,
+    std::vector<Node *> & new_on_plane_nodes)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  auto bdry_side_list = boundary_info.build_side_list();
   // Create a list of sidesets involving the element to be split
   // It might be complex to assign the boundary id to the new elements
   // In TET4, none of the four faces have the same normal vector
