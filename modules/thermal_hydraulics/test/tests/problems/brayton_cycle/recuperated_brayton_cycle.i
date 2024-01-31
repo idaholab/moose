@@ -152,9 +152,9 @@ hs_power = 105750
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [steel]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = 8050
     k = 45
     cp = 466
@@ -472,7 +472,8 @@ hs_power = 105750
     n_elems = ${fparse n_elems3/2}
     n_part_elems = 2
     names = recuperator
-    materials = steel
+    solid_properties = steel
+    solid_properties_T_ref = '300'
     inner_radius = ${D1}
   []
   # heat transfer from recuperator to cold leg
@@ -532,7 +533,8 @@ hs_power = 105750
     n_elems = ${n_elems4}
     n_part_elems = 2
     names = core
-    materials = steel
+    solid_properties = steel
+    solid_properties_T_ref = '300'
   []
   [total_power]
     type = TotalPower

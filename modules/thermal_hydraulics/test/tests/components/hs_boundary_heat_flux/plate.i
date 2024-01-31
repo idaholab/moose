@@ -22,9 +22,9 @@ E_change = ${fparse scale * heat_flux * A * t}
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = ${density}
     cp = ${specific_heat_capacity}
     k = ${conductivity}
@@ -42,7 +42,8 @@ E_change = ${fparse scale * heat_flux * A * t}
     depth = ${depth}
     widths = '${thickness}'
     n_part_elems = '10'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
     names = 'region'
 
     initial_T = ${T_hs}

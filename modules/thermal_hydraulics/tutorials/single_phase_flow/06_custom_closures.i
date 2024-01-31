@@ -129,9 +129,9 @@ m_dot_sec_in = 1. # kg/s
     block = hx/pri
   []
 []
-[HeatStructureMaterials]
+[SolidProperties]
   [steel]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = 8050
     k = 45
     cp = 466
@@ -178,7 +178,8 @@ m_dot_sec_in = 1. # kg/s
     n_elems = ${core_n_elems}
     names = 'block'
     widths = '${fparse core_dia / 2.}'
-    materials = 'steel'
+    solid_properties = 'steel'
+    solid_properties_T_ref = '300'
     n_part_elems = 3
   []
 
@@ -313,7 +314,8 @@ m_dot_sec_in = 1. # kg/s
       n_elems = ${hx_n_elems}
       widths = '${hx_wall_thickness}'
       n_part_elems = '3'
-      materials = 'steel'
+      solid_properties = 'steel'
+      solid_properties_T_ref = '300'
       names = '0'
       inner_radius = '${fparse hx_dia_inner / 2.}'
     []

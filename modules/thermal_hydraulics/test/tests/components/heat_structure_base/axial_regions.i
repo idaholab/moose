@@ -4,9 +4,9 @@
 # taken, and the output should show heat transfer only at the bottom 2
 # boundaries.
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 5
     cp = 300
     rho = 100
@@ -26,7 +26,8 @@
     names = 'radialregion'
     widths = '0.5'
     n_part_elems = '3'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
 
     initial_T = 300
   []

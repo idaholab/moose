@@ -10,7 +10,7 @@
 #include "ADSolidMaterial.h"
 #include "HeatConductionModel.h"
 
-registerMooseObject("ThermalHydraulicsApp", ADSolidMaterial);
+registerMooseObjectDeprecated("ThermalHydraulicsApp", ADSolidMaterial, "04/31/2024 24:00");
 
 InputParameters
 ADSolidMaterial::validParams()
@@ -33,6 +33,9 @@ ADSolidMaterial::ADSolidMaterial(const InputParameters & parameters)
     _temp(adCoupledValue("T")),
     _props(getUserObject<SolidMaterialProperties>("properties"))
 {
+  mooseDeprecated(
+      "Heat structure materials are deprecated in favor of SolidProperties objects, so this "
+      "Material should no longer be used. See heat structure documentation for more information.");
 }
 
 void

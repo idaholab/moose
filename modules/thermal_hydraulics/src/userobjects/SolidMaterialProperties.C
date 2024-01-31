@@ -9,7 +9,7 @@
 
 #include "SolidMaterialProperties.h"
 
-registerMooseObject("ThermalHydraulicsApp", SolidMaterialProperties);
+registerMooseObjectDeprecated("ThermalHydraulicsApp", SolidMaterialProperties, "04/31/2024 24:00");
 
 InputParameters
 SolidMaterialProperties::validParams()
@@ -41,6 +41,8 @@ SolidMaterialProperties::SolidMaterialProperties(const InputParameters & paramet
     _cp(isParamValid("Cp") ? getFunction("Cp") : getFunction("cp")),
     _rho(getFunction("rho"))
 {
+  mooseDeprecated("Heat structure materials are deprecated in favor of SolidProperties objects. "
+                  "See heat structure documentation for more information.");
 }
 
 void

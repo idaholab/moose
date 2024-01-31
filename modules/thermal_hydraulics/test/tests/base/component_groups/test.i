@@ -23,9 +23,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hx:wall]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -63,7 +63,8 @@
       type = HeatStructurePlate
       position = '0 0 0'
       orientation = '1 0 0'
-      materials = hx:wall
+      solid_properties = 'hx:wall'
+      solid_properties_T_ref = '300'
       n_elems = ${n_elems}
       length = ${length}
       n_part_elems = 1

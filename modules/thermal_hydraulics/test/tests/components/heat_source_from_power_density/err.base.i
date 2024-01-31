@@ -15,9 +15,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [fuel-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
@@ -35,7 +35,8 @@
     names = 'fuel'
     widths = '0.004096'
     n_part_elems = '1'
-    materials = 'fuel-mat'
+    solid_properties = 'fuel-mat'
+    solid_properties_T_ref = '300'
 
     initial_T = 559.15
   []

@@ -1,6 +1,6 @@
-[HeatStructureMaterials]
+[SolidProperties]
   [mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -23,7 +23,8 @@
     names = '0'
     widths = '1'
     n_part_elems = '1'
-    materials = 'mat'
+    solid_properties = 'mat'
+    solid_properties_T_ref = '300'
   []
 []
 

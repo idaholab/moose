@@ -57,9 +57,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hx:wall]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -134,7 +134,8 @@
     orientation = '1 0 0'
     length = 1
     n_elems = 1
-    materials = hx:wall
+    solid_properties = hx:wall
+    solid_properties_T_ref = '300'
     n_part_elems = 1
     names = 0
     widths = 1

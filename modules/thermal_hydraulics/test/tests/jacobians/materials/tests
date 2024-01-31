@@ -7,6 +7,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    no_error_deprecated = true
     issues = '#20662'
     design = 'ADSolidMaterial.md'
     requirement = 'The system shall be able to use the material property system to define solid properties for a solid energy equation.'
