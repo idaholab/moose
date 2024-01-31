@@ -82,7 +82,7 @@ HybridizedKernel::assemble()
     // still remember to swap back during stack unwinding. Stack is LIFO so this will be destructed
     // before fe_face_reinitd, so it's valid for us to pass it in here
     SwapBackSentinel sentinel(
-        _fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid, fe_face_reinitd);
+        _fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid, fe_face_reinitd, false);
 
     const auto & boundary_ids = _mesh.getBoundaryIDs(_current_elem, side);
     for (const auto bnd_id : boundary_ids)

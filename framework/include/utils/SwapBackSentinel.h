@@ -46,8 +46,12 @@ public:
   SwapBackSentinel(FEProblemBase & fe_problem,
                    SwapBackFunction func,
                    THREAD_ID tid,
-                   const bool & predicate)
-    : _fe_problem(fe_problem), _func(func), _thread_id(tid), _predicate(predicate)
+                   const bool & predicate,
+                   const bool store_pred_as_value = true)
+    : _fe_problem(fe_problem),
+      _func(func),
+      _thread_id(tid),
+      _predicate(store_pred_as_value ? (predicate ? _always_true : _always_false) : predicate)
   {
   }
 
@@ -70,5 +74,6 @@ private:
   SwapBackFunction _func;
   THREAD_ID _thread_id;
   static constexpr bool _always_true = true;
+  static constexpr bool _always_false = false;
   const bool & _predicate;
 };
