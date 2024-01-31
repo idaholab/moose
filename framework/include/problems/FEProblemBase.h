@@ -400,6 +400,7 @@ public:
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
                               const THREAD_ID tid) override;
+  void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID, const THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void reinitLowerDElem(const Elem * lower_d_elem,
                                 const THREAD_ID tid,

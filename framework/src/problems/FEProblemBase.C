@@ -1973,7 +1973,7 @@ FEProblemBase::reinitElem(const Elem * elem, const THREAD_ID tid)
 }
 
 void
-FEProblemBase::reinitElemPhys(const Elem * elem,
+FEProblemBase::reinitElemPhys(const Elem * const elem,
                               const std::vector<Point> & phys_points_in_elem,
                               const THREAD_ID tid)
 {
@@ -1994,7 +1994,20 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
 }
 
 void
-FEProblemBase::reinitElemFace(const Elem * elem, unsigned int side, const THREAD_ID tid)
+FEProblemBase::reinitElemFace(const Elem * const elem,
+                              const unsigned int side,
+                              const BoundaryID,
+                              const THREAD_ID tid)
+{
+  mooseDeprecated(
+      "reinitElemFace with a BoundaryID argument is deprecated because the boundary id was never "
+      "used. Please call reinitElemFace without the BoundaryID argument instead");
+
+  reinitElemFace(elem, side, tid);
+}
+
+void
+FEProblemBase::reinitElemFace(const Elem * const elem, const unsigned int side, const THREAD_ID tid)
 {
   for (const auto i : index_range(_solver_systems))
   {
