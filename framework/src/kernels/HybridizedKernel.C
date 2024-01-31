@@ -78,6 +78,12 @@ HybridizedKernel::assemble()
     // Whether we have reinitialized the finite element (libMesh FE) objects on the current face
     bool fe_face_reinitd = false;
 
+    // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
+    // still remember to swap back during stack unwinding. Stack is LIFO so this will be destructed
+    // before fe_face_reinitd, so it's valid for us to pass it in here
+    SwapBackSentinel sentinel(
+        _fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid, fe_face_reinitd);
+
     const auto & boundary_ids = _mesh.getBoundaryIDs(_current_elem, side);
     for (const auto bnd_id : boundary_ids)
       if (_hibc_warehouse.hasActiveBoundaryObjects(bnd_id, _tid))
@@ -86,12 +92,12 @@ HybridizedKernel::assemble()
 
         if (!fe_face_reinitd)
         {
+          fe_face_reinitd = true;
           // Do the whole shebang:
           // - reinit FE objects on the face
           // - compute variable values on the face
           // - compute material values, including values from face and boundary materials
           NonlinearThread::prepareFace(_fe_problem, _tid, _current_elem, side, _current_bnd_id);
-          fe_face_reinitd = true;
         }
         else
           // Only need to compute boundary materials; face materials have already been computed on
@@ -114,8 +120,11 @@ HybridizedKernel::assemble()
         _neigh && this->hasBlocks(_neigh->subdomain_id()))
     {
       if (!fe_face_reinitd)
+      {
+        fe_face_reinitd = true;
         NonlinearThread::prepareFace(
             _fe_problem, _tid, _current_elem, side, Moose::INVALID_BOUNDARY_ID);
+      }
 
       libmesh_assert(_current_side == side);
       onInternalSide();
