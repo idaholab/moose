@@ -141,7 +141,7 @@ CutMeshByPlaneGenerator::generate()
                                                           block_id_to_remove,
                                                           false);
 
-  std::vector<Node *> new_on_plane_nodes;
+  std::vector<const Node *> new_on_plane_nodes;
   // We build the sideset information now, as we only need the information of the elements before
   // cutting
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -201,9 +201,9 @@ CutMeshByPlaneGenerator::pointPairPlaneInterception(const Point & point1,
   return point1 + dist_ratio * (point2 - point1);
 }
 
-Node *
+const Node *
 CutMeshByPlaneGenerator::nonDuplicateNodeCreator(ReplicatedMesh & mesh,
-                                                 std::vector<Node *> & new_on_plane_nodes,
+                                                 std::vector<const Node *> & new_on_plane_nodes,
                                                  const Point & new_point)
 {
   for (const auto & new_on_plane_node : new_on_plane_nodes)
@@ -223,7 +223,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
     const Point & plane_point,
     const Point & plane_normal,
     const subdomain_id_type & block_id_to_remove,
-    std::vector<Node *> & new_on_plane_nodes)
+    std::vector<const Node *> & new_on_plane_nodes)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -253,10 +253,10 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
   }
 
   std::vector<PointPlaneRelationIndex> node_plane_relation(4);
-  std::vector<Node *> tet4_nodes(4);
-  std::vector<Node *> tet4_nodes_on_plane;
-  std::vector<Node *> tet4_nodes_outside_plane;
-  std::vector<Node *> tet4_nodes_inside_plane;
+  std::vector<const Node *> tet4_nodes(4);
+  std::vector<const Node *> tet4_nodes_on_plane;
+  std::vector<const Node *> tet4_nodes_outside_plane;
+  std::vector<const Node *> tet4_nodes_inside_plane;
   for (unsigned int i = 0; i < 4; i++)
   {
     tet4_nodes[i] = mesh.elem_ptr(elem_id)->node_ptr(i);
@@ -296,7 +296,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
     new_elements_created = true;
     if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 3)
     {
-      std::vector<Node *> new_plane_nodes;
+      std::vector<const Node *> new_plane_nodes;
       // A smaller TET4 element is created, this solution is unique
       for (const auto & tet4_node_outside_plane : tet4_nodes_outside_plane)
       {
@@ -307,16 +307,16 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
                 *tet4_node_outside_plane, *tet4_nodes_inside_plane[0], plane_point, plane_normal)));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
-      new_elem_tet4->set_node(0) = tet4_nodes_inside_plane[0];
-      new_elem_tet4->set_node(1) = new_plane_nodes[0];
-      new_elem_tet4->set_node(2) = new_plane_nodes[1];
-      new_elem_tet4->set_node(3) = new_plane_nodes[2];
+      new_elem_tet4->set_node(0) = const_cast<Node *>(tet4_nodes_inside_plane[0]);
+      new_elem_tet4->set_node(1) = const_cast<Node *>(new_plane_nodes[0]);
+      new_elem_tet4->set_node(2) = const_cast<Node *>(new_plane_nodes[1]);
+      new_elem_tet4->set_node(3) = const_cast<Node *>(new_plane_nodes[2]);
       new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 2)
     {
-      std::vector<Node *> new_plane_nodes;
+      std::vector<const Node *> new_plane_nodes;
       // 3 smaller TET3 elements are created
       for (const auto & tet4_node_outside_plane : tet4_nodes_outside_plane)
       {
@@ -329,31 +329,31 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
                   *tet4_node_outside_plane, *tet4_node_inside_plane, plane_point, plane_normal)));
         }
       }
-      std::vector<Node *> new_elems_nodes = {tet4_nodes_inside_plane[1],
-                                             new_plane_nodes[3],
-                                             new_plane_nodes[1],
-                                             tet4_nodes_inside_plane[0],
-                                             new_plane_nodes[2],
-                                             new_plane_nodes[0]};
+      std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[1],
+                                                   new_plane_nodes[3],
+                                                   new_plane_nodes[1],
+                                                   tet4_nodes_inside_plane[0],
+                                                   new_plane_nodes[2],
+                                                   new_plane_nodes[0]};
       std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-      std::vector<std::vector<Node *>> optimized_node_list;
+      std::vector<std::vector<const Node *>> optimized_node_list;
       MooseMeshElementConversionUtils::prismNodesToTetNodesDeterminer(
           new_elems_nodes, rotated_tet_face_indices, optimized_node_list);
 
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
         auto new_elem_tet4 = std::make_unique<Tet4>();
-        new_elem_tet4->set_node(0) = optimized_node_list[i][0];
-        new_elem_tet4->set_node(1) = optimized_node_list[i][1];
-        new_elem_tet4->set_node(2) = optimized_node_list[i][2];
-        new_elem_tet4->set_node(3) = optimized_node_list[i][3];
+        new_elem_tet4->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
+        new_elem_tet4->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
+        new_elem_tet4->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
+        new_elem_tet4->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
         new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
     else if (tet4_nodes_inside_plane.size() == 3 && tet4_nodes_outside_plane.size() == 1)
     {
-      std::vector<Node *> new_plane_nodes;
+      std::vector<const Node *> new_plane_nodes;
       // 3 smaller Tet4 elements are created
       for (const auto & tet4_node_inside_plane : tet4_nodes_inside_plane)
       {
@@ -363,24 +363,24 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
             pointPairPlaneInterception(
                 *tet4_node_inside_plane, *tet4_nodes_outside_plane[0], plane_point, plane_normal)));
       }
-      std::vector<Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
-                                             tet4_nodes_inside_plane[1],
-                                             tet4_nodes_inside_plane[2],
-                                             new_plane_nodes[0],
-                                             new_plane_nodes[1],
-                                             new_plane_nodes[2]};
+      std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
+                                                   tet4_nodes_inside_plane[1],
+                                                   tet4_nodes_inside_plane[2],
+                                                   new_plane_nodes[0],
+                                                   new_plane_nodes[1],
+                                                   new_plane_nodes[2]};
       std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-      std::vector<std::vector<Node *>> optimized_node_list;
+      std::vector<std::vector<const Node *>> optimized_node_list;
       MooseMeshElementConversionUtils::prismNodesToTetNodesDeterminer(
           new_elems_nodes, rotated_tet_face_indices, optimized_node_list);
 
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
         auto new_elem_tet4 = std::make_unique<Tet4>();
-        new_elem_tet4->set_node(0) = optimized_node_list[i][0];
-        new_elem_tet4->set_node(1) = optimized_node_list[i][1];
-        new_elem_tet4->set_node(2) = optimized_node_list[i][2];
-        new_elem_tet4->set_node(3) = optimized_node_list[i][3];
+        new_elem_tet4->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
+        new_elem_tet4->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
+        new_elem_tet4->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
+        new_elem_tet4->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
         new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
@@ -396,16 +396,16 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
                                                              plane_normal));
       // A smaller Tet4 is created, this solution is unique
       auto new_elem_tet4 = std::make_unique<Tet4>();
-      new_elem_tet4->set_node(0) = new_plane_node;
-      new_elem_tet4->set_node(1) = tet4_nodes_on_plane[0];
-      new_elem_tet4->set_node(2) = tet4_nodes_on_plane[1];
-      new_elem_tet4->set_node(3) = tet4_nodes_inside_plane[0];
+      new_elem_tet4->set_node(0) = const_cast<Node *>(new_plane_node);
+      new_elem_tet4->set_node(1) = const_cast<Node *>(tet4_nodes_on_plane[0]);
+      new_elem_tet4->set_node(2) = const_cast<Node *>(tet4_nodes_on_plane[1]);
+      new_elem_tet4->set_node(3) = const_cast<Node *>(tet4_nodes_inside_plane[0]);
       new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 2)
     {
-      std::vector<Node *> new_plane_nodes;
+      std::vector<const Node *> new_plane_nodes;
       // A smaller Tet4 element is created, this solution is unique
       for (const auto & tet4_node_outside_plane : tet4_nodes_outside_plane)
       {
@@ -416,16 +416,16 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
                 *tet4_node_outside_plane, *tet4_nodes_inside_plane[0], plane_point, plane_normal)));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
-      new_elem_tet4->set_node(0) = new_plane_nodes[0];
-      new_elem_tet4->set_node(1) = new_plane_nodes[1];
-      new_elem_tet4->set_node(2) = tet4_nodes_on_plane[0];
-      new_elem_tet4->set_node(3) = tet4_nodes_inside_plane[0];
+      new_elem_tet4->set_node(0) = const_cast<Node *>(new_plane_nodes[0]);
+      new_elem_tet4->set_node(1) = const_cast<Node *>(new_plane_nodes[1]);
+      new_elem_tet4->set_node(2) = const_cast<Node *>(tet4_nodes_on_plane[0]);
+      new_elem_tet4->set_node(3) = const_cast<Node *>(tet4_nodes_inside_plane[0]);
       new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 1)
     {
-      std::vector<Node *> new_plane_nodes;
+      std::vector<const Node *> new_plane_nodes;
       // 2 smaller TET4 elements are created
       for (const auto & tet4_node_inside_plane : tet4_nodes_inside_plane)
       {
@@ -435,23 +435,23 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
             pointPairPlaneInterception(
                 *tet4_node_inside_plane, *tet4_nodes_outside_plane[0], plane_point, plane_normal)));
       }
-      std::vector<Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
-                                             tet4_nodes_inside_plane[1],
-                                             new_plane_nodes[1],
-                                             new_plane_nodes[0],
-                                             tet4_nodes_on_plane[0]};
+      std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
+                                                   tet4_nodes_inside_plane[1],
+                                                   new_plane_nodes[1],
+                                                   new_plane_nodes[0],
+                                                   tet4_nodes_on_plane[0]};
       std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-      std::vector<std::vector<Node *>> optimized_node_list;
+      std::vector<std::vector<const Node *>> optimized_node_list;
       MooseMeshElementConversionUtils::pyramidNodesToTetNodesDeterminer(
           new_elems_nodes, rotated_tet_face_indices, optimized_node_list);
 
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
         auto new_elem_tet4 = std::make_unique<Tet4>();
-        new_elem_tet4->set_node(0) = optimized_node_list[i][0];
-        new_elem_tet4->set_node(1) = optimized_node_list[i][1];
-        new_elem_tet4->set_node(2) = optimized_node_list[i][2];
-        new_elem_tet4->set_node(3) = optimized_node_list[i][3];
+        new_elem_tet4->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
+        new_elem_tet4->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
+        new_elem_tet4->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
+        new_elem_tet4->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
         new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }

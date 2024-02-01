@@ -82,9 +82,9 @@ std::vector<unsigned int> neighborNodeIndicesHEX8(unsigned int min_id_index);
  * element corresponding to the faces of the newly created TET4 elements
  * @param tet_nodes_list a vector of vectors of pointers to the nodes that can form TET4 elements
  */
-void hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
+void hexNodesToTetNodesDeterminer(std::vector<const Node *> & hex_nodes,
                                   std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
-                                  std::vector<std::vector<Node *>> & tet_nodes_list);
+                                  std::vector<std::vector<const Node *>> & tet_nodes_list);
 
 /**
  * For a HEX8 element, determine the direction of the diagonal line of each face that involves the
@@ -92,7 +92,7 @@ void hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
  * @param hex_nodes A vector of pointers to the nodes that can form a HEX8 element
  * @return a vector of boolean values indicating the direction of the diagonal line of each face
  */
-std::vector<bool> quadFaceDiagonalDirectionsHex(const std::vector<Node *> & hex_nodes);
+std::vector<bool> quadFaceDiagonalDirectionsHex(const std::vector<const Node *> & hex_nodes);
 
 /**
  * For a QUAD4 element, determine the direction of the diagonal line that involves the node with
@@ -100,7 +100,7 @@ std::vector<bool> quadFaceDiagonalDirectionsHex(const std::vector<Node *> & hex_
  * @param quad_nodes A vector of pointers to the nodes that can form a QUAD4 element
  * @return a boolean value indicating the direction of the diagonal line
  */
-bool quadFaceDiagonalDirection(const std::vector<Node *> & quad_nodes);
+bool quadFaceDiagonalDirection(const std::vector<const Node *> & quad_nodes);
 
 /**
  * Creates sets of four nodes indices that can form TET4 elements to replace the original HEX8
@@ -137,9 +137,9 @@ void nodeRotationPRISM6(unsigned int min_id_index,
  * @param tet_nodes_list a vector of vectors of pointers to the nodes that can form TET4 elements
  */
 void
-prismNodesToTetNodesDeterminer(std::vector<Node *> & prism_nodes,
+prismNodesToTetNodesDeterminer(std::vector<const Node *> & prism_nodes,
                                std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
-                               std::vector<std::vector<Node *>> & tet_nodes_list);
+                               std::vector<std::vector<const Node *>> & tet_nodes_list);
 
 /**
  * Creates sets of four nodes indices that can form TET4 elements to replace the original PRISM6
@@ -176,9 +176,9 @@ void nodeRotationPYRAMID5(unsigned int min_id_index,
  * @param tet_nodes_list a vector of vectors of pointers to the nodes that can form TET4 elements
  */
 void
-pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
+pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
                                  std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
-                                 std::vector<std::vector<Node *>> & tet_nodes_list);
+                                 std::vector<std::vector<const Node *>> & tet_nodes_list);
 
 /**
  * Convert all the elements in a 3D mesh, consisting of only linear elements, into TET4 elements.

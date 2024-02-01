@@ -89,7 +89,7 @@ protected:
                       const Point & plane_point,
                       const Point & plane_normal,
                       const subdomain_id_type & block_id_to_remove,
-                      std::vector<Node *> & new_on_plane_nodes);
+                      std::vector<const Node *> & new_on_plane_nodes);
 
   /**
    * Check if a position on a plane has already been used as a node in the mesh. If so, return the
@@ -100,7 +100,7 @@ protected:
    * @param new_point The position of the potential new node
    * @return a pointer to the existing node or the newly created node
    */
-  Node * nonDuplicateNodeCreator(ReplicatedMesh & mesh,
-                                 std::vector<Node *> & new_on_plane_nodes,
-                                 const Point & new_point);
+  const Node * nonDuplicateNodeCreator(ReplicatedMesh & mesh,
+                                       std::vector<const Node *> & new_on_plane_nodes,
+                                       const Point & new_point);
 };
