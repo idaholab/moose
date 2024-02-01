@@ -13,6 +13,16 @@
     requirement = 'The system shall support the generation of meshes in a data-driven mode, where not each step in the generation tree is required to produce a physical mesh and can instead only produce metadata'
   []
 
+  [subgenerator_no_data_only]
+    type = 'Exodiff'
+    input = 'subgenerator_no_data_only.i'
+    cli_args = '--mesh-only'
+    exodiff = 'subgenerator_no_data_only_in.e'
+    recover = false
+
+    requirement = 'The system shall support the generation of subgenerators of the data-driven generator without data only mode'
+  []
+
   [errors]
     requirement = 'The system shall report a reasonable error when generating a mesh with data-driven capabilities when'
 

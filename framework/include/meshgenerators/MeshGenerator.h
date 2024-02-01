@@ -181,6 +181,11 @@ public:
    */
   bool hasGenerateData() const { return hasGenerateData(_pars); }
 
+  /**
+   * @return If this generator was created as a subgenerator, the generator that created it
+   */
+  const MeshGenerator * getSubgeneratorChild() const { return _subgenerator_child; }
+
 protected:
   /**
    * Generate the mesh data
@@ -437,6 +442,9 @@ private:
 
   /// A user-defined name to save the mesh
   const std::string & _save_with_name;
+
+  /// Whether or not this mesh generator is a subgenerator
+  const MeshGenerator * _subgenerator_child;
 };
 
 template <typename T, typename... Args>

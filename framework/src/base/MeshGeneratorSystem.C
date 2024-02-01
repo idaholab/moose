@@ -361,6 +361,21 @@ MeshGeneratorSystem::executeMeshGenerators()
       const auto & generator = *name_generator_pair.second;
       if (generator.isChildMeshGenerator(data_driven_generator_name, false))
       {
+        // Do not run any subgenerators created by the data driven generator in data only
+        const MeshGenerator * subgenerator_child = generator.getSubgeneratorChild();
+        bool skip_subgenerator_of_data_driven_generator = false;
+        while (subgenerator_child)
+        {
+          if (subgenerator_child->name() == data_driven_generator_name)
+          {
+            skip_subgenerator_of_data_driven_generator = true;
+            break;
+          }
+          subgenerator_child = subgenerator_child->getSubgeneratorChild();
+        }
+        if (skip_subgenerator_of_data_driven_generator)
+          continue;
+
         if (!generator.hasGenerateData())
           moose_mesh->paramError(data_driven_generator_param,
                                  "The generator '",

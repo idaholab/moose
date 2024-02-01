@@ -44,6 +44,7 @@ MeshGenerator::validParams()
 
   params.addPrivateParam<bool>("_has_generate_data", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
+  params.addPrivateParam<const MeshGenerator *>("_subgenerator_child", nullptr);
 
   return params;
 }
@@ -53,7 +54,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
     MeshMetaDataInterface(this),
     _mesh(getParam<MooseMesh *>("_moose_mesh") ? getParam<MooseMesh *>("_moose_mesh")
                                                : _app.actionWarehouse().mesh().get()),
-    _save_with_name(getParam<std::string>("save_with_name"))
+    _save_with_name(getParam<std::string>("save_with_name")),
+    _subgenerator_child(getParam<const MeshGenerator *>("_subgenerator_child"))
 {
   if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
     paramError(
@@ -325,6 +327,7 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
 
   // In case the user forgot it
   params.set<MooseApp *>("_moose_app") = &_app;
+  params.set<const MeshGenerator *>("_subgenerator_child") = this;
 
   _app.addMeshGenerator(type, name, params);
   _sub_mesh_generators.insert(&std::as_const(_app).getMeshGenerator(name));
