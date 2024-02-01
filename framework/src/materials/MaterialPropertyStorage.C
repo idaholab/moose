@@ -331,7 +331,7 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
       }
     }
 
-    if (stateful)
+    if (stateful || mat->forceStatefulInit())
       stateful_mats.push_back(mat.get());
   }
 
@@ -348,24 +348,10 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
   // Initialize properties
   for (auto mat : stateful_mats)
   {
-    // Initialize from restart if available
-    if (auto stateful_id_datum_pair_it = materials_to_restart.find(mat);
-        stateful_id_datum_pair_it != materials_to_restart.end())
-    {
-      // Need data in _storage
-      if (swapped)
-      {
-        swapBack(tid, elem, side);
-        swapped = false;
-      }
+    const auto materials_to_restart_find = materials_to_restart.find(mat);
+    const bool restart = materials_to_restart_find != materials_to_restart.end();
 
-      // Load from the cached binary backup into place
-      for (auto & [stateful_id, datum_ptr] : stateful_id_datum_pair_it->second)
-        for (const auto state : index_range(*datum_ptr))
-          dataLoad((*datum_ptr)[state], (*props[state])[stateful_id], nullptr);
-    }
-    // No restart data available, so use initQpStatefulProperties()
-    else
+    if (!restart || mat->forceStatefulInit())
     {
       // Need stateful _material_data in the material to store
       if (!swapped)
@@ -375,6 +361,21 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
       }
 
       mat->initStatefulProperties(n_qpoints);
+    }
+
+    if (restart)
+    {
+      // Need data in _storage
+      if (swapped)
+      {
+        swapBack(tid, elem, side);
+        swapped = false;
+      }
+
+      // Load from the cached binary backup into place
+      for (auto & [stateful_id, datum_ptr] : materials_to_restart_find->second)
+        for (const auto state : index_range(*datum_ptr))
+          dataLoad((*datum_ptr)[state], (*props[state])[stateful_id], nullptr);
     }
   }
 

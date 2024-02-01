@@ -45,6 +45,11 @@ MaterialBase::validParams()
   params.addPrivateParam<bool>("_neighbor", false);
   params.addPrivateParam<bool>("_interface", false);
 
+  // Forces the calling of initStatefulProperties() even when this material
+  // does not declare any properties that are stateful. Right now,
+  // this is only used for porous_flow... pretty please keep it that way?
+  params.addPrivateParam<bool>("_force_stateful_init", false);
+
   // Outputs
   params += OutputInterface::validParams();
   params.set<std::vector<OutputName>>("outputs") = {"none"};
@@ -106,7 +111,8 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
     _has_stateful_property(false),
-    _declare_suffix(getParam<MaterialPropertyName>("declare_suffix"))
+    _declare_suffix(getParam<MaterialPropertyName>("declare_suffix")),
+    _force_stateful_init(getParam<bool>("_force_stateful_init"))
 {
 }
 
