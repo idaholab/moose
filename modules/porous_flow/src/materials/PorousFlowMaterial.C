@@ -26,6 +26,11 @@ PorousFlowMaterial::validParams()
   params.addPrivateParam<std::string>("pf_material_type", "pf_material");
   params.addClassDescription("This generalises MOOSE's Material class to allow for Materials that "
                              "hold information related to the nodes in the finite element");
+
+  // Needed due to the custom tomfoolery going on with nodal material sizing in
+  // initStatefulProperties()
+  params.set<bool>("_force_stateful_init") = true;
+
   return params;
 }
 
