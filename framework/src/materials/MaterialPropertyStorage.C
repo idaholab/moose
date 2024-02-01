@@ -70,13 +70,6 @@ MaterialPropertyStorage::queryStatefulPropName(const unsigned int id) const
   return {};
 }
 
-bool
-MaterialPropertyStorage::isStatefulProp(const std::string & prop_name) const
-{
-  const auto id = _registry.getID(prop_name);
-  return _prop_records.size() > id && _prop_records[id] && _prop_records[id]->stateful();
-}
-
 void
 MaterialPropertyStorage::eraseProperty(const Elem * elem)
 {
@@ -89,6 +82,15 @@ MaterialPropertyStorage::setRestartInPlace()
 {
   _restart_in_place = true;
   _restartable_map.clear();
+}
+
+const MaterialPropertyStorage::PropRecord &
+MaterialPropertyStorage::getPropRecord(const unsigned int id) const
+{
+  mooseAssert(_prop_records.size() > id, "Invalid ID");
+  auto & prop_record_ptr = _prop_records[id];
+  mooseAssert(prop_record_ptr, "Not initialized");
+  return *prop_record_ptr;
 }
 
 void
@@ -117,14 +119,12 @@ MaterialPropertyStorage::updateStatefulPropsForPRefinement(
   mooseAssert(elem.processor_id() == pid, "Prolongation should be occurring locally");
   mooseAssert(p_refinement_map.size() == n_qpoints, "Refinement map not proper size");
 
-  initProps(tid, &elem, side, n_qpoints);
+  auto current_p_level_props = initProps(tid, &elem, side, n_qpoints);
 
   for (const auto state : stateIndexRange())
-  {
-    auto & props = setProps(&elem, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
     {
-      auto & current_p_level_prop = props[i];
+      auto & current_p_level_prop = (*current_p_level_props[state])[i];
       // We need to clone this property in order to not overwrite the values we're going to be
       // reading from
       auto previous_p_level_prop = current_p_level_prop.clone(current_p_level_prop.size());
@@ -136,7 +136,6 @@ MaterialPropertyStorage::updateStatefulPropsForPRefinement(
       for (const auto qp : index_range(p_refinement_map))
         current_p_level_prop.qpCopy(qp, *previous_p_level_prop, p_refinement_map[qp]._to);
     }
-  }
 }
 
 void
@@ -197,15 +196,14 @@ MaterialPropertyStorage::prolongStatefulProps(
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];
 
-    initProps(tid, child_elem, child_side, n_qpoints);
+    auto child_props = initProps(tid, child_elem, child_side, n_qpoints);
 
     for (const auto state : stateIndexRange())
     {
       const auto & parent_props = parent_material_props.props(&elem, parent_side, state);
-      auto & child_props = setProps(child_elem, child_side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
         for (const auto qp : index_range(refinement_map[child]))
-          child_props[i].qpCopy(qp, parent_props[i], child_map[qp]._to);
+          (*child_props[state])[i].qpCopy(qp, parent_props[i], child_map[qp]._to);
     }
   }
 }
@@ -237,11 +235,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     n_qpoints = qrule_face.n_points();
   }
 
-  initProps(tid, &elem, side, n_qpoints);
-
-  std::vector<MaterialProperties *> parent_props(numStates());
-  for (const auto state : stateIndexRange())
-    parent_props[state] = &setProps(&elem, side, state);
+  auto parent_props = initProps(tid, &elem, side, n_qpoints);
 
   // Copy from the child stateful properties
   for (const auto qp : index_range(coarsening_map))
@@ -270,56 +264,95 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
                                            const Elem & elem,
                                            const unsigned int side /* = 0*/)
 {
-  // NOTE: since materials are storing their computed properties in MaterialData class, we need to
-  // juggle the memory between MaterialData and MaterialProperyStorage classes
+  std::unordered_map<const MaterialBase *,
+                     std::vector<std::pair<unsigned int, std::vector<std::stringstream> *>>>
+      materials_to_restart;
+  std::set<unsigned int> restarted_stateful_ids;
+  RestartableMapType::mapped_type * restartable_entry = nullptr;
+  if (_restartable_map.size())
+    if (auto it = _restartable_map.find(std::make_pair(&elem, side)); it != _restartable_map.end())
+      restartable_entry = &it->second;
+
+  std::vector<MaterialBase *> stateful_mats;
+  std::vector<unsigned int> stateful_ids;
+  for (const auto & mat : mats)
+  {
+    bool stateful = true;
+    for (const auto id : mat->getSuppliedPropIDs())
+    {
+      const auto & record = getPropRecord(id);
+      if (record.stateful())
+      {
+        const auto stateful_id = record.stateful_id;
+
+        stateful_ids.push_back(record.stateful_id);
+        stateful = true;
+
+        if (restartable_entry)
+        {
+          if (auto id_datum_pair_it = restartable_entry->find(stateful_id);
+              id_datum_pair_it != restartable_entry->end())
+            materials_to_restart[mat.get()].emplace_back(stateful_id, &id_datum_pair_it->second);
+          restarted_stateful_ids.insert(stateful_id);
+        }
+      }
+    }
+    if (stateful)
+      stateful_mats.push_back(mat.get());
+  }
 
   auto props = initProps(tid, &elem, side, n_qpoints);
 
-  // copy from storage to material data
-  swap(tid, elem, side);
-  // run custom init on properties
-  for (const auto & mat : mats)
-    mat->initStatefulProperties(n_qpoints);
+  // Whether or not we have swapped material data from _storage to _material_data
+  // When we're initializing from initStatefulProperties, the MaterialBase objects
+  // need to be able to access the data in _material_data. When we're initalizing
+  // from restart, we need to be able to access from _storage.
+  bool swapped = false;
 
-  swapBack(tid, elem, side);
-
-  if (!hasStatefulProperties())
+  // Initialize properties
+  for (auto mat : stateful_mats)
   {
-    mooseAssert(_restartable_map.empty(), "Should be empty");
-    return;
+    // Initialize from restart if available
+    if (auto stateful_id_datum_pair_it = materials_to_restart.find(mat);
+        stateful_id_datum_pair_it != materials_to_restart.end())
+    {
+      // Need data in _storage
+      if (swapped)
+      {
+        swapBack(tid, elem, side);
+        swapped = false;
+      }
+
+      // Load from the cached backup into place
+      for (auto & [stateful_id, datum_ptr] : stateful_id_datum_pair_it->second)
+      {
+        for (const auto state : index_range(*datum_ptr))
+          dataLoad((*datum_ptr)[state], (*props[state])[stateful_id], nullptr);
+        restarted_stateful_ids.insert(stateful_id);
+      }
+    }
+    // No restart data available, so use initQpStatefulProperties()
+    else
+    {
+      // Need stateful _material_data in the material to store
+      if (!swapped)
+      {
+        swap(tid, elem, side);
+        swapped = true;
+      }
+
+      mat->initStatefulProperties(n_qpoints);
+    }
   }
 
-  // If we have stateful restart data to load in that we couldn't previously (because we haven't
-  // called initProps() to init the dynamic data), do it now
-  std::set<unsigned int> restarted_stateful_props;
-  if (auto it = _restartable_map.find(std::make_pair(&elem, side)); it != _restartable_map.end())
-    for (auto & entry : it->second)
-    {
-      if (n_qpoints != entry.num_q_points)
-        mooseError("The stateful material '",
-                   _registry.getName(_stateful_prop_id_to_prop_id[entry.stateful_id]),
-                   "' was stored in restart with ",
-                   entry.num_q_points,
-                   " quadrature points but has been initialized with ",
-                   n_qpoints);
-
-      dataLoad(entry.data, (*props[entry.state])[entry.stateful_id], nullptr);
-      restarted_stateful_props.insert(entry.stateful_id);
-    }
-
-  // This second call to initProps covers cases where code in
-  // "init[Qp]StatefulProperties" may have called a get/declare for a stateful
-  // property affecting the _stateful_prop_id_to_prop_id vector among other
-  // things.  This is necessary because a call to
-  // getMaterialProperty[Old/Older] can potentially trigger a material to
-  // become stateful that previously wasn't.  This needs to go after the
-  // swapBack.
-  props = initProps(tid, &elem, side, n_qpoints);
+  // Done with accessing from _material_data
+  if (swapped)
+    swapBack(tid, elem, side);
 
   // Copy to older states as needed, only for non-restarted data
-  for (const auto state : statefulIndexRange())
-    for (const auto stateful_id : index_range(_stateful_prop_id_to_prop_id))
-      if (!restarted_stateful_props.count(stateful_id))
+  for (const auto stateful_id : stateful_ids)
+    if (!restarted_stateful_ids.count(stateful_id))
+      for (const auto state : statefulIndexRange())
         for (const auto qp : make_range(n_qpoints))
           (*props[state])[stateful_id].qpCopy(qp, (*props[0])[stateful_id], qp);
 }
@@ -356,15 +389,14 @@ MaterialPropertyStorage::copy(const THREAD_ID tid,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  initProps(tid, elem_to, side, n_qpoints);
+  auto to_props = initProps(tid, elem_to, side, n_qpoints);
 
   for (const auto state : stateIndexRange())
   {
     const auto & from_props = props(elem_from, side, state);
-    auto & to_props = setProps(elem_to, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
       for (const auto qp : make_range(n_qpoints))
-        to_props[i].qpCopy(qp, from_props[i], qp);
+        (*to_props[state])[i].qpCopy(qp, from_props[i], qp);
   }
 }
 
@@ -424,17 +456,19 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name,
 
   // Fill the record
   auto & record = *_prop_records[prop_id];
-  if (declarer)
-    record.declarer = declarer;
-  if (state > record.state)
-    record.state = state;
   record.type = type.name();
+  if (declarer)
+    record.declarer_type_and_names.emplace(declarer->type(), declarer->name());
+  record.state = std::max(state, record.state);
 
   // Keep track of stateful props by quick access
   if (state > 0 && std::find(_stateful_prop_id_to_prop_id.begin(),
                              _stateful_prop_id_to_prop_id.end(),
                              prop_id) == _stateful_prop_id_to_prop_id.end())
+  {
     _stateful_prop_id_to_prop_id.push_back(prop_id);
+    record.stateful_id = _stateful_prop_id_to_prop_id.size() - 1;
+  }
 
   return prop_id;
 }
@@ -695,13 +729,9 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
                      "\nCurrent states: ",
                      to_record.state);
 
-        const auto find_prop_id = std::find(storage._stateful_prop_id_to_prop_id.begin(),
-                                            storage._stateful_prop_id_to_prop_id.end(),
-                                            to_prop_id);
-        mooseAssert(find_prop_id != storage._stateful_prop_id_to_prop_id.end(), "Not found");
+        const auto to_stateful_id = storage.getPropRecord(to_prop_id).stateful_id;
+        mooseAssert(to_stateful_id != invalid_uint, "Not stateful");
 
-        const std::size_t to_stateful_id =
-            std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
         to_stateful_ids[from_stateful_id] = to_stateful_id;
 
         if (storage._recovering)
@@ -767,11 +797,11 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
               if (!restart_entry)
                 restart_entry = &storage._restartable_map[std::make_pair(elem, side)];
 
-              auto & entry = restart_entry->emplace_back();
-              entry.stateful_id = to_stateful_id;
-              entry.state = state;
-              entry.num_q_points = num_q_points;
-              entry.data = std::move(data);
+              auto & mat_entry = (*restart_entry)[to_stateful_id];
+              if (state >= mat_entry.size())
+                mat_entry.resize(state + 1);
+
+              mat_entry[state] = std::move(data);
             }
           }
           // We do not have a property to load into, so skip
@@ -785,36 +815,17 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void *)
 {
-  const auto declarer_ptr = std::get_if<const MaterialBase *>(&record.declarer);
-  bool has_declarer = declarer_ptr && *declarer_ptr;
-  dataStore(stream, has_declarer, nullptr);
-
-  if (has_declarer)
-  {
-    std::string declarer_type = (*declarer_ptr)->type();
-    dataStore(stream, declarer_type, nullptr);
-    std::string declarer_name = (*declarer_ptr)->name();
-    dataStore(stream, declarer_name, nullptr);
-  }
-
+  dataStore(stream, record.declarer_type_and_names, nullptr);
   dataStore(stream, record.type, nullptr);
+  dataStore(stream, record.stateful_id, nullptr);
   dataStore(stream, record.state, nullptr);
 }
 
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void *)
 {
-  bool has_declarer;
-  dataLoad(stream, has_declarer, nullptr);
-
-  if (has_declarer)
-  {
-    std::pair<std::string, std::string> declarer;
-    dataLoad(stream, declarer.first, nullptr);
-    dataLoad(stream, declarer.second, nullptr);
-    record.declarer = declarer;
-  }
-
+  dataLoad(stream, record.declarer_type_and_names, nullptr);
   dataLoad(stream, record.type, nullptr);
+  dataLoad(stream, record.stateful_id, nullptr);
   dataLoad(stream, record.state, nullptr);
 }

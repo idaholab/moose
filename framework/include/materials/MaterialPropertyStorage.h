@@ -49,9 +49,15 @@ public:
    */
   struct PropRecord
   {
+    /// Whether or not this property is stateful
     bool stateful() const { return state > 0; }
-    std::variant<const MaterialBase *, std::pair<std::string, std::string>> declarer;
+    /// The material names that have declared this property; used in restart when pointers are unavailable
+    std::set<std::pair<std::string, std::string>> declarer_type_and_names;
+    /// The type of this property
     std::string type;
+    /// The stateful id in _stroage used for this property, if any
+    unsigned int stateful_id = invalid_uint;
+    /// The max state requrested for this property (0 = current, 1 = old, ...)
     unsigned int state = 0;
   };
 
@@ -278,11 +284,6 @@ public:
   std::optional<std::string> queryStatefulPropName(const unsigned int id) const;
 
   /**
-   * @returns Whether or not the property \prop_name is stateful
-   */
-  bool isStatefulProp(const std::string & prop_name) const;
-
-  /**
    * Remove the property storage and element pointer from internal data structures
    * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
    * stateful properties) hanging around in our data structures
@@ -339,6 +340,11 @@ public:
    * Also clears _restartable_map, as it should no longer be needed
    */
   void setRestartInPlace();
+
+  /**
+   * Get the property record associated with the material with id \p id
+   */
+  const PropRecord & getPropRecord(const unsigned int id) const;
 
 protected:
   /// The actual storage
@@ -407,30 +413,14 @@ private:
   /// The threaded material data
   std::vector<MaterialData> _material_data;
 
-  /**
-   * Helper struct for all of the data needed to load stateful property data for a
-   * [state, elem, side, stateful_id] combination later in time in initStatefulProps()
-   *
-   * This is needed beacuse restartable data is loaded in FEProblemBase::initialSetup()
-   * so early. At the point it is loaded, we have yet to call initProps() on any properties
-   * to setup the entries in _storage. As this data is dynamically typed, there's no way
-   * we know its type this early on
-   */
-  struct RestartableEntry
-  {
-    unsigned int stateful_id;
-    unsigned int state;
-    std::size_t num_q_points;
-    std::stringstream data;
-  };
-
-  typedef std::unordered_map<std::pair<const Elem *, unsigned int>, std::vector<RestartableEntry>>
+  typedef std::unordered_map<std::pair<const Elem *, unsigned int>,
+                             std::map<unsigned int, std::vector<std::stringstream>>>
       RestartableMapType;
 
-  /// The restartable data to be loaded in initStatefulProps() later; see RestartableEntry
+  /// The restartable data to be loaded in initStatefulProps() later
   RestartableMapType _restartable_map;
 
-  /// Whether or not we want to restart stateful properties in place; see RestartableEntry
+  /// Whether or not we want to restart stateful properties in place
   bool _restart_in_place;
   /// Whether or not we're recovering; enforces a one-to-one mapping of stateful properties
   bool _recovering;

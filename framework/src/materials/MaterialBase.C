@@ -120,8 +120,8 @@ MaterialBase::initStatefulProperties(unsigned int n_points)
   // because owned props might have been promoted to stateful by calls to
   // getMaterialProperty[Old/Older] from other objects.  In these cases, this
   // object won't otherwise know that it owns stateful properties.
-  for (auto & prop : _supplied_props)
-    if (materialData().getMaterialPropertyStorage().isStatefulProp(prop) &&
+  for (const auto id : _supplied_prop_ids)
+    if (materialData().getMaterialPropertyStorage().getPropRecord(id).stateful() &&
         !_overrides_init_stateful_props)
       mooseWarning(std::string("Material \"") + name() +
                    "\" provides one or more stateful "
