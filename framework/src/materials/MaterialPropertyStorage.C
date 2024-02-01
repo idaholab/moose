@@ -285,6 +285,12 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
   // The stateful IDs that we need to copy back
   std::vector<unsigned int> stateful_ids_to_copy;
 
+#ifndef NDEBUG
+  // All of the stateful IDs; used to make sure that we're not supplying one property
+  // across multiple materials
+  std::set<unsigned int> stateful_ids;
+#endif
+
   // Work through all of the materials that we were passed to figure out which ones are stateful
   // that we need to initialize, and also to figure out which ones we need to restart
   for (const auto & mat : mats)
@@ -300,6 +306,13 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
       {
         const auto stateful_id = record.stateful_id;
         stateful = true;
+
+#ifndef NDEBUG
+        const auto it_inserted_pair = stateful_ids.insert(stateful_id);
+        mooseAssert(it_inserted_pair.second,
+                    "Material property '" + _registry.getName(id) +
+                        "' supplied by multiple materials at the same point");
+#endif
 
         bool restarting = false;
         // We have restartable data for this [elem, side]; see if we have it for this prop
