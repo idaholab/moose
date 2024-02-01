@@ -264,43 +264,66 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
                                            const Elem & elem,
                                            const unsigned int side /* = 0*/)
 {
+  // Material -> stateful properties that need to be restarted for said material
+  // We need this because we need to initialize everything in dependency the dependency ordering
+  // as given in mats, which means that we can't just do these all up front
   std::unordered_map<const MaterialBase *,
                      std::vector<std::pair<unsigned int, std::vector<std::stringstream> *>>>
       materials_to_restart;
-  std::set<unsigned int> restarted_stateful_ids;
+  // Find the entry in the restartable data (binary data waiting to be restarted)
+  // for this [elem, side], if any
   RestartableMapType::mapped_type * restartable_entry = nullptr;
   if (_restartable_map.size())
     if (auto it = _restartable_map.find(std::make_pair(&elem, side)); it != _restartable_map.end())
       restartable_entry = &it->second;
 
+  // The stateful objects that we're going to initialize. This is needed for materials that are
+  // passed in as mat that are not stateful, who we don't want to call initStatefulProperties() on.
+  // We unfortunately can only determine this here due to block/boundary restriction, which is
+  // not known without mapping property -> material
   std::vector<MaterialBase *> stateful_mats;
-  std::vector<unsigned int> stateful_ids;
+  // The stateful IDs that we need to copy back
+  std::vector<unsigned int> stateful_ids_to_copy;
+
+  // Work through all of the materials that we were passed to figure out which ones are stateful
+  // that we need to initialize, and also to figure out which ones we need to restart
   for (const auto & mat : mats)
   {
-    bool stateful = true;
+    // For keeping track of this material in stateful_mats
+    bool stateful = false;
+
+    // Check each material that was declared
     for (const auto id : mat->getSuppliedPropIDs())
     {
       const auto & record = getPropRecord(id);
       if (record.stateful())
       {
         const auto stateful_id = record.stateful_id;
-
-        stateful_ids.push_back(record.stateful_id);
         stateful = true;
 
+        bool restarting = false;
+        // We have restartable data for this [elem, side]; see if we have it for this prop
         if (restartable_entry)
         {
           if (auto id_datum_pair_it = restartable_entry->find(stateful_id);
               id_datum_pair_it != restartable_entry->end())
+          {
+            restarting = true;
             materials_to_restart[mat.get()].emplace_back(stateful_id, &id_datum_pair_it->second);
-          restarted_stateful_ids.insert(stateful_id);
+          }
         }
+
+        if (!restarting)
+          stateful_ids_to_copy.push_back(record.stateful_id);
       }
     }
+
     if (stateful)
       stateful_mats.push_back(mat.get());
   }
 
+  // This currently initializes all of the stateful properties for this [elem, side],
+  // even though we didn't necessarily need to init all of them. Future work?
   auto props = initProps(tid, &elem, side, n_qpoints);
 
   // Whether or not we have swapped material data from _storage to _material_data
@@ -323,13 +346,10 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
         swapped = false;
       }
 
-      // Load from the cached backup into place
+      // Load from the cached binary backup into place
       for (auto & [stateful_id, datum_ptr] : stateful_id_datum_pair_it->second)
-      {
         for (const auto state : index_range(*datum_ptr))
           dataLoad((*datum_ptr)[state], (*props[state])[stateful_id], nullptr);
-        restarted_stateful_ids.insert(stateful_id);
-      }
     }
     // No restart data available, so use initQpStatefulProperties()
     else
@@ -350,11 +370,10 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
     swapBack(tid, elem, side);
 
   // Copy to older states as needed, only for non-restarted data
-  for (const auto stateful_id : stateful_ids)
-    if (!restarted_stateful_ids.count(stateful_id))
-      for (const auto state : statefulIndexRange())
-        for (const auto qp : make_range(n_qpoints))
-          (*props[state])[stateful_id].qpCopy(qp, (*props[0])[stateful_id], qp);
+  for (const auto stateful_id : stateful_ids_to_copy)
+    for (const auto state : statefulIndexRange())
+      for (const auto qp : make_range(n_qpoints))
+        (*props[state])[stateful_id].qpCopy(qp, (*props[0])[stateful_id], qp);
 }
 
 void

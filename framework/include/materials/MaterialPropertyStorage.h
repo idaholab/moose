@@ -159,6 +159,9 @@ public:
    * @param n_qpoints Number of quadrature points
    * @param elem Element we are on
    * @param side Side of the element 'elem' (0 for volumetric material properties)
+   *
+   * If restartable stateful information is available, this will load from restart
+   * instead of calling initStatefulProperties()
    */
   void initStatefulProps(const THREAD_ID tid,
                          const std::vector<std::shared_ptr<MaterialBase>> & mats,
