@@ -51,6 +51,9 @@ protected:
   /// Function to ramp down the viscosity, useful for relaxation transient
   const Function & _mu_rampdown;
 
+  /// Whether to neglect the contributions to the Jacobian of the density time derivative
+  const bool _neglect_derivatives_of_density_time_derivative;
+
   using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;
   using UserObjectInterface::getUserObject;
 };
