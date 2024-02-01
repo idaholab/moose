@@ -21,7 +21,7 @@ SalineMoltenSaltFluidProperties::validParams()
   params.addRequiredParam<std::vector<Real>>("comp_val",
                                              "The mole fraction of each salt component");
   params.addRequiredParam<std::string>(
-      "prop_def",
+      "prop_def_file",
       "Definition of a fluid property file, which must be a file path to the "
       "comma-separated data matching the Saline format.");
   return params;
@@ -31,7 +31,7 @@ SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputPara
   : SinglePhaseFluidProperties(parameters)
 {
 #ifdef SALINE_ENABLED
-  const auto & propDef = getParam<std::string>("prop_def");
+  const auto & propDef = getParam<std::string>("prop_def_file");
   _d.load(propDef);
   bool success = _tp.initialize(&_d);
   if (!success)
@@ -51,7 +51,7 @@ SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputPara
     mooseError("The composition set has failed");
   _fluid_name = MooseUtils::join(name, "-");
 #else
-  mooseError("Saline was not made available during the build and can not be used. Make sure you "
+  mooseError("Saline was not made available during the build and cannot be used. Make sure you "
              "have the contrib/saline submodule checked out.");
 #endif
 }

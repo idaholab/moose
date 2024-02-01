@@ -26,7 +26,7 @@
     type = SalineMoltenSaltFluidProperties
     comp_name = "LiF NaF KF"
     comp_val = "0.465 0.115 0.42"
-    prop_def = "saline_custom.prp"
+    prop_def_file = "saline_custom.prp"
   []
 []
 

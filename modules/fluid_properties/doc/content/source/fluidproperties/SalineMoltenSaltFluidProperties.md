@@ -11,10 +11,15 @@ The following properties can be computed:
 - viscosity
 - thermal diffusivity
 
-!alert note
+!alert! note
 Saline must be installed alongside MOOSE using the `contrib/saline` submodule in the fluid properties
-module to be able to use this fluid property object. To download a submodule, use:
-`git submodule update --init contrib/saline`.
+module to be able to use this fluid property object. To initialize/download the saline submodule:
+
+```bash
+git submodule update --init contrib/saline
+```
+
+!alert-end!
 
 ## Example input syntax
 
@@ -23,7 +28,13 @@ In this example, the fluid properties for a `LiF-NaF-KF` salt mixture are comput
 
 !listing modules/fluid_properties/test/tests/saline/test.i block=FluidProperties
 
-It leverages the salt property input data in the `saline_custom.prp` file:
+It leverages the salt property input data in the `saline_custom.prp` file below.
+The data is sorted in columns. The first column is the name of the salt, then its id, then
+a number of thermo-physical properties with additional metadata such as the range of validity,
+the uncertainty and a short name for the reference publication providing the data.
+
+!alert note
+More details on working with Saline can be found in this [reference](https://info.ornl.gov/sites/publications/Files/Pub167853.pdf).
 
 !listing modules/fluid_properties/test/tests/saline/saline_custom.prp
 
