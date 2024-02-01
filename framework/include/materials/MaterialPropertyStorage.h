@@ -300,6 +300,8 @@ public:
    */
   MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
 
+  bool _block_stateful = false;
+
 protected:
   /// The actual storage
   std::array<PropsType, MaterialData::max_state + 1> _storage;

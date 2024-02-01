@@ -242,6 +242,8 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
                                            const Elem & elem,
                                            const unsigned int side /* = 0*/)
 {
+  _block_stateful = true;
+
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes
 
@@ -368,6 +370,9 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
 
   if (state > 0)
   {
+    if (_block_stateful)
+      mooseError("Requested stateful properties too late");
+
     if (std::find(_stateful_prop_id_to_prop_id.begin(),
                   _stateful_prop_id_to_prop_id.end(),
                   prop_id) == _stateful_prop_id_to_prop_id.end())
