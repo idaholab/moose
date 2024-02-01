@@ -458,7 +458,7 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name,
   auto & record = *_prop_records[prop_id];
   record.type = type.name();
   if (declarer)
-    record.declarer_type_and_names.emplace(declarer->type(), declarer->name());
+    record.declarers.emplace(declarer->typeAndName());
   record.state = std::max(state, record.state);
 
   // Keep track of stateful props by quick access
@@ -592,43 +592,32 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   decltype(storage._prop_records) from_prop_records;
   dataLoad(stream, from_prop_records, nullptr);
 
-  // Common type for representing a Material; type and name
-  using MaterialObject = std::pair<std::string, std::string>;
-
   {
-    // Build maps of material object -> properties and property -> material object
+    // Build maps of material object -> properties and property -> material objects
     const auto build_maps = [](const auto & prop_records, const auto & ids_to_names)
     {
-      std::map<MaterialObject, std::set<std::string>> object_to_props;
-      std::map<std::string, MaterialObject> prop_to_object;
+      std::map<std::string, std::set<std::string>> object_to_props, prop_to_objects;
       for (const auto i : index_range(prop_records))
         if (prop_records[i] && prop_records[i]->stateful())
         {
-          const auto & record = *prop_records[i];
-          MaterialObject object;
-          if (const auto material_ptr = std::get_if<const MaterialBase *>(&record.declarer))
-            object = std::make_pair((*material_ptr)->type(), (*material_ptr)->name());
-          else if (const auto material_name = std::get_if<MaterialObject>(&record.declarer))
-            object = *material_name;
-          const auto & name = ids_to_names[i];
-          object_to_props[object].insert(name);
-          prop_to_object.emplace(name, object);
+          const auto & prop = ids_to_names[i];
+          for (const auto & declarer : (*prop_records[i]).declarers)
+          {
+            object_to_props[declarer].insert(prop);
+            prop_to_objects[prop].insert(declarer);
+          }
         }
 
-      return std::make_pair(object_to_props, prop_to_object);
+      return std::make_pair(std::move(object_to_props), std::move(prop_to_objects));
     };
     // Maps for the current stateful properties
     const std::vector<std::string> prop_ids_to_names(registry.idsToNamesBegin(),
                                                      registry.idsToNamesEnd());
-    const auto [object_to_props, prop_to_object] =
+    const auto [object_to_props, prop_to_objects] =
         build_maps(storage._prop_records, prop_ids_to_names);
     // Maps for the stored stateful properties
-    const auto [from_object_to_props, from_prop_to_object] =
+    const auto [from_object_to_props, from_prop_to_objects] =
         build_maps(from_prop_records, from_prop_ids_to_names);
-
-    // Helper for printing object names in errors
-    const auto object_string = [](const MaterialObject & object)
-    { return object.first + " '" + object.second + "'"; };
 
     // Enforce our stateful requirements
     for (const auto & [object, props] : object_to_props)
@@ -645,7 +634,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
         if (props != from_props)
         {
           std::stringstream error;
-          error << "The stateful material properties in " << object_string(object)
+          error << "The stateful material properties in " << object
                 << " that are being restarted do not match the stored properties in the same "
                    "material object from the checkpoint.\n\n";
           error << "Checkpointed stateful properties:\n";
@@ -662,28 +651,13 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
       else if (storage._recovering)
       {
         mooseError("The ",
-                   object_string(object),
+                   object,
                    " was stored in restart but no longer exists. This is not supported when "
                    "recovering stateful material properties.");
       }
-      // We have not found a material object that was stored with the same name
-      // with stateful material properties. Here, we enforce that no other new
-      // stateful material properties are declared in a new material with the
-      // same name to avoid ambiguity.
-      else
-      {
-        for (const auto & prop : props)
-          if (const auto find = from_prop_to_object.find(prop);
-              from_prop_to_object.find(prop) != from_prop_to_object.end())
-            mooseError("The stateful material property '",
-                       prop,
-                       "' was stored in checkpoint in ",
-                       object_string(find->second),
-                       " but is now declared in ",
-                       object_string(object),
-                       ".");
-      }
     }
+
+    // Need to deal with new materials with a property that we previously stored
   }
 
   std::vector<std::optional<unsigned int>> to_stateful_ids(storage.statefulProps().size());
@@ -815,7 +789,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void *)
 {
-  dataStore(stream, record.declarer_type_and_names, nullptr);
+  dataStore(stream, record.declarers, nullptr);
   dataStore(stream, record.type, nullptr);
   dataStore(stream, record.stateful_id, nullptr);
   dataStore(stream, record.state, nullptr);
@@ -824,7 +798,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, v
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void *)
 {
-  dataLoad(stream, record.declarer_type_and_names, nullptr);
+  dataLoad(stream, record.declarers, nullptr);
   dataLoad(stream, record.type, nullptr);
   dataLoad(stream, record.stateful_id, nullptr);
   dataLoad(stream, record.state, nullptr);

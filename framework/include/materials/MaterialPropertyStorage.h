@@ -51,8 +51,8 @@ public:
   {
     /// Whether or not this property is stateful
     bool stateful() const { return state > 0; }
-    /// The material names that have declared this property; used in restart when pointers are unavailable
-    std::set<std::pair<std::string, std::string>> declarer_type_and_names;
+    /// The material (type,name) that have declared this property
+    std::set<std::string> declarers;
     /// The type of this property
     std::string type;
     /// The stateful id in _stroage used for this property, if any

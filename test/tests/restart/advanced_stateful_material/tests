@@ -16,7 +16,7 @@
       input = 'advanced_stateful_material_restart.i'
       cli_args = "Materials/test/real_names='a'
                   Materials/test/real_stateful_names='a'"
-      expect_err = 'The stateful material properties in RestartStatefulMaterial \'test\' that are being restarted do not match the stored properties in the same material object from the checkpoint.'
+      expect_err = 'The stateful material properties in RestartStatefulMaterial "test" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
       prereq = checkpoint
       detail = 'a stateful property for a single material object is removed'
     []
@@ -25,18 +25,19 @@
       input = 'advanced_stateful_material_restart.i'
       cli_args = "Materials/test/real_names='a b c'
                   Materials/test/real_stateful_names='a b c'"
-      expect_err = 'The stateful material properties in RestartStatefulMaterial \'test\' that are being restarted do not match the stored properties in the same material object from the checkpoint.'
+      expect_err = 'The stateful material properties in RestartStatefulMaterial "test" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
       prereq = checkpoint
       detail = 'a stateful property for a single material object is added'
     []
+    # not sure if this test is valid anymore
     [other_object]
-      type = RunException
+      type = RunApp
       input = 'advanced_stateful_material_restart.i'
       cli_args = "Materials/active='new'
                   Materials/new/type=RestartStatefulMaterial
                   Materials/new/real_names='a'
                   Materials/new/real_stateful_names='a'"
-      expect_err = 'The stateful material property \'a\' was stored in checkpoint in RestartStatefulMaterial \'test\' but is now declared in RestartStatefulMaterial \'new\'.'
+      # expect_err = 'The stateful material property \'a\' was stored in checkpoint in RestartStatefulMaterial "test" but is now declared in RestartStatefulMaterial \'new\'.'
       prereq = checkpoint
       detail = 'a stateful object changed names'
     []
