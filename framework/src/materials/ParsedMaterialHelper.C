@@ -234,7 +234,7 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
   // insert material property values
   auto nmat_props = _mat_prop_descriptors.size();
   for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-    _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
+    _func_params[i + _nargs] = _mat_prop_descriptors[i].value(_qp);
 
   // insert material property values
   auto npps = _postprocessor_values.size();

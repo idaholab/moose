@@ -65,8 +65,8 @@ public:
   /// get the property name
   const std::string & getPropertyName() const { return _property_name; };
 
-  /// get the property reference
-  const GenericMaterialProperty<Real, is_ad> & value() const;
+  /// get the property value at the given quadrature point
+  GenericReal<is_ad> value(unsigned int qp = libMesh::invalid_uint) const;
 
   /// take another derivative
   void addDerivative(const SymbolName & symbol);
@@ -91,6 +91,14 @@ private:
   void parseDerivative(const std::string &);
   void parseDependentSymbols(const std::string &);
 
+  /// property state
+  enum class PropertyState
+  {
+    CURRENT,
+    OLD,
+    OLDER
+  } _state;
+
   /// name used in function expression
   std::string _fparser_name;
 
@@ -102,6 +110,9 @@ private:
 
   /// material property value (this is lazily updated and cached when read through value())
   mutable const GenericMaterialProperty<Real, is_ad> * _value;
+
+  /// old/older material property value (this is lazily updated and cached when read through value())
+  mutable const MaterialProperty<Real> * _old_older_value;
 
   /// material object that owns this descriptor
   MooseObject * _parent;

@@ -57,7 +57,7 @@ w.r.t. $\eta$ (`eta`), which contain second and higher derivatives of $h$ (make
 sure to set the `derivative_order` of $h$ high enough!).
 
 The [!param](/Materials/DerivativeParsedMaterial/material_property_names) are parsed by
-the [`FunctionMaterialPropertyDescriptor` class](http://mooseframework.org/docs/doxygen/modules/classFunctionMaterialPropertyDescriptor.html),
+the [`FunctionMaterialPropertyDescriptor` class](http://mooseframework.org/docs/doxygen/moose/classFunctionMaterialPropertyDescriptor.html),
 which understands the following syntax:
 
 | Expression | Description |
@@ -66,6 +66,8 @@ which understands the following syntax:
 | `F(c,phi)` | A material property called *F* with declared dependence on 'c' and 'phi' (uses `DerivativeFunctionMaterial` rules to look up the derivatives) using the round-bracket-notation |
 | `d3x:=D[x(a,b),a,a,b]` | The third derivative $\frac{\partial^3x}{\partial^2a\partial b}$ of the a,b-dependent material property *x*, which will be referred to as `d3x` in the function expression |
 | `dF:=D[F,c]` | Derivative of *F* w.r.t. *c*. Although the c-dependence of *F* is not explicitly declared using the round-bracket-notation it is implicitly assumed as a derivative w.r.t. *c* is requested |
+| `F_old:=Old[F]` | Old (previous time step) state of *F*. Note that no derivatives of this property are available. |
+| `F_older:=Older[F]` |  Older (two time steps ago) state of *F*. Note that no derivatives of this property are available. |
 
 Add `outputs=exodus` to the material block to automatically write all
 derivatives and the function to the exodus output.
