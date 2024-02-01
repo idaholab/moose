@@ -11,14 +11,11 @@
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
-#include "libmesh/enum_order.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/utility.h"
-#include "libmesh/cell_tet4.h"
-#include "libmesh/face_tri3.h"
 
 using namespace libMesh;
 

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "libmesh/mesh_base.h"
-#include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
 
 #include "MooseUtils.h"

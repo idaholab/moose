@@ -21,5 +21,6 @@
     plane_point = '0 0 1.2'
     plane_normal = '1.0 1.0 2.0'
     cut_face_id = 12345
+    cut_face_name = cut
   []
 []

@@ -26,16 +26,16 @@ namespace MooseMeshElementConversionUtils
 {
 void
 hexElemSplitter(ReplicatedMesh & mesh,
+                const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                 const dof_id_type elem_id,
                 std::vector<dof_id_type> & converted_elems_ids)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  auto bdry_side_list = boundary_info.build_side_list();
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(6);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -58,21 +58,27 @@ hexElemSplitter(ReplicatedMesh & mesh,
                                         mesh.elem_ptr(elem_id)->node_ptr(6),
                                         mesh.elem_ptr(elem_id)->node_ptr(7)};
   std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-  auto optimized_node_list = hexNodesToTetNodesDeterminer(elem_node_list, rotated_tet_face_indices);
+
+  std::vector<std::vector<Node *>> optimized_node_list;
+  hexNodesToTetNodesDeterminer(elem_node_list, rotated_tet_face_indices, optimized_node_list);
 
   std::vector<Elem *> elems_Tet4;
-  for (unsigned int i = 0; i < optimized_node_list.size(); i++)
+  for (const auto i : index_range(optimized_node_list))
   {
-    elems_Tet4.push_back(mesh.add_elem(new Tet4));
-    elems_Tet4.back()->set_node(0) = optimized_node_list[i][0];
-    elems_Tet4.back()->set_node(1) = optimized_node_list[i][1];
-    elems_Tet4.back()->set_node(2) = optimized_node_list[i][2];
-    elems_Tet4.back()->set_node(3) = optimized_node_list[i][3];
-    elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+    auto new_elem = std::make_unique<Tet4>();
+    new_elem->set_node(0) = optimized_node_list[i][0];
+    new_elem->set_node(1) = optimized_node_list[i][1];
+    new_elem->set_node(2) = optimized_node_list[i][2];
+    new_elem->set_node(3) = optimized_node_list[i][3];
+    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+    elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
     for (unsigned int j = 0; j < 4; j++)
     {
+      // A hex element has 6 faces indexed from 0 to 5
+      // a <6 value indicates that the face of the tet element corresponds to the face of the
+      // original hex; a =6 value means the face of the tet is an interior face of the hex
       if (rotated_tet_face_indices[i][j] < 6)
       {
         for (const auto & side_info : elem_side_list[rotated_tet_face_indices[i][j]])
@@ -82,7 +88,7 @@ hexElemSplitter(ReplicatedMesh & mesh,
   }
 
   // Retain element extra integers
-  for (unsigned int i = 0; i < 2; i++)
+  for (unsigned int i = 0; i < 6; i++)
     for (unsigned int j = 0; j < n_elem_extra_ids; j++)
     {
       elems_Tet4[i]->set_extra_integer(j, exist_extra_ids[j]);
@@ -91,16 +97,16 @@ hexElemSplitter(ReplicatedMesh & mesh,
 
 void
 prismElemSplitter(ReplicatedMesh & mesh,
+                  const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                   const dof_id_type elem_id,
                   std::vector<dof_id_type> & converted_elems_ids)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  auto bdry_side_list = boundary_info.build_side_list();
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(5);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -122,22 +128,26 @@ prismElemSplitter(ReplicatedMesh & mesh,
                                         mesh.elem_ptr(elem_id)->node_ptr(4),
                                         mesh.elem_ptr(elem_id)->node_ptr(5)};
   std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-  auto optimized_node_list =
-      prismNodesToTetNodesDeterminer(elem_node_list, rotated_tet_face_indices);
+  std::vector<std::vector<Node *>> optimized_node_list;
+  prismNodesToTetNodesDeterminer(elem_node_list, rotated_tet_face_indices, optimized_node_list);
 
   std::vector<Elem *> elems_Tet4;
-  for (unsigned int i = 0; i < optimized_node_list.size(); i++)
+  for (const auto i : index_range(optimized_node_list))
   {
-    elems_Tet4.push_back(mesh.add_elem(new Tet4));
-    elems_Tet4.back()->set_node(0) = optimized_node_list[i][0];
-    elems_Tet4.back()->set_node(1) = optimized_node_list[i][1];
-    elems_Tet4.back()->set_node(2) = optimized_node_list[i][2];
-    elems_Tet4.back()->set_node(3) = optimized_node_list[i][3];
-    elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+    auto new_elem = std::make_unique<Tet4>();
+    new_elem->set_node(0) = optimized_node_list[i][0];
+    new_elem->set_node(1) = optimized_node_list[i][1];
+    new_elem->set_node(2) = optimized_node_list[i][2];
+    new_elem->set_node(3) = optimized_node_list[i][3];
+    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+    elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
     for (unsigned int j = 0; j < 4; j++)
     {
+      // A prism element has 5 faces indexed from 0 to 4
+      // a <4 value indicates that the face of the tet element corresponds to the face of the
+      // original prism; a =5 value means the face of the tet is an interior face of the prism
       if (rotated_tet_face_indices[i][j] < 5)
       {
         for (const auto & side_info : elem_side_list[rotated_tet_face_indices[i][j]])
@@ -156,16 +166,16 @@ prismElemSplitter(ReplicatedMesh & mesh,
 
 void
 pyramidElemSplitter(ReplicatedMesh & mesh,
+                    const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                     const dof_id_type elem_id,
                     std::vector<dof_id_type> & converted_elems_ids)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  auto bdry_side_list = boundary_info.build_side_list();
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(5);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -185,22 +195,26 @@ pyramidElemSplitter(ReplicatedMesh & mesh,
                                         mesh.elem_ptr(elem_id)->node_ptr(3),
                                         mesh.elem_ptr(elem_id)->node_ptr(4)};
   std::vector<std::vector<unsigned int>> rotated_tet_face_indices;
-  auto optimized_node_list =
-      pyramidNodesToTetNodesDeterminer(elem_node_list, rotated_tet_face_indices);
+  std::vector<std::vector<Node *>> optimized_node_list;
+  pyramidNodesToTetNodesDeterminer(elem_node_list, rotated_tet_face_indices, optimized_node_list);
 
   std::vector<Elem *> elems_Tet4;
-  for (unsigned int i = 0; i < optimized_node_list.size(); i++)
+  for (const auto i : index_range(optimized_node_list))
   {
-    elems_Tet4.push_back(mesh.add_elem(new Tet4));
-    elems_Tet4.back()->set_node(0) = optimized_node_list[i][0];
-    elems_Tet4.back()->set_node(1) = optimized_node_list[i][1];
-    elems_Tet4.back()->set_node(2) = optimized_node_list[i][2];
-    elems_Tet4.back()->set_node(3) = optimized_node_list[i][3];
-    elems_Tet4.back()->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+    auto new_elem = std::make_unique<Tet4>();
+    new_elem->set_node(0) = optimized_node_list[i][0];
+    new_elem->set_node(1) = optimized_node_list[i][1];
+    new_elem->set_node(2) = optimized_node_list[i][2];
+    new_elem->set_node(3) = optimized_node_list[i][3];
+    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+    elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
     for (unsigned int j = 0; j < 4; j++)
     {
+      // A pyramid element has 5 faces indexed from 0 to 4
+      // a <4 value indicates that the face of the tet element corresponds to the face of the
+      // original pyramid; a =5 value means the face of the tet is an interior face of the pyramid
       if (rotated_tet_face_indices[i][j] < 5)
       {
         for (const auto & side_info : elem_side_list[rotated_tet_face_indices[i][j]])
@@ -228,9 +242,10 @@ neighborNodeIndicesHEX8(unsigned int min_id_index)
     return preset_indices[min_id_index];
 }
 
-std::vector<std::vector<Node *>>
+void
 hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
-                             std::vector<std::vector<unsigned int>> & rotated_tet_face_indices)
+                             std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
+                             std::vector<std::vector<Node *>> & tet_nodes_list)
 {
   // Find the node with the minimum id
   std::vector<dof_id_type> node_ids(8);
@@ -249,7 +264,8 @@ hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
                     std::min_element(std::begin(neighbor_node_ids), std::end(neighbor_node_ids)));
 
   std::vector<unsigned int> face_rotation;
-  const auto rotated_indices = nodeRotationHEX8(min_node_id_index, sec_min_pos, face_rotation);
+  std::vector<unsigned int> rotated_indices;
+  nodeRotationHEX8(min_node_id_index, sec_min_pos, face_rotation, rotated_indices);
   std::vector<Node *> rotated_hex_nodes;
   for (unsigned int i = 0; i < 8; i++)
     rotated_hex_nodes.push_back(hex_nodes[rotated_indices[i]]);
@@ -270,15 +286,12 @@ hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
     }
   }
 
-  std::vector<std::vector<Node *>> tet_nodes_list;
   for (const auto & tet_nodes : tet_nodes_set)
   {
     tet_nodes_list.push_back(std::vector<Node *>());
     for (const auto & tet_node : tet_nodes)
       tet_nodes_list.back().push_back(rotated_hex_nodes[tet_node]);
   }
-
-  return tet_nodes_list;
 }
 
 std::vector<bool>
@@ -362,10 +375,11 @@ tetNodesForHex(const std::vector<bool> diagonal_directions,
   }
 }
 
-std::vector<unsigned int>
-nodeRotationHEX8(unsigned int min_id_index,
-                 unsigned int sec_min_pos,
-                 std::vector<unsigned int> & face_rotation)
+void
+nodeRotationHEX8(const unsigned int min_id_index,
+                 const unsigned int sec_min_pos,
+                 std::vector<unsigned int> & face_rotation,
+                 std::vector<unsigned int> & node_rotation)
 {
   const std::vector<std::vector<std::vector<unsigned int>>> preset_indices = {
       {{0, 1, 2, 3, 4, 5, 6, 7}, {0, 3, 7, 4, 1, 2, 6, 5}, {0, 4, 5, 1, 3, 7, 6, 2}},
@@ -393,12 +407,14 @@ nodeRotationHEX8(unsigned int min_id_index,
   {
     // index: new face index; value: old face index
     face_rotation = preset_face_indices[min_id_index][sec_min_pos];
-    return preset_indices[min_id_index][sec_min_pos];
+    node_rotation = preset_indices[min_id_index][sec_min_pos];
   }
 }
 
-std::vector<unsigned int>
-nodeRotationPRISM6(unsigned int min_id_index, std::vector<unsigned int> & face_rotation)
+void
+nodeRotationPRISM6(unsigned int min_id_index,
+                   std::vector<unsigned int> & face_rotation,
+                   std::vector<unsigned int> & node_rotation)
 {
   const std::vector<std::vector<unsigned int>> preset_indices = {{0, 1, 2, 3, 4, 5},
                                                                  {1, 2, 0, 4, 5, 3},
@@ -420,13 +436,14 @@ nodeRotationPRISM6(unsigned int min_id_index, std::vector<unsigned int> & face_r
   {
     // index: new face index; value: old face index
     face_rotation = preset_face_indices[min_id_index];
-    return preset_indices[min_id_index];
+    node_rotation = preset_indices[min_id_index];
   }
 }
 
-std::vector<std::vector<Node *>>
+void
 prismNodesToTetNodesDeterminer(std::vector<Node *> & prism_nodes,
-                               std::vector<std::vector<unsigned int>> & rotated_tet_face_indices)
+                               std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
+                               std::vector<std::vector<Node *>> & tet_nodes_list)
 {
   // Find the node with the minimum id
   std::vector<dof_id_type> node_ids(6);
@@ -437,7 +454,8 @@ prismNodesToTetNodesDeterminer(std::vector<Node *> & prism_nodes,
       std::begin(node_ids), std::min_element(std::begin(node_ids), std::end(node_ids)));
 
   std::vector<unsigned int> face_rotation;
-  const auto rotated_indices = nodeRotationPRISM6(min_node_id_index, face_rotation);
+  std::vector<unsigned int> rotated_indices;
+  nodeRotationPRISM6(min_node_id_index, face_rotation, rotated_indices);
   std::vector<Node *> rotated_prism_nodes;
   for (unsigned int i = 0; i < 6; i++)
     rotated_prism_nodes.push_back(prism_nodes[rotated_indices[i]]);
@@ -463,15 +481,12 @@ prismNodesToTetNodesDeterminer(std::vector<Node *> & prism_nodes,
     }
   }
 
-  std::vector<std::vector<Node *>> tet_nodes_list;
   for (const auto & tet_nodes : tet_nodes_set)
   {
     tet_nodes_list.push_back(std::vector<Node *>());
     for (const auto & tet_node : tet_nodes)
       tet_nodes_list.back().push_back(rotated_prism_nodes[tet_node]);
   }
-
-  return tet_nodes_list;
 }
 
 std::vector<std::vector<unsigned int>>
@@ -491,8 +506,10 @@ tetNodesForPrism(const bool diagonal_direction,
   }
 }
 
-std::vector<unsigned int>
-nodeRotationPYRAMIND5(unsigned int min_id_index, std::vector<unsigned int> & face_rotation)
+void
+nodeRotationPYRAMID5(unsigned int min_id_index,
+                     std::vector<unsigned int> & face_rotation,
+                     std::vector<unsigned int> & node_rotation)
 {
   const std::vector<std::vector<unsigned int>> preset_indices = {
       {0, 1, 2, 3, 4}, {1, 2, 3, 0, 4}, {2, 3, 0, 1, 4}, {3, 0, 1, 2, 4}};
@@ -506,13 +523,14 @@ nodeRotationPYRAMIND5(unsigned int min_id_index, std::vector<unsigned int> & fac
   {
     // index: new face index; value: old face index
     face_rotation = preset_face_indices[min_id_index];
-    return preset_indices[min_id_index];
+    node_rotation = preset_indices[min_id_index];
   }
 }
 
-std::vector<std::vector<Node *>>
+void
 pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
-                                 std::vector<std::vector<unsigned int>> & rotated_tet_face_indices)
+                                 std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
+                                 std::vector<std::vector<Node *>> & tet_nodes_list)
 {
   // Find the node with the minimum id, ignoring the top node
   std::vector<dof_id_type> node_ids(4);
@@ -523,7 +541,8 @@ pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
       std::begin(node_ids), std::min_element(std::begin(node_ids), std::end(node_ids)));
 
   std::vector<unsigned int> face_rotation;
-  const auto rotated_indices = nodeRotationPYRAMIND5(min_node_id_index, face_rotation);
+  std::vector<unsigned int> rotated_indices;
+  nodeRotationPYRAMID5(min_node_id_index, face_rotation, rotated_indices);
   std::vector<Node *> rotated_pyramid_nodes;
   for (unsigned int i = 0; i < 5; i++)
     rotated_pyramid_nodes.push_back(pyramid_nodes[rotated_indices[i]]);
@@ -543,31 +562,32 @@ pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
     }
   }
 
-  std::vector<std::vector<Node *>> tet_nodes_list;
   for (const auto & tet_nodes : tet_nodes_set)
   {
     tet_nodes_list.push_back(std::vector<Node *>());
     for (const auto & tet_node : tet_nodes)
       tet_nodes_list.back().push_back(rotated_pyramid_nodes[tet_node]);
   }
-
-  return tet_nodes_list;
 }
 
 void
 convert3DMeshToAllTet4(ReplicatedMesh & mesh,
                        const std::vector<std::pair<dof_id_type, bool>> & elems_to_process,
                        std::vector<dof_id_type> & converted_elems_ids_to_cut,
-                       std::vector<dof_id_type> & converted_elems_ids_to_retain,
                        const subdomain_id_type block_id_to_remove,
                        const bool delete_block_to_remove)
 {
+  std::vector<dof_id_type> converted_elems_ids_to_retain;
+  // Build boundary information of the mesh
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  const auto bdry_side_list = boundary_info.build_side_list();
   for (const auto & elem_to_process : elems_to_process)
   {
     switch (mesh.elem_ptr(elem_to_process.first)->type())
     {
       case ElemType::HEX8:
         hexElemSplitter(mesh,
+                        bdry_side_list,
                         elem_to_process.first,
                         elem_to_process.second ? converted_elems_ids_to_cut
                                                : converted_elems_ids_to_retain);
@@ -575,6 +595,7 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh,
         break;
       case ElemType::PYRAMID5:
         pyramidElemSplitter(mesh,
+                            bdry_side_list,
                             elem_to_process.first,
                             elem_to_process.second ? converted_elems_ids_to_cut
                                                    : converted_elems_ids_to_retain);
@@ -582,6 +603,7 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh,
         break;
       case ElemType::PRISM6:
         prismElemSplitter(mesh,
+                          bdry_side_list,
                           elem_to_process.first,
                           elem_to_process.second ? converted_elems_ids_to_cut
                                                  : converted_elems_ids_to_retain);
@@ -629,13 +651,8 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh)
   }
 
   std::vector<dof_id_type> converted_elems_ids_to_cut;
-  std::vector<dof_id_type> converted_elems_ids_to_retain;
 
-  convert3DMeshToAllTet4(mesh,
-                         original_elems,
-                         converted_elems_ids_to_cut,
-                         converted_elems_ids_to_retain,
-                         block_id_to_remove,
-                         true);
+  convert3DMeshToAllTet4(
+      mesh, original_elems, converted_elems_ids_to_cut, block_id_to_remove, true);
 }
 }

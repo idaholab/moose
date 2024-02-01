@@ -9,43 +9,45 @@
 
 #pragma once
 
-#include "libmesh/mesh_base.h"
 #include "libmesh/replicated_mesh.h"
-#include "libmesh/boundary_info.h"
 
-#include "MooseUtils.h"
 #include "MooseTypes.h"
-#include "FaceInfo.h"
 
 namespace MooseMeshElementConversionUtils
 {
 /**
  * Split a HEX8 element into six TET4 elements.
  * @param mesh The mesh to be modified
+ * @param bdry_side_list A list that contains the boundary information of the original mesh
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
  */
 void hexElemSplitter(ReplicatedMesh & mesh,
+                     const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                      const dof_id_type elem_id,
                      std::vector<dof_id_type> & converted_elems_ids);
 
 /**
  * Split a PYRAMID5 element into two TET4 elements.
  * @param mesh The mesh to be modified
+ * @param bdry_side_list A list that contains the boundary information of the original mesh
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
  */
 void pyramidElemSplitter(ReplicatedMesh & mesh,
+                         const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                          const dof_id_type elem_id,
                          std::vector<dof_id_type> & converted_elems_ids);
 
 /**
  * Split a PRISM6 element into three TET4 elements.
  * @param mesh The mesh to be modified
+ * @param bdry_side_list A list that contains the boundary information of the original mesh
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
  */
 void prismElemSplitter(ReplicatedMesh & mesh,
+                       const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                        const dof_id_type elem_id,
                        std::vector<dof_id_type> & converted_elems_ids);
 
@@ -56,10 +58,12 @@ void prismElemSplitter(ReplicatedMesh & mesh,
  * @param sec_min_pos The position of the node among its three neighboring nodes with the minimum
  * id
  * @param face_rotation A vector to record the rotation of the faces of the HEX8 element
+ * @param node_rotation a vector of node indices that can form a HEX8 element
  */
-std::vector<unsigned int> nodeRotationHEX8(unsigned int min_id_index,
-                                           unsigned int sec_min_pos,
-                                           std::vector<unsigned int> & face_rotation);
+void nodeRotationHEX8(const unsigned int min_id_index,
+                      const unsigned int sec_min_pos,
+                      std::vector<unsigned int> & face_rotation,
+                      std::vector<unsigned int> & node_rotation);
 
 /**
  * Calculate the three neighboring nodes of a node in a HEX8 element.
@@ -76,11 +80,11 @@ std::vector<unsigned int> neighborNodeIndicesHEX8(unsigned int min_id_index);
  * @param hex_nodes A vector of pointers to the nodes that can form a HEX8 element
  * @param rotated_tet_face_indices A vector of vectors of the original face indices of the HEX8
  * element corresponding to the faces of the newly created TET4 elements
- * @return a vector of vectors of pointers to the nodes that can form TET4 elements
+ * @param tet_nodes_list a vector of vectors of pointers to the nodes that can form TET4 elements
  */
-std::vector<std::vector<Node *>>
-hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
-                             std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
+void hexNodesToTetNodesDeterminer(std::vector<Node *> & hex_nodes,
+                                  std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
+                                  std::vector<std::vector<Node *>> & tet_nodes_list);
 
 /**
  * For a HEX8 element, determine the direction of the diagonal line of each face that involves the
@@ -116,10 +120,11 @@ tetNodesForHex(const std::vector<bool> diagonal_directions,
  * Rotate a PRISM6 element nodes to ensure that the node with the minimum id is the first node.
  * @param min_id_index The index of the node with the minimum id
  * @param face_rotation A vector to record the rotation of the faces of the PRISM6 element
- * @return a vector of node indices that can form a PRISM6 element
+ * @param node_rotation a vector of node indices that can form a PRISM6 element
  */
-std::vector<unsigned int> nodeRotationPRISM6(unsigned int min_id_index,
-                                             std::vector<unsigned int> & face_rotation);
+void nodeRotationPRISM6(unsigned int min_id_index,
+                        std::vector<unsigned int> & face_rotation,
+                        std::vector<unsigned int> & node_rotation);
 
 /**
  * For a rotated nodes that can form a PRISM6 element, create a series of four-node set that can
@@ -129,11 +134,12 @@ std::vector<unsigned int> nodeRotationPRISM6(unsigned int min_id_index,
  * @param prism_nodes A vector of pointers to the nodes that can form a PRISM6 element
  * @param rotated_tet_face_indices A vector of vectors of the original face indices of the PRISM6
  * element corresponding to the faces of the newly created TET4 elements
- * @return a vector of vectors of pointers to the nodes that can form TET4 elements
+ * @param tet_nodes_list a vector of vectors of pointers to the nodes that can form TET4 elements
  */
-std::vector<std::vector<Node *>>
+void
 prismNodesToTetNodesDeterminer(std::vector<Node *> & prism_nodes,
-                               std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
+                               std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
+                               std::vector<std::vector<Node *>> & tet_nodes_list);
 
 /**
  * Creates sets of four nodes indices that can form TET4 elements to replace the original PRISM6
@@ -153,10 +159,11 @@ tetNodesForPrism(const bool diagonal_direction,
  * for the bottom face.
  * @param min_id_index The index of the node with the minimum id for the bottom face
  * @param face_rotation A vector to record the rotation of the faces of the PYRAMID5 element
- * @return a vector of node indices that can form a PYRAMID5 element
+ * @param node_rotation a vector of node indices that can form a PYRAMID5 element
  */
-std::vector<unsigned int> nodeRotationPYRAMIND5(unsigned int min_id_index,
-                                                std::vector<unsigned int> & face_rotation);
+void nodeRotationPYRAMID5(unsigned int min_id_index,
+                          std::vector<unsigned int> & face_rotation,
+                          std::vector<unsigned int> & node_rotation);
 
 /**
  * For a rotated nodes that can form a PYRAMID5 element, create a series of four-node set that can
@@ -166,21 +173,20 @@ std::vector<unsigned int> nodeRotationPYRAMIND5(unsigned int min_id_index,
  * @param pyramid_nodes A vector of pointers to the nodes that can form a PYRAMID5 element
  * @param rotated_tet_face_indices A vector of vectors of the original face indices of the
  * PYRAMID5 element corresponding to the faces of the newly created TET4 elements
- * @return a vector of vectors of pointers to the nodes that can form TET4 elements
+ * @param tet_nodes_list a vector of vectors of pointers to the nodes that can form TET4 elements
  */
-std::vector<std::vector<Node *>>
+void
 pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
-                                 std::vector<std::vector<unsigned int>> & rotated_tet_face_indices);
+                                 std::vector<std::vector<unsigned int>> & rotated_tet_face_indices,
+                                 std::vector<std::vector<Node *>> & tet_nodes_list);
 
 /**
- * Convert all the elements in a 3D mesh consisting only linear elements into TET4 elements.
+ * Convert all the elements in a 3D mesh, consisting of only linear elements, into TET4 elements.
  * @param mesh The mesh to be converted
  * @param elems_to_process A vector of pairs of element ids and a bool indicating whether the
  * element needs to be fully retained or will be partially cut in the following procedures
  * @param converted_elems_ids_to_cut A vector of element ids that will be cut in the following
  * procedures
- * @param converted_elems_ids_to_retain A vector of element ids that will be fully retained in
- * the following procedures
  * @param block_id_to_remove The id of a new subdomain in the mesh containing all the elements to be
  * removed
  * @param delete_block_to_remove A bool indicating whether the block to be removed will be
@@ -189,12 +195,11 @@ pyramidNodesToTetNodesDeterminer(std::vector<Node *> & pyramid_nodes,
 void convert3DMeshToAllTet4(ReplicatedMesh & mesh,
                             const std::vector<std::pair<dof_id_type, bool>> & elems_to_process,
                             std::vector<dof_id_type> & converted_elems_ids_to_cut,
-                            std::vector<dof_id_type> & converted_elems_ids_to_retain,
                             const subdomain_id_type block_id_to_remove,
                             const bool delete_block_to_remove);
 
 /**
- * Convert all the elements in a 3D mesh consisting only linear elemetns into TET4 elements.
+ * Convert all the elements in a 3D mesh consisting of only linear elements into TET4 elements.
  * @param mesh The mesh to be converted
  */
 void convert3DMeshToAllTet4(ReplicatedMesh & mesh);

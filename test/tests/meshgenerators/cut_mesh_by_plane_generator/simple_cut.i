@@ -19,6 +19,5 @@
     input = block_1
     plane_point = '0.5 0.5 0.3'
     plane_normal = '1.0 0.9 0.8'
-    cut_face_id = 12345
   []
 []
