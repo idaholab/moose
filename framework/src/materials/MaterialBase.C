@@ -176,12 +176,12 @@ MaterialBase::registerPropName(const std::string & prop_name, bool is_get, const
 }
 
 void
-MaterialBase::setActiveProperties(const std::set<unsigned int> & needed_props)
+MaterialBase::setActiveProperties(const std::unordered_set<unsigned int> & needed_props)
 {
   _active_prop_ids.clear();
-  for (const auto & id : needed_props)
-    if (_supplied_prop_ids.count(id) > 0)
-      _active_prop_ids.insert(id);
+  for (const auto supplied_id : _supplied_prop_ids)
+    if (needed_props.count(supplied_id))
+      _active_prop_ids.insert(supplied_id);
 }
 
 std::set<OutputName>
