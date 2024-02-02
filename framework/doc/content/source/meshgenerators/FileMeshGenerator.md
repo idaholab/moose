@@ -8,7 +8,7 @@ The `FileMeshGenerator` is the default type for MOOSE and as the name suggests i
 supports reading and writing a large number of formats and could be extended to read more.
 
 Reading with the `FileMeshGenerator`. These capabilities are inherited from the
-libmesh file IO readers.
+libMesh file IO readers.
 
 | Extension   | Description |
 | :-          | :- |
@@ -41,7 +41,7 @@ for convenience if you are considering using MOOSE as a mesh file converter.
 | .xda, .xdr  | libMesh formats          | [XDA.md] |
 | .vtk, .pvtu | Visualization Toolkit    | [VTKOutput.md] |
 
-These formats (for writing meshes) are supported by libmesh and could easily be added to MOOSE if needed:
+These formats (for writing meshes) are supported by libMesh and could easily be added to MOOSE if needed:
 
 | Extension     | Description                       |
 | :-            | :-                       | :- |

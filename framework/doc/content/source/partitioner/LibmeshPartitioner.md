@@ -2,7 +2,7 @@
 
 !syntax description /Mesh/Partitioner/LibmeshPartitioner
 
-The libmesh partitioners available are:
+The libMesh partitioners available are:
 
 - `METIS`, which uses the [METIS library](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) for graph partitioning
 

@@ -4,7 +4,7 @@
 
 ## Description
 
-UserObject based on available libmesh quality metrics to check the quality of each element. It works for both uniform or mixed element types.
+UserObject based on available libMesh quality metrics to check the quality of each element. It works for both uniform or mixed element types.
 
 ## Example Input Syntax
 
