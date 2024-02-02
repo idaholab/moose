@@ -8,12 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CheckActiveMatProp.h"
+#include "MooseApp.h"
+#include "CheckActiveMatPropProblem.h"
+#include "MaterialData.h"
 
 registerMooseObject("MooseTestApp", CheckActiveMatProp);
-
-#include "MooseApp.h"
-#include "FEProblemBase.h"
-#include "MaterialData.h"
 
 InputParameters
 CheckActiveMatProp::validParams()
@@ -36,5 +35,8 @@ CheckActiveMatProp::CheckActiveMatProp(const InputParameters & parameters)
 Real
 CheckActiveMatProp::computeValue()
 {
-  return _problem.getActiveMaterialProperties(_tid).count(_prop_id) > 0;
+  mooseAssert(dynamic_cast<CheckActiveMatPropProblem *>(&_problem),
+              "We don't want undefined behavior");
+  return static_cast<CheckActiveMatPropProblem &>(_problem).getActiveMaterialProperties(_tid).count(
+             _prop_id) > 0;
 }

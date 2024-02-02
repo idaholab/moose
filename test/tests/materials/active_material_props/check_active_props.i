@@ -8,6 +8,10 @@
   []
 []
 
+[Problem]
+  type = CheckActiveMatPropProblem
+[]
+
 [Variables]
   [u]
   []

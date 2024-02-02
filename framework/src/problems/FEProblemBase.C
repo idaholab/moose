@@ -449,7 +449,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _vector_curl_zero.resize(n_threads);
   _uo_jacobian_moose_vars.resize(n_threads);
 
-  _active_material_property_ids.resize(n_threads);
+  _has_active_material_properties.resize(n_threads, false);
 
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
@@ -3507,12 +3507,6 @@ FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consume
 }
 
 void
-FEProblemBase::prepareMaterials(const SubdomainID blk_id, const THREAD_ID tid)
-{
-  prepareMaterials(getActiveMaterialProperties(tid), blk_id, tid);
-}
-
-void
 FEProblemBase::reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful)
 {
   if (hasActiveMaterialProperties(tid))
@@ -5376,8 +5370,6 @@ void
 FEProblemBase::setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                            const THREAD_ID tid)
 {
-  _active_material_property_ids[tid] = mat_prop_ids;
-
   // mark active properties for materials
   for (auto & mat : _all_materials.getObjects(tid))
     mat->setActiveProperties(mat_prop_ids);
@@ -5385,24 +5377,20 @@ FEProblemBase::setActiveMaterialProperties(const std::unordered_set<unsigned int
     mat->setActiveProperties(mat_prop_ids);
   for (auto & mat : _all_materials[Moose::NEIGHBOR_MATERIAL_DATA].getObjects(tid))
     mat->setActiveProperties(mat_prop_ids);
-}
 
-const std::unordered_set<unsigned int> &
-FEProblemBase::getActiveMaterialProperties(const THREAD_ID tid) const
-{
-  return _active_material_property_ids[tid];
+  _has_active_material_properties[tid] = !mat_prop_ids.empty();
 }
 
 bool
 FEProblemBase::hasActiveMaterialProperties(const THREAD_ID tid) const
 {
-  return !_active_material_property_ids[tid].empty();
+  return _has_active_material_properties[tid];
 }
 
 void
 FEProblemBase::clearActiveMaterialProperties(const THREAD_ID tid)
 {
-  _active_material_property_ids[tid].clear();
+  _has_active_material_properties[tid] = false;
 }
 
 void

@@ -18,6 +18,8 @@ public:
 
   ActiveGenericConstantMaterial(const InputParameters & parameters);
 
+  const std::unordered_set<unsigned int> & getActivePropIDs() { return _active_prop_ids; }
+
 protected:
   virtual void computeProperties() override;
   virtual void computeQpProperties() override;

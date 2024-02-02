@@ -796,13 +796,6 @@ public:
                         const SubdomainID blk_id,
                         const THREAD_ID tid);
 
-  /**
-   * Add the MooseVariables that the current materials depend on to the dependency list.
-   *
-   * This MUST be done after the dependency list has been set for all the other objects!
-   */
-  void prepareMaterials(const SubdomainID blk_id, const THREAD_ID tid);
-
   void reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful = true);
 
   /**
@@ -868,13 +861,6 @@ public:
    */
   void setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                    const THREAD_ID tid);
-
-  /**
-   * Get the material properties required by the current computing thread.
-   *
-   * @param tid The thread id
-   */
-  const std::unordered_set<unsigned int> & getActiveMaterialProperties(const THREAD_ID tid) const;
 
   /**
    * Method to check whether or not a list of active material roperties has been set. This method
@@ -2423,8 +2409,8 @@ protected:
 
   std::vector<std::vector<const MooseVariableFEBase *>> _uo_jacobian_moose_vars;
 
-  /// Set of material property ids that determine whether materials get reinited
-  std::vector<std::unordered_set<unsigned int>> _active_material_property_ids;
+  /// Whether there are active material properties on each thread
+  std::vector<bool> _has_active_material_properties;
 
   SolverParams _solver_params;
 
