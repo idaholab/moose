@@ -72,11 +72,10 @@ WebServerControl::startServer()
       return result(name_json.toString());
     };
 
-    const auto require_waiting = [this, &error]()
+    const auto require_waiting = [&error](auto & control)
     {
       using result = std::optional<HttpResponse>;
-      std::cerr << this->_currently_waiting.load() << std::endl;
-      if (!this->_currently_waiting.load())
+      if (!control.currentlyWaiting())
         return result(error("This control is not currently waiting for data"));
       return result{};
     };
@@ -96,7 +95,15 @@ WebServerControl::startServer()
             [this](const HttpRequest & /*req*/)
             {
               miniJson::Json::_object res_json;
-              res_json["waiting"] = this->_currently_waiting.load();
+              if (this->_currently_waiting.load())
+              {
+                res_json["waiting"] = true;
+                res_json["execute_on_flag"] =
+                    static_cast<std::string>(this->_fe_problem.getCurrentExecuteOnFlag());
+              }
+              else
+                res_json["waiting"] = false;
+
               return HttpResponse{200, res_json};
             });
 
@@ -118,7 +125,7 @@ WebServerControl::startServer()
               if (const auto response = require_parameters(msg, {"name"}))
                 return *response;
               // Should be waiting for data
-              if (const auto response = require_waiting())
+              if (const auto response = require_waiting(*this))
                 return *response;
               // Postprocessor should exist
               if (!this->hasPostprocessorByName(name))
@@ -153,7 +160,7 @@ WebServerControl::startServer()
               if (const auto response = require_parameters(msg, {"name", "value"}))
                 return *response;
               // Should be waiting for data
-              if (const auto response = require_waiting())
+              if (const auto response = require_waiting(*this))
                 return *response;
               // Parameter should exist
               if (!this->hasControllableParameterByName(name))
