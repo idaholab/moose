@@ -1337,12 +1337,14 @@ private:
    * Take an input relationship manager, clone it, and then initialize it with provided mesh and
    * optional \p dof_map
    * @param template_rm The relationship manager template from which we will clone
+   * @param moose_mesh The moose mesh to use for initialization
    * @param mesh The mesh to use for initialization
    * @param dof_map An optional parameter that, if provided, will be used to help init the cloned
    * relationship manager
    * @return a reference to the cloned and initialized relationship manager
    */
   RelationshipManager & createRMFromTemplateAndInit(const RelationshipManager & template_rm,
+                                                    MooseMesh & moose_mesh,
                                                     MeshBase & mesh,
                                                     const DofMap * dof_map = nullptr);
 

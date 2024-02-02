@@ -212,6 +212,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
         getParam<MooseEnum>("patch_update_strategy").getEnum<Moose::PatchUpdateType>()),
     _regular_orthogonal_mesh(false),
     _is_split(getParam<bool>("_is_split")),
+    _has_lower_d(false),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
     _need_delete(false),
@@ -270,6 +271,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
     _is_split(other_mesh._is_split),
+    _has_lower_d(other_mesh._has_lower_d),
+    _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _need_delete(other_mesh._need_delete),
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
@@ -609,6 +612,8 @@ MooseMesh::buildLowerDMesh()
   // update_parallel_id_counts(), cache_elem_dims(), etc. except partitioning here.
   const bool skip_partitioning_old = mesh.skip_partitioning();
   mesh.skip_partitioning(true);
+  // Finding neighbors is ambiguous for lower-dimensional elements on interior faces
+  mesh.allow_find_neighbors(false);
   mesh.prepare_for_use();
   mesh.skip_partitioning(skip_partitioning_old);
 }
@@ -1205,8 +1210,8 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
-  _sub_to_neighbor_subs.clear();
-  _subdomain_boundary_ids.clear();
+  _has_lower_d = false;
+  _sub_to_data.clear();
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
   _higher_d_elem_side_to_lower_d_elem.clear();
@@ -1218,6 +1223,8 @@ MooseMesh::cacheInfo()
 
     if (ip_elem)
     {
+      if (elem->active())
+        _sub_to_data[elem->subdomain_id()].is_lower_d = true;
       unsigned int ip_side = ip_elem->which_side_am_i(elem);
 
       // For some grid sequencing tests: ip_side == libMesh::invalid_uint
@@ -1239,12 +1246,11 @@ MooseMesh::cacheInfo()
   for (const auto & elem : getMesh().active_local_element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
+    auto & sub_data = _sub_to_data[subdomain_id];
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
-      std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
-
-      subdomain_set.insert(boundary_ids.begin(), boundary_ids.end());
+      sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
       if (neig)
@@ -1253,15 +1259,19 @@ MooseMesh::cacheInfo()
                                                                       boundary_ids.end());
         SubdomainID neighbor_subdomain_id = neig->subdomain_id();
         if (neighbor_subdomain_id != subdomain_id)
-          _sub_to_neighbor_subs[subdomain_id].insert(neighbor_subdomain_id);
+          sub_data.neighbor_subs.insert(neighbor_subdomain_id);
       }
     }
   }
 
-  for (const auto & blk_id : _mesh_subdomains)
+  for (const auto blk_id : _mesh_subdomains)
   {
-    _communicator.set_union(_sub_to_neighbor_subs[blk_id]);
-    _communicator.set_union(_subdomain_boundary_ids[blk_id]);
+    auto & sub_data = _sub_to_data[blk_id];
+    _communicator.set_union(sub_data.neighbor_subs);
+    _communicator.set_union(sub_data.boundary_ids);
+    _communicator.max(sub_data.is_lower_d);
+    if (sub_data.is_lower_d)
+      _has_lower_d = true;
     _communicator.set_union(_neighbor_subdomain_boundary_ids[blk_id]);
   }
 }
@@ -3236,13 +3246,12 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 const std::set<BoundaryID> &
 MooseMesh::getSubdomainBoundaryIds(const SubdomainID subdomain_id) const
 {
-  std::unordered_map<SubdomainID, std::set<BoundaryID>>::const_iterator it =
-      _subdomain_boundary_ids.find(subdomain_id);
+  const auto it = _sub_to_data.find(subdomain_id);
 
-  if (it == _subdomain_boundary_ids.end())
+  if (it == _sub_to_data.end())
     mooseError("Unable to find subdomain ID: ", subdomain_id, '.');
 
-  return it->second;
+  return it->second.boundary_ids;
 }
 
 std::set<BoundaryID>
@@ -3262,9 +3271,9 @@ std::set<SubdomainID>
 MooseMesh::getBoundaryConnectedBlocks(const BoundaryID bid) const
 {
   std::set<SubdomainID> subdomain_ids;
-  for (const auto & it : _subdomain_boundary_ids)
-    if (it.second.find(bid) != it.second.end())
-      subdomain_ids.insert(it.first);
+  for (const auto & [sub_id, data] : _sub_to_data)
+    if (data.boundary_ids.find(bid) != data.boundary_ids.end())
+      subdomain_ids.insert(sub_id);
 
   return subdomain_ids;
 }
@@ -3294,12 +3303,12 @@ MooseMesh::getInterfaceConnectedBlocks(const BoundaryID bid) const
 const std::set<SubdomainID> &
 MooseMesh::getBlockConnectedBlocks(const SubdomainID subdomain_id) const
 {
-  auto it = _sub_to_neighbor_subs.find(subdomain_id);
+  const auto it = _sub_to_data.find(subdomain_id);
 
-  if (it == _sub_to_neighbor_subs.end())
+  if (it == _sub_to_data.end())
     mooseError("Unable to find subdomain ID: ", subdomain_id, '.');
 
-  return it->second;
+  return it->second.neighbor_subs;
 }
 
 bool

@@ -1,0 +1,37 @@
+[Tests]
+  design = 'AuxKernels/index.md'
+  issues = '#26592'
+  [csv]
+    requirement = 'The system shall allow populating lower-dimensional auxiliary variables using boundary restricted auxiliary kernels on'
+    [uniform]
+      type = CSVDiff
+      input = lower-d-aux-var.i
+      csvdiff = lower-d-aux-var_out.csv
+      detail = 'a mesh with a uniform level of refinement, and'
+    []
+    [some_refined_boundaries]
+      type = CSVDiff
+      input = lower-d-aux-var.i
+      csvdiff = lower-d-aux-var_out.csv
+      detail = 'a mesh with mixed levels of refinement along the boundary.'
+      cli_args = "Mesh/inactive=''"
+    []
+  []
+  [non_superset]
+    requirement = 'The system shall error if a boundary auxiliary kernel attempts to populate a lower-dimensional auxiliary variable when'
+    [mesh_blocks]
+      type = RunException
+      input = lower-d-aux-var.i
+      cli_args = "AuxVariables/lower_constant/block='lower_top lower_right lower_bottom' Postprocessors/inactive='avg_lower_constant_left avg_lower_first_left' Problem/boundary_restricted_elem_integrity_check=false Mesh/inactive='lower_left refine_left_and_top' Mesh/lower_right/input='gen' AuxVariables/lower_first/block='lower_top lower_right lower_bottom'"
+      expect_err = "No lower-dimensional element\. Make sure that the lower-d variable lives on a lower-d block that is a superset of the boundary"
+      detail = 'the mesh lower-dimensional block restriction is not a superset of the boundary, or when'
+    []
+    [variable_blocks]
+      type = RunException
+      input = lower-d-aux-var.i
+      cli_args = "AuxVariables/lower_constant/block='lower_top lower_right lower_bottom' Postprocessors/inactive='avg_lower_constant_left' Problem/boundary_restricted_elem_integrity_check=false"
+      expect_err = "No degrees of freedom\. Make sure that the lower-d variable lives on a lower-d block that is a superset of the boundary"
+      detail = 'the variable lower-dimensional block restriction is not a superset of the boundary.'
+    []
+  []
+[]
