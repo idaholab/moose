@@ -38,6 +38,11 @@ protected:
    */
   std::unique_ptr<std::thread> startServer();
 
+  /**
+   * @return Whether or not the server is currently waiting
+   */
+  bool currentlyWaiting() const { return _currently_waiting.load(); }
+
   /// Whether or not the Control is currently waiting
   std::atomic<bool> _currently_waiting;
 
