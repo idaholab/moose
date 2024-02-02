@@ -174,21 +174,42 @@ WebServerControl::startServer()
               {
                 _real_data[name] = value.toDouble();
               }
-              // Array, currently only std::vector<Real>
+              // Array, currently std::vector<Real/std::string>
               else if (value.isArray())
               {
                 const auto & array_value = value.toArray();
 
-                std::vector<Real> real_values(array_value.size());
-                for (const auto i : index_range(array_value))
-                {
-                  if (!array_value[i].isNumber())
-                    return error("The " + std::to_string(i) + "-th value is not a number.");
-                  real_values[i] = array_value[i].toDouble();
-                }
+                if (array_value.size() == 0)
+                  return error("Cannot send empty vector data as we cannot distinguish the type");
 
-                _vec_real_data[name] = std::move(real_values);
+                if (array_value[0].isString())
+                {
+                  std::vector<std::string> string_values(array_value.size());
+                  for (const auto i : index_range(array_value))
+                  {
+                    if (!array_value[i].isString())
+                      return error("The " + std::to_string(i) + "-th value is not a string.");
+                    string_values[i] = array_value[i].toString();
+                  }
+                  _vec_string_data[name] = std::move(string_values);
+                }
+                else if (array_value[0].isNumber())
+                {
+                  std::vector<Real> real_values(array_value.size());
+                  for (const auto i : index_range(array_value))
+                  {
+                    if (!array_value[i].isNumber())
+                      return error("The " + std::to_string(i) + "-th value is not a number.");
+                    real_values[i] = array_value[i].toDouble();
+                  }
+
+                  _vec_real_data[name] = std::move(real_values);
+                }
+                else
+                  return error("The vector data type is not a supported type (float or string)");
               }
+              else
+                return error("The data type is not a supported type");
 
               return HttpResponse{201};
             });
@@ -235,6 +256,7 @@ WebServerControl::execute()
   // Broadcast all of the data that we have received
   comm().broadcast(_real_data);
   comm().broadcast(_vec_real_data);
+  comm().broadcast(_vec_string_data);
 
   // Helper for setting values from the data maps
   const auto set_values = [this](const auto & value_map)
@@ -259,8 +281,10 @@ WebServerControl::execute()
   // Set all of the data that we have
   set_values(_real_data);
   set_values(_vec_real_data);
+  set_values(_vec_string_data);
 
   // Done with these
   _real_data.clear();
   _vec_real_data.clear();
+  _vec_string_data.clear();
 }

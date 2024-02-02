@@ -57,6 +57,8 @@ protected:
   std::map<std::string, Real> _real_data;
   /// The std::vector<Real> data that we accumulate from the server
   std::map<std::string, std::vector<Real>> _vec_real_data;
+  /// The std::vector<std::string> data that we accumulate from the server
+  std::map<std::string, std::vector<std::string>> _vec_string_data;
   /// Mutex to prevent threaded writes to _real_data and _vec_real_data
   std::mutex _data_mutex;
 };
