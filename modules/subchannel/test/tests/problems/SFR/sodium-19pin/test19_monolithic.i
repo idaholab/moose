@@ -195,6 +195,15 @@ P_out = 2.0e5 # Pa
   exodus = true
 []
 
+[Postprocessors]
+  [Temp_B]
+    type = PlanarMean
+    variable = T
+    execute_on = 'TIMESTEP_END'
+    height = 0.5
+  []
+[]
+
 [Executioner]
   type = Steady
 []
