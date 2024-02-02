@@ -3476,7 +3476,9 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 }
 
 void
-FEProblemBase::prepareMaterials(SubdomainID blk_id, const THREAD_ID tid)
+FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                                const SubdomainID blk_id,
+                                const THREAD_ID tid)
 {
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::unordered_set<unsigned int> needed_mat_props;
@@ -3498,12 +3500,16 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, const THREAD_ID tid)
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(),
                            current_active_elemental_moose_variables.end());
 
-  const auto & current_active_material_properties = getActiveMaterialProperties(tid);
-  needed_mat_props.insert(current_active_material_properties.begin(),
-                          current_active_material_properties.end());
+  needed_mat_props.insert(consumer_needed_mat_props.begin(), consumer_needed_mat_props.end());
 
   setActiveElementalMooseVariables(needed_moose_vars, tid);
   setActiveMaterialProperties(needed_mat_props, tid);
+}
+
+void
+FEProblemBase::prepareMaterials(const SubdomainID blk_id, const THREAD_ID tid)
+{
+  prepareMaterials(getActiveMaterialProperties(tid), blk_id, tid);
 }
 
 void
