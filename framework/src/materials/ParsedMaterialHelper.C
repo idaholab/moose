@@ -22,6 +22,11 @@ ParsedMaterialHelper<is_ad>::validParams()
                         true,
                         "Throw an error if any explicitly requested material property does not "
                         "exist. Otherwise assume it to be zero.");
+  MultiMooseEnum extra_symbols("x y z t dt");
+  params.addParam<MultiMooseEnum>(
+      "extra_symbols",
+      extra_symbols,
+      "Special symbols, like point coordinates, time, and timestep size.");
   return params;
 }
 
@@ -31,12 +36,15 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
   : FunctionMaterialBase<is_ad>(parameters),
     FunctionParserUtils<is_ad>(parameters),
     _symbol_names(_nargs),
+    _extra_symbols(
+        this->template getParam<MultiMooseEnum>("extra_symbols").template getEnum<ExtraSymbols>()),
     _mat_prop_descriptors(0),
     _tol(0),
     _map_mode(map_mode),
     _error_on_missing_material_properties(
         this->template getParam<bool>("error_on_missing_material_properties"))
 {
+  // decode extra symbols
 }
 
 template <bool is_ad>
@@ -136,12 +144,12 @@ ParsedMaterialHelper<is_ad>::functionParse(
 
   // set tolerances
   _tol.resize(_nargs);
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (const auto i : make_range(_nargs))
   {
     _tol[i] = -1.0;
 
     // for every argument look through the entire tolerance vector to find a match
-    for (MooseIndex(tol_names) j = 0; j < tol_names.size(); ++j)
+    for (const auto j : index_range(tol_names))
       if (_symbol_names[i] == tol_names[j])
       {
         _tol[i] = tol_values[j];
@@ -152,7 +160,7 @@ ParsedMaterialHelper<is_ad>::functionParse(
   // get all material properties
   unsigned int nmat_props = mat_prop_expressions.size();
   _mat_prop_descriptors.resize(nmat_props);
-  for (unsigned int i = 0; i < nmat_props; ++i)
+  for (const auto i : make_range(nmat_props))
   {
     // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
     _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor<is_ad>(
@@ -169,6 +177,27 @@ ParsedMaterialHelper<is_ad>::functionParse(
     _symbol_names.push_back(pp);
   }
 
+  // get all extra symbols
+  for (const auto symbol : _extra_symbols)
+    switch (symbol)
+    {
+      case ExtraSymbols::x:
+        _symbol_names.push_back("x");
+        break;
+      case ExtraSymbols::y:
+        _symbol_names.push_back("y");
+        break;
+      case ExtraSymbols::z:
+        _symbol_names.push_back("z");
+        break;
+      case ExtraSymbols::t:
+        _symbol_names.push_back("t");
+        break;
+      case ExtraSymbols::dt:
+        _symbol_names.push_back("dt");
+        break;
+    }
+
   // build 'variables' argument for fparser
   std::string variables = Moose::stringify(_symbol_names);
 
@@ -182,7 +211,7 @@ ParsedMaterialHelper<is_ad>::functionParse(
                _func_F->ErrorMsg());
 
   // create parameter passing buffer
-  _func_params.resize(_nargs + nmat_props + _postprocessor_values.size());
+  _func_params.resize(_nargs + nmat_props + _postprocessor_values.size() + _extra_symbols.size());
 
   // perform next steps (either optimize or take derivatives and then optimize)
 
@@ -232,15 +261,37 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
   }
 
   // insert material property values
-  auto nmat_props = _mat_prop_descriptors.size();
-  for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+  for (const auto i : index_range(_mat_prop_descriptors))
     _func_params[i + _nargs] = _mat_prop_descriptors[i].value(_qp);
 
-  // insert material property values
+  // insert postprocessor values
   auto npps = _postprocessor_values.size();
   for (MooseIndex(_postprocessor_values) i = 0; i < npps; ++i)
-    _func_params[i + _nargs + nmat_props] = *_postprocessor_values[i];
+    _func_params[i + _nargs + _mat_prop_descriptors.size()] = *_postprocessor_values[i];
 
+  // insert extra symbol values
+  for (const auto i : index_range(_extra_symbols))
+  {
+    const auto j = _nargs + _mat_prop_descriptors.size() + _postprocessor_values.size() + i;
+    switch (_extra_symbols[i])
+    {
+      case ExtraSymbols::x:
+        _func_params[j] = _q_point[_qp](0);
+        break;
+      case ExtraSymbols::y:
+        _func_params[j] = _q_point[_qp](1);
+        break;
+      case ExtraSymbols::z:
+        _func_params[j] = _q_point[_qp](2);
+        break;
+      case ExtraSymbols::t:
+        _func_params[j] = _t;
+        break;
+      case ExtraSymbols::dt:
+        _func_params[j] = _dt;
+        break;
+    }
+  }
   // set function value
   if (_prop_F)
     (*_prop_F)[_qp] = evaluate(_func_F, _name);

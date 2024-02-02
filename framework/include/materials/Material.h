@@ -20,6 +20,7 @@
 #define usingMaterialMembers                                                                       \
   usingMaterialBaseMembers;                                                                        \
   usingCoupleableMembers;                                                                          \
+  usingMaterialPropertyInterfaceMembers;                                                           \
   using Material::_q_point;                                                                        \
   using Material::_qrule;                                                                          \
   using Material::_JxW;                                                                            \

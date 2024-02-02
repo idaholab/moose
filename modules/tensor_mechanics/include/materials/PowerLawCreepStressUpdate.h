@@ -85,9 +85,8 @@ protected:
   /// Exponential calculated from current time
   Real _exp_time;
 
+  usingTransientInterfaceMembers;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_qp;
-  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_dt;
-  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_t;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_three_shear_modulus;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain_old;

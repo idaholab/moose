@@ -35,7 +35,7 @@ protected:
   /// Postprocessor that gives the uniform value of pressure on the boundary
   const PostprocessorValue * const _pp_value;
 
-  using FVDirichletBCBase::_t;
+  usingTransientInterfaceMembers;
   using FVDirichletBCBase::_var;
   using FVDirichletBCBase::determineState;
   using FVDirichletBCBase::getFunction;

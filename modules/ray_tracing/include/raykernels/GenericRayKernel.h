@@ -64,7 +64,6 @@ protected:
   using GenericRayKernel<is_ad>::_test;                                                            \
   using GenericRayKernel<is_ad>::_q_point;                                                         \
   using GenericRayKernel<is_ad>::_var;                                                             \
-  using GenericRayKernel<is_ad>::_name;                                                            \
   using GenericRayKernel<is_ad>::getVar;                                                           \
   using Coupleable::coupled;                                                                       \
   using Coupleable::coupledComponents;                                                             \

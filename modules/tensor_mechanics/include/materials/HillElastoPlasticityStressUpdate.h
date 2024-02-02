@@ -32,16 +32,15 @@ public:
       const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate) override;
 
 protected:
+  usingTransientInterfaceMembers;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain_old;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_plasticity_strain;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_plasticity_strain_old;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::isBlockDiagonal;
   using Material::_current_elem;
-  using Material::_dt;
   using Material::_q_point;
   using Material::_qp;
-  using Material::_t;
   using Material::paramError;
 
   virtual void initQpStatefulProperties() override;

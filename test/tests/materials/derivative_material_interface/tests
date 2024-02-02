@@ -400,5 +400,11 @@
   []
 
   [additional_symbols]
+    type = 'Exodiff'
+    input = 'extra_symbols.i'
+    exodiff = 'extra_symbols_out.e'
+    recover = false
+    requirement = 'The system shall make available current point location, simulation time, and current time step size.'
+    issues = '#26713'
   []
 []

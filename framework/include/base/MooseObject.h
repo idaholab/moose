@@ -23,14 +23,9 @@
 #include "libmesh/parallel_object.h"
 
 #define usingMooseObjectMembers                                                                    \
-  using MooseObject::isParamValid;                                                                 \
-  using MooseObject::isParamSetByUser;                                                             \
-  using MooseObject::paramError
-
-// helper macro to explicitly instantiate AD classes
-#define adBaseClass(X)                                                                             \
-  template class X<RESIDUAL>;                                                                      \
-  template class X<JACOBIAN>
+  usingMooseBaseMembers;                                                                           \
+  usingMooseBaseParameterInterfaceMembers;                                                         \
+  using MooseObject::enabled
 
 /**
  * Every object that can be built by the factory should be derived from this class.
