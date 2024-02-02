@@ -1,6 +1,7 @@
 
 #include "http.h"
 
+#include <iterator>
 #include <vector>
 #include <sstream>
 

@@ -42,6 +42,7 @@
 
 #ifdef TINYHTTP_JSON
 #include <minijson.h>
+#include <cstring>
 #endif
 
 #ifdef TINYHTTP_TEMPLATES
