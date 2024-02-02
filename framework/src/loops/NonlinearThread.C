@@ -86,7 +86,7 @@ NonlinearThread::subdomainChanged()
       _subdomain, needed_fe_var_vector_tags, _tid);
 
   // Update material dependencies
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   _tag_kernels->updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
   _ibc_warehouse->updateBoundaryMatPropDependency(needed_mat_props, _tid);
   _dg_warehouse->updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);

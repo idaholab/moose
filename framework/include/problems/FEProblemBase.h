@@ -851,7 +851,7 @@ public:
    *
    * @param tid The thread id
    */
-  void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
+  void setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                    const THREAD_ID tid);
 
   /**
@@ -859,7 +859,7 @@ public:
    *
    * @param tid The thread id
    */
-  const std::set<unsigned int> & getActiveMaterialProperties(const THREAD_ID tid) const;
+  const std::unordered_set<unsigned int> & getActiveMaterialProperties(const THREAD_ID tid) const;
 
   /**
    * Method to check whether or not a list of active material roperties has been set. This method
@@ -2405,6 +2405,9 @@ protected:
   bool _calculate_jacobian_in_uo;
 
   std::vector<std::vector<const MooseVariableFEBase *>> _uo_jacobian_moose_vars;
+
+  /// Set of material property ids that determine whether materials get reinited
+  std::vector<std::unordered_set<unsigned int>> _active_material_property_ids;
 
   SolverParams _solver_params;
 

@@ -103,10 +103,10 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
         if (_need_materials)
         {
-          std::set<unsigned int> needed_mat_props;
+          std::unordered_set<unsigned int> needed_mat_props;
           for (const auto & aux : iter->second)
           {
-            const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
+            const auto & mp_deps = aux->getMatPropDependencies();
             needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
           }
           _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);

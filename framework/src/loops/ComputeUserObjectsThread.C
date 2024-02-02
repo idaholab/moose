@@ -74,7 +74,7 @@ ComputeUserObjectsThread::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   std::set<TagID> needed_fe_var_vector_tags;
   for (const auto obj : objs)
   {
