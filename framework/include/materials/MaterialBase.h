@@ -215,7 +215,7 @@ public:
    * @return The IDs corresponding to the material properties that
    * MUST be reinited before evaluating this object
    */
-  virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const = 0;
 
   /**
    * @return Whether this material has stateful properties
