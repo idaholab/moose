@@ -113,7 +113,7 @@ ParsedMaterialHelper<is_ad>::functionParse(
   // add further constants coming from default value coupling
   if (_map_mode == VariableNameMappingMode::USE_PARAM_NAMES)
     for (const auto & acd : _arg_constant_defaults)
-      if (!_func_F->AddConstant(acd, _pars.defaultCoupledValue(acd)))
+      if (!_func_F->AddConstant(acd, this->_pars.defaultCoupledValue(acd)))
         mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
