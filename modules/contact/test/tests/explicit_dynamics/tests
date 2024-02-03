@@ -20,6 +20,17 @@
     requirement = 'The system shall be able to solve a simple few-element normal contact problem '
                   'using explicit dynamics solving uncoupled, local equations of momentum balance.'
   []
+  [test_balance_overwrite]
+    type = 'CSVDiff'
+    input = 'test_balance.i'
+    csvdiff = 'test_balance_overwrite_out.csv'
+    cli_args = 'ExplicitDynamicsContact/my_contact/overwrite_current_solution=true Outputs/file_base=test_balance_overwrite_out'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
+                  ' and overwrite boundary variables after applying the time stepper scheme.'
+  []
   [settlement]
     type = 'CSVDiff'
     input = 'settlement.i'

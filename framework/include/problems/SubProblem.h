@@ -396,9 +396,15 @@ public:
                                   unsigned int neighbor_side,
                                   const std::vector<Point> & physical_points,
                                   const THREAD_ID tid) = 0;
+  /**
+   * Populates a Point object with physical coordinates in the undisplaced configuration.
+   * @param[in] neighbor The neighbor element
+   * @param[in] neighbor_reference_points A vector with the reference point in the neighbor element
+   * @param[out] neighbor_physical_point The physical point in the undisplaced mesh
+   */
   virtual void getNeighborPoints(const Elem * neighbor,
                                  const std::vector<Point> * neighbor_reference_points,
-                                 Point & neighbor_physical_points);
+                                 Point & neighbor_physical_point);
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   const THREAD_ID tid) = 0;

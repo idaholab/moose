@@ -2,7 +2,7 @@
 
 ## Description
 
-The `NodalWaveSpeed` object computes a nodally assigned value of the
+The `NodalWaveSpeed` object computes a nodal value of the
 wave speed material property.
 
 

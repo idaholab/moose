@@ -26,8 +26,6 @@ public:
   virtual void finalize();
 
 protected:
-  virtual Real computeQpIntegral();
-
   std::map<const Node *, Real> _node_wave_speeds;
 
   std::map<unsigned, unsigned> _commMap;

@@ -294,7 +294,7 @@ NodeFaceConstraint::buildBoundaryIDs()
 }
 
 const std::set<SubdomainID>
-NodeFaceConstraint::getSecondaryConnectecBlocks() const
+NodeFaceConstraint::getSecondaryConnectedBlocks() const
 {
   return _mesh.getBoundaryConnectedBlocks(_secondary);
 }

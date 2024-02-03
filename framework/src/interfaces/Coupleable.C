@@ -942,7 +942,7 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
                _obj->name(),
                "' is defined on.");
 
-  if (nfc && !var->hasBlocks(nfc->getSecondaryConnectecBlocks()))
+  if (nfc && !var->hasBlocks(nfc->getSecondaryConnectedBlocks()))
     mooseError("The variable '",
                var->name(),
                " must be defined on all blocks '",

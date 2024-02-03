@@ -2,7 +2,7 @@
 
 ## Description
 
-The `NodalDensity` object computes a nodally assigned value of the
+The `NodalDensity` object computes a nodal value of the
 density material property. It is used by explicit dynamics contact.
 
 

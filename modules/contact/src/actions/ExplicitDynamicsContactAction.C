@@ -89,6 +89,12 @@ ExplicitDynamicsContactAction::ExplicitDynamicsContactAction(const InputParamete
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
     _model(getParam<MooseEnum>("model").getEnum<ExplicitDynamicsContactModel>())
 {
+  // The resulting velocity of the contact algorithm is applied, as the code stands, by modifying
+  // the old position. This causes artifacts in the internal forces as old position, new position,
+  // and velocities are not fully consistent. Results improve with shorter time steps, but it would
+  // be best to modify all the solution arrays for consistency or replace the way the explicit
+  // system is solved to obtain accelerations (a = M^{-1}F) such that only velocities on the
+  // contacting boundary need to be updated with the contact algorithm output.
   mooseWarning("Verification of explicit dynamics capabilities is an ongoing effort.");
 }
 
@@ -294,7 +300,6 @@ void
 ExplicitDynamicsContactAction::addContactPressureAuxKernel()
 {
   // Add ContactPressureAux: Only one object for all contact pairs
-  // if (_formulation != ContactFormulation::MORTAR)
   const auto actions = _awh.getActions<ExplicitDynamicsContactAction>();
 
   // Increment counter for contact action objects

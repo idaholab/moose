@@ -49,12 +49,6 @@ NodalWaveSpeed::threadJoin(const UserObject & fred)
     _node_wave_speeds[it->first] += it->second;
 }
 
-Real
-NodalWaveSpeed::computeQpIntegral()
-{
-  return 1;
-}
-
 void
 NodalWaveSpeed::initialize()
 {

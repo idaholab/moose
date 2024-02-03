@@ -67,10 +67,8 @@ ExplicitDynamicsContactConstraint::validParams()
                         "Whether to overwrite the position of contact boundaries with the velocity "
                         "computed with the contact algorithm.");
   params.addClassDescription(
-      "Apply non-penetration constraints on the mechanical deformation "
-      "using a node on face, primary/secondary algorithm, and multiple options "
-      "for the physical behavior on the interface and the mathematical "
-      "formulation for constraint enforcement");
+      "Apply non-penetration constraints on the mechanical deformation in explicit dynamics "
+      "using a node on face formulation by solving uncoupled momentum-balance equations.");
   return params;
 }
 
@@ -392,6 +390,7 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
 Real
 ExplicitDynamicsContactConstraint::computeQpSecondaryValue()
 {
+  // Not used in current implementation.
   return _u_secondary[_qp];
 }
 

@@ -248,7 +248,7 @@ protected:
   std::set<BoundaryID> _boundary_ids;
 
 public:
-  const std::set<SubdomainID> getSecondaryConnectecBlocks() const;
+  const std::set<SubdomainID> getSecondaryConnectedBlocks() const;
 
   PenetrationLocator & _penetration_locator;
 

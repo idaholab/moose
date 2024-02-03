@@ -51,12 +51,6 @@ NodalDensity::threadJoin(const UserObject & fred)
   }
 }
 
-Real
-NodalDensity::computeQpIntegral()
-{
-  return 1;
-}
-
 void
 NodalDensity::initialize()
 {
