@@ -253,7 +253,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     PerfGraphInterface(this, std::string("MultiApp::") + _name),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
-                                       : _fe_problem.getMooseApp().getAppType()),
+                                       : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
@@ -1113,7 +1113,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (input_file.size())
   {
     parser->parse();
-    auto app_type = parser->getAppType();
+    const auto & app_type = parser->getAppType();
     if (app_type.empty() && _app_type.empty())
       mooseWarning("The application type is not specified for ",
                    full_name,

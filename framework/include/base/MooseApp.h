@@ -126,6 +126,13 @@ public:
   InputParameters & parameters() { return _pars; }
 
   /**
+   * Get the type of this object as a string. This is a string version of the class name (e.g.
+   * MooseTestApp).
+   * @return The the type of the object
+   */
+  const std::string & type() const;
+
+  /**
    * The RankMap is a useful object for determining how the processes
    * are laid out on the physical nodes of the cluster
    */
@@ -221,14 +228,6 @@ public:
    * @return The last input filename set (if any)
    */
   const std::string & getLastInputFileName() const;
-
-  /**
-   * Get the type of this object as a string. This is a string version of the class name (e.g.
-   * MooseTestApp).
-   *
-   * If this is empty, an application type was not provided.
-   */
-  const std::string & getAppType() const;
 
   /**
    * Override the selection of the output file base name.
