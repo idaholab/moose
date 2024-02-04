@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APPLICATION_NAME=tensor_mechanics
+APPLICATION_NAME=solid_mechanics
 # If $METHOD is not set, use opt
 if [ -z $METHOD ]; then
   export METHOD=opt

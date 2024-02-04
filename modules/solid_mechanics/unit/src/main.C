@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-#include "TensorMechanicsApp.h"
+#include "SolidMechanicsApp.h"
 
 GTEST_API_ int
 main(int argc, char ** argv)
@@ -25,7 +25,7 @@ main(int argc, char ** argv)
   testing::InitGoogleTest(&argc, argv);
 
   MooseInit init(argc, argv);
-  registerApp(TensorMechanicsApp);
+  registerApp(SolidMechanicsApp);
   Moose::_throw_on_error = true;
   Moose::_throw_on_warning = true;
 
