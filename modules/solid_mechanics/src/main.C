@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TensorMechanicsTestApp.h"
+#include "SolidMechanicsTestApp.h"
 #include "MooseMain.h"
 
 // Begin the main program.
 int
 main(int argc, char * argv[])
 {
-  Moose::main<TensorMechanicsTestApp>(argc, argv);
+  Moose::main<SolidMechanicsTestApp>(argc, argv);
 
   return 0;
 }

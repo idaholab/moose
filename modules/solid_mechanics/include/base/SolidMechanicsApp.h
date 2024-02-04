@@ -11,13 +11,13 @@
 
 #include "MooseApp.h"
 
-class TensorMechanicsApp : public MooseApp
+class SolidMechanicsApp : public MooseApp
 {
 public:
   static InputParameters validParams();
 
-  TensorMechanicsApp(const InputParameters & parameters);
-  virtual ~TensorMechanicsApp();
+  SolidMechanicsApp(const InputParameters & parameters);
+  virtual ~SolidMechanicsApp();
 
   virtual void setupOptions() override;
   virtual void runInputFile() override;
