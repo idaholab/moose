@@ -31,7 +31,7 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
     _velocity(getParam<RealVectorValue>("velocity"))
 {
   if (_two_term_expansion)
-    _var->computeCellGradients();
+    _var.computeCellGradients();
 }
 
 Real
@@ -43,11 +43,11 @@ LinearFVOutflowBC::computeBoundaryValue() const
                              : _current_face_info->neighborInfo();
 
   // By default we approximate the boundary value with the neighboring cell value
-  auto boundary_value = _var->getElemValue(elem_info, determineState());
+  auto boundary_value = _var.getElemValue(*elem_info, determineState());
 
   // If we request linear extrapolation, we add the gradient term as well
   if (_two_term_expansion)
-    boundary_value += _var->gradSln(elem_info) * computeCellToFaceVector();
+    boundary_value += _var.gradSln(*elem_info) * computeCellToFaceVector();
 
   return boundary_value;
 }
@@ -65,7 +65,7 @@ LinearFVOutflowBC::computeBoundaryNormalGradient() const
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-    normal_gradient = _var->gradSln(elem_info) * _current_face_info->normal();
+    normal_gradient = _var.gradSln(*elem_info) * _current_face_info->normal();
   }
   return normal_gradient;
 }
@@ -90,7 +90,7 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-    contribution = _var->gradSln(elem_info) * computeCellToFaceVector();
+    contribution = _var.gradSln(*elem_info) * computeCellToFaceVector();
   }
 
   return contribution;

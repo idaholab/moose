@@ -14,8 +14,6 @@
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
-#include "ComputeLinearFVElementalThread.h"
-#include "ComputeLinearFVFaceThread.h"
 #include "libmesh/linear_implicit_system.h"
 
 #include "libmesh/equation_systems.h"

@@ -26,7 +26,7 @@ public:
    */
   LinearFVOutflowBC(const InputParameters & parameters);
 
-  /// If this the face value on this boundary is determined using a linear
+  /// Whether the face value on this boundary is determined using a linear
   /// extrapolation from the adjacent cell center.
   virtual bool needsExtrapolation() const override { return _two_term_expansion; }
 

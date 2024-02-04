@@ -75,7 +75,7 @@ protected:
   libMesh::LinearImplicitSystem & _linear_system;
 
   /// The thread ID for this object
-  THREAD_ID _tid;
+  const THREAD_ID _tid;
 
   /// Reference to the mesh object
   MooseMesh & _mesh;

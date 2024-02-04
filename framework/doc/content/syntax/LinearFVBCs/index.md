@@ -25,7 +25,7 @@ these two boundary conditions, let's start with the advection equation:
 \end{equation}
 
 with $\vec{v}$ denoting the velocity vector, $u$ the solution, and $S$ a potentially space-dependent
-source term. The boundary conditions on the left can be expressed as:
+source term. The boundary condition on the left can be expressed as:
 
 \begin{equation}
   u_b = f(x_b),
@@ -38,7 +38,7 @@ Both boundary conditions can be applied in an integral sense through the discret
 advection term on the cell adjacent to the boundary:
 
 \begin{equation}
-  \int\limits_{V_b} \nabla \cdot (\vec{v} u) dV approx \left(\sum\limits_i \vec{n}_i
+  \int\limits_{V_b} \nabla \cdot (\vec{v} u) dV \approx \left(\sum\limits_i \vec{n}_i
   \cdot \vec{v}_i u_{f,i}|S_i|\right) + \vec{n}_b \cdot \vec{v}_b u_b |S_b|~,
 \end{equation}
 
@@ -54,7 +54,7 @@ the right hand side of the system only, whereas the outflow boundary condition c
 
 Different linear finite volume kernels might use the quantities provided by these boundary
 conditions differently, but there are some common functionalities which are used more
-frequently between diffusion and advection these kernels.
+frequently between diffusion and advection kernels.
 The following functions represent this common functionality:
 
 - `computeBoundaryValue` computes the boundary value of the field.
@@ -87,7 +87,7 @@ The following functions represent this common functionality:
 - `computeBoundaryGradientRHSContribution` computes the right hand side contributions
   for terms that need the boundary gradient of the field, extensively used within diffusion kernels.
   Using the same example as above, the remaining part of the expression belongs to the right hand side
-  meaning that it will be added a $\frac{u_b}{|d_Cf|}$ term with additional multipliers
+  meaning that a $\frac{u_b}{|d_Cf|}$ term will be added with additional multipliers
   applied at the kernel level.
 
 ## LinearFVBCs source code: LinearFVFunctorDirichletBC

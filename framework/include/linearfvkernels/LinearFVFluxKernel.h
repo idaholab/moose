@@ -13,7 +13,7 @@
 #include "FaceArgInterface.h"
 
 /**
- * Finite volume kernel that contributes approximates of discretized face flux terms to the matrix
+ * Finite volume kernel that contributes approximations of discretized face flux terms to the matrix
  * and right hand side of a linear system.
  */
 class LinearFVFluxKernel : public LinearFVKernel, public FaceArgProducerInterface
@@ -55,13 +55,13 @@ public:
    * Computes the matrix contribution from a boundary face
    * @param bc The boundary condition on the given face
    */
-  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc) = 0;
+  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc) = 0;
 
   /**
    * Computes the right hand side contribution from a boundary face
    * @param bc The boundary condition on the given face
    */
-  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc) = 0;
+  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) = 0;
 
 protected:
   /**

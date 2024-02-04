@@ -228,7 +228,7 @@ protected:
   /// map of non-vector finite element variables with name keys
   HashMap<std::string, MooseVariableFVReal *> _fv_vars_by_name;
 
-  /// map of non-vector linear finite volume  variables with name keys
+  /// map of non-vector linear finite volume variables with name keys
   HashMap<std::string, MooseLinearVariableFVReal *> _linear_fv_vars_by_name;
 
   /// map of non-vector finite element variables with name keys

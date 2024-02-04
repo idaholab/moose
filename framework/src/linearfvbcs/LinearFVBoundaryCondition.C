@@ -22,7 +22,7 @@ LinearFVBoundaryCondition::validParams()
   params += NonADFunctorInterface::validParams();
 
   MultiMooseEnum vtags("rhs time", "rhs", true);
-  MultiMooseEnum & vector_tag_enum = params.set<MultiMooseEnum>("vector_tags", true);
+  auto & vector_tag_enum = params.set<MultiMooseEnum>("vector_tags", true);
   vector_tag_enum = vtags;
 
   params.addRequiredParam<LinearVariableName>(
@@ -58,18 +58,18 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mesh(_subproblem.mesh()),
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
-    _var(mooseLinearVariableFV()),
-    _sys(_var->sys()),
+    _var(*mooseLinearVariableFV()),
+    _sys(_var.sys()),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
     _includes_material_multiplier(false)
 {
-  addMooseVariableDependency(_var);
+  addMooseVariableDependency(&_var);
 }
 
 bool
 LinearFVBoundaryCondition::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
 {
-  const auto ft = fi.faceType(std::make_pair(_var->number(), _var->sys().number()));
+  const auto ft = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   if (fi_elem_side)
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else

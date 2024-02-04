@@ -43,6 +43,6 @@ protected:
   /// the sideset associated within this boundary condition might be within the mesh.
   Real computeCellToFaceDistance() const;
 
-  /// The functor for this BC (can be value, function, etc)
+  /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;
 };

@@ -125,12 +125,8 @@ loopOverElemFaceInfo(const Elem & elem,
  * @return A tuple, where the first item is elem1, the second item is elem2, and the third item is
  * a boolean indicating whether elem1 corresponds to the FaceInfo elem
  */
-template <typename OutputType>
-std::tuple<const Elem *, const Elem *, bool>
-determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var);
-
-template <typename OutputType>
-std::tuple<const Elem *, const Elem *, bool>
-determineElemOneAndTwo(const FaceInfo & fi, const MooseLinearVariableFV<OutputType> & var);
+template <typename FVVar>
+std::tuple<const Elem *, const Elem *, bool> determineElemOneAndTwo(const FaceInfo & fi,
+                                                                    const FVVar & var);
 }
 }

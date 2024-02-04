@@ -31,10 +31,6 @@
 #include "libmesh/linear_implicit_system.h"
 
 // Forward declerations
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class Problem;
 class SubProblem;
@@ -69,7 +65,7 @@ public:
 
   static InputParameters validParams();
 
-  bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
+  virtual bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
   virtual bool needsExtrapolation() const { return false; }
 
@@ -80,7 +76,7 @@ public:
   const SubProblem & subProblem() const { return _subproblem; }
 
   /// Return the linear finite volume variable
-  const MooseLinearVariableFV<Real> & variable() const { return *_var; }
+  const MooseLinearVariableFV<Real> & variable() const { return _var; }
 
   /**
    * Computes the boundary value of this object. This relies on the current solution field.
@@ -103,13 +99,13 @@ public:
   virtual Real computeBoundaryValueRHSContribution() const = 0;
 
   /**
-   * Computed the boundary gradient's contribution to the linear system matrix. Mostly used for
+   * Computes the boundary gradient's contribution to the linear system matrix. Mostly used for
    * diffusion.
    */
   virtual Real computeBoundaryGradientMatrixContribution() const = 0;
 
   /**
-   * Computed the boundary gradient's contribution to the linear system right hand side.
+   * Computes the boundary gradient's contribution to the linear system right hand side.
    * Mostly used for diffusion.
    */
   virtual Real computeBoundaryGradientRHSContribution() const = 0;
@@ -131,14 +127,7 @@ public:
   }
 
   /// Set current face info
-  void setCurrentFaceInfo(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type)
-  {
-    mooseAssert(
-        face_info,
-        "The face info pointer should not be null when passing to the LinearFVBoundaryCondition!");
-    _current_face_info = face_info;
-    _current_face_type = face_type;
-  }
+  void setCurrentFaceInfo(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type);
 
   const FaceInfo * currentFaceInfo() const { return _current_face_info; }
   FaceInfo::VarFaceNeighbors currentFaceType() const { return _current_face_type; }
@@ -157,7 +146,7 @@ protected:
       bool correct_skewness = false) const;
 
   /// Thread id
-  THREAD_ID _tid;
+  const THREAD_ID _tid;
 
   /// Reference to SubProblem
   SubProblem & _subproblem;
@@ -168,8 +157,8 @@ protected:
   /// Reference to the ruling finite volume problem
   FVProblemBase & _fv_problem;
 
-  /// Pointer to the linear finite volume variable object
-  MooseLinearVariableFV<Real> * _var;
+  /// Reference to the linear finite volume variable object
+  MooseLinearVariableFV<Real> & _var;
 
   /// Reference to SystemBase
   SystemBase & _sys;
@@ -186,3 +175,14 @@ protected:
   /// Face ownership information for the current face
   FaceInfo::VarFaceNeighbors _current_face_type;
 };
+
+inline void
+LinearFVBoundaryCondition::setCurrentFaceInfo(const FaceInfo * face_info,
+                                              const FaceInfo::VarFaceNeighbors face_type)
+{
+  mooseAssert(
+      face_info,
+      "The face info pointer should not be null when passing to the LinearFVBoundaryCondition!");
+  _current_face_info = face_info;
+  _current_face_type = face_type;
+}

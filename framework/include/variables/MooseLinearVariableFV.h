@@ -83,9 +83,9 @@ public:
 
   virtual bool isFV() const override { return true; }
 
-  Moose::VarFieldType fieldType() const override;
-  bool isArray() const override;
-  bool isVector() const override;
+  virtual Moose::VarFieldType fieldType() const override;
+  virtual bool isArray() const override;
+  virtual bool isVector() const override;
 
   /**
    * Switch to request cell gradient computations.
@@ -110,12 +110,12 @@ public:
    * Get the variable gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    */
-  const VectorValue<Real> & gradSln(const ElemInfo * const elem_info) const;
+  const VectorValue<Real> & gradSln(const ElemInfo & elem_info) const;
 
   /**
    * Compute interpolated gradient on the provided face.
    * @param face The face for which to retrieve the gradient.
-   * @param state State argument which describes at what time / solution iteration  state we want to
+   * @param state State argument which describes at what time / solution iteration state we want to
    * evaluate the variable
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
@@ -126,10 +126,10 @@ public:
    * Get the solution value for the provided element and seed the derivative for the corresponding
    * dof index
    * @param elem_info The element to retrieive the solution value for
-   * @param state State argument which describes at what time / solution iteration  state we want to
+   * @param state State argument which describes at what time / solution iteration state we want to
    * evaluate the variable
    */
-  Real getElemValue(const ElemInfo * elem_info, const StateArg & state) const;
+  Real getElemValue(const ElemInfo & elem_info, const StateArg & state) const;
 
   /**
    * Get the boundary condition object which corresponds to the given boundary ID
@@ -137,27 +137,50 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
+protected:
+  usingMooseVariableBaseMembers;
+
+  /// Boolean to check if this variable needs gradient computations.
+  bool _needs_cell_gradients;
+
+  /// A cache for storing gradients on elements
+  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_cache;
+
+  /// Temporary storage for the cell gradient to avoid unnecessary allocations.
+  mutable RealVectorValue _cell_gradient;
+
+  friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
+
 private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
   using MooseVariableField<OutputType>::evaluateDot;
 
-  ValueType evaluate(const ElemArg & elem, const StateArg &) const override final;
-  ValueType evaluate(const FaceArg & face, const StateArg &) const override final;
-  ValueType evaluate(const NodeArg & node, const StateArg &) const override final;
-  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final;
-  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final;
-  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
-                     const StateArg & state) const override final;
-  GradientType evaluateGradient(const ElemQpArg & qp_arg, const StateArg &) const override final;
-  GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg &) const override final;
-  GradientType evaluateGradient(const FaceArg & face, const StateArg &) const override final;
-  DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
+  virtual ValueType evaluate(const ElemArg & elem, const StateArg &) const override final;
+  virtual ValueType evaluate(const FaceArg & face, const StateArg &) const override final;
+  virtual ValueType evaluate(const NodeArg & node, const StateArg &) const override final;
+  virtual ValueType evaluate(const ElemPointArg & elem_point,
+                             const StateArg & state) const override final;
+  virtual ValueType evaluate(const ElemQpArg & elem_qp,
+                             const StateArg & state) const override final;
+  virtual ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                             const StateArg & state) const override final;
+  virtual GradientType evaluateGradient(const ElemQpArg & qp_arg,
+                                        const StateArg &) const override final;
+  virtual GradientType evaluateGradient(const ElemArg & elem_arg,
+                                        const StateArg &) const override final;
+  virtual GradientType evaluateGradient(const FaceArg & face,
+                                        const StateArg &) const override final;
+  virtual DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
 
   /**
    * Setup the boundary to Dirichlet BC map
    */
   void cacheBoundaryBCMap();
+
+  /// Map for easily accessing the boundary conditions based on the boundary IDs.
+  /// We assume that each boundary has one boundary condition only.
+  std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
 public:
   /*---------------------------------------------------------------------------
@@ -566,37 +589,13 @@ public:
   {
     mooseError("phiLowerSize not supported by MooseLinearVariableFVBase");
   }
-
-private:
-  /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
-  /// because the solution might not exist at the time that this variable is constructed, so we
-  /// cannot safely dereference at that time
-  const NumericVector<Number> * const & _solution;
-
-  /// Map for easily accessing the boundary conditions based on the boundary IDs.
-  /// We assume that each boundary has one boundary condition only.
-  std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
-
-protected:
-  usingMooseVariableBaseMembers;
-
-  /// Boolean to check if this variable needs gradient computations.
-  bool _needs_cell_gradients;
-
-  /// A cache for storing gradients on elements
-  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_cache;
-
-  /// Temporary storage for the cell gradient to avoid unnecessary allocations.
-  mutable RealVectorValue _cell_gradient;
-
-  friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
 };
 
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
-  const auto elem_info = &this->_mesh.elemInfo(elem_arg.elem->id());
+  const auto & elem_info = this->_mesh.elemInfo(elem_arg.elem->id());
   return getElemValue(elem_info, state);
 }
 
@@ -605,7 +604,7 @@ typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemPointArg & elem_point,
                                             const StateArg & state) const
 {
-  const auto elem_info = &this->_mesh.elemInfo(elem_point.elem->id());
+  const auto & elem_info = this->_mesh.elemInfo(elem_point.elem->id());
   return getElemValue(elem_info, state);
 }
 
@@ -613,7 +612,7 @@ template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  const auto elem_info = &this->_mesh.elemInfo(elem_qp.elem->id());
+  const auto & elem_info = this->_mesh.elemInfo(elem_qp.elem->id());
   return getElemValue(elem_info, state);
 }
 
@@ -630,7 +629,7 @@ typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
                                                     const StateArg & /*state*/) const
 {
-  const auto & elem_info = &this->_mesh.elemInfo(qp_arg.elem->id());
+  const auto & elem_info = this->_mesh.elemInfo(qp_arg.elem->id());
   return gradSln(elem_info);
 }
 
@@ -639,7 +638,7 @@ typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg,
                                                     const StateArg & /*state*/) const
 {
-  const auto & elem_info = &this->_mesh.elemInfo(elem_arg.elem->id());
+  const auto & elem_info = this->_mesh.elemInfo(elem_arg.elem->id());
   return gradSln(elem_info);
 }
 

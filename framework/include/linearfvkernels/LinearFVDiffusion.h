@@ -34,9 +34,9 @@ public:
 
   virtual Real computeNeighborRightHandSideContribution() override;
 
-  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc) override;
+  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc) override;
 
-  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc) override;
+  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) override;
 
 protected:
   /**

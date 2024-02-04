@@ -37,9 +37,9 @@ LinearFVFluxKernel::addMatrixContribution()
   {
     // The dof ids of the variable corresponding to the element and neighbor
     const auto dof_id_elem =
-        _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+        _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
     const auto dof_id_neighbor =
-        _current_face_info->neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
+        _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
 
     // Compute the entries which will go to the neighbor (offdiagonal) and element
     // (diagonal).
@@ -53,26 +53,25 @@ LinearFVFluxKernel::addMatrixContribution()
     (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, -neighbor_matrix_contribution);
   }
   else if (auto * bc_pointer =
-               _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
+               _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
   {
     mooseAssert(_current_face_info->boundaryIDs().size() == 1,
                 "We should only have one boundary on every face.");
     bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
+    const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
 
     // We allow internal boundaries too, so we have to check on which side we
     // are on
     if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
     {
       const auto dof_id_elem =
-          _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
-      const auto matrix_contribution = computeBoundaryMatrixContribution(bc_pointer);
+          _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
       (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
     }
     else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     {
       const auto dof_id_neighbor =
-          _current_face_info->neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
-      const auto matrix_contribution = computeBoundaryMatrixContribution(bc_pointer);
+          _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
       (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
     }
   }
@@ -87,9 +86,9 @@ LinearFVFluxKernel::addRightHandSideContribution()
   {
     // The dof ids of the variable corresponding to the element and neighbor
     const auto dof_id_elem =
-        _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+        _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
     const auto dof_id_neighbor =
-        _current_face_info->neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
+        _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
 
     // Compute the entries which will go to the neighbor and element positions.
     const auto elem_rhs_contribution = computeElemRightHandSideContribution();
@@ -100,23 +99,23 @@ LinearFVFluxKernel::addRightHandSideContribution()
     (*_linear_system.rhs).add(dof_id_neighbor, neighbor_rhs_contribution);
   }
   else if (auto * bc_pointer =
-               _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
+               _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
   {
     bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
+    const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
+
     // We allow internal boundaries too, so we have to check on which side we
     // are on
     if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
     {
       const auto dof_id_elem =
-          _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
-      const auto rhs_contribution = computeBoundaryRHSContribution(bc_pointer);
+          _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
       (*_linear_system.rhs).add(dof_id_elem, rhs_contribution);
     }
     else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     {
       const auto dof_id_neighbor =
-          _current_face_info->neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
-      const auto rhs_contribution = computeBoundaryRHSContribution(bc_pointer);
+          _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
       (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
     }
   }
@@ -125,7 +124,7 @@ LinearFVFluxKernel::addRightHandSideContribution()
 bool
 LinearFVFluxKernel::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
 {
-  const auto ft = fi.faceType(std::make_pair(_var->number(), _var->sys().number()));
+  const auto ft = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   if (fi_elem_side)
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else
@@ -148,5 +147,5 @@ LinearFVFluxKernel::setCurrentFaceInfo(const FaceInfo * face_info)
   _cached_rhs_contribution = false;
   _current_face_info = face_info;
   _current_face_type =
-      _current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number()));
+      _current_face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
 }

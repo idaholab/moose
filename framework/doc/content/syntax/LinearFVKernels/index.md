@@ -22,7 +22,7 @@ defined by the equation:
   - \nabla \cdot D \nabla u = S.
 \end{equation}
 
-The diffusion term is represented by the kernel named `diff`.
+The diffusion term is represented by the kernel named `diffusion`.
 
 !listing test/tests/linearfvkernels/diffusion/diffusion-2d.i
          block=LinearFVKernels
@@ -36,7 +36,7 @@ The `variable` parameter refers to the variable that this kernel is acting on (i
 which equation do the contributions of this term go). This must be a linear finite-volume
 variable in this case.
 
-Boundary conditions are not discussed in these examples. We recommend visiting
-[syntax files](syntax/LinearFVBCs/index.md) for details about boundary conditions.
+Boundary conditions are not discussed in these examples. We recommend visiting the
+[LinearFVBCs/index.md) page for details about boundary conditions.
 
 !syntax list /LinearFVKernels objects=True actions=False subsystems=False

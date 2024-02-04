@@ -40,7 +40,7 @@ LinearFVFunctorDirichletBC::computeBoundaryNormalGradient() const
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
   return (_functor(singleSidedFaceArg(_current_face_info), determineState()) -
-          raw_value((*_var)(elem_arg, determineState()))) /
+          raw_value(_var(elem_arg, determineState()))) /
          distance;
 }
 

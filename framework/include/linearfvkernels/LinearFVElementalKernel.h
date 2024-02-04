@@ -13,8 +13,8 @@
 #include "ElemInfo.h"
 
 /**
- * Finite volume kernel that contributes approximates of volumetric integral terms to the matrix and
- * right hand side of a linear system.
+ * Finite volume kernel that contributes approximations of volumetric integral terms to the matrix
+ * and right hand side of a linear system.
  */
 class LinearFVElementalKernel : public LinearFVKernel
 {

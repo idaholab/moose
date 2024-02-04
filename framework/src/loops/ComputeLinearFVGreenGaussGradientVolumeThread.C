@@ -65,7 +65,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
 
           if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
           {
-            const auto radial_contrib = _current_var->getElemValue(elem_info, state) /
+            const auto radial_contrib = _current_var->getElemValue(*elem_info, state) /
                                         elem_info->centroid()(rz_radial_coord);
             grad_container[rz_radial_coord]->add(dof_id_elem, radial_contrib);
           }

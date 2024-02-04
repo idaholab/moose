@@ -11,13 +11,10 @@
 
 #include "LinearSystemContributionObject.h"
 #include "BlockRestrictable.h"
-#include "Assembly.h"
-#include "ADFunctorInterface.h"
+#include "NonADFunctorInterface.h"
 #include "MooseLinearVariableFV.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
-
-class SubProblem;
 
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
@@ -32,9 +29,9 @@ public:
                           unsigned short ghost_layers);
   LinearFVKernel(const InputParameters & params);
 
-  virtual const MooseLinearVariableFV<Real> & variable() const override { return *_var; }
+  virtual const MooseLinearVariableFV<Real> & variable() const override { return _var; }
 
 protected:
-  /// Pointer to the linear finite volume variable
-  MooseLinearVariableFV<Real> * _var;
+  /// Reference to the linear finite volume variable
+  MooseLinearVariableFV<Real> & _var;
 };

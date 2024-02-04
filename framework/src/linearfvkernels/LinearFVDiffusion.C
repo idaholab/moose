@@ -24,7 +24,7 @@ LinearFVDiffusion::validParams()
       "use_nonorthogonal_correction",
       true,
       "If the nonorthogonal correction should be used when computing the normal gradient.");
-  params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The reaction coefficient.");
+  params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The diffusion coefficient.");
   return params;
 }
 
@@ -36,7 +36,7 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
     _flux_rhs_contribution(0.0)
 {
   if (_use_nonorthogonal_correction)
-    _var->computeCellGradients();
+    _var.computeCellGradients();
 }
 
 Real
@@ -97,8 +97,8 @@ LinearFVDiffusion::computeFluxRHSContribution()
     const auto state_arg = determineState();
 
     // Get the gradients from the adjacent cells
-    const auto grad_elem = _var->gradSln(_current_face_info->elemInfo());
-    const auto & grad_neighbor = _var->gradSln(_current_face_info->neighborInfo());
+    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo());
+    const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
 
     // Interpolate the two gradients to the face
     const auto interp_coeffs = interpCoeffs(
@@ -122,13 +122,13 @@ LinearFVDiffusion::computeFluxRHSContribution()
 }
 
 Real
-LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
+LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  auto grad_contrib = bc->computeBoundaryGradientMatrixContribution() *
+  auto grad_contrib = bc.computeBoundaryGradientMatrixContribution() *
                       _current_face_info->faceArea() * _current_face_info->faceCoord();
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
-  if (!bc->includesMaterialPropertyMultiplier())
+  if (!bc.includesMaterialPropertyMultiplier())
   {
     const auto face_arg = singleSidedFaceArg(_current_face_info);
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
@@ -138,15 +138,15 @@ LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
 }
 
 Real
-LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
+LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
   const auto face_arg = singleSidedFaceArg(_current_face_info);
-  auto grad_contrib = bc->computeBoundaryGradientRHSContribution() *
-                      _current_face_info->faceArea() * _current_face_info->faceCoord();
+  auto grad_contrib = bc.computeBoundaryGradientRHSContribution() * _current_face_info->faceArea() *
+                      _current_face_info->faceCoord();
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
-  if (!bc->includesMaterialPropertyMultiplier())
+  if (!bc.includesMaterialPropertyMultiplier())
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
@@ -158,7 +158,7 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
         1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
 
     grad_contrib += _diffusion_coeff(face_arg, determineState()) *
-                    _var->gradSln(_current_face_info->elemInfo()) * correction_vector *
+                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
                     _current_face_info->faceArea() * _current_face_info->faceCoord();
   }
 

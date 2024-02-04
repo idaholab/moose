@@ -27,11 +27,12 @@ class FEProblemBase;
  * \nabla u \approx \frac{1}{V_C} \sum_f u_f\vec{n}_f,
  *
  * where V_C denotes the volume of the cell, f is a face iterator, while u_f and
- * \vec{n}_f are the face value of the variable and face normal, respectively.
- * This object carries out the normalization with the element volumes.
+ * \vec{S}_f are the face value of the variable and surface area vector (the product of the
+ * surface area and normals), respectively. This object carries out the normalization with the
+ * element volumes.
  *
  * Furthermore, in cylindrical coordinates, the radial value of the gradient needs to be extended
- * with u(r)/r value which is added in this object as well.
+ * with a u(r)/r value which is added in this object as well.
  */
 class ComputeLinearFVGreenGaussGradientVolumeThread
 {
