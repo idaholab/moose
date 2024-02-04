@@ -15,7 +15,15 @@ InputParameters
 SalineMoltenSaltFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addClassDescription("Molten salt fluid properties using Saline");
+  const std::string description = "Molten salt fluid properties using Saline";
+#ifdef THERMOCHIMICA_ENABLED
+  params.addClassDescription(description);
+#else
+  params.addClassDescription(
+      "To use this object, you need to have the `Saline` library installed. Refer to the "
+      "documentation for guidance on how to enable it. (Original description: " +
+      description + ")");
+#endif
   params.addRequiredParam<std::vector<std::string>>("comp_name",
                                                     "The name of the components in the salt");
   params.addRequiredParam<std::vector<Real>>("comp_val",
@@ -43,7 +51,7 @@ SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputPara
   Real mole_sum = 0.0;
   for (const auto val : comp)
     mole_sum += val;
-  if (std::abs(mole_sum - 1.0) > 1e-6)
+  if (!MooseUtils::absoluteFuzzyEqual(mole_sum, 1.))
     mooseError("Mole fractions of defined salt compound do not sum to 1.0.");
 
   success = _tp.setComposition(name, comp);
