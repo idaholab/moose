@@ -75,16 +75,81 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("EmptyAction", "BCs/CoupledPressure");
   registerSyntax("CoupledPressureAction", "BCs/CoupledPressure/*");
 
-  registerSyntax("GeneralizedPlaneStrainAction",
-                 "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
-  registerSyntax("GlobalStrainAction", "Modules/TensorMechanics/GlobalStrain/*");
-  registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
-  registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/DynamicMaster");
-  registerSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
-  registerSyntax("DynamicTensorMechanicsAction", "Modules/TensorMechanics/DynamicMaster/*");
+  // Deprecated Modules/TensorMechanics syntax
+  registerDeprecatedSyntax("GeneralizedPlaneStrainAction",
+                           "Modules/TensorMechanics/GeneralizedPlaneStrain/*",
+                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics' instead.");
+  registerDeprecatedSyntax("GlobalStrainAction",
+                           "Modules/TensorMechanics/GlobalStrain/*",
+                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics' instead.");
+  registerDeprecatedSyntax("CommonTensorMechanicsAction",
+                           "Modules/TensorMechanics/Master",
+                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics' instead.");
+  registerDeprecatedSyntax("CommonTensorMechanicsAction",
+                           "Modules/TensorMechanics/DynamicMaster",
+                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics' instead.");
+  registerDeprecatedSyntax("TensorMechanicsAction",
+                           "Modules/TensorMechanics/Master/*",
+                           "The 'Modules/TensorMechanics/Master' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics/QuasiStatic' instead.");
+  registerDeprecatedSyntax(
+      "DynamicTensorMechanicsAction",
+      "Modules/TensorMechanics/DynamicMaster/*",
+      "The 'Modules/TensorMechanics/DynamicMaster' syntax is deprecated. Please use "
+      "'Physics/SolidMechanics/Dynamic' instead.");
 
-  registerSyntax("CommonLineElementAction", "Modules/TensorMechanics/LineElementMaster");
-  registerSyntax("LineElementAction", "Modules/TensorMechanics/LineElementMaster/*");
+  registerDeprecatedSyntax(
+      "CommonLineElementAction",
+      "Modules/TensorMechanics/LineElementMaster",
+      "The 'Modules/TensorMechanics/LineElementMaster' syntax is deprecated. Please use "
+      "'Physics/SolidMechanics/LineElement/QuasiStatic' instead.");
+  registerDeprecatedSyntax(
+      "LineElementAction",
+      "Modules/TensorMechanics/LineElementMaster/*",
+      "The 'Modules/TensorMechanics/LineElementMaster' syntax is deprecated. Please use "
+      "'Physics/SolidMechanics/LineElement/QuasiStatic' instead.");
+
+  registerDeprecatedSyntax(
+      "CommonCohesiveZoneAction",
+      "Modules/TensorMechanics/CohesiveZoneMaster",
+      "The 'Modules/TensorMechanics/CohesiveZoneMaster' syntax is deprecated. Please use "
+      "'Physics/SolidMechanics/CohesiveZone' instead.");
+  registerDeprecatedSyntax(
+      "CohesiveZoneAction",
+      "Modules/TensorMechanics/CohesiveZoneMaster/*",
+      "The 'Modules/TensorMechanics/CohesiveZoneMaster' syntax is deprecated. Please use "
+      "'Physics/SolidMechanics/CohesiveZone' instead.");
+
+  registerDeprecatedSyntax("EmptyAction",
+                           "Modules/TensorMechanics/MaterialVectorBodyForce",
+                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics' instead.");
+  registerDeprecatedSyntax("MaterialVectorBodyForceAction",
+                           "Modules/TensorMechanics/MaterialVectorBodyForce/*",
+                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics' instead.");
+
+  // New Physics syntax
+  registerSyntax("GeneralizedPlaneStrainAction", "Physics/SolidMechanics/GeneralizedPlaneStrain/*");
+  registerSyntax("GlobalStrainAction", "Physics/SolidMechanics/GlobalStrain/*");
+  registerSyntax("CommonTensorMechanicsAction", "Physics/SolidMechanics/QuasiStatic");
+  registerSyntax("CommonTensorMechanicsAction", "Physics/SolidMechanics/Dynamic");
+  registerSyntax("TensorMechanicsAction", "Physics/SolidMechanics/QuasiStatic/*");
+  registerSyntax("DynamicTensorMechanicsAction", "Physics/SolidMechanics/Dynamic/*");
+
+  registerSyntax("CommonLineElementAction", "Physics/SolidMechanics/LineElement/QuasiStatic");
+  registerSyntax("LineElementAction", "Physics/SolidMechanics/LineElement/QuasiStatic/*");
+
+  registerSyntax("CommonCohesiveZoneAction", "Physics/SolidMechanics/CohesiveZone");
+  registerSyntax("CohesiveZoneAction", "Physics/SolidMechanics/CohesiveZone/*");
+
+  registerSyntax("EmptyAction", "Physics/SolidMechanics/MaterialVectorBodyForce");
+  registerSyntax("MaterialVectorBodyForceAction",
+                 "Physics/SolidMechanics/MaterialVectorBodyForce/*");
 
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_user_object");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
@@ -92,13 +157,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_postprocessor");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_vector_postprocessor");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_material");
-
-  registerSyntax("CommonCohesiveZoneAction", "Modules/TensorMechanics/CohesiveZoneMaster");
-  registerSyntax("CohesiveZoneAction", "Modules/TensorMechanics/CohesiveZoneMaster/*");
-
-  registerSyntax("EmptyAction", "Modules/TensorMechanics/MaterialVectorBodyForce");
-  registerSyntax("MaterialVectorBodyForceAction",
-                 "Modules/TensorMechanics/MaterialVectorBodyForce/*");
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
