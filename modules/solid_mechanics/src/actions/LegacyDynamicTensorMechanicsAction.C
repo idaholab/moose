@@ -20,7 +20,7 @@ registerMooseAction("SolidMechanicsApp", LegacyDynamicTensorMechanicsAction, "ad
 InputParameters
 LegacyDynamicTensorMechanicsAction::validParams()
 {
-  InputParameters params = DynamicTensorMechanicsAction::validParams();
+  InputParameters params = SolidMechanicsAction::validParams();
   params.addParam<bool>(
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   return params;
@@ -28,7 +28,7 @@ LegacyDynamicTensorMechanicsAction::validParams()
 
 LegacyDynamicTensorMechanicsAction::LegacyDynamicTensorMechanicsAction(
     const InputParameters & params)
-  : DynamicTensorMechanicsAction(params)
+  : DynamicSolidMechanicsAction(params)
 {
 }
 
@@ -36,7 +36,7 @@ void
 LegacyDynamicTensorMechanicsAction::act()
 {
   if (_current_task == "add_kernel" || _current_task == "validate_coordinate_systems")
-    // note that we do not call DynamicTensorMechanicsAction::act() here, because the old
+    // note that we do not call SolidMechanicsAction::act() here, because the old
     // behavior is not to add inertia kernels
-    TensorMechanicsAction::act();
+    SolidMechanicsAction::act();
 }

@@ -14,12 +14,12 @@
 /**
  * Store common tensor mechanics parameters
  */
-class CommonTensorMechanicsAction : public Action
+class CommonSolidMechanicsAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  CommonTensorMechanicsAction(const InputParameters & parameters);
+  CommonSolidMechanicsAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "TensorMechanicsActionBase.h"
+#include "SolidMechanicsActionBase.h"
 #include "libmesh/point.h"
 
-class TensorMechanicsAction : public TensorMechanicsActionBase
+class SolidMechanicsAction : public SolidMechanicsActionBase
 {
 public:
   static InputParameters validParams();
 
-  TensorMechanicsAction(const InputParameters & params);
+  SolidMechanicsAction(const InputParameters & params);
 
   virtual void act();
 
@@ -65,7 +65,7 @@ protected:
   /// set generated from the passed in vector of subdomain names
   std::set<SubdomainID> _subdomain_ids;
 
-  /// set generated from the combined block restrictions of all TensorMechanics/Master action blocks
+  /// set generated from the combined block restrictions of all SolidMechanics/Master action blocks
   std::set<SubdomainID> _subdomain_id_union;
 
   /// strain formulation
@@ -170,7 +170,7 @@ protected:
 
 template <typename T, typename T2>
 bool
-TensorMechanicsAction::setupOutput(std::string out, T table, T2 setup)
+SolidMechanicsAction::setupOutput(std::string out, T table, T2 setup)
 {
   for (const auto & t1 : table)
   {

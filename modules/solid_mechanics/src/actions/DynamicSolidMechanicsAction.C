@@ -7,37 +7,35 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DynamicTensorMechanicsAction.h"
+#include "DynamicSolidMechanicsAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "meta_action");
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "setup_mesh_complete");
 
 registerMooseAction("SolidMechanicsApp",
-                    DynamicTensorMechanicsAction,
+                    DynamicSolidMechanicsAction,
                     "validate_coordinate_systems");
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_variable");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_variable");
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_aux_variable");
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_kernel");
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_aux_kernel");
 
-registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_material");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_material");
 
-registerMooseAction("SolidMechanicsApp",
-                    DynamicTensorMechanicsAction,
-                    "add_master_action_material");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_master_action_material");
 
 InputParameters
-DynamicTensorMechanicsAction::validParams()
+DynamicSolidMechanicsAction::validParams()
 {
-  InputParameters params = TensorMechanicsAction::validParams();
+  InputParameters params = SolidMechanicsAction::validParams();
   params.addClassDescription("Set up dynamic stress divergence kernels");
   params.addParam<bool>("static_initialization",
                         false,
@@ -95,8 +93,8 @@ DynamicTensorMechanicsAction::validParams()
   return params;
 }
 
-DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params)
-  : TensorMechanicsAction(params),
+DynamicSolidMechanicsAction::DynamicSolidMechanicsAction(const InputParameters & params)
+  : SolidMechanicsAction(params),
     _velocities(getParam<std::vector<AuxVariableName>>("velocities")),
     _accelerations(getParam<std::vector<AuxVariableName>>("accelerations")),
     _newmark_beta(isParamValid("beta") ? getParam<Real>("beta") : getParam<Real>("newmark_beta")),
@@ -108,7 +106,7 @@ DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters
 }
 
 void
-DynamicTensorMechanicsAction::act()
+DynamicSolidMechanicsAction::act()
 {
   const std::array<std::string, 3> dir{{"x", "y", "z"}};
 
@@ -197,11 +195,11 @@ DynamicTensorMechanicsAction::act()
   }
 
   // call parent class method
-  TensorMechanicsAction::act();
+  SolidMechanicsAction::act();
 }
 
 std::string
-DynamicTensorMechanicsAction::getKernelType()
+DynamicSolidMechanicsAction::getKernelType()
 {
   // choose kernel type based on coordinate system
   if (_coord_system == Moose::COORD_XYZ)
@@ -211,9 +209,9 @@ DynamicTensorMechanicsAction::getKernelType()
 }
 
 InputParameters
-DynamicTensorMechanicsAction::getKernelParameters(std::string type)
+DynamicSolidMechanicsAction::getKernelParameters(std::string type)
 {
-  TensorMechanicsAction::getKernelParameters(type);
+  SolidMechanicsAction::getKernelParameters(type);
   InputParameters params = _factory.getValidParams(type);
   params.applyParameters(parameters(), {"zeta", "alpha"});
 

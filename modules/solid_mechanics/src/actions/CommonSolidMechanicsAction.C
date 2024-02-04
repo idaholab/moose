@@ -7,30 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CommonTensorMechanicsAction.h"
-#include "TensorMechanicsAction.h"
+#include "CommonSolidMechanicsAction.h"
+#include "SolidMechanicsAction.h"
 #include "ActionWarehouse.h"
 
-registerMooseAction("SolidMechanicsApp", CommonTensorMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", CommonSolidMechanicsAction, "meta_action");
 
 InputParameters
-CommonTensorMechanicsAction::validParams()
+CommonSolidMechanicsAction::validParams()
 {
-  InputParameters params = TensorMechanicsActionBase::validParams();
+  InputParameters params = SolidMechanicsActionBase::validParams();
   params.addClassDescription("Store common tensor mechanics parameters");
   return params;
 }
 
-CommonTensorMechanicsAction::CommonTensorMechanicsAction(const InputParameters & parameters)
+CommonSolidMechanicsAction::CommonSolidMechanicsAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }
 
 void
-CommonTensorMechanicsAction::act()
+CommonSolidMechanicsAction::act()
 {
   // check if sub-blocks block are found which will use the common parameters
-  auto action = _awh.getActions<TensorMechanicsActionBase>();
+  auto action = _awh.getActions<SolidMechanicsActionBase>();
   if (action.size() == 0)
     mooseWarning("Common parameters are supplied, but not used in ", parameters().blockLocation());
 }

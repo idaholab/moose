@@ -11,12 +11,12 @@
 
 #include "Action.h"
 
-class TensorMechanicsActionBase : public Action
+class SolidMechanicsActionBase : public Action
 {
 public:
   static InputParameters validParams();
 
-  TensorMechanicsActionBase(const InputParameters & params);
+  SolidMechanicsActionBase(const InputParameters & params);
 
   static MultiMooseEnum outputPropertiesType();
   static MultiMooseEnum materialOutputOrders();

@@ -20,14 +20,14 @@ registerMooseAction("SolidMechanicsApp", LegacyTensorMechanicsAction, "add_kerne
 InputParameters
 LegacyTensorMechanicsAction::validParams()
 {
-  InputParameters params = TensorMechanicsAction::validParams();
+  InputParameters params = SolidMechanicsAction::validParams();
   params.addParam<bool>(
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   return params;
 }
 
 LegacyTensorMechanicsAction::LegacyTensorMechanicsAction(const InputParameters & params)
-  : TensorMechanicsAction(params)
+  : SolidMechanicsAction(params)
 {
 }
 
@@ -35,5 +35,5 @@ void
 LegacyTensorMechanicsAction::act()
 {
   if (_current_task == "add_kernel" || _current_task == "validate_coordinate_systems")
-    TensorMechanicsAction::act();
+    SolidMechanicsAction::act();
 }

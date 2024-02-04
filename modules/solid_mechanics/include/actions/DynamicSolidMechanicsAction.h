@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "TensorMechanicsAction.h"
+#include "SolidMechanicsAction.h"
 
-class DynamicTensorMechanicsAction : public TensorMechanicsAction
+class DynamicSolidMechanicsAction : public SolidMechanicsAction
 {
 public:
   static InputParameters validParams();
 
-  DynamicTensorMechanicsAction(const InputParameters & params);
+  DynamicSolidMechanicsAction(const InputParameters & params);
 
   virtual void act() override;
 

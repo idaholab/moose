@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "TensorMechanicsAction.h"
+#include "SolidMechanicsAction.h"
 
-class LegacyTensorMechanicsAction : public TensorMechanicsAction
+class LegacyTensorMechanicsAction : public SolidMechanicsAction
 {
 public:
   static InputParameters validParams();
