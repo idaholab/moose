@@ -1,1 +1,1 @@
-!template load file=sqa/module_vvr.md.template category=tensor_mechanics module=Tensor Mechanics
+!template load file=sqa/module_vvr.md.template category=solid_mechanics module=Solid Mechanics

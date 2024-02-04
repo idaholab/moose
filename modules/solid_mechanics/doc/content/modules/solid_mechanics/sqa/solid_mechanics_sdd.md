@@ -1,11 +1,11 @@
-!template load file=sqa/module_sdd.md.template category=tensor_mechanics module=Tensor Mechanics
+!template load file=sqa/module_sdd.md.template category=solid_mechanics module=Solid Mechanics
 
 !template! item key=introduction
 Computing mechanical deformation of solids or structures is important for a variety of applications. These can employ a variety of assumptions of material behavior, and can be either run as standalone single-physics problems or couple the mechanical response with that of other physics. The [!ac](MOOSE) {{module}} module provides a foundational set of models for modeling mechanical deformation. This module relies on MOOSE for solving its system of equations, and is designed to be readily extended or coupled with other physics models. This document describes the system design of the {{module}} module.
 !template-end!
 
 !template! item key=system-scope
-!include tensor_mechanics_srs.md start=system-scope-begin end=system-scope-finish
+!include solid_mechanics_srs.md start=system-scope-begin end=system-scope-finish
 !template-end!
 
 !template! item key=dependencies-and-limitations
