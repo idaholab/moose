@@ -596,7 +596,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::checkPropDeps(
 #ifndef NDEBUG
   std::set<unsigned int> props_diff;
   std::set<unsigned int> supplied_props;
-  std::set<unsigned int> fv_kernel_requested_props;
+  std::unordered_set<unsigned int> fv_kernel_requested_props;
 
   for (auto * kernel : _fv_flux_kernels)
   {
@@ -615,7 +615,8 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::checkPropDeps(
     }
 
     const auto & mp_deps = mat->getMatPropDependencies();
-    emptyDifferenceTest(mp_deps, supplied_props, props_diff);
+    emptyDifferenceTest(
+        std::set<unsigned int>(mp_deps.begin(), mp_deps.end()), supplied_props, props_diff);
   }
 
   // Print a warning if block restricted materials are used
@@ -631,7 +632,10 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::checkPropDeps(
                      "property name? \nUnfortunately that is not supported in FV because we have "
                      "to allow ghosting \nof material properties for block-restricted physics."));
 
-  emptyDifferenceTest(fv_kernel_requested_props, supplied_props, props_diff);
+  emptyDifferenceTest(
+      std::set<unsigned int>(fv_kernel_requested_props.begin(), fv_kernel_requested_props.end()),
+      supplied_props,
+      props_diff);
 #endif
 }
 

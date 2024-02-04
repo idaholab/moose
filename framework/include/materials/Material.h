@@ -199,7 +199,7 @@ public:
 
   virtual bool isBoundaryMaterial() const override { return _bnd; }
 
-  virtual const std::set<unsigned int> & getMatPropDependencies() const override
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override
   {
     return MaterialPropertyInterface::getMatPropDependencies();
   }

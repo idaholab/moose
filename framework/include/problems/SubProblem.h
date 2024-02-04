@@ -1005,9 +1005,6 @@ protected:
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
 
-  /// Set of material property ids that determine whether materials get reinited
-  std::vector<std::set<unsigned int>> _active_material_property_ids;
-
   std::vector<std::set<TagID>> _active_fe_var_coupleable_matrix_tags;
 
   std::vector<std::set<TagID>> _active_fe_var_coupleable_vector_tags;

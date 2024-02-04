@@ -147,8 +147,8 @@ NodalPatchRecovery::reinitPatch()
   _coef.resize(_multi_index.size());
 
   // activate dependent material properties
-  std::set<unsigned int> needed_mat_props;
-  const std::set<unsigned int> & mp_deps = getMatPropDependencies();
+  std::unordered_set<unsigned int> needed_mat_props;
+  const auto & mp_deps = getMatPropDependencies();
   needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 }

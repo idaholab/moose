@@ -60,7 +60,7 @@ ComputeDiracThread::subdomainChanged()
   _dirac_kernels.updateVariableDependency(needed_moose_vars, _tid);
 
   // Update material dependencies
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   _dirac_kernels.updateMatPropDependency(needed_mat_props, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);

@@ -321,7 +321,7 @@ public:
    * @return The IDs corresponding to the material properties that
    * MUST be reinited before evaluating this object
    */
-  const std::set<unsigned int> & getMatPropDependencies() const
+  const std::unordered_set<unsigned int> & getMatPropDependencies() const
   {
     return _material_property_dependencies;
   }
@@ -542,7 +542,7 @@ protected:
   std::vector<std::unique_ptr<PropertyValue>> _default_properties;
 
   /// The set of material properties (as given by their IDs) that _this_ object depends on
-  std::set<unsigned int> _material_property_dependencies;
+  std::unordered_set<unsigned int> _material_property_dependencies;
 
   const MaterialPropertyName _get_suffix;
 

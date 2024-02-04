@@ -168,7 +168,7 @@ public:
 
   virtual bool isBoundaryMaterial() const override { return true; }
 
-  virtual const std::set<unsigned int> & getMatPropDependencies() const override
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override
   {
     return TwoMaterialPropertyInterface::getMatPropDependencies();
   }

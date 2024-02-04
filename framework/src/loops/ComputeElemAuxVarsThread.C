@@ -54,7 +54,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   std::set<TagID> needed_fe_var_matrix_tags;
   std::set<TagID> needed_fe_var_vector_tags;
 
@@ -67,8 +67,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
     for (const auto & aux : kernels)
     {
       aux->subdomainSetup();
-      const std::set<MooseVariableFEBase *> & mv_deps = aux->getMooseVariableDependencies();
-      const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
+      const auto & mv_deps = aux->getMooseVariableDependencies();
+      const auto & mp_deps = aux->getMatPropDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
       needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
 
