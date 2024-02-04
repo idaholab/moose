@@ -5,42 +5,42 @@
     input = 'axisymmetric_gps_incremental.i'
     exodiff = 'axisymmetric_gps_incremental_out.e'
     design = 'GeneralizedPlaneStrainAction.md'
-    requirement = 'The system shall support generalized plane strain with incremental strain for 1D meshes using the TensorMechanics/Master Action.'
+    requirement = 'The system shall support generalized plane strain with incremental strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
   [../]
   [./axisymmetric_gps_small]
     type = 'Exodiff'
     input = 'axisymmetric_gps_small.i'
     exodiff = 'axisymmetric_gps_small_out.e'
     design = 'GeneralizedPlaneStrainAction.md'
-    requirement = 'The system shall support generalized plane strain with small strain for 1D meshes using the TensorMechanics/Master Action.'
+    requirement = 'The system shall support generalized plane strain with small strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
   [../]
   [./axisymmetric_gps_finite]
     type = 'Exodiff'
     input = 'axisymmetric_gps_finite.i'
     exodiff = 'axisymmetric_gps_finite_out.e'
     design = 'GeneralizedPlaneStrainAction.md'
-    requirement = 'The system shall support generalized plane strain with finite strain for 1D meshes using the TensorMechanics/Master Action.'
+    requirement = 'The system shall support generalized plane strain with finite strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
   [../]
   [./axisymmetric_plane_strain_incremental]
     type = 'Exodiff'
     input = 'axisymm_plane_strain_incremental.i'
     exodiff = 'axisymm_plane_strain_incremental_out.e'
     design = 'source/materials/ComputeAxisymmetric1DIncrementalStrain.md'
-    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall compute the elastic stress for a 1D axisymmetric small incremental strain formulation under a combination of applied tensile displacement and thermal expansion loading using the TensorMechanics/Master Action.'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall compute the elastic stress for a 1D axisymmetric small incremental strain formulation under a combination of applied tensile displacement and thermal expansion loading using the SolidMechanics/QuasiStatic Physics.'
   [../]
   [./axisymmetric_plane_strain_small]
     type = 'Exodiff'
     input = 'axisymm_plane_strain_small.i'
     exodiff = 'axisymm_plane_strain_small_out.e'
     design = 'source/materials/ComputeAxisymmetric1DSmallStrain.md'
-    requirement = 'The ComputeAxisymmetric1DSmallStrain class shall compute the elastic stress for a 1D axisymmetric small total strain formulation under a combination of applied tensile displacement and thermal expansion loading using the TensorMechanics/Master Action.'
+    requirement = 'The ComputeAxisymmetric1DSmallStrain class shall compute the elastic stress for a 1D axisymmetric small total strain formulation under a combination of applied tensile displacement and thermal expansion loading using the SolidMechanics/QuasiStatic Physics.'
   [../]
   [./axisymmetric_plane_strain_finite]
     type = 'Exodiff'
     input = 'axisymm_plane_strain_finite.i'
     exodiff = 'axisymm_plane_strain_finite_out.e'
     design = 'source/materials/ComputeAxisymmetric1DFiniteStrain.md'
-    requirement = 'The ComputeAxisymmetric1DFiniteStrain class shall compute the elastic stress for a 1D axisymmetric incremental finite strain formulation under a combination of applied tensile displacement and thermal expansion loading using the TensorMechanics/Master Action.'
+    requirement = 'The ComputeAxisymmetric1DFiniteStrain class shall compute the elastic stress for a 1D axisymmetric incremental finite strain formulation under a combination of applied tensile displacement and thermal expansion loading using the SolidMechanics/QuasiStatic Physics.'
   [../]
 
   [./axisymm_gps_incremental]

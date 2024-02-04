@@ -1,6 +1,6 @@
 [Tests]
   issues = '#3878 #4150 #4507'
-  design = '/TensorMechanicsPlasticWeakPlaneShear.md'
+  design = '/SolidMechanicsPlasticWeakPlaneShear.md'
   [except1]
     type = 'RunException'
     input = 'except1.i'
@@ -17,7 +17,7 @@
   [except3]
     type = 'RunException'
     input = 'large_deform1.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/decomposition_method=TaylorExpansion'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/decomposition_method=TaylorExpansion'
     expect_err = 'Cannot take square root of a number less than or equal to '
                  'zero in the calculation of C1 for the Rashid approximation '
                  'for the rotation tensor. This zero or negative number may '

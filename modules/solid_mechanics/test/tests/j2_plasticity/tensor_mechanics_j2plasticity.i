@@ -44,7 +44,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
     displacements = 'x_disp y_disp z_disp'
     use_displaced_mesh = true
   [../]

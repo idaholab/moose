@@ -31,7 +31,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Physics/SolidMechanics/Dynamic]
   [all]
     add_variables = true
     hht_alpha = -0.3

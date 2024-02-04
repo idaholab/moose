@@ -32,7 +32,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [master]
     strain = SMALL
     add_variables = true

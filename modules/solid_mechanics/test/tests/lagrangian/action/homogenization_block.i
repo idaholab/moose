@@ -31,9 +31,9 @@
   []
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       displacements = 'disp_x disp_y disp_z'
       [all]
         displacements = 'disp_x disp_y disp_z'

@@ -1,8 +1,8 @@
 # The primary purpose of this test is to verify that the ability to combine
 # multiple eigenstrains works correctly.  It should behave identically to the
 # constant_expansion_coeff.i model in the thermal_expansion directory. Instead
-# of having the eigenstrain names passed directly to the TensorMechanics MasterAction,
-# the MasterAction should be able to extract the necessary eigenstrains and apply
+# of having the eigenstrain names passed directly to the TensorMechanics QuasiStaticAction,
+# the QuasiStaticAction should be able to extract the necessary eigenstrains and apply
 # to their respective blocks without reduncacy.
 
 # This test involves only thermal expansion strains on a 2x2x2 cube of approximate
@@ -41,7 +41,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./solid]
     strain = SMALL
     incremental = true

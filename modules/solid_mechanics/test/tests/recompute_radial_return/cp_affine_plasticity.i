@@ -177,7 +177,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
   [../]
 []
 

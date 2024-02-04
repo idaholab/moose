@@ -14,7 +14,7 @@
     input = 'isotropic_plasticity_incremental_strain.i'
     cli_args = "Materials/isotropic_plasticity/base_name=base
                 "
-               "Modules/TensorMechanics/Master/all/generate_output=''"
+               "Physics/SolidMechanics/QuasiStatic/all/generate_output=''"
     exodiff = 'isotropic_plasticity_incremental_strain_out.e'
     exodiff_opts = '-allow_name_mismatch'
     compiler = 'CLANG GCC'

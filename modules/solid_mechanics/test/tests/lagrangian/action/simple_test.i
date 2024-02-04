@@ -22,9 +22,9 @@
   file = 'second.exo'
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       [all]
         strain = FINITE
         new_system = true

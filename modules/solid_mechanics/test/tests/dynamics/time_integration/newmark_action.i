@@ -30,7 +30,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Physics/SolidMechanics/Dynamic]
   [all]
     add_variables = true
     newmark_beta = 0.25

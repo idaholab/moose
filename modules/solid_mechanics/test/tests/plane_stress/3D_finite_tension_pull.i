@@ -41,7 +41,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [plane_stress]
     strain = FINITE
     extra_vector_tags = 'ref'

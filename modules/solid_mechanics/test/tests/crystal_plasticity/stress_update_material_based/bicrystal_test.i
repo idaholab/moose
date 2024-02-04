@@ -68,7 +68,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [copper]
     strain = FINITE
     incremental = true

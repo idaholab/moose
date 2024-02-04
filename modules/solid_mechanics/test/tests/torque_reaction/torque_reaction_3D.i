@@ -61,7 +61,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [master]
     strain = SMALL
     generate_output = 'stress_xx stress_yy stress_zz'

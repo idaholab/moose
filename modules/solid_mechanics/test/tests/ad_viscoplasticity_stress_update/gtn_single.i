@@ -13,7 +13,7 @@
   ymax = 0.002
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = FINITE
   add_variables = true
   base_name = 'total'

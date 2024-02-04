@@ -206,7 +206,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
     displacements = 'disp_x disp_y'
     use_displaced_mesh = true
   [../]

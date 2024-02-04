@@ -26,16 +26,16 @@
   large_kinematics = true
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       [all]
         strain = FINITE
         add_variables = true
         new_system = true
       []
     []
-    [CohesiveZoneMaster]
+    [CohesiveZone]
       [interface]
         boundary = 'interface'
         strain = SMALL

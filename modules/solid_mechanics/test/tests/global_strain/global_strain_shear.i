@@ -88,7 +88,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
   [../]
 []
 

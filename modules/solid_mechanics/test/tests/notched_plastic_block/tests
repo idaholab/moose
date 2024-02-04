@@ -2,7 +2,7 @@
   [confined_uniaxial]
     issues = '#13766'
     design = 'tensor_mechanics/Stresses.md'
-    requirement = 'TensorMechanics shall be able to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
+    requirement = 'SolidMechanics shall be able to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
     [cmc_planar]
       type = 'CSVDiff'
       input = 'cmc_planar.i'
@@ -26,7 +26,7 @@
       heavy = true
       # note, the number of residual calls for this test was documented in a published journal article.  To get no diffs when testing in parallel, various tolerances and settings must be set differently, resulting in a different number of residual calls.  Therefore, to keep the journal article correct, only test in serial.
       max_parallel = 1
-      cli_args = 'Modules/TensorMechanics/Master/all/strain=FINITE Executioner/end_time=1 Postprocessors/active=s_zz'
+      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/strain=FINITE Executioner/end_time=1 Postprocessors/active=s_zz'
       detail = 'unsmoothed Mohr-Coulomb plasticity'
     []
     [biaxial_abbo]

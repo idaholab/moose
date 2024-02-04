@@ -15,9 +15,9 @@
   coord_type = RZ
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       [all]
         formulation = TOTAL
         strain = FINITE

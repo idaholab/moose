@@ -24,7 +24,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./generalized_plane_strain]
     block = 1
     strain = SMALL

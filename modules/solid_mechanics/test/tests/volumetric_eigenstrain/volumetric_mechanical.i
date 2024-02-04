@@ -31,7 +31,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./master]
     strain = FINITE
     decomposition_method = EigenSolution #Necessary for exact solution

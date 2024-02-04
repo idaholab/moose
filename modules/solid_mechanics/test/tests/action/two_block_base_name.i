@@ -24,7 +24,7 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   # parameters that apply to all subblocks are specified at this level. They
   # can be overwritten in the subblocks.
   add_variables = true

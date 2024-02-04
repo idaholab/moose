@@ -5,7 +5,7 @@
     expect_err = 'ComputeEigenstrainFromInitialStress: 9 initial stress functions must be provided.  You supplied 3'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
-    requirement = "TensorMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of functions to define the initial stress tensor"
+    requirement = "SolidMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of functions to define the initial stress tensor"
   [../]
   [./except02]
     type = 'RunException'
@@ -13,7 +13,7 @@
     expect_err = 'ComputeEigenstrainFromInitialStress: If you supply initial_stress_aux, 9 values must be given.  You supplied 3'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#13087"
-    requirement = "TensorMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of AuxVariables to define the initial stress tensor"
+    requirement = "SolidMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of AuxVariables to define the initial stress tensor"
   [../]
   [./gravity]
     type = 'Exodiff'
@@ -21,7 +21,7 @@
     exodiff = 'gravity.e'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
-    requirement = "TensorMechanics shall allow users to specify initial stresses using Functions"
+    requirement = "SolidMechanics shall allow users to specify initial stresses using Functions"
   [../]
   [./gravity_with_aux]
     type = 'Exodiff'
@@ -29,7 +29,7 @@
     exodiff = 'gravity_with_aux.e'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#13087"
-    requirement = "TensorMechanics shall allow users to specify initial stresses using AuxVariables"
+    requirement = "SolidMechanics shall allow users to specify initial stresses using AuxVariables"
   [../]
   [./gravity_cosserat]
     type = 'Exodiff'
@@ -37,7 +37,7 @@
     exodiff = 'gravity_cosserat.e'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
-    requirement = "TensorMechanics shall allow users to specify initial stresses for problems with Cosserat mechanics"
+    requirement = "SolidMechanics shall allow users to specify initial stresses for problems with Cosserat mechanics"
   [../]
   [./mc_tensile]
     type = 'CSVDiff'
@@ -48,6 +48,6 @@
     cli_args = '--no-trap-fpe'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
-    requirement = "TensorMechanics shall allow users to specify initial stresses for problems with plasticity, and if the initial stresses are inadmissible, the return-map algorithm will be applied, perhaps incrementally, to bring the initial stresses back to the admissible region"
+    requirement = "SolidMechanics shall allow users to specify initial stresses for problems with plasticity, and if the initial stresses are inadmissible, the return-map algorithm will be applied, perhaps incrementally, to bring the initial stresses back to the admissible region"
   [../]
 []

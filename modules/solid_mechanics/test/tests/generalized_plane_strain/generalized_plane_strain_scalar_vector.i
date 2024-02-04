@@ -85,8 +85,8 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
+[Physics]
+  [SolidMechanics]
     [./GeneralizedPlaneStrain]
       [./gps1]
         use_displaced_mesh = true
@@ -105,7 +105,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
     use_displaced_mesh = false
     displacements = 'disp_x disp_y'
     temperature = temp

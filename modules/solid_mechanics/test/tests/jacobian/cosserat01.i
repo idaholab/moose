@@ -43,7 +43,7 @@
     displacements = 'disp_x disp_y disp_z'
     component = 2
   [../]
-  [./TensorMechanics]
+  [SolidMechanics]
     displacements = 'wc_x wc_y wc_z'
     base_name = couple
   [../]

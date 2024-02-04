@@ -59,7 +59,7 @@
   eigenstrain_gradient = thermal_expansion_gradient
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     add_variables = true

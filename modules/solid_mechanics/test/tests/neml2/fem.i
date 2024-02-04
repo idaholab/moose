@@ -28,9 +28,9 @@ N = 2
   []
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       [all]
         strain = SMALL
         new_system = true

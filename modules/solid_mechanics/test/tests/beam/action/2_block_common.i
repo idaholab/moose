@@ -85,7 +85,7 @@
   end_time = 2
 []
 
-[Modules/TensorMechanics/LineElementMaster]
+[Physics/SolidMechanics/LineElement/QuasiStatic]
   # parameters common to all blocks
 
   add_variables = true

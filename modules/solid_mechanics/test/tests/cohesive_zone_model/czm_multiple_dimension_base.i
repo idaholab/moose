@@ -38,7 +38,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
     add_variables = true
@@ -46,7 +46,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/CohesiveZoneMaster]
+[Physics/SolidMechanics/CohesiveZone]
   [./czm1]
     boundary = 'interface'
     generate_output = 'traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump'

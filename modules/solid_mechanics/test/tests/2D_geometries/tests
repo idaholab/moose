@@ -44,7 +44,7 @@
     type = Exodiff
     input = '2D-RZ_test.i'
     exodiff = '2D-RZ_test_out.e'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
                 Materials/stress/type=ComputeLinearElasticStress'
     design = 'source/materials/ComputeAxisymmetricRZSmallStrain.md'
     requirement = 'The ComputeAxisymmetricRZSmallStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
@@ -53,7 +53,7 @@
     type = Exodiff
     input = '2D-RZ_test.i'
     exodiff = '2D-RZ_incremental_strain_test_out.e'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress
                 Outputs/file_base=2D-RZ_incremental_strain_test_out'
     prereq = 'axisym_smallstrain'
@@ -76,8 +76,8 @@
     heavy = true
     abs_zero = 1e-5
     rel_err = 3E-3
-    design = 'syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation.'
+    design = 'syntax/Physics/SolidMechanics/QuasiStatic/index.md'
+    requirement = 'The QuasiStatic SolidMechanics Physics shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation.'
   [../]
   [./axisym_resid]
     type = Exodiff

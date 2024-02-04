@@ -14,9 +14,9 @@
   coord_type = RSPHERICAL
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       [all]
         formulation = TOTAL
         strain = FINITE

@@ -60,7 +60,7 @@ endtime = 1.9
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     add_variables = true

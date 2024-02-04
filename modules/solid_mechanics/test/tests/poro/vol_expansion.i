@@ -72,7 +72,7 @@
     type = Diffusion
     variable = p
   [../]
-  [./TensorMechanics]
+  [SolidMechanics]
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./poro_x]

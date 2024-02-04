@@ -43,7 +43,7 @@
   equivalent_k = true
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./master]
     strain = FINITE
     add_variables = true

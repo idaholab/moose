@@ -50,7 +50,7 @@
     exodiff = 'truss_2d_out.e'
     abs_zero = 1e-7
     max_parallel = 1
-    cli_args='Modules/TensorMechanics/LineElementMaster/block/area=area'
+    cli_args='Physics/SolidMechanics/LineElement/QuasiStatic/block/area=area'
     prereq = 'truss_2d'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using 2D truss elements."
@@ -66,7 +66,7 @@
   [./action_error_2]
     type = 'RunException'
     input = 'truss_2d_action.i'
-    cli_args='Outputs/exodus=false Outputs/csv=false Modules/TensorMechanics/LineElementMaster/block/area=area Modules/TensorMechanics/LineElementMaster/block/rotations="rot_x"'
+    cli_args='Outputs/exodus=false Outputs/csv=false Physics/SolidMechanics/LineElement/QuasiStatic/block/area=area Physics/SolidMechanics/LineElement/QuasiStatic/block/rotations="rot_x"'
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
     requirement = "The LineElementAction shall produce an error if rotational variables are"
                   " provided as input for truss elements."

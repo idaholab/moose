@@ -64,7 +64,7 @@
     exodiff = 'newmark_action_out.e'
     abs_zero = 1e-09
 
-    cli_args = 'Modules/TensorMechanics/DynamicMaster/all/use_automatic_differentiation=true '
+    cli_args = 'Physics/SolidMechanics/Dynamic/all/use_automatic_differentiation=true '
                'Materials/Elasticity_tensor/type=ADComputeElasticityTensor '
                'Materials/stress/type=ADComputeLinearElasticStress Executioner/solve_type=NEWTON'
     requirement = "The dynamic tensor mechanics action shall support automatic differentiation using "

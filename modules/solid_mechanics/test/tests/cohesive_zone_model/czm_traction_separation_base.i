@@ -45,7 +45,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
     add_variables = true
@@ -53,7 +53,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/CohesiveZoneMaster]
+[Physics/SolidMechanics/CohesiveZone]
   [./czm1]
     strain = SMALL
     boundary = 'interface'

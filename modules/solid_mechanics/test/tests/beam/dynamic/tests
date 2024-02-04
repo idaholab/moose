@@ -98,7 +98,7 @@
     requirement = "The LineElementAction shall create the translational and rotational"
                   " velocities and accelerations required for a dynamic simulation"
                   " using beam elements."
-    design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
+    design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
   [../]
   [./dyn_euler_added_mass_inertia_damping]
     type = 'Exodiff'
@@ -132,7 +132,7 @@
                   " required for a dynamic beam simulation using beam elements and"
                   " a consistent mass/inertia matrix in the presence of Rayleigh"
                   " damping and numerical damping in the form of Hilber-Hughes-Taylor (HHT) time integration."
-    design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
+    design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
     rel_err = 2e-5
   [../]
   [./dyn_euler_added_mass_inertia_damping_action]
@@ -145,7 +145,7 @@
                   " required for a dynamic beam simulation using beam elements and nodal mass/inertia"
                   " matrix in the presence of Rayleigh damping and numerical damping"
                   " in the form of Hilber-Hughes-Taylor (HHT) time integration."
-    design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
+    design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
   [../]
   [./dyn_euler_added_mass2]
     type = 'CSVDiff'
@@ -302,19 +302,19 @@
   [./error_16]
     type = 'RunException'
     input = 'dyn_euler_small_rayleigh_hht_action.i'
-    cli_args = 'Modules/TensorMechanics/LineElementMaster/all/add_dynamic_variables=false Outputs/csv=false Outputs/exodus=false'
+    cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/all/add_dynamic_variables=false Outputs/csv=false Outputs/exodus=false'
     expect_err = "LineElementAction: When using 'dynamic_consistent_inertia', 'dynamic_nodal_rotational_inertia' or '_dynamic_nodal_translational_inertia', the velocity and acceleration AuxVariables and the corresponding AuxKernels are automatically set by"
 
     requirement = "The LineElementAction class shall produce an error if `add_dynamic_variables`"
                   " option is set to false while `dynamic_consistent_inertia`,"
                   " `dynamic_nodal_rotational_inertia` or `dynamic_nodal_translational_inertia`"
                   " options are set to true."
-    design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
+    design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
   [../]
   [./error_17]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping_action.i'
-    cli_args = 'Modules/TensorMechanics/LineElementMaster/all/nodal_mass_file=nodal_mass.csv Outputs/csv=false Outputs/exodus=false'
+    cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/all/nodal_mass_file=nodal_mass.csv Outputs/csv=false Outputs/exodus=false'
     expect_err = "NodalTranslationalInertia: Please provide either mass or nodal_mass_file as input, not both"
     superlu = true
     requirement = "The NodalTranslationalInertia class shall produce an error if"

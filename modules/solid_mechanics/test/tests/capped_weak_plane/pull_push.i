@@ -27,7 +27,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
   [../]
 []
 

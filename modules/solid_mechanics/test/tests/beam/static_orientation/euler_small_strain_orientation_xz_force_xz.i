@@ -28,7 +28,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/LineElementMaster]
+[Physics/SolidMechanics/LineElement/QuasiStatic]
   [./all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'

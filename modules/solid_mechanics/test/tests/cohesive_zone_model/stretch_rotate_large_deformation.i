@@ -123,7 +123,7 @@
 
 
 
-[Modules/TensorMechanics/CohesiveZoneMaster]
+[Physics/SolidMechanics/CohesiveZone]
   [./czm_ik]
     boundary = 'interface'
     strain = FINITE
@@ -141,9 +141,9 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
       [./all]
         strain = FINITE
         add_variables = true

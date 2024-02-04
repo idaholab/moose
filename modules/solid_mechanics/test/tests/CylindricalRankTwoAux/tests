@@ -1,6 +1,6 @@
 [Tests]
   issues = '#716'
-  design = 'syntax/Kernels/TensorMechanics/index.md source/auxkernels/CylindricalRankTwoAux.md'
+  design = 'syntax/Kernels/SolidMechanics/index.md source/auxkernels/CylindricalRankTwoAux.md'
   [./test]
     type = 'Exodiff'
     input = 'test.i'

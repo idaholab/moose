@@ -34,8 +34,8 @@
   body_force = body_force
 []
 
-[Modules/TensorMechanics]
-  [Master/all]
+[Physics/SolidMechanics]
+  [QuasiStatic/all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'

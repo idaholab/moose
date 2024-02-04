@@ -37,8 +37,8 @@
     prereq = generalized_plane_strain_ref_resid_absolute_value_vector_tags
     type = 'Exodiff'
     input = 'generalized_plane_strain_ref_resid.i'
-    cli_args = "Modules/TensorMechanics/Master/all/absolute_value_vector_tags='' "
-               "Modules/TensorMechanics/Master/all/extra_vector_tags='ref' "
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/absolute_value_vector_tags='' "
+               "Physics/SolidMechanics/QuasiStatic/all/extra_vector_tags='ref' "
                "Outputs/file_base=generalized_plane_strain_ref_resid_extra_vector_tags_out"
     exodiff = 'generalized_plane_strain_ref_resid_extra_vector_tags_out.e'
     custom_cmp = 'generalized.exodiff'
@@ -83,7 +83,7 @@
     type = 'Exodiff'
     input = 'out_of_plane_pressure.i'
     exodiff = 'out_of_plane_pressure_out.e'
-    cli_args = 'Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_function=0 Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_material=traction_material'
+    cli_args = 'Physics/SolidMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_function=0 Physics/SolidMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_material=traction_material'
     abs_zero = 1e-9
     requirement = 'The system shall support setting the out-of-plane pressure using a material property for generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'

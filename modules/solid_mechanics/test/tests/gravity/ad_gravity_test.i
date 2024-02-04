@@ -18,7 +18,7 @@
   dim = 3
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     use_automatic_differentiation = true

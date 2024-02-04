@@ -12,7 +12,7 @@
   [./elastic_Bbar]
     type = 'CSVDiff'
     input = 'elastic_stress.i'
-    cli_args = 'Kernels/TensorMechanics/volumetric_locking_correction=true Materials/strain/volumetric_locking_correction=true'
+    cli_args = 'Kernels/SolidMechanics/volumetric_locking_correction=true Materials/strain/volumetric_locking_correction=true'
     csvdiff = 'elastic_stress_out.csv'
     prereq = 'elastic'
     requirement = "The ComputeDeformGradBasedStress class shall correctly compute"
@@ -36,7 +36,7 @@
     input = 'volumetric_strain_interface.i'
     csvdiff = 'volumetric_strain_interface_out.csv'
     prereq = 'interface'
-    cli_args = 'Kernels/TensorMechanics/volumetric_locking_correction=true Materials/strain/volumetric_locking_correction=true'
+    cli_args = 'Kernels/SolidMechanics/volumetric_locking_correction=true Materials/strain/volumetric_locking_correction=true'
     requirement = "The ComputeVolumeDeformGrad and the VolumeDeformGradCorrectedStress classes shall correctly"
                   " compute the volumetric deformation gradient, total deformation gradient and transform"
                   " the stress from previous configuration to the current configuration when volumetric locking"

@@ -50,7 +50,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./plane_stress]
     planar_formulation = WEAK_PLANE_STRESS
     strain = FINITE

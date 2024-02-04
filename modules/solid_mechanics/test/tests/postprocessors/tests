@@ -12,7 +12,7 @@
     input = 'material_tensor_average_test.i'
     csvdiff = 'material_tensor_average_AD_test_out.csv'
     requirement = 'The system shall be able to compute the volume average of rank two tensor component, which was computed using automatic differentiation.'
-    cli_args = 'Materials/stress/type=ADComputeFiniteStrainElasticStress Materials/elasticity_tensor/type=ADComputeElasticityTensor Modules/TensorMechanics/Master/all/use_automatic_differentiation=true Outputs/file_base=material_tensor_average_AD_test_out Postprocessors/szz_avg/type=ADMaterialTensorAverage Postprocessors/szz_int/type=ADMaterialTensorIntegral'
+    cli_args = 'Materials/stress/type=ADComputeFiniteStrainElasticStress Materials/elasticity_tensor/type=ADComputeElasticityTensor Physics/SolidMechanics/QuasiStatic/all/use_automatic_differentiation=true Outputs/file_base=material_tensor_average_AD_test_out Postprocessors/szz_avg/type=ADMaterialTensorAverage Postprocessors/szz_int/type=ADMaterialTensorIntegral'
     design = 'MaterialTensorAverage.md'
     issues = '#15424'
   []

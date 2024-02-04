@@ -1,5 +1,5 @@
 # This test uses the strain calculator ComputePlaneFiniteStrain,
-# which is generated through the use of the TensorMechanics MasterAction.
+# which is generated through the use of the TensorMechanics QuasiStaticAction.
 
 [Mesh]
   type = GeneratedMesh
@@ -12,7 +12,7 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     planar_formulation = PLANE_STRAIN

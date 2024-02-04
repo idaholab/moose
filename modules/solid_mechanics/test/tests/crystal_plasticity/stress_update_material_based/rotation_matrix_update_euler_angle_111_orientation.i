@@ -27,7 +27,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/all]
+[Physics/SolidMechanics/QuasiStatic/all]
   strain = FINITE
   incremental = true
   add_variables = true

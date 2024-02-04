@@ -1,5 +1,5 @@
 [Tests]
-  design = 'TensorMechanicsPlasticOrthotropic.md'
+  design = 'SolidMechanicsPlasticOrthotropic.md'
   issues = '#3832'
   [./test]
     type = 'CSVDiff'

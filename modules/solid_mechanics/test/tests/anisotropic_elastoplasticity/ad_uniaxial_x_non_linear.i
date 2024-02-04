@@ -78,7 +78,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     generate_output = 'elastic_strain_xx stress_xx strain_xx plastic_strain_xx'

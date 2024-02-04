@@ -62,7 +62,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
   [../]
   [./inertia_x]
     type = InertialForce

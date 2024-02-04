@@ -66,7 +66,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/all]
+[Physics/SolidMechanics/QuasiStatic/all]
   strain = FINITE
   add_variables = true
   generate_output = stress_zz

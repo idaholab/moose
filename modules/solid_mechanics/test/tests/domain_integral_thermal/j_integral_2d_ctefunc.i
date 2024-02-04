@@ -46,7 +46,7 @@
   eigenstrain_names = thermal_expansion
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./master]
     strain = FINITE
     add_variables = true

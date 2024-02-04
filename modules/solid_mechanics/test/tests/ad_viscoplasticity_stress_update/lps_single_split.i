@@ -14,7 +14,7 @@
   ymax = 0.002
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = FINITE
   add_variables = true
   generate_output = 'strain_xx strain_yy strain_xy hydrostatic_stress vonmises_stress'

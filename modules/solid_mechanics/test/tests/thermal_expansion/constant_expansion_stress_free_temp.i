@@ -61,9 +61,9 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
       [./all]
         strain = SMALL
         incremental = true

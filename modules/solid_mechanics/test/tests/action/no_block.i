@@ -25,7 +25,7 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   # parameters that apply to all subblocks are specified at this level. But
   # no subblocks are present. This should trigger a warning.
   add_variables = true

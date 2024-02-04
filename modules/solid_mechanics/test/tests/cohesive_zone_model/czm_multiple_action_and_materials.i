@@ -91,7 +91,7 @@
 []
 
 
-[Modules/TensorMechanics/CohesiveZoneMaster]
+[Physics/SolidMechanics/CohesiveZone]
   [./czm_ik_012]
     boundary = 'Block0_Block1 Block1_Block2'
     base_name = 'czm_b012'
@@ -131,9 +131,9 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
       [./all]
         strain = FINITE
         add_variables = true

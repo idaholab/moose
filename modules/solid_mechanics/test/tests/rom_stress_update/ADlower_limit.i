@@ -48,7 +48,7 @@ disp = 1.0053264195e6
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     add_variables = true

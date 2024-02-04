@@ -5,8 +5,8 @@
   [./smallstrain_3D]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
-                Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
                 Materials/stress/type=ComputeLinearElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -16,8 +16,8 @@
   [./incrementalstrain_3D]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -28,8 +28,8 @@
   [./finitestrain_3D]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=FINITE
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-7
     difference_tol = 1E10
@@ -40,9 +40,9 @@
   [./smallstrain_3D_Bbar]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
-                Modules/TensorMechanics/Master/all/strain=SMALL
-                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
                 Materials/stress/type=ComputeLinearElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -54,9 +54,9 @@
   [./incrementalstrain_3D_Bbar]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=SMALL
-                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -68,9 +68,9 @@
   [./finitestrain_3D_Bbar]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=FINITE
-                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-7
     difference_tol = 1E10
@@ -82,8 +82,8 @@
   [./smallstrain_RZ]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_RZ.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
-                Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
                 Materials/stress/type=ComputeLinearElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -93,8 +93,8 @@
   [./incrementalstrain_RZ]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_RZ.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -105,8 +105,8 @@
   [./finitestrain_RZ]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_RZ.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=FINITE
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-7
     difference_tol = 1E10
@@ -117,9 +117,9 @@
   [./smallstrain_RZ_Bbar]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_RZ.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
-                Modules/TensorMechanics/Master/all/strain=SMALL
-                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
                 Materials/stress/type=ComputeLinearElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -131,9 +131,9 @@
   [./incrementalstrain_RZ_Bbar]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_RZ.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=SMALL
-                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-12
     difference_tol = 1E10
@@ -145,9 +145,9 @@
   [./finitestrain_RZ_Bbar]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_RZ.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=FINITE
-                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 1E-7
     difference_tol = 1E10
@@ -233,8 +233,8 @@
   [./smallstrain_spherical]
     type = 'PetscJacobianTester'
     input = 'jacobian_spherical.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
-                Modules/TensorMechanics/Master/all/strain=SMALL'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL'
     ratio_tol = 2e-10
     difference_tol = 2e5
     requirement = "The mechanics system shall correctly compute the jacobian"
@@ -243,8 +243,8 @@
   [./incrementalstrain_spherical]
     type = 'PetscJacobianTester'
     input = 'jacobian_spherical.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 2e-10
     difference_tol = 2e5
@@ -254,8 +254,8 @@
   [./incstrn_pressure_spherical]
     type = 'PetscJacobianTester'
     input = 'jacobian_pressure_spherical.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     ratio_tol = 2e-10
     difference_tol = 2e5

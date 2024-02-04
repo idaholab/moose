@@ -148,7 +148,7 @@
   end_time = 3
 []
 
-[Modules/TensorMechanics/LineElementMaster]
+[Physics/SolidMechanics/LineElement/QuasiStatic]
   [./block]
     truss = true
     add_variables = true

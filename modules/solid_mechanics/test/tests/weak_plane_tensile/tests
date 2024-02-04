@@ -1,6 +1,6 @@
 [Tests]
   issues = '#3878 #4150 #4507'
-  design = '/TensorMechanicsPlasticWeakPlaneTensile.md'
+  design = '/SolidMechanicsPlasticWeakPlaneTensile.md'
   [except1]
     type = 'RunException'
     input = 'except1.i'

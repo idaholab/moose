@@ -43,7 +43,7 @@
   []
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Physics/SolidMechanics/Dynamic]
   [all]
     add_variables = true
     stiffness_damping_coefficient = 0.1

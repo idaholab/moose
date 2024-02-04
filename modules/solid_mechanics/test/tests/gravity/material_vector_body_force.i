@@ -17,8 +17,8 @@
   dim = 3
 []
 
-[Modules/TensorMechanics]
-  [Master/all]
+[Physics/SolidMechanics]
+  [QuasiStatic/all]
     add_variables = true
   []
   [MaterialVectorBodyForce/all]

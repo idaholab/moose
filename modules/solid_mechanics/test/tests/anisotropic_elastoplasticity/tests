@@ -1,5 +1,5 @@
 [Tests]
-  design = 'TensorMechanicsPlasticOrthotropic.md'
+  design = 'SolidMechanicsPlasticOrthotropic.md'
   issues = '#16016'
 
   [ad_aniso_plasticity_x_one_ref]

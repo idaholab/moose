@@ -66,12 +66,12 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
+[Physics]
+  [SolidMechanics]
     [./GeneralizedPlaneStrain]
       [./gps]
       [../]

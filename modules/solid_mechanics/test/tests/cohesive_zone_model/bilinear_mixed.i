@@ -45,9 +45,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       generate_output = 'stress_yy'
       [all]
         strain = FINITE
@@ -93,7 +93,7 @@
   []
 []
 
-[Modules/TensorMechanics/CohesiveZoneMaster]
+[Physics/SolidMechanics/CohesiveZone]
   [czm_ik]
     boundary = 'interface'
   []

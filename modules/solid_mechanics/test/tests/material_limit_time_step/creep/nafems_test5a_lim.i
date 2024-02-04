@@ -87,7 +87,7 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
     use_displaced_mesh = true
     extra_vector_tags = 'ref'
   [../]

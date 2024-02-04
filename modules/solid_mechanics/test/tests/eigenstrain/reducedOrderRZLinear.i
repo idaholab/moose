@@ -2,7 +2,7 @@
 # This test checks whether the ComputeReducedOrderEigenstrain is functioning properly.
 #
 # If instead of 'reduced_eigenstrain', 'thermal_eigenstrain' is given to
-# eigenstrain_names in the Modules/TensorMechanics/Master/all block, the output will be
+# eigenstrain_names in the Physics/SolidMechanics/QuasiStatic/all block, the output will be
 # quite different.
 #
 # Open the reducedOrderRZLinear_out_hydro_0001.csv file and plot the hydro variables as
@@ -100,9 +100,9 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
       [./all]
         add_variables = true
         strain = SMALL

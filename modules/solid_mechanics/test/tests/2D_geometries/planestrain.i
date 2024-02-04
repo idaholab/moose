@@ -1,5 +1,5 @@
 # This test uses the strain calculator ComputePlaneSmallStrain,
-# which is generated through the use of the TensorMechanics MasterAction.
+# which is generated through the use of the TensorMechanics QuasiStaticAction.
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -14,7 +14,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
     planar_formulation = PLANE_STRAIN

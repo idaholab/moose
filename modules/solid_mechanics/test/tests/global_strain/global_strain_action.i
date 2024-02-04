@@ -32,11 +32,11 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    # Master action for generating the tensor mechanics kernels, variables,
+[Physics]
+  [SolidMechanics]
+    # QuasiStatic action for generating the tensor mechanics kernels, variables,
     # strain calculation material, and the auxilliary system for visualization
-    [./Master]
+    [QuasiStatic]
       [./stress_div]
         strain = SMALL
         add_variables = true

@@ -47,9 +47,9 @@
   []
 []
 
-[Modules]
+[Physics]
   [TensorMechanics]
-    [Master]
+    [QuasiStatic]
       [all]
         incremental = false
       []

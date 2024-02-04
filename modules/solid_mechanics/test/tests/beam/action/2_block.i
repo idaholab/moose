@@ -84,7 +84,7 @@
   end_time = 2
 []
 
-[Modules/TensorMechanics/LineElementMaster]
+[Physics/SolidMechanics/LineElement/QuasiStatic]
   [./block_1]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'

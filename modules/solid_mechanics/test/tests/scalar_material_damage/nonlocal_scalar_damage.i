@@ -13,7 +13,7 @@
   elem_type = HEX8
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     incremental = true

@@ -209,7 +209,7 @@
     area = area
     save_in = react_z
   [../]
-  [./TensorMechanics]
+  [SolidMechanics]
     block = 1000
     displacements = 'disp_x disp_y disp_z'
   [../]

@@ -52,7 +52,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [master]
     strain = FINITE
     generate_output = 'stress_xx'

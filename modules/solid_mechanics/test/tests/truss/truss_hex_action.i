@@ -181,13 +181,13 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [SolidMechanics]
     block = 1000
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
-[Modules/TensorMechanics/LineElementMaster]
+[Physics/SolidMechanics/LineElement/QuasiStatic]
    [./block]
      truss = true
      displacements = 'disp_x disp_y disp_z'

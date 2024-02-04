@@ -49,7 +49,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [gps]
     planar_formulation = GENERALIZED_PLANE_STRAIN
     scalar_out_of_plane_strain = scalar_strain_yy

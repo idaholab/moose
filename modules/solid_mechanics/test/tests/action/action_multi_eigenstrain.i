@@ -36,7 +36,7 @@
   solve = false
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./block1]
     block = 1
     strain = FINITE

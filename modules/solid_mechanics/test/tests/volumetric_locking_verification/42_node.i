@@ -25,9 +25,9 @@
   file = 42_node_side.e
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
       [./all]
         add_variables = true
         strain = SMALL
