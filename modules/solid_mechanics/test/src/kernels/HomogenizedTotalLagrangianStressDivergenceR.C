@@ -19,7 +19,7 @@
 
 // #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsTestApp", HomogenizedTotalLagrangianStressDivergenceR);
+registerMooseObject("SolidMechanicsTestApp", HomogenizedTotalLagrangianStressDivergenceR);
 
 InputParameters
 HomogenizedTotalLagrangianStressDivergenceR::validParams()

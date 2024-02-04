@@ -13,7 +13,7 @@
 #include "Function.h"
 #include "MooseVariableScalar.h"
 
-registerMooseObject("TensorMechanicsTestApp", HomogenizedTotalLagrangianStressDivergenceS);
+registerMooseObject("SolidMechanicsTestApp", HomogenizedTotalLagrangianStressDivergenceS);
 
 InputParameters
 HomogenizedTotalLagrangianStressDivergenceS::validParams()

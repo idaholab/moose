@@ -11,7 +11,7 @@
 #include "RankTwoTensor.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsTestApp", FunctionIsotropicEigenstrain);
+registerMooseObject("SolidMechanicsTestApp", FunctionIsotropicEigenstrain);
 
 InputParameters
 FunctionIsotropicEigenstrain::validParams()

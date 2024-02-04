@@ -11,13 +11,13 @@
 
 #include "MooseApp.h"
 
-class TensorMechanicsTestApp : public MooseApp
+class SolidMechanicsTestApp : public MooseApp
 {
 public:
   static InputParameters validParams();
 
-  TensorMechanicsTestApp(InputParameters parameters);
-  virtual ~TensorMechanicsTestApp();
+  SolidMechanicsTestApp(InputParameters parameters);
+  virtual ~SolidMechanicsTestApp();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);

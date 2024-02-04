@@ -9,8 +9,8 @@
 
 #include "SS316HLAROMANCEStressUpdateTest.h"
 
-registerMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
-registerMooseObject("TensorMechanicsTestApp", ADSS316HLAROMANCEStressUpdateTest);
+registerMooseObject("SolidMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
+registerMooseObject("SolidMechanicsTestApp", ADSS316HLAROMANCEStressUpdateTest);
 
 template <bool is_ad>
 InputParameters

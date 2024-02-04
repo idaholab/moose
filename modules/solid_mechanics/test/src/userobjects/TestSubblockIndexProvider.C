@@ -9,7 +9,7 @@
 
 #include "TestSubblockIndexProvider.h"
 
-registerMooseObject("TensorMechanicsTestApp", TestSubblockIndexProvider);
+registerMooseObject("SolidMechanicsTestApp", TestSubblockIndexProvider);
 
 InputParameters
 TestSubblockIndexProvider::validParams()

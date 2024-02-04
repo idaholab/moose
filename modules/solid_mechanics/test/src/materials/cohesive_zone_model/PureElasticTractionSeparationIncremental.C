@@ -9,7 +9,7 @@
 
 #include "PureElasticTractionSeparationIncremental.h"
 
-registerMooseObject("TensorMechanicsTestApp", PureElasticTractionSeparationIncremental);
+registerMooseObject("SolidMechanicsTestApp", PureElasticTractionSeparationIncremental);
 
 InputParameters
 PureElasticTractionSeparationIncremental::validParams()

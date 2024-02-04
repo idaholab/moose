@@ -11,8 +11,8 @@
 
 #include "NonlinearSystemBase.h"
 
-registerMooseObject("TensorMechanicsTestApp", PowerLawCreepTest);
-registerMooseObject("TensorMechanicsTestApp", ADPowerLawCreepTest);
+registerMooseObject("SolidMechanicsTestApp", PowerLawCreepTest);
+registerMooseObject("SolidMechanicsTestApp", ADPowerLawCreepTest);
 
 template <bool is_ad>
 InputParameters

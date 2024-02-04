@@ -9,8 +9,8 @@
 
 #include "LAROMANCE3TileTest.h"
 
-registerMooseObject("TensorMechanicsTestApp", LAROMANCE3TileTest);
-registerADMooseObject("TensorMechanicsTestApp", ADLAROMANCE3TileTest);
+registerMooseObject("SolidMechanicsTestApp", LAROMANCE3TileTest);
+registerADMooseObject("SolidMechanicsTestApp", ADLAROMANCE3TileTest);
 
 template <bool is_ad>
 InputParameters
