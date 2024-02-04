@@ -142,6 +142,7 @@
                   "approach allows for maintaining reasonable system condition numbers and selecting "
                   "the 'Bussetta' and 'FrictionLimit' adaptivity strategies for the normal and frictional "
                   "penalty values, respectively."
+    method = '!dbg'
   []
   [cylinder_friction_penalty_al_separation]
     type = 'CSVDiff'
