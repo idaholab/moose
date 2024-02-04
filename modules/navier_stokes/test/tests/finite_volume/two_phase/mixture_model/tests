@@ -8,6 +8,8 @@
     requirement = 'The system shall give the correct solution for two phase flow in a lid-driven cavity with the mixture model.'
     recover = false
     allow_warnings = true
+    installation_type = in_tree
+    valgrind = none
   []
   [mixture_rayleigh_bernard_two_phase]
     type = 'CSVDiff'
@@ -25,11 +27,13 @@
     input = 'channel-drift-flux.i'
     exodiff = 'channel-drift-flux_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model.'
+    installation_type = in_tree
   []
   [mixture_channel_advection_slip]
     type = 'Exodiff'
     input = 'channel-advection-slip.i'
     exodiff = 'channel-advection-slip_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture advection-slip model.'
+    installation_type = in_tree
   []
 []
