@@ -244,7 +244,7 @@ ComputeMultiPlasticityStress::computeQpStress()
 
   _cumulative_pm.assign(_num_surfaces, 0);
   // try a "quick" return first - this can be purely elastic, or a customised plastic return defined
-  // by a TensorMechanicsPlasticXXXX UserObject
+  // by a SolidMechanicsPlasticXXXX UserObject
   const bool found_solution = quickStep(rot(_stress_old[_qp]),
                                         _stress[_qp],
                                         _intnl_old[_qp],

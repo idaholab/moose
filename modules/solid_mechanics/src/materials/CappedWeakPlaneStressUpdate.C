@@ -20,24 +20,24 @@ CappedWeakPlaneStressUpdate::validParams()
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "cohesion",
-      "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
+      "A SolidMechanicsHardening UserObject that defines hardening of the cohesion.  "
       "Physically the cohesion should not be negative.");
   params.addRequiredParam<UserObjectName>("tan_friction_angle",
-                                          "A TensorMechanicsHardening UserObject that defines "
+                                          "A SolidMechanicsHardening UserObject that defines "
                                           "hardening of tan(friction angle).  Physically the "
                                           "friction angle should be between 0 and 90deg.");
   params.addRequiredParam<UserObjectName>(
       "tan_dilation_angle",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "tan(dilation angle).  Usually the dilation angle is not greater than "
       "the friction angle, and it is between 0 and 90deg.");
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "weak-plane tensile strength.  In physical situations this is positive "
       "(and always must be greater than negative compressive-strength.");
   params.addRequiredParam<UserObjectName>("compressive_strength",
-                                          "A TensorMechanicsHardening UserObject that defines "
+                                          "A SolidMechanicsHardening UserObject that defines "
                                           "hardening of the weak-plane compressive strength.  In "
                                           "physical situations this is positive.");
   params.addRequiredRangeCheckedParam<Real>(
@@ -56,11 +56,11 @@ CappedWeakPlaneStressUpdate::validParams()
 
 CappedWeakPlaneStressUpdate::CappedWeakPlaneStressUpdate(const InputParameters & parameters)
   : TwoParameterPlasticityStressUpdate(parameters, 3, 2),
-    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
-    _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
-    _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
-    _tstrength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
-    _cstrength(getUserObject<TensorMechanicsHardeningModel>("compressive_strength")),
+    _cohesion(getUserObject<SolidMechanicsHardeningModel>("cohesion")),
+    _tan_phi(getUserObject<SolidMechanicsHardeningModel>("tan_friction_angle")),
+    _tan_psi(getUserObject<SolidMechanicsHardeningModel>("tan_dilation_angle")),
+    _tstrength(getUserObject<SolidMechanicsHardeningModel>("tensile_strength")),
+    _cstrength(getUserObject<SolidMechanicsHardeningModel>("compressive_strength")),
     _small_smoother2(Utility::pow<2>(getParam<Real>("tip_smoother"))),
     _perfect_guess(getParam<bool>("perfect_guess")),
     _stress_return_type(StressReturnType::nothing_special),

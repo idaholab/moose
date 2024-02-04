@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MultiParameterPlasticityStressUpdate.h"
-#include "TensorMechanicsHardeningModel.h"
+#include "SolidMechanicsHardeningModel.h"
 
 /**
  * CappedMohrCoulombStressUpdate implements rate-independent nonassociative
@@ -32,19 +32,19 @@ public:
 
 protected:
   /// Hardening model for tensile strength
-  const TensorMechanicsHardeningModel & _tensile_strength;
+  const SolidMechanicsHardeningModel & _tensile_strength;
 
   /// Hardening model for compressive strength
-  const TensorMechanicsHardeningModel & _compressive_strength;
+  const SolidMechanicsHardeningModel & _compressive_strength;
 
   /// Hardening model for cohesion
-  const TensorMechanicsHardeningModel & _cohesion;
+  const SolidMechanicsHardeningModel & _cohesion;
 
   /// Hardening model for friction angle
-  const TensorMechanicsHardeningModel & _phi;
+  const SolidMechanicsHardeningModel & _phi;
 
   /// Hardening model for dilation angle
-  const TensorMechanicsHardeningModel & _psi;
+  const SolidMechanicsHardeningModel & _psi;
 
   /// Whether to provide an estimate of the returned stress, based on perfect plasticity
   const bool _perfect_guess;

@@ -18,7 +18,7 @@ TensileStressUpdate::validParams()
   InputParameters params = MultiParameterPlasticityStressUpdate::validParams();
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
-      "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");
+      "A SolidMechanicsHardening UserObject that defines hardening of the tensile strength");
   params.addParam<bool>("perfect_guess",
                         true,
                         "Provide a guess to the Newton-Raphson procedure "
@@ -32,7 +32,7 @@ TensileStressUpdate::validParams()
 
 TensileStressUpdate::TensileStressUpdate(const InputParameters & parameters)
   : MultiParameterPlasticityStressUpdate(parameters, 3, 3, 1),
-    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
+    _strength(getUserObject<SolidMechanicsHardeningModel>("tensile_strength")),
     _perfect_guess(getParam<bool>("perfect_guess")),
     _eigvecs(RankTwoTensor())
 {

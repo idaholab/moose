@@ -10,8 +10,8 @@
 #pragma once
 
 #include "TwoParameterPlasticityStressUpdate.h"
-#include "TensorMechanicsHardeningModel.h"
-#include "TensorMechanicsPlasticDruckerPrager.h"
+#include "SolidMechanicsHardeningModel.h"
+#include "SolidMechanicsPlasticDruckerPrager.h"
 
 /**
  * CappedDruckerPragerStressUpdate performs the return-map
@@ -68,13 +68,13 @@ public:
 
 protected:
   /// Hardening model for cohesion, friction and dilation angles
-  const TensorMechanicsPlasticDruckerPrager & _dp;
+  const SolidMechanicsPlasticDruckerPrager & _dp;
 
   /// Hardening model for tensile strength
-  const TensorMechanicsHardeningModel & _tstrength;
+  const SolidMechanicsHardeningModel & _tstrength;
 
   /// Hardening model for compressive strength
-  const TensorMechanicsHardeningModel & _cstrength;
+  const SolidMechanicsHardeningModel & _cstrength;
 
   /// The cone vertex is smoothed by this amount
   const Real _small_smoother2;

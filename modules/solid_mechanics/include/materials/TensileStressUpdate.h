@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MultiParameterPlasticityStressUpdate.h"
-#include "TensorMechanicsHardeningModel.h"
+#include "SolidMechanicsHardeningModel.h"
 
 /**
  * TensileStressUpdate implements rate-independent associative tensile failure
@@ -30,7 +30,7 @@ public:
 
 protected:
   /// Hardening model for tensile strength
-  const TensorMechanicsHardeningModel & _strength;
+  const SolidMechanicsHardeningModel & _strength;
 
   /// Whether to provide an estimate of the returned stress, based on perfect plasticity
   const bool _perfect_guess;

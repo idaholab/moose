@@ -19,22 +19,22 @@ CappedMohrCoulombStressUpdate::validParams()
   InputParameters params = MultiParameterPlasticityStressUpdate::validParams();
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "tensile strength.  In physical situations this is positive (and always "
       "must be greater than negative compressive-strength.");
   params.addRequiredParam<UserObjectName>(
       "compressive_strength",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "compressive strength.  In physical situations this is positive.");
   params.addRequiredParam<UserObjectName>(
-      "cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion");
+      "cohesion", "A SolidMechanicsHardening UserObject that defines hardening of the cohesion");
   params.addRequiredParam<UserObjectName>("friction_angle",
-                                          "A TensorMechanicsHardening UserObject "
+                                          "A SolidMechanicsHardening UserObject "
                                           "that defines hardening of the "
                                           "friction angle (in radians)");
   params.addRequiredParam<UserObjectName>(
       "dilation_angle",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "dilation angle (in radians).  Unless you are quite confident, this should "
       "be set positive and not greater than the friction angle.");
   params.addParam<bool>("perfect_guess",
@@ -50,11 +50,11 @@ CappedMohrCoulombStressUpdate::validParams()
 
 CappedMohrCoulombStressUpdate::CappedMohrCoulombStressUpdate(const InputParameters & parameters)
   : MultiParameterPlasticityStressUpdate(parameters, 3, 12, 2),
-    _tensile_strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
-    _compressive_strength(getUserObject<TensorMechanicsHardeningModel>("compressive_strength")),
-    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
-    _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
-    _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
+    _tensile_strength(getUserObject<SolidMechanicsHardeningModel>("tensile_strength")),
+    _compressive_strength(getUserObject<SolidMechanicsHardeningModel>("compressive_strength")),
+    _cohesion(getUserObject<SolidMechanicsHardeningModel>("cohesion")),
+    _phi(getUserObject<SolidMechanicsHardeningModel>("friction_angle")),
+    _psi(getUserObject<SolidMechanicsHardeningModel>("dilation_angle")),
     _perfect_guess(getParam<bool>("perfect_guess")),
     _poissons_ratio(0.0),
     _shifter(_f_tol),

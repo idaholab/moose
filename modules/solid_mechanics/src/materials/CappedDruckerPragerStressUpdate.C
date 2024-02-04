@@ -20,16 +20,16 @@ CappedDruckerPragerStressUpdate::validParams()
   params.addClassDescription("Capped Drucker-Prager plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "DP_model",
-      "A TensorMechanicsPlasticDruckerPrager UserObject that defines the "
+      "A SolidMechanicsPlasticDruckerPrager UserObject that defines the "
       "Drucker-Prager parameters (cohesion, friction angle and dilation angle)");
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "tensile strength.  In physical situations this is positive (and always "
       "must be greater than negative compressive-strength.");
   params.addRequiredParam<UserObjectName>(
       "compressive_strength",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "compressive strength.  In physical situations this is positive.");
   params.addRequiredRangeCheckedParam<Real>(
       "tip_smoother",
@@ -53,9 +53,9 @@ CappedDruckerPragerStressUpdate::validParams()
 
 CappedDruckerPragerStressUpdate::CappedDruckerPragerStressUpdate(const InputParameters & parameters)
   : TwoParameterPlasticityStressUpdate(parameters, 3, 2),
-    _dp(getUserObject<TensorMechanicsPlasticDruckerPrager>("DP_model")),
-    _tstrength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
-    _cstrength(getUserObject<TensorMechanicsHardeningModel>("compressive_strength")),
+    _dp(getUserObject<SolidMechanicsPlasticDruckerPrager>("DP_model")),
+    _tstrength(getUserObject<SolidMechanicsHardeningModel>("tensile_strength")),
+    _cstrength(getUserObject<SolidMechanicsHardeningModel>("compressive_strength")),
     _small_smoother2(Utility::pow<2>(getParam<Real>("tip_smoother"))),
     _perfect_guess(getParam<bool>("perfect_guess")),
     _stress_return_type(StressReturnType::nothing_special),

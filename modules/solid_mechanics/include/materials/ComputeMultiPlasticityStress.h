@@ -446,7 +446,7 @@ protected:
   /**
    * Attempts to find an admissible (stress, intnl) by using the
    * customized return-map algorithms defined through the
-   * TensorMechanicsPlasticXXXX.returnMap functions.
+   * SolidMechanicsPlasticXXXX.returnMap functions.
    *
    * @param stress_old The value of stress at the previous "time" step
    * @param[out] stress If returnvalue=true then this is the returned value of stress.  Otherwise,
