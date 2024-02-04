@@ -43,7 +43,7 @@ MultiPlasticityRawComponentAssembler::MultiPlasticityRawComponentAssembler(
 {
   _f.resize(_num_models);
   for (unsigned model = 0; model < _num_models; ++model)
-    _f[model] = &getUserObjectByName<TensorMechanicsPlasticModel>(
+    _f[model] = &getUserObjectByName<SolidMechanicsPlasticModel>(
         _params.get<std::vector<UserObjectName>>("plastic_models")[model]);
 
   for (unsigned model = 0; model < _num_models; ++model)

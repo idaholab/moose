@@ -14,7 +14,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "TensorMechanicsPlasticModel.h"
+#include "SolidMechanicsPlasticModel.h"
 #include "UserObjectInterface.h"
 
 /**
@@ -67,7 +67,7 @@ protected:
   MooseEnum _specialIC;
 
   /// User objects that define the yield functions, flow potentials, etc
-  std::vector<const TensorMechanicsPlasticModel *> _f;
+  std::vector<const SolidMechanicsPlasticModel *> _f;
 
   /**
    * The active yield function(s)
@@ -191,7 +191,7 @@ protected:
 
   /**
    * Constructs a set of active constraints, given the yield functions, f.
-   * This uses TensorMechanicsPlasticModel::activeConstraints to identify the active
+   * This uses SolidMechanicsPlasticModel::activeConstraints to identify the active
    * constraints for each model.
    * @param f yield functions (should be _num_surfaces of these)
    * @param stress stress tensor
@@ -295,7 +295,7 @@ private:
   /**
    * "Rock" version
    * Constructs a set of active constraints, given the yield functions, f.
-   * This uses TensorMechanicsPlasticModel::activeConstraints to identify the active
+   * This uses SolidMechanicsPlasticModel::activeConstraints to identify the active
    * constraints for each model.
    * @param f yield functions (should be _num_surfaces of these)
    * @param stress stress tensor
@@ -312,7 +312,7 @@ private:
   /**
    * "Joint" version
    * Constructs a set of active constraints, given the yield functions, f.
-   * This uses TensorMechanicsPlasticModel::activeConstraints to identify the active
+   * This uses SolidMechanicsPlasticModel::activeConstraints to identify the active
    * constraints for each model.
    * @param f yield functions (should be _num_surfaces of these)
    * @param stress stress tensor
