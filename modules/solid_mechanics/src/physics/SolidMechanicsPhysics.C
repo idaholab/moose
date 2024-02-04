@@ -12,7 +12,7 @@
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
-#include "SolidMechanicsAction.h"
+#include "SolidMechanicsPhysics.h"
 #include "Material.h"
 
 #include "BlockRestrictable.h"
@@ -23,32 +23,32 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "meta_action");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "setup_mesh_complete");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "validate_coordinate_systems");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "validate_coordinate_systems");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_variable");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_variable");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_aux_variable");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_kernel");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_aux_kernel");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_material");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_material");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_master_action_material");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_master_action_material");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_scalar_kernel");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_scalar_kernel");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_user_object");
+registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_user_object");
 
 InputParameters
-SolidMechanicsAction::validParams()
+SolidMechanicsPhysics::validParams()
 {
-  InputParameters params = SolidMechanicsActionBase::validParams();
+  InputParameters params = SolidMechanicsPhysicsBase::validParams();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
 
   // parameters specified here only appear in the input file sub-blocks of the
@@ -61,17 +61,17 @@ SolidMechanicsAction::validParams()
   params.addParamNamesToGroup("block", "Advanced");
 
   params.addParam<MultiMooseEnum>("additional_generate_output",
-                                  SolidMechanicsActionBase::outputPropertiesType(),
+                                  SolidMechanicsPhysicsBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain (will be "
                                   "appended to the list in `generate_output`)");
   params.addParam<MultiMooseEnum>(
       "additional_material_output_order",
-      SolidMechanicsActionBase::materialOutputOrders(),
+      SolidMechanicsPhysicsBase::materialOutputOrders(),
       "Specifies the order of the FE shape function to use for this variable.");
 
   params.addParam<MultiMooseEnum>(
       "additional_material_output_family",
-      SolidMechanicsActionBase::materialOutputFamilies(),
+      SolidMechanicsPhysicsBase::materialOutputFamilies(),
       "Specifies the family of FE shape functions to use for this variable.");
 
   params.addParamNamesToGroup("additional_generate_output additional_material_output_order "
@@ -115,8 +115,8 @@ SolidMechanicsAction::validParams()
   return params;
 }
 
-SolidMechanicsAction::SolidMechanicsAction(const InputParameters & params)
-  : SolidMechanicsActionBase(params),
+SolidMechanicsPhysics::SolidMechanicsPhysics(const InputParameters & params)
+  : SolidMechanicsPhysicsBase(params),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
@@ -304,7 +304,7 @@ SolidMechanicsAction::SolidMechanicsAction(const InputParameters & params)
 }
 
 void
-SolidMechanicsAction::act()
+SolidMechanicsPhysics::act()
 {
   std::string ad_prepend = "";
   if (_use_ad)
@@ -313,7 +313,7 @@ SolidMechanicsAction::act()
   // Consistency checks across subdomains
   actSubdomainChecks();
 
-  // Gather info from all other SolidMechanicsAction
+  // Gather info from all other SolidMechanicsPhysics
   actGatherActionParameters();
 
   // Deal with the optional AuxVariable based tensor quantity output
@@ -491,7 +491,7 @@ SolidMechanicsAction::act()
 }
 
 void
-SolidMechanicsAction::actSubdomainChecks()
+SolidMechanicsPhysics::actSubdomainChecks()
 {
   // Do the coordinate system check only once the problem is created
   if (_current_task == "setup_mesh_complete")
@@ -534,7 +534,7 @@ SolidMechanicsAction::actSubdomainChecks()
 }
 
 void
-SolidMechanicsAction::actOutputGeneration()
+SolidMechanicsPhysics::actOutputGeneration()
 {
   if (_current_task == "add_material")
     actOutputMatProp();
@@ -615,7 +615,7 @@ SolidMechanicsAction::actOutputGeneration()
 }
 
 void
-SolidMechanicsAction::actEigenstrainNames()
+SolidMechanicsPhysics::actEigenstrainNames()
 {
   // Create containers for collecting blockIDs and eigenstrain names from materials
   std::map<std::string, std::set<SubdomainID>> material_eigenstrain_map;
@@ -732,7 +732,7 @@ SolidMechanicsAction::actEigenstrainNames()
 }
 
 void
-SolidMechanicsAction::verifyOrderAndFamilyOutputs()
+SolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
 {
   // Ensure material output order and family vectors are same size as generate output
 
@@ -782,7 +782,7 @@ SolidMechanicsAction::verifyOrderAndFamilyOutputs()
 }
 
 void
-SolidMechanicsAction::actOutputMatProp()
+SolidMechanicsPhysics::actOutputMatProp()
 {
   std::string ad_prepend = _use_ad ? "AD" : "";
 
@@ -890,12 +890,12 @@ SolidMechanicsAction::actOutputMatProp()
 }
 
 void
-SolidMechanicsAction::actGatherActionParameters()
+SolidMechanicsPhysics::actGatherActionParameters()
 {
   // Gather info about all other master actions when we add variables
   if (_current_task == "validate_coordinate_systems" && getParam<bool>("add_variables"))
   {
-    auto actions = _awh.getActions<SolidMechanicsAction>();
+    auto actions = _awh.getActions<SolidMechanicsPhysics>();
     for (const auto & action : actions)
     {
       const auto size_before = _subdomain_id_union.size();
@@ -915,7 +915,7 @@ SolidMechanicsAction::actGatherActionParameters()
 }
 
 void
-SolidMechanicsAction::actLagrangianKernelStrain()
+SolidMechanicsPhysics::actLagrangianKernelStrain()
 {
   std::string type;
   if (_coord_system == Moose::COORD_XYZ)
@@ -967,7 +967,7 @@ SolidMechanicsAction::actLagrangianKernelStrain()
 }
 
 void
-SolidMechanicsAction::actStressDivergenceTensorsStrain()
+SolidMechanicsPhysics::actStressDivergenceTensorsStrain()
 {
   std::string ad_prepend = _use_ad ? "AD" : "";
 
@@ -1052,7 +1052,7 @@ SolidMechanicsAction::actStressDivergenceTensorsStrain()
 }
 
 std::string
-SolidMechanicsAction::getKernelType()
+SolidMechanicsPhysics::getKernelType()
 {
   if (_lagrangian_kernels)
   {
@@ -1111,7 +1111,7 @@ SolidMechanicsAction::getKernelType()
 }
 
 InputParameters
-SolidMechanicsAction::getKernelParameters(std::string type)
+SolidMechanicsPhysics::getKernelParameters(std::string type)
 {
   InputParameters params = _factory.getValidParams(type);
   params.applyParameters(

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SolidMechanicsActionBase.h"
+#include "SolidMechanicsPhysicsBase.h"
 #include "CommonSolidMechanicsAction.h"
 #include "ActionWarehouse.h"
 #include "AddAuxVariableAction.h"
@@ -16,25 +16,25 @@
 #include "InputParameterWarehouse.h"
 
 // map tensor name shortcuts to tensor material property names
-std::map<std::string, std::string> SolidMechanicsActionBase::_rank_two_cartesian_component_table = {
-    {"strain", "total_strain"},
-    {"mechanical_strain", "mechanical_strain"},
-    {"stress", "stress"},
-    {"cauchy_stress", "cauchy_stress"},
-    {"deformation_gradient", "deformation_gradient"},
-    {"pk1_stress", "pk1_stress"},
-    {"pk2_stress", "pk2_stress"},
-    {"small_stress", "small_stress"},
-    {"elastic_strain", "elastic_strain"},
-    {"plastic_strain", "plastic_strain"},
-    {"creep_strain", "creep_strain"},
-    {"creep_stress", "creep_stress"}};
-const std::vector<char> SolidMechanicsActionBase::_component_table = {'x', 'y', 'z'};
+std::map<std::string, std::string> SolidMechanicsPhysicsBase::_rank_two_cartesian_component_table =
+    {{"strain", "total_strain"},
+     {"mechanical_strain", "mechanical_strain"},
+     {"stress", "stress"},
+     {"cauchy_stress", "cauchy_stress"},
+     {"deformation_gradient", "deformation_gradient"},
+     {"pk1_stress", "pk1_stress"},
+     {"pk2_stress", "pk2_stress"},
+     {"small_stress", "small_stress"},
+     {"elastic_strain", "elastic_strain"},
+     {"plastic_strain", "plastic_strain"},
+     {"creep_strain", "creep_strain"},
+     {"creep_stress", "creep_stress"}};
+const std::vector<char> SolidMechanicsPhysicsBase::_component_table = {'x', 'y', 'z'};
 
 // map aux variable name prefixes to RankTwoInvariant option and list of permitted tensor name
 // shortcuts
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    SolidMechanicsActionBase::_rank_two_invariant_table = {
+    SolidMechanicsPhysicsBase::_rank_two_invariant_table = {
         {"vonmises", {"VonMisesStress", {"stress", "cauchy_stress", "pk1_stress", "pk2_stress"}}},
         {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"hydrostatic",
@@ -115,11 +115,11 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
            "strain"}}}};
 
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    SolidMechanicsActionBase::_rank_two_directional_component_table = {
+    SolidMechanicsPhysicsBase::_rank_two_directional_component_table = {
         {"directional", {"Direction", {"stress", "strain"}}}};
 
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    SolidMechanicsActionBase::_rank_two_cylindrical_component_table = {
+    SolidMechanicsPhysicsBase::_rank_two_cylindrical_component_table = {
         {"axial",
          {"AxialStress", {"stress", "strain", "plastic_strain", "creep_strain", "elastic_strain"}}},
         {"hoop",
@@ -127,13 +127,13 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"radial", {"RadialStress", {"stress", "strain"}}}};
 
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    SolidMechanicsActionBase::_rank_two_spherical_component_table = {
+    SolidMechanicsPhysicsBase::_rank_two_spherical_component_table = {
         {"spherical_hoop",
          {"HoopStress", {"stress", "strain", "plastic_strain", "creep_strain", "elastic_strain"}}},
         {"spherical_radial", {"RadialStress", {"stress", "strain"}}}};
 
 InputParameters
-SolidMechanicsActionBase::validParams()
+SolidMechanicsPhysicsBase::validParams()
 {
   InputParameters params = Action::validParams();
 
@@ -211,17 +211,17 @@ SolidMechanicsActionBase::validParams()
 
   // Output
   params.addParam<MultiMooseEnum>("generate_output",
-                                  SolidMechanicsActionBase::outputPropertiesType(),
+                                  SolidMechanicsPhysicsBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain");
 
   params.addParam<MultiMooseEnum>(
       "material_output_order",
-      SolidMechanicsActionBase::materialOutputOrders(),
+      SolidMechanicsPhysicsBase::materialOutputOrders(),
       "Specifies the order of the FE shape function to use for this variable.");
 
   params.addParam<MultiMooseEnum>(
       "material_output_family",
-      SolidMechanicsActionBase::materialOutputFamilies(),
+      SolidMechanicsPhysicsBase::materialOutputFamilies(),
       "Specifies the family of FE shape functions to use for this variable.");
   params.addParamNamesToGroup("generate_output material_output_order material_output_family",
                               "Output");
@@ -242,7 +242,7 @@ SolidMechanicsActionBase::validParams()
   return params;
 }
 
-SolidMechanicsActionBase::SolidMechanicsActionBase(const InputParameters & parameters)
+SolidMechanicsPhysicsBase::SolidMechanicsPhysicsBase(const InputParameters & parameters)
   : Action(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
   const auto & params = _app.getInputParameterWarehouse().getInputParameters();
@@ -282,7 +282,7 @@ SolidMechanicsActionBase::SolidMechanicsActionBase(const InputParameters & param
 }
 
 MultiMooseEnum
-SolidMechanicsActionBase::materialOutputOrders()
+SolidMechanicsPhysicsBase::materialOutputOrders()
 {
   auto orders = AddAuxVariableAction::getAuxVariableOrders().getRawNames();
 
@@ -290,13 +290,13 @@ SolidMechanicsActionBase::materialOutputOrders()
 }
 
 MultiMooseEnum
-SolidMechanicsActionBase::materialOutputFamilies()
+SolidMechanicsPhysicsBase::materialOutputFamilies()
 {
   return MultiMooseEnum("MONOMIAL LAGRANGE");
 }
 
 MultiMooseEnum
-SolidMechanicsActionBase::outputPropertiesType()
+SolidMechanicsPhysicsBase::outputPropertiesType()
 {
   std::string options = "";
   for (auto & r2tc : _rank_two_cartesian_component_table)
@@ -325,8 +325,8 @@ SolidMechanicsActionBase::outputPropertiesType()
 }
 
 void
-SolidMechanicsActionBase::addCartesianComponentOutput(const std::string & enum_name,
-                                                      const std::string & prop_name)
+SolidMechanicsPhysicsBase::addCartesianComponentOutput(const std::string & enum_name,
+                                                       const std::string & prop_name)
 {
   if (prop_name.empty())
     // the enum name is the actual tensor material property name

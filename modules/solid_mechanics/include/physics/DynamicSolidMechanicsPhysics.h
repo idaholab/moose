@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "SolidMechanicsAction.h"
+#include "SolidMechanicsPhysics.h"
 
-class DynamicSolidMechanicsAction : public SolidMechanicsAction
+class DynamicSolidMechanicsPhysics : public SolidMechanicsPhysics
 {
 public:
   static InputParameters validParams();
 
-  DynamicSolidMechanicsAction(const InputParameters & params);
+  DynamicSolidMechanicsPhysics(const InputParameters & params);
 
   virtual void act() override;
 

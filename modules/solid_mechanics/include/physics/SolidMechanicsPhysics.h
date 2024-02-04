@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "SolidMechanicsActionBase.h"
+#include "SolidMechanicsPhysicsBase.h"
 #include "libmesh/point.h"
 
-class SolidMechanicsAction : public SolidMechanicsActionBase
+class SolidMechanicsPhysics : public SolidMechanicsPhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  SolidMechanicsAction(const InputParameters & params);
+  SolidMechanicsPhysics(const InputParameters & params);
 
   virtual void act();
 
@@ -170,7 +170,7 @@ protected:
 
 template <typename T, typename T2>
 bool
-SolidMechanicsAction::setupOutput(std::string out, T table, T2 setup)
+SolidMechanicsPhysics::setupOutput(std::string out, T table, T2 setup)
 {
   for (const auto & t1 : table)
   {

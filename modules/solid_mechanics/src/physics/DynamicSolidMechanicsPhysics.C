@@ -7,35 +7,37 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DynamicSolidMechanicsAction.h"
+#include "DynamicSolidMechanicsPhysics.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "meta_action");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "setup_mesh_complete");
 
 registerMooseAction("SolidMechanicsApp",
-                    DynamicSolidMechanicsAction,
+                    DynamicSolidMechanicsPhysics,
                     "validate_coordinate_systems");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_variable");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "add_variable");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "add_aux_variable");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "add_kernel");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "add_aux_kernel");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_material");
+registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsPhysics, "add_material");
 
-registerMooseAction("SolidMechanicsApp", DynamicSolidMechanicsAction, "add_master_action_material");
+registerMooseAction("SolidMechanicsApp",
+                    DynamicSolidMechanicsPhysics,
+                    "add_master_action_material");
 
 InputParameters
-DynamicSolidMechanicsAction::validParams()
+DynamicSolidMechanicsPhysics::validParams()
 {
-  InputParameters params = SolidMechanicsAction::validParams();
+  InputParameters params = SolidMechanicsPhysics::validParams();
   params.addClassDescription("Set up dynamic stress divergence kernels");
   params.addParam<bool>("static_initialization",
                         false,
@@ -93,8 +95,8 @@ DynamicSolidMechanicsAction::validParams()
   return params;
 }
 
-DynamicSolidMechanicsAction::DynamicSolidMechanicsAction(const InputParameters & params)
-  : SolidMechanicsAction(params),
+DynamicSolidMechanicsPhysics::DynamicSolidMechanicsPhysics(const InputParameters & params)
+  : SolidMechanicsPhysics(params),
     _velocities(getParam<std::vector<AuxVariableName>>("velocities")),
     _accelerations(getParam<std::vector<AuxVariableName>>("accelerations")),
     _newmark_beta(isParamValid("beta") ? getParam<Real>("beta") : getParam<Real>("newmark_beta")),
@@ -106,7 +108,7 @@ DynamicSolidMechanicsAction::DynamicSolidMechanicsAction(const InputParameters &
 }
 
 void
-DynamicSolidMechanicsAction::act()
+DynamicSolidMechanicsPhysics::act()
 {
   const std::array<std::string, 3> dir{{"x", "y", "z"}};
 
@@ -195,11 +197,11 @@ DynamicSolidMechanicsAction::act()
   }
 
   // call parent class method
-  SolidMechanicsAction::act();
+  SolidMechanicsPhysics::act();
 }
 
 std::string
-DynamicSolidMechanicsAction::getKernelType()
+DynamicSolidMechanicsPhysics::getKernelType()
 {
   // choose kernel type based on coordinate system
   if (_coord_system == Moose::COORD_XYZ)
@@ -209,9 +211,9 @@ DynamicSolidMechanicsAction::getKernelType()
 }
 
 InputParameters
-DynamicSolidMechanicsAction::getKernelParameters(std::string type)
+DynamicSolidMechanicsPhysics::getKernelParameters(std::string type)
 {
-  SolidMechanicsAction::getKernelParameters(type);
+  SolidMechanicsPhysics::getKernelParameters(type);
   InputParameters params = _factory.getValidParams(type);
   params.applyParameters(parameters(), {"zeta", "alpha"});
 

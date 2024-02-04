@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CommonSolidMechanicsAction.h"
-#include "SolidMechanicsAction.h"
+#include "SolidMechanicsPhysics.h"
 #include "ActionWarehouse.h"
 
 registerMooseAction("SolidMechanicsApp", CommonSolidMechanicsAction, "meta_action");
