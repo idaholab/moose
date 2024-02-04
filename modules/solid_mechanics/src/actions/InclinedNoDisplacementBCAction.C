@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", InclinedNoDisplacementBCAction, "add_bc");
+registerMooseAction("SolidMechanicsApp", InclinedNoDisplacementBCAction, "add_bc");
 
 InputParameters
 InclinedNoDisplacementBCAction::validParams()

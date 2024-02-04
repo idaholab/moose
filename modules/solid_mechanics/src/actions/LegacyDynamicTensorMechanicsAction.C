@@ -9,15 +9,13 @@
 
 #include "LegacyDynamicTensorMechanicsAction.h"
 
-registerMooseAction("TensorMechanicsApp",
-                    LegacyDynamicTensorMechanicsAction,
-                    "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", LegacyDynamicTensorMechanicsAction, "setup_mesh_complete");
 
-registerMooseAction("TensorMechanicsApp",
+registerMooseAction("SolidMechanicsApp",
                     LegacyDynamicTensorMechanicsAction,
                     "validate_coordinate_systems");
 
-registerMooseAction("TensorMechanicsApp", LegacyDynamicTensorMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", LegacyDynamicTensorMechanicsAction, "add_kernel");
 
 InputParameters
 LegacyDynamicTensorMechanicsAction::validParams()

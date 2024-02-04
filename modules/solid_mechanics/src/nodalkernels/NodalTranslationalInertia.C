@@ -14,7 +14,7 @@
 #include "DelimitedFileReader.h"
 #include "TimeIntegrator.h"
 
-registerMooseObject("TensorMechanicsApp", NodalTranslationalInertia);
+registerMooseObject("SolidMechanicsApp", NodalTranslationalInertia);
 
 InputParameters
 NodalTranslationalInertia::validParams()

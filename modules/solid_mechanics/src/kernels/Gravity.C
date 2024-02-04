@@ -10,8 +10,8 @@
 #include "Gravity.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", Gravity);
-registerMooseObject("TensorMechanicsApp", ADGravity);
+registerMooseObject("SolidMechanicsApp", Gravity);
+registerMooseObject("SolidMechanicsApp", ADGravity);
 
 template <bool is_ad>
 InputParameters

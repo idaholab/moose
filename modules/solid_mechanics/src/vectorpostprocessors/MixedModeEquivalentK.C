@@ -9,7 +9,7 @@
 
 #include "MixedModeEquivalentK.h"
 
-registerMooseObject("TensorMechanicsApp", MixedModeEquivalentK);
+registerMooseObject("SolidMechanicsApp", MixedModeEquivalentK);
 
 InputParameters
 MixedModeEquivalentK::validParams()

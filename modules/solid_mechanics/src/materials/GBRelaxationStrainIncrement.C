@@ -10,7 +10,7 @@
 #include "GBRelaxationStrainIncrement.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", GBRelaxationStrainIncrement);
+registerMooseObject("SolidMechanicsApp", GBRelaxationStrainIncrement);
 
 InputParameters
 GBRelaxationStrainIncrement::validParams()

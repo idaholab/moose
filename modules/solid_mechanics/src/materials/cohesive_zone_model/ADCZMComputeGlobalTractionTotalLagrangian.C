@@ -10,7 +10,7 @@
 #include "ADCZMComputeGlobalTractionTotalLagrangian.h"
 #include "CZMComputeGlobalTractionTotalLagrangian.h"
 
-registerMooseObject("TensorMechanicsApp", ADCZMComputeGlobalTractionTotalLagrangian);
+registerMooseObject("SolidMechanicsApp", ADCZMComputeGlobalTractionTotalLagrangian);
 
 InputParameters
 ADCZMComputeGlobalTractionTotalLagrangian::validParams()

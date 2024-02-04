@@ -10,8 +10,8 @@
 #include "ComputeDamageStress.h"
 #include "DamageBase.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeDamageStress);
-registerMooseObject("TensorMechanicsApp", ADComputeDamageStress);
+registerMooseObject("SolidMechanicsApp", ComputeDamageStress);
+registerMooseObject("SolidMechanicsApp", ADComputeDamageStress);
 
 template <bool is_ad>
 InputParameters

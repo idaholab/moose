@@ -22,7 +22,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeIncrementalShellStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeIncrementalShellStrain);
 
 InputParameters
 ADComputeIncrementalShellStrain::validParams()

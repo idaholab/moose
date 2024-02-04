@@ -9,7 +9,7 @@
 
 #include "ComputeCrackedStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeCrackedStress);
+registerMooseObject("SolidMechanicsApp", ComputeCrackedStress);
 
 InputParameters
 ComputeCrackedStress::validParams()

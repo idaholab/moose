@@ -10,7 +10,7 @@
 #include "OutOfPlanePressure.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", OutOfPlanePressure);
+registerMooseObject("SolidMechanicsApp", OutOfPlanePressure);
 
 InputParameters
 OutOfPlanePressure::validParams()

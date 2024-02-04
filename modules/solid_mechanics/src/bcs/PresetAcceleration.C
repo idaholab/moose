@@ -10,7 +10,7 @@
 #include "PresetAcceleration.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", PresetAcceleration);
+registerMooseObject("SolidMechanicsApp", PresetAcceleration);
 
 InputParameters
 PresetAcceleration::validParams()

@@ -10,7 +10,7 @@
 #include "ADComputePlaneFiniteStrain.h"
 #include "UserObject.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputePlaneFiniteStrain);
+registerMooseObject("SolidMechanicsApp", ADComputePlaneFiniteStrain);
 
 InputParameters
 ADComputePlaneFiniteStrain::validParams()

@@ -20,7 +20,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", StressDivergenceBeam);
+registerMooseObject("SolidMechanicsApp", StressDivergenceBeam);
 
 InputParameters
 StressDivergenceBeam::validParams()

@@ -11,7 +11,7 @@
 #include "DensityScaling.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", DensityScaling);
+registerMooseObject("SolidMechanicsApp", DensityScaling);
 
 InputParameters
 DensityScaling::validParams()

@@ -10,7 +10,7 @@
 #include "ADDynamicStressDivergenceTensors.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
+registerMooseObject("SolidMechanicsApp", ADDynamicStressDivergenceTensors);
 
 InputParameters
 ADDynamicStressDivergenceTensors::validParams()

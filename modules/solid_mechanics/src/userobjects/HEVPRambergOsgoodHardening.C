@@ -9,7 +9,7 @@
 
 #include "HEVPRambergOsgoodHardening.h"
 
-registerMooseObject("TensorMechanicsApp", HEVPRambergOsgoodHardening);
+registerMooseObject("SolidMechanicsApp", HEVPRambergOsgoodHardening);
 
 InputParameters
 HEVPRambergOsgoodHardening::validParams()

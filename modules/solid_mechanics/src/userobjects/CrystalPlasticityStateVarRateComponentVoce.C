@@ -10,7 +10,7 @@
 #include "CrystalPlasticityStateVarRateComponentVoce.h"
 #include "MooseError.h"
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentVoce);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticityStateVarRateComponentVoce);
 
 InputParameters
 CrystalPlasticityStateVarRateComponentVoce::validParams()

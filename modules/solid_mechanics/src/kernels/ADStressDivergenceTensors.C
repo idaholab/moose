@@ -12,8 +12,8 @@
 #include "SymmetricRankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
-registerMooseObject("TensorMechanicsApp", ADSymmetricStressDivergenceTensors);
+registerMooseObject("SolidMechanicsApp", ADStressDivergenceTensors);
+registerMooseObject("SolidMechanicsApp", ADSymmetricStressDivergenceTensors);
 
 template <typename R2>
 InputParameters

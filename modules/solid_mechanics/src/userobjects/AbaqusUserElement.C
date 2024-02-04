@@ -13,7 +13,7 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-registerMooseObject("TensorMechanicsApp", AbaqusUserElement);
+registerMooseObject("SolidMechanicsApp", AbaqusUserElement);
 
 InputParameters
 AbaqusUserElement::validParams()

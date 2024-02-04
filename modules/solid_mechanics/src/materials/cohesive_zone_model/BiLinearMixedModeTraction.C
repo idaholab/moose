@@ -10,7 +10,7 @@
 #include "BiLinearMixedModeTraction.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", BiLinearMixedModeTraction);
+registerMooseObject("SolidMechanicsApp", BiLinearMixedModeTraction);
 
 InputParameters
 BiLinearMixedModeTraction::validParams()

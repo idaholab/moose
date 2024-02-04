@@ -12,8 +12,8 @@
 #include "SymmetricRankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeSmallStrain);
-registerMooseObject("TensorMechanicsApp", ADSymmetricSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADSymmetricSmallStrain);
 
 template <typename R2>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "TestNewmarkTI.h"
 
-registerMooseObject("TensorMechanicsApp", TestNewmarkTI);
+registerMooseObject("SolidMechanicsApp", TestNewmarkTI);
 
 InputParameters
 TestNewmarkTI::validParams()

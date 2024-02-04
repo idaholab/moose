@@ -9,7 +9,7 @@
 
 #include "HomogenizedTotalLagrangianStressDivergence.h"
 
-registerMooseObject("TensorMechanicsApp", HomogenizedTotalLagrangianStressDivergence);
+registerMooseObject("SolidMechanicsApp", HomogenizedTotalLagrangianStressDivergence);
 
 InputParameters
 HomogenizedTotalLagrangianStressDivergence::validParams()

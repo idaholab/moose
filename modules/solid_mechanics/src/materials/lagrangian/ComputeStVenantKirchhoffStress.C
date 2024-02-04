@@ -9,7 +9,7 @@
 
 #include "ComputeStVenantKirchhoffStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeStVenantKirchhoffStress);
+registerMooseObject("SolidMechanicsApp", ComputeStVenantKirchhoffStress);
 
 InputParameters
 ComputeStVenantKirchhoffStress::validParams()

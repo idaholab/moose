@@ -11,7 +11,7 @@
 
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", ADAbruptSoftening);
+registerMooseObject("SolidMechanicsApp", ADAbruptSoftening);
 
 InputParameters
 ADAbruptSoftening::validParams()

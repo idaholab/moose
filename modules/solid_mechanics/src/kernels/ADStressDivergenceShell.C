@@ -24,7 +24,7 @@
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseObject("TensorMechanicsApp", ADStressDivergenceShell);
+registerMooseObject("SolidMechanicsApp", ADStressDivergenceShell);
 
 InputParameters
 ADStressDivergenceShell::validParams()

@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", StressDivergenceRSphericalTensors);
+registerMooseObject("SolidMechanicsApp", StressDivergenceRSphericalTensors);
 
 InputParameters
 StressDivergenceRSphericalTensors::validParams()

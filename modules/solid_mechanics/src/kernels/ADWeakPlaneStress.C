@@ -9,7 +9,7 @@
 
 #include "ADWeakPlaneStress.h"
 
-registerMooseObject("TensorMechanicsApp", ADWeakPlaneStress);
+registerMooseObject("SolidMechanicsApp", ADWeakPlaneStress);
 
 InputParameters
 ADWeakPlaneStress::validParams()

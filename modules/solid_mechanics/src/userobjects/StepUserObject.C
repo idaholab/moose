@@ -11,7 +11,7 @@
 #include <limits>
 #include <algorithm>
 
-registerMooseObject("TensorMechanicsApp", StepUserObject);
+registerMooseObject("SolidMechanicsApp", StepUserObject);
 
 InputParameters
 StepUserObject::validParams()

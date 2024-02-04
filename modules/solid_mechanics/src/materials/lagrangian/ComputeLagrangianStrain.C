@@ -9,4 +9,4 @@
 
 #include "ComputeLagrangianStrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianStrain);
+registerMooseObject("SolidMechanicsApp", ComputeLagrangianStrain);

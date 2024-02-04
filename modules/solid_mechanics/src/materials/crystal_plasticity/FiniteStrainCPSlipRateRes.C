@@ -10,7 +10,7 @@
 #include "FiniteStrainCPSlipRateRes.h"
 #include "libmesh/utility.h"
 
-registerMooseObjectDeprecated("TensorMechanicsApp", FiniteStrainCPSlipRateRes, "11/15/2024 12:00");
+registerMooseObjectDeprecated("SolidMechanicsApp", FiniteStrainCPSlipRateRes, "11/15/2024 12:00");
 
 InputParameters
 FiniteStrainCPSlipRateRes::validParams()

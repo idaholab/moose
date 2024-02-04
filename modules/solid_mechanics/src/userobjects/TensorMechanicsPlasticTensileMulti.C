@@ -13,7 +13,7 @@
 // Following is for perturbing eigvenvalues.  This looks really bodgy, but works quite well!
 #include "MooseRandom.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticTensileMulti);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticTensileMulti);
 
 InputParameters
 TensorMechanicsPlasticTensileMulti::validParams()

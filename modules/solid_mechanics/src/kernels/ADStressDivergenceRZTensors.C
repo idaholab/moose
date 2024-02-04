@@ -13,7 +13,7 @@
 #include "ElasticityTensorTools.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ADStressDivergenceRZTensors);
+registerMooseObject("SolidMechanicsApp", ADStressDivergenceRZTensors);
 
 InputParameters
 ADStressDivergenceRZTensors::validParams()

@@ -14,7 +14,7 @@
 #include "MooseException.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeCreepPlasticityStress);
+registerMooseObject("SolidMechanicsApp", ComputeCreepPlasticityStress);
 
 InputParameters
 ComputeCreepPlasticityStress::validParams()

@@ -10,7 +10,7 @@
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
 #include "UserObject.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DIncrementalStrain);
+registerMooseObject("SolidMechanicsApp", ComputeAxisymmetric1DIncrementalStrain);
 
 InputParameters
 ComputeAxisymmetric1DIncrementalStrain::validParams()

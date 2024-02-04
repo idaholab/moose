@@ -9,7 +9,7 @@
 
 #include "CZMRealVectorCartesianComponent.h"
 
-registerMooseObject("TensorMechanicsApp", CZMRealVectorCartesianComponent);
+registerMooseObject("SolidMechanicsApp", CZMRealVectorCartesianComponent);
 
 InputParameters
 CZMRealVectorCartesianComponent::validParams()

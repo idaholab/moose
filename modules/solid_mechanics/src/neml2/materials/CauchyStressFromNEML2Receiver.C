@@ -10,7 +10,7 @@
 #include "CauchyStressFromNEML2Receiver.h"
 #include "NEML2Utils.h"
 
-registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2Receiver);
+registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2Receiver);
 
 InputParameters
 CauchyStressFromNEML2Receiver::validParams()

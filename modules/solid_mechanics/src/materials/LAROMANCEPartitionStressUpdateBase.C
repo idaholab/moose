@@ -11,10 +11,10 @@
 
 #include <libmesh/dense_matrix.h> // libMesh::cholesky_solve
 
-registerMooseObjectAliased("TensorMechanicsApp",
+registerMooseObjectAliased("SolidMechanicsApp",
                            LAROMANCEPartitionStressUpdateBase,
                            "LAROMANCEPartitionStressUpdate");
-registerMooseObjectAliased("TensorMechanicsApp",
+registerMooseObjectAliased("SolidMechanicsApp",
                            ADLAROMANCEPartitionStressUpdateBase,
                            "ADLAROMANCEPartitionStressUpdate");
 

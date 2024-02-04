@@ -9,7 +9,7 @@
 
 #include "ComputeFiniteStrainElasticStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeFiniteStrainElasticStress);
+registerMooseObject("SolidMechanicsApp", ComputeFiniteStrainElasticStress);
 
 InputParameters
 ComputeFiniteStrainElasticStress::validParams()

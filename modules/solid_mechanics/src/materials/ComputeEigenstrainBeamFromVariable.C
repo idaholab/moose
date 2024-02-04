@@ -9,7 +9,7 @@
 
 #include "ComputeEigenstrainBeamFromVariable.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeEigenstrainBeamFromVariable);
+registerMooseObject("SolidMechanicsApp", ComputeEigenstrainBeamFromVariable);
 
 InputParameters
 ComputeEigenstrainBeamFromVariable::validParams()

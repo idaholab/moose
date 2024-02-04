@@ -9,13 +9,13 @@
 
 #include "LegacyTensorMechanicsAction.h"
 
-registerMooseAction("TensorMechanicsApp", LegacyTensorMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", LegacyTensorMechanicsAction, "setup_mesh_complete");
 
-registerMooseAction("TensorMechanicsApp",
+registerMooseAction("SolidMechanicsApp",
                     LegacyTensorMechanicsAction,
                     "validate_coordinate_systems");
 
-registerMooseAction("TensorMechanicsApp", LegacyTensorMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", LegacyTensorMechanicsAction, "add_kernel");
 
 InputParameters
 LegacyTensorMechanicsAction::validParams()

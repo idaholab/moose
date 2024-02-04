@@ -15,8 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);
-registerMooseObject("TensorMechanicsApp", ADSymmetricIncrementalSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeIncrementalSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADSymmetricIncrementalSmallStrain);
 
 template <typename R2>
 InputParameters

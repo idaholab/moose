@@ -9,7 +9,7 @@
 
 #include "ComputeDeformGradBasedStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeDeformGradBasedStress);
+registerMooseObject("SolidMechanicsApp", ComputeDeformGradBasedStress);
 
 InputParameters
 ComputeDeformGradBasedStress::validParams()

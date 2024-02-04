@@ -9,7 +9,7 @@
 
 #include "PolarMomentOfInertia.h"
 
-registerMooseObject("TensorMechanicsApp", PolarMomentOfInertia);
+registerMooseObject("SolidMechanicsApp", PolarMomentOfInertia);
 
 InputParameters
 PolarMomentOfInertia::validParams()

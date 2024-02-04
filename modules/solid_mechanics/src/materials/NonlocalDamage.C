@@ -9,8 +9,8 @@
 
 #include "NonlocalDamage.h"
 
-registerMooseObject("TensorMechanicsApp", NonlocalDamage);
-registerMooseObject("TensorMechanicsApp", ADNonlocalDamage);
+registerMooseObject("SolidMechanicsApp", NonlocalDamage);
+registerMooseObject("SolidMechanicsApp", ADNonlocalDamage);
 
 template <bool is_ad>
 InputParameters

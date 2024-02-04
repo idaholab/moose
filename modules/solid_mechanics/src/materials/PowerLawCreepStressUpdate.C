@@ -9,8 +9,8 @@
 
 #include "PowerLawCreepStressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
-registerMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
+registerMooseObject("SolidMechanicsApp", PowerLawCreepStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADPowerLawCreepStressUpdate);
 
 template <bool is_ad>
 InputParameters

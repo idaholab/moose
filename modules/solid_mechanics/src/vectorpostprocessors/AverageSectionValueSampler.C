@@ -12,7 +12,7 @@
 #include "SystemBase.h"
 #include <limits>
 
-registerMooseObject("TensorMechanicsApp", AverageSectionValueSampler);
+registerMooseObject("SolidMechanicsApp", AverageSectionValueSampler);
 
 InputParameters
 AverageSectionValueSampler::validParams()

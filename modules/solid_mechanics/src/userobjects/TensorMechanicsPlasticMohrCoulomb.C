@@ -11,7 +11,7 @@
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMohrCoulomb);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticMohrCoulomb);
 
 InputParameters
 TensorMechanicsPlasticMohrCoulomb::validParams()

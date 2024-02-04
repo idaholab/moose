@@ -10,7 +10,7 @@
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticSimpleTester);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticSimpleTester);
 
 InputParameters
 TensorMechanicsPlasticSimpleTester::validParams()

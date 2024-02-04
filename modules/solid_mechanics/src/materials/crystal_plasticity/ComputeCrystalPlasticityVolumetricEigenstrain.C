@@ -9,7 +9,7 @@
 
 #include "ComputeCrystalPlasticityVolumetricEigenstrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeCrystalPlasticityVolumetricEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeCrystalPlasticityVolumetricEigenstrain);
 
 InputParameters
 ComputeCrystalPlasticityVolumetricEigenstrain::validParams()

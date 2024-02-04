@@ -10,7 +10,7 @@
 #include "ComputeElasticityBeam.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeElasticityBeam);
+registerMooseObject("SolidMechanicsApp", ComputeElasticityBeam);
 
 InputParameters
 ComputeElasticityBeam::validParams()

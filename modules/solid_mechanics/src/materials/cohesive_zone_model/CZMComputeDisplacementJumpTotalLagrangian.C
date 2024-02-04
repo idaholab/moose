@@ -11,8 +11,8 @@
 #include "CohesiveZoneModelTools.h"
 #include "FactorizedRankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", CZMComputeDisplacementJumpTotalLagrangian);
-registerMooseObject("TensorMechanicsApp", ADCZMComputeDisplacementJumpTotalLagrangian);
+registerMooseObject("SolidMechanicsApp", CZMComputeDisplacementJumpTotalLagrangian);
+registerMooseObject("SolidMechanicsApp", ADCZMComputeDisplacementJumpTotalLagrangian);
 
 template <bool is_ad>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "SalehaniIrani3DCTraction.h"
 
-registerMooseObject("TensorMechanicsApp", SalehaniIrani3DCTraction);
+registerMooseObject("SolidMechanicsApp", SalehaniIrani3DCTraction);
 
 InputParameters
 SalehaniIrani3DCTraction::validParams()

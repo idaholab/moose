@@ -9,8 +9,8 @@
 
 #include "ComputeThermalExpansionEigenstrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeThermalExpansionEigenstrain);
-registerMooseObject("TensorMechanicsApp", ADComputeThermalExpansionEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeThermalExpansionEigenstrain);
+registerMooseObject("SolidMechanicsApp", ADComputeThermalExpansionEigenstrain);
 
 template <bool is_ad>
 InputParameters

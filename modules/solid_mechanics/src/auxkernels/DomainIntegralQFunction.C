@@ -9,7 +9,7 @@
 
 #include "DomainIntegralQFunction.h"
 
-registerMooseObject("TensorMechanicsApp", DomainIntegralQFunction);
+registerMooseObject("SolidMechanicsApp", DomainIntegralQFunction);
 
 InputParameters
 DomainIntegralQFunction::validParams()

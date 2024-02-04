@@ -9,7 +9,7 @@
 
 #include "DashpotBC.h"
 
-registerMooseObject("TensorMechanicsApp", DashpotBC);
+registerMooseObject("SolidMechanicsApp", DashpotBC);
 
 InputParameters
 DashpotBC::validParams()

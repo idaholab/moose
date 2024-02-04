@@ -9,7 +9,7 @@
 
 #include "ComputePlasticHeatEnergy.h"
 
-registerMooseObject("TensorMechanicsApp", ComputePlasticHeatEnergy);
+registerMooseObject("SolidMechanicsApp", ComputePlasticHeatEnergy);
 
 InputParameters
 ComputePlasticHeatEnergy::validParams()

@@ -10,7 +10,7 @@
 #include "FiniteStrainPlasticMaterial.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", FiniteStrainPlasticMaterial);
+registerMooseObject("SolidMechanicsApp", FiniteStrainPlasticMaterial);
 
 InputParameters
 FiniteStrainPlasticMaterial::validParams()

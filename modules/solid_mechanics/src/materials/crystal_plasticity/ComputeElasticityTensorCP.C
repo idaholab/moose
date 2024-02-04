@@ -10,7 +10,7 @@
 #include "ComputeElasticityTensorCP.h"
 #include "RotationTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeElasticityTensorCP);
+registerMooseObject("SolidMechanicsApp", ComputeElasticityTensorCP);
 
 InputParameters
 ComputeElasticityTensorCP::validParams()

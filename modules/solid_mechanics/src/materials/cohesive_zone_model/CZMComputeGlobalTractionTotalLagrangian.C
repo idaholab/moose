@@ -10,7 +10,7 @@
 #include "CZMComputeGlobalTractionTotalLagrangian.h"
 #include "CohesiveZoneModelTools.h"
 
-registerMooseObject("TensorMechanicsApp", CZMComputeGlobalTractionTotalLagrangian);
+registerMooseObject("SolidMechanicsApp", CZMComputeGlobalTractionTotalLagrangian);
 
 InputParameters
 CZMComputeGlobalTractionTotalLagrangian::validParams()

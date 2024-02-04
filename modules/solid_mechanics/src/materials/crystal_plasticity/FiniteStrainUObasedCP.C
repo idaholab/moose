@@ -15,7 +15,7 @@
 #include "CrystalPlasticityStateVariable.h"
 #include "CrystalPlasticityStateVarRateComponent.h"
 
-registerMooseObject("TensorMechanicsApp", FiniteStrainUObasedCP);
+registerMooseObject("SolidMechanicsApp", FiniteStrainUObasedCP);
 
 InputParameters
 FiniteStrainUObasedCP::validParams()

@@ -16,7 +16,7 @@
 
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeMultiPlasticityStress);
+registerMooseObject("SolidMechanicsApp", ComputeMultiPlasticityStress);
 
 InputParameters
 ComputeMultiPlasticityStress::validParams()

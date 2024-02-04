@@ -9,7 +9,7 @@
 
 #include "ComputeCrystalPlasticityThermalEigenstrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeCrystalPlasticityThermalEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeCrystalPlasticityThermalEigenstrain);
 
 InputParameters
 ComputeCrystalPlasticityThermalEigenstrain::validParams()

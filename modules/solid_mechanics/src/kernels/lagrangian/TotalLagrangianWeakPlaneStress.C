@@ -9,7 +9,7 @@
 
 #include "TotalLagrangianWeakPlaneStress.h"
 
-registerMooseObject("TensorMechanicsApp", TotalLagrangianWeakPlaneStress);
+registerMooseObject("SolidMechanicsApp", TotalLagrangianWeakPlaneStress);
 
 InputParameters
 TotalLagrangianWeakPlaneStress::validParams()

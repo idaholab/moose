@@ -11,8 +11,8 @@
 
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeDilatationThermalExpansionFunctionEigenstrain);
-registerMooseObject("TensorMechanicsApp", ADComputeDilatationThermalExpansionFunctionEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeDilatationThermalExpansionFunctionEigenstrain);
+registerMooseObject("SolidMechanicsApp", ADComputeDilatationThermalExpansionFunctionEigenstrain);
 
 template <bool is_ad>
 InputParameters

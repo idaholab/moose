@@ -9,7 +9,7 @@
 
 #include "ComputeLagrangianWPSStrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianWPSStrain);
+registerMooseObject("SolidMechanicsApp", ComputeLagrangianWPSStrain);
 
 InputParameters
 ComputeLagrangianWPSStrain::validParams()

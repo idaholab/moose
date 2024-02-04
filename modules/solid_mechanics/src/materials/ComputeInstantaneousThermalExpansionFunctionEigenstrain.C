@@ -12,9 +12,8 @@
 #include "CastDualNumber.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeInstantaneousThermalExpansionFunctionEigenstrain);
-registerMooseObject("TensorMechanicsApp",
-                    ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeInstantaneousThermalExpansionFunctionEigenstrain);
+registerMooseObject("SolidMechanicsApp", ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
 
 template <bool is_ad>
 InputParameters

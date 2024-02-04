@@ -9,7 +9,7 @@
 
 #include "ComputeVolumetricDeformGrad.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeVolumetricDeformGrad);
+registerMooseObject("SolidMechanicsApp", ComputeVolumetricDeformGrad);
 
 InputParameters
 ComputeVolumetricDeformGrad::validParams()

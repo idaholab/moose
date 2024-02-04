@@ -9,7 +9,7 @@
 
 #include "ComputeVariableBaseEigenStrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeVariableBaseEigenStrain);
+registerMooseObject("SolidMechanicsApp", ComputeVariableBaseEigenStrain);
 
 InputParameters
 ComputeVariableBaseEigenStrain::validParams()

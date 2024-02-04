@@ -9,7 +9,7 @@
 
 #include "ComputeStrainIncrementBasedStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeStrainIncrementBasedStress);
+registerMooseObject("SolidMechanicsApp", ComputeStrainIncrementBasedStress);
 
 InputParameters
 ComputeStrainIncrementBasedStress::validParams()

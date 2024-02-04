@@ -12,7 +12,7 @@
 #include "DelimitedFileReader.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", NodalGravity);
+registerMooseObject("SolidMechanicsApp", NodalGravity);
 
 InputParameters
 NodalGravity::validParams()

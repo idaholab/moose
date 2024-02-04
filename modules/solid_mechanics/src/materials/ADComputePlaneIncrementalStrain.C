@@ -10,7 +10,7 @@
 #include "ADComputePlaneIncrementalStrain.h"
 #include "UserObject.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputePlaneIncrementalStrain);
+registerMooseObject("SolidMechanicsApp", ADComputePlaneIncrementalStrain);
 
 InputParameters
 ADComputePlaneIncrementalStrain::validParams()

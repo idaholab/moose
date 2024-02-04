@@ -10,7 +10,7 @@
 #include "InteractionIntegralBenchmarkBC.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", InteractionIntegralBenchmarkBC);
+registerMooseObject("SolidMechanicsApp", InteractionIntegralBenchmarkBC);
 
 InputParameters
 InteractionIntegralBenchmarkBC::validParams()

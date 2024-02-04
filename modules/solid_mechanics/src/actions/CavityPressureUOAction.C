@@ -13,7 +13,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
-registerMooseAction("TensorMechanicsApp", CavityPressureUOAction, "add_user_object");
+registerMooseAction("SolidMechanicsApp", CavityPressureUOAction, "add_user_object");
 
 InputParameters
 CavityPressureUOAction::validParams()

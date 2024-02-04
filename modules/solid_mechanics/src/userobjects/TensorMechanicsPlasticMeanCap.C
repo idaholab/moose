@@ -10,7 +10,7 @@
 #include "TensorMechanicsPlasticMeanCap.h"
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCap);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticMeanCap);
 
 InputParameters
 TensorMechanicsPlasticMeanCap::validParams()

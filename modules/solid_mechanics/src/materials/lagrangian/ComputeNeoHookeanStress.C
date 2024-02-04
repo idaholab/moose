@@ -9,7 +9,7 @@
 
 #include "ComputeNeoHookeanStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeNeoHookeanStress);
+registerMooseObject("SolidMechanicsApp", ComputeNeoHookeanStress);
 
 InputParameters
 ComputeNeoHookeanStress::validParams()

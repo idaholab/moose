@@ -9,8 +9,8 @@
 
 #include "CZMComputeDisplacementJumpSmallStrain.h"
 
-registerMooseObject("TensorMechanicsApp", CZMComputeDisplacementJumpSmallStrain);
-registerMooseObject("TensorMechanicsApp", ADCZMComputeDisplacementJumpSmallStrain);
+registerMooseObject("SolidMechanicsApp", CZMComputeDisplacementJumpSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADCZMComputeDisplacementJumpSmallStrain);
 
 template <bool is_ad>
 InputParameters

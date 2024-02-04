@@ -10,7 +10,7 @@
 #include "CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticityHCPDislocationSlipBeyerleinUpdate);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticityHCPDislocationSlipBeyerleinUpdate);
 
 InputParameters
 CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::validParams()

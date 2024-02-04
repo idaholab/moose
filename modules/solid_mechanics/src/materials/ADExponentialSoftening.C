@@ -11,7 +11,7 @@
 
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", ADExponentialSoftening);
+registerMooseObject("SolidMechanicsApp", ADExponentialSoftening);
 
 InputParameters
 ADExponentialSoftening::validParams()

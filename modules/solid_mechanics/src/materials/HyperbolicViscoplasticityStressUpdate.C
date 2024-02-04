@@ -12,7 +12,7 @@
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", HyperbolicViscoplasticityStressUpdate);
+registerMooseObject("SolidMechanicsApp", HyperbolicViscoplasticityStressUpdate);
 
 InputParameters
 HyperbolicViscoplasticityStressUpdate::validParams()

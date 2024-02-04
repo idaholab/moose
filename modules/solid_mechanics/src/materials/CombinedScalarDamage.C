@@ -9,8 +9,8 @@
 
 #include "CombinedScalarDamage.h"
 
-registerMooseObject("TensorMechanicsApp", CombinedScalarDamage);
-registerMooseObject("TensorMechanicsApp", ADCombinedScalarDamage);
+registerMooseObject("SolidMechanicsApp", CombinedScalarDamage);
+registerMooseObject("SolidMechanicsApp", ADCombinedScalarDamage);
 
 template <bool is_ad>
 InputParameters

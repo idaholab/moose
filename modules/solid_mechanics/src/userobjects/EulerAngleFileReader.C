@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-registerMooseObject("TensorMechanicsApp", EulerAngleFileReader);
+registerMooseObject("SolidMechanicsApp", EulerAngleFileReader);
 
 InputParameters
 EulerAngleFileReader::validParams()

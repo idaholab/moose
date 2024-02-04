@@ -9,7 +9,7 @@
 
 #include "ComputeCosseratElasticityTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeCosseratElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ComputeCosseratElasticityTensor);
 
 InputParameters
 ComputeCosseratElasticityTensor::validParams()

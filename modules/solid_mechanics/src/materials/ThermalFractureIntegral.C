@@ -10,7 +10,7 @@
 #include "ThermalFractureIntegral.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ThermalFractureIntegral);
+registerMooseObject("SolidMechanicsApp", ThermalFractureIntegral);
 
 InputParameters
 ThermalFractureIntegral::validParams()

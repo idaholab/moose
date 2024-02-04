@@ -9,7 +9,7 @@
 
 #include "CoupledPressureBC.h"
 
-registerMooseObject("TensorMechanicsApp", CoupledPressureBC);
+registerMooseObject("SolidMechanicsApp", CoupledPressureBC);
 
 InputParameters
 CoupledPressureBC::validParams()

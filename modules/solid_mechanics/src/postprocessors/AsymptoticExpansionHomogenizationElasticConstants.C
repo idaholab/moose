@@ -10,7 +10,7 @@
 #include "AsymptoticExpansionHomogenizationElasticConstants.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", AsymptoticExpansionHomogenizationElasticConstants);
+registerMooseObject("SolidMechanicsApp", AsymptoticExpansionHomogenizationElasticConstants);
 
 InputParameters
 AsymptoticExpansionHomogenizationElasticConstants::validParams()

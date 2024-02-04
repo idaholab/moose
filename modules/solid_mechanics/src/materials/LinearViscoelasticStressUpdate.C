@@ -9,7 +9,7 @@
 
 #include "LinearViscoelasticStressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", LinearViscoelasticStressUpdate);
+registerMooseObject("SolidMechanicsApp", LinearViscoelasticStressUpdate);
 
 InputParameters
 LinearViscoelasticStressUpdate::validParams()

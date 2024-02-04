@@ -10,7 +10,7 @@
 #include "ADMultiplePowerLawCreepStressUpdate.h"
 #include <algorithm>
 
-registerMooseObject("TensorMechanicsApp", ADMultiplePowerLawCreepStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADMultiplePowerLawCreepStressUpdate);
 
 InputParameters
 ADMultiplePowerLawCreepStressUpdate::validParams()

@@ -10,7 +10,7 @@
 #include "ComputeSurfaceTensionKKS.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeSurfaceTensionKKS);
+registerMooseObject("SolidMechanicsApp", ComputeSurfaceTensionKKS);
 
 InputParameters
 ComputeSurfaceTensionKKS::validParams()

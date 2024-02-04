@@ -9,7 +9,7 @@
 
 #include "RotationAngle.h"
 
-registerMooseObject("TensorMechanicsApp", RotationAngle);
+registerMooseObject("SolidMechanicsApp", RotationAngle);
 
 InputParameters
 RotationAngle::validParams()

@@ -9,7 +9,7 @@
 
 #include "ComputeExtraStressConstant.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeExtraStressConstant);
+registerMooseObject("SolidMechanicsApp", ComputeExtraStressConstant);
 
 InputParameters
 ComputeExtraStressConstant::validParams()

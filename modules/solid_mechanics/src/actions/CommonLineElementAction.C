@@ -10,7 +10,7 @@
 #include "CommonLineElementAction.h"
 #include "LineElementAction.h"
 
-registerMooseAction("TensorMechanicsApp", CommonLineElementAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", CommonLineElementAction, "meta_action");
 
 InputParameters
 CommonLineElementAction::validParams()

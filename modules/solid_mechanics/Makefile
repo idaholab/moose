@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-MODULE_NAME := tensor_mechanics
+MODULE_NAME := solid_mechanics
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

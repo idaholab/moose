@@ -10,7 +10,7 @@
 #include "CauchyStressFromNEML2UO.h"
 #include "NEML2Utils.h"
 
-registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2UO);
+registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2UO);
 
 InputParameters
 CauchyStressFromNEML2UO::validParams()

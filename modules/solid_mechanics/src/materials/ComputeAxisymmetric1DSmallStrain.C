@@ -10,7 +10,7 @@
 #include "ComputeAxisymmetric1DSmallStrain.h"
 #include "UserObject.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DSmallStrain);
+registerMooseObject("SolidMechanicsApp", ComputeAxisymmetric1DSmallStrain);
 
 InputParameters
 ComputeAxisymmetric1DSmallStrain::validParams()

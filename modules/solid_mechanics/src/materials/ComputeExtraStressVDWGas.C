@@ -9,7 +9,7 @@
 
 #include "ComputeExtraStressVDWGas.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeExtraStressVDWGas);
+registerMooseObject("SolidMechanicsApp", ComputeExtraStressVDWGas);
 
 InputParameters
 ComputeExtraStressVDWGas::validParams()

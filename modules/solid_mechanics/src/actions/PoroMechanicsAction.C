@@ -14,11 +14,11 @@
 #include "Parser.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", PoroMechanicsAction, "setup_mesh_complete");
 
-registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "validate_coordinate_systems");
+registerMooseAction("SolidMechanicsApp", PoroMechanicsAction, "validate_coordinate_systems");
 
-registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", PoroMechanicsAction, "add_kernel");
 
 InputParameters
 PoroMechanicsAction::validParams()

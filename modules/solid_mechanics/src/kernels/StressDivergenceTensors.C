@@ -18,7 +18,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", StressDivergenceTensors);
+registerMooseObject("SolidMechanicsApp", StressDivergenceTensors);
 
 InputParameters
 StressDivergenceTensors::validParams()

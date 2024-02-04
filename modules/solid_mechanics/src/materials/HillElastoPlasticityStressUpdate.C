@@ -11,8 +11,8 @@
 #include "RankTwoScalarTools.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", ADHillElastoPlasticityStressUpdate);
-registerMooseObject("TensorMechanicsApp", HillElastoPlasticityStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADHillElastoPlasticityStressUpdate);
+registerMooseObject("SolidMechanicsApp", HillElastoPlasticityStressUpdate);
 
 template <bool is_ad>
 InputParameters

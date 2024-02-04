@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TensorMechanicsApp.h"
+#include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
 InputParameters
-TensorMechanicsApp::validParams()
+SolidMechanicsApp::validParams()
 {
   auto params = MooseApp::validParams();
   params.set<bool>("automatic_automatic_scaling") = false;
@@ -25,17 +25,17 @@ TensorMechanicsApp::validParams()
   return params;
 }
 
-registerKnownLabel("TensorMechanicsApp");
+registerKnownLabel("SolidMechanicsApp");
 
-TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
+SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  TensorMechanicsApp::registerAll(_factory, _action_factory, _syntax);
+  SolidMechanicsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
-TensorMechanicsApp::~TensorMechanicsApp() {}
+SolidMechanicsApp::~SolidMechanicsApp() {}
 
 void
-TensorMechanicsApp::setupOptions()
+SolidMechanicsApp::setupOptions()
 {
   MooseApp::setupOptions();
 
@@ -48,7 +48,7 @@ TensorMechanicsApp::setupOptions()
 }
 
 void
-TensorMechanicsApp::runInputFile()
+SolidMechanicsApp::runInputFile()
 {
   MooseApp::runInputFile();
 
@@ -111,48 +111,48 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 }
 
 void
-TensorMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  Registry::registerObjectsTo(f, {"TensorMechanicsApp"});
-  Registry::registerActionsTo(af, {"TensorMechanicsApp"});
+  Registry::registerObjectsTo(f, {"SolidMechanicsApp"});
+  Registry::registerActionsTo(af, {"SolidMechanicsApp"});
   associateSyntaxInner(s, af);
   registerDataFilePath();
 }
 
 void
-TensorMechanicsApp::registerApps()
+SolidMechanicsApp::registerApps()
 {
-  registerApp(TensorMechanicsApp);
+  registerApp(SolidMechanicsApp);
 }
 
 void
-TensorMechanicsApp::registerObjects(Factory & factory)
+SolidMechanicsApp::registerObjects(Factory & factory)
 {
   mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"TensorMechanicsApp"});
+  Registry::registerObjectsTo(factory, {"SolidMechanicsApp"});
 }
 
 void
-TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"TensorMechanicsApp"});
+  Registry::registerActionsTo(action_factory, {"SolidMechanicsApp"});
   associateSyntaxInner(syntax, action_factory);
 }
 
 void
-TensorMechanicsApp::registerExecFlags(Factory & /*factory*/)
+SolidMechanicsApp::registerExecFlags(Factory & /*factory*/)
 {
   mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void
-TensorMechanicsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+SolidMechanicsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  TensorMechanicsApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, s);
 }
 extern "C" void
-TensorMechanicsApp_registerApps()
+SolidMechanicsApp_registerApps()
 {
-  TensorMechanicsApp::registerApps();
+  SolidMechanicsApp::registerApps();
 }

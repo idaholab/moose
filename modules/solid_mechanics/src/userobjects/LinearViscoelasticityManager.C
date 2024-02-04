@@ -10,7 +10,7 @@
 #include "LinearViscoelasticityManager.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", LinearViscoelasticityManager);
+registerMooseObject("SolidMechanicsApp", LinearViscoelasticityManager);
 
 InputParameters
 LinearViscoelasticityManager::validParams()

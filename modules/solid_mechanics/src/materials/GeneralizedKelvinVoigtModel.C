@@ -9,7 +9,7 @@
 
 #include "GeneralizedKelvinVoigtModel.h"
 
-registerMooseObject("TensorMechanicsApp", GeneralizedKelvinVoigtModel);
+registerMooseObject("SolidMechanicsApp", GeneralizedKelvinVoigtModel);
 
 InputParameters
 GeneralizedKelvinVoigtModel::validParams()

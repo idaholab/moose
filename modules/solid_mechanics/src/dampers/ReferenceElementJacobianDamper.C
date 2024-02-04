@@ -15,7 +15,7 @@
 
 #include "libmesh/quadrature.h" // _qrule
 
-registerMooseObject("TensorMechanicsApp", ReferenceElementJacobianDamper);
+registerMooseObject("SolidMechanicsApp", ReferenceElementJacobianDamper);
 
 InputParameters
 ReferenceElementJacobianDamper::validParams()

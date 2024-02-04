@@ -11,7 +11,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
-registerMooseAction("TensorMechanicsApp", CavityPressurePPAction, "add_postprocessor");
+registerMooseAction("SolidMechanicsApp", CavityPressurePPAction, "add_postprocessor");
 
 InputParameters
 CavityPressurePPAction::validParams()

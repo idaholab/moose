@@ -9,7 +9,7 @@
 
 #include "AsymptoticExpansionHomogenizationKernel.h"
 
-registerMooseObject("TensorMechanicsApp", AsymptoticExpansionHomogenizationKernel);
+registerMooseObject("SolidMechanicsApp", AsymptoticExpansionHomogenizationKernel);
 
 InputParameters
 AsymptoticExpansionHomogenizationKernel::validParams()

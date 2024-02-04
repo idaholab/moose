@@ -10,7 +10,7 @@
 #include "ComputePlaneIncrementalStrain.h"
 #include "UserObject.h"
 
-registerMooseObject("TensorMechanicsApp", ComputePlaneIncrementalStrain);
+registerMooseObject("SolidMechanicsApp", ComputePlaneIncrementalStrain);
 
 InputParameters
 ComputePlaneIncrementalStrain::validParams()

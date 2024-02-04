@@ -15,7 +15,7 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeFiniteBeamStrain);
+registerMooseObject("SolidMechanicsApp", ComputeFiniteBeamStrain);
 
 InputParameters
 ComputeFiniteBeamStrain::validParams()

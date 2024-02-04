@@ -12,7 +12,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeRSphericalSmallStrain);
+registerMooseObject("SolidMechanicsApp", ComputeRSphericalSmallStrain);
 
 InputParameters
 ComputeRSphericalSmallStrain::validParams()

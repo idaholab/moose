@@ -9,7 +9,7 @@
 
 #include "AccumulateAux.h"
 
-registerMooseObject("TensorMechanicsApp", AccumulateAux);
+registerMooseObject("SolidMechanicsApp", AccumulateAux);
 
 InputParameters
 AccumulateAux::validParams()

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <limits>
 
-registerMooseObject("TensorMechanicsApp", MaterialTimeStepPostprocessor);
+registerMooseObject("SolidMechanicsApp", MaterialTimeStepPostprocessor);
 
 InputParameters
 MaterialTimeStepPostprocessor::validParams()

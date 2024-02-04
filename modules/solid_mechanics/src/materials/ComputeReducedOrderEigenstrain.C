@@ -12,7 +12,7 @@
 #include "MooseMesh.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeReducedOrderEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeReducedOrderEigenstrain);
 
 InputParameters
 ComputeReducedOrderEigenstrain::validParams()

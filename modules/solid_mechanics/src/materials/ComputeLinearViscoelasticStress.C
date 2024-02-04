@@ -9,7 +9,7 @@
 
 #include "ComputeLinearViscoelasticStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLinearViscoelasticStress);
+registerMooseObject("SolidMechanicsApp", ComputeLinearViscoelasticStress);
 
 InputParameters
 ComputeLinearViscoelasticStress::validParams()

@@ -9,4 +9,4 @@
 
 #include "ComputeLagrangianStrainAxisymmetricCylindrical.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianStrainAxisymmetricCylindrical);
+registerMooseObject("SolidMechanicsApp", ComputeLagrangianStrainAxisymmetricCylindrical);

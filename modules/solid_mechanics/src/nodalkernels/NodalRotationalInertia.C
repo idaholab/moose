@@ -13,7 +13,7 @@
 #include "MooseMesh.h"
 #include "TimeIntegrator.h"
 
-registerMooseObject("TensorMechanicsApp", NodalRotationalInertia);
+registerMooseObject("SolidMechanicsApp", NodalRotationalInertia);
 
 InputParameters
 NodalRotationalInertia::validParams()

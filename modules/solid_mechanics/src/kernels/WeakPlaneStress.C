@@ -15,7 +15,7 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", WeakPlaneStress);
+registerMooseObject("SolidMechanicsApp", WeakPlaneStress);
 
 InputParameters
 WeakPlaneStress::validParams()

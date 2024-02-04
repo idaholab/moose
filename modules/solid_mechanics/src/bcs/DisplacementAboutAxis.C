@@ -10,7 +10,7 @@
 #include "DisplacementAboutAxis.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", DisplacementAboutAxis);
+registerMooseObject("SolidMechanicsApp", DisplacementAboutAxis);
 
 InputParameters
 DisplacementAboutAxis::validParams()

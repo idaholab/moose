@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrain);
+registerMooseObject("SolidMechanicsApp", GeneralizedPlaneStrain);
 
 InputParameters
 GeneralizedPlaneStrain::validParams()

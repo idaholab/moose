@@ -9,4 +9,4 @@
 
 #include "TotalLagrangianStressDivergenceCentrosymmetricSpherical.h"
 
-registerMooseObject("TensorMechanicsApp", TotalLagrangianStressDivergenceCentrosymmetricSpherical);
+registerMooseObject("SolidMechanicsApp", TotalLagrangianStressDivergenceCentrosymmetricSpherical);

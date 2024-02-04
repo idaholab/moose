@@ -12,25 +12,25 @@
 #include "FEProblem.h"
 #include "Parser.h"
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "meta_action");
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "setup_mesh_complete");
 
-registerMooseAction("TensorMechanicsApp",
+registerMooseAction("SolidMechanicsApp",
                     DynamicTensorMechanicsAction,
                     "validate_coordinate_systems");
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_variable");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_variable");
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_aux_variable");
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_aux_kernel");
 
-registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_material");
+registerMooseAction("SolidMechanicsApp", DynamicTensorMechanicsAction, "add_material");
 
-registerMooseAction("TensorMechanicsApp",
+registerMooseAction("SolidMechanicsApp",
                     DynamicTensorMechanicsAction,
                     "add_master_action_material");
 

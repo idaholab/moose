@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", PressureAction, "add_bc");
+registerMooseAction("SolidMechanicsApp", PressureAction, "add_bc");
 
 InputParameters
 PressureAction::validParams()

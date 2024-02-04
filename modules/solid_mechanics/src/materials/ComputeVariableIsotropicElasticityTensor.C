@@ -9,7 +9,7 @@
 
 #include "ComputeVariableIsotropicElasticityTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeVariableIsotropicElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ComputeVariableIsotropicElasticityTensor);
 
 InputParameters
 ComputeVariableIsotropicElasticityTensor::validParams()

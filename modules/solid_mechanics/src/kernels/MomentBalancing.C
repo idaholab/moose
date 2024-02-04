@@ -17,7 +17,7 @@
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", MomentBalancing);
+registerMooseObject("SolidMechanicsApp", MomentBalancing);
 
 InputParameters
 MomentBalancing::validParams()

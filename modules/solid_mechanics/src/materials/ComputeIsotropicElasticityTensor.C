@@ -9,10 +9,10 @@
 
 #include "ComputeIsotropicElasticityTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeIsotropicElasticityTensor);
-registerMooseObject("TensorMechanicsApp", ADComputeIsotropicElasticityTensor);
-registerMooseObject("TensorMechanicsApp", SymmetricIsotropicElasticityTensor);
-registerMooseObject("TensorMechanicsApp", ADSymmetricIsotropicElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ComputeIsotropicElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ADComputeIsotropicElasticityTensor);
+registerMooseObject("SolidMechanicsApp", SymmetricIsotropicElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ADSymmetricIsotropicElasticityTensor);
 
 template <bool is_ad, typename T>
 InputParameters

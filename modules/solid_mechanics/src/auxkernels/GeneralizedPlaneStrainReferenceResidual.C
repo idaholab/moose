@@ -15,7 +15,7 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainReferenceResidual);
+registerMooseObject("SolidMechanicsApp", GeneralizedPlaneStrainReferenceResidual);
 
 InputParameters
 GeneralizedPlaneStrainReferenceResidual::validParams()

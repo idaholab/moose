@@ -14,7 +14,7 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 #include "CrackFrontDefinition.h"
-registerMooseObject("TensorMechanicsApp", JIntegral);
+registerMooseObject("SolidMechanicsApp", JIntegral);
 
 InputParameters
 JIntegral::validParams()

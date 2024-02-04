@@ -10,7 +10,7 @@
 #include "LineMaterialRankTwoSampler.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", LineMaterialRankTwoSampler);
+registerMooseObject("SolidMechanicsApp", LineMaterialRankTwoSampler);
 
 InputParameters
 LineMaterialRankTwoSampler::validParams()

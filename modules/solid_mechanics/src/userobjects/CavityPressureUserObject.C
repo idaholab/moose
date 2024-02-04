@@ -9,7 +9,7 @@
 
 #include "CavityPressureUserObject.h"
 
-registerMooseObject("TensorMechanicsApp", CavityPressureUserObject);
+registerMooseObject("SolidMechanicsApp", CavityPressureUserObject);
 
 InputParameters
 CavityPressureUserObject::validParams()

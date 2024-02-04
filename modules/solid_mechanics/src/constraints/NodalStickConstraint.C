@@ -22,7 +22,7 @@
 // C++ includes
 #include <limits.h>
 
-registerMooseObject("TensorMechanicsApp", NodalStickConstraint);
+registerMooseObject("SolidMechanicsApp", NodalStickConstraint);
 
 InputParameters
 NodalStickConstraint::validParams()

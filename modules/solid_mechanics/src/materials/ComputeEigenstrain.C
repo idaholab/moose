@@ -9,8 +9,8 @@
 
 #include "ComputeEigenstrain.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeEigenstrain);
-registerMooseObject("TensorMechanicsApp", ADComputeEigenstrain);
+registerMooseObject("SolidMechanicsApp", ComputeEigenstrain);
+registerMooseObject("SolidMechanicsApp", ADComputeEigenstrain);
 
 template <bool is_ad>
 InputParameters

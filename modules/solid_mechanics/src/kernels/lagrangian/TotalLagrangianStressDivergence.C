@@ -9,4 +9,4 @@
 
 #include "TotalLagrangianStressDivergence.h"
 
-registerMooseObject("TensorMechanicsApp", TotalLagrangianStressDivergence);
+registerMooseObject("SolidMechanicsApp", TotalLagrangianStressDivergence);

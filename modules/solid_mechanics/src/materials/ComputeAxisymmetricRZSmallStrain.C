@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeAxisymmetricRZSmallStrain);
+registerMooseObject("SolidMechanicsApp", ComputeAxisymmetricRZSmallStrain);
 
 InputParameters
 ComputeAxisymmetricRZSmallStrain::validParams()

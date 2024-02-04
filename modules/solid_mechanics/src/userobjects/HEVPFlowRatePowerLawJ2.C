@@ -9,7 +9,7 @@
 
 #include "HEVPFlowRatePowerLawJ2.h"
 
-registerMooseObject("TensorMechanicsApp", HEVPFlowRatePowerLawJ2);
+registerMooseObject("SolidMechanicsApp", HEVPFlowRatePowerLawJ2);
 
 InputParameters
 HEVPFlowRatePowerLawJ2::validParams()

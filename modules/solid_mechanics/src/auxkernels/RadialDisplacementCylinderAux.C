@@ -10,7 +10,7 @@
 #include "RadialDisplacementCylinderAux.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", RadialDisplacementCylinderAux);
+registerMooseObject("SolidMechanicsApp", RadialDisplacementCylinderAux);
 
 InputParameters
 RadialDisplacementCylinderAux::validParams()

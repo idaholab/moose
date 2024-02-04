@@ -9,7 +9,7 @@
 
 #include "GeneralizedMaxwellModel.h"
 
-registerMooseObject("TensorMechanicsApp", GeneralizedMaxwellModel);
+registerMooseObject("SolidMechanicsApp", GeneralizedMaxwellModel);
 
 InputParameters
 GeneralizedMaxwellModel::validParams()

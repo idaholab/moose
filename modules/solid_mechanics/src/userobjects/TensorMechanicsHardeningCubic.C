@@ -10,7 +10,7 @@
 #include "TensorMechanicsHardeningCubic.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningCubic);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsHardeningCubic);
 
 InputParameters
 TensorMechanicsHardeningCubic::validParams()

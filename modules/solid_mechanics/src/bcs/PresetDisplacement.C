@@ -10,7 +10,7 @@
 #include "PresetDisplacement.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", PresetDisplacement);
+registerMooseObject("SolidMechanicsApp", PresetDisplacement);
 
 InputParameters
 PresetDisplacement::validParams()

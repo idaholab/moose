@@ -11,7 +11,7 @@
 
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", CappedDruckerPragerStressUpdate);
+registerMooseObject("SolidMechanicsApp", CappedDruckerPragerStressUpdate);
 
 InputParameters
 CappedDruckerPragerStressUpdate::validParams()

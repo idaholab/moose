@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticitySlipRateGSS);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticitySlipRateGSS);
 
 InputParameters
 CrystalPlasticitySlipRateGSS::validParams()

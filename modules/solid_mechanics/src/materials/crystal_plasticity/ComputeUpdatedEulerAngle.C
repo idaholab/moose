@@ -9,7 +9,7 @@
 
 #include "ComputeUpdatedEulerAngle.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeUpdatedEulerAngle);
+registerMooseObject("SolidMechanicsApp", ComputeUpdatedEulerAngle);
 
 InputParameters
 ComputeUpdatedEulerAngle::validParams()

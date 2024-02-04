@@ -11,7 +11,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", NormalBoundaryDisplacement);
+registerMooseObject("SolidMechanicsApp", NormalBoundaryDisplacement);
 
 InputParameters
 NormalBoundaryDisplacement::validParams()

@@ -10,7 +10,7 @@
 #include "HyperElasticPhaseFieldIsoDamage.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", HyperElasticPhaseFieldIsoDamage);
+registerMooseObject("SolidMechanicsApp", HyperElasticPhaseFieldIsoDamage);
 
 InputParameters
 HyperElasticPhaseFieldIsoDamage::validParams()

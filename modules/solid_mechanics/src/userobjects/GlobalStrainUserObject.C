@@ -11,7 +11,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", GlobalStrainUserObject);
+registerMooseObject("SolidMechanicsApp", GlobalStrainUserObject);
 
 InputParameters
 GlobalStrainUserObject::validParams()

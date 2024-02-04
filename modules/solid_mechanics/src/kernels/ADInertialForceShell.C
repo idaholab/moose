@@ -26,7 +26,7 @@
 #include "libmesh/quadrature_gauss.h"
 #include "MooseVariable.h"
 
-registerMooseObject("TensorMechanicsApp", ADInertialForceShell);
+registerMooseObject("SolidMechanicsApp", ADInertialForceShell);
 
 InputParameters
 ADInertialForceShell::validParams()

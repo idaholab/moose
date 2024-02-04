@@ -9,7 +9,7 @@
 
 #include "StressBasedChemicalPotential.h"
 
-registerMooseObject("TensorMechanicsApp", StressBasedChemicalPotential);
+registerMooseObject("SolidMechanicsApp", StressBasedChemicalPotential);
 
 InputParameters
 StressBasedChemicalPotential::validParams()

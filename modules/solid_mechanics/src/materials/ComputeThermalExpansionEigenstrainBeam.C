@@ -9,7 +9,7 @@
 
 #include "ComputeThermalExpansionEigenstrainBeam.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeThermalExpansionEigenstrainBeam);
+registerMooseObject("SolidMechanicsApp", ComputeThermalExpansionEigenstrainBeam);
 
 InputParameters
 ComputeThermalExpansionEigenstrainBeam::validParams()

@@ -9,7 +9,7 @@
 
 #include "CrystalPlasticitySlipResistanceGSS.h"
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticitySlipResistanceGSS);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticitySlipResistanceGSS);
 
 InputParameters
 CrystalPlasticitySlipResistanceGSS::validParams()

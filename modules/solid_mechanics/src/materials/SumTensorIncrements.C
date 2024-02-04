@@ -10,7 +10,7 @@
 #include "SumTensorIncrements.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", SumTensorIncrements);
+registerMooseObject("SolidMechanicsApp", SumTensorIncrements);
 
 InputParameters
 SumTensorIncrements::validParams()

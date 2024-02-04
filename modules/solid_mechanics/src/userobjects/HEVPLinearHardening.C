@@ -9,7 +9,7 @@
 
 #include "HEVPLinearHardening.h"
 
-registerMooseObject("TensorMechanicsApp", HEVPLinearHardening);
+registerMooseObject("SolidMechanicsApp", HEVPLinearHardening);
 
 InputParameters
 HEVPLinearHardening::validParams()

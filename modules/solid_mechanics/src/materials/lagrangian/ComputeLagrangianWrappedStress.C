@@ -9,7 +9,7 @@
 
 #include "ComputeLagrangianWrappedStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianWrappedStress);
+registerMooseObject("SolidMechanicsApp", ComputeLagrangianWrappedStress);
 
 InputParameters
 ComputeLagrangianWrappedStress::validParams()

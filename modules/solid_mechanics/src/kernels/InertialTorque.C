@@ -12,7 +12,7 @@
 #include "MooseVariable.h"
 #include "PermutationTensor.h"
 
-registerMooseObject("TensorMechanicsApp", InertialTorque);
+registerMooseObject("SolidMechanicsApp", InertialTorque);
 
 InputParameters
 InertialTorque::validParams()

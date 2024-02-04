@@ -10,7 +10,7 @@
 #include "ComputeInterfaceStress.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeInterfaceStress);
+registerMooseObject("SolidMechanicsApp", ComputeInterfaceStress);
 
 InputParameters
 ComputeInterfaceStress::validParams()

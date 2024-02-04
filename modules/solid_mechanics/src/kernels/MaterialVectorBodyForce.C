@@ -10,7 +10,7 @@
 #include "MaterialVectorBodyForce.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", MaterialVectorBodyForce);
+registerMooseObject("SolidMechanicsApp", MaterialVectorBodyForce);
 
 InputParameters
 MaterialVectorBodyForce::validParams()

@@ -16,8 +16,8 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
-registerMooseObject("TensorMechanicsApp", ADSymmetricFiniteStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeFiniteStrain);
+registerMooseObject("SolidMechanicsApp", ADSymmetricFiniteStrain);
 
 template <typename R2, typename R4>
 MooseEnum

@@ -9,7 +9,7 @@
 
 #include "ComplianceSensitivity.h"
 
-registerMooseObject("TensorMechanicsApp", ComplianceSensitivity);
+registerMooseObject("SolidMechanicsApp", ComplianceSensitivity);
 
 InputParameters
 ComplianceSensitivity::validParams()

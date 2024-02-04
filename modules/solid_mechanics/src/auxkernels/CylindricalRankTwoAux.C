@@ -9,7 +9,7 @@
 
 #include "CylindricalRankTwoAux.h"
 
-registerMooseObject("TensorMechanicsApp", CylindricalRankTwoAux);
+registerMooseObject("SolidMechanicsApp", CylindricalRankTwoAux);
 
 InputParameters
 CylindricalRankTwoAux::validParams()

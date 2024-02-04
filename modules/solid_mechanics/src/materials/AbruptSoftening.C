@@ -11,7 +11,7 @@
 
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", AbruptSoftening);
+registerMooseObject("SolidMechanicsApp", AbruptSoftening);
 
 InputParameters
 AbruptSoftening::validParams()

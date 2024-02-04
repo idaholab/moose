@@ -9,7 +9,7 @@
 
 #include "CZMInterfaceKernelSmallStrain.h"
 
-registerMooseObject("TensorMechanicsApp", CZMInterfaceKernelSmallStrain);
+registerMooseObject("SolidMechanicsApp", CZMInterfaceKernelSmallStrain);
 
 InputParameters
 CZMInterfaceKernelSmallStrain::validParams()

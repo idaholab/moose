@@ -16,10 +16,8 @@
 
 #include <iostream>
 
-registerMooseObjectAliased("TensorMechanicsApp",
-                           LAROMANCEStressUpdateBase,
-                           "LAROMANCEStressUpdate");
-registerMooseObjectAliased("TensorMechanicsApp",
+registerMooseObjectAliased("SolidMechanicsApp", LAROMANCEStressUpdateBase, "LAROMANCEStressUpdate");
+registerMooseObjectAliased("SolidMechanicsApp",
                            ADLAROMANCEStressUpdateBase,
                            "ADLAROMANCEStressUpdate");
 

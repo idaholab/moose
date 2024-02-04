@@ -12,8 +12,8 @@
 #include "PiecewiseLinear.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", TemperatureDependentHardeningStressUpdate);
-registerMooseObject("TensorMechanicsApp", ADTemperatureDependentHardeningStressUpdate);
+registerMooseObject("SolidMechanicsApp", TemperatureDependentHardeningStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADTemperatureDependentHardeningStressUpdate);
 
 template <bool is_ad>
 InputParameters

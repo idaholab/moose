@@ -9,7 +9,7 @@
 
 #include "CZMInterfaceKernelTotalLagrangian.h"
 
-registerMooseObject("TensorMechanicsApp", CZMInterfaceKernelTotalLagrangian);
+registerMooseObject("SolidMechanicsApp", CZMInterfaceKernelTotalLagrangian);
 
 InputParameters
 CZMInterfaceKernelTotalLagrangian::validParams()

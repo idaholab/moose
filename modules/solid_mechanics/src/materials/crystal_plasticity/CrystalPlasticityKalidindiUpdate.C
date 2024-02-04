@@ -10,7 +10,7 @@
 #include "CrystalPlasticityKalidindiUpdate.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticityKalidindiUpdate);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticityKalidindiUpdate);
 
 InputParameters
 CrystalPlasticityKalidindiUpdate::validParams()

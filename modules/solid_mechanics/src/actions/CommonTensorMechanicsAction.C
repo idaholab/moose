@@ -11,7 +11,7 @@
 #include "TensorMechanicsAction.h"
 #include "ActionWarehouse.h"
 
-registerMooseAction("TensorMechanicsApp", CommonTensorMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", CommonTensorMechanicsAction, "meta_action");
 
 InputParameters
 CommonTensorMechanicsAction::validParams()

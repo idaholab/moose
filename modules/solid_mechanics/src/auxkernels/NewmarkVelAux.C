@@ -9,7 +9,7 @@
 
 #include "NewmarkVelAux.h"
 
-registerMooseObject("TensorMechanicsApp", NewmarkVelAux);
+registerMooseObject("SolidMechanicsApp", NewmarkVelAux);
 
 InputParameters
 NewmarkVelAux::validParams()

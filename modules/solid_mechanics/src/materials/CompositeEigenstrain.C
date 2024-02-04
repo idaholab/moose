@@ -9,7 +9,7 @@
 
 #include "CompositeEigenstrain.h"
 
-registerMooseObject("TensorMechanicsApp", CompositeEigenstrain);
+registerMooseObject("SolidMechanicsApp", CompositeEigenstrain);
 
 InputParameters
 CompositeEigenstrain::validParams()

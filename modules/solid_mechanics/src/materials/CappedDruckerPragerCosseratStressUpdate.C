@@ -9,7 +9,7 @@
 
 #include "CappedDruckerPragerCosseratStressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", CappedDruckerPragerCosseratStressUpdate);
+registerMooseObject("SolidMechanicsApp", CappedDruckerPragerCosseratStressUpdate);
 
 InputParameters
 CappedDruckerPragerCosseratStressUpdate::validParams()

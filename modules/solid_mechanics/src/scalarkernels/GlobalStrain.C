@@ -17,7 +17,7 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", GlobalStrain);
+registerMooseObject("SolidMechanicsApp", GlobalStrain);
 
 InputParameters
 GlobalStrain::validParams()

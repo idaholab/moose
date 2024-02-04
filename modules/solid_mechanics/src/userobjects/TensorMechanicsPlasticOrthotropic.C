@@ -11,7 +11,7 @@
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticOrthotropic);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticOrthotropic);
 
 InputParameters
 TensorMechanicsPlasticOrthotropic::validParams()

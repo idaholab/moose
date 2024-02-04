@@ -9,7 +9,7 @@
 
 #include "ADCZMInterfaceKernelSmallStrain.h"
 
-registerMooseObject("TensorMechanicsApp", ADCZMInterfaceKernelSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADCZMInterfaceKernelSmallStrain);
 
 InputParameters
 ADCZMInterfaceKernelSmallStrain::validParams()

@@ -13,8 +13,8 @@
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
-registerMooseObject("TensorMechanicsApp", ADSymmetricFiniteStrainElasticStress);
+registerMooseObject("SolidMechanicsApp", ADComputeFiniteStrainElasticStress);
+registerMooseObject("SolidMechanicsApp", ADSymmetricFiniteStrainElasticStress);
 
 template <typename R2, typename R4>
 InputParameters

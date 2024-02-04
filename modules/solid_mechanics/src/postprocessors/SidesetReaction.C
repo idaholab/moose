@@ -10,8 +10,8 @@
 #include "SidesetReaction.h"
 #include "metaphysicl/raw_type.h"
 
-registerMooseObject("TensorMechanicsApp", SidesetReaction);
-registerMooseObject("TensorMechanicsApp", ADSidesetReaction);
+registerMooseObject("SolidMechanicsApp", SidesetReaction);
+registerMooseObject("SolidMechanicsApp", ADSidesetReaction);
 
 template <bool is_ad>
 InputParameters

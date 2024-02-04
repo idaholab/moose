@@ -13,7 +13,7 @@
 // MOOSE includes
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeGlobalStrain);
+registerMooseObject("SolidMechanicsApp", ComputeGlobalStrain);
 
 InputParameters
 ComputeGlobalStrain::validParams()

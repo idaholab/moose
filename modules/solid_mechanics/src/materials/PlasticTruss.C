@@ -12,7 +12,7 @@
 #include "MooseException.h"
 #include "MathUtils.h"
 
-registerMooseObject("TensorMechanicsApp", PlasticTruss);
+registerMooseObject("SolidMechanicsApp", PlasticTruss);
 
 InputParameters
 PlasticTruss::validParams()

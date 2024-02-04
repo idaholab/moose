@@ -19,7 +19,7 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
+registerMooseObject("SolidMechanicsApp", AbaqusUMATStress);
 
 InputParameters
 AbaqusUMATStress::validParams()

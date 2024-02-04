@@ -9,7 +9,7 @@
 
 #include "TensorMechanicsHardeningConstant.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningConstant);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsHardeningConstant);
 
 InputParameters
 TensorMechanicsHardeningConstant::validParams()

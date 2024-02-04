@@ -9,7 +9,7 @@
 
 #include "TensorMechanicsHardeningExponential.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningExponential);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsHardeningExponential);
 
 InputParameters
 TensorMechanicsHardeningExponential::validParams()

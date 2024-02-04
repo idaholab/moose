@@ -20,7 +20,7 @@
 
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", HomogenizationConstraint);
+registerMooseObject("SolidMechanicsApp", HomogenizationConstraint);
 
 InputParameters
 HomogenizationConstraint::validParams()

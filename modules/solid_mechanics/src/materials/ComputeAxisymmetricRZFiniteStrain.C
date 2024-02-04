@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeAxisymmetricRZFiniteStrain);
+registerMooseObject("SolidMechanicsApp", ComputeAxisymmetricRZFiniteStrain);
 
 InputParameters
 ComputeAxisymmetricRZFiniteStrain::validParams()

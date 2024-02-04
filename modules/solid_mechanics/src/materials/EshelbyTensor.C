@@ -11,8 +11,8 @@
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", EshelbyTensor);
-registerMooseObject("TensorMechanicsApp", ADEshelbyTensor);
+registerMooseObject("SolidMechanicsApp", EshelbyTensor);
+registerMooseObject("SolidMechanicsApp", ADEshelbyTensor);
 
 template <bool is_ad>
 InputParameters

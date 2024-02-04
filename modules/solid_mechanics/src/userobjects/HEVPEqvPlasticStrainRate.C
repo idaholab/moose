@@ -9,7 +9,7 @@
 
 #include "HEVPEqvPlasticStrainRate.h"
 
-registerMooseObject("TensorMechanicsApp", HEVPEqvPlasticStrainRate);
+registerMooseObject("SolidMechanicsApp", HEVPEqvPlasticStrainRate);
 
 InputParameters
 HEVPEqvPlasticStrainRate::validParams()

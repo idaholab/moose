@@ -18,9 +18,9 @@
 #include "neml2/base/HITParser.h"
 #endif
 
-registerMooseAction("TensorMechanicsApp", NEML2Action, "parse_neml2");
-registerMooseAction("TensorMechanicsApp", NEML2Action, "add_material");
-registerMooseAction("TensorMechanicsApp", NEML2Action, "add_user_object");
+registerMooseAction("SolidMechanicsApp", NEML2Action, "parse_neml2");
+registerMooseAction("SolidMechanicsApp", NEML2Action, "add_material");
+registerMooseAction("SolidMechanicsApp", NEML2Action, "add_user_object");
 
 InputParameters
 NEML2Action::validParams()

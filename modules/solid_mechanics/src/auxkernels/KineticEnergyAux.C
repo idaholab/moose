@@ -9,8 +9,8 @@
 
 #include "KineticEnergyAux.h"
 
-registerMooseObject("TensorMechanicsApp", KineticEnergyAux);
-registerMooseObject("TensorMechanicsApp", ADKineticEnergyAux);
+registerMooseObject("SolidMechanicsApp", KineticEnergyAux);
+registerMooseObject("SolidMechanicsApp", ADKineticEnergyAux);
 
 template <bool is_ad>
 InputParameters

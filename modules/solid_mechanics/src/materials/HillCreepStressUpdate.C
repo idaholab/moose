@@ -10,8 +10,8 @@
 #include "HillCreepStressUpdate.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", ADHillCreepStressUpdate);
-registerMooseObject("TensorMechanicsApp", HillCreepStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADHillCreepStressUpdate);
+registerMooseObject("SolidMechanicsApp", HillCreepStressUpdate);
 
 template <bool is_ad>
 InputParameters

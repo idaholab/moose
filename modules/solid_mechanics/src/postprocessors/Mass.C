@@ -15,8 +15,8 @@
 
 #include "metaphysicl/raw_type.h"
 
-registerMooseObject("TensorMechanicsApp", Mass);
-registerMooseObject("TensorMechanicsApp", ADMass);
+registerMooseObject("SolidMechanicsApp", Mass);
+registerMooseObject("SolidMechanicsApp", ADMass);
 
 template <bool is_ad>
 InputParameters

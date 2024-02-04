@@ -9,7 +9,7 @@
 
 #include "TensorMechanicsHardeningGaussian.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningGaussian);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsHardeningGaussian);
 
 InputParameters
 TensorMechanicsHardeningGaussian::validParams()

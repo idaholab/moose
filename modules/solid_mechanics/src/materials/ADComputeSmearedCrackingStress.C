@@ -12,7 +12,7 @@
 #include "StressUpdateBase.h"
 #include "Conversion.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeSmearedCrackingStress);
+registerMooseObject("SolidMechanicsApp", ADComputeSmearedCrackingStress);
 
 InputParameters
 ADComputeSmearedCrackingStress::validParams()

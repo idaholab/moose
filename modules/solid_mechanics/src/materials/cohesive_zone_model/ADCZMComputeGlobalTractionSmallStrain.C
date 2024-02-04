@@ -10,7 +10,7 @@
 #include "ADCZMComputeGlobalTractionSmallStrain.h"
 #include "CZMComputeGlobalTractionSmallStrain.h"
 
-registerMooseObject("TensorMechanicsApp", ADCZMComputeGlobalTractionSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADCZMComputeGlobalTractionSmallStrain);
 
 InputParameters
 ADCZMComputeGlobalTractionSmallStrain::validParams()

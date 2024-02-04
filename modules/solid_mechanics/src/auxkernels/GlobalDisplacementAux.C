@@ -15,7 +15,7 @@
 #include "SystemBase.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", GlobalDisplacementAux);
+registerMooseObject("SolidMechanicsApp", GlobalDisplacementAux);
 
 InputParameters
 GlobalDisplacementAux::validParams()

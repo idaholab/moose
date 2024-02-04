@@ -10,8 +10,8 @@
 #include "Torque.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", Torque);
-registerMooseObject("TensorMechanicsApp", ADTorque);
+registerMooseObject("SolidMechanicsApp", Torque);
+registerMooseObject("SolidMechanicsApp", ADTorque);
 
 template <bool is_ad>
 InputParameters

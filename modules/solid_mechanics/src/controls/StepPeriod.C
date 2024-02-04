@@ -14,7 +14,7 @@
 #include "Transient.h"
 #include "MooseUtils.h"
 
-registerMooseObject("TensorMechanicsApp", StepPeriod);
+registerMooseObject("SolidMechanicsApp", StepPeriod);
 
 InputParameters
 StepPeriod::validParams()

@@ -9,8 +9,8 @@
 
 #include "PorosityFromStrain.h"
 
-registerMooseObject("TensorMechanicsApp", PorosityFromStrain);
-registerMooseObject("TensorMechanicsApp", ADPorosityFromStrain);
+registerMooseObject("SolidMechanicsApp", PorosityFromStrain);
+registerMooseObject("SolidMechanicsApp", ADPorosityFromStrain);
 
 template <bool is_ad>
 InputParameters

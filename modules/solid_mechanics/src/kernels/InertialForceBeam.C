@@ -16,7 +16,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", InertialForceBeam);
+registerMooseObject("SolidMechanicsApp", InertialForceBeam);
 
 InputParameters
 InertialForceBeam::validParams()

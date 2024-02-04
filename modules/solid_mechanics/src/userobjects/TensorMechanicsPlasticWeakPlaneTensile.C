@@ -10,7 +10,7 @@
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensile);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticWeakPlaneTensile);
 
 InputParameters
 TensorMechanicsPlasticWeakPlaneTensile::validParams()

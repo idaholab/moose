@@ -10,7 +10,7 @@
 #include "TensorMechanicsPlasticJ2.h"
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticJ2);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticJ2);
 
 InputParameters
 TensorMechanicsPlasticJ2::validParams()

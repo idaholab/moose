@@ -9,8 +9,8 @@
 
 #include "MaterialTensorAverage.h"
 
-registerMooseObject("TensorMechanicsApp", MaterialTensorAverage);
-registerMooseObject("TensorMechanicsApp", ADMaterialTensorAverage);
+registerMooseObject("SolidMechanicsApp", MaterialTensorAverage);
+registerMooseObject("SolidMechanicsApp", ADMaterialTensorAverage);
 
 template <bool is_ad>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "LinearElasticTruss.h"
 
-registerMooseObject("TensorMechanicsApp", LinearElasticTruss);
+registerMooseObject("SolidMechanicsApp", LinearElasticTruss);
 
 InputParameters
 LinearElasticTruss::validParams()

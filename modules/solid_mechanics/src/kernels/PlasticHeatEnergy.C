@@ -11,7 +11,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-registerMooseObject("TensorMechanicsApp", PlasticHeatEnergy);
+registerMooseObject("SolidMechanicsApp", PlasticHeatEnergy);
 
 InputParameters
 PlasticHeatEnergy::validParams()

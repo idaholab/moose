@@ -23,27 +23,27 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "meta_action");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "setup_mesh_complete");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "validate_coordinate_systems");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "validate_coordinate_systems");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_variable");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_variable");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_aux_variable");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_kernel");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_aux_kernel");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_material");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_material");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_master_action_material");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_master_action_material");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_scalar_kernel");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_scalar_kernel");
 
-registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_user_object");
+registerMooseAction("SolidMechanicsApp", TensorMechanicsAction, "add_user_object");
 
 InputParameters
 TensorMechanicsAction::validParams()

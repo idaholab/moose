@@ -9,8 +9,8 @@
 
 #include "HillConstants.h"
 
-registerMooseObject("TensorMechanicsApp", HillConstants);
-registerMooseObject("TensorMechanicsApp", ADHillConstants);
+registerMooseObject("SolidMechanicsApp", HillConstants);
+registerMooseObject("SolidMechanicsApp", ADHillConstants);
 
 template <bool is_ad>
 InputParameters

@@ -13,13 +13,13 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "add_interface_kernel");
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "add_material");
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "add_master_action_material");
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "add_aux_variable");
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "add_aux_kernel");
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "add_kernel");
-registerMooseAction("TensorMechanicsApp", CohesiveZoneAction, "validate_coordinate_systems");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "add_interface_kernel");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "add_material");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "add_master_action_material");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", CohesiveZoneAction, "validate_coordinate_systems");
 
 InputParameters
 CohesiveZoneAction::validParams()

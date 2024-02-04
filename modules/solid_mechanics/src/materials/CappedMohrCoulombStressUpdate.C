@@ -11,7 +11,7 @@
 #include "libmesh/utility.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", CappedMohrCoulombStressUpdate);
+registerMooseObject("SolidMechanicsApp", CappedMohrCoulombStressUpdate);
 
 InputParameters
 CappedMohrCoulombStressUpdate::validParams()

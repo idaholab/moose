@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", MaterialVectorBodyForceAction, "add_kernel");
+registerMooseAction("SolidMechanicsApp", MaterialVectorBodyForceAction, "add_kernel");
 
 InputParameters
 MaterialVectorBodyForceAction::validParams()

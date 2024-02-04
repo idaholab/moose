@@ -10,7 +10,7 @@
 #include "CrystalPlasticityStateVarRateComponentGSS.h"
 #include <cmath>
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentGSS);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticityStateVarRateComponentGSS);
 
 InputParameters
 CrystalPlasticityStateVarRateComponentGSS::validParams()

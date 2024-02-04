@@ -17,7 +17,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeFiniteShellStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeFiniteShellStrain);
 
 InputParameters
 ADComputeFiniteShellStrain::validParams()

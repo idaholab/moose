@@ -9,7 +9,7 @@
 
 #include "UpdatedLagrangianStressDivergence.h"
 
-registerMooseObject("TensorMechanicsApp", UpdatedLagrangianStressDivergence);
+registerMooseObject("SolidMechanicsApp", UpdatedLagrangianStressDivergence);
 
 template <class G>
 UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(

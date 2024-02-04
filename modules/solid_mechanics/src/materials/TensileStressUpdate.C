@@ -10,7 +10,7 @@
 #include "TensileStressUpdate.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", TensileStressUpdate);
+registerMooseObject("SolidMechanicsApp", TensileStressUpdate);
 
 InputParameters
 TensileStressUpdate::validParams()

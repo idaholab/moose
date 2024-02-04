@@ -9,8 +9,8 @@
 
 #include "ScalarMaterialDamage.h"
 
-registerMooseObject("TensorMechanicsApp", ScalarMaterialDamage);
-registerMooseObject("TensorMechanicsApp", ADScalarMaterialDamage);
+registerMooseObject("SolidMechanicsApp", ScalarMaterialDamage);
+registerMooseObject("SolidMechanicsApp", ADScalarMaterialDamage);
 
 template <bool is_ad>
 InputParameters

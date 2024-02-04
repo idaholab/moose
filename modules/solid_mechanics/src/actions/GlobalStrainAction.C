@@ -16,15 +16,15 @@
 
 #include "libmesh/string_to_enum.h"
 
-registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_user_object");
+registerMooseAction("SolidMechanicsApp", GlobalStrainAction, "add_user_object");
 
-registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_scalar_kernel");
+registerMooseAction("SolidMechanicsApp", GlobalStrainAction, "add_scalar_kernel");
 
-registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_material");
+registerMooseAction("SolidMechanicsApp", GlobalStrainAction, "add_material");
 
-registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", GlobalStrainAction, "add_aux_variable");
 
-registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", GlobalStrainAction, "add_aux_kernel");
 
 InputParameters
 GlobalStrainAction::validParams()

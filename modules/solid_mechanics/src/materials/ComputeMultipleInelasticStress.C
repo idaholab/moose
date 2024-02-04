@@ -14,7 +14,7 @@
 #include "DamageBase.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticStress);
+registerMooseObject("SolidMechanicsApp", ComputeMultipleInelasticStress);
 
 InputParameters
 ComputeMultipleInelasticStress::validParams()

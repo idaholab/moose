@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVariable);
+registerMooseObject("SolidMechanicsApp", CrystalPlasticityStateVariable);
 
 InputParameters
 CrystalPlasticityStateVariable::validParams()

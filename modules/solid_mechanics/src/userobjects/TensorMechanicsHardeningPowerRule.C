@@ -9,7 +9,7 @@
 
 #include "TensorMechanicsHardeningPowerRule.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningPowerRule);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsHardeningPowerRule);
 
 InputParameters
 TensorMechanicsHardeningPowerRule::validParams()

@@ -14,7 +14,7 @@
 #include <fstream>
 #include <cmath>
 
-registerMooseObjectDeprecated("TensorMechanicsApp",
+registerMooseObjectDeprecated("SolidMechanicsApp",
                               FiniteStrainCrystalPlasticity,
                               "11/15/2024 12:00");
 

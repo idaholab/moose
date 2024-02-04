@@ -13,8 +13,8 @@
 #include "Function.h"
 #include "MooseError.h"
 
-registerMooseObject("TensorMechanicsApp", Pressure);
-registerMooseObject("TensorMechanicsApp", ADPressure);
+registerMooseObject("SolidMechanicsApp", Pressure);
+registerMooseObject("SolidMechanicsApp", ADPressure);
 
 template <bool is_ad>
 InputParameters

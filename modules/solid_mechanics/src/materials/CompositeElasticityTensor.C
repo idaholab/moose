@@ -9,7 +9,7 @@
 
 #include "CompositeElasticityTensor.h"
 
-registerMooseObject("TensorMechanicsApp", CompositeElasticityTensor);
+registerMooseObject("SolidMechanicsApp", CompositeElasticityTensor);
 
 InputParameters
 CompositeElasticityTensor::validParams()

@@ -10,7 +10,7 @@
 #include "ADComputePlaneSmallStrain.h"
 #include "UserObject.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputePlaneSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADComputePlaneSmallStrain);
 
 InputParameters
 ADComputePlaneSmallStrain::validParams()

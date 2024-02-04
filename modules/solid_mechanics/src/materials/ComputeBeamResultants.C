@@ -9,7 +9,7 @@
 
 #include "ComputeBeamResultants.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeBeamResultants);
+registerMooseObject("SolidMechanicsApp", ComputeBeamResultants);
 
 InputParameters
 ComputeBeamResultants::validParams()

@@ -10,8 +10,8 @@
 #include "ComputeElasticityTensor.h"
 #include "RotationTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeElasticityTensor);
-registerMooseObject("TensorMechanicsApp", ADComputeElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ComputeElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ADComputeElasticityTensor);
 
 template <bool is_ad>
 InputParameters

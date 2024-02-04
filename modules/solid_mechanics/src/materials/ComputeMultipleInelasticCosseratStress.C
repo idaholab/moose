@@ -9,7 +9,7 @@
 
 #include "ComputeMultipleInelasticCosseratStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticCosseratStress);
+registerMooseObject("SolidMechanicsApp", ComputeMultipleInelasticCosseratStress);
 
 InputParameters
 ComputeMultipleInelasticCosseratStress::validParams()

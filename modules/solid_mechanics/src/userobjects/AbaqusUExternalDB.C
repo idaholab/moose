@@ -13,7 +13,7 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-registerMooseObject("TensorMechanicsApp", AbaqusUExternalDB);
+registerMooseObject("SolidMechanicsApp", AbaqusUExternalDB);
 
 InputParameters
 AbaqusUExternalDB::validParams()

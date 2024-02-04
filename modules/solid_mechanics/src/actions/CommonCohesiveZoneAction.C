@@ -11,7 +11,7 @@
 #include "CohesiveZoneActionBase.h"
 #include "ActionWarehouse.h"
 
-registerMooseAction("TensorMechanicsApp", CommonCohesiveZoneAction, "meta_action");
+registerMooseAction("SolidMechanicsApp", CommonCohesiveZoneAction, "meta_action");
 
 InputParameters
 CommonCohesiveZoneAction::validParams()

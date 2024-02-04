@@ -18,15 +18,15 @@
 
 #include "libmesh/string_to_enum.h"
 
-registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_user_object");
+registerMooseAction("SolidMechanicsApp", DomainIntegralAction, "add_user_object");
 
-registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", DomainIntegralAction, "add_aux_variable");
 
-registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", DomainIntegralAction, "add_aux_kernel");
 
-registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_postprocessor");
+registerMooseAction("SolidMechanicsApp", DomainIntegralAction, "add_postprocessor");
 
-registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_material");
+registerMooseAction("SolidMechanicsApp", DomainIntegralAction, "add_material");
 
 InputParameters
 DomainIntegralAction::validParams()

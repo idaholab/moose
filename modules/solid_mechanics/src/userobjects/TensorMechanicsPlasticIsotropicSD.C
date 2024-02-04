@@ -9,7 +9,7 @@
 
 #include "TensorMechanicsPlasticIsotropicSD.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticIsotropicSD);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticIsotropicSD);
 
 InputParameters
 TensorMechanicsPlasticIsotropicSD::validParams()

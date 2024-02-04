@@ -11,8 +11,8 @@
 #include "Function.h"
 #include "Coupleable.h"
 
-registerMooseObject("TensorMechanicsApp", PenaltyInclinedNoDisplacementBC);
-registerMooseObject("TensorMechanicsApp", ADPenaltyInclinedNoDisplacementBC);
+registerMooseObject("SolidMechanicsApp", PenaltyInclinedNoDisplacementBC);
+registerMooseObject("SolidMechanicsApp", ADPenaltyInclinedNoDisplacementBC);
 
 template <bool is_ad>
 InputParameters

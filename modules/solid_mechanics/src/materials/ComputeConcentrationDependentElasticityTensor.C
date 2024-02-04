@@ -10,7 +10,7 @@
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "RotationTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeConcentrationDependentElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ComputeConcentrationDependentElasticityTensor);
 
 InputParameters
 ComputeConcentrationDependentElasticityTensor::validParams()

@@ -12,7 +12,7 @@
 #include "Function.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLayeredCosseratElasticityTensor);
+registerMooseObject("SolidMechanicsApp", ComputeLayeredCosseratElasticityTensor);
 
 InputParameters
 ComputeLayeredCosseratElasticityTensor::validParams()

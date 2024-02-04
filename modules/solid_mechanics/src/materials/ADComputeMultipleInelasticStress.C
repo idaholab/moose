@@ -10,7 +10,7 @@
 #include "ADComputeMultipleInelasticStress.h"
 #include "MooseException.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeMultipleInelasticStress);
+registerMooseObject("SolidMechanicsApp", ADComputeMultipleInelasticStress);
 
 InputParameters
 ADComputeMultipleInelasticStress::validParams()

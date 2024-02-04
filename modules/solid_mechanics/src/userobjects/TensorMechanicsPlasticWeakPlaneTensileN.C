@@ -11,7 +11,7 @@
 #include "RotationMatrix.h" // for rotVecToZ
 #include "RankFourTensor.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensileN);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticWeakPlaneTensileN);
 
 InputParameters
 TensorMechanicsPlasticWeakPlaneTensileN::validParams()

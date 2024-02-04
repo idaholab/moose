@@ -11,8 +11,8 @@
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
-registerMooseObject("TensorMechanicsApp", StrainEnergyDensity);
-registerMooseObject("TensorMechanicsApp", ADStrainEnergyDensity);
+registerMooseObject("SolidMechanicsApp", StrainEnergyDensity);
+registerMooseObject("SolidMechanicsApp", ADStrainEnergyDensity);
 
 template <bool is_ad>
 InputParameters

@@ -9,7 +9,7 @@
 
 #include "VolumeWeightedWeibull.h"
 
-registerMooseObject("TensorMechanicsApp", VolumeWeightedWeibull);
+registerMooseObject("SolidMechanicsApp", VolumeWeightedWeibull);
 
 InputParameters
 VolumeWeightedWeibull::validParams()

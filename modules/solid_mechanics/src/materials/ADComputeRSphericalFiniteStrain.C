@@ -14,7 +14,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeRSphericalFiniteStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeRSphericalFiniteStrain);
 
 InputParameters
 ADComputeRSphericalFiniteStrain::validParams()

@@ -9,7 +9,7 @@
 
 #include "NewmarkAccelAux.h"
 
-registerMooseObject("TensorMechanicsApp", NewmarkAccelAux);
+registerMooseObject("SolidMechanicsApp", NewmarkAccelAux);
 
 InputParameters
 NewmarkAccelAux::validParams()

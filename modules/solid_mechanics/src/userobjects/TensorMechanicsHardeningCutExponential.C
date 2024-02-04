@@ -9,7 +9,7 @@
 
 #include "TensorMechanicsHardeningCutExponential.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningCutExponential);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsHardeningCutExponential);
 
 InputParameters
 TensorMechanicsHardeningCutExponential::validParams()

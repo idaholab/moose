@@ -12,7 +12,7 @@
 #include "Function.h"
 #include "Conversion.h" // for stringify
 
-registerMooseObject("TensorMechanicsApp", ComputeEigenstrainFromInitialStress);
+registerMooseObject("SolidMechanicsApp", ComputeEigenstrainFromInitialStress);
 
 InputParameters
 ComputeEigenstrainFromInitialStress::validParams()

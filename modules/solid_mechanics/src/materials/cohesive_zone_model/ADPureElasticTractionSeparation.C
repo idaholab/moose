@@ -10,7 +10,7 @@
 #include "ADPureElasticTractionSeparation.h"
 #include "PureElasticTractionSeparation.h"
 
-registerMooseObject("TensorMechanicsApp", ADPureElasticTractionSeparation);
+registerMooseObject("SolidMechanicsApp", ADPureElasticTractionSeparation);
 
 InputParameters
 ADPureElasticTractionSeparation::validParams()

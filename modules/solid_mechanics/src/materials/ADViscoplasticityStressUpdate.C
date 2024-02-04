@@ -11,7 +11,7 @@
 
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADViscoplasticityStressUpdate);
 
 InputParameters
 ADViscoplasticityStressUpdate::validParams()

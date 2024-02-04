@@ -14,7 +14,7 @@
 #include "Conversion.h"
 #include "MooseException.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeMultipleCrystalPlasticityStress);
+registerMooseObject("SolidMechanicsApp", ComputeMultipleCrystalPlasticityStress);
 
 InputParameters
 ComputeMultipleCrystalPlasticityStress::validParams()

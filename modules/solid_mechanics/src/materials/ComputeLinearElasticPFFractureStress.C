@@ -10,7 +10,7 @@
 #include "ComputeLinearElasticPFFractureStress.h"
 #include "MathUtils.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLinearElasticPFFractureStress);
+registerMooseObject("SolidMechanicsApp", ComputeLinearElasticPFFractureStress);
 
 InputParameters
 ComputeLinearElasticPFFractureStress::validParams()

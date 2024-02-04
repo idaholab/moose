@@ -9,7 +9,7 @@
 
 #include "VolumeDeformGradCorrectedStress.h"
 
-registerMooseObject("TensorMechanicsApp", VolumeDeformGradCorrectedStress);
+registerMooseObject("SolidMechanicsApp", VolumeDeformGradCorrectedStress);
 
 InputParameters
 VolumeDeformGradCorrectedStress::validParams()

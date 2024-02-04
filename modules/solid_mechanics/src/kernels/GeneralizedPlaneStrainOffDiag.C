@@ -20,7 +20,7 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainOffDiag);
+registerMooseObject("SolidMechanicsApp", GeneralizedPlaneStrainOffDiag);
 
 InputParameters
 GeneralizedPlaneStrainOffDiag::validParams()

@@ -10,8 +10,8 @@
 #include "IsotropicPowerLawHardeningStressUpdate.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsApp", IsotropicPowerLawHardeningStressUpdate);
-registerMooseObject("TensorMechanicsApp", ADIsotropicPowerLawHardeningStressUpdate);
+registerMooseObject("SolidMechanicsApp", IsotropicPowerLawHardeningStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADIsotropicPowerLawHardeningStressUpdate);
 
 template <bool is_ad>
 InputParameters

@@ -23,7 +23,7 @@
 #include "MooseVariableScalar.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", HomogenizationConstraintScalarKernel);
+registerMooseObject("SolidMechanicsApp", HomogenizationConstraintScalarKernel);
 
 InputParameters
 HomogenizationConstraintScalarKernel::validParams()

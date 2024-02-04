@@ -9,7 +9,7 @@
 
 #include "CriticalTimeStep.h"
 
-registerMooseObject("TensorMechanicsApp", CriticalTimeStep);
+registerMooseObject("SolidMechanicsApp", CriticalTimeStep);
 
 InputParameters
 CriticalTimeStep::validParams()

@@ -12,8 +12,8 @@
 #include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
 
-registerMooseObject("TensorMechanicsApp", InertialForce);
-registerMooseObject("TensorMechanicsApp", ADInertialForce);
+registerMooseObject("SolidMechanicsApp", InertialForce);
+registerMooseObject("SolidMechanicsApp", ADInertialForce);
 
 template <bool is_ad>
 InputParameters

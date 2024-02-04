@@ -9,4 +9,4 @@
 
 #include "ComputeLagrangianStrainCentrosymmetricSpherical.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianStrainCentrosymmetricSpherical);
+registerMooseObject("SolidMechanicsApp", ComputeLagrangianStrainCentrosymmetricSpherical);

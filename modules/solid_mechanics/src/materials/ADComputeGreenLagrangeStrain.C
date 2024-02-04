@@ -10,7 +10,7 @@
 #include "ADComputeGreenLagrangeStrain.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeGreenLagrangeStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeGreenLagrangeStrain);
 
 InputParameters
 ADComputeGreenLagrangeStrain::validParams()

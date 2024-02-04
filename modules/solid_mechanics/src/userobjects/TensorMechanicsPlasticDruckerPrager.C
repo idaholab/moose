@@ -11,7 +11,7 @@
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticDruckerPrager);
 
 InputParameters
 TensorMechanicsPlasticDruckerPrager::validParams()

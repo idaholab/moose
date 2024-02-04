@@ -9,7 +9,7 @@
 
 #include "ComputeLagrangianLinearElasticStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianLinearElasticStress);
+registerMooseObject("SolidMechanicsApp", ComputeLagrangianLinearElasticStress);
 
 InputParameters
 ComputeLagrangianLinearElasticStress::validParams()

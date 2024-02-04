@@ -9,7 +9,7 @@
 
 #include "ElasticEnergyAux.h"
 
-registerMooseObject("TensorMechanicsApp", ElasticEnergyAux);
+registerMooseObject("SolidMechanicsApp", ElasticEnergyAux);
 
 InputParameters
 ElasticEnergyAux::validParams()

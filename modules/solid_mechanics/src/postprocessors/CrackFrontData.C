@@ -16,7 +16,7 @@
 
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("TensorMechanicsApp", CrackFrontData);
+registerMooseObject("SolidMechanicsApp", CrackFrontData);
 
 InputParameters
 CrackFrontData::validParams()

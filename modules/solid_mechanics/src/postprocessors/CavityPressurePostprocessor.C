@@ -11,7 +11,7 @@
 
 #include "CavityPressureUserObject.h"
 
-registerMooseObject("TensorMechanicsApp", CavityPressurePostprocessor);
+registerMooseObject("SolidMechanicsApp", CavityPressurePostprocessor);
 
 InputParameters
 CavityPressurePostprocessor::validParams()

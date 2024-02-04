@@ -9,7 +9,7 @@
 
 #include "ComputeSimoHughesJ2PlasticityStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeSimoHughesJ2PlasticityStress);
+registerMooseObject("SolidMechanicsApp", ComputeSimoHughesJ2PlasticityStress);
 
 InputParameters
 ComputeSimoHughesJ2PlasticityStress::validParams()

@@ -11,7 +11,7 @@
 
 #include "RankTwoTensor.h"
 
-registerMooseObjectDeprecated("TensorMechanicsApp",
+registerMooseObjectDeprecated("SolidMechanicsApp",
                               ADComputeMultiplePorousInelasticStress,
                               "01/30/2021 24:00");
 

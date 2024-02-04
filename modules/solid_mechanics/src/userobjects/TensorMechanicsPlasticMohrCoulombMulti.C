@@ -14,7 +14,7 @@
 #include "MooseRandom.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMohrCoulombMulti);
+registerMooseObject("SolidMechanicsApp", TensorMechanicsPlasticMohrCoulombMulti);
 
 InputParameters
 TensorMechanicsPlasticMohrCoulombMulti::validParams()

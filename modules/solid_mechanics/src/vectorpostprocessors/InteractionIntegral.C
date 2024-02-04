@@ -17,8 +17,8 @@
 #include "libmesh/utility.h"
 #include "CrackFrontDefinition.h"
 
-registerMooseObject("TensorMechanicsApp", InteractionIntegral);
-registerMooseObject("TensorMechanicsApp", ADInteractionIntegral);
+registerMooseObject("SolidMechanicsApp", InteractionIntegral);
+registerMooseObject("SolidMechanicsApp", ADInteractionIntegral);
 
 template <bool is_ad>
 MooseEnum

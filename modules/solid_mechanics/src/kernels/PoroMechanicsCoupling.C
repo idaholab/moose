@@ -14,7 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-registerMooseObject("TensorMechanicsApp", PoroMechanicsCoupling);
+registerMooseObject("SolidMechanicsApp", PoroMechanicsCoupling);
 
 InputParameters
 PoroMechanicsCoupling::validParams()

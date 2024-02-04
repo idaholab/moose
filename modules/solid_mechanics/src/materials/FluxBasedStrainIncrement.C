@@ -10,7 +10,7 @@
 #include "FluxBasedStrainIncrement.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", FluxBasedStrainIncrement);
+registerMooseObject("SolidMechanicsApp", FluxBasedStrainIncrement);
 
 InputParameters
 FluxBasedStrainIncrement::validParams()

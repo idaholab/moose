@@ -10,7 +10,7 @@
 #include "CZMRealVectorScalar.h"
 #include "CohesiveZoneModelTools.h"
 
-registerMooseObject("TensorMechanicsApp", CZMRealVectorScalar);
+registerMooseObject("SolidMechanicsApp", CZMRealVectorScalar);
 
 InputParameters
 CZMRealVectorScalar::validParams()

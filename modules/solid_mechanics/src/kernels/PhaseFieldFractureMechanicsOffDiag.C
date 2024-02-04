@@ -9,7 +9,7 @@
 
 #include "PhaseFieldFractureMechanicsOffDiag.h"
 
-registerMooseObject("TensorMechanicsApp", PhaseFieldFractureMechanicsOffDiag);
+registerMooseObject("SolidMechanicsApp", PhaseFieldFractureMechanicsOffDiag);
 
 InputParameters
 PhaseFieldFractureMechanicsOffDiag::validParams()
