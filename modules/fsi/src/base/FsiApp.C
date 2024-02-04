@@ -13,7 +13,7 @@
 #include "MooseSyntax.h"
 
 #include "NavierStokesApp.h"
-#include "TensorMechanicsApp.h"
+#include "SolidMechanicsApp.h"
 
 InputParameters
 FsiApp::validParams()
@@ -37,7 +37,7 @@ FsiApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"FsiApp"});
 
   NavierStokesApp::registerAll(f, af, s);
-  TensorMechanicsApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, s);
 }
 
 void
@@ -46,7 +46,7 @@ FsiApp::registerApps()
   registerApp(FsiApp);
 
   NavierStokesApp::registerApps();
-  TensorMechanicsApp::registerApps();
+  SolidMechanicsApp::registerApps();
 }
 
 /***************************************************************************************************

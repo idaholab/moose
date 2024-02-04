@@ -37,7 +37,7 @@
 #include "ScalarTransportApp.h"
 #include "SolidPropertiesApp.h"
 #include "StochasticToolsApp.h"
-#include "TensorMechanicsApp.h"
+#include "SolidMechanicsApp.h"
 #include "ThermalHydraulicsApp.h"
 #include "XFEMApp.h"
 
@@ -88,9 +88,9 @@ CombinedApp::registerApps()
   ReactorApp::registerApps();
   RichardsApp::registerApps();
   ScalarTransportApp::registerApps();
+  SolidMechanicsApp::registerApps();
   SolidPropertiesApp::registerApps();
   StochasticToolsApp::registerApps();
-  TensorMechanicsApp::registerApps();
   ThermalHydraulicsApp::registerApps();
   XFEMApp::registerApps();
 }
@@ -122,9 +122,9 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ReactorApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
   ScalarTransportApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, s);
   SolidPropertiesApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
-  TensorMechanicsApp::registerAll(f, af, s);
   ThermalHydraulicsApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
 }

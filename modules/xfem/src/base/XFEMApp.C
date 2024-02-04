@@ -9,7 +9,7 @@
 
 #include "XFEMApp.h"
 #include "XFEMAppTypes.h"
-#include "TensorMechanicsApp.h"
+#include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -49,7 +49,7 @@ XFEMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"XFEMApp"});
   associateSyntaxInner(s, af);
 
-  TensorMechanicsApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, s);
 }
 
 void
@@ -57,14 +57,14 @@ XFEMApp::registerApps()
 {
   registerApp(XFEMApp);
 
-  TensorMechanicsApp::registerApps();
+  SolidMechanicsApp::registerApps();
 }
 
 void
 XFEMApp::registerObjectDepends(Factory & factory)
 {
   mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  TensorMechanicsApp::registerObjects(factory);
+  SolidMechanicsApp::registerObjects(factory);
 }
 
 void
@@ -78,7 +78,7 @@ void
 XFEMApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
 {
   mooseDeprecated("use registerAll instead of associateSyntaxDepends");
-  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+  SolidMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
 void
