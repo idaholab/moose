@@ -1,9 +1,9 @@
 Applications:
-    tensor_mechanics:
-        exe_directory: ${MOOSE_DIR}/modules/tensor_mechanics
+    solid_mechanics:
+        exe_directory: ${MOOSE_DIR}/modules/solid_mechanics
         app_types:
-            - TensorMechanicsApp
-        content_directory: ${MOOSE_DIR}/modules/tensor_mechanics/doc/content
+            - SolidMechanicsApp
+        content_directory: ${MOOSE_DIR}/modules/solid_mechanics/doc/content
         unregister:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
@@ -18,22 +18,22 @@ Documents:
     configuration_management_plan: sqa/inl_records.md#configuration_management_plan
     asset_management_plan: sqa/inl_records.md#asset_management_plan
     verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
-    software_requirements_specification: sqa/tensor_mechanics_srs.md
-    software_design_description: sqa/tensor_mechanics_sdd.md
-    software_test_plan: sqa/tensor_mechanics_stp.md
-    requirements_traceability_matrix: sqa/tensor_mechanics_rtm.md
-    verification_validation_report: sqa/tensor_mechanics_vvr.md
-    failure_analysis_report: sqa/tensor_mechanics_far.md
-    software_library_list: sqa/tensor_mechanics_sll.md
+    software_requirements_specification: sqa/solid_mechanics_srs.md
+    software_design_description: sqa/solid_mechanics_sdd.md
+    software_test_plan: sqa/solid_mechanics_stp.md
+    requirements_traceability_matrix: sqa/solid_mechanics_rtm.md
+    verification_validation_report: sqa/solid_mechanics_vvr.md
+    failure_analysis_report: sqa/solid_mechanics_far.md
+    software_library_list: sqa/solid_mechanics_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
 
 Requirements:
-    tensor_mechanics:
+    solid_mechanics:
         directories:
-            - ${MOOSE_DIR}/modules/tensor_mechanics
+            - ${MOOSE_DIR}/modules/solid_mechanics
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING
