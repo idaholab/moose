@@ -16,7 +16,7 @@
 []
 
 [Physics]
-  [TensorMechanics]
+  [SolidMechanics]
     [QuasiStatic]
       [all]
         formulation = TOTAL

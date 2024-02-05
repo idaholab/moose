@@ -32,7 +32,7 @@
 []
 
 [Kernels]
-  [TensorMechanics]
+  [SolidMechanics]
     displacements = 'ux uy'
     use_displaced_mesh = true
   []

@@ -1,5 +1,5 @@
 # This test uses the strain calculator ComputePlaneFiniteStrain,
-# which is generated through the use of the TensorMechanics QuasiStaticAction.
+# which is generated through the use of the SolidMechanics QuasiStatic Physics.
 
 [Mesh]
   type = GeneratedMesh

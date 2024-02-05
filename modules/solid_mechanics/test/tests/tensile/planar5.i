@@ -173,13 +173,13 @@
 
 [UserObjects]
   [./hard]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.5
     value_residual = 1
     internal_limit = 1E-6
   [../]
   [./tens]
-    type = TensorMechanicsPlasticTensileMulti
+    type = SolidMechanicsPlasticTensileMulti
     tensile_strength = hard
     shift = 1E-6
     yield_function_tolerance = 1E-6

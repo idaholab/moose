@@ -38,37 +38,37 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1
     value_residual = 2
     internal_limit = 100
   [../]
   [./cs]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 5
     value_residual = 3
     internal_limit = 100
   [../]
   [./mc_coh]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 10
     value_residual = 1
     internal_limit = 100
   [../]
   [./phi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.8
     value_residual = 0.4
     internal_limit = 50
   [../]
   [./psi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.4
     value_residual = 0
     internal_limit = 10
   [../]
   [./dp]
-    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
     mc_dilation_angle = psi
@@ -76,32 +76,32 @@
     internal_constraint_tolerance = 1E-9 # irrelevant here
   [../]
   [./wp_ts]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 100
     value_residual = 100
     rate = 1
   [../]
   [./wp_cs]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1
     value_residual = 0
     internal_0 = -2
     internal_limit = 0
   [../]
   [./wp_coh]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 2
     rate = 1
   [../]
   [./wp_tanphi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1.0
     value_residual = 0.5
     rate = 2
   [../]
   [./wp_tanpsi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 0.1
     value_residual = 0.05
     rate = 3

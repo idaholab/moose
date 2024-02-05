@@ -194,23 +194,23 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 10
     value_residual = 2
     internal_limit = 0.0003
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 60
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi

@@ -124,25 +124,25 @@
 
 [UserObjects]
   [coh]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1E3
     value_residual = 0
     rate = 0.01
   []
   [tanphi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 0.577350269
     rate = 0.01
   []
   [tanpsi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 0.08748866
     value_residual = 0.03492077
     rate = 0.01
   []
   [wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = SolidMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi

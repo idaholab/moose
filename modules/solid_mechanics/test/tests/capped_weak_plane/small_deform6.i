@@ -270,23 +270,23 @@
 
 [UserObjects]
   [./coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 20
   [../]
   [./tanphi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.5
   [../]
   [./tanpsi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.1
   [../]
   [./t_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 20
   [../]
   [./c_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0
   [../]
 []

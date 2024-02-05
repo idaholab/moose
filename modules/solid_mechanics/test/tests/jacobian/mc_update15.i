@@ -36,21 +36,21 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./cs]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1
     value_residual = 0.5
     internal_limit = 2E-2
   [../]
   [./coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./ang]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
   [../]

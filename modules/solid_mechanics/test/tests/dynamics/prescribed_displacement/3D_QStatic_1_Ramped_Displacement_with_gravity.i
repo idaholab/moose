@@ -7,7 +7,7 @@
 # Gravity is applied in y direction. To equilibrate the system
 # under gravity, a static analysis is run in the first time step
 # by turning off the inertial terms. (see controls block and
-# DynamicTensorMechanics block).
+# DynamicSolidMechanics block).
 
 # Result: The displacement at the top node in the z direction should match
 # the prescribed displacement. Also, the z acceleration should
@@ -85,7 +85,7 @@
 []
 
 [Kernels]
-  [./DynamicTensorMechanics] # zeta*K*vel + K * disp
+  [./DynamicSolidMechanics] # zeta*K*vel + K * disp
     displacements = 'disp_x disp_y disp_z'
     stiffness_damping_coefficient = 0.000025
     static_initialization = true #turns off rayliegh damping for the first time step to stabilize system under gravity

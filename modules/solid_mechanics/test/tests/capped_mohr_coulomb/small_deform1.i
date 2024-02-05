@@ -108,15 +108,15 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1
   [../]
   [./coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./ang]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.5
   [../]
 []

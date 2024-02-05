@@ -121,22 +121,22 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./cs]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.9
     value_residual = 0.5
     internal_0 = -1E-5
     internal_limit = 0
   [../]
   [./coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./ang]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.5
   [../]
 []

@@ -321,11 +321,11 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 300
   [../]
   [./IsotropicSD]
-    type = TensorMechanicsPlasticIsotropicSD
+    type = SolidMechanicsPlasticIsotropicSD
     b = -0.2
     c = -0.779422863
     associative = true

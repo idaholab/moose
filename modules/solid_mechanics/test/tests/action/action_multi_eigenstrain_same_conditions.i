@@ -1,6 +1,6 @@
 # This tests a thermal expansion coefficient function using defined on both
 # blocks.  There two blocks, each containing a single element, and these use
-# automatic_eigenstrain_names function of the TensorMechanicsAction to ensure
+# automatic_eigenstrain_names function of the SolidMechanics QuasiStatic Physics to ensure
 # the names are passed correctly.
 
 # In this test, the instantaneous CTE function has a constant value,

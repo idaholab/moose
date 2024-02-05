@@ -143,11 +143,11 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensile
+    type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0E-1

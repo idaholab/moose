@@ -20,7 +20,7 @@
   [../]
 []
 
-[TensorMechanics]
+[SolidMechanics]
   [./solid]
 #    disp_x = x_disp
 #    disp_y = y_disp

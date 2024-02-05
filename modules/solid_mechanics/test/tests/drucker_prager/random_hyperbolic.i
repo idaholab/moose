@@ -130,21 +130,21 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E3
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
   [../]
   [./dp]
-    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = mc_phi
     mc_dilation_angle = mc_psi

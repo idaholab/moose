@@ -1,5 +1,5 @@
 # This test uses the strain calculator ComputePlaneSmallStrain,
-# which is generated through the use of the TensorMechanics QuasiStaticAction.
+# which is generated through the use of the SolidMechanics QuasiStatic Physics.
 
 [GlobalParams]
   displacements = 'disp_x disp_y'

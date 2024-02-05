@@ -108,19 +108,19 @@
 
 [UserObjects]
   [coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E3
   []
   [tanphi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.5773503
   []
   [tanpsi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.08748866
   []
   [wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = SolidMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi

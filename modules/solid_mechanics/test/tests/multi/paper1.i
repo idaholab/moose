@@ -221,7 +221,7 @@
 
 [UserObjects]
   [./simple0]
-    type = TensorMechanicsPlasticSimpleTester
+    type = SolidMechanicsPlasticSimpleTester
     a = 1
     b = 0
     strength = 1E9
@@ -229,7 +229,7 @@
     internal_constraint_tolerance = 1.0E-6
   [../]
   [./simple1]
-    type = TensorMechanicsPlasticSimpleTester
+    type = SolidMechanicsPlasticSimpleTester
     a = 1
     b = 0
     strength = 0
@@ -237,7 +237,7 @@
     internal_constraint_tolerance = 1.0E-6
   [../]
   [./simple2]
-    type = TensorMechanicsPlasticSimpleTester
+    type = SolidMechanicsPlasticSimpleTester
     a = 1
     b = 0
     strength = 1E-3

@@ -37,25 +37,25 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 10
     value_residual = 1
     internal_limit = 100
   [../]
   [./phi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.8
     value_residual = 0.4
     internal_limit = 50
   [../]
   [./psi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.4
     value_residual = 0
     internal_limit = 10
   [../]
   [./dp]
-    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
     mc_dilation_angle = psi

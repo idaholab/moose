@@ -118,25 +118,25 @@
 
 [UserObjects]
   [coh]
-    type = TensorMechanicsHardeningGaussian
+    type = SolidMechanicsHardeningGaussian
     value_0 = 1E3
     value_residual = 700
     rate = 2E16
   []
   [tanphi]
-    type = TensorMechanicsHardeningGaussian
+    type = SolidMechanicsHardeningGaussian
     value_0 = 1
     value_residual = 0.577350269
     rate = 2E16
   []
   [tanpsi]
-    type = TensorMechanicsHardeningGaussian
+    type = SolidMechanicsHardeningGaussian
     value_0 = 0.0874886635
     value_residual = 0.01745506
     rate = 2E16
   []
   [wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = SolidMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi

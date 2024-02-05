@@ -218,13 +218,13 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningGaussian
+    type = SolidMechanicsHardeningGaussian
     value_0 = 2
     value_residual = 1
     rate = 1E12
   [../]
   [./j2]
-    type = TensorMechanicsPlasticJ2
+    type = SolidMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-5
     internal_constraint_tolerance = 1E-9

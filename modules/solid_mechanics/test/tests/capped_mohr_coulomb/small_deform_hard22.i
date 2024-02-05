@@ -138,15 +138,15 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_residual = 0.524 # 30deg
     value_0 = 0.174 # 10deg
     internal_limit = 4E-6

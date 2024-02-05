@@ -212,19 +212,19 @@
 
 [UserObjects]
   [./tensile_strength]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 2
     value_residual = 0
     internal_limit = 4E-7
   [../]
   [./compressive_strength]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = -1
     value_residual = -0.5
     internal_limit = 1E-8
   [../]
   [./cap]
-    type = TensorMechanicsPlasticMeanCapTC
+    type = SolidMechanicsPlasticMeanCapTC
     tensile_strength = tensile_strength
     compressive_strength = compressive_strength
     yield_function_tolerance = 1E-5

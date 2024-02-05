@@ -159,22 +159,22 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 0.52359878 # 30deg
     value_residual = 0.62831853 # 36deg
     rate = 3000.0
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi

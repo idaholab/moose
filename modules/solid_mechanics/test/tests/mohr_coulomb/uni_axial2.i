@@ -178,21 +178,21 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10E6
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi

@@ -294,31 +294,31 @@
 
 [UserObjects]
   [./coh]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 2
     rate = 1
   [../]
   [./tanphi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1.0
     value_residual = 0.5
     rate = 2
   [../]
   [./tanpsi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 0.1
     value_residual = 0.05
     rate = 1
   [../]
   [./t_strength]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 0
     rate = 1
   [../]
   [./c_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E8
   [../]
 []

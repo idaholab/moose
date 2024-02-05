@@ -136,14 +136,14 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1.0
     value_residual = 0.5
     internal_0 = 0
     internal_limit = 1E-5
   [../]
   [./mc]
-    type = TensorMechanicsPlasticTensile
+    type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     yield_function_tolerance = 1E-6
     tensile_tip_smoother = 0.0

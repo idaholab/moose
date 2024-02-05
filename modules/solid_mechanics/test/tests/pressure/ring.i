@@ -48,7 +48,7 @@
 []
 
 [Physics]
-  [TensorMechanics]
+  [SolidMechanics]
     [QuasiStatic]
       [all]
         incremental = false

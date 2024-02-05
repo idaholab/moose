@@ -319,21 +319,21 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 4E1
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombMulti
+    type = SolidMechanicsPlasticMohrCoulombMulti
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi
@@ -343,11 +343,11 @@
   [../]
 
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E0
   [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensileMulti
+    type = SolidMechanicsPlasticTensileMulti
     tensile_strength = ts
     yield_function_tolerance = 1.0E-4  # Note larger value
     shift = 1.0E-4                     # Note larger value

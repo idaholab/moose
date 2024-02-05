@@ -115,28 +115,28 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1000
   [../]
   [./cs]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1000
   [../]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 20
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0
   [../]
   [./dp]
-    type = TensorMechanicsPlasticDruckerPrager
+    type = SolidMechanicsPlasticDruckerPrager
     mc_cohesion = mc_coh
     mc_friction_angle = mc_phi
     mc_dilation_angle = mc_psi

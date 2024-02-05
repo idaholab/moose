@@ -1,7 +1,7 @@
 # Considers the mechanics solution for a thick spherical shell that is uniformly
 # pressurized on the inner and outer surfaces, using 2D axisymmetric geometry.
 # This test uses the strain calculator ComputeAxisymmetricRZFiniteStrain,
-# which is generated through the use of the TensorMechanics QuasiStaticAction.
+# which is generated through the use of the SolidMechanics QuasiStatic Physics.
 #
 # From Roark (Formulas for Stress and Strain, McGraw-Hill, 1975), the radially-dependent
 # circumferential stress in a uniformly pressurized thick spherical shell is given by:

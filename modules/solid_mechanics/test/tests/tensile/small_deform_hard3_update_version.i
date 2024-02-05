@@ -122,7 +122,7 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1.0
     value_residual = 0.5
     internal_0 = 0

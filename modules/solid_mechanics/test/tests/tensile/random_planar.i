@@ -192,13 +192,13 @@
 
 [UserObjects]
   [./hard]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1E6
     value_residual = 0
     internal_limit = 1
   [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensileMulti
+    type = SolidMechanicsPlasticTensileMulti
     tensile_strength = hard
     yield_function_tolerance = 1.0E-1
     shift = 1.0E-1

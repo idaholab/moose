@@ -169,11 +169,11 @@
 
 [UserObjects]
   [./hard]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1
   [../]
   [./tens]
-    type = TensorMechanicsPlasticTensileMulti
+    type = SolidMechanicsPlasticTensileMulti
     tensile_strength = hard
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5

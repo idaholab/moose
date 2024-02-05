@@ -175,11 +175,11 @@
 
 [UserObjects]
   [./strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
   [../]
   [./cap]
-    type = TensorMechanicsPlasticMeanCap
+    type = SolidMechanicsPlasticMeanCap
     a = 1
     strength = strength
     yield_function_tolerance = 1E-3

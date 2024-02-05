@@ -29,7 +29,7 @@ N = 2
 []
 
 [Physics]
-  [TensorMechanics]
+  [SolidMechanics]
     [QuasiStatic]
       [all]
         strain = SMALL

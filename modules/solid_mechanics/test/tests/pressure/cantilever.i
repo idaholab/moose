@@ -43,7 +43,7 @@
 []
 
 [Kernels]
-  [TensorMechanics]
+  [SolidMechanics]
   []
 []
 

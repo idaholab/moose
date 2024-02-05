@@ -73,7 +73,7 @@
 []
 
 [Physics]
-  [TensorMechanics]
+  [SolidMechanics]
     [QuasiStatic]
       [all]
         strain = SMALL

@@ -179,22 +179,22 @@
 
 [UserObjects]
   [./coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E7
   [../]
   [./fric]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
     convert_to_radians = true
   [../]
   [./dil]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
     convert_to_radians = true
   [../]
 
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombMulti
+    type = SolidMechanicsPlasticMohrCoulombMulti
     cohesion = coh
     friction_angle = fric
     dilation_angle = dil

@@ -128,18 +128,18 @@
 
 [UserObjects]
   [./strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1
   [../]
   [./cap1]
-    type = TensorMechanicsPlasticMeanCap
+    type = SolidMechanicsPlasticMeanCap
     a = -1
     strength = strength
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
   [../]
   [./cap2]
-    type = TensorMechanicsPlasticMeanCap
+    type = SolidMechanicsPlasticMeanCap
     a = 1
     strength = strength
     yield_function_tolerance = 1E-3

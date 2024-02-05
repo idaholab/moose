@@ -252,11 +252,11 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 300
   [../]
   [./Orthotropic]
-    type = TensorMechanicsPlasticOrthotropic
+    type = SolidMechanicsPlasticOrthotropic
     b = -0.2
     c1 = '1 1 1 1 1 1'
     c2 = '1 1 1 1 1 1'

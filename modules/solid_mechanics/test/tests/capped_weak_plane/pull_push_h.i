@@ -347,29 +347,29 @@
 
 [UserObjects]
   [./coh_irrelevant]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 2E6
     value_residual = 1E6
     internal_limit = 0.01
   [../]
   [./tanphi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.5
     value_residual = 0.2
     internal_limit = 0.01
   [../]
   [./tanpsi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.166666666667
   [../]
   [./t_strength]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0
     value_residual = 1E8
     internal_limit = 0.1
   [../]
   [./c_strength]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1E8
     value_residual = 0.0
     internal_limit = 0.01

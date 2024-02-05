@@ -181,15 +181,15 @@
 
 [UserObjects]
   [./tensile_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
   [../]
   [./compressive_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = -1
   [../]
   [./cap]
-    type = TensorMechanicsPlasticMeanCapTC
+    type = SolidMechanicsPlasticMeanCapTC
     tensile_strength = tensile_strength
     compressive_strength = compressive_strength
     yield_function_tolerance = 1E-3

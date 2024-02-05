@@ -439,31 +439,31 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1E6
     value_residual = 2E6
     internal_limit = 1
   [../]
   [./cs]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1E7
     value_residual = 0.5E7
     internal_limit = 1
   [../]
   [./coh]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 2E6
     value_residual = 1E6
     internal_limit = 1
   [../]
   [./phi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.6
     value_residual = 0.2
     internal_limit = 1
   [../]
   [./psi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.5
     value_residual = 0.1
     internal_limit = 1

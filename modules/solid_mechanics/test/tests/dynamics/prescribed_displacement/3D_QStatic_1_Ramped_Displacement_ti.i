@@ -92,7 +92,7 @@
 []
 
 [Kernels]
-  [./DynamicTensorMechanics] # zeta*K*vel + K * disp
+  [./DynamicSolidMechanics] # zeta*K*vel + K * disp
     displacements = 'disp_x disp_y disp_z'
     stiffness_damping_coefficient = 0.000025
   [../]

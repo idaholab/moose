@@ -269,13 +269,13 @@
 
 [UserObjects]
   [./yield_strength]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 20E6
     value_residual = 10E6
     internal_limit = 1
   [../]
   [./j2]
-    type = TensorMechanicsPlasticJ2
+    type = SolidMechanicsPlasticJ2
     yield_strength = yield_strength
     yield_function_tolerance = 1.0E2
     internal_constraint_tolerance = 1.0E-7
@@ -284,13 +284,13 @@
 
 
   [./compressive_strength]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 15E6
     value_residual = 5E6
     internal_limit = 1
   [../]
   [./cap]
-    type = TensorMechanicsPlasticMeanCap
+    type = SolidMechanicsPlasticMeanCap
     a = -1
     strength = compressive_strength
     yield_function_tolerance = 1.0E2

@@ -1,4 +1,4 @@
-# Uses an Abbo et al smoothed version of Mohr-Coulomb (via TensorMechanicsPlasticMohrCoulomb and ComputeMultiPlasticityStress) to simulate the following problem.
+# Uses an Abbo et al smoothed version of Mohr-Coulomb (via SolidMechanicsPlasticMohrCoulomb and ComputeMultiPlasticityStress) to simulate the following problem.
 # A cubical block is notched around its equator.
 # All of its outer surfaces have roller BCs, but the notched region is free to move as needed
 # The block is initialised with a high hydrostatic tensile stress
@@ -179,21 +179,21 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5E6
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi

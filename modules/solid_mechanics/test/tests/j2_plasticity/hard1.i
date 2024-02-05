@@ -195,11 +195,11 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 2
   [../]
   [./j2]
-    type = TensorMechanicsPlasticJ2
+    type = SolidMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9

@@ -1,4 +1,4 @@
-# Uses an unsmoothed version of capped-Mohr-Coulomb (via ComputeMultiPlasticityStress with TensorMechanicsPlasticTensileMulti and TensorMechanicsPlasticMohrCoulombMulti) to simulate the following problem.
+# Uses an unsmoothed version of capped-Mohr-Coulomb (via ComputeMultiPlasticityStress with SolidMechanicsPlasticTensileMulti and SolidMechanicsPlasticMohrCoulombMulti) to simulate the following problem.
 # A cubical block is notched around its equator.
 # All of its outer surfaces have roller BCs, but the notched region is free to move as needed
 # The block is initialised with a high hydrostatic tensile stress
@@ -191,11 +191,11 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 3E6
   [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensileMulti
+    type = SolidMechanicsPlasticTensileMulti
     tensile_strength = ts
     yield_function_tolerance = 1
     internal_constraint_tolerance = 1.0E-6
@@ -205,21 +205,21 @@
   [../]
 
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5E6
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombMulti
+    type = SolidMechanicsPlasticMohrCoulombMulti
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi

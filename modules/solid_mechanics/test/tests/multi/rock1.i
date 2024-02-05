@@ -319,21 +319,21 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 4E7
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi
@@ -343,30 +343,30 @@
   [../]
 
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensile
+    type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]
   [./coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
   [./tanphi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.46630766
   [../]
   [./tanpsi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.46630766
   [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = SolidMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi
@@ -375,11 +375,11 @@
     internal_constraint_tolerance = 1.0E-7
   [../]
   [./str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.01E6
   [../]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
+    type = SolidMechanicsPlasticWeakPlaneTensile
     tensile_strength = str
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7

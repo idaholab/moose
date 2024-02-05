@@ -257,14 +257,14 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningPowerRule
+    type = SolidMechanicsHardeningPowerRule
     value_0 = 300
     epsilon0 = 1
     exponent = 1e1
 
   [../]
   [./Orthotropic]
-    type = TensorMechanicsPlasticOrthotropic
+    type = SolidMechanicsPlasticOrthotropic
     b = -0.1
     c1 = '1 1 1 1 1 1'
     c2 = '1 1 1 1 1 1'

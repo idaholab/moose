@@ -80,27 +80,27 @@
 
 [UserObjects]
   [./ts]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
   [../]
   [./cs]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 10
   [../]
   [./mc_coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 4
   [../]
   [./phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.8
   [../]
   [./psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.4
   [../]
   [./dp]
-    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
     mc_dilation_angle = psi

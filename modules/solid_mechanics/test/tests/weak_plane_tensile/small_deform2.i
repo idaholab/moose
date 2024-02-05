@@ -105,11 +105,11 @@
 
 [UserObjects]
   [str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 5
   []
   [wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
+    type = SolidMechanicsPlasticWeakPlaneTensile
     tensile_strength = str
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5

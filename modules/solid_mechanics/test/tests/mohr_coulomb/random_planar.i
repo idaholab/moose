@@ -129,24 +129,24 @@
 
 [UserObjects]
   [./coh]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 1000
     value_residual = 100
     internal_limit = 4
   [../]
   [./phi]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.8
     value_residual = 0.3
     internal_limit = 2
   [../]
   [./psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 15
     convert_to_radians = true
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombMulti
+    type = SolidMechanicsPlasticMohrCoulombMulti
     cohesion = coh
     friction_angle = phi
     dilation_angle = psi

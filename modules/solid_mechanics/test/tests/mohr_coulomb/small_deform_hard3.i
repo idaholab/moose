@@ -195,25 +195,25 @@
 
 [UserObjects]
   [./mc_coh]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 10
     value_residual = 9.9
     rate = 1E7
   [../]
   [./mc_phi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 0.8726646 # 50deg
     value_residual = 0.8901179 # 51deg
     rate = 1E7
   [../]
   [./mc_psi]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 0
     value_residual = 0.8726646 # 50deg
     rate = 3000
   [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi

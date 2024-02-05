@@ -220,30 +220,30 @@
 
 [UserObjects]
   [./wpt_str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1000
   [../]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
+    type = SolidMechanicsPlasticWeakPlaneTensile
     tensile_strength = wpt_str
     yield_function_tolerance = 1.0
     internal_constraint_tolerance = 1.0E-7
   [../]
 
   [./wps_c]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1.0E5
   [../]
   [./wps_tan_phi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.466
   [../]
   [./wps_tan_psi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.087
   [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = SolidMechanicsPlasticWeakPlaneShear
     cohesion = wps_c
     tan_friction_angle = wps_tan_phi
     tan_dilation_angle = wps_tan_psi

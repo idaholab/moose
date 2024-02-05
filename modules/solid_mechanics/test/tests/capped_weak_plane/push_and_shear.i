@@ -71,7 +71,7 @@
 []
 
 [Kernels]
-  [DynamicTensorMechanics] # zeta*K*vel + K * disp
+  [DynamicSolidMechanics] # zeta*K*vel + K * disp
     displacements = 'disp_x disp_y disp_z'
     stiffness_damping_coefficient = 1E-2 # higher values mean more damping via stiffness
     hht_alpha = 0 # better nonlinear convergence than for alpha>0
@@ -471,23 +471,23 @@
 
 [UserObjects]
   [coh]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E6
   []
   [tanphi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.5
   []
   [tanpsi]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.166666666667
   []
   [t_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1E80
   []
   [c_strength]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0
   []
 []

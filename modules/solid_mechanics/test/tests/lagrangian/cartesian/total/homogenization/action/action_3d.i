@@ -26,7 +26,7 @@
 []
 
 [Physics]
-  [TensorMechanics]
+  [SolidMechanics]
     [QuasiStatic]
       [all]
         strain = FINITE

@@ -44,7 +44,7 @@
 []
 
 [Kernels]
-  [./DynamicTensorMechanics]
+  [./DynamicSolidMechanics]
     displacements = 'disp_x'
   [../]
 []

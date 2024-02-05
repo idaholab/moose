@@ -47,13 +47,13 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0
     value_residual = 1
     internal_limit = 1
   [../]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
+    type = SolidMechanicsPlasticWeakPlaneTensile
     tensile_strength = str
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5

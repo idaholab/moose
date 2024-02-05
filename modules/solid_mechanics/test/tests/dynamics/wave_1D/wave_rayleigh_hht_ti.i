@@ -55,7 +55,7 @@
 []
 
 [Kernels]
-  [./DynamicTensorMechanics]
+  [./DynamicSolidMechanics]
     displacements = 'disp_x disp_y disp_z'
     hht_alpha = -0.3
     stiffness_damping_coefficient = 0.1

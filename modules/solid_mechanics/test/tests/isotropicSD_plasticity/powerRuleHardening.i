@@ -323,14 +323,14 @@
 
 [UserObjects]
   [./str]
-    type = TensorMechanicsHardeningPowerRule
+    type = SolidMechanicsHardeningPowerRule
     value_0 = 300
     epsilon0 = 1
     exponent = 1e2
 
   [../]
   [./IsotropicSD]
-    type = TensorMechanicsPlasticIsotropicSD
+    type = SolidMechanicsPlasticIsotropicSD
     b = -0.2
     c = -0.779422863
     associative = true

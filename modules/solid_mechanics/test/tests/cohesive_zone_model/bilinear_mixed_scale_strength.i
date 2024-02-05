@@ -46,7 +46,7 @@
 []
 
 [Physics]
-  [TensorMechanics]
+  [SolidMechanics]
     [QuasiStatic]
       generate_output = 'stress_yy'
       [all]

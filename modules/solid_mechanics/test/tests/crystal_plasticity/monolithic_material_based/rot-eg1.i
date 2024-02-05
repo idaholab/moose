@@ -224,7 +224,7 @@
   [../]
 []
 
-[TensorMechanics]
+[SolidMechanics]
   [./tensormech]
     disp_z = uz
     disp_y = uy
