@@ -89,10 +89,10 @@ Parameters:
 
 ## Inspect NEML2 information
 
-The MOOSE tensor-mechanics module also provides a command-line option to inspect the NEML2 material model _without_ running the entire simulation. This is achieved using the `--parse-neml2-only` command-line argument, i.e.
+The MOOSE solid-mechanics module also provides a command-line option to inspect the NEML2 material model _without_ running the entire simulation. This is achieved using the `--parse-neml2-only` command-line argument, i.e.
 
 ```bash
-tensor_mechanics-opt -i input.i --parse-neml2-only
+solid_mechanics-opt -i input.i --parse-neml2-only
 ```
 
 !syntax parameters /NEML2/NEML2Action

@@ -8,7 +8,7 @@ The InclinedNoDisplacementBCAction Action, given in the input file as simply `In
 
 ## Example Input Syntax
 
-!listing modules/tensor_mechanics/test/tests/inclined_bc/inclined_bc_action.i block=BCs/InclinedNoDisplacementBC
+!listing modules/solid_mechanics/test/tests/inclined_bc/inclined_bc_action.i block=BCs/InclinedNoDisplacementBC
 
 !syntax parameters /BCs/InclinedNoDisplacementBC/InclinedNoDisplacementBCAction
 

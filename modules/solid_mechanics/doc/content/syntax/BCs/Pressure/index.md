@@ -33,7 +33,7 @@ be selected via the `use_automatic_differentiation` input parameter.
 
 ## Example Input Syntax
 
-!listing modules/tensor_mechanics/test/tests/pressure/pressure_test.i block=BCs/Pressure
+!listing modules/solid_mechanics/test/tests/pressure/pressure_test.i block=BCs/Pressure
 
 !syntax parameters /BCs/Pressure/PressureAction
 

@@ -29,7 +29,7 @@ Note that the location of each of the variables in the `displacements` string de
 
 ## Example Input Syntax
 
-!listing modules/tensor_mechanics/test/tests/coupled_pressure/coupled_pressure_test.i block=BCs/CoupledPressure
+!listing modules/solid_mechanics/test/tests/coupled_pressure/coupled_pressure_test.i block=BCs/CoupledPressure
 
 !syntax parameters /BCs/CoupledPressure/CoupledPressureAction
 
