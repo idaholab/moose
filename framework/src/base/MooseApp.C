@@ -312,6 +312,10 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
+  MooseEnum device("cpu gpu", "gpu");
+  params.addParam<MooseEnum>(
+      "libtorch_device", device, "The device type we want to run libtorch on.");
+
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
       "gperf_profiler_on",
@@ -407,6 +411,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
+#ifdef LIBTORCH_ENABLED
+    ,
+    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+#endif
 {
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
@@ -2815,3 +2823,28 @@ MooseApp::constructingMeshGenerators() const
   return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
          _mesh_generator_system.appendingMeshGenerators();
 }
+
+#ifdef LIBTORCH_ENABLED
+torch::DeviceType
+MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum)
+{
+  if (device_enum == "gpu")
+  {
+#ifdef __APPLE__
+    if (!torch::mps::is_available())
+      mooseError("MPS is not available for GPU usage! We only support MPS-based GPU libtorch "
+                 "operations on Mac(R) systems!");
+    return torch::kMPS;
+#elif __linux__
+    if (!torch::cuda::is_available())
+      mooseError("CUDA is not available for GPU usage! We only support CUDA-based GPU libtorch "
+                 "operations on Linux systems!");
+    return torch::kCUDA;
+#else
+    mooseError("We only support GPU-based libtorch on Linux and Mac systems!");
+#endif
+  }
+  else
+    return torch::kCPU;
+}
+#endif
