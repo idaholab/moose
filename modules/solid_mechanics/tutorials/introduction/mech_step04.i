@@ -37,7 +37,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     # we anticipate large deformation

@@ -16,7 +16,7 @@
   second_order = true
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./block1]
     strain = FINITE #change to use finite strain instead of small linearized strain class
     add_variables = true #detects the change of the mesh to second order and automatically sets the variables

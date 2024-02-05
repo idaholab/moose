@@ -11,7 +11,7 @@
   uniform_refine = 1
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./block1]
     strain = SMALL
     add_variables = true

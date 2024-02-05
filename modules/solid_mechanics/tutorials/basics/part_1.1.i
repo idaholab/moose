@@ -10,7 +10,7 @@
   file = necking_quad4.e
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./block1]
     strain = SMALL #Small linearized strain, automatically set to XY coordinates
     add_variables = true #Add the variables from the displacement string in GlobalParams

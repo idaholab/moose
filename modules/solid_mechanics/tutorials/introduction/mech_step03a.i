@@ -55,7 +55,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     automatic_eigenstrain_names = true

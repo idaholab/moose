@@ -42,7 +42,7 @@
     variable = disp_y
     value = -9.81
   [../]
-  [./SolidMechanics]
+  [./TensorMechanics]
     #Stress divergence kernels
     displacements = 'disp_x disp_y disp_z'
   [../]

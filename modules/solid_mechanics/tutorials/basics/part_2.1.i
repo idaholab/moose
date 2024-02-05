@@ -15,7 +15,7 @@
   uniform_refine = 1
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./block1]
     strain = SMALL #detects the change in coordinate system and automatically sets the correct strain class
     add_variables = true
