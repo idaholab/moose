@@ -23,13 +23,13 @@ registerMooseAction("SolidMechanicsApp", PoroMechanicsAction, "add_kernel");
 InputParameters
 PoroMechanicsAction::validParams()
 {
-  InputParameters params = SolidMechanicsAction::validParams();
+  InputParameters params = QuasiStaticSolidMechanicsPhysics::validParams();
   params.addRequiredParam<VariableName>("porepressure", "The pore pressure variable");
   return params;
 }
 
 PoroMechanicsAction::PoroMechanicsAction(const InputParameters & params)
-  : SolidMechanicsAction(params)
+  : QuasiStaticSolidMechanicsPhysics(params)
 {
   if (_use_ad)
     paramError("use_ad", "AD not setup for use with PoroMechanicsAction");
@@ -38,7 +38,7 @@ PoroMechanicsAction::PoroMechanicsAction(const InputParameters & params)
 void
 PoroMechanicsAction::act()
 {
-  SolidMechanicsAction::act();
+  QuasiStaticSolidMechanicsPhysics::act();
 
   if (_current_task == "add_kernel")
   {

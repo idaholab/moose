@@ -11,12 +11,12 @@
 
 #include "Action.h"
 
-class SolidMechanicsPhysicsBase : public Action
+class QuasiStaticSolidMechanicsPhysicsBase : public Action
 {
 public:
   static InputParameters validParams();
 
-  SolidMechanicsPhysicsBase(const InputParameters & params);
+  QuasiStaticSolidMechanicsPhysicsBase(const InputParameters & params);
 
   static MultiMooseEnum outputPropertiesType();
   static MultiMooseEnum materialOutputOrders();

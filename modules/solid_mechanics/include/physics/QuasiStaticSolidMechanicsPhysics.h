@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "SolidMechanicsPhysicsBase.h"
+#include "QuasiStaticSolidMechanicsPhysicsBase.h"
 #include "libmesh/point.h"
 
-class SolidMechanicsPhysics : public SolidMechanicsPhysicsBase
+class QuasiStaticSolidMechanicsPhysics : public QuasiStaticSolidMechanicsPhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  SolidMechanicsPhysics(const InputParameters & params);
+  QuasiStaticSolidMechanicsPhysics(const InputParameters & params);
 
   virtual void act();
 
@@ -119,7 +119,7 @@ protected:
   bool _direction_valid;
   bool _verbose;
 
-  /// points used to determine axis of rotation for cyclindrical stress/strain quantities
+  /// points used to determine axis of rotation for cylindrical stress/strain quantities
   Point _cylindrical_axis_point1;
   Point _cylindrical_axis_point2;
   Point _direction;
@@ -170,7 +170,7 @@ protected:
 
 template <typename T, typename T2>
 bool
-SolidMechanicsPhysics::setupOutput(std::string out, T table, T2 setup)
+QuasiStaticSolidMechanicsPhysics::setupOutput(std::string out, T table, T2 setup)
 {
   for (const auto & t1 : table)
   {

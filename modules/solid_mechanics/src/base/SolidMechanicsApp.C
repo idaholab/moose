@@ -64,8 +64,23 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
   registerSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
 
-  registerSyntax("LegacyTensorMechanicsAction", "Kernels/TensorMechanics");
-  registerSyntax("LegacyDynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
+  registerDeprecatedSyntax("LegacyTensorMechanicsAction",
+                           "Kernels/TensorMechanics",
+                           "The 'Kernels/TensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics/QuasiStatic' instead.");
+  registerDeprecatedSyntax("LegacyDynamicTensorMechanicsAction",
+                           "Kernels/DynamicTensorMechanics",
+                           "The 'Kernels/DynamicTensorMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics/Dynamic' instead.");
+  // For convenience, since the Kernels/XYZMechanics syntax is still around
+  registerDeprecatedSyntax("LegacyTensorMechanicsAction",
+                           "Kernels/SolidMechanics",
+                           "The 'Kernels/SolidMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics/QuasiStatic' instead.");
+  registerDeprecatedSyntax("LegacyDynamicTensorMechanicsAction",
+                           "Kernels/DynamicSolidMechanics",
+                           "The 'Kernels/DynamicSolidMechanics' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics/Dynamic' instead.");
   registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
 
   registerSyntax("EmptyAction", "BCs/Pressure");
@@ -86,18 +101,19 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
                            "'Physics/SolidMechanics' instead.");
   registerDeprecatedSyntax("CommonTensorMechanicsAction",
                            "Modules/TensorMechanics/Master",
-                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
-                           "'Physics/SolidMechanics' instead.");
-  registerDeprecatedSyntax("CommonTensorMechanicsAction",
-                           "Modules/TensorMechanics/DynamicMaster",
-                           "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
-                           "'Physics/SolidMechanics' instead.");
-  registerDeprecatedSyntax("TensorMechanicsAction",
+                           "The 'Modules/TensorMechanics/Master' syntax is deprecated. Please use "
+                           "'Physics/SolidMechanics/QuasiStatic' instead.");
+  registerDeprecatedSyntax(
+      "CommonTensorMechanicsAction",
+      "Modules/TensorMechanics/DynamicMaster",
+      "The 'Modules/TensorMechanics/DynamicMaster' syntax is deprecated. Please use "
+      "'Physics/SolidMechanics/Dynamic' instead.");
+  registerDeprecatedSyntax("QuasiStaticSolidMechanicsPhysics",
                            "Modules/TensorMechanics/Master/*",
                            "The 'Modules/TensorMechanics/Master' syntax is deprecated. Please use "
                            "'Physics/SolidMechanics/QuasiStatic' instead.");
   registerDeprecatedSyntax(
-      "DynamicTensorMechanicsAction",
+      "DynamicSolidMechanicsPhysics",
       "Modules/TensorMechanics/DynamicMaster/*",
       "The 'Modules/TensorMechanics/DynamicMaster' syntax is deprecated. Please use "
       "'Physics/SolidMechanics/Dynamic' instead.");
@@ -136,10 +152,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // New Physics syntax
   registerSyntax("GeneralizedPlaneStrainAction", "Physics/SolidMechanics/GeneralizedPlaneStrain/*");
   registerSyntax("GlobalStrainAction", "Physics/SolidMechanics/GlobalStrain/*");
-  registerSyntax("CommonTensorMechanicsAction", "Physics/SolidMechanics/QuasiStatic");
-  registerSyntax("CommonTensorMechanicsAction", "Physics/SolidMechanics/Dynamic");
-  registerSyntax("TensorMechanicsAction", "Physics/SolidMechanics/QuasiStatic/*");
-  registerSyntax("DynamicTensorMechanicsAction", "Physics/SolidMechanics/Dynamic/*");
+  registerSyntax("CommonSolidMechanicsAction", "Physics/SolidMechanics/QuasiStatic");
+  registerSyntax("CommonSolidMechanicsAction", "Physics/SolidMechanics/Dynamic");
+  registerSyntax("QuasiStaticSolidMechanicsPhysics", "Physics/SolidMechanics/QuasiStatic/*");
+  registerSyntax("DynamicSolidMechanicsPhysics", "Physics/SolidMechanics/Dynamic/*");
 
   registerSyntax("CommonLineElementAction", "Physics/SolidMechanics/LineElement/QuasiStatic");
   registerSyntax("LineElementAction", "Physics/SolidMechanics/LineElement/QuasiStatic/*");

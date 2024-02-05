@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CommonSolidMechanicsAction.h"
-#include "SolidMechanicsPhysics.h"
+#include "QuasiStaticSolidMechanicsPhysics.h"
 #include "ActionWarehouse.h"
 
 registerMooseAction("SolidMechanicsApp", CommonSolidMechanicsAction, "meta_action");
@@ -16,8 +16,8 @@ registerMooseAction("SolidMechanicsApp", CommonSolidMechanicsAction, "meta_actio
 InputParameters
 CommonSolidMechanicsAction::validParams()
 {
-  InputParameters params = SolidMechanicsActionBase::validParams();
-  params.addClassDescription("Store common tensor mechanics parameters");
+  InputParameters params = QuasiStaticSolidMechanicsPhysicsBase::validParams();
+  params.addClassDescription("Store common solid mechanics parameters");
   return params;
 }
 
@@ -30,7 +30,7 @@ void
 CommonSolidMechanicsAction::act()
 {
   // check if sub-blocks block are found which will use the common parameters
-  auto action = _awh.getActions<SolidMechanicsActionBase>();
+  auto action = _awh.getActions<QuasiStaticSolidMechanicsPhysicsBase>();
   if (action.size() == 0)
     mooseWarning("Common parameters are supplied, but not used in ", parameters().blockLocation());
 }

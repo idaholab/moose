@@ -12,7 +12,7 @@
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
-#include "SolidMechanicsPhysics.h"
+#include "QuasiStaticSolidMechanicsPhysics.h"
 #include "Material.h"
 
 #include "BlockRestrictable.h"
@@ -23,32 +23,36 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "meta_action");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "meta_action");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "setup_mesh_complete");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "validate_coordinate_systems");
+registerMooseAction("SolidMechanicsApp",
+                    QuasiStaticSolidMechanicsPhysics,
+                    "validate_coordinate_systems");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_variable");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_variable");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_aux_variable");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_aux_variable");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_kernel");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_kernel");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_aux_kernel");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_aux_kernel");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_material");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_material");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_master_action_material");
+registerMooseAction("SolidMechanicsApp",
+                    QuasiStaticSolidMechanicsPhysics,
+                    "add_master_action_material");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_scalar_kernel");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_scalar_kernel");
 
-registerMooseAction("SolidMechanicsApp", SolidMechanicsPhysics, "add_user_object");
+registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "add_user_object");
 
 InputParameters
-SolidMechanicsPhysics::validParams()
+QuasiStaticSolidMechanicsPhysics::validParams()
 {
-  InputParameters params = SolidMechanicsPhysicsBase::validParams();
+  InputParameters params = QuasiStaticSolidMechanicsPhysicsBase::validParams();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
 
   // parameters specified here only appear in the input file sub-blocks of the
@@ -61,17 +65,17 @@ SolidMechanicsPhysics::validParams()
   params.addParamNamesToGroup("block", "Advanced");
 
   params.addParam<MultiMooseEnum>("additional_generate_output",
-                                  SolidMechanicsPhysicsBase::outputPropertiesType(),
+                                  QuasiStaticSolidMechanicsPhysicsBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain (will be "
                                   "appended to the list in `generate_output`)");
   params.addParam<MultiMooseEnum>(
       "additional_material_output_order",
-      SolidMechanicsPhysicsBase::materialOutputOrders(),
+      QuasiStaticSolidMechanicsPhysicsBase::materialOutputOrders(),
       "Specifies the order of the FE shape function to use for this variable.");
 
   params.addParam<MultiMooseEnum>(
       "additional_material_output_family",
-      SolidMechanicsPhysicsBase::materialOutputFamilies(),
+      QuasiStaticSolidMechanicsPhysicsBase::materialOutputFamilies(),
       "Specifies the family of FE shape functions to use for this variable.");
 
   params.addParamNamesToGroup("additional_generate_output additional_material_output_order "
@@ -115,8 +119,8 @@ SolidMechanicsPhysics::validParams()
   return params;
 }
 
-SolidMechanicsPhysics::SolidMechanicsPhysics(const InputParameters & params)
-  : SolidMechanicsPhysicsBase(params),
+QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputParameters & params)
+  : QuasiStaticSolidMechanicsPhysicsBase(params),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
@@ -304,7 +308,7 @@ SolidMechanicsPhysics::SolidMechanicsPhysics(const InputParameters & params)
 }
 
 void
-SolidMechanicsPhysics::act()
+QuasiStaticSolidMechanicsPhysics::act()
 {
   std::string ad_prepend = "";
   if (_use_ad)
@@ -313,7 +317,7 @@ SolidMechanicsPhysics::act()
   // Consistency checks across subdomains
   actSubdomainChecks();
 
-  // Gather info from all other SolidMechanicsPhysics
+  // Gather info from all other QuasiStaticSolidMechanicsPhysics
   actGatherActionParameters();
 
   // Deal with the optional AuxVariable based tensor quantity output
@@ -491,7 +495,7 @@ SolidMechanicsPhysics::act()
 }
 
 void
-SolidMechanicsPhysics::actSubdomainChecks()
+QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
 {
   // Do the coordinate system check only once the problem is created
   if (_current_task == "setup_mesh_complete")
@@ -534,7 +538,7 @@ SolidMechanicsPhysics::actSubdomainChecks()
 }
 
 void
-SolidMechanicsPhysics::actOutputGeneration()
+QuasiStaticSolidMechanicsPhysics::actOutputGeneration()
 {
   if (_current_task == "add_material")
     actOutputMatProp();
@@ -615,7 +619,7 @@ SolidMechanicsPhysics::actOutputGeneration()
 }
 
 void
-SolidMechanicsPhysics::actEigenstrainNames()
+QuasiStaticSolidMechanicsPhysics::actEigenstrainNames()
 {
   // Create containers for collecting blockIDs and eigenstrain names from materials
   std::map<std::string, std::set<SubdomainID>> material_eigenstrain_map;
@@ -732,7 +736,7 @@ SolidMechanicsPhysics::actEigenstrainNames()
 }
 
 void
-SolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
+QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
 {
   // Ensure material output order and family vectors are same size as generate output
 
@@ -782,7 +786,7 @@ SolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
 }
 
 void
-SolidMechanicsPhysics::actOutputMatProp()
+QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
 {
   std::string ad_prepend = _use_ad ? "AD" : "";
 
@@ -890,12 +894,12 @@ SolidMechanicsPhysics::actOutputMatProp()
 }
 
 void
-SolidMechanicsPhysics::actGatherActionParameters()
+QuasiStaticSolidMechanicsPhysics::actGatherActionParameters()
 {
-  // Gather info about all other master actions when we add variables
+  // Gather info about all other solid mechanics physics when we add variables
   if (_current_task == "validate_coordinate_systems" && getParam<bool>("add_variables"))
   {
-    auto actions = _awh.getActions<SolidMechanicsPhysics>();
+    auto actions = _awh.getActions<QuasiStaticSolidMechanicsPhysics>();
     for (const auto & action : actions)
     {
       const auto size_before = _subdomain_id_union.size();
@@ -904,18 +908,19 @@ SolidMechanicsPhysics::actGatherActionParameters()
       const auto size_after = _subdomain_id_union.size();
 
       if (size_after != size_before + added_size)
-        mooseError("The block restrictions in the SolidMechanics/Master actions must be "
+        mooseError("The block restrictions in the SolidMechanics/QuasiStatic actions must be "
                    "non-overlapping.");
 
       if (added_size == 0 && actions.size() > 1)
-        mooseError("No SolidMechanics/Master action can be block unrestricted if more than one "
-                   "SolidMechanics/Master action is specified.");
+        mooseError(
+            "No SolidMechanics/QuasiStatic action can be block unrestricted if more than one "
+            "SolidMechanics/QuasiStatic action is specified.");
     }
   }
 }
 
 void
-SolidMechanicsPhysics::actLagrangianKernelStrain()
+QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
 {
   std::string type;
   if (_coord_system == Moose::COORD_XYZ)
@@ -967,7 +972,7 @@ SolidMechanicsPhysics::actLagrangianKernelStrain()
 }
 
 void
-SolidMechanicsPhysics::actStressDivergenceTensorsStrain()
+QuasiStaticSolidMechanicsPhysics::actStressDivergenceTensorsStrain()
 {
   std::string ad_prepend = _use_ad ? "AD" : "";
 
@@ -1052,7 +1057,7 @@ SolidMechanicsPhysics::actStressDivergenceTensorsStrain()
 }
 
 std::string
-SolidMechanicsPhysics::getKernelType()
+QuasiStaticSolidMechanicsPhysics::getKernelType()
 {
   if (_lagrangian_kernels)
   {
@@ -1111,7 +1116,7 @@ SolidMechanicsPhysics::getKernelType()
 }
 
 InputParameters
-SolidMechanicsPhysics::getKernelParameters(std::string type)
+QuasiStaticSolidMechanicsPhysics::getKernelParameters(std::string type)
 {
   InputParameters params = _factory.getValidParams(type);
   params.applyParameters(

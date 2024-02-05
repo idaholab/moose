@@ -37,7 +37,7 @@ registerMooseAction("SolidMechanicsApp",
 InputParameters
 DynamicSolidMechanicsPhysics::validParams()
 {
-  InputParameters params = SolidMechanicsPhysics::validParams();
+  InputParameters params = QuasiStaticSolidMechanicsPhysics::validParams();
   params.addClassDescription("Set up dynamic stress divergence kernels");
   params.addParam<bool>("static_initialization",
                         false,
@@ -96,7 +96,7 @@ DynamicSolidMechanicsPhysics::validParams()
 }
 
 DynamicSolidMechanicsPhysics::DynamicSolidMechanicsPhysics(const InputParameters & params)
-  : SolidMechanicsPhysics(params),
+  : QuasiStaticSolidMechanicsPhysics(params),
     _velocities(getParam<std::vector<AuxVariableName>>("velocities")),
     _accelerations(getParam<std::vector<AuxVariableName>>("accelerations")),
     _newmark_beta(isParamValid("beta") ? getParam<Real>("beta") : getParam<Real>("newmark_beta")),
@@ -197,7 +197,7 @@ DynamicSolidMechanicsPhysics::act()
   }
 
   // call parent class method
-  SolidMechanicsPhysics::act();
+  QuasiStaticSolidMechanicsPhysics::act();
 }
 
 std::string
@@ -213,7 +213,7 @@ DynamicSolidMechanicsPhysics::getKernelType()
 InputParameters
 DynamicSolidMechanicsPhysics::getKernelParameters(std::string type)
 {
-  SolidMechanicsPhysics::getKernelParameters(type);
+  QuasiStaticSolidMechanicsPhysics::getKernelParameters(type);
   InputParameters params = _factory.getValidParams(type);
   params.applyParameters(parameters(), {"zeta", "alpha"});
 

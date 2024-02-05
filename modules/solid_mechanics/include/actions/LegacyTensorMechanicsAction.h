@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "SolidMechanicsAction.h"
+#include "QuasiStaticSolidMechanicsPhysics.h"
 
-class LegacyTensorMechanicsAction : public SolidMechanicsAction
+class LegacyTensorMechanicsAction : public QuasiStaticSolidMechanicsPhysics
 {
 public:
   static InputParameters validParams();

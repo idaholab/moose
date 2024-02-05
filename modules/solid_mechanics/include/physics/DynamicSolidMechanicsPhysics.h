@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "SolidMechanicsPhysics.h"
+#include "QuasiStaticSolidMechanicsPhysics.h"
 
-class DynamicSolidMechanicsPhysics : public SolidMechanicsPhysics
+class DynamicSolidMechanicsPhysics : public QuasiStaticSolidMechanicsPhysics
 {
 public:
   static InputParameters validParams();
