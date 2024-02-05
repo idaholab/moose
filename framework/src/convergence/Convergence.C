@@ -17,18 +17,13 @@ Convergence::validParams()
   params += SetupInterface::validParams();
 
   params.registerBase("Convergence");
-  //params.registerSystemAttributeName("ConvergenceName");
+  // params.registerSystemAttributeName("ConvergenceName");
   params.addClassDescription("Check convergence of the set up problem.");
 
   return params;
 }
 
 Convergence::Convergence(const InputParameters & parameters)
-  : MooseObject(parameters),
-    SetupInterface(this)
+  : MooseObject(parameters), SetupInterface(this)
 {
 }
-
-
-
-

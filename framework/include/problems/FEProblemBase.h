@@ -586,10 +586,9 @@ public:
   MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
 
   virtual void
-  addConvergence(const std::string & type, const std::string & name,
-                      InputParameters & parameters);
+  addConvergence(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0);
-  virtual bool hasConvergence(const std::string & name, const THREAD_ID tid=0);
+  virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0);
 
   /// Nonlinear convergence name
   ConvergenceName _nonlinear_convergence_name;
@@ -2153,7 +2152,6 @@ public:
   /// Flag that the nonlinear convergence name has been set
   bool _set_nonlinear_convergence_name;
 
-
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
   virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
@@ -2189,7 +2187,6 @@ protected:
 
   /// Flag that the nonlinear convergence name has been set
   bool _set_nonlinear_convergence_name;
-  
 
   /// maximum number
   unsigned int _n_nl_pingpong = 0;
@@ -2240,7 +2237,7 @@ protected:
   /// functions
   MooseObjectWarehouse<Function> _functions;
 
-  //convergence
+  // convergence
   MooseObjectWarehouse<Convergence> _convergences;
 
   /// nonlocal kernels

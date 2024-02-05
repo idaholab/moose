@@ -33,7 +33,6 @@
 
 registerMooseObject("MooseApp", ResidualConvergence);
 
-
 InputParameters
 ResidualConvergence::validParams()
 {
@@ -41,113 +40,119 @@ ResidualConvergence::validParams()
   params += FEProblemSolve::commonParams();
 
   params.addClassDescription("Check ResidualConvergence of the set up problem.");
-  
+
   return params;
 }
 
 ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   : Convergence(parameters),
-   _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-   _initialized(false)
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _initialized(false)
 {
   EquationSystems & es = _fe_problem.es();
-  
+
   if (isParamSetByUser("l_tol"))
-    {es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
+  {
+    es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
     _l_tol = getParam<Real>("l_tol");
-    }
-  
+  }
+
   if (isParamSetByUser("l_abs_tol"))
-    {es.parameters.set<Real>("linear solver absolute tolerance") = getParam<Real>("l_abs_tol");
+  {
+    es.parameters.set<Real>("linear solver absolute tolerance") = getParam<Real>("l_abs_tol");
     _l_abs_tol = getParam<Real>("l_abs_tol");
-    }
+  }
 
   if (isParamSetByUser("l_max_its"))
-    {es.parameters.set<unsigned int>("linear solver maximum iterations") =
-      getParam<unsigned int>("l_max_its");
+  {
+    es.parameters.set<unsigned int>("linear solver maximum iterations") =
+        getParam<unsigned int>("l_max_its");
     _l_max_its = getParam<unsigned int>("l_max_its");
-    }
+  }
 
   if (isParamSetByUser("nl_max_its"))
-    {es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
-      getParam<unsigned int>("nl_max_its");
+  {
+    es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
+        getParam<unsigned int>("nl_max_its");
     _nl_max_its = getParam<unsigned int>("nl_max_its");
-    }
+  }
 
   if (isParamSetByUser("nl_forced_its"))
-    {_fe_problem.setNonlinearForcedIterations(getParam<unsigned int>("nl_forced_its"));
+  {
+    _fe_problem.setNonlinearForcedIterations(getParam<unsigned int>("nl_forced_its"));
     _nl_forced_its = getParam<unsigned int>("nl_forced_its");
-    }
+  }
 
   if (isParamSetByUser("nl_max_funcs"))
-    {es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
-      getParam<unsigned int>("nl_max_funcs");
+  {
+    es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
+        getParam<unsigned int>("nl_max_funcs");
     _nl_max_funcs = getParam<unsigned int>("nl_max_funcs");
-    }
-  
+  }
+
   if (isParamSetByUser("nl_abs_tol"))
-    {es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
-      getParam<Real>("nl_abs_tol");
+  {
+    es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
+        getParam<Real>("nl_abs_tol");
     _nl_abs_tol = getParam<Real>("nl_abs_tol");
-    }
-  
+  }
+
   if (isParamSetByUser("nl_rel_tol"))
-    {es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
-      getParam<Real>("nl_rel_tol");
+  {
+    es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
+        getParam<Real>("nl_rel_tol");
     _nl_rel_tol = getParam<Real>("nl_rel_tol");
-    }
+  }
 
   if (isParamSetByUser("nl_div_tol"))
-    {es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol"); 
+  {
+    es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol");
     _divtol = getParam<Real>("nl_div_tol");
-    }
+  }
 
   if (isParamSetByUser("nl_abs_div_tol"))
     _fe_problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
-    
 
   if (isParamSetByUser("nl_abs_step_tol"))
-    {es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
-      getParam<Real>("nl_abs_step_tol");
+  {
+    es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
+        getParam<Real>("nl_abs_step_tol");
     _nl_abs_step_tol = getParam<Real>("nl_abs_step_tol");
-    }
+  }
 
   if (isParamSetByUser("nl_rel_step_tol"))
-    {es.parameters.set<Real>("nonlinear solver relative step tolerance") =
-      getParam<Real>("nl_rel_step_tol");
+  {
+    es.parameters.set<Real>("nonlinear solver relative step tolerance") =
+        getParam<Real>("nl_rel_step_tol");
     _nl_rel_step_tol = getParam<Real>("nl_rel_step_tol");
-    }
-  
-  if (isParamSetByUser("nl_max_nonlinear_pingpong"))
-    {_fe_problem.setMaxNLPingPong(getParam<unsigned int>("n_max_nonlinear_pingpong"));
-    _n_max_nl_pingpong = getParam<unsigned int>("n_max_nonlinear_pingpong");
-    }
+  }
 
-  
+  if (isParamSetByUser("nl_max_nonlinear_pingpong"))
+  {
+    _fe_problem.setMaxNLPingPong(getParam<unsigned int>("n_max_nonlinear_pingpong"));
+    _n_max_nl_pingpong = getParam<unsigned int>("n_max_nonlinear_pingpong");
+  }
 }
 
 Convergence::MooseAlgebraicConvergence
-ResidualConvergence::checkAlgebraicConvergence(int it,
-                        Real xnorm,
-                        Real snorm,
-                        Real fnorm)
+ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm)
 {
-  //registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
+  // registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
   MooseAlgebraicConvergence reason = MooseAlgebraicConvergence::ITERATING;
 
-  //Needed by problems/residual_reference
+  // Needed by problems/residual_reference
   _fe_problem.nonlinearConvergenceSetup();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
-  SNES snes = system.getSNES(); //system.getSNES();
+  SNES snes = system.getSNES(); // system.getSNES();
 
   // Ask the SNES object about its tolerances.
   ierr = SNESGetTolerances(snes, &_atol, &_rtol, &_stol, &_maxit, &_maxf);
   CHKERRABORT(_fe_problem.comm().get(), ierr);
-  
+
   // Ask the SNES object about its divergence tolerance
 #if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   ierr = SNESGetDivergenceTolerance(snes, &_divtol);
@@ -211,8 +216,8 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
   else
     _n_nl_pingpong = 0;
 
-  long int _nl_forced_its=_fe_problem.getNonlinearForcedIterations();
-  
+  long int _nl_forced_its = _fe_problem.getNonlinearForcedIterations();
+
   std::ostringstream oss;
   if (fnorm != fnorm)
   {
@@ -226,8 +231,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
   }
   else if (_nfuncs >= _maxf)
   {
-    oss << "Exceeded maximum number of function evaluations: " << _nfuncs << " > " << _maxf
-        << '\n';
+    oss << "Exceeded maximum number of function evaluations: " << _nfuncs << " > " << _maxf << '\n';
     reason = MooseAlgebraicConvergence::DIVERGED;
   }
   else if ((it >= _nl_forced_its) && it && fnorm > system._last_nl_rnorm && fnorm >= _div_threshold)
@@ -236,7 +240,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
     reason = MooseAlgebraicConvergence::DIVERGED;
   }
   if ((it >= _nl_forced_its) && it && reason == MooseAlgebraicConvergence::ITERATING)
-  { 
+  {
     // If compute_initial_residual_before_preset_bcs==false, then use the
     // first residual computed by PETSc to determine convergence.
     Real the_residual = system._compute_initial_residual_before_preset_bcs
@@ -276,7 +280,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
   msg = oss.str();
   if (_app.multiAppLevel() > 0)
     MooseUtils::indentMessage(_app.name(), msg);
-      if (msg.length() > 0)
+  if (msg.length() > 0)
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
     PetscInfo(snes, "%s", msg.c_str());
 #else
@@ -285,4 +289,3 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
 
   return reason;
 }
-

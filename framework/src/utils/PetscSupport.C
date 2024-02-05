@@ -275,43 +275,44 @@ petscSetupOutput(CommandLine * cmd_line)
 
 PetscErrorCode
 petscAlgebraicTest(SNES snes,
-                        PetscInt it,
-                        PetscReal xnorm,
-                        PetscReal snorm,
-                        PetscReal fnorm,
-                        SNESConvergedReason * reason,
-                        void * ctx)
+                   PetscInt it,
+                   PetscReal xnorm,
+                   PetscReal snorm,
+                   PetscReal fnorm,
+                   SNESConvergedReason * reason,
+                   void * ctx)
 {
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
-  //TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
+  // TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
 
   // Error message that was set by the FEProblemBase and now is not used
   std::string msg;
-  
-  auto & convergence = problem.getConvergence(problem._nonlinear_convergence_name);
-  Convergence::MooseAlgebraicConvergence mreason=convergence.checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
 
-  //if (msg.length() > 0)
+  auto & convergence = problem.getConvergence(problem._nonlinear_convergence_name);
+  Convergence::MooseAlgebraicConvergence mreason =
+      convergence.checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
+
+  // if (msg.length() > 0)
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
     PetscInfo(snes, "%s", msg.c_str());
 #else
     PetscInfo(snes, msg.c_str());
 #endif
 
-  switch (mreason)
-  {
-    case Convergence::MooseAlgebraicConvergence::ITERATING:
-      *reason = SNES_CONVERGED_ITERATING;
-      break;
+    switch (mreason)
+    {
+      case Convergence::MooseAlgebraicConvergence::ITERATING:
+        *reason = SNES_CONVERGED_ITERATING;
+        break;
 
-    case Convergence::MooseAlgebraicConvergence::CONVERGED:
-      *reason = SNES_CONVERGED_FNORM_ABS;
-      break;
+      case Convergence::MooseAlgebraicConvergence::CONVERGED:
+        *reason = SNES_CONVERGED_FNORM_ABS;
+        break;
 
-    case Convergence::MooseAlgebraicConvergence::DIVERGED:
-      *reason = SNES_DIVERGED_DTOL;
-      break;
-  }
+      case Convergence::MooseAlgebraicConvergence::DIVERGED:
+        *reason = SNES_DIVERGED_DTOL;
+        break;
+    }
 
   return 0;
 }
@@ -425,8 +426,7 @@ petscSetDefaults(FEProblemBase & problem)
     // we use the default context provided by PETSc in addition to
     // a few other tests.
     {
-      auto ierr =
-          SNESSetConvergenceTest(snes, petscAlgebraicTest, &problem, LIBMESH_PETSC_NULLPTR);
+      auto ierr = SNESSetConvergenceTest(snes, petscAlgebraicTest, &problem, LIBMESH_PETSC_NULLPTR);
       CHKERRABORT(nl.comm().get(), ierr);
     }
 

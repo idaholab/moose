@@ -21,15 +21,13 @@ public:
   {
     ITERATING = 0,
     CONVERGED = 2,
-    DIVERGED  = -2
+    DIVERGED = -2
   };
 
   Convergence(const InputParameters & parameters);
 
   static InputParameters commonParams();
 
-  virtual MooseAlgebraicConvergence checkAlgebraicConvergence(int it,
-                        Real xnorm,
-                        Real snorm,
-                        Real fnorm) = 0;
+  virtual MooseAlgebraicConvergence
+  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
 };

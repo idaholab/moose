@@ -2276,13 +2276,12 @@ FEProblemBase::addFunction(const std::string & type,
   }
 }
 
-
 void
 FEProblemBase::addConvergence(const std::string & type,
-                           const std::string & name,
-                           InputParameters & parameters)
+                              const std::string & name,
+                              InputParameters & parameters)
 {
-  //parallel_object_only();
+  // parallel_object_only();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -2342,7 +2341,6 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
   return *ret;
 }
 
-
 bool
 FEProblemBase::hasConvergence(const std::string & name, const THREAD_ID tid)
 {
@@ -2354,15 +2352,15 @@ FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid)
 {
   // This thread lock is necessary since this method will create functions
   // for all threads if one is missing.
-  //Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+  // Threads::spin_mutex::scoped_lock lock(get_function_mutex);
 
   if (!hasConvergence(name, tid))
   {
-    //mooseError("Unable to find convergence criteria " + name);
+    // mooseError("Unable to find convergence criteria " + name);
     std::string class_name = "ResidualConvergence";
     InputParameters params = _factory.getValidParams(class_name);
     setNonlinearConvergenceObject("default");
-    addConvergence(class_name,_nonlinear_convergence_name, params);
+    addConvergence(class_name, _nonlinear_convergence_name, params);
   }
 
   auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());

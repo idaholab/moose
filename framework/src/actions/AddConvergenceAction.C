@@ -10,7 +10,6 @@
 #include "AddConvergenceAction.h"
 #include "FEProblem.h"
 
-
 registerMooseAction("MooseApp", AddConvergenceAction, "add_convergence");
 
 InputParameters
@@ -21,12 +20,14 @@ AddConvergenceAction::validParams()
   return params;
 }
 
-AddConvergenceAction::AddConvergenceAction(const InputParameters & params) : MooseObjectAction(params) {}
+AddConvergenceAction::AddConvergenceAction(const InputParameters & params)
+  : MooseObjectAction(params)
+{
+}
 
 void
 AddConvergenceAction::act()
 {
-    _problem->addConvergence(_type, _name, _moose_object_pars);
-    Moose::out<<"AddConvergenceAction::act()"<<std::endl;
+  _problem->addConvergence(_type, _name, _moose_object_pars);
+  Moose::out << "AddConvergenceAction::act()" << std::endl;
 }
-
