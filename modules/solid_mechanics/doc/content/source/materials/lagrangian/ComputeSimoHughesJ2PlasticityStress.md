@@ -77,7 +77,7 @@ Then we update the current configuration
 
 The follow example configures a large deformation Neo-Hookean model with J2 plasticity and linear hardening.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/materials/correctness/hyperelastic_J2_plastic.i
+!listing modules/solid_mechanics/test/tests/lagrangian/materials/correctness/hyperelastic_J2_plastic.i
          block=Materials
 
 !syntax parameters /Materials/ComputeSimoHughesJ2PlasticityStress

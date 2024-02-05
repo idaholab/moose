@@ -42,7 +42,7 @@ of internal forces, uses the `AbaqusUMATStress` plugin.
 
 The UEL plugin entry function signature is defined in the `AbaqusUserElement.h` header file
 
-!listing modules/tensor_mechanics/include/userobjects/AbaqusUserElement.h start=typedef end=validParams
+!listing modules/solid_mechanics/include/userobjects/AbaqusUserElement.h start=typedef end=validParams
 
 ### Output parameters
 

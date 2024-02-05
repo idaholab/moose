@@ -87,7 +87,7 @@ Recalling $\hat{F} = 0.5 \left( F^+ + F^-\right)$ and that $F_{ij}=\delta_{ij}\s
 
 ## Example Input File Syntax
 
-This object is automatically added from the [Cohesive Master Master Action](CohesiveZoneMaster/index.md) when `strain=FINITE`.
+This object is automatically added from the [Cohesive Zone Physics](CohesiveZone/index.md) when `strain=FINITE`.
 
 !syntax parameters /InterfaceKernels/CZMInterfaceKernelTotalLagrangian
 !syntax inputs /InterfaceKernels/CZMInterfaceKernelTotalLagrangian

@@ -24,12 +24,12 @@ reference tensor
 \end{equation}
 
 This class is most often used in
-[Generalized Plane Strain](modules/tensor_mechanics/generalized_plane_strain.md)
+[Generalized Plane Strain](modules/solid_mechanics/generalized_plane_strain.md)
 simulations to calculate the out-of-plane stress component.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/plane_strain.i block=Postprocessors
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/plane_strain.i block=Postprocessors
 
 !syntax parameters /Postprocessors/MaterialTensorIntegral
 

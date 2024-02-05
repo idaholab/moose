@@ -16,7 +16,7 @@ where $D_{ijkl}$ is the elasticity tensor.  See [!cite](hales15homogenization).
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/homogenization/anisoShortFiber.i block=Postprocessors/E1111
+!listing modules/solid_mechanics/test/tests/homogenization/anisoShortFiber.i block=Postprocessors/E1111
 
 
 !syntax parameters /Postprocessors/AsymptoticExpansionHomogenizationElasticConstants

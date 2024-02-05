@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=TensorMechanicsPlasticMohrCoulombMulti syntax=/UserObjects/TensorMechanicsPlasticMohrCoulombMulti
+!template load file=stubs/moose_object.md.template name=SolidMechanicsPlasticMohrCoulombMulti syntax=/UserObjects/SolidMechanicsPlasticMohrCoulombMulti

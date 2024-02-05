@@ -10,7 +10,7 @@ directions can be set up using the [MaterialVectorBodyForce action](MaterialVect
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/gravity/material_vector_body_force.i block=Modules/TensorMechanics/MaterialVectorBodyForce/all
+!listing modules/solid_mechanics/test/tests/gravity/material_vector_body_force.i block=Physics/SolidMechanics/MaterialVectorBodyForce/all
 
 !syntax parameters /Kernels/MaterialVectorBodyForce
 

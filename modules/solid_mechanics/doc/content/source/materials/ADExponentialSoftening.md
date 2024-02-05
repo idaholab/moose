@@ -14,11 +14,11 @@ For more details, refer to the non-AD version [ExponentialSoftening](/Exponentia
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/ad_smeared_cracking/cracking_rotation.i block=Materials/exponential_softening
+!listing modules/solid_mechanics/test/tests/ad_smeared_cracking/cracking_rotation.i block=Materials/exponential_softening
 
 `ADExponentialSoftening` must be run in conjunction with the ad fixed smeared cracking material model as shown below:
 
-!listing modules/tensor_mechanics/test/tests/ad_smeared_cracking/cracking_rotation.i block=Materials/cracking_stress
+!listing modules/solid_mechanics/test/tests/ad_smeared_cracking/cracking_rotation.i block=Materials/cracking_stress
 
 !syntax parameters /Materials/ADExponentialSoftening
 

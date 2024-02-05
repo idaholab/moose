@@ -9,7 +9,7 @@ Jacobian for the homogenization system.  It is identical to the [`TotalLagrangia
 class except it also provides the correct off-diagonal Jacobian
 terms for the [Lagrangian kernel homogenization system](Homogenization.md).
 
-The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can add this object
+The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax
@@ -22,7 +22,7 @@ The `constraint_types` parameters controls the type of constraint (deformation o
 The [homogenization system](Homogenization.md) documentation lists the order of these inputs
 for each problem dimension/type.  
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=Kernels
 
 !syntax parameters /Kernels/HomogenizedTotalLagrangianStressDivergence

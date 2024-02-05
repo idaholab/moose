@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=TensorMechanicsHardeningGaussian syntax=/UserObjects/TensorMechanicsHardeningGaussian
+!template load file=stubs/moose_object.md.template name=SolidMechanicsHardeningGaussian syntax=/UserObjects/SolidMechanicsHardeningGaussian

@@ -11,7 +11,7 @@ area underneath the stress-strain curve:
   u = \int_x \frac{1}{2} \sigma : d \epsilon
 \end{equation}
 where $\sigma$ is the stress and $\epsilon$ is the mechanical strain. In the
-tensor mechanics module we define the mechanical strain as the sum of the
+solid mechanics module we define the mechanical strain as the sum of the
 elastic and inelastic (e.g. plastic, creep) strain without the eigenstrains.
 
 The strain energy density can be calculated either in total or in incremental
@@ -30,7 +30,7 @@ should not be used to calculate the strain energy density for cyclic loading cas
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/strain_energy_density/incr_model_elas_plas.i block=Materials/strain_energy_density
+!listing modules/solid_mechanics/test/tests/strain_energy_density/incr_model_elas_plas.i block=Materials/strain_energy_density
 
 !syntax parameters /Materials/StrainEnergyDensity
 

@@ -226,7 +226,7 @@ inelastic models and the damage model.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/combined_creep_plasticity/creepWithPlasticity.i block=Materials
+!listing modules/solid_mechanics/test/tests/combined_creep_plasticity/creepWithPlasticity.i block=Materials
 
 
 !syntax parameters /Materials/ComputeCreepPlasticityStress

@@ -54,7 +54,7 @@ Any constitutive eigenstrain model developed for use within the [ComputeMultiple
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/cp_eigenstrains/volumetric_eigenstrain_increase.i block=Materials/stress/ Materials/void_eigenstrain/ Materials/void_density/ Materials/void_radius
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/cp_eigenstrains/volumetric_eigenstrain_increase.i block=Materials/stress/ Materials/void_eigenstrain/ Materials/void_density/ Materials/void_radius
 
 !syntax parameters /Materials/ComputeCrystalPlasticityVolumetricEigenstrain
 

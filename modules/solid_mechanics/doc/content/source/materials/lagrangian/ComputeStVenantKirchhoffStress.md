@@ -25,7 +25,7 @@ plot shows the results in terms of the Cauchy stress and logarithmic
 strain to illustrate that the large deformation version of the
 model is in fact nonlinear.
 
-!media tensor_mechanics/stvenant.png
+!media solid_mechanics/stvenant.png
        id=example
        style=width:50%;float:center;padding-top:1.5%;
        caption=Response of the St. Venant-Kirchhoff model to uniaxial deformation, plotted as log strain versus Cauchy stress.
@@ -36,7 +36,7 @@ The follow example configures a large deformation St. Venant-Kirchhoff
 model using the default elasticity tensor name to define the
 response.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/materials/correctness/stvenantkirchhoff.i
+!listing modules/solid_mechanics/test/tests/lagrangian/materials/correctness/stvenantkirchhoff.i
          block=Materials
 
 !syntax parameters /Materials/ComputeStVenantKirchhoffStress

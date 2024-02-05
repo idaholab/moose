@@ -19,7 +19,7 @@ Rotations to the elasticity tensor are applied as
 See [below](#rotation-examples) for examples of tensor rotations.
 
 For a general stiffness tensor with 21 independent components, the elasticity tensor within the
-tensor mechanics module can be represented with the notation shown in
+solid mechanics module can be represented with the notation shown in
 [eq:rank4tensor_aux_indices].  Nonetheless, the full Rank-4 tensor with all 81 components is
 created by `ComputeElasticityTensor`.
 \begin{equation}
@@ -111,14 +111,14 @@ where $k = 1 - \nu_{12} \nu_{21} - \nu_{23} \nu_{32} - \nu_{31} \nu_{13} - \nu_{
 
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/elasticity_tensor
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/elasticity_tensor
 
 In the Einstein index notation shown in [eq:rank4tensor_aux_indices], the parameter `C_ijkl`
 expects the elasticity components in the order `C_ijkl = '1111 1122 1133 2222 2233 3333 2323 3131
 1212'` for the `symmetric9` fill method option. Note that, in this case, the method `symmetric9` is used
 to enter an isotropic elasticity tensor.
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic_anisotropy/3d_bar_orthotropic_full_rotation.i block=Materials/elasticity_tensor
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic_anisotropy/3d_bar_orthotropic_full_rotation.i block=Materials/elasticity_tensor
 
 For the `orthotropic` fill method, the material parameters need to be referred to the global frame and introduced in the following order: $E_{11}\;E_{22}\;E_{33}\;G_{12}\;G_{23}\;G_{31}\;\nu_{21}\;\nu_{31}\;\nu_{32}\;\nu_{12}\;\nu_{13}\;\nu_{23}$. For cases where axes of orthotropy do not coincide with global axes, Euler angles can be provided to perform a general rotation of the elasticity tensor at the beginning of the simulation.
 
@@ -164,7 +164,7 @@ C_{ijkl}^{axisymmetric} = \begin{bmatrix}
 
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/isotropic_elasticity_tensor/2D-axisymmetric_rz_test.i
+!listing modules/solid_mechanics/test/tests/isotropic_elasticity_tensor/2D-axisymmetric_rz_test.i
          block=Materials/elasticity_tensor
 
 In the Einstein index notation shown in [eq:rank4tensor_aux_indices], the parameter `C_ijkl`
@@ -282,7 +282,7 @@ using the `rotation_matrix` parameter in `ComputeElasticityTensor`.
 
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_1_rotation.i
+!listing modules/solid_mechanics/test/tests/elasticitytensor/rotation_matrix_1_rotation.i
          block=Materials/elasticity_matrix
 
 Note that the same rotation can be applied using Euler angles. MOOSE expects the "passive"
@@ -292,7 +292,7 @@ is used, and only a single rotation is needed, the angle could be entered as eit
 
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_1_rotation.i
+!listing modules/solid_mechanics/test/tests/elasticitytensor/rotation_matrix_1_rotation.i
          block=Materials/elasticity_euler
 
 ### Orientation Relationship Rotation
@@ -323,7 +323,7 @@ simulation frame: $R\hat{z}=\left<111\right>$, meaning it correctly converts dir
 
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_2_rotations.i
+!listing modules/solid_mechanics/test/tests/elasticitytensor/rotation_matrix_2_rotations.i
          block=Materials/elasticity_matrix
 
 The rotation matrix in [eq:orientation_rotation] can also be built in an "active" sense
@@ -336,7 +336,7 @@ order must be reversed.
 
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_2_rotations.i
+!listing modules/solid_mechanics/test/tests/elasticitytensor/rotation_matrix_2_rotations.i
          block=Materials/elasticity_euler
 
 !syntax parameters /Materials/ComputeElasticityTensor

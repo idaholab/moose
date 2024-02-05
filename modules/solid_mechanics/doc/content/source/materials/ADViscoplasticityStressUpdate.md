@@ -50,7 +50,7 @@ response with an approximated, simplified medium. These methods aim to match the
 potential of the true medium [true_vs_homo], thereby ensuring accurate stress-strain constitutive
 behavior of the porous material system.
 
-!media media/tensor_mechanics/true_vs_homo.png
+!media media/solid_mechanics/true_vs_homo.png
       style=width:80%;margin-left:5%;
       id=true_vs_homo
       caption=Schematic comparing the true sub-material response and the homogenized response and showing that the two methods match energy dissipation.
@@ -164,7 +164,7 @@ In all cases, `ADViscoplasticityStressUpdate` must be combined with
 [ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md) in order to
 calculate the stress and capture the porosity evolution of the material:
 
-!listing modules/tensor_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_single.i block=Materials
+!listing modules/solid_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_single.i block=Materials
 
 In this case, the power law coefficient defined in [eq:norton] is provided as an example here as a
 `ParsedMaterial`. Note, if necessary, the coefficient must be provided as an AD material if
@@ -176,9 +176,9 @@ specified, and combined in
 
 Here,  materials calculated by `ADViscoplasticityStressUpdate` are prepended with `base_name` to
 separate their contributions to the overall system. Note, this is different than the `base_name`
-provided in the [TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md)
+provided in the [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md)
 
-!listing modules/tensor_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
+!listing modules/solid_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
 
 !syntax parameters /Materials/ADViscoplasticityStressUpdate
 

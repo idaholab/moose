@@ -82,23 +82,23 @@ with:
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/kelvin_voigt
+!listing modules/solid_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/kelvin_voigt
 
 with the required strain calculator
 
-!listing modules/tensor_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/strain
+!listing modules/solid_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/strain
 
 the required stress calculator
 
-!listing modules/tensor_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/stress
 
 and the additional material to define the viscoelastic behavior
 
-!listing modules/tensor_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/creep
+!listing modules/solid_mechanics/test/tests/visco/visco_finite_strain.i block=Materials/creep
 
 and the required Linear Viscoelasticity Manager User Object:
 
-!listing modules/tensor_mechanics/test/tests/visco/visco_finite_strain.i block=UserObjects
+!listing modules/solid_mechanics/test/tests/visco/visco_finite_strain.i block=UserObjects
 
 !syntax parameters /Materials/GeneralizedKelvinVoigtModel
 

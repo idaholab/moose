@@ -209,7 +209,7 @@ Hexagonal Close Packed (HCP) crystals are often described with the 4-index Mille
 \end{equation}
 To compute the Schmid tensor from these slip direction and slip plane normals, the indices must first be transformed to the Cartesian coordinate system. Within the associated `ComputeMultipleCrystalPlasticityStress` implementation, this conversion uses the assumption that the a$_1$-axis, or the H index, aligns with the x-axis in the basal plane of the HCP crystal lattice, see [xtalpl_hcp_basalplane_notation]. The c-axis, the L index, is assumed to be parallel to the z-axis of the Cartesian system.
 
-!media tensor_mechanics/crystal_plasticity/HCP_basal_plane_diagram.png
+!media solid_mechanics/crystal_plasticity/HCP_basal_plane_diagram.png
     id=xtalpl_hcp_basalplane_notation
     caption=The convention used to transform the 4-index Miller-Bravais indices to the 3-index Cartesian system aligns the x-axis with the a$_1$-axis in the basal plane in this implementation.
     style=display:block;margin-left:auto;margin-right:auto;width:40%
@@ -298,9 +298,9 @@ calculated, via the inverse of [eqn:defSecondPiolaKirchhoffStress], before conti
 the FEM residual calculation within the MOOSE framework.
 
 
-!media tensor_mechanics/crystal_plasticity/crystal_plasticity_stress_update_algorithm.png
+!media solid_mechanics/crystal_plasticity/crystal_plasticity_stress_update_algorithm.png
     id=xtalpl_nr_pk2convergence
-    caption=The flowchart for the calculation of the stress and strain measures within the `ComputeMultipleCrystalPlasticityStress` class as implemented in the tensor mechanics module of MOOSE is shown here. The components involved in the Newton-Raphson iteration are shown in light blue and the components shown in light orange are executed once per MOOSE iteration.
+    caption=The flowchart for the calculation of the stress and strain measures within the `ComputeMultipleCrystalPlasticityStress` class as implemented in the solid mechanics module of MOOSE is shown here. The components involved in the Newton-Raphson iteration are shown in light blue and the components shown in light orange are executed once per MOOSE iteration.
     style=display:block;margin-left:auto;margin-right:auto;width:80%
 
 Using a Newton Raphson approach, outlined below in [xtalpl_constitutive_convergence], we
@@ -315,7 +315,7 @@ velocity gradient, see [xtalpl_constitutive_convergence]. The convergence algori
 for Newton-Raphson iteration is taken from other approaches already implemented
 in MOOSE and is adapted for our crystal plasticity framework.
 
-!media tensor_mechanics/crystal_plasticity/multiple_crystal_plasticity_stress_update_constitutive_convergence.png
+!media solid_mechanics/crystal_plasticity/multiple_crystal_plasticity_stress_update_constitutive_convergence.png
     id=xtalpl_constitutive_convergence
     caption=The algorithm components of the Newton-Raphson iteration are shown in light blue and the crystal plasticity constitutive model components, which should be overwritten by a specific constitutive model class inheriting from `CrystalPlasticityStressUpdateBase`, are shown in light green.
     style=display:block;margin-left:auto;margin-right:auto;width:80%
@@ -346,18 +346,18 @@ of crystal defects (e.g. dislocations, point defects) should be given in
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/stress
 
 Note that the specific constitutive crystal plasticity model must also be given
 in the input file to define the plastic slip rate increment
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/trial_xtalpl
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/trial_xtalpl
 
 Finally a specific constant elasticity tensor class must be used with these materials
 to account for the use of the slip planes and directions in the reference
 configuration, [eqn:SumShears_multiple_cp], [eqn:SumShears_one_cp], and [eqn:appliedShearStress],
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/elasticity_tensor
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/elasticity_tensor
 
 !syntax parameters /Materials/ComputeMultipleCrystalPlasticityStress
 

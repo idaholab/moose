@@ -76,7 +76,7 @@ Recalling $\llbracket u \rrbracket = u^{-} - u^{+}$ and that $u_i =\sum_z \phi_{
 
 ## Example Input File Syntax
 
-This object is automatically added from the [Cohesive Master Master Action](CohesiveZoneMaster/index.md) when `strain=SMALL`.
+This object is automatically added from the [Cohesive Zone Physics](CohesiveZone/index.md) when `strain=SMALL`.
 
 !syntax parameters /InterfaceKernels/CZMInterfaceKernelSmallStrain
 !syntax inputs /InterfaceKernels/CZMInterfaceKernelSmallStrain

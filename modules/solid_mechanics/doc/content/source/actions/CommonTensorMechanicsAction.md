@@ -1,5 +1,5 @@
-# Common Tensor Mechanics Action
+# Common Solid Mechanics Action
 
 ## Description
 
-This `CommonTensorMechanicsAction` action adds the parameters supplied at the `[Modules/TensorMechanics/Master]` level as defaults for all the subblocks within the Master block. See the description, example use, and parameters on the [TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md) action system page.
+This `CommonSolidMechanicsAction` action adds the parameters supplied at the `[/Physics/SolidMechanics/QuasiStatic]` level as defaults for all the subblocks within the `QuasiStatic` block. See the description, example use, and parameters on the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) action system page.

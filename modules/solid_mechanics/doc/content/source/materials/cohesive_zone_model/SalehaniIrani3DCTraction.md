@@ -23,7 +23,7 @@ where $\lambda = e$ if $i==1$ or $\lambda = \sqrt{2 e}$ if $i == 2,3$. The param
 
 ## Examples
 
-!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i block=Materials/czm_3dc
+!listing modules/solid_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i block=Materials/czm_3dc
 !syntax parameters /Materials/SalehaniIrani3DCTraction
 !syntax inputs /Materials/SalehaniIrani3DCTraction
 !syntax children /Materials/SalehaniIrani3DCTraction

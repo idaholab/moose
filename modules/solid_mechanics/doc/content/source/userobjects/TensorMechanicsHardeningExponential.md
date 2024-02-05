@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=TensorMechanicsHardeningExponential syntax=/UserObjects/TensorMechanicsHardeningExponential
+!template load file=stubs/moose_object.md.template name=SolidMechanicsHardeningExponential syntax=/UserObjects/SolidMechanicsHardeningExponential

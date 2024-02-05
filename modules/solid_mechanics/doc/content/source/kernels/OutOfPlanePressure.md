@@ -5,7 +5,7 @@
 ## Description
 
 The `OutOfPlanePressure` kernel applies an out-of-plane pressure value in the
-out-of-plane direction of [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
+out-of-plane direction of [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
 or 2D plane stress problems.
 Either a function or a postprocessor can be used to specify the value of the
 out-of-plane pressure at each quadrature point.

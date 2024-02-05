@@ -45,11 +45,11 @@ to compute the softened cracked material stiffness.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=Materials/exponential_softening
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=Materials/exponential_softening
 
 `ExponentialSoftening` must be run in conjunction with the fixed smeared cracking material model as shown below:
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=Materials/cracking_stress
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=Materials/cracking_stress
 
 !syntax parameters /Materials/ExponentialSoftening
 

@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=TensorMechanicsPlasticWeakPlaneTensile syntax=/UserObjects/TensorMechanicsPlasticWeakPlaneTensile
+!template load file=stubs/moose_object.md.template name=SolidMechanicsPlasticWeakPlaneTensile syntax=/UserObjects/SolidMechanicsPlasticWeakPlaneTensile

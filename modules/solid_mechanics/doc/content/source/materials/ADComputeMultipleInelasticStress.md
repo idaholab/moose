@@ -45,7 +45,7 @@ models inherit from the same base class.
 
 ## Multiple Inelastic Models
 
-!media tensor_mechanics/flowchart_ComputeMultipleInelasticStress.png
+!media solid_mechanics/flowchart_ComputeMultipleInelasticStress.png
        id=fig:multiple_materials
        style=width:55%;margin-left:2%;float:right
        caption=The `ADComputeMultipleInelasticStress` algorithm for calculating the
@@ -142,7 +142,7 @@ strain tensors are calculated as shown in the last element of [fig:multiple_mate
 `ADComputeMultipleInelasticStress` can also be used to calculate the inelastic
 strain and the stress when only a single inelastic material model is provided.
 
-!media tensor_mechanics/flowchart_ComputeMultipleInelasticStress-SingleModel.png
+!media solid_mechanics/flowchart_ComputeMultipleInelasticStress-SingleModel.png
        id=fig:single_material
        style=width:40%;margin-right:2%;float:left
        caption=The optimized algorithm for calculating the strains and stress
@@ -208,19 +208,19 @@ For multiple inelastic models, all of the inelastic material
 model names must be listed as arguments to the `inelastic_models` parameter.
 The inelastic material blocks must also be present.
 
-!listing modules/tensor_mechanics/test/tests/combined_creep_plasticity/combined_creep_plasticity.i block=Materials
+!listing modules/solid_mechanics/test/tests/combined_creep_plasticity/combined_creep_plasticity.i block=Materials
 
 ### Single Inelastic Model
 
 For a single inelastic material model the input syntax is simply condensed
 
-!listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/stress
 
 and only a single inelastic material model is included in the input. This example
 includes the `max_inelastic_increment` parameter which is used to limit the time
 step size.
 
-!listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/isoplas
+!listing modules/solid_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/isoplas
 
 !syntax parameters /Materials/ADComputeMultipleInelasticStress
 

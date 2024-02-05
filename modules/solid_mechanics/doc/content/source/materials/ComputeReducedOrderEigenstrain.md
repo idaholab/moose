@@ -13,7 +13,7 @@ This class accepts eigenstrains and computes a reduced order eigenstrain.  If th
 !alert warning When using the
 [`ComputeReducedOrderEigenstrain`](ComputeReducedOrderEigenstrain.md) object for
 RankTwoTensor eigenstrains with the
-[TensorMechanicsAction](TensorMechanics/Master/index.md) setting
+[SolidMechanicsAction](SolidMechanics/QuasiStatic/index.md) setting
 `automatic_eigenstrain_names = true`, eigenstrains listed as MaterialADConverter
 input  tensors will not be included in the `eigenstrain_names` list passed. Set
 the automatic/_eigenstrain/_names = false and populate this list manually if
@@ -21,11 +21,11 @@ these components need to be included.
 
 ## Example Input File syntax
 
-!listing modules/tensor_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Materials/reduced_order_eigenstrain
+!listing modules/solid_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Materials/reduced_order_eigenstrain
 
 The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example parameter setting is shown below:
 
-!listing modules/tensor_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Modules
+!listing modules/solid_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Physics/
 
 !syntax parameters /Materials/ComputeReducedOrderEigenstrain
 

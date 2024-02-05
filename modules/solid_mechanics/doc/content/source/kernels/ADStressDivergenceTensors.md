@@ -13,13 +13,13 @@ calculator for the Cartesian system.
 
 ## Residual Calculation
 
-!include modules/tensor_mechanics/common/supplementalADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/supplementalADStressDivergenceKernels.md
 
 ## Example Input File syntax
 
 !syntax parameters /Kernels/ADStressDivergenceTensors
 
-!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/seealsoADStressDivergenceKernels.md
 
 !syntax inputs /Kernels/ADStressDivergenceTensors
 

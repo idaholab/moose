@@ -8,7 +8,7 @@ This NodalKernel computes the gravitational force proportional to nodal mass in 
 
 For example, the below csv file has two rows with 4 columns. The first three columns correspond to the nodal positions in the global coordinate system and the last column corresponds to the nodal mass. Each row contains position and mass information for one node.
 
-!listing modules/tensor_mechanics/test/tests/beam/dynamic/nodal_mass.csv
+!listing modules/solid_mechanics/test/tests/beam/dynamic/nodal_mass.csv
 
 !syntax parameters /NodalKernels/NodalGravity
 

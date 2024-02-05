@@ -20,7 +20,7 @@ where $D_{ijkl}^\text{H}$ is the homogenized elasticity tensor.  See [!cite](hal
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/homogenization/anisoShortFiber.i block=Kernels/aeh_dx_xx
+!listing modules/solid_mechanics/test/tests/homogenization/anisoShortFiber.i block=Kernels/aeh_dx_xx
 
 !syntax parameters /Kernels/AsymptoticExpansionHomogenizationKernel
 

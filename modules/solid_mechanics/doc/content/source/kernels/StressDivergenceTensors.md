@@ -6,15 +6,15 @@
 
 The `StressDivergenceTensors` kernel calculates the residual of the stress divergence for 1D, 2D, and
 3D problems in the Cartesian coordinate system.  This kernel can be automatically created with the
-[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
-mechanics master action is recommended to ensure the consistent setting of the _use_displaced_mesh_
+[Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md). Use of the tensor
+mechanics quasi-static physics is recommended to ensure the consistent setting of the _use_displaced_mesh_
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
-_use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the
+_use_displaced_mesh_ in mechanics problems and the Solid Mechanics Physics usage, see the
 [Introduction/StressDivergence](auto::/introduction/StressDivergence) page.
 
 ## Residual Calculation
 
-!include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
+!include modules/solid_mechanics/common/supplementalStressDivergenceKernels.md
 
 ## Use with Planar Models
 
@@ -37,17 +37,17 @@ This correction is made for 2D planar models when the deformed mesh is used by s
 ## Example Input File syntax
 
 The Cartesian `StressDivergenceTensors` is the default case for the tensor
-mechanics master action
+mechanics quasi-static physics
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
-         block=Modules
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
+         block=Physics
 
 Either 1, 2, or 3 displacement variables can be used in the stress divergence calculator for the
 Cartesian system.
 
 !syntax parameters /Kernels/StressDivergenceTensors
 
-!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/seealsoADStressDivergenceKernels.md
 
 !syntax inputs /Kernels/StressDivergenceTensors
 

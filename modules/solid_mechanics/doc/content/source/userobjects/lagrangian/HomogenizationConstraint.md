@@ -11,7 +11,7 @@ during residual and Jacobian assembly.
 This user object then performs and stores the integrals for the kernel.
 For more details refer to the homogenization system documentation.
 
-The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can add this object
+The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax
@@ -30,7 +30,7 @@ The `large_kinematics` flag controls whether the constraints are on the deformat
 This object should be run with `execute_on = 'initial linear'` to provide the
 updated integral values when required by the kernels.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=UserObjects
 
 !syntax parameters /UserObjects/HomogenizationConstraint

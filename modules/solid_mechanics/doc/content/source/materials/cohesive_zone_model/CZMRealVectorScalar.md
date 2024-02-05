@@ -9,7 +9,7 @@ This is a Material model used to extract the normal or tangent norm of a real ve
 !alert warning
 Behind the scene, this material uses the `czm_total_rotation` matrix to compute the tangent or normal scalar values, so it should not be used for vector quantities defined in interface coordinates.
 
-This Material model is set up by [CohesiveZoneMaster](CohesiveZoneMaster/index.md) automatically
+This Material model is set up by [CohesiveZone](CohesiveZone/index.md) automatically
 when the normal or tangent traction/displacement_jump scalar are requested in the generate_output parameter, but can also be set up directly by the user.  
 
 The `CZMRealVectorScalar` takes as arguments the `real_vector_value`  for which the scalar component needs to be computed, the `direction`, and the `property_name` assigned to the computed scalar.

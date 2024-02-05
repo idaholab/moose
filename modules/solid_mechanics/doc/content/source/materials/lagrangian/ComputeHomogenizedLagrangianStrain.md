@@ -13,7 +13,7 @@ the displacement field.
 The [homogenization system](Homogenization.md) documentation describes how the
 strain/gradient components are stored in the `ScalarVariable`.
 
-The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can add this object
+The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax
@@ -24,7 +24,7 @@ The important input parameters are `macro_gradient`, the name of the `ScalarVari
 and `large_kinematics` which determines if the `ScalarVariable` holds a symmetric
 small strain tensor (`false`) or a non-symmetric displacement gradient (`large`).
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=Materials
 
 !syntax parameters /Materials/ComputeHomogenizedLagrangianStrain

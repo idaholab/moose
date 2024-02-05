@@ -10,7 +10,7 @@ differentiation is used to compute an exact Jacobian.
 
 ## Residual Calculation
 
-!include modules/tensor_mechanics/common/supplementalADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/supplementalADStressDivergenceKernels.md
 
 The stress divergence in spherical coordinates includes contributions from the
 normal polar and azimuthal stresses even in the 1D case.  After simplifying for
@@ -35,7 +35,7 @@ The coordinate type in the `[Problem]` block of the input file must be set to
 
 !syntax parameters /Kernels/ADStressDivergenceRSphericalTensors
 
-!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/seealsoADStressDivergenceKernels.md
 
 !syntax inputs /Kernels/ADStressDivergenceRSphericalTensors
 

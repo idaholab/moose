@@ -68,12 +68,12 @@ as shown below.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/only_twinning_fcc.i block=Materials/twin_only_xtalpl
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/twinning/only_twinning_fcc.i block=Materials/twin_only_xtalpl
 
 `CrystalPlasticityTwinningKalidindiUpdate` must be run in conjunction with the crystal
 plasticity specific  stress calculator as shown below:
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/only_twinning_fcc.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/twinning/only_twinning_fcc.i block=Materials/stress
 
 In most cases this twinning model is intended to be used with a dislocation glide
 or slip model, such as [CrystalPlasticityKalidindiUpdate](/CrystalPlasticityKalidindiUpdate.md).
@@ -82,7 +82,7 @@ gradient contribution, as shown in [eqn:modTwinsLP]. The name of the total twin
 volume fraction material property must be supplied to the glide or slip material
 model:
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/combined_twinning_slip_100compression.i block=Materials/slip_xtalpl
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/twinning/combined_twinning_slip_100compression.i block=Materials/slip_xtalpl
 
 !syntax parameters /Materials/CrystalPlasticityTwinningKalidindiUpdate
 

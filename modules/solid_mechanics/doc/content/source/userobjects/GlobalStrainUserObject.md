@@ -10,7 +10,7 @@
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i block=UserObjects/global_strain_uo
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain.i block=UserObjects/global_strain_uo
 
 !syntax parameters /UserObjects/GlobalStrainUserObject
 

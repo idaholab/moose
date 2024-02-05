@@ -4,7 +4,7 @@
 
 ## Description
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 In isotropic linear hardening plasticity, with the hardening function $r = hp$, the effective
 plastic strain increment has the form:
@@ -29,12 +29,12 @@ assemble a perfect Jacobian (this replaces the approximated tangent operator).
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/recompute_radial_return/isotropic_plasticity_finite_strain.i block=Materials/isotropic_plasticity
+!listing modules/solid_mechanics/test/tests/recompute_radial_return/isotropic_plasticity_finite_strain.i block=Materials/isotropic_plasticity
 
 `IsotropicPlasticityStressUpdate` must be run in conjunction with the inelastic strain return mapping
 stress calculator as shown below:
 
-!listing modules/tensor_mechanics/test/tests/recompute_radial_return/isotropic_plasticity_finite_strain.i block=Materials/radial_return_stress
+!listing modules/solid_mechanics/test/tests/recompute_radial_return/isotropic_plasticity_finite_strain.i block=Materials/radial_return_stress
 
 !syntax parameters /Materials/IsotropicPlasticityStressUpdate
 

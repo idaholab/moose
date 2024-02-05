@@ -17,7 +17,7 @@ where $\Delta \boldsymbol{\epsilon}$ is the strain increment; this strain measur
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/stress
 
 !syntax parameters /Materials/ComputeFiniteStrainElasticStress
 

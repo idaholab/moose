@@ -4,7 +4,7 @@
 
 ## Description
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 ## Isotropic Plasticity
 
@@ -58,19 +58,19 @@ return stress increment.  The plastic strain as a stateful material property.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Materials/temp_dep_hardening
+!listing modules/solid_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Materials/temp_dep_hardening
 
 where the arguments for the `hardening_functions` parameter are defined in the
 `Functions` block of the input file:
 
-!listing modules/tensor_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Functions/hf1
+!listing modules/solid_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Functions/hf1
 
-!listing modules/tensor_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Functions/hf2
+!listing modules/solid_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Functions/hf2
 
 `TemperatureDependentHardeningStressUpdate` must be run in conjunction with the
 inelastic strain return mapping stress calculator as shown below:
 
-!listing modules/tensor_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Materials/radial_return_stress
+!listing modules/solid_mechanics/test/tests/temperature_dependent_hardening/temp_dep_hardening.i block=Materials/radial_return_stress
 
 
 !syntax parameters /Materials/TemperatureDependentHardeningStressUpdate

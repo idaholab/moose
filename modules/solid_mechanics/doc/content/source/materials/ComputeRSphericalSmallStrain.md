@@ -46,16 +46,16 @@ while the calculation of the total strain components $\epsilon_{\theta \theta}$ 
 ## Example Input File Syntax
 
 The small R-spherical strain calculator can be activated in the input file through the use of the
-TensorMechanics Master Action, as shown below.
+Solid Mechanics Physics, as shown below.
 
-!listing modules/tensor_mechanics/test/tests/1D_spherical/smallStrain_1DSphere.i
-         block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/1D_spherical/smallStrain_1DSphere.i
+         block=Physics/SolidMechanics/QuasiStatic
 
-!alert note title=Use of the Tensor Mechanics Master Action Recommended
-The [TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md) is designed to
+!alert note title=Use of the Solid Mechanics QuasiStatic Physics Recommended
+The [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) is designed to
 automatically determine and set the strain and stress divergence parameters correctly for the
 selected strain formulation.  We recommend that users employ the
-[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md) whenever possible
+[Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.
 
 !syntax parameters /Materials/ComputeRSphericalSmallStrain

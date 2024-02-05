@@ -12,7 +12,7 @@ Objects that use `use_displaced_mesh = true` will operate on a displaced mesh th
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain.i
          block=Materials/global_strain
 
 !syntax parameters /Materials/ComputeGlobalStrain

@@ -14,11 +14,11 @@ For more details, refer to the non-AD version [`AbruptSoftening`](/AbruptSofteni
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/ad_smeared_cracking/cracking_rz.i block=Materials/abrupt_softening
+!listing modules/solid_mechanics/test/tests/ad_smeared_cracking/cracking_rz.i block=Materials/abrupt_softening
 
 `ADAbruptSoftening` must be run in conjunction with the fixed ad smeared cracking material model as shown below:
 
-!listing modules/tensor_mechanics/test/tests/ad_smeared_cracking/cracking_rz.i block=Materials/elastic_stress
+!listing modules/solid_mechanics/test/tests/ad_smeared_cracking/cracking_rz.i block=Materials/elastic_stress
 
 !syntax parameters /Materials/ADAbruptSoftening
 

@@ -10,19 +10,19 @@ problem in the cylindrical coordinate system on a 2D mesh.
 !alert warning title=Symmetry Assumed About the $z$-axis
 The axis of symmetry must lie along the $z$-axis in a $\left(r, z, \theta \right)$
 or cylindrical coordinate system. This symmetry orientation is required for the
-calculation of the residual and of the jacobian, as defined in [eq-tensor_mechanics-RZ-stress-divergence].
+calculation of the residual and of the jacobian, as defined in [eq-solid_mechanics-RZ-stress-divergence].
 
 The `StressDivergenceRZTensors` kernel can be automatically created with the
-[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
-mechanics master action is recommended to ensure the consistent setting of the `use_displaced_mesh`
+[Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md). Use of the tensor
+mechanics quasi-static physics is recommended to ensure the consistent setting of the `use_displaced_mesh`
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
-_use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the
-[Introduction/Stress Divergence](/tensor_mechanics/StressDivergence.md) page.
+_use_displaced_mesh_ in mechanics problems and the Solid Mechanics Physics usage, see the
+[Introduction/Stress Divergence](/solid_mechanics/StressDivergence.md) page.
 
 
 ## Residual Calculation
 
-!include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
+!include modules/solid_mechanics/common/supplementalStressDivergenceKernels.md
 
 In cylindrical coordinates, the
 [divergence of a rank-2 tensor](https://en.wikipedia.org/wiki/Tensor_derivative_%28continuum_mechanics%29#Cylindrical_polar_coordinates_2)
@@ -30,7 +30,7 @@ includes mixed term contributions.  In the axisymmetric model we assume symmetri
 in addition to the zero out-of-plane shear strains, so that the residual computation is simplified.
 
 \begin{equation}
-  \label{eq-tensor_mechanics-RZ-stress-divergence}
+  \label{eq-solid_mechanics-RZ-stress-divergence}
   \begin{aligned}
   \nabla \sigma  & = \left[ \frac{\partial \sigma_{rr}}{\partial r} + \frac{u_r}{X_r}\sigma_{\theta \theta} + \frac{\partial \sigma_{rz}}{\partial z} \right] \hat{e}_r \\
    & + \left[ \frac{\partial \sigma_{zz}}{\partial z} + \frac{\partial \sigma_{rz}}{\partial r}    \right] \hat{e}_z
@@ -51,22 +51,22 @@ input files and when adding extra stresses.
 The coordinate type in the Problem block of the input file must be set to
 +`COORD_TYPE = RZ`+.
 
-Using the tensor mechanics master action, as shown
+Using the solid mechanics quasi-static physics, as shown
 
-!listing modules/tensor_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=Physics/SolidMechanics/QuasiStatic
 
 the `StressDivergenceRZTensors` kernel will be automatically built when the coordinate system in the
 Problem block is specified for the axisymmetric RZ system,
 
-!listing modules/tensor_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=Problem
+!listing modules/solid_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=Problem
 
 and only two displacement variables are provided:
 
-!listing modules/tensor_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=GlobalParams
+!listing modules/solid_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=GlobalParams
 
 !syntax parameters /Kernels/StressDivergenceRZTensors
 
-!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/seealsoADStressDivergenceKernels.md
 
 !syntax inputs /Kernels/StressDivergenceRZTensors
 

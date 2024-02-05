@@ -8,7 +8,7 @@ This updates the internal time-stepping scheme for linear viscoelastic materials
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/visco/visco_finite_strain.i block=UserObjects/update
+!listing modules/solid_mechanics/test/tests/visco/visco_finite_strain.i block=UserObjects/update
 
 !syntax parameters /UserObjects/LinearViscoelasticityManager
 

@@ -61,13 +61,13 @@ UMAT's `PNEWDT`. First, we select a soft `Terminator` which will invalidate a
 time step if the time step increment used turns out to be larger than a computed
 maximum time step increment anywhere in the system:
 
-!listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=UserObjects
+!listing modules/solid_mechanics/test/tests/umat/time_step/elastic_timestep.i block=UserObjects
 
 As a second step, we select the time stepper controls for the entire finite
 element system. These controls will apply to UMAT stepping as well as any other
 kernel or object in the system:
 
-!listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Executioner/TimeStepper
+!listing modules/solid_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Executioner/TimeStepper
 
 The time step increment will be reduced as prescribed in the UMAT routine.
 However, the maximum increment will be limited by the selection of
@@ -77,7 +77,7 @@ larger `growth_factor`.
 
 A subroutine that acts on `PNEWDT` is chosen in the regression test:
 
-!listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Materials/umat
+!listing modules/solid_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Materials/umat
 
 ## UMAT Loading steps
 
@@ -91,14 +91,14 @@ MOOSE steps need to be defined throughout the simulation in [StepUserObject](/St
 
 An example of how to pass the user object in an input file is given below:
 
-!listing modules/tensor_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=Materials/umat
+!listing modules/solid_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=Materials/umat
 
 Note that the step capability is three-pronged: 1) It allows to pass the step number to the UMAT
 routine via the present object, 2) It allows to pass the step number to the [AbaqusUExternalDB](/AbaqusUExternalDB.md) plugin, and 3) It allows to directly drive controls via step number in [StepPeriod](/StepPeriod.md).
 
 ## Example input file
 
-!listing modules/tensor_mechanics/test/tests/umat/elastic_hardening/linear_strain_hardening.i block=Materials/constant
+!listing modules/solid_mechanics/test/tests/umat/elastic_hardening/linear_strain_hardening.i block=Materials/constant
 
 !syntax parameters /Materials/AbaqusUMATStress
 

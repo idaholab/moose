@@ -18,7 +18,7 @@ This class is available both for manually coded Jacobian and automatic different
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/strain_energy_density/ad_rate_model_weak_plane.i block=Materials/strain_energy_rate_density
+!listing modules/solid_mechanics/test/tests/strain_energy_density/ad_rate_model_weak_plane.i block=Materials/strain_energy_rate_density
 
 !syntax parameters /Materials/StrainEnergyRateDensity
 

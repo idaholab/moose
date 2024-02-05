@@ -15,7 +15,7 @@ where $\boldsymbol{\epsilon}^{total}$ is the total strain formulation; this stra
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Materials/stress
+!listing modules/solid_mechanics/tutorials/basics/part_1.1.i block=Materials/stress
 
 
 !syntax parameters /Materials/ComputeLinearElasticStress

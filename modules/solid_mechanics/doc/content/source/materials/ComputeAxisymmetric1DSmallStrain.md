@@ -6,7 +6,7 @@
 
 The material `ComputeAxisymmetric1DSmallStrain` calculates the small total
 strain for 1D Axisymmetric systems and is intended for use with
-[Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) simulations.
 This material assumes symmetry about the $z$-axis.
 This 'strain calculator' material computes the strain within the cylindrical
 coordinate system and relies on the specialized
@@ -52,7 +52,7 @@ where the components of the strain tensor in [eqn:1d_axisym_strain] are given as
 \end{equation}
 where $\epsilon|^{op}$ is a prescribed out-of-plane strain value: this strain
 value can be given either as a scalar variable or a nonlinear variable.
-The [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
+The [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
 problems use scalar variables.
 The value of the strain $\epsilon_{\theta \theta}$ depends on the displacement
 and position in the radial direction.
@@ -71,16 +71,16 @@ The coordinate type in the Problem block of the input file must be set to
 +`COORD_TYPE = RZ`+.
 
 The common use of the `ComputeAxisymmetric1DSmallStrain` class is with the
-[Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) system;
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) system;
 this type of simulation uses the scalar strain variables
 
-!listing modules/tensor_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Materials/strain
+!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Materials/strain
 
 which uses a scalar variable for the coupled out-of-plane strain; the argument
 for the `scalar_out_of_plane_strain` parameter is the name of the scalar strain
 variable:
 
-!listing modules/tensor_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Variables/scalar_strain_yy
+!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Variables/scalar_strain_yy
 
 !syntax parameters /Materials/ComputeAxisymmetric1DSmallStrain
 

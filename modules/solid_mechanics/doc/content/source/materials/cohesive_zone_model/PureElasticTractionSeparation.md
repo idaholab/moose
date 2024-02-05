@@ -13,7 +13,7 @@ This model can be used for 1D, 2D and 3D problems.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/stretch_rotate_large_deformation.i block=Materials/czm_mat
+!listing modules/solid_mechanics/test/tests/cohesive_zone_model/stretch_rotate_large_deformation.i block=Materials/czm_mat
 
 !syntax parameters /Materials/PureElasticTractionSeparation
 !syntax inputs /Materials/PureElasticTractionSeparation

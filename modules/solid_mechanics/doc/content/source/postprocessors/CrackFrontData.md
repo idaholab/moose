@@ -8,7 +8,7 @@ This object is a utility function used to output values of nodal variables at no
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/j_integral/j_integral_3d.i block=Postprocessors/disp_x_centercrack
+!listing modules/solid_mechanics/test/tests/j_integral/j_integral_3d.i block=Postprocessors/disp_x_centercrack
 
 !syntax parameters /Postprocessors/CrackFrontData
 

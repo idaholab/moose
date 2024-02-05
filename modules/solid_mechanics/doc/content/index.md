@@ -1,1 +1,1 @@
-[modules/tensor_mechanics/index.md]
+[modules/solid_mechanics/index.md]

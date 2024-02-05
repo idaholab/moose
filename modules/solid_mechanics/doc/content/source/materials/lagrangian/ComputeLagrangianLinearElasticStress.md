@@ -26,7 +26,7 @@ parameters controls which objective rate is used.
 The following example sets up a hypoelastic, large deformation model based on the
 `truesdell` rate using the default elastic tensor name (`"elasticity_tensor"`).
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
          block=Materials
 
 !syntax parameters /Materials/ComputeLagrangianLinearElasticStress

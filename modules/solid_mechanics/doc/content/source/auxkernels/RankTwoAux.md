@@ -33,7 +33,7 @@ Results will have different quality based on the AuxVariable:
 
 - +Elemental Constant Monomial+ Using an AuxVariable with `family = MONOMIAL` and `order = CONSTANT` will give a constant value of
   the AuxVariable for the entire element, which is computed by taking a volume-weighted average of the integration
-  point quantities. This is the default option using TensorMechanics Action and requires the least computational cost.
+  point quantities. This is the default option using SolidMechanics Action and requires the least computational cost.
 - +Elemental Higher-order Monomial+ Using an AuxVariable with `family = MONOMIAL` and `order = FIRST` or higher will result in
   fields that vary linearly (or with higher order) within each element. Because the Exodus mesh format does not
   support higher-order elemental variables, these AuxVariables are output by libMesh as nodal variables for visualization
@@ -49,12 +49,12 @@ Results will have different quality based on the AuxVariable:
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i block=AuxKernels/stress_xy
+!listing modules/solid_mechanics/test/tests/elastic_patch/elastic_patch.i block=AuxKernels/stress_xy
 
 An AuxVariable is required to store the `RankTwoAux` AuxKernel information. Note that the name of the
 AuxVariable is used as the argument for the `variable` input parameter in the `RankTwoAux` block.
 
-!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i block=AuxVariables/stress_xy
+!listing modules/solid_mechanics/test/tests/elastic_patch/elastic_patch.i block=AuxVariables/stress_xy
 
 !syntax parameters /AuxKernels/RankTwoAux
 

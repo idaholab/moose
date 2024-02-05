@@ -14,7 +14,7 @@ have a key influence on the simulation output metrics.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/central_difference/consistent/3D/3d_consistent_explicit_mass_scaling.i block=Materials/density_scaling
+!listing modules/solid_mechanics/test/tests/central_difference/consistent/3D/3d_consistent_explicit_mass_scaling.i block=Materials/density_scaling
 
 !syntax parameters /Materials/DensityScaling
 

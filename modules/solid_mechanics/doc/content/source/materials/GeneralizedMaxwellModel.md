@@ -84,23 +84,23 @@ with:
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/maxwell
+!listing modules/solid_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/maxwell
 
 with the required strain calculator
 
-!listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/strain
+!listing modules/solid_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/strain
 
 the required stress calculator
 
-!listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/stress
 
 the additional material to define the viscoelastic behavior
 
-!listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/creep
+!listing modules/solid_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/creep
 
 and the required Linear Viscoelasticity Manager User Object:
 
-!listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=UserObjects
+!listing modules/solid_mechanics/test/tests/visco/gen_maxwell_driving.i block=UserObjects
 
 !syntax parameters /Materials/GeneralizedMaxwellModel
 

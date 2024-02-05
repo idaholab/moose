@@ -39,7 +39,7 @@ object.
 The following example wraps a simple J2 plasticity model for use with the new
 kernels.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/cross_material/correctness/plastic_j2.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/updated/cross_material/correctness/plastic_j2.i
          block=Materials
 
 !syntax parameters /Materials/ComputeLagrangianWrappedStress

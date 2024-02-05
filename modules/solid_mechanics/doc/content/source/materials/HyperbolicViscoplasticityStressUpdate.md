@@ -4,7 +4,7 @@
 
 ## Description
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 This uniaxial viscoplasticity class computes the plastic strain as a stateful material property.  The
 constitutive equation for scalar plastic strain rate used in this model is
@@ -17,13 +17,13 @@ pg. 162--163.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/recompute_radial_return/uniaxial_viscoplasticity_incrementalstrain.i
+!listing modules/solid_mechanics/test/tests/recompute_radial_return/uniaxial_viscoplasticity_incrementalstrain.i
          block=Materials/viscoplasticity
 
 `HyperbolicViscoplasticityStressUpdate` must be run in conjunction with the inelastic strain return
 mapping stress calculator as shown below:
 
-!listing modules/tensor_mechanics/test/tests/recompute_radial_return/uniaxial_viscoplasticity_incrementalstrain.i
+!listing modules/solid_mechanics/test/tests/recompute_radial_return/uniaxial_viscoplasticity_incrementalstrain.i
          block=Materials/radial_return_stress
 
 !syntax parameters /Materials/HyperbolicViscoplasticityStressUpdate

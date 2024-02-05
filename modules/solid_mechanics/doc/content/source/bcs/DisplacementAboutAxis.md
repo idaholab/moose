@@ -23,7 +23,7 @@ $\hat{x}$, $\hat{y}$, and $\hat{z}$ coordinate system axes, respectively.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_cylinder.i
+!listing modules/solid_mechanics/test/tests/torque_reaction/torque_reaction_cylinder.i
          block=BCs/top_x
 
 A Function is required to prescribe either the total rotation or angular velocity of the `DisplacementAboutAxis` boundary condition

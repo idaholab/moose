@@ -1,6 +1,6 @@
 # Global Strain Action
 
-!syntax description /Modules/TensorMechanics/GlobalStrain/GlobalStrainAction
+!syntax description /Physics/SolidMechanics/GlobalStrain/GlobalStrainAction
 
 This action simplifies the input file syntax for global strain calculation required for maintaining strain periodicity. It also generates the auxiliary displacement field created by the global strain. It creates following MOOSE objects,
 
@@ -25,4 +25,4 @@ This action simplifies the input file syntax for global strain calculation requi
 - [Global Displacement AuxKernels](/GlobalDisplacementAux.md): Calculates the global displacement field from the scalar variable
 
 
-!syntax parameters /Modules/TensorMechanics/GlobalStrain/GlobalStrainAction
+!syntax parameters /Physics/SolidMechanics/GlobalStrain/GlobalStrainAction

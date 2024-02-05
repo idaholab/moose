@@ -18,11 +18,11 @@ For more details, refer to the non-AD class [PowerLawSoftening](/PowerLawSofteni
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_power.i block=Materials/power_law_softening
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_power.i block=Materials/power_law_softening
 
 `ADPowerLawSoftening` must be run in conjunction with the ad fixed smeared cracking material model as shown below:
 
-!listing modules/tensor_mechanics/test/tests/ad_smeared_cracking/cracking_power.i block=Materials/elastic_stress
+!listing modules/solid_mechanics/test/tests/ad_smeared_cracking/cracking_power.i block=Materials/elastic_stress
 
 !syntax parameters /Materials/ADPowerLawSoftening
 

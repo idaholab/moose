@@ -9,7 +9,7 @@ Cartesian coordinate system. This can be used regardless of the coordinate
 system used by the model.
 
 This ADMaterial model is set up by
-[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md) automatically
+[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) automatically
 when stress components are requested in the generate_output parameter, but can
 also be set up directly by the user.  
 

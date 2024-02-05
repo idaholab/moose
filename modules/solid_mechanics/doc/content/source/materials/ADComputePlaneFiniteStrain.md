@@ -9,7 +9,7 @@ The material `ADComputePlaneFiniteStrain` calculates the finite strain for 2D
 plane strain problems. It can be used for classical
 [plane strain or plane stress](https://en.wikipedia.org/wiki/Plane_stress)
 problems, or in
-[Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) simulations.
 
 ## Out of Plane Strain
 
@@ -53,7 +53,7 @@ strain field variable. This results in a weak enforcement of the condition that
 the out-of-plane stress is zero, which allows for re-use of the same constitutive
 models for models of all dimensionality.
 
-The [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
+The [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
 problems use scalar variables. Multiple scalar variables can be provided such
 that one strain calculator is needed for multiple generalized plane strain
 models on different subdomains.
@@ -153,7 +153,7 @@ gradient
 \end{equation}
 and the total deformation gradient. For more details about the theory behind
 [eqn:vlc_fhat] see the
-[Volumetric Locking Correction](/tensor_mechanics/VolumetricLocking.md)
+[Volumetric Locking Correction](/solid_mechanics/VolumetricLocking.md)
 documentation.
 
 Once the incremental deformation gradient is calculated for the specific 2D geometry,
@@ -165,35 +165,35 @@ documentation.
 
 ### Plane Stress
 
-The tensor mechanics [Master action](/Modules/TensorMechanics/Master/index.md)
+The solid mechanics [QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md)
 can be used to create the `ADComputePlaneFiniteStrain` class by setting
 `planar_formulation = WEAK_PLANE_STRESS` and `strain = FINITE` in the
-`Master` action block.
+QuasiStatic Physics block.
 
-!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Physics/SolidMechanics/QuasiStatic
 
 Note that for plane stress analysis, the `out_of_plane_strain` parameter must be
 defined, and is the name of the out-of-plane strain field variable.
 
-!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Variables/strain_zz
+!listing modules/solid_mechanics/test/tests/plane_stress/weak_plane_stress_finite.i block=Variables/strain_zz
 
 In the case of this example, `out_of_plane_strain` is defined in the `GlobalParams` block.
 
 ### Generalized Plane Strain
 
 The use of this plane strain class for
-[Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
-simulations uses the scalar out-of-plane strains. The tensor mechanics
-[Master action](/Modules/TensorMechanics/Master/index.md) is used to create the
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
+simulations uses the scalar out-of-plane strains. The solid mechanics
+[QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md) is used to create the
 `ADComputePlaneFiniteStrain` class with the `planar_formulation = GENERALIZED_PLANE_STRAIN`
 and the `strain = FINITE` settings.
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_finite.i block=Modules/TensorMechanics/Master/all
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_finite.i block=Physics/SolidMechanics/QuasiStatic/all
 
 Note that the argument for the `scalar_out_of_plane_strain` parameter is the
 name of the scalar strain variable
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_finite.i block=Variables/scalar_strain_zz
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_finite.i block=Variables/scalar_strain_zz
 
 !syntax parameters /Materials/ADComputePlaneFiniteStrain
 

@@ -19,7 +19,7 @@ This object can be used in 1D 2D and 3D simulation.
 
 ## Example Input File Syntax
 
-This object is automatically added from the [Cohesive Master Master Action](CohesiveZoneMaster/index.md) when `strain=FINITE`.
+This object is automatically added from the [Cohesive Zone Physics](CohesiveZone/index.md) when `strain=FINITE`.
 
 !syntax parameters /Materials/CZMComputeDisplacementJumpTotalLagrangian
 

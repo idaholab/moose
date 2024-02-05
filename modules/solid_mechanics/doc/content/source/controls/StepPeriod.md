@@ -15,7 +15,7 @@ A step number is thus a required input to this control object. At the beginning 
 boundary conditions and constraints are enabled or disabled, as directed by
 [StepUserObject](/StepUserObject.md). Only one step is allowed per `StepPeriod` object.
 
-!listing modules/tensor_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=Controls/step1
+!listing modules/solid_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=Controls/step1
 
 !syntax parameters /Controls/StepPeriod
 

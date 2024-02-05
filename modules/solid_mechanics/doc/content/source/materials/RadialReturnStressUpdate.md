@@ -28,12 +28,12 @@ as is required to achieve convergence.
 
 ## Radial Return Algorithm Overview
 
-!media media/tensor_mechanics/RadialReturnStressSpace.png
+!media media/solid_mechanics/RadialReturnStressSpace.png
        style=width:30%;margin-left:2%;float:right
        caption=A trial stress is shown outside of the deviatoric yield surface and the radial return
                  stress which is normal to the yield surface.
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 In the case of isotropic linear hardening plasticity, with the hardening
 function $r = hp$ , the effective plastic strain increment has the form:
@@ -72,7 +72,7 @@ in Combined Power Law Creep and Linear Strain Hardening,
 stress until the return stress has reached a stable value.
 
 Users can print out any of these strains and stresses using the `RankTwoAux` as
-described on the [Visualizing Tensors](/tensor_mechanics/VisualizingTensors.md)
+described on the [Visualizing Tensors](/solid_mechanics/VisualizingTensors.md)
 page.
 
 ## Substepping capability

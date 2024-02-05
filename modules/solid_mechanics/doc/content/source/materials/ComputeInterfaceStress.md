@@ -48,7 +48,7 @@ range is well defined - commonly 0 and 1 on the two sides of the interface).
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/interface_stress/test.i block=Materials/interface
+!listing modules/solid_mechanics/test/tests/interface_stress/test.i block=Materials/interface
 
 !syntax parameters /Materials/ComputeInterfaceStress
 

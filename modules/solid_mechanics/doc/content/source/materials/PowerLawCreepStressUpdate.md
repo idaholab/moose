@@ -4,7 +4,7 @@
 
 ## Description
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 The increment of inelastic strain is computed from the creep rate in this class.
 

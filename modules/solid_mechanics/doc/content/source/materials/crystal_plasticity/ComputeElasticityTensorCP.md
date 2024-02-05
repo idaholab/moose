@@ -71,7 +71,7 @@ parameter values, note that this crystal plasticity class uses the "passive" rot
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/elasticity_tensor
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/elasticity_tensor
 
 !syntax parameters /Materials/ComputeElasticityTensorCP
 

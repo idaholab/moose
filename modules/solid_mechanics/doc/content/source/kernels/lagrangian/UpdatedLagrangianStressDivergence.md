@@ -9,7 +9,7 @@ residual in the current configuration using the `cauchy_stress` (the
 Cauchy stress).  This kernel provides the residual
 for Cartesian coordinates and the user needs to add one kernel
 for each dimension of the problem.  Alternatively, the
-[TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
+[SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md)
 simplifies the process of adding the required kernels and setting up the
 input parameters.
 
@@ -86,7 +86,7 @@ Jacobian.
 
 The constitutive model needs to provide the Cauchy stress and the derivative of
 that stress with respect to the increment in the spatial velocity gradient.
-However, the [material system](tensor_mechanics/NewMaterialSystem.md)
+However, the [material system](solid_mechanics/NewMaterialSystem.md)
 provides a common interface to define the constitutive model with any stress and strain
 measures that are convenient, translating the user-defined stress and Jacobian to the correct
 form automatically.
@@ -97,7 +97,7 @@ Note that if the model is rotationally invariant then
 where $\Delta d_{kl}$ is the increment in the material deformation rate, equal to the increment
 in the logarithmic strain [!cite](freed2014).
 
-The kernel is compatible with the [$\bar{\boldsymbol{F}}$ modification](/tensor_mechanics/Stabilization.md) of the
+The kernel is compatible with the [$\bar{\boldsymbol{F}}$ modification](/solid_mechanics/Stabilization.md) of the
 strains to stabilize the problem for incompressible or nearly incompressible deformation.
 This form of stabilization does not modify the residual equation, though the modified strain does change the constitutive
 model stress update.
@@ -118,14 +118,14 @@ with
 \begin{equation}
       \bar{\psi}_{i,j}^{\beta}=\frac{1}{V}\int_{V}\psi_{i,K}^{\beta}dV\bar{F}_{Kj}^{-1}
 \end{equation}
-and $\bar{F}$ the average deformation gradient, defined in the [stabilization system documentation](/tensor_mechanics/Stabilization.md).
+and $\bar{F}$ the average deformation gradient, defined in the [stabilization system documentation](/solid_mechanics/Stabilization.md).
 Note this is a somewhat unusual integral for an updated Lagrangian model, but it follows to keep the
 derivative term consistent with the $\bar{\boldsymbol{F}}$ modification to the strains.
 The `stabilize_strain` flag controls if the kernel modifies the Jacobian to account for the stabilized strains.
 
 ## `use_displaced_mesh`
 
-The `UpdatedLagrangianStressDivergence` kernel is the only object in the new, Lagrangian Tensor Mechanics system
+The `UpdatedLagrangianStressDivergence` kernel is the only object in the new, Lagrangian Solid Mechanics system
 that requires `use_displaced_mesh` to be set.  The `use_displaced_mesh` flag should be set to `true` if and only
 if `large_kinematics` is also `true`.  The kernel enforces this condition with an error.
 
@@ -134,7 +134,7 @@ if `large_kinematics` is also `true`.  The kernel enforces this condition with a
 The following illustrates manually including 3D stress equilibrium with the total Lagrangian formulation, using
 large deformation kinematics.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
          block=Kernels
 
 !syntax parameters /Kernels/UpdatedLagrangianStressDivergence

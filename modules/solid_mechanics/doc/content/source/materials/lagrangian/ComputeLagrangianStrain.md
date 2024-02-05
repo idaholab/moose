@@ -49,7 +49,7 @@ The calculator requires `use_displaced_mesh=false` and enforces this with an err
 The following example sets up the `ComputeLagrangianStrain` object for a large deformation problem without stabilization.
 For small deformations the only change would be `large_kinematics=false`.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
          block=Materials
 
 !syntax parameters /Materials/ComputeLagrangianStrain

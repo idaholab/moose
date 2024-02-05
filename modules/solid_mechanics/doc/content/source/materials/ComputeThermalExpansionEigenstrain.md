@@ -20,11 +20,11 @@ An automatic differentiation version of this object is available as `ADComputeTh
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_stress_free_temp.i block=Materials/thermal_expansion_strain
+!listing modules/solid_mechanics/test/tests/thermal_expansion/constant_expansion_stress_free_temp.i block=Materials/thermal_expansion_strain
 
 The `eigenstrain_names` parameter value must also be set for the strain calculator, and an example parameter setting is shown below:
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_stress_free_temp.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/thermal_expansion/constant_expansion_stress_free_temp.i block=Physics/SolidMechanics/QuasiStatic
 
 !syntax parameters /Materials/ComputeThermalExpansionEigenstrain
 

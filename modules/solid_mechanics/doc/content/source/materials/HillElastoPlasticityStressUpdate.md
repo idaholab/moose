@@ -142,9 +142,9 @@ The effective plastic strain increment is obtained within the framework of a gen
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/anisotropic_elastoplasticity/ad_aniso_plasticity_x_one.i block=Materials/trial_plasticity
+!listing modules/solid_mechanics/test/tests/anisotropic_elastoplasticity/ad_aniso_plasticity_x_one.i block=Materials/trial_plasticity
 
-!listing modules/tensor_mechanics/test/tests/anisotropic_elastoplasticity/hoop_strain_comparison.i block=Materials/plasticity
+!listing modules/solid_mechanics/test/tests/anisotropic_elastoplasticity/hoop_strain_comparison.i block=Materials/plasticity
 
 !syntax parameters /Materials/HillElastoPlasticityStressUpdate
 

@@ -23,14 +23,14 @@ information can be retained via the $\lambda$ function
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/dilatation.i
+!listing modules/solid_mechanics/test/tests/thermal_expansion_function/dilatation.i
          block=Materials/thermal_expansion_strain
 
 The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example
 parameter setting is shown below:
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion_function/dilatation.i
-         block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/thermal_expansion_function/dilatation.i
+         block=Physics/SolidMechanics/QuasiStatic
 
 !syntax parameters /Materials/ComputeDilatationThermalExpansionFunctionEigenstrain
 

@@ -25,13 +25,13 @@ elasticity tensor should not be time-varying in the first timestep.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/initial_stress/gravity.i block=Materials
+!listing modules/solid_mechanics/test/tests/initial_stress/gravity.i block=Materials
 
 In this example the eigenstrain is given the name `ini_stress`.  This name is passed to the
 `ComputeSmallStrain` strain calculator using the `eigenstrain_names` parameter.  The initial stress
 is defined by the functions defined in
 
-!listing modules/tensor_mechanics/test/tests/initial_stress/gravity.i block=Functions
+!listing modules/solid_mechanics/test/tests/initial_stress/gravity.i block=Functions
 
 !syntax parameters /Materials/ComputeEigenstrainFromInitialStress
 

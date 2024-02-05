@@ -11,15 +11,15 @@ spherically symmetric system on a 1D mesh.
 The `COORD_TYPE` in the Problem block of the input file must be set to RSPHERICAL.
 
 The `StressDivergenceRSphericalTensors` kernel can be automatically created with the
-[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
-mechanics master action is recommended to ensure the consistent setting of the *use_displaced_mesh*
+[Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md). Use of the tensor
+mechanics quasi-static physics is recommended to ensure the consistent setting of the *use_displaced_mesh*
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
-_use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the
+_use_displaced_mesh_ in mechanics problems and the Solid Mechanics Physics usage, see the
 [Introduction/StressDivergence](/StressDivergence.md) page.
 
 ## Residual Calculation
 
-!include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
+!include modules/solid_mechanics/common/supplementalStressDivergenceKernels.md
 
 The stress divergence in spherical coordinates includes contributions from the normal polar and
 azimuthal stresses even in the 1D case.  After simplifying for the 1D case, the spherical stress
@@ -37,23 +37,23 @@ goes to zero and the residual contribution in the `StressDivergenceRSphericalTen
 
 ## Example Input File syntax
 
-Using the tensor mechanics master action, as shown
+Using the solid mechanics quasi-static physics, as shown
 
-!listing modules/tensor_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i
-         block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i
+         block=Physics/SolidMechanics/QuasiStatic
 
 the `StressDivergenceRSphericalTensors` kernel will be automatically built when the coordinate system
 in the Problem block is specified for the spherical system,
 
-!listing modules/tensor_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=Problem
+!listing modules/solid_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=Problem
 
 and only a single displacement variable is provided:
 
-!listing modules/tensor_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=GlobalParams
+!listing modules/solid_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=GlobalParams
 
 !syntax parameters /Kernels/StressDivergenceRSphericalTensors
 
-!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+!include modules/solid_mechanics/common/seealsoADStressDivergenceKernels.md
 
 !syntax inputs /Kernels/StressDivergenceRSphericalTensors
 

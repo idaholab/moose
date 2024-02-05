@@ -30,9 +30,9 @@ be specified by groups of slip systems.
 
 This UserObject assumes that slip systems are provided in a well defined order
 and are grouped by planes (see
-`modules/tensor_mechanics/test/tests/cp_user_object/input_slip_sys_bcc48.txt` for
+`modules/solid_mechanics/test/tests/cp_user_object/input_slip_sys_bcc48.txt` for
 BCC crystals and
-`modules/tensor_mechanics/test/tests/cp_user_object/input_slip_sys.txt` for FCC)
+`modules/solid_mechanics/test/tests/cp_user_object/input_slip_sys.txt` for FCC)
 
 Seven variables need to be specified and one value is required for each group:
 
@@ -56,7 +56,7 @@ Seven variables need to be specified and one value is required for each group:
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/user_object_based/user_object_Voce_BCC.i block=UserObjects/state_var_evol_rate_comp_voce
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/user_object_based/user_object_Voce_BCC.i block=UserObjects/state_var_evol_rate_comp_voce
 
 In this example illustrate a BCC in which slip systems have been grouped by slip system class.
 

@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=TensorMechanicsHardeningConstant syntax=/UserObjects/TensorMechanicsHardeningConstant
+!template load file=stubs/moose_object.md.template name=SolidMechanicsHardeningConstant syntax=/UserObjects/SolidMechanicsHardeningConstant

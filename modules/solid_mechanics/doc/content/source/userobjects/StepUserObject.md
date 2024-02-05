@@ -14,7 +14,7 @@ boundary conditions and constraints according the user-defined loading steps.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=UserObjects/step_uo
+!listing modules/solid_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=UserObjects/step_uo
 
 !syntax parameters /UserObjects/StepUserObject
 

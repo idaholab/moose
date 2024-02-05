@@ -98,12 +98,12 @@ where f$^{\alpha}$ is the slip-mode dependent substructure generation rate coeff
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/hcp_single_crystal/update_method_hcp_aprismatic_capyramidal.i block=Materials/trial_xtalpl
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/hcp_single_crystal/update_method_hcp_aprismatic_capyramidal.i block=Materials/trial_xtalpl
 
 `CrystalPlasticityHCPDislocationSlipBeyerleinUpdate` must be run in conjunction with the crystal
 plasticity specific  stress calculator as shown below:
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/hcp_single_crystal/update_method_hcp_aprismatic_capyramidal.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/hcp_single_crystal/update_method_hcp_aprismatic_capyramidal.i block=Materials/stress
 
 !syntax parameters /Materials/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate
 

@@ -22,12 +22,12 @@ the sum of the inelastic strains from the mechanical strain:
 \end{equation}
 where $\boldsymbol{\epsilon}^{mech}$ is the mechanical strain and
 $\boldsymbol{\epsilon}^{inel}$ is the inelastic strain.
-In the tensor mechanics module mechanical strain is defined as the sum of the
+In the solid mechanics module mechanical strain is defined as the sum of the
 elastic and inelastic (e.g. creep and/or plasticity) strains.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_incremental.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/plane_stress/weak_plane_stress_incremental.i block=Materials/stress
 
 !syntax parameters /Materials/ComputeStrainIncrementBasedStress
 

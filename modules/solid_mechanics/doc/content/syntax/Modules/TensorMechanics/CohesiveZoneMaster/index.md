@@ -1,6 +1,6 @@
-# Cohesive Zone Master Action System
+# Cohesive Zone Action System
 
-!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
+!syntax description /Modules/TensorMechanics/CohesiveZone/CohesiveZoneAction
 
 ## Description
 
@@ -24,13 +24,13 @@ The `CZMInterfaceKernel` imposes equilibrium by adding the proper residual to th
 !alert note
 The provided `CZMInterfaceKernel` assume the `ComputeLocalTraction` is only function of the displacement $\llbracket u \rrbracket$. If one wants to implement a traction separation law depending upon other variables, such as bulk stress or temperature, it is responsibility of the user to implement the proper Jacobian terms.
 
-The `CohesiveZoneMaster` action automatically adds the proper `ComputeDisplacementJump`, `ComputeGlobalTraction`, `CZMInterfaceKernel` based on the `kinematic_type` parameter value (see inputs).
+The `CohesiveZone` action automatically adds the proper `ComputeDisplacementJump`, `ComputeGlobalTraction`, `CZMInterfaceKernel` based on the `kinematic_type` parameter value (see inputs).
 The flowchart below summarizes the flow of information of the cohesive zone modeling frameworks, and highlights the  objects automatically added by the `CohesizeZoneMaster` action.
 
 !media media/tensor_mechanics/CZMMasterAction.png style=width:100%;
 
 !alert note
-Even when using the `CohesiveZoneMaster` action it is the responsibility of the user to add the appropriate `ComputeLocalTraction` constitutive model and `BreakMeshByBlockGenerator` in the input file.
+Even when using the `CohesiveZone` action it is the responsibility of the user to add the appropriate `ComputeLocalTraction` constitutive model and `BreakMeshByBlockGenerator` in the input file.
 
 ### Supported Kinematic Formulations
 
@@ -53,7 +53,7 @@ The `Total Lagrangian` formulations requires adding:
 2. [CZMComputeGlobalTractionTotalLagrangian](CZMComputeGlobalTractionTotalLagrangian.md)
 3. [CZMInterfaceKernelTotalLagrangian](CZMInterfaceKernelTotalLagrangian.md)
 
-As mentioned in previous section, the `CohesiveZoneMaster` action adds the appropriate objects depending on the selected kinematic formulation.  
+As mentioned in previous section, the `CohesiveZone` action adds the appropriate objects depending on the selected kinematic formulation.
 
 !alert warning
 To obtain a traction consistent with the bulk stress, the `Small Strain` kinematic should be used together with a bulk `Small Strain` formulation, and the `Total Lagrangian` kinematics should be used together with a `Finite Strain` formulation.
@@ -69,24 +69,25 @@ Both types of `ComputeLocalTraction` objects allow using either the `Small Strai
 
 ## Input Examples
 
-The following example show how to use the `CohesiveZoneMaster` action.
+The following example show how to use the `CohesiveZone` action.
 
-!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/stretch_rotate_large_deformation.i block=Modules/TensorMechanics/CohesiveZoneMaster
+!listing modules/solid_mechanics/test/tests/cohesive_zone_model/stretch_rotate_large_deformation.i block=Physics/SolidMechanics/CohesiveZone
 
-If necessary, multiple instances of the `CohesiveZoneMaster` action can be added, for instance when different material properties `base_name` are needed for different boundaries. The `base_name` parameter used in the action should also be provided to the associated materials.
+If necessary, multiple instances of the `CohesiveZone` action can be added, for instance when different material properties `base_name` are needed for different boundaries. The `base_name` parameter used in the action should also be provided to the associated materials.
 The `generate_output` parameter adds scalar quantities of the traction and displacement jump to the outputs. Available options are: `traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump pk1_traction_x pk1_traction_y pk1_traction_z `.
 The name `traction` refers to the Cauchy traction, `pk1_traction` refers to the the first Piola-Kirchhoff traction, and `jump` refers to the displacement jump across the cohesive interface. All the above vectors are defined in the global coordinate system.
 The `normal_traction` and `tangent_traction` are scalar values compute using [CZMRealVectorScalar](CZMRealVectorScalar.md) (the same is true for the `normal_jump` and `tangent_jump`).
 
-!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i start=[Modules/TensorMechanics/CohesiveZoneMaster] end=[Modules] include-end=false
 
-!syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
-!syntax inputs /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
+!listing modules/solid_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i start=[Physics/SolidMechanics/CohesiveZone] end=[Physics] include-end=false
+
+!syntax parameters /Modules/TensorMechanics/CohesiveZone/CohesiveZoneAction
+!syntax inputs /Modules/TensorMechanics/CohesiveZone/CohesiveZoneAction
 
 ## Associated Actions
 
-!syntax list /Modules/TensorMechanics/CohesiveZoneMaster objects=True actions=False subsystems=False
+!syntax list /Modules/TensorMechanics/CohesiveZone objects=True actions=False subsystems=False
 
-!syntax list /Modules/TensorMechanics/CohesiveZoneMaster objects=False actions=False subsystems=True
+!syntax list /Modules/TensorMechanics/CohesiveZone objects=False actions=False subsystems=True
 
-!syntax list /Modules/TensorMechanics/CohesiveZoneMaster objects=False actions=True subsystems=False
+!syntax list /Modules/TensorMechanics/CohesiveZone objects=False actions=True subsystems=False

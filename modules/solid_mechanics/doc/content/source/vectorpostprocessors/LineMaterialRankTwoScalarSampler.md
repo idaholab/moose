@@ -12,7 +12,7 @@ Often this class is used to track stress or strain along an exterior or interior
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/line_material_rank_two_sampler/rank_two_scalar_sampler.i block=VectorPostprocessors/vonmises
+!listing modules/solid_mechanics/test/tests/line_material_rank_two_sampler/rank_two_scalar_sampler.i block=VectorPostprocessors/vonmises
 
 !syntax parameters /VectorPostprocessors/LineMaterialRankTwoScalarSampler
 

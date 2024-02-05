@@ -42,7 +42,7 @@ For three-dimensional problems, a norm of the stress difference and a representa
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/ad_aniso_creep_y_3d.i block=Materials/trial_creep_two
+!listing modules/solid_mechanics/test/tests/ad_anisotropic_creep/ad_aniso_creep_y_3d.i block=Materials/trial_creep_two
 
 !syntax parameters /Materials/ADHillCreepStressUpdate
 

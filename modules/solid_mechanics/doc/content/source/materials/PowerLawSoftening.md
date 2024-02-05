@@ -44,11 +44,11 @@ the initial stiffness reduction factor.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_power.i block=Materials/power_law_softening
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_power.i block=Materials/power_law_softening
 
 `PowerLawSoftening` must be run in conjunction with the fixed smeared cracking material model as shown below:
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_power.i block=Materials/elastic_stress
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_power.i block=Materials/elastic_stress
 
 !syntax parameters /Materials/PowerLawSoftening
 

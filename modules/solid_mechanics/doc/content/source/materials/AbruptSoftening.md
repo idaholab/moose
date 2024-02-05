@@ -51,11 +51,11 @@ to compute the softened cracked material stiffness.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_rz.i block=Materials/abrupt_softening
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_rz.i block=Materials/abrupt_softening
 
 `AbruptSoftening` must be run in conjunction with the fixed smeared cracking material model as shown below:
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_rz.i block=Materials/elastic_stress
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_rz.i block=Materials/elastic_stress
 
 !syntax parameters /Materials/AbruptSoftening
 

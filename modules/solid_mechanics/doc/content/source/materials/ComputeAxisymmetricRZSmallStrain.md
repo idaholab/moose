@@ -7,7 +7,7 @@
 The material `ComputeAxisymmetricRZSmallStrain` calculates the small total strain for Axisymmetric
 systems.
 
-!include modules/tensor_mechanics/common/supplementalAxisymmetricRZStrain.md
+!include modules/solid_mechanics/common/supplementalAxisymmetricRZStrain.md
 
 Only minimal changes are required to adapt a plane strain problem to an axisymmetric problem. The
 axisymmetric specific `ComputeAxisymmetricRZSmallStrain` code overwrites the method used to calculate

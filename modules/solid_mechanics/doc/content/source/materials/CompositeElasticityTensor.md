@@ -16,7 +16,7 @@ where $\boldsymbol{T}$ is a Rank-4 tensor and $w$ is the weighting factor for ea
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/composite.i block=Materials/C
+!listing modules/solid_mechanics/test/tests/elasticitytensor/composite.i block=Materials/C
 
 !syntax parameters /Materials/CompositeElasticityTensor
 

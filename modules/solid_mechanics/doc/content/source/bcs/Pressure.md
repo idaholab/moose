@@ -142,7 +142,7 @@ with $r = X + u$.  However, both $n$ and $r$ depend on the displacements.  Thus,
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=BCs/outerPressure
+!listing modules/solid_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=BCs/outerPressure
 
 !syntax parameters /BCs/Pressure
 

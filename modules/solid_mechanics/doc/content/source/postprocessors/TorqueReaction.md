@@ -34,25 +34,25 @@ $d$ is the axis of rotation direction vector.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
+!listing modules/solid_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=Postprocessors/torque
 
 A list of the AuxVariables which save the reaction forces must be provided to the `TorqueReaction` block.
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
+!listing modules/solid_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=AuxVariables/saved_x
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
+!listing modules/solid_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=AuxVariables/saved_y
 
-The reaction force AuxVariables must also be computed using the tagging system to save the reactions to a separate vector in the stress divergence kernel, which is handled in this case using the `extra_vector_tags` parameter in the `Master` action:
+The reaction force AuxVariables must also be computed using the tagging system to save the reactions to a separate vector in the stress divergence kernel, which is handled in this case using the `extra_vector_tags` parameter in the QuasiStatic Physics:
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
-         block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/torque_reaction/torque_reaction.i
+         block=Physics/SolidMechanics/QuasiStatic
 
 The `TagVectorAux` AuxKernel is used to extract the saved components of the reaction vector from a tagged vector and put them in an AuxVariable. This shows how the $x$ component of this is extracted, and the others are handled in a similar manner:
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
+!listing modules/solid_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=AuxKernels/saved_x
 
 !syntax parameters /Postprocessors/TorqueReaction

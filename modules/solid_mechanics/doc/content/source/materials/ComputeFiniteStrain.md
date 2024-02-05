@@ -167,22 +167,22 @@ the rotation increment.
 ## Example Input File Syntax
 
 The finite strain calculator can be activated in the input file through the use of the
-TensorMechanics Master Action, as shown below.
+Solid Mechanics Physics, as shown below.
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
-         block=Modules/TensorMechanics
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
+         block=Physics/SolidMechanics
 
-!alert note title=Use of the Tensor Mechanics Master Action Recommended
-The [TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md) is designed to
+!alert note title=Use of the Solid Mechanics QuasiStatic Physics Recommended
+The [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) is designed to
 automatically determine and set the strain and stress divergence parameters correctly for the
 selected strain formulation.  We recommend that users employ the
-[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md) whenever possible
+[Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.
 
 Although not recommended, it is possible to directly use the `ComputeFiniteStrain` material
 in the input file.
 
-!listing modules/tensor_mechanics/test/tests/volumetric_deform_grad/elastic_stress.i
+!listing modules/solid_mechanics/test/tests/volumetric_deform_grad/elastic_stress.i
          block=Materials/strain
 
 When directly using `ComputeFiniteStrain` in an input file as shown above, the
@@ -191,10 +191,10 @@ from the default by setting the parameter `use_displaced_mesh = true`. This sett
 is required to maintain consistency in the test function gradients and the
 strain formulation. For a complete discussion of the stress divergence kernel
 settings and the corresponding strain classes, see the section on
-[Consistency Between Stress and Strain](/tensor_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
-in the TensorMechanics module overview. In addition, be aware of the loading
+[Consistency Between Stress and Strain](/solid_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
+in the SolidMechanics module overview. In addition, be aware of the loading
 cycle limitations while using finite strains as outlined in the section
-[Large Strain Closed Loop Loading Cycle](/tensor_mechanics/Strains.md#large_strain_closed_loop_loading_cycle).
+[Large Strain Closed Loop Loading Cycle](/solid_mechanics/Strains.md#large_strain_closed_loop_loading_cycle).
 
 
 !syntax parameters /Materials/ComputeFiniteStrain

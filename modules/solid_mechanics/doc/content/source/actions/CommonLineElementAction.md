@@ -1,5 +1,5 @@
-# Common Line Element Master Action
+# Common Line Element QuasiStatic Physics
 
 ## Description
 
-This `CommonLineElement` action adds the parameters supplied at the `[Modules/TensorMechanics/LineElementMaster]` level as defaults for all the subblocks within the LineElementMaster block. See the description, example use, and parameters on the [LineElementMaster](/LineElementMaster/index.md) action system page.
+This `CommonLineElement` action adds the parameters supplied at the `[/Physics/SolidMechanics/LineElementStatic]` level as defaults for all the subblocks within the LineElementStatic block. See the description, example use, and parameters on the [LineElementStatic](/LineElementStatic/index.md) action system page.

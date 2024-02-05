@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=TensorMechanicsHardeningCubic syntax=/UserObjects/TensorMechanicsHardeningCubic
+!template load file=stubs/moose_object.md.template name=SolidMechanicsHardeningCubic syntax=/UserObjects/SolidMechanicsHardeningCubic

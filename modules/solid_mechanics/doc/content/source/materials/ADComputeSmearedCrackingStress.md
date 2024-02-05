@@ -8,7 +8,7 @@ except that the Jacobian of the internal forces is computed via automatic differ
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/ad_smeared_cracking/cracking.i block=Materials/elastic_stress
+!listing modules/solid_mechanics/test/tests/ad_smeared_cracking/cracking.i block=Materials/elastic_stress
 
 !syntax parameters /Materials/ADComputeSmearedCrackingStress
 

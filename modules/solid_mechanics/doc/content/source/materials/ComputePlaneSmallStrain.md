@@ -8,7 +8,7 @@ The material `ComputePlaneSmallStrain` calculates the small total
 strain for 2D plane strain problems. It can be used for classical
 [plane strain or plane stress](https://en.wikipedia.org/wiki/Plane_stress)
 problems, or in
-[Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) simulations.
 
 ## Out of Plane Strain
 
@@ -38,7 +38,7 @@ where $\epsilon|^{dop}$ is the strain tensor diagonal component for
 the direction of the out-of-plane strain and $\epsilon|^{op}$ is a
 prescribed out-of-plane strain value: this strain value can be
 given either as a scalar variable or a nonlinear field variable.
-The [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
+The [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
 problems use scalar variables. Multiple scalar variables can be provided such
 that one strain calculator is needed for multiple generalized plane strain
 models on different subdomains.
@@ -122,53 +122,53 @@ The volumetric locking correction is applied to the total strain
 where $\boldsymbol{\epsilon}_V$ is the volumetric strain and $\boldsymbol{I}$
 is the Rank-2 identity tensor. For more details about the theory
 behind [eqn:vlc_strain] see the
-[Volumetric Locking Correction](/tensor_mechanics/VolumetricLocking.md)
+[Volumetric Locking Correction](/solid_mechanics/VolumetricLocking.md)
 documentation.
 
 ## Example Input Files
 
 ### Plane Stress
 
-The tensor mechanics [Master action](/Modules/TensorMechanics/Master/index.md)
+The solid mechanics [QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md)
 can be used to create the `ComputePlaneSmallStrain` class by setting
 `planar_formulation = WEAK_PLANE_STRESS` and `strain = SMALL` in the
-`Master` action block.
+QuasiStatic Physics block.
 
-!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_small.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/plane_stress/weak_plane_stress_small.i block=Physics/SolidMechanics/QuasiStatic
 
 Note that for plane stress analysis, the `out_of_plane_strain` parameter must be
 defined, and is the name of the out-of-plane strain field variable.
 
-!listing modules/tensor_mechanics/test/tests/plane_stress/weak_plane_stress_small.i block=Variables/strain_zz
+!listing modules/solid_mechanics/test/tests/plane_stress/weak_plane_stress_small.i block=Variables/strain_zz
 
 In the case of this example, `out_of_plane_strain` is defined in the `GlobalParams` block.
 
 ### Generalized Plane Strain
 
 The use of this plane strain class for
-[Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
-simulations uses the scalar out-of-plane strains. The tensor mechanics
-[Master action](/Modules/TensorMechanics/Master/index.md) is used to create the
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
+simulations uses the scalar out-of-plane strains. The solid mechanics
+[QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md) is used to create the
 `ComputePlaneSmallStrain` class with the `planar_formulation = GENERALIZED_PLANE_STRAIN`
 and `strain = SMALL` settings.
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_small.i block=Modules/TensorMechanics/Master/all
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_small.i block=Physics/SolidMechanics/QuasiStatic/all
 
 Note that the argument for the `scalar_out_of_plane_strain` parameter is the
 name of the scalar strain variable
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_small.i block=Variables/scalar_strain_zz
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_small.i block=Variables/scalar_strain_zz
 
 ### $Y$-Direction of Out-of-Plane Strain
 
 This plane strain class is used to model plane strain with an out-of-plane strain
-in directions other than in the $z$-direction. As an example, the tensor mechanics
-[Master action](/Modules/TensorMechanics/Master/index.md) can be used to create
+in directions other than in the $z$-direction. As an example, the solid mechanics
+[QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md) can be used to create
 the `ComputePlaneFiniteStrain` class for a $y$-direction out-of-plane strain with
 the `planar_formulation = PLANE_STRAIN` and the `out_of_plane_direction = y`
 settings.
 
-!listing modules/tensor_mechanics/test/tests/2D_different_planes/planestrain_xz.i block=Modules/TensorMechanics/Master/plane_strain
+!listing modules/solid_mechanics/test/tests/2D_different_planes/planestrain_xz.i block=Physics/SolidMechanics/QuasiStatic/plane_strain
 
 !syntax parameters /Materials/ComputePlaneSmallStrain
 

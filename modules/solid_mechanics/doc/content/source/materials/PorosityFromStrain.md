@@ -13,7 +13,7 @@ Here, $\epsilon_{in}$ is typically computed by [ComputeMultipleInelasticStress](
 
 ## Example Input Files
 
-!listing modules/tensor_mechanics/test/tests/porosity/reg.i block=Materials
+!listing modules/solid_mechanics/test/tests/porosity/reg.i block=Materials
 
 !syntax parameters /Materials/PorosityFromStrain
 

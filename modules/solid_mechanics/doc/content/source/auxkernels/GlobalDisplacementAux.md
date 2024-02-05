@@ -9,12 +9,12 @@ The AuxKernel `GlobalDisplacementAux` calculates the displacement components fro
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i block=AuxKernels/disp_y
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain.i block=AuxKernels/disp_y
 
 An AuxVariable is required to store the displacements calculated by the AuxKernel.
 The name of the AuxVariable is used as the argument for the `variable` input parameter.
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i block=AuxVariables/disp_y
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain.i block=AuxVariables/disp_y
 
 ## Visualization
 

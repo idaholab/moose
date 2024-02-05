@@ -9,7 +9,7 @@ residual in the reference configuration using the `pk1_stress` (the
 1st Piola-Kirchhoff stress).  This kernel provides the residual
 for Cartesian coordinates and the user needs to add one kernel
 for each dimension of the problem.  Alternatively, the
-[TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
+[SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md)
 simplifies the process of adding the required kernels and setting up the
 input parameters.
 
@@ -62,12 +62,12 @@ The `large_kinematics` flag controls the kinematic theory.
 
 The constitutive model needs to provide the first Piola-Kirchhoff stress and the derivative of
 that stress with respect to the deformation gradient.
-However, the [material system](tensor_mechanics/NewMaterialSystem.md)
+However, the [material system](solid_mechanics/NewMaterialSystem.md)
 provides a common interface to define the constitutive model with any stress and strain
 measures that are convenient, translating the user-defined stress and Jacobian to the correct
 form automatically.
 
-The kernel is compatible with the [$\bar{\boldsymbol{F}}$ modification](/tensor_mechanics/Stabilization.md) of the
+The kernel is compatible with the [$\bar{\boldsymbol{F}}$ modification](/solid_mechanics/Stabilization.md) of the
 strains to stabilize the problem for incompressible or nearly incompressible deformation.
 This form of stabilization does not modify the residual equation, though the modified strain does change the constitutive
 model stress update.
@@ -88,14 +88,14 @@ with
 \begin{equation}
     \bar{\psi}_{i,J}^{\beta}=\frac{1}{V}\int_{V}\psi_{i,J}^{\beta}dV
 \end{equation}
-and $\bar{F}$ the average deformation gradient, defined in the [stabilization system documentation](/tensor_mechanics/Stabilization.md).
+and $\bar{F}$ the average deformation gradient, defined in the [stabilization system documentation](/solid_mechanics/Stabilization.md).
 
 ## Example Input File Syntax
 
 The following illustrates manually including 3D stress equilibrium with the total Lagrangian formulation, using
 large deformation kinematics.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/patch/large_patch.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/patch/large_patch.i
          block=Kernels
 
 !syntax parameters /Kernels/TotalLagrangianStressDivergence

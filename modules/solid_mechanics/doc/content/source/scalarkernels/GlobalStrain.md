@@ -13,7 +13,7 @@ Please refer to [GlobalStrainUserObject](/GlobalStrainUserObject.md) for informa
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i block=ScalarKernels/global_strain
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain.i block=ScalarKernels/global_strain
 
 !syntax parameters /ScalarKernels/GlobalStrain
 

@@ -98,17 +98,17 @@ of elements changed is used.
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Postprocessors/matl_ts_min
+!listing modules/solid_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Postprocessors/matl_ts_min
 
 The name of the `MaterialTimeStepPostprocessor` is passed to the `IterationAdaptiveDT`
 as the argument for the `timestep_limiting_postprocessor` parameter
 
-!listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Executioner/TimeStepper
+!listing modules/solid_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Executioner/TimeStepper
 
 and the `max_inelastic_increment` parameter in the inelastic material model(s)
 must be set to run the time step limit calculation.
 
-!listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/isoplas
+!listing modules/solid_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/isoplas
 
 !syntax parameters /Postprocessors/MaterialTimeStepPostprocessor
 

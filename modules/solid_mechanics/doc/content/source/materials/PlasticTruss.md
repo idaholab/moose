@@ -51,7 +51,7 @@ The updated axial stress is calculated
 
 ## Example Input Syntax
 
-!listing modules/tensor_mechanics/test/tests/truss/truss_plastic.i block=Materials/truss
+!listing modules/solid_mechanics/test/tests/truss/truss_plastic.i block=Materials/truss
 
 !syntax parameters /Materials/PlasticTruss
 

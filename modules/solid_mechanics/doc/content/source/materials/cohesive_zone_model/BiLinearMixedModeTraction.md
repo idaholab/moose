@@ -120,7 +120,7 @@ The step (Heaviside) function $\frac{\langle-\delta_3\rangle}{-\delta_3}$ in [tr
 
 ## Examples
 
-!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/bilinear_mixed.i block=Materials/czm
+!listing modules/solid_mechanics/test/tests/cohesive_zone_model/bilinear_mixed.i block=Materials/czm
 !syntax parameters /Materials/BiLinearMixedModeTraction
 !syntax inputs /Materials/BiLinearMixedModeTraction
 !syntax children /Materials/BiLinearMixedModeTraction

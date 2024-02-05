@@ -26,7 +26,7 @@ An automatic differentiation version of this object is available as `ADComputeIs
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch_quadratic.i block=Materials/elast_tensor
+!listing modules/solid_mechanics/test/tests/elastic_patch/elastic_patch_quadratic.i block=Materials/elast_tensor
 
 !syntax parameters /Materials/ComputeIsotropicElasticityTensor
 

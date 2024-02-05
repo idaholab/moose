@@ -27,7 +27,7 @@ The parameter `use_displaced_mesh` controls the volume utilized to compute the a
 
 ## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/postprocessors/material_tensor_average_test.i block=Postprocessors
+!listing modules/solid_mechanics/test/tests/postprocessors/material_tensor_average_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/MaterialTensorAverage
 

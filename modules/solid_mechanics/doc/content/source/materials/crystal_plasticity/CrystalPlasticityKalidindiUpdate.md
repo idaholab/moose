@@ -72,12 +72,12 @@ as shown below.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/trial_xtalpl
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/trial_xtalpl
 
 `CrystalPlasticityKalidindiUpdate` must be run in conjunction with the crystal
 plasticity specific  stress calculator as shown below:
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/stress
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/stress
 
 In simulations which couple this dislocation slip constitutive model with a twin
 propagation model, such as
@@ -85,7 +85,7 @@ propagation model, such as
 the name of the total twin volume fraction material property must be supplied
 in the input file:
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/combined_twinning_slip_100compression.i block=Materials/slip_xtalpl
+!listing modules/solid_mechanics/test/tests/crystal_plasticity/twinning/combined_twinning_slip_100compression.i block=Materials/slip_xtalpl
 
 !syntax parameters /Materials/CrystalPlasticityKalidindiUpdate
 

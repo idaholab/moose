@@ -27,13 +27,13 @@ center point defined by the user with the parameter `center_point` in the input 
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/CylindricalRankTwoAux/test.i block=AuxKernels/stress_tt
+!listing modules/solid_mechanics/test/tests/CylindricalRankTwoAux/test.i block=AuxKernels/stress_tt
 
 and an AuxVariable is required to store the AuxKernel information. Note that the name of the
 AuxVariable is used as the argument for the `variable` input parameter in the `CylindricalRankTwoAux`
 block.
 
-!listing modules/tensor_mechanics/test/tests/CylindricalRankTwoAux/test.i block=AuxVariables/stress_tt
+!listing modules/solid_mechanics/test/tests/CylindricalRankTwoAux/test.i block=AuxVariables/stress_tt
 
 !syntax parameters /AuxKernels/CylindricalRankTwoAux
 

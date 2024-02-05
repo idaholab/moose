@@ -11,7 +11,7 @@ and the [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangia
 Kernel handles all the off-diagonal Jacobian terms.  This
 `ScalarKernel` only supplies the residual and on-diagonal Jacobian.
 
-The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can add this object
+The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax
@@ -23,7 +23,7 @@ is `integrator`, `ndim` sets the dimensionality of the problem,
 and `large_kinematics` controls if large or small deformation kinematics
 apply.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=ScalarKernels
 
 !syntax parameters /ScalarKernels/HomogenizationConstraintScalarKernel

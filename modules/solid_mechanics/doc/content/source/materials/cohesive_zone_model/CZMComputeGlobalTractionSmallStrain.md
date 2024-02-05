@@ -34,7 +34,7 @@ Equation [eq:dt_du_final] is used by [CZM Interface Kernel Small Strain](CZMInte
 
 ## Example Input File Syntax
 
-This object is automatically added from the [Cohesive Master Master Action](CohesiveZoneMaster/index.md) when `strain=SMALL`.
+This object is automatically added from the [Cohesive Zone Physics](CohesiveZone/index.md) when `strain=SMALL`.
 
 !syntax parameters /Materials/CZMComputeGlobalTractionSmallStrain
 

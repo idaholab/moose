@@ -23,7 +23,7 @@ To enable NEML2 in MOOSE, set the environment variable `NEML2_DIR` to the path t
 Alternatively, a compatible version of NEML2 also comes with MOOSE as an optional submodule. To obtain the submodule, run
 
 ```bash
-git submodule update --checkout --init --recursive modules/tensor_mechanics/contrib/neml2
+git submodule update --checkout --init --recursive modules/solid_mechanics/contrib/neml2
 ```
 
 Once the environment variable `NEML2_DIR` is set to a valid path or the submodule is initialized,

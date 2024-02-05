@@ -8,7 +8,7 @@
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/beam/eigenstrain/eigenstrain_from_var.i block=Materials/thermal
+!listing modules/solid_mechanics/test/tests/beam/eigenstrain/eigenstrain_from_var.i block=Materials/thermal
 
 !syntax parameters /Materials/ComputeEigenstrainBeamFromVariable
 

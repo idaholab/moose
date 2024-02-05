@@ -26,7 +26,7 @@ the details of how `ADComputeMultiplePorousInelasticStress` computes stress.
 `ADComputeMultiplePorousInelasticStress` can take individual or combinations of different inelastic
 material models that inherit from `ADStressUpdateBase`.
 
-!listing modules/tensor_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
+!listing modules/solid_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
 
 !syntax parameters /Materials/ADComputeMultiplePorousInelasticStress
 

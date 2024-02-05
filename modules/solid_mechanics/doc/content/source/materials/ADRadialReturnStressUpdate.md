@@ -33,12 +33,12 @@ convergence.
 
 ## Radial Return Algorithm Overview
 
-!media media/tensor_mechanics/RadialReturnStressSpace.png
+!media media/solid_mechanics/RadialReturnStressSpace.png
        style=width:30%;margin-left:2%;float:right
        caption=A trial stress is shown outside of the deviatoric yield surface and the radial return
                  stress which is normal to the yield surface.
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 In the case of isotropic linear hardening plasticity, with the hardening function $r = hp$, the
 effective plastic strain increment has the form:
@@ -75,7 +75,7 @@ Creep and Linear Strain Hardening, `ComputeMultipleInelasticStress` will iterate
 the calculated stress until the return stress has reached a stable value.
 
 Users can print out any of these strains and stresses using the `RankTwoAux` as described on the
-[Visualizing Tensors](/tensor_mechanics/VisualizingTensors.md) page.
+[Visualizing Tensors](/solid_mechanics/VisualizingTensors.md) page.
 
 ## Writing a New Stress Update Material
 New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six
@@ -108,7 +108,7 @@ Dunne and Petrinic.
 
 We provide the substepping capability in `ADRadialReturnStressUpdate` for nonlinear material models in order to improve the convergence. The idea is that when material is undergoing large deformation and the return mapping algorithm struggles to converge, we would divide the original strain into smaller strain increments and take several substeps where incremental strain is applied at each substep.  The following shows an example of the syntax for using substepping.
 
-!listing modules/tensor_mechanics/test/tests/substepping/power_law_creep.i block=Materials/power_law_creep
+!listing modules/solid_mechanics/test/tests/substepping/power_law_creep.i block=Materials/power_law_creep
 
 <!-- !syntax children /Materials/RadialReturnStressUpdate -->
 

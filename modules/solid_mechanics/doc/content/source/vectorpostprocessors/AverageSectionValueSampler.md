@@ -14,7 +14,7 @@ a way analogous to beams, thereby freeing the user from performing additional po
 different software. One use case of this postprocessor is the definition of cross sections in ducts that
 bend or bow (see [disp_cross]).
 
-!media tensor_mechanics/disp_cross_section.png
+!media solid_mechanics/disp_cross_section.png
     id=disp_cross
     caption=Undeformed and deformed configurations of a duct with a cross section defined by
     nodes in a regularly meshed geometry.
@@ -29,7 +29,7 @@ ensure that the mesh is reasonably uniform.
 
 See below an input file excerpt which locates the cross section along the $Z$ direction at distances of 10 and 18.
 
-!listing modules/tensor_mechanics/test/tests/cross_section_deflection/test_one_step.i block=VectorPostprocessors
+!listing modules/solid_mechanics/test/tests/cross_section_deflection/test_one_step.i block=VectorPostprocessors
 
 Additionally, if multiple structural components share the same mesh block, one can set the input parameters
 `reference_point` and `cross_section_maximum_radius` to point to the structural component's local frame
@@ -37,7 +37,7 @@ and the maximum in-cross-section-plane distance within. These parameters disambi
 component the nodes belong. An example of computing average section variables for multiple strucutral
 components sharing the same mesh block is given below:
 
-!listing modules/tensor_mechanics/test/tests/cross_section_deflection/test_one_step_two_ducts.i block=VectorPostprocessors
+!listing modules/solid_mechanics/test/tests/cross_section_deflection/test_one_step_two_ducts.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/AverageSectionValueSampler
 

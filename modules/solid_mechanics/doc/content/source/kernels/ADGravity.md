@@ -16,7 +16,7 @@ the ADGravity body force per unit mass.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/gravity/ad_gravity_test.i block=Kernels/gravity_y
+!listing modules/solid_mechanics/test/tests/gravity/ad_gravity_test.i block=Kernels/gravity_y
 
 !syntax parameters /Kernels/ADGravity
 

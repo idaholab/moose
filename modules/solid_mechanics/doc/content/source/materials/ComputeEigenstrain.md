@@ -19,7 +19,7 @@ Based on the number and values of constants provided as the argument to the `eig
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/visco/gen_kv_driving.i block=Materials/eigen
+!listing modules/solid_mechanics/test/tests/visco/gen_kv_driving.i block=Materials/eigen
 
 !syntax parameters /Materials/ComputeEigenstrain
 

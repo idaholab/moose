@@ -29,7 +29,7 @@ and the tangent required by the parent class
 The class converts the small strain model by integrating an objective
 rate of the Cauchy stress [!cite](simo2006computational).
 There are a wide variety of objective rates described in the literature
-and the implementation in the Tensor Mechanics module provides  
+and the implementation in the Solid Mechanics module provides  
 a general form in which different rates can be implemented.
 The current implementation provides two options: the Truesdell rate of the
 Cauchy stress and the Jaumann rate of the Cauchy stress.  
@@ -176,7 +176,7 @@ than being applied directly from the simulation kinematics.  This means that the
 but only in the limit of zero time integration error.  In theory then, the rotational kinematics are only correct for infinitesimal
 time steps.
 
-!media tensor_mechanics/rotatecube.gif
+!media solid_mechanics/rotatecube.gif
        id=rotate
        style=width:50%;float:center;padding-top:1.5%;
        caption=Simulation of stretch plus rotation for an elastic material.
@@ -190,7 +190,7 @@ steps the simulation results are correct: the $yy$ component of the Cauchy stres
 and the $zz$ component goes to zero as the block rotates.  But for fewer steps the rotational process is not integrated exactly, leading to errors in the
 final stress tensor.
 
-!media tensor_mechanics/rotation.png
+!media solid_mechanics/rotation.png
        id=rotation
        style=width:50%;float:center;padding-top:1.5%;
        caption=Plot of $\sigma_{yy}$ and $\sigma_{zz}$ in the cube as it rotates, for different numbers of time steps.
@@ -199,7 +199,7 @@ This $90^\circ$ rotation without additional stretch is not a typical simulation.
 during the large rotations, which in turn requires a smaller time step to accurately resolve the material deformation itself.  However, this
 example does illustrate one of the shortcomings of this particular implementation of objective integration.
 Note this is not a generic shortcoming of objective rates, other integration approaches can achieve exact rotational kinematics
-regardless of the time increment, including one of the options in the base tensor mechanics kernels [!cite](rashid1993incremental).
+regardless of the time increment, including one of the options in the base solid mechanics kernels [!cite](rashid1993incremental).
 
 ### Large shears
 
@@ -209,7 +209,7 @@ shear stress/strain response for the Jaumann model oscillates, which is not a re
 elastic material.  The Truesdell rate, which is used by default by `ComputeLagrangianObjectiveStress` models, avoids
 this non-physical behavior.
 
-!media tensor_mechanics/shearcompare.png
+!media solid_mechanics/shearcompare.png
        id=shear
        style=width:50%;float:center;padding-top:1.5%;
        caption=Shear stress/shear strain plot comparing the Truesdell and Jaumann rates for very large shear deformations.

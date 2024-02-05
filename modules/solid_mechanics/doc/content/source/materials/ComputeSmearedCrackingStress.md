@@ -95,7 +95,7 @@ of which can significantly affect convergence.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking.i block=Materials/elastic_stress
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking.i block=Materials/elastic_stress
 
 !syntax parameters /Materials/ComputeSmearedCrackingStress
 
