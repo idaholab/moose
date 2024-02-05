@@ -192,8 +192,6 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
 
   _nl_abs_div_tol = _fe_problem.getNonlinearAbsoluteDivergenceTolerance();
 
-  //std::cout << "Fnorm " << fnorm << " absolute divtol "<< _nl_abs_div_tol << " divtol "<<_divtol <<'\n';
-
   // This is the first residual before any iterations have been done,
   // but after preset BCs (if any) have been imposed on the solution
   // vector.  We save it, and use it to detect convergence if
