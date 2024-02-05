@@ -1,6 +1,6 @@
-[HeatStructureMaterials]
+[SolidProperties]
   [ss316]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = 8.0272e3
     cp = 502.1
     k = 16.26
@@ -18,7 +18,8 @@
     inner_radius = 0.1
     widths = '0.5'
     n_part_elems = '10'
-    materials = 'ss316'
+    solid_properties = 'ss316'
+    solid_properties_T_ref = '300'
     names = 'region'
 
     initial_T = 300

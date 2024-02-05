@@ -25,9 +25,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [main-material]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1e4
     cp = 500.0
     rho = 100.0
@@ -87,7 +87,8 @@
     n_elems = 5
 
     names = 'main'
-    materials = 'main-material'
+    solid_properties = 'main-material'
+    solid_properties_T_ref = '300'
     widths = '1.0'
     n_part_elems = '5'
 

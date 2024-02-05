@@ -30,9 +30,9 @@ R_i = 1.0
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hsmat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 5
     cp = 1
     rho = 1
@@ -51,7 +51,8 @@ R_i = 1.0
 
     inner_radius = ${R_i}
     names = 'radial1 radial2'
-    materials = 'hsmat hsmat'
+    solid_properties = 'hsmat hsmat'
+    solid_properties_T_ref = '300 300'
     widths = '0.5 0.7'
     n_part_elems = '2 3'
 

@@ -30,6 +30,10 @@ GeneralFunctorFluidProps::validParams()
       "force_define_density",
       false,
       "Whether to force the definition of a density functor from the fluid properties");
+  params.addParam<bool>("neglect_derivatives_of_density_time_derivative",
+                        false,
+                        "Whether to neglect the derivatives with regards to nonlinear variables "
+                        "of the density time derivatives");
 
   params.addParam<FunctionName>(
       "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
@@ -50,7 +54,9 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _speed(getFunctor<ADReal>(NS::speed)),
     _force_define_density(getParam<bool>("force_define_density")),
     _rho(getFunctor<ADReal>(NS::density)),
-    _mu_rampdown(getFunction("mu_rampdown"))
+    _mu_rampdown(getFunction("mu_rampdown")),
+    _neglect_derivatives_of_density_time_derivative(
+        getParam<bool>("neglect_derivatives_of_density_time_derivative"))
 {
   //
   // Set material properties functors
@@ -83,15 +89,29 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   //
   // Time derivatives of fluid properties
   //
-
-  addFunctorProperty<ADReal>(NS::time_deriv(NS::density),
-                             [this](const auto & r, const auto & t) -> ADReal
-                             {
-                               ADReal rho, drho_dp, drho_dT;
-                               _fluid.rho_from_p_T(
-                                   _pressure(r, t), _T_fluid(r, t), rho, drho_dp, drho_dT);
-                               return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
-                             });
+  if (_neglect_derivatives_of_density_time_derivative)
+  {
+    addFunctorProperty<ADReal>(
+        NS::time_deriv(NS::density),
+        [this](const auto & r, const auto & t) -> ADReal
+        {
+          Real rho, drho_dp, drho_dT;
+          _fluid.rho_from_p_T(
+              _pressure(r, t).value(), _T_fluid(r, t).value(), rho, drho_dp, drho_dT);
+          return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
+        });
+  }
+  else
+  {
+    addFunctorProperty<ADReal>(
+        NS::time_deriv(NS::density),
+        [this](const auto & r, const auto & t) -> ADReal
+        {
+          ADReal rho, drho_dp, drho_dT;
+          _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t), rho, drho_dp, drho_dT);
+          return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
+        });
+  }
 
   addFunctorProperty<ADReal>(NS::time_deriv(NS::cp),
                              [this](const auto & r, const auto & t) -> ADReal

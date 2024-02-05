@@ -152,14 +152,15 @@ public:
   /**
    * Update material property dependency vector.
    */
-  void updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+  void updateMatPropDependency(std::unordered_set<unsigned int> & needed_mat_props,
+                               THREAD_ID tid = 0) const;
   void updateBlockMatPropDependency(SubdomainID id,
-                                    std::set<unsigned int> & needed_mat_props,
+                                    std::unordered_set<unsigned int> & needed_mat_props,
                                     THREAD_ID tid = 0) const;
-  void updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props,
+  void updateBoundaryMatPropDependency(std::unordered_set<unsigned int> & needed_mat_props,
                                        THREAD_ID tid = 0) const;
   void updateBoundaryMatPropDependency(BoundaryID id,
-                                       std::set<unsigned int> & needed_mat_props,
+                                       std::unordered_set<unsigned int> & needed_mat_props,
                                        THREAD_ID tid = 0) const;
   ///@}
 
@@ -232,7 +233,7 @@ protected:
   /**
    * Helper method for updating material property dependency vector
    */
-  static void updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props,
+  static void updateMatPropDependencyHelper(std::unordered_set<unsigned int> & needed_mat_props,
                                             const std::vector<std::shared_ptr<T>> & objects);
 
   /**
@@ -686,8 +687,8 @@ MooseObjectWarehouseBase<T>::updateFEVariableCoupledVectorTagDependencyHelper(
 
 template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & needed_mat_props,
-                                                     THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::updateMatPropDependency(
+    std::unordered_set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
     updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
@@ -695,9 +696,10 @@ MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & ne
 
 template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id,
-                                                          std::set<unsigned int> & needed_mat_props,
-                                                          THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(
+    SubdomainID id,
+    std::unordered_set<unsigned int> & needed_mat_props,
+    THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
@@ -706,7 +708,7 @@ MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id,
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
-    std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+    std::unordered_set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(tid))
     for (auto & active_bnd_object : _active_boundary_objects[tid])
@@ -716,7 +718,9 @@ MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
-    BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+    BoundaryID id,
+    std::unordered_set<unsigned int> & needed_mat_props,
+    THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBoundaryObjects(id, tid));
@@ -725,7 +729,8 @@ MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(
-    std::set<unsigned int> & needed_mat_props, const std::vector<std::shared_ptr<T>> & objects)
+    std::unordered_set<unsigned int> & needed_mat_props,
+    const std::vector<std::shared_ptr<T>> & objects)
 {
   for (auto & object : objects)
   {

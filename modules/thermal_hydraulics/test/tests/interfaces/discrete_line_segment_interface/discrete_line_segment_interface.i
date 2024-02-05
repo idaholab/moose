@@ -21,9 +21,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -43,7 +43,8 @@
     names = 'region1 region2 region3'
     widths = '1.0 3.0 2.0'
     n_part_elems = '2 6 8'
-    materials = 'hs_mat hs_mat hs_mat'
+    solid_properties = 'hs_mat hs_mat hs_mat'
+    solid_properties_T_ref = '300 300 300'
 
     initial_T = 300
   []

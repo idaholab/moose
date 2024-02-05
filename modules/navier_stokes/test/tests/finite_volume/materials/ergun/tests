@@ -9,5 +9,6 @@
     issues = '#16756'
     design = 'FunctorErgunDragCoefficients.md'
     valgrind = 'none'
+    method = '!dbg'
   []
 []

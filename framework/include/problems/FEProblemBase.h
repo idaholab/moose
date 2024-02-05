@@ -782,11 +782,26 @@ public:
                           InputParameters & parameters);
 
   /**
+   * Add the MooseVariables and the material properties that the current materials depend on to the
+   * dependency list.
+   * @param consumer_needed_mat_props The material properties needed by consumer objects (other than
+   * the materials themselves)
+   * @param blk_id The subdomain ID for which we are preparing our list of needed vars and props
+   * @param tid The thread ID we are preparing the requirements for
+   *
+   * This MUST be done after the moose variable dependency list has been set for all the other
+   * objects using the \p setActiveElementalMooseVariables API!
+   */
+  void prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                        const SubdomainID blk_id,
+                        const THREAD_ID tid);
+
+  /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
    *
    * This MUST be done after the dependency list has been set for all the other objects!
    */
-  virtual void prepareMaterials(SubdomainID blk_id, const THREAD_ID tid);
+  void prepareMaterials(const SubdomainID blk_id, const THREAD_ID tid);
 
   void reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful = true);
 
@@ -851,7 +866,7 @@ public:
    *
    * @param tid The thread id
    */
-  void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
+  void setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                    const THREAD_ID tid);
 
   /**
@@ -859,7 +874,7 @@ public:
    *
    * @param tid The thread id
    */
-  const std::set<unsigned int> & getActiveMaterialProperties(const THREAD_ID tid) const;
+  const std::unordered_set<unsigned int> & getActiveMaterialProperties(const THREAD_ID tid) const;
 
   /**
    * Method to check whether or not a list of active material roperties has been set. This method
@@ -2145,6 +2160,8 @@ public:
    */
   bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
 
+  virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2405,6 +2422,9 @@ protected:
   bool _calculate_jacobian_in_uo;
 
   std::vector<std::vector<const MooseVariableFEBase *>> _uo_jacobian_moose_vars;
+
+  /// Set of material property ids that determine whether materials get reinited
+  std::vector<std::unordered_set<unsigned int>> _active_material_property_ids;
 
   SolverParams _solver_params;
 

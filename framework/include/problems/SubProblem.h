@@ -939,6 +939,11 @@ public:
    */
   [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
 
+  /**
+   * Set the current lower dimensional element. This can be null
+   */
+  virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -999,9 +1004,6 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
-
-  /// Set of material property ids that determine whether materials get reinited
-  std::vector<std::set<unsigned int>> _active_material_property_ids;
 
   std::vector<std::set<TagID>> _active_fe_var_coupleable_matrix_tags;
 

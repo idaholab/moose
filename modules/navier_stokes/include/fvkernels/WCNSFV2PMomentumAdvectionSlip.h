@@ -21,14 +21,11 @@ public:
   static InputParameters validParams();
   WCNSFV2PMomentumAdvectionSlip(const InputParameters & params);
 
-  using INSFVMomentumAdvection::computeResidual;
-  void computeResidual(const FaceInfo & fi) override;
-
 protected:
   /**
    * Helper method that computes the 'a' coefficients and AD residuals
    */
-  void computeResidualsAndADataSlip(const FaceInfo & fi);
+  virtual void computeResidualsAndAData(const FaceInfo & fi) override;
 
   /// Dispersed phase density
   const Moose::Functor<ADReal> & _rho_d;

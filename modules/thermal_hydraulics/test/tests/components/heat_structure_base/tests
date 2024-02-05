@@ -94,12 +94,12 @@
       detail = 'the user does not specify a matching number of names and widths for every part in a cylindrical heat structure,'
     []
 
-    [err:incorrect_size_of_materials]
+    [err:incorrect_size_of_solid_properties]
       type = 'RunException'
       input = 'err.no_T_ic.i'
-      cli_args = 'Components/hs/materials=a'
-      expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'materials' \(1\)"
-      detail = 'the user does not specify a matching number of names and materials for every part in a cylindrical heat structure.'
+      cli_args = 'Components/hs/solid_properties=a'
+      expect_err = "hs: The number of entries in parameter 'solid_properties' \(1\) must equal the number of entries of parameter 'names' \(3\)"
+      detail = 'the user does not specify a matching number of names and solid properties for every part in a cylindrical heat structure.'
     []
   []
 []

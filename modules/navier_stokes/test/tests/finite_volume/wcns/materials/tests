@@ -17,7 +17,16 @@
     type = 'Exodiff'
     input = functorfluidprops.i
     exodiff = functorfluidprops_out.e
-    requirement = 'The system shall be able to output gradeurs, derivatives and adimensional quantities from realistic functor fluid properties'
+    requirement = 'The system shall be able to output grandeurs, derivatives and non-dimensional quantities from realistic functor fluid properties'
     recover = false
+  []
+  [neglect_drho_dt_derivatives]
+    type = 'Exodiff'
+    input = functorfluidprops.i
+    exodiff = functorfluidprops_out.e
+    cli_args = 'FunctorMaterials/fluid_props_to_mat_props/neglect_derivatives_of_density_time_derivative=true'
+    requirement = 'The system shall be able to neglect the derivatives with regards to nonlinear variables of the density first order time derivative.'
+    recover = false
+    prereq = 'fluidprops'
   []
 []

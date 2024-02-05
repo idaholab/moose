@@ -55,6 +55,17 @@ protected:
   void
   loadMaterial(InputParameters & pars, const std::string & par, const std::string & material_name);
 
+  /**
+   * Adds a ADConstantDensityThermalSolidPropertiesMaterial for a heat structure region
+   *
+   * @param[in] sp_name   Solid properties object name
+   * @param[in] T_ref     Constant density reference temperature
+   * @param[in] i_region  Heat structure region index
+   */
+  void addConstantDensitySolidPropertiesMaterial(const UserObjectName & sp_name,
+                                                 const Real & T_ref,
+                                                 unsigned int i_region) const;
+
   /// Map from block name to block index
   std::map<std::string, unsigned int> _name_index;
   /// Material names

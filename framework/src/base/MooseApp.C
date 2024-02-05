@@ -2454,6 +2454,7 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
 
 RelationshipManager &
 MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
+                                      MooseMesh & moose_mesh,
                                       MeshBase & mesh,
                                       const DofMap * const dof_map)
 {
@@ -2465,7 +2466,7 @@ MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
     auto & clone_rm = *it->second;
     if (!clone_rm.dofMap() && dof_map)
       // We didn't have a DofMap before, but now we do, so we should re-init
-      clone_rm.init(mesh, dof_map);
+      clone_rm.init(moose_mesh, mesh, dof_map);
     else if (clone_rm.dofMap() && dof_map && (clone_rm.dofMap() != dof_map))
       mooseError("Attempting to create and initialize an existing clone with a different DofMap. "
                  "This should not happen.");
@@ -2483,7 +2484,7 @@ MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
                      dynamic_pointer_cast<RelationshipManager>(template_rm.clone())));
   mooseAssert(pr.second, "An insertion should have happened");
   auto & clone_rm = *pr.first->second;
-  clone_rm.init(mesh, dof_map);
+  clone_rm.init(moose_mesh, mesh, dof_map);
   return clone_rm;
 }
 
@@ -2495,7 +2496,7 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
     {
       if (rm->attachGeometricEarly())
-        mesh.add_ghosting_functor(createRMFromTemplateAndInit(*rm, mesh));
+        mesh.add_ghosting_functor(createRMFromTemplateAndInit(*rm, moose_mesh, mesh));
       else
       {
         // If we have a geometric ghosting functor that can't be attached early, then we have to
@@ -2538,32 +2539,28 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       // "attach_geometric_rm_final = true" inidicate that it is the last chance to attach
       // geometric RMs. Therefore, we need to attach them.
       if (!rm->attachGeometricEarly() && !attach_geometric_rm_final)
-      {
         // Will attach them later (during algebraic). But also, we need to tell the mesh that we
         // shouldn't be deleting remote elements yet
-        if (!mesh->getMeshPtr())
-          mooseError("We should have attached a MeshBase object to the mesh by now");
-
         mesh->allowRemoteElementRemoval(false);
-      }
       else
       {
         MeshBase & undisp_mesh_base = mesh->getMesh();
         const DofMap * const undisp_nl_dof_map =
             _executioner ? &feProblem().systemBaseNonlinear(0).dofMap() : nullptr;
         undisp_mesh_base.add_ghosting_functor(
-            createRMFromTemplateAndInit(*rm, undisp_mesh_base, undisp_nl_dof_map));
+            createRMFromTemplateAndInit(*rm, *mesh, undisp_mesh_base, undisp_nl_dof_map));
 
         // In the final stage, if there is a displaced mesh, we need to
         // clone ghosting functors for displacedMesh
-        if (attach_geometric_rm_final && _action_warehouse.displacedMesh())
+        if (auto & disp_moose_mesh = _action_warehouse.displacedMesh();
+            attach_geometric_rm_final && disp_moose_mesh)
         {
-          MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
+          MeshBase & disp_mesh_base = disp_moose_mesh->getMesh();
           const DofMap * disp_nl_dof_map = nullptr;
           if (_executioner && feProblem().getDisplacedProblem())
             disp_nl_dof_map = &feProblem().getDisplacedProblem()->systemBaseNonlinear(0).dofMap();
           disp_mesh_base.add_ghosting_functor(
-              createRMFromTemplateAndInit(*rm, disp_mesh_base, disp_nl_dof_map));
+              createRMFromTemplateAndInit(*rm, *disp_moose_mesh, disp_mesh_base, disp_nl_dof_map));
         }
         else if (_action_warehouse.displacedMesh())
           mooseError("The displaced mesh should not yet exist at the time that we are attaching "
@@ -2582,9 +2579,10 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
 
       // Now we've built the problem, so we can use it
       auto & problem = feProblem();
+      auto & undisp_moose_mesh = problem.mesh();
       auto & undisp_nl = problem.systemBaseNonlinear(0);
       auto & undisp_nl_dof_map = undisp_nl.dofMap();
-      auto & undisp_mesh = problem.mesh().getMesh();
+      auto & undisp_mesh = undisp_moose_mesh.getMesh();
 
       if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
       {
@@ -2601,16 +2599,17 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           // functor for! Let's err on the side of *libMesh* consistency and pass properly paired
           // MeshBase-DofMap
           problem.addCouplingGhostingFunctor(
-              createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
+              createRMFromTemplateAndInit(*rm, undisp_moose_mesh, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
 
         else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
         {
           auto & displaced_problem = *problem.getDisplacedProblem();
-          MeshBase & disp_mesh = displaced_problem.mesh().getMesh();
+          auto & disp_moose_mesh = displaced_problem.mesh();
+          auto & disp_mesh = disp_moose_mesh.getMesh();
           const DofMap * const disp_nl_dof_map = &displaced_problem.systemBaseNonlinear(0).dofMap();
           displaced_problem.addAlgebraicGhostingFunctor(
-              createRMFromTemplateAndInit(*rm, disp_mesh, disp_nl_dof_map),
+              createRMFromTemplateAndInit(*rm, disp_moose_mesh, disp_mesh, disp_nl_dof_map),
               /*to_mesh = */ false);
         }
       }
@@ -2618,12 +2617,12 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       {
         if (rm_type == Moose::RelationshipManagerType::COUPLING)
           problem.addCouplingGhostingFunctor(
-              createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
+              createRMFromTemplateAndInit(*rm, undisp_moose_mesh, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
 
         else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
           problem.addAlgebraicGhostingFunctor(
-              createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
+              createRMFromTemplateAndInit(*rm, undisp_moose_mesh, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
       }
 

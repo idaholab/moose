@@ -32,14 +32,14 @@ tot_power = 2000 # W
 ```
 
 
-## Heat Structure Materials
+## Solid Properties
 
 To set up a heat conduction, we will need to define a solid material used in the block with
 heat conduction.
-To do that, we put the following block into a top-level [HeatStructureMaterials](HeatStructureMaterials/index.md) block:
+To do that, we put the following block into a top-level [SolidProperties](syntax/SolidProperties/index.md) block:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
-         block=HeatStructureMaterials/steel
+         block=SolidProperties/steel
          link=False
 
 where `rho`, `k`, and `cp` are density, thermal conductivity, and specific heat, respectively.

@@ -18,9 +18,9 @@ energy_change = ${fparse power_fraction * power * t}
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [main-material]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1e4
     cp = 500.0
     rho = 100.0
@@ -38,7 +38,8 @@ energy_change = ${fparse power_fraction * power * t}
     n_elems = 100
 
     names = 'rgn1 rgn2 rgn3'
-    materials = 'main-material main-material main-material'
+    solid_properties = 'main-material main-material main-material'
+    solid_properties_T_ref = '300 300 300'
     widths = '0.4 0.1 0.5'
     n_part_elems = '2 2 2'
 

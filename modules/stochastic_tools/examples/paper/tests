@@ -11,5 +11,6 @@
     required_python_packages = 'pandas'
     executable_pattern = 'stochastic_tools*'
     valgrind = none
+    method = '!dbg'
   []
 []

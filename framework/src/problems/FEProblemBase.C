@@ -449,7 +449,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _vector_curl_zero.resize(n_threads);
   _uo_jacobian_moose_vars.resize(n_threads);
 
-  _active_elemental_moose_variables.resize(n_threads);
+  _active_material_property_ids.resize(n_threads);
 
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
@@ -3476,10 +3476,12 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 }
 
 void
-FEProblemBase::prepareMaterials(SubdomainID blk_id, const THREAD_ID tid)
+FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                                const SubdomainID blk_id,
+                                const THREAD_ID tid)
 {
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
   {
@@ -3487,25 +3489,27 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, const THREAD_ID tid)
     _all_materials.updateBlockMatPropDependency(blk_id, needed_mat_props, tid);
   }
 
-  const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
-  for (const auto & id : ids)
+  const auto & ids = _mesh.getSubdomainBoundaryIds(blk_id);
+  for (const auto id : ids)
   {
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
     _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
   }
 
-  const std::set<MooseVariableFEBase *> & current_active_elemental_moose_variables =
-      getActiveElementalMooseVariables(tid);
+  const auto & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(),
                            current_active_elemental_moose_variables.end());
 
-  const std::set<unsigned int> & current_active_material_properties =
-      getActiveMaterialProperties(tid);
-  needed_mat_props.insert(current_active_material_properties.begin(),
-                          current_active_material_properties.end());
+  needed_mat_props.insert(consumer_needed_mat_props.begin(), consumer_needed_mat_props.end());
 
   setActiveElementalMooseVariables(needed_moose_vars, tid);
   setActiveMaterialProperties(needed_mat_props, tid);
+}
+
+void
+FEProblemBase::prepareMaterials(const SubdomainID blk_id, const THREAD_ID tid)
+{
+  prepareMaterials(getActiveMaterialProperties(tid), blk_id, tid);
 }
 
 void
@@ -5369,13 +5373,13 @@ FEProblemBase::clearActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid
 }
 
 void
-FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
+FEProblemBase::setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                            const THREAD_ID tid)
 {
   _active_material_property_ids[tid] = mat_prop_ids;
 }
 
-const std::set<unsigned int> &
+const std::unordered_set<unsigned int> &
 FEProblemBase::getActiveMaterialProperties(const THREAD_ID tid) const
 {
   return _active_material_property_ids[tid];
@@ -8346,4 +8350,13 @@ FEProblemBase::setVerboseProblem(bool verbose)
 {
   _verbose_setup = verbose;
   _verbose_multiapps = verbose;
+}
+
+void
+FEProblemBase::setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid)
+{
+  SubProblem::setCurrentLowerDElem(lower_d_elem, tid);
+  if (_displaced_problem)
+    _displaced_problem->setCurrentLowerDElem(
+        lower_d_elem ? _displaced_mesh->elemPtr(lower_d_elem->id()) : nullptr, tid);
 }

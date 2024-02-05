@@ -11,6 +11,7 @@
 #include "INSFVVelocityVariable.h"
 #include "Function.h"
 #include "NS.h"
+#include "FVKernel.h"
 
 registerMooseObject("NavierStokesApp", WCNSFV2PSlipVelocityFunctorMaterial);
 
@@ -32,7 +33,7 @@ WCNSFV2PSlipVelocityFunctorMaterial::validParams()
   params.addParam<PostprocessorName>(
       "force_postprocessor", 0, "A postprocessor whose value is multiplied by the body force");
   params.addParam<RealVectorValue>(
-      "force_direction", RealVectorValue(1, 0, 0), "Gravity acceleration vector");
+      "force_direction", RealVectorValue(1, 0, 0), "Gravitational acceleration vector");
   params.addParam<MooseFunctorName>(
       "linear_coef_name", 0.44, "Linear friction coefficient name as a material property");
   params.addParam<MooseFunctorName>(
@@ -44,6 +45,17 @@ WCNSFV2PSlipVelocityFunctorMaterial::validParams()
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
   params.addRequiredParam<MooseFunctorName>("slip_velocity_name", "the name of the slip velocity");
+  params.addParam<unsigned short>("ghost_layers",
+                                  3,
+                                  "The number of layers of elements to ghost. With Rhie-Chow and "
+                                  "the velocity gradient calculation below, we need 3");
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
+      });
   return params;
 }
 
