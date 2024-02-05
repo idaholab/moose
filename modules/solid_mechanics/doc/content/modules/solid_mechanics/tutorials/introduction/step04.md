@@ -1,10 +1,10 @@
 # Step 4 - Multiple submeshes
 
-As a final step in the tensor mechanics section of this tutorial we'll set up a
+As a final step in the solid mechanics section of this tutorial we'll set up a
 pair of separate mesh blocks - two cantilevers side by side, fixed at the
 bottom, that will be pushed towards each other with pressure boundary conditions.
 
-!listing modules/tensor_mechanics/tutorials/introduction/mech_step04.i
+!listing modules/solid_mechanics/tutorials/introduction/mech_step04.i
 
 ## Input file
 
@@ -51,7 +51,7 @@ important thing for MOOSE is that a single generator sits at the end of such a
 chain or root of such a tree (otherwise MOOSE will complain with an error
 message).
 
-### TensorMechanics `Master` Action
+### SolidMechanics QuasiStatic Physics
 
 As discussed previously, when we expect large deformation we need to make sure
 we select the correct strain formulation. So here we select finite strain.
@@ -82,7 +82,7 @@ First off, run the simulation and look at the result.
 
 > What do you observe (does it meet your expectations)?
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04a.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer04a.md)
 
 ### Convergence
 
@@ -129,11 +129,11 @@ the `[Outputs]` block.
 > variable. Take a look at [NodalExtremeValue](NodalExtremeValue.md) and try to
 > set it up to output the maximum positive x deflection.
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04b.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer04b.md)
 
 ### Sidebar: Volumetric locking
 
-[Volumetric locking](tensor_mechanics/VolumetricLocking.md) can occur in
+[Volumetric locking](solid_mechanics/VolumetricLocking.md) can occur in
 mechanics simulations of near incompressible materials if the elements (and
 associated shape functions) cannot accommodate the incompressibility constraint.
 
@@ -142,7 +142,7 @@ associated shape functions) cannot accommodate the incompressibility constraint.
 > cantilevers to `0.49`. Then add and modify the following parameters
 >
 > - [!param](/Mesh/uniform_refine) in the `[Mesh]` block
-> - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/volumetric_locking_correction) in the tensor mechanics master action block
+> - [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/volumetric_locking_correction) in the solid mechanics quasi-static physics block
 > - [!param](/Mesh/GeneratedMeshGenerator/elem_type) in the `GeneratedMeshGenerator` blocks
 >
 > For convenience all those parameters may be listed under `[GlobalParams]`
@@ -151,7 +151,7 @@ associated shape functions) cannot accommodate the incompressibility constraint.
 > correction (with QUAD4 elements), and compare the result for different levels
 > of uniform refinement (1, 2, 3, 4).
 
-[Click here for the sidebar on volumetric locking.](tensor_mechanics/tutorials/introduction/step04a.md)
+[Click here for the sidebar on volumetric locking.](solid_mechanics/tutorials/introduction/step04a.md)
 
 Once you've answered the questions and run this example we will move on to
 [Step 1](contact/tutorials/introduction/step04.md optional=True) of the contact

@@ -1,6 +1,6 @@
-# Stresses in Tensor Mechanics
+# Stresses in Solid Mechanics
 
-The tensor mechanics module include multiple classes for calculating elastic stress, plastic stress, creep stress, and a combination of stress calculation methods.
+The solid mechanics module include multiple classes for calculating elastic stress, plastic stress, creep stress, and a combination of stress calculation methods.
 
 ## Elasticity
 
@@ -9,7 +9,7 @@ is recoverable.  Elastic stress is related to elastic strain through the elastic
 \begin{equation}
 \sigma_{ij} = C_{ijkl} \epsilon_{kl}
 \end{equation}
-The two simplified elastic stress materials in Tensor Mechanics are:
+The two simplified elastic stress materials in Solid Mechanics are:
 
 1. [ComputeLinearElasticStress](/ComputeLinearElasticStress.md) for small total strain formulations,
    and
@@ -19,7 +19,7 @@ The two simplified elastic stress materials in Tensor Mechanics are:
 
 ## Inelastic Stress Calculations
 
-Tensor Mechanics includes two different algorithm approaches to solving for stresses due to inelastic strains:
+Solid Mechanics includes two different algorithm approaches to solving for stresses due to inelastic strains:
 
 1. +User Objects+, which perform the stress calculations in both MOOSE code `UserObjects` and `Materials`, and
 

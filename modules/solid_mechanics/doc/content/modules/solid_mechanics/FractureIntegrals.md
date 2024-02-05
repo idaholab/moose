@@ -130,7 +130,7 @@ The $T$-stress is the first second-order parameter in Williams' expansion of str
 
 The MOOSE implementation of the capability to compute these fracture integrals is provided using a variety of MOOSE objects, which are quite complex to define manually, especially for 3D simulations. For this reason, the to compute $J$-integrals or interaction integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects.
 
-!listing modules/tensor_mechanics/test/tests/j_integral/j_integral_3d.i block=DomainIntegral
+!listing modules/solid_mechanics/test/tests/j_integral/j_integral_3d.i block=DomainIntegral
 
 
 ## C-Integral
@@ -149,4 +149,4 @@ This integral is computed in an analogous way to the J-integral: A domain integr
 
 To compute $C$-integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects. In particular, two additional inputs are required `integrals = CIntegral` and `inelastic_models`. The former refers to the type of integral requested ('C') and the latter refers to the name of the power law creep model --only supported material model at present. The power law exponent in the material model is used to compute the strain energy rate density in the fracture integral under the assumption of a creep strain rate field subject to steady-state (secondary) crack growth.
 
-!listing modules/tensor_mechanics/test/tests/j_integral_vtest/c_int_surfbreak_ellip_crack_sym_mm.i block=DomainIntegral
+!listing modules/solid_mechanics/test/tests/j_integral_vtest/c_int_surfbreak_ellip_crack_sym_mm.i block=DomainIntegral

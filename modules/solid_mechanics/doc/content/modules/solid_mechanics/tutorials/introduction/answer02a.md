@@ -10,9 +10,9 @@ to the material stiffness will lead to large deformation, for which a finite
 strain formulation needs to be used. Read about our incremental finite strain
 formulation [here](ComputeFiniteStrain.md).
 
-In the Tensor mechanics Master action this finite strain formulation can be
+In the Tensor mechanics QuasiStatic Physics this finite strain formulation can be
 activated by setting the
-[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/strain) parameter
+[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/strain) parameter
 to `FINITE`. Furthermore you need to swap out the corresponding stress calculator from [`ComputeLinearElasticStress`](ComputeLinearElasticStress.md) to [`ComputeFiniteStrainElasticStress`](ComputeFiniteStrainElasticStress.md).
 
 Rerun the problem again with these changes and your modified Young's modulus of

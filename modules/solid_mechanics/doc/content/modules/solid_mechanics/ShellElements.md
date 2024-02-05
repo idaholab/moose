@@ -2,7 +2,7 @@
 
 A shell element is used to model the response of structural elements that are much thinner along one direction (out-of-plane direction) compared to the two in-plane directions. A 4-node shell element is implemented in MOOSE based on [!cite](dvorkin1984continuum) that can model structural response of both thin and thick plates.
 
-!media media/tensor_mechanics/shell_element.png
+!media media/solid_mechanics/shell_element.png
       style=width:50%;margin-left:2%;float:right
       id=fig_shell
       caption=Shell element with 4 nodes and 3 translational and 2 rotational degrees of freedom at each node.

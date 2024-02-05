@@ -9,7 +9,7 @@ Jacobian for the homogenization system.  It is identical to the [`TotalLagrangia
 class except it also provides the correct off-diagonal Jacobian
 terms for the [Lagrangian kernel homogenization system](Homogenization.md).
 
-The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
+The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax

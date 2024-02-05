@@ -11,7 +11,7 @@ and the [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangia
 Kernel handles all the off-diagonal Jacobian terms.  This
 `ScalarKernel` only supplies the residual and on-diagonal Jacobian.
 
-The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
+The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax

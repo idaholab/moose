@@ -94,7 +94,7 @@ subdivided into four subdomain.  The material model in each subdomain is a [St. 
 model, but the material properties in each subdomain are different as indicated on the figure.
 The problem imposes a combination of deformation gradient and 1st Piola Kirchhoff constraints on the simulation cell.
 
-!media tensor_mechanics/homogenization-setup.png
+!media solid_mechanics/homogenization-setup.png
        id=hsetup
        style=width:50%;float:center;padding-top:1.5%;
        caption=Simple, 2D large deformation homogenization cell problem.
@@ -104,12 +104,12 @@ The problem imposes a combination of deformation gradient and 1st Piola Kirchhof
 equilibrium in the body.  Because each subdomain has different material properties the microdisplacements are not
 homogeneous, producing an inhomogeneous stress state in the simulation cell.
 
-!media tensor_mechanics/homogenization-strain.png
+!media solid_mechanics/homogenization-strain.png
        id=strain
        style=width:50%;float:center;padding-top:1.5%;
        caption=Results showing that the controlled deformation values match their targets.
 
-!media tensor_mechanics/homogenization-stress.png
+!media solid_mechanics/homogenization-stress.png
        id=stress
        style=width:50%;float:center;padding-top:1.5%;
        caption=Results showing that the controlled stress values match their targets.
@@ -120,7 +120,7 @@ The homogenization system works for 1D, 2D, and 3D problems and for any material
 
 The homogenization system relies on several different objects to impose the constraint residual, specify the constraints,
 and add the appropriate off-diagonal Jacobian terms.
-The easiest way to set up a homogenization problem is to use the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
+The easiest way to set up a homogenization problem is to use the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)
 which automatically configures the correct MOOSE objects.
 
 !alert warning
@@ -147,7 +147,7 @@ least 3 off-diagonal displacement gradient constraints (3D).  That is, not all o
 large deformations.  An unconstrained displacement gradient admits free rigid body rotation and these modes must removed.
 
 The following steps then provide the homogenization constraints.  These steps can be replaced by 
-the appropriate options in the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md).
+the appropriate options in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md).
 
 1. Add a `ScalarVariable` with the appropriate order for the problem being solved (see [sizes]).
 2. Add a [`HomogenizationConstraint`](userobjects/lagrangian/HomogenizationConstraint.md) `UserObject` to calculate the volume-averaged constraint value.

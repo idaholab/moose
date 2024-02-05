@@ -1,7 +1,7 @@
 > If you created a large strain version of the input, try and convert it to use
 > MOOSE's automatic differentiation system. A few places to look at:
 >
-> - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/use_automatic_differentiation) in the tensor mechanics master action
+> - [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/use_automatic_differentiation) in the solid mechanics quasi-static physics
 > - [!param](/BCs/Pressure/PressureAction/use_automatic_differentiation) in the Pressure BC action
 > - [ADDirichletBC](ADDirichletBC.md)
 > - [ADComputeIsotropicElasticityTensor](ComputeIsotropicElasticityTensor.md)
@@ -9,11 +9,11 @@
 
 Here is the converted input:
 
-!listing modules/tensor_mechanics/tutorials/introduction/mech_step02a.i
+!listing modules/solid_mechanics/tutorials/introduction/mech_step02a.i
 
 ## Input file
 
-### TensorMechanics `Master` Action
+### SolidMechanics QuasiStatic Physics
 
 Adding `use_automatic_differentiation = true` here causes the action to build
 the automatic differentiation (AD) enabled versions of the materials, kernels,
@@ -34,15 +34,15 @@ condition objects that act on the displacement variables in the problem.
 
 ### `Materials`
 
-As mentioned above, when using AD-enabled kernels (added through the master
-action), we must supply them with AD-enabled material properties. That's why we
+As mentioned above, when using AD-enabled kernels (added through the quasi static
+physics syntax), we must supply them with AD-enabled material properties. That's why we
 select the AD-enabled objects to compute stiffness tensor and stress. (The
-AD-enabled strain calculator is automatically added by the master action.)
+AD-enabled strain calculator is automatically added by the quasi-static physics.)
 
-Note that in [the first exercise](tensor_mechanics/tutorials/introduction/answer02a.md)
+Note that in [the first exercise](solid_mechanics/tutorials/introduction/answer02a.md)
 we switched to a large strain formulation. In case you didn't make that change
 use `ADComputeLinearElasticStress` here and make sure you do not have `strain =
-FINITE` in the master action.
+FINITE` in the quasi-static physics.
 
 ### `Executioner`
 

@@ -4,7 +4,7 @@ In the previous step we set up a basic small strain mechanics simulation that
 did... nothing. In this step we're adding a load to the top and we'll fix the
 displacements on the bottom surface of our block.
 
-!listing modules/tensor_mechanics/tutorials/introduction/mech_step02.i
+!listing modules/solid_mechanics/tutorials/introduction/mech_step02.i
 
 ## Input file
 
@@ -88,13 +88,13 @@ boundary condition effect the deformation of the sample.
 > and the applied loading. What happens if you drastically reduce the Young's
 > modulus or increase the applied pressure. Is the simulation result still valid?
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer02a.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer02a.md)
 
 ### Units again
 
 > What changes if you scale Young's and applied pressure by the same amount. Why?
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer02b.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer02b.md)
 
 ### Sidebar: Automatic differentiation
 
@@ -105,14 +105,14 @@ is not always feasible, and it is not exact under every circumstance.
 > If you created a large strain version of the input, try and convert it to use
 > MOOSE's automatic differentiation system. A few places to look at:
 >
-> - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/use_automatic_differentiation) in the tensor mechanics master action
+> - [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/use_automatic_differentiation) in the solid mechanics quasi-static physics
 > - [!param](/BCs/Pressure/PressureAction/use_automatic_differentiation) in the Pressure BC action
 > - [ADDirichletBC](ADDirichletBC.md)
 > - [ADComputeIsotropicElasticityTensor](ComputeIsotropicElasticityTensor.md)
 > - [ADComputeFiniteStrainElasticStress](ADComputeFiniteStrainElasticStress.md)
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer02c.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer02c.md)
 
 Once you've answered the questions and run this example we will move on to
-[Step 3](tensor_mechanics/tutorials/introduction/step03.md) where the concept of subdomains or "blocks" is
+[Step 3](solid_mechanics/tutorials/introduction/step03.md) where the concept of subdomains or "blocks" is
 introduced.

@@ -1,6 +1,6 @@
 # Tensor Representation and Utility Classes
 
- The basis for Tensor Mechanics is the tensor representation classes.  The two base classes are
+ The basis for Solid Mechanics is the tensor representation classes.  The two base classes are
  RankTwoTensor and RankFourTensor, which as expected hold 3x3 values and 3x3x3x3 values,
  respectively.  A suite of operators and get/set methods are available.
 

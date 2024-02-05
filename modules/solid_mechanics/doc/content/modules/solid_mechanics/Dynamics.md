@@ -1,6 +1,6 @@
 # Dynamics
 
-Dynamic problems like the response of a multi degree of freedom structure to external forcing and wave propagation in a medium can also be solved using the Tensor Mechanics module.
+Dynamic problems like the response of a multi degree of freedom structure to external forcing and wave propagation in a medium can also be solved using the Solid Mechanics module.
 
 The equation of motion for a typical dynamics problem has the following format:
 \begin{equation}
@@ -62,7 +62,7 @@ The degree of damping in the system depends on the coefficients $\zeta$ and $\et
 
 where, $\xi(\omega)$ is the damping ratio of the system as a function of frequency $\omega$. For example, the damping ratio as a function of frequency for $\zeta = 0.0035$ and $\eta = 0.09$ is presented in [fig:rayleigh]. Note that $\omega$ has units of rad/s and $f$ used in the figure has units of Hz.
 
-!media media/tensor_mechanics/rayleigh.png style=width:60%;margin-left:150px;float:center; id=fig:rayleigh caption=Damping ratio as a function of frequency.
+!media media/solid_mechanics/rayleigh.png style=width:60%;margin-left:150px;float:center; id=fig:rayleigh caption=Damping ratio as a function of frequency.
 
 To model a constant damping ratio using Rayleigh damping, the aim is to find $\zeta$ and $\eta$ such that the $\xi(f)$ is close to the target damping ratio $\xi_t$, which is a constant value, between the frequency range $[f_1, f_2]$. This can be achieved by minimizing the difference between $\xi_t$ and $\xi(f)$ for all the frequencies between $f_1$ and $f_2$, i.e., if
 
@@ -106,9 +106,9 @@ Note that the time derivative of $\sigma(t+\Delta t)$ and $\sigma(t)$ are approx
 
 The input file syntax for calculating the residual due to both the Inertial force and the DynamicStressDivergenceTensors is:
 
-!listing modules/tensor_mechanics/test/tests/dynamics/rayleigh_damping/rayleigh_hht.i start=Kernels end=AuxKernels
+!listing modules/solid_mechanics/test/tests/dynamics/rayleigh_damping/rayleigh_hht.i start=Kernels end=AuxKernels
 
-Here, `./DynamicTensorMechanics` is the action that calls the [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel.
+Here, `./DynamicSolidMechanics` is the action that calls the [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel.
 
 Finally, when using HHT time integration method, external forces like gravity and pressure also require $\alpha$ as input.
 
@@ -120,8 +120,8 @@ For dynamic problems, it is recommended to use [PresetDisplacement](/PresetDispl
 
 ## Static Initialization
 
-To initialize the system under a constant initial loading such as gravity, an initial static analysis can be conducted by turning off all the dynamics related Kernels and AuxKernels such as [InertialForce](/InertialForce.md), [NewmarkVelAux](/NewmarkVelAux.md) and [NewmarkAccelAux](/NewmarkAccelAux.md) for the first time step. To turn off stiffness proportional Rayleigh damping for the first time step `static_initialization` flag can be set to true in [DynamicTensorMechanics](/DynamicTensorMechanicsAction.md) or [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md). An example of static initialization can be found in this following test:
+To initialize the system under a constant initial loading such as gravity, an initial static analysis can be conducted by turning off all the dynamics related Kernels and AuxKernels such as [InertialForce](/InertialForce.md), [NewmarkVelAux](/NewmarkVelAux.md) and [NewmarkAccelAux](/NewmarkAccelAux.md) for the first time step. To turn off stiffness proportional Rayleigh damping for the first time step `static_initialization` flag can be set to true in [DynamicSolidMechanics](/DynamicSolidMechanicsAction.md) or [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md). An example of static initialization can be found in this following test:
 
-!listing /modules/tensor_mechanics/test/tests/dynamics/prescribed_displacement/3D_QStatic_1_Ramped_Displacement_with_gravity.i
+!listing /modules/solid_mechanics/test/tests/dynamics/prescribed_displacement/3D_QStatic_1_Ramped_Displacement_with_gravity.i
 
 !bibtex bibliography

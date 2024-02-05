@@ -9,7 +9,7 @@ residual in the reference configuration using the `pk1_stress` (the
 1st Piola-Kirchhoff stress).  This kernel provides the residual
 for Cartesian coordinates and the user needs to add one kernel
 for each dimension of the problem.  Alternatively, the
-[SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md)
+[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)
 simplifies the process of adding the required kernels and setting up the
 input parameters.
 

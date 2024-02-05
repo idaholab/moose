@@ -21,7 +21,7 @@ while
 denotes a gradient with respect to the reference coordinates.  [potatoes]
 describes these two frames of reference. The new kernel system current supports three coordinate systems: [GradientOperator.md#3D_cartesian], [GradientOperator.md#2D_axisymmetric_cylindrical], and [GradientOperator.md#1D_centrosymmetric_spherical].
 
-!media tensor_mechanics/mechanics_potatoes.png
+!media solid_mechanics/mechanics_potatoes.png
        id=potatoes
        style=width:30%;float:center;padding-top:1.5%;
        caption=Summary of the reference and current configurations with key quantities.
@@ -77,7 +77,7 @@ when using a [updated Lagrangian](kernels/lagrangian/UpdatedLagrangianStressDive
 [total Lagrangian](kernels/lagrangian/TotalLagrangianStressDivergence.md) model.*
 
 However, at times one formulation may be more convenient than another.
-For example, the [homogenization system](tensor_mechanics/Homogenization.md)
+For example, the [homogenization system](solid_mechanics/Homogenization.md)
 system only works with the [total Lagrangian kernel](kernels/lagrangian/TotalLagrangianStressDivergence.md)
 because of the difficulty in including the extra homogenization
 field in the kinematic spatial derivatives.
@@ -85,7 +85,7 @@ In theory it can be more efficient to couple a "native" Cauchy stress
 constitutive model to the updated Lagrangian configuration and a
 "native" 1st Piola-Kirchhoff model to the total Lagrangian configuration.
 However, the currently-implemented
-[material system](tensor_mechanics/NewMaterialSystem.md) always coverts
+[material system](solid_mechanics/NewMaterialSystem.md) always coverts
 Cauchy stress to 1st Piola-Kirchhoff stress and vice-versa so that models
 can be used with either the updated or total Lagrangian kernels.
 
@@ -105,8 +105,8 @@ theories.  The user can switch between them by setting the
 `large_kinematics` flag to `true` for large deformation theory and
 `false` for small deformation theory.  This flag applies to the kernels,
 the [strain calculator](materials/lagrangian/ComputeLagrangianStrain.md), the
-[homogenization system](/tensor_mechanics/Homogenization.md), and
-for many models, the [constitutive](tensor_mechanics/NewMaterialSystem.md) models for calculating the stress.
+[homogenization system](/solid_mechanics/Homogenization.md), and
+for many models, the [constitutive](solid_mechanics/NewMaterialSystem.md) models for calculating the stress.
  As such, it is often convenient to set it in the `GlobalParams` section
  of the input file so that you can easily switch between the two.
 
@@ -122,7 +122,7 @@ when `large_kinematics = true`.  The kernel enforces this condition with
 an error.  For all other objects in the new mechanics system the
 flag should be set to `false`.
 
-The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
+The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)
 can be used to easily coordinate the
 values of this flag and the `use_displaced_mesh` flag.
 

@@ -3,7 +3,7 @@
 In this step we'll be setting up two subdomains (regions of our sample) with
 differing material properties.
 
-!listing modules/tensor_mechanics/tutorials/introduction/mech_step03.i
+!listing modules/solid_mechanics/tutorials/introduction/mech_step03.i
 
 ## Input file
 
@@ -38,15 +38,15 @@ We make a few changes in the Executioner block here, and you should try playing 
 ### Visualizing strain
 
 So far we've only looked at the deformation of the mesh. MOOSE can visualize a
-host of mechanical quantities, and the master action makes this particularly
+host of mechanical quantities, and the quasi-static physics makes this particularly
 easy.
 
 > Try and add output for the vonMises stress in the simulation domain. Take a
 > look at the
-> [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/generate_output)
+> [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/generate_output)
 > parameter...
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03a.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer03a.md)
 
 ### Sidebar: Thermal expansion
 
@@ -54,8 +54,8 @@ easy.
 > internal changes of a material. One common effect is the thermal expansion (or
 > contraction) under temperature changes.
 
-[Click here for the sidebar on thermal expansion.](tensor_mechanics/tutorials/introduction/step03a.md)
+[Click here for the sidebar on thermal expansion.](solid_mechanics/tutorials/introduction/step03a.md)
 
 Once you've answered the questions and run this example we will move on to
-[Step 4](tensor_mechanics/tutorials/introduction/step04.md) and setup a cantilever problem that prepares us
+[Step 4](solid_mechanics/tutorials/introduction/step04.md) and setup a cantilever problem that prepares us
 for contact.

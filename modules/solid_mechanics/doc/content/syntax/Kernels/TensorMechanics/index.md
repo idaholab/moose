@@ -4,7 +4,7 @@
 
 !alert warning title=Deprecated Action
 This legacy action will soon be deprecated in favor of the more inclusive
-+[TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)+.
++[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)+.
 See the description, example use, and parameters on the
 +[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md)+ action system page.
 
@@ -30,8 +30,13 @@ Review the theoretical introduction for the
 Pay particular attention to the setting of the `use_displaced_mesh` parameter
 discussion; this parameter depends on the strain formulation used in the simulation.
 
+<<<<<<< HEAD
 !alert note title=Use of the Tensor Mechanics MasterAction Recommended
 We recommend that users employ the +[TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)+
+=======
+!alert note title=Use of the Solid Mechanics QuasiStatic Physics Recommended
+We recommend that users employ the +[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)+
+>>>>>>> 86b1d6bfa2 (fixup! Update modules/solid_mech to new syntax)
 whenever possible to ensure consistency between the test function gradients and
 the strain formulation selected.
 

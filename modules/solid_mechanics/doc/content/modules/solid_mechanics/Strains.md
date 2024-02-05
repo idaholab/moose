@@ -1,11 +1,11 @@
-# Strain Formulations in Tensor Mechanics
+# Strain Formulations in Solid Mechanics
 
-The tensor mechanics module offers three different types of strain calculation:
+The solid mechanics module offers three different types of strain calculation:
 Small linearized total strain, small linearized incremental strain, and finite incremental strain.
 
 ## Small Linearized Total Strain
 
-For linear elasticity problems, the Tensor Mechanics module includes a small strain
+For linear elasticity problems, the Solid Mechanics module includes a small strain
 and total strain material [ComputeSmallStrain](/ComputeSmallStrain.md).  This material
 is useful for verifying material models with hand calculations because of the
 simplified strain calculations.
@@ -29,7 +29,7 @@ see [!cite](shammamy1967incremental).
 
 The input file syntax for small strain is
 
-!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/tutorials/basics/part_1.1.i block=Physics/SolidMechanics/QuasiStatic
 end=stress
 
 ## Incremental Small Strains
@@ -52,7 +52,7 @@ a component of verifying more complex finite incremental strain-stress calculati
 
 The input file syntax for incremental small strain is
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i block=Modules/TensorMechanics
+!listing modules/solid_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i block=Physics/SolidMechanics
 
 
 ## Finite Large Strains
@@ -61,7 +61,7 @@ For finite strains, use [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which 
 
 ### Incremental Deformation Gradient
 
-The finite strain mechanics approach used in the MOOSE tensor_mechanics module
+The finite strain mechanics approach used in the MOOSE solid_mechanics module
 is the incremental corotational form from [!cite](rashid1993incremental). In this
 form, the generic time increment under consideration is such that $t \in [t_n, t_{n+1}]$.
 The configurations of the material element under consideration at $t = t_n$ and
@@ -91,7 +91,7 @@ For this form, we assume
 \end{aligned}
 \end{equation}
 
-In tensor mechanics, there are two decomposition options to obtain the strain increment:
+In solid mechanics, there are two decomposition options to obtain the strain increment:
 TaylorExpansion and EigenSolution, with the default set to TaylorExpansion. See the
 [ComputeFiniteStrain](/ComputeFiniteStrain.md) for a description of both decomposition options.
 
@@ -113,7 +113,7 @@ This occurs because the integral of the rate-of-deformation over the full
 loading cycle is not zero. A detailed explanation can be found in
 [!cite](belytschko2003).
 
-!media tensor_mechanics/closed_loop_large_deform_cycle_loading.png
+!media solid_mechanics/closed_loop_large_deform_cycle_loading.png
        id=closed_loop_cycle_loading
        style=width:95%;float:right;padding-top:1.5%;
        caption=Closed loop large deformation loading cycle.
@@ -130,6 +130,6 @@ Once the strain increment is calculated, it is added to the total strain from $t
 
 The input file syntax for a finite incremental strain material is
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules/TensorMechanics
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Physics/SolidMechanics
 
 !bibtex bibliography

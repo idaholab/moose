@@ -1,8 +1,8 @@
-# Plug-n-Play System Overview in Tensor Mechanics
+# Plug-n-Play System Overview in Solid Mechanics
 
-The tensor mechanics materials use a plug-and-play system where the main tensors used in the residual
+The solid mechanics materials use a plug-and-play system where the main tensors used in the residual
 equation are defined in individual material classes in MOOSE. The plug-and-play approach used in the
-Tensor Mechanics module requires at least three separate classes to fully describe a material model.
+Solid Mechanics module requires at least three separate classes to fully describe a material model.
 
 !alert note title=Three Tensors Are Required for a Mechanics Problem
 The three tensors that must be defined for any mechanics problem are the the strain
@@ -10,7 +10,7 @@ $\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mat
 $\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain)
 $\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.
 
-!media media/tensor_mechanics/IntroPlugNPlay.png
+!media media/solid_mechanics/IntroPlugNPlay.png
        style=width:800;float:right;
        caption=Figure 1: Tensors required to fully describe a mechanics material.
 
@@ -25,7 +25,7 @@ The base material class to create strains ($\boldsymbol{\epsilon}$) or strain in
 `computeQpProperties()` method.  For all strains the base class defines the property `total_strain`.
 For incremental strains, both finite and small, the compute strain base class defines the properties
 `strain_rate`, `strain_increment`, `rotation_increment`, and `deformation_gradient`. A discussion of
-the different types of strain formulations is available on the [Strains](tensor_mechanics/Strains.md)
+the different types of strain formulations is available on the [Strains](solid_mechanics/Strains.md)
 page.
 
 For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\boldsymbol{\epsilon} =
@@ -33,11 +33,11 @@ For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\b
 [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which an incremental form is employed such that the
 strain_increment and rotation_increment are calculated.
 
-With the TensorMechanics master action, the strain formulation can be set with the `strain= SMALL |
+With the SolidMechanics quasi-static physics, the strain formulation can be set with the `strain= SMALL |
 FINITE` parameter, as shown below.
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
-         block=Modules/TensorMechanics
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
+         block=Physics/SolidMechanics
 
 ## Elasticity Tensor Materials
 
@@ -55,11 +55,11 @@ elasticity tensors, including:
 
 The input file syntax for the isotropic elasticity tensor is
 
-!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Materials/elasticity_tensor
+!listing modules/solid_mechanics/tutorials/basics/part_1.1.i block=Materials/elasticity_tensor
 
 and for an orthotropic material, such as a metal crystal, is
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
          block=Materials/elasticity_tensor
 
 ## Stress Materials
@@ -75,12 +75,12 @@ strains and rotations increments
 [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) The input file syntax for
 these materials is
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
          block=Materials/stress
 
 There are a number of other constitutive models that have been implemented to calculate more complex
 elasticity problems, plasticity, and creep.  An overview of these different materials is available on
-the [Stresses](tensor_mechanics/Stresses.md) page.
+the [Stresses](solid_mechanics/Stresses.md) page.
 
 ## Eigenstrain Materials
 
@@ -112,15 +112,15 @@ e.g. ($\boldsymbol{\epsilon}_T = \alpha \Delta T$) or a more complex function of
 thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md)
 computes the thermal strain as a linear function of temperature.  The input file syntax is
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i
+!listing modules/solid_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i
          block=Materials/thermal_expansion_strain
 
 The eigenstrain material block name must also be added as an input parameter, `eigenstrain_names` to
-the strain material or TensorMechanics master action block. An example of the additional parameter in
-the TensorMechanics master action is shown below.
+the strain material or SolidMechanics quasi-static physics block. An example of the additional parameter in
+the SolidMechanics quasi-static physics is shown below.
 
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i
-         block=Modules/TensorMechanics
+!listing modules/solid_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i
+         block=Physics/SolidMechanics
 
 Other eigenstrains could be caused by defects such as over-sized or under-sized second phase
 particles. Such an eigenstrain material is

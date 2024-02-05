@@ -39,4 +39,4 @@ of the [!ac](IGA) based elements using Paraview visualization.
 
 !listing examples/cframe_iga/cframe_iga.i id=moose-iga-input caption=Complete input file for running example problem with [!ac](IGA) in MOOSE.
 
-!media tensor_mechanics/cframe_iga.png id=moose-iga-vtk caption=Maximum principal stress for "c-frame" example utilizing [!ac](IGA) in MOOSE.
+!media solid_mechanics/cframe_iga.png id=moose-iga-vtk caption=Maximum principal stress for "c-frame" example utilizing [!ac](IGA) in MOOSE.

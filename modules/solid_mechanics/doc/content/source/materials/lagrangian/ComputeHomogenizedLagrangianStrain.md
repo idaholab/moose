@@ -13,7 +13,7 @@ the displacement field.
 The [homogenization system](Homogenization.md) documentation describes how the
 strain/gradient components are stored in the `ScalarVariable`.
 
-The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
+The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax

@@ -183,9 +183,9 @@ and thus must be within the window of applicability at the start of the simulati
 
 While `LAROMANCEStressUpdateBase` contains the necessary algorithms contained to evaluate the ROM,
 the material specific `LAROMANCE` data is contained in inherited classes.
-Within the `tensor_mechanics` module, a test object `SS316HLAROMANCEStressUpdateTest` is included as
+Within the `solid_mechanics` module, a test object `SS316HLAROMANCEStressUpdateTest` is included as
 an example of how a ROM can be formulated. Note that `SS316HLAROMANCEStressUpdateTest` is only a
-test object located in `tensor_mechanics/test/src/`, and is not actively updated nor validated, but
+test object located in `solid_mechanics/test/src/`, and is not actively updated nor validated, but
 rather included in order to verify the math contained in `LAROMANCEStressUpdateBase`. The
 material specific ROMs provided in specific MOOSE applications should be utilized, which consists of
 the input limits, input transformations, and Legendre polynomials. Derived classes must overwrite

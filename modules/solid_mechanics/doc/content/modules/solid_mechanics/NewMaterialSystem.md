@@ -8,7 +8,7 @@ The material system for the new Lagrangian kernels consists of:
 - A stress calculator, implemented as a derived class based on either
   [`ComputeLagrangianStressCauchy`](ComputeLagrangianStressCauchy.md) or
   [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md)
-- Optionally, additional material objects part of the [homogenization system](tensor_mechanics/Homogenization.md).
+- Optionally, additional material objects part of the [homogenization system](solid_mechanics/Homogenization.md).
 
 
 The objective of these objects is to provide the stress update needed by *both* the
@@ -47,7 +47,7 @@ alternative stress measures provide additional, common kinematic quantities, des
 
 ### Stabilization
 
-As described in the [description of the stabilization system](/tensor_mechanics/Stabilization.md) and
+As described in the [description of the stabilization system](/solid_mechanics/Stabilization.md) and
 in the [strain calculator](ComputeLagrangianStrain.md), these standard kinematic quantities and all other kinematic
 measures derived from them are altered by the `stabilize_strain` option to stabilize problems with incompressible and 
 near-incompressible deformation using linear quad or hex elements.
@@ -96,7 +96,7 @@ Except for the deformation gradient itself, all the large deformation quantities
 for `large_kinematics = false`, leaving only the strain tensors defined.
 
 The strains are defined incrementally in terms of the inverse incremental deformation gradient (or the increment in the gradient for small displacement kinematics).
-The calculator [stabilizes](/tensor_mechanics/Stabilization.md) the deformation gradient adds any homogenization gradient from the [homogenization system](tensor_mechanics/Homogenization.md)
+The calculator [stabilizes](/solid_mechanics/Stabilization.md) the deformation gradient adds any homogenization gradient from the [homogenization system](solid_mechanics/Homogenization.md)
 before calculating the incremental and accumulated strains, and so these modifications propagate through all the available kinematic measures.
 However, the eigenstrains are currently defined incrementally and so they will not affect the deformation gradient, the inverse deformation gradient,
 and the incremental deformation gradient.
@@ -105,7 +105,7 @@ and the incremental deformation gradient.
 
 The [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) class uses the `large_kinematics` option to switch between
 large strain kinematics and small strain kinematics.  This option must be set consistently between the strain 
-calculator and the kernels.  The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can
+calculator and the kernels.  The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) can
 be used to automatically setup the kernels and strain calculator with consistent options by using the `strain=SMALL` or
 `strain=FINITE` options.
 
@@ -114,7 +114,7 @@ with the strain calculator and the kernel.
 However, material models can use this option to provide variations of the model, often a linearized version using the
 for `large_kinematics = false` and a nonlinear version for `large_kinematics = true`.
 Oftentimes it makes sense to keep the `large_kinematics` option consistent between the stress calculator, strain 
-calculator, and kernels.  The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) cannot
+calculator, and kernels.  The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) cannot
 set the option for the stress calculator automatically, so it is up to the user to specify it in the input file.
 
 ## Base Class Options

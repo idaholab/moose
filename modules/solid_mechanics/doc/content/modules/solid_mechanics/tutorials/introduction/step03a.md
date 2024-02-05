@@ -4,7 +4,7 @@ In this sidebar we'll introduce a thermal expansion eigenstrain. To demonstrate
 the effect we reshape the domain from step 3 and make it narrow like a
 cantilever.
 
-!listing modules/tensor_mechanics/tutorials/introduction/mech_step03a.i
+!listing modules/solid_mechanics/tutorials/introduction/mech_step03a.i
 
 ## Input file
 
@@ -39,11 +39,11 @@ function of space and time. Note the
 MOOSE systems. Here we skip execution during LINEAR and NON_LINEAR iterations
 and only update the variable value at the beginning of the timestep.
 
-### TensorMechanics `Master` Action
+### SolidMechanics QuasiStatic Physics
 
 We've added the
-[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/automatic_eigenstrain_names)
-parameter to the master action. With this option enabled the master action will
+[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/automatic_eigenstrain_names)
+parameter to the quasi-static physics. With this option enabled the quasi-static physics will
 try to automatically detect all material objects that provide eigenstrain
 properties. This works well for most scenarios. Note that MOOSE will print a
 list of detected eigenstrain names very early in its console output. Look for
@@ -53,18 +53,18 @@ list of detected eigenstrain names very early in its console output. Look for
 all: thermal_expansion
 ```
 
-when you run this example. Here `all` is the master action block name and
+when you run this example. Here `all` is the quasi-static physics block name and
 `thermal_expansion` is the
 [!param](/Materials/ComputeThermalExpansionEigenstrain/eigenstrain_name)
 parameter value for the two eigenstrain materials below. The action correctly
 detected it and verified that eigenstrains are provided on all subdomains
-covered by the master action block. To manually supply the eigenstrain material
+covered by the quasi-static physics block. To manually supply the eigenstrain material
 properties use the
-[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/eigenstrain_names)
+[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/eigenstrain_names)
 parameter. Like so
 
 ```
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     eigenstrain_names = 'thermal_expansion'
@@ -119,7 +119,7 @@ bimetallic strip.
 
 > Think about what you expect to happen when you run the input.
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03b.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer03b.md)
 
 ### Overconstraining
 
@@ -127,7 +127,7 @@ bimetallic strip.
 > observe what happens. Undo that change before you move on to the next
 > question.
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03c.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer03c.md)
 
 ### Constraining even less
 
@@ -137,8 +137,8 @@ bimetallic strip.
 > generator). Use one of the two bottom corner nodes. Now think about where you
 > have to apply the `disp_y != 0` boundary condition.
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03d.md)
+[Click here for the answer.](solid_mechanics/tutorials/introduction/answer03d.md)
 
 Once you've answered the questions and run this example we will move on to
-[Step 4](tensor_mechanics/tutorials/introduction/step04.md)  and setup a
+[Step 4](solid_mechanics/tutorials/introduction/step04.md)  and setup a
 cantilever problem that prepares us for contact.

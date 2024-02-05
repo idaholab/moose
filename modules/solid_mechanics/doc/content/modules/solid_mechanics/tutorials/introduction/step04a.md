@@ -5,7 +5,7 @@
 > cantilevers to `0.49`. Then add and modify the following parameters
 >
 > - [!param](/Mesh/uniform_refine) in the `[Mesh]` block
-> - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/volumetric_locking_correction) in the tensor mechanics master action block
+> - [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/volumetric_locking_correction) in the solid mechanics quasi-static physics block
 > - [!param](/Mesh/GeneratedMeshGenerator/elem_type) in the `GeneratedMeshGenerator` blocks
 >
 > For convenience all those parameters may be listed under `[GlobalParams]`
@@ -14,7 +14,7 @@
 > correction (with QUAD4 elements), and compare the result for different levels
 > of uniform refinement (1, 2, 3, 4).
 
-!listing modules/tensor_mechanics/tutorials/introduction/mech_step04a.i
+!listing modules/solid_mechanics/tutorials/introduction/mech_step04a.i
 
 We can run the various combinations of first/second order elements,
 active/deactivated volumetric locking correction, and levels of refinement
@@ -23,12 +23,12 @@ and plot the resulting data.
 Note that you can override input file parameters from the command line! That means you can run all the cases plotted below using these commands:
 
 ```
-../../tensor_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4
-../../tensor_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4 GlobalParams/volumetric_locking_correction=true
-mpirun -n 4 ../../tensor_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4 GlobalParams/volumetric_locking_correction=true GlobalParams/uniform_refine=1
-mpirun -n 4 ../../tensor_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD8
-mpirun -n 8 ../../tensor_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4 GlobalParams/volumetric_locking_correction=true GlobalParams/uniform_refine=4
-mpirun -n 8 ../../tensor_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD8 GlobalParams/uniform_refine=2
+../../solid_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4
+../../solid_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4 GlobalParams/volumetric_locking_correction=true
+mpirun -n 4 ../../solid_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4 GlobalParams/volumetric_locking_correction=true GlobalParams/uniform_refine=1
+mpirun -n 4 ../../solid_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD8
+mpirun -n 8 ../../solid_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD4 GlobalParams/volumetric_locking_correction=true GlobalParams/uniform_refine=4
+mpirun -n 8 ../../solid_mechanics-opt -i mech_step04a.i GlobalParams/elem_type=QUAD8 GlobalParams/uniform_refine=2
 ```
 
 !plot scatter data=[{'x': [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],

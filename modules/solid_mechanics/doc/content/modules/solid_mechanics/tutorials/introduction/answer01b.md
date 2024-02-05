@@ -11,10 +11,10 @@ instantly converge.
 
 #### Running the input
 
-If you have not done so already, compile the `tensor_mechanics-opt` executable by running `make -j N` (where `N` is the number of CPU cores you have available) in `moose/modules/tensor_mechanics/`. Then run the first tutorial input by typing
+If you have not done so already, compile the `solid_mechanics-opt` executable by running `make -j N` (where `N` is the number of CPU cores you have available) in `moose/modules/solid_mechanics/`. Then run the first tutorial input by typing
 
 ```
-./tensor_mechanics-opt -i tutorials/introduction/mech_step01.i
+./solid_mechanics-opt -i tutorials/introduction/mech_step01.i
 ```
 
 You should see some Framework information output, info on your mesh, and the non-linear system that is being solved, followed by the convergence history:

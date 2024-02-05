@@ -1,6 +1,6 @@
 # Frequency Domain Analysis
 
-The following example presents two frequency domain analysis of a cantilever beam done in the MOOSE Tensor Mechanics module. The first example computes a frequency response function of the cantilever beam and identifies the first two eigenvalues of beam.  The second analysis computes the dynamic response at a single frequency (time-harmonic problem).
+The following example presents two frequency domain analysis of a cantilever beam done in the MOOSE Solid Mechanics module. The first example computes a frequency response function of the cantilever beam and identifies the first two eigenvalues of beam.  The second analysis computes the dynamic response at a single frequency (time-harmonic problem).
 A frequency domain analysis provides the structural response at a discrete set of frequencies. At each frequency, an independent steady state simulation is performed. This document provides an example of modeling a dynamic problem at a single frequency (time-harmonic problem).
 
 Frequency domain analysis is often used to determine a frequency response function (FRF). An FRF describes the relationship between an input (frequency and amplitude of the input forcing source) and output (displacement response of a system). For simple systems, an analytic FRF can be derived. For more complex systems, the FRF is numerically obtained by determining the system response over a range of frequencies. The frequencies corresponding to the peaks on the FRF plot indicate natural frequencies of the system (eigen/fundamental frequencies). The mode shape (eigenvector) is given by the displacement profile at a natural frequency.
@@ -45,7 +45,7 @@ with amplitude $A$ and frequency $f$, is transformed to
 
 The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Frequencies corresponding to the displacement peaks in the FRF indicate natural frequencies/modes.
 
-!media media/tensor_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
+!media media/solid_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
 
 The analytic solution for the free vibration of a cantilever [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
 \begin{equation}
@@ -70,15 +70,15 @@ where 50Hz frequency increments are used in the FRF frequency sweep. The FRF whe
 The simulations will fail if they are run at the natural frequencies because the solution will become singular,
 i.e the displacements blow-up as shown by the asymptotes in [cantileverfrf].
 
-!media media/tensor_mechanics/Cantilever_frfmag.png style=width:60%; caption=Cantilever beam displacement magnitude for coarse mesh (0.1m elements) and fine mesh (0.033m elements).  Analytic results are shown in grey. id=cantileverfrfmag
+!media media/solid_mechanics/Cantilever_frfmag.png style=width:60%; caption=Cantilever beam displacement magnitude for coarse mesh (0.1m elements) and fine mesh (0.033m elements).  Analytic results are shown in grey. id=cantileverfrfmag
 
-!media media/tensor_mechanics/Cantilever_frf.png style=width:60%; caption=Cantilever beam y- and z-displacements for the fine mesh (0.033m elements).  Analytic results are shown in grey. id=cantileverfrf
+!media media/solid_mechanics/Cantilever_frf.png style=width:60%; caption=Cantilever beam y- and z-displacements for the fine mesh (0.033m elements).  Analytic results are shown in grey. id=cantileverfrf
 
 The input file for the coarse simulation shown in [cantileverfrfmag] and [cantileverfrf] is given in [listing0].
 
 !listing examples/wave_propagation/cantilever_sweep.i id=listing0
 
-This uses the [TensorMechanics MasterAction](Modules/TensorMechanics/Master/index.md) to setup the StressDivergence Kernels because this simulation only includes real displacements.  A `Transient` executioner with a `ConstantDT` timestepper is used to sweep over frequencies where the time is substituted for the frequency.  The time is converted to the frequency dependent `Reaction` `rate` using a `ParsedFunction` and is applied to the `rate` using the `RealFunctionControl`.
+This uses the [SolidMechanics QuasiStatic Physics](Physics/SolidMechanics/QuasiStatic/index.md) to setup the StressDivergence Kernels because this simulation only includes real displacements.  A `Transient` executioner with a `ConstantDT` timestepper is used to sweep over frequencies where the time is substituted for the frequency.  The time is converted to the frequency dependent `Reaction` `rate` using a `ParsedFunction` and is applied to the `rate` using the `RealFunctionControl`.
 
 In the next example, imaginary displacements will be introduced by including an absorbing boundary condition.  Imaginary displacement represent a phase shift in the problem and often result from damping.  
 
@@ -125,4 +125,4 @@ The analytical solution of [eq8] and the associated boundary conditions in [eq9]
 Applying the boundary conditions, and considering the wave to travel in the negative $x$ direction, we obtain, $C_1=0$ with $C_2=0.5/(e^{-ikL})$. Plugging these values into the analytical solution gives: $U=0.5 e^{ik(L-x)}.$
 The moose solution for this problem is shown in [solution].
 
-!media media/tensor_mechanics/wavefieldandprofile.png style=width:40%; caption=Real and imaginary displacements at $\omega =10$. id=solution
+!media media/solid_mechanics/wavefieldandprofile.png style=width:40%; caption=Real and imaginary displacements at $\omega =10$. id=solution

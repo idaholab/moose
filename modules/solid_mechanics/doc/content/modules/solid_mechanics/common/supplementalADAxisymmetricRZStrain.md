@@ -1,4 +1,4 @@
-Axisymmetric (cylindrical) materials are included in Tensor Mechanics for
+Axisymmetric (cylindrical) materials are included in Solid Mechanics for
 revolved geometries and assume symmetrical loading. These 'strain calculator'
 materials compute the strain within the appropriate coordinate system and rely
 on specialized AxisymmetricRZ kernels to handle the stress divergence. This

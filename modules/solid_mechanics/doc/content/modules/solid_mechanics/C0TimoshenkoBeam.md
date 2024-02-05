@@ -2,7 +2,7 @@
 
 A beam element [fig_beam] is used to model the response of a structural element that is long in one dimension compared to its cross-section. There are two popular formulation of beam elements:
 
-!media media/tensor_mechanics/beam_representation.png
+!media media/solid_mechanics/beam_representation.png
       style=width:50%;margin-left:2%;float:right
       id=fig_beam
       caption=Beam element with 2 nodes and 3 translational and 3 rotational degrees of freedom at each node.
@@ -203,6 +203,6 @@ R_j = \sum_{i=1}^3 I_{ji} \; \ddot{\theta}_i
 
 ### Time-integration and damping
 
-Rayleigh damping and Newmark and HHT time integration are calculated as in [Damping](http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Dynamics/) but with [StressDivergenceBeam](/StressDivergenceBeam.md) and [InertialForceBeam](/InertialForceBeam.md) while using consistent mass/inertia matrix, and [StressDivergenceBeam](/StressDivergenceBeam.md), [NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) while using point mass/inertia matrix.
+Rayleigh damping and Newmark and HHT time integration are calculated as in [Damping](http://mooseframework.org/wiki/PhysicsPhysics/SolidMechanics/Dynamics/) but with [StressDivergenceBeam](/StressDivergenceBeam.md) and [InertialForceBeam](/InertialForceBeam.md) while using consistent mass/inertia matrix, and [StressDivergenceBeam](/StressDivergenceBeam.md), [NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) while using point mass/inertia matrix.
 
 !bibtex bibliography

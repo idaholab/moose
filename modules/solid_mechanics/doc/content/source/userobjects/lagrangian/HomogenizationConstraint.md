@@ -11,7 +11,7 @@ during residual and Jacobian assembly.
 This user object then performs and stores the integrals for the kernel.
 For more details refer to the homogenization system documentation.
 
-The [SolidMechanics/QuasiStaticAction](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
+The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) can add this object
 automatically, which is the recommended way to set up homogenization constraints.
 
 ## Example Input File Syntax

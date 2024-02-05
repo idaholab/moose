@@ -7,7 +7,7 @@ the displacement field are not stable for incompressible
 and nearly incompressible deformation [!cite](hughes1987finite).
 These standard elements include the triangle, tetrahedral, quadrilateral,
 and hexahedral elements commonly used in solving problems in the 
-Tensor Mechanics module.  Incompressible deformation is 
+Solid Mechanics module.  Incompressible deformation is 
 material deformation that does not change the local volume of the structure,
 for example linear elastic deformation as the Poisson's ratio
 approaches $\nu = 0.5$.  Other common examples include problems
@@ -122,7 +122,7 @@ defined by $E=250$ and $\nu=0.4999999$ and then again with large deformation kin
 $\mu=8300.33333888888926$.
 Each plot shows the displacement at the tip of the beam as a function of mesh refinement
 
-!media tensor_mechanics/cooksetup.png
+!media solid_mechanics/cooksetup.png
        id=cooksetup
        style=width:30%;float:center;padding-top:1.5%;
        caption=Cook's membrane: a reference problem for testing locking and stabilization strategies
@@ -137,12 +137,12 @@ These plots demonstrate
    for each kernel type are identical, they demonstrate the proper, non-locking stiffness, and mesh refinement converges the
    problem to a stable, analytic solution.
 
-!media tensor_mechanics/smallcook.png
+!media solid_mechanics/smallcook.png
        id=smallcook
        style=width:50%;float:center;padding-top:1.5%;
        caption=Demonstration of $\bar{F}$ stabilization on a small deformation problem.
 
-!media tensor_mechanics/largecook.png
+!media solid_mechanics/largecook.png
        id=largecook
        style=width:50%;float:center;padding-top:1.5%;
        caption=Demonstration of $\bar{F}$ stabilization on a large deformation problem.

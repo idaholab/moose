@@ -23,12 +23,12 @@ If the solve type for the simulation is set to +NEWTON+ the finite deformation J
 to be calculated.  Set the parameter `use_finite_deform_jacobian = true` in this case.
 
 
-!alert note title=Use of the Tensor Mechanics Master Action Recommended
+!alert note title=Use of the Solid Mechanics QuasiStatic Physics Recommended
 The `use_displaced_mesh` parameter must be set correcting to ensure consistency in the equilibrium
 equation: if the stress is calculated with respect to the deformed mesh, the test function gradients
 must also be calculated with respect to the deformed mesh. The
-[Tensor Mechanics MasterAction](/Modules/TensorMechanics/Master/index.md) is designed to
+[Solid Mechanics QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md) is designed to
 automatically determine and set the parameter correctly for the selected strain formulation.  We
 recommend that users employ the
-[Tensor Mechanics MasterAction](/Modules/TensorMechanics/Master/index.md) whenever possible
+[Solid Mechanics QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.

@@ -53,16 +53,16 @@ determinant of the deformation matrix.
 
 ## Usage
 
-Volumetric locking correction is set to false by default in tensor mechanics. When dealing with
+Volumetric locking correction is set to false by default in solid mechanics. When dealing with
 problems involving plasticity or incompressible materials, it can be turned on by setting
 `volumetric_locking_correction=true` in both the stress divergence kernel and the strain calculator
-or in the Tensor Mechanics master action.
+or in the Solid Mechanics quasi-static physics.
 
 When volumetric locking correction is turned on, using a SMP preconditioner with coupled displacement
 variables may help with convergence. For a 3-D problem with only displacement as unknown variables,
 the following pre-conditioner block may be used:
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/elastic_rotation_test.i
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/elastic_rotation_test.i
          start=Preconditioning
          end=Executioner
 
@@ -72,12 +72,12 @@ A 2D trapezoidal membrane [fig_cook] with Poisson's ratio of 0.4999 is fixed at 
 
 !row!
 
-!media media/tensor_mechanics/cook_problem.png
+!media media/solid_mechanics/cook_problem.png
       style=width:45%;float:left;
       id=fig_cook
       caption=2D problem to demonstrate volumetric locking.
 
-!media media/tensor_mechanics/cook_results.png
+!media media/solid_mechanics/cook_results.png
       style=width:45%;float:right;
       id=fig_cook_results
       caption= Vertical displacement at Point A for different element types and mesh density. Locking behavior is observed when Quad4 elements with no volumetric locking correction are used.

@@ -6,14 +6,14 @@ will never converge.  If the tolerances are too weak, models will yield incorrec
 ## Global Nonlinear Convergence Criteria
 
 Regardless of whether plasticity or only elasticity is used, MOOSE needs to know what you mean by
-"converged".  You must place a tolerance on the nonlinear residual.  In TensorMechanics this comes
+"converged".  You must place a tolerance on the nonlinear residual.  In SolidMechanics this comes
 from integrating $\nabla \sigma$ over an element, and for an element of side length $L$ the integral
 cannot be less than
 \begin{equation}
 R > 10^{-P}L^{d-2}\sigma
 \end{equation}
 where $P$ is the precision of MOOSE (15 for double precision), $d$ is the dimensionality of the
-problem (TensorMechanics currently only works for $d=3$), and $\sigma$ is the rough size of stress.
+problem (SolidMechanics currently only works for $d=3$), and $\sigma$ is the rough size of stress.
 
 For example, for J2 plasticity, $\sigma$ will be roughly the yield strength of the material, say
 $10^6$.  For a element of size 0.1, this yields $R \sim 10^{-15}\times 0.1 \times 10^{6} = 10^{-10}$.

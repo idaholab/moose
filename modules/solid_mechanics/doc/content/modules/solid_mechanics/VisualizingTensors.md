@@ -19,7 +19,7 @@ Strain $\epsilon_{yy}$ component:
 
 Elasticity Tensor $C_{1133}$ component:
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/composite.i block=AuxVariables/C1133_aux
+!listing modules/solid_mechanics/test/tests/elasticitytensor/composite.i block=AuxVariables/C1133_aux
 
 ## AuxKernel Creation
 
@@ -38,7 +38,7 @@ Strain $\epsilon_{yy}$ component:
 
 Elasticity Tensor $C_{1133}$ component:
 
-!listing modules/tensor_mechanics/test/tests/elasticitytensor/composite.i block=AuxKernels/matl_C1133
+!listing modules/solid_mechanics/test/tests/elasticitytensor/composite.i block=AuxKernels/matl_C1133
 
 See the documentation for [RankTwoAux](/RankTwoAux.md) and [RankFourAux](/RankFourAux.md)
 for more details about the available  options for saving quantities from these tensor types.
