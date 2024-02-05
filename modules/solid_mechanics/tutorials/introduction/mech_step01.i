@@ -1,6 +1,6 @@
 #
 # Initial single block mechanics input
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step01.html
+# https://mooseframework.inl.gov/modules/solid_mechanics/tutorials/introduction/step01.html
 #
 
 [GlobalParams]

@@ -43,7 +43,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   # Parameters that apply to all subblocks are specified at this level.
   # They can be overwritten in the subblocks.
   add_variables = true

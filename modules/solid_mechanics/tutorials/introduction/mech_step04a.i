@@ -1,6 +1,6 @@
 #
 # We study the effects of volumetric locking
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/answer04b.html
+# https://mooseframework.inl.gov/modules/solid_mechanics/tutorials/introduction/answer04b.html
 #
 
 [GlobalParams]

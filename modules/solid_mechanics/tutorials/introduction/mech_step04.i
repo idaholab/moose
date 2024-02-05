@@ -1,6 +1,6 @@
 #
 # Multiple submesh setup with two cantilevers side by side
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step04.html
+# https://mooseframework.inl.gov/modules/solid_mechanics/tutorials/introduction/step04.html
 #
 
 [GlobalParams]

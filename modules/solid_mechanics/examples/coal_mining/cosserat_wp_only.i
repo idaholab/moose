@@ -349,33 +349,33 @@
 
 [UserObjects]
   [./dp_coh_strong_harden]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 2.9 # MPa
     value_residual = 3.1 # MPa
     rate = 1.0
   [../]
   [./dp_fric]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.65 # 37deg
   [../]
   [./dp_dil]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.65
   [../]
 
   [./dp_tensile_str_strong_harden]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.4 # MPa
     rate = 1.0
   [../]
   [./dp_compressive_str]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 1.0E3 # Large!
   [../]
 
   [./drucker_prager_model]
-    type = TensorMechanicsPlasticDruckerPrager
+    type = SolidMechanicsPlasticDruckerPrager
     mc_cohesion = dp_coh_strong_harden
     mc_friction_angle = dp_fric
     mc_dilation_angle = dp_dil
@@ -384,28 +384,28 @@
   [../]
 
   [./wp_coh_harden]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
   [../]
   [./wp_tan_fric]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.36 # 20deg
   [../]
   [./wp_tan_dil]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.18 # 10deg
   [../]
 
   [./wp_tensile_str_harden]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
   [../]
   [./wp_compressive_str_soften]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 100
     value_residual = 1.0
     internal_limit = 1.0

@@ -21,7 +21,7 @@
 
 #
 # Added boundary/loading conditions
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step02.html
+# https://mooseframework.inl.gov/modules/solid_mechanics/tutorials/introduction/step02.html
 #
 [BCs]
   [bottom_x]

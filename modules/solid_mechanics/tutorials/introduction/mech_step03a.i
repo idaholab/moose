@@ -1,6 +1,6 @@
 #
 # Added subdomains and subdomain-specific properties
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step03.html
+# https://mooseframework.inl.gov/modules/solid_mechanics/tutorials/introduction/step03.html
 #
 
 [GlobalParams]
