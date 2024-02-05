@@ -11,6 +11,10 @@
 
 #include "Convergence.h"
 
+// PETSc includes
+#include <petsc.h>
+#include <petscmat.h>
+
 class ResidualConvergence : public Convergence
 {
 public:
@@ -28,8 +32,6 @@ protected:
 
   bool _initialized;
 
-  long int _nl_forced_its = 0; // the number of forced nonlinear iterations
-  long int _nfuncs = 0;
   // Variables for the convergence criteria
   Real _atol; // absolute convergence tolerance
   Real _rtol; // relative convergence tolerance
@@ -46,16 +48,19 @@ protected:
   Real _nl_rel_step_tol;
   Real _nl_abs_step_tol;
 
-  long int _nl_max_its;
-  long int _nl_max_funcs;
+  int _nl_forced_its = 0; // the number of forced nonlinear iterations
+  PetscInt _nfuncs = 0;
 
-  long int _maxit; // maximum number of iterations
-  long int _maxf;  // maximum number of function evaluations
+  unsigned int _nl_max_its;
+  unsigned int _nl_max_funcs;
+
+  PetscInt _maxit; // maximum number of iterations
+  PetscInt _maxf;  // maximum number of function evaluations
 
   // Linear solver convergence criteria
   Real _l_tol;
   Real _l_abs_tol;
-  long int _l_max_its;
+  unsigned int _l_max_its;
 
   /// maximum number of ping-pong iterations
   unsigned int _n_nl_pingpong = 0;

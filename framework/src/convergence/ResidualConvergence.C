@@ -17,16 +17,9 @@
 #include "ActionWarehouse.h"
 
 // PETSc includes
-#include <petsc.h>
 #include <petscsnes.h>
 #include <petscksp.h>
-
-// For graph coloring
-#include <petscmat.h>
-#include <petscis.h>
 #include <petscdm.h>
-
-#include <iostream>
 
 // PetscDMMoose include
 #include "PetscDMMoose.h"
@@ -144,6 +137,9 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
 
   // Needed by problems/residual_reference
   _fe_problem.nonlinearConvergenceSetup();
+
+  // To check if the nonlinear iterations should abort
+  bool terminate = _fe_problem.getFailNextNonlinearConvergenceCheck();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -271,6 +267,12 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
       oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
       reason = MooseAlgebraicConvergence::DIVERGED;
     }
+  }
+
+  if (terminate)
+  {
+    _fe_problem.setFailNextNonlinearConvergenceCheck();
+    reason = MooseAlgebraicConvergence::DIVERGED;
   }
 
   system._last_nl_rnorm = fnorm;

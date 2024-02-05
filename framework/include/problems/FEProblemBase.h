@@ -2147,11 +2147,6 @@ public:
    */
   bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
 
-  /// Nonlinear convergence name
-  ConvergenceName _nonlinear_convergence_name;
-  /// Flag that the nonlinear convergence name has been set
-  bool _set_nonlinear_convergence_name;
-
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
   virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
