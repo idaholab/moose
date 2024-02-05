@@ -132,8 +132,6 @@ ResidualConvergence::checkAlgebraicConvergence(int it,
                         Real snorm,
                         Real fnorm)
 {
-  std::cout << "Inside algebraic convergence " << '\n';
- 
   //registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
