@@ -988,6 +988,11 @@ private:
   void setParameters() {}
 
   /**
+   * Appends description of what a functor is to a doc string.
+   */
+  std::string appendFunctorDescription(const std::string & doc_string) const;
+
+  /**
    * Helper that uses overloading to distinguish adding command-line parameters of
    * a scalar and a vector kind. Vector parameters are options that may appear multiple
    * times on the command line (like -i).
@@ -1385,7 +1390,10 @@ InputParameters::addRequiredParam(const std::string & name, const std::string & 
   InputParameters::insert<T>(name);
   auto & metadata = _params[name];
   metadata._required = true;
-  metadata._doc_string = doc_string;
+  if (std::is_same_v<T, MooseFunctorName>)
+    metadata._doc_string = appendFunctorDescription(doc_string);
+  else
+    metadata._doc_string = doc_string;
 }
 
 template <typename T>
@@ -1407,7 +1415,10 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
 
   T & l_value = InputParameters::set<T>(name);
   auto & metadata = _params[name];
-  metadata._doc_string = doc_string;
+  if (std::is_same_v<T, MooseFunctorName>)
+    metadata._doc_string = appendFunctorDescription(doc_string);
+  else
+    metadata._doc_string = doc_string;
 
   // Set the parameter now
   setParamHelper(name, l_value, value);
@@ -1426,7 +1437,10 @@ InputParameters::addParam(const std::string & name, const std::string & doc_stri
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
-  _params[name]._doc_string = doc_string;
+  if (std::is_same_v<T, MooseFunctorName>)
+    _params[name]._doc_string = appendFunctorDescription(doc_string);
+  else
+    _params[name]._doc_string = doc_string;
 }
 
 template <typename T, typename S>
