@@ -29,18 +29,20 @@ public:
    * The descriptor is constructed with an expression that describes the
    * material property.
    * Examples:
-   *   'F'               A material property called 'F' with no declared variable
-   *                     dependencies (i.e. vanishing derivatives)
-   *   'F(c,phi)'        A material property called 'F' with declared dependence
-   *                     on 'c' and 'phi' (uses DerivativeFunctionMaterial rules to
-   *                     look up the derivatives)
-   *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
-   *                     which will be referred to as 'a' in the function expression.
+   *   'F'                 A material property called 'F' with no declared variable
+   *                       dependencies (i.e. vanishing derivatives)
+   *   'F(c,phi)'          A material property called 'F' with declared dependence
+   *                       on 'c' and 'phi' (uses DerivativeFunctionMaterial rules to
+   *                       look up the derivatives)
+   *   'a:=D[x(t),t,t]'    The second time derivative of the t-dependent material property 'x'
+   *                       which will be referred to as 'a' in the function expression.
+   *   'x_old:=Old[x]'     The previous time step value of x
+   *   'x_older:=Older[x]' The value of x two time steps ago
    */
   FunctionMaterialPropertyDescriptor(const std::string &, MooseObject *, bool required = false);
 
-  /// default constructor
-  FunctionMaterialPropertyDescriptor();
+  /// no default constructor
+  FunctionMaterialPropertyDescriptor() = delete;
 
   /// copy constructor
   FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor &);

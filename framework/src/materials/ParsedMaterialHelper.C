@@ -38,13 +38,11 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
     _symbol_names(_nargs),
     _extra_symbols(
         this->template getParam<MultiMooseEnum>("extra_symbols").template getEnum<ExtraSymbols>()),
-    _mat_prop_descriptors(0),
     _tol(0),
     _map_mode(map_mode),
     _error_on_missing_material_properties(
         this->template getParam<bool>("error_on_missing_material_properties"))
 {
-  // decode extra symbols
 }
 
 template <bool is_ad>
@@ -159,15 +157,14 @@ ParsedMaterialHelper<is_ad>::functionParse(
 
   // get all material properties
   unsigned int nmat_props = mat_prop_expressions.size();
-  _mat_prop_descriptors.resize(nmat_props);
   for (const auto i : make_range(nmat_props))
   {
     // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
-    _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor<is_ad>(
+    _mat_prop_descriptors.emplace_back(
         mat_prop_expressions[i], this, _error_on_missing_material_properties);
 
     // get the fparser symbol name for the new material property
-    _symbol_names.push_back(_mat_prop_descriptors[i].getSymbolName());
+    _symbol_names.push_back(_mat_prop_descriptors.back().getSymbolName());
   }
 
   // get all coupled postprocessors

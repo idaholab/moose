@@ -137,7 +137,7 @@ public:
    */
   unsigned int get(unsigned int i) const;
 
-  /// get the current value casts to a vector of enum type T
+  /// get the current values cast to a vector of enum type T
   template <typename T>
   std::vector<T> getEnum() const;
 

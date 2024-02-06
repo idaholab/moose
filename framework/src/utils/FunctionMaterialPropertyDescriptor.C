@@ -47,15 +47,9 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
 }
 
 template <bool is_ad>
-FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor()
-  : _value(nullptr), _old_older_value(nullptr), _required(false)
-{
-}
-
-template <bool is_ad>
 FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const FunctionMaterialPropertyDescriptor & rhs)
-  : _state(PropertyState::CURRENT),
+  : _state(rhs._state),
     _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
     _dependent_symbols(rhs._dependent_symbols),
