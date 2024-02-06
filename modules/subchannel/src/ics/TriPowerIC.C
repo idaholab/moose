@@ -135,9 +135,6 @@ TriPowerIC::initialSetup()
 Real
 TriPowerIC::value(const Point & p)
 {
-  // Determine which subchannel this point is in.
-  auto i = _mesh.getSubchannelIndexFromPoint(p);
-  auto subch_type = _mesh.getSubchannelType(i);
   auto heat_rate = 0.0;
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
@@ -158,6 +155,9 @@ TriPowerIC::value(const Point & p)
   }
   else
   {
+    // Determine which subchannel this point is in.
+    auto i = _mesh.getSubchannelIndexFromPoint(p);
+    auto subch_type = _mesh.getSubchannelType(i);
     // project axial heat rate on subchannels
     if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
     {

@@ -81,6 +81,7 @@ TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 unsigned int
 TriSubChannelMesh::channelIndex(const Point & p) const
 {
+  mooseAssert(!p.is_zero(), "Zero point");
   /// Function that returns the subchannel index given a point
   /// Determining a channel index given a point
   /// Looping over all subchannels to determine the closest one to the point
@@ -229,9 +230,22 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
       theta1 = fmod(theta + 1.0e-10, pi / 3.0);
       distance = std::sqrt((pow(i * pitch, 2) + pow(theta1 / dtheta * pitch, 2) -
                             2.0 * i * pitch * (theta1 / dtheta * pitch) * std::cos(pi / 3.0)));
-      theta_corrected = std::acos(
-          1.0 / (i * pitch) / distance / 2.0 *
-          (std::pow(i * pitch, 2) + std::pow(distance, 2) - std::pow(theta1 / dtheta * pitch, 2)));
+      double argument = 1.0 / (i * pitch) / distance / 2.0 *
+                        (std::pow(i * pitch, 2.0) + std::pow(distance, 2.0) -
+                         std::pow(theta1 / dtheta * pitch, 2.0));
+      // Check if the argument to std::acos() is within the valid range [-1, 1]
+      if (argument >= -1.0 && argument <= 1.0)
+      {
+        theta_corrected = std::acos(argument);
+      }
+      else if (argument > 1.0)
+      {
+        theta_corrected = 0.0;
+      }
+      else
+      {
+        theta_corrected = pi;
+      }
       if (theta1 < 1.0e-6)
       {
         theta_corrected = theta;
