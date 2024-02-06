@@ -67,7 +67,7 @@ CutMeshByPlaneGenerator::generate()
     paramError("input", "Input is not a replicated mesh, which is required");
   if (*(replicated_mesh_ptr->elem_dimensions().begin()) != 3 ||
       *(replicated_mesh_ptr->elem_dimensions().rbegin()) != 3)
-    paramError("input", "Only 3D meshes are supported. Use XYMeshLineCutter for 2D meshes.");
+    paramError("input", "Only 3D meshes are supported. Use XYMeshLineCutter for 2D meshes. Mixed dimensional meshes are not supported at the moment.");
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
@@ -80,7 +80,7 @@ CutMeshByPlaneGenerator::generate()
       if (_cut_face_id != -1 && _cut_face_id != exist_cut_face_id)
         paramError("cut_face_id",
                    "The cut face boundary name and id are both provided, but they are inconsistent "
-                   "with the existing boundary name and id.");
+                   "with an existing boundary name which has a different id.");
       else
         _cut_face_id = exist_cut_face_id;
     }
@@ -225,7 +225,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
     const subdomain_id_type & block_id_to_remove,
     std::vector<const Node *> & new_on_plane_nodes)
 {
-  // Build boundary information of the mesh
+  // Retrieve boundary information for the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   // Create a list of sidesets involving the element to be split
   // It might be complex to assign the boundary id to the new elements
@@ -287,7 +287,6 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
     {
       // I think the neighboring element will be handled,
       // So we do not need to assign the cross section boundary here
-      // Need recheck
     }
   }
   // As we have nodes on both sides, five different scenarios are possible

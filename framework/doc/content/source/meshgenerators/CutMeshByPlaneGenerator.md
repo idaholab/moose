@@ -16,7 +16,7 @@ The splitting of non-TET4 elements was performed using the same algorithm as des
 
 ### Cutting of TET4 Elements along Plane
 
-Once all the elements of the input mesh have been converted into TET elements, the cutting method only needs to be applied to TET elements. First, all the elements that are cut by the given cutting plane are identified. For these involved TET elements, their relationship with the cutting plane can be categorized into one of the six cases shown in [tet_cut]. For each of these six cases, new nodes are created at the intersection points between the cutting plane and the edges of the TET element. Then the red part of the original TET element is removed and new TET element(s) are created as shown in [tet_cut]. The cross-sections created by this cutting procedure are assigned a new boundary ID as defined by [!param](/Mesh/CutMeshByPlaneGenerator/cut_face_id)
+Once all the elements of the input mesh have been converted into TET elements, the cutting method only needs to be applied to TET elements. First, all the elements that are cut by the given cutting plane are identified. For the TET elements involved, their relationship with the cutting plane can be categorized into one of the six cases shown in [tet_cut]. For each of these six cases, new nodes are created at the intersection points between the cutting plane and the edges of the TET element. Then the red part of the original TET element is removed and new TET element(s) are created as shown in [tet_cut]. The cross-sections created by this cutting procedure are assigned a new boundary ID as defined by [!param](/Mesh/CutMeshByPlaneGenerator/cut_face_id)
 
 !media framework/meshgenerators/tet_cut.png
       style=display: block;margin-left:auto;margin-right:auto;width:75%;

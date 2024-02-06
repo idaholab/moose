@@ -11,7 +11,7 @@
                   Mesh/gmg/elem_type=HEX8'
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh consisting of only HEX8 elements with cut face id automatically assigned.'
+      detail ='cut a 3D mesh consisting of only HEX8 elements with the cut face id automatically assigned.'
     []
     [simple_prism_cut]
       type = 'Exodiff'
@@ -22,7 +22,7 @@
                   Mesh/cut/cut_face_id=12345'
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh consisting of only PRISM6 elements with cut face id specified.'
+      detail ='cut a 3D mesh consisting of only PRISM6 elements with the cut face id specified by the user.'
     []
     [simple_pyramid_cut]
       type = 'Exodiff'
@@ -33,7 +33,7 @@
                   Mesh/cut/cut_face_name="cut"'
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh consisting of only PYRAMID5 elements with cut face id automatically assigned and cut face name specified.'
+      detail ='cut a 3D mesh consisting of only PYRAMID5 elements with the cut face id automatically assigned and cut face name specified.'
     []
     [simple_tet_cut]
       type = 'Exodiff'
@@ -45,7 +45,7 @@
                   Mesh/cut/cut_face_id=4'
       mesh_mode = 'REPLICATED'
       recover = false
-      detail ='cut a 3D mesh consisting of only TET4 elements cut face id and name automatically assigned to be the same as an existing boundary.'
+      detail ='cut a 3D mesh consisting of only TET4 elements with the cut face id and name automatically assigned to be the same as an existing boundary.'
     []
     [hex_prism_cut]
       type = 'Exodiff'

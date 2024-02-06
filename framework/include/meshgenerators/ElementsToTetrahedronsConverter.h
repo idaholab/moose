@@ -12,7 +12,7 @@
 
 /**
  * This ElementsToTetrahedronsConverter object is designed to convert all the elements in a 3D mesh
- * consisting only linear elements into TET4 elements.
+ * consisting of only linear elements into TET4 elements.
  */
 class ElementsToTetrahedronsConverter : public MeshGenerator
 {

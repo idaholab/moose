@@ -66,7 +66,7 @@ void nodeRotationHEX8(const unsigned int min_id_index,
                       std::vector<unsigned int> & node_rotation);
 
 /**
- * Calculate the three neighboring nodes of a node in a HEX8 element.
+ * Calculate the indices (within the element nodes) of the three neighboring nodes of a node in a HEX8 element.
  * @param min_id_index The index of the node with the minimum id
  * @return a vector of the three neighboring nodes
  */
@@ -118,7 +118,7 @@ tetNodesForHex(const std::vector<bool> diagonal_directions,
 
 /**
  * Rotate a PRISM6 element nodes to ensure that the node with the minimum id is the first node.
- * @param min_id_index The index of the node with the minimum id
+ * @param min_id_index The index of the node, within the prism nodes, with the minimum id
  * @param face_rotation A vector to record the rotation of the faces of the PRISM6 element
  * @param node_rotation a vector of node indices that can form a PRISM6 element
  */
@@ -157,7 +157,7 @@ tetNodesForPrism(const bool diagonal_direction,
 /**
  * Rotate a PYRAMID5 element nodes to ensure that the node with the minimum id is the first node
  * for the bottom face.
- * @param min_id_index The index of the node with the minimum id for the bottom face
+ * @param min_id_index The index of the node, within the pyramid nodes, with the minimum id for the bottom face
  * @param face_rotation A vector to record the rotation of the faces of the PYRAMID5 element
  * @param node_rotation a vector of node indices that can form a PYRAMID5 element
  */
