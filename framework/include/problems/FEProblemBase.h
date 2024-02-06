@@ -2410,7 +2410,7 @@ protected:
   std::vector<std::vector<const MooseVariableFEBase *>> _uo_jacobian_moose_vars;
 
   /// Whether there are active material properties on each thread
-  std::vector<bool> _has_active_material_properties;
+  std::vector<unsigned char> _has_active_material_properties;
 
   SolverParams _solver_params;
 

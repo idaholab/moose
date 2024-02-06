@@ -449,7 +449,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _vector_curl_zero.resize(n_threads);
   _uo_jacobian_moose_vars.resize(n_threads);
 
-  _has_active_material_properties.resize(n_threads, false);
+  _has_active_material_properties.resize(n_threads, 0);
 
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
@@ -5390,7 +5390,7 @@ FEProblemBase::hasActiveMaterialProperties(const THREAD_ID tid) const
 void
 FEProblemBase::clearActiveMaterialProperties(const THREAD_ID tid)
 {
-  _has_active_material_properties[tid] = false;
+  _has_active_material_properties[tid] = 0;
 }
 
 void
