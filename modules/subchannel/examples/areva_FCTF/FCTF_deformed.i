@@ -21,7 +21,7 @@ Power = 90640 # Watt Each heater rod had a max power of 30kW
 # Index of heated pins per silicon controled rectifiers (SC notation):0 3 6 1 || 4 5 12 16 || 2 10 8 43 39 || 14 47 51 55 59 (from top to bottom) 38 areva->41 SC
 # Relative power of pin per rectifier: 1.12266659312 || 1.12251765225 || 0.90373345101 || 0.90011915269
 mdot_average = '${fparse 9.58 * Total_Surface_Area_SC / Total_Surface_Area_EXP}'
-mass_flux_in = '${fparse mdot_average / Total_Surface_Area_SC / 1.5}' #kg/m2
+mass_flux_in = '${fparse mdot_average / Total_Surface_Area_SC}' #kg/m2
 # mass_flux_in = 3456.29
 ###################################################
 # Geometric parameters (non-deformed heated bundle)

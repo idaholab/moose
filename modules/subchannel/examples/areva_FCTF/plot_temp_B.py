@@ -109,6 +109,7 @@ plt.legend(fontsize=12)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 plt.ylim(0, 50)
+plt.xlim(-4, 9)
 plt.yticks(np.arange(0, 51, 5), fontsize=14)  # Set y-axis ticks every 1, starting from 0
 # Initialize minor ticks
 plt.minorticks_on()
