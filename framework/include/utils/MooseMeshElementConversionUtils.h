@@ -15,6 +15,19 @@
 
 namespace MooseMeshElementConversionUtils
 {
+// Define for comparing the key value of BCTuple
+struct BCTupleKeyComp
+{
+  bool operator()(const libMesh::BoundaryInfo::BCTuple & s, dof_id_type i) const
+  {
+    return std::get<0>(s) < i;
+  }
+  bool operator()(dof_id_type i, const libMesh::BoundaryInfo::BCTuple & s) const
+  {
+    return i < std::get<0>(s);
+  }
+};
+
 /**
  * Split a HEX8 element into six TET4 elements.
  * @param mesh The mesh to be modified
@@ -55,8 +68,8 @@ void prismElemSplitter(ReplicatedMesh & mesh,
  * Rotate a HEX8 element's nodes to ensure that the node with the minimum id is the first node;
  * and the node among its three neighboring nodes with the minimum id is the second node.
  * @param min_id_index The index of the node with the minimum id
- * @param sec_min_pos The position of the node among its three neighboring nodes with the minimum
- * id
+ * @param sec_min_pos The index of the node among its three neighboring nodes with the minimum
+ * id (see comments in the function for more details about how the index is defined)
  * @param face_rotation A vector to record the rotation of the faces of the HEX8 element
  * @param node_rotation a vector of node indices that can form a HEX8 element
  */
@@ -66,7 +79,8 @@ void nodeRotationHEX8(const unsigned int min_id_index,
                       std::vector<unsigned int> & node_rotation);
 
 /**
- * Calculate the indices (within the element nodes) of the three neighboring nodes of a node in a HEX8 element.
+ * Calculate the indices (within the element nodes) of the three neighboring nodes of a node in a
+ * HEX8 element.
  * @param min_id_index The index of the node with the minimum id
  * @return a vector of the three neighboring nodes
  */
@@ -157,7 +171,8 @@ tetNodesForPrism(const bool diagonal_direction,
 /**
  * Rotate a PYRAMID5 element nodes to ensure that the node with the minimum id is the first node
  * for the bottom face.
- * @param min_id_index The index of the node, within the pyramid nodes, with the minimum id for the bottom face
+ * @param min_id_index The index of the node, within the pyramid nodes, with the minimum id for the
+ * bottom face
  * @param face_rotation A vector to record the rotation of the faces of the PYRAMID5 element
  * @param node_rotation a vector of node indices that can form a PYRAMID5 element
  */
@@ -184,9 +199,9 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
  * Convert all the elements in a 3D mesh, consisting of only linear elements, into TET4 elements.
  * @param mesh The mesh to be converted
  * @param elems_to_process A vector of pairs of element ids and a bool indicating whether the
- * element needs to be fully retained or will be partially cut in the following procedures
- * @param converted_elems_ids_to_cut A vector of element ids that will be cut in the following
- * procedures
+ * element needs to be fully retained or will be further processed in the following procedures
+ * @param converted_elems_ids_to_track A vector of element ids that need to be tracked for beig
+ * further processed in the following procedures
  * @param block_id_to_remove The id of a new subdomain in the mesh containing all the elements to be
  * removed
  * @param delete_block_to_remove A bool indicating whether the block to be removed will be
@@ -194,7 +209,7 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
  */
 void convert3DMeshToAllTet4(ReplicatedMesh & mesh,
                             const std::vector<std::pair<dof_id_type, bool>> & elems_to_process,
-                            std::vector<dof_id_type> & converted_elems_ids_to_cut,
+                            std::vector<dof_id_type> & converted_elems_ids_to_track,
                             const subdomain_id_type block_id_to_remove,
                             const bool delete_block_to_remove);
 
@@ -203,4 +218,17 @@ void convert3DMeshToAllTet4(ReplicatedMesh & mesh,
  * @param mesh The mesh to be converted
  */
 void convert3DMeshToAllTet4(ReplicatedMesh & mesh);
+
+/**
+ * Collect the boundary information of the given element in a mesh.
+ * @param bdry_side_list A list that contains the boundary information of the mesh
+ * @param elem_id The id of the element to be processed
+ * @param n_elem_sides The number of sides of the element
+ * @param elem_side_list a vector of vectors to record the boundary information of the element
+ */
+void
+elementBoundaryInfoCollector(const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                             const dof_id_type elem_id,
+                             const unsigned short n_elem_sides,
+                             std::vector<std::vector<boundary_id_type>> & elem_side_list);
 }

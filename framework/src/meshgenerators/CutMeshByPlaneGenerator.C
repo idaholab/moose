@@ -67,7 +67,9 @@ CutMeshByPlaneGenerator::generate()
     paramError("input", "Input is not a replicated mesh, which is required");
   if (*(replicated_mesh_ptr->elem_dimensions().begin()) != 3 ||
       *(replicated_mesh_ptr->elem_dimensions().rbegin()) != 3)
-    paramError("input", "Only 3D meshes are supported. Use XYMeshLineCutter for 2D meshes. Mixed dimensional meshes are not supported at the moment.");
+    paramError("input",
+               "Only 3D meshes are supported. Use XYMeshLineCutter for 2D meshes. Mixed "
+               "dimensional meshes are not supported at the moment.");
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
@@ -243,20 +245,15 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
   }
 
   std::vector<std::vector<boundary_id_type>> elem_side_list;
-  elem_side_list.resize(4);
-  for (const auto i : index_range(bdry_side_list))
-  {
-    if (std::get<0>(bdry_side_list[i]) == elem_id)
-    {
-      elem_side_list[std::get<1>(bdry_side_list[i])].push_back(std::get<2>(bdry_side_list[i]));
-    }
-  }
+  MooseMeshElementConversionUtils::elementBoundaryInfoCollector(
+      bdry_side_list, elem_id, 4, elem_side_list);
 
   std::vector<PointPlaneRelationIndex> node_plane_relation(4);
   std::vector<const Node *> tet4_nodes(4);
   std::vector<const Node *> tet4_nodes_on_plane;
   std::vector<const Node *> tet4_nodes_outside_plane;
   std::vector<const Node *> tet4_nodes_inside_plane;
+  // Sort tetrahedral nodes based on their positioning wrt the plane
   for (unsigned int i = 0; i < 4; i++)
   {
     tet4_nodes[i] = mesh.elem_ptr(elem_id)->node_ptr(i);
@@ -289,7 +286,7 @@ CutMeshByPlaneGenerator::tet4ElemCutter(
       // So we do not need to assign the cross section boundary here
     }
   }
-  // As we have nodes on both sides, five different scenarios are possible
+  // As we have nodes on both sides, six different scenarios are possible
   else
   {
     new_elements_created = true;

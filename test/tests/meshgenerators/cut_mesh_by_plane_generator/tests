@@ -41,6 +41,8 @@
       exodiff = 'simple_tet_cut_in.e'
       cli_args = '--mesh-only simple_tet_cut_in.e 
                   Mesh/gmg/elem_type=TET4 
+                  Mesh/cut/plane_point="0.25 0.0 0.0" 
+                  Mesh/cut/plane_normal="1.0 0.0 0.0" 
                   Mesh/cut/cut_face_name="left"
                   Mesh/cut/cut_face_id=4'
       mesh_mode = 'REPLICATED'

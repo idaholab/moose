@@ -35,13 +35,8 @@ hexElemSplitter(ReplicatedMesh & mesh,
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(6);
-  for (const auto i : index_range(bdry_side_list))
-  {
-    if (std::get<0>(bdry_side_list[i]) == elem_id)
-    {
-      elem_side_list[std::get<1>(bdry_side_list[i])].push_back(std::get<2>(bdry_side_list[i]));
-    }
-  }
+  elementBoundaryInfoCollector(bdry_side_list, elem_id, 6, elem_side_list);
+
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
   // Record all the element extra integers of the original quad element
@@ -105,14 +100,7 @@ prismElemSplitter(ReplicatedMesh & mesh,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
-  elem_side_list.resize(5);
-  for (const auto i : index_range(bdry_side_list))
-  {
-    if (std::get<0>(bdry_side_list[i]) == elem_id)
-    {
-      elem_side_list[std::get<1>(bdry_side_list[i])].push_back(std::get<2>(bdry_side_list[i]));
-    }
-  }
+  elementBoundaryInfoCollector(bdry_side_list, elem_id, 5, elem_side_list);
 
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
@@ -174,14 +162,7 @@ pyramidElemSplitter(ReplicatedMesh & mesh,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
-  elem_side_list.resize(5);
-  for (const auto i : index_range(bdry_side_list))
-  {
-    if (std::get<0>(bdry_side_list[i]) == elem_id)
-    {
-      elem_side_list[std::get<1>(bdry_side_list[i])].push_back(std::get<2>(bdry_side_list[i]));
-    }
-  }
+  elementBoundaryInfoCollector(bdry_side_list, elem_id, 5, elem_side_list);
 
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
@@ -254,6 +235,9 @@ hexNodesToTetNodesDeterminer(std::vector<const Node *> & hex_nodes,
 
   const unsigned int min_node_id_index = std::distance(
       std::begin(node_ids), std::min_element(std::begin(node_ids), std::end(node_ids)));
+  // Get the index of the three neighbor nodes of the minimum node
+  // The order is consistent with the description in nodeRotationHEX8()
+  // Then determine the index of the second minimum node
   const auto neighbor_node_indices = neighborNodeIndicesHEX8(min_node_id_index);
 
   const auto neighbor_node_ids = {node_ids[neighbor_node_indices[0]],
@@ -263,6 +247,10 @@ hexNodesToTetNodesDeterminer(std::vector<const Node *> & hex_nodes,
       std::distance(std::begin(neighbor_node_ids),
                     std::min_element(std::begin(neighbor_node_ids), std::end(neighbor_node_ids)));
 
+  // Rotate the node and face indices based on the identified minimum and second minimum nodes
+  // After the rotation, we guarantee that the minimum node is the first node (Node 0)
+  // And the second node (Node 1) has the minium global id among the three neighbor nodes of Node 0
+  // This makes the splitting process simpler
   std::vector<unsigned int> face_rotation;
   std::vector<unsigned int> rotated_indices;
   nodeRotationHEX8(min_node_id_index, sec_min_pos, face_rotation, rotated_indices);
@@ -270,8 +258,11 @@ hexNodesToTetNodesDeterminer(std::vector<const Node *> & hex_nodes,
   for (unsigned int i = 0; i < 8; i++)
     rotated_hex_nodes.push_back(hex_nodes[rotated_indices[i]]);
 
+  // Find the selection of each face's cutting direction
   const auto diagonal_directions = quadFaceDiagonalDirectionsHex(rotated_hex_nodes);
 
+  // Based on the determined splitting directions of all the faces, determine the nodes of each
+  // resulting TET4 elements after the splitting.
   std::vector<std::vector<unsigned int>> tet_face_indices;
   const auto tet_nodes_set = tetNodesForHex(diagonal_directions, tet_face_indices);
   for (const auto & tet_face_index : tet_face_indices)
@@ -381,6 +372,10 @@ nodeRotationHEX8(const unsigned int min_id_index,
                  std::vector<unsigned int> & face_rotation,
                  std::vector<unsigned int> & node_rotation)
 {
+  // Assuming the original hex element is a cube, the vectors formed by nodes 0-1, 0-2, and 0-4 are
+  // overlapped with the x, y, and z axes, respectively. sec_min_pos = 0 means the second minimum
+  // node is in the x direction, sec_min_pos = 1 means the second minimum node is in the y
+  // direction, and sec_min_pos = 2 means the second minimum node is in the z direction.
   const std::vector<std::vector<std::vector<unsigned int>>> preset_indices = {
       {{0, 1, 2, 3, 4, 5, 6, 7}, {0, 3, 7, 4, 1, 2, 6, 5}, {0, 4, 5, 1, 3, 7, 6, 2}},
       {{1, 0, 4, 5, 2, 3, 7, 6}, {1, 2, 3, 0, 5, 6, 7, 4}, {1, 5, 6, 2, 0, 4, 7, 3}},
@@ -453,6 +448,9 @@ prismNodesToTetNodesDeterminer(std::vector<const Node *> & prism_nodes,
   const unsigned int min_node_id_index = std::distance(
       std::begin(node_ids), std::min_element(std::begin(node_ids), std::end(node_ids)));
 
+  // Rotate the node and face indices based on the identified minimum node
+  // After the rotation, we guarantee that the minimum node is the first node (Node 0)
+  // This makes the splitting process simpler
   std::vector<unsigned int> face_rotation;
   std::vector<unsigned int> rotated_indices;
   nodeRotationPRISM6(min_node_id_index, face_rotation, rotated_indices);
@@ -465,8 +463,11 @@ prismNodesToTetNodesDeterminer(std::vector<const Node *> & prism_nodes,
                                               rotated_prism_nodes[5],
                                               rotated_prism_nodes[4]};
 
+  // Find the selection of each face's cutting direction
   const bool diagonal_direction = quadFaceDiagonalDirection(key_quad_nodes);
 
+  // Based on the determined splitting directions of all the faces, determine the nodes of each
+  // resulting TET4 elements after the splitting.
   std::vector<std::vector<unsigned int>> tet_face_indices;
   const auto tet_nodes_set = tetNodesForPrism(diagonal_direction, tet_face_indices);
   for (const auto & tet_face_index : tet_face_indices)
@@ -540,6 +541,9 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
   const unsigned int min_node_id_index = std::distance(
       std::begin(node_ids), std::min_element(std::begin(node_ids), std::end(node_ids)));
 
+  // Rotate the node and face indices based on the identified minimum nodes
+  // After the rotation, we guarantee that the minimum node is the first node (Node 0)
+  // This makes the splitting process simpler
   std::vector<unsigned int> face_rotation;
   std::vector<unsigned int> rotated_indices;
   nodeRotationPYRAMID5(min_node_id_index, face_rotation, rotated_indices);
@@ -547,9 +551,12 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
   for (unsigned int i = 0; i < 5; i++)
     rotated_pyramid_nodes.push_back(pyramid_nodes[rotated_indices[i]]);
 
+  // There is only one quad face in a pyramid element, so the splitting selection is binary
   const std::vector<std::vector<unsigned int>> tet_nodes_set = {{0, 1, 2, 4}, {0, 2, 3, 4}};
   const std::vector<std::vector<unsigned int>> tet_face_indices = {{4, 0, 1, 5}, {4, 5, 2, 3}};
 
+  // Based on the determined splitting direction, determine the nodes of each resulting TET4
+  // elements after the splitting.
   for (const auto & tet_face_index : tet_face_indices)
   {
     rotated_tet_face_indices.push_back(std::vector<unsigned int>());
@@ -573,7 +580,7 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
 void
 convert3DMeshToAllTet4(ReplicatedMesh & mesh,
                        const std::vector<std::pair<dof_id_type, bool>> & elems_to_process,
-                       std::vector<dof_id_type> & converted_elems_ids_to_cut,
+                       std::vector<dof_id_type> & converted_elems_ids_to_track,
                        const subdomain_id_type block_id_to_remove,
                        const bool delete_block_to_remove)
 {
@@ -589,7 +596,7 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh,
         hexElemSplitter(mesh,
                         bdry_side_list,
                         elem_to_process.first,
-                        elem_to_process.second ? converted_elems_ids_to_cut
+                        elem_to_process.second ? converted_elems_ids_to_track
                                                : converted_elems_ids_to_retain);
         mesh.elem_ptr(elem_to_process.first)->subdomain_id() = block_id_to_remove;
         break;
@@ -597,7 +604,7 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh,
         pyramidElemSplitter(mesh,
                             bdry_side_list,
                             elem_to_process.first,
-                            elem_to_process.second ? converted_elems_ids_to_cut
+                            elem_to_process.second ? converted_elems_ids_to_track
                                                    : converted_elems_ids_to_retain);
         mesh.elem_ptr(elem_to_process.first)->subdomain_id() = block_id_to_remove;
         break;
@@ -605,13 +612,13 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh,
         prismElemSplitter(mesh,
                           bdry_side_list,
                           elem_to_process.first,
-                          elem_to_process.second ? converted_elems_ids_to_cut
+                          elem_to_process.second ? converted_elems_ids_to_track
                                                  : converted_elems_ids_to_retain);
         mesh.elem_ptr(elem_to_process.first)->subdomain_id() = block_id_to_remove;
         break;
       case ElemType::TET4:
         if (elem_to_process.second)
-          converted_elems_ids_to_cut.push_back(elem_to_process.first);
+          converted_elems_ids_to_track.push_back(elem_to_process.first);
         else
           converted_elems_ids_to_retain.push_back(elem_to_process.first);
         break;
@@ -650,9 +657,26 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh)
     original_elems.push_back(std::make_pair((*elem_it)->id(), false));
   }
 
-  std::vector<dof_id_type> converted_elems_ids_to_cut;
+  std::vector<dof_id_type> converted_elems_ids_to_track;
 
   convert3DMeshToAllTet4(
-      mesh, original_elems, converted_elems_ids_to_cut, block_id_to_remove, true);
+      mesh, original_elems, converted_elems_ids_to_track, block_id_to_remove, true);
+}
+
+void
+elementBoundaryInfoCollector(const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                             const dof_id_type elem_id,
+                             const unsigned short n_elem_sides,
+                             std::vector<std::vector<boundary_id_type>> & elem_side_list)
+{
+  elem_side_list.resize(n_elem_sides);
+  const auto selected_bdry_side_list =
+      std::equal_range(bdry_side_list.begin(), bdry_side_list.end(), elem_id, BCTupleKeyComp{});
+  for (auto selected_bdry_side = selected_bdry_side_list.first;
+       selected_bdry_side != selected_bdry_side_list.second;
+       ++selected_bdry_side)
+  {
+    elem_side_list[std::get<1>(*selected_bdry_side)].push_back(std::get<2>(*selected_bdry_side));
+  }
 }
 }
