@@ -37,7 +37,8 @@ public:
                               const unsigned int num_inputs,
                               const unsigned int num_outputs,
                               const std::vector<unsigned int> & num_neurons_per_layer,
-                              const std::vector<std::string> & activation_function = {"relu"});
+                              const std::vector<std::string> & activation_function = {"relu"},
+                              const torch::DeviceType device_type = torch::kCPU);
 
   /**
    * Copy construct an artificial neural network
@@ -73,7 +74,8 @@ public:
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
   /// Return the multi enum containing the activation functions
   const MultiMooseEnum & activationFunctions() const { return _activation_function; }
-
+  /// Return the device which is used by this neural network
+  torch::DeviceType deviceType() const { return _device_type; }
   /// Construct the neural network
   void constructNeuralNetwork();
 
@@ -95,6 +97,8 @@ protected:
   /// Activation functions (either one for all hidden layers or one for every layer
   /// separately)
   MultiMooseEnum _activation_function;
+  /// The device type used for this neural network
+  const torch::DeviceType _device_type;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
