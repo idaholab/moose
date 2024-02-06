@@ -41,6 +41,7 @@ main(int argc, char * argv[])
   DefaultAppType::registerApps();
 
   const auto default_app_name = MooseUtils::prettyCppType<DefaultAppType>();
+
   auto app = createMooseApp(default_app_name, argc, argv);
 
   app->run();

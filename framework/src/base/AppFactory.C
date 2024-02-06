@@ -51,8 +51,12 @@ AppFactory::createAppShared(const std::string & default_app_type,
   std::string app_type;
   if (!command_line->search("app_to_run", app_type))
     app_type = default_app_type;
+  else
+    mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
+                    "is deprecated and will be removed in a future release.");
 
   auto app_params = AppFactory::instance().getValidParams(app_type);
+  parser->setAppType(app_type);
 
   app_params.set<int>("_argc") = argc;
   app_params.set<char **>("_argv") = argv;
@@ -98,7 +102,11 @@ AppFactory::createAppShared(const std::string & default_app_type,
   std::string app_type;
   if (!command_line->search("app_to_run", app_type))
     app_type = default_app_type;
+  else
+    mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
+                    "is deprecated and will be removed in a future release.");
 
+  parser->setAppType(app_type);
   auto app_params = AppFactory::instance().getValidParams(app_type);
 
   app_params.set<int>("_argc") = argc;

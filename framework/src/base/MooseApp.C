@@ -1031,6 +1031,14 @@ MooseApp::setupOptions()
   Moose::out << std::flush;
 }
 
+const std::string &
+MooseApp::type() const
+{
+  if (_parser && _parser->getAppType().size())
+    mooseAssert(_parser->getAppType() == _type, "Should be equivalent");
+  return _type;
+}
+
 const std::vector<std::string> &
 MooseApp::getInputFileNames() const
 {

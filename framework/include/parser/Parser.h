@@ -92,6 +92,18 @@ private:
   const CompileParamWalker::ParamMap & _map;
 };
 
+class FindAppWalker : public hit::Walker
+{
+public:
+  void walk(const std::string & /*fullpath*/,
+            const std::string & /*nodepath*/,
+            hit::Node * section) override;
+  std::string getApp() { return _app_type; };
+
+private:
+  std::string _app_type;
+};
+
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
  * parsing files. It is not currently designed for extensibility. If you wish to build your own
@@ -138,6 +150,16 @@ public:
    */
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
 
+  /*
+   * Get extracted application type from parser
+   */
+  const std::string & getAppType() const { return _app_type; }
+
+  /*
+   * Set the application type in parser
+   */
+  void setAppType(const std::string & app_type) { _app_type = app_type; }
+
   /**
    * @return The file name of the last input
    */
@@ -154,6 +176,10 @@ private:
 
   /// The input file names
   const std::vector<std::string> _input_filenames;
+
   /// The optional input text (to augment reading a single input with the MooseServer)
   const std::optional<std::string> _input_text;
+
+  /// The application types extracted from [Application] block
+  std::string _app_type;
 };
