@@ -78,9 +78,10 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
     _old_delta(0)
 {
   if (!_fe_problem.isTransient())
-    mooseWarning("PIDTransientControl is only meant to be used when the problem is transient, for "
-                 "example with a Transient Executioner. If using a Steady "
-                 "Executioner, make sure to specify a minimum number of Picard iterations.");
+    mooseError("PIDTransientControl is only meant to be used when the problem is transient, for "
+               "example with a Transient Executioner. Support for Steady "
+               "Executioner can be added in the future, however certain parameters are currently "
+               "not well defined for use with Picard iterations.");
 
   if (isParamValid("parameter") && isParamValid("parameter_pp"))
     paramError("parameter_pp",
