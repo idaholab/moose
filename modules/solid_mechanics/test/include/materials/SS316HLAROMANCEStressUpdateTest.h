@@ -20,8 +20,8 @@ public:
   SS316HLAROMANCEStressUpdateTestTempl(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<
-      std::vector<std::vector<std::vector<typename LAROMANCEStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
+  virtual std::vector<std::vector<
+      std::vector<std::vector<typename LAROMANCEStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
   getTransform() override;
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs() override;
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits() override;

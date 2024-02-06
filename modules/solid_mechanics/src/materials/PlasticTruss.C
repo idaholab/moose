@@ -133,7 +133,8 @@ PlasticTruss::computeHardeningValue(Real scalar)
   return _hardening_variable_old[_qp] + _hardening_constant * scalar;
 }
 
-Real PlasticTruss::computeHardeningDerivative(Real /*scalar*/)
+Real
+PlasticTruss::computeHardeningDerivative(Real /*scalar*/)
 {
   if (_hardening_function)
   {

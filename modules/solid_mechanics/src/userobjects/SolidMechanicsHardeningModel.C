@@ -40,6 +40,14 @@ SolidMechanicsHardeningModel::finalize()
 {
 }
 
-Real SolidMechanicsHardeningModel::value(Real /*intnl*/) const { return 1.0; }
+Real
+SolidMechanicsHardeningModel::value(Real /*intnl*/) const
+{
+  return 1.0;
+}
 
-Real SolidMechanicsHardeningModel::derivative(Real /*intnl*/) const { return 0.0; }
+Real
+SolidMechanicsHardeningModel::derivative(Real /*intnl*/) const
+{
+  return 0.0;
+}

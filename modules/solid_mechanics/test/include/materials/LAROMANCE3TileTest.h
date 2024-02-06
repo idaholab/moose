@@ -28,8 +28,8 @@ protected:
    * input[3]: effective strain old,
    * input[4]: temperature
    **/
-  virtual std::vector<
-      std::vector<std::vector<std::vector<typename LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
+  virtual std::vector<std::vector<std::vector<
+      std::vector<typename LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
   getTransform() override;
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs() override;
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>>

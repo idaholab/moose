@@ -99,12 +99,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
                            "Modules/TensorMechanics/GlobalStrain/*",
                            "The 'Modules/TensorMechanics' syntax is deprecated. Please use "
                            "'Physics/SolidMechanics' instead.");
-  registerDeprecatedSyntax("CommonTensorMechanicsAction",
+  registerDeprecatedSyntax("CommonSolidMechanicsAction",
                            "Modules/TensorMechanics/Master",
                            "The 'Modules/TensorMechanics/Master' syntax is deprecated. Please use "
                            "'Physics/SolidMechanics/QuasiStatic' instead.");
   registerDeprecatedSyntax(
-      "CommonTensorMechanicsAction",
+      "CommonSolidMechanicsAction",
       "Modules/TensorMechanics/DynamicMaster",
       "The 'Modules/TensorMechanics/DynamicMaster' syntax is deprecated. Please use "
       "'Physics/SolidMechanics/Dynamic' instead.");

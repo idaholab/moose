@@ -40,9 +40,17 @@ SolidMechanicsHardeningConstant::SolidMechanicsHardeningConstant(const InputPara
 {
 }
 
-Real SolidMechanicsHardeningConstant::value(Real /*intnl*/) const { return _val; }
+Real
+SolidMechanicsHardeningConstant::value(Real /*intnl*/) const
+{
+  return _val;
+}
 
-Real SolidMechanicsHardeningConstant::derivative(Real /*intnl*/) const { return 0.0; }
+Real
+SolidMechanicsHardeningConstant::derivative(Real /*intnl*/) const
+{
+  return 0.0;
+}
 
 std::string
 SolidMechanicsHardeningConstant::modelName() const
