@@ -25,6 +25,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "FVBoundaryCondition.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
@@ -49,11 +50,13 @@ extraSparsity(SparsityPattern::Graph & sparsity,
 }
 
 SystemBase::SystemBase(SubProblem & subproblem,
+                       FEProblemBase & fe_problem,
                        const std::string & name,
                        Moose::VarKindType var_kind)
   : libMesh::ParallelObject(subproblem),
     ConsoleStreamInterface(subproblem.getMooseApp()),
     _subproblem(subproblem),
+    _fe_problem(fe_problem),
     _app(subproblem.getMooseApp()),
     _factory(_app.getFactory()),
     _mesh(subproblem.mesh()),
@@ -61,10 +64,14 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _vars(libMesh::n_threads()),
     _var_map(),
     _max_var_number(0),
-    _saved_old(NULL),
-    _saved_older(NULL),
-    _saved_dot_old(NULL),
-    _saved_dotdot_old(NULL),
+    _u_dot(nullptr),
+    _u_dotdot(nullptr),
+    _u_dot_old(nullptr),
+    _u_dotdot_old(nullptr),
+    _saved_old(nullptr),
+    _saved_older(nullptr),
+    _saved_dot_old(nullptr),
+    _saved_dotdot_old(nullptr),
     _var_kind(var_kind),
     _max_var_n_dofs_per_elem(0),
     _max_var_n_dofs_per_node(0),
@@ -1543,6 +1550,19 @@ SystemBase::setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & 
                                                         THREAD_ID tid)
 {
   _vars[tid].setActiveScalarVariableCoupleableVectorTags(vtags);
+}
+
+void
+SystemBase::addDotVectors()
+{
+  if (_fe_problem.uDotRequested())
+    _u_dot = &addVector("u_dot", true, GHOSTED);
+  if (_fe_problem.uDotOldRequested())
+    _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
+  if (_fe_problem.uDotDotRequested())
+    _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
+  if (_fe_problem.uDotDotOldRequested())
+    _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,

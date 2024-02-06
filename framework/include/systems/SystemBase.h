@@ -38,6 +38,7 @@ class SubProblem;
 class SystemBase;
 class TimeIntegrator;
 class InputParameters;
+class FEProblemBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -85,7 +86,10 @@ class SystemBase : public libMesh::ParallelObject, public ConsoleStreamInterface
 
 {
 public:
-  SystemBase(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind);
+  SystemBase(SubProblem & subproblem,
+             FEProblemBase & fe_problem,
+             const std::string & name,
+             Moose::VarKindType var_kind);
   virtual ~SystemBase() {}
 
   /**
@@ -93,10 +97,12 @@ public:
    * @return The number of this system
    */
   unsigned int number() const;
-  virtual MooseMesh & mesh() { return _mesh; }
-  virtual const MooseMesh & mesh() const { return _mesh; }
-  virtual SubProblem & subproblem() { return _subproblem; }
-  virtual const SubProblem & subproblem() const { return _subproblem; }
+  MooseMesh & mesh() { return _mesh; }
+  const MooseMesh & mesh() const { return _mesh; }
+  SubProblem & subproblem() { return _subproblem; }
+  const SubProblem & subproblem() const { return _subproblem; }
+  FEProblemBase & feProblem() { return _fe_problem; }
+  const FEProblemBase & feProblem() const { return _fe_problem; }
 
   /**
    * Applies scaling factors to the system's variables
@@ -219,21 +225,25 @@ public:
       const unsigned int state,
       Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time) const;
 
+  /**
+   * Add u_dot, u_dotdot, u_dot_old and u_dotdot_old
+   * vectors if requested by the time integrator
+   */
+  virtual void addDotVectors();
+
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
   virtual const Number & duDotDu() const { return _du_dot_du; }
   virtual const Number & duDotDotDu() const { return _du_dotdot_du; }
 
-  // non-const getters
-  virtual NumericVector<Number> * solutionUDot() = 0;
-  virtual NumericVector<Number> * solutionUDotOld() = 0;
-  virtual NumericVector<Number> * solutionUDotDot() = 0;
-  virtual NumericVector<Number> * solutionUDotDotOld() = 0;
-  // const getters
-  virtual const NumericVector<Number> * solutionUDot() const = 0;
-  virtual const NumericVector<Number> * solutionUDotOld() const = 0;
-  virtual const NumericVector<Number> * solutionUDotDot() const = 0;
-  virtual const NumericVector<Number> * solutionUDotDotOld() const = 0;
+  virtual NumericVector<Number> * solutionUDot() { return _u_dot; }
+  virtual NumericVector<Number> * solutionUDotDot() { return _u_dotdot; }
+  virtual NumericVector<Number> * solutionUDotOld() { return _u_dot_old; }
+  virtual NumericVector<Number> * solutionUDotDotOld() { return _u_dotdot_old; }
+  virtual const NumericVector<Number> * solutionUDot() const { return _u_dot; }
+  virtual const NumericVector<Number> * solutionUDotDot() const { return _u_dotdot; }
+  virtual const NumericVector<Number> * solutionUDotOld() const { return _u_dot_old; }
+  virtual const NumericVector<Number> * solutionUDotDotOld() const { return _u_dotdot_old; }
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();
@@ -921,7 +931,12 @@ protected:
    */
   virtual NumericVector<Number> & solutionInternal() const = 0;
 
+  /// The subproblem for whom this class holds variable data, etc; this can either be the governing
+  /// finite element/volume problem or a subjugate displaced problem
   SubProblem & _subproblem;
+
+  /// the governing finite element/volume problem
+  FEProblemBase & _fe_problem;
 
   MooseApp & _app;
   Factory & _factory;
@@ -939,6 +954,16 @@ protected:
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
+
+  /// solution vector for u^dot
+  NumericVector<Number> * _u_dot;
+  /// solution vector for u^dotdot
+  NumericVector<Number> * _u_dotdot;
+
+  /// old solution vector for u^dot
+  NumericVector<Number> * _u_dot_old;
+  /// old solution vector for u^dotdot
+  NumericVector<Number> * _u_dotdot_old;
 
   Real _du_dot_du;
   Real _du_dotdot_du;

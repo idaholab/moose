@@ -109,9 +109,8 @@ EXTERN_C_END
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          System & sys,
                                          const std::string & name)
-  : SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
+  : SystemBase(fe_problem, fe_problem, name, Moose::VAR_NONLINEAR),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "NonlinearSystemBase"),
-    _fe_problem(fe_problem),
     _sys(sys),
     _last_nl_rnorm(0.),
     _initial_residual_before_preset_bcs(0.),
@@ -120,10 +119,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_initial_residual_before_preset_bcs(true),
     _current_solution(NULL),
     _residual_ghosted(NULL),
-    _u_dot(NULL),
-    _u_dotdot(NULL),
-    _u_dot_old(NULL),
-    _u_dotdot_old(NULL),
     _Re_time_tag(-1),
     _Re_time(NULL),
     _Re_non_time_tag(-1),
@@ -197,19 +192,6 @@ NonlinearSystemBase::init()
 
   if (_residual_copy.get())
     _residual_copy->init(_sys.n_dofs(), false, SERIAL);
-}
-
-void
-NonlinearSystemBase::addDotVectors()
-{
-  if (_fe_problem.uDotRequested())
-    _u_dot = &addVector("u_dot", true, GHOSTED);
-  if (_fe_problem.uDotOldRequested())
-    _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
-  if (_fe_problem.uDotDotRequested())
-    _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
-  if (_fe_problem.uDotDotOldRequested())
-    _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
 }
 
 void

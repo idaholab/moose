@@ -296,8 +296,8 @@ public:
   virtual void prepareFaceShapes(unsigned int var, const THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, const THREAD_ID tid) override;
 
-  Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
-  const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
+  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
+  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
@@ -337,32 +337,32 @@ public:
    */
   void undisplaceMesh();
 
-  LineSearch * getLineSearch() override;
+  virtual LineSearch * getLineSearch() override;
 
-  const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const override;
+  virtual const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const override;
 
-  bool haveDisplaced() const override final { return true; }
+  virtual bool haveDisplaced() const override final { return true; }
 
-  bool computingScalingJacobian() const override final;
+  virtual bool computingScalingJacobian() const override final;
 
-  bool computingScalingResidual() const override final;
+  virtual bool computingScalingResidual() const override final;
 
-  void initialSetup() override;
-  void timestepSetup() override;
-  void customSetup(const ExecFlagType & exec_type) override;
-  void residualSetup() override;
-  void jacobianSetup() override;
+  virtual void initialSetup() override;
+  virtual void timestepSetup() override;
+  virtual void customSetup(const ExecFlagType & exec_type) override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
 
   using SubProblem::haveADObjects;
-  void haveADObjects(bool have_ad_objects) override;
+  virtual void haveADObjects(bool have_ad_objects) override;
 
-  std::size_t numNonlinearSystems() const override;
+  virtual std::size_t numNonlinearSystems() const override;
 
-  std::size_t numLinearSystems() const override;
+  virtual std::size_t numLinearSystems() const override;
 
-  unsigned int currentNlSysNum() const override;
+  virtual unsigned int currentNlSysNum() const override;
 
-  unsigned int currentLinearSysNum() const override;
+  virtual unsigned int currentLinearSysNum() const override;
 
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
 
@@ -393,11 +393,11 @@ protected:
   GeometricSearchData _geometric_search_data;
 
 private:
-  std::pair<bool, unsigned int>
+  virtual std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
 
-  std::pair<bool, unsigned int>
+  virtual std::pair<bool, unsigned int>
   determineLinearSystem(const std::string & var_name,
                         bool error_if_not_found = false) const override;
 

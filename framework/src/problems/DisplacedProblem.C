@@ -58,6 +58,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   {
     _displaced_nl.emplace_back(std::make_unique<DisplacedSystem>(
         *this,
+        _mproblem,
         _mproblem.getNonlinearSystemBase(nl_sys_num),
         "displaced_" + _mproblem.getNonlinearSystemBase(nl_sys_num).name() + "_" +
             std::to_string(nl_sys_num),
@@ -74,6 +75,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
 
   _displaced_aux =
       std::make_unique<DisplacedSystem>(*this,
+                                        _mproblem,
                                         _mproblem.getAuxiliarySystem(),
                                         "displaced_" + _mproblem.getAuxiliarySystem().name(),
                                         Moose::VAR_AUXILIARY);

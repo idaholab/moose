@@ -131,12 +131,6 @@ public:
   using SystemBase::addTimeIntegrator;
 
   /**
-   * Add u_dot, u_dotdot, u_dot_old and u_dotdot_old
-   * vectors if requested by the time integrator
-   */
-  void addDotVectors();
-
-  /**
    * Adds a kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
@@ -389,15 +383,6 @@ public:
    * explicit argument.
    */
   virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
-
-  NumericVector<Number> * solutionUDot() override { return _u_dot; }
-  NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
-  NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
-  NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
-  const NumericVector<Number> * solutionUDot() const override { return _u_dot; }
-  const NumericVector<Number> * solutionUDotDot() const override { return _u_dotdot; }
-  const NumericVector<Number> * solutionUDotOld() const override { return _u_dot_old; }
-  const NumericVector<Number> * solutionUDotDotOld() const override { return _u_dotdot_old; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -682,7 +667,6 @@ public:
     _off_diagonals_in_auto_scaling = off_diagonals_in_auto_scaling;
   }
 
-  FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_nl_rnorm;
@@ -804,16 +788,6 @@ protected:
 
   /// Copy of the residual vector, or nullptr if a copy is not needed
   std::unique_ptr<NumericVector<Number>> _residual_copy;
-
-  /// solution vector for u^dot
-  NumericVector<Number> * _u_dot;
-  /// solution vector for u^dotdot
-  NumericVector<Number> * _u_dotdot;
-
-  /// old solution vector for u^dot
-  NumericVector<Number> * _u_dot_old;
-  /// old solution vector for u^dotdot
-  NumericVector<Number> * _u_dotdot_old;
 
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;

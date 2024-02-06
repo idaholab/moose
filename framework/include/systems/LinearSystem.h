@@ -42,15 +42,9 @@ public:
   virtual void solve() override;
   virtual void restoreSolutions() override;
 
-  /**
-   * Returns the convergence state
-   * @return true if converged, otherwise false
-   */
-  virtual bool converged() { return false; }
-
-  void addTimeIntegrator(const std::string & type,
-                         const std::string & name,
-                         InputParameters & parameters) override;
+  virtual void addTimeIntegrator(const std::string & type,
+                                 const std::string & name,
+                                 InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
   /**
@@ -83,7 +77,7 @@ public:
    * Set the solution to a given vector.
    * @param soln The vector which should be treated as the solution.
    */
-  virtual void setSolution(const NumericVector<Number> & soln);
+  void setSolution(const NumericVector<Number> & soln);
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -95,7 +89,7 @@ public:
    */
   NumericVector<Number> & getRightHandSideNonTimeVector();
 
-  const NumericVector<Number> * const & currentSolution() const override
+  virtual const NumericVector<Number> * const & currentSolution() const override
   {
     return _current_solution;
   }
@@ -146,41 +140,6 @@ public:
   TagID rightHandSideVectorTag() const { return _rhs_tag; }
   TagID systemMatrixTag() const override { return _system_matrix_tag; }
   ///@}
-
-  // non-const getters
-  NumericVector<Number> * solutionUDot() override
-  {
-    mooseError("solutionUDot not implemented in LinearSystem!");
-  }
-  NumericVector<Number> * solutionUDotOld() override
-  {
-    mooseError("solutionUDotOld not implemented in LinearSystem!");
-  }
-  NumericVector<Number> * solutionUDotDot() override
-  {
-    mooseError(" solutionUDotDot not implemented in LinearSystem!");
-  }
-  NumericVector<Number> * solutionUDotDotOld() override
-  {
-    mooseError("solutionUDotDotOld not implemented in LinearSystem!");
-  }
-  // const getters
-  const NumericVector<Number> * solutionUDot() const override
-  {
-    mooseError("solutionUDot not implemented in LinearSystem!");
-  }
-  const NumericVector<Number> * solutionUDotOld() const override
-  {
-    mooseError("solutionUDotOld not implemented in LinearSystem!");
-  }
-  const NumericVector<Number> * solutionUDotDot() const override
-  {
-    mooseError(" solutionUDotDot not implemented in LinearSystem!");
-  }
-  const NumericVector<Number> * solutionUDotDotOld() const override
-  {
-    mooseError("solutionUDotDotOld not implemented in LinearSystem!");
-  }
 
   /// Serialize the distributed solution vector
   virtual void serializeSolution();

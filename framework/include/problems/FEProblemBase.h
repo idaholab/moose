@@ -363,8 +363,8 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
-  const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
+  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
+  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -450,8 +450,8 @@ public:
    * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
    * @param po The petsc options for the solve, if not supplied, the defaults are used
    */
-  virtual void solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
+  void solveLinearSystem(const unsigned int linear_sys_num,
+                         const Moose::PetscSupport::PetscOptions * po = nullptr);
 
   ///@{
   /**
@@ -1381,16 +1381,15 @@ public:
    * @param sys The linear system whose right hand side should be computed
    * @param rhs Reference to the vector which will hold the right hand side
    */
-  virtual void computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys,
-                                                   NumericVector<Number> & rhs);
+  void computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys, NumericVector<Number> & rhs);
 
   /**
    * Compute the system matrix of a given linear system.
    * @param sys The linear system whosesystem matrix should be computed
    * @param system_matrix Reference to the sparse matrix which will hold the msystem matrix
    */
-  virtual void computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
-                                            SparseMatrix<Number> & system_matrix);
+  void computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
+                                    SparseMatrix<Number> & system_matrix);
 
   /**
    * Compute the right hand side of the current linear system for given vector tags.
@@ -1399,9 +1398,9 @@ public:
    * @param tags The vector tag IDs which should be used to select terms that contribute to the
    * right hand side
    */
-  virtual void computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
-                                                    NumericVector<Number> & rhs,
-                                                    const std::set<TagID> & tags);
+  void computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
+                                            NumericVector<Number> & rhs,
+                                            const std::set<TagID> & tags);
 
   /**
    * Compute the system matrix of the current linear system for given matrix tags.
@@ -1410,9 +1409,9 @@ public:
    * @param tags The matrix tag IDs which should be used to select terms that contribute to the
    * matrix
    */
-  virtual void computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
-                                             SparseMatrix<Number> & system_matrix,
-                                             const std::set<TagID> & tags);
+  void computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
+                                     SparseMatrix<Number> & system_matrix,
+                                     const std::set<TagID> & tags);
 
   /**
    * Assemble both the right hand side and the system matrix of a given linear
@@ -1421,9 +1420,9 @@ public:
    * @param system_matrix The sparse matrix which should hold the system matrix
    * @param rhs The vector which should hold the right hand side
    */
-  virtual void computeLinearSystemSys(LinearImplicitSystem & sys,
-                                      SparseMatrix<Number> & system_matrix,
-                                      NumericVector<Number> & rhs);
+  void computeLinearSystemSys(LinearImplicitSystem & sys,
+                              SparseMatrix<Number> & system_matrix,
+                              NumericVector<Number> & rhs);
 
   /**
    * Assemble the current linear system given a set of vector and matrix tags.
@@ -1434,11 +1433,11 @@ public:
    * @param vector_tags The vector tags for the right hand side
    * @param matrix_tags The matrix tags for the matrix
    */
-  virtual void computeLinearSystemTags(const NumericVector<Number> & soln,
-                                       SparseMatrix<Number> & system_matrix,
-                                       NumericVector<Number> & rhs,
-                                       const std::set<TagID> & vector_tags,
-                                       const std::set<TagID> & matrix_tags);
+  void computeLinearSystemTags(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & system_matrix,
+                               NumericVector<Number> & rhs,
+                               const std::set<TagID> & vector_tags,
+                               const std::set<TagID> & matrix_tags);
 
   virtual Real computeDamping(const NumericVector<Number> & soln,
                               const NumericVector<Number> & update);
@@ -2211,7 +2210,7 @@ public:
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
-   * @return the nlinear system number corresponding to the provided \p linear_sys_name
+   * @return the linear system number corresponding to the provided \p linear_sys_name
    */
   unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const override;
 
@@ -2350,7 +2349,7 @@ protected:
   /// Map from linear system name to number
   std::map<LinearSystemName, unsigned int> _linear_sys_name_to_num;
 
-  /// Map from linear variable name to nonlinear system number
+  /// Map from linear variable name to linear system number
   std::map<NonlinearVariableName, unsigned int> _linear_var_to_sys_num;
 
   /// The current linear system that we are solving
@@ -2691,7 +2690,7 @@ private:
    * nonlinear systems and the second member indicates the nonlinear system number in which the
    * variable was found (or an invalid unsigned integer if not found)
    */
-  std::pair<bool, unsigned int>
+  virtual std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
 
@@ -2704,7 +2703,7 @@ private:
    * linear systems and the second member indicates the linear system number in which the
    * variable was found (or an invalid unsigned integer if not found)
    */
-  std::pair<bool, unsigned int>
+  virtual std::pair<bool, unsigned int>
   determineLinearSystem(const std::string & var_name,
                         bool error_if_not_found = false) const override;
 

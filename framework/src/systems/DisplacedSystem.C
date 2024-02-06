@@ -16,10 +16,11 @@
 #include "libmesh/dof_map.h"
 
 DisplacedSystem::DisplacedSystem(DisplacedProblem & problem,
+                                 FEProblemBase & fe_problem,
                                  SystemBase & undisplaced_system,
                                  const std::string & name,
                                  Moose::VarKindType var_kind)
-  : SystemBase(problem, name, var_kind),
+  : SystemBase(problem, fe_problem, name, var_kind),
     _undisplaced_system(undisplaced_system),
     _sys(problem.es().add_system<TransientExplicitSystem>(name))
 {

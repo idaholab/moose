@@ -1076,17 +1076,17 @@ protected:
 
 private:
   /**
-   * @return whether a given variable name is in the nonlinear systems (reflected the first member
-   * of the returned paired which is a boolean) and if so, what nonlinear system number it is in
-   * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
-   * this will be an invalid unsigned integer)
+   * @return whether a given variable name is in the nonlinear systems (reflected by the first
+   * member of the returned pair which is a boolean) and if so, what nonlinear system number it is
+   * in (the second member of the returned pair; if the variable is not in the nonlinear systems,
+   * then this will be an invalid unsigned integer)
    */
   virtual std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
 
   /**
-   * @return whether a given variable name is in the linear systems (reflected the first member
-   * of the returned paired which is a boolean) and if so, what nonlinear system number it is in
+   * @return whether a given variable name is in the linear systems (reflected by the first member
+   * of the returned pair which is a boolean) and if so, what nonlinear system number it is in
    * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
    * this will be an invalid unsigned integer)
    */
