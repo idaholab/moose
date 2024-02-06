@@ -5370,7 +5370,7 @@ void
 FEProblemBase::setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                            const THREAD_ID tid)
 {
-  // mark active properties for materials
+  // mark active properties in every material
   for (auto & mat : _all_materials.getObjects(tid))
     mat->setActiveProperties(mat_prop_ids);
   for (auto & mat : _all_materials[Moose::FACE_MATERIAL_DATA].getObjects(tid))

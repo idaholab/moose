@@ -243,7 +243,7 @@ public:
 
   /**
    * Set active properties of this material
-   * Note: This function is called FEProblemBase::setActiveMaterialProperties in an element loop
+   * Note: This function is called by FEProblemBase::setActiveMaterialProperties in an element loop
    *       typically when switching subdomains.
    */
   void setActiveProperties(const std::unordered_set<unsigned int> & needed_props);
