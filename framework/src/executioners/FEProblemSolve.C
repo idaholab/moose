@@ -164,7 +164,7 @@ FEProblemSolve::validParams()
 }
 
 FEProblemSolve::FEProblemSolve(Executioner & ex)
-  : SolveObject(ex),
+  : NonlinearSolveObject(ex),
     _splitting(getParam<std::vector<std::string>>("splitting")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
 {
