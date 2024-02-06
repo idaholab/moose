@@ -41,7 +41,8 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
           3,
           1,
           num_neurons_per_layer,
-          getParam<std::vector<std::string>>("activation_functions"));
+          getParam<std::vector<std::string>>("activation_functions"),
+          _app.getLibtorchDevice());
 
   // Create an Adam optimizer
   torch::optim::Adam optimizer(nn->parameters(), torch::optim::AdamOptions(0.02));
