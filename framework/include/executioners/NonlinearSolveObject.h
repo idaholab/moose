@@ -20,4 +20,8 @@ public:
   NonlinearSolveObject(Executioner & ex);
 
   static InputParameters validParams();
+
+protected:
+  /// Reference to nonlinear system base for faster access
+  NonlinearSystemBase & _nl;
 };

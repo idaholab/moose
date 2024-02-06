@@ -68,10 +68,10 @@ SecantSolve::allocateStorage(const bool primary)
   // TODO: We would only need to store the solution for the degrees of freedom that
   // will be transformed, not the entire solution.
   // Store solution vectors for the two previous points and their evaluation
-  _nl->addVector(xn_m1_tagid, false, PARALLEL);
-  _nl->addVector(fxn_m1_tagid, false, PARALLEL);
-  _nl->addVector(xn_m2_tagid, false, PARALLEL);
-  _nl->addVector(fxn_m2_tagid, false, PARALLEL);
+  _solver_sys.addVector(xn_m1_tagid, false, PARALLEL);
+  _solver_sys.addVector(fxn_m1_tagid, false, PARALLEL);
+  _solver_sys.addVector(xn_m2_tagid, false, PARALLEL);
+  _solver_sys.addVector(fxn_m2_tagid, false, PARALLEL);
 }
 
 void
@@ -97,11 +97,11 @@ SecantSolve::saveVariableValues(const bool primary)
   }
 
   // Save previous variable values
-  NumericVector<Number> & solution = _nl->solution();
-  NumericVector<Number> & fxn_m1 = _nl->getVector(fxn_m1_tagid);
-  NumericVector<Number> & xn_m1 = _nl->getVector(xn_m1_tagid);
-  NumericVector<Number> & fxn_m2 = _nl->getVector(fxn_m2_tagid);
-  NumericVector<Number> & xn_m2 = _nl->getVector(xn_m2_tagid);
+  NumericVector<Number> & solution = _solver_sys.solution();
+  NumericVector<Number> & fxn_m1 = _solver_sys.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = _solver_sys.getVector(xn_m1_tagid);
+  NumericVector<Number> & fxn_m2 = _solver_sys.getVector(fxn_m2_tagid);
+  NumericVector<Number> & xn_m2 = _solver_sys.getVector(xn_m2_tagid);
 
   // Advance one step
   xn_m2 = xn_m1;
@@ -222,13 +222,13 @@ SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const
     xn_m2_tagid = _secondary_xn_m2_tagid;
   }
 
-  NumericVector<Number> & solution = _nl->solution();
-  NumericVector<Number> & xn_m1 = _nl->getVector(xn_m1_tagid);
-  NumericVector<Number> & fxn_m2 = _nl->getVector(fxn_m2_tagid);
-  NumericVector<Number> & xn_m2 = _nl->getVector(xn_m2_tagid);
+  NumericVector<Number> & solution = _solver_sys.solution();
+  NumericVector<Number> & xn_m1 = _solver_sys.getVector(xn_m1_tagid);
+  NumericVector<Number> & fxn_m2 = _solver_sys.getVector(fxn_m2_tagid);
+  NumericVector<Number> & xn_m2 = _solver_sys.getVector(xn_m2_tagid);
 
   // Save the most recent evaluation of the coupled problem
-  NumericVector<Number> & fxn_m1 = _nl->getVector(fxn_m1_tagid);
+  NumericVector<Number> & fxn_m1 = _solver_sys.getVector(fxn_m1_tagid);
   fxn_m1 = solution;
 
   for (const auto & dof : target_dofs)
@@ -245,7 +245,7 @@ SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const
     solution.set(dof, new_value);
   }
   solution.close();
-  _nl->update();
+  _solver_sys.update();
 }
 
 void

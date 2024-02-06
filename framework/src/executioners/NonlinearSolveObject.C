@@ -15,4 +15,7 @@ NonlinearSolveObject::validParams()
   return emptyInputParameters();
 }
 
-NonlinearSolveObject::NonlinearSolveObject(Executioner & ex) : SolveObject(ex) {}
+NonlinearSolveObject::NonlinearSolveObject(Executioner & ex)
+  : SolveObject(ex), _nl(_problem.getNonlinearSystemBase(/*nl_sys=*/0))
+{
+}
