@@ -21,13 +21,15 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const unsigned int num_outputs,
     const std::vector<unsigned int> & num_neurons_per_layer,
     const std::vector<std::string> & activation_function,
-    const torch::DeviceType device_type)
+    const torch::DeviceType device_type,
+    const torch::ScalarType data_type)
   : _name(name),
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
     _num_neurons_per_layer(num_neurons_per_layer),
     _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear", "relu")),
-    _device_type(device_type)
+    _device_type(device_type),
+    _data_type(data_type)
 {
   _activation_function = activation_function;
 
@@ -47,7 +49,8 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_outputs(nn.numOutputs()),
     _num_neurons_per_layer(nn.numNeuronsPerLayer()),
     _activation_function(nn.activationFunctions()),
-    _device_type(nn.deviceType())
+    _device_type(nn.deviceType()),
+    _data_type(nn.dataType())
 {
 
   // We construct the NN architecture
@@ -71,20 +74,22 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
     addLayer("hidden_layer_" + std::to_string(i + 1), parameters);
 
     // Necessary to retain double precision (and error-free runs)
-    _weights[i]->to(at::kDouble);
+    _weights[i]->to(_device_type, _data_type);
     inp_neurons = _num_neurons_per_layer[i];
   }
   // Adding output layer
   std::unordered_map<std::string, unsigned int> parameters = {{"inp_neurons", inp_neurons},
                                                               {"out_neurons", _num_outputs}};
   addLayer("output_layer_", parameters);
-  _weights.back()->to(_device_type, at::kDouble);
+  _weights.back()->to(_device_type, _data_type);
 }
 
 torch::Tensor
 LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
 {
   torch::Tensor output(x);
+  if (_data_type != x.scalar_type())
+    output.to(_data_type);
   if (_device_type != x.device().type())
     output.to(_device_type);
 
@@ -183,6 +188,9 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
   int8_t device_type = static_cast<std::underlying_type<torch::DeviceType>::type>(nn->deviceType());
   dataStore(stream, device_type, context);
 
+  int8_t data_type = static_cast<std::underlying_type<torch::ScalarType>::type>(nn->dataType());
+  dataStore(stream, data_type, context);
+
   torch::save(nn, nn->name());
 }
 
@@ -216,10 +224,14 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
 
   int8_t device_type;
   dataLoad(stream, device_type, context);
-  const torch::DeviceType dt(static_cast<torch::DeviceType>(device_type));
+  const torch::DeviceType divt(static_cast<torch::DeviceType>(device_type));
+
+  int8_t data_type;
+  dataLoad(stream, data_type, context);
+  const torch::ScalarType datt(static_cast<torch::ScalarType>(data_type));
 
   nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, dt);
+      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, divt, datt);
 
   torch::load(nn, name);
 }
