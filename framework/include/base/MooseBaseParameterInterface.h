@@ -18,6 +18,7 @@
 #include "MooseBaseErrorInterface.h"
 
 #include <string>
+#include <optional>
 
 #define usingMooseBaseParameterInterfaceMembers                                                    \
   using MooseBaseParameterInterface::parameters;                                                   \
@@ -97,6 +98,15 @@ public:
   template <typename T1, typename T2>
   std::vector<std::pair<T1, T2>> getParam(const std::string & param1,
                                           const std::string & param2) const;
+
+  /**
+   * Retrieves a parameter as an optional value if it is valid. If it is not valid,
+   * an empty optional value will be returned.
+   * @param param The parameter name
+   * @return The optional value
+   */
+  template <typename T>
+  std::optional<T> getOptionalParam(const std::string & param) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -210,6 +220,15 @@ const T &
 MooseBaseParameterInterface::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+std::optional<T>
+MooseBaseParameterInterface::getOptionalParam(const std::string & name) const
+{
+  return isParamValid(name)
+             ? std::optional<T>(InputParameters::getParamHelper(name, _pars, static_cast<T *>(0)))
+             : std::optional<T>();
 }
 
 template <typename T>
