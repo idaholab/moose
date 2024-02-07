@@ -49,8 +49,11 @@ ComputeMarkerThread::subdomainChanged()
   for (auto * var : _aux_sys._elem_vars[_tid])
     var->prepareAux();
 
+  std::unordered_set<unsigned int> needed_mat_props;
+  _marker_whs.updateMatPropDependency(needed_mat_props, _tid);
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-  _fe_problem.prepareMaterials(_subdomain, _tid);
+  _fe_problem.prepareMaterials(needed_mat_props, _subdomain, _tid);
 }
 
 void

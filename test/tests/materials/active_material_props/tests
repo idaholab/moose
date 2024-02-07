@@ -1,0 +1,10 @@
+[Tests]
+  [check_active_properties]
+    issues = '#26696'
+    design = 'syntax/Materials/index.md'
+    requirement = 'The system shall provide a function for materials to check whether a declared material property is active on current element.'
+    type = 'Exodiff'
+    input = 'check_active_props.i'
+    exodiff = 'check_active_props_out.e'
+  []
+[]
