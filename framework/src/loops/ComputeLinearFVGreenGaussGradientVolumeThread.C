@@ -55,9 +55,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
           const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
           const auto dof_id_elem =
               elem_info->dofIndices()[_linear_system.number()][_current_var->number()];
-          auto volume = elem_info->volume();
-          if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
-            volume *= elem_info->coordFactor();
+          const auto volume = elem_info->volume() * elem_info->coordFactor();
 
           for (const auto dim_index : index_range(grad_container))
             grad_container[dim_index]->set(dof_id_elem,
