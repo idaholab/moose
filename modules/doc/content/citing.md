@@ -151,9 +151,9 @@ institution = {Idaho National Laboratory}
 }
 ```
 
-### Tensor Mechanics
+### Solid Mechanics
 
-If you use the multi-surface plasticity capability, `ComputeMultiPlasticityStress`, of the Tensor Mechanics module (feel free to contact Andy Wilkins if unsure) or if you just want to demonstrate MOOSE's advanced plasticity features, please cite:
+If you use the multi-surface plasticity capability, `ComputeMultiPlasticityStress`, of the Solid Mechanics module (feel free to contact Andy Wilkins if unsure) or if you just want to demonstrate MOOSE's advanced plasticity features, please cite:
 
 ```
 @article{adhikary2016robust,

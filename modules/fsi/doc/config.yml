@@ -1,7 +1,7 @@
 Content:
     - framework/doc/content
     - modules/fsi/doc/content
-    - modules/tensor_mechanics/doc/content
+    - modules/solid_mechanics/doc/content
     - modules/fluid_properties/doc/content
     - modules/navier_stokes/doc/content
     - modules/heat_transfer/doc/content
@@ -23,7 +23,7 @@ Extensions:
         includes:
             - framework/include
             - modules/fsi/include
-            - modules/tensor_mechanics/include
+            - modules/solid_mechanics/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -34,7 +34,7 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+            solid_mechanics: !include modules/solid_mechanics/doc/sqa_solid_mechanics.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml

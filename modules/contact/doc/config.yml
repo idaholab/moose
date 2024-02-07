@@ -1,11 +1,11 @@
 Content:
     - framework/doc/content
     - modules/contact/doc/content
-    - modules/tensor_mechanics/doc/content
+    - modules/solid_mechanics/doc/content
     - utility:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
-            - help/finite_element_concepts/nodal_patch_recovery.md            
+            - help/finite_element_concepts/nodal_patch_recovery.md
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
@@ -23,7 +23,7 @@ Extensions:
         includes:
             - framework/include
             - modules/contact/include
-            - modules/tensor_mechanics/include
+            - modules/solid_mechanics/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -36,4 +36,4 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             contact: !include modules/contact/doc/sqa_contact.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+            solid_mechanics: !include modules/solid_mechanics/doc/sqa_solid_mechanics.yml
