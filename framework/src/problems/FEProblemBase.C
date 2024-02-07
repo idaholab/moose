@@ -6456,7 +6456,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
   // matrix tags
   {
-    // selectMatrixTagsFromSystem(*_current_nl_sys, getMatrixTags(), _fe_matrix_tags);
     _fe_matrix_tags.clear();
 
     auto & tags = getMatrixTags();
