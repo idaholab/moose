@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#26474 #26757'
+  design = 'syntax/Application/index.md'
+
+  [default_type]
+    type = 'RunApp'
+    input = 'application_block.i'
+    requirement = "The system shall support running a default application type when one is not specified"
+    cli_args = "--show-type"
+    expect_out = 'MooseApp Type: MooseTestApp'
+  []
+
+  [change_type]
+    requirement = 'The system shall support selecting the application type from an executable via'
+    [hit_cli]
+      type = 'RunApp'
+      input = 'application_block.i'
+      cli_args = '--show-type Application/type=MooseApp'
+      detail = "a command line option with input syntax"
+      expect_out = 'MooseApp Type: MooseApp'
+    []
+    [cli]
+      type = 'RunApp'
+      input = 'application_block.i'
+      cli_args = '--show-type --type MooseApp'
+      detail = "a command line option"
+      expect_out = 'MooseApp Type: MooseApp'
+    []
+    [deprecated_cli]
+      type = 'RunApp'
+      input = 'application_block.i'
+      cli_args = '--show-type --app MooseApp'
+      detail = "a deprecated command line option"
+      expect_out = 'Please use Application/type= or --type <AppName> via command line(.*)MooseApp Type: MooseApp'
+    []
+  []
+
+  [errors]
+    [type_app_together]
+      type = 'RunException'
+      input = 'application_block.i'
+      cli_args = '--app MooseApp --type MooseApp'
+      requirement = "The system shall report a reasonable error when specifying the application type using the deprecated method and the current method"
+      expect_err = 'You cannot specify the command-line options --type and --app together.'
+    []
+    [unregistered]
+      type = 'RunException'
+      input = 'application_block.i'
+      cli_args = 'Application/type=DummyApp'
+      expect_err = "A 'DummyApp' is not a registered object"
+      detail = "return an error message when the application type is not registered."
+    []
+  []
+[]
