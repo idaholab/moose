@@ -31,6 +31,7 @@ class FunctionParserBase
 #include <tuple>
 #include <unordered_map>
 #include <mutex>
+#include <optional>
 
 // Forward declarations
 class Action;
@@ -53,6 +54,24 @@ public:
   virtual ~InputParameters() = default;
 
   virtual void clear() override;
+
+  /**
+   * Structure for storing information about a command line parameter
+   */
+  struct CommandLineMetadata
+  {
+    enum ArgumentType
+    {
+      NONE,
+      OPTIONAL,
+      REQUIRED
+    };
+
+    /// The syntax for the parameter (i.e., ["-t", "--timing"])
+    std::vector<std::string> syntax;
+    /// The type of argument
+    ArgumentType argument_type;
+  };
 
   /**
    * This method adds a description of the class that will be displayed
@@ -281,9 +300,19 @@ public:
   void checkConsistentType(const std::string & name) const;
 
   /**
-   * Get the syntax for a command-line parameter
+   * @return Whether or not the parameter \p name is a command line parameter
    */
-  std::vector<std::string> getSyntax(const std::string & name) const;
+  bool isCommandLineParameter(const std::string & name) const;
+
+  /**
+   * @return The command line syntax for the parameter \p name
+   */
+  const std::vector<std::string> & getCommandLineSyntax(const std::string & name) const;
+
+  /**
+   * @return The command line argument type for the parameter \p name
+   */
+  CommandLineMetadata::ArgumentType getCommandLineArgumentType(const std::string & name) const;
 
   /**
    * Get the documentation string for a parameter
@@ -993,22 +1022,6 @@ private:
   std::string appendFunctorDescription(const std::string & doc_string) const;
 
   /**
-   * Helper that uses overloading to distinguish adding command-line parameters of
-   * a scalar and a vector kind. Vector parameters are options that may appear multiple
-   * times on the command line (like -i).
-   */
-  template <typename T>
-  void addCommandLineParamHelper(const std::string & name,
-                                 const std::string & syntax,
-                                 const std::string & doc_string,
-                                 T *);
-  template <typename T>
-  void addCommandLineParamHelper(const std::string & name,
-                                 const std::string & syntax,
-                                 const std::string & doc_string,
-                                 std::vector<T> *);
-
-  /**
    * Private method for setting deprecated coupled variable documentation strings
    */
   void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
@@ -1030,7 +1043,8 @@ private:
     std::string _doc_string;
     /// The custom type that will be printed in the YAML dump for a parameter if supplied
     std::string _custom_type;
-    std::vector<std::string> _cli_flag_names;
+    /// The data pertaining to a command line parameter (empty if not a command line param)
+    std::optional<CommandLineMetadata> _cl_data;
     /// The names of the parameters organized into groups
     std::string _group;
     /// The map of functions used for range checked parameters
@@ -1107,6 +1121,17 @@ private:
    */
   template <typename T, typename S>
   void setParamHelper(const std::string & name, T & l_value, const S & r_value);
+
+  /**
+   * @return The command line metadata for the parameter \p name.
+   */
+  const CommandLineMetadata & getCommandLineMetadata(const std::string & name) const;
+
+  /**
+   * Helper for all of the addCommandLineParam() calls, which sets up _cl_data in the metadata
+   */
+  template <typename T>
+  void addCommandLineParamHelper(const std::string & name, const std::string & syntax);
 
   /// original location of input block (i.e. filename,linenum) - used for nice error messages.
   std::string _block_location;
@@ -1452,6 +1477,21 @@ InputParameters::setParamHelper(const std::string & /*name*/, T & l_value, const
 
 template <typename T>
 void
+InputParameters::addCommandLineParamHelper(const std::string & name, const std::string & syntax)
+{
+  auto & cl_data = at(name)._cl_data;
+  cl_data = CommandLineMetadata();
+  MooseUtils::tokenize(syntax, cl_data->syntax, 1, " \t\n\v\f\r");
+  if constexpr (std::is_same_v<T, bool>)
+    cl_data->argument_type = CommandLineMetadata::ArgumentType::NONE;
+  else if constexpr (std::is_same_v<T, MooseEnum>)
+    cl_data->argument_type = CommandLineMetadata::ArgumentType::REQUIRED;
+  else
+    cl_data->argument_type = CommandLineMetadata::ArgumentType::OPTIONAL;
+}
+
+template <typename T>
+void
 InputParameters::addRequiredRangeCheckedParam(const std::string & name,
                                               const std::string & parsed_function,
                                               const std::string & doc_string)
@@ -1559,7 +1599,7 @@ InputParameters::addRequiredCommandLineParam(const std::string & name,
                                              const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
-  MooseUtils::tokenize(syntax, _params[name]._cli_flag_names, 1, " \t\n\v\f\r");
+  addCommandLineParamHelper<T>(name, syntax);
 }
 
 template <typename T>
@@ -1569,7 +1609,7 @@ InputParameters::addCommandLineParam(const std::string & name,
                                      const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
-  MooseUtils::tokenize(syntax, _params[name]._cli_flag_names, 1, " \t\n\v\f\r");
+  addCommandLineParamHelper<T>(name, syntax);
 }
 
 template <typename T>
@@ -1580,7 +1620,7 @@ InputParameters::addCommandLineParam(const std::string & name,
                                      const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
-  MooseUtils::tokenize(syntax, _params[name]._cli_flag_names, 1, " \t\n\v\f\r");
+  addCommandLineParamHelper<T>(name, syntax);
 }
 
 template <typename T>
