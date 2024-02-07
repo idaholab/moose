@@ -21,7 +21,6 @@ ComputeSmearedCrackingStress::validParams()
   params.addClassDescription("Compute stress using a fixed smeared cracking model");
   params.addRequiredParam<std::vector<MaterialName>>(
       "softening_models",
-      {},
       "The material objects used to compute softening behavior for loading a crack."
       "Either 1 or 3 models must be specified. If a single model is specified, it is"
       "used for all directions. If 3 models are specified, they will be used for the"
@@ -55,9 +54,14 @@ ComputeSmearedCrackingStress::validParams()
   params.set<std::vector<MaterialName>>("inelastic_models") = {};
 
   MooseEnum crackedElasticityType("DIAGONAL FULL", "DIAGONAL");
-  crackedElasticityType.addDocumentation("DIAGONAL", "Zero out terms coupling with directions orthogonal to a crack (legacy)");
-  crackedElasticityType.addDocumentation("FULL", "Consistently scale all entries based on damage (recommended)");
-  params.addParam<MooseEnum>("cracked_elasticity_type", crackedElasticityType, "Method to modify the local elasticity tensor to account for cracking");
+  crackedElasticityType.addDocumentation(
+      "DIAGONAL", "Zero out terms coupling with directions orthogonal to a crack (legacy)");
+  crackedElasticityType.addDocumentation(
+      "FULL", "Consistently scale all entries based on damage (recommended)");
+  params.addParam<MooseEnum>(
+      "cracked_elasticity_type",
+      crackedElasticityType,
+      "Method to modify the local elasticity tensor to account for cracking");
 
   return params;
 }
@@ -69,7 +73,8 @@ ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters
     _cracking_neg_fraction(getParam<Real>("cracking_neg_fraction")),
     _shear_retention_factor(getParam<Real>("shear_retention_factor")),
     _max_stress_correction(getParam<Real>("max_stress_correction")),
-    _cracked_elasticity_type(getParam<MooseEnum>("cracked_elasticity_type").getEnum<CrackedElasticityType>()),
+    _cracked_elasticity_type(
+        getParam<MooseEnum>("cracked_elasticity_type").getEnum<CrackedElasticityType>()),
     _crack_damage(declareProperty<RealVectorValue>(_base_name + "crack_damage")),
     _crack_damage_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_damage")),
     _crack_flags(declareProperty<RealVectorValue>(_base_name + "crack_flags")),
@@ -109,6 +114,10 @@ ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters
       _prescribed_crack_directions.push_back(*available_dirs.begin());
     }
   }
+  if (!isParamSetByUser("cracked_elasticity_type"))
+    paramWarning(
+        "cracked_elasticity_type",
+        "Defaulting to the legacy option of 'DIAGONAL', but the 'FULL' option is preferred");
 
   _local_elastic_vector.resize(9);
 }
@@ -310,23 +319,23 @@ ComputeSmearedCrackingStress::updateLocalElasticityTensor()
         const Real c12_shear_retention = (c1_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
 
         _local_elastic_vector[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
-                                    : stiffness_ratio_local(0) * youngs_modulus);
+                                               : stiffness_ratio_local(0) * youngs_modulus);
         _local_elastic_vector[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
         _local_elastic_vector[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
         _local_elastic_vector[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1)
-                                    : stiffness_ratio_local(1) * youngs_modulus);
+                                               : stiffness_ratio_local(1) * youngs_modulus);
         _local_elastic_vector[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
         _local_elastic_vector[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2)
-                                    : stiffness_ratio_local(2) * youngs_modulus);
+                                               : stiffness_ratio_local(2) * youngs_modulus);
         _local_elastic_vector[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
         _local_elastic_vector[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
         _local_elastic_vector[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
       }
       else // _cracked_elasticity_type == CrackedElasticityType::FULL
       {
-        const Real c0 = stiffness_ratio_local(0);
-        const Real c1 = stiffness_ratio_local(1);
-        const Real c2 = stiffness_ratio_local(2);
+        const Real & c0 = stiffness_ratio_local(0);
+        const Real & c1 = stiffness_ratio_local(1);
+        const Real & c2 = stiffness_ratio_local(2);
 
         const Real c01 = c0 * c1;
         const Real c02 = c0 * c2;
@@ -349,7 +358,8 @@ ComputeSmearedCrackingStress::updateLocalElasticityTensor()
 
       // Filling with 9 components is sufficient because these are the only nonzero entries
       // for isotropic or orthotropic materials.
-      _local_elasticity_tensor.fillFromInputVector(_local_elastic_vector, RankFourTensor::symmetric9);
+      _local_elasticity_tensor.fillFromInputVector(_local_elastic_vector,
+                                                   RankFourTensor::symmetric9);
 
       // Rotate the modified elasticity tensor back into global coordinates
       _local_elasticity_tensor.rotate(R);

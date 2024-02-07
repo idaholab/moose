@@ -94,6 +94,7 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
+    cracked_elasticity_type = FULL
     softening_models = 'power_law_softening exponential_softening abrupt_softening'
     prescribed_crack_directions = 'x y z'
   [../]

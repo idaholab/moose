@@ -84,6 +84,7 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 119.3e6
+    cracked_elasticity_type = FULL
     softening_models = exponential_softening
   [../]
   [./exponential_softening]
@@ -105,9 +106,9 @@
   l_tol = 1e-5
 
   nl_max_its = 100
-  nl_abs_tol = 1e-4
+  nl_abs_tol = 1e-6
   #nl_rel_tol = 1e-4
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-8
 
   start_time = 0.0
   end_time = 3.0

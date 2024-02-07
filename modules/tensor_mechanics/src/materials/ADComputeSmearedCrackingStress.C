@@ -20,9 +20,8 @@ ADComputeSmearedCrackingStress::validParams()
   InputParameters params = ADComputeMultipleInelasticStress::validParams();
   params.addClassDescription(
       "Compute stress using a fixed smeared cracking model. Uses automatic differentiation");
-  params.addParam<std::vector<MaterialName>>(
+  params.addRequiredParam<std::vector<MaterialName>>(
       "softening_models",
-      {},
       "The material objects used to compute softening behavior for loading a crack."
       "Either 1 or 3 models must be specified. If a single model is specified, it is"
       "used for all directions. If 3 models are specified, they will be used for the"
@@ -56,9 +55,14 @@ ADComputeSmearedCrackingStress::validParams()
   params.set<std::vector<MaterialName>>("inelastic_models") = {};
 
   MooseEnum crackedElasticityType("DIAGONAL FULL", "DIAGONAL");
-  crackedElasticityType.addDocumentation("DIAGONAL", "Zero out terms coupling with directions orthogonal to a crack (legacy)");
-  crackedElasticityType.addDocumentation("FULL", "Consistently scale all entries based on damage (recommended)");
-  params.addParam<MooseEnum>("cracked_elasticity_type", crackedElasticityType, "Method to modify the local elasticity tensor to account for cracking");
+  crackedElasticityType.addDocumentation(
+      "DIAGONAL", "Zero out terms coupling with directions orthogonal to a crack (legacy)");
+  crackedElasticityType.addDocumentation(
+      "FULL", "Consistently scale all entries based on damage (recommended)");
+  params.addParam<MooseEnum>(
+      "cracked_elasticity_type",
+      crackedElasticityType,
+      "Method to modify the local elasticity tensor to account for cracking");
 
   return params;
 }
@@ -70,7 +74,8 @@ ADComputeSmearedCrackingStress::ADComputeSmearedCrackingStress(const InputParame
     _cracking_neg_fraction(getParam<Real>("cracking_neg_fraction")),
     _shear_retention_factor(getParam<Real>("shear_retention_factor")),
     _max_stress_correction(getParam<Real>("max_stress_correction")),
-    _cracked_elasticity_type(getParam<MooseEnum>("cracked_elasticity_type").getEnum<CrackedElasticityType>()),
+    _cracked_elasticity_type(
+        getParam<MooseEnum>("cracked_elasticity_type").getEnum<CrackedElasticityType>()),
     _crack_damage(declareADProperty<RealVectorValue>(_base_name + "crack_damage")),
     _crack_damage_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_damage")),
     _crack_flags(declareADProperty<RealVectorValue>(_base_name + "crack_flags")),
@@ -110,6 +115,10 @@ ADComputeSmearedCrackingStress::ADComputeSmearedCrackingStress(const InputParame
       _prescribed_crack_directions.push_back(*available_dirs.begin());
     }
   }
+  if (!isParamSetByUser("cracked_elasticity_type"))
+    paramWarning(
+        "cracked_elasticity_type",
+        "Defaulting to the legacy option of 'DIAGONAL', but the 'FULL' option is preferred");
 
   _local_elastic_vector.resize(9);
 }
@@ -302,9 +311,12 @@ ADComputeSmearedCrackingStress::updateLocalElasticityTensor()
         const ADReal c02 = (c0_coupled && c2_coupled ? 1.0 : 0.0);
         const ADReal c12 = (c1_coupled && c2_coupled ? 1.0 : 0.0);
 
-        const ADReal c01_shear_retention = (c0_coupled && c1_coupled ? 1.0 : _shear_retention_factor);
-        const ADReal c02_shear_retention = (c0_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
-        const ADReal c12_shear_retention = (c1_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
+        const ADReal c01_shear_retention =
+            (c0_coupled && c1_coupled ? 1.0 : _shear_retention_factor);
+        const ADReal c02_shear_retention =
+            (c0_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
+        const ADReal c12_shear_retention =
+            (c1_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
 
         _local_elastic_vector[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
                                                : stiffness_ratio_local(0) * youngs_modulus);
@@ -321,9 +333,9 @@ ADComputeSmearedCrackingStress::updateLocalElasticityTensor()
       }
       else // _cracked_elasticity_type == CrackedElasticityType::FULL
       {
-        const ADReal c0 = stiffness_ratio_local(0);
-        const ADReal c1 = stiffness_ratio_local(1);
-        const ADReal c2 = stiffness_ratio_local(2);
+        const ADReal & c0 = stiffness_ratio_local(0);
+        const ADReal & c1 = stiffness_ratio_local(1);
+        const ADReal & c2 = stiffness_ratio_local(2);
 
         const ADReal c01 = c0 * c1;
         const ADReal c02 = c0 * c2;
