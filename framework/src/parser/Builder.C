@@ -219,6 +219,9 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
   // is active
   if (!isSectionActive(curr_identifier, &root()))
     return;
+  // The AppBuilder manages the [Application] block
+  if (curr_identifier == "Application")
+    return;
 
   // Extract the block parameters before constructing the action
   // There may be more than one Action registered for a given section in which case we need to
