@@ -54,6 +54,7 @@
 #include "RestartableDataWriter.h"
 #include "StringInputStream.h"
 #include "MooseMain.h"
+#include "AppBuilder.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -82,14 +83,28 @@
 #define QUOTE(macro) stringifyName(macro)
 
 void
-MooseApp::addAppParam(InputParameters & params)
+MooseApp::addTypeParam(InputParameters & params)
 {
+  params.addCommandLineParam<std::string>("app",
+                                          "--app <AppName>",
+                                          "Deprecated option for specifying the application type. "
+                                          "Use Application/type or --type instead.");
   params.addCommandLineParam<std::string>(
-      "app_to_run",
-      "--app <AppName>",
+      "type",
+      "--type <AppName>",
       "Specify the application that should be used to run the input file. This must match an "
       "application name registered to the application factory. Note that this option is "
       "case-sensitive.");
+}
+
+void
+MooseApp::addInputFileParam(InputParameters & params)
+{
+  params.addCommandLineParam<std::vector<std::string>>(
+      "input_file",
+      "-i <input_files>",
+      "Specify one or multiple input files. Multiple files get merged into a single simulation "
+      "input.");
 }
 
 InputParameters
@@ -97,8 +112,8 @@ MooseApp::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  // Parameters that main also expects that we won't use (-i)
-  Moose::addMainCommandLineParams(params);
+  MooseApp::addTypeParam(params);
+  MooseApp::addInputFileParam(params);
 
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
@@ -148,7 +163,7 @@ MooseApp::validParams()
       "use_executor", "--executor", false, "Use the new Executor system instead of Executioners");
 
   params.addCommandLineParam<bool>(
-      "apptype", "--type", false, "Return the name of the application object.");
+      "show_type", "--show-type", false, "Return the name of the application object.");
   params.addCommandLineParam<std::string>(
       "yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<std::string>(
@@ -323,6 +338,7 @@ MooseApp::validParams()
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char **>("_argv");
+  params.addPrivateParam<std::shared_ptr<Moose::AppBuilder::State>>("_app_builder_state");
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
   params.addPrivateParam<unsigned int>("_multiapp_level");
@@ -341,8 +357,6 @@ MooseApp::validParams()
       MeshGeneratorSystem::allow_data_driven_param,
       false,
       "Set true to enable data-driven mesh generation, which is an experimental feature");
-
-  MooseApp::addAppParam(params);
 
   return params;
 }
@@ -366,7 +380,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(parameters.get<std::shared_ptr<Parser>>("_parser")),
-    _builder(*this, _action_warehouse, _parser),
+    _builder(*this,
+             _action_warehouse,
+             _parser,
+             *getParam<std::shared_ptr<Moose::AppBuilder::State>>("_app_builder_state")),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
@@ -922,7 +939,7 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
-  else if (getParam<bool>("apptype"))
+  else if (getParam<bool>("show_type"))
   {
     _perf_graph.disableLivePrint();
 
@@ -945,11 +962,6 @@ MooseApp::setupOptions()
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
         _restart_recover_base = recover_following_arg;
     }
-
-    // In the event that we've parsed once before already in MooseMain, we
-    // won't need to parse again
-    if (!_parser->root())
-      _parser->parse();
 
     _builder.build();
 
@@ -1031,26 +1043,16 @@ MooseApp::setupOptions()
   Moose::out << std::flush;
 }
 
-const std::string &
-MooseApp::type() const
-{
-  if (_parser && _parser->getAppType().size())
-    mooseAssert(_parser->getAppType() == _type, "Should be equivalent");
-  return _type;
-}
-
 const std::vector<std::string> &
 MooseApp::getInputFileNames() const
 {
-  mooseAssert(_parser, "Parser is not set");
-  return _parser->getInputFileNames();
+  return parser().getInputFileNames();
 }
 
 const std::string &
 MooseApp::getLastInputFileName() const
 {
-  mooseAssert(_parser, "Parser is not set");
-  return _parser->getLastInputFileName();
+  return parser().getLastInputFileName();
 }
 
 std::string
@@ -1333,11 +1335,18 @@ MooseApp::addExecutorParams(const std::string & type,
   _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
 }
 
-Moose::Builder &
+Parser &
 MooseApp::parser()
 {
-  mooseDeprecated("MooseApp::parser() is deprecated, use MooseApp::builder() instead.");
-  return _builder;
+  mooseAssert(_parser, "Not set");
+  return *_parser;
+}
+
+const Parser &
+MooseApp::parser() const
+{
+  mooseAssert(_parser, "Not set");
+  return *_parser;
 }
 
 void

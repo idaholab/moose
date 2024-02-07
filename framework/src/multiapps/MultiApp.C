@@ -11,6 +11,7 @@
 #include "MultiApp.h"
 
 #include "AppFactory.h"
+#include "AppBuilder.h"
 #include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "Console.h"
@@ -224,7 +225,6 @@ MultiApp::validParams()
   params.addParam<bool>(
       "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
 
-  params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
@@ -406,7 +406,10 @@ void
 MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
-  _app.builder().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+
+  // I think that this marks the hit CLI parameters as unused for the
+  // unused parameter check... who didn't comment this madness?!
+  _app.builder().hitCLIFilter(_apps[i]->name(), *_app.commandLine());
 }
 
 void
@@ -1064,7 +1067,37 @@ MultiApp::createApp(unsigned int i, Real start_time)
   else
     full_name = multiapp_name;
 
-  InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
+  // If only one input file was provided, use it for all the solves
+  const auto input_index = _input_files.size() == 1 ? 0 : _first_local_app + i;
+  const auto & input_file = _input_files[input_index];
+
+  // Parse the input so that we can get Application/type= if it is set
+  auto parser = std::make_unique<Parser>(input_file);
+  parser->parse();
+  auto app_type = _app.type();
+  if (input_file.size())
+  {
+    const auto & input_app_type = parser->getInputAppType();
+    if (!input_app_type && _app_type.empty())
+      paramWarning("input_files",
+                   "The application type is not specified in '",
+                   input_file,
+                   "'. Please set Application/type= to specify the application type. Defaulting to "
+                   "the parent application type '",
+                   _app.type(),
+                   "'.");
+    if (input_app_type && _app_type.size())
+      paramError("app_type",
+                 "This parameter is redundant because Application/type is set in '",
+                 input_file,
+                 "'.");
+    if (_app_type.size())
+      app_type = _app_type;
+    if (input_app_type)
+      app_type = *input_app_type;
+  }
+
+  auto app_params = AppFactory::instance().getValidParams(app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<std::unique_ptr<Backup> *>("_initial_backup") = &_sub_app_backups[i];
 
@@ -1103,38 +1136,11 @@ MultiApp::createApp(unsigned int i, Real start_time)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
   }
 
-  // If only one input file was provided, use it for all the solves
-  const auto input_index = _input_files.size() == 1 ? 0 : _first_local_app + i;
-  const auto & input_file = _input_files[input_index];
-
-  // create new parser tree for the application and parse
-  auto parser = std::make_unique<Parser>(input_file);
-
-  if (input_file.size())
   {
-    parser->parse();
-    const auto & app_type = parser->getAppType();
-    if (app_type.empty() && _app_type.empty())
-      mooseWarning("The application type is not specified for ",
-                   full_name,
-                   ". Please use [Application] block to specify the application type.");
-    if (!app_type.empty() && app_type != _app_type &&
-        !AppFactory::instance().isRegistered(app_type))
-      mooseError("In the ",
-                 full_name,
-                 ", '",
-                 app_type,
-                 "' is not a registered application. The registered application is named: '",
-                 _app_type,
-                 "'. Please double check the [Application] block to make sure the correct "
-                 "application is provided. \n");
+    Moose::AppBuilder app_builder(std::move(parser));
+    app_builder.buildParamsFromCommandLine(full_name, app_params, _my_comm);
+    _apps[i] = AppFactory::instance().createShared(app_params);
   }
-
-  if (parser->getAppType().empty())
-    parser->setAppType(_app_type);
-
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
-  _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);

@@ -72,6 +72,9 @@ public:
 
   void addCommandLineOptionsFromParams(const InputParameters & params);
 
+  /**
+   * Populates the input parameters \p params from these command line parameters
+   */
   void populateInputParams(InputParameters & params);
 
   void addOption(const std::string & name, Option cli_opt);

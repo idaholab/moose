@@ -152,15 +152,12 @@ UnitsConversionEvaler::eval(hit::Field * n,
 }
 
 Parser::Parser(const std::vector<std::string> & input_filenames)
-  : _root(nullptr), _input_filenames(input_filenames), _input_text(), _app_type(std::string())
+  : _input_filenames(input_filenames), _input_text(), _root(nullptr)
 {
 }
 
 Parser::Parser(const std::string & input_filename, const std::optional<std::string> & input_text)
-  : _root(nullptr),
-    _input_filenames({input_filename}),
-    _input_text(input_text),
-    _app_type(std::string())
+  : _input_filenames({input_filename}), _input_text(input_text), _root(nullptr)
 {
 }
 
@@ -268,15 +265,6 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
   }
 }
 
-void
-FindAppWalker ::walk(const std::string & /*fullpath*/,
-                     const std::string & /*nodepath*/,
-                     hit::Node * n)
-{
-  if (n && n->type() == hit::NodeType::Field && n->fullpath() == "Application/type")
-    _app_type = n->param<std::string>();
-}
-
 const std::string &
 Parser::getLastInputFileName() const
 {
@@ -288,7 +276,14 @@ Parser::getLastInputFileName() const
 void
 Parser::parse()
 {
-  _root.reset();
+  mooseAssert(!_root, "Already parsed");
+
+  // Having no input is valid; we can still merge hit CLI input later
+  if (getInputFileNames().empty())
+  {
+    _root.reset(hit::parse("empty", ""));
+    return;
+  }
 
   if (_input_text)
     mooseAssert(getInputFileNames().size() == 1,
@@ -331,16 +326,17 @@ Parser::parse()
       // provide stream to hit parse function to capture any syntax errors,
       // set parser root node, then throw those errors if any were captured
       std::stringstream input_errors;
-      std::unique_ptr<hit::Node> root(hit::parse(corrected_filename, input, &input_errors));
-      hit::explode(root.get());
+      std::unique_ptr<hit::Node> corrected_root(
+          hit::parse(corrected_filename, input, &input_errors));
+      hit::explode(corrected_root.get());
       DupParamWalker dw;
-      root->walk(&dw, hit::NodeType::Field);
-      if (!_root)
-        _root = std::move(root);
+      corrected_root->walk(&dw, hit::NodeType::Field);
+      if (!hasParsed())
+        _root = std::move(corrected_root);
       else
       {
-        root->walk(&opw, hit::NodeType::Field);
-        hit::merge(root.get(), _root.get());
+        corrected_root->walk(&opw, hit::NodeType::Field);
+        hit::merge(corrected_root.get(), &root());
       }
 
       if (!input_errors.str().empty())
@@ -350,7 +346,7 @@ Parser::parse()
         errmsg += msg + "\n";
 
       dw_errmsg.push_back(errmsg);
-      _root->walk(&cpw, hit::NodeType::Field);
+      root().walk(&cpw, hit::NodeType::Field);
     }
     catch (hit::ParseError & err)
     {
@@ -365,11 +361,7 @@ Parser::parse()
   // do as much error checking as early as possible so that errors are more useful instead
   // of surprising and disconnected from what caused them.
   BadActiveWalker bw;
-  _root->walk(&bw, hit::NodeType::Section);
-
-  FindAppWalker fw;
-  _root->walk(&fw, hit::NodeType::Field);
-  _app_type = fw.getApp();
+  root().walk(&bw, hit::NodeType::Section);
 
   for (auto & msg : bw.errors)
     errmsg += msg + "\n";
@@ -381,4 +373,17 @@ Parser::parse()
   for (auto & msg : dw_errmsg)
     if (msg.size() > 0)
       mooseError(msg);
+
+  // Get the application type while we're here
+  if (const auto node = root().find("Application/type"))
+    if (node->type() == hit::NodeType::Field)
+      _input_app_type = node->param<std::string>();
+}
+
+hit::Node &
+Parser::root()
+{
+  if (!hasParsed())
+    mooseError("Getting Parser::root() before parsing with Parser::parse()");
+  return *_root;
 }

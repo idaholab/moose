@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <optional>
 #include <filesystem>
+#include <optional>
 
 // Forward declarations
 class ActionWarehouse;
@@ -92,18 +93,6 @@ private:
   const CompileParamWalker::ParamMap & _map;
 };
 
-class FindAppWalker : public hit::Walker
-{
-public:
-  void walk(const std::string & /*fullpath*/,
-            const std::string & /*nodepath*/,
-            hit::Node * section) override;
-  std::string getApp() { return _app_type; };
-
-private:
-  std::string _app_type;
-};
-
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
  * parsing files. It is not currently designed for extensibility. If you wish to build your own
@@ -127,23 +116,21 @@ public:
   Parser(const std::string & input_filename, const std::optional<std::string> & input_text = {});
 
   /**
-   * Parses the inputs
+   * Parses the input(s)
    */
   void parse();
 
   /**
-   * This function attempts to extract values from the input file based on the contents of
-   * the passed parameters objects.  It handles a number of various types with dynamic casting
-   * including vector types
+   * @return The root hit node
+   *
+   * Will error if parsing has not taken place
    */
-  void extractParams(const std::string & prefix, InputParameters & p);
+  hit::Node & root();
 
   /**
-   * @return The root HIT node, if any
-   *
-   * If this is null, it means that we haven't parsed yet
+   * @return Whether or not parse() has been called yet
    */
-  hit::Node * root() { return _root.get(); }
+  bool hasParsed() const { return _root != nullptr; }
 
   /**
    * @return The names of the inputs
@@ -153,12 +140,12 @@ public:
   /*
    * Get extracted application type from parser
    */
-  const std::string & getAppType() const { return _app_type; }
+  const std::optional<std::string> & getInputAppType() const { return _input_app_type; }
 
   /*
    * Set the application type in parser
    */
-  void setAppType(const std::string & app_type) { _app_type = app_type; }
+  void setInputAppType(const std::string & input_app_type) { _input_app_type = input_app_type; }
 
   /**
    * @return The file name of the last input
@@ -171,15 +158,15 @@ public:
   std::filesystem::path getLastInputFilePath() const { return getLastInputFileName(); }
 
 private:
-  /// The root node, which owns the whole tree
-  std::unique_ptr<hit::Node> _root;
-
   /// The input file names
   const std::vector<std::string> _input_filenames;
 
   /// The optional input text (to augment reading a single input with the MooseServer)
   const std::optional<std::string> _input_text;
 
-  /// The application types extracted from [Application] block
-  std::string _app_type;
+  /// The application types extracted from [Application] block, if any
+  std::optional<std::string> _input_app_type;
+
+  /// The root node, which owns the whole tree
+  std::unique_ptr<hit::Node> _root;
 };

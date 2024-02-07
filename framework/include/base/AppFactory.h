@@ -64,23 +64,6 @@ public:
   virtual ~AppFactory();
 
   static InputParameters validParams();
-  /**
-   * Helper function for creating a MooseApp from command-line arguments and a Parser.
-   */
-  static MooseAppPtr createAppShared(const std::string & default_app_type,
-                                     int argc,
-                                     char ** argv,
-                                     std::unique_ptr<Parser> parser,
-                                     MPI_Comm comm_word = MPI_COMM_WORLD);
-
-  /**
-   * Deprecated helper function for creating a MooseApp for Apps haven't adapted to the new Parser
-   * and Builder changes. This function needed to be removed after the new Parser and Builder merged
-   */
-  static MooseAppPtr createAppShared(const std::string & default_app_type,
-                                     int argc,
-                                     char ** argv,
-                                     MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
    * Register a new object
@@ -97,16 +80,11 @@ public:
   InputParameters getValidParams(const std::string & name);
 
   /**
-   * Build an application object (must be registered)
-   * @param app_type Type of the application being constructed
-   * @param name Name for the object
-   * @param parameters Parameters this object should have
-   * @return The created object
+   * Creates an application with the parameters in \p parameters.
+   *
+   * @return The application
    */
-  MooseAppPtr createShared(const std::string & app_type,
-                           const std::string & name,
-                           InputParameters parameters,
-                           MPI_Comm COMM_WORLD_IN);
+  MooseAppPtr createShared(InputParameters parameters);
 
   /**
    * Returns a reference to the map from names to AppFactoryBuildInfo pointers

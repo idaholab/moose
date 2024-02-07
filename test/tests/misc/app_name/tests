@@ -1,7 +1,7 @@
 [Tests]
   [./test]
     type = 'RunApp'
-    cli_args = '--type'
+    cli_args = '--show-type'
     expect_out = "MooseTestApp"
     input = ''
     input_switch = ''

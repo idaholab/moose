@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseApp.h"
 #include "wasplsp/LSP.h"
 #include "wasplsp/ServerImpl.h"
 #include "wasplsp/Connection.h"
@@ -20,10 +19,17 @@
 #include "wasphit/HITNodeView.h"
 #include "waspsiren/SIRENInterpreter.h"
 #include "waspsiren/SIRENResultSet.h"
+#include "parse.h"
+
 #include <string>
 #include <memory>
 #include <set>
 #include <map>
+#include <functional>
+
+class MooseApp;
+class Parser;
+class InputParameters;
 
 class MooseServer : public wasp::lsp::ServerImpl
 {
@@ -315,7 +321,7 @@ private:
    *
    * Will be true if the app is valid, the root is not nullptr, and the root node view is not null
    */
-  bool rootIsValid() const;
+  bool rootIsValid();
 
   /**
    * @return The current root node
@@ -325,7 +331,12 @@ private:
   /**
    * @return Input check application for document path from current operation
    */
-  std::shared_ptr<MooseApp> getCheckApp() const;
+  MooseApp & getCheckApp();
+
+  /**
+   * @return Whether or not the check app exists for the current document path
+   */
+  MooseApp * queryCheckApp();
 
   /**
    * @brief _moose_app - reference to parent application that owns this server

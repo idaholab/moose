@@ -12,6 +12,7 @@
 #include "InputParameters.h"
 #include "MooseApp.h"
 #include "Parser.h"
+#include "AppBuilder.h"
 
 AppFactory &
 AppFactory::instance()
@@ -30,126 +31,25 @@ InputParameters
 AppFactory::getValidParams(const std::string & name)
 {
   if (const auto it = _name_to_build_info.find(name); it != _name_to_build_info.end())
-    return it->second->buildParameters();
+  {
+    auto params = it->second->buildParameters();
+    params.set<std::string>("_type") = name;
+    return params;
+  }
 
   mooseError(std::string("A '") + name + "' is not a registered object\n\n");
 }
 
 MooseAppPtr
-AppFactory::createAppShared(const std::string & default_app_type,
-                            int argc,
-                            char ** argv,
-                            std::unique_ptr<Parser> parser,
-                            MPI_Comm comm_world_in)
+AppFactory::createShared(InputParameters parameters)
 {
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
-  auto which_app_param = emptyInputParameters();
+  const auto & type = parameters.get<std::string>("_type");
 
-  MooseApp::addAppParam(which_app_param);
-  command_line->addCommandLineOptionsFromParams(which_app_param);
-
-  std::string app_type;
-  if (!command_line->search("app_to_run", app_type))
-    app_type = default_app_type;
-  else
-    mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
-                    "is deprecated and will be removed in a future release.");
-
-  auto app_params = AppFactory::instance().getValidParams(app_type);
-  parser->setAppType(app_type);
-
-  app_params.set<int>("_argc") = argc;
-  app_params.set<char **>("_argv") = argv;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
-
-  // Take the front parser and add it to the parameters so that it can be retrieved in the
-  // Application
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
-
-  return AppFactory::instance().createShared(app_type, "main", app_params, comm_world_in);
-}
-
-MooseAppPtr
-AppFactory::createAppShared(const std::string & default_app_type,
-                            int argc,
-                            char ** argv,
-                            MPI_Comm comm_world_in)
-{
-  mooseDeprecated("Please update your main.C to adapt new main function in MOOSE framework, "
-                  "see'test/src/main.C in MOOSE as an example of moose::main()'. ");
-
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
-  auto which_app_param = emptyInputParameters();
-
-  which_app_param.addCommandLineParam<std::vector<std::string>>(
-      "input_file",
-      "-i <input_files>",
-      "Specify one or multiple input files. Multiple files get merged into a single simulation "
-      "input.");
-
-  command_line->addCommandLineOptionsFromParams(which_app_param);
-
-  std::vector<std::string> input_filenames;
-  command_line->search("input_file", input_filenames);
-
-  auto parser = std::make_unique<Parser>(input_filenames);
-  if (input_filenames.size())
-    parser->parse();
-
-  MooseApp::addAppParam(which_app_param);
-  command_line->addCommandLineOptionsFromParams(which_app_param);
-
-  std::string app_type;
-  if (!command_line->search("app_to_run", app_type))
-    app_type = default_app_type;
-  else
-    mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
-                    "is deprecated and will be removed in a future release.");
-
-  parser->setAppType(app_type);
-  auto app_params = AppFactory::instance().getValidParams(app_type);
-
-  app_params.set<int>("_argc") = argc;
-  app_params.set<char **>("_argv") = argv;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
-
-  // Take the front parser and add it to the parameters so that it can be retrieved in the
-  // Application
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
-
-  return AppFactory::instance().createShared(app_type, "main", app_params, comm_world_in);
-}
-
-MooseAppPtr
-AppFactory::createShared(const std::string & app_type,
-                         const std::string & name,
-                         InputParameters parameters,
-                         MPI_Comm comm_world_in)
-{
   // Error if the application type is not located
-  const auto it = _name_to_build_info.find(app_type);
+  const auto it = _name_to_build_info.find(type);
   if (it == _name_to_build_info.end())
-    mooseError("Object '" + app_type + "' was not registered.");
+    mooseError("Object '" + type + "' was not registered.");
   auto & build_info = it->second;
-
-  // Take the app_type and add it to the parameters so that it can be retrieved in the Application
-  parameters.set<std::string>("_type") = app_type;
-
-  // Check to make sure that all required parameters are supplied
-  parameters.checkParams("");
-
-  auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
-
-  parameters.set<std::shared_ptr<Parallel::Communicator>>("_comm") = comm;
-  parameters.set<std::string>("_app_name") = name;
-
-  if (!parameters.isParamValid("_command_line"))
-    mooseError("Valid CommandLine object required");
-
-  std::shared_ptr<CommandLine> command_line =
-      parameters.get<std::shared_ptr<CommandLine>>("_command_line");
-  command_line->addCommandLineOptionsFromParams(parameters);
-  command_line->populateInputParams(parameters);
 
   build_info->_app_creation_count++;
 
