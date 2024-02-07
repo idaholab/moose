@@ -128,10 +128,10 @@ VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & /*state*/) const
 {
   const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
-  const auto * elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
-  const auto * elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
+  const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
+  const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
 
-  const auto & elem_one_grad = gradSln(*elem_one);
+  const auto elem_one_grad = gradSln(*elem_one);
 
   // If we have a neighbor then we interpolate between the two to the face.
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
@@ -154,7 +154,7 @@ MooseLinearVariableFV<OutputType>::initialSetup()
     _grad_cache.clear();
     for (const auto i : make_range(this->_mesh.dimension()))
     {
-      (void)i;
+      libmesh_ignore(i);
       _grad_cache.push_back(this->_sys.currentSolution()->zero_clone());
     }
   }
@@ -177,7 +177,7 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   {
     mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
 
-    const auto * original_face_info = bc_pointer->currentFaceInfo();
+    const auto * const original_face_info = bc_pointer->currentFaceInfo();
     const auto original_face_type = bc_pointer->currentFaceType();
 
     if (fi != original_face_info)
