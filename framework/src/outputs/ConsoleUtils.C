@@ -42,7 +42,9 @@ outputFrameworkInformation(const MooseApp & app)
   if (app.getSystemInfo() != NULL)
     oss << app.getSystemInfo()->getInfo();
 
-  oss << std::left << "Parallelism:\n"
+  oss << std::left << "Application:\n"
+      << std::setw(console_field_width) << "  Type: " << app.type() << "\n\n"
+      << "Parallelism:\n"
       << std::setw(console_field_width)
       << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
       << std::setw(console_field_width)

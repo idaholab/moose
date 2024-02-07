@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#26474 #26757'
+  design = 'syntax/Application/index.md syntax/MultiApps/index.md'
+
+  [run]
+    requirement = "The system shall support specifying the type of a multiapp by"
+
+    [from_parent]
+      type = RunApp
+      input = application_block_parent.i
+      detail = 'assuming the type of the parent application'
+      expect_out = 'Type:\s+MooseTestApp(.*)Type:\s+MooseTestApp'
+    []
+    [app_type_param]
+      type = RunApp
+      input = application_block_parent.i
+      detail = 'assuming the type of the parent application'
+      cli_args = 'MultiApps/sub/app_type=MooseApp'
+      expect_out = 'Type:\s+MooseTestApp(.*)Type:\s+MooseApp'
+    []
+    [type_in_input]
+      type = RunApp
+      input = application_block_parent.i
+      detail = 'assuming the type of the parent application'
+      cli_args = 'MultiApps/sub/input_files=application_block_sub_with_type.i'
+      expect_out = 'Type:\s+MooseTestApp(.*)Type:\s+MooseApp'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when specifying multiapp types when'
+    [app_type_and_input_type]
+      type = RunException
+      input = application_block_parent.i
+      cli_args = 'MultiApps/sub/input_files=application_block_sub_with_type.i
+                  MultiApps/sub/app_type=MooseApp'
+      expect_err = 'This parameter is redundant because Application/type is set'
+      detail = 'the type was specified in both the parent input and the multiapp input'
+    []
+    [missing_type]
+      type = 'RunException'
+      input = 'application_block_parent.i'
+      cli_args = 'MultiApps/sub/app_type=FooApp'
+      expect_err = '"FooApp" is not a registered application name.(.*)No search paths were set'
+      detail = "when the input application type is not registered in sub app"
+    []
+  []
+
+  # need to re add this
+  #[application_type_set_for_subapp]
+  #  type = 'RunException'
+  #  input = 'application_block_parent.i'
+  #  cli_args = 'sub0:Application/type=DummyApp'
+  #  expect_err = "Using the CommandLine option to overwite \[Application\] block is not supported for sub_apps"
+  #  detail = "when a command line option is used to set the application type for a child application."
+  #[]
+[]
