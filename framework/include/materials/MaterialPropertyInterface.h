@@ -20,6 +20,10 @@
 
 #include <unordered_map>
 
+#define usingMaterialPropertyInterfaceMembers                                                      \
+  using MaterialPropertyInterface::_material_data_type;                                            \
+  using MaterialPropertyInterface::_material_data
+
 // Forward declarations
 class MooseObject;
 class FEProblemBase;

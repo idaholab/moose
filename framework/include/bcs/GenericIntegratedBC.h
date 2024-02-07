@@ -42,7 +42,6 @@ public:
   using GenericIntegratedBC<is_ad>::_test;                                                         \
   using GenericIntegratedBC<is_ad>::_q_point;                                                      \
   using GenericIntegratedBC<is_ad>::_var;                                                          \
-  using GenericIntegratedBC<is_ad>::_name;                                                         \
   using GenericIntegratedBC<is_ad>::getVar;                                                        \
   using Coupleable::coupled;                                                                       \
   using Coupleable::coupledComponents
