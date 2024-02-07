@@ -95,7 +95,7 @@ This fixes some broken paths in `$PETSC_DIR/$PETSC_ARCH/lib/petsc/conf/petscvari
 # libMesh
 
 !alert note
-libmesh requires a patch to enable using an external netcdf installation. That patch is not in the master branch or submodule yet.
+libMesh requires a patch to enable using an external netcdf installation. That patch is not in the master branch or submodule yet.
 
 Set the `LIBMESH_DIR` environment variable
 
@@ -103,14 +103,14 @@ Set the `LIBMESH_DIR` environment variable
 - `export LIBMESH_DIR=$HOME/projects/libmesh/installed` when using a separate libMesh repo (this assumes the repo is already checked out!)
 
 
-Change into the libmesh repo dir (that's usually the parent of your `LIBMESH_DIR`)
+Change into the libMesh repo dir (that's usually the parent of your `LIBMESH_DIR`)
 
 ```
 mkdir -p $LIBMESH_DIR/installed
 cd $LIBMESH_DIR/..
 ```
 
-And run the libmesh script to fix missing symlinks
+And run the libMesh script to fix missing symlinks
 
 ```
 mkdir -p $LIBMESH_DIR/installed
@@ -119,7 +119,7 @@ cd $LIBMESH_DIR/..
 ```
 
 Next we install netcdf from the MSYS2 repository (the version that is shipped with
-libmesh won't work)
+libMesh won't work)
 
 ```
 pacman -S mingw-w64-x86_64-netcdf
@@ -134,7 +134,7 @@ Start the configure and build process with...
 
 (continue in the appropriate subsection)
 
-## libmesh (separate repo)
+## libMesh (separate repo)
 
 ```
 mkdir build

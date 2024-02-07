@@ -23,7 +23,7 @@ coreform_cubit -batch cframe_build.jou
 Within the journal file, see [!ref](cframe_jou), there are unique commands that will generate a uspline on the discretized mesh. 
 
 - Line 35 sets the degree and continuity of the uspline
-- As of this writing, the max degree supported by libmesh is 2.
+- As of this writing, the max degree supported by libMesh is 2.
 - All continuity must equal p-1 where p is the degree.
 - Line 36 constructs the uspline using the geometry as a basis.
 - Line 37 fits the uspline that was built to the geometry.

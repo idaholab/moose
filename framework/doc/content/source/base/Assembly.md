@@ -27,7 +27,7 @@ This system is in charge of:
   or `reinitFVFace(face_info)` for the current face.
 
 - getting the shape function values and its derivatives at the quadrature points, as well as the locations of the
-  quadrature points from libmesh in the `buildFE...` routines for various locations.
+  quadrature points from libMesh in the `buildFE...` routines for various locations.
 
 - preparing the vectors for storing the local contributions to
   the Jacobian and the residual, by sizing and zeroing them, through the `prepare...` methods.

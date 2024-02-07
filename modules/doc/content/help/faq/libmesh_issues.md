@@ -67,7 +67,7 @@ Compiling libMesh requires a proper environment. Lets verify a few things before
   ./update_and_rebuild_libmesh.sh
   ```
 
-  If you encounter errors during this step, we would like to hear from you! Please seek help on the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions). Provide the diagnostic and libmesh configure logs. Those two files can be found in the following locations:
+  If you encounter errors during this step, we would like to hear from you! Please seek help on the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions). Provide the diagnostic and libMesh configure logs. Those two files can be found in the following locations:
 
   - `moose/libmesh/build/config.log`
   - `moose/scripts/libmesh_diagnostic.log`

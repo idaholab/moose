@@ -5,10 +5,10 @@
 This mesh generator splits a given sideset (`sideset` parameter) into `n` pieces (`n_patches`).
 The pieces are referred to as patches. Patches are used for net radiation transfer method via
 view factors. The sideset is divided into `n` patches using partitioner that are available from
-libmesh. The new sidesets are named `<old_side_name>_<id>`, where `<id>` is a number running from
+libMesh. The new sidesets are named `<old_side_name>_<id>`, where `<id>` is a number running from
 `0` to `n - 1`.
 
-In addition to libmesh partitioners, this mesh generator also supports a grid partitioner. The
+In addition to libMesh partitioners, this mesh generator also supports a grid partitioner. The
 grid partitioner superimposes a 3-dimensional (where $d$ is the dimensionality of the problem) uniform, orthogonal grid
 over the sideset and partitions the elements according to where the centroids of the
 sideset faces fall on the orthogonal grid. The superimposed grid is congruent to the bounding box of the sideset to ensure

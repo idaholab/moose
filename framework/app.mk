@@ -204,12 +204,11 @@ include_files	:= $(shell find $(depend_dirs) -regex "[^\#~]*\.[hf]")
 all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 
 # header file links
-link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
+app_LINK := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(link_names)
 app_INCLUDE = -I$(all_header_dir)
 
 else # No Header Symlinks
@@ -257,11 +256,14 @@ else
   app_plugin_deps :=
 endif
 
-app_LIBS       := $(app_LIB) $(app_LIBS)
-app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
+app_LIBS       += $(app_LIB)
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
+# app_LINKS cumulatively lists all the header symlinks.
+# This is such that when used as a dependency for the module loader rule, it
+# establishes a dependence on the header symlinks of each individual module.
+app_LINKS      := $(app_LINK) $(app_LINKS)
 
 # WARNING: the += operator does NOT work here!
 ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | perl -pe 'y/a-z/A-Z/' | perl -pe 's/-//g')_ENABLED
@@ -287,7 +289,7 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 # object files until all symlinking is completed. The first dependency in the
 # list below ensures this.
 
-$(all_app_objects) : | $(APPLICATION_NAME)_header_symlinks $(moose_config_symlink)
+$(all_app_objects) : | $(app_LINKS) $(moose_config_symlink)
 
 else
 

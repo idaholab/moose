@@ -22,7 +22,7 @@ For Mac workstations, the user needs to create a conda environment using the
 instructions [here](installation/conda.md). On Linux machines, however,
 we cannot use the conda packages due to the mismatch between `libc` versions.
 For this reason, given that the system `libc` version allows the linking between
-the two libraries, we need to install `PETSc` and `libmesh` manually. For instructions
+the two libraries, we need to install `PETSc` and `libMesh` manually. For instructions
 on the installation of these, see [installation/hpc_install_moose.md].
 
 In situations when the `libc` version allows the linking but the compiler stack

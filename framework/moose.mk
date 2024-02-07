@@ -168,18 +168,20 @@ moose_all_header_dir := $(all_header_dir)
 define all_header_dir_rule
 $(1):
 	@echo Rebuilding symlinks in $$@
-	@$$(shell mkdir -p $$@)
+	@mkdir -p $$@
 endef
 
 include_files	:= $(shell find $(FRAMEWORK_DIR)/include \( -regex "[^\#~]*\.h" ! -name "*MooseConfig.h" \))
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
-# Create a rule for one symlink for one header file
+# Create a rule for one symlink for one header file.
+# The order-only prerequisite guarantees the target directory exists before
+# this rule attempts to create the symlink.
 # Args
 # 1: the header file
 # 2: the symlink to create
 define symlink_rule
-$(2): $(1)
+$(2): $(1) | $(abspath $(dir $(2)))
 	@ln -sf $$< $$@
 endef
 
