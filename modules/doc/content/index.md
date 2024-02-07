@@ -11,10 +11,6 @@ Multiphysics Object-Oriented Simulation Environment
 
 !media large_media/gallery/twist_white.webm quicktime=large_media/gallery/twist_white.mp4 style=width:100%; controls=False autoplay=True loop=True
 
-## Upcoming Conference Event! class=center style=font-weight:200;font-size:200%
-
-!media large_media/organization_logos/23-50052_webbanner_R1-03.jpg dark_src=large_media/organization_logos/23-50052_webbanner_R1-03_dark.jpg link=https://mooseframework.inl.gov/conference style=display:block;margin-left:auto;margin-right:auto;width:90%;class=center;
-
 !row!
 !col! small=12 medium=4 large=4 icon=computer
 ### Proven Capability class=center style=font-weight:200;
