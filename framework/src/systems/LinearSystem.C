@@ -68,17 +68,13 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 }
 
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
-  : SystemBase(fe_problem, fe_problem, name, Moose::VAR_LINEAR),
+  : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_LINEAR),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
-    _fe_problem(fe_problem),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
-    _current_solution(NULL),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
     _rhs_non_time_tag(-1),
     _rhs_non_time(NULL),
-    _pc_side(Moose::PCS_DEFAULT),
-    _ksp_norm(Moose::KSPN_UNPRECONDITIONED),
     _n_linear_iters(0),
     _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name)),
     _solution_is_invalid(false)
@@ -94,23 +90,6 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 }
 
 LinearSystem::~LinearSystem() = default;
-
-void
-LinearSystem::init()
-{
-  SystemBase::init();
-
-  _current_solution = _sys.current_local_solution.get();
-}
-
-void
-LinearSystem::restoreSolutions()
-{
-  // call parent
-  SystemBase::restoreSolutions();
-  // and update _current_solution
-  _current_solution = _sys.current_local_solution.get();
-}
 
 void
 LinearSystem::addTimeIntegrator(const std::string & /*type*/,
@@ -233,79 +212,8 @@ LinearSystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
 }
 
 void
-LinearSystem::serializeSolution()
-{
-  if (_serialized_solution.get())
-  {
-    if (!_serialized_solution->initialized() || _serialized_solution->size() != _sys.n_dofs())
-    {
-      _serialized_solution->clear();
-      _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
-    }
-
-    _current_solution->localize(*_serialized_solution);
-  }
-}
-
-NumericVector<Number> &
-LinearSystem::serializedSolution()
-{
-  if (!_serialized_solution.get())
-  {
-    _serialized_solution = NumericVector<Number>::build(_communicator);
-    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
-  }
-
-  return *_serialized_solution;
-}
-
-void
-LinearSystem::setSolution(const NumericVector<Number> & soln)
-{
-  _current_solution = &soln;
-
-  auto tag = _subproblem.getVectorTagID(Moose::SOLUTION_TAG);
-  associateVectorToTag(const_cast<NumericVector<Number> &>(soln), tag);
-
-  if (_serialized_solution.get())
-    serializeSolution();
-}
-
-void
 LinearSystem::checkKernelCoverage(const std::set<SubdomainID> & /*mesh_subdomains*/) const
 {
-}
-
-void
-LinearSystem::setPCSide(MooseEnum pcs)
-{
-  if (pcs == "left")
-    _pc_side = Moose::PCS_LEFT;
-  else if (pcs == "right")
-    _pc_side = Moose::PCS_RIGHT;
-  else if (pcs == "symmetric")
-    _pc_side = Moose::PCS_SYMMETRIC;
-  else if (pcs == "default")
-    _pc_side = Moose::PCS_DEFAULT;
-  else
-    mooseError("Unknown PC side specified.");
-}
-
-void
-LinearSystem::setMooseKSPNormType(MooseEnum kspnorm)
-{
-  if (kspnorm == "none")
-    _ksp_norm = Moose::KSPN_NONE;
-  else if (kspnorm == "preconditioned")
-    _ksp_norm = Moose::KSPN_PRECONDITIONED;
-  else if (kspnorm == "unpreconditioned")
-    _ksp_norm = Moose::KSPN_UNPRECONDITIONED;
-  else if (kspnorm == "natural")
-    _ksp_norm = Moose::KSPN_NATURAL;
-  else if (kspnorm == "default")
-    _ksp_norm = Moose::KSPN_DEFAULT;
-  else
-    mooseError("Unknown ksp norm type specified.");
 }
 
 void

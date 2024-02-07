@@ -409,7 +409,7 @@ public:
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
    */
-  virtual NumericVector<Number> & serializedSolution() = 0;
+  virtual NumericVector<Number> & serializedSolution();
 
   virtual NumericVector<Number> & residualCopy()
   {
@@ -1011,6 +1011,10 @@ protected:
 
   /// Container for the dof indices of a given variable
   std::vector<dof_id_type> _var_all_dof_indices;
+
+  /// Serialized version of the solution vector, or nullptr if a
+  /// serialized solution is not needed
+  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
 private:
   /**

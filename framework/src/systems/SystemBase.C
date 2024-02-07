@@ -1565,6 +1565,18 @@ SystemBase::addDotVectors()
     _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
 }
 
+NumericVector<Number> &
+SystemBase::serializedSolution()
+{
+  if (!_serialized_solution.get())
+  {
+    _serialized_solution = NumericVector<Number>::build(_communicator);
+    _serialized_solution->init(system().n_dofs(), false, SERIAL);
+  }
+
+  return *_serialized_solution;
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

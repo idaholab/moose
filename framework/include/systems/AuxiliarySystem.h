@@ -96,7 +96,6 @@ public:
   }
 
   virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution() override;
 
   // This is an empty function since the Aux system doesn't have a matrix!
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
@@ -167,9 +166,6 @@ protected:
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
-  /// Serialized version of the solution vector, or nullptr if a
-  /// serialized solution is not needed
-  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;

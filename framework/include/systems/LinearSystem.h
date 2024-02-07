@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "SystemBase.h"
+#include "SolverSystem.h"
 #include "PerfGraphInterface.h"
 
 #include "libmesh/transient_system.h"
@@ -32,15 +32,13 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SystemBase, public PerfGraphInterface
+class LinearSystem : public SolverSystem, public PerfGraphInterface
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
   virtual ~LinearSystem();
 
-  virtual void init() override;
   virtual void solve() override;
-  virtual void restoreSolutions() override;
 
   virtual void addTimeIntegrator(const std::string & type,
                                  const std::string & name,
@@ -62,12 +60,6 @@ public:
   LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
 
   /**
-   * Set the solution to a given vector.
-   * @param soln The vector which should be treated as the solution.
-   */
-  void setSolution(const NumericVector<Number> & soln);
-
-  /**
    *  Return a numeric vector that is associated with the time tag.
    */
   NumericVector<Number> & getRightHandSideTimeVector();
@@ -76,11 +68,6 @@ public:
    * Return a numeric vector that is associated with the nontime tag.
    */
   NumericVector<Number> & getRightHandSideNonTimeVector();
-
-  virtual const NumericVector<Number> * const & currentSolution() const override
-  {
-    return _current_solution;
-  }
 
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
@@ -96,28 +83,6 @@ public:
    */
   unsigned int nLinearIterations() const { return _n_linear_iters; }
 
-  /**
-   * Set the side on which the preconditioner is applied to.
-   * @param pcs The required preconditioning side
-   */
-  void setPCSide(MooseEnum pcs);
-
-  /**
-   * Get the current preconditioner side.
-   */
-  Moose::PCSideType getPCSide() { return _pc_side; }
-
-  /**
-   * Set the norm in which the linear convergence will be measured.
-   * @param kspnorm The required norm
-   */
-  void setMooseKSPNormType(MooseEnum kspnorm);
-
-  /**
-   * Get the norm in which the linear convergence is measured.
-   */
-  Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
-
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
@@ -126,21 +91,8 @@ public:
   TagID rightHandSideTimeVectorTag() const { return _rhs_time_tag; }
   TagID rightHandSideNonTimeVectorTag() const { return _rhs_non_time_tag; }
   TagID rightHandSideVectorTag() const { return _rhs_tag; }
-  TagID systemMatrixTag() const override { return _system_matrix_tag; }
+  virtual TagID systemMatrixTag() const override { return _system_matrix_tag; }
   ///@}
-
-  /// Serialize the distributed solution vector
-  virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution() override;
-
-  /// Reference to the problem
-  FEProblemBase & _fe_problem;
-
-  /// Base class reference to the libmesh system
-  System & _sys;
-
-  /// The linear iterations needed for convergence
-  unsigned int _current_l_its;
 
 protected:
   /**
@@ -151,10 +103,11 @@ protected:
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
                                    const std::set<TagID> & matrix_tags);
 
-  NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
+  /// Base class reference to the libmesh system
+  System & _sys;
 
-  /// solution vector from linear solver
-  const NumericVector<Number> * _current_solution;
+  /// The linear iterations needed for convergence
+  unsigned int _current_l_its;
 
   /// Vector tags to temporarily store all tags associated with the current system.
   std::set<TagID> _vector_tags;
@@ -183,11 +136,6 @@ protected:
   /// Tag for every contribution to system matrix
   TagID _system_matrix_tag;
 
-  /// Preconditioning side
-  Moose::PCSideType _pc_side;
-  /// KSP norm type
-  Moose::MooseKSPNormType _ksp_norm;
-
   /// Number of linear iterations
   unsigned int _n_linear_iters;
 
@@ -200,10 +148,6 @@ protected:
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
-
-  /// Serialized version of the solution vector, or nullptr if a
-  /// serialized solution is not needed
-  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
   /// Boolean to see if solution is invalid
   bool _solution_is_invalid;

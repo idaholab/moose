@@ -363,18 +363,6 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
   }
 }
 
-NumericVector<Number> &
-AuxiliarySystem::serializedSolution()
-{
-  if (!_serialized_solution.get())
-  {
-    _serialized_solution = NumericVector<Number>::build(_fe_problem.comm());
-    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
-  }
-
-  return *_serialized_solution;
-}
-
 void
 AuxiliarySystem::serializeSolution()
 {

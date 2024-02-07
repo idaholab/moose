@@ -109,7 +109,7 @@ EXTERN_C_END
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          System & sys,
                                          const std::string & name)
-  : SystemBase(fe_problem, fe_problem, name, Moose::VAR_NONLINEAR),
+  : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_NONLINEAR),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "NonlinearSystemBase"),
     _sys(sys),
     _last_nl_rnorm(0.),
@@ -117,7 +117,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _initial_residual_after_preset_bcs(0.),
     _current_nl_its(0),
     _compute_initial_residual_before_preset_bcs(true),
-    _current_solution(NULL),
     _residual_ghosted(NULL),
     _Re_time_tag(-1),
     _Re_time(NULL),
@@ -129,8 +128,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _ad_preset_nodal_bcs(/*threaded=*/false),
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
-    _pc_side(Moose::PCS_DEFAULT),
-    _ksp_norm(Moose::KSPN_UNPRECONDITIONED),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
     _use_field_split_preconditioner(false),
@@ -180,15 +177,10 @@ NonlinearSystemBase::~NonlinearSystemBase() = default;
 void
 NonlinearSystemBase::init()
 {
-  SystemBase::init();
+  SolverSystem::init();
 
   if (_fe_problem.hasDampers())
     setupDampers();
-
-  _current_solution = _sys.current_local_solution.get();
-
-  if (_serialized_solution.get())
-    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
 
   if (_residual_copy.get())
     _residual_copy->init(_sys.n_dofs(), false, SERIAL);
@@ -202,20 +194,11 @@ NonlinearSystemBase::turnOffJacobian()
 }
 
 void
-NonlinearSystemBase::restoreSolutions()
-{
-  // call parent
-  SystemBase::restoreSolutions();
-  // and update _current_solution
-  _current_solution = _sys.current_local_solution.get();
-}
-
-void
 NonlinearSystemBase::initialSetup()
 {
   TIME_SECTION("nlInitialSetup", 2, "Setting Up Nonlinear System");
 
-  SystemBase::initialSetup();
+  SolverSystem::initialSetup();
 
   {
     TIME_SECTION("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints");
@@ -314,7 +297,7 @@ NonlinearSystemBase::initialSetup()
 void
 NonlinearSystemBase::timestepSetup()
 {
-  SystemBase::timestepSetup();
+  SolverSystem::timestepSetup();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -368,7 +351,7 @@ NonlinearSystemBase::timestepSetup()
 void
 NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
 {
-  SystemBase::customSetup(exec_type);
+  SolverSystem::customSetup(exec_type);
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -926,7 +909,7 @@ NonlinearSystemBase::setPredictor(std::shared_ptr<Predictor> predictor)
 void
 NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
-  SystemBase::subdomainSetup();
+  SolverSystem::subdomainSetup();
 
   _kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
@@ -1616,7 +1599,7 @@ NonlinearSystemBase::residualSetup()
 {
   TIME_SECTION("residualSetup", 3);
 
-  SystemBase::residualSetup();
+  SolverSystem::residualSetup();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -2669,7 +2652,7 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 void
 NonlinearSystemBase::jacobianSetup()
 {
-  SystemBase::jacobianSetup();
+  SolverSystem::jacobianSetup();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -3413,33 +3396,6 @@ NonlinearSystemBase::augmentSparsity(SparsityPattern::Graph & sparsity,
 }
 
 void
-NonlinearSystemBase::serializeSolution()
-{
-  if (_serialized_solution.get())
-  {
-    if (!_serialized_solution->initialized() || _serialized_solution->size() != _sys.n_dofs())
-    {
-      _serialized_solution->clear();
-      _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
-    }
-
-    _current_solution->localize(*_serialized_solution);
-  }
-}
-
-void
-NonlinearSystemBase::setSolution(const NumericVector<Number> & soln)
-{
-  _current_solution = &soln;
-
-  auto tag = _subproblem.getVectorTagID(Moose::SOLUTION_TAG);
-  associateVectorToTag(const_cast<NumericVector<Number> &>(soln), tag);
-
-  if (_serialized_solution.get())
-    serializeSolution();
-}
-
-void
 NonlinearSystemBase::setSolutionUDot(const NumericVector<Number> & u_dot)
 {
   *_u_dot = u_dot;
@@ -3461,18 +3417,6 @@ void
 NonlinearSystemBase::setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old)
 {
   *_u_dotdot_old = u_dotdot_old;
-}
-
-NumericVector<Number> &
-NonlinearSystemBase::serializedSolution()
-{
-  if (!_serialized_solution.get())
-  {
-    _serialized_solution = NumericVector<Number>::build(_communicator);
-    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
-  }
-
-  return *_serialized_solution;
 }
 
 void
@@ -3664,38 +3608,6 @@ NonlinearSystemBase::containsTimeKernel()
   auto & time_kernels = _kernels.getVectorTagObjectWarehouse(timeVectorTag(), 0);
 
   return time_kernels.hasActiveObjects();
-}
-
-void
-NonlinearSystemBase::setPCSide(MooseEnum pcs)
-{
-  if (pcs == "left")
-    _pc_side = Moose::PCS_LEFT;
-  else if (pcs == "right")
-    _pc_side = Moose::PCS_RIGHT;
-  else if (pcs == "symmetric")
-    _pc_side = Moose::PCS_SYMMETRIC;
-  else if (pcs == "default")
-    _pc_side = Moose::PCS_DEFAULT;
-  else
-    mooseError("Unknown PC side specified.");
-}
-
-void
-NonlinearSystemBase::setMooseKSPNormType(MooseEnum kspnorm)
-{
-  if (kspnorm == "none")
-    _ksp_norm = Moose::KSPN_NONE;
-  else if (kspnorm == "preconditioned")
-    _ksp_norm = Moose::KSPN_PRECONDITIONED;
-  else if (kspnorm == "unpreconditioned")
-    _ksp_norm = Moose::KSPN_UNPRECONDITIONED;
-  else if (kspnorm == "natural")
-    _ksp_norm = Moose::KSPN_NATURAL;
-  else if (kspnorm == "default")
-    _ksp_norm = Moose::KSPN_DEFAULT;
-  else
-    mooseError("Unknown ksp norm type specified.");
 }
 
 bool
