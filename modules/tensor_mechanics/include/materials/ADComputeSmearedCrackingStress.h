@@ -95,6 +95,9 @@ protected:
   const ADReal _max_stress_correction;
   ///@}
 
+  /// Enum defining the method used to adjust the elasticity tensor for cracking
+  const enum class CrackedElasticityType { DIAGONAL, FULL } _cracked_elasticity_type;
+
   //@{ Damage (goes from 0 to 1) in crack directions
   ADMaterialProperty<RealVectorValue> & _crack_damage;
   const MaterialProperty<RealVectorValue> & _crack_damage_old;

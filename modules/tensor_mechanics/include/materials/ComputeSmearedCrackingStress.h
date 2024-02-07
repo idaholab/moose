@@ -95,6 +95,9 @@ protected:
   const Real _max_stress_correction;
   ///@}
 
+  /// Enum defining the method used to adjust the elasticity tensor for cracking
+  const enum class CrackedElasticityType { DIAGONAL, FULL } _cracked_elasticity_type;
+
   //@{ Damage (goes from 0 to 1) in crack directions
   MaterialProperty<RealVectorValue> & _crack_damage;
   const MaterialProperty<RealVectorValue> & _crack_damage_old;
@@ -125,4 +128,7 @@ protected:
 
   /// The user-supplied list of softening models to be used in the 3 crack directions
   std::vector<SmearedCrackSofteningBase *> _softening_models;
+
+  /// Vector helper to update local elasticity tensor
+  std::vector<Real> _local_elastic_vector;
 };
