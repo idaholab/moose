@@ -8,11 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AppFactory.h"
-#include "CommandLine.h"
-#include "InputParameters.h"
 #include "MooseApp.h"
-#include "Parser.h"
-#include "AppBuilder.h"
 
 AppFactory &
 AppFactory::instance()
@@ -24,8 +20,6 @@ AppFactory::instance()
     instance = new AppFactory;
   return *instance;
 }
-
-AppFactory::~AppFactory() {}
 
 InputParameters
 AppFactory::getValidParams(const std::string & name)
@@ -53,7 +47,11 @@ AppFactory::createShared(InputParameters parameters)
 
   build_info->_app_creation_count++;
 
-  return build_info->build(parameters);
+  _currently_constructing = true; // force app construction via AppFactory
+  auto app = build_info->build(parameters);
+  _currently_constructing = false;
+
+  return app;
 }
 
 std::size_t

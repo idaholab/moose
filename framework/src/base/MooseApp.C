@@ -425,6 +425,13 @@ MooseApp::MooseApp(InputParameters parameters)
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
 {
+  if (!AppFactory::instance().currentlyConstructing())
+    mooseError("The ",
+               type(),
+               " '",
+               name(),
+               "' was not constructed by the AppFactory. This is not supported.");
+
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
   const_cast<Parallel::Communicator &>(comm()).sync_type(timpi_sync);

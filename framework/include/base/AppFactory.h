@@ -9,12 +9,9 @@
 
 #pragma once
 
-#include <vector>
+#include "InputParameters.h"
 
-#include "MooseApp.h"
-
-// Forward declarations
-class InputParameters;
+class MooseApp;
 
 /**
  * Macros
@@ -60,10 +57,6 @@ public:
    * @return Pointer to the AppFactory instance
    */
   static AppFactory & instance();
-
-  virtual ~AppFactory();
-
-  static InputParameters validParams();
 
   /**
    * Register a new object
@@ -118,8 +111,19 @@ public:
   Registry & operator=(AppFactory &&) = delete;
   ///@}
 
+  /**
+   * @return Whether or not this factory is currently constructing an object
+   *
+   * Used in the MooseApp constructor to enforce that construction must
+   * only be done by the AppFactory
+   */
+  bool currentlyConstructing() const { return _currently_constructing; }
+
 protected:
   AppFactoryBuildInfoMap _name_to_build_info;
+
+  /// Whether or not we're currently constructing an app; see currentlyConstructing()
+  bool _currently_constructing = false;
 
 private:
   // Private constructor for singleton pattern

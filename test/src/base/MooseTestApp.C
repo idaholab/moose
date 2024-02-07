@@ -125,6 +125,7 @@ void
 MooseTestApp::registerApps()
 {
   registerApp(MooseTestApp);
+  registerApp(MooseApp);
 }
 
 extern "C" void

@@ -108,6 +108,8 @@ public:
    */
   static void addInputFileParam(InputParameters & params);
 
+  MooseApp(InputParameters parameters);
+
   virtual ~MooseApp();
 
   TheWarehouse & theWarehouse() { return *_the_warehouse; }
@@ -1080,9 +1082,6 @@ protected:
   void loadLibraryAndDependencies(const std::string & library_filename,
                                   const Parameters & params,
                                   bool load_dependencies = true);
-
-  /// Constructor is protected so that this object is constructed through the AppFactory object
-  MooseApp(InputParameters parameters);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
