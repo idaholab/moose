@@ -186,7 +186,7 @@ methods listed in [#MSB-coupling] need to be overridden.
 
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the `MortarConstraint` class, each focusing on one scalar from the list. This approach is
-similar to how Tensor Mechanics module classes operator on one component variable of the displacement vector
+similar to how Solid Mechanics module classes operator on one component variable of the displacement vector
 field and are coupled to the other components. The developer can decide how to organize the coupling
 and off-diagonal Jacobian terms in a logical way and document this for the user.
 

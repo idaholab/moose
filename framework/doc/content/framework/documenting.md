@@ -53,7 +53,7 @@ framework or modules will create a corresponding markdown file to document the n
 
 The documentation for the classes within MOOSE and the modules are located within the "doc"
 directory where the class is registered: "framework/doc" contains all core MOOSE level objects,
-"modules/tensor_mechanics/doc" contains objects for the tensor mechanics modules, etc.
+"modules/solid_mechanics/doc" contains objects for the solid mechanics modules, etc.
 
 When adding documentation, the MOOSE modules executable must exist; this is accomplished by using the
 following commands:
@@ -65,14 +65,14 @@ make -j16 # 16 should be replaced by the number of cores on your system
 
 If you are writing a documentation page for a new class with MOOSE or the modules, you can use the
 MooseDocs executable to build a documentation stub for your new class. However, the executable
-for the module must be used. For example, if you add a new class to the tensor mechanics
+for the module must be used. For example, if you add a new class to the solid mechanics
 module:
 
 ```bash
-cd ~/projects/moose/modules/tensor_mechanics
+cd ~/projects/moose/modules/solid_mechanics
 make -j16
 cd doc
-./moosedocs.py generate TensorMechanicsApp
+./moosedocs.py generate SolidMechanicsApp
 ```
 
 To generate pages for the framework, the moose test application can be used as follows.

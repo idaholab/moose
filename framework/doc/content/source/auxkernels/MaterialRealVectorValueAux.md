@@ -20,7 +20,7 @@ do support automatic differentiation, to auxiliary variables, the derivatives wi
 In this example, the `MaterialRealVectorValueAux` is being used to examine different cracking criteria
 for a smear cracking model.
 
-!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=AuxKernels
+!listing modules/solid_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=AuxKernels
 
 !syntax parameters /AuxKernels/MaterialRealVectorValueAux
 

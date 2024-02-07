@@ -92,7 +92,7 @@ and AD. As an example, consider the scalar residual weak form term of the
 
 The [`ScalarLMKernel`](/ScalarLMKernel.md) class is implemented using the
 [`GenericKernelScalar`](/GenericKernelScalar.md) template class to contain both the AD and non-AD
-versions within the same source files; the test sources files in the Tensor Mechanics module described
+versions within the same source files; the test sources files in the Solid Mechanics module described
 at the bottom of this section appear more simply since they are non-AD only: [HTLSDR-header].
 The `computeScalarQpResidual` method for this class is
 provided in [scalar-kernel-non-ad-residual], where `_value/_pp_value` is equal to $V_0$.
@@ -139,9 +139,9 @@ The AD version of this object, [`ADScalarLMKernel`](/ADScalarLMKernel.md), only 
 implementation. A solely AD source file would only need to override `computeScalarQpResidual` and `computeQpResidual` and leave all the Jacobian methods as base definitions, which return zero. See 
 [MortarScalarBase](source/constraints/MortarScalarBase.md) for examples of AD-only and non-AD separate classes.
 
-As a more complicated example of the scalar augmentation system for kernels, the Tensor Mechanics test
+As a more complicated example of the scalar augmentation system for kernels, the Solid Mechanics test
 app contains headers, source, and test files for an alternative implementation of the
-"HomogenizedTotalLagrangianStressDivergence" system from the Tensor Mechanics module. This Kernel is
+"HomogenizedTotalLagrangianStressDivergence" system from the Solid Mechanics module. This Kernel is
 designated with the suffix "S" to distinguish from the existing objects in the module. Also, there are
 other intermediate classes such as "TotalLagrangianStressDivergence" that are also designated with
 an "S" suffix. These other classes are needed since the lower class needs to also derive from
@@ -151,29 +151,29 @@ about leaving this parameter blank.
 
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the Kernel class, each focusing on one scalar from the list. This approach is similar
-to how Tensor Mechanics module classes operator on one component variable of the displacement vector
+to how Solid Mechanics module classes operator on one component variable of the displacement vector
 field and are coupled to the other components. The developer can decide how to organize the coupling
 and off-diagonal Jacobian terms in a logical way and document this for the user.
 
 Examples of two schemes for decomposing the coupling terms and having multiple scalar variables are
-contained in the source files of the Tensor Mechanics module test directory as well as input files
+contained in the source files of the Solid Mechanics module test directory as well as input files
 `2drow.i` and `2dsole.i`, with listings below. The comments within these header and source files
 serve as documentation and should be consulted to visualize how the rows and columns of the relevant
 residual and Jacobian contributions are handled. The suffix "R" refers to assembling the entire row
 of the Jacobian in one object, and the suffix "A" refers to assembling symmetric pairs of the residual
 and Jacobian; see the header file for clarification.
 
-!listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceR.h id=HTLSDR-header
+!listing modules/solid_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceR.h id=HTLSDR-header
          re=/// Total Lagrangian formulation.*?}
          caption=Organization of spatial and scalar variable contributions by row.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2drow.i block=Kernels
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2drow.i block=Kernels
 
-!listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceA.h id=HTLSDA-header
+!listing modules/solid_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceA.h id=HTLSDA-header
          re=/// Total Lagrangian formulation.*?}
          caption=Organization of spatial and scalar variable contributions by symmetric pairs.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2dsole.i block=Kernels
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2dsole.i block=Kernels
 
 !alert note title=Displaced mesh features untested
 The displaced mesh features are not yet tested for the scalar augmentation system.
