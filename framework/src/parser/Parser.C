@@ -152,12 +152,15 @@ UnitsConversionEvaler::eval(hit::Field * n,
 }
 
 Parser::Parser(const std::vector<std::string> & input_filenames)
-  : _root(nullptr), _input_filenames(input_filenames), _input_text()
+  : _root(nullptr), _input_filenames(input_filenames), _input_text(), _app_type(std::string())
 {
 }
 
 Parser::Parser(const std::string & input_filename, const std::optional<std::string> & input_text)
-  : _root(nullptr), _input_filenames({input_filename}), _input_text(input_text)
+  : _root(nullptr),
+    _input_filenames({input_filename}),
+    _input_text(input_text),
+    _app_type(std::string())
 {
 }
 
@@ -265,6 +268,15 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
   }
 }
 
+void
+FindAppWalker ::walk(const std::string & /*fullpath*/,
+                     const std::string & /*nodepath*/,
+                     hit::Node * n)
+{
+  if (n && n->type() == hit::NodeType::Field && n->fullpath() == "Application/type")
+    _app_type = n->param<std::string>();
+}
+
 const std::string &
 Parser::getLastInputFileName() const
 {
@@ -348,6 +360,10 @@ Parser::parse()
   // of surprising and disconnected from what caused them.
   BadActiveWalker bw;
   _root->walk(&bw, hit::NodeType::Section);
+
+  FindAppWalker fw;
+  _root->walk(&fw, hit::NodeType::Field);
+  _app_type = fw.getApp();
 
   for (auto & msg : bw.errors)
     errmsg += msg + "\n";

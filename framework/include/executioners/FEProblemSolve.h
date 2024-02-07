@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "SolveObject.h"
+#include "NonlinearSolveObject.h"
 
-class FEProblemSolve : public SolveObject
+class FEProblemSolve : public NonlinearSolveObject
 {
 public:
   FEProblemSolve(Executioner & ex);

@@ -36,6 +36,8 @@
 #include "RdgTestApp.h"
 #include "ReactorTestApp.h"
 #include "RichardsTestApp.h"
+#include "ScalarTransportTestApp.h"
+#include "SolidPropertiesTestApp.h"
 #include "StochasticToolsTestApp.h"
 #include "ScalarTransportTestApp.h"
 #include "SolidPropertiesTestApp.h"
@@ -89,6 +91,8 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     RdgTestApp::registerAll(f, af, s, use_test_objs);
     ReactorTestApp::registerAll(f, af, s, use_test_objs);
     RichardsTestApp::registerAll(f, af, s, use_test_objs);
+    ScalarTransportTestApp::registerAll(f, af, s, use_test_objs);
+    SolidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
     StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
     TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
     ThermalHydraulicsTestApp::registerAll(f, af, s, use_test_objs);
@@ -99,8 +103,8 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
 void
 CombinedTestApp::registerApps()
 {
-  registerApp(CombinedApp);
   registerApp(CombinedTestApp);
+  registerApp(CombinedApp);
 
   ChemicalReactionsTestApp::registerApps();
   ContactTestApp::registerApps();

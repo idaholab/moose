@@ -130,7 +130,7 @@ public:
    * MooseTestApp).
    * @return The the type of the object
    */
-  const std::string & type() const { return _type; }
+  const std::string & type() const;
 
   /**
    * The RankMap is a useful object for determining how the processes

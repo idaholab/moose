@@ -241,6 +241,13 @@ public:
                          const std::vector<std::shared_ptr<MaterialBase>> & mats,
                          const bool allow_stateful);
 
+  /**
+   * Set active properties of this material
+   * Note: This function is called by FEProblemBase::setActiveMaterialProperties in an element loop
+   *       typically when switching subdomains.
+   */
+  void setActiveProperties(const std::unordered_set<unsigned int> & needed_props);
+
 protected:
   /**
    * Users must override this method.
@@ -277,6 +284,14 @@ protected:
 
   virtual const QBase & qRule() const = 0;
 
+  /**
+   * Check whether a material property is active
+   */
+  bool isPropertyActive(const unsigned int prop_id) const
+  {
+    return _active_prop_ids.count(prop_id) > 0;
+  }
+
   SubProblem & _subproblem;
 
   FEProblemBase & _fe_problem;
@@ -308,6 +323,9 @@ protected:
   /// MaterialBase::computeProperties() without looking up the ids from
   /// the name strings each time.
   std::set<unsigned int> _supplied_prop_ids;
+
+  /// The ids of the current active supplied properties
+  std::unordered_set<unsigned int> _active_prop_ids;
 
   /// If False MOOSE does not compute this property
   const bool _compute;

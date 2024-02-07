@@ -1108,8 +1108,32 @@ MultiApp::createApp(unsigned int i, Real start_time)
   const auto & input_file = _input_files[input_index];
 
   // create new parser tree for the application and parse
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::make_shared<Parser>(input_file);
+  auto parser = std::make_unique<Parser>(input_file);
 
+  if (input_file.size())
+  {
+    parser->parse();
+    const auto & app_type = parser->getAppType();
+    if (app_type.empty() && _app_type.empty())
+      mooseWarning("The application type is not specified for ",
+                   full_name,
+                   ". Please use [Application] block to specify the application type.");
+    if (!app_type.empty() && app_type != _app_type &&
+        !AppFactory::instance().isRegistered(app_type))
+      mooseError("In the ",
+                 full_name,
+                 ", '",
+                 app_type,
+                 "' is not a registered application. The registered application is named: '",
+                 _app_type,
+                 "'. Please double check the [Application] block to make sure the correct "
+                 "application is provided. \n");
+  }
+
+  if (parser->getAppType().empty())
+    parser->setAppType(_app_type);
+
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
