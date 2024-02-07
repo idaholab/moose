@@ -13,7 +13,7 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = BlockRestrictedADR
-    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary conditions using a linear finite volume system on a block-restricted two-dimensional orthogonal mesh.'
+    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary condition using a linear finite volume system on a block-restricted two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree # see #26480
   []
