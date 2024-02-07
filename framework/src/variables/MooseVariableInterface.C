@@ -41,10 +41,11 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     if (!(_fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var)))
       _linear_fv_variable = dynamic_cast<MooseLinearVariableFV<T> *>(_var);
 
-  _mvi_assembly =
-      _linear_fv_variable
-          ? nullptr
-          : &problem.assembly(tid, _var->kind() == Moose::VAR_NONLINEAR ? _var->sys().number() : 0);
+  _mvi_assembly = &problem.assembly(
+      tid,
+      ((_var->kind() == Moose::VAR_NONLINEAR) || (_var->kind() == Moose::VAR_LINEAR))
+          ? _var->sys().number()
+          : 0);
 }
 
 template <typename T>
@@ -331,7 +332,7 @@ MooseVariableInterface<T>::secondPhi()
     mooseError("second derivatives are not defined at nodes");
 
   if (_linear_fv_variable)
-    mooseError("Assembly is not available for linear FV variables");
+    mooseError("second order shape function derivatives not available for linear FV variables");
 
   return _mvi_assembly->secondPhi(*_variable);
 }
@@ -344,7 +345,7 @@ MooseVariableInterface<T>::secondPhiFace()
     mooseError("second derivatives are not defined at nodes");
 
   if (_linear_fv_variable)
-    mooseError("Assembly is not available for linear FV variables");
+    mooseError("second order shape function derivatives not available for linear FV variables");
 
   return _mvi_assembly->secondPhiFace(*_variable);
 }

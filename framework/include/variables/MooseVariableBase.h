@@ -213,7 +213,7 @@ protected:
   const Variable & _variable;
 
   /// Assembly data
-  Assembly * _assembly;
+  Assembly & _assembly;
 
   /// DOF map
   const DofMap & _dof_map;

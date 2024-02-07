@@ -56,28 +56,28 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
                                                                   _sys,
                                                                   _tid,
                                                                   Moose::ElementType::Element,
-                                                                  this->_assembly->qRule(),
-                                                                  this->_assembly->qRuleFace(),
-                                                                  this->_assembly->node(),
-                                                                  this->_assembly->elem());
+                                                                  this->_assembly.qRule(),
+                                                                  this->_assembly.qRuleFace(),
+                                                                  this->_assembly.node(),
+                                                                  this->_assembly.elem());
   _neighbor_data = std::make_unique<MooseVariableData<OutputType>>(
       *this,
       _sys,
       _tid,
       Moose::ElementType::Neighbor,
-      this->_assembly->qRuleNeighbor(), // Place holder
-      this->_assembly->qRuleNeighbor(),
-      this->_assembly->nodeNeighbor(),
-      this->_assembly->neighbor());
+      this->_assembly.qRuleNeighbor(), // Place holder
+      this->_assembly.qRuleNeighbor(),
+      this->_assembly.nodeNeighbor(),
+      this->_assembly.neighbor());
   _lower_data =
       std::make_unique<MooseVariableData<OutputType>>(*this,
                                                       _sys,
                                                       _tid,
                                                       Moose::ElementType::Lower,
-                                                      this->_assembly->qRuleFace(),
-                                                      this->_assembly->qRuleFace(), // Place holder
-                                                      this->_assembly->node(),      // Place holder
-                                                      this->_assembly->lowerDElem());
+                                                      this->_assembly.qRuleFace(),
+                                                      this->_assembly.qRuleFace(), // Place holder
+                                                      this->_assembly.node(),      // Place holder
+                                                      this->_assembly.lowerDElem());
 }
 
 template <typename OutputType>

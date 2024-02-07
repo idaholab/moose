@@ -101,10 +101,10 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _var_kind(getParam<Moose::VarKindType>("_var_kind")),
     _subproblem(_sys.subproblem()),
     _variable(_sys.system().variable(_var_num)),
-    _assembly(_var_kind == Moose::VAR_LINEAR
-                  ? nullptr
-                  : &_subproblem.assembly(getParam<THREAD_ID>("_tid"),
-                                          _var_kind == Moose::VAR_NONLINEAR ? _sys.number() : 0)),
+    _assembly(_subproblem.assembly(
+        getParam<THREAD_ID>("_tid"),
+        ((_var_kind == Moose::VAR_NONLINEAR) || (_var_kind == Moose::VAR_LINEAR)) ? _sys.number()
+                                                                                  : 0)),
     _dof_map(_sys.dofMap()),
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),
