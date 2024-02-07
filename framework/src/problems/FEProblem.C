@@ -49,12 +49,8 @@ FEProblem::FEProblem(const InputParameters & parameters)
   }
 
   if (_num_linear_sys)
-  {
     for (const auto i : index_range(_linear_sys_names))
       _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
-
-    setCurrentLinearSystem(0);
-  }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
