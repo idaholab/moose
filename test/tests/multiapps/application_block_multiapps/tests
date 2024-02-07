@@ -1,6 +1,6 @@
 [Tests]
   issues = '#26474'
-  design = 'syntax/Application/index.md CreateApplicationBlockAction.md'
+  design = 'syntax/Application/index.md'
 
 [Run_multiapp]
   requirement = "The system shall support running a multiapp simulation"

@@ -238,7 +238,6 @@ addActionTypes(Syntax & syntax)
   registerTask("coupling_functor_check", true);
   registerTask("add_master_action_material", false);
   registerTask("setup_projected_properties", false);
-  registerTask("create_application_block", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -364,8 +363,7 @@ addActionTypes(Syntax & syntax)
                            "(init_problem)"
                            "(add_control)"
                            "(check_output)"
-                           "(check_integrity)"
-                           "(create_application_block)");
+                           "(check_integrity)");
   // clang-format on
 }
 
@@ -589,9 +587,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
 
   registerSyntax("ProjectedStatefulMaterialStorageAction", "ProjectedStatefulMaterialStorage/*");
-
-  // Application Block System
-  registerSyntax("CreateApplicationBlockAction", "Application");
 
   addActionTypes(syntax);
 }

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#26474'
-  design = 'syntax/Application/index.md CreateApplicationBlockAction.md'
+  design = 'syntax/Application/index.md'
   requirement = "The system shall support running a simulation with application type check and"
 
   [no_application_block]
