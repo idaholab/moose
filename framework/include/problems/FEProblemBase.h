@@ -1377,43 +1377,6 @@ public:
                                     unsigned int jvar);
 
   /**
-   * Compute the right hand side of a given linear system.
-   * @param sys The linear system whose right hand side should be computed
-   * @param rhs Reference to the vector which will hold the right hand side
-   */
-  void computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys, NumericVector<Number> & rhs);
-
-  /**
-   * Compute the system matrix of a given linear system.
-   * @param sys The linear system whosesystem matrix should be computed
-   * @param system_matrix Reference to the sparse matrix which will hold the msystem matrix
-   */
-  void computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
-                                    SparseMatrix<Number> & system_matrix);
-
-  /**
-   * Compute the right hand side of the current linear system for given vector tags.
-   * @param soln The solution which should be used to compute the right hand side
-   * @param rhs The vector which should hold the right hand side
-   * @param tags The vector tag IDs which should be used to select terms that contribute to the
-   * right hand side
-   */
-  void computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
-                                            NumericVector<Number> & rhs,
-                                            const std::set<TagID> & tags);
-
-  /**
-   * Compute the system matrix of the current linear system for given matrix tags.
-   * @param soln The solution which should be used to compute the matrix
-   * @param system_matrix The sparse matrix which should hold the system matrix
-   * @param tags The matrix tag IDs which should be used to select terms that contribute to the
-   * matrix
-   */
-  void computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
-                                     SparseMatrix<Number> & system_matrix,
-                                     const std::set<TagID> & tags);
-
-  /**
    * Assemble both the right hand side and the system matrix of a given linear
    * system.
    * @param sys The linear system which should be assembled

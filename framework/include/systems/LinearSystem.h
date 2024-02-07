@@ -48,12 +48,6 @@ public:
   using SystemBase::addTimeIntegrator;
 
   /**
-   * Compute the right hand side of the system for given tags.
-   * @param tags The IDs of the vector tags whose contribution should be included
-   */
-  void computeRightHandSideTags(const std::set<TagID> & tags);
-
-  /**
    * Compute the right hand side and the system matrix of the system for given tags.
    * @param vector_tags The IDs of the vector tags whose right hand side contribution should be
    * included
@@ -61,12 +55,6 @@ public:
    */
   void computeLinearSystemTags(const std::set<TagID> & vector_tags,
                                const std::set<TagID> & matrix_tags);
-
-  /**
-   * Compute the system matrix of the system for given tags.
-   * @param matrix_tags The IDs of the matrix tags whose contribution should be included
-   */
-  void computeSystemMatrixTags(const std::set<TagID> & tags);
 
   /**
    * Return a reference to the stored linear implicit system
@@ -155,18 +143,6 @@ public:
   unsigned int _current_l_its;
 
 protected:
-  /**
-   * Compute the right hand side for given tags.
-   * @param tags The tags of kernels for which the right hand side is to be computed.
-   */
-  void computeRightHandSideInternal(const std::set<TagID> & tags);
-
-  /**
-   * Compute the system matrix for given tags.
-   * @param tags The tags of kernels for which the matrix is to be computed.
-   */
-  void computeSystemMatrixInternal(const std::set<TagID> & tags);
-
   /**
    * Compute the right hand side and system matrix for given tags
    * @param vector_tags The tags of kernels for which the right hand side is to be computed.
