@@ -105,10 +105,9 @@ public:
 
   ///@{ Don't allow creation through copy/move construction or assignment
   AppFactory(AppFactory const &) = delete;
-  Registry & operator=(AppFactory const &) = delete;
-
+  AppFactory & operator=(AppFactory const &) = delete;
   AppFactory(AppFactory &&) = delete;
-  Registry & operator=(AppFactory &&) = delete;
+  AppFactory & operator=(AppFactory &&) = delete;
   ///@}
 
   /**
