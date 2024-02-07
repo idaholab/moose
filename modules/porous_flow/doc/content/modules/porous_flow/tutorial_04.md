@@ -47,7 +47,7 @@ The boundary conditions used here are roller boundary conditions, as well as bou
 
 !listing modules/porous_flow/examples/tutorial/04.i start=[BCs] end=[AuxVariables]
 
-The `TensorMechanics` module of MOOSE provides some useful `AuxKernels` for extracting effective stresses of interest to this problem (the effective radial stress and the effective hoop stress)
+The `SolidMechanics` module of MOOSE provides some useful `AuxKernels` for extracting effective stresses of interest to this problem (the effective radial stress and the effective hoop stress)
 
 !listing modules/porous_flow/examples/tutorial/04.i start=[AuxVariables] end=[Modules]
 

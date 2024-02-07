@@ -1,6 +1,6 @@
 # Introduction to Contact
 
-Users are expected to have worked through the [Introduction to Tensor Mechanics](solid_mechanics/tutorials/introduction/index.md) tutorial first.
+Users are expected to have worked through the [Introduction to Solid Mechanics](solid_mechanics/tutorials/introduction/index.md) tutorial first.
 
 ## [First contact](contact/tutorials/introduction/step01.md)
 

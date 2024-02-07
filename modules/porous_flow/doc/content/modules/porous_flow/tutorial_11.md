@@ -225,7 +225,7 @@ There are mechanical Kernels only for `disp_r`, and the `StressDivergenceTensors
 
 !listing modules/porous_flow/examples/tutorial/11_2D.i start=[grad_stress_r] end=[poro_r]
 
-The stress `AuxKernels` are modified.  In TensorMechanics with RZ coordinates, the 00 component is $rr$, the 11 component is $zz$ and the 22 component is $\theta\theta$.  Therefore, these `AuxKernels` read
+The stress `AuxKernels` are modified.  In SolidMechanics with RZ coordinates, the 00 component is $rr$, the 11 component is $zz$ and the 22 component is $\theta\theta$.  Therefore, these `AuxKernels` read
 
 !listing modules/porous_flow/examples/tutorial/11_2D.i start=[stress_rr_aux] end=[porosity]
 
