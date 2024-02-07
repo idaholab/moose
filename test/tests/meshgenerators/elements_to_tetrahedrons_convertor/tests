@@ -1,0 +1,89 @@
+[Tests]
+  design = 'meshgenerators/ElementsToTetrahedronsConverter.md'
+  issues = '#26579'
+  [test]
+    requirement = "The system shall be able to "
+    [simple_hex_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_hex_convert_in.e'
+      cli_args = '--mesh-only simple_hex_convert_in.e 
+                  Mesh/gmg/elem_type=HEX8'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='convert a 3D mesh consisting of only HEX8 elements.'
+    []
+    [simple_prism_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_prism_convert_in.e'
+      cli_args = '--mesh-only simple_prism_convert_in.e 
+                  Mesh/gmg/elem_type=PRISM6'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='convert a 3D mesh consisting of only PRISM6 elements.'
+    []
+    [simple_pyramid_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_pyramid_convert_in.e'
+      cli_args = '--mesh-only simple_pyramid_convert_in.e 
+                  Mesh/gmg/elem_type=PYRAMID5'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='convert a 3D mesh consisting of only PYRAMID5 elements.'
+    []
+    [simple_tet_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_tet_convert_in.e'
+      cli_args = '--mesh-only simple_tet_convert_in.e 
+                  Mesh/gmg/elem_type=TET4'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='convert a 3D mesh consisting of only TET4 elements.'
+    []
+    [hex_prism_convert]
+      type = 'Exodiff'
+      input = 'hex_prism_convert.i'
+      exodiff = 'hex_prism_convert_in.e'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='convert a 3D mesh with mixed element types.'
+    []
+  []
+
+  [error]
+    requirement = 'The system shall throw an error '
+    [err_distributed]
+      type = 'RunException'
+      input = 'simple_convert.i'
+      cli_args = '--mesh-only simple_convert_err.e
+                  Mesh/gmg/elem_type=HEX8 
+                  Mesh/parallel_type=distributed'
+      expect_err = 'Input is not a replicated mesh'
+      mesh_mode = 'REPLICATED'
+      detail = 'if the input mesh to be converted is not a replicated mesh.'
+    []
+    [err_non_3d]
+      type = 'RunException'
+      input = 'hex_prism_convert.i'
+      cli_args = '--mesh-only hex_prism_convert_err.e 
+                  Mesh/final_generator=convert
+                  Mesh/convert/input=accg'
+      expect_err = 'Only 3D meshes are supported'
+      mesh_mode = 'REPLICATED'
+      detail = 'if the input mesh to be converted contains non-3D elements.'
+    []
+    [err_high_order]
+      type = 'RunException'
+      input = 'simple_convert.i'
+      cli_args = '--mesh-only simple_convert_err.e
+                  Mesh/gmg/elem_type=HEX20'
+      expect_err = 'Only first order elements are supported for cutting'
+      mesh_mode = 'REPLICATED'
+      detail = 'if the input mesh to be converted contains high-order elements.'
+    []
+  []
+[]
