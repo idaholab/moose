@@ -252,8 +252,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     Restartable(this, "MultiApps"),
     PerfGraphInterface(this, std::string("MultiApp::") + _name),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
-                                       : _fe_problem.getMooseApp().type()),
+    _app_type(getOptionalParam<MooseEnum>("app_type")),
     _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
@@ -372,13 +371,6 @@ MultiApp::createApps()
   Moose::ScopedCommSwapper swapper(_my_comm);
 
   _apps.resize(_my_num_apps);
-
-  // If the user provided an unregistered app type, see if we can load it dynamically
-  if (!AppFactory::instance().isRegistered(_app_type))
-    _app.dynamicAppRegistration(_app_type,
-                                getParam<std::string>("library_path"),
-                                getParam<std::string>("library_name"),
-                                getParam<bool>("library_load_dependencies"));
 
   bool rank_did_quiet_init = false;
   unsigned int local_app = libMesh::invalid_uint;
@@ -1074,27 +1066,28 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Parse the input so that we can get Application/type= if it is set
   auto parser = std::make_unique<Parser>(input_file);
   parser->parse();
+
+  // Determine which application type we are to build
   auto app_type = _app.type();
   if (input_file.size())
   {
     const auto & input_app_type = parser->getInputAppType();
-    if (!input_app_type && _app_type.empty())
-      paramWarning("input_files",
-                   "The application type is not specified in '",
-                   input_file,
-                   "'. Please set Application/type= to specify the application type. Defaulting to "
-                   "the parent application type '",
-                   _app.type(),
-                   "'.");
-    if (input_app_type && _app_type.size())
+    if (input_app_type && _app_type)
       paramError("app_type",
                  "This parameter is redundant because Application/type is set in '",
                  input_file,
                  "'.");
-    if (_app_type.size())
-      app_type = _app_type;
+    if (_app_type)
+      app_type = *_app_type;
     if (input_app_type)
       app_type = *input_app_type;
+
+    // If the user provided an unregistered app type, see if we can load it dynamically
+    if (!AppFactory::instance().isRegistered(app_type))
+      _app.dynamicAppRegistration(app_type,
+                                  getParam<std::string>("library_path"),
+                                  getParam<std::string>("library_name"),
+                                  getParam<bool>("library_load_dependencies"));
   }
 
   auto app_params = AppFactory::instance().getValidParams(app_type);
@@ -1119,7 +1112,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (_fe_problem.verboseMultiApps())
-    _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
+    _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << app_type
              << " of level " << _app.multiAppLevel() + 1 << " and number " << _first_local_app + i
              << " on processor " << processor_id() << " with full name " << full_name
              << COLOR_DEFAULT << std::endl;

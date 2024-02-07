@@ -20,6 +20,8 @@
 
 #include "nlohmann/json.h"
 
+#include <optional>
+
 class UserObject;
 class FEProblemBase;
 class FEProblem;
@@ -478,8 +480,8 @@ protected:
   /// The FEProblemBase this MultiApp is part of
   FEProblemBase & _fe_problem;
 
-  /// The type of application to build
-  std::string _app_type;
+  /// The type of application to build if set in app_type (to be deprecated)
+  const std::optional<std::string> _app_type;
 
   /// The positions of all of the apps, using input constant vectors (to be deprecated)
   std::vector<Point> _positions;

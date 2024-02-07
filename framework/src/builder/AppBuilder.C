@@ -37,41 +37,24 @@ AppBuilder::buildParams(const std::string & default_type,
     MooseApp::addTypeParam(params);
     type_command_line.addCommandLineOptionsFromParams(params);
 
-    std::string cli_type_syntax, cli_type;
-
     // Search for Application/[type,app]= on command line
     auto cli_root = parseCLIArgs(name, type_command_line);
     if (cli_root->find("Application/app"))
       mooseError("The command-line input option Application/app is not supported. Please use "
                  "Application/type= or --type instead.");
     if (const auto node = cli_root->find("Application/type"))
-    {
-      cli_type_syntax = "Application/type=";
-      cli_type = node->param<std::string>();
-    }
+      type = node->param<std::string>();
 
     // Search for --[type,app] on command line
-    if (type_command_line.search("type", cli_type))
-      cli_type_syntax = "--type ";
-    if (type_command_line.search("app", cli_type))
+    const bool has_cli_type = type_command_line.search("type", type);
+    if (type_command_line.search("app", type))
     {
-      if (cli_type_syntax == "--type ")
+      if (has_cli_type)
         mooseError("You cannot specify the command-line options --type and --app together.");
       else
         mooseDeprecated("Please use Application/type= or --type <AppName> via command line "
                         "to specify application type; '--app <AppName>' is deprecated and will be "
                         "removed in a future release.");
-      cli_type_syntax = "--app ";
-    }
-
-    if (cli_type.size())
-    {
-      if (name != "main")
-        mooseError("You are overriding a MultiApp's application type via '",
-                   cli_type_syntax,
-                   cli_type,
-                   "'. This is not supported.");
-      type = cli_type;
     }
   }
 
