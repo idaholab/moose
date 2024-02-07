@@ -9,6 +9,7 @@
   [test]
     type = LibtorchArtificialNeuralNetTest
     activation_functions = 'relu relu'
+    data_type = 'double'
   []
 []
 

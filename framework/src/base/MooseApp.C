@@ -312,9 +312,8 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
-  MooseEnum device("cpu gpu", "gpu");
-  params.addParam<MooseEnum>(
-      "libtorch_device", device, "The device type we want to run libtorch on.");
+  params.addCommandLineParam<std::string>(
+      "libtorch_device", "--libtorch_device", "cpu", "The device type we want to run libtorch on.");
 
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
@@ -413,7 +412,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
 #ifdef LIBTORCH_ENABLED
     ,
-    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+    _libtorch_device(determineLibtorchDeviceType(getParam<std::string>("libtorch_device")))
 #endif
 {
   // Set the TIMPI sync type via --timpi-sync
@@ -2826,8 +2825,11 @@ MooseApp::constructingMeshGenerators() const
 
 #ifdef LIBTORCH_ENABLED
 torch::DeviceType
-MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum)
+MooseApp::determineLibtorchDeviceType(const std::string & device_string)
 {
+  MooseEnum device_enum("cpu gpu");
+  device_enum = device_string;
+
   if (device_enum == "gpu")
   {
 #ifdef __APPLE__

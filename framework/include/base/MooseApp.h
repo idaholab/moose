@@ -971,9 +971,9 @@ private:
    * Function to determine the device which should be used by libtorch on this
    * application. We use this function to decide what is available on different
    * builds.
-   * @param device_enum Enum to describe if a cpu or a gpu should be used.
+   * @param device String to describe if a cpu or a gpu should be used.
    */
-  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device_enum);
+  torch::DeviceType determineLibtorchDeviceType(const std::string & device);
 #endif
 
 public:

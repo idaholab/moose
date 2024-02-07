@@ -88,9 +88,9 @@ torch::Tensor
 LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
 {
   torch::Tensor output(x);
-  if (_data_type != x.scalar_type())
+  if (_data_type != output.scalar_type())
     output.to(_data_type);
-  if (_device_type != x.device().type())
+  if (_device_type != output.device().type())
     output.to(_device_type);
 
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
