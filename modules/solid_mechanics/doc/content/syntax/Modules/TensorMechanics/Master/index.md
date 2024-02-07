@@ -72,27 +72,27 @@ populate this list manually if these components need to be included.
 The following example sets up the new *Lagrangian* kernel system with a total Lagrangian formulation for a
 large displacement kinematics problem.
 
-!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/action/action_L.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/action/action_L.i block=Physics/SolidMechanics/QuasiStatic
 
 ### New Kernel System, with Homogenization Constraints
 
 The following uses the action to setup homogenization constraints in a problem using the new kernel system.
 
-!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/action/action_3d.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/action/action_3d.i block=Physics/SolidMechanics/QuasiStatic
 
 ### Subblocks
 
 The subblocks of the Master action are what triggers MOOSE objects to be built.
 If none of the mechanics is subdomain restricted a single subblock can be used
 
-!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Physics/SolidMechanics/QuasiStatic
 
 if different mechanics models are needed, multiple subblocks with subdomain restrictions
 can be used.
 
-!listing modules/solid_mechanics/test/tests/action/two_block_new.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/action/two_block_new.i block=Physics/SolidMechanics/QuasiStatic
 
-Parameters supplied at the `[Modules/TensorMechanics/Master]` level act as
+Parameters supplied at the `[Physics/SolidMechanics/QuasiStatic]` level act as
 defaults for the Master action subblocks.
 
 !syntax parameters /Modules/TensorMechanics/Master/TensorMechanicsAction

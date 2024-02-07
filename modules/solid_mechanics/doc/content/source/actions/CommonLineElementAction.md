@@ -2,4 +2,4 @@
 
 ## Description
 
-This `CommonLineElement` action adds the parameters supplied at the `[/Physics/SolidMechanics/LineElementStatic]` level as defaults for all the subblocks within the LineElementStatic block. See the description, example use, and parameters on the [LineElementStatic](/LineElementStatic/index.md) action system page.
+This `CommonLineElement` action adds the parameters supplied at the `[/Physics/SolidMechanics/LineElement/QuasiStatic]` level as defaults for all the subblocks within the LineElement/QuasiStatic block. See the description, example use, and parameters on the [LineElement/QuasiStatic](/LineElement/QuasiStatic/index.md) action system page.

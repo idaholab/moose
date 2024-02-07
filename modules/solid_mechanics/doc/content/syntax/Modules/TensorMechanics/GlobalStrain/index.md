@@ -36,7 +36,7 @@ where $\boldsymbol u$ is the local displacement field calculated from the mechan
 
 ## Example Input File Syntax
 
-!listing modules/solid_mechanics/test/tests/global_strain/global_strain_action.i block=Modules/TensorMechanics/GlobalStrain
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain_action.i block=Physics/SolidMechanics/GlobalStrain
 
 ## Subblocks
 
@@ -44,7 +44,7 @@ The subblocks of the GlobalStrain action triggers MOOSE objects to be built.
 It can be applied to the whole domain using a single subblock
 
 ```
-[Modules/TensorMechanics/GlobalStrain]
+[Physics/SolidMechanics/GlobalStrain]
   [./all]
     ...
   [../]
@@ -54,7 +54,7 @@ It can be applied to the whole domain using a single subblock
 or multiple subblocks can be used to apply block restrictions to the objects
 
 ```
-[Modules/TensorMechanics/GlobalStrain]
+[Physics/SolidMechanics/GlobalStrain]
   [./block_a]
     ...
   [../]

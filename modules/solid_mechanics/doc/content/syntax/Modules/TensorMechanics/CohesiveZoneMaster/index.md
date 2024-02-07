@@ -1,6 +1,6 @@
 # Cohesive Zone Action System
 
-!syntax description /Modules/TensorMechanics/CohesiveZone/CohesiveZoneAction
+!syntax description /Physics/SolidMechanics/CohesiveZone/CohesiveZoneAction
 
 ## Description
 
@@ -80,13 +80,13 @@ The `normal_traction` and `tangent_traction` are scalar values compute using [CZ
 
 !listing modules/solid_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i start=[Physics/SolidMechanics/CohesiveZone] end=[Physics] include-end=false
 
-!syntax parameters /Modules/TensorMechanics/CohesiveZone/CohesiveZoneAction
-!syntax inputs /Modules/TensorMechanics/CohesiveZone/CohesiveZoneAction
+!syntax parameters /Physics/SolidMechanics/CohesiveZone/CohesiveZoneAction
+!syntax inputs /Physics/SolidMechanics/CohesiveZone/CohesiveZoneAction
 
 ## Associated Actions
 
-!syntax list /Modules/TensorMechanics/CohesiveZone objects=True actions=False subsystems=False
+!syntax list /Physics/SolidMechanics/CohesiveZone objects=True actions=False subsystems=False
 
-!syntax list /Modules/TensorMechanics/CohesiveZone objects=False actions=False subsystems=True
+!syntax list /Physics/SolidMechanics/CohesiveZone objects=False actions=False subsystems=True
 
-!syntax list /Modules/TensorMechanics/CohesiveZone objects=False actions=True subsystems=False
+!syntax list /Physics/SolidMechanics/CohesiveZone objects=False actions=True subsystems=False

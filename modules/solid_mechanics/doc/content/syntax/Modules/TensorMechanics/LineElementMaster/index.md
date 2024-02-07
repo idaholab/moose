@@ -23,7 +23,7 @@ A truss element is chosen by setting +`truss = true`+ in the input block.
 
 ## Example Input Syntax (Truss Elements)
 
-!listing modules/solid_mechanics/test/tests/truss/truss_3d_action.i block=Modules/TensorMechanics/LineElementMaster
+!listing modules/solid_mechanics/test/tests/truss/truss_3d_action.i block=Physics/SolidMechanics/LineElement/QuasiStatic
 
 ## Beam Elements: Constructed MooseObjects
 
@@ -45,7 +45,7 @@ By default, the `LineElement` Action sets up the kernels, strain materials, disp
 
 ## Example Input Syntax (Beam Elements)
 
-!listing modules/solid_mechanics/test/tests/beam/action/2_block_common.i block=Modules/TensorMechanics/LineElementMaster
+!listing modules/solid_mechanics/test/tests/beam/action/2_block_common.i block=Physics/SolidMechanics/LineElement/QuasiStatic
 
 ### Subblocks
 
@@ -54,7 +54,7 @@ If none of the mechanics is subdomain restricted a single subblock should be use
 if different mechanics models are needed, multiple subblocks with subdomain restrictions
 can be used.
 
-Parameters supplied at the `[Modules/TensorMechanics/LineElementMaster]` level act as
+Parameters supplied at the `[Physics/SolidMechanics/LineElement/QuasiStatic]` level act as
 defaults for all the subblocks within that LineElement block.
 
 !syntax parameters /Modules/TensorMechanics/LineElementMaster/LineElementAction

@@ -33,17 +33,17 @@ The `GeneralizedPlaneStrain` Action is used to construct the kernels, user objec
 The subblocks of the GeneralizedPlaneStrain action are what triggers MOOSE objects to be built.
 If a generalized plane strain model is applied for the whole simulation domain, a single subblock should be used
 
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 
 if different mesh subdomain has different generalized plane strain model, multiple subblocks with subdomain restrictions can be used.
 
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 
-An example of using generalized plane strain action through the Tensor Mechanics master action with a different `out_of_plane_direction` than the default of $z$  is given by:
+An example of using generalized plane strain action through the Solid Mechanics quasi static physics with a different `out_of_plane_direction` than the default of $z$  is given by:
 
-!listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Modules/TensorMechanics/Master/generalized_plane_strain
+!listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Physics/SolidMechanics/QuasiStatic/generalized_plane_strain
 
-Parameters supplied at the `[Modules/TensorMechanics/GeneralizedPlaneStrain]` level act as
+Parameters supplied at the `[Physics/SolidMechanics/GeneralizedPlaneStrain]` level act as
 defaults for the Master action subblocks.
 
 !syntax parameters /Modules/TensorMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction
