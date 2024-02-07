@@ -16,7 +16,7 @@ Flow streamlines computed with the [Navier-Stokes](modules/navier_stokes/index.m
 
 !card! gallery/twist_gallery.mp4 title=Wire Twist
 Mechanical modeling of two copper wires being twisted together to create a twisted pair
-using the [Tensor Mechanics](modules/tensor_mechanics/index.md) and [Contact](modules/contact/index.md) modules.
+using the [Tensor Mechanics](modules/solid_mechanics/index.md) and [Contact](modules/contact/index.md) modules.
 
 !style fontsize=90% fontweight=100
 *Credit:*  [Materials Science and Scientific Computing Department at UKAEA](https://ccfe.ukaea.uk/research/)

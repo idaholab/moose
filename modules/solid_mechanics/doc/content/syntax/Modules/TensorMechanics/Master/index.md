@@ -40,7 +40,7 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
 | Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
 
-Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](tensor_mechanics/StressDivergence.md) and the [Strain Formulations](tensor_mechanics/Strains.md) for more information.
+Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](solid_mechanics/StressDivergence.md) and the [Strain Formulations](solid_mechanics/Strains.md) for more information.
 
 ### For the New Lagrangian Kernel system
 
@@ -72,25 +72,25 @@ populate this list manually if these components need to be included.
 The following example sets up the new *Lagrangian* kernel system with a total Lagrangian formulation for a
 large displacement kinematics problem.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/action/action_L.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/action/action_L.i block=Modules/TensorMechanics/Master
 
 ### New Kernel System, with Homogenization Constraints
 
 The following uses the action to setup homogenization constraints in a problem using the new kernel system.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/action/action_3d.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/action/action_3d.i block=Modules/TensorMechanics/Master
 
 ### Subblocks
 
 The subblocks of the Master action are what triggers MOOSE objects to be built.
 If none of the mechanics is subdomain restricted a single subblock can be used
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules/TensorMechanics/Master
 
 if different mechanics models are needed, multiple subblocks with subdomain restrictions
 can be used.
 
-!listing modules/tensor_mechanics/test/tests/action/two_block_new.i block=Modules/TensorMechanics/Master
+!listing modules/solid_mechanics/test/tests/action/two_block_new.i block=Modules/TensorMechanics/Master
 
 Parameters supplied at the `[Modules/TensorMechanics/Master]` level act as
 defaults for the Master action subblocks.

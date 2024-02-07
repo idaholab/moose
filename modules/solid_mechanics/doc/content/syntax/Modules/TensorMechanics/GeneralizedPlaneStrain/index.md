@@ -4,7 +4,7 @@
 
 ## Description
 
-This action sets up a generalized plane strain model. A detailed description of generalized plane strain model can be found in the [formulation](tensor_mechanics/generalized_plane_strain.md) page.
+This action sets up a generalized plane strain model. A detailed description of generalized plane strain model can be found in the [formulation](solid_mechanics/generalized_plane_strain.md) page.
 
 !alert! warning title=For 2D and 1D Simulations
 GeneralizedPlaneStrain only works for 1D axisymmetric or 2D generalized plane strain cases. For 1D axisymmetric and 2D generalized plane strain cases in the x-y plane the number of displacement variables must be one or two displacements, respectively.
@@ -33,15 +33,15 @@ The `GeneralizedPlaneStrain` Action is used to construct the kernels, user objec
 The subblocks of the GeneralizedPlaneStrain action are what triggers MOOSE objects to be built.
 If a generalized plane strain model is applied for the whole simulation domain, a single subblock should be used
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
 
 if different mesh subdomain has different generalized plane strain model, multiple subblocks with subdomain restrictions can be used.
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
 
 An example of using generalized plane strain action through the Tensor Mechanics master action with a different `out_of_plane_direction` than the default of $z$  is given by:
 
-!listing modules/tensor_mechanics/test/tests/2D_different_planes/gps_xz.i block=Modules/TensorMechanics/Master/generalized_plane_strain
+!listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Modules/TensorMechanics/Master/generalized_plane_strain
 
 Parameters supplied at the `[Modules/TensorMechanics/GeneralizedPlaneStrain]` level act as
 defaults for the Master action subblocks.

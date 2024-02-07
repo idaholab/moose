@@ -6,7 +6,7 @@ culminated with a [model](heat_transfer/tutorials/introduction/therm_step03a.md)
 that solves the heat equation on a simple rectangular domain, including terms
 for heat conduction, time-dependent effects, and volumetric heating.
 
-The Tensor Mechanics tutorial includes a [model](tensor_mechanics/tutorials/introduction/step03a.md)
+The Tensor Mechanics tutorial includes a [model](solid_mechanics/tutorials/introduction/step03a.md)
 that shows how thermal expansion can be accounted for using a prescribed
 temperature field.
 

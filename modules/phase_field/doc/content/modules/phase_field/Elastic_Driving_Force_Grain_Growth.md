@@ -103,7 +103,7 @@ ACGrGrElasticDrivingForce::computeDFDOP(PFFunctionType type)
 }
 ```
 
-The stress and strain are computed using kernels from the tensor mechanics module, but a material in the phase field module was created to compute the polycrystal elasticity tensor, [ComputePolycrystalElasticityTensor](/ComputePolycrystalElasticityTensor.md). It also computes the derivatives of the elasticity tensor with respect to all of the order parameters. This material must be used with the [GrainTracker](/GrainTracker.md) user object.
+The stress and strain are computed using kernels from the solid mechanics module, but a material in the phase field module was created to compute the polycrystal elasticity tensor, [ComputePolycrystalElasticityTensor](/ComputePolycrystalElasticityTensor.md). It also computes the derivatives of the elasticity tensor with respect to all of the order parameters. This material must be used with the [GrainTracker](/GrainTracker.md) user object.
 
 As with the basic grain growth model, creating separate blocks in the input file for every order parameter would be burdensome. Thus, we have implemented an action that adds the elastic driving force kernel for each order parameter. The action is [PolycrystalElasticDrivingForceAction](/PolycrystalElasticDrivingForceAction.md) and it must be used with the [PolycrystalKernelAction](/PolycrystalKernelAction.md).
 

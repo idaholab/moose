@@ -3,7 +3,7 @@
 This tutorial provides an introduction to setting up models that combine models
 of heat transfer and mechanical deformation, including contact. This builds on the material in the
 [Introduction to Heat Transfer](heat_transfer/tutorials/introduction/index.md),
-[Introduction to Tensor Mechanics](tensor_mechanics/tutorials/introduction/index.md), and
+[Introduction to Tensor Mechanics](solid_mechanics/tutorials/introduction/index.md), and
 [Introduction to Contact](contact/tutorials/introduction/index.md)
 tutorials, the completion of which is recommended prior to this tutorial.
 

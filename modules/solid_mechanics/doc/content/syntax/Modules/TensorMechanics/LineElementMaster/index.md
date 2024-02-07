@@ -23,7 +23,7 @@ A truss element is chosen by setting +`truss = true`+ in the input block.
 
 ## Example Input Syntax (Truss Elements)
 
-!listing modules/tensor_mechanics/test/tests/truss/truss_3d_action.i block=Modules/TensorMechanics/LineElementMaster
+!listing modules/solid_mechanics/test/tests/truss/truss_3d_action.i block=Modules/TensorMechanics/LineElementMaster
 
 ## Beam Elements: Constructed MooseObjects
 
@@ -45,7 +45,7 @@ By default, the `LineElement` Action sets up the kernels, strain materials, disp
 
 ## Example Input Syntax (Beam Elements)
 
-!listing modules/tensor_mechanics/test/tests/beam/action/2_block_common.i block=Modules/TensorMechanics/LineElementMaster
+!listing modules/solid_mechanics/test/tests/beam/action/2_block_common.i block=Modules/TensorMechanics/LineElementMaster
 
 ### Subblocks
 

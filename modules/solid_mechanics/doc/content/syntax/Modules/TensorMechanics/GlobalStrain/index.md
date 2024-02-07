@@ -36,7 +36,7 @@ where $\boldsymbol u$ is the local displacement field calculated from the mechan
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain_action.i block=Modules/TensorMechanics/GlobalStrain
+!listing modules/solid_mechanics/test/tests/global_strain/global_strain_action.i block=Modules/TensorMechanics/GlobalStrain
 
 ## Subblocks
 
