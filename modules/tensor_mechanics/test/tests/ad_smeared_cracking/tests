@@ -8,15 +8,6 @@ issues = '#6815 #9227 #15311'
     custom_cmp = cracking.cmp
     requirement = 'The MOOSE TensorMechanics module shall simulate cracking on a specimen under tension in cartesian coordinates using AD and match non-AD methods.'
   [../]
-  [./cracking_deprecated]
-    type = Exodiff
-    input = cracking_deprecated.i
-    exodiff = cracking_out.e
-    custom_cmp = cracking.cmp
-    prereq = cracking
-    allow_deprecated = true
-    requirement = 'The MOOSE TensorMechanics module shall simulate cracking on a specimen under tension in cartesian coordinates using the deprecated input file using AD and match non-AD methods.'
-  [../]
   [./cracking_rz]
     type = Exodiff
     input = cracking_rz.i
@@ -38,16 +29,6 @@ issues = '#6815 #9227 #15311'
     custom_cmp = cracking_exponential.cmp
     use_old_floor = true
     requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress release using AD and match non-AD methods.'
-  [../]
-  [./exponential_deprecated]
-    type = Exodiff
-    input = cracking_exponential.i
-    exodiff = cracking_exponential_out.e
-    custom_cmp = cracking_exponential.cmp
-    use_old_floor = true
-    prereq = exponential
-    allow_deprecated = true
-    requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress relase, using the deprecated input file using AD and match non-AD methods.'
   [../]
   [./rz_exponential]
     type = Exodiff

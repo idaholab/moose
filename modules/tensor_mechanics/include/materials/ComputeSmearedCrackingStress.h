@@ -43,26 +43,6 @@ protected:
   virtual void updateCrackingStateAndStress();
 
   /**
-   * Compute the effect of the cracking release model on the stress
-   * and stiffness in the direction of a single crack.
-   * @param i Index of current crack direction
-   * @param sigma Stress in direction of crack
-   * @param stiffness_ratio Ratio of damaged to original stiffness
-   *                        in cracking direction
-   * @param strain_in_crack_dir Strain in the current crack direction
-   * @param cracking_stress Threshold tensile stress for crack initiation
-   * @param cracking_alpha Initial slope of exponential softening model
-   * @param youngs_modulus Young's modulus
-   */
-  virtual void computeCrackingRelease(int i,
-                                      Real & sigma,
-                                      Real & stiffness_ratio,
-                                      const Real strain_in_crack_dir,
-                                      const Real cracking_stress,
-                                      const Real cracking_alpha,
-                                      const Real youngs_modulus);
-
-  /**
    * Get the number of known crack directions. This includes cracks
    * in prescribed directions (even if not yet active) and active
    * cracks in other directions.
@@ -93,14 +73,7 @@ protected:
    */
   bool previouslyCracked();
 
-  /// Enum defining the crack release model
-  const enum class CrackingRelease { abrupt, exponential, power } _cracking_release;
-
   ///@{ Input parameters for smeared crack models
-
-  /// Ratio of the residual stress after being fully cracked to the tensile
-  /// cracking threshold stress
-  const Real _cracking_residual_stress;
 
   /// Threshold at which cracking initiates if tensile stress exceeds it
   const VariableValue & _cracking_stress;
@@ -113,9 +86,6 @@ protected:
 
   /// Defines transition to changed stiffness during unloading
   const Real _cracking_neg_fraction;
-
-  /// Controls slope of exponential softening curve
-  const Real _cracking_beta;
 
   /// Controls the amount of shear retained
   const Real _shear_retention_factor;
