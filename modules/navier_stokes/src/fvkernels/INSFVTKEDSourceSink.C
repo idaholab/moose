@@ -227,7 +227,8 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     if (_v2f_formulation)
     {
-      const auto blending_function = 1.0 + 0.05 * std::min(std::sqrt(TKE / (*_v2)(elem_arg, state)), 100.0);
+      const auto blending_function =
+          1.0 + 0.05 * std::min(std::sqrt(TKE / (*_v2)(elem_arg, state)), 100.0);
       production = _C1_eps * blending_function * _mu_t(elem_arg, state) *
                    symmetric_strain_tensor_sq_norm / time_scale;
     }

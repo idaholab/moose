@@ -1414,12 +1414,11 @@ SIMPLE::execute()
                 (1.0 + std::sqrt(libMesh::TOLERANCE) - std::exp(-relaxation_ratio));
 
             // Compute solution
-            ns_residuals[residual_index] =
-                solveAdvectedSystem(_turbulence_system_numbers[system_i],
-                                    *_turbulence_systems[system_i],
-                                    local_relaxation_coefficient,
-                                    _turbulence_linear_control,
-                                    _turbulence_l_abs_tol);
+            ns_residuals[residual_index] = solveAdvectedSystem(_turbulence_system_numbers[system_i],
+                                                               *_turbulence_systems[system_i],
+                                                               local_relaxation_coefficient,
+                                                               _turbulence_linear_control,
+                                                               _turbulence_l_abs_tol);
 
             // Relax the turbulence update for the next momentum predictor
             relaxSolutionUpdate(*_turbulence_systems[system_i], local_relaxation_coefficient);
