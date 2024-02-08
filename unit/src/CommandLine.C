@@ -137,7 +137,7 @@ TEST(CommandLine, setMooseEnum)
   MooseEnum enum_values("foo bar", default_value);
   params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
 
-  const auto check = [this, params, &default_value](const std::string & value)
+  const auto check = [params, &default_value](const std::string & value)
   {
     auto params_copy = params;
     CommandLine cl;
