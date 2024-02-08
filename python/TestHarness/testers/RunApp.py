@@ -314,18 +314,18 @@ class RunApp(Tester):
             # in the derived class.
             if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
                 reason = 'ERRMSG'
-            elif self.exit_code == 0 and specs['should_crash'] == True:
+            elif self.getExitCode() == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
-            elif self.exit_code != 0 and specs['should_crash'] == False:
+            elif self.getExitCode() != 0 and specs['should_crash'] == False:
                 # Let's look at the error code to see if we can perhaps further split this out later with a post exam
                 reason = 'CRASH'
             # Valgrind runs
-            elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+            elif self.getExitCode() == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
                 reason = 'MEMORY ERROR'
 
             if reason != '':
                 self.setStatus(self.fail, str(reason))
-                return "\n\nExit Code: " + str(self.exit_code)
+                return "\n\nExit Code: " + str(self.getExitCode())
 
         # Return anything extra here that we want to tack onto the Output for when it gets printed later
         return ''

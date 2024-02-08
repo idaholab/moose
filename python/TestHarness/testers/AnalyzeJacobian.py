@@ -76,12 +76,12 @@ class AnalyzeJacobian(FileTester):
         specs = self.specs
         if specs.isValid('expect_out'):
             out_ok = util.checkOutputForPattern(output, specs['expect_out'])
-            if (out_ok and self.exit_code != 0):
+            if (out_ok and self.getExitCode() != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         if reason == '':
-            if self.exit_code != 0 :
+            if self.getExitCode() != 0 :
                 reason = 'CRASH'
 
         if reason != '':

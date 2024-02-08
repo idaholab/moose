@@ -12,6 +12,8 @@ import traceback
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness import util
+from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
+from TestHarness.testers.Tester import Tester
 
 class RunParallel(Scheduler):
     """
@@ -30,6 +32,7 @@ class RunParallel(Scheduler):
         """ Run a tester command """
 
         tester = job.getTester()
+        tester.setRunner(self.buildRunner(tester))
 
         # Do not execute app, and do not processResults
         if self.options.dry_run:
@@ -92,6 +95,14 @@ class RunParallel(Scheduler):
 
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
+
+    def buildRunner(self, tester: Tester) -> Runner:
+        """Builds the runner for a given tester
+
+        This exists as a method so that derived schedulers can change how they
+        run commands (i.e., for PBS and slurm)
+        """
+        return SubprocessRunner(tester)
 
     def setSuccessfulMessage(self, tester):
         """ properly set a finished successful message for tester """

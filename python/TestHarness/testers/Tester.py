@@ -11,6 +11,7 @@ import platform, re, os, sys, pkgutil, shutil, shlex
 import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.runners.Runner import Runner
 from FactorySystem.MooseObject import MooseObject
 from tempfile import SpooledTemporaryFile, TemporaryDirectory
 from pathlib import Path
@@ -127,10 +128,7 @@ class Tester(MooseObject):
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
         self.specs = params
-        self.outfile = None
-        self.errfile = None
         self.joined_out = ''
-        self.exit_code = 0
         self.process = None
         self.tags = params['tags']
         self.__caveats = set([])
@@ -166,6 +164,9 @@ class Tester(MooseObject):
         # A temp directory for this Tester, if requested
         self.tmp_dir = None
 
+        # The object that'll actually do the run
+        self._runner = None
+
     def getTempDirectory(self):
         """
         Gets a shared temp directory that will be cleaned up for this Tester
@@ -187,6 +188,22 @@ class Tester(MooseObject):
             except:
                 pass
             self.tmp_dir = None
+
+    def setRunner(self, runner: Runner):
+        """Sets the underlying Runner object that will run the command"""
+        self._runner = runner
+
+    def getOutput(self) -> str:
+        """Return the combined contents of stdout and stderr of the command ran"""
+        return self._runner.getOutput()
+
+    def isOutputReady(self) -> bool:
+        """Returns whether or not the output is ready for reading"""
+        return self._runner.isOutputReady()
+
+    def getExitCode(self) -> int:
+        """Gets the exit code of the command that was ran"""
+        return self._runner.getExitCode()
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -285,10 +302,6 @@ class Tester(MooseObject):
         """ return the output files if applicable to this Tester """
         return []
 
-    def getOutput(self):
-        """ Return the contents of stdout and stderr """
-        return self.joined_out
-
     def getCheckInput(self):
         return self.check_input
 
@@ -359,19 +372,12 @@ class Tester(MooseObject):
             return False
         return Path(which_mpiexec).parent.absolute() == Path(which_ompi_info).parent.absolute()
 
-    def spawnSubprocessFromOptions(self, timer, options):
+    def spawnProcessFromOptions(self, timer, options):
         """
-        Spawns a subprocess based on given options, sets output and error files,
+        Spawns a process based on given options, sets output and error files,
         and starts timer.
         """
         cmd = self.getCommand(options)
-
-        use_shell = self.specs["use_shell"]
-
-        if not use_shell:
-            # Split command into list of args to be passed to Popen
-            cmd = shlex.split(cmd)
-
         cwd = self.getTestDir()
 
         # Verify that the working directory is available right before we execute.
@@ -382,64 +388,18 @@ class Tester(MooseObject):
             timer.stop()
             return 1
 
-        self.process = None
-        try:
-            f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
-            e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
+        # Spawn the process
+        self._runner.spawn(cmd, cwd, timer)
 
-            popen_args = [cmd]
-            popen_kwargs = {'stdout': f,
-                            'stderr': e,
-                            'close_fds': False,
-                            'shell': use_shell,
-                            'cwd': cwd}
-            # On Windows, there is an issue with path translation when the command
-            # is passed in as a list.
-            if platform.system() == "Windows":
-                popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
-            else:
-                popen_kwargs['preexec_fn'] = os.setsid
-
-            # Special logic for openmpi runs
-            if self.hasOpenMPI():
-                popen_env = os.environ.copy()
-
-                # Don't clobber state
-                popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
-                # Allow oversubscription for hosts that don't have a hostfile
-                popen_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
-
-                popen_kwargs['env'] = popen_env
-
-            process = subprocess.Popen(*popen_args, **popen_kwargs)
-        except:
-            print("Error in launching a new task", cmd)
-            raise
-
-        self.process = process
-        self.outfile = f
-        self.errfile = e
-
-        timer.start()
         return 0
 
-    def finishAndCleanupSubprocess(self, timer):
+    def finishAndCleanupProcess(self, timer):
         """
-        Waits for the current subproccess to finish, stops the timer, and
+        Waits for the current process to finish, stops the timer, and
         cleans up.
         """
-        self.process.wait()
 
-        timer.stop()
-
-        self.exit_code = self.process.poll()
-        self.outfile.flush()
-        self.errfile.flush()
-
-        # store the contents of output, and close the file
-        self.joined_out = util.readOutput(self.outfile, self.errfile, self)
-        self.outfile.close()
-        self.errfile.close()
+        self._runner.wait(timer)
 
     def runCommand(self, timer, options):
         """
@@ -449,29 +409,17 @@ class Tester(MooseObject):
         in the tester's output and exit_code fields.
         """
 
-        exit_code = self.spawnSubprocessFromOptions(timer, options)
+        exit_code = self.spawnProcessFromOptions(timer, options)
         if exit_code: # Something went wrong
             return
 
-        self.finishAndCleanupSubprocess(timer)
+        self.finishAndCleanupProcess(timer)
 
     def killCommand(self):
         """
         Kills any currently executing process started by the runCommand method.
         """
-        if self.process is not None:
-            try:
-                if platform.system() == "Windows":
-                    from distutils import spawn
-                    if spawn.find_executable("taskkill"):
-                        subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.process.pid)])
-                    else:
-                        self.process.terminate()
-                else:
-                    pgid = os.getpgid(self.process.pid)
-                    os.killpg(pgid, SIGTERM)
-            except OSError: # Process already terminated
-                pass
+        return self._runner.kill()
 
         # Try to clean up anything else that we can
         self.cleanup()

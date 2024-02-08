@@ -51,7 +51,6 @@ class Job(object):
         self.specs = tester.specs
         self.__job_dag = job_dag
         self.timer = Timer()
-        self.__outfile = None
         self.__start_time = clock()
         self.__end_time = None
         self.__previous_time = None
@@ -272,8 +271,7 @@ class Job(object):
 
     def setOutput(self, output):
         """ Method to allow schedulers to overwrite the output if certain conditions are met """
-        if (not self.__tester.outfile is None and not self.__tester.outfile.closed
-           and not self.__tester.errfile is None and not self.__tester.errfile.closed):
+        if not self.__tester.isOutputReady():
             return
 
         # Check for invalid unicode in output
