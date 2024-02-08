@@ -27,9 +27,9 @@ class RunCommand(Tester):
         return self.command
 
     def processResults(self, moose_dir, options, output):
-        if self.exit_code == 77 :
+        if self.getExitCode() == 77 :
             self.setStatus(self.skip)
-        elif self.exit_code != 0 :
-            self.setStatus(self.fail, 'CODE %d' % self.exit_code)
+        elif self.getExitCode() != 0 :
+            self.setStatus(self.fail, 'CODE %d' % self.getExitCode())
 
         return output
