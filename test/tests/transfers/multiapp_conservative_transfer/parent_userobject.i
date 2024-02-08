@@ -9,43 +9,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./multi_layered_average]
-  [../]
-  [./element_multi_layered_average]
+  [multi_layered_average]
+  []
+  [element_multi_layered_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,7 +60,6 @@
   l_tol = 1e-8
   nl_rel_tol = 1e-10
 []
-
 
 [Outputs]
   exodus = true
@@ -84,33 +83,33 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     positions = '0.3 0.1 0.3 0.7 0.1 0.3'
     type = TransientMultiApp
     input_files = sub_userobject.i
     app_type = MooseTestApp
-  [../]
+  []
 []
 
 [Transfers]
-  [./layered_transfer]
-    user_object = layered_average
+  [layered_transfer]
+    source_user_object = layered_average
     variable = multi_layered_average
-    type = MultiAppUserObjectTransfer
+    type = MultiAppGeneralFieldUserObjectTransfer
     from_multi_app = sub_app
     skip_coordinate_collapsing = true
 
-    from_postprocessors_to_be_preserved  = 'from_postprocessor'
-    to_postprocessors_to_be_preserved  = 'to_nearest_point'
-  [../]
-  [./element_layered_transfer]
-    user_object = layered_average
+    from_postprocessors_to_be_preserved = 'from_postprocessor'
+    to_postprocessors_to_be_preserved = 'to_nearest_point'
+  []
+  [element_layered_transfer]
+    source_user_object = layered_average
     variable = element_multi_layered_average
-    type = MultiAppUserObjectTransfer
+    type = MultiAppGeneralFieldUserObjectTransfer
     from_multi_app = sub_app
     skip_coordinate_collapsing = true
 
-    from_postprocessors_to_be_preserved  = 'from_postprocessor'
-    to_postprocessors_to_be_preserved  = 'to_nearest_point_element'
-  [../]
+    from_postprocessors_to_be_preserved = 'from_postprocessor'
+    to_postprocessors_to_be_preserved = 'to_nearest_point_element'
+  []
 []

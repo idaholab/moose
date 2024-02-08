@@ -3,53 +3,49 @@
   dim = 2
   nx = 10
   ny = 10
+  coord_type = RZ
+  rz_coord_axis = X
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./time_derivative]
+  [time_derivative]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-[]
-
-[Problem]
-  type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = X
+  []
 []
 
 [Executioner]
   type = Transient
   scheme = implicit-euler
 
-  [./TimeStepper]
+  [TimeStepper]
     type = ConstantDT
     dt = 0.01
-  [../]
+  []
 
   start_time = 0.0
   num_steps = 2
@@ -60,13 +56,13 @@
 []
 
 [Postprocessors]
-  [./nonlin_it]
+  [nonlin_it]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative_nonlin_it]
+  []
+  [cumulative_nonlin_it]
     type = CumulativeValuePostprocessor
     postprocessor = nonlin_it
-  [../]
+  []
 []
 
 [Outputs]

@@ -3,7 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-  block = '0'
+  coord_block = '0'
   coord_type = 'XYZ'
 []
 

@@ -6,54 +6,54 @@
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./v2]
-  [../]
+  [v2]
+  []
 []
 
 [Kernels]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./coupled_force]
+  []
+  [coupled_force]
     type = CoupledForce
     variable = v
     v = v2
-  [../]
-  [./td_v]
+  []
+  [td_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   # Accumulate the number of times 'timestep_end' is reached
   # (which is an indicator of the number of Picard iterations)
-  [./cumulative_picard_its_pp]
+  [cumulative_picard_its_pp]
     type = TestPostprocessor
     test_type = custom_execute_on
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,21 +75,21 @@
 []
 
 [MultiApps]
-  [./sub2]
+  [sub2]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = picard_sub2.i
     sub_cycling = true
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
-  [./v2]
-    type = MultiAppNearestNodeTransfer
+  [v2]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub2
     source_variable = v
     variable = v2
-  [../]
+  []
 []

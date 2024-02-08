@@ -10,36 +10,36 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_average]
+  [layered_average]
     type = GetTransferUserObject
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,26 +55,26 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./nearest_node]
-    type = MultiAppNearestNodeTransfer
+  [nearest_node]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = nearest_node
-  [../]
-  [./mesh_function]
-    type = MultiAppShapeEvaluationTransfer
+  []
+  [mesh_function]
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     to_multi_app = sub
     source_variable = u
     variable = mesh_function
-  [../]
+  []
 []

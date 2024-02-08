@@ -38,13 +38,13 @@
     variable = v
     boundary = left
     value = 1
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]

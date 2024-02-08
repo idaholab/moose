@@ -10,37 +10,37 @@
 []
 
 [Variables]
-  [./u]
-     order = FIRST
-     family = LAGRANGE
-  [../]
+  [u]
+    order = FIRST
+    family = LAGRANGE
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
-  [../]
+  [from_sub]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,22 +59,22 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 1.0 0.0'
     input_files = parallel_sub.i
     execute_on = 'timestep_end'
-   [../]
+  []
 []
 
 [Transfers]
-# Surface to volume data transfer
-  [./from_sub]
+  # Surface to volume data transfer
+  [from_sub]
     type = MultiAppNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub
     execute_on = 'timestep_end'
-  [../]
+  []
 []

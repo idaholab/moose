@@ -34,7 +34,7 @@
   [injection_area]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x*x+y*y<1.01'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'injection_area'
     input = 'aquifer'
   []
@@ -95,7 +95,6 @@
     property = saturation
   []
 []
-
 
 [BCs]
   [production]

@@ -9,9 +9,6 @@
   bias_x = 1.1
   ymin = 0.0
   ymax = 1.0
-[]
-
-[Problem]
   coord_type = RZ
 []
 

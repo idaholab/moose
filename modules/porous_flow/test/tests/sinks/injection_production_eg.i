@@ -95,7 +95,7 @@
     type = Water97FluidProperties
   []
   [tabulated_water]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = true_water
     temperature_min = 275
     pressure_max = 1E8
@@ -106,7 +106,7 @@
     type = CO2FluidProperties
   []
   [tabulated_co2]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = true_co2
     temperature_min = 275
     pressure_max = 1E8

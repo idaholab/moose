@@ -10,10 +10,6 @@
   nx = 40
   xmax = 200
   bias_x = 1.05
-[]
-
-[Problem]
-  type = FEProblem
   coord_type = RZ
   rz_coord_axis = Y
 []
@@ -210,12 +206,12 @@
 [Postprocessors]
   [pgas]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = pgas
   []
   [sgas]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = saturation_gas
   []
   [zi]
@@ -229,12 +225,12 @@
   []
   [x1]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = x1
   []
   [y0]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = y0
   []
 []

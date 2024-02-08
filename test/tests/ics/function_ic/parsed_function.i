@@ -16,37 +16,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Functions]
-  [./parsed_function]
+  [parsed_function]
     type = ParsedFunction
     expression = 'sin(x)-cos(y/2)'
-  [../]
-  [./parsed_grad_function]
-    type =ParsedGradFunction
+  []
+  [parsed_grad_function]
+    type = ParsedGradFunction
     expression = 'sin(x)-cos(y/2)'
     grad_x = 'cos(x)'
     grad_y = 'sin(y/2)/2'
-  [../]
-  [./parsed_zerograd_function]
+  []
+  [parsed_zerograd_function]
     type = ParsedGradFunction
-    value = 'sin(x)-cos(y/2)'
+    expression = 'sin(x)-cos(y/2)'
     grad_x = '0'
     grad_y = '0'
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = 'u'
     function = parsed_function
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,8 +59,8 @@
 
 [Outputs]
   file_base = parsed
-  [./OverSampling]
+  [OverSampling]
     type = Exodus
     refinements = 3
-  [../]
+  []
 []

@@ -7,66 +7,66 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./force_u]
+  []
+  [force_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./unorm_begin]
+  [unorm_begin]
     type = ElementL2Norm
     variable = u
     execute_on = 'initial timestep_begin'
     outputs = none
-  [../]
-  [./unorm]
+  []
+  [unorm]
     type = ElementL2Norm
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
-  [./unorm_err]
+  []
+  [unorm_err]
     type = RelativeDifferencePostprocessor
     value1 = unorm
     value2 = unorm_begin
     outputs = none
-  [../]
-  [./vnorm]
+  []
+  [vnorm]
     type = ElementL2Norm
     variable = v
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -84,24 +84,24 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     input_files = steady_picard_sub.i
     no_backup_and_restore = true
-  [../]
+  []
 []
 
 [Transfers]
-  [./v_from_sub]
-    type = MultiAppNearestNodeTransfer
+  [v_from_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = v
     variable = v
-  [../]
-  [./u_to_sub]
-    type = MultiAppNearestNodeTransfer
+  []
+  [u_to_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = u
-  [../]
+  []
 []
