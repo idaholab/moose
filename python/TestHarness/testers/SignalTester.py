@@ -26,7 +26,11 @@ class SignalTester(RunApp):
 
         valid_signals = {}
         for sig in signal.valid_signals():
-            valid_signals[sig.name] = sig
+            try:
+                valid_signals[sig.name] = sig
+            # Skip int signals that don't have names.
+            except AttributeError:
+                pass
         try:
             self.signal = valid_signals[self.specs["signal"]]
         except KeyError as e:
