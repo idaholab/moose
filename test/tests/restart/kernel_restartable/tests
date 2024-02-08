@@ -10,7 +10,6 @@
       input = 'kernel_restartable.i'
       exodiff = 'kernel_restartable_out.e'
       detail = "perform residual calculations that accumulate state and"
-      recover = false
     []
 
     [test2]
@@ -30,7 +29,6 @@
       input = 'kernel_restartable_custom_name.i'
       exodiff = 'kernel_restartable_custom_name_out.e'
       detail = "to name problem objects in a simulation and"
-      recover = false
     []
 
     [custom_name2]

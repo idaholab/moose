@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "FileOutput.h"
+#include "AutoCheckpointAction.h"
 
 #include <deque>
 #include <filesystem>
@@ -56,6 +57,9 @@ struct CheckpointFileNames
  */
 class Checkpoint : public FileOutput
 {
+
+friend class AutoCheckpointAction;
+
 public:
   static InputParameters validParams();
 
@@ -75,9 +79,6 @@ public:
    * @return String containing the checkpoint output directory
    */
   std::string directory() const;
-
-  /// Output all necessary data for a single timestep.
-  virtual void outputStep(const ExecFlagType & type) override;
 
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(CheckpointType flag) { _checkpoint_type = flag; }

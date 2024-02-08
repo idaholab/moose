@@ -81,7 +81,7 @@ TransientAndAdjoint::postExecute()
   // If it is a half transient, then the app is meant to be run with recovery. Therefore, it doesn't
   // make sense to run the adjoint calculation since we aren't getting to the final time required
   // for a consistent adjoint.
-  if (_app.halfTransient())
+  if (_app.testCheckpointHalfTransient())
     return;
 
   // Looping backward through forward time steps

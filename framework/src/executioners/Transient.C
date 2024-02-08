@@ -208,7 +208,7 @@ Transient::Transient(const InputParameters & parameters)
 
   setupTimeIntegrator();
 
-  if (_app.halfTransient()) // Cut timesteps and end_time in half...
+  if (_app.testCheckpointHalfTransient()) // Cut timesteps and end_time in half...
   {
     _end_time = (_start_time + _end_time) / 2.0;
     _num_steps /= 2.0;
@@ -331,7 +331,7 @@ Transient::execute()
     }
   }
 
-  if (!_app.halfTransient())
+  if (!_app.testCheckpointHalfTransient())
   {
     TIME_SECTION("final", 1, "Executing Final Objects");
     _problem.execMultiApps(EXEC_FINAL);

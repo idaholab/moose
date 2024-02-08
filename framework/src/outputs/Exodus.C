@@ -473,7 +473,7 @@ Exodus::output()
 
   // It is possible to have an empty file created with the following scenario. By default the
   // 'execute_on_input' flag is setup to run on INITIAL. If the 'execute_on' is set to FINAL
-  // but the simulation stops early (e.g., --half-transient) the Exodus file is created but there
+  // but the simulation stops early (e.g., --test-checkpoint-half-transient) the Exodus file is created but there
   // is no data in it, because of the initial call to write the input data seems to create the file
   // but doesn't actually write the data into the solution/mesh is also supplied to the IO object.
   // Then if --recover is used this empty file fails to open for appending.

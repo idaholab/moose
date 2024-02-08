@@ -122,7 +122,7 @@ TimeStepper::constrainStep(Real & dt)
   }
 
   // Don't let time go beyond simulation end time (unless we're doing a half transient)
-  if (_time + dt > _end_time && !_app.halfTransient())
+  if (_time + dt > _end_time && !_app.testCheckpointHalfTransient())
   {
     dt = _end_time - _time;
     diag << "Limiting dt for end_time: " << std::setw(9) << std::setprecision(6)

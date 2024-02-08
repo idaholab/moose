@@ -24,25 +24,9 @@ class SignalTester(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-        valid_signals = {
-            "SIGUSR1" : signal.SIGUSR1,
-            "SIG_DFL" : signal.SIG_DFL,
-            "SIG_IGN" : signal.SIG_IGN,
-            "SIGABRT" : signal.SIGABRT,
-            "SIGBUS"  : signal.SIGBUS,
-            "SIGCHLD" : signal.SIGCHLD,
-            "SIGCONT" : signal.SIGCONT,
-            "SIGFPE"  : signal.SIGFPE,
-            "SIGHUP"  : signal.SIGHUP,
-            "SIGILL"  : signal.SIGILL,
-            "SIGINT"  : signal.SIGINT,
-            "SIGKILL" : signal.SIGKILL,
-            "SIGPIPE" : signal.SIGPIPE,
-            "SIGSEGV" : signal.SIGSEGV,
-            "SIGTERM" : signal.SIGTERM,
-            "SIGUSR2" : signal.SIGUSR2,
-            "SIGWINCH": signal.SIGWINCH
-        }
+        valid_signals = []
+        for sig in signal:
+            valid_signals[sig.name] = sig
         try:
             self.signal = valid_signals[self.specs["signal"]]
         except KeyError as e:

@@ -40,11 +40,13 @@ Output::validParams()
       "use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
   // Output intervals and timing
-  params.addParam<unsigned int>("time_step_interval",
-                                1,
-                                "The interval (number of time steps) at which output occurs. "
-                                "Unless explicitly set, the default value of this parameter is set "
-                                "to infinity if the wall_time_interval is explicitly set.");
+  params.addRangeCheckedParam<unsigned int>(
+    "time_step_interval",
+    1,
+    "time_step_interval > 0",
+    "The interval (number of time steps) at which output occurs. "
+    "Unless explicitly set, the default value of this parameter is set "
+    "to infinity if the wall_time_interval is explicitly set.");
   params.addDeprecatedParam<unsigned int>(
       "interval",
       "The interval (number of time steps) at which output occurs",
@@ -321,6 +323,8 @@ Output::onInterval()
   _wall_time_since_last_output =
       std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_output_wall_time).count() /
       1000.0;
+  // Take the maximum wall time since last output accross all processors
+  _communicator.max(_wall_time_since_last_output);
   if (_wall_time_since_last_output >= _wall_time_interval)
     output = true;
 
@@ -331,15 +335,16 @@ Output::onInterval()
 void
 Output::setWallTimeIntervalFromCommandLineParam()
 {
-  // Below function returns true if --output-wall-time-interval value was provided on command line
-  const bool set_by_user =
-      _app.setVariableToCommandLineParam<Real>(_wall_time_interval, "output_wall_time_interval");
+  if (_app.isParamValid("output_wall_time_interval"))
+  {
+    _wall_time_interval = _app.getParam<Real>("output_wall_time_interval");
 
-  // If default value of _wall_time_interval was just overriden and user did not
-  // explicitly specify _time_step_interval, override default value of
-  // _time_step_interval so output does not occur after every time step
-  if (set_by_user && _time_step_interval_set_by_addparam)
-    _time_step_interval = std::numeric_limits<unsigned int>::max();
+    // If default value of _wall_time_interval was just overriden and user did not
+    // explicitly specify _time_step_interval, override default value of
+    // _time_step_interval so output does not occur after every time step
+    if (_time_step_interval_set_by_addparam)
+      _time_step_interval = std::numeric_limits<unsigned int>::max();
+  }
 }
 
 Real

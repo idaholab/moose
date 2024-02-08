@@ -123,12 +123,6 @@ Checkpoint::directory() const
   return _file_base + "_" + _suffix;
 }
 
-void
-Checkpoint::outputStep(const ExecFlagType & type)
-{
-  FileOutput::outputStep(type);
-}
-
 bool
 Checkpoint::shouldOutput()
 {
@@ -145,7 +139,7 @@ Checkpoint::shouldOutput()
   const bool should_output_signal = (Moose::interrupt_signal_number != 0) && (timeStep() > 0);
   if (should_output_signal)
   {
-    _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. \n";
+    _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file.\n";
     // Reset signal number since we output
     Moose::interrupt_signal_number = 0;
     return true;

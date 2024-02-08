@@ -50,7 +50,6 @@
     csvdiff = 'adapt_tstep_grow_dtfunc_out.csv'
     requirement = "The system shall support the ability to grow the time step size
     when specifying the values of t and dt in the TimeStepper."
-    recover = false
   []
 
   [adapt_tstep_grow_dtfunc_restart]

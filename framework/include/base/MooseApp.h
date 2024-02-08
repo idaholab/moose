@@ -519,30 +519,7 @@ public:
    *  Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
-  bool halfTransient() const { return _half_transient; }
-
-  /**
-   *  Set the passed variable's value to that of the named command line parameter (if valid)
-   *
-   * @param variable_to_set The variable whose value is to be modified
-   * @param cli_param_name The name of the command line parameter used to set variable_to_set
-   *
-   * @return variable_value_changed Whether the passed variable was changed (whether cli_param_name
-   * is valid)
-   */
-  template <typename T>
-  bool setVariableToCommandLineParam(T & variable_to_set, const std::string & cli_param_name) const
-  {
-    bool variable_value_changed = false;
-
-    if (isParamValid(cli_param_name))
-    {
-      variable_to_set = getParam<T>(cli_param_name);
-      variable_value_changed = true;
-    }
-
-    return variable_value_changed;
-  }
+  bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
 
   /**
    * Store a map of outputter names and file numbers
@@ -1262,7 +1239,7 @@ protected:
   std::string _restart_recover_base;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
-  bool _half_transient;
+  bool _test_checkpoint_half_transient;
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;

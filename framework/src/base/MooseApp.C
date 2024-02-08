@@ -230,13 +230,14 @@ MooseApp::validParams()
                                           "Continue the calculation.  If file_base is omitted then "
                                           "the most recent recovery file will be utilized");
 
-  params.addCommandLineParam<bool>("half_transient",
-                                   "--half-transient",
+  params.addCommandLineParam<bool>("test_checkpoint_half_transient",
+                                   "--test-checkpoint-half-transient",
                                    false,
                                    "When true the simulation will only run half of "
                                    "its specified transient (ie half the "
-                                   "timesteps).  This is useful for testing "
-                                   "recovery and restart");
+                                   "timesteps) with checkpoints enabled. "
+                                   "This is useful for testing recovery and restart "
+                                   "and should only be used in the test harness.");
 
   params.addCommandLineParam<Real>("output_wall_time_interval",
                                    "--output-wall-time-interval [interval]",
@@ -397,7 +398,7 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _half_transient(false),
+    _test_checkpoint_half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _multiapp_level(
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
@@ -698,13 +699,13 @@ MooseApp::setupOptions()
 
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
-  _half_transient = getParam<bool>("half_transient");
+  _test_checkpoint_half_transient = getParam<bool>("test_checkpoint_half_transient");
 
   if (isParamValid("output_wall_time_interval"))
   {
     const auto output_wall_time_interval = getParam<Real>("output_wall_time_interval");
     if (output_wall_time_interval <= 0)
-      mooseError("output-wall-time-interval must be greater than zero.");
+      mooseError("--output-wall-time-interval must be greater than zero.");
   }
 
   // The no_timing flag takes precedence over the timing flag.

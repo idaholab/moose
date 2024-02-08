@@ -137,7 +137,3 @@
   [../]
 []
 
-[Debug]
-  show_parser = true
-  show_actions = true
-[]
