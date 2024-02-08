@@ -142,7 +142,7 @@ CommandLine::populateInputParams(InputParameters & params)
 
   for (const auto & [name, value] : params)
   {
-    if (search(name))
+    if (params.isCommandLineParameter(name) && search(name))
     {
       trySetParameter(std::string);
       trySetParameter(std::vector<std::string>);
