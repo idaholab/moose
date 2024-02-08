@@ -61,14 +61,14 @@
   [to_sub]
     source_variable = u
     variable = transferred_u
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     to_multi_app = sub
   []
 
   [elemental_to_sub]
     source_variable = u
     variable = elemental_transferred_u
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     to_multi_app = sub
   []
 []

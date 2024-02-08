@@ -6,42 +6,44 @@
   nz = 2
   zmin = 0
   zmax = 1
+  coord_type = 'RZ'
+  corrd_block = '0'
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,7 +57,3 @@
 []
 
 # Try to specify an RZ problem with a 3D mesh
-[Problem]
-  coord_type = 'RZ'
-  block = '0'
-[]

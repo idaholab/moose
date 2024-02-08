@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
-  [../]
-  [./elemental_from_sub]
+  [from_sub]
+  []
+  [elemental_from_sub]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,33 +59,33 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0.1 0.45 0'
     input_files = fromsub_fixed_meshes_sub.i
-  [../]
+  []
 []
 
 [Transfers]
   # Note: it's not generally advised to use "fixed_meshes = true" with displaced
   # meshes.  We only do that for this test to make sure the test will fail if
   # "fixed_meshes" isn't working properly.
-  [./from_sub]
+  [from_sub]
     type = MultiAppNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub
     fixed_meshes = true
     displaced_source_mesh = true
-  [../]
-  [./elemental_from_sub]
+  []
+  [elemental_from_sub]
     type = MultiAppNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     variable = elemental_from_sub
     fixed_meshes = true
     displaced_source_mesh = true
-  [../]
+  []
 []
 

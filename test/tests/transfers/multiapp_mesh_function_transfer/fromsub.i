@@ -69,7 +69,7 @@
   [from_sub]
     source_variable = 'sub_u sub_u'
     variable = 'transferred_u elemental_transferred_u'
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     from_multi_app = sub
   []
 []

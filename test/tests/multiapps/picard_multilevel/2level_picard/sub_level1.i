@@ -80,7 +80,6 @@
   dt = 0.02
 []
 
-
 [MultiApps]
   [level2-]
     type = TransientMultiApp
@@ -93,14 +92,14 @@
 
 [Transfers]
   [v_to_sub]
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     source_variable = v
     variable = v
     to_multi_app = level2-
     execute_on = 'timestep_end'
   []
   [w_from_sub]
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     source_variable = w
     variable = w
     from_multi_app = level2-
@@ -113,6 +112,6 @@
   perf_graph = true
   [screen]
     type = Console
-    execute_postprocessors_on= "timestep_end timestep_begin"
+    execute_postprocessors_on = "timestep_end timestep_begin"
   []
 []

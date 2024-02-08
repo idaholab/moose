@@ -23,7 +23,6 @@
 # With rmax = 2 and rmin = 1
 # fluid_mass = volume0 * rho0 * exp(P0/bulk) = pi*3 * 1 * exp(0.1/0.5) = 11.51145
 
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -33,9 +32,6 @@
   xmax = 2
   ymin = -0.5
   ymax = 0.5
-[]
-
-[Problem]
   coord_type = RZ
 []
 

@@ -12,7 +12,8 @@
     [coord_type]
       type = RunException
       input = mismatch.i
-      expect_err = "Did you provide different parameter values for 'coord_type' to 'Mesh' and 'Problem'"
+      expect_err = "Did you provide different parameter values for 'coord_type' to 'Mesh' and "
+                   "'Problem'"
       detail = 'coordinate system types'
       cli_args = "Problem/block='0'"
     []

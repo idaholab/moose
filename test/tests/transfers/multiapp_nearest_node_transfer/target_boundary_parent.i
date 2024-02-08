@@ -11,7 +11,8 @@
 []
 
 [Variables]
-  [u][]
+  [u]
+  []
 []
 
 [Kernels]

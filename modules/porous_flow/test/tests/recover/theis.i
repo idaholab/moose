@@ -16,10 +16,6 @@
   nx = 20
   xmax = 100
   bias_x = 1.05
-[]
-
-[Problem]
-  type = FEProblem
   coord_type = RZ
   rz_coord_axis = Y
 []

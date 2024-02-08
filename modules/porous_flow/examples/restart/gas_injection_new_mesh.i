@@ -31,9 +31,6 @@
   xmax = 5000
   bias_x = 1.05
   bias_y = 0.95
-[]
-
-[Problem]
   coord_type = RZ
   rz_coord_axis = Y
 []
@@ -205,7 +202,7 @@
     type = MethaneFluidProperties
   []
   [methane_tab]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = methane
     save_file = false
   []

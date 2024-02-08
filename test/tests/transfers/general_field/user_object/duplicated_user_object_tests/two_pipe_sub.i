@@ -12,40 +12,39 @@
   []
 []
 
-
 [AuxVariables]
-  [./var]
+  [var]
     order = CONSTANT
     family = MONOMIAL
     block = p1
-  [../]
+  []
 []
 
 [ICs]
-  [./var]
+  [var]
     type = FunctionIC
     variable = var
     function = setvar
     block = p1
-  [../]
+  []
 []
 
 [Functions]
-  [./setvar]
+  [setvar]
     type = ParsedFunction
-    value = '1 + z * z'
-  [../]
+    expression = '1 + z * z'
+  []
 []
 
 [UserObjects]
-  [./sub_app_uo]
+  [sub_app_uo]
     type = LayeredAverage
     direction = z
     variable = var
     num_layers = 10
     execute_on = TIMESTEP_END
     block = p1
-  [../]
+  []
 []
 
 [Executioner]

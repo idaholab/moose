@@ -8,10 +8,6 @@
   nx = 100
   xmax = 2000
   bias_x = 1.05
-[]
-
-[Problem]
-  type = FEProblem
   coord_type = RZ
   rz_coord_axis = Y
 []
@@ -191,7 +187,7 @@
 [Postprocessors]
   [ppwater]
     type = PointValue
-    point =  '4 0 0'
+    point = '4 0 0'
     variable = ppwater
   []
   [sgas]
