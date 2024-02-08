@@ -156,4 +156,16 @@ TEST(CommandLine, setMooseEnum)
   check("");
   check("foo");
   check("bar");
+  try
+  {
+    check("baz");
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    const std::string expected_err = "While parsing command line argument '--value' with value "
+                                     "'baz':\n\nInvalid option \"baz\" in MooseEnum.";
+    const auto pos = std::string(err.what()).find(expected_err);
+    EXPECT_TRUE(pos != std::string::npos);
+  }
 }
