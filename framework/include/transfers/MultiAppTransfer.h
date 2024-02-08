@@ -210,7 +210,7 @@ protected:
   {
     mooseError("Siblings transfer not supported. You cannot transfer both from a multiapp to "
                "another multiapp");
-  };
+  }
 
   /**
    * Get the target app point from a point in the reference frame

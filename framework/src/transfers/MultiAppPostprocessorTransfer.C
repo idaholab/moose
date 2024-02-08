@@ -81,8 +81,10 @@ MultiAppPostprocessorTransfer::execute()
         // Find the postprocessor value from another process
         if (getFromMultiApp()->numGlobalApps() == 1)
           _communicator.min(pp_value);
-        else if (pp_value == std::numeric_limits<Real>::max() && getToMultiApp()->hasLocalApp(i))
-          mooseError("Source and target app parallel distribution must be the same");
+        else
+          mooseAssert(pp_value != std::numeric_limits<Real>::max() ||
+                          !getToMultiApp()->hasLocalApp(i),
+                      "Source and target app parallel distribution must be the same");
 
         // Case 1: a single source app, multiple target apps
         // All target apps must be local
