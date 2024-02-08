@@ -1,4 +1,4 @@
-# Legacy Kernel-Only Solid Mechanics Action
+# Legacy Kernel-Only Tensor Mechanics Action
 
 !syntax description /Kernels/SolidMechanics/LegacyTensorMechanicsAction
 
