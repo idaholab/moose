@@ -414,7 +414,7 @@ ComputeSmearedCrackingStress::updateCrackingStateAndStress()
 
     bool cracked(false);
     RealVectorValue sigma;
-    mooseAssert(_softening_models.size() != 3, "Must have 3 softening models");
+    mooseAssert(_softening_models.size() == 3, "Must have 3 softening models");
     for (unsigned int i = 0; i < 3; ++i)
     {
       sigma(i) = sigmaPrime(i, i);
