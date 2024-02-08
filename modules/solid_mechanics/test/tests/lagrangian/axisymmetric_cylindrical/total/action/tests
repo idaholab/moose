@@ -1,6 +1,6 @@
 [Tests]
   issues = '#20712'
-  design = 'source/actions/SolidMechanicsAction.md'
+  design = 'source/actions/TensorMechanicsAction.md'
   [action_small_unstabilized]
     type = Exodiff
     input = 'action.i'

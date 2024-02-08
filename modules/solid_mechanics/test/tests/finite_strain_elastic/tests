@@ -14,7 +14,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'new'
     issues = '#8235 #4716'
-    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md solid_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress for a finite strain formulation found with the Taylor expansion from Rashid(1993) on a unit 3D cube in a Cartesian system using the volumetric locking correction b-bar formulation.'
   []
   [fake_plastic]
@@ -32,7 +32,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'fake_plastic'
     issues = '#9212 #8235'
-    design = 'source/materials/ComputeMultiPlasticityStress.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeMultiPlasticityStress.md solid_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeMultiPlasticityStress class shall, when supplied with no plastic models, reduce to and produce the solely elastic stress solution for a finite strain fomulation, using the volumetric locking correction b-bar formulation.'
   []
   [rotation_new]
@@ -50,7 +50,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'rotation_new'
     issues = '#4716 #8235'
-    design = 'source/materials/ComputeFiniteStrainElasticStress.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md solid_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress based on a finite strain fomulation and then follow the stress as the mesh is rotated 90 degrees in accordance with Kamojjala et al.(2015) using the volumetric locking correction b-bar formulation.'
   []
   [eigen_sol]
@@ -68,7 +68,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'eigen_sol'
     issues = '#8235 #4716'
-    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md solid_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress for a finite strain formulation using a direct eigensolution to perform the polar decomposition of stretch and rotation on a unit 3D cube in a Cartesian system using the volumetric locking correction b-bar formulation.'
   []
   [stress_errorcheck]

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'GlobalStrain/index.md'
+  design = 'SolidMechanics/GlobalStrain/index.md'
   issues = '#11314'
   [./test]
     type = 'Exodiff'

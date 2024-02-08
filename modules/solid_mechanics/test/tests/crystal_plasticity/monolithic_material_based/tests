@@ -1,6 +1,6 @@
 [Tests]
   issues = ''
-  design = 'tensor_mechanics/index.md'
+  design = 'solid_mechanics/index.md'
   [./test]
     type = 'Exodiff'
     input = 'crysp.i'

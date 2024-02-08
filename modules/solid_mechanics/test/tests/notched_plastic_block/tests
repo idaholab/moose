@@ -1,7 +1,7 @@
 [Tests]
   [confined_uniaxial]
     issues = '#13766'
-    design = 'tensor_mechanics/Stresses.md'
+    design = 'solid_mechanics/Stresses.md'
     requirement = 'SolidMechanics shall be able to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
     [cmc_planar]
       type = 'CSVDiff'

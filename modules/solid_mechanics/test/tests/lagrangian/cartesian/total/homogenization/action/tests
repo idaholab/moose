@@ -1,6 +1,6 @@
 [Tests]
   issues = '#17473'
-  design = 'source/actions/SolidMechanicsAction.md'
+  design = 'source/actions/TensorMechanicsAction.md'
   [compare_3d]
     type = Exodiff
     input = 'action_3d.i'

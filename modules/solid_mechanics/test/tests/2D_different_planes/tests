@@ -104,7 +104,7 @@
     exodiff = 'gps_xy_small_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-y plane for small strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_xy_incremental]
@@ -116,7 +116,7 @@
     exodiff = 'gps_xy_incremental_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-y plane for incremental strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_xy_finite]
@@ -129,7 +129,7 @@
     exodiff = 'gps_xy_finite_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-y plane for finite strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_xz_small]
@@ -138,7 +138,7 @@
     exodiff = 'gps_xz_small_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-z plane for small strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_xz_incremental]
@@ -150,7 +150,7 @@
     exodiff = 'gps_xz_incremental_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-z plane for incremental strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_xz_finite]
@@ -163,7 +163,7 @@
     exodiff = 'gps_xz_finite_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-z plane for finite strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_yz_small]
@@ -172,7 +172,7 @@
     exodiff = 'gps_yz_small_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the y-z plane for small strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_yz_incremental]
@@ -184,7 +184,7 @@
     exodiff = 'gps_yz_incremental_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the y-z plane for incremental strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./gps_yz_finite]
@@ -197,7 +197,7 @@
     exodiff = 'gps_yz_finite_out.e'
     abs_zero = 1e-7
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the y-z plane for finite strain"
-    design = 'modules/tensor_mechanics/generalized_plane_strain.md'
+    design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
   [./planestrain_jacobian_xy]
