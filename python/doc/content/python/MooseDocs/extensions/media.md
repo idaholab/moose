@@ -102,7 +102,7 @@ Locally stored or hosted videos can be displayed using the `!media` syntax. This
 fashion as for [images](#images), but also includes some extra settings as listed in
 [video-settings].
 
-!media http://clips.vorwaerts-gmbh.de/VfE.webm
+!media https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.1080p.vp9.webm
        id=big_buck_bunny
        caption=["Big Buck Bunny"](https://en.wikipedia.org/wiki/Big_Buck_Bunny) is an open-source
                animated short.
