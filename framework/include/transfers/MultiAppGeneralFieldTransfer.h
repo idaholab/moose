@@ -52,6 +52,9 @@ public:
   VariableName getToVarName(unsigned int var_index);
 
 protected:
+  /// Siblings transfers fully supported
+  virtual void checkSiblingsTransferSupported() const override {}
+
   /*
    * Prepare evaluation of interpolation values
    * @param var_index index of the variable & component to prepare for. This routine is called once

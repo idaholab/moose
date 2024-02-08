@@ -205,6 +205,13 @@ protected:
   /// We use the fact that global app indexes are consecutive on a given rank
   unsigned int getLocalSourceAppIndex(unsigned int i_from) const;
 
+  /// Whether the transfer supports siblings transfer
+  virtual void checkSiblingsTransferSupported() const
+  {
+    mooseError("Siblings transfer not supported. You cannot transfer both from a multiapp to "
+               "another multiapp");
+  }
+
   /**
    * Get the target app point from a point in the reference frame
    * @param p the point in the reference frame

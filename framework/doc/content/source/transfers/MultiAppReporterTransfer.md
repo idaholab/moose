@@ -10,6 +10,13 @@ This MultiAppReporterTransfer provides a method to transfer a reporter value (se
 
 When transferring data from the main application the data from the main is copied to each sub-application. If the [!param](/Transfers/MultiAppReporterTransfer/subapp_index) is used then data is only transferred to the specified sub-application. When transferring data to the main application the [!param](/Transfers/MultiAppReporterTransfer/subapp_index) must be supplied if there is more than one sub-application.
 
+## Siblings transfer behavior
+
+This transfer supports sending data from a MultiApp to a MultiApp if and only if the number of subapps
+in the source MultiApp matches the number of subapps in the target MultiApp, and they are distributed
+the same way on the parallel processes. Each source app is then matched to the target app with the same
+subapp index.
+
 ## Example Input File Syntax
 
 !alert! tip

@@ -31,4 +31,7 @@ protected:
 
   /// The name of the auxiliary scalar variable to which the scalar values are being transfered
   VariableName _to_aux_name;
+
+private:
+  virtual void checkSiblingsTransferSupported() const override;
 };

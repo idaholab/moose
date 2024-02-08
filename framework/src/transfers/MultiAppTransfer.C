@@ -140,12 +140,6 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     _current_direction = _directions[0];
   }
 
-  // Check for different number of subapps
-  if (_to_multi_app && _from_multi_app &&
-      _from_multi_app->numGlobalApps() != _to_multi_app->numGlobalApps())
-    mooseError(
-        "Between multiapp transfer is only supported with the same number of subapps per MultiApp");
-
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("direction"))
   {
@@ -217,6 +211,10 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 void
 MultiAppTransfer::initialSetup()
 {
+  // Check for siblings transfer support
+  if (_to_multi_app && _from_multi_app)
+    checkSiblingsTransferSupported();
+
   getAppInfo();
 
   if (_from_multi_app)
