@@ -5,7 +5,6 @@
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
-    # needs short enough that the simulation has not finished
     method = 'opt'
     recover = false
     max_threads = 1
@@ -121,3 +120,4 @@
     rel_err = 2.0e-4
   []
 []
+

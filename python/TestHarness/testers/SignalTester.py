@@ -24,8 +24,8 @@ class SignalTester(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-        valid_signals = []
-        for sig in signal:
+        valid_signals = {}
+        for sig in signal.valid_signals():
             valid_signals[sig.name] = sig
         try:
             self.signal = valid_signals[self.specs["signal"]]
