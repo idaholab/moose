@@ -29,6 +29,9 @@ protected:
   /// The name of the postprocessor that the transfer originates
   PostprocessorName _from_pp_name;
 
-  /// The name of the field variable to which the postprocessor is being transfered
+  /// The name of the field variable to which the postprocessor is being transferred
   VariableName _to_aux_name;
+
+private:
+  virtual void checkSiblingsTransferSupported() const override;
 };

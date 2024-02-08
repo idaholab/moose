@@ -64,7 +64,6 @@ The following features cannot be supported by general field transfers, as a limi
 the `MultiAppGeneralFieldTransfer` base class.
 
 - bi-directional transfer, a single transfer that send data to an app and from that same application
-- transfers between two sibling `MultiApps` with different numbers of child applications
 - reduction operations, sum/average/min/max, on data transferred from multiple child apps
 - transfers between vector variables
 
@@ -73,6 +72,13 @@ These features are currently unsupported, but could be enabled if necessary with
 
 - caching optimizations for when both the target and origin mesh are constant
 
+## Siblings transfer behavior
+
+This transfer supports sending data from a MultiApp to a MultiApp with an arbitrary number
+of source subapps in the source MultiApp and an arbitrary, possibly non-matching, number
+of target subapps in the target MultiApp. It is the user's responsibility to ensure the
+transfer is well defined, for example by avoiding overlaps between source multiapps which cause
+multiple valid values for a target point.
 
 ## Use of bounding boxes
 

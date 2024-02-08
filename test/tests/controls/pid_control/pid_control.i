@@ -52,6 +52,12 @@ c = 0
     variable = u
     execute_on = 'initial timestep_end'
   []
+  [left_boundary_average]
+    type = SideAverageValue
+    variable = u
+    boundary = 3
+    execute_on = 'initial timestep_end'
+  []
 []
 
 [Controls]

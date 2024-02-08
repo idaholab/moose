@@ -18,12 +18,14 @@
   type = TransientMultiApp
   input_files = sub_between_diffusion1.i
   max_procs_per_app = 3
+  output_in_position = true
 []
 
 # This application will use as many processes as the main app
 [MultiApps/ma2]
   type = TransientMultiApp
   input_files = sub_between_diffusion2.i
+  output_in_position = true
 []
 
 [Transfers]
@@ -97,6 +99,25 @@
     source_variable = sent_nodal
     variable = received_elem
     extrapolation_constant = -1
+  []
+[]
+
+# To create multiple subapps for the 1 to N and N to M tests
+# The subapps should not overlap for shape evaluation transfers
+# or at least, the block restriction of the source variables between
+# applications should not overlap
+[Positions]
+  [app1_locs]
+    type = InputPositions
+    positions = '0 0 0
+                 0 1.01 0'
+  []
+  # Keep in mind app2's mesh is offset
+  [app2_locs]
+    type = InputPositions
+    positions = '-0.7 -0.45 0
+                 0.7 0.3 0
+                 -0.5 0.5 0'
   []
 []
 

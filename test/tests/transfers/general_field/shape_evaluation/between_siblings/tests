@@ -3,7 +3,8 @@
   design = 'MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
   [from_sub_to_sub]
-    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin mesh between multiapps"
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in "
+                  "the origin mesh between multiapps"
     [nodal_nodal]
       type = Exodiff
       input = main_between_multiapp.i
@@ -74,6 +75,57 @@
                   MultiApps/ma1/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'
                   MultiApps/ma2/cli_args='AuxVariables/sent_nodal/block=0;AuxVariables/received_nodal/block=0;AuxVariables/sent_elem/block=0;AuxVariables/received_elem/block=0'"
       detail = 'with block restricted variables of different types.'
+    []
+  []
+
+  [1_to_N_siblings]
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in "
+                  "the origin mesh when transfering from a single to multiple subapps"
+    [from_nodal_1_to_2]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'from_nodal_1toN_ma20.e from_nodal_1toN_ma21.e from_nodal_1toN_ma22.e'
+      cli_args = "Outputs/file_base=from_nodal_1toN
+                  MultiApps/ma2/positions_objects=app2_locs
+                  MultiApps/ma1/cli_args='Outputs/exodus=false'
+                  Transfers/active='app1_to_2_nodal_nodal app1_to_2_nodal_elem'"
+      detail = 'from nodal variables to nodal and elemental variables,'
+    []
+    [from_elem_1_to_2]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'from_elem_1toN_ma20.e from_elem_1toN_ma21.e from_elem_1toN_ma22.e'
+      cli_args = "Outputs/file_base=from_elem_1toN
+                  MultiApps/ma2/positions_objects=app2_locs
+                  MultiApps/ma1/cli_args='Outputs/exodus=false'
+                  Transfers/active='app1_to_2_elem_nodal app1_to_2_elem_elem'"
+      detail = 'from elemental variables to nodal and elemental variables,'
+    []
+  []
+
+  [N_to_M_siblings]
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in "
+                  "the origin mesh when transfering from an arbitrary number of subapps to an "
+                  "arbitrary number of subapps"
+    [from_nodal_1_to_2]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'from_nodal_NtoM_ma10.e from_nodal_NtoM_ma11.e from_nodal_NtoM_ma20.e from_nodal_NtoM_ma21.e from_nodal_NtoM_ma22.e'
+      cli_args = "Outputs/file_base=from_nodal_NtoM
+                  MultiApps/ma1/positions_objects=app1_locs
+                  MultiApps/ma2/positions_objects=app2_locs
+                  Transfers/active='app1_to_2_nodal_nodal app1_to_2_nodal_elem app2_to_1_nodal_nodal app2_to_1_nodal_elem'"
+      detail = 'from nodal variables to nodal and elemental variables,'
+    []
+    [from_elem_1_to_2]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'from_elem_NtoM_ma10.e from_elem_NtoM_ma11.e from_elem_NtoM_ma20.e from_elem_NtoM_ma21.e from_elem_NtoM_ma22.e'
+      cli_args = "Outputs/file_base=from_elem_NtoM
+                  MultiApps/ma1/positions_objects=app1_locs
+                  MultiApps/ma2/positions_objects=app2_locs
+                  Transfers/active='app1_to_2_elem_nodal app1_to_2_elem_elem app2_to_1_elem_nodal app2_to_1_elem_elem'"
+      detail = 'from elemental variables to nodal and elemental variables,'
     []
   []
 []

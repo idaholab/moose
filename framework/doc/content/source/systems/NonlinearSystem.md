@@ -465,7 +465,7 @@ setting up preconditioner reuse directly in PETSc with the
    `reuse_preconditioner_max_linear_its = X` will continue to reuse
    the same preconditioner until the number of linear iterations
    required to solve the linearized equations exceeds X.
-2. By default libmesh deletes the PETSc `SNES` instance after each time
+2. By default libMesh deletes the PETSc `SNES` instance after each time
    step.  This means that regardless of how the reuse options are set,
    the solver cannot retain the preconditioner across time steps.  The
    `reuse_preconditioner` alters this behavior to retain the `SNES`
