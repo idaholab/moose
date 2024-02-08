@@ -645,11 +645,10 @@ protected:
   /// JSON object constructed from the datafile
   nlohmann::json _json;
 
-  using Material::_dt;
+  usingTransientInterfaceMembers;
   using Material::_name;
   using Material::_q_point;
   using Material::_qp;
-  using Material::_t;
   using Material::coupledGenericValue;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeResidual;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeDerivative;

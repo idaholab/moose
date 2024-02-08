@@ -43,7 +43,6 @@ public:
   using GenericKernel<is_ad>::_test;                                                               \
   using GenericKernel<is_ad>::_q_point;                                                            \
   using GenericKernel<is_ad>::_var;                                                                \
-  using GenericKernel<is_ad>::_name;                                                               \
   using GenericKernel<is_ad>::getVar;                                                              \
   using Coupleable::coupled;                                                                       \
   using Coupleable::coupledComponents

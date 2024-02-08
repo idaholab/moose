@@ -36,10 +36,10 @@ protected:
    */
   virtual typename Moose::ADType<T>::type computeQpValue() = 0;
 
+  usingTransientInterfaceMembers;
   using ADNodalBCTempl<T, ADDirichletBCBase>::_var;
   using ADNodalBCTempl<T, ADDirichletBCBase>::_sys;
   using ADNodalBCTempl<T, ADDirichletBCBase>::_current_node;
   using ADNodalBCTempl<T, ADDirichletBCBase>::_u;
-  using ADNodalBCTempl<T, ADDirichletBCBase>::_t;
   using ADNodalBCTempl<T, ADDirichletBCBase>::shouldSetComp;
 };

@@ -37,6 +37,7 @@
 #include "SolutionInvalidInterface.h"
 
 #define usingMaterialBaseMembers                                                                   \
+  usingMooseObjectMembers;                                                                         \
   usingTransientInterfaceMembers;                                                                  \
   using MaterialBase::_subproblem;                                                                 \
   using MaterialBase::_fe_problem;                                                                 \

@@ -99,8 +99,7 @@ protected:
 };
 
 #define usingViscoplasticityStressUpdateBaseMembers                                                \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_dt;                                          \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_t;                                           \
+  usingTransientInterfaceMembers;                                                                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_name;                                        \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_qp;                                          \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::isParamValid;                                 \

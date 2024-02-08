@@ -35,11 +35,10 @@ protected:
   // _alpha parameter for HHT time integration scheme
   const Real _alpha;
 
-  using GenericKernel<is_ad>::_dt;
+  usingTransientInterfaceMembers;
   using GenericKernel<is_ad>::_i;
   using GenericKernel<is_ad>::_q_point;
   using GenericKernel<is_ad>::_qp;
-  using GenericKernel<is_ad>::_t;
   using GenericKernel<is_ad>::_test;
 };
 

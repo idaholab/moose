@@ -29,18 +29,20 @@ public:
    * The descriptor is constructed with an expression that describes the
    * material property.
    * Examples:
-   *   'F'               A material property called 'F' with no declared variable
-   *                     dependencies (i.e. vanishing derivatives)
-   *   'F(c,phi)'        A material property called 'F' with declared dependence
-   *                     on 'c' and 'phi' (uses DerivativeFunctionMaterial rules to
-   *                     look up the derivatives)
-   *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
-   *                     which will be referred to as 'a' in the function expression.
+   *   'F'                 A material property called 'F' with no declared variable
+   *                       dependencies (i.e. vanishing derivatives)
+   *   'F(c,phi)'          A material property called 'F' with declared dependence
+   *                       on 'c' and 'phi' (uses DerivativeFunctionMaterial rules to
+   *                       look up the derivatives)
+   *   'a:=D[x(t),t,t]'    The second time derivative of the t-dependent material property 'x'
+   *                       which will be referred to as 'a' in the function expression.
+   *   'x_old:=Old[x]'     The previous time step value of x
+   *   'x_older:=Older[x]' The value of x two time steps ago
    */
   FunctionMaterialPropertyDescriptor(const std::string &, MooseObject *, bool required = false);
 
-  /// default constructor
-  FunctionMaterialPropertyDescriptor();
+  /// no default constructor
+  FunctionMaterialPropertyDescriptor() = delete;
 
   /// copy constructor
   FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor &);
@@ -65,8 +67,8 @@ public:
   /// get the property name
   const std::string & getPropertyName() const { return _property_name; };
 
-  /// get the property reference
-  const GenericMaterialProperty<Real, is_ad> & value() const;
+  /// get the property value at the given quadrature point
+  GenericReal<is_ad> value(unsigned int qp = libMesh::invalid_uint) const;
 
   /// take another derivative
   void addDerivative(const SymbolName & symbol);
@@ -91,6 +93,14 @@ private:
   void parseDerivative(const std::string &);
   void parseDependentSymbols(const std::string &);
 
+  /// property state
+  enum class PropertyState
+  {
+    CURRENT,
+    OLD,
+    OLDER
+  } _state;
+
   /// name used in function expression
   std::string _fparser_name;
 
@@ -102,6 +112,9 @@ private:
 
   /// material property value (this is lazily updated and cached when read through value())
   mutable const GenericMaterialProperty<Real, is_ad> * _value;
+
+  /// old/older material property value (this is lazily updated and cached when read through value())
+  mutable const MaterialProperty<Real> * _old_older_value;
 
   /// material object that owns this descriptor
   MooseObject * _parent;

@@ -11,6 +11,15 @@
 
 #include <string>
 
+#define usingMooseBaseMembers                                                                      \
+  using MooseBase::getMooseApp;                                                                    \
+  using MooseBase::type;                                                                           \
+  using MooseBase::name;                                                                           \
+  using MooseBase::typeAndName;                                                                    \
+  using MooseBase::_type;                                                                          \
+  using MooseBase::_app;                                                                           \
+  using MooseBase::_name
+
 class MooseApp;
 
 /**
