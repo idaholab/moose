@@ -1,6 +1,6 @@
 > Try and add output for the vonMises stress in the simulation domain. Take a
 > look at the
-> [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/generate_output)
+> [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/generate_output)
 > parameter...
 
 `generate_output` is a convenient way to obtain scalar quantities, such as
@@ -20,9 +20,9 @@ Change your quasi-static physics block to
 Then rerun the input and visualize the output. You will notice that the
 resulting field looks blocky. MOOSE is projecting the material point values onto
 constant monomial functions. The
-[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/material_output_family)
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/material_output_family)
 and
-[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/material_output_order)
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/material_output_order)
 parameters allow to to select higher order monomials and even nodal variables
 for smooth material property output. For now let's just try a second order
 monomial with

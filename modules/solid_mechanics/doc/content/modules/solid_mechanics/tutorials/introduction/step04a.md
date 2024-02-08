@@ -5,7 +5,7 @@
 > cantilevers to `0.49`. Then add and modify the following parameters
 >
 > - [!param](/Mesh/uniform_refine) in the `[Mesh]` block
-> - [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/volumetric_locking_correction) in the solid mechanics quasi-static physics block
+> - [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/volumetric_locking_correction) in the solid mechanics quasi-static physics block
 > - [!param](/Mesh/GeneratedMeshGenerator/elem_type) in the `GeneratedMeshGenerator` blocks
 >
 > For convenience all those parameters may be listed under `[GlobalParams]`

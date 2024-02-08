@@ -1,6 +1,6 @@
 # Solid Mechanics QuasiStatic Physics System
 
-!syntax description /Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction
+!syntax description /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
 The Solid Mechanics Physics is a convenience object that simplifies part of the
 mechanics system setup.
@@ -54,15 +54,15 @@ Note that there are many variations for the calculation of the stress divergence
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
 | Add the optional homogenization constraints | Adds all objects required to impose the [homogenization constraints](Homogenization.md) | `constraint_types` : MooseEnum controlling whether `strain` or `stress` constraints and imposed, `targets` : Functions providing the time-dependent targets  |
 
-!alert warning If the using the SolidMechanicsAction with
+!alert warning If the using the QuasiStaticSolidMechanicsPhysics with
 `automatic_eigenstrain_names = true`, the eigenstrain_names will be populated
 under restrictive conditions for classes such as
 [CompositeEigenstrain](CompositeEigenstrain.md),
 [ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
 [RankTwoTensorMaterialADConverter](MaterialADConverter.md).  The input components for
 these classes are not included in the
-[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/eigenstrain_names) passed to the
-`SolidMechanicsAction`.  Set the `automatic_eigenstrain_names = false` and
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/eigenstrain_names) passed to the
+`QuasiStaticSolidMechanicsPhysics`.  Set the `automatic_eigenstrain_names = false` and
 populate this list manually if these components need to be included.
 
 ## Example Input File Syntax
@@ -95,7 +95,7 @@ can be used.
 Parameters supplied at the `[Physics/SolidMechanics/QuasiStatic]` level act as
 defaults for the QuasiStatic Physics subblocks.
 
-!syntax parameters /Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction
+!syntax parameters /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
 ## Associated Actions
 

@@ -1,12 +1,12 @@
 # Solid Mechanics QuasiStatic Physics System
 
-!syntax description /Physics/SolidMechanics/Dynamic/DynamicSolidMechanicsAction
+!syntax description /Physics/SolidMechanics/Dynamic/DynamicSolidMechanicsPhysics
 
 The SolidMechanics Dynamic QuasiStatic Physics is a convenience object that
 simplifies part of the dynamic mechanics system setup. It performs
 
 
-!syntax parameters /Physics/SolidMechanics/Dynamic/DynamicSolidMechanicsAction
+!syntax parameters /Physics/SolidMechanics/Dynamic/DynamicSolidMechanicsPhysics
 
 ## Associated Actions
 

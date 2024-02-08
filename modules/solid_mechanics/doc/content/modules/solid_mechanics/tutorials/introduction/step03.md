@@ -43,7 +43,7 @@ easy.
 
 > Try and add output for the vonMises stress in the simulation domain. Take a
 > look at the
-> [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/generate_output)
+> [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/generate_output)
 > parameter...
 
 [Click here for the answer.](solid_mechanics/tutorials/introduction/answer03a.md)

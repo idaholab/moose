@@ -42,7 +42,7 @@ and only update the variable value at the beginning of the timestep.
 ### SolidMechanics QuasiStatic Physics
 
 We've added the
-[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/automatic_eigenstrain_names)
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/automatic_eigenstrain_names)
 parameter to the quasi-static physics. With this option enabled the quasi-static physics will
 try to automatically detect all material objects that provide eigenstrain
 properties. This works well for most scenarios. Note that MOOSE will print a
@@ -60,7 +60,7 @@ parameter value for the two eigenstrain materials below. The action correctly
 detected it and verified that eigenstrains are provided on all subdomains
 covered by the quasi-static physics block. To manually supply the eigenstrain material
 properties use the
-[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/eigenstrain_names)
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/eigenstrain_names)
 parameter. Like so
 
 ```

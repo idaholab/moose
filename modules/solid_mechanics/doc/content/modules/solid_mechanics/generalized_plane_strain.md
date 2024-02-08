@@ -189,6 +189,6 @@ Objects specific for generalized plane strain:
 
 ## How to use generalized plane strain model
 
-The [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) can be used to set up a generalized plane strain model. The [SolidMechanicsAction](/SolidMechanicsAction.md) which considers the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) as Meta-Action can also be used.
+The [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) can be used to set up a generalized plane strain model. The [QuasiStaticSolidMechanicsPhysics](/QuasiStaticSolidMechanicsPhysics.md) which considers the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) as Meta-Action can also be used.
 
 !bibtex bibliography

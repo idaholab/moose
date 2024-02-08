@@ -12,7 +12,7 @@ formulation [here](ComputeFiniteStrain.md).
 
 In the Tensor mechanics QuasiStatic Physics this finite strain formulation can be
 activated by setting the
-[!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/strain) parameter
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/strain) parameter
 to `FINITE`. Furthermore you need to swap out the corresponding stress calculator from [`ComputeLinearElasticStress`](ComputeLinearElasticStress.md) to [`ComputeFiniteStrainElasticStress`](ComputeFiniteStrainElasticStress.md).
 
 Rerun the problem again with these changes and your modified Young's modulus of

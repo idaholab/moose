@@ -17,7 +17,7 @@ where $\boldsymbol{T}$ is a Rank-2 tensor and $w$ is the weighting factor for ea
 
 !alert warning When using the [`CompositeEigenstrain`](CompositeEigenstrain.md)
 object for RankTwoTensor eigenstrains with the
-[SolidMechanicsAction](SolidMechanics/QuasiStatic/index.md) setting
+[QuasiStaticSolidMechanicsPhysics](SolidMechanics/QuasiStatic/index.md) setting
 `automatic_eigenstrain_names = true`, eigenstrains listed as `MaterialADConverter`
 input tensors will not be included in the `eigenstrain_names` list passed. Set
 the automatic/_eigenstrain/_names = false and populate this list manually if

@@ -11,5 +11,5 @@ See the description, example use, and parameters on the
 The legacy kernel only solid mechanics action simplifies the input file syntax
 for creating a solid mechanics model by reducing the number of kernels
 required. See a description of the action and parameters on the
-[LegacyDynamicSolidMechanicsAction](/Kernels/DynamicSolidMechanics/index.md)
+[LegacyDynamicSolidMechanicsPhysics](/Kernels/DynamicSolidMechanics/index.md)
 action system page.

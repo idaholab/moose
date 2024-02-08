@@ -120,7 +120,7 @@ For dynamic problems, it is recommended to use [PresetDisplacement](/PresetDispl
 
 ## Static Initialization
 
-To initialize the system under a constant initial loading such as gravity, an initial static analysis can be conducted by turning off all the dynamics related Kernels and AuxKernels such as [InertialForce](/InertialForce.md), [NewmarkVelAux](/NewmarkVelAux.md) and [NewmarkAccelAux](/NewmarkAccelAux.md) for the first time step. To turn off stiffness proportional Rayleigh damping for the first time step `static_initialization` flag can be set to true in [DynamicSolidMechanics](/DynamicSolidMechanicsAction.md) or [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md). An example of static initialization can be found in this following test:
+To initialize the system under a constant initial loading such as gravity, an initial static analysis can be conducted by turning off all the dynamics related Kernels and AuxKernels such as [InertialForce](/InertialForce.md), [NewmarkVelAux](/NewmarkVelAux.md) and [NewmarkAccelAux](/NewmarkAccelAux.md) for the first time step. To turn off stiffness proportional Rayleigh damping for the first time step `static_initialization` flag can be set to true in [DynamicSolidMechanics](/DynamicSolidMechanicsPhysics.md) or [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md). An example of static initialization can be found in this following test:
 
 !listing /modules/solid_mechanics/test/tests/dynamics/prescribed_displacement/3D_QStatic_1_Ramped_Displacement_with_gravity.i
 

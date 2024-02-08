@@ -105,7 +105,7 @@ is not always feasible, and it is not exact under every circumstance.
 > If you created a large strain version of the input, try and convert it to use
 > MOOSE's automatic differentiation system. A few places to look at:
 >
-> - [!param](/Physics/SolidMechanics/QuasiStatic/SolidMechanicsAction/use_automatic_differentiation) in the solid mechanics quasi-static physics
+> - [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/use_automatic_differentiation) in the solid mechanics quasi-static physics
 > - [!param](/BCs/Pressure/PressureAction/use_automatic_differentiation) in the Pressure BC action
 > - [ADDirichletBC](ADDirichletBC.md)
 > - [ADComputeIsotropicElasticityTensor](ComputeIsotropicElasticityTensor.md)
