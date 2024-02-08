@@ -21,6 +21,8 @@
                     0 0'
     hex_pitches = 6
     desired_area = 1.0
+    background_subdomain_id = 200
+    background_subdomain_name = 'background'
   []
 []
 
@@ -31,7 +33,7 @@
 [Postprocessors]
   [background]
     type = VolumePostprocessor
-    block = 0
+    block = 200
   []
   [circle1]
     type = VolumePostprocessor

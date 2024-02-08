@@ -335,6 +335,8 @@ XYDelaunayGenerator::generate()
   // cheaper to do that once than to do it once-per-hole
   MeshSerializer serial(*mesh, doing_stitching);
 
+  // Define a reference map variable for subdomain map
+  auto & main_subdomain_map = mesh->set_subdomain_name_map();
   for (auto hole_i : index_range(hole_ptrs))
   {
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
@@ -409,6 +411,11 @@ XYDelaunayGenerator::generate()
       }
       mooseAssert(found_inner_sides == np, "Failed to find full boundary around meshed hole");
 
+      // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+      // subdomain map
+      const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
+      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
       mesh->stitch_meshes(hole_mesh,
                           inner_bcid,
                           new_hole_bcid,
@@ -418,6 +425,13 @@ XYDelaunayGenerator::generate()
                           use_binary_search);
     }
   }
+  // Check if one SubdomainName is shared by more than one subdomain ids
+  std::set<SubdomainName> main_subdomain_map_name_list;
+  for (auto const & id_name_pair : main_subdomain_map)
+    main_subdomain_map_name_list.emplace(id_name_pair.second);
+  if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
+    paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
+
   mesh->prepare_for_use();
   return mesh;
 }
