@@ -41,12 +41,12 @@ Output::validParams()
 
   // Output intervals and timing
   params.addRangeCheckedParam<unsigned int>(
-    "time_step_interval",
-    1,
-    "time_step_interval > 0",
-    "The interval (number of time steps) at which output occurs. "
-    "Unless explicitly set, the default value of this parameter is set "
-    "to infinity if the wall_time_interval is explicitly set.");
+      "time_step_interval",
+      1,
+      "time_step_interval > 0",
+      "The interval (number of time steps) at which output occurs. "
+      "Unless explicitly set, the default value of this parameter is set "
+      "to infinity if the wall_time_interval is explicitly set.");
   params.addDeprecatedParam<unsigned int>(
       "interval",
       "The interval (number of time steps) at which output occurs",

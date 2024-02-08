@@ -58,7 +58,7 @@ struct CheckpointFileNames
 class Checkpoint : public FileOutput
 {
 
-friend class AutoCheckpointAction;
+  friend class AutoCheckpointAction;
 
 public:
   static InputParameters validParams();

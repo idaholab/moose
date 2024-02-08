@@ -56,8 +56,7 @@ AutoCheckpointAction::act()
     {
       // Use the existing Checkpoint object, since we only need to/should make one object the
       // autosave
-      checkpoints[0]->setAutosaveFlag(
-          CheckpointType::USER_CREATED);
+      checkpoints[0]->setAutosaveFlag(CheckpointType::USER_CREATED);
     }
 
     // Check for special half transient test harness case
@@ -65,8 +64,7 @@ AutoCheckpointAction::act()
     {
       // For half transient, we want to simulate a user-created checkpoint so
       // time_step_interval works correctly.
-      checkpoints[0]->setAutosaveFlag(
-          CheckpointType::USER_CREATED);
+      checkpoints[0]->setAutosaveFlag(CheckpointType::USER_CREATED);
       checkpoints[0]->_time_step_interval = 1;
     }
   }
