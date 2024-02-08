@@ -16,7 +16,7 @@
     [half_transient]
       type = RunApp
       input = random_pps.i
-      cli_args = 'Outputs/checkpoint=true --half-transient'
+      cli_args = 'Outputs/checkpoint=true --test-checkpoint-half-transient'
       recover = false
       prereq = 'random_pps/full_sim'
       group = random_pps

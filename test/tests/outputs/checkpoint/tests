@@ -69,7 +69,7 @@
     [recover_half_transient]
       type = CheckFiles
       input = checkpoint.i
-      cli_args = 'Outputs/checkpoint=true --half-transient'
+      cli_args = 'Outputs/checkpoint=true --test-checkpoint-half-transient'
       recover = false
 
       check_files = "checkpoint_out_cp/0004-restart-0.rd/data "
@@ -154,7 +154,7 @@
       # Tests that recover works when defining as a Output sub-block
       type = CheckFiles
       input = checkpoint_block.i
-      cli_args = '--half-transient'
+      cli_args = '--test-checkpoint-half-transient'
       recover = false
       detail = "at every timestep while maintaining the most recent two files and"
 
