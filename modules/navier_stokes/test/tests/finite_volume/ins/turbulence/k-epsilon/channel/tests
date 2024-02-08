@@ -1,7 +1,7 @@
 [Tests]
   design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
   issues = '#9007'
-  [channel_ERCOFTAC]
+  [channel_ERCOFTAC_std_k_epsilon]
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel, '
     [result]
       type = 'Exodiff'

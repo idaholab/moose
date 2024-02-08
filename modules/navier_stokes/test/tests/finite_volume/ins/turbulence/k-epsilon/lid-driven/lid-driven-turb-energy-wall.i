@@ -34,8 +34,10 @@ C_mu = 0.09
 
 ### Modeling parameters ###
 non_equilibrium_treatment = false
+bulk_wall_treatment = false
 walls = 'left top right bottom'
 max_mixing_length = 1e10
+linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton'
 
 pressure_tag = "pressure_grad"
@@ -359,9 +361,9 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
     cp = ${cp}

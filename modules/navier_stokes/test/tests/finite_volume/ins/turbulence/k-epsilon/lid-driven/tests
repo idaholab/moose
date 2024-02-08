@@ -1,7 +1,7 @@
 [Tests]
   design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
   issues = '#9007'
-  [lid_driven_turb_std_wall]
+  [lid_driven_turb_std_wall_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
     [result]
       type = 'Exodiff'
@@ -20,7 +20,7 @@
       abs_zero = 1e-6
     []
   []
-  [lid_driven_turb_std_wall_bulk]
+  [lid_driven_turb_std_wall_bulk_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions using bulk wall treatment for the turbulent viscosity, '
     [result]
       type = 'Exodiff'
@@ -40,8 +40,7 @@
       abs_zero = 1e-6
     []
   []
-  [lid_driven_turb_non_eq_wall]
-
+  [lid_driven_turb_non_eq_wall_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with non-equilibrium wall functions, '
     [result]
       type = 'Exodiff'
@@ -60,8 +59,7 @@
       abs_zero = 1e-6
     []
   []
-  [lid_driven_turb_linear_wall]
-
+  [lid_driven_turb_linear_wall_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with linear wall functions, '
     [result]
       type = 'Exodiff'
@@ -80,8 +78,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-linear-wall_short'
     []
   []
-  [lid_driven_turb_inc_wall]
-
+  [lid_driven_turb_inc_wall_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with incremental wall functions, '
     [result]
       type = 'Exodiff'
@@ -100,8 +97,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-inc-wall_short'
     []
   []
-  [lid_driven_turb_no_wall_log_first_layer]
-
+  [lid_driven_turb_no_wall_log_first_layer_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with no wall treatment and the first cell in the logarithmic regime, '
     [result]
       type = 'Exodiff'
@@ -121,8 +117,7 @@
       cli_args = 'Executioner/num_iterations=10 lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=no_wall_log_layer_short'
     []
   []
-  [lid_driven_turb_no_wall]
-
+  [lid_driven_turb_no_wall_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with no wall treatment, '
     [result]
       type = 'Exodiff'
@@ -141,8 +136,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-no-wall_short'
     []
   []
-  [lid_driven_turb_non_eq_bulk]
-
+  [lid_driven_turb_non_eq_bulk_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with non-equilibrium bulk treatment, '
     [result]
       type = 'Exodiff'
@@ -161,8 +155,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-non-eq-bulk_short'
     []
   []
-  [lid_driven_turb_energy]
-
+  [lid_driven_turb_energy_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with transported energy, '
     [result]
       type = 'Exodiff'
@@ -185,8 +178,7 @@
       installation_type = in_tree
     []
   []
-  [lid_driven_turb_energy_wall]
-
+  [lid_driven_turb_energy_wall_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions, '
     [result]
       type = 'Exodiff'
@@ -205,8 +197,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-energy-wall_short'
     []
   []
-  [lid_driven_turb_energy_wall_linear]
-
+  [lid_driven_turb_energy_wall_linear_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with linearized temperature wall functions, '
     [result]
       type = 'Exodiff'
@@ -226,8 +217,7 @@
       abs_zero = 1e-6
     []
   []
-  [lid_driven_turb_energy_wall_log]
-
+  [lid_driven_turb_energy_wall_log_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions in the log-layer regime, '
     [result]
       type = 'Exodiff'
@@ -247,8 +237,7 @@
       abs_zero = 1e-6
     []
   []
-  [lid_driven_turb_capped]
-
+  [lid_driven_turb_capped_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with capped production, '
     [result]
       type = 'Exodiff'
@@ -267,8 +256,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-capped_short'
     []
   []
-  [lid_driven_turb_std_wall_nonlinear]
-
+  [lid_driven_turb_std_wall_nonlinear_std_k_epsilon]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
     [result]
       type = 'Exodiff'
