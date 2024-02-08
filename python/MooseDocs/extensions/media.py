@@ -99,7 +99,7 @@ class ImageCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
         settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
-        settings['link'] = (None, "Anchor to navigate to upon being clicked")
+        settings['link'] = (None, "Anchor URL to navigate to upon being clicked")
         settings.update(floats.caption_settings())
         return settings
 
@@ -209,7 +209,7 @@ class RenderImage(components.RenderComponent):
             src = str(node.relativeSource(page))
 
         if token['href']:
-            # Remove any styles being set for the img tag so it does not pollute the anchore tag
+            # Remove any styles being set for the img tag so it does not pollute the anchor tag
             pic_link = html.Tag(parent, 'a', token, href=token["href"], style=None)
             pic = html.Tag(pic_link, 'picture')
         else:
