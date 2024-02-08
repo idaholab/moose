@@ -1,6 +1,6 @@
 # Tensor Mechanics Master Action System
 
-!syntax description /Modules/TensorMechanics/Master/TensorMechanicsAction
+!syntax description /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
 The TensorMechanics Master Action is a convenience object that simplifies part of the
 mechanics system setup.
@@ -38,7 +38,7 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 |   | [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) or [ComputePlaneIncrementalStrain](/ComputePlaneIncrementalStrain.md) or [ComputeAxisymmetric1DIncrementalStrain](/ComputeAxisymmetric1DIncrementalStrain.md) or [ComputeAxisymmetricRZIncrementalStrain](/ComputeAxisymmetricRZIncrementalStrain.md) | `incremental` : boolean for using a incremental strain formulation |
 | Add AuxVariables and AuxKernels for various tensor component and quantity outputs | Material Properties as well as [AuxVariables](/AuxVariables/index.md) and [RankTwoAux](/RankTwoAux.md) or [RankTwoScalarAux](/RankTwoScalarAux.md) or [RankFourAux](/RankFourAux.md) | `generate_output`: a string of the quantities to add |
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
-| Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
+| Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](SolidMechanics/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
 
 Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](solid_mechanics/StressDivergence.md) and the [Strain Formulations](solid_mechanics/Strains.md) for more information.
 
@@ -61,7 +61,7 @@ under restrictive conditions for classes such as
 [ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
 [RankTwoTensorMaterialADConverter](MaterialADConverter.md).  The input components for
 these classes are not included in the
-[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/eigenstrain_names) passed to the
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/eigenstrain_names) passed to the
 `TensorMechanicsAction`.  Set the `automatic_eigenstrain_names = false` and
 populate this list manually if these components need to be included.
 
@@ -95,7 +95,7 @@ can be used.
 Parameters supplied at the `[Physics/SolidMechanics/QuasiStatic]` level act as
 defaults for the Master action subblocks.
 
-!syntax parameters /Modules/TensorMechanics/Master/TensorMechanicsAction
+!syntax parameters /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
 ## Associated Actions
 

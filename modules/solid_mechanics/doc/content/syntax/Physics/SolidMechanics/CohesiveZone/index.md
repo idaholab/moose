@@ -27,7 +27,7 @@ The provided `CZMInterfaceKernel` assume the `ComputeLocalTraction` is only func
 The `CohesiveZone` action automatically adds the proper `ComputeDisplacementJump`, `ComputeGlobalTraction`, `CZMInterfaceKernel` based on the `kinematic_type` parameter value (see inputs).
 The flowchart below summarizes the flow of information of the cohesive zone modeling frameworks, and highlights the  objects automatically added by the `CohesiveZone` action.
 
-!media media/solid_mechanics/CZMQuasiStatic Physics.png style=width:100%;
+!media media/solid_mechanics/CZMMasterAction.png style=width:100%;
 
 !alert note
 Even when using the `CohesiveZone` action it is the responsibility of the user to add the appropriate `ComputeLocalTraction` constitutive model and `BreakMeshByBlockGenerator` in the input file.

@@ -31,7 +31,7 @@
   []
 []
 
-[Modules/SolidMechanics/QuasiStatic]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     # This block adds all of the proper Kernels, strain calculators, and Variables
     # for SolidMechanics in the correct coordinate system (autodetected)

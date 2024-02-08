@@ -38,7 +38,7 @@ The Solid Mechanics QuasiStatic Physics is used to construct the kernels, displa
 |   | [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) or [ComputePlaneIncrementalStrain](/ComputePlaneIncrementalStrain.md) or [ComputeAxisymmetric1DIncrementalStrain](/ComputeAxisymmetric1DIncrementalStrain.md) or [ComputeAxisymmetricRZIncrementalStrain](/ComputeAxisymmetricRZIncrementalStrain.md) | `incremental` : boolean for using a incremental strain formulation |
 | Add AuxVariables and AuxKernels for various tensor component and quantity outputs | Material Properties as well as [AuxVariables](/AuxVariables/index.md) and [RankTwoAux](/RankTwoAux.md) or [RankTwoScalarAux](/RankTwoScalarAux.md) or [RankFourAux](/RankFourAux.md) | `generate_output`: a string of the quantities to add |
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
-| Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
+| Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](/SolidMechanics/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
 
 Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](solid_mechanics/StressDivergence.md) and the [Strain Formulations](solid_mechanics/Strains.md) for more information.
 

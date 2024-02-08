@@ -17,7 +17,7 @@ parameters to be manipulated and re-used during object creation.
 
 An action designed to build specific objects, such as the case in [#step09] for solid mechanics.
 
-!listing problems/step9.i block=Modules/SolidMechanics/Master
+!listing problems/step9.i block=Physics/SolidMechanics/QuasiStatic
 
 !---
 

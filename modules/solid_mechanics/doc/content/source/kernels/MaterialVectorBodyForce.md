@@ -6,7 +6,7 @@
 
 The kernel `MaterialVectorBodyForce` provides a body force term from a vector valued
 material property in the stress divergence equilibrium. Kernels for all spatial
-directions can be set up using the [MaterialVectorBodyForce action](MaterialVectorBodyForce/index.md).
+directions can be set up using the [MaterialVectorBodyForce action](SolidMechanics/MaterialVectorBodyForce/index.md).
 
 ## Example Input File Syntax
 
