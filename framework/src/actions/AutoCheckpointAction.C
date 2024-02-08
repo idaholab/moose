@@ -64,8 +64,9 @@ AutoCheckpointAction::act()
     {
       // For half transient, we want to simulate a user-created checkpoint so
       // time_step_interval works correctly.
-      checkpoints[0]->setAutosaveFlag(CheckpointType::USER_CREATED);
-      checkpoints[0]->_time_step_interval = 1;
+      const auto checkpoint = _app.getOutputWarehouse().getOutputs<Checkpoint>()[0];
+      checkpoint->setAutosaveFlag(CheckpointType::USER_CREATED);
+      checkpoint->_time_step_interval = 1;
     }
   }
 }
