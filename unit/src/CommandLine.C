@@ -11,6 +11,7 @@
 
 #include "CommandLine.h"
 #include "InputParameters.h"
+#include "MooseEnum.h"
 
 TEST(CommandLine, parse)
 {
@@ -101,5 +102,70 @@ TEST(CommandLine, initForMultiApp)
     cl.initForMultiApp("notsub0");
     std::vector<std::string> gold = {"--flag", "notsub:day=2", ":niner=9"};
     EXPECT_EQ(cl.getArguments(), gold);
+  }
+}
+
+TEST(CommandLine, requiredArgument)
+{
+  InputParameters params = emptyInputParameters();
+  const auto default_value = "foo";
+  MooseEnum enum_values("foo", default_value);
+  params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
+
+  CommandLine cl;
+  cl.addArgument("--value");
+  cl.addCommandLineOptionsFromParams(params);
+
+  try
+  {
+    cl.populateInputParams(params);
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    const auto pos =
+        std::string(err.what())
+            .find("The command line argument '--value' requires a value and one was not provided");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
+
+TEST(CommandLine, setMooseEnum)
+{
+  InputParameters params = emptyInputParameters();
+  const auto default_value = "foo";
+  MooseEnum enum_values("foo bar", default_value);
+  params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
+
+  const auto check = [params, &default_value](const std::string & value)
+  {
+    auto params_copy = params;
+    CommandLine cl;
+    if (value.size())
+    {
+      cl.addArgument("--value");
+      cl.addArgument(value);
+    }
+    cl.addCommandLineOptionsFromParams(params_copy);
+    cl.populateInputParams(params_copy);
+
+    EXPECT_EQ((std::string)params_copy.get<MooseEnum>("value"),
+              value.size() ? value : default_value);
+  };
+
+  check("");
+  check("foo");
+  check("bar");
+  try
+  {
+    check("baz");
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    const std::string expected_err = "While parsing command line argument '--value' with value "
+                                     "'baz':\n\nInvalid option \"baz\" in MooseEnum.";
+    const auto pos = std::string(err.what()).find(expected_err);
+    EXPECT_TRUE(pos != std::string::npos);
   }
 }

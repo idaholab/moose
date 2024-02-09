@@ -1539,7 +1539,7 @@ MooseApp::showInputs() const
 {
   if (isParamValid("show_inputs"))
   {
-    auto copy_syntax = _pars.getSyntax("copy_inputs");
+    auto copy_syntax = _pars.getCommandLineSyntax("copy_inputs");
     std::vector<std::string> dirs;
     const auto installable_inputs = getInstallableInputs();
 
@@ -1590,11 +1590,11 @@ MooseApp::copyInputs() const
     if (binname == "")
       mooseError("could not locate installed tests to run (unresolved binary/app name)");
 
-    auto src_dir =
-        MooseUtils::installedInputsDir(binname,
-                                       dir_to_copy,
-                                       "Rerun binary with " + _pars.getSyntax("show_inputs")[0] +
-                                           " to get a list of installable directories.");
+    auto src_dir = MooseUtils::installedInputsDir(binname,
+                                                  dir_to_copy,
+                                                  "Rerun binary with " +
+                                                      _pars.getCommandLineSyntax("show_inputs")[0] +
+                                                      " to get a list of installable directories.");
 
     // Use the command line here because if we have a symlink to another binary,
     // we want to dump into a directory that is named after the symlink not the true binary
