@@ -9,7 +9,7 @@ Multiphysics Object-Oriented Simulation Environment
 
 # An open-source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
-!media gallery/twist_dark.mp4 style=width:100%; controls=False autoplay=True loop=True
+!media large_media/gallery/twist_white.webm quicktime=large_media/gallery/twist_white.mp4 style=width:100%; controls=False autoplay=True loop=True
 
 !row!
 !col! small=12 medium=4 large=4 icon=computer
@@ -51,7 +51,7 @@ Multiphysics Object-Oriented Simulation Environment
 !row! style=display:inline-flex;
 !col! small=12 medium=4 large=2
 
-!media large_media/organization_logos/INL-Logo_Left-Black.png dark_src=large_media/organization_logos/INL-Logo_Left-White.png style=width:100%;display:block;
+!media large_media/organization_logos/INL-Logo_Left-Black.png dark_src=large_media/organization_logos/INL-Logo_Left-White.png link=https://inl.gov style=width:100%;display:block;
 
 !col-end!
 
@@ -59,7 +59,7 @@ Multiphysics Object-Oriented Simulation Environment
 
 !style halign=center
 
-!media large_media/organization_logos/Argonne_cmyk_black.png dark_src=large_media/organization_logos/Argonne_cmyk_white.png style=width:100%;display:block;
+!media large_media/organization_logos/Argonne_cmyk_black.png dark_src=large_media/organization_logos/Argonne_cmyk_white.png link=https://www.anl.gov/ style=width:100%;display:block;
 
 !col-end!
 
@@ -67,7 +67,7 @@ Multiphysics Object-Oriented Simulation Environment
 
 !style halign=center
 
-!media large_media/organization_logos/LosAlamosLab_light.png dark_src=large_media/organization_logos/LosAlamosLab_dark.png style=width:100%;display:block;
+!media large_media/organization_logos/LosAlamosLab_light.png dark_src=large_media/organization_logos/LosAlamosLab_dark.png link=https://lanl.gov/ style=width:100%;display:block;
 
 !col-end!
 
@@ -75,7 +75,7 @@ Multiphysics Object-Oriented Simulation Environment
 
 !style halign=center
 
-!media large_media/organization_logos/OLCF_official_black_10_26_15.png dark_src=large_media/organization_logos/OLCF_official_white_10_26_15.png style=width:100%;display:block;
+!media large_media/organization_logos/OLCF_official_black_10_26_15.png dark_src=large_media/organization_logos/OLCF_official_white_10_26_15.png link=https://www.olcf.ornl.gov/ style=width:100%;display:block;
 
 !col-end!
 !row-end!
