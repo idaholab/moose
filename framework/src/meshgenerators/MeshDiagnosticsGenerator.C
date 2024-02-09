@@ -10,6 +10,7 @@
 #include "MeshDiagnosticsGenerator.h"
 #include "CastUniquePointer.h"
 #include "MeshCoarseningUtils.h"
+#include "MeshBaseDiagnosticsUtils.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_refinement.h"
@@ -471,45 +472,11 @@ void
 MeshDiagnosticsGenerator::checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh) const
 {
   unsigned int num_nonconformal_nodes = 0;
-  auto pl = mesh->sub_point_locator();
-  pl->set_close_to_point_tol(_non_conformality_tol);
-
-  // loop on nodes, assumes a replicated mesh
-  for (auto & node : mesh->node_ptr_range())
-  {
-    // find all the elements around this node
-    std::set<const Elem *> elements;
-    (*pl)(*node, elements);
-
-    // loop through the set of elements near this node
-    for (auto & elem : elements)
-    {
-      // If the node is not part of this element's nodes, it is a
-      // case of non-conformality
-      bool found_conformal = false;
-
-      for (auto & elem_node : elem->node_ref_range())
-      {
-        if (*node == elem_node)
-        {
-          found_conformal = true;
-          break;
-        }
-      }
-      if (!found_conformal)
-      {
-        num_nonconformal_nodes++;
-        if (num_nonconformal_nodes < _num_outputs)
-          _console << "Non-conformality detected at  : " << *node << std::endl;
-        else if (num_nonconformal_nodes == _num_outputs)
-          _console << "Maximum output reached, log is silenced" << std::endl;
-      }
-    }
-  }
+  MeshBaseDiagnosticsUtils::checkNonConformalMesh(
+      mesh, _console, _num_outputs, _non_conformality_tol, num_nonconformal_nodes);
   diagnosticsLog("Number of non-conformal nodes: " + Moose::stringify(num_nonconformal_nodes),
                  _check_non_conformal_mesh,
                  num_nonconformal_nodes);
-  pl->unset_close_to_point_tol();
 }
 
 void
