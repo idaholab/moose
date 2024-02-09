@@ -858,12 +858,14 @@ MooseVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state)
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
   if (isDirichletBoundaryFace(*fi, face.face_side, state))
-    return ADReal(0.0);
+    return ADReal(0.0); // No time derivative is boudnary value is set
   else if (isExtrapolatedBoundaryFace(*fi, face.face_side, state))
   {
     const auto elem_guaranteed_to_have_dofs =
         std::get<0>(Moose::FV::determineElemOneAndTwo(*fi, *this));
     const auto elem_arg = ElemArg({elem_guaranteed_to_have_dofs, face.correct_skewness});
+    // For extrapolated boundary faces we take the value of the time derivative at the cell in
+    // contact with the face
     return evaluateDot(elem_arg, state);
   }
   else
