@@ -44,6 +44,9 @@ private:
   /// Whether the mesh generator should be verbose to the console
   const bool _verbose;
 
+  /// Whether to check the output mesh for non-conformality
+  const bool _check_output_mesh_for_nonconformality;
+
   /**
    * The actual function coarsening the blocks.
    * @param block_ids Vector of block_ids to coarsen

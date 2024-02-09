@@ -10,6 +10,7 @@
 #include "CoarsenBlockGenerator.h"
 #include "MooseMeshUtils.h"
 #include "MeshCoarseningUtils.h"
+#include "MeshBaseDiagnosticsUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/mesh_modification.h"
@@ -44,6 +45,10 @@ CoarsenBlockGenerator::validParams()
       "verbose",
       false,
       "Whether to make the mesh generator output details of its actions on the console");
+  params.addParam<bool>("check_for_non_conformal_output_mesh",
+                        true,
+                        "Whether to check the entire mesh for non-conformal nodes indicating that "
+                        "the coarsening operation has failed to produce a conformal mesh");
   return params;
 }
 
@@ -54,7 +59,8 @@ CoarsenBlockGenerator::CoarsenBlockGenerator(const InputParameters & parameters)
     _coarsening(getParam<std::vector<unsigned int>>("coarsening")),
     _starting_point(getParam<Point>("starting_point")),
     _max_vol_ratio(getParam<Real>("maximum_volume_ratio")),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _check_output_mesh_for_nonconformality(getParam<bool>("check_for_non_conformal_output_mesh"))
 {
   if (_block.size() != _coarsening.size())
     paramError("coarsening", "The blocks and coarsening parameter vectors should be the same size");
@@ -124,6 +130,17 @@ CoarsenBlockGenerator::generate()
   // flip elements as we were not careful to build them with a positive volume
   MeshTools::Modification::orient_elements(*mesh_ptr);
 
+  // check that we are not returning a non-conformal mesh
+  if (_check_output_mesh_for_nonconformality)
+  {
+    unsigned int num_nonconformal_nodes = 0;
+    MeshBaseDiagnosticsUtils::checkNonConformalMesh(
+        mesh, _console, 10, TOLERANCE, num_nonconformal_nodes);
+    if (num_nonconformal_nodes)
+      mooseError("Coarsened mesh has non-conformal nodes. The coarsening process likely failed to "
+                 "form a uniform paving of coarsened elements. Number of non-conformal nodes: " +
+                 Moose::stringify(num_nonconformal_nodes));
+  }
   return mesh_ptr;
 }
 
