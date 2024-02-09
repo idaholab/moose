@@ -359,8 +359,16 @@ pressure_tag = "pressure_grad"
 
 [AuxKernels]
   [compute_mu_t_v2f]
-    type = v2fViscosityAux
+    type = FunctorAux
     variable = 'mu_t_v2f'
+    functor = 'mu_t'
+    execute_on = 'NONLINEAR'
+  []
+[]
+
+[FunctorMaterials]
+  [v2f_viscosity_material]
+    type = INSFVv2fViscosityFunctorMaterial
     k = TKE
     epsilon = TKED
     v2 = TV2
