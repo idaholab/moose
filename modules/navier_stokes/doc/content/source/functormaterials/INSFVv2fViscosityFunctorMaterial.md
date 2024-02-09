@@ -1,6 +1,6 @@
 # INSFVv2fViscosityFunctorMaterial
 
-This is the auxiliary kernel used to compute the dynamic turbulent viscosity for the v2f model.
+This is the functor material is used to compute the dynamic turbulent viscosity for the v2f model.
 
 \begin{equation}
 \mu_t = \rho \min \left[ C_{\mu} \frac{k^2}{\epsilon}, C_{\mu 2} \overline{v^2} T_s \right]\,,
@@ -32,8 +32,8 @@ If the user is not doing enhanced wall treatments,
 wall boundary conditions for the turbulent viscosity should be set via
 [INSFVTurbulentViscosityWallFunction](INSFVTurbulentViscosityWallFunction.md).
 
-!syntax parameters /AuxKernels/INSFVv2fViscosityFunctorMaterial
+!syntax parameters /FunctorMaterials/INSFVv2fViscosityFunctorMaterial
 
-!syntax inputs /AuxKernels/INSFVv2fViscosityFunctorMaterial
+!syntax inputs /FunctorMaterials/INSFVv2fViscosityFunctorMaterial
 
-!syntax children /AuxKernels/INSFVv2fViscosityFunctorMaterial
+!syntax children /FunctorMaterials/INSFVv2fViscosityFunctorMaterial
