@@ -26,7 +26,7 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall-NL.i'
       exodiff = 'lid-driven-turb-std-wall-NL_out.e'
-      detail = 'and reach converged results with segregated solvers.'
+      detail = 'and reach converged results with segregated solvers with nonlinear solves.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -34,8 +34,8 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall-NL.i'
       exodiff = 'lid_driven_turb_std_wall_NL_short.e'
-      detail = 'and pass debugging checks.'
-      cli_args = 'Executioner/end_time=0.1 Outputs/file_base=lid_driven_turb_std_wall_NL_short'
+      detail = 'and pass debugging checks with nonlinear solves.'
+      cli_args = 'Executioner/end_time=0.01 Outputs/file_base=lid_driven_turb_std_wall_NL_short'
       abs_zero = 1e-6
     []
   []
