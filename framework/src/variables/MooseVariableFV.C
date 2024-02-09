@@ -851,6 +851,47 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & st
     return (*_sys.solutionUDot())(dof_index);
 }
 
+template <>
+ADReal
+MooseVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state) const
+{
+  const FaceInfo * const fi = face.fi;
+  mooseAssert(fi, "The face information must be non-null");
+  if (isDirichletBoundaryFace(*fi, face.face_side, state))
+    return ADReal(0.0);
+  else if (isExtrapolatedBoundaryFace(*fi, face.face_side, state))
+  {
+    const auto elem_guaranteed_to_have_dofs =
+        std::get<0>(Moose::FV::determineElemOneAndTwo(*fi, *this));
+    const auto elem_arg = ElemArg({elem_guaranteed_to_have_dofs, face.correct_skewness});
+    return evaluateDot(elem_arg, state);
+  }
+  else
+  {
+    mooseAssert(this->isInternalFace(*fi),
+                "We must be either Dirichlet, extrapolated, or internal");
+    const auto [elem_one, elem_two, elem_one_is_fi_elem] =
+        Moose::FV::determineElemOneAndTwo(*fi, *this);
+    const auto elem_dt_val = evaluateDot(ElemArg({elem_one, face.correct_skewness}), state);
+    const auto neigh_dt_val = evaluateDot(ElemArg({elem_two, face.correct_skewness}), state);
+    ADReal interp_dt_val;
+    Moose::FV::interpolate(/*InterpMethod*/ _face_interp_method,
+                           /*result*/ interp_dt_val,
+                           /*value1*/ elem_dt_val,
+                           /*value2*/ neigh_dt_val,
+                           /*FaceInfo*/ *fi,
+                           /*one_is_elem*/ elem_one_is_fi_elem);
+    return interp_dt_val;
+  }
+}
+
+template <>
+ADReal
+MooseVariableFV<Real>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
+{
+  return evaluateDot(ElemArg({elem_qp.elem, /*correct_skewness*/ false}), state);
+}
+
 template <typename OutputType>
 void
 MooseVariableFV<OutputType>::prepareAux()
