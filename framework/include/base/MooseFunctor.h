@@ -29,6 +29,59 @@
 
 namespace Moose
 {
+enum class FunctorEvaluationKind
+{
+  Value,
+  Gradient,
+  Dot,
+  GradDot
+};
+
+template <typename, FunctorEvaluationKind>
+struct FunctorReturnType;
+
+template <typename T>
+struct FunctorReturnType<T, FunctorEvaluationKind::Value>
+{
+  typedef T type;
+};
+
+template <typename T>
+struct FunctorReturnType<T, FunctorEvaluationKind::Gradient>
+{
+  typedef typename MetaPhysicL::ReplaceAlgebraicType<
+      T,
+      typename TensorTools::IncrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type
+      type;
+};
+
+template <typename T>
+struct FunctorReturnType<T, FunctorEvaluationKind::Dot>
+{
+  typedef T type;
+};
+
+template <typename T>
+struct FunctorReturnType<T, FunctorEvaluationKind::GradDot>
+{
+  typedef typename FunctorReturnType<T, FunctorEvaluationKind::Gradient>::type type;
+};
+
+template <FunctorEvaluationKind>
+struct FunctorGradientEvaluationKind;
+
+template <>
+struct FunctorGradientEvaluationKind<FunctorEvaluationKind::Value>
+{
+  static constexpr FunctorEvaluationKind value = FunctorEvaluationKind::Gradient;
+};
+
+template <>
+struct FunctorGradientEvaluationKind<FunctorEvaluationKind::Dot>
+{
+  static constexpr FunctorEvaluationKind value = FunctorEvaluationKind::GradDot;
+};
+
 /**
  * Abstract base class that can be used to hold collections of functors
  */
@@ -52,7 +105,6 @@ class FunctorBase : public FunctorAbstract
 {
 public:
   using FunctorType = FunctorBase<T>;
-  using FunctorReturnType = T;
   using ValueType = T;
   /// This rigmarole makes it so that a user can create functors that return containers (std::vector,
   /// std::array). This logic will make it such that if a user requests a functor type T that is a
@@ -61,9 +113,7 @@ public:
   /// std::vector<Real>, then GradientType will be std::vector<VectorValue<Real>>. As another
   /// example: T = std::array<VectorValue<Real>, 1> -> GradientType = std::array<TensorValue<Real>,
   /// 1>
-  using GradientType = typename MetaPhysicL::ReplaceAlgebraicType<
-      T,
-      typename TensorTools::IncrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;
+  using GradientType = typename FunctorReturnType<T, FunctorEvaluationKind::Gradient>::type;
   using DotType = ValueType;
 
   virtual ~FunctorBase() = default;
@@ -72,6 +122,14 @@ public:
     : _clearance_schedule(clearance_schedule), _functor_name(name)
   {
   }
+
+  /**
+   * Perform a generic evaluation based on the supplied template argument \p FET and supplied
+   * spatial and temporal arguments
+   */
+  template <FunctorEvaluationKind FET, typename Space, typename State>
+  typename FunctorReturnType<T, FET>::type genericEvaluate(const Space & r,
+                                                           const State & state) const;
 
   /// Return the functor name
   const MooseFunctorName & functorName() const { return _functor_name; }
@@ -870,6 +928,21 @@ FunctorBase<T>::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
     return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }
 
+template <typename T>
+template <FunctorEvaluationKind FET, typename Space, typename State>
+typename FunctorReturnType<T, FET>::type
+FunctorBase<T>::genericEvaluate(const Space & r, const State & state) const
+{
+  if constexpr (FET == FunctorEvaluationKind::Value)
+    return (*this)(r, state);
+  else if constexpr (FET == FunctorEvaluationKind::Gradient)
+    return gradient(r, state);
+  else if constexpr (FET == FunctorEvaluationKind::Dot)
+    return dot(r, state);
+  else
+    return gradDot(r, state);
+}
+
 /**
  * A non-templated base class for functors that allow an owner object to hold
  * different class template instantiations of \p Functor in a single container
@@ -1139,7 +1212,6 @@ class ConstantFunctor final : public FunctorBase<T>
 {
 public:
   using typename FunctorBase<T>::FunctorType;
-  using typename FunctorBase<T>::FunctorReturnType;
   using typename FunctorBase<T>::ValueType;
   using typename FunctorBase<T>::GradientType;
   using typename FunctorBase<T>::DotType;
@@ -1202,7 +1274,6 @@ class NullFunctor final : public FunctorBase<T>
 {
 public:
   using typename FunctorBase<T>::FunctorType;
-  using typename FunctorBase<T>::FunctorReturnType;
   using typename FunctorBase<T>::ValueType;
   using typename FunctorBase<T>::GradientType;
   using typename FunctorBase<T>::DotType;

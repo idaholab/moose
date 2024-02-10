@@ -858,12 +858,13 @@ MooseVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state)
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
   if (isDirichletBoundaryFace(*fi, face.face_side, state))
-    return ADReal(0.0); // No time derivative is boudnary value is set
+    return ADReal(0.0); // No time derivative if boundary value is set
   else if (isExtrapolatedBoundaryFace(*fi, face.face_side, state))
   {
-    const auto elem_guaranteed_to_have_dofs =
-        std::get<0>(Moose::FV::determineElemOneAndTwo(*fi, *this));
-    const auto elem_arg = ElemArg({elem_guaranteed_to_have_dofs, face.correct_skewness});
+    mooseAssert(face.face_side && this->hasBlocks(face.face_side->subdomain_id()),
+                "If we are an extrapolated boundary face, then our FunctorBase::checkFace method "
+                "should have assigned a non-null element that we are defined on");
+    const auto elem_arg = ElemArg({face.face_side, face.correct_skewness});
     // For extrapolated boundary faces we take the value of the time derivative at the cell in
     // contact with the face
     return evaluateDot(elem_arg, state);
@@ -872,18 +873,7 @@ MooseVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state)
   {
     mooseAssert(this->isInternalFace(*fi),
                 "We must be either Dirichlet, extrapolated, or internal");
-    const auto [elem_one, elem_two, elem_one_is_fi_elem] =
-        Moose::FV::determineElemOneAndTwo(*fi, *this);
-    const auto elem_dt_val = evaluateDot(ElemArg({elem_one, face.correct_skewness}), state);
-    const auto neigh_dt_val = evaluateDot(ElemArg({elem_two, face.correct_skewness}), state);
-    ADReal interp_dt_val;
-    Moose::FV::interpolate(/*InterpMethod*/ _face_interp_method,
-                           /*result*/ interp_dt_val,
-                           /*value1*/ elem_dt_val,
-                           /*value2*/ neigh_dt_val,
-                           /*FaceInfo*/ *fi,
-                           /*one_is_elem*/ elem_one_is_fi_elem);
-    return interp_dt_val;
+    return Moose::FV::interpolate<ADReal, FunctorEvaluationKind::Dot>(*this, face, state);
   }
 }
 

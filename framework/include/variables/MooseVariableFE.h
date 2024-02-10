@@ -81,7 +81,6 @@ public:
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
-  using typename Moose::FunctorBase<FunctorArg>::FunctorReturnType;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
   using typename Moose::FunctorBase<FunctorArg>::GradientType;
   using typename Moose::FunctorBase<FunctorArg>::DotType;

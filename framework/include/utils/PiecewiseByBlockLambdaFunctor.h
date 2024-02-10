@@ -62,7 +62,6 @@ public:
   using typename Moose::FunctorBase<T>::ValueType;
   using typename Moose::FunctorBase<T>::DotType;
   using typename Moose::FunctorBase<T>::GradientType;
-  using typename Moose::FunctorBase<T>::FunctorReturnType;
 
 protected:
   using ElemFn = std::function<T(const Moose::ElemArg &, const Moose::StateArg &)>;
