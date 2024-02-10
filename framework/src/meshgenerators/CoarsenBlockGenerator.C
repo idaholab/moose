@@ -133,9 +133,10 @@ CoarsenBlockGenerator::generate()
   // check that we are not returning a non-conformal mesh
   if (_check_output_mesh_for_nonconformality)
   {
+    mesh_ptr->prepare_for_use();
     unsigned int num_nonconformal_nodes = 0;
     MeshBaseDiagnosticsUtils::checkNonConformalMesh(
-        mesh, _console, 10, TOLERANCE, num_nonconformal_nodes);
+        mesh_ptr, _console, 10, TOLERANCE, num_nonconformal_nodes);
     if (num_nonconformal_nodes)
       mooseError("Coarsened mesh has non-conformal nodes. The coarsening process likely failed to "
                  "form a uniform paving of coarsened elements. Number of non-conformal nodes: " +
@@ -408,6 +409,8 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
         if (!fine_elem)
           continue;
 
+        // We dont delete nodes in the fine elements as they get removed during renumbering/
+        // remove_orphaned_nodes calls in preparing for use
         mesh_copy->delete_elem(fine_elem);
 
         // Clean up the list of candidates from any deleted elements
