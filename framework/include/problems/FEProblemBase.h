@@ -2147,6 +2147,7 @@ public:
   bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
 
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
+  virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
 protected:
   /// Create extra tagged vectors and matrices
