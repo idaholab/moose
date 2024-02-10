@@ -83,7 +83,6 @@
   [./front]
     type = ADPressure
     variable = disp_z
-    component = 2
     boundary = 6
     function = pressure
   [../]
@@ -98,6 +97,7 @@
   [./elastic_stress]
     type = ADComputeSmearedCrackingStress
     cracking_stress = 120
+    cracked_elasticity_type = DIAGONAL
     shear_retention_factor = 0.1
     softening_models = exponential_softening
   [../]

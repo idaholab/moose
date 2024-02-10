@@ -69,6 +69,7 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
+    cracked_elasticity_type = FULL
     softening_models = power_law_softening
   [../]
   [./power_law_softening]

@@ -75,6 +75,18 @@ $\boldsymbol{\sigma}_{cg}$ in terms of the stress $\boldsymbol{\sigma}_g$ is
 \end{aligned}
 \end{equation}
 
+There are two options on how the elasticity tensor is modified to account for the
+effects of cracking, controlled by the `cracked_elasticity_type` parameter. If 
+that parameter is set to `DIAGONAL`, when a crack forms in a given direction the
+diagonal entry in the local tensor is set to the product of the Young's modulus
+and $c_i$ for that direction, and the off-diagonal coupling terms that define the
+interaction between that and the other directions are set to 0. This was historically
+the way this was handled, but is somewhat problematic because upon cracking the 
+transverse stress due to Poisson's affect is abruptly removed. Alternatively,
+the `FULL` option scales down the existing on- and off-diagonal entries in the
+elasticity tensor by $c_i$, which scales down the transverse stresses at the same
+rate as stresses in the crack opening direction, resulting in smoother behavior.
+
 When many material points have multiple cracks, the solution becomes difficult to
 obtain numerically.  For this reason, controls are available to limit the number
 and direction of cracks that are allowed. Also, there are options to control the

@@ -84,7 +84,6 @@
     variable = disp_z
     boundary = 6
     function = pressure
-    factor   = 1.0
   [../]
 []
 
@@ -97,6 +96,7 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 120
+    cracked_elasticity_type = DIAGONAL
     shear_retention_factor = 0.1
     softening_models = exponential_softening
   [../]

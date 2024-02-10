@@ -86,6 +86,7 @@
   [./elastic_stress]
     type = ADComputeSmearedCrackingStress
     cracking_stress = 119.3e6
+    cracked_elasticity_type = FULL
     softening_models = exponential_softening
   [../]
   [./exponential_softening]
