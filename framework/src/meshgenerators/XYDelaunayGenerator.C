@@ -411,7 +411,7 @@ XYDelaunayGenerator::generate()
       }
       mooseAssert(found_inner_sides == np, "Failed to find full boundary around meshed hole");
 
-      // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+      // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
