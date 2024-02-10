@@ -11,6 +11,8 @@
 
 #include "SolveObject.h"
 
+class NonlinearSystemBase;
+
 /**
  * A solve object for use with a nonlinear system solver
  */

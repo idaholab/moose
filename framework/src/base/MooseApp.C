@@ -2620,7 +2620,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       auto & problem = feProblem();
       auto & undisp_moose_mesh = problem.mesh();
       auto & undisp_sys =
-          problem.numLinearSystems() ? problem.systemBaseNonlinear(0) : problem.systemBaseLinear(0);
+          problem.numLinearSystems() ? problem.systemBaseLinear(0) : problem.systemBaseNonlinear(0);
       auto & undisp_sys_dof_map = undisp_sys.dofMap();
       auto & undisp_mesh = undisp_moose_mesh.getMesh();
 

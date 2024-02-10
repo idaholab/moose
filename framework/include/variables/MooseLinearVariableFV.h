@@ -291,7 +291,9 @@ public:
   virtual void computeElemValues() override {}
   virtual void computeFaceValues(const FaceInfo & /*fi*/) override {}
   void setDofValues(const DenseVector<OutputData> & /*values*/) override {}
+  virtual void setLowerDofValues(const DenseVector<OutputData> & /*values*/) override {}
   virtual void insert(NumericVector<Number> & /*residual*/) override {}
+  virtual void insertLower(NumericVector<Number> & /*residual*/) override {}
   virtual void add(NumericVector<Number> & /*residual*/) override {}
   void setActiveTags(const std::set<TagID> & /*vtags*/) override
   {
