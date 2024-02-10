@@ -36,7 +36,7 @@ PHASE_FIELD               := yes
 POROUS_FLOW               := no
 RICHARDS                  := no
 # solid_mechanics is required by Steps 9-10.
-SOLID_MECHANICS          := yes
+SOLID_MECHANICS           := yes
 XFEM                      := no
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################

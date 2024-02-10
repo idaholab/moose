@@ -36,7 +36,7 @@ ifeq ($(ALL_MODULES),yes)
         REACTOR                     := yes
         RICHARDS                    := yes
         SCALAR_TRANSPORT            := yes
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
         SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
         THERMAL_HYDRAULICS          := yes
@@ -57,7 +57,7 @@ endif
 
 ifeq ($(FSI),yes)
         NAVIER_STOKES               := yes
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
 endif
 
 ifeq ($(NAVIER_STOKES),yes)
@@ -71,7 +71,7 @@ ifeq ($(SOLID_PROPERTIES),yes)
 endif
 
 ifeq ($(CONTACT),yes)
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
 endif
 
 # heat_conduction was renamed to heat_transfer
@@ -91,21 +91,21 @@ ifeq ($(HEAT_TRANSFER),yes)
 endif
 
 ifeq ($(PERIDYNAMICS),yes)
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
 endif
 
 ifeq ($(PHASE_FIELD),yes)
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
 endif
 
 ifeq ($(POROUS_FLOW),yes)
         CHEMICAL_REACTIONS          := yes
         FLUID_PROPERTIES            := yes
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
 endif
 
 ifeq ($(XFEM),yes)
-        SOLID_MECHANICS            := yes
+        SOLID_MECHANICS             := yes
 endif
 
 ifeq ($(SCALAR_TRANSPORT),yes)
@@ -243,7 +243,7 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
-  SUFFIX             := tm
+  SUFFIX             := sm
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
