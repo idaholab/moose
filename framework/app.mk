@@ -209,6 +209,7 @@ app_LINK := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
+$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(app_LINK)
 app_INCLUDE = -I$(all_header_dir)
 
 else # No Header Symlinks
@@ -257,6 +258,7 @@ else
 endif
 
 app_LIBS       += $(app_LIB)
+app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
@@ -289,7 +291,7 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 # object files until all symlinking is completed. The first dependency in the
 # list below ensures this.
 
-$(all_app_objects) : | $(app_LINKS) $(moose_config_symlink)
+$(all_app_objects) : | $(APPLICATION_NAME)_header_symlinks $(moose_config_symlink)
 
 else
 
