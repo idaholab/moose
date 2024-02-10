@@ -412,7 +412,7 @@ public:
   virtual void reinitOffDiagScalars(const THREAD_ID tid) = 0;
 
   /// sets the current boundary ID in assembly
-  void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid);
+  virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid);
 
   /**
    * reinitialize FE objects on a given element on a given side at a given set of reference

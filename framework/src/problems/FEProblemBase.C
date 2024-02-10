@@ -8356,3 +8356,11 @@ FEProblemBase::setCurrentLowerDElem(const Elem * const lower_d_elem, const THREA
     _displaced_problem->setCurrentLowerDElem(
         lower_d_elem ? _displaced_mesh->elemPtr(lower_d_elem->id()) : nullptr, tid);
 }
+
+void
+FEProblemBase::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
+{
+  SubProblem::setCurrentBoundaryID(bid, tid);
+  if (_displaced_problem)
+    _displaced_problem->setCurrentBoundaryID(bid, tid);
+}
