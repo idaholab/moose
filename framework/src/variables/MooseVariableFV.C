@@ -865,8 +865,8 @@ MooseVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state)
                 "If we are an extrapolated boundary face, then our FunctorBase::checkFace method "
                 "should have assigned a non-null element that we are defined on");
     const auto elem_arg = ElemArg({face.face_side, face.correct_skewness});
-    // For extrapolated boundary faces we take the value of the time derivative at the cell in
-    // contact with the face
+    // For extrapolated boundary faces, note that we take the value of the time derivative at the
+    // cell in contact with the face
     return evaluateDot(elem_arg, state);
   }
   else
