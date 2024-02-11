@@ -21,7 +21,7 @@
     []
   []
   [lid_driven_v2f_turb_std_wall_NL]
-    requirement = 'The system shall be able to run fluid flow with v2f turbulence model in enclosures with standard wall functions, '
+    requirement = 'The system shall be able to run fluid flow with v2f turbulence model in enclosures, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall-NL.i'
