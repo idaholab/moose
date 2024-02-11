@@ -16,8 +16,8 @@ This variable can only be used with linear systems and cannot be used for system
 Jacobian and residual evaluations.
 
 Similarly to [MooseVariableFV.md], this variable describes a field which has been discretized
-using the cell-centered finite volume method and can be evaluated using the [functor system in
-MOOSE](Functors/index.md).
+using the cell-centered finite volume method and can be evaluated using the
+[functor system in MOOSE](Functors/index.md).
 
 
 ## Example Input File Syntax

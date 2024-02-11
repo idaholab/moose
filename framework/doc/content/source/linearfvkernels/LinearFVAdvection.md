@@ -11,12 +11,12 @@ The contributions can be derived using the discretized term of the advection ter
 \sum_f u_f\vec{v}\cdot \vec{n}_f|S_f|,
 
 where $V_C$ is a cell in the mesh, while $\vec{v}$ is a pre-defined
-constant advecting velocity and can be supplied through the
+constant advecting velocity that can be supplied through the
 [!param](/LinearFVKernels/LinearFVAdvection/velocity) parameter.
 The face value of the variable $u_f$ is computed using the user-selected interpolation
 technique that can be supplied through the [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method) parameter.
 
-In the simplest case, using an linear interpolation method and an internal face
+In the simplest case, using a linear interpolation method and an internal face
 for the integration, we get the following matrix contribution to the degree of freedom corresponding
 to the variable on $V_C$:
 

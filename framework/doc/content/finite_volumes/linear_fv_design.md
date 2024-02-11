@@ -4,25 +4,27 @@
 The main motivation for introducing a new approach for finite volume system
 assembly is that many fluid dynamics solvers use a Picard-style velocity-pressure
 coupling and the routines designed for computing Residuals and Jacobians for Newton
-solves involve additional costs that can considerable slow down a Picard
+solves involve additional costs that can considerably slow down a Picard
 solve which may require orders of magnitude more iterations for convergence.
 
 To distinguish from the classical parts of MOOSE that solve nonlinear equations
-implicity using the Newton (or quasi-Newton) method, the new systems include a
-`Linear` addition denoting that they contribute to a linear system containing a
-system matrix and right hand side instead of a Jacobian and a residual.
+implicity using the Newton (or quasi-Newton) method, the new linear class names
+include a `Linear` sub-string denoting that they contribute to a linear system
+containing a matrix of coefficients and a right hand side instead of a
+Jacobian and a residual.
 
 ## Design Choices for Finite Volume Linear System Assembly
 
 - We assume a Picard-style iteration where the system matrix and right hand side
   are assembled using the previous solution vector.
 - We rely on the `LinearSystem` object in MOOSE which is a wrapper around
-  the `LinearImplicit` system class of `LibMesh`. The corresponding kernels will
-  directly contribute to the system matrix and right hand side located within this class.
-- We try to keep the sparse matrix as lean as possible so every term that requires
+  the `LinearImplicit` system class of `libMesh`. The corresponding kernels will
+  directly contribute to the system matrix and right hand side owned by the
+  `LinearSystem` class.
+- We try to keep the matrix as sparse as possible so every term that requires
   an extended stencil is treated explicitly. The assumption is that if we already use
-  a Picard-style solve this would increase the total number of iterations a little bit,
-  but for large runs the increased number of iterations would be offset by faster linear
+  a Picard-style solve this will increase the total number of iterations a little bit,
+  but for large runs the increased number of iterations will be offset by faster linear
   solves and assembly times.
 
 ## Linear FV Variables
@@ -36,16 +38,17 @@ FV moose variables that contribute to a Newton system:
   in an external loop. This will be further discussed below.
 - There are no data members for holding and computing
   quadrature-point-based quantities.
-- Only supports data interaction with other moose systems through the functor system.
+- The linear variable only supports data interaction with other moose systems
+  through the functor system.
 
 ## Linear FV Kernels
 
 To add contributions to the system matrix and right hand side to a linear system,
 a new system has been created which corresponds to the `[LinearFVKernels]` block
 in the input file. These kernels add contributions to the system matrix and right hand
- side of a linear system directly.
+side of a linear system directly.
 
-### Flux Kernels:
+### Flux Kernels
 
 Similarly to the nonlinear approach with the Newton system, we often encounter
 terms in the partial differential equations which contain face fluxes in
@@ -69,7 +72,7 @@ equations. Within these functions the following functions need to be overridden:
 - `computeBoundaryRHSContribution` which computes the right hand side contributions of
   a boundary face to the degree of freedom corresponding to the adjacent element.
 
-### Elemental Kernels:
+### Elemental Kernels
 
 For volumetric effects, an element-based evaluation is necessary. Good examples are
 external source terms or reaction terms in the partial differential equations.
@@ -111,18 +114,17 @@ time over an iteration. The setbacks of this design choice are:
 ## Boundary Conditions
 
 A significant difference compared to other systems in MOOSE is the way
-boundary conditions are enforced. In the linear finite volume setting,
-boundary conditions are enforced through `LinearFVFluxKernel`, using the following
-two functions:
+boundary conditions are enforced. Even though the user is still required to define the
+boundary conditions in the `[LinearFVBCs]` block, these boundary conditions
+are not executed on their own; instead they are used within `LinearFVFluxKernel`-s,
+through the following two functions:
 
 - `computeBoundaryMatrixContribution` which computes the matrix contributions of
   a boundary face to the degree of freedom corresponding to the adjacent element.
 - `computeBoundaryRHSContribution` which computes the right hand side contributions of
   a boundary face to the degree of freedom corresponding to the adjacent element.
 
-For these types of boundary conditions, a new system has been created and objects can be
-created in the input file under the `[LinearFVBCs]` block. To create a new boundary
-condition the following functions need to be overridden:
+To create a new boundary condition the following functions need to be overridden:
 
 - `computeBoundaryValue` computes the boundary value of the field.
 - `computBoundaryNormalGradient` computes the normal gradient of the variable on this boundary.
@@ -133,12 +135,13 @@ condition the following functions need to be overridden:
   as an approximation for the boundary value: $u_b = u_C$. In this case, we can treat the outflow term
   implicitly by adding a $\vec{v} \cdot \vec{n} |S_b|$ term to the matrix which comes from
   $\vec{v} \cdot \vec{n} u_C |S_b|$ outward flux term. This function will return
-  $1$ (as it is just the cell value) and the $\vec{v} \cdot \vec{n} |S_b|$ multipliers are added in the advection kernel.
+  $1$ (as it is just the cell value) and the $\vec{v} \cdot \vec{n} |S_b|$ multipliers are added
+  in the advection kernel.
 - `computeBoundaryValueRHSContribution` computes the right hand side contributions for terms that
   need the boundary value of the field, extensively used within advection kernels.
   Using the same example as above, by employing an extrapolation to the boundary face to determine the
   boundary value, we get the following expression: $u_b = u_C+\nabla u_C d_{Cf}$, where $d_{Cf}$ is
-  the vector pointing to the face center from the cell center. In this case, besides the the same matrix
+  the vector pointing to the face center from the cell center. In this case, besides the same matrix
   contribution as above, we need to add the following term to the right hand side:
   $\vec{v} \cdot \vec{n} \nabla u_C d_{Cf} |S_b|$. Therefore, this function returns $\nabla u_C d_{Cf}$
   (as it is just the value contribution) and the other multipliers are added in the advection kernel.
@@ -153,9 +156,9 @@ condition the following functions need to be overridden:
   function will return $\frac{1}{|d_Cf|}$ with additional multipliers added at the kernel level.
 - `computeBoundaryGradientRHSContribution` computes the right hand side contributions
   for terms that need the boundary gradient of the field, extensively used within diffusion kernels.
-  Using the same example as above, the remaining part of the expression belongs to the right hand side
-  meaning that it will be added a $\frac{u_b}{|d_Cf|}$ term with additional multipliers
-  applied at the kernel level.
+  Continuing with the example above, we add the remaining part of the expression ($-\frac{u_b}{|d_Cf|}$)
+  with the opposite sign to the right hand side. The additional multipliers, e.g. the diffusion coefficient
+  and the surface area, are factored in at the kernel level.
 
 
 

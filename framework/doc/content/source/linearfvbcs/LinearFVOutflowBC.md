@@ -12,15 +12,15 @@ where $\vec{v}_f$, $\vec{n}$ and $|S_f|$ are the outlet face velocity, outward p
 and the surface area, respectively. The velocity in this case can be defined using
 the [!param](/LinearFVBCs/LinearFVOutflowBC/velocity) parameter.
 
-The value of $u_f$ can be computed two different ways depending on the settings of the
+The value of $u_f$ can be computed two different ways depending on the setting of the
 [!param](/LinearFVBCs/LinearFVOutflowBC/use_two_term_expansion) parameter. When the two-term
-expansion is enable the face value is approximated as:
+expansion is enabled the face value is approximated as:
 
 !equation
-u_f = u_C + \nabla u_C \cdot \vec{d}_Cf~,
+u_f = u_C + \nabla u_C \cdot \vec{d}_{Cf}~,
 
 where $u_C$ and $\nabla u_C$ are the solution value and gradient in the boundary cell, while
-$\vec{d}_Cf$ is the vector pointing to the face center from the boundary cell centroid.
+$\vec{d}_{Cf}$ is the vector pointing to the face center from the boundary cell centroid.
 When [!param](/LinearFVBCs/LinearFVOutflowBC/use_two_term_expansion) is disabled the following first-order
 approximation is used:
 
