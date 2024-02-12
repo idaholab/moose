@@ -31,32 +31,32 @@ The Multiphysics Object-Oriented Simulation Environment (MOOSE) is an open-sourc
 finite element framework written in C++ [@lindsay2022moose]. The Thermal Hydraulics
 Module (THM) is an optional MOOSE physics module that provides capabilities for
 studying thermal hydraulic systems. Its core capability lies in assembling a network of
-coupled components, for instance, pipes, junctions, valves, etc.
+coupled components, for instance, pipes, junctions, and valves.
 
 THM provides several new systems to MOOSE to enable and facilitate thermal
 hydraulic simulations, most notably the `Components` system, which provides
 a higher-level syntax to MOOSE's lower-level objects. This system is extensible
-by the user, but the current library primarily includes components based on a 1D, single-phase,
+by the user, but the current library primarily includes components based on a one-dimensional, single-phase,
 variable-area, compressible flow model, as well as heat conduction.
 
 # Statement of need
 
-Numerous engineering applications employ fluids as mediums for transferring heat.
+Numerous engineering applications employ fluids as media for transferring heat.
 Power generation applications notably transfer heat from a source, such as a boiler,
 to an energy conversion system, such as a turbine. Thermal
 hydraulic systems are well-suited for the task, due to their ability to move
 energy efficiently over the scale of a plant. These systems vary widely in their size
-and complexity and may feature a large number of components coupled together.
+and complexity and may feature a large number of coupled components.
 
 A notable example requiring thermal hydraulic systems analysis is a
 nuclear reactor system. These systems typically involve a large network of
-components to perform the conversion of nuclear power to electrical power and
+components to convert nuclear power to electrical power and
 additional heat transfer components to remove the heat during accidental transients.
 For example, there may be a
 primary flow "loop" of pipes that extract heat from the fuel, pumps to force
 circulation, one or more heat exchangers exchanging heat between this primary
-loop and a secondary loop, turbomachinery components like turbines and generators,
-etc. Accurate systems analyses require models that capture the coupling
+loop and a secondary loop, and turbomachinery components like turbines and generators. 
+Accurate systems analyses require models that capture the coupling
 between all of these components.
 
 A wide variety of applications have been built using the MOOSE framework. A
@@ -73,10 +73,10 @@ used in nuclear microreactors.
 
 The `Components` system allows users to add "components", which are very flexible
 in their use, but in general represent "pieces" of a simulation, which may be coupled
-together. Common uses for components include adding meshes (1D, 2D, or 3D), variables,
+together. Common uses for components include adding meshes (one-, two-, or three-dimensional), variables,
 equations, and output. Components provide a higher level syntax that
-hides lower level MOOSE objects, such as `Kernel`s, `BoundaryCondition`s, etc. While
-`Action`s can also be used to create a higher level syntax, components provide much more
+hides lower level MOOSE objects, such as `Kernel`s and `BoundaryCondition`s. While
+`Action`s can also be used to create a higher-level syntax, components provide much more
 convenience, particularly when multiple components interact.
 
 Usually, components represent physical pieces in a system,
@@ -89,9 +89,9 @@ The `Components` system is abstract and provides several base classes that could
 be utilized by a variety of physical applications. All components share the
 base class `Component`; some intermediate base classes are:
 
-- `Component1D`: generates a 1D mesh in 3D space, defined by a starting point,
+- `Component1D`: generates a one-dimensional (1D) mesh in three-dimensional (3D) space, defined by a starting point,
   direction, length, and discretization.
-- `Component2D`: generates a 2D mesh in 3D space, defined by the same axial
+- `Component2D`: generates a two-dimensional (2D) mesh in 3D space, defined by the same axial
   parameters as `Component1D`, plus transverse direction, length, and discretization.
   This may represent either a Cartesian or axisymmetric coordinate system.
 - `FileMeshComponent`: generates a mesh read from an external file (any dimension).
@@ -116,11 +116,11 @@ related to this flow model are summarized as follows:
   condition, or a coupled heat flux.
 - Volumetric form loss sources, such as those arising from flow blockages.
 - Turbomachinery components, such as pumps, compressors, and turbines,
-  which are particular types of junction that add source terms to the momentum
+  which are particular types of junctions that add source terms to the momentum
   and energy equations to simulate turbomachinery.
 
 In addition to these components, there is also `FlowComponentNS`, which leverages
-a selection of flow formulations from MOOSE's Navier-Stokes module [@lindsay2023moose],
+a selection of flow formulations from MOOSE's Navier–Stokes module [@lindsay2023moose],
 with a mesh provided by an external file.
 
 The fluid properties needed by these components are defined using the MOOSE Fluid Properties module.
@@ -192,7 +192,7 @@ An application creates a single "logger" object, and
 then various objects (such as components and closures objects) can log errors
 and warnings. Execution continues until the application chooses to print
 out all of the errors and warnings, in a very palatable, condensed format.
-Then the user can view and address these errors all at once, significantly
+The user can then view and address these errors all at once, significantly
 decreasing the number of input file iterations.
 
 # Documentation
