@@ -19,7 +19,7 @@ class MooseObjectWarehouse;
 class HybridizedIntegratedBC;
 
 /**
- * A kernel for mixed dual finite element formulations
+ * A kernel for hybridized finite element formulations
  */
 class HybridizedKernel : public KernelBase, public HybridizedInterface
 {
@@ -89,7 +89,7 @@ protected:
   const MooseArray<Point> & _normals;
 
   // These data members should be set in the derived class
-  std::vector<dof_id_type> _mixed_dof_indices;
+  std::vector<dof_id_type> _primal_dof_indices;
   std::vector<dof_id_type> _lm_dof_indices;
 
   /// The current neighbor
@@ -121,13 +121,13 @@ private:
   DenseMatrix<Number> _K_libmesh;
   DenseVector<Number> _F_libmesh;
 
-  /// Mixed matrix inverse
-  EigenMatrix _MixedMatInv;
+  /// Primal matrix inverse
+  EigenMatrix _PrimalMatInv;
 
   // local degree of freedom increment values
   std::vector<Number> _lm_increment_dof_values;
-  std::vector<Number> _mixed_increment_dof_values;
-  EigenVector _LMIncrement, _MixedIncrement;
+  std::vector<Number> _primal_increment_dof_values;
+  EigenVector _LMIncrement, _PrimalIncrement;
 };
 
 inline void
