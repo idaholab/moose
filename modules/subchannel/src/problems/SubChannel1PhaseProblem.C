@@ -90,6 +90,10 @@ SubChannel1PhaseProblem::validParams()
       "monolithic_thermal", false, "Boolean to define whether to use thermal monolithic solve.");
   params.addParam<bool>(
       "verbose_subchannel", false, "Boolean to print out information related to subchannel solve.");
+  params.addParam<bool>(
+      "deformation",
+      false,
+      "Boolean that activates the deformation effect based on values for: displacement, Dpin");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("compute_viscosity",
                                 "Flag that enables the calculation of viscosity");
@@ -133,6 +137,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _segregated_bool(getParam<bool>("segregated")),
     _monolithic_thermal_bool(getParam<bool>("monolithic_thermal")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
+    _deformation(getParam<bool>("deformation")),
     _fp(nullptr),
     _Tpin_soln(nullptr),
     _q_prime_duct_soln(nullptr),
@@ -728,7 +733,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
-        _friction_args.Dh_i = Dh_i;
         auto fi = computeFrictionFactor(_friction_args);
         auto ki = k_grid[i_ch][iz - 1];
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
@@ -789,7 +793,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.i_ch = i_ch;
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
-          _friction_args.Dh_i = Dh_i;
           auto fi = computeFrictionFactor(_friction_args);
           auto ki = computeInterpolatedValue(
               k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
@@ -1015,7 +1018,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
-        _friction_args.Dh_i = Dh_i;
         auto fi = computeFrictionFactor(_friction_args);
         auto ki = computeInterpolatedValue(
             k_grid[i_ch][iz], k_grid[i_ch][iz - 1], _interpolation_scheme, Pe);
@@ -2604,7 +2606,6 @@ SubChannel1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
     _friction_args.i_ch = i_ch;
     _friction_args.S = Si;
     _friction_args.w_perim = w_perim;
-    _friction_args.Dh_i = Dhi;
     auto fi = computeFrictionFactor(_friction_args);
     massflow = std::sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
     error = std::abs((massflow - massflow_old) / massflow_old);
@@ -2642,7 +2643,6 @@ SubChannel1PhaseProblem::enforceUniformDPDZAtInlet()
     _friction_args.i_ch = i_ch;
     _friction_args.S = Si;
     _friction_args.w_perim = w_perim;
-    _friction_args.Dh_i = Dhi;
     auto fi = computeFrictionFactor(_friction_args);
     dPdZ_i(i_ch) =
         (fi / Dhi) * 0.5 * (std::pow((*_mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);

@@ -12,8 +12,7 @@ x_values = np.linspace(0, np.pi, 1000)
 y_values = sine_function(x_values)
 
 # Plot the function
-plt.plot(x_values, y_values, label='Axial power lot'
-         )
+plt.plot(x_values, y_values, label='Axial power plot')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.title('Sine Function')

@@ -51,9 +51,8 @@ LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
 void
 LiquidWaterSubChannel1PhaseProblem::initializeSolution()
 {
-  auto pin_mesh_exist = _subchannel_mesh.pinMeshExist();
-  auto duct_mesh_exist = _subchannel_mesh.ductMeshExist();
-  if (pin_mesh_exist || duct_mesh_exist)
+  /// update surface area, wetted perimeter based on: Dpin, displacement
+  if (_deformation)
   {
     Real standard_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
@@ -119,7 +118,7 @@ LiquidWaterSubChannel1PhaseProblem::initializeSolution()
         _w_perim_soln->set(node, wetted_perimeter);
       }
     }
-
+    /// update map of gap between pins (gij) based on: Dpin, displacement
     for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
     {
       for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)

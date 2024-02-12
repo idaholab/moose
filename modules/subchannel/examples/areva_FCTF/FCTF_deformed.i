@@ -41,7 +41,7 @@ unheated_length_exit = 0.855 #m
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = ${n_rings}
-    n_cells = 100
+    n_cells = 56
     flat_to_flat = ${inner_duct_in}
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
@@ -58,7 +58,7 @@ unheated_length_exit = 0.855 #m
     type = TriPinMeshGenerator
     input = subchannel
     nrings = ${n_rings}
-    n_cells = 100
+    n_cells = 56
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
     unheated_length_exit = ${unheated_length_exit}
@@ -141,6 +141,7 @@ unheated_length_exit = 0.855 #m
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = false
+  deformation = true
 []
 
 [ICs]

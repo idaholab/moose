@@ -65,7 +65,7 @@ SubChannelPointValue::execute()
     auto elem_id = elem ? elem->id() : DofObject::invalid_id;
     gatherMin(elem_id);
     if (elem_id == DofObject::invalid_id)
-      mooseError(name(), "height: No element located at given height.");
+      mooseError(name(), " height: No element located at given height.");
   }
 }
 

@@ -53,7 +53,7 @@ protected:
   struct _friction_args_struct
   {
     int i_ch;
-    Real Re, S, w_perim, Dh_i;
+    Real Re, S, w_perim;
   } _friction_args;
 
   /// Returns friction factor
@@ -184,6 +184,8 @@ protected:
   const bool _monolithic_thermal_bool;
   /// Boolean to printout information related to subchannel solve
   const bool _verbose_subchannel;
+  /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin
+  const bool _deformation;
 
   /// Solutions handles and link to TH tables properties
   const SinglePhaseFluidProperties * _fp;
