@@ -13,6 +13,15 @@
 #include <string>
 #include <map>
 
+#include "gtest_include.h"
+
+// forward declare unit tests
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, boolTest);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, intTest);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, stringTest);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, versionTest);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, multipleTest);
+
 namespace Moose
 {
 
@@ -31,28 +40,27 @@ public:
   /// A capability can have a bool, int, or string value
   typedef std::variant<bool, int, std::string> CapabilityType;
 
+  static Capabilities & getCapabilityRegistry();
+
   /// register a new capability
-  static void add(const std::string & capability, CapabilityType value, const std::string & doc);
-  static void add(const std::string & capability, const char * value, const char * doc);
+  void add(const std::string & capability, CapabilityType value, const std::string & doc);
+  void add(const std::string & capability, const char * value, const char * doc);
 
   /// create a JSON dump of the capabilities registry
-  static std::string dump();
+  std::string dump() const;
 
   /// check if the given required capabilities are fulfilled, returns a bool and a reason
-  static std::pair<bool, std::string> check(const std::string & requested_capabilities);
+  std::pair<bool, std::string> check(const std::string & requested_capabilities) const;
 
   ///@{ Don't allow creation through copy/move construction or assignment
   Capabilities(Capabilities const &) = delete;
   Capabilities & operator=(Capabilities const &) = delete;
+
+  Capabilities(Capabilities &&) = delete;
+  Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
 protected:
-  static Capabilities & instance();
-  void
-  addInternal(const std::string & raw_capability, CapabilityType value, const std::string & doc);
-  std::string dumpInternal() const;
-  std::pair<bool, std::string> checkInternal(const std::string & requested_capabilities) const;
-
   /**
    * Capability registry. The capabilities registered here can be dumped using the
    * --show-capabilities command line option. Capabilities are used by the test harness
@@ -63,6 +71,12 @@ protected:
 private:
   // Private constructor for singleton pattern
   Capabilities() {}
+
+  FRIEND_TEST(::CapabilitiesTest, boolTest);
+  FRIEND_TEST(::CapabilitiesTest, intTest);
+  FRIEND_TEST(::CapabilitiesTest, stringTest);
+  FRIEND_TEST(::CapabilitiesTest, versionTest);
+  FRIEND_TEST(::CapabilitiesTest, multipleTest);
 };
 
 } // namespace Moose
