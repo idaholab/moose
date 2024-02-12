@@ -32,7 +32,7 @@ public:
   virtual const MooseVariableBase & variable() const override { return _u_face_var; }
 
 protected:
-  virtual void assemble() override;
+  virtual void onBoundary() override;
 
 private:
   RealVectorValue getDirichletVelocity(const unsigned int qp) const;

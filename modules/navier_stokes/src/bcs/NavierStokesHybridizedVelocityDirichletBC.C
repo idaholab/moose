@@ -41,7 +41,7 @@ NavierStokesHybridizedVelocityDirichletBC::NavierStokesHybridizedVelocityDirichl
 }
 
 void
-NavierStokesHybridizedVelocityDirichletBC::assemble()
+NavierStokesHybridizedVelocityDirichletBC::onBoundary()
 {
   resizeData(*this);
 

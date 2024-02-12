@@ -32,7 +32,7 @@ NavierStokesHybridizedOutflowBC::NavierStokesHybridizedOutflowBC(const InputPara
 }
 
 void
-NavierStokesHybridizedOutflowBC::assemble()
+NavierStokesHybridizedOutflowBC::onBoundary()
 {
   resizeData(*this);
 

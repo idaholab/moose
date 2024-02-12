@@ -111,7 +111,7 @@ HybridizedKernel::assemble()
           mooseAssert(bc->shouldApply(),
                       "I don't think anyone uses the shouldApply feature for integrated boundary "
                       "conditions");
-          bc->assemble();
+          bc->onBoundary();
           addBCData(*bc);
         }
       }

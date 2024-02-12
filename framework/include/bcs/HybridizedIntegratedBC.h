@@ -51,9 +51,9 @@ private:
   friend class HybridizedKernel;
 
   /**
-   * Local finite element assembly
+   * Perform finite element assembly for this boundary condition
    */
-  virtual void assemble() = 0;
+  virtual void onBoundary() = 0;
 };
 
 inline void
