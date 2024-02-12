@@ -13,7 +13,7 @@
 #include "HybridizedInterface.h"
 
 /**
- * A kernel for mixed dual finite element formulations
+ * An integrated boundary condition for hybridized finite element formulations
  */
 class HybridizedIntegratedBC : public IntegratedBCBase, public HybridizedInterface
 {

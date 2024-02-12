@@ -205,7 +205,7 @@ NavierStokesHybridizedKernel::vectorFaceResidual(NSHybridized & obj,
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     // Vector equation dependence on LM dofs
     for (const auto i : make_range(obj._vector_n_dofs))
-      obj._MixedVec(i_offset + i) -=
+      obj._PrimalVec(i_offset + i) -=
           obj._JxW_face[qp] * (obj._vector_phi_face[i][qp] * obj._normals[qp]) * lm_sol[qp];
 }
 
@@ -219,7 +219,7 @@ NavierStokesHybridizedKernel::vectorFaceJacobian(NSHybridized & obj,
     // Vector equation dependence on LM dofs
     for (const auto i : make_range(obj._vector_n_dofs))
       for (const auto j : make_range(obj._lm_n_dofs))
-        obj._MixedLM(i_offset + i, lm_j_offset + j) -=
+        obj._PrimalLM(i_offset + i, lm_j_offset + j) -=
             obj._JxW_face[qp] * (obj._vector_phi_face[i][qp] * obj._normals[qp]) *
             obj._lm_phi_face[j][qp];
 }
@@ -244,25 +244,25 @@ NavierStokesHybridizedKernel::scalarFaceResidual(NSHybridized & obj,
       if (obj._neigh)
       {
         // vector
-        obj._MixedVec(i_offset + i) -= obj._JxW_face[qp] * obj._nu[qp] *
-                                       obj._scalar_phi_face[i][qp] *
-                                       (vector_sol[qp] * obj._normals[qp]);
+        obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._nu[qp] *
+                                        obj._scalar_phi_face[i][qp] *
+                                        (vector_sol[qp] * obj._normals[qp]);
 
         // pressure
-        obj._MixedVec(i_offset + i) +=
+        obj._PrimalVec(i_offset + i) +=
             obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (qp_p * obj._normals[qp]);
 
         // scalar from stabilization term
-        obj._MixedVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
-                                       scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
+        obj._PrimalVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
+                                        scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
 
         // lm from stabilization term
-        obj._MixedVec(i_offset + i) -= obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
-                                       lm_sol[qp] * obj._normals[qp] * obj._normals[qp];
+        obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
+                                        lm_sol[qp] * obj._normals[qp] * obj._normals[qp];
       }
 
       // lm from convection term
-      obj._MixedVec(i_offset + i) +=
+      obj._PrimalVec(i_offset + i) +=
           obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
     }
   }
@@ -286,7 +286,7 @@ NavierStokesHybridizedKernel::scalarFaceJacobian(NSHybridized & obj,
       if (obj._neigh)
       {
         for (const auto j : make_range(obj._vector_n_dofs))
-          obj._MixedMat(i_offset + i, vector_j_offset + j) -=
+          obj._PrimalMat(i_offset + i, vector_j_offset + j) -=
               obj._JxW_face[qp] * obj._nu[qp] * obj._scalar_phi_face[i][qp] *
               (obj._vector_phi_face[j][qp] * obj._normals[qp]);
 
@@ -295,12 +295,12 @@ NavierStokesHybridizedKernel::scalarFaceJacobian(NSHybridized & obj,
           Gradient p_phi;
           p_phi(vel_component) = obj._scalar_phi_face[j][qp];
           // pressure
-          obj._MixedLM(i_offset + i, p_j_offset + j) +=
+          obj._PrimalLM(i_offset + i, p_j_offset + j) +=
               obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (p_phi * obj._normals[qp]);
         }
 
         for (const auto j : make_range(obj._scalar_n_dofs))
-          obj._MixedMat(i_offset + i, scalar_j_offset + j) +=
+          obj._PrimalMat(i_offset + i, scalar_j_offset + j) +=
               obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._scalar_phi_face[j][qp] *
               obj._normals[qp] * obj._normals[qp];
       }
@@ -309,7 +309,7 @@ NavierStokesHybridizedKernel::scalarFaceJacobian(NSHybridized & obj,
       {
         if (obj._neigh)
           // from stabilization term
-          obj._MixedLM(i_offset + i, lm_j_offset + j) -=
+          obj._PrimalLM(i_offset + i, lm_j_offset + j) -=
               obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._lm_phi_face[j][qp] *
               obj._normals[qp] * obj._normals[qp];
 
@@ -321,14 +321,14 @@ NavierStokesHybridizedKernel::scalarFaceJacobian(NSHybridized & obj,
         {
           const auto vel_cross_vel = velCrossVelJacobian(
               obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 0, obj._lm_phi_face, j);
-          obj._MixedLM(i_offset + i, lm_u_j_offset + j) +=
+          obj._PrimalLM(i_offset + i, lm_u_j_offset + j) +=
               obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
         }
         // derivatives wrt 1th component
         {
           const auto vel_cross_vel = velCrossVelJacobian(
               obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 1, obj._lm_phi_face, j);
-          obj._MixedLM(i_offset + i, lm_v_j_offset + j) +=
+          obj._PrimalLM(i_offset + i, lm_v_j_offset + j) +=
               obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
         }
       }
@@ -394,7 +394,7 @@ NavierStokesHybridizedKernel::lmFaceJacobian(NSHybridized & obj,
     for (const auto i : make_range(obj._lm_n_dofs))
     {
       for (const auto j : make_range(obj._vector_n_dofs))
-        obj._LMMixed(i_offset + i, vector_j_offset + j) -=
+        obj._LMPrimal(i_offset + i, vector_j_offset + j) -=
             obj._JxW_face[qp] * obj._nu[qp] * obj._lm_phi_face[i][qp] *
             (obj._vector_phi_face[j][qp] * obj._normals[qp]);
 
@@ -407,7 +407,7 @@ NavierStokesHybridizedKernel::lmFaceJacobian(NSHybridized & obj,
       }
 
       for (const auto j : make_range(obj._scalar_n_dofs))
-        obj._LMMixed(i_offset + i, scalar_j_offset + j) +=
+        obj._LMPrimal(i_offset + i, scalar_j_offset + j) +=
             obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * _tau * obj._scalar_phi_face[j][qp] *
             obj._normals[qp] * obj._normals[qp];
 

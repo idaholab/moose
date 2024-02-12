@@ -60,11 +60,11 @@ HybridizedKernel::HybridizedKernel(const InputParameters & parameters)
 void
 HybridizedKernel::addBCData(const HybridizedIntegratedBC & hibc)
 {
-  _MixedMat += hibc._MixedMat;
+  _PrimalMat += hibc._PrimalMat;
   _LMMat += hibc._LMMat;
-  _MixedLM += hibc._MixedLM;
-  _LMMixed += hibc._LMMixed;
-  _MixedVec += hibc._MixedVec;
+  _PrimalLM += hibc._PrimalLM;
+  _LMPrimal += hibc._LMPrimal;
+  _PrimalVec += hibc._PrimalVec;
   _LMVec += hibc._LMVec;
 }
 
@@ -131,15 +131,15 @@ HybridizedKernel::assemble()
     }
   }
 
-  _MixedMatInv = _MixedMat.inverse();
+  _PrimalMatInv = _PrimalMat.inverse();
   libmesh_assert(_lm_size == _lm_dof_indices.size());
   if (_computing_global_data)
   {
     _K_libmesh.resize(_lm_size, _lm_size);
     _F_libmesh.resize(_lm_size);
-    const auto LMProductMat = -_LMMixed * _MixedMatInv;
-    _LMMat += LMProductMat * _MixedLM;
-    _LMVec += LMProductMat * _MixedVec;
+    const auto LMProductMat = -_LMPrimal * _PrimalMatInv;
+    _LMMat += LMProductMat * _PrimalLM;
+    _LMVec += LMProductMat * _PrimalVec;
     libmesh_assert(cast_int<std::size_t>(_LMMat.rows()) == _lm_size);
     libmesh_assert(cast_int<std::size_t>(_LMMat.cols()) == _lm_size);
     libmesh_assert(cast_int<std::size_t>(_LMVec.size()) == _lm_size);
@@ -168,12 +168,12 @@ HybridizedKernel::assemble()
     for (const auto i : index_range(_lm_dof_indices))
       _LMIncrement(i) = _lm_increment_dof_values[i];
 
-    _MixedIncrement = _MixedMatInv * (-_MixedVec - _MixedLM * _LMIncrement);
-    libmesh_assert(_mixed_dof_indices.size() == _mixed_size);
-    _mixed_increment_dof_values.resize(_mixed_size);
-    for (const auto i : index_range(_mixed_increment_dof_values))
-      _mixed_increment_dof_values[i] = _MixedIncrement(i);
+    _PrimalIncrement = _PrimalMatInv * (-_PrimalVec - _PrimalLM * _LMIncrement);
+    libmesh_assert(_primal_dof_indices.size() == _primal_size);
+    _primal_increment_dof_values.resize(_primal_size);
+    for (const auto i : index_range(_primal_increment_dof_values))
+      _primal_increment_dof_values[i] = _PrimalIncrement(i);
 
-    _aux_sys.solution().add_vector(_mixed_increment_dof_values, _mixed_dof_indices);
+    _aux_sys.solution().add_vector(_primal_increment_dof_values, _primal_dof_indices);
   }
 }

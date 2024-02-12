@@ -136,14 +136,14 @@ NavierStokesHybridizedInterface::resizeData(NSHybridized & obj)
   libmesh_assert_equal_to(obj._vector_n_dofs, obj._vector_phi.size());
   libmesh_assert_equal_to(obj._scalar_n_dofs, obj._scalar_phi.size());
 
-  obj._mixed_size = 2 * (obj._vector_n_dofs + obj._scalar_n_dofs);
+  obj._primal_size = 2 * (obj._vector_n_dofs + obj._scalar_n_dofs);
   obj._lm_size = 2 * obj._lm_n_dofs + obj._p_n_dofs + obj._global_lm_n_dofs;
 
   // prepare our matrix/vector data structures
-  obj._MixedMat.setZero(obj._mixed_size, obj._mixed_size);
-  obj._MixedVec.setZero(obj._mixed_size);
+  obj._PrimalMat.setZero(obj._primal_size, obj._primal_size);
+  obj._PrimalVec.setZero(obj._primal_size);
   obj._LMMat.setZero(obj._lm_size, obj._lm_size);
   obj._LMVec.setZero(obj._lm_size);
-  obj._MixedLM.setZero(obj._mixed_size, obj._lm_size);
-  obj._LMMixed.setZero(obj._lm_size, obj._mixed_size);
+  obj._PrimalLM.setZero(obj._primal_size, obj._lm_size);
+  obj._LMPrimal.setZero(obj._lm_size, obj._primal_size);
 }

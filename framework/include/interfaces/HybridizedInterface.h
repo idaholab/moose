@@ -24,12 +24,12 @@ class HybridizedInterface
 {
 protected:
   /// Matrix data structures for on-diagonal coupling
-  EigenMatrix _MixedMat, _LMMat;
+  EigenMatrix _PrimalMat, _LMMat;
   /// Vector data structures
-  EigenVector _MixedVec, _LMVec;
+  EigenVector _PrimalVec, _LMVec;
   /// Matrix data structures for off-diagonal coupling
-  EigenMatrix _MixedLM, _LMMixed;
+  EigenMatrix _PrimalLM, _LMPrimal;
 
   /// Local sizes of the systems
-  std::size_t _mixed_size, _lm_size;
+  std::size_t _primal_size, _lm_size;
 };

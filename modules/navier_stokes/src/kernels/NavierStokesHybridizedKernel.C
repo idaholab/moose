@@ -60,12 +60,12 @@ NavierStokesHybridizedKernel::onElement()
     _lm_dof_indices.insert(
         _lm_dof_indices.end(), _global_lm_dof_indices->begin(), _global_lm_dof_indices->end());
 
-  // Populate mixed dof indices if we are computing the primal increment
+  // Populate primal dof indices if we are computing the primal increment
   if (!computingGlobalData())
   {
-    _mixed_dof_indices = _qu_dof_indices;
+    _primal_dof_indices = _qu_dof_indices;
     auto append = [this](const auto & dofs)
-    { _mixed_dof_indices.insert(_mixed_dof_indices.end(), dofs.begin(), dofs.end()); };
+    { _primal_dof_indices.insert(_primal_dof_indices.end(), dofs.begin(), dofs.end()); };
     append(_u_dof_indices);
     append(_qv_dof_indices);
     append(_v_dof_indices);
@@ -162,10 +162,10 @@ NavierStokesHybridizedKernel::vectorVolumeResidual(const unsigned int i_offset,
     for (const auto i : make_range(_vector_n_dofs))
     {
       // Vector equation dependence on vector dofs
-      _MixedVec(i_offset + i) += _JxW[qp] * (_vector_phi[i][qp] * vector_sol[qp]);
+      _PrimalVec(i_offset + i) += _JxW[qp] * (_vector_phi[i][qp] * vector_sol[qp]);
 
       // Vector equation dependence on scalar dofs
-      _MixedVec(i_offset + i) += _JxW[qp] * (_div_vector_phi[i][qp] * scalar_sol[qp]);
+      _PrimalVec(i_offset + i) += _JxW[qp] * (_div_vector_phi[i][qp] * scalar_sol[qp]);
     }
 }
 
@@ -179,12 +179,12 @@ NavierStokesHybridizedKernel::vectorVolumeJacobian(const unsigned int i_offset,
     {
       // Vector equation dependence on vector dofs
       for (const auto j : make_range(_vector_n_dofs))
-        _MixedMat(i_offset + i, vector_j_offset + j) +=
+        _PrimalMat(i_offset + i, vector_j_offset + j) +=
             _JxW[qp] * (_vector_phi[i][qp] * _vector_phi[j][qp]);
 
       // Vector equation dependence on scalar dofs
       for (const auto j : make_range(_scalar_n_dofs))
-        _MixedMat(i_offset + i, scalar_j_offset + j) +=
+        _PrimalMat(i_offset + i, scalar_j_offset + j) +=
             _JxW[qp] * (_div_vector_phi[i][qp] * _scalar_phi[j][qp]);
     }
 }
@@ -207,13 +207,13 @@ NavierStokesHybridizedKernel::scalarVolumeResidual(const unsigned int i_offset,
     for (const auto i : make_range(_scalar_n_dofs))
     {
       // Scalar equation dependence on vector and pressure dofs
-      _MixedVec(i_offset + i) += _JxW[qp] * (_grad_scalar_phi[i][qp] * sigma[qp]);
+      _PrimalVec(i_offset + i) += _JxW[qp] * (_grad_scalar_phi[i][qp] * sigma[qp]);
 
       // Scalar equation dependence on scalar dofs
-      _MixedVec(i_offset + i) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
+      _PrimalVec(i_offset + i) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
 
       // Scalar equation RHS
-      _MixedVec(i_offset + i) -= _JxW[qp] * _scalar_phi[i][qp] * f;
+      _PrimalVec(i_offset + i) -= _JxW[qp] * _scalar_phi[i][qp] * f;
     }
   }
 }
@@ -231,7 +231,7 @@ NavierStokesHybridizedKernel::scalarVolumeJacobian(const unsigned int i_offset,
     {
       // Scalar equation dependence on vector dofs
       for (const auto j : make_range(_vector_n_dofs))
-        _MixedMat(i_offset + i, vel_gradient_j_offset + j) +=
+        _PrimalMat(i_offset + i, vel_gradient_j_offset + j) +=
             _JxW[qp] * _nu[qp] * (_grad_scalar_phi[i][qp] * _vector_phi[j][qp]);
 
       // Scalar equation dependence on pressure dofs
@@ -239,7 +239,7 @@ NavierStokesHybridizedKernel::scalarVolumeJacobian(const unsigned int i_offset,
       {
         Gradient p_phi;
         p_phi(vel_component) = _scalar_phi[j][qp];
-        _MixedLM(i_offset + i, p_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * p_phi);
+        _PrimalLM(i_offset + i, p_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * p_phi);
       }
 
       // Scalar equation dependence on scalar dofs
@@ -249,14 +249,14 @@ NavierStokesHybridizedKernel::scalarVolumeJacobian(const unsigned int i_offset,
         {
           const auto vel_cross_vel =
               velCrossVelJacobian(_u_sol, _v_sol, qp, vel_component, 0, _scalar_phi, j);
-          _MixedMat(i_offset + i, u_j_offset + j) -=
+          _PrimalMat(i_offset + i, u_j_offset + j) -=
               _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
         }
         // derivatives wrt 1th component
         {
           const auto vel_cross_vel =
               velCrossVelJacobian(_u_sol, _v_sol, qp, vel_component, 1, _scalar_phi, j);
-          _MixedMat(i_offset + i, v_j_offset + j) -=
+          _PrimalMat(i_offset + i, v_j_offset + j) -=
               _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
         }
       }
@@ -309,11 +309,11 @@ NavierStokesHybridizedKernel::pressureVolumeJacobian(const unsigned int i_offset
       {
         {
           const Gradient phi(_scalar_phi[j][qp], 0);
-          _LMMixed(i_offset + i, u_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * phi);
+          _LMPrimal(i_offset + i, u_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * phi);
         }
         {
           const Gradient phi(0, _scalar_phi[j][qp]);
-          _LMMixed(i_offset + i, v_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * phi);
+          _LMPrimal(i_offset + i, v_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * phi);
         }
       }
       if (_enclosure_lm_var)

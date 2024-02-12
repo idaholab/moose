@@ -99,7 +99,8 @@ NavierStokesHybridizedVelocityDirichletBC::vectorDirichletResidual(const unsigne
 
     // External boundary -> Dirichlet faces -> Vector equation RHS
     for (const auto i : make_range(_vector_n_dofs))
-      _MixedVec(i_offset + i) -= _JxW[qp] * (_vector_phi_face[i][qp] * _normals[qp]) * scalar_value;
+      _PrimalVec(i_offset + i) -=
+          _JxW[qp] * (_vector_phi_face[i][qp] * _normals[qp]) * scalar_value;
   }
 }
 
@@ -122,22 +123,22 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletResidual(
     for (const auto i : make_range(_scalar_n_dofs))
     {
       // vector
-      _MixedVec(i_offset + i) -=
+      _PrimalVec(i_offset + i) -=
           _JxW[qp] * _nu[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * _normals[qp]);
 
       // pressure
-      _MixedVec(i_offset + i) += _JxW[qp] * _scalar_phi_face[i][qp] * (qp_p * _normals[qp]);
+      _PrimalVec(i_offset + i) += _JxW[qp] * _scalar_phi_face[i][qp] * (qp_p * _normals[qp]);
 
       // scalar from stabilization term
-      _MixedVec(i_offset + i) +=
+      _PrimalVec(i_offset + i) +=
           _JxW[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] * _normals[qp] * _normals[qp];
 
       // dirichlet lm from stabilization term
-      _MixedVec(i_offset + i) -=
+      _PrimalVec(i_offset + i) -=
           _JxW[qp] * _scalar_phi_face[i][qp] * _tau * scalar_value * _normals[qp] * _normals[qp];
 
       // dirichlet lm from advection term
-      _MixedVec(i_offset + i) +=
+      _PrimalVec(i_offset + i) +=
           _JxW[qp] * _scalar_phi_face[i][qp] * (dirichlet_velocity * _normals[qp]) * scalar_value;
     }
   }
@@ -155,7 +156,7 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletJacobian(
     for (const auto i : make_range(_scalar_n_dofs))
     {
       for (const auto j : make_range(_vector_n_dofs))
-        _MixedMat(i_offset + i, vector_j_offset + j) -=
+        _PrimalMat(i_offset + i, vector_j_offset + j) -=
             _JxW[qp] * _nu[qp] * _scalar_phi_face[i][qp] * (_vector_phi_face[j][qp] * _normals[qp]);
 
       for (const auto j : make_range(_p_n_dofs))
@@ -163,13 +164,13 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletJacobian(
         Gradient p_phi;
         p_phi(vel_component) = _scalar_phi_face[j][qp];
         // pressure
-        _MixedLM(i_offset + i, p_j_offset + j) +=
+        _PrimalLM(i_offset + i, p_j_offset + j) +=
             _JxW[qp] * _scalar_phi_face[i][qp] * (p_phi * _normals[qp]);
       }
 
       for (const auto j : make_range(_scalar_n_dofs))
-        _MixedMat(i_offset + i, scalar_j_offset + j) += _JxW[qp] * _scalar_phi_face[i][qp] * _tau *
-                                                        _scalar_phi_face[j][qp] * _normals[qp] *
-                                                        _normals[qp];
+        _PrimalMat(i_offset + i, scalar_j_offset + j) += _JxW[qp] * _scalar_phi_face[i][qp] * _tau *
+                                                         _scalar_phi_face[j][qp] * _normals[qp] *
+                                                         _normals[qp];
     }
 }
