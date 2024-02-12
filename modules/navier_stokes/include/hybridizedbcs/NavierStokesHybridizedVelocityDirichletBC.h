@@ -21,6 +21,10 @@ template <typename>
 class MooseArray;
 class Function;
 
+/**
+ * Weakly imposes Dirichlet boundary conditions for the velocity for a hybridized discretization of
+ * the Navier-Stokes equations
+ */
 class NavierStokesHybridizedVelocityDirichletBC : public HybridizedIntegratedBC,
                                                   public NavierStokesHybridizedInterface
 {
