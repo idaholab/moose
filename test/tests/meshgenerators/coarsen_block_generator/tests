@@ -25,7 +25,7 @@
       input = 'coarsen_quad_multi.i'
       cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 2' --mesh-only "
                  "double_nonuniform.e"
-      detail = 'for a mesh coarsening test with a twice-refined elements,'
+      detail = 'for a mesh coarsening test with twice-refined elements,'
       recover = false
     []
     [external_refined]
@@ -43,7 +43,7 @@
       cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
                  "Mesh/refine_side/input=add_internal Mesh/refine_side/boundaries=middle "
                  "Mesh/refine_side/refinement='1' --mesh-only internal_uniform.e"
-      detail = 'and for a mesh coarsening test with an external boundary refined.'
+      detail = 'and for a mesh coarsening test with an internal boundary refined.'
       recover = false
     []
   []
@@ -57,7 +57,7 @@
       exodiff = 'coarsen_quad_in.e'
       cli_args = '--mesh-only'
       recover = false
-      detail = 'elements within a non-uniformly refined meshed,'
+      detail = 'elements within a non-uniformly refined mesh,'
       mesh_mode = replicated
     []
     [multiple_block_uniform]
@@ -133,7 +133,7 @@
       input = 'coarsen_hex_multi.i'
       cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 2' --mesh-only "
                  "double_nonuniform_hex.e"
-      detail = 'for a mesh coarsening test with a twice-refined elements,'
+      detail = 'for a mesh coarsening test with twice-refined elements,'
       recover = false
     []
     [external_refined]
@@ -151,7 +151,7 @@
       cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
                  "Mesh/refine_side/input=add_internal Mesh/refine_side/boundaries=middle "
                  "Mesh/refine_side/refinement='1' --mesh-only internal_uniform_hex.e"
-      detail = 'and for a mesh coarsening test with an external boundary refined.'
+      detail = 'and for a mesh coarsening test with an internal boundary refined.'
       recover = false
     []
   []
@@ -165,7 +165,7 @@
       exodiff = 'coarsen_hex_in.e'
       cli_args = '--mesh-only'
       recover = false
-      detail = 'elements within a non-uniformly refined meshed,'
+      detail = 'elements within a non-uniformly refined mesh,'
       mesh_mode = replicated
     []
     [multiple_block_uniform]
