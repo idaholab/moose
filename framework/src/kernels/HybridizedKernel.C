@@ -132,21 +132,21 @@ HybridizedKernel::assemble()
   }
 
   _PrimalMatInv = _PrimalMat.inverse();
-  libmesh_assert(_lm_size == _lm_dof_indices.size());
+  const auto lm_size = _lm_dof_indices.size();
   if (_computing_global_data)
   {
-    _K_libmesh.resize(_lm_size, _lm_size);
-    _F_libmesh.resize(_lm_size);
+    _K_libmesh.resize(lm_size, lm_size);
+    _F_libmesh.resize(lm_size);
     const auto LMProductMat = -_LMPrimal * _PrimalMatInv;
     _LMMat += LMProductMat * _PrimalLM;
     _LMVec += LMProductMat * _PrimalVec;
-    libmesh_assert(cast_int<std::size_t>(_LMMat.rows()) == _lm_size);
-    libmesh_assert(cast_int<std::size_t>(_LMMat.cols()) == _lm_size);
-    libmesh_assert(cast_int<std::size_t>(_LMVec.size()) == _lm_size);
+    libmesh_assert(cast_int<std::size_t>(_LMMat.rows()) == lm_size);
+    libmesh_assert(cast_int<std::size_t>(_LMMat.cols()) == lm_size);
+    libmesh_assert(cast_int<std::size_t>(_LMVec.size()) == lm_size);
 
-    for (const auto i : make_range(_lm_size))
+    for (const auto i : make_range(lm_size))
     {
-      for (const auto j : make_range(_lm_size))
+      for (const auto j : make_range(lm_size))
         _K_libmesh(i, j) = _LMMat(i, j);
       _F_libmesh(i) = _LMVec(i);
     }
@@ -164,13 +164,12 @@ HybridizedKernel::assemble()
     // the vector and scalar solutions
     //
     _lm_increment->get(_lm_dof_indices, _lm_increment_dof_values);
-    _LMIncrement.resize(_lm_size);
+    _LMIncrement.resize(lm_size);
     for (const auto i : index_range(_lm_dof_indices))
       _LMIncrement(i) = _lm_increment_dof_values[i];
 
     _PrimalIncrement = _PrimalMatInv * (-_PrimalVec - _PrimalLM * _LMIncrement);
-    libmesh_assert(_primal_dof_indices.size() == _primal_size);
-    _primal_increment_dof_values.resize(_primal_size);
+    _primal_increment_dof_values.resize(_primal_dof_indices.size());
     for (const auto i : index_range(_primal_increment_dof_values))
       _primal_increment_dof_values[i] = _PrimalIncrement(i);
 

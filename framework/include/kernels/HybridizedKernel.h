@@ -88,7 +88,8 @@ protected:
   /// face normals
   const MooseArray<Point> & _normals;
 
-  // These data members should be set in the derived class
+  /// Containers for the global degree of freedom numbers for primal and LM variables
+  /// respectively. These data members should be set in the derived class
   std::vector<dof_id_type> _primal_dof_indices;
   std::vector<dof_id_type> _lm_dof_indices;
 
