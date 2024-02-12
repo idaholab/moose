@@ -16,6 +16,9 @@
 
 class Function;
 
+/**
+ * Implements the steady incompressible Navier-Stokes equations for a hybridized discretization
+ */
 class NavierStokesHybridizedKernel : public HybridizedKernel, public NavierStokesHybridizedInterface
 {
 public:
@@ -50,23 +53,57 @@ protected:
                                              const MooseArray<std::vector<Real>> & phi,
                                              const unsigned int j);
 
+  /**
+   * Compute the stress at quadrature points for a given velocity component and its gradient
+   */
   void computeStress(const MooseArray<Gradient> & vel_gradient,
                      const unsigned int vel_component,
                      std::vector<Gradient> & sigma);
 
+  /**
+   * Compute the volumetric contributions to a velocity gradient residual for a provided velocity
+   * gradient and velocity
+   * @param i_offset The local degree of freedom offset for the velocity gradient component
+   * @param vector_sol A velocity gradient component
+   * @param scalar_sol A velocity component
+   */
   void vectorVolumeResidual(const unsigned int i_offset,
                             const MooseArray<Gradient> & vector_sol,
                             const MooseArray<Number> & scalar_sol);
 
+  /**
+   * Compute the volumetric contributions to a velocity gradient Jacobian
+   * @param i_offset The local degree of freedom offset for the velocity gradient component
+   * @param vector_j_offset The local degree of freedom offset for the velocity gradient component
+   * @param scalar_j_offset The local degree of freedom offset for the velocity component
+   */
   void vectorVolumeJacobian(const unsigned int i_offset,
                             const unsigned int vector_j_offset,
                             const unsigned int scalar_j_offset);
 
+  /**
+   * Compute the volumetric contributions to a velocity residual for a provided velocity
+   * gradient and stress
+   * @param i_offset The local degree of freedom offset for the velocity component
+   * @param vel_gradient The velocity gradient component
+   * @param vel_component The velocity component
+   * @param sigma The associated stress
+   */
   void scalarVolumeResidual(const unsigned int i_offset,
                             const MooseArray<Gradient> & vel_gradient,
                             const unsigned int vel_component,
                             std::vector<Gradient> & sigma);
 
+  /**
+   * Compute the volumetric contributions to a velocity Jacobian
+   * @param i_offset The local degree of freedom offset for the velocity component
+   * @param vel_gradient_j_offset The local degree of freedom offset for the associated velocity
+   * gradient
+   * @param p_j_offset The local degree of freedom offset for the pressure
+   * @param vel_component The velocity component
+   * @param u_j_offset The local degree of freedom offset for the x-component velocity
+   * @param v_j_offset The local degree of freedom offset for the y-component velocity
+   */
   void scalarVolumeJacobian(const unsigned int i_offset,
                             const unsigned int vel_gradient_j_offset,
                             const unsigned int p_j_offset,
@@ -74,8 +111,25 @@ protected:
                             const unsigned int u_j_offset,
                             const unsigned int v_j_offset);
 
+  /**
+   * Compute the volumetric contributions to the pressure residual, e.g. the conservation of mass
+   * equation
+   * @param i_offset The local degree of freedom offset for the pressure
+   * @param global_lm_i_offset The local degree of freedom offset for the global Lagrange multiplier
+   * that removes the pressure nullspace
+   */
   void pressureVolumeResidual(const unsigned int i_offset, const unsigned int global_lm_i_offset);
 
+  /**
+   * Compute the volumetric contributions to the pressure Jacobian, e.g. the conservation of mass
+   * equation
+   * @param i_offset The local degree of freedom offset for the pressure
+   * @param u_j_offset The local degree of freedom offset for the x-component of velocity
+   * @param v_j_offset The local degree of freedom offset for the y-component of velocity
+   * @param p_j_offset The local degree of freedom offset for the pressure
+   * @param global_lm_i_offset The local degree of freedom offset for the global Lagrange multiplier
+   * that removes the pressure nullspace
+   */
   void pressureVolumeJacobian(const unsigned int i_offset,
                               const unsigned int u_j_offset,
                               const unsigned int v_j_offset,

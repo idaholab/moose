@@ -29,6 +29,8 @@ NavierStokesHybridizedKernel::validParams()
       "pressure_mms_forcing_function",
       0,
       "A forcing function for the pressure (mass) equation for conducting MMS studies");
+  params.addClassDescription("Implements the steady incompressible Navier-Stokes equations for a "
+                             "hybridized discretization");
 
   return params;
 }

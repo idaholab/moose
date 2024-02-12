@@ -20,6 +20,8 @@ NavierStokesHybridizedVelocityDirichletBC::validParams()
 {
   auto params = HybridizedIntegratedBC::validParams();
   params += NavierStokesHybridizedInterface::validParams();
+  params.addClassDescription("Weakly imposes Dirichlet boundary conditions for the velocity for a "
+                             "hybridized discretization of the Navier-Stokes equations");
   params.addParam<FunctionName>(
       "dirichlet_u", 0, "The Dirichlet value for the x-component of velocity");
   params.addParam<FunctionName>(

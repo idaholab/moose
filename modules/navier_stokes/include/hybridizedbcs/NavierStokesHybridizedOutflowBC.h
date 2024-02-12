@@ -21,6 +21,10 @@ template <typename>
 class MooseArray;
 class Function;
 
+/**
+ * Implements an outflow boundary condition for use with a hybridized discretization of the
+ * Navier-Stokes equations
+ */
 class NavierStokesHybridizedOutflowBC : public HybridizedIntegratedBC,
                                         public NavierStokesHybridizedInterface
 {
