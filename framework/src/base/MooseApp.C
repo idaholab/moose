@@ -55,7 +55,6 @@
 #include "StringInputStream.h"
 #include "MooseMain.h"
 #include "FEProblemBase.h"
-#include "Capabilities.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -697,44 +696,42 @@ MooseApp::registerCapabilities()
 {
   // helper lambdas
   auto haveCapability = [](const std::string & capability, const std::string & doc)
-  { Moose::Capabilities::add(capability, true, doc + " is available."); };
+  { addCapability(capability, true, doc + " is available."); };
 
   auto missingCapability =
       [](const std::string & capability, const std::string & doc, const std::string & help = "")
-  { Moose::Capabilities::add(capability, false, doc + " is not available. " + help); };
+  { addCapability(capability, false, doc + " is not available. " + help); };
 
   auto haveCapabilityVersion =
       [](const std::string & capability, const std::string & doc, const std::string & version)
-  {
-    Moose::Capabilities::add(capability, version, doc + " version " + version + " is available.");
-  };
+  { addCapability(capability, version, doc + " version " + version + " is available."); };
 
   auto petscMissingCapability = [](const std::string & capability, const std::string & doc)
   {
-    Moose::Capabilities::add(
+    addCapability(
         capability, false, doc + " is not available. Check your PETSc configure options.");
   };
 
   auto libmeshMissingCapability =
       [](const std::string & capability, const std::string & doc, const std::string & config_option)
   {
-    Moose::Capabilities::add(capability,
-                             false,
-                             doc + " is not available. It is controlled by the `" + config_option +
-                                 "` libMesh configure option.");
+    addCapability(capability,
+                  false,
+                  doc + " is not available. It is controlled by the `" + config_option +
+                      "` libMesh configure option.");
   };
 
   // register capabilities
   if (_trap_fpe)
-    Moose::Capabilities::add("trap_fpe",
-                             true,
-                             "Trapping floating point exceptions is enabled (in debug mode this "
-                             "can be disabled using the --no-trap-fpe option).");
+    addCapability("trap_fpe",
+                  true,
+                  "Trapping floating point exceptions is enabled (in debug mode this "
+                  "can be disabled using the --no-trap-fpe option).");
   else
-    Moose::Capabilities::add("trap_fpe",
-                             false,
-                             "Trapping floating point exceptions is not enabled (enable them using "
-                             "the --trap-fpe option or by running a debug mode executable).");
+    addCapability("trap_fpe",
+                  false,
+                  "Trapping floating point exceptions is not enabled (enable them using "
+                  "the --trap-fpe option or by running a debug mode executable).");
 
   {
     const auto doc = "LibTorch machine learning and parallel tensor algebra library";
@@ -783,7 +780,7 @@ MooseApp::registerCapabilities()
 #endif
   }
 
-  Moose::Capabilities::add(
+  addCapability(
       "ad_size",
       MOOSE_AD_MAX_DOFS_PER_ELEM,
       "MOOSE was configured and built with a dual number backing store size of " +
@@ -793,8 +790,7 @@ MooseApp::registerCapabilities()
           "repository.");
   {
     const std::string method = QUOTE(METHOD);
-    Moose::Capabilities::add(
-        "method", method, "The executable was built with METHOD=\"" + method + "\"");
+    addCapability("method", method, "The executable was built with METHOD=\"" + method + "\"");
   }
 
   {
@@ -809,19 +805,19 @@ MooseApp::registerCapabilities()
   {
     const std::string version = QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
         LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR);
-    Moose::Capabilities::add("petsc", version, "Using PETSc version " + version + ".");
+    addCapability("petsc", version, "Using PETSc version " + version + ".");
   }
 
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_RELEASE
-  Moose::Capabilities::add("petsc_release", true, "Using a release version of PETSc.");
+  addCapability("petsc_release", true, "Using a release version of PETSc.");
 #else
-  Moose::Capabilities::add("petsc_release", false, "Not using a release version of PETSc.");
+  addCapability("petsc_release", false, "Not using a release version of PETSc.");
 #endif
 
 #ifdef LIBMESH_PETSC_USE_DEBUG
-  Moose::Capabilities::add("petsc_debug", true, "PETSc was built with debugging options.");
+  addCapability("petsc_debug", true, "PETSc was built with debugging options.");
 #else
-  Moose::Capabilities::add("petsc_debug", false, "PETSc was built without debugging options.");
+  addCapability("petsc_debug", false, "PETSc was built without debugging options.");
 #endif
 
   {
@@ -959,26 +955,24 @@ MooseApp::registerCapabilities()
 
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  Moose::Capabilities::add(
-      "fparser", "jit", "FParser enabled with just in time compilation support.");
+  addCapability("fparser", "jit", "FParser enabled with just in time compilation support.");
 #else
-  Moose::Capabilities::add("fparser", "byte_code", "FParser enabled.");
+  addCapability("fparser", "byte_code", "FParser enabled.");
 #endif
 #else
-  Moose::Capabilities::add(
-      "fparser",
-      false,
-      "FParser is disabled, libMesh was likely configured with --disable-fparser.");
+  addCapability("fparser",
+                false,
+                "FParser is disabled, libMesh was likely configured with --disable-fparser.");
 #endif
 
 #ifdef LIBMESH_HAVE_DLOPEN
-  Moose::Capabilities::add(
+  addCapability(
       "dlopen", true, "The dlopen() system call is available to dynamically load libraries.");
 #else
-  Moose::Capabilities::add("dlopen",
-                           false,
-                           "The dlopen() system call is not available. Dynamic library loading is "
-                           "not supported on this system.");
+  addCapability("dlopen",
+                false,
+                "The dlopen() system call is not available. Dynamic library loading is "
+                "not supported on this system.");
 #endif
 
   {
@@ -1016,24 +1010,23 @@ MooseApp::registerCapabilities()
 #endif
   }
 
-  Moose::Capabilities::add("dof_id_bytes",
-                           static_cast<int>(sizeof(dof_id_type)),
-                           "Degree of freedom (DOF) identifiers use " +
-                               Moose::stringify(sizeof(dof_id_type)) +
-                               " bytes for storage. This is controlled by the "
-                               "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.");
+  addCapability("dof_id_bytes",
+                static_cast<int>(sizeof(dof_id_type)),
+                "Degree of freedom (DOF) identifiers use " + Moose::stringify(sizeof(dof_id_type)) +
+                    " bytes for storage. This is controlled by the "
+                    "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.");
 
   // compiler
   {
     const auto doc = "Compiler used to build the MOOSE framework.";
 #if defined(__clang__)
-    Moose::Capabilities::add("compiler", "clang", doc);
+    addCapability("compiler", "clang", doc);
 #elif defined(__GNUC__) || defined(__GNUG__)
-    Moose::Capabilities::add("compiler", "gcc", doc);
+    addCapability("compiler", "gcc", doc);
 #elif defined(_MSC_VER)
-    Moose::Capabilities::add("compiler", "msvc", doc);
+    addCapability("compiler", "msvc", doc);
 #else
-    Moose::Capabilities::add("compiler", false, "Unknown compiler");
+    addCapability("compiler", false, "Unknown compiler");
 #endif
   }
 
@@ -1041,13 +1034,13 @@ MooseApp::registerCapabilities()
   {
     const auto doc = "Operating system this executable is running on.";
 #ifdef __APPLE__
-    Moose::Capabilities::add("platform", "darwin", doc);
+    addCapability("platform", "darwin", doc);
 #elif __WIN32__
-    Moose::Capabilities::add("platform", "win32", doc);
+    addCapability("platform", "win32", doc);
 #elif __linux__
-    Moose::Capabilities::add("platform", "linux", doc);
+    addCapability("platform", "linux", doc);
 #elif __unix__ // all unices not caught above
-    Moose::Capabilities::add("platform", "unix", doc);
+    addCapability("platform", "unix", doc);
 #endif
   }
 }
@@ -1361,7 +1354,7 @@ MooseApp::setupOptions()
     outputMachineReadableData("show_capabilities",
                               "**START JSON DATA**\n",
                               "\n**END JSON DATA**",
-                              Moose::Capabilities::dump());
+                              Moose::Capabilities::getCapabilityRegistry().dump());
     _ready_to_exit = true;
   }
   else if (!getInputFileNames().empty())
@@ -1387,8 +1380,8 @@ MooseApp::setupOptions()
     {
       _perf_graph.disableLivePrint();
 
-      auto [fulfilled, reason] =
-          Moose::Capabilities::check(getParam<std::string>("required_capabilities"));
+      auto [fulfilled, reason] = Moose::Capabilities::getCapabilityRegistry().check(
+          getParam<std::string>("required_capabilities"));
       if (!fulfilled)
       {
         Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"

@@ -18,44 +18,16 @@ namespace Moose
 {
 
 Capabilities &
-Capabilities::instance()
+Capabilities::getCapabilityRegistry()
 {
   // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
   // bug in clang's static object destruction when using dynamic library loading.
-  static Capabilities * instance = nullptr;
-  if (!instance)
-    instance = new Capabilities;
-  return *instance;
+  static Capabilities capability_registry;
+  return capability_registry;
 }
 
 void
-Capabilities::add(const std::string & capability, CapabilityType value, const std::string & doc)
-{
-  instance().addInternal(capability, value, doc);
-}
-
-void
-Capabilities::add(const std::string & capability, const char * value, const char * doc)
-{
-  instance().addInternal(capability, std::string(value), std::string(doc));
-}
-
-std::string
-Capabilities::dump()
-{
-  return instance().dumpInternal();
-}
-
-std::pair<bool, std::string>
-Capabilities::check(const std::string & requested_capabilities)
-{
-  return instance().checkInternal(requested_capabilities);
-}
-
-void
-Capabilities::addInternal(const std::string & raw_capability,
-                          CapabilityType value,
-                          const std::string & doc)
+Capabilities::add(const std::string & raw_capability, CapabilityType value, const std::string & doc)
 {
   const auto capability = MooseUtils::toLower(raw_capability);
   if (std::holds_alternative<std::string>(value))
@@ -69,8 +41,14 @@ Capabilities::addInternal(const std::string & raw_capability,
     mooseWarning("Capability '", capability, "' was already registered with a different value.");
 }
 
+void
+Capabilities::add(const std::string & capability, const char * value, const char * doc)
+{
+  add(capability, std::string(value), std::string(doc));
+}
+
 std::string
-Capabilities::dumpInternal() const
+Capabilities::dump() const
 {
   nlohmann::json root;
   for (const auto & [capability, value_doc] : _capability_registry)
@@ -89,7 +67,7 @@ Capabilities::dumpInternal() const
 }
 
 std::pair<bool, std::string>
-Capabilities::checkInternal(const std::string & requested_capabilities) const
+Capabilities::check(const std::string & requested_capabilities) const
 {
   // break up list into individual capability checks
   std::vector<std::string> conditions;
