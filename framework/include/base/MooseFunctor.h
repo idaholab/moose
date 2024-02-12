@@ -29,6 +29,10 @@
 
 namespace Moose
 {
+/**
+ * An enumeration of possible functor evaluation kinds. The available options are value, gradient,
+ * time derivative (dot), and gradient of time derivative (gradDot)
+ */
 enum class FunctorEvaluationKind
 {
   Value,
@@ -37,15 +41,28 @@ enum class FunctorEvaluationKind
   GradDot
 };
 
+/**
+ * A structure that defines the return type of a functor based on the type of the functor and the
+ * requested evaluation kind, e.g. value, gradient, time derivative, or gradient of time derivative
+ */
 template <typename, FunctorEvaluationKind>
 struct FunctorReturnType;
 
+/**
+ * The return type for a value evaluation is just the type of the functor
+ */
 template <typename T>
 struct FunctorReturnType<T, FunctorEvaluationKind::Value>
 {
   typedef T type;
 };
 
+/**
+ * The return type of a gradient evaluation is the rank increment of a value return type. So if the
+ * value type is Real, then a gradient will be a VectorValue<Real>. This also allows for containers
+ * of mathematical types. So if a value type is std::vector<Real>, then the gradient type will be
+ * std::vector<VectorValue<Real>>
+ */
 template <typename T>
 struct FunctorReturnType<T, FunctorEvaluationKind::Gradient>
 {
@@ -55,27 +72,43 @@ struct FunctorReturnType<T, FunctorEvaluationKind::Gradient>
       type;
 };
 
+/**
+ * The return type of a time derivative evaluation is the same as the value type
+ */
 template <typename T>
 struct FunctorReturnType<T, FunctorEvaluationKind::Dot>
 {
   typedef T type;
 };
 
+/**
+ * The return type of a gradient of time derivative evaluation is the same as the gradient type
+ */
 template <typename T>
 struct FunctorReturnType<T, FunctorEvaluationKind::GradDot>
 {
   typedef typename FunctorReturnType<T, FunctorEvaluationKind::Gradient>::type type;
 };
 
+/**
+ * This structure takes an evaluation kind as a template argument and defines a constant expression
+ * indicating the associated gradient kind
+ */
 template <FunctorEvaluationKind>
 struct FunctorGradientEvaluationKind;
 
+/**
+ * The gradient kind associated with a value is simply the gradient
+ */
 template <>
 struct FunctorGradientEvaluationKind<FunctorEvaluationKind::Value>
 {
   static constexpr FunctorEvaluationKind value = FunctorEvaluationKind::Gradient;
 };
 
+/**
+ * The gradient kind associated with a time derivative is the gradient of the time derivative
+ */
 template <>
 struct FunctorGradientEvaluationKind<FunctorEvaluationKind::Dot>
 {
