@@ -36,6 +36,8 @@
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
+#include "Capabilities.h"
+
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
@@ -1124,6 +1126,9 @@ protected:
                                  const std::string & start_marker,
                                  const std::string & end_marker,
                                  const std::string & data) const;
+  /// register a new capability
+  template <typename T>
+  static void addCapability(const std::string & capability, T value, const std::string & doc);
 
   /// The name of this object
   const std::string _name;
@@ -1578,4 +1583,11 @@ MooseApp::getInterfaceObjects() const
     return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
   const static std::vector<T *> empty;
   return empty;
+}
+
+template <typename T>
+void
+MooseApp::addCapability(const std::string & capability, T value, const std::string & doc)
+{
+  Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
 }
