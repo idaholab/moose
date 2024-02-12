@@ -210,7 +210,7 @@ which describes how these objects are instantiated and used in a simulation.
 For example, `Components` and `Closures` are examples of syntax unique to THM that also correspond to
 base classes of groups of THM objects.
 
-This documentation page is hosted on the module website [@thm_website]. The website also notably hosts the software
+This documentation page is hosted on the [module website](https://mooseframework.inl.gov/modules/thermal_hydraulics/index.html). The website also notably hosts the software
 quality assurance (SQA) records, such as the testing requirement matrix or failure analysis reports for example.
 The interested reader is referred to the MOOSE SQA plan [@sqa] for more information.
 
@@ -242,7 +242,7 @@ standards, and are sufficiently tested.
 # Demonstration
 
 THM can be used as a foundation for other MOOSE-based applications or as a stand-alone software to model a variety of systems, including nuclear systems, power conversion cycles, and geothermal piping networks.
-The flexibility of THM is demonstrated with a two-loop system that is typical of a nuclear reactor system. This model is the final step of the single-phase flow THM tutorial available on the THM website [@thm_website].
+The flexibility of THM is demonstrated with a two-loop system that is typical of a nuclear reactor system. This model is the final step of the single-phase flow THM tutorial available on the [THM website](https://mooseframework.inl.gov/modules/thermal_hydraulics/index.html).
 
 ![System diagram (left) and temperature distribution (right) \label{fig:demo}](demo_dia_T.png)
 
