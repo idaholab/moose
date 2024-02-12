@@ -1,6 +1,6 @@
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
@@ -82,6 +82,8 @@ P_out = 4.923e6 # Pa
   n_blocks = 1
   beta = 0.006
   CT = 2.0
+  implicit = true
+  segregated = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -201,6 +203,41 @@ P_out = 4.923e6 # Pa
     execute_on = final
     file_base = "mdot_In.txt"
     height = 0.0
+  []
+[]
+
+[Postprocessors]
+  [Pin_Planar_Mean]
+    type = PlanarMean
+    variable = P
+    execute_on = 'TIMESTEP_END'
+    height = 0.0
+  []
+
+  [Pout_Planar_Mean]
+    type = PlanarMean
+    variable = P
+    execute_on = 'TIMESTEP_END'
+    height = 1.2
+  []
+
+  [Pout_user_provided]
+    type = Receiver
+    default = ${P_out}
+    execute_on = 'TIMESTEP_END'
+  []
+
+  ####### Assembly pressure drop
+  [DP_Planar_mean]
+    type = ParsedPostprocessor
+    pp_names = 'Pin_Planar_Mean Pout_Planar_Mean'
+    function = 'Pin_Planar_Mean - Pout_Planar_Mean'
+  []
+
+  [DP_SubchannelDelta]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'TIMESTEP_END'
   []
 []
 
