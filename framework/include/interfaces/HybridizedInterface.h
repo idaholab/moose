@@ -29,7 +29,4 @@ protected:
   EigenVector _PrimalVec, _LMVec;
   /// Matrix data structures for off-diagonal coupling
   EigenMatrix _PrimalLM, _LMPrimal;
-
-  /// Local sizes of the systems
-  std::size_t _primal_size, _lm_size;
 };

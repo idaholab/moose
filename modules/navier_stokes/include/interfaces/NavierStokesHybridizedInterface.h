@@ -119,6 +119,9 @@ protected:
   std::size_t _p_n_dofs;
   std::size_t _global_lm_n_dofs;
 
+  /// Local sizes of the systems
+  std::size_t _primal_size, _lm_size;
+
   /// Our stabilization coefficient
   static constexpr Real _tau = 1;
 };
