@@ -107,6 +107,7 @@ pitch = 7.26e-3
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = 'upwind'
+  deformation = true
 []
 
 [ICs]

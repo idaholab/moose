@@ -46,6 +46,8 @@ P_out = 2.0e5 # Pa
   []
   [mu]
   []
+  [displacement]
+  []
 []
 
 [FluidProperties]
@@ -66,8 +68,8 @@ P_out = 2.0e5 # Pa
   compute_power = true
   P_tol = 1.0e-4
   T_tol = 1.0e-4
-  implicit = true
-  segregated = false
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
@@ -169,17 +171,44 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  [total_pressure_drop]
-    type = SubChannelDelta
-    variable = P
-    execute_on = "timestep_end"
-  []
   [T]
     type = SubChannelPointValue
     variable = T
     index = 36
     execute_on = "timestep_end"
     height = 0.7
+  []
+
+  [Pin_Planar_Mean]
+    type = PlanarMean
+    variable = P
+    execute_on = 'TIMESTEP_END'
+    height = 0.0
+  []
+
+  [Pout_Planar_Mean]
+    type = PlanarMean
+    variable = P
+    execute_on = 'TIMESTEP_END'
+    height = 1.2
+  []
+
+  [Pout_user_provided]
+    type = Receiver
+    default = ${P_out}
+    execute_on = 'TIMESTEP_END'
+  []
+
+  ####### Assembly pressure drop
+  [DP_Planar_mean]
+    type = ParsedPostprocessor
+    pp_names = 'Pin_Planar_Mean Pout_Planar_Mean'
+    function = 'Pin_Planar_Mean - Pout_Planar_Mean'
+  []
+  [DP_SubchannelDelta]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'TIMESTEP_END'
   []
 []
 ################################################################################

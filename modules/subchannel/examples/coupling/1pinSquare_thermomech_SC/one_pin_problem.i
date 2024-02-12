@@ -1,7 +1,7 @@
 ######## BC's #################
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 4.923e6 # Pa
 heated_length = 1.0
 
@@ -98,6 +98,7 @@ heated_length = 1.0
   compute_power = true
   P_out = ${P_out}
   verbose_subchannel = true
+  deformation = true
 []
 
 [ICs]
