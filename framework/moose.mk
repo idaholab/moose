@@ -181,7 +181,7 @@ link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 # 1: the header file
 # 2: the symlink to create
 define symlink_rule
-$(2): $(1) | $(abspath $(dir $(2)))
+$(2): $(1) | $(patsubst %/, %, $(dir $(2)))
 	@ln -sf $$< $$@
 endef
 
