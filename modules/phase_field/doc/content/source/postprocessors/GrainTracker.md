@@ -123,7 +123,7 @@ several overlaps near the back.
 !table id=large_red style=border:4px solid black;width:350px; caption=Large Red Distances
 | Variable | Distance |
 |----------|----------|
-| A        | $\varnothing$|
+| A        | $\varnothing$ |
 | B        | -2.0     |
 | C        | -1.0     |
 | D        | -3.0     |
@@ -163,7 +163,7 @@ ensure that the same variable is never considered as a possible remapping option
 |----------|----------|
 | A        | 52.6     |
 | B        | 4.2      |
-| C        | $\varnothing$|
+| C        | $\varnothing$ |
 | D        | -1.0     |
 !col-end!
 !row-end!
