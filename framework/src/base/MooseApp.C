@@ -1734,9 +1734,9 @@ MooseApp::getCheckpointDirectories() const
     if (!moose_object_action)
       continue;
 
-    const InputParameters & params = moose_object_action->getObjectParams();
     if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
-      checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
+      checkpoint_dirs.push_back(getOutputFileBase(true) + "_" + moose_object_action->name() +
+                                "_cp");
   }
   return checkpoint_dirs;
 }
