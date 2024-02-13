@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Capabilities.h"
+#include "libmesh/int_range.h"
 
 #include "gtest/gtest.h"
 
@@ -27,6 +28,8 @@ TEST(CapabilitiesTest, boolTest)
   EXPECT_FALSE(capabilities.check("unittest_bool2=>1.0.0").first);
   EXPECT_FALSE(capabilities.check("unittest_doesnotexist").first);
   EXPECT_TRUE(capabilities.check("!unittest_doesnotexist").first);
+  EXPECT_THROW(capabilities.check("unittest_bool="), std::invalid_argument);
+  EXPECT_THROW(capabilities.check("unittest_bool=="), std::invalid_argument);
 }
 
 TEST(CapabilitiesTest, intTest)
@@ -48,6 +51,7 @@ TEST(CapabilitiesTest, intTest)
     EXPECT_FALSE(capabilities.check("unittest_int" + c).first);
     EXPECT_TRUE(capabilities.check("!unittest_int" + c).first);
   }
+  EXPECT_THROW(capabilities.check("unittest_int<"), std::invalid_argument);
 }
 
 TEST(CapabilitiesTest, stringTest)
@@ -61,6 +65,7 @@ TEST(CapabilitiesTest, stringTest)
   EXPECT_TRUE(capabilities.check("unittest_string=clang").first);
   EXPECT_TRUE(capabilities.check("unittest_string=CLANG").first);
   EXPECT_FALSE(capabilities.check("unittest_string=gcc").first);
+  EXPECT_THROW(capabilities.check("unittest_string>"), std::invalid_argument);
 }
 
 TEST(CapabilitiesTest, versionTest)
@@ -97,10 +102,12 @@ TEST(CapabilitiesTest, versionTest)
     EXPECT_FALSE(capabilities.check("unittest_version" + c).first);
     EXPECT_TRUE(capabilities.check("!unittest_version" + c).first);
   }
+  EXPECT_THROW(capabilities.check("!unittest_version<"), std::invalid_argument);
 }
 
 TEST(CapabilitiesTest, multipleTest)
 {
+  using libMesh::index_range;
   Moose::Capabilities capabilities;
   capabilities.add("unittest2_bool", true, "Multiple capability test bool");
   capabilities.add("unittest2_int", 78, "Multiple capability test int");
@@ -111,4 +118,23 @@ TEST(CapabilitiesTest, multipleTest)
                   .check("!unittest_doesnotexist unittest2_version<4.2.2 "
                          "unittest2_int<100 unittest2_int>50 unittest2_string!=Popel")
                   .first);
+  EXPECT_THROW(capabilities.check("unittest2_bool unittest2_int< unittest2_string==Popel"),
+               std::invalid_argument);
+
+  // test mix of true and false requirements (even indices are true, odd are false)
+  const std::vector<std::string> test = {"unittest2_bool",
+                                         "!unittest2_bool",
+                                         "!unittest_doesnotexist",
+                                         "unittest_doesnotexist",
+                                         "unittest2_int<100",
+                                         "unittest2_int>100",
+                                         "unittest2_string=clang",
+                                         "unittest2_string=gcc",
+                                         "unittest2_version<4.2.2",
+                                         "unittest2_version>4.2.2"};
+  for (const auto i : index_range(test))
+    for (const auto j : index_range(test))
+      for (const auto k : index_range(test))
+        EXPECT_EQ(capabilities.check(test[i] + ' ' + test[j] + ' ' + test[k]).first,
+                  i % 2 + j % 2 + k % 2 == 0);
 }
