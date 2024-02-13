@@ -67,7 +67,7 @@ GeneratedMesh::validParams()
       "bias_z>=0.5 & bias_z<=2",
       "The amount by which to grow (or shrink) the cells in the z-direction.");
 
-  params.addParamNamesToGroup("dim", "Main");
+  params.addParamNamesToGroup("dim", "Required");
 
   params.addClassDescription(
       "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
