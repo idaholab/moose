@@ -1731,10 +1731,10 @@ MooseApp::getCheckpointDirectories() const
   {
     // Get the parameters from the MooseObjectAction
     MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-    const InputParameters & params = moose_object_action->getObjectParams();
     if (!moose_object_action)
       continue;
 
+    const InputParameters & params = moose_object_action->getObjectParams();
     if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
     {
       // Unless file_base was explicitly set by user, we cannot rely on it, as it will be changed
