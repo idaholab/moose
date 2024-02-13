@@ -9,7 +9,7 @@
 
 #include "Capabilities.h"
 
-#include "gtest_include.h"
+#include "gtest/gtest.h"
 
 TEST(CapabilitiesTest, boolTest)
 {
