@@ -210,9 +210,8 @@ which describes how these objects are instantiated and used in a simulation.
 For example, `Components` and `Closures` are examples of syntax unique to THM that also correspond to
 base classes of groups of THM objects.
 
-This documentation page is hosted on the [module website](https://mooseframework.inl.gov/modules/thermal_hydraulics/index.html). The website also notably hosts the software
-quality assurance (SQA) records, such as the testing requirement matrix or failure analysis reports for example.
-The interested reader is referred to the MOOSE SQA plan [@sqa] for more information.
+This documentation page is hosted on the [module website](https://mooseframework.inl.gov/modules/thermal_hydraulics/index.html). The website also hosts the software
+quality assurance (SQA) records, such as the testing requirement matrix and failure analysis reports.
 
 # Testing
 
@@ -234,7 +233,7 @@ the field it produces is consistent. Components are often tested in the minimal 
 to satisfy the test requirement, for example, to prove conservation of mass and energy on a flow channel.
 
 In addition to the automated testing provided by CIVET, proposed changes to the module
-are reviewed by at least one member of the MOOSE change control board, as detailed in MOOSE's SQA plan [@sqa],
+are reviewed by at least one member of the MOOSE change control board, as detailed in MOOSE's SQA plan [@slaughter2021continuous],
 in addition to any other interested reviewers.
 Reviewers determine if the proposed changes have an acceptable design, follow coding
 standards, and are sufficiently tested.
