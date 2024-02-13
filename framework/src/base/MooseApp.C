@@ -1731,12 +1731,19 @@ MooseApp::getCheckpointDirectories() const
   {
     // Get the parameters from the MooseObjectAction
     MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    const InputParameters & params = moose_object_action->getObjectParams();
     if (!moose_object_action)
       continue;
 
     if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
-      checkpoint_dirs.push_back(getOutputFileBase(true) + "_" + moose_object_action->name() +
-                                "_cp");
+    {
+      // Unless file_base was explicitly set by user, we cannot rely on it, as it will be changed
+      // later
+      const std::string cp_dir =
+          _file_base_set_by_user ? params.get<std::string>("file_base")
+                                 : (getOutputFileBase(true) + "_" + moose_object_action->name());
+      checkpoint_dirs.push_back(cp_dir + "_cp");
+    }
   }
   return checkpoint_dirs;
 }
