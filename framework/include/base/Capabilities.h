@@ -13,14 +13,15 @@
 #include <string>
 #include <map>
 
-#include "gtest_include.h"
-
+#ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
+#include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, boolTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, intTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, stringTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, versionTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, multipleTest);
+#endif
 
 namespace Moose
 {
@@ -72,11 +73,13 @@ private:
   // Private constructor for singleton pattern
   Capabilities() {}
 
+#ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::CapabilitiesTest, boolTest);
   FRIEND_TEST(::CapabilitiesTest, intTest);
   FRIEND_TEST(::CapabilitiesTest, stringTest);
   FRIEND_TEST(::CapabilitiesTest, versionTest);
   FRIEND_TEST(::CapabilitiesTest, multipleTest);
+#endif
 };
 
 } // namespace Moose
