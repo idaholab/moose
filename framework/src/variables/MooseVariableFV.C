@@ -851,6 +851,39 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & st
     return (*_sys.solutionUDot())(dof_index);
 }
 
+template <>
+ADReal
+MooseVariableFV<Real>::evaluateDot(const FaceArg & face, const StateArg & state) const
+{
+  const FaceInfo * const fi = face.fi;
+  mooseAssert(fi, "The face information must be non-null");
+  if (isDirichletBoundaryFace(*fi, face.face_side, state))
+    return ADReal(0.0); // No time derivative if boundary value is set
+  else if (isExtrapolatedBoundaryFace(*fi, face.face_side, state))
+  {
+    mooseAssert(face.face_side && this->hasBlocks(face.face_side->subdomain_id()),
+                "If we are an extrapolated boundary face, then our FunctorBase::checkFace method "
+                "should have assigned a non-null element that we are defined on");
+    const auto elem_arg = ElemArg({face.face_side, face.correct_skewness});
+    // For extrapolated boundary faces, note that we take the value of the time derivative at the
+    // cell in contact with the face
+    return evaluateDot(elem_arg, state);
+  }
+  else
+  {
+    mooseAssert(this->isInternalFace(*fi),
+                "We must be either Dirichlet, extrapolated, or internal");
+    return Moose::FV::interpolate<ADReal, FunctorEvaluationKind::Dot>(*this, face, state);
+  }
+}
+
+template <>
+ADReal
+MooseVariableFV<Real>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
+{
+  return evaluateDot(ElemArg({elem_qp.elem, /*correct_skewness*/ false}), state);
+}
+
 template <typename OutputType>
 void
 MooseVariableFV<OutputType>::prepareAux()

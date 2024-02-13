@@ -548,6 +548,8 @@ private:
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg &) const override final;
   GradientType evaluateGradient(const FaceArg & face, const StateArg &) const override final;
   DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
+  DotType evaluateDot(const FaceArg & face, const StateArg &) const override final;
+  DotType evaluateDot(const ElemQpArg & elem_qp, const StateArg &) const override final;
 
   /**
    * Setup the boundary to Dirichlet BC map

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#22637'
+  issues = '#22637 #26773'
   design = 'WCNSFV2PSlipVelocityFunctorMaterial.md WCNSFV2PMomentumAdvectionSlip.md WCNSFV2PMomentumDriftFlux.md INSFVScalarFieldAdvection.md NSFVMixturePhaseInterface.md NSFVDispersePhaseDragFunctorMaterial.md'
   [mixture_lid_driven_two_phase]
     type = 'CSVDiff'
@@ -27,6 +27,13 @@
     input = 'channel-drift-flux.i'
     exodiff = 'channel-drift-flux_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model.'
+    installation_type = in_tree
+  []
+  [mixture_channel_drift_flux_transient]
+    type = 'CSVDiff'
+    input = 'channel-drift-flux-transient.i'
+    csvdiff = 'channel-drift-flux-transient_CSV.csv'
+    requirement = 'The system shall be able to solve transient two-phase flow in a channel using the mixture drift flux model.'
     installation_type = in_tree
   []
   [mixture_channel_advection_slip]
