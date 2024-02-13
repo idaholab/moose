@@ -1,4 +1,4 @@
-{% set version = "2023.11.29" %}
+{% set version = "2024.02.19" %}
 
 package:
   name: moose-pyhit
@@ -24,6 +24,7 @@ requirements:
   host:
     - {{ compiler('cxx') }}
     - {{ moose_python }}
+    - make
     - cython
 
   run:
