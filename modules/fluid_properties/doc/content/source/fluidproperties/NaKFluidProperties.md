@@ -30,7 +30,7 @@ The reported range of validity is specified for each property:
 
 ## Uncertainties of NaK Fluid Properties
 
-The **reported** uncertainties in [!citep](NaKHandbook) for NaK fluid properties are reported in Table [tab:uncertainty].
+The +reported+ uncertainties in [!citep](NaKHandbook) for NaK fluid properties are reported in Table [tab:uncertainty].
 
 !alert note
 Many `NaK` properties are computed from a mix of `Na` and `K` properties and the uncertainty is only reported for these individual properties. We report it here, and the user will have to perform uncertainty propagation to obtain the uncertainties for the eutectic.

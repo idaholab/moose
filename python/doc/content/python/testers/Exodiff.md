@@ -44,7 +44,7 @@ custom comparison file, where the tolerances for each variable may be set indivi
 In the example below, the tolerances are adjusted for local comparisons of field variables,
 both nodal and elemental. The relative error criteria is set to `1e-6` and the absolute
 error criteria is strongly tightened by setting it to `0`. These modifications apply to variable `u` and `distance`,
-and any variable that is **not** listed in the comparison file is not compared.
+and any variable that is +not+ listed in the comparison file is not compared.
 The time step and nodal coordinates tolerances are also modified to `1e-6`.
 
 !listing geomsearch/quadrature_nearest_node_locator/qnnl_ad.cmp

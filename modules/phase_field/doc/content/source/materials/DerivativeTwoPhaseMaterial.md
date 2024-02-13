@@ -2,7 +2,7 @@
 
 !syntax description /Materials/DerivativeTwoPhaseMaterial
 
-The simplified **two-phase model** uses a single order parameter to switch between the two phases. A global free energy is constructed using a meta material class that combines the phase free energies.
+The simplified +two-phase model+ uses a single order parameter to switch between the two phases. A global free energy is constructed using a meta material class that combines the phase free energies.
 
 For two phase models the `DerivativeTwoPhaseMaterial` can be used to combine two phase
 free energies into a global free energy (which the [`AllenCahn`](/AllenCahn.md)

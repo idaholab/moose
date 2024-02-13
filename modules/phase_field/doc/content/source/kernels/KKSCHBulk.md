@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/KKSCHBulk
 
-Non-split KKS Cahn-Hilliard bulk kernel, which is **not fully implemented**.
+Non-split KKS Cahn-Hilliard bulk kernel, which is +not fully implemented+.
 The non-linear variable for this Kernel is the concentration $c$.
 
 ### Residual

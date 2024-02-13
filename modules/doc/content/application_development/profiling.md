@@ -140,8 +140,8 @@ of profiling files when profiling with a large number of processes.
 Profiling data can be analyzed using the
 [pprof](https://github.com/google/pprof) utility which is included in the
 latest MOOSE environment package.  Or you can also build/install it yourself.
-When using `pprof`, the **exact same** compiled version of the binary you used
-to create the profile **must** still be located where it was when the profile
+When using `pprof`, the +exact same+ compiled version of the binary you used
+to create the profile +must+ still be located where it was when the profile
 was created. `pprof` presents two types of profiling times - "flat" and
 "cumulative".  "flat" times report the amount of time spent *directly* inside
 a function (i.e. excluding time spent in transitively called functions), and
