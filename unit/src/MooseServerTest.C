@@ -959,48 +959,48 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
 
   std::string completions_expect = R"INPUT(
 label: active                                 text: active = '__all__'                             desc: If specified only the blocks named wi... pos: [6.0]-[6.0] kind:  7
-label: add_subdomain_ids                      text: add_subdomain_ids = '0'                        desc: The listed subdomains will be assumed... pos: [6.0]-[6.0] kind: 14
+label: add_subdomain_ids                      text: add_subdomain_ids =                            desc: The listed subdomains will be assumed... pos: [6.0]-[6.0] kind: 14
 label: allow_renumbering                      text: allow_renumbering = true                       desc: If allow_renumbering=false, node and ... pos: [6.0]-[6.0] kind:  8
-label: alpha_rotation                         text: alpha_rotation = 0.0                           desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
-label: beta_rotation                          text: beta_rotation = 0.0                            desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
-label: block_id                               text: block_id = '0'                                 desc: IDs of the block id/name pairs           pos: [6.0]-[6.0] kind: 14
-label: block_name                             text: block_name = 'value'                           desc: Names of the block id/name pairs (mus... pos: [6.0]-[6.0] kind: 14
-label: boundary_id                            text: boundary_id = '0'                              desc: IDs of the boundary id/name pairs        pos: [6.0]-[6.0] kind: 14
-label: boundary_name                          text: boundary_name = 'value'                        desc: Names of the boundary id/name pairs (... pos: [6.0]-[6.0] kind: 14
+label: alpha_rotation                         text: alpha_rotation =                               desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
+label: beta_rotation                          text: beta_rotation =                                desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
+label: block_id                               text: block_id =                                     desc: IDs of the block id/name pairs           pos: [6.0]-[6.0] kind: 14
+label: block_name                             text: block_name =                                   desc: Names of the block id/name pairs (mus... pos: [6.0]-[6.0] kind: 14
+label: boundary_id                            text: boundary_id =                                  desc: IDs of the boundary id/name pairs        pos: [6.0]-[6.0] kind: 14
+label: boundary_name                          text: boundary_name =                                desc: Names of the boundary id/name pairs (... pos: [6.0]-[6.0] kind: 14
 label: build_all_side_lowerd_mesh             text: build_all_side_lowerd_mesh = false             desc: True to build the lower-dimensional m... pos: [6.0]-[6.0] kind:  8
-label: centroid_partitioner_direction         text: centroid_partitioner_direction = RADIAL        desc: Specifies the sort direction if using... pos: [6.0]-[6.0] kind: 13
+label: centroid_partitioner_direction         text: centroid_partitioner_direction =               desc: Specifies the sort direction if using... pos: [6.0]-[6.0] kind: 13
 label: clear_spline_nodes                     text: clear_spline_nodes = false                     desc: If clear_spline_nodes=true, IsoGeomet... pos: [6.0]-[6.0] kind:  8
 label: construct_node_list_from_side_list     text: construct_node_list_from_side_list = true      desc: Whether or not to generate nodesets f... pos: [6.0]-[6.0] kind:  8
 label: construct_side_list_from_node_list     text: construct_side_list_from_node_list = false     desc: If true, construct side lists from th... pos: [6.0]-[6.0] kind:  8
-label: control_tags                           text: control_tags = 'value'                         desc: Adds user-defined labels for accessin... pos: [6.0]-[6.0] kind: 14
-label: coord_block                            text: coord_block = 'value'                          desc: Block IDs for the coordinate systems.... pos: [6.0]-[6.0] kind: 14
+label: control_tags                           text: control_tags =                                 desc: Adds user-defined labels for accessin... pos: [6.0]-[6.0] kind: 14
+label: coord_block                            text: coord_block =                                  desc: Block IDs for the coordinate systems.... pos: [6.0]-[6.0] kind: 14
 label: coord_type                             text: coord_type = 'XYZ'                             desc: Type of the coordinate system per blo... pos: [6.0]-[6.0] kind: 13
 label: enable                                 text: enable = true                                  desc: Set the enabled status of the MooseOb... pos: [6.0]-[6.0] kind:  8
-label: file                                   text: file = value                                   desc: The name of the mesh file to read        pos: [6.0]-[6.0] kind: 23
-label: gamma_rotation                         text: gamma_rotation = 0.0                           desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
-label: ghosted_boundaries                     text: ghosted_boundaries = 'value'                   desc: Boundaries to be ghosted if using Nem... pos: [6.0]-[6.0] kind: 14
-label: ghosted_boundaries_inflation           text: ghosted_boundaries_inflation = '0.0'           desc: If you are using ghosted boundaries y... pos: [6.0]-[6.0] kind: 14
-label: ghosting_patch_size                    text: ghosting_patch_size = 0                        desc: The number of nearest neighbors consi... pos: [6.0]-[6.0] kind: 14
-label: inactive                               text: inactive = 'value'                             desc: If specified blocks matching these id... pos: [6.0]-[6.0] kind:  7
+label: file                                   text: file =                                         desc: The name of the mesh file to read        pos: [6.0]-[6.0] kind: 23
+label: gamma_rotation                         text: gamma_rotation =                               desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
+label: ghosted_boundaries                     text: ghosted_boundaries =                           desc: Boundaries to be ghosted if using Nem... pos: [6.0]-[6.0] kind: 14
+label: ghosted_boundaries_inflation           text: ghosted_boundaries_inflation =                 desc: If you are using ghosted boundaries y... pos: [6.0]-[6.0] kind: 14
+label: ghosting_patch_size                    text: ghosting_patch_size =                          desc: The number of nearest neighbors consi... pos: [6.0]-[6.0] kind: 14
+label: inactive                               text: inactive =                                     desc: If specified blocks matching these id... pos: [6.0]-[6.0] kind:  7
 label: include_local_in_ghosting              text: include_local_in_ghosting = false              desc: Boolean used to toggle on the inclusi... pos: [6.0]-[6.0] kind:  8
-label: length_unit                            text: length_unit = value                            desc: How much distance one mesh length uni... pos: [6.0]-[6.0] kind: 14
+label: length_unit                            text: length_unit =                                  desc: How much distance one mesh length uni... pos: [6.0]-[6.0] kind: 14
 label: max_leaf_size                          text: max_leaf_size = 10                             desc: The maximum number of points in each ... pos: [6.0]-[6.0] kind: 14
 label: nemesis                                text: nemesis = false                                desc: If nemesis=true and file=foo.e, actua... pos: [6.0]-[6.0] kind:  8
 label: output_ghosting                        text: output_ghosting = false                        desc: Boolean to turn on ghosting auxiliary... pos: [6.0]-[6.0] kind:  8
 label: partitioner                            text: partitioner = default                          desc: Specifies a mesh partitioner to use w... pos: [6.0]-[6.0] kind: 13
 label: patch_size                             text: patch_size = 40                                desc: The number of nodes to consider in th... pos: [6.0]-[6.0] kind: 14
 label: rz_coord_axis                          text: rz_coord_axis = Y                              desc: The rotation axis (X | Y) for axisymm... pos: [6.0]-[6.0] kind: 13
-label: rz_coord_blocks                        text: rz_coord_blocks = 'value'                      desc: Blocks using general axisymmetric coo... pos: [6.0]-[6.0] kind: 14
-label: rz_coord_directions                    text: rz_coord_directions = '0.0'                    desc: Axis directions for each block in 'rz... pos: [6.0]-[6.0] kind: 14
-label: rz_coord_origins                       text: rz_coord_origins = '0.0'                       desc: Axis origin points for each block in ... pos: [6.0]-[6.0] kind: 14
+label: rz_coord_blocks                        text: rz_coord_blocks =                              desc: Blocks using general axisymmetric coo... pos: [6.0]-[6.0] kind: 14
+label: rz_coord_directions                    text: rz_coord_directions =                          desc: Axis directions for each block in 'rz... pos: [6.0]-[6.0] kind: 14
+label: rz_coord_origins                       text: rz_coord_origins =                             desc: Axis origin points for each block in ... pos: [6.0]-[6.0] kind: 14
 label: second_order                           text: second_order = false                           desc: Converts a first order mesh to a seco... pos: [6.0]-[6.0] kind:  8
 label: skip_deletion_repartition_after_refine text: skip_deletion_repartition_after_refine = false desc: If the flag is true, uniform refineme... pos: [6.0]-[6.0] kind:  8
 label: skip_partitioning                      text: skip_partitioning = false                      desc: If true the mesh won't be partitioned... pos: [6.0]-[6.0] kind:  8
 label: skip_refine_when_use_split             text: skip_refine_when_use_split = true              desc: True to skip uniform refinements when... pos: [6.0]-[6.0] kind:  8
-label: split_file                             text: split_file = value                             desc: Optional name of split mesh file(s) t... pos: [6.0]-[6.0] kind: 14
+label: split_file                             text: split_file =                                   desc: Optional name of split mesh file(s) t... pos: [6.0]-[6.0] kind: 14
 label: type                                   text: type = FileMesh                                desc: A string representing the Moose Objec... pos: [6.0]-[6.0] kind: 25
 label: uniform_refine                         text: uniform_refine = 0                             desc: Specify the level of uniform refineme... pos: [6.0]-[6.0] kind: 14
-label: up_direction                           text: up_direction = X                               desc: Specify what axis corresponds to the ... pos: [6.0]-[6.0] kind: 13
+label: up_direction                           text: up_direction =                                 desc: Specify what axis corresponds to the ... pos: [6.0]-[6.0] kind: 13
 label: use_displaced_mesh                     text: use_displaced_mesh = true                      desc: Create the displaced mesh if the 'dis... pos: [6.0]-[6.0] kind:  8
 label: use_split                              text: use_split = false                              desc: Use split distributed mesh files; is ... pos: [6.0]-[6.0] kind:  8
 label: *                                      text: [block_name]\n  \n[]                           desc: custom user named block                  pos: [6.0]-[6.0] kind:  6
@@ -1065,7 +1065,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 
   std::string completions_expect = R"INPUT(
 label: active                           text: active = '__all__'                         desc: If specified only the blocks named wi... pos: [42.0]-[42.0] kind:  7
-label: inactive                         text: inactive = 'value'                         desc: If specified blocks matching these id... pos: [42.0]-[42.0] kind:  7
+label: inactive                         text: inactive =                                 desc: If specified blocks matching these id... pos: [42.0]-[42.0] kind:  7
 label: Adaptivity                       text: [Adaptivity]\n  \n[]                       desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: AuxKernels                       text: [AuxKernels]\n  \n[]                       desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: AuxScalarKernels                 text: [AuxScalarKernels]\n  \n[]                 desc: application named block                  pos: [42.0]-[42.0] kind: 22

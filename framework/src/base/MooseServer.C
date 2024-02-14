@@ -408,7 +408,7 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     MooseUtils::escape(doc_string);
 
     // use basic type to decide if parameter is array and quotes are needed
-    std::string array_quote = basic_type.compare(0, 6, "Array:") == 0 ? "'" : "";
+    bool is_array = basic_type.compare(0, 6, "Array:") == 0;
 
     // remove any array prefixes from basic type string and leave base type
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
@@ -437,42 +437,14 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
       default_value = oss.str();
     }
 
-    // otherwise if parameter is enum then use first item for default value
-    if (default_value.empty())
-    {
-      std::map<std::string, std::string> options_and_descs;
-
-      if (valid_params.have_parameter<MooseEnum>(param_name))
-        getEnumsAndDocs(valid_params.get<MooseEnum>(param_name), options_and_descs);
-      else if (valid_params.have_parameter<MultiMooseEnum>(param_name))
-        getEnumsAndDocs(valid_params.get<MultiMooseEnum>(param_name), options_and_descs);
-      else if (valid_params.have_parameter<ExecFlagEnum>(param_name))
-        getEnumsAndDocs(valid_params.get<ExecFlagEnum>(param_name), options_and_descs);
-      else if (valid_params.have_parameter<std::vector<MooseEnum>>(param_name))
-        getEnumsAndDocs(valid_params.get<std::vector<MooseEnum>>(param_name)[0], options_and_descs);
-
-      if (!options_and_descs.empty())
-        default_value = options_and_descs.begin()->first;
-    }
-
-    // otherwise use parameter basic type to pick appropriate default value
-    if (default_value.empty())
-    {
-      if (basic_type == "Boolean")
-        default_value = "true";
-      else if (basic_type == "Integer")
-        default_value = "0";
-      else if (basic_type == "Real")
-        default_value = "0.0";
-      else
-        default_value = "value";
-    }
-
     // switch 1 to true or 0 to false if boolean parameter as default value
     if (basic_type == "Boolean" && default_value == "1")
       default_value = "true";
     else if (basic_type == "Boolean" && default_value == "0")
       default_value = "false";
+
+    // wrap default value with single quotes if it exists and type is array
+    std::string array_quote = is_array && !default_value.empty() ? "'" : "";
 
     // finally build full insertion from parameter name, quote, and default
     std::string embed_text = param_name + " = " + array_quote + default_value + array_quote;
@@ -980,7 +952,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
   // formatted string that will be built recursively by appending each call
   std::string format_string;
 
-  // walk over all children of this node context and build document symbols
+  // walk over all children of this node context and build formatted string
   for (const auto i : make_range(parent.child_count()))
   {
     // walk must be index based to catch file include and skip its children
@@ -1010,7 +982,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
 
       const std::string render_val = hit::extractValue(child.data());
       std::size_t val_column = child.child_count() > 2 ? child.child_at(2).column() : 0;
-      size_t prefix_len = prefix.size() - 1;
+      std::size_t prefix_len = prefix.size() - 1;
 
       format_string += blank + prefix + hit::formatValue(render_val, val_column, prefix_len);
     }
@@ -1057,7 +1029,7 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
     wasp::DataObject * data_child = documentSymbols.back().to_object();
     pass &= wasp::lsp::buildDocumentSymbolObject(*data_child,
                                                  errors,
-                                                 name,
+                                                 (name.empty() ? "void" : name),
                                                  detail,
                                                  symbol_kind,
                                                  false,
@@ -1109,7 +1081,7 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
     wasp::DataObject & data_child = wasp::lsp::addDocumentSymbolChild(data_parent);
     pass &= wasp::lsp::buildDocumentSymbolObject(data_child,
                                                  errors,
-                                                 name,
+                                                 (name.empty() ? "void" : name),
                                                  detail,
                                                  symbol_kind,
                                                  false,
