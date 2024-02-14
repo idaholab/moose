@@ -74,19 +74,26 @@ NavierStokesHybridizedKernel::onElement()
   }
 
   // qu and u
-  vectorVolumeResidual(0, _qu_sol, _u_sol);
-  scalarVolumeResidual(_vector_n_dofs, _qu_sol, 0);
-  vectorVolumeJacobian(0, 0, _vector_n_dofs);
-  scalarVolumeJacobian(
-      _vector_n_dofs, 0, 2 * _lm_n_dofs, 0, _vector_n_dofs, 2 * _vector_n_dofs + _scalar_n_dofs);
+  vectorVolumeResidual(*this, 0, _qu_sol, _u_sol);
+  scalarVolumeResidual(*this, _vector_n_dofs, _qu_sol, 0, _body_force_x);
+  vectorVolumeJacobian(*this, 0, 0, _vector_n_dofs);
+  scalarVolumeJacobian(*this,
+                       _vector_n_dofs,
+                       0,
+                       2 * _lm_n_dofs,
+                       0,
+                       _vector_n_dofs,
+                       2 * _vector_n_dofs + _scalar_n_dofs);
 
   // qv and v
-  vectorVolumeResidual(_vector_n_dofs + _scalar_n_dofs, _qv_sol, _v_sol);
-  scalarVolumeResidual(2 * _vector_n_dofs + _scalar_n_dofs, _qv_sol, 1);
-  vectorVolumeJacobian(_vector_n_dofs + _scalar_n_dofs,
+  vectorVolumeResidual(*this, _vector_n_dofs + _scalar_n_dofs, _qv_sol, _v_sol);
+  scalarVolumeResidual(*this, 2 * _vector_n_dofs + _scalar_n_dofs, _qv_sol, 1, _body_force_y);
+  vectorVolumeJacobian(*this,
+                       _vector_n_dofs + _scalar_n_dofs,
                        _vector_n_dofs + _scalar_n_dofs,
                        2 * _vector_n_dofs + _scalar_n_dofs);
-  scalarVolumeJacobian(2 * _vector_n_dofs + _scalar_n_dofs,
+  scalarVolumeJacobian(*this,
+                       2 * _vector_n_dofs + _scalar_n_dofs,
                        _vector_n_dofs + _scalar_n_dofs,
                        2 * _lm_n_dofs,
                        1,
@@ -94,8 +101,10 @@ NavierStokesHybridizedKernel::onElement()
                        2 * _vector_n_dofs + _scalar_n_dofs);
 
   // p
-  pressureVolumeResidual(2 * _lm_n_dofs, 2 * _lm_n_dofs + _p_n_dofs);
-  pressureVolumeJacobian(2 * _lm_n_dofs,
+  pressureVolumeResidual(
+      *this, 2 * _lm_n_dofs, 2 * _lm_n_dofs + _p_n_dofs, _pressure_mms_forcing_function);
+  pressureVolumeJacobian(*this,
+                         2 * _lm_n_dofs,
                          _vector_n_dofs,
                          2 * _vector_n_dofs + _scalar_n_dofs,
                          2 * _lm_n_dofs,
@@ -139,182 +148,4 @@ NavierStokesHybridizedKernel::onInternalSide()
   // p
   pressureFaceResidual(*this, 2 * _lm_n_dofs);
   pressureFaceJacobian(*this, 2 * _lm_n_dofs, 0, _lm_n_dofs);
-}
-
-void
-NavierStokesHybridizedKernel::vectorVolumeResidual(const unsigned int i_offset,
-                                                   const MooseArray<Gradient> & vector_sol,
-                                                   const MooseArray<Number> & scalar_sol)
-{
-  DiffusionHybridizedInterface::vectorVolumeResidual(*this, i_offset, vector_sol, scalar_sol);
-}
-
-void
-NavierStokesHybridizedKernel::vectorVolumeJacobian(const unsigned int i_offset,
-                                                   const unsigned int vector_j_offset,
-                                                   const unsigned int scalar_j_offset)
-{
-  DiffusionHybridizedInterface::vectorVolumeJacobian(
-      *this, i_offset, vector_j_offset, scalar_j_offset);
-}
-
-void
-NavierStokesHybridizedKernel::scalarVolumeResidual(const unsigned int i_offset,
-                                                   const MooseArray<Gradient> & vel_gradient,
-                                                   const unsigned int vel_component)
-{
-  DiffusionHybridizedInterface::scalarVolumeResidual(
-      *this, i_offset, vel_gradient, *_body_forces[vel_component]);
-
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    const auto vel_cross_vel = velCrossVelResidual(_u_sol, _v_sol, qp, vel_component);
-    Gradient qp_p;
-    qp_p(vel_component) = _p_sol[qp];
-
-    for (const auto i : make_range(_scalar_n_dofs))
-    {
-      // Scalar equation dependence on pressure dofs
-      _PrimalVec(i_offset + i) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * qp_p);
-
-      // Scalar equation dependence on scalar dofs
-      _PrimalVec(i_offset + i) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
-    }
-  }
-}
-
-void
-NavierStokesHybridizedKernel::scalarVolumeJacobian(const unsigned int i_offset,
-                                                   const unsigned int vel_gradient_j_offset,
-                                                   const unsigned int p_j_offset,
-                                                   const unsigned int vel_component,
-                                                   const unsigned int u_j_offset,
-                                                   const unsigned int v_j_offset)
-{
-  DiffusionHybridizedInterface::scalarVolumeJacobian(*this, i_offset, vel_gradient_j_offset);
-
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
-    {
-      // Scalar equation dependence on pressure dofs
-      for (const auto j : make_range(_p_n_dofs))
-      {
-        Gradient p_phi;
-        p_phi(vel_component) = _scalar_phi[j][qp];
-        _PrimalLM(i_offset + i, p_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * p_phi);
-      }
-
-      // Scalar equation dependence on scalar dofs
-      for (const auto j : make_range(_scalar_n_dofs))
-      {
-        // derivatives wrt 0th component
-        {
-          const auto vel_cross_vel =
-              velCrossVelJacobian(_u_sol, _v_sol, qp, vel_component, 0, _scalar_phi, j);
-          _PrimalMat(i_offset + i, u_j_offset + j) -=
-              _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
-        }
-        // derivatives wrt 1th component
-        {
-          const auto vel_cross_vel =
-              velCrossVelJacobian(_u_sol, _v_sol, qp, vel_component, 1, _scalar_phi, j);
-          _PrimalMat(i_offset + i, v_j_offset + j) -=
-              _JxW[qp] * (_grad_scalar_phi[i][qp] * vel_cross_vel);
-        }
-      }
-    }
-}
-
-void
-NavierStokesHybridizedKernel::pressureVolumeResidual(const unsigned int i_offset,
-                                                     const unsigned int global_lm_i_offset)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    // Prepare forcing function
-    const auto f = _pressure_mms_forcing_function.value(_t, _q_point[qp]);
-
-    const Gradient vel(_u_sol[qp], _v_sol[qp]);
-    for (const auto i : make_range(_p_n_dofs))
-    {
-      _LMVec(i_offset + i) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * vel);
-
-      // Pressure equation forcing function RHS
-      _LMVec(i_offset + i) -= _JxW[qp] * _scalar_phi[i][qp] * f;
-
-      if (_enclosure_lm_var)
-      {
-        mooseAssert(
-            _global_lm_dof_value->size() == 1,
-            "There should only be one degree of freedom for removing the pressure nullspace");
-        _LMVec(i_offset + i) -= _JxW[qp] * _scalar_phi[i][qp] * (*_global_lm_dof_value)[0];
-      }
-    }
-
-    if (_enclosure_lm_var)
-      _LMVec(global_lm_i_offset) -= _JxW[qp] * _p_sol[qp];
-  }
-}
-
-void
-NavierStokesHybridizedKernel::pressureVolumeJacobian(const unsigned int i_offset,
-                                                     const unsigned int u_j_offset,
-                                                     const unsigned int v_j_offset,
-                                                     const unsigned int p_j_offset,
-                                                     const unsigned int global_lm_offset)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    for (const auto i : make_range(_p_n_dofs))
-    {
-      for (const auto j : make_range(_scalar_n_dofs))
-      {
-        {
-          const Gradient phi(_scalar_phi[j][qp], 0);
-          _LMPrimal(i_offset + i, u_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * phi);
-        }
-        {
-          const Gradient phi(0, _scalar_phi[j][qp]);
-          _LMPrimal(i_offset + i, v_j_offset + j) -= _JxW[qp] * (_grad_scalar_phi[i][qp] * phi);
-        }
-      }
-      if (_enclosure_lm_var)
-        _LMMat(i_offset + i, global_lm_offset) -= _JxW[qp] * _scalar_phi[i][qp];
-    }
-
-    if (_enclosure_lm_var)
-    {
-      libmesh_assert(_scalar_n_dofs == _p_n_dofs);
-      for (const auto j : make_range(_p_n_dofs))
-        _LMMat(global_lm_offset, p_j_offset + j) -= _JxW[qp] * _scalar_phi[j][qp];
-    }
-  }
-}
-
-RealVectorValue
-NavierStokesHybridizedKernel::velCrossVelResidual(const MooseArray<Number> & u_sol,
-                                                  const MooseArray<Number> & v_sol,
-                                                  const unsigned int qp,
-                                                  const unsigned int vel_component)
-{
-  const RealVectorValue U(u_sol[qp], v_sol[qp]);
-  return U * U(vel_component);
-}
-
-RealVectorValue
-NavierStokesHybridizedKernel::velCrossVelJacobian(const MooseArray<Number> & u_sol,
-                                                  const MooseArray<Number> & v_sol,
-                                                  const unsigned int qp,
-                                                  const unsigned int vel_component,
-                                                  const unsigned int vel_j_component,
-                                                  const MooseArray<std::vector<Real>> & phi,
-                                                  const unsigned int j)
-{
-  const RealVectorValue U(u_sol[qp], v_sol[qp]);
-  RealVectorValue vector_phi;
-  vector_phi(vel_j_component) = phi[j][qp];
-  auto ret = vector_phi * U(vel_component);
-  if (vel_component == vel_j_component)
-    ret += U * phi[j][qp];
-  return ret;
 }

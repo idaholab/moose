@@ -37,43 +37,37 @@ NavierStokesHybridizedOutflowBC::onBoundary()
   resizeData(*this);
 
   // qu, u, lm_u
-  NavierStokesHybridizedKernel::vectorFaceResidual(*this, 0, _lm_u_sol);
-  NavierStokesHybridizedKernel::vectorFaceJacobian(*this, 0, 0);
-  NavierStokesHybridizedKernel::scalarFaceResidual(
-      *this, _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol, 0);
-  NavierStokesHybridizedKernel::scalarFaceJacobian(
-      *this, _vector_n_dofs, 0, _vector_n_dofs, 0, 2 * _lm_n_dofs, 0, 0, _lm_n_dofs);
-  NavierStokesHybridizedKernel::lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol, 0);
-  NavierStokesHybridizedKernel::lmFaceJacobian(
-      *this, 0, 0, _vector_n_dofs, 0, 2 * _lm_n_dofs, 0, 0, _lm_n_dofs);
+  vectorFaceResidual(*this, 0, _lm_u_sol);
+  vectorFaceJacobian(*this, 0, 0);
+  scalarFaceResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol, 0);
+  scalarFaceJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs, 0, 2 * _lm_n_dofs, 0, 0, _lm_n_dofs);
+  lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol, 0);
+  lmFaceJacobian(*this, 0, 0, _vector_n_dofs, 0, 2 * _lm_n_dofs, 0, 0, _lm_n_dofs);
   // qv, v, lm_v
-  NavierStokesHybridizedKernel::vectorFaceResidual(
-      *this, _vector_n_dofs + _scalar_n_dofs, _lm_v_sol);
-  NavierStokesHybridizedKernel::vectorFaceJacobian(
-      *this, _vector_n_dofs + _scalar_n_dofs, _lm_n_dofs);
-  NavierStokesHybridizedKernel::scalarFaceResidual(
-      *this, 2 * _vector_n_dofs + _scalar_n_dofs, _qv_sol, _v_sol, _lm_v_sol, 1);
-  NavierStokesHybridizedKernel::scalarFaceJacobian(*this,
-                                                   2 * _vector_n_dofs + _scalar_n_dofs,
-                                                   _vector_n_dofs + _scalar_n_dofs,
-                                                   2 * _vector_n_dofs + _scalar_n_dofs,
-                                                   _lm_n_dofs,
-                                                   2 * _lm_n_dofs,
-                                                   1,
-                                                   0,
-                                                   _lm_n_dofs);
-  NavierStokesHybridizedKernel::lmFaceResidual(*this, _lm_n_dofs, _qv_sol, _v_sol, _lm_v_sol, 1);
-  NavierStokesHybridizedKernel::lmFaceJacobian(*this,
-                                               _lm_n_dofs,
-                                               _vector_n_dofs + _scalar_n_dofs,
-                                               2 * _vector_n_dofs + _scalar_n_dofs,
-                                               _lm_n_dofs,
-                                               2 * _lm_n_dofs,
-                                               1,
-                                               0,
-                                               _lm_n_dofs);
+  vectorFaceResidual(*this, _vector_n_dofs + _scalar_n_dofs, _lm_v_sol);
+  vectorFaceJacobian(*this, _vector_n_dofs + _scalar_n_dofs, _lm_n_dofs);
+  scalarFaceResidual(*this, 2 * _vector_n_dofs + _scalar_n_dofs, _qv_sol, _v_sol, _lm_v_sol, 1);
+  scalarFaceJacobian(*this,
+                     2 * _vector_n_dofs + _scalar_n_dofs,
+                     _vector_n_dofs + _scalar_n_dofs,
+                     2 * _vector_n_dofs + _scalar_n_dofs,
+                     _lm_n_dofs,
+                     2 * _lm_n_dofs,
+                     1,
+                     0,
+                     _lm_n_dofs);
+  lmFaceResidual(*this, _lm_n_dofs, _qv_sol, _v_sol, _lm_v_sol, 1);
+  lmFaceJacobian(*this,
+                 _lm_n_dofs,
+                 _vector_n_dofs + _scalar_n_dofs,
+                 2 * _vector_n_dofs + _scalar_n_dofs,
+                 _lm_n_dofs,
+                 2 * _lm_n_dofs,
+                 1,
+                 0,
+                 _lm_n_dofs);
 
   // p
-  NavierStokesHybridizedKernel::pressureFaceResidual(*this, 2 * _lm_n_dofs);
-  NavierStokesHybridizedKernel::pressureFaceJacobian(*this, 2 * _lm_n_dofs, 0, _lm_n_dofs);
+  pressureFaceResidual(*this, 2 * _lm_n_dofs);
+  pressureFaceJacobian(*this, 2 * _lm_n_dofs, 0, _lm_n_dofs);
 }
