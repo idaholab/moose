@@ -1150,9 +1150,13 @@ protected:
                                  const std::string & start_marker,
                                  const std::string & end_marker,
                                  const std::string & data) const;
-  /// register a new capability
-  template <typename T>
-  static void addCapability(const std::string & capability, T value, const std::string & doc);
+  ///@{ register a new capability
+  static void addCapability(const std::string & capability,
+                            Moose::Capabilities::CapabilityType value,
+                            const std::string & doc);
+  static void
+  addCapability(const std::string & capability, const char * value, const std::string & doc);
+  //@}
 
   /// Parameters of this object
   InputParameters _pars;
@@ -1612,11 +1616,4 @@ MooseApp::getInterfaceObjects() const
     return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
   const static std::vector<T *> empty;
   return empty;
-}
-
-template <typename T>
-void
-MooseApp::addCapability(const std::string & capability, T value, const std::string & doc)
-{
-  Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
 }
