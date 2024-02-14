@@ -39,10 +39,10 @@ DiffusionHybridizedZeroFluxBC::onBoundary()
   resizeData(*this);
 
   // qu, u, lm_u
-  DiffusionHybridizedKernel::vectorFaceResidual(*this, 0, _lm_u_sol);
-  DiffusionHybridizedKernel::vectorFaceJacobian(*this, 0, 0);
-  DiffusionHybridizedKernel::scalarFaceResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol);
-  DiffusionHybridizedKernel::scalarFaceJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs, 0);
-  DiffusionHybridizedKernel::lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol);
-  DiffusionHybridizedKernel::lmFaceJacobian(*this, 0, 0, _vector_n_dofs, 0);
+  vectorFaceResidual(*this, 0, _lm_u_sol);
+  vectorFaceJacobian(*this, 0, 0);
+  scalarFaceResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol);
+  scalarFaceJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs, 0);
+  lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol);
+  lmFaceJacobian(*this, 0, 0, _vector_n_dofs, 0);
 }
