@@ -109,6 +109,24 @@ protected:
                              const unsigned int scalar_j_offset,
                              const unsigned int lm_j_offset);
 
+  template <typename DiffusionHybridized>
+  static void vectorDirichletResidual(DiffusionHybridized & obj,
+                                      const unsigned int i_offset,
+                                      const Function & dirichlet_function);
+
+  template <typename DiffusionHybridized>
+  static void scalarDirichletResidual(DiffusionHybridized & obj,
+                                      const unsigned int i_offset,
+                                      const MooseArray<Gradient> & vector_sol,
+                                      const MooseArray<Number> & scalar_sol,
+                                      const Function & dirichlet_function);
+
+  template <typename DiffusionHybridized>
+  static void scalarDirichletJacobian(DiffusionHybridized & obj,
+                                      const unsigned int i_offset,
+                                      const unsigned int vector_j_offset,
+                                      const unsigned int scalar_j_offset);
+
   const MooseVariableFE<Real> & _u_var;
   const MooseVariableFE<RealVectorValue> & _grad_u_var;
   const MooseVariableFE<Real> & _u_face_var;
@@ -385,5 +403,74 @@ DiffusionHybridizedInterface::lmFaceJacobian(DiffusionHybridized & obj,
         obj._LMMat(i_offset + i, lm_j_offset + j) -= obj._JxW_face[qp] * obj._lm_phi_face[i][qp] *
                                                      _tau * obj._lm_phi_face[j][qp] *
                                                      obj._normals[qp] * obj._normals[qp];
+    }
+}
+
+template <typename DiffusionHybridized>
+void
+DiffusionHybridizedInterface::vectorDirichletResidual(DiffusionHybridized & obj,
+                                                      const unsigned int i_offset,
+                                                      const Function & dirichlet_function)
+{
+  for (const auto qp : make_range(obj._qrule_face->n_points()))
+  {
+    const auto scalar_value = dirichlet_function.value(obj._t, obj._q_point_face[qp]);
+
+    // External boundary -> Dirichlet faces -> Vector equation RHS
+    for (const auto i : make_range(obj._vector_n_dofs))
+      obj._PrimalVec(i_offset + i) -=
+          obj._JxW_face[qp] * (obj._vector_phi_face[i][qp] * obj._normals[qp]) * scalar_value;
+  }
+}
+
+template <typename DiffusionHybridized>
+void
+DiffusionHybridizedInterface::scalarDirichletResidual(DiffusionHybridized & obj,
+                                                      const unsigned int i_offset,
+                                                      const MooseArray<Gradient> & vector_sol,
+                                                      const MooseArray<Number> & scalar_sol,
+                                                      const Function & dirichlet_function)
+{
+  for (const auto qp : make_range(obj._qrule_face->n_points()))
+  {
+    const auto scalar_value = dirichlet_function.value(obj._t, obj._q_point_face[qp]);
+
+    for (const auto i : make_range(obj._scalar_n_dofs))
+    {
+      // vector
+      obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._diff[qp] *
+                                      obj._scalar_phi_face[i][qp] *
+                                      (vector_sol[qp] * obj._normals[qp]);
+
+      // scalar from stabilization term
+      obj._PrimalVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * obj._tau *
+                                      scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
+
+      // dirichlet lm from stabilization term
+      obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * obj._tau *
+                                      scalar_value * obj._normals[qp] * obj._normals[qp];
+    }
+  }
+}
+
+template <typename DiffusionHybridized>
+void
+DiffusionHybridizedInterface::scalarDirichletJacobian(DiffusionHybridized & obj,
+                                                      const unsigned int i_offset,
+                                                      const unsigned int vector_j_offset,
+                                                      const unsigned int scalar_j_offset)
+{
+  for (const auto qp : make_range(obj._qrule_face->n_points()))
+    for (const auto i : make_range(obj._scalar_n_dofs))
+    {
+      for (const auto j : make_range(obj._vector_n_dofs))
+        obj._PrimalMat(i_offset + i, vector_j_offset + j) -=
+            obj._JxW_face[qp] * obj._diff[qp] * obj._scalar_phi_face[i][qp] *
+            (obj._vector_phi_face[j][qp] * obj._normals[qp]);
+
+      for (const auto j : make_range(obj._scalar_n_dofs))
+        obj._PrimalMat(i_offset + i, scalar_j_offset + j) +=
+            obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * obj._tau *
+            obj._scalar_phi_face[j][qp] * obj._normals[qp] * obj._normals[qp];
     }
 }

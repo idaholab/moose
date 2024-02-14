@@ -33,16 +33,6 @@ protected:
   virtual void onBoundary() override;
 
 private:
-  void vectorDirichletResidual(const unsigned int i_offset);
-
-  void scalarDirichletResidual(const unsigned int i_offset,
-                               const MooseArray<Gradient> & vector_sol,
-                               const MooseArray<Number> & scalar_sol);
-
-  void scalarDirichletJacobian(const unsigned int i_offset,
-                               const unsigned int vector_j_offset,
-                               const unsigned int scalar_j_offset);
-
   /// Dirichlet function
   const Function & _dirichlet_val;
 

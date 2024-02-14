@@ -23,6 +23,9 @@ HybridizedIntegratedBC::validParams()
 HybridizedIntegratedBC::HybridizedIntegratedBC(const InputParameters & parameters)
   : IntegratedBCBase(parameters),
     _normals(_assembly.normals()),
-    _aux_sys(_fe_problem.getAuxiliarySystem())
+    _aux_sys(_fe_problem.getAuxiliarySystem()),
+    _JxW_face(_JxW),
+    _qrule_face(_qrule),
+    _q_point_face(_q_point)
 {
 }
