@@ -39,71 +39,11 @@ DiffusionHybridizedDirichletBC::onBoundary()
   resizeData(*this);
 
   // qu, u
-  vectorDirichletResidual(0);
-  scalarDirichletResidual(_vector_n_dofs, _qu_sol, _u_sol);
-  scalarDirichletJacobian(_vector_n_dofs, 0, _vector_n_dofs);
+  vectorDirichletResidual(*this, 0, _dirichlet_val);
+  scalarDirichletResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _dirichlet_val);
+  scalarDirichletJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs);
 
   // Set the LMs on these Dirichlet boundary faces to 0
   createIdentityResidual(_lm_phi_face, _lm_u_sol, _lm_n_dofs, 0);
   createIdentityJacobian(_lm_phi_face, _lm_n_dofs, 0);
-}
-
-void
-DiffusionHybridizedDirichletBC::vectorDirichletResidual(const unsigned int i_offset)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    const auto scalar_value = _dirichlet_val.value(_t, _q_point[qp]);
-
-    // External boundary -> Dirichlet faces -> Vector equation RHS
-    for (const auto i : make_range(_vector_n_dofs))
-      _PrimalVec(i_offset + i) -=
-          _JxW[qp] * (_vector_phi_face[i][qp] * _normals[qp]) * scalar_value;
-  }
-}
-
-void
-DiffusionHybridizedDirichletBC::scalarDirichletResidual(const unsigned int i_offset,
-                                                        const MooseArray<Gradient> & vector_sol,
-                                                        const MooseArray<Number> & scalar_sol)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    const auto scalar_value = _dirichlet_val.value(_t, _q_point[qp]);
-
-    for (const auto i : make_range(_scalar_n_dofs))
-    {
-      // vector
-      _PrimalVec(i_offset + i) -=
-          _JxW[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * _normals[qp]);
-
-      // scalar from stabilization term
-      _PrimalVec(i_offset + i) +=
-          _JxW[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] * _normals[qp] * _normals[qp];
-
-      // dirichlet lm from stabilization term
-      _PrimalVec(i_offset + i) -=
-          _JxW[qp] * _scalar_phi_face[i][qp] * _tau * scalar_value * _normals[qp] * _normals[qp];
-    }
-  }
-}
-
-void
-DiffusionHybridizedDirichletBC::scalarDirichletJacobian(const unsigned int i_offset,
-                                                        const unsigned int vector_j_offset,
-                                                        const unsigned int scalar_j_offset)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
-    {
-      for (const auto j : make_range(_vector_n_dofs))
-        _PrimalMat(i_offset + i, vector_j_offset + j) -= _JxW[qp] * _diff[qp] *
-                                                         _scalar_phi_face[i][qp] *
-                                                         (_vector_phi_face[j][qp] * _normals[qp]);
-
-      for (const auto j : make_range(_scalar_n_dofs))
-        _PrimalMat(i_offset + i, scalar_j_offset + j) += _JxW[qp] * _scalar_phi_face[i][qp] * _tau *
-                                                         _scalar_phi_face[j][qp] * _normals[qp] *
-                                                         _normals[qp];
-    }
 }

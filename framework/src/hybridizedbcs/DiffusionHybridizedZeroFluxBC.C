@@ -27,9 +27,7 @@ DiffusionHybridizedZeroFluxBC::validParams()
 
 DiffusionHybridizedZeroFluxBC::DiffusionHybridizedZeroFluxBC(const InputParameters & parameters)
   : HybridizedIntegratedBC(parameters),
-    DiffusionHybridizedInterface(this, this, _sys, _aux_sys, _tid),
-    _JxW_face(_JxW),
-    _qrule_face(_qrule)
+    DiffusionHybridizedInterface(this, this, _sys, _aux_sys, _tid)
 {
 }
 

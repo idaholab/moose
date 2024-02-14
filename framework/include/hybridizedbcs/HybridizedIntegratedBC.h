@@ -44,6 +44,15 @@ protected:
   /// The auxiliary system
   SystemBase & _aux_sys;
 
+  /// transformed Jacobian weights on the face
+  const MooseArray<Real> & _JxW_face;
+
+  /// The face quadrature rule
+  const QBase * const & _qrule_face;
+
+  /// active quadrature points on the face
+  const MooseArray<Point> & _q_point_face;
+
   /// The current neighbor
   const Elem * _neigh = nullptr;
 
