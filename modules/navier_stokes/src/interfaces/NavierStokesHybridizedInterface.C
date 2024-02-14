@@ -27,22 +27,22 @@ using namespace libMesh;
 InputParameters
 NavierStokesHybridizedInterface::validParams()
 {
-  auto params = emptyInputParameters();
+  auto params = DiffusionHybridizedInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(NS::pressure, "The pressure variable.");
-  params.addRequiredParam<AuxVariableName>("u", "The x-component of velocity");
+  params.setDocString("u", "The x-component of velocity");
   params.addRequiredParam<AuxVariableName>("v", "The y-component of velocity");
   params.addParam<AuxVariableName>("w", "The z-component of velocity");
-  params.addRequiredParam<AuxVariableName>("grad_u", "The gradient of the x-component of velocity");
+  params.setDocString("grad_u", "The gradient of the x-component of velocity");
   params.addRequiredParam<AuxVariableName>("grad_v", "The gradient of the y-component of velocity");
   params.addParam<AuxVariableName>("grad_w", "The gradient of the z-component of velocity");
-  params.addRequiredParam<NonlinearVariableName>("face_u", "The x-component of the face velocity");
+  params.setDocString("face_u", "The x-component of the face velocity");
   params.addRequiredParam<NonlinearVariableName>("face_v", "The y-component of the face velocity");
   params.addParam<NonlinearVariableName>("face_w", "The z-component of the face velocity");
   params.addParam<NonlinearVariableName>(
       "enclosure_lm",
       "For enclosed problems like the lid driven cavity this variable can be provided to remove "
       "the pressure nullspace");
-  params.addRequiredParam<MaterialPropertyName>("nu", "The kinematic viscosity");
+  params.renameParam("diffusivity", "nu", "The kinematic viscosity");
   return params;
 }
 
@@ -53,21 +53,17 @@ NavierStokesHybridizedInterface::NavierStokesHybridizedInterface(
     SystemBase & aux_sys,
     const MooseMesh & mesh,
     const THREAD_ID tid)
-  : // vars
-    _u_var(aux_sys.getFieldVariable<Real>(tid, moose_obj->getParam<AuxVariableName>("u"))),
+  : DiffusionHybridizedInterface(moose_obj, mpi, nl_sys, aux_sys, tid),
+    // vars
     _v_var(aux_sys.getFieldVariable<Real>(tid, moose_obj->getParam<AuxVariableName>("v"))),
     _w_var(mesh.dimension() > 2
                ? &aux_sys.getFieldVariable<Real>(tid, moose_obj->getParam<AuxVariableName>("w"))
                : nullptr),
-    _grad_u_var(aux_sys.getFieldVariable<RealVectorValue>(
-        tid, moose_obj->getParam<AuxVariableName>("grad_u"))),
     _grad_v_var(aux_sys.getFieldVariable<RealVectorValue>(
         tid, moose_obj->getParam<AuxVariableName>("grad_v"))),
     _grad_w_var(mesh.dimension() > 2 ? &aux_sys.getFieldVariable<RealVectorValue>(
                                            tid, moose_obj->getParam<AuxVariableName>("grad_w"))
                                      : nullptr),
-    _u_face_var(
-        nl_sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("face_u"))),
     _v_face_var(
         nl_sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("face_v"))),
     _w_face_var(mesh.dimension() > 2
@@ -81,9 +77,6 @@ NavierStokesHybridizedInterface::NavierStokesHybridizedInterface(
                                 tid, moose_obj->getParam<NonlinearVariableName>("enclosure_lm"))
                           : nullptr),
     // dof indices
-    _qu_dof_indices(_grad_u_var.dofIndices()),
-    _u_dof_indices(_u_var.dofIndices()),
-    _lm_u_dof_indices(_u_face_var.dofIndices()),
     _qv_dof_indices(_grad_v_var.dofIndices()),
     _v_dof_indices(_v_var.dofIndices()),
     _lm_v_dof_indices(_v_face_var.dofIndices()),
@@ -93,9 +86,6 @@ NavierStokesHybridizedInterface::NavierStokesHybridizedInterface(
     _p_dof_indices(_pressure_var.dofIndices()),
     _global_lm_dof_indices(_enclosure_lm_var ? &_enclosure_lm_var->dofIndices() : nullptr),
     // solutions
-    _qu_sol(_grad_u_var.sln()),
-    _u_sol(_u_var.sln()),
-    _lm_u_sol(_u_face_var.sln()),
     _qv_sol(_grad_v_var.sln()),
     _v_sol(_v_var.sln()),
     _lm_v_sol(_v_face_var.sln()),
@@ -104,20 +94,7 @@ NavierStokesHybridizedInterface::NavierStokesHybridizedInterface(
     _lm_w_sol(_w_face_var ? &_w_face_var->sln() : nullptr),
     _p_sol(_pressure_var.sln()),
     _global_lm_dof_value(_enclosure_lm_var ? &_enclosure_lm_var->sln() : nullptr),
-    // shape functions
-    _vector_phi(_grad_u_var.phi()),
-    _scalar_phi(_u_var.phi()),
-    _grad_scalar_phi(_u_var.gradPhi()),
-    _div_vector_phi(_grad_u_var.divPhi()),
-    _vector_phi_face(_grad_u_var.phiFace()),
-    _scalar_phi_face(_u_var.phiFace()),
-    _lm_phi_face(_u_face_var.phiFace()),
-    // material properties
-    _nu(mpi->getMaterialProperty<Real>("nu")),
     // initialize local number of dofs
-    _vector_n_dofs(0),
-    _scalar_n_dofs(0),
-    _lm_n_dofs(0),
     _p_n_dofs(0),
     _global_lm_n_dofs(_enclosure_lm_var ? 1 : 0)
 {

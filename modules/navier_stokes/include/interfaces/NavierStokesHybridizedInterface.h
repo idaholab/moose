@@ -9,29 +9,9 @@
 
 #pragma once
 
-#include "MooseTypes.h"
-#include "MooseArray.h"
-#include "libmesh/vector_value.h"
-#include <vector>
+#include "DiffusionHybridizedInterface.h"
 
-template <typename>
-class MooseVariableFE;
-class MooseVariableScalar;
-template <typename>
-class MooseArray;
-class SystemBase;
-class MooseMesh;
-class HybridizedData;
-class MooseObject;
-class MaterialPropertyInterface;
-namespace libMesh
-{
-class Elem;
-class Point;
-class QBase;
-}
-
-class NavierStokesHybridizedInterface
+class NavierStokesHybridizedInterface : public DiffusionHybridizedInterface
 {
 public:
   static InputParameters validParams();
@@ -50,22 +30,16 @@ protected:
   template <typename NSHybridized>
   static void resizeData(NSHybridized & obj);
 
-  const MooseVariableFE<Real> & _u_var;
   const MooseVariableFE<Real> & _v_var;
   const MooseVariableFE<Real> * const _w_var;
-  const MooseVariableFE<RealVectorValue> & _grad_u_var;
   const MooseVariableFE<RealVectorValue> & _grad_v_var;
   const MooseVariableFE<RealVectorValue> * const _grad_w_var;
-  const MooseVariableFE<Real> & _u_face_var;
   const MooseVariableFE<Real> & _v_face_var;
   const MooseVariableFE<Real> * const _w_face_var;
   const MooseVariableFE<Real> & _pressure_var;
   const MooseVariableScalar * const _enclosure_lm_var;
 
-  // Containers for dof indices
-  const std::vector<dof_id_type> & _qu_dof_indices;
-  const std::vector<dof_id_type> & _u_dof_indices;
-  const std::vector<dof_id_type> & _lm_u_dof_indices;
+  /// Containers for dof indices
   const std::vector<dof_id_type> & _qv_dof_indices;
   const std::vector<dof_id_type> & _v_dof_indices;
   const std::vector<dof_id_type> & _lm_v_dof_indices;
@@ -75,10 +49,7 @@ protected:
   const std::vector<dof_id_type> & _p_dof_indices;
   const std::vector<dof_id_type> * const _global_lm_dof_indices;
 
-  // local solutions at quadrature points
-  const MooseArray<Gradient> & _qu_sol;
-  const MooseArray<Number> & _u_sol;
-  const MooseArray<Number> & _lm_u_sol;
+  /// local solutions at quadrature points
   const MooseArray<Gradient> & _qv_sol;
   const MooseArray<Number> & _v_sol;
   const MooseArray<Number> & _lm_v_sol;
@@ -88,32 +59,9 @@ protected:
   const MooseArray<Number> & _p_sol;
   const MooseArray<Number> * const _global_lm_dof_value;
 
-  // Element shape functions
-  const MooseArray<std::vector<RealVectorValue>> & _vector_phi;
-  const MooseArray<std::vector<Real>> & _scalar_phi;
-  const MooseArray<std::vector<RealVectorValue>> & _grad_scalar_phi;
-  const MooseArray<std::vector<Real>> & _div_vector_phi;
-
-  // Face shape functions
-  const MooseArray<std::vector<RealVectorValue>> & _vector_phi_face;
-  const MooseArray<std::vector<Real>> & _scalar_phi_face;
-  const MooseArray<std::vector<Real>> & _lm_phi_face;
-
-  // Material properties
-  const MaterialProperty<Real> & _nu;
-
-  // Number of dofs on elem
-  std::size_t _vector_n_dofs;
-  std::size_t _scalar_n_dofs;
-  std::size_t _lm_n_dofs;
+  /// Number of dofs on elem
   std::size_t _p_n_dofs;
   std::size_t _global_lm_n_dofs;
-
-  /// Local sizes of the systems
-  std::size_t _primal_size, _lm_size;
-
-  /// Our stabilization coefficient
-  static constexpr Real _tau = 1;
 };
 
 template <typename NSHybridized>

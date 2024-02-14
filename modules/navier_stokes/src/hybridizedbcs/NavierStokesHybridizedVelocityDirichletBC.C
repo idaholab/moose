@@ -95,15 +95,8 @@ void
 NavierStokesHybridizedVelocityDirichletBC::vectorDirichletResidual(const unsigned int i_offset,
                                                                    const unsigned int vel_component)
 {
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    const auto scalar_value = getDirichletVelocity(qp)(vel_component);
-
-    // External boundary -> Dirichlet faces -> Vector equation RHS
-    for (const auto i : make_range(_vector_n_dofs))
-      _PrimalVec(i_offset + i) -=
-          _JxW[qp] * (_vector_phi_face[i][qp] * _normals[qp]) * scalar_value;
-  }
+  DiffusionHybridizedInterface::vectorDirichletResidual(
+      *this, i_offset, *_dirichlet_vel[vel_component]);
 }
 
 void
@@ -113,6 +106,9 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletResidual(
     const MooseArray<Number> & scalar_sol,
     const unsigned int vel_component)
 {
+  DiffusionHybridizedInterface::scalarDirichletResidual(
+      *this, i_offset, vector_sol, scalar_sol, *_dirichlet_vel[vel_component]);
+
   for (const auto qp : make_range(_qrule->n_points()))
   {
     Gradient qp_p;
@@ -120,24 +116,11 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletResidual(
 
     const auto dirichlet_velocity = getDirichletVelocity(qp);
     const auto scalar_value = dirichlet_velocity(vel_component);
-    ;
 
     for (const auto i : make_range(_scalar_n_dofs))
     {
-      // vector
-      _PrimalVec(i_offset + i) -=
-          _JxW[qp] * _nu[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * _normals[qp]);
-
       // pressure
       _PrimalVec(i_offset + i) += _JxW[qp] * _scalar_phi_face[i][qp] * (qp_p * _normals[qp]);
-
-      // scalar from stabilization term
-      _PrimalVec(i_offset + i) +=
-          _JxW[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] * _normals[qp] * _normals[qp];
-
-      // dirichlet lm from stabilization term
-      _PrimalVec(i_offset + i) -=
-          _JxW[qp] * _scalar_phi_face[i][qp] * _tau * scalar_value * _normals[qp] * _normals[qp];
 
       // dirichlet lm from advection term
       _PrimalVec(i_offset + i) +=
@@ -154,13 +137,11 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletJacobian(
     const unsigned int p_j_offset,
     const unsigned int vel_component)
 {
+  DiffusionHybridizedInterface::scalarDirichletJacobian(
+      *this, i_offset, vector_j_offset, scalar_j_offset);
+
   for (const auto qp : make_range(_qrule->n_points()))
     for (const auto i : make_range(_scalar_n_dofs))
-    {
-      for (const auto j : make_range(_vector_n_dofs))
-        _PrimalMat(i_offset + i, vector_j_offset + j) -=
-            _JxW[qp] * _nu[qp] * _scalar_phi_face[i][qp] * (_vector_phi_face[j][qp] * _normals[qp]);
-
       for (const auto j : make_range(_p_n_dofs))
       {
         Gradient p_phi;
@@ -169,10 +150,4 @@ NavierStokesHybridizedVelocityDirichletBC::scalarDirichletJacobian(
         _PrimalLM(i_offset + i, p_j_offset + j) +=
             _JxW[qp] * _scalar_phi_face[i][qp] * (p_phi * _normals[qp]);
       }
-
-      for (const auto j : make_range(_scalar_n_dofs))
-        _PrimalMat(i_offset + i, scalar_j_offset + j) += _JxW[qp] * _scalar_phi_face[i][qp] * _tau *
-                                                         _scalar_phi_face[j][qp] * _normals[qp] *
-                                                         _normals[qp];
-    }
 }

@@ -38,12 +38,7 @@ public:
 protected:
   virtual void onBoundary() override;
 
-  /// transformed Jacobian weights on the face
-  const MooseArray<Real> & _JxW_face;
-
-  /// The face quadrature rule
-  const QBase * const & _qrule_face;
-
   friend class NavierStokesHybridizedKernel;
   friend class NavierStokesHybridizedInterface;
+  friend class DiffusionHybridizedInterface;
 };

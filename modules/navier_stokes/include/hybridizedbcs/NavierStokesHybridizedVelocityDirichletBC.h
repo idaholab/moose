@@ -59,4 +59,5 @@ private:
   std::vector<const Function *> _dirichlet_vel;
 
   friend class NavierStokesHybridizedInterface;
+  friend class DiffusionHybridizedInterface;
 };
