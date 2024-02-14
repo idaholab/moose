@@ -15,6 +15,8 @@
   - Single-phase, variable-area, inviscid, compressible flow.
   - 2-D and 3-D heat conduction.
 
+See [this paper](https://joss.theoj.org/papers/10.21105/joss.06146) for an overview of this module.
+
 !col-end!
 
 !col! small=6 medium=6 large=6 icon=school
