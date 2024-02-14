@@ -6,4 +6,14 @@
     csvdiff = 'diffusion_out.csv'
     type = CSVDiff
   []
+  [mms]
+    requirement = 'The system shall show second order convergence in the L2 norm with a first order basis using a hybridized discontinuous Galerkin discretization.'
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLagrange
+    method = "!dbg"
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    valgrind = 'none'
+  []
 []
