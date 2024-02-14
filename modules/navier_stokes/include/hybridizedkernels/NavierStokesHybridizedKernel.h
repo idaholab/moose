@@ -54,13 +54,6 @@ protected:
                                              const unsigned int j);
 
   /**
-   * Compute the stress at quadrature points for a given velocity component and its gradient
-   */
-  void computeStress(const MooseArray<Gradient> & vel_gradient,
-                     const unsigned int vel_component,
-                     std::vector<Gradient> & sigma);
-
-  /**
    * Compute the volumetric contributions to a velocity gradient residual for a provided velocity
    * gradient and velocity
    * @param i_offset The local degree of freedom offset for the velocity gradient component
@@ -87,12 +80,10 @@ protected:
    * @param i_offset The local degree of freedom offset for the velocity component
    * @param vel_gradient The velocity gradient component
    * @param vel_component The velocity component
-   * @param sigma The associated stress
    */
   void scalarVolumeResidual(const unsigned int i_offset,
                             const MooseArray<Gradient> & vel_gradient,
-                            const unsigned int vel_component,
-                            std::vector<Gradient> & sigma);
+                            const unsigned int vel_component);
 
   /**
    * Compute the volumetric contributions to a velocity Jacobian
@@ -150,16 +141,6 @@ protected:
                                    const unsigned int lm_v_j_offset);
 
   template <typename NSHybridized>
-  static void vectorFaceResidual(NSHybridized & obj,
-                                 const unsigned int i_offset,
-                                 const MooseArray<Number> & lm_sol);
-
-  template <typename NSHybridized>
-  static void vectorFaceJacobian(NSHybridized & obj,
-                                 const unsigned int i_offset,
-                                 const unsigned int lm_j_offset);
-
-  template <typename NSHybridized>
   static void scalarFaceResidual(NSHybridized & obj,
                                  const unsigned int i_offset,
                                  const MooseArray<Gradient> & vector_sol,
@@ -197,11 +178,6 @@ protected:
                              const unsigned int lm_u_j_offset,
                              const unsigned int lm_v_j_offset);
 
-  // stresses at quadrature points
-  std::vector<Gradient> _sigma_u;
-  std::vector<Gradient> _sigma_v;
-  std::vector<Gradient> _sigma_w;
-
   // body forces
   const Function & _body_force_x;
   const Function & _body_force_y;
@@ -211,6 +187,7 @@ protected:
 
   friend class NavierStokesHybridizedOutflowBC;
   friend class NavierStokesHybridizedInterface;
+  friend class DiffusionHybridizedInterface;
 };
 
 template <typename NSHybridized>
@@ -252,34 +229,6 @@ NavierStokesHybridizedKernel::pressureFaceJacobian(NSHybridized & obj,
 
 template <typename NSHybridized>
 void
-NavierStokesHybridizedKernel::vectorFaceResidual(NSHybridized & obj,
-                                                 const unsigned int i_offset,
-                                                 const MooseArray<Number> & lm_sol)
-{
-  for (const auto qp : make_range(obj._qrule_face->n_points()))
-    // Vector equation dependence on LM dofs
-    for (const auto i : make_range(obj._vector_n_dofs))
-      obj._PrimalVec(i_offset + i) -=
-          obj._JxW_face[qp] * (obj._vector_phi_face[i][qp] * obj._normals[qp]) * lm_sol[qp];
-}
-
-template <typename NSHybridized>
-void
-NavierStokesHybridizedKernel::vectorFaceJacobian(NSHybridized & obj,
-                                                 const unsigned int i_offset,
-                                                 const unsigned int lm_j_offset)
-{
-  for (const auto qp : make_range(obj._qrule_face->n_points()))
-    // Vector equation dependence on LM dofs
-    for (const auto i : make_range(obj._vector_n_dofs))
-      for (const auto j : make_range(obj._lm_n_dofs))
-        obj._PrimalLM(i_offset + i, lm_j_offset + j) -=
-            obj._JxW_face[qp] * (obj._vector_phi_face[i][qp] * obj._normals[qp]) *
-            obj._lm_phi_face[j][qp];
-}
-
-template <typename NSHybridized>
-void
 NavierStokesHybridizedKernel::scalarFaceResidual(NSHybridized & obj,
                                                  const unsigned int i_offset,
                                                  const MooseArray<Gradient> & vector_sol,
@@ -287,6 +236,8 @@ NavierStokesHybridizedKernel::scalarFaceResidual(NSHybridized & obj,
                                                  const MooseArray<Number> & lm_sol,
                                                  const unsigned int vel_component)
 {
+  DiffusionHybridizedInterface::scalarFaceResidual(obj, i_offset, vector_sol, scalar_sol, lm_sol);
+
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
     Gradient qp_p;
@@ -296,24 +247,9 @@ NavierStokesHybridizedKernel::scalarFaceResidual(NSHybridized & obj,
     for (const auto i : make_range(obj._scalar_n_dofs))
     {
       if (obj._neigh)
-      {
-        // vector
-        obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._nu[qp] *
-                                        obj._scalar_phi_face[i][qp] *
-                                        (vector_sol[qp] * obj._normals[qp]);
-
         // pressure
         obj._PrimalVec(i_offset + i) +=
             obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (qp_p * obj._normals[qp]);
-
-        // scalar from stabilization term
-        obj._PrimalVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
-                                        scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
-
-        // lm from stabilization term
-        obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
-                                        lm_sol[qp] * obj._normals[qp] * obj._normals[qp];
-      }
 
       // lm from convection term
       obj._PrimalVec(i_offset + i) +=
@@ -334,16 +270,13 @@ NavierStokesHybridizedKernel::scalarFaceJacobian(NSHybridized & obj,
                                                  const unsigned int lm_u_j_offset,
                                                  const unsigned int lm_v_j_offset)
 {
+  DiffusionHybridizedInterface::scalarFaceJacobian(
+      obj, i_offset, vector_j_offset, scalar_j_offset, lm_j_offset);
+
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
     {
       if (obj._neigh)
-      {
-        for (const auto j : make_range(obj._vector_n_dofs))
-          obj._PrimalMat(i_offset + i, vector_j_offset + j) -=
-              obj._JxW_face[qp] * obj._nu[qp] * obj._scalar_phi_face[i][qp] *
-              (obj._vector_phi_face[j][qp] * obj._normals[qp]);
-
         for (const auto j : make_range(obj._p_n_dofs))
         {
           Gradient p_phi;
@@ -353,20 +286,8 @@ NavierStokesHybridizedKernel::scalarFaceJacobian(NSHybridized & obj,
               obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (p_phi * obj._normals[qp]);
         }
 
-        for (const auto j : make_range(obj._scalar_n_dofs))
-          obj._PrimalMat(i_offset + i, scalar_j_offset + j) +=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._scalar_phi_face[j][qp] *
-              obj._normals[qp] * obj._normals[qp];
-      }
-
       for (const auto j : make_range(obj._lm_n_dofs))
       {
-        if (obj._neigh)
-          // from stabilization term
-          obj._PrimalLM(i_offset + i, lm_j_offset + j) -=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._lm_phi_face[j][qp] *
-              obj._normals[qp] * obj._normals[qp];
-
         //
         // from convection term
         //
@@ -398,6 +319,8 @@ NavierStokesHybridizedKernel::lmFaceResidual(NSHybridized & obj,
                                              const MooseArray<Number> & lm_sol,
                                              const unsigned int vel_component)
 {
+  DiffusionHybridizedInterface::lmFaceResidual(obj, i_offset, vector_sol, scalar_sol, lm_sol);
+
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
     Gradient qp_p;
@@ -406,21 +329,9 @@ NavierStokesHybridizedKernel::lmFaceResidual(NSHybridized & obj,
 
     for (const auto i : make_range(obj._lm_n_dofs))
     {
-      // vector
-      obj._LMVec(i_offset + i) -= obj._JxW_face[qp] * obj._nu[qp] * obj._lm_phi_face[i][qp] *
-                                  (vector_sol[qp] * obj._normals[qp]);
-
       // pressure
       obj._LMVec(i_offset + i) +=
           obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * (qp_p * obj._normals[qp]);
-
-      // scalar from stabilization term
-      obj._LMVec(i_offset + i) += obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * _tau *
-                                  scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
-
-      // lm from stabilization term
-      obj._LMVec(i_offset + i) -= obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * _tau * lm_sol[qp] *
-                                  obj._normals[qp] * obj._normals[qp];
 
       // If we are an internal face we add the convective term. On the outflow boundary we do not
       // zero out the convection term, e.g. we are going to set q + p + tau * (u - u_hat) to zero
@@ -444,14 +355,12 @@ NavierStokesHybridizedKernel::lmFaceJacobian(NSHybridized & obj,
                                              const unsigned int lm_u_j_offset,
                                              const unsigned int lm_v_j_offset)
 {
+  DiffusionHybridizedInterface::lmFaceJacobian(
+      obj, i_offset, vector_j_offset, scalar_j_offset, lm_j_offset);
+
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._lm_n_dofs))
     {
-      for (const auto j : make_range(obj._vector_n_dofs))
-        obj._LMPrimal(i_offset + i, vector_j_offset + j) -=
-            obj._JxW_face[qp] * obj._nu[qp] * obj._lm_phi_face[i][qp] *
-            (obj._vector_phi_face[j][qp] * obj._normals[qp]);
-
       for (const auto j : make_range(obj._p_n_dofs))
       {
         Gradient p_phi;
@@ -460,17 +369,7 @@ NavierStokesHybridizedKernel::lmFaceJacobian(NSHybridized & obj,
             obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * (p_phi * obj._normals[qp]);
       }
 
-      for (const auto j : make_range(obj._scalar_n_dofs))
-        obj._LMPrimal(i_offset + i, scalar_j_offset + j) +=
-            obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * _tau * obj._scalar_phi_face[j][qp] *
-            obj._normals[qp] * obj._normals[qp];
-
       for (const auto j : make_range(obj._lm_n_dofs))
-      {
-        // from stabilization term
-        obj._LMMat(i_offset + i, lm_j_offset + j) -= obj._JxW_face[qp] * obj._lm_phi_face[i][qp] *
-                                                     _tau * obj._lm_phi_face[j][qp] *
-                                                     obj._normals[qp] * obj._normals[qp];
         if (obj._neigh)
         {
           // derivatives wrt 0th component
@@ -488,6 +387,5 @@ NavierStokesHybridizedKernel::lmFaceJacobian(NSHybridized & obj,
                 obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
           }
         }
-      }
     }
 }

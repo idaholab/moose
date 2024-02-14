@@ -27,9 +27,7 @@ NavierStokesHybridizedOutflowBC::validParams()
 
 NavierStokesHybridizedOutflowBC::NavierStokesHybridizedOutflowBC(const InputParameters & parameters)
   : HybridizedIntegratedBC(parameters),
-    NavierStokesHybridizedInterface(this, this, _sys, _aux_sys, _mesh, _tid),
-    _JxW_face(_JxW),
-    _qrule_face(_qrule)
+    NavierStokesHybridizedInterface(this, this, _sys, _aux_sys, _mesh, _tid)
 {
 }
 
