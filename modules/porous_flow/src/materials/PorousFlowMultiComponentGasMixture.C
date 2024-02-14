@@ -33,7 +33,7 @@ PorousFlowMultiComponentGasMixtureTempl<is_ad>::PorousFlowMultiComponentGasMixtu
   : PorousFlowMultiComponentFluidBaseTempl<is_ad>(parameters),
     _fp_names(this->template getParam<std::vector<UserObjectName>>("fp")),
     _n_components(_fp_names.size()),
-    _x_components(this->template isParamValid("x") ? this->template coupledComponents("x") : 0)
+    _x_components(this->coupledComponents("x"))
 
 {
   if (_n_components < 2)
