@@ -48,10 +48,10 @@ DiffusionHybridizedKernel::onElement()
   }
 
   // qu and u
-  vectorVolumeResidual(0, _qu_sol, _u_sol);
-  scalarVolumeResidual(_vector_n_dofs, _qu_sol);
-  vectorVolumeJacobian(0, 0, _vector_n_dofs);
-  scalarVolumeJacobian(_vector_n_dofs, 0);
+  vectorVolumeResidual(*this, 0, _qu_sol, _u_sol);
+  scalarVolumeResidual(*this, _vector_n_dofs, _qu_sol, _source);
+  vectorVolumeJacobian(*this, 0, 0, _vector_n_dofs);
+  scalarVolumeJacobian(*this, _vector_n_dofs, 0);
 }
 
 void
@@ -64,72 +64,4 @@ DiffusionHybridizedKernel::onInternalSide()
   scalarFaceJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs, 0);
   lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol);
   lmFaceJacobian(*this, 0, 0, _vector_n_dofs, 0);
-}
-
-void
-DiffusionHybridizedKernel::vectorVolumeResidual(const unsigned int i_offset,
-                                                const MooseArray<Gradient> & vector_sol,
-                                                const MooseArray<Number> & scalar_sol)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : make_range(_vector_n_dofs))
-    {
-      // Vector equation dependence on vector dofs
-      _PrimalVec(i_offset + i) += _JxW[qp] * (_vector_phi[i][qp] * vector_sol[qp]);
-
-      // Vector equation dependence on scalar dofs
-      _PrimalVec(i_offset + i) += _JxW[qp] * (_div_vector_phi[i][qp] * scalar_sol[qp]);
-    }
-}
-
-void
-DiffusionHybridizedKernel::vectorVolumeJacobian(const unsigned int i_offset,
-                                                const unsigned int vector_j_offset,
-                                                const unsigned int scalar_j_offset)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : make_range(_vector_n_dofs))
-    {
-      // Vector equation dependence on vector dofs
-      for (const auto j : make_range(_vector_n_dofs))
-        _PrimalMat(i_offset + i, vector_j_offset + j) +=
-            _JxW[qp] * (_vector_phi[i][qp] * _vector_phi[j][qp]);
-
-      // Vector equation dependence on scalar dofs
-      for (const auto j : make_range(_scalar_n_dofs))
-        _PrimalMat(i_offset + i, scalar_j_offset + j) +=
-            _JxW[qp] * (_div_vector_phi[i][qp] * _scalar_phi[j][qp]);
-    }
-}
-
-void
-DiffusionHybridizedKernel::scalarVolumeResidual(const unsigned int i_offset,
-                                                const MooseArray<Gradient> & vector_field)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-  {
-    // Evaluate body force
-    const auto f = _source.value(_t, _q_point[qp]);
-
-    for (const auto i : make_range(_scalar_n_dofs))
-    {
-      _PrimalVec(i_offset + i) +=
-          _JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * vector_field[qp]);
-
-      // Scalar equation RHS
-      _PrimalVec(i_offset + i) -= _JxW[qp] * _scalar_phi[i][qp] * f;
-    }
-  }
-}
-
-void
-DiffusionHybridizedKernel::scalarVolumeJacobian(const unsigned int i_offset,
-                                                const unsigned int vector_field_j_offset)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
-      // Scalar equation dependence on vector dofs
-      for (const auto j : make_range(_vector_n_dofs))
-        _PrimalMat(i_offset + i, vector_field_j_offset + j) +=
-            _JxW[qp] * _diff[qp] * (_grad_scalar_phi[i][qp] * _vector_phi[j][qp]);
 }
