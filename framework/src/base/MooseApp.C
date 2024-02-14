@@ -3376,3 +3376,17 @@ MooseApp::outputMachineReadableData(const std::string & param const,
   else
     mooseError("Unable to open file `", filename, "` for writing ", param, " data to it.");
 }
+
+void
+MooseApp::addCapability(const std::string & capability,
+                        Moose::Capabilities::CapabilityType value,
+                        const std::string & doc)
+{
+  Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
+}
+
+void
+MooseApp::addCapability(const std::string & capability, const char * value, const std::string & doc)
+{
+  Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
+}
