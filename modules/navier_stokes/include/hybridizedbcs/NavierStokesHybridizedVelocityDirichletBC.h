@@ -39,24 +39,8 @@ protected:
   virtual void onBoundary() override;
 
 private:
-  RealVectorValue getDirichletVelocity(const unsigned int qp) const;
-
-  void pressureDirichletResidual(const unsigned int i_offset);
-
-  void vectorDirichletResidual(const unsigned int i_offset, const unsigned int vel_component);
-
-  void scalarDirichletResidual(const unsigned int i_offset,
-                               const MooseArray<Gradient> & vector_sol,
-                               const MooseArray<Number> & scalar_sol,
-                               const unsigned int vel_component);
-
-  void scalarDirichletJacobian(const unsigned int i_offset,
-                               const unsigned int vector_j_offset,
-                               const unsigned int scalar_j_offset,
-                               const unsigned int p_j_offset,
-                               const unsigned int vel_component);
   /// Dirichlet velocity
-  std::vector<const Function *> _dirichlet_vel;
+  std::array<const Function *, 3> _dirichlet_vel;
 
   friend class NavierStokesHybridizedInterface;
   friend class DiffusionHybridizedInterface;

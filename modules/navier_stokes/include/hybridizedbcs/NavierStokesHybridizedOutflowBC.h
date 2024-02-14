@@ -38,7 +38,6 @@ public:
 protected:
   virtual void onBoundary() override;
 
-  friend class NavierStokesHybridizedKernel;
   friend class NavierStokesHybridizedInterface;
   friend class DiffusionHybridizedInterface;
 };
