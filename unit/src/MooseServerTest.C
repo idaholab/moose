@@ -279,6 +279,46 @@ protected:
     }
   }
 
+  // build completion request, handle request with server, and check response
+  void check_completions(int req_id,
+                         const std::string & req_uri,
+                         int req_line,
+                         int req_char,
+                         std::size_t expect_count,
+                         const std::string & expect_items) const
+  {
+    // build completion request with the test parameters
+    wasp::DataObject completion_request;
+    std::stringstream completion_errors;
+    EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
+        completion_request, completion_errors, req_id, req_uri, req_line, req_char));
+    EXPECT_TRUE(completion_errors.str().empty());
+
+    // handle the built completion request with the moose_server
+    wasp::DataObject completion_response;
+    EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
+    EXPECT_TRUE(moose_server->getErrors().empty());
+
+    // check the dissected values of the moose_server completion response
+    std::stringstream response_errors;
+    int response_id;
+    bool response_is_incomplete;
+    wasp::DataArray completions_array;
+    EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
+                                                     response_errors,
+                                                     response_id,
+                                                     response_is_incomplete,
+                                                     completions_array));
+    EXPECT_TRUE(response_errors.str().empty());
+    EXPECT_EQ(req_id, response_id);
+    EXPECT_EQ(expect_count, completions_array.size());
+
+    // make formatted list from completion items and check it is as expected
+    std::ostringstream actual_items;
+    format_completions(completions_array, actual_items);
+    EXPECT_EQ(expect_items, "\n" + actual_items.str());
+  }
+
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
@@ -1539,11 +1579,130 @@ document_uri: "file:///test/input/path"    definition_start: [19.5]    definitio
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
 
+TEST_F(MooseServerTest, CompletionPartialInputCases)
+{
+  // didchange test parameters - update for partial input completion checking
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int doc_version = 4;
+  std::string doc_text_change = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  ghos
+[]
+[Variables]
+  [u]
+    [
+    []
+  []
+  [v]
+  []
+[]
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable =
+  []
+[]
+[Executioner]
+  type = Steady
+  [Tim
+  []
+[]
+[Outputs]
+  [out]
+    type = Exodus
+    output_dimension =
+    lin
+)INPUT";
+
+  // build didchange notification and handle it with the moose_server
+  wasp::DataObject didchange_notification;
+  std::stringstream errors;
+  wasp::DataObject diagnostics_notification;
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
+  // check partial input completion 01 - on incomplete ghos parameter in Mesh
+  int request_id = 13;
+  int request_line = 3;
+  int request_char = 6;
+  std::size_t expect_count = 4;
+  std::string expect_items = R"INPUT(
+label: ghosted_boundaries           text: ghosted_boundaries =            desc: Boundaries to be ghosted if using Nem... pos: [3.2]-[3.6] kind: 14
+label: ghosted_boundaries_inflation text: ghosted_boundaries_inflation =  desc: If you are using ghosted boundaries y... pos: [3.2]-[3.6] kind: 14
+label: ghosting_patch_size          text: ghosting_patch_size =           desc: The number of nearest neighbors consi... pos: [3.2]-[3.6] kind: 14
+label: *                            text: [ghos]\n  \n[]                  desc: custom user named block                  pos: [3.2]-[3.6] kind:  6
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check partial input completion 02 - on missing block name in Variables/u
+  request_id = 14;
+  request_line = 7;
+  request_char = 5;
+  expect_count = 2;
+  expect_items = R"INPUT(
+label: FVInitialCondition text: FVInitialCondition]\n  \n[] desc: application named block pos: [7.5]-[7.6] kind: 22
+label: InitialCondition   text: InitialCondition]\n  \n[]   desc: application named block pos: [7.5]-[7.6] kind: 22
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check partial input completion 03 - on missing lookup value for variable
+  request_id = 15;
+  request_line = 16;
+  request_char = 15;
+  expect_count = 2;
+  expect_items = R"INPUT(
+label: u text: u desc: from /Variables/* pos: [16.15]-[16.15] kind: 18
+label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check partial input completion 04 - on incomplete Executioner block name
+  request_id = 16;
+  request_line = 21;
+  request_char = 6;
+  expect_count = 3;
+  expect_items = R"INPUT(
+label: TimeIntegrator text: TimeIntegrator]\n  \n[] desc: application named block pos: [21.3]-[21.6] kind: 22
+label: TimeStepper    text: TimeStepper]\n  \n[]    desc: application named block pos: [21.3]-[21.6] kind: 22
+label: TimeSteppers   text: TimeSteppers]\n  \n[]   desc: application named block pos: [21.3]-[21.6] kind: 22
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check partial input completion 05 - on missing value with unclosed block
+  request_id = 17;
+  request_line = 27;
+  request_char = 23;
+  expect_count = 5;
+  expect_items = R"INPUT(
+label: 1                 text: 1                 desc:  pos: [27.23]-[27.23] kind: 20
+label: 2                 text: 2                 desc:  pos: [27.23]-[27.23] kind: 20
+label: 3                 text: 3                 desc:  pos: [27.23]-[27.23] kind: 20
+label: DEFAULT           text: DEFAULT           desc:  pos: [27.23]-[27.23] kind: 20
+label: PROBLEM_DIMENSION text: PROBLEM_DIMENSION desc:  pos: [27.23]-[27.23] kind: 20
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check partial input completion 06 - on incomplete decl in unclosed block
+  request_id = 18;
+  request_line = 28;
+  request_char = 7;
+  expect_count = 3;
+  expect_items = R"INPUT(
+label: linear_residual_dt_divisor text: linear_residual_dt_divisor = 1000 desc: Number of divisions applied to time s... pos: [28.4]-[28.7] kind: 14
+label: linear_residual_end_time   text: linear_residual_end_time =        desc: Specifies an end time to begin output... pos: [28.4]-[28.7] kind: 14
+label: linear_residual_start_time text: linear_residual_start_time =      desc: Specifies a start time to begin outpu... pos: [28.4]-[28.7] kind: 14
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+}
+
 TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // references test parameters
 
-  int request_id = 13;
+  int request_id = 19;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 0;
   int character = 0;
@@ -1586,7 +1745,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
   // didchange test parameters - update input to set up document formatting
 
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int doc_version = 4;
+  int doc_version = 5;
   std::string doc_text_change = R"INPUT(
 
 [Mesh]
@@ -1661,7 +1820,7 @@ expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 
 
   // formatting test parameters
 
-  int request_id = 14;
+  int request_id = 20;
   int tab_size = 4;
   int insert_spaces = true;
 
@@ -1804,7 +1963,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 15;
+  int request_id = 21;
 
   // build shutdown request with the test parameters
 

@@ -177,16 +177,89 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
 {
   // add only root level blocks to completion list when parser root is null
   if (!rootIsValid())
-    return addSubblocksToList(completionItems, "/", line, character);
+    return addSubblocksToList(completionItems, "/", line, character, line, character, "", false);
 
-  // find hit node for zero based request line and column number from input
+  // lambdas that will be used for checking completion request context type
+  auto is_request_in_open_block = [](wasp::HITNodeView request_context) {
+    return request_context.type() == wasp::OBJECT || request_context.type() == wasp::DOCUMENT_ROOT;
+  };
+  auto is_request_on_param_decl = [](wasp::HITNodeView request_context)
+  {
+    return request_context.type() == wasp::DECL && request_context.has_parent() &&
+           (request_context.parent().type() == wasp::KEYED_VALUE ||
+            request_context.parent().type() == wasp::ARRAY);
+  };
+  auto is_request_on_block_decl = [](wasp::HITNodeView request_context)
+  {
+    return request_context.type() == wasp::DECL && request_context.has_parent() &&
+           request_context.parent().type() == wasp::OBJECT;
+  };
+
+  // get document tree root used to find node under request line and column
   wasp::HITNodeView view_root = getRoot().getNodeView();
-  wasp::HITNodeView request_context =
-      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+  wasp::HITNodeView request_context;
+
+  // find node under request location if it is not past all defined content
+  if (line + 1 < (int)view_root.last_line() ||
+      (line + 1 == (int)view_root.last_line() && character <= (int)view_root.last_column()))
+    request_context = wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // otherwise find last node in document with last line and column of tree
+  else
+  {
+    request_context =
+        wasp::findNodeUnderLineColumn(view_root, view_root.last_line(), view_root.last_column());
+
+    // change context to be parent block or grandparent if block terminator
+    wasp::HITNodeView object_context = request_context;
+    while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+      object_context = object_context.parent();
+    if (request_context.type() == wasp::OBJECT_TERM && object_context.has_parent())
+      object_context = object_context.parent();
+    request_context = object_context;
+  }
+
+  // change context to equal sign if it is preceding node and in open block
+  if (is_request_in_open_block(request_context))
+  {
+    wasp::HITNodeView backup_context = request_context;
+    for (int backup_char = character; backup_context == request_context && --backup_char > 0;)
+      backup_context = wasp::findNodeUnderLineColumn(request_context, line + 1, backup_char + 1);
+    if (backup_context.type() == wasp::ASSIGN)
+      request_context = backup_context;
+  }
+
+  // use request context type to set up replacement range and prefix filter
+  int replace_line_beg = line;
+  int replace_char_beg = character;
+  int replace_line_end = line;
+  int replace_char_end = character;
+  std::string filtering_prefix;
+  if (request_context.type() == wasp::DECL || request_context.type() == wasp::VALUE)
+  {
+    // completion on existing block name, parameter name, or value replaces
+    replace_line_beg = request_context.line() - 1;
+    replace_char_beg = request_context.column() - 1;
+    replace_line_end = request_context.last_line() - 1;
+    replace_char_end = request_context.last_column();
+    filtering_prefix = request_context.data();
+
+    // empty block name columns are same as bracket so bump replace columns
+    if (is_request_on_block_decl(request_context) && filtering_prefix.empty())
+    {
+      replace_char_beg++;
+      replace_char_end++;
+    }
+  }
+
+  // get name of request context direct parent node so it can be used later
+  const auto & parent_name = request_context.has_parent() ? request_context.parent().name() : "";
 
   // get object context and value of type parameter for request if provided
   wasp::HITNodeView object_context = request_context;
   while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+    object_context = object_context.parent();
+  if (is_request_on_block_decl(request_context))
     object_context = object_context.parent();
   const std::string & object_path = object_context.path();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
@@ -208,44 +281,41 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
 
   bool pass = true;
 
-  // use context of request to pick types of items added to completion list
-  if (request_context.type() == wasp::OBJECT || request_context.type() == wasp::DOCUMENT_ROOT)
-  {
-    // add gathered parameters to completion list at request input location
-    pass &= addParametersToList(completionItems, valid_params, existing_params, line, character);
-
-    // add all valid subblock objects to completion list for request object
-    pass &= addSubblocksToList(completionItems, object_path, line, character);
-  }
-  else if (request_context.type() == wasp::VALUE)
-  {
-    // get name of parameter in input and zero based line and column ranges
-    std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
-    int replace_line_start = request_context.line() - 1;
-    int replace_char_start = request_context.column() - 1;
-    int replace_line_end = request_context.last_line() - 1;
-    int replace_char_end = request_context.last_column();
-
-    // add options to completion list for request value if parameter exists
-    for (const auto & valid_params_iter : valid_params)
-    {
-      const std::string & valid_param_name = valid_params_iter.first;
-
-      if (param_name == valid_param_name)
-      {
-        pass &= addValuesToList(completionItems,
+  // add gathered parameters to completion list with input range and prefix
+  if (is_request_in_open_block(request_context) || is_request_on_param_decl(request_context))
+    pass &= addParametersToList(completionItems,
                                 valid_params,
-                                existing_subblocks,
-                                param_name,
-                                obj_act_tasks,
-                                replace_line_start,
-                                replace_char_start,
+                                existing_params,
+                                replace_line_beg,
+                                replace_char_beg,
                                 replace_line_end,
-                                replace_char_end);
-        break;
-      }
-    }
-  }
+                                replace_char_end,
+                                filtering_prefix);
+
+  // add all valid subblocks to completion list with input range and prefix
+  if (is_request_in_open_block(request_context) || is_request_on_param_decl(request_context) ||
+      is_request_on_block_decl(request_context))
+    pass &= addSubblocksToList(completionItems,
+                               object_path,
+                               replace_line_beg,
+                               replace_char_beg,
+                               replace_line_end,
+                               replace_char_end,
+                               filtering_prefix,
+                               is_request_on_block_decl(request_context));
+
+  // add valid parameter value options to completion list using input range
+  if ((request_context.type() == wasp::VALUE || request_context.type() == wasp::ASSIGN) &&
+      valid_params.getParametersList().count(parent_name))
+    pass &= addValuesToList(completionItems,
+                            valid_params,
+                            existing_subblocks,
+                            parent_name,
+                            obj_act_tasks,
+                            replace_line_beg,
+                            replace_char_beg,
+                            replace_line_end,
+                            replace_char_end);
 
   is_incomplete = !pass;
 
@@ -384,8 +454,11 @@ bool
 MooseServer::addParametersToList(wasp::DataArray & completionItems,
                                  const InputParameters & valid_params,
                                  const std::set<std::string> & existing_params,
-                                 int request_line,
-                                 int request_char)
+                                 int replace_line_beg,
+                                 int replace_char_beg,
+                                 int replace_line_end,
+                                 int replace_char_end,
+                                 const std::string & filtering_prefix)
 {
   bool pass = true;
 
@@ -398,6 +471,10 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
 
     // filter out parameters that are deprecated, private, or already exist
     if (deprecated || is_private || existing_params.count(param_name))
+      continue;
+
+    // filter out parameters that do not begin with prefix if one was given
+    if (param_name.rfind(filtering_prefix, 0) != 0)
       continue;
 
     // process parameter description and type to use in input default value
@@ -455,10 +532,10 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     pass &= wasp::lsp::buildCompletionObject(*item,
                                              errors,
                                              param_name,
-                                             request_line,
-                                             request_char,
-                                             request_line,
-                                             request_char,
+                                             replace_line_beg,
+                                             replace_char_beg,
+                                             replace_line_end,
+                                             replace_char_end,
                                              embed_text,
                                              complete_kind,
                                              "",
@@ -473,8 +550,12 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
 bool
 MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                 const std::string & object_path,
-                                int request_line,
-                                int request_char)
+                                int replace_line_beg,
+                                int replace_char_beg,
+                                int replace_line_end,
+                                int replace_char_end,
+                                const std::string & filtering_prefix,
+                                bool request_on_block_decl)
 {
   Syntax & syntax = _check_app->syntax();
 
@@ -512,6 +593,10 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
   {
     for (const auto & subblock_name : _syntax_to_subblocks[registered_syntax])
     {
+      // filter subblock if it does not begin with prefix and one was given
+      if (subblock_name != "*" && subblock_name.rfind(filtering_prefix, 0) != 0)
+        continue;
+
       std::string doc_string;
       std::string embed_text;
       int complete_kind;
@@ -520,13 +605,14 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       if (subblock_name == "*")
       {
         doc_string = "custom user named block";
-        embed_text = "[block_name]\n  \n[]";
+        embed_text = (request_on_block_decl ? "" : "[") +
+                     (filtering_prefix.size() ? filtering_prefix : "block_name") + "]\n  \n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
         doc_string = "application named block";
-        embed_text = "[" + subblock_name + "]\n  \n[]";
+        embed_text = (request_on_block_decl ? "" : "[") + subblock_name + "]\n  \n[]";
         complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
@@ -536,10 +622,10 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       pass &= wasp::lsp::buildCompletionObject(*item,
                                                errors,
                                                subblock_name,
-                                               request_line,
-                                               request_char,
-                                               request_line,
-                                               request_char,
+                                               replace_line_beg,
+                                               replace_char_beg,
+                                               replace_line_end,
+                                               replace_char_end,
                                                embed_text,
                                                complete_kind,
                                                "",
@@ -558,8 +644,8 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                              const std::set<std::string> & existing_subblocks,
                              const std::string & param_name,
                              const std::set<std::string> & obj_act_tasks,
-                             int replace_line_start,
-                             int replace_char_start,
+                             int replace_line_beg,
+                             int replace_char_beg,
                              int replace_line_end,
                              int replace_char_end)
 {
@@ -685,8 +771,8 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
     pass &= wasp::lsp::buildCompletionObject(*item,
                                              errors,
                                              option,
-                                             replace_line_start,
-                                             replace_char_start,
+                                             replace_line_beg,
+                                             replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
                                              option,
