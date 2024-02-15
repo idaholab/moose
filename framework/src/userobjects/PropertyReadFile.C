@@ -54,6 +54,11 @@ PropertyReadFile::validParams()
   params.addParam<bool>(
       "use_zero_based_block_indexing", true, "Are the blocks numbered starting at zero?");
 
+  params.addParam<bool>(
+      "load_first_file_on_construction",
+      true,
+      "Whether to read the first CSV file on construction or on the first execution");
+
   // Set an execution schedule to what makes sense currently
   // We do not allow INITIAL because we read the file at construction
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -84,7 +89,8 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
     _nvoronoi(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
                                      : getParam<unsigned int>("nvoronoi")),
     _nblock(getParam<unsigned int>("nblock")),
-    _initialize_called_once(declareRestartableData<bool>("initialize_called", false))
+    _initialize_called_once(declareRestartableData<bool>("initialize_called", false)),
+    _load_on_construction(getParam<bool>("load_first_file_on_construction"))
 {
   if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
     paramError("rand_seed",
@@ -98,7 +104,8 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   }
   _bounding_box = MooseUtils::buildBoundingBox(mesh_min, mesh_max);
 
-  readData();
+  if (_load_on_construction)
+    readData();
 }
 
 void
