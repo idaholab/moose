@@ -438,8 +438,7 @@ public:
   virtual void subdomainSetup(SubdomainID subdomain, const THREAD_ID tid);
   virtual void neighborSubdomainSetup(SubdomainID subdomain, const THREAD_ID tid);
 
-  virtual void newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
-                                std::vector<std::shared_ptr<LinearSystem>> & linear_systems);
+  virtual void newAssemblyArray(std::vector<std::shared_ptr<SolverSystem>> & solver_systems);
   virtual void initNullSpaceVectors(const InputParameters & parameters,
                                     std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 

@@ -38,14 +38,17 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
    * Luckily, it can just be empty (no variables).
    */
   if (_num_nl_sys)
+  {
     _nl[0] = std::make_shared<NonlinearSystem>(*this, "nl0");
+    _solver_systems[0] = std::dynamic_pointer_cast<SolverSystem>(_nl[0]);
+  }
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   /**
    * We still need to create Assembly objects to hold the data structures for working with Aux
    * Variables, which will be used in the external problem.
    */
-  newAssemblyArray(_nl, _linear_systems);
+  newAssemblyArray(_solver_systems);
 
   // Create extra vectors and matrices if any
   createTagVectors();

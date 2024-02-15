@@ -41,6 +41,7 @@ FEProblem::FEProblem(const InputParameters & parameters)
       nl = _use_nonlinear ? (std::make_shared<NonlinearSystem>(*this, sys_name))
                           : (std::make_shared<MooseEigenSystem>(*this, sys_name));
       _nl_sys.push_back(std::dynamic_pointer_cast<NonlinearSystem>(nl));
+      _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(nl);
     }
 
     // backwards compatibility for AD for objects that depend on initializing derivatives during
@@ -50,11 +51,14 @@ FEProblem::FEProblem(const InputParameters & parameters)
 
   if (_num_linear_sys)
     for (const auto i : index_range(_linear_sys_names))
+    {
       _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
+      _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
+    }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
-  newAssemblyArray(_nl, _linear_systems);
+  newAssemblyArray(_solver_systems);
 
   if (_num_nl_sys)
     initNullSpaceVectors(parameters, _nl);

@@ -56,14 +56,14 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   _assembly.resize(n_threads);
   for (const auto nl_sys_num : make_range(_mproblem.numNonlinearSystems()))
   {
-    _displaced_nl.emplace_back(std::make_unique<DisplacedSystem>(
+    _displaced_solver_systems.emplace_back(std::make_unique<DisplacedSystem>(
         *this,
         _mproblem,
         _mproblem.getNonlinearSystemBase(nl_sys_num),
         "displaced_" + _mproblem.getNonlinearSystemBase(nl_sys_num).name() + "_" +
             std::to_string(nl_sys_num),
         Moose::VAR_NONLINEAR));
-    auto & displaced_nl = _displaced_nl.back();
+    auto & displaced_nl = _displaced_solver_systems.back();
 
     for (unsigned int i = 0; i < n_threads; ++i)
       _assembly[i].emplace_back(std::make_unique<Assembly>(*displaced_nl, i));
@@ -71,7 +71,8 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
     displaced_nl->addTimeIntegrator(
         _mproblem.getNonlinearSystemBase(nl_sys_num).getSharedTimeIntegrator());
   }
-  _nl_solution.resize(_displaced_nl.size(), nullptr);
+
+  _nl_solution.resize(_displaced_solver_systems.size(), nullptr);
 
   _displaced_aux =
       std::make_unique<DisplacedSystem>(*this,
@@ -146,10 +147,10 @@ DisplacedProblem::init()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    for (const auto nl_sys_num : index_range(_displaced_nl))
+    for (const auto nl_sys_num : index_range(_displaced_solver_systems))
       _assembly[tid][nl_sys_num]->init(_mproblem.couplingMatrix(nl_sys_num));
 
-    for (const auto nl_sys_num : index_range(_displaced_nl))
+    for (const auto nl_sys_num : index_range(_displaced_solver_systems))
     {
       std::vector<std::pair<unsigned int, unsigned short>> disp_numbers_and_directions;
       for (const auto direction : index_range(_displacements))
@@ -164,7 +165,7 @@ DisplacedProblem::init()
     }
   }
 
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
   {
     nl->dofMap().attach_extra_send_list_function(&extraSendList, nl.get());
     nl->init();
@@ -179,7 +180,7 @@ DisplacedProblem::init()
   }
 
   /// Get face types properly set for variables
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->update(/*update_libmesh_system=*/false);
   _displaced_aux->update(/*update_libmesh_system=*/false);
 
@@ -197,7 +198,7 @@ DisplacedProblem::initAdaptivity()
 void
 DisplacedProblem::saveOldSolutions()
 {
-  for (auto & displaced_nl : _displaced_nl)
+  for (auto & displaced_nl : _displaced_solver_systems)
     displaced_nl->saveOldSolutions();
   _displaced_aux->saveOldSolutions();
 }
@@ -205,7 +206,7 @@ DisplacedProblem::saveOldSolutions()
 void
 DisplacedProblem::restoreOldSolutions()
 {
-  for (auto & displaced_nl : _displaced_nl)
+  for (auto & displaced_nl : _displaced_solver_systems)
     displaced_nl->restoreOldSolutions();
   _displaced_aux->restoreOldSolutions();
 }
@@ -215,9 +216,9 @@ DisplacedProblem::syncSolutions()
 {
   TIME_SECTION("syncSolutions", 5, "Syncing Displaced Solutions");
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
-    auto & displaced_nl = _displaced_nl[nl_sys_num];
+    auto & displaced_nl = _displaced_solver_systems[nl_sys_num];
     mooseAssert(nl_sys_num == displaced_nl->number(),
                 "We should have designed things such that the nl system numbers make their system "
                 "numbering in the EquationSystems object");
@@ -237,8 +238,8 @@ DisplacedProblem::syncSolutions(
 
   for (const auto [nl_sys_num, nl_soln] : nl_solns)
   {
-    (*_displaced_nl[nl_sys_num]->sys().solution) = *nl_soln;
-    _displaced_nl[nl_sys_num]->update();
+    (*_displaced_solver_systems[nl_sys_num]->sys().solution) = *nl_soln;
+    _displaced_solver_systems[nl_sys_num]->update();
   }
   (*_displaced_aux->sys().solution) = aux_soln;
 }
@@ -255,8 +256,8 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   if (!mesh_changing)
     syncSolutions();
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
-    _nl_solution[nl_sys_num] = _displaced_nl[nl_sys_num]->sys().solution.get();
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
+    _nl_solution[nl_sys_num] = _displaced_solver_systems[nl_sys_num]->sys().solution.get();
   _aux_solution = _displaced_aux->sys().solution.get();
 
   // If the displaced mesh has been serialized to one processor (as
@@ -286,7 +287,7 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   if (haveFV())
     _mesh.setupFiniteVolumeMeshData();
 
-  for (auto & disp_nl : _displaced_nl)
+  for (auto & disp_nl : _displaced_solver_systems)
     disp_nl->update(false);
   _displaced_aux->update(false);
 
@@ -325,8 +326,8 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
 
   syncSolutions(nl_solns, aux_soln);
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
-    _nl_solution[nl_sys_num] = _displaced_nl[nl_sys_num]->sys().solution.get();
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
+    _nl_solution[nl_sys_num] = _displaced_solver_systems[nl_sys_num]->sys().solution.get();
   _aux_solution = _displaced_aux->sys().solution.get();
 
   UpdateDisplacedMeshThread udmt(_mproblem, *this);
@@ -455,7 +456,7 @@ DisplacedProblem::numMatrixTags() const
 bool
 DisplacedProblem::hasVariable(const std::string & var_name) const
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasVariable(var_name))
       return true;
   if (_displaced_aux->hasVariable(var_name))
@@ -474,7 +475,7 @@ DisplacedProblem::getVariable(const THREAD_ID tid,
                            var_name,
                            expected_var_type,
                            expected_var_field_type,
-                           _displaced_nl,
+                           _displaced_solver_systems,
                            std::vector<std::shared_ptr<LinearSystem>>(),
                            *_displaced_aux);
 }
@@ -482,7 +483,7 @@ DisplacedProblem::getVariable(const THREAD_ID tid,
 MooseVariable &
 DisplacedProblem::getStandardVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasVariable(var_name))
       return nl->getFieldVariable<Real>(tid, var_name);
   if (_displaced_aux->hasVariable(var_name))
@@ -494,7 +495,7 @@ DisplacedProblem::getStandardVariable(const THREAD_ID tid, const std::string & v
 MooseVariableFieldBase &
 DisplacedProblem::getActualFieldVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasVariable(var_name))
       return nl->getActualFieldVariable<Real>(tid, var_name);
   if (_displaced_aux->hasVariable(var_name))
@@ -506,7 +507,7 @@ DisplacedProblem::getActualFieldVariable(const THREAD_ID tid, const std::string 
 VectorMooseVariable &
 DisplacedProblem::getVectorVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasVariable(var_name))
       return nl->getFieldVariable<RealVectorValue>(tid, var_name);
   if (_displaced_aux->hasVariable(var_name))
@@ -518,7 +519,7 @@ DisplacedProblem::getVectorVariable(const THREAD_ID tid, const std::string & var
 ArrayMooseVariable &
 DisplacedProblem::getArrayVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasVariable(var_name))
       return nl->getFieldVariable<RealEigenVector>(tid, var_name);
   if (_displaced_aux->hasVariable(var_name))
@@ -530,7 +531,7 @@ DisplacedProblem::getArrayVariable(const THREAD_ID tid, const std::string & var_
 bool
 DisplacedProblem::hasScalarVariable(const std::string & var_name) const
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasScalarVariable(var_name))
       return true;
   if (_displaced_aux->hasScalarVariable(var_name))
@@ -542,7 +543,7 @@ DisplacedProblem::hasScalarVariable(const std::string & var_name) const
 MooseVariableScalar &
 DisplacedProblem::getScalarVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     if (nl->hasScalarVariable(var_name))
       return nl->getScalarVariable(tid, var_name);
   if (_displaced_aux->hasScalarVariable(var_name))
@@ -570,7 +571,7 @@ DisplacedProblem::addVariable(const std::string & var_type,
                               InputParameters & parameters,
                               const unsigned int nl_system_number)
 {
-  _displaced_nl[nl_system_number]->addVariable(var_type, name, parameters);
+  _displaced_solver_systems[nl_system_number]->addVariable(var_type, name, parameters);
 }
 
 void
@@ -596,10 +597,10 @@ DisplacedProblem::currentLinearSysNum() const
 void
 DisplacedProblem::prepare(const Elem * elem, const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinit(elem);
-    _displaced_nl[nl_sys_num]->prepare(tid);
+    _displaced_solver_systems[nl_sys_num]->prepare(tid);
     // This method is called outside of residual/Jacobian callbacks during initial condition
     // evaluation
     if (!_mproblem.hasJacobian() || !_mproblem.constJacobian())
@@ -619,7 +620,7 @@ DisplacedProblem::prepareNonlocal(const THREAD_ID tid)
 void
 DisplacedProblem::prepareFace(const Elem * /*elem*/, const THREAD_ID tid)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->prepareFace(tid, true);
   _displaced_aux->prepareFace(tid, false);
 }
@@ -631,10 +632,10 @@ DisplacedProblem::prepare(const Elem * elem,
                           const std::vector<dof_id_type> & dof_indices,
                           const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinit(elem);
-    _displaced_nl[nl_sys_num]->prepare(tid);
+    _displaced_solver_systems[nl_sys_num]->prepare(tid);
   }
   _displaced_aux->prepare(tid);
   _assembly[tid][currentNlSysNum()]->prepareBlock(ivar, jvar, dof_indices);
@@ -687,10 +688,10 @@ DisplacedProblem::reinitDirac(const Elem * elem, const THREAD_ID tid)
 
   if (n_points)
   {
-    for (const auto nl_sys_num : index_range(_displaced_nl))
+    for (const auto nl_sys_num : index_range(_displaced_solver_systems))
     {
       _assembly[tid][nl_sys_num]->reinitAtPhysical(elem, points);
-      _displaced_nl[nl_sys_num]->prepare(tid);
+      _displaced_solver_systems[nl_sys_num]->prepare(tid);
     }
     _displaced_aux->prepare(tid);
 
@@ -705,7 +706,7 @@ DisplacedProblem::reinitDirac(const Elem * elem, const THREAD_ID tid)
 void
 DisplacedProblem::reinitElem(const Elem * elem, const THREAD_ID tid)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->reinitElem(elem, tid);
   _displaced_aux->reinitElem(elem, tid);
 }
@@ -718,10 +719,10 @@ DisplacedProblem::reinitElemPhys(const Elem * elem,
   mooseAssert(_mesh.queryElemPtr(elem->id()) == elem,
               "Are you calling this method with a undisplaced mesh element?");
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinitAtPhysical(elem, phys_points_in_elem);
-    _displaced_nl[nl_sys_num]->prepare(tid);
+    _displaced_solver_systems[nl_sys_num]->prepare(tid);
     _assembly[tid][nl_sys_num]->prepare();
   }
   _displaced_aux->prepare(tid);
@@ -735,10 +736,10 @@ DisplacedProblem::reinitElemFace(const Elem * elem,
                                  BoundaryID bnd_id,
                                  const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinit(elem, side);
-    _displaced_nl[nl_sys_num]->reinitElemFace(elem, side, bnd_id, tid);
+    _displaced_solver_systems[nl_sys_num]->reinitElemFace(elem, side, bnd_id, tid);
   }
   _displaced_aux->reinitElemFace(elem, side, bnd_id, tid);
 }
@@ -746,10 +747,10 @@ DisplacedProblem::reinitElemFace(const Elem * elem,
 void
 DisplacedProblem::reinitNode(const Node * node, const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinit(node);
-    _displaced_nl[nl_sys_num]->reinitNode(node, tid);
+    _displaced_solver_systems[nl_sys_num]->reinitNode(node, tid);
   }
   _displaced_aux->reinitNode(node, tid);
 }
@@ -757,10 +758,10 @@ DisplacedProblem::reinitNode(const Node * node, const THREAD_ID tid)
 void
 DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinit(node);
-    _displaced_nl[nl_sys_num]->reinitNodeFace(node, bnd_id, tid);
+    _displaced_solver_systems[nl_sys_num]->reinitNodeFace(node, bnd_id, tid);
   }
   _displaced_aux->reinitNodeFace(node, bnd_id, tid);
 }
@@ -768,7 +769,7 @@ DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, const THR
 void
 DisplacedProblem::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->reinitNodes(nodes, tid);
   _displaced_aux->reinitNodes(nodes, tid);
 }
@@ -776,7 +777,7 @@ DisplacedProblem::reinitNodes(const std::vector<dof_id_type> & nodes, const THRE
 void
 DisplacedProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->reinitNodesNeighbor(nodes, tid);
   _displaced_aux->reinitNodesNeighbor(nodes, tid);
 }
@@ -798,18 +799,18 @@ DisplacedProblem::reinitNeighbor(const Elem * elem,
   const Elem * neighbor = elem->neighbor_ptr(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinitElemAndNeighbor(
         elem, side, neighbor, neighbor_side, neighbor_reference_points);
-    _displaced_nl[nl_sys_num]->prepareNeighbor(tid);
+    _displaced_solver_systems[nl_sys_num]->prepareNeighbor(tid);
     // Called during stateful material property evaluation outside of solve
     _assembly[tid][nl_sys_num]->prepareNeighbor();
   }
   _displaced_aux->prepareNeighbor(tid);
 
   BoundaryID bnd_id = 0; // some dummy number (it is not really used for anything, right now)
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
   {
     nl->reinitElemFace(elem, side, bnd_id, tid);
     nl->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
@@ -827,20 +828,20 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
   mooseAssert(_mesh.queryElemPtr(neighbor->id()) == neighbor,
               "Are you calling this method with a undisplaced mesh element?");
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     // Reinit shape functions
     _assembly[tid][nl_sys_num]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
 
     // Set the neighbor dof indices
-    _displaced_nl[nl_sys_num]->prepareNeighbor(tid);
+    _displaced_solver_systems[nl_sys_num]->prepareNeighbor(tid);
   }
   _displaced_aux->prepareNeighbor(tid);
 
   prepareAssemblyNeighbor(tid);
 
   // Compute values at the points
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
   _displaced_aux->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
 }
@@ -853,20 +854,20 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
   mooseAssert(_mesh.queryElemPtr(neighbor->id()) == neighbor,
               "Are you calling this method with a undisplaced mesh element?");
 
-  for (const auto nl_sys_num : index_range(_displaced_nl))
+  for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     // Reinit shape functions
     _assembly[tid][nl_sys_num]->reinitNeighborAtPhysical(neighbor, physical_points);
 
     // Set the neighbor dof indices
-    _displaced_nl[nl_sys_num]->prepareNeighbor(tid);
+    _displaced_solver_systems[nl_sys_num]->prepareNeighbor(tid);
   }
   _displaced_aux->prepareNeighbor(tid);
 
   prepareAssemblyNeighbor(tid);
 
   // Compute values at the points
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->reinitNeighbor(neighbor, tid);
   _displaced_aux->reinitNeighbor(neighbor, tid);
 }
@@ -903,7 +904,7 @@ void
 DisplacedProblem::reinitScalars(const THREAD_ID tid,
                                 bool reinit_for_derivative_reordering /*=false*/)
 {
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->reinitScalars(tid, reinit_for_derivative_reordering);
   _displaced_aux->reinitScalars(tid, reinit_for_derivative_reordering);
 }
@@ -950,19 +951,19 @@ DisplacedProblem::addResidualLower(const THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, const THREAD_ID tid)
 {
-  if (_displaced_nl[currentNlSysNum()]->hasVector(
-          _displaced_nl[currentNlSysNum()]->timeVectorTag()))
+  if (_displaced_solver_systems[currentNlSysNum()]->hasVector(
+          _displaced_solver_systems[currentNlSysNum()]->timeVectorTag()))
     _assembly[tid][currentNlSysNum()]->addCachedResidualDirectly(
         residual,
         Assembly::GlobalDataKey{},
-        getVectorTag(_displaced_nl[currentNlSysNum()]->timeVectorTag()));
+        getVectorTag(_displaced_solver_systems[currentNlSysNum()]->timeVectorTag()));
 
-  if (_displaced_nl[currentNlSysNum()]->hasVector(
-          _displaced_nl[currentNlSysNum()]->nonTimeVectorTag()))
+  if (_displaced_solver_systems[currentNlSysNum()]->hasVector(
+          _displaced_solver_systems[currentNlSysNum()]->nonTimeVectorTag()))
     _assembly[tid][currentNlSysNum()]->addCachedResidualDirectly(
         residual,
         Assembly::GlobalDataKey{},
-        getVectorTag(_displaced_nl[currentNlSysNum()]->nonTimeVectorTag()));
+        getVectorTag(_displaced_solver_systems[currentNlSysNum()]->nonTimeVectorTag()));
 
   // We do this because by adding the cached residual directly, we cannot ensure that all of the
   // cached residuals are emptied after only the two add calls above
@@ -975,7 +976,7 @@ DisplacedProblem::setResidual(NumericVector<Number> & residual, const THREAD_ID 
   _assembly[tid][currentNlSysNum()]->setResidual(
       residual,
       Assembly::GlobalDataKey{},
-      getVectorTag(_displaced_nl[currentNlSysNum()]->residualVectorTag()));
+      getVectorTag(_displaced_solver_systems[currentNlSysNum()]->residualVectorTag()));
 }
 
 void
@@ -984,7 +985,7 @@ DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, const TH
   _assembly[tid][currentNlSysNum()]->setResidualNeighbor(
       residual,
       Assembly::GlobalDataKey{},
-      getVectorTag(_displaced_nl[currentNlSysNum()]->residualVectorTag()));
+      getVectorTag(_displaced_solver_systems[currentNlSysNum()]->residualVectorTag()));
 }
 
 void
@@ -1118,7 +1119,7 @@ DisplacedProblem::meshChanged()
 
   // Since the mesh has changed, we need to make sure that we update any of our
   // MOOSE-system specific data. libmesh system data has already been updated
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->update(/*update_libmesh_system=*/false);
   _displaced_aux->update(/*update_libmesh_system=*/false);
 }
@@ -1228,7 +1229,7 @@ DisplacedProblem::initialSetup()
 {
   SubProblem::initialSetup();
 
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->initialSetup();
   _displaced_aux->initialSetup();
 }
@@ -1238,7 +1239,7 @@ DisplacedProblem::timestepSetup()
 {
   SubProblem::timestepSetup();
 
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->timestepSetup();
   _displaced_aux->timestepSetup();
 }
@@ -1248,7 +1249,7 @@ DisplacedProblem::customSetup(const ExecFlagType & exec_type)
 {
   SubProblem::customSetup(exec_type);
 
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->customSetup(exec_type);
   _displaced_aux->customSetup(exec_type);
 }
@@ -1258,7 +1259,7 @@ DisplacedProblem::residualSetup()
 {
   SubProblem::residualSetup();
 
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->residualSetup();
   _displaced_aux->residualSetup();
 }
@@ -1268,7 +1269,7 @@ DisplacedProblem::jacobianSetup()
 {
   SubProblem::jacobianSetup();
 
-  for (auto & nl : _displaced_nl)
+  for (auto & nl : _displaced_solver_systems)
     nl->jacobianSetup();
   _displaced_aux->jacobianSetup();
 }

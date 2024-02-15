@@ -32,8 +32,9 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   : FEProblemBase(parameters), _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
 {
   _nl[0] = _nl_sys;
+  _solver_systems[0] = std::dynamic_pointer_cast<SolverSystem>(_nl[0]);
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
-  newAssemblyArray(_nl, _linear_systems);
+  newAssemblyArray(_solver_systems);
 
   // Create extra vectors and matrices if any
   createTagVectors();

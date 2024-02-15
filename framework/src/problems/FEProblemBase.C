@@ -353,6 +353,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_nl_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
     _current_nl_sys(nullptr),
+    _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
     _mesh_divisions(/*threaded=*/true),
@@ -443,10 +444,16 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   ADReal::do_derivatives = true;
 
   for (const auto i : index_range(_nl_sys_names))
+  {
     _nl_sys_name_to_num[_nl_sys_names[i]] = i;
+    _solver_sys_name_to_num[_nl_sys_names[i]] = i;
+  }
 
   for (const auto i : index_range(_linear_sys_names))
+  {
     _linear_sys_name_to_num[_linear_sys_names[i]] = i;
+    _solver_sys_name_to_num[_linear_sys_names[i]] = i + _num_nl_sys;
+  }
 
   _nonlocal_cm.resize(_nl_sys_names.size());
   _cm.resize(_nl_sys_names.size());
@@ -560,8 +567,8 @@ FEProblemBase::createTagSolutions()
   for (auto & vector : getParam<std::vector<TagName>>("extra_tag_solutions"))
   {
     auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
-    for (auto & nl : _nl)
-      nl->addVector(tag, false, GHOSTED);
+    for (auto & sys : _solver_systems)
+      sys->addVector(tag, false, GHOSTED);
     _aux->addVector(tag, false, GHOSTED);
   }
 
@@ -573,32 +580,29 @@ FEProblemBase::createTagSolutions()
     // a new vector
     for (const auto i : make_range(0, 2))
     {
-      for (auto & nl : _nl)
-        nl->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
+      for (auto & sys : _solver_systems)
+        sys->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
       _aux->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
     }
   }
 
   auto tag = addVectorTag(Moose::SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
-  for (auto & nl : _nl)
-    nl->associateVectorToTag(*nl->system().current_local_solution.get(), tag);
+  for (auto & sys : _solver_systems)
+    sys->associateVectorToTag(*sys->system().current_local_solution.get(), tag);
   _aux->associateVectorToTag(*_aux->system().current_local_solution.get(), tag);
 }
 
 void
-FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
-                                std::vector<std::shared_ptr<LinearSystem>> & linear_systems)
+FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<SolverSystem>> & solver_systems)
 {
   unsigned int n_threads = libMesh::n_threads();
 
   _assembly.resize(n_threads);
   for (const auto i : make_range(n_threads))
   {
-    _assembly[i].resize(nls.size() + linear_systems.size());
-    for (const auto j : index_range(nls))
-      _assembly[i][j] = std::make_unique<Assembly>(*nls[j], i);
-    for (const auto j : index_range(linear_systems))
-      _assembly[i][nls.size() + j] = std::make_unique<Assembly>(*linear_systems[j], i);
+    _assembly[i].resize(solver_systems.size());
+    for (const auto j : index_range(solver_systems))
+      _assembly[i][j] = std::make_unique<Assembly>(*solver_systems[j], i);
   }
 }
 
@@ -745,11 +749,11 @@ FEProblemBase::initialSetup()
 
   // Setup the solution states (current, old, etc) in each system based on
   // its default and the states requested of each of its variables
-  for (const auto i : index_range(_nl))
+  for (const auto i : index_range(_solver_systems))
   {
-    _nl[i]->initSolutionState();
+    _solver_systems[i]->initSolutionState();
     if (getDisplacedProblem())
-      getDisplacedProblem()->nlSys(i).initSolutionState();
+      getDisplacedProblem()->solverSys(i).initSolutionState();
   }
   _aux->initSolutionState();
   if (getDisplacedProblem())
@@ -785,11 +789,11 @@ FEProblemBase::initialSetup()
       nl.assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
       auto displaced_problem = getDisplacedProblem();
       if (displaced_problem)
-        displaced_problem->nlSys(i).assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+        displaced_problem->solverSys(i).assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
 
       nl.assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
       if (displaced_problem)
-        displaced_problem->nlSys(i).assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+        displaced_problem->solverSys(i).assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
     }
   }
 
@@ -2608,7 +2612,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_elem = true;
   }
   else
@@ -2643,7 +2647,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_elem = true;
   }
   else
@@ -2677,7 +2681,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
   }
   else
   {
@@ -2711,7 +2715,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_face = true;
   }
   else
@@ -2767,7 +2771,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_face = true;
   }
   else
@@ -2921,7 +2925,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
-    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys(0);
+    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->solverSys(0);
     if (!parameters.get<std::vector<BoundaryName>>("boundary").empty())
       _reinit_displaced_face = true;
     else
@@ -2992,7 +2996,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_elem = true;
   }
   else
@@ -3030,7 +3034,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_neighbor = true;
   }
   else
@@ -3119,7 +3123,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
     _reinit_displaced_neighbor = true;
   }
   else
@@ -3873,7 +3877,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
     if (var_in_linear)
       parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseLinear(sys_num);
     else
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(sys_num);
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
   }
   else
   {
@@ -6214,7 +6218,7 @@ FEProblemBase::advanceState()
   if (_displaced_problem)
   {
     for (const auto i : index_range(_nl))
-      _displaced_problem->nlSys(i).copyOldSolutions();
+      _displaced_problem->solverSys(i).copyOldSolutions();
     _displaced_problem->auxSys().copyOldSolutions();
   }
 

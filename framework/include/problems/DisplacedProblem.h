@@ -53,7 +53,7 @@ public:
   }
   MooseMesh & refMesh();
 
-  DisplacedSystem & nlSys(const unsigned int sys_num);
+  DisplacedSystem & solverSys(const unsigned int sys_num);
   DisplacedSystem & auxSys() { return *_displaced_aux; }
 
   virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const override;
@@ -379,7 +379,7 @@ protected:
   MooseMesh & _ref_mesh;
   std::vector<std::string> _displacements;
 
-  std::vector<std::unique_ptr<DisplacedSystem>> _displaced_nl;
+  std::vector<std::unique_ptr<DisplacedSystem>> _displaced_solver_systems;
   std::unique_ptr<DisplacedSystem> _displaced_aux;
 
   /// The nonlinear system solutions
@@ -406,27 +406,27 @@ private:
 };
 
 inline DisplacedSystem &
-DisplacedProblem::nlSys(const unsigned int sys_num)
+DisplacedProblem::solverSys(const unsigned int sys_num)
 {
-  mooseAssert(sys_num < _displaced_nl.size(),
+  mooseAssert(sys_num < _displaced_solver_systems.size(),
               "System number greater than the number of nonlinear systems");
-  return *_displaced_nl[sys_num];
+  return *_displaced_solver_systems[sys_num];
 }
 
 inline const SystemBase &
 DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num) const
 {
-  mooseAssert(sys_num < _displaced_nl.size(),
+  mooseAssert(sys_num < _displaced_solver_systems.size(),
               "System number greater than the number of nonlinear systems");
-  return *_displaced_nl[sys_num];
+  return *_displaced_solver_systems[sys_num];
 }
 
 inline SystemBase &
 DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num)
 {
-  mooseAssert(sys_num < _displaced_nl.size(),
+  mooseAssert(sys_num < _displaced_solver_systems.size(),
               "System number greater than the number of nonlinear systems");
-  return *_displaced_nl[sys_num];
+  return *_displaced_solver_systems[sys_num];
 }
 
 inline const SystemBase &

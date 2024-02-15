@@ -173,6 +173,8 @@ private:
                                         const StateArg &) const override final;
   virtual DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
 
+  unsigned int oldestSolutionStateRequested() const override final { return 0; }
+
   /**
    * Setup the boundary to Dirichlet BC map
    */
@@ -471,10 +473,7 @@ public:
   {
     mooseError("adGradSln is not implemented for MooseLinearVariableFV!");
   }
-  unsigned int oldestSolutionStateRequested() const override final
-  {
-    mooseError("oldestSolutionStateRequested is not implemented for MooseLinearVariableFV!");
-  }
+
   const DoFValue & dofValues() const override
   {
     mooseError("add is not implemented for MooseLinearVariableFV!");
