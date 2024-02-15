@@ -158,4 +158,7 @@ private:
 
   /// To keep track of initialization to avoid reading the files twice
   bool & _initialize_called_once;
+
+  /// Whether to read the first CSV file in the constructor or on the first initialization before execution
+  const bool _load_on_construction;
 };
