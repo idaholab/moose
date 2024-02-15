@@ -165,6 +165,13 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     GenericReal<is_ad> & scalar,
     std::stringstream * iter_output)
 {
+  // we switch off forward mode derivatives until we have a converged solution
+  const auto did_derivatives = ADReal::do_derivatives;
+  if constexpr (is_ad)
+    ADReal::do_derivatives = false;
+  else
+    libmesh_ignore(did_derivatives);
+
   scalar = initialGuess(effective_trial_stress);
   GenericReal<is_ad> scalar_old = scalar;
   GenericReal<is_ad> scalar_increment = 0.0;
@@ -295,6 +302,17 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
 
   if (std::isnan(_residual) || std::isinf(MetaPhysicL::raw_value(_residual)))
     return SolveState::NAN_INF;
+
+  // recover derivatives
+  if constexpr (is_ad)
+  {
+    ADReal::do_derivatives = did_derivatives;
+    if (did_derivatives)
+    {
+      computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+      scalar -= _residual / _derivative;
+    }
+  }
 
   if (_iteration == _max_its)
     return SolveState::EXCEEDED_ITERATIONS;
