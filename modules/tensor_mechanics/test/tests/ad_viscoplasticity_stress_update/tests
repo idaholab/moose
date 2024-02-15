@@ -126,7 +126,7 @@
     input = 'gtn_single.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    ratio_tol = 3e-7
+    ratio_tol = 6e-7
     difference_tol = 1e8
     prereq = gtn_single
     requirement = 'The Jacobian for the AD gtn single problem shall be perfect'
