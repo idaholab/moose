@@ -368,13 +368,14 @@ class Tester(MooseObject):
         timer.stop()
 
         self.exit_code = self.process.poll()
-        self.outfile.flush()
-        self.errfile.flush()
+        if not self.outfile.closed and not self.errfile.closed:
+            self.outfile.flush()
+            self.errfile.flush()
 
-        # store the contents of output, and close the file
-        self.joined_out = util.readOutput(self.outfile, self.errfile, self)
-        self.outfile.close()
-        self.errfile.close()
+            # store the contents of output, and close the file
+            self.joined_out = util.readOutput(self.outfile, self.errfile, self)
+            self.outfile.close()
+            self.errfile.close()
 
     def runCommand(self, timer, options):
         """

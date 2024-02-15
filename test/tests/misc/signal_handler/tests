@@ -6,7 +6,6 @@
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
     # needs short enough that the simulation has not finished
-    sleep_time = 1
     method = 'opt'
     recover = false
     max_threads = 1
@@ -43,7 +42,6 @@
   []
   [test_signal_parallel]
     type = SignalTester
-    sleep_time = 1
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a parallel checkpoint file at any time by sending a signal to it.'
     min_parallel = 3
@@ -86,7 +84,6 @@
   []
   [test_signal_debug]
     type = SignalTester
-    sleep_time = 4
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it, in a debug build.'
     method = 'dbg'

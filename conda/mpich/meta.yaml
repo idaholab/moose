@@ -6,8 +6,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 15 %}
-{% set version = "4.0.2" %}
+{% set build = 0 %}
+{% set version = "4.1.2" %}
 
 # permanent
 {% set strbuild = "build_" + build|string %}
@@ -36,16 +36,13 @@ requirements:
     - mpich-mpicc {{ version }}
     - mpich-mpicxx {{ version }}
     - mpich-mpifort {{ version }}
-    - {{ moose_hdf5 }}
+    - hdf5=1.14.3=mpi*
     - {{ moose_krb5 }}
     - {{ moose_icu }}
     - {{ moose_libclang }}
     - {{ moose_libclang13 }}
     - {{ moose_clangcc }}       # [osx]
     - {{ moose_clangxx }}       # [osx]
-  host:
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a           # [osx]
   run:
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
@@ -53,12 +50,12 @@ requirements:
     - mpich-mpifort {{ version }}
     - {{ moose_libgfortran }}
     - {{ moose_libgfortran5 }}
-    - {{ moose_hdf5 }}
+    - hdf5=1.14.3=mpi*
     - {{ moose_krb5 }}
     - {{ moose_icu }}
+    - {{ moose_libclang }}
+    - {{ moose_libclang13 }}
     - {{ moose_ld64 }}          # [osx]
-    - {{ moose_libclang }}      # [osx]
-    - {{ moose_libclang13 }}    # [osx]
     - {{ moose_clangcc }}       # [osx]
     - {{ moose_clangxx }}       # [osx]
     - {{ moose_libxt }}         # [linux]
@@ -79,10 +76,8 @@ requirements:
     - zfp 0.5.5
     - bison 3.4
     - mpi 1.0 mpich
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
   run_constrained:
-    - python <{{3.11}}
+    - python <{{3.12}}
 
 test:
   commands:
