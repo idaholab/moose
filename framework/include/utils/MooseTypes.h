@@ -981,13 +981,16 @@ DerivativeStringClass(OutFileBase);
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
 DerivativeStringClass(NonlinearVariableName);
 
-/// This type is used for objects that expect linear variable names (i.e. LinearKernels, LinearBCs)
+/// This type is used for objects that expect linear variable names (i.e. LinearFVKernels, LinearFVBCs)
 DerivativeStringClass(LinearVariableName);
+
+/// This type is used for objects that expect linear or nonlinear solver variable names
+DerivativeStringClass(SolverVariableName);
 
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
 DerivativeStringClass(AuxVariableName);
 
-/// This type is used for objects that expect either Nonlinear or Auxiliary Variables such as postprocessors
+/// This type is used for objects that expect either Solver or Auxiliary Variables such as postprocessors
 DerivativeStringClass(VariableName);
 
 /// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
@@ -1070,6 +1073,9 @@ DerivativeStringClass(NonlinearSystemName);
 
 /// System name support of multiple linear systems on the same mesh
 DerivativeStringClass(LinearSystemName);
+
+/// Name of a system which either be linear or nonlinear
+DerivativeStringClass(SolverSystemName);
 
 /// Command line argument, specialized to handle quotes in vector arguments
 DerivativeStringClass(CLIArgString);

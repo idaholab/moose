@@ -37,6 +37,7 @@
 #include "Function.h"
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
+#include "SolverSystem.h"
 #include "Distribution.h"
 #include "Sampler.h"
 #include "PetscSupport.h"

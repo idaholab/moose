@@ -48,6 +48,7 @@ class DisplacedProblem;
 class MooseMesh;
 class NonlinearSystemBase;
 class LinearSystem;
+class SolverSystem;
 class NonlinearSystem;
 class RandomInterface;
 class RandomData;
@@ -2338,6 +2339,15 @@ protected:
 
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
+
+  /// Combined container to base pointer of every solver system
+  std::vector<std::shared_ptr<SolverSystem>> _solver_systems;
+
+  /// Map connecting variable names with their respective solver systems
+  std::map<SolverVariableName, unsigned int> _solver_var_to_sys_num;
+
+  /// Map connecting solver system names with their respective systems
+  std::map<SolverSystemName, unsigned int> _solver_sys_name_to_num;
 
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
