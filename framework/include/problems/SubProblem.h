@@ -110,6 +110,11 @@ public:
    */
   virtual unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const = 0;
 
+  /**
+   * @return the solver system number corresponding to the provided \p solver_sys_name
+   */
+  virtual unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const = 0;
+
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
@@ -979,13 +984,12 @@ protected:
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
-  template <typename T, typename T2>
+  template <typename T>
   MooseVariableFieldBase & getVariableHelper(const THREAD_ID tid,
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
                                              Moose::VarFieldType expected_var_field_type,
                                              const std::vector<T> & nls,
-                                             const std::vector<T2> & linear_systems,
                                              const SystemBase & aux) const;
 
   /**
@@ -1076,22 +1080,13 @@ protected:
 
 private:
   /**
-   * @return whether a given variable name is in the nonlinear systems (reflected by the first
-   * member of the returned pair which is a boolean) and if so, what nonlinear system number it is
-   * in (the second member of the returned pair; if the variable is not in the nonlinear systems,
+   * @return whether a given variable name is in the solver systems (reflected by the first
+   * member of the returned pair which is a boolean) and if so, what solver system number it is
+   * in (the second member of the returned pair; if the variable is not in the solver systems,
    * then this will be an invalid unsigned integer)
    */
   virtual std::pair<bool, unsigned int>
-  determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
-
-  /**
-   * @return whether a given variable name is in the linear systems (reflected by the first member
-   * of the returned pair which is a boolean) and if so, what nonlinear system number it is in
-   * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
-   * this will be an invalid unsigned integer)
-   */
-  virtual std::pair<bool, unsigned int>
-  determineLinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
+  determineSolverSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
 
   enum class TrueFunctorIs
   {

@@ -476,7 +476,6 @@ DisplacedProblem::getVariable(const THREAD_ID tid,
                            expected_var_type,
                            expected_var_field_type,
                            _displaced_solver_systems,
-                           std::vector<std::shared_ptr<LinearSystem>>(),
                            *_displaced_aux);
 }
 
@@ -1282,17 +1281,10 @@ DisplacedProblem::haveADObjects(const bool have_ad_objects)
 }
 
 std::pair<bool, unsigned int>
-DisplacedProblem::determineNonlinearSystem(const std::string & var_name,
-                                           const bool error_if_not_found) const
-{
-  return _mproblem.determineNonlinearSystem(var_name, error_if_not_found);
-}
-
-std::pair<bool, unsigned int>
-DisplacedProblem::determineLinearSystem(const std::string & var_name,
+DisplacedProblem::determineSolverSystem(const std::string & var_name,
                                         const bool error_if_not_found) const
 {
-  return _mproblem.determineLinearSystem(var_name, error_if_not_found);
+  return _mproblem.determineSolverSystem(var_name, error_if_not_found);
 }
 
 Assembly &
@@ -1371,4 +1363,10 @@ unsigned int
 DisplacedProblem::linearSysNum(const LinearSystemName & sys_name) const
 {
   return _mproblem.linearSysNum(sys_name);
+}
+
+unsigned int
+DisplacedProblem::solverSysNum(const SolverSystemName & sys_name) const
+{
+  return _mproblem.solverSysNum(sys_name);
 }

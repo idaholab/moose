@@ -2178,6 +2178,23 @@ public:
   unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const override;
 
   /**
+   * @return the solver system number corresponding to the provided \p solver_sys_name
+   */
+  unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const override;
+
+  /**
+   * @return the solver system number corresponding to the provided nonlinear system
+   * number \p nl_sys_num
+   */
+  unsigned int nlSysNumToSolverSysNum(const unsigned int nl_sys_num) const;
+
+  /**
+   * @return the solver system number corresponding to the provided linear system number
+   * \p linear_sys_num
+   */
+  unsigned int linearSysNumToSolverSysNum(const unsigned int linear_sys_num) const;
+
+  /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
    */
   bool getFailNextNonlinearConvergenceCheck() const
@@ -2654,29 +2671,16 @@ private:
                                                        bool displaced);
 
   /**
-   * Determine what nonlinear system the provided variable name lies in
-   * @param var_name The name of the variable we are doing nonlinear system lookups for
+   * Determine what solver system the provided variable name lies in
+   * @param var_name The name of the variable we are doing solver system lookups for
    * @param error_if_not_found Whether to error if the variable name isn't found in any of the
-   * nonlinear systems
+   * solver systems
    * @return A pair in which the first member indicates whether the variable was found in the
-   * nonlinear systems and the second member indicates the nonlinear system number in which the
+   * solver systems and the second member indicates the solver system number in which the
    * variable was found (or an invalid unsigned integer if not found)
    */
   virtual std::pair<bool, unsigned int>
-  determineNonlinearSystem(const std::string & var_name,
-                           bool error_if_not_found = false) const override;
-
-  /**
-   * Determine what linear system the provided variable name lies in
-   * @param var_name The name of the variable we are doing linear system lookups for
-   * @param error_if_not_found Whether to error if the variable name isn't found in any of the
-   * linear systems
-   * @return A pair in which the first member indicates whether the variable was found in the
-   * linear systems and the second member indicates the linear system number in which the
-   * variable was found (or an invalid unsigned integer if not found)
-   */
-  virtual std::pair<bool, unsigned int>
-  determineLinearSystem(const std::string & var_name,
+  determineSolverSystem(const std::string & var_name,
                         bool error_if_not_found = false) const override;
 
   /**

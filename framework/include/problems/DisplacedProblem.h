@@ -82,6 +82,7 @@ public:
   virtual bool nlConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
   virtual unsigned int linearSysNum(const LinearSystemName & sys_name) const override;
+  virtual unsigned int solverSysNum(const SolverSystemName & sys_name) const override;
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -394,11 +395,7 @@ protected:
 
 private:
   virtual std::pair<bool, unsigned int>
-  determineNonlinearSystem(const std::string & var_name,
-                           bool error_if_not_found = false) const override;
-
-  virtual std::pair<bool, unsigned int>
-  determineLinearSystem(const std::string & var_name,
+  determineSolverSystem(const std::string & var_name,
                         bool error_if_not_found = false) const override;
 
   friend class UpdateDisplacedMeshThread;

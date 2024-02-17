@@ -762,20 +762,20 @@ FEProblemBase::initialSetup()
   // always execute to get the max number of DoF per element and node needed to initialize phi_zero
   // variables
   dof_id_type global_max_var_n_dofs_per_elem = 0;
-  for (const auto i : index_range(_nl))
+  for (const auto i : index_range(_solver_systems))
   {
-    auto & nl = *_nl[i];
+    auto & sys = *_solver_systems[i];
     dof_id_type max_var_n_dofs_per_elem;
     dof_id_type max_var_n_dofs_per_node;
     {
       TIME_SECTION("computingMaxDofs", 3, "Computing Max Dofs Per Element");
 
-      MaxVarNDofsPerElem mvndpe(*this, nl);
+      MaxVarNDofsPerElem mvndpe(*this, sys);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
       max_var_n_dofs_per_elem = mvndpe.max();
       _communicator.max(max_var_n_dofs_per_elem);
 
-      MaxVarNDofsPerNode mvndpn(*this, nl);
+      MaxVarNDofsPerNode mvndpn(*this, sys);
       Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
       max_var_n_dofs_per_node = mvndpn.max();
       _communicator.max(max_var_n_dofs_per_node);
@@ -786,12 +786,12 @@ FEProblemBase::initialSetup()
     {
       TIME_SECTION("assignMaxDofs", 5, "Assigning Maximum Dofs Per Elem");
 
-      nl.assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+      sys.assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
       auto displaced_problem = getDisplacedProblem();
       if (displaced_problem)
         displaced_problem->solverSys(i).assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
 
-      nl.assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+      sys.assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
       if (displaced_problem)
         displaced_problem->solverSys(i).assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
     }
@@ -853,14 +853,13 @@ FEProblemBase::initialSetup()
     {
       TIME_SECTION("copyingFromExodus", 3, "Copying Variables From Exodus");
 
-      for (auto & nl : _nl)
-        nl->copyVars(*reader);
+      for (auto & sys : _solver_systems)
+        sys->copyVars(*reader);
       _aux->copyVars(*reader);
     }
     else
     {
-      if ((_nl.size() && _nl[0]->hasVarCopy()) ||
-          (_linear_systems.size() && _linear_systems[0]->hasVarCopy()) || _aux->hasVarCopy())
+      if ((_solver_systems.size() && _solver_systems[0]->hasVarCopy()) || _aux->hasVarCopy())
         mooseError("Need Exodus reader to restart variables but the reader is not available\n"
                    "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
                    "Exodus mesh file and with use_for_exodus_restart equal to true");
@@ -1040,12 +1039,8 @@ FEProblemBase::initialSetup()
       updateMeshXFEM();
   }
 
-  // Call initialSetup on the nonlinear system
-  for (auto & nl : _nl)
-    nl->initialSetup();
-
-  // Call initialSetup on the linear systems
-  for (auto & sys : _linear_systems)
+  // Call initialSetup on the solver systems
+  for (auto & sys : _solver_systems)
     sys->initialSetup();
 
   // Auxilary variable initialSetup calls
@@ -1055,10 +1050,7 @@ FEProblemBase::initialSetup()
     // initialSetup for displaced systems
     _displaced_problem->initialSetup();
 
-  for (auto & nl : _nl)
-    nl->setSolution(*(nl->system().current_local_solution.get()));
-
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     sys->setSolution(*(sys->system().current_local_solution.get()));
 
   // Update the nearest node searches (has to be called after the problem is all set up)
@@ -1083,9 +1075,9 @@ FEProblemBase::initialSetup()
 
   updateGeomSearch(); // Call all of the rest of the geometric searches
 
-  for (auto & nl : _nl)
+  for (auto & sys : _solver_systems)
   {
-    auto ti = nl->getTimeIntegrator();
+    auto ti = sys->getTimeIntegrator();
 
     if (ti)
     {
@@ -1361,8 +1353,8 @@ FEProblemBase::timestepSetup()
   }
 
   _aux->timestepSetup();
-  for (auto & nl : _nl)
-    nl->timestepSetup();
+  for (auto & sys : _solver_systems)
+    sys->timestepSetup();
 
   if (_displaced_problem)
     // timestepSetup for displaced systems
@@ -1485,9 +1477,9 @@ FEProblemBase::setVariableAllDoFMap(const std::vector<const MooseVariableFEBase 
   for (unsigned int i = 0; i < moose_vars.size(); ++i)
   {
     VariableName var_name = moose_vars[i]->name();
-    auto & nl = _nl[moose_vars[i]->sys().number()];
-    nl->setVariableGlobalDoFs(var_name);
-    _var_dof_map[var_name] = nl->getVariableGlobalDoFs();
+    auto & sys = _solver_systems[moose_vars[i]->sys().number()];
+    sys->setVariableGlobalDoFs(var_name);
+    _var_dof_map[var_name] = sys->getVariableGlobalDoFs();
   }
 }
 
@@ -2512,92 +2504,54 @@ FEProblemBase::addVariable(const std::string & var_type,
   if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
     return;
 
+  logAdd("Variable", var_name, var_type);
+
   const bool should_be_linear = params.isParamValid("linear_sys");
   const bool should_be_nonlinear = params.isParamSetByUser("nl_sys");
   if (should_be_linear && should_be_nonlinear)
-    mooseError("'linear_sys' and 'nl_sys' should not be both used for a parameter!");
+    mooseError("'linear_sys' and 'nl_sys' should not be both used as a parameter for variable ",
+               var_name);
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") =
       should_be_linear ? Moose::VarKindType::VAR_LINEAR : Moose::VarKindType::VAR_NONLINEAR;
+  SolverSystemName sys_name = should_be_linear
+                                  ? SolverSystemName(params.get<LinearSystemName>("linear_sys"))
+                                  : SolverSystemName(params.get<NonlinearSystemName>("nl_sys"));
+  const auto solver_system_number = solverSysNum(sys_name);
+  _solver_systems[solver_system_number]->addVariable(var_type, var_name, params);
+  if (_displaced_problem)
+    // MooseObjects need to be unique so change the name here
+    _displaced_problem->addVariable(var_type, var_name, params, solver_system_number);
 
-  logAdd("Variable", var_name, var_type);
-  if (should_be_linear)
-  {
-    params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_LINEAR;
-    const auto & linear_sys_name = params.get<LinearSystemName>("linear_sys");
-    std::istringstream ss(linear_sys_name);
-    unsigned int linear_sys_num;
-    if (!(ss >> linear_sys_num) || !ss.eof())
-      linear_sys_num = libmesh_map_find(_linear_sys_name_to_num, linear_sys_name);
-
-    _linear_systems[linear_sys_num]->addVariable(var_type, var_name, params);
-    if (_displaced_problem)
-      // MooseObjects need to be unique so change the name here
-      _displaced_problem->addVariable(var_type, var_name, params, linear_sys_num);
-
-    _linear_var_to_sys_num[var_name] = linear_sys_num;
-  }
-  else
-  {
-    params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
-    const auto & nl_sys_name = params.get<NonlinearSystemName>("nl_sys");
-    std::istringstream ss(nl_sys_name);
-    unsigned int nl_sys_num;
-    if (!(ss >> nl_sys_num) || !ss.eof())
-      nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
-
-    _nl[nl_sys_num]->addVariable(var_type, var_name, params);
-    if (_displaced_problem)
-      // MooseObjects need to be unique so change the name here
-      _displaced_problem->addVariable(var_type, var_name, params, nl_sys_num);
-
-    _nl_var_to_sys_num[var_name] = nl_sys_num;
-  }
+  _solver_var_to_sys_num[var_name] = solver_system_number;
 }
 
 std::pair<bool, unsigned int>
-FEProblemBase::determineNonlinearSystem(const std::string & var_name,
-                                        const bool error_if_not_found) const
+FEProblemBase::determineSolverSystem(const std::string & var_name,
+                                     const bool error_if_not_found) const
 {
-  auto nl_map_it = _nl_var_to_sys_num.find(var_name);
-  const bool var_in_nl = nl_map_it != _nl_var_to_sys_num.end();
-  if (var_in_nl)
-    mooseAssert(_nl[nl_map_it->second]->hasVariable(var_name) ||
-                    _nl[nl_map_it->second]->hasScalarVariable(var_name),
-                "If the variable is in our FEProblem nonlinear system map, then it must be in the "
-                "nonlinear system we expect");
+  auto map_it = _solver_var_to_sys_num.find(var_name);
+  const bool var_in_sys = map_it != _solver_var_to_sys_num.end();
+  if (var_in_sys)
+    mooseAssert(_solver_systems[map_it->second]->hasVariable(var_name) ||
+                    _solver_systems[map_it->second]->hasScalarVariable(var_name),
+                "If the variable is in our FEProblem solver system map, then it must be in the "
+                "solver system we expect");
   else if (error_if_not_found)
   {
     if (_aux->hasVariable(var_name) || _aux->hasScalarVariable(var_name))
-      mooseError("No nonlinear variable named ",
+      mooseError("No solver variable named ",
                  var_name,
                  " found. Did you specify an auxiliary variable when you meant to specify a "
-                 "nonlinear variable?");
+                 "solver variable?");
     else
       mooseError("Unknown variable '",
                  var_name,
-                 "'. It does not exist in the nonlinear system(s) or auxiliary system");
+                 "'. It does not exist in the solver system(s) or auxiliary system");
   }
 
-  return std::make_pair(var_in_nl, var_in_nl ? nl_map_it->second : libMesh::invalid_uint);
-}
-
-std::pair<bool, unsigned int>
-FEProblemBase::determineLinearSystem(const std::string & var_name,
-                                     const bool error_if_not_found) const
-{
-  auto linear_map_it = _linear_var_to_sys_num.find(var_name);
-  const bool var_in_linear = linear_map_it != _linear_var_to_sys_num.end();
-  if (var_in_linear)
-    mooseAssert(_linear_systems[linear_map_it->second]->hasVariable(var_name),
-                "If the variable is in our FEProblem linear system map, then it must be in the "
-                "linear system we expect");
-  else if (error_if_not_found)
-    mooseError("Unknown variable '", var_name, "'. It does not exist in the linear system(s)!");
-
-  return std::make_pair(var_in_linear,
-                        var_in_linear ? linear_map_it->second : libMesh::invalid_uint);
+  return std::make_pair(var_in_sys, var_in_sys ? map_it->second : libMesh::invalid_uint);
 }
 
 void
@@ -2607,8 +2561,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2642,8 +2595,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2676,8 +2628,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2710,8 +2661,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2766,7 +2716,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
   };
 
   const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName(determine_var_param_name(), name), true).second;
+      determineSolverSystem(parameters.varName(determine_var_param_name(), name), true).second;
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2991,8 +2941,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -3028,8 +2977,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -3117,8 +3065,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
 {
   parallel_object_only();
 
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -3845,39 +3792,17 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  unsigned int sys_num = 0;
-  bool var_in_nl = false;
-  bool var_in_linear = false;
-
-  if (parameters.isParamValid(var_param_name))
-  {
-    std::tie(var_in_nl, sys_num) =
-        determineNonlinearSystem(parameters.varName(var_param_name, object_name));
-    if (!var_in_nl)
-      std::tie(var_in_linear, sys_num) =
-          determineLinearSystem(parameters.varName(var_param_name, object_name));
-  }
-  else
-  {
-    var_in_nl = _nl.size();
-    if (!var_in_nl)
-      var_in_linear = _linear_systems.size();
-  }
-
-  // If the variable is not in the nonlinear or linear systems, it must be in the aux system.
-  // In this case we just use the first linear or nonlinear system for the auxvariable
-  if (!var_in_nl && !var_in_linear)
-    sys_num = 0;
+  const auto solver_sys_num =
+      parameters.isParamValid(var_param_name) &&
+              determineSolverSystem(parameters.varName(var_param_name, object_name)).first
+          ? determineSolverSystem(parameters.varName(var_param_name, object_name)).second
+          : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-
-    if (var_in_linear)
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseLinear(sys_num);
-    else
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(solver_sys_num);
   }
   else
   {
@@ -3889,10 +3814,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    if (var_in_linear)
-      parameters.set<SystemBase *>("_sys") = _linear_systems[sys_num].get();
-    else
-      parameters.set<SystemBase *>("_sys") = _nl[sys_num].get();
+    parameters.set<SystemBase *>("_sys") = _solver_systems[solver_sys_num].get();
   }
 }
 
@@ -4797,7 +4719,7 @@ FEProblemBase::addDamper(const std::string & damper_name,
 
   const auto nl_sys_num =
       parameters.isParamValid("variable")
-          ? determineNonlinearSystem(parameters.varName("variable", name), true).second
+          ? determineSolverSystem(parameters.varName("variable", name), true).second
           : (unsigned int)0;
 
   parameters.set<SubProblem *>("_subproblem") = this;
@@ -5334,7 +5256,7 @@ FEProblemBase::getVariable(const THREAD_ID tid,
                            Moose::VarFieldType expected_var_field_type) const
 {
   return getVariableHelper(
-      tid, var_name, expected_var_type, expected_var_field_type, _nl, _linear_systems, *_aux);
+      tid, var_name, expected_var_type, expected_var_field_type, _solver_systems, *_aux);
 }
 
 MooseVariable &
@@ -5427,12 +5349,9 @@ FEProblemBase::getScalarVariable(const THREAD_ID tid, const std::string & var_na
 System &
 FEProblemBase::getSystem(const std::string & var_name)
 {
-  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
-  const auto [var_in_linear, linear_sys_num] = determineLinearSystem(var_name);
-  if (var_in_nl)
-    return _nl[nl_sys_num]->system();
-  else if (var_in_linear)
-    return _linear_systems[linear_sys_num]->system();
+  const auto [var_in_sys, sys_num] = determineSolverSystem(var_name);
+  if (var_in_sys)
+    return _solver_systems[sys_num]->system();
   else if (_aux->hasVariable(var_name))
     return _aux->system();
   else
@@ -5971,6 +5890,31 @@ FEProblemBase::linearSysNum(const LinearSystemName & linear_sys_name) const
     linear_sys_num = libmesh_map_find(_linear_sys_name_to_num, linear_sys_name);
 
   return linear_sys_num;
+}
+
+unsigned int
+FEProblemBase::solverSysNum(const SolverSystemName & solver_sys_name) const
+{
+  std::istringstream ss(solver_sys_name);
+  unsigned int solver_sys_num;
+  if (!(ss >> solver_sys_num) || !ss.eof())
+    solver_sys_num = libmesh_map_find(_solver_sys_name_to_num, solver_sys_name);
+
+  return solver_sys_num;
+}
+
+unsigned int
+FEProblemBase::nlSysNumToSolverSysNum(const unsigned int nl_sys_num) const
+{
+  mooseAssert(nl_sys_num < _num_nl_sys, "The requested nonlinear system does not exist!");
+  return libmesh_map_find(_nl_sys_name_to_num, _nl_sys_names[nl_sys_num]);
+}
+
+unsigned int
+FEProblemBase::linearSysNumToSolverSysNum(const unsigned int linear_sys_num) const
+{
+  mooseAssert(linear_sys_num < _num_linear_sys, "The requested linear system does not exist!");
+  return libmesh_map_find(_linear_sys_name_to_num, _linear_sys_names[linear_sys_num]);
 }
 
 void
