@@ -1317,6 +1317,12 @@ DisplacedProblem::numLinearSystems() const
   return _mproblem.numLinearSystems();
 }
 
+std::size_t
+DisplacedProblem::numSolverSystems() const
+{
+  return _mproblem.numSolverSystems();
+}
+
 const std::vector<VectorTag> &
 DisplacedProblem::currentResidualVectorTags() const
 {

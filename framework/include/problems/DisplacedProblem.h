@@ -361,6 +361,8 @@ public:
 
   virtual std::size_t numLinearSystems() const override;
 
+  virtual std::size_t numSolverSystems() const override;
+
   virtual unsigned int currentNlSysNum() const override;
 
   virtual unsigned int currentLinearSysNum() const override;

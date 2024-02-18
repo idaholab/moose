@@ -859,7 +859,7 @@ FEProblemBase::initialSetup()
     }
     else
     {
-      if ((_solver_systems.size() && _solver_systems[0]->hasVarCopy()) || _aux->hasVarCopy())
+      if (_solver_systems[0]->hasVarCopy() || _aux->hasVarCopy())
         mooseError("Need Exodus reader to restart variables but the reader is not available\n"
                    "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
                    "Exodus mesh file and with use_for_exodus_restart equal to true");
@@ -1486,23 +1486,21 @@ FEProblemBase::setVariableAllDoFMap(const std::vector<const MooseVariableFEBase 
 void
 FEProblemBase::prepare(const Elem * elem, const THREAD_ID tid)
 {
-  for (const auto i : index_range(_nl))
+  for (const auto i : index_range(_solver_systems))
   {
     _assembly[tid][i]->reinit(elem);
-    _nl[i]->prepare(tid);
+    _solver_systems[i]->prepare(tid);
 
-    // This method is called outside of residual/Jacobian callbacks during initial condition
-    // evaluation
-    if ((!_has_jacobian || !_const_jacobian) && currentlyComputingJacobian())
-      _assembly[tid][i]->prepareJacobianBlock();
-    _assembly[tid][i]->prepareResidual();
-    if (_has_nonlocal_coupling && currentlyComputingJacobian())
-      _assembly[tid][i]->prepareNonlocal();
-  }
-  for (const auto i : index_range(_linear_systems))
-  {
-    _assembly[tid][_nl.size() + i]->reinit(elem);
-    _linear_systems[i]->prepare(tid);
+    if (i < _num_nl_sys)
+    {
+      // This method is called outside of residual/Jacobian callbacks during initial condition
+      // evaluation
+      if ((!_has_jacobian || !_const_jacobian) && currentlyComputingJacobian())
+        _assembly[tid][i]->prepareJacobianBlock();
+      _assembly[tid][i]->prepareResidual();
+      if (_has_nonlocal_coupling && currentlyComputingJacobian())
+        _assembly[tid][i]->prepareNonlocal();
+    }
   }
   _aux->prepare(tid);
 
@@ -1569,15 +1567,13 @@ void
 FEProblemBase::setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid)
 {
   SubdomainID did = elem->subdomain_id();
-  for (const auto i : index_range(_nl))
+  for (const auto i : index_range(_solver_systems))
   {
     _assembly[tid][i]->setCurrentSubdomainID(did);
     if (_displaced_problem &&
         (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
       _displaced_problem->assembly(tid, i).setCurrentSubdomainID(did);
   }
-  for (const auto i : index_range(_linear_systems))
-    _assembly[tid][i + _nl.size()]->setCurrentSubdomainID(did);
 }
 
 void
@@ -2458,20 +2454,20 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                       const FEType & type,
                                       bool is_aux)
 {
-  for (auto & nl : _nl)
+  for (auto & sys : _solver_systems)
   {
-    SystemBase * curr_sys_ptr = nl.get();
+    SystemBase * curr_sys_ptr = sys.get();
     SystemBase * other_sys_ptr = _aux.get();
     std::string error_prefix = "";
     if (is_aux)
     {
       curr_sys_ptr = _aux.get();
-      other_sys_ptr = nl.get();
+      other_sys_ptr = sys.get();
       error_prefix = "Aux";
     }
 
     if (other_sys_ptr->hasVariable(var_name))
-      mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name: ",
+      mooseError("Cannot have an auxiliary variable and a solver variable with the same name: ",
                  var_name);
 
     if (curr_sys_ptr->hasVariable(var_name))
@@ -3286,13 +3282,7 @@ FEProblemBase::projectSolution()
     }
   }
 
-  for (auto & nl : _nl)
-  {
-    nl->solution().close();
-    nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
-  }
-
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
   {
     sys->solution().close();
     sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
@@ -5237,10 +5227,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
 bool
 FEProblemBase::hasVariable(const std::string & var_name) const
 {
-  for (auto & nl : _nl)
-    if (nl->hasVariable(var_name))
-      return true;
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     if (sys->hasVariable(var_name))
       return true;
   if (_aux->hasVariable(var_name))
@@ -5262,9 +5249,9 @@ FEProblemBase::getVariable(const THREAD_ID tid,
 MooseVariable &
 FEProblemBase::getStandardVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _nl)
-    if (nl->hasVariable(var_name))
-      return nl->getFieldVariable<Real>(tid, var_name);
+  for (auto & sys : _solver_systems)
+    if (sys->hasVariable(var_name))
+      return sys->getFieldVariable<Real>(tid, var_name);
   if (_aux->hasVariable(var_name))
     return _aux->getFieldVariable<Real>(tid, var_name);
 
@@ -5274,10 +5261,7 @@ FEProblemBase::getStandardVariable(const THREAD_ID tid, const std::string & var_
 MooseVariableFieldBase &
 FEProblemBase::getActualFieldVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _nl)
-    if (nl->hasVariable(var_name))
-      return nl->getActualFieldVariable<Real>(tid, var_name);
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     if (sys->hasVariable(var_name))
       return sys->getActualFieldVariable<Real>(tid, var_name);
   if (_aux->hasVariable(var_name))
@@ -5289,10 +5273,7 @@ FEProblemBase::getActualFieldVariable(const THREAD_ID tid, const std::string & v
 VectorMooseVariable &
 FEProblemBase::getVectorVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _nl)
-    if (nl->hasVariable(var_name))
-      return nl->getFieldVariable<RealVectorValue>(tid, var_name);
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     if (sys->hasVariable(var_name))
       return sys->getFieldVariable<RealVectorValue>(tid, var_name);
   if (_aux->hasVariable(var_name))
@@ -5304,10 +5285,7 @@ FEProblemBase::getVectorVariable(const THREAD_ID tid, const std::string & var_na
 ArrayMooseVariable &
 FEProblemBase::getArrayVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _nl)
-    if (nl->hasVariable(var_name))
-      return nl->getFieldVariable<RealEigenVector>(tid, var_name);
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     if (sys->hasVariable(var_name))
       return sys->getFieldVariable<RealEigenVector>(tid, var_name);
   if (_aux->hasVariable(var_name))
@@ -5319,10 +5297,7 @@ FEProblemBase::getArrayVariable(const THREAD_ID tid, const std::string & var_nam
 bool
 FEProblemBase::hasScalarVariable(const std::string & var_name) const
 {
-  for (auto & nl : _nl)
-    if (nl->hasScalarVariable(var_name))
-      return true;
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     if (sys->hasScalarVariable(var_name))
       return true;
   if (_aux->hasScalarVariable(var_name))
@@ -5334,10 +5309,7 @@ FEProblemBase::hasScalarVariable(const std::string & var_name) const
 MooseVariableScalar &
 FEProblemBase::getScalarVariable(const THREAD_ID tid, const std::string & var_name)
 {
-  for (auto & nl : _nl)
-    if (nl->hasScalarVariable(var_name))
-      return nl->getScalarVariable(tid, var_name);
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     if (sys->hasScalarVariable(var_name))
       return sys->getScalarVariable(tid, var_name);
   if (_aux->hasScalarVariable(var_name))
@@ -5601,12 +5573,10 @@ FEProblemBase::createQRules(QuadratureType type,
   if (order == INVALID_ORDER)
   {
     // automatically determine the integration order
-    for (const auto i : make_range(_nl.size()))
-      if (i == 0 || order < _nl[i]->getMinQuadratureOrder())
-        order = _nl[i]->getMinQuadratureOrder();
-    for (const auto i : make_range(_linear_systems.size()))
-      if (order == INVALID_ORDER || order < _linear_systems[i]->getMinQuadratureOrder())
-        order = _linear_systems[i]->getMinQuadratureOrder();
+    order = _solver_systems[0]->getMinQuadratureOrder();
+    for (const auto i : make_range(std::size_t(1), _solver_systems.size()))
+      if (order < _solver_systems[i]->getMinQuadratureOrder())
+        order = _solver_systems[i]->getMinQuadratureOrder();
     if (order < _aux->getMinQuadratureOrder())
       order = _aux->getMinQuadratureOrder();
   }
@@ -5618,14 +5588,9 @@ FEProblemBase::createQRules(QuadratureType type,
     face_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    for (const auto i : index_range(_nl))
+    for (const auto i : index_range(_solver_systems))
       _assembly[tid][i]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
-    for (const auto i : index_range(_linear_systems))
-      _assembly[tid][_nl.size() + i]->createQRules(
-          type, order, volume_order, face_order, block, allow_negative_qweights);
-  }
 
   if (_displaced_problem)
     _displaced_problem->createQRules(
@@ -5824,12 +5789,10 @@ FEProblemBase::init()
 
   // do not assemble system matrix for JFNK solve
   for (auto & nl : _nl)
-  {
     if (solverParams()._type == Moose::ST_JFNK)
       nl->turnOffJacobian();
-    nl->init();
-  }
-  for (auto & sys : _linear_systems)
+
+  for (auto & sys : _solver_systems)
     sys->init();
   _aux->init();
 
@@ -5854,9 +5817,7 @@ FEProblemBase::init()
   if (haveFV())
     _mesh.setupFiniteVolumeMeshData();
 
-  for (auto & nl : _nl)
-    nl->update();
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     sys->update();
   _aux->update();
 
@@ -5901,20 +5862,6 @@ FEProblemBase::solverSysNum(const SolverSystemName & solver_sys_name) const
     solver_sys_num = libmesh_map_find(_solver_sys_name_to_num, solver_sys_name);
 
   return solver_sys_num;
-}
-
-unsigned int
-FEProblemBase::nlSysNumToSolverSysNum(const unsigned int nl_sys_num) const
-{
-  mooseAssert(nl_sys_num < _num_nl_sys, "The requested nonlinear system does not exist!");
-  return libmesh_map_find(_nl_sys_name_to_num, _nl_sys_names[nl_sys_num]);
-}
-
-unsigned int
-FEProblemBase::linearSysNumToSolverSysNum(const unsigned int linear_sys_num) const
-{
-  mooseAssert(linear_sys_num < _num_linear_sys, "The requested linear system does not exist!");
-  return libmesh_map_find(_linear_sys_name_to_num, _linear_sys_names[linear_sys_num]);
 }
 
 void
@@ -6096,10 +6043,10 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   }
 
   if (_solve)
+  {
     _current_linear_sys->solve();
-
-  if (_solve)
     _current_linear_sys->update();
+  }
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
@@ -6145,8 +6092,8 @@ FEProblemBase::copySolutionsBackwards()
 {
   TIME_SECTION("copySolutionsBackwards", 3, "Copying Solutions Backward");
 
-  for (auto & nl : _nl)
-    nl->copySolutionsBackwards();
+  for (auto & sys : _solver_systems)
+    sys->copySolutionsBackwards();
   _aux->copySolutionsBackwards();
 }
 
@@ -6183,8 +6130,8 @@ FEProblemBase::restoreSolutions()
 {
   TIME_SECTION("restoreSolutions", 5, "Restoring Solutions");
 
-  for (auto & nl : _nl)
-    nl->restoreSolutions();
+  for (auto & sys : _solver_systems)
+    sys->restoreSolutions();
   _aux->restoreSolutions();
 
   if (_displaced_problem)
@@ -6196,8 +6143,8 @@ FEProblemBase::saveOldSolutions()
 {
   TIME_SECTION("saveOldSolutions", 5, "Saving Old Solutions");
 
-  for (auto & nl : _nl)
-    nl->saveOldSolutions();
+  for (auto & sys : _solver_systems)
+    sys->saveOldSolutions();
   _aux->saveOldSolutions();
 }
 
@@ -6206,8 +6153,8 @@ FEProblemBase::restoreOldSolutions()
 {
   TIME_SECTION("restoreOldSolutions", 5, "Restoring Old Solutions");
 
-  for (auto & nl : _nl)
-    nl->restoreOldSolutions();
+  for (auto & sys : _solver_systems)
+    sys->restoreOldSolutions();
   _aux->restoreOldSolutions();
 }
 
@@ -6218,9 +6165,7 @@ FEProblemBase::outputStep(ExecFlagType type)
 
   setCurrentExecuteOnFlag(type);
 
-  for (auto & nl : _nl)
-    nl->update();
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     sys->update();
   _aux->update();
   if (_displaced_problem)
@@ -7706,9 +7651,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   // Since the mesh has changed, we need to make sure that we update any of our
   // MOOSE-system specific data. libmesh system data has already been updated
-  for (auto & nl : _nl)
-    nl->update(/*update_libmesh_system=*/false);
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
     sys->update(/*update_libmesh_system=*/false);
   _aux->update(/*update_libmesh_system=*/false);
 }
@@ -8051,13 +7994,7 @@ FEProblemBase::getVariableNames()
 {
   std::vector<VariableName> names;
 
-  for (auto & nl : _nl)
-  {
-    const std::vector<VariableName> & nl_var_names = nl->getVariableNames();
-    names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
-  }
-
-  for (auto & sys : _linear_systems)
+  for (auto & sys : _solver_systems)
   {
     const std::vector<VariableName> & var_names = sys->getVariableNames();
     names.insert(names.end(), var_names.begin(), var_names.end());

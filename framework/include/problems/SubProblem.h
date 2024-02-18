@@ -909,6 +909,11 @@ public:
   virtual std::size_t numLinearSystems() const = 0;
 
   /**
+   * @return the number of solver systems in the problem
+   */
+  virtual std::size_t numSolverSystems() const = 0;
+
+  /**
    * @return the current linear system number
    */
   virtual unsigned int currentLinearSysNum() const = 0;

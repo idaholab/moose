@@ -688,6 +688,18 @@ public:
   const LinearSystem & getLinearSystem(unsigned int sys_num) const;
 
   /**
+   * Get non-constant reference to a solver system
+   * @param sys_num The number of the solver system
+   */
+  SolverSystem & getSolverSystem(unsigned int sys_num);
+
+  /**
+   * Get a constant reference to a solver system
+   * @param sys_num The number of the solver system
+   */
+  const SolverSystem & getSolverSystem(unsigned int sys_num) const;
+
+  /**
    * Set the current linear system pointer
    * @param sys_num The number of linear system
    */
@@ -2163,6 +2175,8 @@ public:
 
   virtual std::size_t numLinearSystems() const override { return _num_linear_sys; }
 
+  virtual std::size_t numSolverSystems() const override { return _num_nl_sys + _num_linear_sys; }
+
   virtual unsigned int currentNlSysNum() const override;
 
   virtual unsigned int currentLinearSysNum() const override;
@@ -2181,18 +2195,6 @@ public:
    * @return the solver system number corresponding to the provided \p solver_sys_name
    */
   unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const override;
-
-  /**
-   * @return the solver system number corresponding to the provided nonlinear system
-   * number \p nl_sys_num
-   */
-  unsigned int nlSysNumToSolverSysNum(const unsigned int nl_sys_num) const;
-
-  /**
-   * @return the solver system number corresponding to the provided linear system number
-   * \p linear_sys_num
-   */
-  unsigned int linearSysNumToSolverSysNum(const unsigned int linear_sys_num) const;
 
   /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
@@ -2329,9 +2331,6 @@ protected:
   /// Map from linear system name to number
   std::map<LinearSystemName, unsigned int> _linear_sys_name_to_num;
 
-  /// Map from linear variable name to linear system number
-  std::map<NonlinearVariableName, unsigned int> _linear_var_to_sys_num;
-
   /// The current linear system that we are solving
   LinearSystem * _current_linear_sys;
 
@@ -2349,9 +2348,6 @@ protected:
 
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
-
-  /// Map from nonlinear variable name to nonlinear system number
-  std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
 
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
@@ -2869,6 +2865,22 @@ FEProblemBase::getNonlinearSystemBase(const unsigned int sys_num) const
 {
   mooseAssert(sys_num < _nl.size(), "System number greater than the number of nonlinear systems");
   return *_nl[sys_num];
+}
+
+inline SolverSystem &
+FEProblemBase::getSolverSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
+}
+
+inline const SolverSystem &
+FEProblemBase::getSolverSystem(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
 }
 
 inline NonlinearSystemBase &

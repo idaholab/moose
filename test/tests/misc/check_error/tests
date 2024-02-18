@@ -635,9 +635,9 @@
   [same_name_variable_test]
     type = 'RunException'
     input = 'same_name_variable_test.i'
-    expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name"
+    expect_err = "Cannot have an auxiliary variable and a solver variable with the same name"
 
-    requirement = 'The system shall report an error when nonlinear and auxiliary variables are declared with the same name.'
+    requirement = 'The system shall report an error when solver and auxiliary variables are declared with the same name.'
     issues = '#1405'
   []
 
@@ -1043,7 +1043,7 @@
     expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
                  "you meant to specify a solver variable"
 
-    requirement = 'The system shall report an error when a discontinuous Galerkin Kernel attempts to use a solution variable.'
+    requirement = 'The system shall report an error when a discontinuous Galerkin Kernel attempts to use an auxiliary variable.'
     issues = '#11039'
   []
 
