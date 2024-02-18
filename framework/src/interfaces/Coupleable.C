@@ -447,9 +447,9 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp) const
   }
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  if (var->kind() == Moose::VAR_NONLINEAR &&
+  if (var->kind() == Moose::VAR_SOLVER &&
       // are we not an object that feeds into the nonlinear system?
-      (!_c_sys || _c_sys->varKind() != Moose::VAR_NONLINEAR ||
+      (!_c_sys || _c_sys->varKind() != Moose::VAR_SOLVER ||
        // are we an object that impacts the nonlinear system and this variable is within our
        // nonlinear system?
        var->sys().number() == _c_sys->number()))

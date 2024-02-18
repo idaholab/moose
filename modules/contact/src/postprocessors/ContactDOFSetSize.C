@@ -37,7 +37,7 @@ ContactDOFSetSize::ContactDOFSetSize(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _var(_fe_problem.getVariable(_tid,
                                  getParam<VariableName>("variable"),
-                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarKindType::VAR_SOLVER,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD)),
     _mesh(_fe_problem.mesh().getMesh()),
     _subdomain_id(_fe_problem.mesh().getSubdomainID(getParam<SubdomainName>("subdomain"))),

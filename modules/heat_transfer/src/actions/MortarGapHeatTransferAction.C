@@ -216,7 +216,7 @@ MortarGapHeatTransferAction::addMortarVariable()
     mooseError("Temperature variable is missing");
 
   const auto primal_type =
-      _problem->getVariable(0, temperature, Moose::VarKindType::VAR_NONLINEAR).feType();
+      _problem->getVariable(0, temperature, Moose::VarKindType::VAR_SOLVER).feType();
   const int lm_order = primal_type.order.get_order();
 
   if (primal_type.family != LAGRANGE)

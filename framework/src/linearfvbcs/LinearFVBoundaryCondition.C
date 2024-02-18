@@ -49,7 +49,7 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     MooseVariableInterface(this,
                            false,
                            "variable",
-                           Moose::VarKindType::VAR_LINEAR,
+                           Moose::VarKindType::VAR_SOLVER,
                            Moose::VarFieldType::VAR_FIELD_STANDARD),
     MooseVariableDependencyInterface(this),
     NonADFunctorInterface(this),

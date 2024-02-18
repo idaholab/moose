@@ -626,8 +626,7 @@ enum AuxGroup
  */
 enum VarKindType
 {
-  VAR_NONLINEAR,
-  VAR_LINEAR,
+  VAR_SOLVER,
   VAR_AUXILIARY,
   VAR_ANY
 };

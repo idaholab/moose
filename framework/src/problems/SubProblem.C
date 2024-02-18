@@ -798,16 +798,15 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
     else
       mooseError("Unknown variable " + var_name);
   }
-  else if ((expected_var_type == Moose::VarKindType::VAR_NONLINEAR ||
-            expected_var_type == Moose::VarKindType::VAR_LINEAR) &&
-           var_in_sys && systems[sys_num]->hasVariable(var_name))
+  else if (expected_var_type == Moose::VarKindType::VAR_SOLVER && var_in_sys &&
+           systems[sys_num]->hasVariable(var_name))
     var = &(systems[sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
     var = &(aux.getVariable(tid, var_name));
   else
   {
     std::string expected_var_type_string =
-        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR ? "nonlinear" : "auxiliary");
+        (expected_var_type == Moose::VarKindType::VAR_SOLVER ? "nonlinear" : "auxiliary");
     mooseError("No ",
                expected_var_type_string,
                " variable named ",

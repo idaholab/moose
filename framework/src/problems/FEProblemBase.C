@@ -2509,8 +2509,7 @@ FEProblemBase::addVariable(const std::string & var_type,
                var_name);
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") =
-      should_be_linear ? Moose::VarKindType::VAR_LINEAR : Moose::VarKindType::VAR_NONLINEAR;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_SOLVER;
   SolverSystemName sys_name = should_be_linear
                                   ? SolverSystemName(params.get<LinearSystemName>("linear_sys"))
                                   : SolverSystemName(params.get<NonlinearSystemName>("nl_sys"));

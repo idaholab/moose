@@ -101,10 +101,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _var_kind(getParam<Moose::VarKindType>("_var_kind")),
     _subproblem(_sys.subproblem()),
     _variable(_sys.system().variable(_var_num)),
-    _assembly(_subproblem.assembly(
-        getParam<THREAD_ID>("_tid"),
-        ((_var_kind == Moose::VAR_NONLINEAR) || (_var_kind == Moose::VAR_LINEAR)) ? _sys.number()
-                                                                                  : 0)),
+    _assembly(_subproblem.assembly(getParam<THREAD_ID>("_tid"),
+                                   (_var_kind == Moose::VAR_SOLVER) ? _sys.number() : 0)),
     _dof_map(_sys.dofMap()),
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),
@@ -204,7 +202,7 @@ void
 MooseVariableBase::initialSetup()
 {
   // Currently the scaling vector is only used through AD residual computing objects
-  if ((_var_kind == Moose::VAR_NONLINEAR) && _subproblem.haveADObjects() &&
+  if ((_var_kind == Moose::VAR_SOLVER) && _subproblem.haveADObjects() &&
       (_subproblem.automaticScaling() || (std::find_if(_scaling_factor.begin(),
                                                        _scaling_factor.end(),
                                                        [](const Real element) {

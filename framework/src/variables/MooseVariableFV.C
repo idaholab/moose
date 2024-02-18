@@ -838,7 +838,7 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & st
 
   const dof_id_type dof_index = this->_dof_indices[0];
 
-  if (_var_kind == Moose::VAR_NONLINEAR)
+  if (_var_kind == Moose::VAR_SOLVER)
   {
     ADReal dot = (*_solution)(dof_index);
     if (ADReal::do_derivatives && state.state == 0 &&

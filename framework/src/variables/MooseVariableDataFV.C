@@ -39,7 +39,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _var(var),
     _fe_type(_var.feType()),
     _var_num(_var.number()),
-    _assembly(_subproblem.assembly(_tid, var.kind() == Moose::VAR_NONLINEAR ? sys.number() : 0)),
+    _assembly(_subproblem.assembly(_tid, var.kind() == Moose::VAR_SOLVER ? sys.number() : 0)),
     _element_type(element_type),
     _ad_zero(0),
     _need_second(false),

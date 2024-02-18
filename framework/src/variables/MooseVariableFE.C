@@ -968,7 +968,7 @@ MooseVariableFE<OutputType>::computeSolution(const Elem * const elem,
       Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
     if (computing_dot)
     {
-      if (_var_kind == Moose::VAR_NONLINEAR)
+      if (_var_kind == Moose::VAR_SOLVER)
       {
         dof_values_dot.push_back(dof_values.back());
         _time_integrator->computeADTimeDerivatives(

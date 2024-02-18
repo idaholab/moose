@@ -68,7 +68,7 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 }
 
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
-  : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_LINEAR),
+  : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),

@@ -62,7 +62,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
         _mproblem.getNonlinearSystemBase(nl_sys_num),
         "displaced_" + _mproblem.getNonlinearSystemBase(nl_sys_num).name() + "_" +
             std::to_string(nl_sys_num),
-        Moose::VAR_NONLINEAR));
+        Moose::VAR_SOLVER));
     auto & displaced_nl = _displaced_solver_systems.back();
 
     for (unsigned int i = 0; i < n_threads; ++i)

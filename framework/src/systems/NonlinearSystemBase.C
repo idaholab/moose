@@ -109,7 +109,7 @@ EXTERN_C_END
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          System & sys,
                                          const std::string & name)
-  : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_NONLINEAR),
+  : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "NonlinearSystemBase"),
     _sys(sys),
     _last_nl_rnorm(0.),
@@ -2328,7 +2328,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 for (const auto & jvar : coupled_vars)
                 {
                   // Only compute jacobians for nonlinear variables
-                  if (jvar->kind() != Moose::VAR_NONLINEAR)
+                  if (jvar->kind() != Moose::VAR_SOLVER)
                     continue;
 
                   // Only compute Jacobian entries if this coupling is being used by the
@@ -2544,7 +2544,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 for (const auto & jvar : coupled_vars)
                 {
                   // Only compute jacobians for nonlinear variables
-                  if (jvar->kind() != Moose::VAR_NONLINEAR)
+                  if (jvar->kind() != Moose::VAR_SOLVER)
                     continue;
 
                   // Only compute Jacobian entries if this coupling is being used by the
@@ -2935,7 +2935,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
             // and the BC's own variable
             std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
             for (const auto & coupled_var : coupled_moose_vars)
-              if (coupled_var->kind() == Moose::VAR_NONLINEAR)
+              if (coupled_var->kind() == Moose::VAR_SOLVER)
                 var_set.insert(coupled_var->number());
 
             var_set.insert(bc->variable().number());

@@ -61,7 +61,7 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
     MooseVariableInterface(this,
                            false,
                            "variable",
-                           Moose::VarKindType::VAR_LINEAR,
+                           Moose::VarKindType::VAR_SOLVER,
                            Moose::VarFieldType::VAR_FIELD_STANDARD),
     MooseVariableDependencyInterface(this),
     _var(*mooseLinearVariableFV())

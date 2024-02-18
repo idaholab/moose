@@ -26,7 +26,7 @@ VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
     MooseVariableInterface<RealVectorValue>(this,
                                             true,
                                             "variable",
-                                            Moose::VarKindType::VAR_NONLINEAR,
+                                            Moose::VarKindType::VAR_SOLVER,
                                             Moose::VarFieldType::VAR_FIELD_VECTOR),
     _var(*mooseVariable()),
     _current_node(_var.node()),

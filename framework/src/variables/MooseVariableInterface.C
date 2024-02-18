@@ -41,11 +41,8 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     if (!(_fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var)))
       _linear_fv_variable = dynamic_cast<MooseLinearVariableFV<T> *>(_var);
 
-  _mvi_assembly = &problem.assembly(
-      tid,
-      ((_var->kind() == Moose::VAR_NONLINEAR) || (_var->kind() == Moose::VAR_LINEAR))
-          ? _var->sys().number()
-          : 0);
+  _mvi_assembly =
+      &problem.assembly(tid, (_var->kind() == Moose::VAR_SOLVER) ? _var->sys().number() : 0);
 }
 
 template <typename T>

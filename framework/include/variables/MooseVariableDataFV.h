@@ -473,7 +473,7 @@ MooseVariableDataFV<OutputType>::safeToComputeADUDot() const
   // the auxiliary system copy of the time integrator. Some derived time integrator classes do setup
   // in their solve() method, and that solve() method only happens for the nonlinear system copy of
   // the time integrator.
-  return _time_integrator && (_var.kind() == Moose::VAR_NONLINEAR);
+  return _time_integrator && (_var.kind() == Moose::VAR_SOLVER);
 }
 
 template <typename OutputType>

@@ -33,7 +33,7 @@ ArrayDGKernel::validParams()
 ArrayDGKernel::ArrayDGKernel(const InputParameters & parameters)
   : DGKernelBase(parameters),
     NeighborMooseVariableInterface(
-        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_ARRAY),
+        this, false, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_ARRAY),
     _var(*mooseVariable()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
