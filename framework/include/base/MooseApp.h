@@ -119,6 +119,12 @@ public:
   }
 
   /**
+   * Get the shell exit code for the application
+   * @return The shell exit code
+   */
+  int exitCode() { return _exit_code; }
+
+  /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
@@ -1233,6 +1239,7 @@ protected:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
   bool _ready_to_exit;
+  int _exit_code;
 
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
