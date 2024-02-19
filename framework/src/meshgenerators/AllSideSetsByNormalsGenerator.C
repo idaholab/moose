@@ -30,14 +30,12 @@ AllSideSetsByNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Adds sidesets to the entire mesh based on unique normals.");
   return params;
 }
 
 AllSideSetsByNormalsGenerator::AllSideSetsByNormalsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _input(getMesh("input")),
     _boundary_to_normal_map(
         declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals"))
 {
@@ -59,7 +57,7 @@ AllSideSetsByNormalsGenerator::generate()
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
   for (const auto & elem : mesh->element_ptr_range())
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : make_range(elem->n_sides()))
     {
       if (elem->neighbor_ptr(side))
         continue;

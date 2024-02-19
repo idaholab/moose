@@ -33,7 +33,6 @@ SideSetsFromNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription(
       "Adds a new named sideset to the mesh for all faces matching the specified normal.");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
@@ -47,7 +46,6 @@ SideSetsFromNormalsGenerator::validParams()
 
 SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _input(getMesh("input")),
     _normals(getParam<std::vector<Point>>("normals")),
     _boundary_to_normal_map(
         declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals")),
@@ -86,7 +84,7 @@ SideSetsFromNormalsGenerator::generate()
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
   for (const auto & elem : mesh->element_ptr_range())
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : make_range(elem->n_sides()))
     {
       if (elem->neighbor_ptr(side))
         continue;
@@ -94,7 +92,7 @@ SideSetsFromNormalsGenerator::generate()
       const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
 
-      for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+      for (const auto i : make_range(boundary_ids.size()))
       {
         if (std::abs(1.0 - _normals[i] * normals[0]) < _tolerance)
           flood(elem, _normals[i], boundary_ids[i], *mesh);
@@ -104,7 +102,7 @@ SideSetsFromNormalsGenerator::generate()
   finalize();
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+  for (const auto i : make_range(boundary_ids.size()))
   {
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
     _boundary_to_normal_map[boundary_ids[i]] = _normals[i];

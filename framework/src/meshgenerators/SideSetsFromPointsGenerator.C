@@ -34,11 +34,10 @@ SideSetsFromPointsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Adds a new sideset starting at the specified point containing all "
                              "connected element faces with the same normal.");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
-                                                     "The name of the boundary to create");
+                                                     "The name of the boundaries to create");
   params.addRequiredParam<std::vector<Point>>(
       "points", "A list of points from which to start painting sidesets");
 
@@ -47,7 +46,6 @@ SideSetsFromPointsGenerator::validParams()
 
 SideSetsFromPointsGenerator::SideSetsFromPointsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
     _points(getParam<std::vector<Point>>("points"))
 {
@@ -74,7 +72,7 @@ SideSetsFromPointsGenerator::generate()
 
   std::unique_ptr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *mesh);
 
-  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+  for (const auto i : make_range(boundary_ids.size()))
   {
     std::set<const Elem *> candidate_elements;
     (*pl)(_points[i], candidate_elements);
@@ -83,7 +81,7 @@ SideSetsFromPointsGenerator::generate()
     Point normal_to_flood;
 
     for (const Elem * elem : candidate_elements)
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      for (const auto side : make_range(elem->n_sides()))
       {
         if (elem->neighbor_ptr(side))
           continue;
@@ -131,7 +129,7 @@ SideSetsFromPointsGenerator::generate()
 
   finalize();
 
-  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+  for (const auto i : make_range(boundary_ids.size()))
     mesh->get_boundary_info().sideset_name(boundary_ids[i]) = _boundary_names[i];
 
   mesh->set_isnt_prepared();

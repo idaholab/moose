@@ -28,9 +28,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// mesh to add the sidesets to
-  std::unique_ptr<MeshBase> & _input;
-
   /// function expression
   std::string _function;
 
@@ -54,9 +51,6 @@ protected:
 
   /// A list of included neighbor subdomain ids
   std::vector<subdomain_id_type> _included_neighbor_ids;
-
-  /// Whether to consider internal sides or not when building the sideset
-  const bool _include_only_external_sides;
 
   /// A normal vector that (if provided) is compared against side's normals
   Point _normal;

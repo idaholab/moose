@@ -24,8 +24,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// the mesh to add the sidesets to
-  std::unique_ptr<MeshBase> & _input;
   /// holds the boundary names for the sidesets
   std::vector<BoundaryName> _boundary_names;
   /// holds the normals used to generate sidesets

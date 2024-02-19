@@ -25,15 +25,13 @@ SideSetsAroundSubdomainGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<BoundaryName>>(
-      "new_boundary", "The list of boundary IDs to create on the supplied subdomain");
+      "new_boundary", "The list of boundary names to create on the supplied subdomain");
   params.addRequiredParam<std::vector<SubdomainName>>("block",
                                                       "The blocks around which to create sidesets");
   params.addParam<Point>("normal",
                          "If supplied, only faces with normal equal to this, up to "
                          "normal_tol, will be added to the sidesets specified");
-  params.addParam<bool>("external_only", false, "Only apply the sideset to external boundaries");
   params.addRangeCheckedParam<Real>("normal_tol",
                                     0.1,
                                     "normal_tol>=0 & normal_tol<=2",
@@ -51,10 +49,8 @@ SideSetsAroundSubdomainGenerator::validParams()
 SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
     const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
     _using_normal(isParamValid("normal")),
-    _external_only(getParam<bool>("external_only")),
     _normal_tol(getParam<Real>("normal_tol")),
     _normal(_using_normal ? getParam<Point>("normal") : Point())
 {
@@ -109,7 +105,7 @@ SideSetsAroundSubdomainGenerator::generate()
     if (block_ids.count(curr_subdomain) == 0)
       continue;
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : make_range(elem->n_sides()))
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
 
@@ -121,8 +117,9 @@ SideSetsAroundSubdomainGenerator::generate()
         queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
       }
       else if (neighbor == nullptr || // element on boundary OR
-               (!_external_only && block_ids.count(neighbor->subdomain_id()) ==
-                                       0)) // neighboring element is on a different subdomain
+               (!_include_only_external_sides &&
+                block_ids.count(neighbor->subdomain_id()) ==
+                    0)) // neighboring element is on a different subdomain
       {
         if (_using_normal)
         {

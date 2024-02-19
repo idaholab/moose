@@ -24,6 +24,7 @@ InputParameters
 SideSetsGeneratorBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<Real>(
       "variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
   params.addParam<bool>("fixed_normal",
@@ -36,14 +37,34 @@ SideSetsGeneratorBase::validParams()
                         "If true, replace the old sidesets. If false, the current sidesets (if "
                         "any) will be preserved.");
 
+  params.addParam<bool>(
+      "include_only_external_sides",
+      false,
+      "Whether to only include external sides when considering sides to add to the sideset");
+
+  params.addParam<bool>(
+      "skip_if_part_of_existing_sideset",
+      false,
+      "Whether to only include sides that are not already part of an existing sideset.");
+
+  params.addParam<bool>(
+      "include_only_if_part_of_existing_sideset",
+      false,
+      "Whether to only include sides that are already part of an existing sideset.");
+
   return params;
 }
 
 SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
   : MeshGenerator(parameters),
+    _input(getMesh("input")),
     _variance(getParam<Real>("variance")),
     _fixed_normal(getParam<bool>("fixed_normal")),
-    _replace(getParam<bool>("replace"))
+    _replace(getParam<bool>("replace")),
+    _include_only_external_sides(getParam<bool>("include_only_external_sides")),
+    _skip_if_part_of_existing_sideset(getParam<bool>("skip_if_part_of_existing_sideset")),
+    _include_only_if_part_of_existing_sideset(
+        getParam<bool>("include_only_if_part_of_existing_sideset"))
 {
 }
 
@@ -67,15 +88,12 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
   _fe_face->attach_quadrature_rule(_qface.get());
 
   // We will want to Change the below code when we have more fine-grained control over advertising
-  // what we need need and how we satisfy those needs. For now we know we need to have neighbors per
+  // what we need and how we satisfy those needs. For now we know we need to have neighbors per
   // #15823...and we do have an explicit `find_neighbors` call...but we don't have a
   // `neighbors_found` API and it seems off to do:
   //
   // if (!mesh.is_prepared())
   //   mesh.find_neighbors()
-
-  if (!mesh.is_prepared())
-    mesh.prepare_for_use();
 }
 
 void
@@ -95,7 +113,7 @@ SideSetsGeneratorBase::flood(const Elem * elem,
     return;
 
   _visited[side_id].insert(elem);
-  for (unsigned int side = 0; side < elem->n_sides(); ++side)
+  for (const auto side : make_range(elem->n_sides()))
   {
     if (elem->neighbor_ptr(side))
       continue;
@@ -110,7 +128,7 @@ SideSetsGeneratorBase::flood(const Elem * elem,
         mesh.get_boundary_info().remove_side(elem, side);
 
       mesh.get_boundary_info().add_side(elem, side, side_id);
-      for (unsigned int neighbor = 0; neighbor < elem->n_sides(); ++neighbor)
+      for (const auto neighbor : make_range(elem->n_sides()))
       {
         // Flood to the neighboring elements using the current matching side normal from this
         // element.

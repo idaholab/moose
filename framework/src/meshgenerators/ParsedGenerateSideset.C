@@ -27,7 +27,6 @@ ParsedGenerateSideset::validParams()
   InputParameters params = SideSetsGeneratorBase::validParams();
   params += FunctionParserUtils<false>::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<BoundaryName>("new_sideset_name", "The name of the new sideset");
@@ -50,10 +49,6 @@ ParsedGenerateSideset::validParams()
       "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
       "neighbor is in this set",
       "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
-  params.addParam<bool>(
-      "include_only_external_sides",
-      false,
-      "Whether to only include external sides when considering sides to add to the sideset");
   params.addParam<Point>(
       "normal",
       Point(),
@@ -75,7 +70,6 @@ ParsedGenerateSideset::validParams()
 ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
     FunctionParserUtils<false>(parameters),
-    _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
     _check_boundaries(isParamValid("included_boundaries")),
@@ -90,7 +84,6 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     _included_neighbor_ids(isParamValid("included_neighbor_ids")
                                ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
                                : std::vector<SubdomainID>()),
-    _include_only_external_sides(getParam<bool>("include_only_external_sides")),
     _normal(getParam<Point>("normal"))
 {
   // Handle deprecated parameters

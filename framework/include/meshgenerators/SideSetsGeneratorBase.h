@@ -54,11 +54,26 @@ protected:
 
   boundary_id_type getNextBoundaryID() const;
 
+  /// the mesh to add the sidesets to
+  std::unique_ptr<MeshBase> & _input;
+
   Real _variance;
-  bool _fixed_normal;
+  const bool _fixed_normal;
 
   /// Whether or not to remove the old sidesets (if any) when adding sidesets
-  bool _replace;
+  const bool _replace;
+
+  /// Whether to only include external side when considering sides to add to the sideset
+  const bool _include_only_external_sides;
+
+  /// Whether to skip side if it is already part of existing sideset
+  const bool _skip_if_part_of_existing_sideset;
+
+  /// Whether to only include if side is already part of existing sideset
+  const bool _include_only_if_part_of_existing_sideset;
+
+  ///// Whether to only include if side is touching a subdomain
+  // const bool _include_only_if_touching_subdomain;
 
   std::unique_ptr<FEBase> _fe_face;
   std::unique_ptr<QGauss> _qface;
