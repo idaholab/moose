@@ -13,7 +13,7 @@ where $f$ is the source term (negative if a sink) and the second term on the
 left hand side represents the strong forms of other kernels.
 
 The Jacobian term for this kernel is zero: $\frac{\partial R_i(u_h)}{\partial u_j} = 0$, since
-it is assumed that $f$ **is not** a function of the unknown $u$.
+it is assumed that $f$ +is not+ a function of the unknown $u$.
 
 The force is constructed through a user supplied constant $c$,
 [function](/Functions/index.md) value evaluated at the current time and

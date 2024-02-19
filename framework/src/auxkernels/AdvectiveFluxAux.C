@@ -30,7 +30,7 @@ AdvectiveFluxAux::validParams()
       "useful for finite element simulations");
 
   params.addClassDescription("Compute components of flux vector for advection problems "
-                             "$(\\vec{J} = \\vec{v} u \\cdot \\vec{n})$.");
+                             "$(\\vec{J} \\cdot \\vec{n} = \\vec{v} u \\cdot \\vec{n})$.");
 
   return params;
 }

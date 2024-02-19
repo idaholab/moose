@@ -105,7 +105,7 @@ time (the time we are solving "from"):
 
 !listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=timeOld
 
-However, `DirichletBC` derived boundary conditions need to use the **final** time,
+However, `DirichletBC` derived boundary conditions need to use the +final+ time,
 since the strong constraints they represent use the final time and are not affected
 by the time integrator. To achieve this, time is reset to the `_current_time` after
 the weak form residual evaluation and before `NodalBC` boundary condition application,

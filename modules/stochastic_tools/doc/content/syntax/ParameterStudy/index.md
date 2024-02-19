@@ -127,7 +127,7 @@ All the objects built with [ParameterStudyAction.md] can be shown on console usi
 | [Control](Controls/index.md) | [MultiAppSamplerControl.md] | `study_multiapp_control`$^b$ |
 | [Transfer](Transfers/index.md) | [SamplerParameterTransfer.md] | `study_parameter_transfer`$^c$ |
 | [Transfer](Transfers/index.md) | [SamplerReporterTransfer.md] | `study_qoi_transfer`$^d$ |
-| [Reporter](Reporters/index.md) | [StochasticMatrix.md] | `study_results`|
+| [Reporter](Reporters/index.md) | [StochasticMatrix.md] | `study_results` |
 | [Reporter](Reporters/index.md) | [StatisticsReporter.md] | `study_statistics`$^{d,e}$ |
 | [Output](syntax/Outputs/index.md) | [CSV.md] | `csv`$^f$ |
 | [Output](syntax/Outputs/index.md) | [JSONOutput.md] | `json`$^g$ |

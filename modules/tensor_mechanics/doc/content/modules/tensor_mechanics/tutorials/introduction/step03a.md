@@ -88,7 +88,7 @@ thermal expansion). Yet we still remove all rigid body modes
 
 Pinning nodes to remove rigid body modes is an important tool to create
 mechanics simulations that converge. The presence of rigid body modes will lead
-to **non-convergence**. BCs on single nodes rather than whole boundaries can help
+to +non-convergence+. BCs on single nodes rather than whole boundaries can help
 avoid overconstraining your problems. Keep in mind that to remove all 6 rigid
 body modes in a 3D simulation you need to apply BCs on at least 3 nodes (which
 cannot be co-linear). One node will have to be constrained in 3 direction, one

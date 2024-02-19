@@ -8,7 +8,7 @@
 (\vec{u}^\ast, -\vec{f}),
 \end{equation}
 where $\vec{u}^\ast$ is the test functions of all the components of the array variable $\vec{u}$, and $\vec{f}$ is the body force functions whose size must agree with the number of components of the array variable.
-The Jacobian term for this kernel is zero since it is assumed that $\vec{f}$ **is not** a function of the unknown $\vec{u}$.
+The Jacobian term for this kernel is zero since it is assumed that $\vec{f}$ +is not+ a function of the unknown $\vec{u}$.
 
 ## Example Input Syntax
 

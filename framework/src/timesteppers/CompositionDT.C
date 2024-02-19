@@ -38,8 +38,8 @@ CompositionDT::validParams()
   InputParameters params = TimeStepper::validParams();
   params += CompositionDT::compositionDTParams();
 
-  params.addClassDescription("The time stepper take all the other time steppers as input and "
-                             "return the minimum time step size.");
+  params.addClassDescription("The time stepper takes all the other time steppers as input and "
+                             "returns the minimum time step size.");
 
   return params;
 }

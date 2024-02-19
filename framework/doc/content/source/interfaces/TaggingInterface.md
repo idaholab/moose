@@ -11,7 +11,7 @@ This behavior can be modified by setting parameters in the object's blocks in th
 
 | Tag           | Description |
 |-              |            -|
-|vector_tags    | The tag for the vectors this object should fill |
-|extra_vector_tags | Add more vectors to fill beyond what is in `vector_tags` - useful for adding without overriding the defaults|
-|matrix_tags    | The tag for the matrices this object should fill |
-|extra_matrix_tags | Add more matrices to fill beyond what is in `matrix_tags` - useful for adding without overriding the defaults |
+| vector_tags    | The tag for the vectors this object should fill |
+| extra_vector_tags | Add more vectors to fill beyond what is in `vector_tags` - useful for adding without overriding the defaults |
+| matrix_tags    | The tag for the matrices this object should fill |
+| extra_matrix_tags | Add more matrices to fill beyond what is in `matrix_tags` - useful for adding without overriding the defaults |

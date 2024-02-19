@@ -81,7 +81,7 @@ params.addRelationshipManager("ElementSideNeighborLayers",
 because there is a (default) 1 layer of side ghosting for all ghosting types
 (1 layer coupling ghosting <= 1 layer algebraic ghosting <= 1 layer geometric
 ghosting).
-The following RM set-up would be **invalid**:
+The following RM set-up would be +invalid+:
 
 ```c++
 params.addRelationshipManager(

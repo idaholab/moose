@@ -7,7 +7,7 @@
 This class samples Real material properties for the integration points
 in all elements that are intersected by a user-defined line.
 
-The output to CSV is **by default** ordered as follows:
+The output to CSV is +by default+ ordered as follows:
 
 - rows are ordered by point sampled along the line
 
