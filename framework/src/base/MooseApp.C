@@ -410,6 +410,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _factory(*this),
     _error_overridden(false),
     _ready_to_exit(false),
+    _exit_code(0),
     _initial_from_file(false),
     _distributed_mesh_on_command_line(false),
     _recover(false),
@@ -1367,6 +1368,8 @@ MooseApp::setupOptions()
         Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"
                    << reason << "\nCAPABILITIES_MISMATCH_END" << std::endl;
         _ready_to_exit = true;
+        // we use code 77 as "skip" in the Testharness
+        _exit_code = 77;
         return;
       }
     }

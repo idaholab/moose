@@ -447,7 +447,9 @@ class Tester(MooseObject):
         """
 
         exit_code = self.spawnSubprocessFromOptions(timer, options)
-        if exit_code: # Something went wrong
+        if exit_code == 77:
+            self.setStatus(self.skip, 'Requirements unmet')
+        elif exit_code: # Something went wrong
             return
 
         self.finishAndCleanupSubprocess(timer)
