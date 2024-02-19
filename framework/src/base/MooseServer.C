@@ -523,8 +523,20 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     // wrap default value with single quotes if it exists and type is array
     std::string array_quote = is_array && !default_value.empty() ? "'" : "";
 
+    // choose format of insertion text based on if client supports snippets
+    int text_format;
+    std::string insert_text;
+    if (client_snippet_support && !default_value.empty())
+    {
+      text_format = wasp::lsp::m_text_format_snippet;
+      insert_text = param_name + " = " + array_quote + "${1:" + default_value + "}" + array_quote;
+    }
+    else
+    {
+      text_format = wasp::lsp::m_text_format_plaintext;
+      insert_text = param_name + " = " + array_quote + default_value + array_quote;
+    }
     // finally build full insertion from parameter name, quote, and default
-    std::string embed_text = param_name + " = " + array_quote + default_value + array_quote;
 
     // add parameter label, insert text, and description to completion list
     completionItems.push_back(wasp::DataObject());
@@ -536,12 +548,13 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
                                              replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             embed_text,
+                                             insert_text,
                                              complete_kind,
                                              "",
                                              doc_string,
                                              false,
-                                             false);
+                                             false,
+                                             text_format);
   }
 
   return pass;
@@ -598,21 +611,27 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
         continue;
 
       std::string doc_string;
-      std::string embed_text;
+      std::string insert_text;
       int complete_kind;
+
+      // choose format for insert text based on if client supports snippets
+      int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
+                                               : wasp::lsp::m_text_format_plaintext;
 
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
         doc_string = "custom user named block";
-        embed_text = (request_on_block_decl ? "" : "[") +
-                     (filtering_prefix.size() ? filtering_prefix : "block_name") + "]\n  \n[]";
+        insert_text = (request_on_block_decl ? "" : "[") +
+                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]\n  " +
+                      (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
         doc_string = "application named block";
-        embed_text = (request_on_block_decl ? "" : "[") + subblock_name + "]\n  \n[]";
+        insert_text = (request_on_block_decl ? "" : "[") + subblock_name + "]\n  " +
+                      (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
@@ -626,12 +645,13 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                                replace_char_beg,
                                                replace_line_end,
                                                replace_char_end,
-                                               embed_text,
+                                               insert_text,
                                                complete_kind,
                                                "",
                                                doc_string,
                                                false,
-                                               false);
+                                               false,
+                                               text_format);
     }
   }
 
@@ -765,6 +785,20 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
     const std::string & option = option_and_desc.first;
     const std::string & dscrpt = option_and_desc.second;
 
+    // choose format of insertion text based on if client supports snippets
+    int text_format;
+    std::string insert_text;
+    if (client_snippet_support)
+    {
+      text_format = wasp::lsp::m_text_format_snippet;
+      insert_text = "${1:" + option + "}";
+    }
+    else
+    {
+      text_format = wasp::lsp::m_text_format_plaintext;
+      insert_text = option;
+    }
+
     // add option name, insertion range, and description to completion list
     completionItems.push_back(wasp::DataObject());
     wasp::DataObject * item = completionItems.back().to_object();
@@ -775,12 +809,13 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                                              replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             option,
+                                             insert_text,
                                              complete_kind,
                                              "",
                                              dscrpt,
                                              false,
-                                             false);
+                                             false,
+                                             text_format);
   }
 
   return pass;
