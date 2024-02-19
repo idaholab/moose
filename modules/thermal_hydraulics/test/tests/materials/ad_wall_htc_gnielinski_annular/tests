@@ -1,0 +1,33 @@
+[Tests]
+  design = 'ADWallHTCGnielinskiAnnularMaterial.md'
+  issues = '#26389'
+  [test]
+    requirement = "The system shall compute the heat transfer coefficient using the Gnielinski correlation for annular turbulent flows:"
+
+    [gas_inner]
+      type = 'CSVDiff'
+      input = 'ad_wall_htc_gnielinski_annular.i'
+      cli_args = 'Outputs/file_base=gas_inner'
+      csvdiff = 'gas_inner.csv'
+      detail = "when the fluid is a gas and heat transfer is at the inner side of the annulus"
+    []
+    [gas_outer]
+      type = 'CSVDiff'
+      input = 'ad_wall_htc_gnielinski_annular.i'
+      cli_args = '
+        Materials/test_material/at_inner_wall=false
+        Outputs/file_base=gas_outer'
+      csvdiff = 'gas_outer.csv'
+      detail = "when the fluid is a gas and heat transfer is at the outer side of the annulus"
+    []
+    [liquid_inner]
+      type = 'CSVDiff'
+      input = 'ad_wall_htc_gnielinski_annular.i'
+      cli_args = '
+        Materials/test_material/fluid_is_gas=false
+        Outputs/file_base=liquid_inner'
+      csvdiff = 'liquid_inner.csv'
+      detail = "when the fluid is a liquid and heat transfer is at the inner side of the annulus"
+    []
+  []
+[]

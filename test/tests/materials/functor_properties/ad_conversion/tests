@@ -9,7 +9,7 @@
   []
   [errors]
     design = 'FunctorADConverter.md'
-    requirement = 'The system shall error with a clear parameter error if'
+    requirement = 'The system shall report an error with a clear parameter error if'
     [reg_in_ad_out]
       type = RunException
       input = 1d_dirichlet.i

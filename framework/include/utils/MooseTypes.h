@@ -44,6 +44,8 @@
 #include <type_traits>
 #include <functional>
 
+#include "nlohmann/json_fwd.h"
+
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
 #define MooseSharedNamespace std
@@ -301,43 +303,52 @@ typedef typename OutputTools<Real>::VariableValue VariableValue;
 typedef typename OutputTools<Real>::VariableGradient VariableGradient;
 typedef typename OutputTools<Real>::VariableSecond VariableSecond;
 typedef typename OutputTools<Real>::VariableCurl VariableCurl;
+typedef typename OutputTools<Real>::VariableDivergence VariableDivergence;
 typedef typename OutputTools<Real>::VariablePhiValue VariablePhiValue;
 typedef typename OutputTools<Real>::VariablePhiGradient VariablePhiGradient;
 typedef typename OutputTools<Real>::VariablePhiSecond VariablePhiSecond;
 typedef typename OutputTools<Real>::VariablePhiCurl VariablePhiCurl;
+typedef typename OutputTools<Real>::VariablePhiDivergence VariablePhiDivergence;
 typedef typename OutputTools<Real>::VariableTestValue VariableTestValue;
 typedef typename OutputTools<Real>::VariableTestGradient VariableTestGradient;
 typedef typename OutputTools<Real>::VariableTestSecond VariableTestSecond;
 typedef typename OutputTools<Real>::VariableTestCurl VariableTestCurl;
+typedef typename OutputTools<Real>::VariableTestDivergence VariableTestDivergence;
 
 // types for vector variable
 typedef typename OutputTools<RealVectorValue>::VariableValue VectorVariableValue;
 typedef typename OutputTools<RealVectorValue>::VariableGradient VectorVariableGradient;
 typedef typename OutputTools<RealVectorValue>::VariableSecond VectorVariableSecond;
 typedef typename OutputTools<RealVectorValue>::VariableCurl VectorVariableCurl;
+typedef typename OutputTools<RealVectorValue>::VariableDivergence VectorVariableDivergence;
 typedef typename OutputTools<RealVectorValue>::VariablePhiValue VectorVariablePhiValue;
 typedef typename OutputTools<RealVectorValue>::VariablePhiGradient VectorVariablePhiGradient;
 typedef typename OutputTools<RealVectorValue>::VariablePhiSecond VectorVariablePhiSecond;
 typedef typename OutputTools<RealVectorValue>::VariablePhiCurl VectorVariablePhiCurl;
+typedef typename OutputTools<RealVectorValue>::VariablePhiDivergence VectorVariablePhiDivergence;
 typedef typename OutputTools<RealVectorValue>::VariableTestValue VectorVariableTestValue;
 typedef typename OutputTools<RealVectorValue>::VariableTestGradient VectorVariableTestGradient;
 typedef typename OutputTools<RealVectorValue>::VariableTestSecond VectorVariableTestSecond;
 typedef typename OutputTools<RealVectorValue>::VariableTestCurl VectorVariableTestCurl;
+typedef typename OutputTools<RealVectorValue>::VariableTestDivergence VectorVariableTestDivergence;
 
 // types for array variable
 typedef typename OutputTools<RealEigenVector>::VariableValue ArrayVariableValue;
 typedef typename OutputTools<RealEigenVector>::VariableGradient ArrayVariableGradient;
 typedef typename OutputTools<RealEigenVector>::VariableSecond ArrayVariableSecond;
 typedef typename OutputTools<RealEigenVector>::VariableCurl ArrayVariableCurl;
+typedef typename OutputTools<RealEigenVector>::VariableDivergence ArrayVariableDivergence;
 typedef typename OutputTools<RealEigenVector>::VariablePhiValue ArrayVariablePhiValue;
 typedef typename OutputTools<RealEigenVector>::VariablePhiGradient ArrayVariablePhiGradient;
 typedef std::vector<std::vector<Eigen::Map<RealDIMValue>>> MappedArrayVariablePhiGradient;
 typedef typename OutputTools<RealEigenVector>::VariablePhiSecond ArrayVariablePhiSecond;
 typedef typename OutputTools<RealEigenVector>::VariablePhiCurl ArrayVariablePhiCurl;
+typedef typename OutputTools<RealEigenVector>::VariablePhiDivergence ArrayVariablePhiDivergence;
 typedef typename OutputTools<RealEigenVector>::VariableTestValue ArrayVariableTestValue;
 typedef typename OutputTools<RealEigenVector>::VariableTestGradient ArrayVariableTestGradient;
 typedef typename OutputTools<RealEigenVector>::VariableTestSecond ArrayVariableTestSecond;
 typedef typename OutputTools<RealEigenVector>::VariableTestCurl ArrayVariableTestCurl;
+typedef typename OutputTools<RealEigenVector>::VariableTestDivergence ArrayVariableTestDivergence;
 
 /**
  * AD typedefs
@@ -550,6 +561,8 @@ template <bool is_ad>
 using GenericChainedReal = typename Moose::GenericType<ChainedReal, is_ad>;
 template <bool is_ad>
 using GenericRealVectorValue = typename Moose::GenericType<RealVectorValue, is_ad>;
+template <bool is_ad>
+using GenericRealTensorValue = typename Moose::GenericType<RealTensorValue, is_ad>;
 template <bool is_ad>
 using GenericRankTwoTensor = typename Moose::GenericType<RankTwoTensor, is_ad>;
 template <bool is_ad>
@@ -915,6 +928,9 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * This Macro is used to generate std::string derived types useful for
  * strong type checking and special handling in the GUI.  It does not
  * extend std::string in any way so it is generally "safe"
+ *
+ * Be sure to use the DerivativeStringToJSON macro for new types in
+ * MooseTypes.C to also define to_json for each
  */
 #define DerivativeStringClass(TheName)                                                             \
   class TheName : public std::string                                                               \
@@ -926,7 +942,16 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
     TheName(const char * s, size_t n) : std::string(s, n) {}                                       \
     TheName(const char * s) : std::string(s) {}                                                    \
     TheName(size_t n, char c) : std::string(n, c) {}                                               \
-  } /* No semicolon here because this is a macro */
+  };                                                                                               \
+  namespace nlohmann                                                                               \
+  {                                                                                                \
+  template <>                                                                                      \
+  struct adl_serializer<TheName>                                                                   \
+  {                                                                                                \
+    static void to_json(json & j, const TheName & v);                                              \
+  };                                                                                               \
+  }                                                                                                \
+  static_assert(true, "")
 
 // Instantiate new Types
 
@@ -965,6 +990,9 @@ DerivativeStringClass(PostprocessorName);
 
 /// This type is used for objects that expect VectorPostprocessor objects
 DerivativeStringClass(VectorPostprocessorName);
+
+/// This type is used for objects that expect MeshDivision objects
+DerivativeStringClass(MeshDivisionName);
 
 /// This type is used for objects that expect Moose Function objects
 DerivativeStringClass(FunctionName);
@@ -1011,6 +1039,9 @@ DerivativeStringClass(ExtraElementIDName);
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
 DerivativeStringClass(ReporterValueName);
 
+/// Name of a Physics object
+DerivativeStringClass(PhysicsName);
+
 /// Name of a Positions object
 DerivativeStringClass(PositionsName);
 
@@ -1029,6 +1060,10 @@ DerivativeStringClass(NonlinearSystemName);
 /// Command line argument, specialized to handle quotes in vector arguments
 DerivativeStringClass(CLIArgString);
 
+/**
+ * additional MOOSE typedefs
+ */
+typedef std::vector<VariableName> CoupledName;
 namespace Moose
 {
 extern const TagName SOLUTION_TAG;

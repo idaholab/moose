@@ -356,6 +356,9 @@ setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
   // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
   Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
   Moose::PetscSupport::setSinglePetscOption("-eps_max_it", stringify(free_power_iterations));
+  // We always want the number of free power iterations respected so we don't want to stop early if
+  // we've satisfied a convergence criterion. Consequently we make this tolerance very tight
+  Moose::PetscSupport::setSinglePetscOption("-eps_tol", "1e-50");
 }
 
 void
@@ -367,6 +370,7 @@ clearFreeNonlinearPowerIterations(const InputParameters & params)
                                             stringify(params.get<unsigned int>("nl_max_its")));
   Moose::PetscSupport::setSinglePetscOption("-snes_rtol",
                                             stringify(params.get<Real>("nl_rel_tol")));
+  Moose::PetscSupport::setSinglePetscOption("-eps_tol", stringify(params.get<Real>("eigen_tol")));
 }
 
 void
@@ -497,6 +501,9 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
   // can be overriden
   setSlepcEigenSolverTolerances(eigen_problem, params);
   setEigenSolverOptions(eigen_problem.solverParams(), params);
+  // when Bx norm postprocessor is provided, we switch off the sign normalization
+  if (eigen_problem.bxNormProvided())
+    Moose::PetscSupport::setSinglePetscOption("-eps_power_sign_normalization", "0");
   setEigenProblemOptions(eigen_problem.solverParams());
   setWhichEigenPairsOptions(eigen_problem.solverParams());
   Moose::PetscSupport::addPetscOptionsFromCommandline();
@@ -962,28 +969,60 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   PetscFunctionReturn(0);
 }
 
+PetscErrorCode
+mooseSlepcEigenFormNorm(SNES /*snes*/, Vec /*Bx*/, PetscReal * norm, void * ctx)
+{
+  PetscFunctionBegin;
+  auto * const eigen_problem = static_cast<EigenProblem *>(ctx);
+  *norm = eigen_problem->formNorm();
+  PetscFunctionReturn(0);
+}
+
 void
 attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
 {
+  // Recall that we are solving the potentially nonlinear problem:
+  // F(x) = A(x) - \lambda B(x) = 0
+  //
+  // To solve this, we can use Newton's method: J \Delta x = -F
+  // Generally we will approximate J using matrix free methods. However, in order to solve the
+  // linearized system efficiently, we typically will need preconditioning. Typically we will build
+  // the preconditioner only from A, but we also have the option to include information from B
+
+  // Attach the Jacobian computation function. If \p mat is the "eigen" matrix corresponding to B,
+  // then attach our JacobianB computation routine, else the matrix corresponds to A, and we attach
+  // the JacobianA computation routine
   PetscObjectComposeFunction((PetscObject)mat,
                              "formJacobian",
                              eigen ? Moose::SlepcSupport::mooseSlepcEigenFormJacobianB
                                    : Moose::SlepcSupport::mooseSlepcEigenFormJacobianA);
+
+  // Attach the residual computation function. If \p mat is the "eigen" matrix corresponding to B,
+  // then attach our FunctionB computation routine, else the matrix corresponds to A, and we attach
+  // the FunctionA computation routine
   PetscObjectComposeFunction((PetscObject)mat,
                              "formFunction",
                              eigen ? Moose::SlepcSupport::mooseSlepcEigenFormFunctionB
                                    : Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
 
+  // It's also beneficial to be able to evaluate both A and B residuals at once
   PetscObjectComposeFunction(
       (PetscObject)mat, "formFunctionAB", Moose::SlepcSupport::mooseSlepcEigenFormFunctionAB);
 
+  // Users may choose to provide a custom measure of the norm of B (Bx for a linear system)
+  if (eigen_problem.bxNormProvided())
+    PetscObjectComposeFunction(
+        (PetscObject)mat, "formNorm", Moose::SlepcSupport::mooseSlepcEigenFormNorm);
+
+  // Finally we need to attach the "context" object, which is our EigenProblem, to the matrices so
+  // that eventually when we get callbacks from SLEPc we can call methods on the EigenProblem
   PetscContainer container;
   PetscContainerCreate(eigen_problem.comm().get(), &container);
   PetscContainerSetPointer(container, &eigen_problem);
-  PetscObjectCompose((PetscObject)mat, "formJacobianCtx", nullptr);
   PetscObjectCompose((PetscObject)mat, "formJacobianCtx", (PetscObject)container);
-  PetscObjectCompose((PetscObject)mat, "formFunctionCtx", nullptr);
   PetscObjectCompose((PetscObject)mat, "formFunctionCtx", (PetscObject)container);
+  if (eigen_problem.bxNormProvided())
+    PetscObjectCompose((PetscObject)mat, "formNormCtx", (PetscObject)container);
   PetscContainerDestroy(&container);
 }
 
@@ -1086,7 +1125,8 @@ PCCreate_MoosePC(PC pc)
   PetscFunctionReturn(0);
 }
 
-PetscErrorCode PCDestroy_MoosePC(PC /*pc*/)
+PetscErrorCode
+PCDestroy_MoosePC(PC /*pc*/)
 {
   PetscFunctionBegin;
   /* We do not need to do anything right now, but later we may have some data we need to free here

@@ -24,25 +24,28 @@ please refer to the below pages:
 Here we give a brief tabular summary of the Navier-Stokes implementations:
 
 !table id=navier_stokes_summary caption=Summary of Navier-Stokes implementations
-| prefix     | Jacobian   | compressibility      | turbulence support | friction support  | method | advection strategy                |
-| ------     | --------   | -------------------- | ------------------ | ----------------  | ------ | ------------------                |
-| INS        | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
-| INSAD      | AD         | incompressible       | Smagorinsky        | Not porous        | CGFE   | SUPG                              |
-| INSFE      | Hand-coded | incompressible       | mixing length      | Not porous        | CGFE   | SUPG                              |
-| PINSFE     | Hand-coded | incompressible       | mixing length      | porous            | CGFE   | SUPG                              |
-| NS         | Hand-coded | compressible         | None               | Not porous        | CGFE   | SUPG                              |
-| INSChorin  | Hand-coded | incompressible       | None               | Not porous        | CGFE   | Chorin predictor-corrector        |
-| INSFV      | AD         | incompressible       | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
-| WCNSFV     | AD         | weakly compressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
-| PINSFV     | AD         | incompressible       | mixing length      | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
-| CNSFVHLLC  | AD         | compressible         | None               | Not porous        | FV     | HLLC, piecewise constant data     |
-| PCNSFVHLLC | AD         | compressible         | None               | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
-| PCNSFVKT   | AD         | compressible         | None               | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
+| prefix     | Jacobian   | compressibility               | turbulence support          | friction support  | method | advection strategy                |
+| ------     | --------   | ----------------------------- | --------------------------- | ----------------  | ------ | --------------------------------- |
+| INS        | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | SUPG                              |
+| INSAD      | AD         | incompressible                | Smagorinsky                 | Not porous        | CGFE   | SUPG                              |
+| INSFE      | Hand-coded | incompressible                | mixing length               | Not porous        | CGFE   | SUPG                              |
+| PINSFE     | Hand-coded | incompressible                | mixing length               | porous            | CGFE   | SUPG                              |
+| NS         | Hand-coded | compressible                  | None                        | Not porous        | CGFE   | SUPG                              |
+| INSChorin  | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | Chorin predictor-corrector        |
+| INSFV      | AD         | incompressible                | mixing length; $k-\epsilon$ | Not porous        | FV     | RC, CD velocity; limited advected |
+| WCNSFV     | AD         | weakly compressible           | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
+| WCNSFV2P   | AD         | weakly compressible; 2-phase  | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
+| PINSFV     | AD         | incompressible                | mixing length               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
+| CNSFVHLLC  | AD         | compressible                  | None                        | Not porous        | FV     | HLLC, piecewise constant data     |
+| PCNSFVHLLC | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
+| PCNSFVKT   | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
 
 Table definitions:
 
 - INS: incompressible Navier-Stokes
 - AD: automatic differentiation
+- WCNS: weakly-compressible Navier-Stokes
+- WCNS2P: weakly-compressible Navier-Stokes 2-phase
 - CNS: compressible Navier-Stokes
 - PINS or PCNS: porous incompressible Navier-Stokes or porous compressible Navier-Stokes
 - SUPG: Streamline-Upwind Petrov-Galerkin

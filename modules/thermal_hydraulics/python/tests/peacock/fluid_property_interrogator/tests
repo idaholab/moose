@@ -1,9 +1,13 @@
 [Tests]
-  [./fluid_property_interrogator]
+  # See relap-7#331
+  issues = '#26336'
+  design = 'FluidPropertiesInterrogator.md'
+  [fluid_property_interrogator]
     type = PythonUnitTest
     input = test_FluidPropertyInterrogator.py
     separate = True
     display_required = True
     required_python_packages = PyQt5
-  [../]
+    requirement = 'The system shall be able to plot the dependence of fluid properties on pressure and temperature.'
+  []
 []

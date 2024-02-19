@@ -40,7 +40,7 @@ NodalArea::~NodalArea() {}
 void
 NodalArea::threadJoin(const UserObject & fred)
 {
-  const NodalArea & na = dynamic_cast<const NodalArea &>(fred);
+  const auto & na = static_cast<const NodalArea &>(fred);
 
   std::map<const Node *, Real>::const_iterator it = na._node_areas.begin();
   const std::map<const Node *, Real>::const_iterator it_end = na._node_areas.end();

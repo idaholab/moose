@@ -40,5 +40,13 @@ AddICAction::act()
   // The variable name will be the second to last element in the path name
   std::string & var_name = elements[elements.size() - 2];
   _moose_object_pars.set<VariableName>("variable") = var_name;
-  _problem->addInitialCondition(_type, var_name, _moose_object_pars);
+  const auto & var = _problem->getVariable(0, var_name);
+
+  if (var.isFV())
+    mooseError(
+        "Finite volume variables do not support an [InitialCondition] subblock, please use a "
+        "separate [FVICs] block with all your finite volume initial conditions in your input "
+        "file.");
+  else
+    _problem->addInitialCondition(_type, var_name, _moose_object_pars);
 }

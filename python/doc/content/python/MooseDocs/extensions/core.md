@@ -47,7 +47,7 @@ Code blocks or snippets---as shown in [fenced-code-example]---are created by enc
 display in triple back-ticks (```), this is commonly referred to as fenced code blocks. Two
 requirements exist for creating the code blocks:
 
-1. the back-ticks must be proceeded by an empty line and
+1. the back-ticks must be preceded by an empty line and
 1. the back-ticks must start at the beginning of a line.
 
 Settings for code blocks are defined by key-value pairings that follow the back-ticks;
@@ -91,7 +91,7 @@ number of hashes indicate the heading level (see [heading-basic-example]). The f
 to define a heading:
 
 1. the hash(es) must be followed by a single space,
-1. the hash(es) must +not+ be proceeded by a space.
+1. the hash(es) must +not+ be preceded by a space.
 
 
 Settings, as listed in [heading-settings], are be applied after the heading title text and as shown in
@@ -126,7 +126,7 @@ Settings, as listed in [heading-settings], are be applied after the heading titl
 ### Unordered List id=unordered
 
 Unordered list items in MooseDown +must+ begin with a dash (`-`), as shown below in
-[unordered-basic-example]. As with any block item, a list must be proceeded and followed by an empty
+[unordered-basic-example]. As with any block item, a list must be preceded and followed by an empty
 line. However, lists have additional behavior that allow for nested content to be included.
 
 1. An empty line will not stop the list if the following line begins with another list marker
@@ -254,9 +254,9 @@ making the syntax suitable to simple parsing of multiline regions, and to suppor
 formats.
 
 For all formats the starting character must be immediately followed by a non-whitespace
-character. The starting character must alwo be proceeded by a whitespace, except in the case of the
-super and subscript which must be proceecded by a non-whitespace character. The ending character must
-be immediately proceeded by a non-whitespace character.  The following table lists the available
+character. The starting character must also be preceded by a whitespace, except in the case of the
+super and subscript which must be preceded by a non-whitespace character. The ending character must
+be immediately preceded by a non-whitespace character.  The following table lists the available
 formats with start and end characters.
 
 | Name | Character | MooseDown | Result (HTML) |
@@ -273,7 +273,7 @@ as shown in [format-example], complicated and compound formatting of text is pos
 
 !devel example id=format-example caption=Example inline text formatting in MooseDocs
 Yo, dawg I heard you like formatting, so I created =underline
-formatted text that contains text with ~stikethrough that
+formatted text that contains text with ~strikethrough that
 contains +bold formatting with *emphasis that has some^superscript
 text with a@subscript@^*+~=, I hope you like it.
 

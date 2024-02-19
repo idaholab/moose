@@ -7,7 +7,7 @@ This kernel provides the time derivative term in the heat equation for truss ele
 \begin{equation}
 \rho c_p A \frac{\partial T}{\partial t}
 \end{equation}
-where A is cross-sectional area of the truss element, $\rho$ is density of material, and $c_p$ is heat capacity fo the material.
+where A is cross-sectional area of the truss element, $\rho$ is density of material, and $c_p$ is heat capacity of the material.
 
 This kernel should only be used for 1D line elements, which can be used to model heat conduction through networks of trusses in 1D, 2D, or 3D space. It is important to note that this should not be used for 1D models in 1D space if the intent is to model heat conduction through an infinite medium (in 1D Cartesian coordinates) or through an axisymmetric volume. The standard HeatConductionTimeDerivative kernel should be used in those situations.
 

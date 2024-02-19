@@ -221,7 +221,7 @@ I_{\text{compressor}} = I_{\text{coeff}}[0] + I_{\text{coeff}}[1] \mid \alpha \m
 
 ## Output
 
-In addition to the junction variables, this component creates the following post-processors and auxillary scalar variables:
+In addition to the junction variables, this component creates the following post-processors and auxiliary scalar variables:
 
 | Post-processor/variable name | Description |Notation |Unit|
 | - | :- | - | -|

@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'modules/thermal_hydraulics/index.md'
   [1phase]
     type = 'Exodiff'
     input = '1phase.i'
@@ -7,5 +10,6 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     max_parallel = 1
+    requirement = 'The system shall be able to solve with 1D single phase compresible flow a Riemann problem with a double rarefaction solution.'
   []
 []

@@ -1,4 +1,6 @@
 [Tests]
+  design = 'HeatSourceFromTotalPower.md'
+  issues = '#19679'
   # physics
   [phy:power_component_shape_cylindrical]
     type = 'Exodiff'
@@ -7,7 +9,8 @@
     rel_err = 1e-4
     abs_zero = 1e-9
 
-    requirement = "The system shall provide the heat source shape for a cylindrical heat structure when power component and power shape function are supplied"
+    requirement = "The system shall provide the heat source shape for a cylindrical heat structure "
+                  "when power component and power shape function are supplied"
   []
   [phy:power_component_shape_plate]
     type = 'Exodiff'
@@ -16,37 +19,42 @@
     rel_err = 1e-4
     abs_zero = 1e-9
 
-    requirement = "The system shall provide the heat source shape for a plate heat structure when power component and power shape function are supplied"
+    requirement = "The system shall provide the heat source shape for a plate heat structure when "
+                  "power component and power shape function are supplied"
   []
 
   [phy:conservation_plate]
     type = CSVDiff
     input = 'phy.conservation.i'
-    cli_args = "
-      Components/heat_structure/type=HeatStructurePlate
-      Components/heat_structure/depth=2
-      Postprocessors/E_tot/type=ADHeatStructureEnergy
-      Postprocessors/E_tot/plate_depth=2
-      Outputs/file_base=phy.conservation_plate"
+    cli_args = "Components/heat_structure/type=HeatStructurePlate
+                Components/heat_structure/depth=2
+                Postprocessors/E_tot/type=ADHeatStructureEnergy
+                Postprocessors/E_tot/plate_depth=2
+                Outputs/file_base=phy.conservation_plate"
     csvdiff = 'phy.conservation_plate.csv'
     abs_zero = 4e-7
     # because output has execute_on = 'initial final'
     recover = false
+    requirement = "The system shall be able to impose a heat source from the component, computed "
+                  "from the component power and shape shape, onto a plate heat structure component "
+                  "and prove conservation of energy."
   []
   [phy:conservation_cylinder]
     type = CSVDiff
     input = 'phy.conservation.i'
-    cli_args = "
-      Components/heat_structure/type=HeatStructureCylindrical
-      Components/heat_structure/inner_radius=1.0
-      Postprocessors/E_tot/type=ADHeatStructureEnergyRZ
-      Postprocessors/E_tot/axis_point='0 1 0'
-      Postprocessors/E_tot/axis_dir='1 0 0'
-      Outputs/file_base=phy.conservation_cylinder"
+    cli_args = "Components/heat_structure/type=HeatStructureCylindrical
+                Components/heat_structure/inner_radius=1.0
+                Postprocessors/E_tot/type=ADHeatStructureEnergyRZ
+                Postprocessors/E_tot/axis_point='0 1 0'
+                Postprocessors/E_tot/axis_dir='1 0 0'
+                Outputs/file_base=phy.conservation_cylinder"
     csvdiff = 'phy.conservation_cylinder.csv'
     abs_zero = 1e-7
     # because output has execute_on = 'initial final'
     recover = false
+    requirement = "The system shall be able to impose a heat source from the component, computed "
+                  "from the component power and shape shape, onto a cylindrical heat structure "
+                  "component and prove conservation of energy."
   []
   [phy:conservation_from_file_3d]
     type = CSVDiff
@@ -55,25 +63,35 @@
     abs_zero = 1e-7
     # because output has execute_on = 'final'
     recover = false
+    requirement = "The system shall be able to apply a heat source, computed from the component "
+                  "power norm and shape, onto a component whose mesh is loaded from a mesh file."
   []
 
   # Error checking
   [err:no_hs]
     type = 'RunException'
     input = 'err.base.i'
-    cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' Components/hgen/power=reactor"
+    cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' "
+               "Components/hgen/power=reactor"
     expect_err = "hgen: The component 'reactor' is not of type 'HeatStructureInterface'"
+    requirement = "The system shall report an error if the heat structure to apply a heat source on, computed "
+                  "from the component power norm and shape, is not of the expected heat structure "
+                  "interface type."
   []
   [err:wrong_block_name]
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf' Components/hgen/power=reactor"
     expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
+    requirement = "The system shall report an error if the specified subdomain to apply a heat source on, "
+                  "computed from the component power norm and shape, does not exist."
   []
   [err:wrong_power_comp]
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=hs"
     expect_err = "hgen: The component 'hs' is not of type 'TotalPowerBase'"
+    requirement = "The system shall report an error if the heat structure to apply a heat source on, computed "
+                  "from the component power norm and shape, is not of the expected type."
   []
 []

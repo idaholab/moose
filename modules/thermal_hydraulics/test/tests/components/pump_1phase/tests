@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#26336'
+  design = 'Pump1Phase.md'
   # conservation
   [phy:pump_mass_energy_conservation]
     type = 'CSVDiff'
     input = 'pump_mass_energy_conservation.i'
     csvdiff = 'pump_mass_energy_conservation_out.csv'
     group = 'pump1phase'
+    requirement = 'The system shall be able to model a pump in 1D single phase flow and show conservation of mass and energy.'
   []
   [phy:pump_mass_energy_conservation_orientation]
     type = 'CSVDiff'
@@ -15,6 +18,7 @@
     # csvdiff made with Components/pipe1/orientation='1 0 0'
     csvdiff = 'pump_mass_energy_conservation_out_orientation.csv'
     group = 'pump1phase'
+    requirement = 'The system shall be able to model a pump in 1D single phase flow within a slanted pipe and show conservation of mass and energy.'
   []
 
   # physics
@@ -24,6 +28,7 @@
     csvdiff = 'pump_pressure_check_out.csv'
     abs_zero = 5e-7
     group = 'pump1phase'
+    requirement = 'The system shall be able to compute the expected pressure rise when modeling a pump in 1D single phase flow.'
   []
   [phy:pressure_check_orientation]
     type = 'CSVDiff'
@@ -34,12 +39,14 @@
     csvdiff = 'pump_pressure_check_out_orientation.csv'
     abs_zero = 5e-7
     group = 'pump1phase'
+    requirement = 'The system shall be able to compute the expected pressure rise when modeling a pump in 1D single phase flow with an orientation not aligned with one of the frame axis.'
   []
   [phy:pipe_friction_pump_head_balance_x_direction]
     type = 'Exodiff'
     input = 'pipe_friction_pump_head_balance.i'
     exodiff = 'pipe_friction_pump_head_balance_out_x.e'
     group = 'pump1phase'
+    requirement = 'The system shall be able to compute the expected pressure rise when modeling a pump in 1D single phase flow with the flow aligned with the X axis.'
   []
   [phy:pipe_friction_pump_head_balance_y_direction]
     type = 'Exodiff'
@@ -50,6 +57,7 @@
                 Outputs/file_base=pipe_friction_pump_head_balance_out_y"
     exodiff = 'pipe_friction_pump_head_balance_out_y.e'
     group = 'pump1phase'
+    requirement = 'The system shall be able to compute the expected pressure rise when modeling a pump in 1D single phase flow with the flow aligned with the Y axis.'
   []
 
   [phy:pump_loop]
@@ -59,6 +67,7 @@
     rel_err = 8e-5
     abs_zero = 1e-9
     group = 'pump1phase'
+    requirement = 'The system shall be able to model a pump in a 1D single phase flow loop.'
   []
 
   # controls
@@ -69,7 +78,8 @@
     group = 'pump1phase'
     requirement = 'The system shall allow for controlling the pump head'
     design = 'Pump1Phase.md'
-    issues = '#684'
+    # relap7 #684
+    issues = '#26336'
   []
 
   [jacobian]
@@ -79,8 +89,9 @@
     difference_tol = 20
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
-    requirement = 'The system shall allow for controlling the pump head'
+    requirement = 'The system shall allow for controlling the pump head and maintain a numerically correct Jacobian.'
     design = 'Pump1Phase.md'
-    issues = '#684'
+    # relap7 #684
+    issues = '#26336'
   []
 []

@@ -54,6 +54,7 @@ PressureDrop::PressureDrop(const InputParameters & parameters)
   _qp_integration = dynamic_cast<const MooseVariableFE<Real> *>(pressure_var);
   if (!_qp_integration)
     Moose::FV::setInterpolationMethod(*this, _weight_interp_method, "weighting_interp_method");
+
   else if (parameters.isParamSetByUser("weighting_interp_method"))
     paramError("weighting_interp_method", "Face interpolation only specified for finite volume");
 
@@ -103,7 +104,8 @@ PressureDrop::initialize()
   _weight_downstream = 0;
 
   // Build the face infos in all cases, needed to detect upstream/downstream status
-  _mesh.faceInfo(nullptr, 0);
+  if (_mesh.isFiniteVolumeInfoDirty())
+    _mesh.setupFiniteVolumeMeshData();
 }
 
 void
@@ -119,6 +121,7 @@ PressureDrop::execute()
   bool upstream = false;
   bool status_known = false;
   getFaceInfos();
+
   for (auto & fi : _face_infos)
   {
     for (const auto bdy : fi->boundaryIDs())
@@ -290,7 +293,7 @@ PressureDrop::computeQpWeightIntegral() const
 void
 PressureDrop::threadJoin(const UserObject & y)
 {
-  const PressureDrop & pps = static_cast<const PressureDrop &>(y);
+  const auto & pps = static_cast<const PressureDrop &>(y);
   _weighted_pressure_upstream += pps._weighted_pressure_upstream;
   _weighted_pressure_downstream += pps._weighted_pressure_downstream;
   _weight_upstream += pps._weight_upstream;

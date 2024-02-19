@@ -36,7 +36,6 @@ public:
   /// initialSetup gets the pointer to the solution UO
   virtual void initialSetup() override;
 
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

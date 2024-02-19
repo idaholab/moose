@@ -13,6 +13,7 @@
 #include "FaceCenteredMapFunctor.h"
 #include "AppFactory.h"
 #include "libmesh/quadrature_gauss.h"
+#include "MooseMain.h"
 
 using namespace libMesh;
 using namespace Moose;
@@ -37,7 +38,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   const char * argv[2] = {"foo", "\0"};
 
   // First we create a simple mesh
-  auto app = AppFactory::createAppShared("NavierStokesUnitApp", 1, (char **)argv);
+  auto app = Moose::createMooseApp("NavierStokesUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 
@@ -64,8 +65,9 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   mesh->prepare(nullptr);
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
   mesh->setCoordSystem({}, coord_type_enum);
+  mesh->buildFiniteVolumeInfo();
+  mesh->computeFiniteVolumeCoords();
   const auto & all_fi = mesh->allFaceInfo();
-  mesh->computeFaceInfoFaceCoords();
 
   // We create a face-centered functor
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> u(*mesh,

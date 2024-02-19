@@ -96,6 +96,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
   registerMooseObjectTask("read_executor",                Executor,               false);
   registerTask("add_executor", true);
+  registerTask("init_physics", false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -119,8 +120,9 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
-  registerMooseObjectTask("add_functor_material",         MaterialBase,           false);
+  registerMooseObjectTask("add_functor_material",         FunctorMaterial,        false);
   registerMooseObjectTask("add_material",                 MaterialBase,           false);
+  appendDeprecatedMooseObjectTask("add_material",         FunctorMaterial);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
 
   registerMooseObjectTask("add_function",                 Function,               false);
@@ -130,6 +132,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
   appendMooseObjectTask  ("add_aux_kernel",               ArrayAuxKernel);
+  registerMooseObjectTask("add_bound",                    Bounds,                 false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
@@ -146,6 +149,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_ic",                       InitialCondition,       false);
   appendMooseObjectTask  ("add_ic",                       ScalarInitialCondition);
 
+  registerMooseObjectTask("add_fv_ic",                    FVInitialCondition,     false);
+
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("add_time_steppers",            TimeStepper,            false);
@@ -156,6 +161,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
   registerMooseObjectTask("add_field_split",              Split,                  false);
 
+  registerMooseObjectTask("add_mesh_division",            MeshDivision,           false);
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
 
@@ -231,6 +237,8 @@ addActionTypes(Syntax & syntax)
   registerTask("add_mortar_interface", false);
   registerTask("coupling_functor_check", true);
   registerTask("add_master_action_material", false);
+  registerTask("setup_projected_properties", false);
+  registerTask("create_application_block", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -290,6 +298,7 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
+                           "(init_physics)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
@@ -312,7 +321,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
-                           "(add_ic)"
+                           "(add_ic, add_fv_ic)"
                            "(add_constraint, add_field_split)"
                            "(add_preconditioning)"
                            "(add_times)"
@@ -324,12 +333,14 @@ addActionTypes(Syntax & syntax)
                            "(setup_residual_debug)"
                            "(add_bounds_vectors)"
                            "(add_positions)"
+                           "(add_mesh_division)"  // NearestPositionsDivision uses a Positions
                            "(add_multi_app)"
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
                            "(add_master_action_material)"
                            "(add_functor_material)"
+                           "(setup_projected_properties)"
                            "(add_output_aux_variables)"
                            "(add_output)"
                            "(auto_checkpoint_action)"
@@ -341,7 +352,7 @@ addActionTypes(Syntax & syntax)
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
                            " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_fv_ik,"
                            " add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel,"
-                           " add_indicator, add_marker)"
+                           " add_indicator, add_marker, add_bound)"
                            "(resolve_optional_materials)"
                            "(add_algebraic_rm)"
                            "(add_coupling_rm)"
@@ -353,7 +364,8 @@ addActionTypes(Syntax & syntax)
                            "(init_problem)"
                            "(add_control)"
                            "(check_output)"
-                           "(check_integrity)");
+                           "(check_integrity)"
+                           "(create_application_block)");
   // clang-format on
 }
 
@@ -411,6 +423,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
    * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one task
    */
+  registerSyntax("DiffusionCG", "Physics/Diffusion/ContinuousGalerkin/*");
+  registerSyntax("DiffusionFV", "Physics/Diffusion/FiniteVolume/*");
+
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
@@ -419,7 +434,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "Kernels/*", "add_kernel");
   registerSyntaxTask("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
-  registerSyntaxTask("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
   registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
 
@@ -442,6 +456,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
 
+  registerSyntax("AddMeshDivisionAction", "MeshDivisions/*");
+  syntax.registerSyntaxType("MeshDivisions/*", "MeshDivisionName");
+
   registerSyntax("GlobalParamsAction", "GlobalParams");
 
   registerSyntax("AddDistributionAction", "Distributions/*");
@@ -459,17 +476,20 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
 
   registerSyntax("AddICAction", "Variables/*/InitialCondition");
+  registerSyntax("AddFVICAction", "Variables/*/FVInitialCondition");
 
   registerSyntax("AddAuxVariableAction", "AuxVariables/*");
   syntax.registerSyntaxType("AuxVariables/*", "VariableName");
   syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
 
   registerSyntax("AddICAction", "AuxVariables/*/InitialCondition");
+  registerSyntax("AddFVICAction", "AuxVariables/*/FVInitialCondition");
 
   registerSyntaxTask("EmptyAction", "BCs/Periodic", "no_action"); // placeholder
   registerSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
 
   registerSyntaxTask("AddInitialConditionAction", "ICs/*", "add_ic");
+  registerSyntaxTask("AddFVInitialConditionAction", "FVICs/*", "add_fv_ic");
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
@@ -536,6 +556,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddControlAction", "Controls/*");
+  registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
@@ -566,6 +587,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Material derivative test
   registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
   registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
+
+  registerSyntax("ProjectedStatefulMaterialStorageAction", "ProjectedStatefulMaterialStorage/*");
+
+  // Application Block System
+  registerSyntax("CreateApplicationBlockAction", "Application");
 
   addActionTypes(syntax);
 }

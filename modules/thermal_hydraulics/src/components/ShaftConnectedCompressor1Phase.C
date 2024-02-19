@@ -27,6 +27,7 @@ ShaftConnectedCompressor1Phase::validParams()
   params.makeParamRequired<Real>("A_ref");
   params.addRequiredParam<BoundaryName>("inlet", "Compressor inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Compressor outlet");
+  params.set<std::vector<BoundaryName>>("connections") = {};
   params.suppressParameter<std::vector<BoundaryName>>("connections");
   params.addParam<bool>("treat_as_turbine", false, "Treat the compressor as a turbine?");
   params.addRequiredParam<Real>("omega_rated", "Rated compressor speed [rad/s]");
@@ -167,19 +168,19 @@ ShaftConnectedCompressor1Phase::addVariables()
   VolumeJunction1Phase::addVariables();
 
   getTHMProblem().addSimVariable(false, _delta_p_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_delta_p_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _isentropic_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_isentropic_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _dissipation_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_dissipation_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _friction_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _moment_of_inertia_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+
+  if (!_app.isRestarting())
+  {
+    getTHMProblem().addConstantScalarIC(_delta_p_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_isentropic_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_dissipation_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+  }
 }
 
 void

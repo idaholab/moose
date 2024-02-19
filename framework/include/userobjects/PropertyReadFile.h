@@ -32,7 +32,7 @@ public:
   PropertyReadFile(const InputParameters & parameters);
   virtual ~PropertyReadFile() {}
 
-  virtual void initialize() {}
+  virtual void initialize();
   virtual void execute() {}
   virtual void finalize() {}
 
@@ -119,7 +119,9 @@ public:
 
 protected:
   /// Name of file containing property values
-  const std::string _prop_file_name;
+  const std::vector<FileName> _prop_file_names;
+  /// Index of the file we last read
+  unsigned int & _current_file_index;
   /// Use DelimitedFileReader to read and store data from file
   MooseUtils::DelimitedFileReader _reader;
 
@@ -153,4 +155,10 @@ private:
   const unsigned int _nvoronoi;
   /// Number of blocks (for reading a CSV file with properties ordered by blocks)
   const unsigned int _nblock;
+
+  /// To keep track of initialization to avoid reading the files twice
+  bool & _initialize_called_once;
+
+  /// Whether to read the first CSV file in the constructor or on the first initialization before execution
+  const bool _load_on_construction;
 };

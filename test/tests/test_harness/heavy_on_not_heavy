@@ -1,0 +1,55 @@
+[Tests]
+  [./singleton_a]
+    type = RunApp
+    input = good.i
+  [../]
+  [./singleton_b]
+    type = RunApp
+    input = good.i
+  [../]
+  [./not_heavy]
+    type = RunApp
+    input = good.i
+  [../]
+  [./not_heavy_a]
+    type = RunApp
+    input = good.i
+  [../]
+  [./not_heavy_b]
+    type = RunApp
+    input = good.i
+  [../]
+  [./heavy_a]
+    type = RunApp
+    input = good.i
+    heavy = true
+  [../]
+  [./heavy_b]
+    type = RunApp
+    input = good.i
+    heavy = true
+  [../]
+  [./heavy_on_not_heavy]
+    type = RunApp
+    input = good.i
+    heavy = true
+    prereq = not_heavy
+  [../]
+  [./heavy_on_heavy_a_and_heavy_b]
+    type = RunApp
+    input = good.i
+    heavy = true
+    prereq = 'heavy_a heavy_b'
+  [../]
+  [./heavy_on_not_heavy_a_and_not_heavy_b]
+    type = RunApp
+    input = good.i
+    heavy = true
+    prereq = 'not_heavy_a not_heavy_b'
+  [../]
+  [./not_heavy_on_singleton_a_and_singleton_b]
+    type = RunApp
+    input = good.i
+    prereq = 'singleton_a singleton_b'
+  [../]
+[]

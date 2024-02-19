@@ -74,7 +74,7 @@ ComputeUserObjectsThread::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   std::set<TagID> needed_fe_var_vector_tags;
   for (const auto obj : objs)
   {
@@ -105,9 +105,8 @@ ComputeUserObjectsThread::subdomainChanged()
       _subdomain, needed_fe_var_vector_tags, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
-  _fe_problem.prepareMaterials(_subdomain, _tid);
+  _fe_problem.prepareMaterials(needed_mat_props, _subdomain, _tid);
 
   querySubdomain(Interfaces::InternalSideUserObject, _internal_side_objs);
   querySubdomain(Interfaces::ElementUserObject, _element_objs);

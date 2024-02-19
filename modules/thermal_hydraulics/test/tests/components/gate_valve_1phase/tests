@@ -1,4 +1,7 @@
 [Tests]
+  # idaholab/relap-7#615
+  issues = '#26336'
+  design = 'GateValve1Phase.md'
   [1phase_heavy]
     type = Exodiff
     input = 'gate_valve_1phase.i'
@@ -6,6 +9,7 @@
     rel_err = 5e-5
     abs_zero = 1e-8
     heavy = true
+    requirement = 'The system shall be able to simulate a gate valve in between two components for a full transient.'
   []
 
   [1phase_light]
@@ -18,6 +22,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
+    requirement = 'The system shall be able to simulate a gate valve in between two components for a few time steps.'
   []
 
   [1phase_light_flipped]
@@ -34,6 +39,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
+    requirement = 'The system shall be able to simulate a gate valve in between two components with the component oriented in either direction.'
   []
 
   [err:not_2_connections]
@@ -41,6 +47,7 @@
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe2_valve/connections='pipe1:in pipe2A:out pipe2B:in'"
     expect_err = "The number of connections \(3\) must equal 2"
+    requirement = 'The system shall report an error if a gate valve is connected to more than two components.'
   []
 
   [err:not_parallel]
@@ -48,6 +55,7 @@
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe3B/orientation='1 1 1'"
     expect_err = "The connected channels must be parallel at the junction"
+    requirement = 'The system shall report an error if the two components connected to a gate valve are not parallel.'
   []
 
   [warn:slope_reconstruction_used]
@@ -55,5 +63,6 @@
     input = 'gate_valve_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
     expect_err = "GateValve1Phase cannot perform slope reconstruction"
+    requirement = 'The system shall report an error if a gate valve is requested to perform slope reconstruction.'
   []
 []

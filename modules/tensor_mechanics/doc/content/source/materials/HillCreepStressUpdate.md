@@ -38,7 +38,7 @@ where $\Delta t_{limit}$ is the computed time step limit, $\Delta t$ is the curr
 !alert warning title=Selection of time step increments with creep
 It is recommended to choose a `max_inelastic_increment` that guarantees that creep strain increments are well within the small strain increment assumption. Complementarily, `max_integration_error` must be selected such that the numerical time integration will not significantly affect the creep results. Usually, for most applications, values on the order of $1.0\cdot10^{-3}$ - $1.0\cdot10^{-5}$ will suffice. For better results, these time integration limits may be combined with a soft [Terminator](/Terminator.md).
 
-For three-dimensional problems, a norm of the stress diference and a representative value for the Young's modulus is used internally.
+For three-dimensional problems, a norm of the stress difference and a representative value for the Young's modulus is used internally.
 
 ## Example Input File Syntax
 

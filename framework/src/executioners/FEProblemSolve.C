@@ -26,6 +26,7 @@ FEProblemSolve::validParams()
   InputParameters params = emptyInputParameters();
 
   params.addParam<std::vector<std::string>>("splitting",
+                                            {},
                                             "Top-level splitting defining a "
                                             "hierarchical decomposition into "
                                             "subsystems to help the solver.");
@@ -57,7 +58,7 @@ FEProblemSolve::validParams()
                         "be looser than the standard linear tolerance");
 
   params += Moose::PetscSupport::getPetscValidParams();
-  params.addParam<Real>("l_tol", 1.0e-5, "Linear Tolerance");
+  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
@@ -163,7 +164,7 @@ FEProblemSolve::validParams()
 }
 
 FEProblemSolve::FEProblemSolve(Executioner & ex)
-  : SolveObject(ex),
+  : NonlinearSolveObject(ex),
     _splitting(getParam<std::vector<std::string>>("splitting")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
 {

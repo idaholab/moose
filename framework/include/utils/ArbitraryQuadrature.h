@@ -23,6 +23,14 @@ class ArbitraryQuadrature : public QBase
 public:
   ArbitraryQuadrature(const unsigned int _dim, const Order _order = INVALID_ORDER);
 
+  /**
+   * Copy/move ctor, copy/move assignment operator, and destructor are
+   * all explicitly defaulted for this simple class.
+   */
+  ArbitraryQuadrature(const ArbitraryQuadrature &) = default;
+  ArbitraryQuadrature(ArbitraryQuadrature &&) = default;
+  ArbitraryQuadrature & operator=(const ArbitraryQuadrature &) = default;
+  ArbitraryQuadrature & operator=(ArbitraryQuadrature &&) = default;
   virtual ~ArbitraryQuadrature() = default;
 
   QuadratureType type() const override;
@@ -38,6 +46,8 @@ public:
   void setWeights(const std::vector<Real> & weights);
 
   virtual bool shapes_need_reinit() override { return true; }
+
+  virtual std::unique_ptr<QBase> clone() const override;
 
 private:
   /**

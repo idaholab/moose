@@ -34,21 +34,6 @@ BoundaryFluxBase::initialize()
   _cached_jacobian_side_id = libMesh::invalid_uint;
 }
 
-void
-BoundaryFluxBase::execute()
-{
-}
-
-void
-BoundaryFluxBase::finalize()
-{
-}
-
-void
-BoundaryFluxBase::threadJoin(const UserObject &)
-{
-}
-
 const std::vector<Real> &
 BoundaryFluxBase::getFlux(unsigned int iside,
                           dof_id_type ielem,

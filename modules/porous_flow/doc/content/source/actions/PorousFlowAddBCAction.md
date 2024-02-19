@@ -19,7 +19,7 @@ This class inherits from `MooseObject` and will register its own parameters as u
 
 Then, in `PorousFlowAddBCAction::act()` developers check the type of a constructed object and if
 it matches their type, they build the underlying boundary conditions objects using the MOOSE C++
-inferface.
+interface.
 
 An example of this approach can be seen in (PorousFlowSinkBC)[PorousFlowSinkBC.md] which is
 the user-friendly proxy class and the way it is setup can be seen in `PorousFlowAddBCAction.C`.

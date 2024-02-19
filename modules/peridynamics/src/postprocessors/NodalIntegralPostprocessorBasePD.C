@@ -49,7 +49,6 @@ NodalIntegralPostprocessorBasePD::finalize()
 void
 NodalIntegralPostprocessorBasePD::threadJoin(const UserObject & uo)
 {
-  const NodalIntegralPostprocessorBasePD & pps =
-      static_cast<const NodalIntegralPostprocessorBasePD &>(uo);
+  const auto & pps = static_cast<const NodalIntegralPostprocessorBasePD &>(uo);
   _integral_value += pps._integral_value;
 }

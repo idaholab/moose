@@ -40,7 +40,7 @@ class SchemaDiff(RunApp):
 
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
-        self.testExitCodes(moose_dir, options, output)
+        output += self.testExitCodes(moose_dir, options, output)
         specs = self.specs
 
         if self.isFail() or specs['skip_checks']:
@@ -169,5 +169,3 @@ class SchemaDiff(RunApp):
             return self.load_file(path1)
         except Exception as e:
             return e
-
-

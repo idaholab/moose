@@ -1,7 +1,11 @@
 [Tests]
+  design = 'MachNumberAux.md'
+  issues = '#12123'
+  # idaholab/relap-7#251 is related as well
   [test]
     type = 'CSVDiff'
     input = '1phase.i'
     csvdiff = '1phase_out.csv'
+    requirement = 'The system shall be able to compute the Mach number for 1D single phase flow.'
   []
 []

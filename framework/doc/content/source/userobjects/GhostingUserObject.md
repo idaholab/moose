@@ -2,7 +2,7 @@
 
 The GhostingUserObject maintains local data structures of elements involved in both
 "Geometric" and "Algebraic" ghosting. This object is normally setup automatically through the
-(DisplayGhostingAction.md).
+[DisplayGhostingAction.md].
 
 ## Example Input Syntax:
 

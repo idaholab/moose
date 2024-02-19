@@ -35,7 +35,6 @@ public:
   /**
    * Return the parameter value
    */
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 private:

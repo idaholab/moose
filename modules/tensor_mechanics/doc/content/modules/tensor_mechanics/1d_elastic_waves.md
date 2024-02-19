@@ -3,7 +3,7 @@
 The following example presents two frequency domain analysis of a cantilever beam done in the MOOSE Tensor Mechanics module. The first example computes a frequency response function of the cantilever beam and identifies the first two eigenvalues of beam.  The second analysis computes the dynamic response at a single frequency (time-harmonic problem).
 A frequency domain analysis provides the structural response at a discrete set of frequencies. At each frequency, an independent steady state simulation is performed. This document provides an example of modeling a dynamic problem at a single frequency (time-harmonic problem).
 
-Frequency domain analysis is often used to determine a frequency response function (FRF). An FRF describes the relationship between an input (frequency and amplitude of the input forcing source) and output (displacement response of a system). For simple systems, an analytic FRF can be derived. For more complex systems, the FRF is numerically obtained by determining the system response over a range of frequencies. The frequencies corresponding to the peaks on the FRF plot indicate natural frequencies of the system (eigen/fundumental frequencies). The mode shape (eigenvector) is given by the displacement profile at a natural frequency.
+Frequency domain analysis is often used to determine a frequency response function (FRF). An FRF describes the relationship between an input (frequency and amplitude of the input forcing source) and output (displacement response of a system). For simple systems, an analytic FRF can be derived. For more complex systems, the FRF is numerically obtained by determining the system response over a range of frequencies. The frequencies corresponding to the peaks on the FRF plot indicate natural frequencies of the system (eigen/fundamental frequencies). The mode shape (eigenvector) is given by the displacement profile at a natural frequency.
 
 Other applications of frequency domain dynamics are: (1) computation of band structure (dispersion curves) of lattices/metamaterial, (2) inverse design for vibration control, e.g. design a system so that it has as minimum/maximum response at particular frequency, (3) material properties inversion/optimization given discrete responses.
 
@@ -68,7 +68,7 @@ $\omega_{1a}=$600Hz\\
 $\omega_{1b}=$800Hz\\
 where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
 The simulations will fail if they are run at the natural frequencies because the solution will become singular,
-i.e the displacements blow-up as shown by the asymptopes in [cantileverfrf].
+i.e the displacements blow-up as shown by the asymptotes in [cantileverfrf].
 
 !media media/tensor_mechanics/Cantilever_frfmag.png style=width:60%; caption=Cantilever beam displacement magnitude for coarse mesh (0.1m elements) and fine mesh (0.033m elements).  Analytic results are shown in grey. id=cantileverfrfmag
 

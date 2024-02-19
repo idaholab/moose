@@ -31,14 +31,16 @@ protected:
                                      const Moose::StateArg & state);
 
   /// Darcy coefficient
-  const Moose::Functor<ADRealVectorValue> * const _cL;
+  const Moose::Functor<ADRealVectorValue> * const _D;
   /// Forchheimer coefficient
-  const Moose::Functor<ADRealVectorValue> * const _cQ;
+  const Moose::Functor<ADRealVectorValue> * const _F;
   /// Booleans to select the right models
   const bool _use_Darcy_friction_model;
   const bool _use_Forchheimer_friction_model;
-  /// Porosity to compute the intersitial velocity from the superficial velocity
-  const Moose::Functor<ADReal> & _eps;
+  /// Dynamic viscosity
+  const Moose::Functor<ADReal> * const _mu;
   /// Density as a functor
   const Moose::Functor<ADReal> & _rho;
+  /// Speed (norm of the interstitial velocity) as a functor
+  const Moose::Functor<ADReal> * const _speed;
 };

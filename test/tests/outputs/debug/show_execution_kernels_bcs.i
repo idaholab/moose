@@ -28,22 +28,22 @@
 [Functions]
   [forcing_fnu]
     type = ParsedFunction
-    value = -5.8*(x+y)+x*x*x-x+y*y*y-y
+    expression = -5.8*(x+y)+x*x*x-x+y*y*y-y
   []
   [forcing_fnv]
     type = ParsedFunction
-    value = -4
+    expression = -4
   []
 
   [slnu]
     type = ParsedGradFunction
-    value = x*x*x-x+y*y*y-y
+    expression = x*x*x-x+y*y*y-y
     grad_x = 3*x*x-1
     grad_y = 3*y*y-1
   []
   [slnv]
     type = ParsedGradFunction
-    value = x*x+y*y
+    expression = x*x+y*y
     grad_x = 2*x
     grad_y = 2*y
   []
@@ -51,19 +51,19 @@
   # NeumannBC functions
   [bc_fnut]
     type = ParsedFunction
-    value = 3*y*y-1
+    expression = 3*y*y-1
   []
   [bc_fnub]
     type = ParsedFunction
-    value = -3*y*y+1
+    expression = -3*y*y+1
   []
   [bc_fnul]
     type = ParsedFunction
-    value = -3*x*x+1
+    expression = -3*x*x+1
   []
   [bc_fnur]
     type = ParsedFunction
-    value = 3*x*x-1
+    expression = 3*x*x-1
   []
 []
 

@@ -217,6 +217,11 @@ public:
   virtual bool computingCurl() const = 0;
 
   /**
+   * Whether or not this variable is computing any divergence quantities
+   */
+  virtual bool computingDiv() const = 0;
+
+  /**
    * Return the variable's elemental shape functions
    */
   virtual const FieldVariablePhiValue & phi() const = 0;
@@ -235,6 +240,11 @@ public:
    * Curl of the shape functions
    */
   virtual const FieldVariablePhiValue & curlPhi() const = 0;
+
+  /**
+   * Divergence of the shape functions
+   */
+  virtual const FieldVariablePhiDivergence & divPhi() const = 0;
 
   /**
    * Return the variable's shape functions on an element face
@@ -295,6 +305,12 @@ public:
   virtual void setDofValues(const DenseVector<OutputData> & values) = 0;
 
   /**
+   * Set local DOF values for a lower dimensional element and evaluate the values on quadrature
+   * points
+   */
+  virtual void setLowerDofValues(const DenseVector<OutputData> & values) = 0;
+
+  /**
    * Whether or not this variable is actually using the shape function value.
    *
    * Currently hardcoded to true because we always compute the value.
@@ -344,6 +360,8 @@ public:
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & vectorTagDofValue(TagID tag) const = 0;
+  virtual const DoFValue & nodalMatrixTagValue(TagID tag) const = 0;
+  virtual const FieldVariableValue & matrixTagValue(TagID tag) const = 0;
 
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;

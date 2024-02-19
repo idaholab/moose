@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/SolutionRasterizer
 
-Mesoscale microstructure simulations using the phase field method can be utilized to generate initial structures for large sacle molecular dynamics simulations. One application is the construction of nano-foam atomistic samples from simulations of spinodal decomposition.
+Mesoscale microstructure simulations using the phase field method can be utilized to generate initial structures for large scale molecular dynamics simulations. One application is the construction of nano-foam atomistic samples from simulations of spinodal decomposition.
 
 !media media/phase_field/solutionrasterizer.png style=width:30%;padding-left:20px;float:right; caption=Nano foam atomistic configuration generated using the `SolutionRasterizer`.
 

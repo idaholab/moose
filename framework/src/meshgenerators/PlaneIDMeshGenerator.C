@@ -20,7 +20,9 @@ PlaneIDMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<std::vector<Real>>("plane_coordinates", "Coordinates of planes");
+  params.addRequiredParam<std::vector<Real>>(
+      "plane_coordinates",
+      "Coordinates of planes along the axis. The origin are at x/y/z=0 depending on the axis");
   params.addParam<std::vector<unsigned int>>("num_ids_per_plane", "Number of unique ids per plane");
   MooseEnum plane_axis("x y z", "z");
   params.addParam<MooseEnum>("plane_axis", plane_axis, "Axis of plane");
@@ -50,6 +52,9 @@ PlaneIDMeshGenerator::PlaneIDMeshGenerator(const InputParameters & parameters)
     for (unsigned int i = 0; i < sublayers.size(); ++i)
     {
       Real layer_size = (base_planes[i + 1] - base_planes[i]) / (Real)sublayers[i];
+      if (MooseUtils::absoluteFuzzyGreaterEqual(base_planes[i], base_planes[i + 1]))
+        paramError("plane_coordinates", "Plane coordinates must be in increasing order");
+
       for (unsigned int j = 0; j < sublayers[i]; ++j)
         _planes.push_back(_planes.back() + layer_size);
     }
@@ -63,7 +68,7 @@ PlaneIDMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   if (mesh->mesh_dimension() < _axis_index + 1)
-    paramError("plane_axis", "PlaneIDMeshGenerator must operate on a proper plane axis");
+    paramError("plane_axis", "Plane axis must be contained in the mesh. Check mesh dimension");
   unsigned int extra_id_index = 0;
   if (!mesh->has_elem_integer(_element_id_name))
     extra_id_index = mesh->add_elem_integer(_element_id_name);
@@ -74,6 +79,7 @@ PlaneIDMeshGenerator::generate()
         "id_name", "An element integer with the name '", _element_id_name, "' already exists");
   }
 
+  // Check that the planes do not cut the elements beyond the acceptable tolerance
   const Real tol = getParam<Real>("tolerance");
   for (auto & elem : mesh->active_element_ptr_range())
   {

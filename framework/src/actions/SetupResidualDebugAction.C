@@ -26,7 +26,7 @@ SetupResidualDebugAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addParam<std::vector<NonlinearVariableName>>(
-      "show_var_residual", "Variables for which residuals will be sent to the output file.");
+      "show_var_residual", {}, "Variables for which residuals will be sent to the output file.");
   params.addClassDescription(
       "Adds the necessary objects for computing the residuals for individual variables.");
   return params;

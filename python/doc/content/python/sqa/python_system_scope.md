@@ -2,7 +2,7 @@ The scope of [!ac](MOOSE) Tools is to provide a set of utilities to support [!ac
 Namely, verification, testing, documentation, and data analysis and manipulation of [!ac](MOOSE) code
 and [!ac](I/O). Tools code is written in a general way, so that it can be extended and tuned to the
 needs of the user/developer. The major two systems of the Tools utilities are described in the following
-sections, but more information on the support utiltities also contained within MOOSE tools can be
+sections, but more information on the support utilities also contained within MOOSE tools can be
 found on the [main documentation page](python/index.md).
 
 ### MooseDocs
@@ -17,7 +17,7 @@ presentation slides and reports.
 
 The [TestHarness.md] system is responsible for finding tests and running them. The extended
 philosophy behind MOOSE testing can be found in the [application_development/test_system.md]
-documentation page,  and this philsophy has driven the creation and design choices of the TestHarness
+documentation page,  and this philosophy has driven the creation and design choices of the TestHarness
 system.
 
 !include application_development/test_system.md start=Within MOOSE there are three end=MOOSE uses tests

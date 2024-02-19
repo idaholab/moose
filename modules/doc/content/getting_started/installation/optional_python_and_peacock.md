@@ -12,7 +12,7 @@ These requirements are easily installed via Conda.
 Next, install the necessary `packaging` module:
 
 ```bash
-mamba install packaging
+conda install packaging
 ```
 
 ## Peacock (optional)

@@ -67,7 +67,7 @@
   []
 
   [errors]
-    requirement = "The system shall error when trying to combine multiple meshes,"
+    requirement = "The system shall report an error when trying to combine multiple meshes,"
     [missing_pos]
       type = 'RunException'
       input = 'combiner_generator.i'

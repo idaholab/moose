@@ -30,11 +30,11 @@ where the $A_{i}$ can potentially contain species that were labelled as equilibr
 
 ## Redox disequilibrium
 
-The [database](geochemistry/database/index.md) also contains a number of "redox couples".  These represent the basis species (e.g. Fe$^{2+}$) in alternative oxidataion states (e.g. Fe$^{3+}$).  The user must define which redox species are "coupled" and which are "decoupled".
+The [database](geochemistry/database/index.md) also contains a number of "redox couples".  These represent the basis species (e.g. Fe$^{2+}$) in alternative oxidation states (e.g. Fe$^{3+}$).  The user must define which redox species are "coupled" and which are "decoupled".
 
 - Coupled (the default).  In this case, the redox pair is in equilibrium.  The database may be used to express the alternative oxidation state in terms of basis species.  For instance: $\mathrm{Fe}^{3+}= -0.5\mathrm{H}_{2}\mathrm{O} + \mathrm{Fe}^{2+} + \mathrm{H}^{+} + 0.25\mathrm{O}_{2}\mathrm{(aq)}$, which allows Fe$^{3+}$ to be eliminated from all reactions (similar to a [swap](swap.md)) in favor of the basis species H$_{2}$O, Fe$^{2+}$, H$^{+}$ and O$_{2}$(aq).  The alternative oxidation state may thereby be considered to be a secondary species (with its own equilibrium constant) and will not appear in the basis.
 
-- Decoupled.  In this case, the redox pair is in disequilibrium.  There are two possibilities.  (A) The alternative oxidation state (e.g. Fe$^{3+}$) is added to the basis as a primary species, and its redox reactions specified in the database is ignored.  This means it is necessary to specify an initial condition for it, and solve for its concentration.  (B) The redox reaction is modelled using a [kinetic approach](theory/index.md).  In this case, the alternative oxidataion state is not added to the basis, but a reaction is specified that produces it, along with a reaction rate law.
+- Decoupled.  In this case, the redox pair is in disequilibrium.  There are two possibilities.  (A) The alternative oxidation state (e.g. Fe$^{3+}$) is added to the basis as a primary species, and its redox reactions specified in the database is ignored.  This means it is necessary to specify an initial condition for it, and solve for its concentration.  (B) The redox reaction is modelled using a [kinetic approach](theory/index.md).  In this case, the alternative oxidation state is not added to the basis, but a reaction is specified that produces it, along with a reaction rate law.
 
 After choosing which redox pairs are decoupled, and adding the non-kinetically-controlled alternative oxidation states to the basis, it is
 \begin{equation}

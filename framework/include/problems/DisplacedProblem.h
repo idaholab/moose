@@ -136,10 +136,10 @@ public:
   virtual Moose::VectorTagType vectorTagType(const TagID tag_id) const override;
 
   virtual TagID addMatrixTag(TagName tag_name) override;
-  virtual TagID getMatrixTagID(const TagName & tag_name) override;
+  virtual TagID getMatrixTagID(const TagName & tag_name) const override;
   virtual TagName matrixTagName(TagID tag) override;
-  virtual bool matrixTagExists(const TagName & tag_name) override;
-  virtual bool matrixTagExists(TagID tag_id) override;
+  virtual bool matrixTagExists(const TagName & tag_name) const override;
+  virtual bool matrixTagExists(TagID tag_id) const override;
   virtual unsigned int numMatrixTags() const override;
   virtual bool safeAccessTaggedMatrices() const override;
   virtual bool safeAccessTaggedVectors() const override;
@@ -357,11 +357,6 @@ public:
   unsigned int currentNlSysNum() const override;
 
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
-
-  /**
-   * Indicate that we have p-refinement
-   */
-  void havePRefinement();
 
   virtual void needFV() override;
   virtual bool haveFV() const override;

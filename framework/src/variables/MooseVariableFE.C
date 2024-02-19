@@ -33,7 +33,8 @@ InputParameters
 MooseVariableFE<RealVectorValue>::validParams()
 {
   auto params = MooseVariableField<RealVectorValue>::validParams();
-  params.addClassDescription("Represents vector field variables, e.g. Vector Lagrange or Nedelec");
+  params.addClassDescription(
+      "Represents vector field variables, e.g. Vector Lagrange, Nedelec or Raviart-Thomas");
   return params;
 }
 
@@ -217,16 +218,23 @@ MooseVariableFE<OutputType>::getElementalValueOlder(const Elem * elem, unsigned 
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
+MooseVariableFE<OutputType>::insert(NumericVector<Number> & vector)
 {
-  _element_data->insert(residual);
+  _element_data->insert(vector);
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
+MooseVariableFE<OutputType>::insertLower(NumericVector<Number> & vector)
 {
-  _element_data->add(residual);
+  _lower_data->insert(vector);
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::add(NumericVector<Number> & vector)
+{
+  _element_data->add(vector);
 }
 
 template <typename OutputType>
@@ -703,6 +711,13 @@ MooseVariableFE<OutputType>::setDofValues(const DenseVector<OutputData> & values
 
 template <typename OutputType>
 void
+MooseVariableFE<OutputType>::setLowerDofValues(const DenseVector<OutputData> & values)
+{
+  _lower_data->setDofValues(values);
+}
+
+template <typename OutputType>
+void
 MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual,
                                               const OutputData & v)
 {
@@ -738,6 +753,13 @@ MooseVariableFE<OutputType>::curlPhi() const
 }
 
 template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhi() const
+{
+  return _element_data->divPhi();
+}
+
+template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
 MooseVariableFE<OutputType>::secondPhiFace() const
 {
@@ -749,6 +771,13 @@ const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
 MooseVariableFE<OutputType>::curlPhiFace() const
 {
   return _element_data->curlPhiFace();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhiFace() const
+{
+  return _element_data->divPhiFace();
 }
 
 template <typename OutputType>
@@ -766,6 +795,13 @@ MooseVariableFE<OutputType>::curlPhiNeighbor() const
 }
 
 template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhiNeighbor() const
+{
+  return _neighbor_data->divPhi();
+}
+
+template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
 MooseVariableFE<OutputType>::secondPhiFaceNeighbor() const
 {
@@ -777,6 +813,13 @@ const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
 MooseVariableFE<OutputType>::curlPhiFaceNeighbor() const
 {
   return _neighbor_data->curlPhiFace();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhiFaceNeighbor() const
+{
+  return _neighbor_data->divPhiFace();
 }
 
 template <typename OutputType>
@@ -798,6 +841,13 @@ bool
 MooseVariableFE<OutputType>::computingCurl() const
 {
   return _element_data->computingCurl();
+}
+
+template <typename OutputType>
+bool
+MooseVariableFE<OutputType>::computingDiv() const
+{
+  return _element_data->computingDiv();
 }
 
 template <typename OutputType>
@@ -966,7 +1016,8 @@ MooseVariableFE<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
                                                const bool cache_eligible) const
 {
   mooseAssert(this->hasBlocks(elem_qp.elem->subdomain_id()),
-              "This variable doesn't exist in the requested block!");
+              "Variable " + this->name() + " doesn't exist on block " +
+                  std::to_string(elem_qp.elem->subdomain_id()));
 
   const Elem * const elem = elem_qp.elem;
   if (!cache_eligible || (elem != _current_elem_qp_functor_elem))
@@ -975,8 +1026,7 @@ MooseVariableFE<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
     std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
-    std::unique_ptr<QBase> qrule(QBase::build(
-        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+    auto qrule = qrule_template->clone();
 
     const auto & phi = fe->get_phi();
     const auto & dphi = fe->get_dphi();
@@ -1167,7 +1217,8 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
                                                    const bool cache_eligible) const
 {
   mooseAssert(this->hasBlocks(elem_side_qp.elem->subdomain_id()),
-              "This variable doesn't exist in the requested block!");
+              "Variable " + this->name() + " doesn't exist on block " +
+                  std::to_string(elem_side_qp.elem->subdomain_id()));
 
   const Elem * const elem = elem_side_qp.elem;
   const auto side = elem_side_qp.side;
@@ -1178,8 +1229,7 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
     std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
-    std::unique_ptr<QBase> qrule(QBase::build(
-        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+    auto qrule = qrule_template->clone();
 
     const auto & phi = fe->get_phi();
     const auto & dphi = fe->get_dphi();

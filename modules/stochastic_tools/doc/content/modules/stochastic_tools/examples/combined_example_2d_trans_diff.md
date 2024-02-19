@@ -120,7 +120,7 @@ again without repeating the training process.
 A [new main input file](surrogates/combined/trans_diff_2d/trans_diff_surr.i) has been created to
 evaluate the surrogate models.
 This input file uses the same parameter distribution as the one used for the training of the surrogates.
-Eeach surrogate model is tested using an new, test parameter sample set, which is generate
+Each surrogate model is tested using a new, test parameter sample set, which is generated
 using a [LatinHypercubeSampler.md] object in the `Samplers` block.
 Since the surrogate models are orders of magnitude faster, $100,000$ samples are
 prepared for testing (compared to $216$ used for training).
@@ -154,7 +154,7 @@ figures can be enlarged by clicking on them.
 !row!
 
 !media stochastic_tools/surrogates/combined/diff_trans_2d/pc_max.svg style=width:33%;float:left id=pc_max_hist
-       caption=Polynomial Chaos Expanison Surrogate.
+       caption=Polynomial Chaos Expansion Surrogate.
 
 !media stochastic_tools/surrogates/combined/diff_trans_2d/pr_max.svg style=width:33%;float:left id=pr_max_hist
        caption=Polynomial Regression Surrogate.
@@ -170,13 +170,13 @@ is not efficient due to the extremely long simulation time. It is also visible t
 both the polynomial chaos and polynomial regression surrogates yield approximately the same results, and
 with 100,000 samples, the distributions are much smoother. On the other hand, the nearest point
 surrogate introduces additional fluctuations which means that it is not capable of
-reconstructing the shape of the original distribution at all. The same phenomena is experiences with
-the minum temperature. The corresponding histograms are presented below.
+reconstructing the shape of the original distribution at all. The same phenomena is experienced with
+the minimum temperature. The corresponding histograms are presented below.
 
 !row!
 
 !media stochastic_tools/surrogates/combined/diff_trans_2d/pc_min.svg style=width:33%;float:left id=pc_min_hist
-       caption=Polynomial Chaos Expanison Surrogate.
+       caption=Polynomial Chaos Expansion Surrogate.
 
 !media stochastic_tools/surrogates/combined/diff_trans_2d/pr_min.svg style=width:33%;float:left id=pr_min_hist
        caption=Polynomial Regression Surrogate.

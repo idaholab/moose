@@ -1,6 +1,6 @@
 # PolycrystalVoronoiVoidIC
 
-The PolycrystalVoronoiVoidIC generates a Voronoi tesslation to produce a grain structure with voids randomly distributed along the grain boundaries. The centroids of grains can be either generated from a set of random points or assigned from a file. It requires the number of voids to be greater than zero. In general, you should use [PolycrystalVoronoi](/PolycrystalVoronoi.md) to represent Voronoi grain structures without voids.
+The PolycrystalVoronoiVoidIC generates a Voronoi tessellation to produce a grain structure with voids randomly distributed along the grain boundaries. The centroids of grains can be either generated from a set of random points or assigned from a file. It requires the number of voids to be greater than zero. In general, you should use [PolycrystalVoronoi](/PolycrystalVoronoi.md) to represent Voronoi grain structures without voids.
 
 ## Typical usage in an input file:
 

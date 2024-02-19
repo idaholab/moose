@@ -20,27 +20,12 @@ ADComputeSmearedCrackingStress::validParams()
   InputParameters params = ADComputeMultipleInelasticStress::validParams();
   params.addClassDescription(
       "Compute stress using a fixed smeared cracking model. Uses automatic differentiation");
-  MooseEnum cracking_release("abrupt exponential power", "abrupt");
-  params.addDeprecatedParam<MooseEnum>(
-      "cracking_release",
-      cracking_release,
-      "The cracking release type.  'abrupt' (default) gives an abrupt "
-      "stress release, 'exponential' uses an exponential softening model, "
-      "and 'power' uses a power law",
-      "This is replaced by the use of 'softening_models' together with a separate block defining "
-      "a softening model");
-  params.addParam<std::vector<MaterialName>>(
+  params.addRequiredParam<std::vector<MaterialName>>(
       "softening_models",
       "The material objects used to compute softening behavior for loading a crack."
       "Either 1 or 3 models must be specified. If a single model is specified, it is"
       "used for all directions. If 3 models are specified, they will be used for the"
       "3 crack directions in sequence");
-  params.addDeprecatedParam<Real>(
-      "cracking_residual_stress",
-      0.0,
-      "The fraction of the cracking stress allowed to be maintained following a crack.",
-      "This is replaced by the use of 'softening_models' together with a separate block defining "
-      "a softening model");
   params.addRequiredCoupledVar(
       "cracking_stress",
       "The stress threshold beyond which cracking occurs. Negative values prevent cracking.");
@@ -55,14 +40,6 @@ ADComputeSmearedCrackingStress::validParams()
                                     "The fraction of the cracking strain at which "
                                     "a transition begins during decreasing "
                                     "strain to the original stiffness.");
-  params.addDeprecatedParam<Real>(
-      "cracking_beta",
-      1.0,
-      "Coefficient used to control the softening in the exponential model.  "
-      "When set to 1, the initial softening slope is equal to the negative "
-      "of the Young's modulus.  Smaller numbers scale down that slope.",
-      "This is replaced by the use of 'softening_models' together with a separate block defining "
-      "a softening model");
   params.addParam<Real>(
       "max_stress_correction",
       1.0,
@@ -77,19 +54,28 @@ ADComputeSmearedCrackingStress::validParams()
       "Fraction of original shear stiffness to be retained after cracking");
   params.set<std::vector<MaterialName>>("inelastic_models") = {};
 
+  MooseEnum crackedElasticityType("DIAGONAL FULL", "DIAGONAL");
+  crackedElasticityType.addDocumentation(
+      "DIAGONAL", "Zero out terms coupling with directions orthogonal to a crack (legacy)");
+  crackedElasticityType.addDocumentation(
+      "FULL", "Consistently scale all entries based on damage (recommended)");
+  params.addParam<MooseEnum>(
+      "cracked_elasticity_type",
+      crackedElasticityType,
+      "Method to modify the local elasticity tensor to account for cracking");
+
   return params;
 }
 
 ADComputeSmearedCrackingStress::ADComputeSmearedCrackingStress(const InputParameters & parameters)
   : ADComputeMultipleInelasticStress(parameters),
-    _cracking_release(getParam<MooseEnum>("cracking_release").getEnum<CrackingRelease>()),
-    _cracking_residual_stress(getParam<Real>("cracking_residual_stress")),
     _cracking_stress(adCoupledValue("cracking_stress")),
     _max_cracks(getParam<unsigned int>("max_cracks")),
     _cracking_neg_fraction(getParam<Real>("cracking_neg_fraction")),
-    _cracking_beta(getParam<Real>("cracking_beta")),
     _shear_retention_factor(getParam<Real>("shear_retention_factor")),
     _max_stress_correction(getParam<Real>("max_stress_correction")),
+    _cracked_elasticity_type(
+        getParam<MooseEnum>("cracked_elasticity_type").getEnum<CrackedElasticityType>()),
     _crack_damage(declareADProperty<RealVectorValue>(_base_name + "crack_damage")),
     _crack_damage_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_damage")),
     _crack_flags(declareADProperty<RealVectorValue>(_base_name + "crack_flags")),
@@ -129,19 +115,10 @@ ADComputeSmearedCrackingStress::ADComputeSmearedCrackingStress(const InputParame
       _prescribed_crack_directions.push_back(*available_dirs.begin());
     }
   }
-
-  if (parameters.isParamSetByUser("softening_models"))
-  {
-    if (parameters.isParamSetByUser("cracking_release"))
-      mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_release' and "
-                 "'softening_models'");
-    if (parameters.isParamSetByUser("cracking_residual_stress"))
-      mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_residual_stress' "
-                 "and 'softening_models'");
-    if (parameters.isParamSetByUser("cracking_beta"))
-      mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_beta' and "
-                 "'softening_models'");
-  }
+  if (!isParamSetByUser("cracked_elasticity_type"))
+    paramWarning(
+        "cracked_elasticity_type",
+        "Defaulting to the legacy option of 'DIAGONAL', but the 'FULL' option is preferred");
 
   _local_elastic_vector.resize(9);
 }
@@ -219,30 +196,23 @@ ADComputeSmearedCrackingStress::initialSetup()
                "guaranteed isotropic");
 
   std::vector<MaterialName> soft_matls = getParam<std::vector<MaterialName>>("softening_models");
-  if (soft_matls.size() != 0)
+  for (auto soft_matl : soft_matls)
   {
-    for (auto soft_matl : soft_matls)
-    {
-      ADSmearedCrackSofteningBase * scsb =
-          dynamic_cast<ADSmearedCrackSofteningBase *>(&getMaterialByName(soft_matl));
-      if (scsb)
-        _softening_models.push_back(scsb);
-      else
-        mooseError(
-            "Model " + soft_matl +
-            " is not a softening model that can be used with ADComputeSmearedCrackingStress");
-    }
-    if (_softening_models.size() == 1)
-    {
-      // Reuse the same model in all 3 directions
-      _softening_models.push_back(_softening_models[0]);
-      _softening_models.push_back(_softening_models[0]);
-    }
-    else if (_softening_models.size() != 3)
-      mooseError(
-          "If 'softening_models' is specified in ADComputeSmearedCrackingStress, either 1 or "
-          "3 models must be provided");
+    ADSmearedCrackSofteningBase * scsb =
+        dynamic_cast<ADSmearedCrackSofteningBase *>(&getMaterialByName(soft_matl));
+    if (scsb)
+      _softening_models.push_back(scsb);
+    else
+      paramError("softening_models", "Model " + soft_matl + " is not a softening model");
   }
+  if (_softening_models.size() == 1)
+  {
+    // Reuse the same model in all 3 directions
+    _softening_models.push_back(_softening_models[0]);
+    _softening_models.push_back(_softening_models[0]);
+  }
+  else if (_softening_models.size() != 3)
+    paramError("softening_models", "Either 1 or 3 softening models must be specified");
 }
 
 void
@@ -331,33 +301,63 @@ ADComputeSmearedCrackingStress::updateLocalElasticityTensor()
     if (cracking_locally_active)
     {
       // Update the elasticity tensor in the crack coordinate system
-      const bool c0_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(0), 1.0);
-      const bool c1_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(1), 1.0);
-      const bool c2_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(2), 1.0);
+      if (_cracked_elasticity_type == CrackedElasticityType::DIAGONAL)
+      {
+        const bool c0_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(0), 1.0);
+        const bool c1_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(1), 1.0);
+        const bool c2_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(2), 1.0);
 
-      const ADReal c01 = (c0_coupled && c1_coupled ? 1.0 : 0.0);
-      const ADReal c02 = (c0_coupled && c2_coupled ? 1.0 : 0.0);
-      const ADReal c12 = (c1_coupled && c2_coupled ? 1.0 : 0.0);
+        const ADReal c01 = (c0_coupled && c1_coupled ? 1.0 : 0.0);
+        const ADReal c02 = (c0_coupled && c2_coupled ? 1.0 : 0.0);
+        const ADReal c12 = (c1_coupled && c2_coupled ? 1.0 : 0.0);
 
-      const ADReal c01_shear_retention = (c0_coupled && c1_coupled ? 1.0 : _shear_retention_factor);
-      const ADReal c02_shear_retention = (c0_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
-      const ADReal c12_shear_retention = (c1_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
+        const ADReal c01_shear_retention =
+            (c0_coupled && c1_coupled ? 1.0 : _shear_retention_factor);
+        const ADReal c02_shear_retention =
+            (c0_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
+        const ADReal c12_shear_retention =
+            (c1_coupled && c2_coupled ? 1.0 : _shear_retention_factor);
+
+        _local_elastic_vector[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
+                                               : stiffness_ratio_local(0) * youngs_modulus);
+        _local_elastic_vector[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
+        _local_elastic_vector[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
+        _local_elastic_vector[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1)
+                                               : stiffness_ratio_local(1) * youngs_modulus);
+        _local_elastic_vector[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
+        _local_elastic_vector[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2)
+                                               : stiffness_ratio_local(2) * youngs_modulus);
+        _local_elastic_vector[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
+        _local_elastic_vector[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
+        _local_elastic_vector[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
+      }
+      else // _cracked_elasticity_type == CrackedElasticityType::FULL
+      {
+        const ADReal & c0 = stiffness_ratio_local(0);
+        const ADReal & c1 = stiffness_ratio_local(1);
+        const ADReal & c2 = stiffness_ratio_local(2);
+
+        const ADReal c01 = c0 * c1;
+        const ADReal c02 = c0 * c2;
+        const ADReal c12 = c1 * c2;
+
+        const ADReal c01_shear_retention = std::max(c01, _shear_retention_factor);
+        const ADReal c02_shear_retention = std::max(c02, _shear_retention_factor);
+        const ADReal c12_shear_retention = std::max(c12, _shear_retention_factor);
+
+        _local_elastic_vector[0] = _elasticity_tensor[_qp](0, 0, 0, 0) * c0;
+        _local_elastic_vector[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
+        _local_elastic_vector[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
+        _local_elastic_vector[3] = _elasticity_tensor[_qp](1, 1, 1, 1) * c1;
+        _local_elastic_vector[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
+        _local_elastic_vector[5] = _elasticity_tensor[_qp](2, 2, 2, 2) * c2;
+        _local_elastic_vector[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
+        _local_elastic_vector[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
+        _local_elastic_vector[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
+      }
 
       // Filling with 9 components is sufficient because these are the only nonzero entries
       // for isotropic or orthotropic materials.
-      _local_elastic_vector[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
-                                             : stiffness_ratio_local(0) * youngs_modulus);
-      _local_elastic_vector[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
-      _local_elastic_vector[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
-      _local_elastic_vector[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1)
-                                             : stiffness_ratio_local(1) * youngs_modulus);
-      _local_elastic_vector[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
-      _local_elastic_vector[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2)
-                                             : stiffness_ratio_local(2) * youngs_modulus);
-      _local_elastic_vector[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
-      _local_elastic_vector[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
-      _local_elastic_vector[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
-
       _local_elasticity_tensor.fillFromInputVector(_local_elastic_vector,
                                                    ADRankFourTensor::symmetric9);
 
@@ -374,7 +374,6 @@ ADComputeSmearedCrackingStress::updateCrackingStateAndStress()
 {
   const ADReal youngs_modulus =
       ElasticityTensorTools::getIsotropicYoungsModulus(_elasticity_tensor[_qp]);
-  const ADReal cracking_alpha = -youngs_modulus;
 
   ADReal cracking_stress = _cracking_stress[_qp];
 
@@ -415,6 +414,7 @@ ADComputeSmearedCrackingStress::updateCrackingStateAndStress()
 
     bool cracked(false);
     ADRealVectorValue sigma;
+    mooseAssert(_softening_models.size() == 3, "Must have 3 softening models");
     for (unsigned int i = 0; i < 3; ++i)
     {
       sigma(i) = sigmaPrime(i, i);
@@ -447,23 +447,13 @@ ADComputeSmearedCrackingStress::updateCrackingStateAndStress()
       if (new_crack || (pre_existing_crack && loading_existing_crack))
       {
         cracked = true;
-
-        if (_softening_models.size() != 0)
-          _softening_models[i]->computeCrackingRelease(sigma(i),
-                                                       stiffness_ratio,
-                                                       strain_in_crack_dir(i),
-                                                       _crack_initiation_strain[_qp](i),
-                                                       _crack_max_strain[_qp](i),
-                                                       cracking_stress,
-                                                       youngs_modulus);
-        else
-          computeCrackingRelease(i,
-                                 sigma(i),
-                                 stiffness_ratio,
-                                 strain_in_crack_dir(i),
-                                 cracking_stress,
-                                 cracking_alpha,
-                                 youngs_modulus);
+        _softening_models[i]->computeCrackingRelease(sigma(i),
+                                                     stiffness_ratio,
+                                                     strain_in_crack_dir(i),
+                                                     _crack_initiation_strain[_qp](i),
+                                                     _crack_max_strain[_qp](i),
+                                                     cracking_stress,
+                                                     youngs_modulus);
         _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
       }
 
@@ -579,70 +569,6 @@ ADComputeSmearedCrackingStress::getNumKnownCrackDirs() const
       ++num_known_dirs;
   }
   return num_known_dirs;
-}
-
-void
-ADComputeSmearedCrackingStress::computeCrackingRelease(int i,
-                                                       ADReal & sigma,
-                                                       ADReal & stiffness_ratio,
-                                                       const ADReal & strain_in_crack_dir,
-                                                       const ADReal & cracking_stress,
-                                                       const ADReal & cracking_alpha,
-                                                       const ADReal & youngs_modulus)
-{
-  switch (_cracking_release)
-  {
-    case CrackingRelease::power:
-    {
-      if (sigma > cracking_stress)
-      {
-        stiffness_ratio /= 3.0;
-        sigma = stiffness_ratio * youngs_modulus * strain_in_crack_dir;
-      }
-      break;
-    }
-    case CrackingRelease::exponential:
-    {
-      const ADReal crack_max_strain = _crack_max_strain[_qp](i);
-      mooseAssert(crack_max_strain >= _crack_initiation_strain[_qp](i),
-                  "crack_max_strain must be >= crack_initiation_strain");
-
-      // Compute stress that follows exponental curve
-      sigma =
-          cracking_stress * (_cracking_residual_stress +
-                             (1.0 - _cracking_residual_stress) *
-                                 std::exp(cracking_alpha * _cracking_beta / cracking_stress *
-                                          (crack_max_strain - _crack_initiation_strain[_qp](i))));
-      // Compute ratio of current stiffness to original stiffness
-      stiffness_ratio =
-          sigma * _crack_initiation_strain[_qp](i) / (crack_max_strain * cracking_stress);
-      break;
-    }
-    case CrackingRelease::abrupt:
-    {
-      if (_cracking_residual_stress == 0)
-      {
-        const Real tiny = 1e-16;
-        stiffness_ratio = tiny;
-        sigma = tiny * _crack_initiation_strain[_qp](i) * youngs_modulus;
-      }
-      else
-      {
-        sigma = _cracking_residual_stress * cracking_stress;
-        stiffness_ratio = sigma / (_crack_max_strain[_qp](i) * youngs_modulus);
-      }
-      break;
-    }
-  }
-
-  if (stiffness_ratio < 0)
-  {
-    std::stringstream err;
-    err << "Negative stiffness ratio: " << i << " " << stiffness_ratio << ", "
-        << _crack_max_strain[_qp](i) << ", " << _crack_initiation_strain[_qp](i) << ", "
-        << std::endl;
-    mooseError(err.str());
-  }
 }
 
 void

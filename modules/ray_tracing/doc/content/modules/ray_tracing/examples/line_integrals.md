@@ -39,7 +39,7 @@ A [RepeatableRayStudy.md] is defined that generates and executes the rays that c
 
 !listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=UserObjects end=RayKernels
 
-The `study` object defines two rays to be exectued on `TIMESTEP_END`:
+The `study` object defines two rays to be executed on `TIMESTEP_END`:
 
 - `diag` from $(0, 0)$ to $(5, 5)$
 - `right_up` from $(5, 0)$ to $(5, 5)$

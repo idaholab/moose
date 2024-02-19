@@ -22,6 +22,8 @@ public:
   FunctorMaterial(const InputParameters & parameters);
   void computeProperties() override final {}
 
+  const std::set<std::string> & getSuppliedFunctors() const { return _supplied_functor_props; }
+
 protected:
   void computeQpProperties() override final {}
 
@@ -43,6 +45,10 @@ protected:
                              PolymorphicLambda my_lammy,
                              const std::set<SubdomainID> & sub_ids,
                              const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS});
+
+private:
+  /// List of the properties supplied
+  std::set<std::string> _supplied_functor_props;
 };
 
 template <typename T, typename PolymorphicLambda>
@@ -51,6 +57,7 @@ FunctorMaterial::addFunctorProperty(const std::string & name,
                                     PolymorphicLambda my_lammy,
                                     const std::set<ExecFlagType> & clearance_schedule)
 {
+  _supplied_functor_props.insert(name);
   return addFunctorPropertyByBlocks<T>(name, my_lammy, blockIDs(), clearance_schedule);
 }
 
@@ -71,6 +78,7 @@ FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
       prop_name = _pars.get<MooseFunctorName>(name);
   }
 
+  _supplied_functor_props.insert(name);
   return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
       prop_name, my_lammy, clearance_schedule, _mesh, sub_ids, _tid);
 }

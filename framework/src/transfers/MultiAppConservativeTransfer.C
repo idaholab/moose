@@ -32,6 +32,7 @@ MultiAppConservativeTransfer::validParams()
 
   params.addParam<std::vector<PostprocessorName>>(
       "to_postprocessors_to_be_preserved",
+      {},
       "The name of the Postprocessor in the to-app to evaluate an adjusting factor.");
   params.addParam<bool>("allow_skipped_adjustment",
                         false,
@@ -47,11 +48,15 @@ MultiAppConservativeTransfer::validParams()
 
 MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters & parameters)
   : MultiAppFieldTransfer(parameters),
-    _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
+    _from_var_names(isParamValid("source_variable")
+                        ? getParam<std::vector<VariableName>>("source_variable")
+                        : std::vector<VariableName>()),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
     _preserve_transfer(isParamValid("from_postprocessors_to_be_preserved")),
     _from_postprocessors_to_be_preserved(
-        getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")),
+        _preserve_transfer
+            ? getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")
+            : std::vector<PostprocessorName>{}),
     _to_postprocessors_to_be_preserved(
         getParam<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
     _use_nearestpoint_pps(false),
@@ -226,16 +231,16 @@ MultiAppConservativeTransfer::postExecute()
         if (getToMultiApp()->hasLocalApp(i))
         {
           if (_use_nearestpoint_pps)
-            adjustTransferedSolutionNearestPoint(i,
-                                                 &from_problem,
-                                                 _from_postprocessors_to_be_preserved[0],
-                                                 getToMultiApp()->appProblemBase(i),
-                                                 _to_postprocessors_to_be_preserved[0]);
+            adjustTransferredSolutionNearestPoint(i,
+                                                  &from_problem,
+                                                  _from_postprocessors_to_be_preserved[0],
+                                                  getToMultiApp()->appProblemBase(i),
+                                                  _to_postprocessors_to_be_preserved[0]);
           else
-            adjustTransferedSolution(&from_problem,
-                                     _from_postprocessors_to_be_preserved[i],
-                                     getToMultiApp()->appProblemBase(i),
-                                     _to_postprocessors_to_be_preserved[0]);
+            adjustTransferredSolution(&from_problem,
+                                      _from_postprocessors_to_be_preserved[i],
+                                      getToMultiApp()->appProblemBase(i),
+                                      _to_postprocessors_to_be_preserved[0]);
         }
     }
 
@@ -249,14 +254,14 @@ MultiAppConservativeTransfer::postExecute()
       for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
       {
         if (_use_nearestpoint_pps)
-          adjustTransferedSolutionNearestPoint(
+          adjustTransferredSolutionNearestPoint(
               i,
               getFromMultiApp()->hasLocalApp(i) ? &getFromMultiApp()->appProblemBase(i) : nullptr,
               _from_postprocessors_to_be_preserved[0],
               to_problem,
               _to_postprocessors_to_be_preserved[0]);
         else
-          adjustTransferedSolution(
+          adjustTransferredSolution(
               getFromMultiApp()->hasLocalApp(i) ? &getFromMultiApp()->appProblemBase(i) : nullptr,
               _from_postprocessors_to_be_preserved[0],
               to_problem,
@@ -272,7 +277,7 @@ MultiAppConservativeTransfer::postExecute()
 }
 
 void
-MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
+MultiAppConservativeTransfer::adjustTransferredSolutionNearestPoint(
     unsigned int i,
     FEProblemBase * from_problem,
     PostprocessorName & from_postprocessor,
@@ -390,10 +395,10 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
 }
 
 void
-MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
-                                                       PostprocessorName & from_postprocessor,
-                                                       FEProblemBase & to_problem,
-                                                       PostprocessorName & to_postprocessor)
+MultiAppConservativeTransfer::adjustTransferredSolution(FEProblemBase * from_problem,
+                                                        PostprocessorName & from_postprocessor,
+                                                        FEProblemBase & to_problem,
+                                                        PostprocessorName & to_postprocessor)
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem)
@@ -421,7 +426,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   // Compute to-postprocessor to have the adjuster
   to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 
-  // Now we should have the right adjuster based on the transfered solution
+  // Now we should have the right adjuster based on the transferred solution
   const auto to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
 
   // decide if the adjustment should be performed

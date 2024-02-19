@@ -9,7 +9,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
-Kuzmin and Turek [!citep](KuzminTurek2004) describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviatved to "KT".  This page will make much more sense if you read it in tandem with the KT paper!  KT consider a single scalar quantity $u$ that is being advected.  For sake of argument, in this page we think of $u$ as "heat".
+Kuzmin and Turek [!citep](KuzminTurek2004) describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviated to "KT".  This page will make much more sense if you read it in tandem with the KT paper!  KT consider a single scalar quantity $u$ that is being advected.  For sake of argument, in this page we think of $u$ as "heat".
 
 In this page, the 1D example studied in the [numerical diffusion page](numerical_diffusion.md) is used to explicitly illustrate how their approach works.  The input file is
 
@@ -89,7 +89,7 @@ Now consider the node at the position of the front (at $x=0.3$).  It has $u_{i-1
 
 !media media/porous_flow/fltvd_k_only.png style=width:60%;margin-left:10px caption=Temperature profile after one timestep, when only $K$ is used to transport the heat.  Notice the overshoots and undershoots.  id=fltvd_k_only
 
-So far, the presentation has invoved only the standard Galerkin finite element scheme, with no special input from KT (other than their notation and referring to their formulae).  Now let us slowly introduce KT's design.
+So far, the presentation has involved only the standard Galerkin finite element scheme, with no special input from KT (other than their notation and referring to their formulae).  Now let us slowly introduce KT's design.
 
 ## Stabilization using upwinding
 
@@ -108,7 +108,7 @@ d_{ii} = -\sum_{j\neq i}d_{ij} \ .
 \end{equation}
 (KT Eqn (32)).  So:
 
-- $D$ picks out the negative off-diagonal entries of $K$, so it contains the entries that we want to elimiate
+- $D$ picks out the negative off-diagonal entries of $K$, so it contains the entries that we want to eliminate
 - $D$ is diagonal and each row of $D$ sums to zero, hence $D$ is a discrete diffusion operator
 
 In our case
@@ -152,7 +152,7 @@ KT demonstrate that this process produces an $L$ that is Locally Extremum Dimini
 
 ## Flux-limiting and anti-diffusion
 
-It is good to add diffusion ($D$) around the front position, because it prevents overshoots and undershoots, but elsewhere it is disasterous because it results in unphysical diffusion.  Therefore, KT add some anti-diffusion in regions where $D$ is not needed, to counter the effect of $D$.  KT introduce $P$ and $Q$ (Eqns (46), (47) and (48)) defined by
+It is good to add diffusion ($D$) around the front position, because it prevents overshoots and undershoots, but elsewhere it is disastrous because it results in unphysical diffusion.  Therefore, KT add some anti-diffusion in regions where $D$ is not needed, to counter the effect of $D$.  KT introduce $P$ and $Q$ (Eqns (46), (47) and (48)) defined by
 \begin{equation}
 P_{i} = \sum_{j\neq i}\mathrm{min}\left\{0, k_{ij}\right\} (u_{j} - u_{i})
 \end{equation}
@@ -211,7 +211,7 @@ When $\Phi=0$, KT's procedure yields the *full upwind* equation [eq:fullupwind].
 
 KT present four different flux-limiters.  These are plotted in [flux_liiters].
 
-Notice that the VanLeer limiter is smoother than the others, so it is likely to provide superior nonlinear concergence, and it is chosen as the default limiter in the [AdvectiveFluxCalculatorConstantVelocity](AdvectiveFluxCalculatorConstantVelocity.md).
+Notice that the VanLeer limiter is smoother than the others, so it is likely to provide superior nonlinear convergence, and it is chosen as the default limiter in the [AdvectiveFluxCalculatorConstantVelocity](AdvectiveFluxCalculatorConstantVelocity.md).
 
 !media media/porous_flow/flux_limiters.png style=width:60%;margin-left:10px caption=Flux limiters, $\Phi(r)$, enumerated by KT (pp 135).  id=flux_liiters
 

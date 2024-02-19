@@ -10,9 +10,12 @@
 #include "INSFVMomentumDiffusion.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 #include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 #include "RelationshipManager.h"
 #include "Factory.h"
+#include "libmesh/nonlinear_solver.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumDiffusion);
 
@@ -30,23 +33,52 @@ INSFVMomentumDiffusion::validParams()
                              "Switch that can select face interpolation method for the viscosity.");
 
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<bool>(
+      "complete_expansion",
+      false,
+      "Boolean parameter to use complete momentum expansion is the diffusion term.");
+  params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
+  params.addParam<bool>(
+      "limit_interpolation", false, "Flag to limit interpolation to positive values.");
   return params;
 }
 
 INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
   : INSFVFluxKernel(params),
     _mu(getFunctor<ADReal>(NS::mu)),
-    _mu_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method")))
+    _mu_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
+    _u_var(params.isParamValid("u") ? &getFunctor<ADReal>("u") : nullptr),
+    _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
+    _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
+    _complete_expansion(getParam<bool>("complete_expansion")),
+    _limit_interpolation(getParam<bool>("limit_interpolation")),
+    _dim(_subproblem.mesh().dimension())
 {
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
     adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
+
+  if (_complete_expansion && !_u_var)
+    paramError("u", "The u velocity must be defined when 'complete_expansion=true'.");
+
+  if (_complete_expansion && _dim >= 2 && !_v_var)
+    paramError("v",
+               "The v velocity must be defined when 'complete_expansion=true'"
+               "and problem dimension is larger or equal to 2.");
+
+  if (_complete_expansion && _dim >= 3 && !_w_var)
+    paramError("w",
+               "The w velocity must be defined when 'complete_expansion=true'"
+               "and problem dimension is larger or equal to three.");
 }
 
 ADReal
 INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 {
-  const auto state = determineState();
+  const Moose::StateArg state = determineState();
   const auto dudn = gradUDotNormal(state);
   ADReal face_mu;
 
@@ -59,6 +91,19 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
                            _mu(neighborArg(), state),
                            *_face_info,
                            true);
+
+  // Protecting from negative viscosity at interpolation
+  // to preserve convergence
+  if (face_mu < 0.0)
+  {
+    if (!(_limit_interpolation))
+      mooseWarning("Negative face viscosity has been encountered. Value ",
+                   raw_value(face_mu),
+                   " at ",
+                   _face_info->faceCentroid(),
+                   " limiting it to 0!");
+    face_mu = 0;
+  }
 
   if (populate_a_coeffs)
   {
@@ -80,7 +125,47 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     }
   }
 
-  return -face_mu * dudn;
+  ADReal dudn_transpose = 0.0;
+  if (_complete_expansion)
+  {
+    // Computing the gradient from coupled variables
+    // Normally, we can do this with `_var.gradient(face, state)` but we will need the transpose
+    // gradient. So, we compute all at once
+    Moose::FaceArg face;
+    const bool skewness_correction =
+        (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+    if (onBoundary(*_face_info))
+      face = singleSidedFaceArg();
+    else
+      face = makeCDFace(*_face_info, skewness_correction);
+
+    ADRealTensorValue gradient;
+    if (_dim == 1)
+    {
+      const auto & grad_u = _u_var->gradient(face, state);
+      gradient = ADRealTensorValue(grad_u, ADRealVectorValue(0, 0, 0), ADRealVectorValue(0, 0, 0));
+    }
+    else if (_dim == 2)
+    {
+      const auto & grad_u = _u_var->gradient(face, state);
+      const auto & grad_v = _v_var->gradient(face, state);
+      gradient = ADRealTensorValue(grad_u, grad_v, ADRealVectorValue(0, 0, 0));
+    }
+    else // if (_dim == 3)
+    {
+      const auto & grad_u = _u_var->gradient(face, state);
+      const auto & grad_v = _v_var->gradient(face, state);
+      const auto & grad_w = _w_var->gradient(face, state);
+      gradient = ADRealTensorValue(grad_u, grad_v, grad_w);
+    }
+
+    // Getting transpose of the gradient matrix
+    const auto gradient_transpose = gradient.transpose();
+
+    dudn_transpose += gradient_transpose.row(_index) * _face_info->normal();
+  }
+
+  return -face_mu * (dudn + dudn_transpose);
 }
 
 void

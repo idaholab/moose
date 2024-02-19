@@ -10,11 +10,13 @@
 #include "PorousFlowThermalConductivityFromPorosity.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowThermalConductivityFromPorosity);
+registerMooseObject("PorousFlowApp", ADPorousFlowThermalConductivityFromPorosity);
 
+template <bool is_ad>
 InputParameters
-PorousFlowThermalConductivityFromPorosity::validParams()
+PorousFlowThermalConductivityFromPorosityTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowThermalConductivityBase::validParams();
+  InputParameters params = PorousFlowThermalConductivityBaseTempl<is_ad>::validParams();
   params.addRequiredParam<RealTensorValue>("lambda_s",
                                            "The thermal conductivity of the solid matrix material");
   params.addRequiredParam<RealTensorValue>("lambda_f",
@@ -28,28 +30,38 @@ PorousFlowThermalConductivityFromPorosity::validParams()
   return params;
 }
 
-PorousFlowThermalConductivityFromPorosity::PorousFlowThermalConductivityFromPorosity(
-    const InputParameters & parameters)
-  : PorousFlowThermalConductivityBase(parameters),
-    _la_s(getParam<RealTensorValue>("lambda_s")),
-    _la_f(getParam<RealTensorValue>("lambda_f")),
-    _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
-    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar"))
+template <bool is_ad>
+PorousFlowThermalConductivityFromPorosityTempl<
+    is_ad>::PorousFlowThermalConductivityFromPorosityTempl(const InputParameters & parameters)
+  : PorousFlowThermalConductivityBaseTempl<is_ad>(parameters),
+    _la_s(this->template getParam<RealTensorValue>("lambda_s")),
+    _la_f(this->template getParam<RealTensorValue>("lambda_f")),
+    _porosity_qp(this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity_qp")),
+    _dporosity_qp_dvar(is_ad ? nullptr
+                             : &this->template getMaterialProperty<std::vector<Real>>(
+                                   "dPorousFlow_porosity_qp_dvar"))
 {
   if (_num_phases != 1)
-    paramError("fluid_phase",
-               "The Dictator proclaims that the number of phases is ",
-               _dictator.numPhases(),
-               " whereas this material can only be used for single phase "
-               "simulations.  Be aware that the Dictator has noted your mistake.");
+    this->template paramError("fluid_phase",
+                              "The Dictator proclaims that the number of phases is ",
+                              _dictator.numPhases(),
+                              " whereas this material can only be used for single phase "
+                              "simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
+template <bool is_ad>
 void
-PorousFlowThermalConductivityFromPorosity::computeQpProperties()
+PorousFlowThermalConductivityFromPorosityTempl<is_ad>::computeQpProperties()
 {
   _la_qp[_qp] = _la_s * (1.0 - _porosity_qp[_qp]) + _la_f * _porosity_qp[_qp];
 
-  _dla_qp_dvar[_qp].assign(_num_var, RealTensorValue());
-  for (unsigned v = 0; v < _num_var; ++v)
-    _dla_qp_dvar[_qp][v] = (_la_f - _la_s) * _dporosity_qp_dvar[_qp][v];
+  if constexpr (!is_ad)
+  {
+    (*_dla_qp_dvar)[_qp].assign(_num_var, RealTensorValue());
+    for (const auto v : make_range(_num_var))
+      (*_dla_qp_dvar)[_qp][v] = (_la_f - _la_s) * (*_dporosity_qp_dvar)[_qp][v];
+  }
 }
+
+template class PorousFlowThermalConductivityFromPorosityTempl<false>;
+template class PorousFlowThermalConductivityFromPorosityTempl<true>;

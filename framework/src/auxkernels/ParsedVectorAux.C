@@ -41,12 +41,9 @@ ParsedVectorAux::validParams()
       false,
       "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
   params.addParam<std::vector<std::vector<std::string>>>(
-      "constant_names",
-      std::vector<std::vector<std::string>>(),
-      "Vector of constants used in the parsed function (use this for kB etc.)");
+      "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::vector<std::string>>>(
       "constant_expressions",
-      std::vector<std::vector<std::string>>(),
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
@@ -66,10 +63,6 @@ ParsedVectorAux::ParsedVectorAux(const InputParameters & parameters)
 {
   _func_F.resize(LIBMESH_DIM);
   _function.resize(LIBMESH_DIM);
-
-  if (getParam<std::vector<std::vector<std::string>>>("constant_names").size() !=
-      getParam<std::vector<std::vector<std::string>>>("constant_expressions").size())
-    paramError("constant_names", "Must be same length as constant_expressions");
 
   for (const auto i : make_range(Moose::dim))
   {
@@ -98,11 +91,19 @@ ParsedVectorAux::ParsedVectorAux(const InputParameters & parameters)
     setParserFeatureFlags(_func_F[i]);
 
     // add the constant expressions
-    if (getParam<std::vector<std::vector<std::string>>>("constant_names").size())
-      addFParserConstants(
-          _func_F[i],
-          getParam<std::vector<std::vector<std::string>>>("constant_names")[i],
-          getParam<std::vector<std::vector<std::string>>>("constant_expressions")[i]);
+    auto constant_names = isParamValid("constant_names")
+                              ? getParam<std::vector<std::vector<std::string>>>("constant_names")
+                              : std::vector<std::vector<std::string>>{};
+    auto constant_expressions =
+        isParamValid("constant_expressions")
+            ? getParam<std::vector<std::vector<std::string>>>("constant_expressions")
+            : std::vector<std::vector<std::string>>{};
+
+    if (constant_names.size() != constant_expressions.size())
+      paramError("constant_names", "Must be same length as constant_expressions");
+
+    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+      addFParserConstants(_func_F[i], constant_names[i], constant_expressions[i]);
 
     // parse function
     if (_func_F[i]->Parse(_function[i], variables) >= 0)

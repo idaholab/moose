@@ -81,7 +81,7 @@ ThermalContactAction::validParams()
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addParam<std::vector<AuxVariableName>>(
-      "save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
+      "save_in", {}, "The Auxiliary Variable to (optionally) save the boundary flux in");
   params.addRangeCheckedParam<Real>("gap_conductivity",
                                     1.0,
                                     "gap_conductivity>0",

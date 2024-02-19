@@ -22,7 +22,7 @@ First step is to define a mesh for the parameters, which is most easily done by 
 
 !listing parameter_mesh/create_mesh.i
 
-Running this input will create a `create_mesh_out.e` exodus file and `create_mesh_out_param_vec_0001.csv` CSV file. The CSV file is read by a [CSVReader.md] to create a vector-postprocessor of the parameter data. A ParameterMeshFunction then reads in the exodus file and retrieves the vector for the interpolation.
+Running this input will create a `create_mesh_out.e` exodus file and `create_mesh_out_param_vec_0001.csv` CSV file. The CSV file is read by a [CSVReaderVectorPostprocessor.md] to create a vector-postprocessor of the parameter data. A ParameterMeshFunction then reads in the exodus file and retrieves the vector for the interpolation.
 
 !listing parameter_mesh/parameter_mesh.i block=VectorPostprocessors Functions
 

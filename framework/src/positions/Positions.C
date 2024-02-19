@@ -9,15 +9,15 @@
 
 #include "Positions.h"
 #include "libmesh/parallel_algebra.h"
+#include "MooseMeshUtils.h"
 
 InputParameters
 Positions::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
 
-  // leverage reporter interface to keep track of consumers
-  params.addParam<ReporterName>("initial_positions",
-                                "Positions at the beginning of the simulation");
+  params.addParam<PositionsName>("initial_positions",
+                                 "Positions at the beginning of the simulation");
 
   // This parameter should be set by each derived class depending on whether the generation of
   // positions is replicated or distributed. We want positions to be replicated across all ranks
@@ -38,20 +38,24 @@ Positions::validParams()
 
 Positions::Positions(const InputParameters & parameters)
   : GeneralReporter(parameters),
+    // leverage reporter interface to keep track of consumers
     _initial_positions(isParamValid("initial_positions")
-                           ? &getReporterValue<std::vector<Point>>("initial_positions")
+                           ? &getReporterValueByName<std::vector<Point>>(
+                                 getParam<PositionsName>("initial_positions") + "/positions_1d")
                            : nullptr),
     // Positions will be replicated on every rank so transfers may query positions from all ranks
     _positions(declareValueByName<std::vector<Point>, ReporterVectorContext<Point>>(
         "positions_1d", REPORTER_MODE_REPLICATED)),
     _need_broadcast(getParam<bool>("auto_broadcast")),
-    _need_sort(getParam<bool>("auto_sort"))
+    _need_sort(getParam<bool>("auto_sort")),
+    _initialized(false)
 {
 }
 
 const Point &
 Positions::getPosition(unsigned int index, bool initial) const
 {
+  mooseAssert(initialized(initial), "Positions vector has not been initialized.");
   // Check sizes of inital positions
   if (initial && _initial_positions && (*_initial_positions).size() < index)
     mooseError("Initial positions is not sized or initialized appropriately");
@@ -62,7 +66,11 @@ Positions::getPosition(unsigned int index, bool initial) const
     if (_initial_positions && _positions.size() != (*_initial_positions).size())
       mooseError("Initial positions and current positions array length do not match");
     else if (_positions.size() < index)
-      mooseError("Positions retrieved with an out-of-bound index");
+      mooseError("Positions retrieved with an out-of-bound index: '",
+                 index,
+                 "' when there are only ",
+                 _positions.size(),
+                 " positions.");
   }
 
   if (initial && _initial_positions)
@@ -76,6 +84,15 @@ Positions::getPosition(unsigned int index, bool initial) const
 const Point &
 Positions::getNearestPosition(const Point & target, const bool initial) const
 {
+  mooseAssert(initialized(initial), "Positions vector has not been initialized.");
+  const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
+  return positions[getNearestPositionIndex(target, initial)];
+}
+
+unsigned int
+Positions::getNearestPositionIndex(const Point & target, const bool initial) const
+{
+  mooseAssert(initialized(initial), "Positions vector has not been initialized.");
   const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
   // To keep track of indetermination due to equidistant positions
   std::pair<int, int> conflict_index(-1, -1);
@@ -83,17 +100,16 @@ Positions::getNearestPosition(const Point & target, const bool initial) const
   // TODO Use faster & fancier machinery such as a KNN-partition
   std::size_t nearest_index = 0;
   auto nearest_distance_sq = std::numeric_limits<Real>::max();
-  for (const auto i : index_range(_positions))
+  for (const auto i : index_range(positions))
   {
-    const auto & pt = _positions[i];
+    const auto & pt = positions[i];
     if (MooseUtils::absoluteFuzzyLessThan((pt - target).norm_sq(), nearest_distance_sq))
     {
       nearest_index = i;
       nearest_distance_sq = (pt - target).norm_sq();
     }
     // Check that no two positions are equidistant to the target
-    else if (MooseUtils::absoluteFuzzyEqual((_positions[i] - target).norm_sq(),
-                                            nearest_distance_sq))
+    else if (MooseUtils::absoluteFuzzyEqual((positions[i] - target).norm_sq(), nearest_distance_sq))
       conflict_index = std::make_pair(cast_int<int>(i), cast_int<int>(nearest_index));
   }
 
@@ -101,13 +117,13 @@ Positions::getNearestPosition(const Point & target, const bool initial) const
   if (cast_int<int>(nearest_index) == conflict_index.second)
   {
     mooseWarning("Search for nearest position found at least two matches: " +
-                     Moose::stringify(_positions[conflict_index.first]) + " and " +
-                     Moose::stringify(_positions[nearest_index]),
+                     Moose::stringify(positions[conflict_index.first]) + " and " +
+                     Moose::stringify(positions[nearest_index]),
                  " for point " + Moose::stringify(target) + " at a distance of " +
                      std::to_string(std::sqrt(nearest_distance_sq)));
   }
 
-  return positions[nearest_index];
+  return nearest_index;
 }
 
 const std::vector<Point> &
@@ -218,7 +234,7 @@ void
 Positions::finalize()
 {
   // Gather up the positions vector on all ranks
-
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
   if (_need_broadcast)
     // The consumer/producer reporter interface can keep track of whether a reduction is needed
     // (for example if a consumer needs replicated data, but the producer is distributed) however,
@@ -228,4 +244,36 @@ Positions::finalize()
   // Sort positions by X then Y then Z
   if (_need_sort)
     std::sort(_positions.begin(), _positions.end());
+}
+
+Real
+Positions::getMinDistanceBetweenPositions() const
+{
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
+  // Dumb nested loops. We can revisit this once we have a KDTree for nearest position searching
+  // These nested loops are still faster than calling getNearestPositions on each position for now
+  Real min_distance_sq = std::numeric_limits<Real>::max();
+  for (const auto i1 : index_range(_positions))
+    for (auto i2 = i1 + 1; i2 < _positions.size(); i2++)
+      min_distance_sq = std::min(min_distance_sq, (_positions[i1] - _positions[i2]).norm_sq());
+  return std::sqrt(min_distance_sq);
+}
+
+bool
+Positions::arePositionsCoplanar() const
+{
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
+  return MooseMeshUtils::isCoPlanar(_positions);
+}
+
+bool
+Positions::initialized(bool initial) const
+{
+  if (initial && _initial_positions)
+    // We do not forward the 'initial' status as we are not currently looking
+    // to support two level nesting for initial positions
+    return _fe_problem.getPositionsObject(getParam<PositionsName>("initial_positions"))
+        .initialized(false);
+  else
+    return _initialized;
 }

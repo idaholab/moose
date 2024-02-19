@@ -31,9 +31,11 @@ LineSourceRayKernelTempl<is_ad>::validParams()
   params.addParam<PostprocessorName>(
       "postprocessor", 1, "A postprocessor whose value is multiplied by the line source");
   params.addParam<std::vector<std::string>>(
-      "ray_data_factor_names", "The names of the Ray data to scale the source by (if any)");
+      "ray_data_factor_names", {}, "The names of the Ray data to scale the source by (if any)");
   params.addParam<std::vector<std::string>>(
-      "ray_aux_data_factor_names", "The names of the Ray aux data to scale the source by (if any)");
+      "ray_aux_data_factor_names",
+      {},
+      "The names of the Ray aux data to scale the source by (if any)");
 
   params.declareControllable("value");
 

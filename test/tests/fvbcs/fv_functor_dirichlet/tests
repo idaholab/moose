@@ -1,10 +1,17 @@
 [Tests]
   design = 'FVFunctorDirichletBC.md'
-  issues = '#21374'
   [fv_functor_dirichlet]
     type = 'Exodiff'
     input = 'fv_functor_dirichlet.i'
     exodiff = 'fv_functor_dirichlet_out.e'
     requirement = 'The system shall allow the use of functors to set Dirichlet boundary values for FV.'
+    issues = '#21374'
+  []
+  [other_side]
+    type = 'CSVDiff'
+    input = 'fv_other_side.i'
+    csvdiff = 'fv_other_side_out_u_sample_0001.csv fv_other_side_out_v_sample_0001.csv'
+    requirement = 'The system shall allow the use of functors to set Dirichlet boundary values for FV evaluated on the other side of the sideset.'
+    issues = '#25933'
   []
 []

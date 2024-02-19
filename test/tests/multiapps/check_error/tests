@@ -46,7 +46,7 @@
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions_file="position1"'
 
     issues = "#1845 #3556 #5784"
-    requirement = "The system shall error when the number of sub app input files doesn't match the number of provided positions files."
+    requirement = "The system shall report an error when the number of sub app input files doesn't match the number of provided positions files."
   [../]
 
   [./both_positions]
@@ -56,7 +56,7 @@
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/positions_file="position1"'
 
     issues = "#1845 #3556 #5784"
-    requirement = "The system shall error when both positions are provided in the input file along with a separate file of positions."
+    requirement = "The system shall report an error when both positions are provided in the input file along with a separate file of positions."
   [../]
 
   [./bad_positions]
@@ -66,7 +66,7 @@
     cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions.txt"'
 
     issues = "#1845 #3556 #5784"
-    requirement = "The system shall error when the multiapp positions file is malformed."
+    requirement = "The system shall report an error when the multiapp positions file is malformed."
   [../]
 
   [./sub_cycling_and_catch_up]
@@ -76,6 +76,6 @@
     cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
 
     issues = "#6127"
-    requirement = "The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true."
+    requirement = "The system shall report an error when the Multiapp parameter sub_cycling and catch_up are both set to true."
   [../]
 []

@@ -127,13 +127,15 @@ INSFVBCInterface::setupFlowBoundaries(T & insfv_fk, const BoundaryID bnd_id)
       for (auto * flow_bc : flow_bcs)
         mooseAssert(dynamic_cast<INSFVFullyDevelopedFlowBC *>(flow_bc),
                     "If one BC is a fully developed flow BC, then all other flow BCs on that "
-                    "boundary must also be fully developed flow BCs");
+                    "boundary must also be fully developed flow BCs. This flow BC is not: " +
+                        dynamic_cast<MooseObject *>(flow_bc)->name());
     }
     else
       for (auto * flow_bc : flow_bcs)
         mooseAssert(!dynamic_cast<INSFVFullyDevelopedFlowBC *>(flow_bc),
                     "If one BC is not a fully developed flow BC, then all other flow BCs on that "
-                    "boundary must also not be fully developed flow BCs");
+                    "boundary must also not be fully developed flow BCs. This flow BC is not: " +
+                        dynamic_cast<MooseObject *>(flow_bc)->name());
 #else
     }
 #endif

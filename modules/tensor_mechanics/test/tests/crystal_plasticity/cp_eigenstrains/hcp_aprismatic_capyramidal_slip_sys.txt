@@ -1,0 +1,1 @@
+../hcp_single_crystal/hcp_aprismatic_capyramidal_slip_sys.txt

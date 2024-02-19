@@ -2,7 +2,7 @@
 
 Notation and definitions are described in [geochemistry_nomenclature.md].
 
-The core material below follows Chapter 2 of [!cite](prausnitz).  Fugacity coefficients follow [!cite](spycher1988) as well as Appendix B of [!cite](toughreact).  Section 3.1.3.3 of [!cite](bethke_2007) offers some further equations, but I find them difficult to undrestand.
+The core material below follows Chapter 2 of [!cite](prausnitz).  Fugacity coefficients follow [!cite](spycher1988) as well as Appendix B of [!cite](toughreact).  Section 3.1.3.3 of [!cite](bethke_2007) offers some further equations, but I find them difficult to understand.
 
 The chemical potential of a gas species, which may be part of a gas mixture, is
 \begin{equation}
@@ -51,7 +51,7 @@ mass-action equilibrium is
 \begin{equation}
 K_{j} = \frac{\prod_{m}f_{m}^{\nu_{m}}}{\gamma_{j}m_{j}} \ .
 \end{equation}
-Here $K_{j}(T)$ is given in the [database](geochemistry/database/index.md) and $f_{m}$ is the fugacity of the $m^{\mathrm{th}}$ gas species in the mixture, computed using the above formulae.  Athough there is a dimensional mismatch between the left and right sides of this equation, I believe it is ignored, as $f^{0}_{m}$ and $\mu^{0}_{m}$ have been lumped into $K_{j}$.  All that is required is to consistently measure $P$ in bars and $T$ in Kelvin.
+Here $K_{j}(T)$ is given in the [database](geochemistry/database/index.md) and $f_{m}$ is the fugacity of the $m^{\mathrm{th}}$ gas species in the mixture, computed using the above formulae.  Although there is a dimensional mismatch between the left and right sides of this equation, I believe it is ignored, as $f^{0}_{m}$ and $\mu^{0}_{m}$ have been lumped into $K_{j}$.  All that is required is to consistently measure $P$ in bars and $T$ in Kelvin.
 
 
 !bibtex bibliography

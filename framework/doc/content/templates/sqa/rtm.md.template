@@ -91,27 +91,45 @@ includes:
 - The steps to validate the test result including any acceptance criteria.
 !template-end!
 
+### Changelog Issue Revisions id=log-revisions
+
+Errors in changelog references can sometimes occur as a result of typos or conversion errors. If
+any need to be noted by the development team, they will be noted here.
+
+!template! field key=log-revisions
+If errors are found in issue references related to the changelog (e.g., commit history), these
+should be noted here. The commit in which the incorrect issue reference occurs should be listed, and
+the correct issue should be added alongside each entry. Relevant links to all items are required.
+An example of this is shown below:
+
+!table
+| MOOSE Commit | Incorrect Referenced Issue | Correct Referenced Issue |
+| - | - | - |
+| [48db61](https://github.com/idaholab/moose/commit/48db61307ed87b58a96e944215f13378138cf7bc) | idaholab/sockeye#19845 | [idaholab/sockeye#130](https://github.inl.gov/ncrc/sockeye/issues/130) |
+
+!template-end!
+
 ## System Requirements Traceability id=system-requirements
 
 ### Functional Requirements id=functional-requirements
 
 !template field key=functional-requirements
-Include the tracebility matrix for functional requirements.
+Include the traceability matrix for functional requirements.
 
 ### Usability Requirements id=usability-requirements
 
 !template field key=usability-requirements
-Include the tracebility matrix for usability requirements.
+Include the traceability matrix for usability requirements.
 
 ### Performance Requirements id=performance-requirements
 
 !template field key=performance-requirements
-Include the tracebility matrix for performance requirements.
+Include the traceability matrix for performance requirements.
 
 ### System Interface Requirements id=performance-requirements
 
 !template field key=system-interfaces-requirements
-Include the tracebility matrix for system interface requirements.
+Include the traceability matrix for system interface requirements.
 
 ## References id=references
 

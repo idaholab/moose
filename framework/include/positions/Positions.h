@@ -32,11 +32,30 @@ public:
   const std::vector<std::vector<std::vector<std::vector<Point>>>> & getPositionsVector4D() const;
   ///}
 
+  /// Get the number of positions in the Positions object
+  unsigned int getNumPositions(bool initial = false) const
+  {
+    mooseAssert(initialized(initial), "Position should be initialized");
+    return (initial && _initial_positions) ? _initial_positions->size() : _positions.size();
+  }
+
   /// Getter for a single position at a known index
   const Point & getPosition(unsigned int index, bool initial) const;
 
   /// Find the nearest Position for a given point
   const Point & getNearestPosition(const Point & target, bool initial) const;
+
+  /// Find the nearest Position index for a given point
+  unsigned int getNearestPositionIndex(const Point & target, bool initial) const;
+
+  /// Find the minimum distance between positions
+  Real getMinDistanceBetweenPositions() const;
+
+  /// Report if the positions are co-planar or not
+  bool arePositionsCoplanar() const;
+
+  /// Whether the positions object has been initialized
+  bool initialized(bool initial) const;
 
 protected:
   /// In charge of computing / loading the positions.
@@ -87,4 +106,7 @@ protected:
   /// are not sorted, then we switch to sorted positions, the mapping might be odd
   /// User may have also sorted their positions file, their input parameter etc
   const bool _need_sort;
+
+  /// Whether the positions object has been initialized. This must be set by derived objects
+  bool _initialized;
 };

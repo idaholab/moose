@@ -33,7 +33,7 @@ J &=& \phi_j\frac{\partial}{\partial\eta}\left[\frac{dh}{d\eta}\sum_{c=1}^N\left
 
 #### Off-diagonal
 
-Since the partial derivative of phase concentrations $c_a$ w.r.t global concentration $c$ is hidden when computing the $\frac \partial{\partial u_j}$ derivative of $R$, where $u\equiv c$, the derivative w.r.t $c$ must be calculated separetely from any other variable dependence. We need to
+Since the partial derivative of phase concentrations $c_a$ w.r.t global concentration $c$ is hidden when computing the $\frac \partial{\partial u_j}$ derivative of $R$, where $u\equiv c$, the derivative w.r.t $c$ must be calculated separately from any other variable dependence. We need to
 apply the chain rule and will again only keep terms with the
 $\frac{\partial c}{\partial u_j}\frac{\partial}{\partial c} = \phi_j \frac{\partial}{\partial c}$
 derivative.

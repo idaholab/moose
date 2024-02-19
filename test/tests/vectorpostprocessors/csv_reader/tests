@@ -1,5 +1,5 @@
 [Tests]
-  design = 'CSVReader.md'
+  design = 'CSVReaderVectorPostprocessor.md'
 
   [read]
     type = CSVDiff
@@ -33,7 +33,7 @@
     recover = false
 
     issues = '#9167'
-    requirement = 'The system shall error if the broadcast CSV data does not match on all ranks in a '
+    requirement = 'The system shall report an error if the broadcast CSV data does not match on all ranks in a '
                   'parallel job.'
   []
 

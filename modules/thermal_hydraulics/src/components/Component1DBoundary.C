@@ -37,14 +37,16 @@ Component1DBoundary::setupMesh()
 
   if (_nodes.size() > 0)
   {
+    _elem = _elems[0];
+    _side = _sides[0];
     _node = _nodes[0];
     _normal = _normals[0];
 
-    // create a nodeset/sideset corresponding to the node of the connected component end
+    // create a sideset corresponding to the side of the connected component end
     const BoundaryID boundary_id = mesh().getNextBoundaryId();
     auto & binfo = mesh().getMesh().get_boundary_info();
-    binfo.add_node(_node, boundary_id);
-    binfo.nodeset_name(boundary_id) = name();
+    binfo.add_side(_elem, _side, boundary_id);
+    binfo.sideset_name(boundary_id) = name();
   }
 }
 

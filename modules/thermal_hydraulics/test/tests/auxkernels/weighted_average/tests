@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19679'
+  design = 'WeightedAverageAux.md'
   [weighted_average]
     type = 'CSVDiff'
     input = 'weighted_average.i'
     csvdiff = 'weighted_average_out.csv'
+    requirement = 'The system shall be able to compute the weighted average of several fields.'
   []
 []

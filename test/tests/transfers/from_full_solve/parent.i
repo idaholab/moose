@@ -10,35 +10,35 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_full]
-  [../]
+  [from_full]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,20 +55,20 @@
 []
 
 [MultiApps]
-  [./full_solve]
+  [full_solve]
     type = FullSolveMultiApp
     app_type = MooseTestApp
     execute_on = initial
     positions = '0 0 0'
     input_files = sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_full]
-    type = MultiAppNearestNodeTransfer
+  [from_full]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = full_solve
     source_variable = u
     variable = from_full
-  [../]
+  []
 []

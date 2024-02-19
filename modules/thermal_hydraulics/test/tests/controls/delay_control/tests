@@ -1,8 +1,12 @@
 [Tests]
+  # relap-7#438
+  issues = '#26336'
+  design = 'DelayControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to delay a control signal in time.'
   []
 
   [err.negative_tau]
@@ -10,5 +14,6 @@
     input = 'test.i'
     cli_args = 'ControlLogic/delay_ctrl/tau=-1'
     expect_err = "Negative values of 'tau' are not allowed\."
+    requirement = 'The system shall report an error if the delay for the action of a control is set by the user to be negative.'
   []
 []

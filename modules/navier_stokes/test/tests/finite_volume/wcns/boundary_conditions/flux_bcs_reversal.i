@@ -389,7 +389,7 @@ inlet_velocity = 0.1
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'cp k rho'
@@ -402,7 +402,7 @@ inlet_velocity = 0.1
   #  pressure = pressure
   #[]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
   []

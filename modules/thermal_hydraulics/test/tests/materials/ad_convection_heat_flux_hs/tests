@@ -1,7 +1,11 @@
 [Tests]
+  # idaholab/sockeye#166
+  issues = '#26411'
+  design = 'ADConvectionHeatFluxHSMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'ad_convection_heat_flux_hs.i'
     csvdiff = 'ad_convection_heat_flux_hs_out.csv'
+    requirement = 'The system shall be able to compute the convective heat flux in a heat structure and store it as a material property to be able to propagate derivatives through automatic differentiation.'
   []
 []

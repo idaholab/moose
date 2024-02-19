@@ -1,4 +1,5 @@
 [Tests]
+  issues = '#19814'
   [layered_area_change]
     type = Exodiff
     input = layered_flow_area_2D.i

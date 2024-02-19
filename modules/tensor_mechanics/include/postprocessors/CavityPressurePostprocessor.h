@@ -24,7 +24,6 @@ public:
 
   virtual void execute() override {}
 
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
 
 protected:

@@ -20,7 +20,20 @@ HeatStructureCylindrical::validParams()
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each radial region [m]");
   params.addRequiredParam<std::vector<unsigned int>>("n_part_elems",
                                                      "Number of elements of each radial region");
-  params.addParam<std::vector<std::string>>("materials", "Material name for each radial region");
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "materials",
+      "Material name for each transverse region",
+      "HeatStructureMaterials are deprecated. Please make corresponding SolidProperties objects "
+      "and replace the heat structure parameter 'materials' with the parameters 'solid_properties' "
+      "and 'solid_properties_T_ref'. See heat structure documentation for more information.");
+  params.addParam<std::vector<UserObjectName>>(
+      "solid_properties", "Solid properties object name for each radial region");
+  params.addParam<std::vector<Real>>(
+      "solid_properties_T_ref",
+      {},
+      "Density reference temperatures for each radial region. This is required if "
+      "'solid_properties' is provided. The density in each region will be a constant value "
+      "computed by evaluating the density function at the reference temperature.");
   params.addParam<Real>("num_rods", 1.0, "Number of rods represented by this heat structure");
   params.addParam<Real>("inner_radius", 0., "Inner radius of the heat structure [m]");
 
@@ -37,7 +50,8 @@ HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & param
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
 
-  _material_names = getParam<std::vector<std::string>>("materials");
+  _material_names = isParamValid("materials") ? getParam<std::vector<std::string>>("materials")
+                                              : std::vector<std::string>{};
 
   _width = getParam<std::vector<Real>>("widths");
   _total_width = std::accumulate(_width.begin(), _width.end(), 0.0);
@@ -70,4 +84,10 @@ HeatStructureCylindrical::check() const
   checkEqualSize<std::string, Real>("names", "widths");
   if (isParamValid("materials"))
     checkEqualSize<std::string, std::string>("names", "materials");
+  if (isParamValid("solid_properties"))
+  {
+    checkEqualSize<UserObjectName, std::string>("solid_properties", "names");
+    checkEqualSize<UserObjectName, Real>("solid_properties", "solid_properties_T_ref");
+  }
+  checkMutuallyExclusiveParameters({"materials", "solid_properties"}, false);
 }

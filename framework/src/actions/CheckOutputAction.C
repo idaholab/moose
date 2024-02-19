@@ -143,8 +143,5 @@ CheckOutputAction::checkPerfLogOutput()
   // If a Console outputter is found then all the correct handling of performance logs are
   // handled within the object(s), so do nothing
   if (!has_console)
-  {
-    Moose::perf_log.disable_logging();
     libMesh::perflog.disable_logging();
-  }
 }

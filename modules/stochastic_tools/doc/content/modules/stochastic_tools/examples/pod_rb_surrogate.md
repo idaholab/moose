@@ -196,7 +196,7 @@ Since the sub-applications use test objects, one has to allow the executioner to
 by specifying the following argument on the command line:
 
 ```
-cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
+cd moose/modules/stochastic_tools/examples/surrogates/pod_rb/2d_multireg
 ../../../../stochastic_tools-opt -i trainer.i --allow-test-objects
 ```
 
@@ -204,7 +204,7 @@ The same is true for the surrogate input file as well, therefore one needs to
 start the executions as follows:
 
 ```
-cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
+cd moose/modules/stochastic_tools/examples/surrogates/pod_rb/2d_multireg
 ../../../../stochastic_tools-opt -i surr.i --allow-test-objects
 ```
 

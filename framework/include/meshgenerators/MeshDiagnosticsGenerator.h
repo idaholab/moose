@@ -56,18 +56,6 @@ private:
    */
   void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool problem_detected) const;
 
-  /**
-   * Utility routine to re-order a vector of nodes so that they form a valid quad
-   * @param nodes the vector containing the nodes to re-order
-   * @param origin the center of the clock (circle to align nodes around)
-   * @param clock_start the start of the clock
-   * @param axis the rotation axis
-   */
-  void reorderNodes(std::vector<const Node *> & nodes,
-                    const Point * origin,
-                    const Point * clock_start,
-                    Point & axis) const;
-
   /// whether to check that sidesets are consistently oriented using neighbor subdomains
   const MooseEnum _check_sidesets_orientation;
   /// whether to check element volumes

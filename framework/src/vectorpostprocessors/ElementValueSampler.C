@@ -76,7 +76,7 @@ ElementValueSampler::finalize()
 void
 ElementValueSampler::threadJoin(const UserObject & y)
 {
-  const ElementValueSampler & vpp = static_cast<const ElementValueSampler &>(y);
+  const auto & vpp = static_cast<const ElementValueSampler &>(y);
 
   SamplerBase::threadJoin(vpp);
 }

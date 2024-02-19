@@ -19,7 +19,7 @@ For large deformation problems the wrapper uses the MOOSE material to provide
 the small deformation/engineering stress update, ignoring the existing
 finite rotations update used in the current kernels.  Instead, this
 wrapper applies the objective integration described in the
-[ComputeLagraignaObjectiveStress](ComputeLagrangianObjectiveStress.md)
+[ComputeLagrangianObjectiveStress](ComputeLagrangianObjectiveStress.md)
 object to convert the engineering stress provided by the MOOSE material
 to the Cauchy and Piola-Kirchhoff stresses needed by the Lagrangian kernels.
 This process is adequate for most materials, but will not produce the

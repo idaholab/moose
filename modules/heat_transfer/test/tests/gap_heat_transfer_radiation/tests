@@ -1,11 +1,33 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'gap_heat_transfer_radiation_test.i'
     exodiff = 'gap_heat_transfer_radiation_test_out.e'
     abs_zero = 1e-06
-    requirement = 'The system shall be able to compute heat flux across a gap using the ThermalContact methods'
+    requirement = 'The system shall be able to compute radiative heat flux across a gap using the ThermalContact methods.'
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
-  [../]
+  []
+  [cylinder]
+    type = CSVDiff
+    input = cylinder.i
+    csvdiff = cylinder_out.csv
+    override_columns = 'error_1 error_2'
+    override_abs_zero = '1e-9 1e-9'
+    override_rel_err = '5e-3 5e-3'
+    requirement = 'The system shall be able to compute radiative heat flux across a cylindrical gap using the ThermalContact methods.'
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#26627'
+  []
+  [sphere]
+    type = CSVDiff
+    input = sphere.i
+    csvdiff = sphere_out.csv
+    override_columns = 'error_1 error_2'
+    override_abs_zero = '1e-9 1e-9'
+    override_rel_err = '5e-3 5e-3'
+    requirement = 'The system shall be able to compute radiative heat flux across a spherical gap using the ThermalContact methods.'
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#26627'
+  []
 []

@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'MassFreeConstraint.md'
   [mass_free_constraint]
     type = 'PetscJacobianTester'
     input = 'mass_free_constraint.i'
@@ -7,5 +10,6 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = "The system shall be able to compute numerically accurate Jacobians when constraining the momentum equation on selected nodes."
   []
 []

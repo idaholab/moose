@@ -1,7 +1,11 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'SetComponentRealValueControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to set a component floating point parameter to the value of a floating point control data.'
   []
 []

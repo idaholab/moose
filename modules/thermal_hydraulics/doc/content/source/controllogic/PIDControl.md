@@ -1,8 +1,8 @@
 # PIDControl
 
-!syntax description /Controls/PIDControl
+!syntax description /ControlLogic/PIDControl
 
-The reference or target value is set by the [!param](/Controls/PIDControl/set_point) parameter [ControlData.md].
+The reference or target value is set by the [!param](/ControlLogic/PIDControl/set_point) parameter [ControlData.md].
 The value of the `output` data is set by:
 
 !equation
@@ -16,8 +16,8 @@ the `set point` and the `value` are user-selected [ControlData.md].
 !alert note
 To control a controllable value directly instead of a [ControlData.md], use the [PIDTransientControl.md]
 
-!syntax parameters /Controls/PIDControl
+!syntax parameters /ControlLogic/PIDControl
 
-!syntax inputs /Controls/PIDControl
+!syntax inputs /ControlLogic/PIDControl
 
-!syntax children /Controls/PIDControl
+!syntax children /ControlLogic/PIDControl

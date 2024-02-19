@@ -25,61 +25,65 @@ AddMetaDataGenerator::validParams()
       "This mesh generator assigns extraneous mesh metadata to the input mesh");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
 
-  params.addParam<std::vector<std::string>>("real_scalar_metadata_names",
-                                            "Names of the real scalar mesh metadata.");
-  params.addParam<std::vector<Real>>("real_scalar_metadata_values",
-                                     "Values of the real scalar mesh metadata.");
-  params.addParam<std::vector<std::string>>("uint_scalar_metadata_names",
-                                            "Names of the unsigned integer scalar mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "real_scalar_metadata_names", {}, "Names of the real scalar mesh metadata.");
+  params.addParam<std::vector<Real>>(
+      "real_scalar_metadata_values", {}, "Values of the real scalar mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "uint_scalar_metadata_names", {}, "Names of the unsigned integer scalar mesh metadata.");
   params.addParam<std::vector<unsigned int>>(
-      "uint_scalar_metadata_values", "Values of the unsigned integer scalar mesh metadata.");
-  params.addParam<std::vector<std::string>>("int_scalar_metadata_names",
-                                            "Names of the integer scalar mesh metadata.");
-  params.addParam<std::vector<int>>("int_scalar_metadata_values",
-                                    "Values of the integer scalar mesh metadata.");
-  params.addParam<std::vector<std::string>>("dof_id_type_scalar_metadata_names",
-                                            "Names of the dof_id_type scalar mesh metadata.");
-  params.addParam<std::vector<dof_id_type>>("dof_id_type_scalar_metadata_values",
-                                            "Values of the dof_id_type scalar mesh metadata.");
+      "uint_scalar_metadata_values", {}, "Values of the unsigned integer scalar mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "int_scalar_metadata_names", {}, "Names of the integer scalar mesh metadata.");
+  params.addParam<std::vector<int>>(
+      "int_scalar_metadata_values", {}, "Values of the integer scalar mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "dof_id_type_scalar_metadata_names", {}, "Names of the dof_id_type scalar mesh metadata.");
+  params.addParam<std::vector<dof_id_type>>(
+      "dof_id_type_scalar_metadata_values", {}, "Values of the dof_id_type scalar mesh metadata.");
   params.addParam<std::vector<std::string>>("subdomain_id_type_scalar_metadata_names",
+                                            {},
                                             "Names of the subdomain_id_type scalar mesh metadata.");
   params.addParam<std::vector<subdomain_id_type>>(
       "subdomain_id_type_scalar_metadata_values",
+      {},
       "Values of the subdomain_id_type scalar mesh metadata.");
-  params.addParam<std::vector<std::string>>("boolean_scalar_metadata_names",
-                                            "Names of the boolean scalar mesh metadata.");
-  params.addParam<std::vector<bool>>("boolean_scalar_metadata_values",
-                                     "Values of the boolean scalar mesh metadata.");
-  params.addParam<std::vector<std::string>>("point_scalar_metadata_names",
-                                            "Names of the point scalar mesh metadata.");
-  params.addParam<std::vector<Point>>("point_scalar_metadata_values",
-                                      "Values of the point scalar mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "boolean_scalar_metadata_names", {}, "Names of the boolean scalar mesh metadata.");
+  params.addParam<std::vector<bool>>(
+      "boolean_scalar_metadata_values", {}, "Values of the boolean scalar mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "point_scalar_metadata_names", {}, "Names of the point scalar mesh metadata.");
+  params.addParam<std::vector<Point>>(
+      "point_scalar_metadata_values", {}, "Values of the point scalar mesh metadata.");
 
-  params.addParam<std::vector<std::string>>("real_vector_metadata_names",
-                                            "Names of the real vector mesh metadata.");
-  params.addParam<std::vector<std::vector<Real>>>("real_vector_metadata_values",
-                                                  "Values of the real vector mesh metadata.");
-  params.addParam<std::vector<std::string>>("uint_vector_metadata_names",
-                                            "Names of the unsigned integer vector mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "real_vector_metadata_names", {}, "Names of the real vector mesh metadata.");
+  params.addParam<std::vector<std::vector<Real>>>(
+      "real_vector_metadata_values", {}, "Values of the real vector mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "uint_vector_metadata_names", {}, "Names of the unsigned integer vector mesh metadata.");
   params.addParam<std::vector<std::vector<unsigned int>>>(
-      "uint_vector_metadata_values", "Values of the unsigned integer vector mesh metadata.");
-  params.addParam<std::vector<std::string>>("int_vector_metadata_names",
-                                            "Names of the integer vector mesh metadata.");
-  params.addParam<std::vector<std::vector<int>>>("int_vector_metadata_values",
-                                                 "Values of the integer vector mesh metadata.");
-  params.addParam<std::vector<std::string>>("dof_id_type_vector_metadata_names",
-                                            "Names of the dof_id_type vector mesh metadata.");
+      "uint_vector_metadata_values", {}, "Values of the unsigned integer vector mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "int_vector_metadata_names", {}, "Names of the integer vector mesh metadata.");
+  params.addParam<std::vector<std::vector<int>>>(
+      "int_vector_metadata_values", {}, "Values of the integer vector mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "dof_id_type_vector_metadata_names", {}, "Names of the dof_id_type vector mesh metadata.");
   params.addParam<std::vector<std::vector<dof_id_type>>>(
-      "dof_id_type_vector_metadata_values", "Values of the dof_id_type vector mesh metadata.");
+      "dof_id_type_vector_metadata_values", {}, "Values of the dof_id_type vector mesh metadata.");
   params.addParam<std::vector<std::string>>("subdomain_id_type_vector_metadata_names",
+                                            {},
                                             "Names of the subdomain_id_type vector mesh metadata.");
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "subdomain_id_type_vector_metadata_values",
+      {},
       "Values of the subdomain_id_type vector mesh metadata.");
-  params.addParam<std::vector<std::string>>("point_vector_metadata_names",
-                                            "Names of the Point vector mesh metadata.");
-  params.addParam<std::vector<std::vector<Point>>>("point_vector_metadata_values",
-                                                   "Values of the Point vector mesh metadata.");
+  params.addParam<std::vector<std::string>>(
+      "point_vector_metadata_names", {}, "Names of the Point vector mesh metadata.");
+  params.addParam<std::vector<std::vector<Point>>>(
+      "point_vector_metadata_values", {}, "Values of the Point vector mesh metadata.");
 
   return params;
 }

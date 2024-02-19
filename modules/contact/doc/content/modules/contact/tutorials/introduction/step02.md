@@ -17,7 +17,7 @@ based contact problem from the previous step) to a mortar formulation. Most of
 the extra work is performed by the Contact action.
 
 MOOSE's mortar based contact uses Lagrange multipliers for the enforcement of
-the contact constraints. These Lagrange multiplieres are additional solution
+the contact constraints. These Lagrange multipliers are additional solution
 variables (added by the Contact action) that live on lower dimensional
 subdomains along the contact interfaces.
 
@@ -55,8 +55,8 @@ function in mortar contact.
 
 Let's look at the penetration variable again:
 
-> Visualize the penetration variable. You may have to rescale the visualiztion
-> to start the color scale at 0. Negative pentrations are not of interest here
+> Visualize the penetration variable. You may have to rescale the visualization
+> to start the color scale at 0. Negative penetrations are not of interest here
 > (they effectively are the gap width)
 
 You should see a maximum interpenetration of about 5.1e-9. That's quite an

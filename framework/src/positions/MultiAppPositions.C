@@ -88,4 +88,5 @@ MultiAppPositions::initialize()
       }
     }
   }
+  _initialized = true;
 }

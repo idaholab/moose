@@ -183,6 +183,25 @@ journal = {International Journal for Numerical Methods in Engineering},
 }
 ```
 
+### Thermal Hydraulics
+
+This paper gives an overview of the MOOSE Thermal Hydraulics module (THM):
+
+```
+@article{hansel2024,
+  author = {Joshua Hansel and David Andrs and Lise Charlot and Guillaume Giudicelli},
+  title = {The {MOOSE} Thermal Hydraulics Module},
+  journal = {Journal of Open Source Software},
+  publisher = {The Open Journal},
+  year = {2024},
+  volume = {9},
+  number = {94},
+  pages = {6146},
+  doi = {10.21105/joss.06146},
+  url = {https://doi.org/10.21105/joss.06146}
+}
+```
+
 ### Peridynamics
 
 The following papers document the formulations used in the MOOSE Peridynamics module.
@@ -347,18 +366,7 @@ journal = {Earthquake Engineering and Structural Dynamics},
 
 ### Electromagnetics Module
 
-The following PhD dissertation documents the initial development, function, verification, and validation
-of the electromagnetics module.
-
-```
-@phdthesis{icenhour2023electromagnetics,
-  author = {Icenhour, Casey T.},
-  title = {Development and Validation of Open Source Software for Electromagnetics Simulation and Multiphysics Coupling},
-  school = {North Carolina State University},
-  year = {2023},
-  url = {https://www.lib.ncsu.edu/resolver/1840.20/40985}
-}
-```
+!include modules/electromagnetics/index.md start=em-citation-start end=em-citation-end
 
 ### Stochastic Tools Module
 

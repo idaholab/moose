@@ -1,7 +1,11 @@
 [Tests]
+  # idaholab/sockeye#56
+  issues = '#26411'
+  design = 'ADMaterialFunctionProductMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'ad_material_function_product.i'
     csvdiff = 'ad_material_function_product_out.csv'
+    requirement = 'The system shall be able to multiply a function by a material property and define the product as a material property.'
   []
 []

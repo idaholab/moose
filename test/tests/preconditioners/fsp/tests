@@ -36,9 +36,28 @@
     []
   []
   [missing_var_in_split]
-    requirement = 'The system shall error if a user has forgotten a variable in their field splits.'
+    requirement = 'The system shall report an error if a user has forgotten a variable in their field splits.'
     input = 'missing-var-in-split.i'
     type = RunException
-    expect_err = 'Local split size sum.*and local system matrix size.*do not match. Did you forget a variable or block in one of your splits?'
+    expect_err = 'Make sure that you have non-overlapping complete sets for variables'
+  []
+  [nested]
+    requirement = 'The system shall support nested field splits.'
+    input = 'nested-split.i'
+    exodiff = 'nested-split_out.e'
+    type = Exodiff
+  []
+  [nested_error]
+    requirement = 'The system shall error if there is an inconsistent covering of degrees of freedom in a nested field split.'
+    input = 'nested-split.i'
+    cli_args = "Outputs/exodus=false Preconditioning/FSP/u_diri/sides='left'"
+    type = RunException
+    expect_err = 'consistency in sides/unsides'
+  []
+  [unside_by_var]
+    requirement = 'The system shall be able to selectively remove degrees of freedom from a field spit by variable by boundary.'
+    input = 'unside-by-var.i'
+    exodiff = 'unside-by-var_out.e'
+    type = Exodiff
   []
 []

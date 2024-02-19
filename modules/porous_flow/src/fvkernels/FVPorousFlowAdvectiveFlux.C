@@ -70,9 +70,9 @@ FVPorousFlowAdvectiveFlux::computeQpResidual()
   ADRealGradient pressure_grad;
   ADRealTensorValue mobility;
 
-  for (unsigned int p = 0; p < _num_phases; ++p)
+  for (const auto p : make_range(_num_phases))
   {
-    // If we are on a boundary face, use the reconstructed gradient computed in _grad_p
+    // If we are on a boundary face, use the gradient computed in _grad_p
     if (onBoundary(*_face_info))
     {
       const auto & gradp = -_grad_p[_qp][p];

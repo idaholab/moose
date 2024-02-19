@@ -97,7 +97,7 @@ Evaluating a polynomial chaos surrogate model is exactly the same as any other t
 
 The points to compute the sensitivity can be defined explicitly by specifying the [!param](/Reporters/PolynomialChaosReporter/local_sensitivity_points) parameter, and/or using a sampler by specifying the [!param](/Reporters/PolynomialChaosReporter/local_sensitivity_sampler). It is vital that the columns of the points match with the distributions defined from the original trainer.
 
-Sobol statistics are a metric of the global sensitivity of each parameter, or a combination of parameters, see [SobolReporter.md] for more details. These are computed by setting the [!param](/Reporters/PolynomialChaosReporter/include_sobol) parameter to `true`. This will compute total, first-, and second-order Sobol indicies.
+Sobol statistics are a metric of the global sensitivity of each parameter, or a combination of parameters, see [SobolReporter.md] for more details. These are computed by setting the [!param](/Reporters/PolynomialChaosReporter/include_sobol) parameter to `true`. This will compute total, first-, and second-order Sobol indices.
 
 !listing examples/surrogates/poly_chaos_uniform.i block=stats
 

@@ -98,7 +98,7 @@ The approach is based on the orthogonal decomposition of the linearized strain t
 \begin{equation}
 \varepsilon = \varepsilon_S + \varepsilon_D,~~~~\varepsilon_D = \frac{1}{n}tr(\varepsilon)I,~~~~\varepsilon_D = \varepsilon - \frac{1}{n}tr(\varepsilon)I
 \end{equation}
-werhe $I$ deontes the n-dimensional identity tensor.
+where $I$ denotes the n-dimensional identity tensor.
 
 $\psi^{+}$ and $\psi^{-}$ is defined as
 \begin{equation}
@@ -127,7 +127,7 @@ $\psi^{+}$ and $\psi^{-}$ is defined as
 \psi^{-} = \frac{1}{2} \boldsymbol{\sigma}^{-} : \boldsymbol{\varepsilon}.
 \end{equation}
 
-The compressive and tensile parts of the stress are computed from postive and negative projection tensors (computed from the spectral decomposition) according to
+The compressive and tensile parts of the stress are computed from positive and negative projection tensors (computed from the spectral decomposition) according to
 \begin{equation}
 	\boldsymbol{\sigma}^+ = \mathbf{P}^+ \boldsymbol{\sigma}_0
 \end{equation}
@@ -231,7 +231,7 @@ The stress equilibrium and damage evolution equations are also modified to accou
 
 ## PETSc SNES variational inequalities solver option
 
-Alternatively, the damage irreversibility condition can be enforced by using PETSc's SNES variational inequalities (VI) solver. In order to use PETSc's VI solver, upper and lower bounds for damage variable should be provided. Specifically, [`ConstantBoundsAux`](/ConstantBoundsAux.md) can be used to set the upper bound to be 1. [`VariableOldValueBoundsAux`](/VariableOldValueBoundsAux.md) can be used to set the lower bound to be the old value. Note that in order for these bounds to have an effect, the user has to specify the
+Alternatively, the damage irreversibility condition can be enforced by using PETSc's SNES variational inequalities (VI) solver. In order to use PETSc's VI solver, upper and lower bounds for damage variable should be provided. Specifically, [`ConstantBounds`](/ConstantBounds.md) can be used to set the upper bound to be 1. [`VariableOldValueBounds`](/VariableOldValueBounds.md) can be used to set the lower bound to be the old value. Note that in order for these bounds to have an effect, the user has to specify the
 PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`.
 
 ## Example Input File

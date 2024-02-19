@@ -10,9 +10,9 @@
 #pragma once
 
 // MOOSE includes
-#include "PointSamplerBase.h"
+#include "PointVariableSamplerBase.h"
 
-class LineValueSampler : public PointSamplerBase
+class LineValueSampler : public PointVariableSamplerBase
 {
 public:
   static InputParameters validParams();

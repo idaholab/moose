@@ -2,7 +2,7 @@
   [all]
     requirement = 'The system shall have the ability to break all element-element interfaces within '
                   'given subdomains both'
-    design = 'meshgenerators/ExplodeMeshGenerator.md'
+    design = 'meshgenerators/BreakMeshByElementGenerator.md'
     issues = '#21060 #22117'
     [2D]
       type = 'Exodiff'
@@ -29,8 +29,8 @@
     input = 2D.i
     cli_args = 'Mesh/explode/subdomains="100"'
     expect_err = "The block ID '100' was not found in the mesh"
-    requirement = "The system shall error if the subdomain to explode was not found in the mesh"
-    design = 'meshgenerators/ExplodeMeshGenerator.md'
+    requirement = "The system shall report an error if the subdomain to explode was not found in the mesh"
+    design = 'meshgenerators/BreakMeshByElementGenerator.md'
     issues = '#22117'
   []
 []

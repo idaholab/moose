@@ -18,6 +18,7 @@
 
 #include "MooseObject.h"
 #include "MooseHashing.h"
+#include "MooseUtils.h"
 
 class MooseObject;
 class Storage;
@@ -494,7 +495,10 @@ public:
       auto cast_obj = dynamic_cast<T *>(obj);
       if (obj)
         mooseAssert(cast_obj,
-                    "Queried object has incompatible c++ type for object named " + obj->name());
+                    "Queried object " + obj->typeAndName() + " has incompatible c++ type with " +
+                        MooseUtils::prettyCppType<T>());
+      mooseAssert(std::find(results.begin(), results.end(), cast_obj) == results.end(),
+                  "Duplicate object");
       if (show_all || obj->enabled())
         results.push_back(cast_obj);
     }

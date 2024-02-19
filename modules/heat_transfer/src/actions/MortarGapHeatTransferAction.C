@@ -59,6 +59,7 @@ MortarGapHeatTransferAction::validParams()
 
   params.addParam<std::vector<UserObjectName>>(
       "user_created_gap_flux_models",
+      {},
       "The name of the user objects created by the user to represent gap heat transfer physics");
 
   return params;

@@ -13,6 +13,17 @@
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/point.h"
 
+// Make newer nanoflann API compatible with older nanoflann versions
+#if NANOFLANN_VERSION < 0x150
+namespace nanoflann
+{
+typedef SearchParams SearchParameters;
+
+template <typename T, typename U>
+using ResultItem = std::pair<T, U>;
+}
+#endif
+
 KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
   : _point_list_adaptor(master_points.begin(), master_points.end()),
     _kd_tree(std::make_unique<KdTreeT>(
@@ -53,9 +64,9 @@ KDTree::neighborSearch(const Point & query_point,
 void
 KDTree::radiusSearch(const Point & query_point,
                      Real radius,
-                     std::vector<std::pair<std::size_t, Real>> & indices_dist)
+                     std::vector<nanoflann::ResultItem<std::size_t, Real>> & indices_dist)
 {
-  nanoflann::SearchParams sp;
+  nanoflann::SearchParameters sp;
   _kd_tree->radiusSearch(&query_point(0), radius * radius, indices_dist, sp);
 }
 

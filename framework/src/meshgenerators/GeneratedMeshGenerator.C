@@ -148,7 +148,7 @@ GeneratedMeshGenerator::generate()
   switch (_dim)
   {
     // The build_XYZ mesh generation functions take an
-    // UnstructuredMesh& as the first argument, hence the dynamic_cast.
+    // UnstructuredMesh& as the first argument, hence the static_cast.
     case 1:
       MeshTools::Generation::build_line(static_cast<UnstructuredMesh &>(*mesh),
                                         _nx,

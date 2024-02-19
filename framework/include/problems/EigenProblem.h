@@ -181,7 +181,7 @@ public:
   /**
    * Hook up monitors for SNES and KSP
    */
-  virtual void initPetscOutput() override;
+  virtual void initPetscOutputAndSomeSolverSettings() override;
 
   /**
    * Whether or not to output eigenvalue inverse. The inverse is useful for
@@ -224,21 +224,20 @@ public:
    */
   void wereMatricesFormed(bool mf) { _matrices_formed = mf; }
 
-private:
   /**
-   * Do some free/extra power iterations
+   * Form the Bx norm
    */
-  void doFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+  Real formNorm();
 
   /**
-   * Adjust eigen vector by either scaling the existing values or setting new values
-   * The operations are applied for only eigen variables
+   * Whether a Bx norm postprocessor has been provided
    */
-  void adjustEigenVector(const Real value, bool scaling);
+  bool bxNormProvided() const { return _bx_norm_name.has_value(); }
 
-#endif
-
-  using FEProblemBase::_nl;
+  /**
+   * Set the Bx norm postprocessor programatically
+   */
+  void setBxNorm(const PostprocessorName & bx_norm) { _bx_norm_name = bx_norm; }
 
 protected:
   unsigned int _n_eigen_pairs_required;
@@ -275,6 +274,26 @@ protected:
   bool & _first_solve;
   /// A value used for initial normalization
   Real _initial_eigenvalue;
+
+private:
+  /**
+   * Do some free/extra power iterations
+   */
+  void doFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+
+  /**
+   * Adjust eigen vector by either scaling the existing values or setting new values
+   * The operations are applied for only eigen variables
+   */
+  void adjustEigenVector(const Real value, bool scaling);
+
+  /// The name of the Postprocessor providing the Bx norm. This may be empty in which case the
+  /// default L2 norm of Bx will be used as the Bx norm
+  std::optional<PostprocessorName> _bx_norm_name;
+
+#endif
+
+  using FEProblemBase::_nl;
 };
 
 #ifdef LIBMESH_HAVE_SLEPC

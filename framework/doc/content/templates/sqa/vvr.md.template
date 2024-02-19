@@ -3,7 +3,7 @@
 ## Introduction id=introduction
 
 !template field key=introduction required=False
-The [!ac](VVR) for the {{project}} provides evidence that the {{project}} fullfills its intended purpose.
+The [!ac](VVR) for the {{project}} provides evidence that the {{project}} fulfills its intended purpose.
 
 ## Verification
 

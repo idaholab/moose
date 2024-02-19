@@ -10,7 +10,7 @@ non-FE type calculations. The Mesh however can consist of just a single element.
 MOOSE can apply several different objects to side sets and node sets to either compute quantities of interest or set boundary
 conditions. It is important to understand the different between these two concepts. Node sets are simply a set of nodes, typically on
 a boundary, that all contain a common ID (the node set ID). These can be created and assigned in your mesh builder program (such
-as Cubit or GMsh). Side sets are a collection of $dim - 1$ elements (sides or edges), typically on a boundary or on a plane within
+as Cubit or Gmsh). Side sets are a collection of $dim - 1$ elements (sides or edges), typically on a boundary or on a plane within
 your mesh. These can be created and assigned in your mesh building program.
 
 By default, MOOSE will construct a node set corresponding to each side set within your mesh. This means that if you always prefer
@@ -33,7 +33,7 @@ the second parameter (from above) to true. The construction will happen at the e
 
 !alert note
 You could also use the [SideSetsFromNodeSetsGenerator.md] class to construct side sets from node
-sets (or the [NodeSetsFromSideSetsGenerator.md] for vice versa). These object allows you to manually
+sets (or the [NodeSetsFromSideSetsGenerator.md] for vice versa). These objects allow you to manually
 construct the relevant side sets and node sets earlier in the mesh generation process.
 
 To declare subdomain IDs which are not found on the mesh right after the mesh is setup, a list of IDs can be 

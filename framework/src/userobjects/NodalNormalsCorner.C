@@ -101,8 +101,3 @@ NodalNormalsCorner::finalize()
 {
   _aux.solution().close();
 }
-
-void
-NodalNormalsCorner::threadJoin(const UserObject & /*uo*/)
-{
-}

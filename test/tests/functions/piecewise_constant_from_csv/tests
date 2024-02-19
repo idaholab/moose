@@ -50,14 +50,21 @@
       input = 'piecewise_constant.i'
       exodiff = 'piecewise_constant_block.e'
       cli_args = 'ICs/active=block Outputs/file_base=piecewise_constant_block'
-      detail = 'with data sorted by blocks and with constant values on each block.'
+      detail = 'with data sorted by blocks and with constant values on each block,'
       recover = false
       # Function used at nodes
       allow_warnings = true
     []
+    [multiple_files]
+      type = 'Exodiff'
+      input = 'piecewise_constant_elem_multiple.i'
+      exodiff = 'piecewise_constant_elem_multiple.e'
+      cli_args = 'Outputs/file_base=piecewise_constant_elem_multiple'
+      detail = 'with multiple CSV files read on every execution of the user object.'
+    []
   []
   [errors]
-    requirement = 'The system shall error out if'
+    requirement = 'The system shall report an error if'
     [read_type]
       type = RunException
       input = 'piecewise_constant.i'

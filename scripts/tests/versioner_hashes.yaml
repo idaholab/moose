@@ -153,3 +153,45 @@ d5e3e09267e1f2b47684a089150bec587178e1cf: #25784
   libmesh: 50463c4
   moose: 176f779
   wasp: 2fdee60
+48886cc54d59c608feeb74572833469b892477c1: #25939
+  mpich: e018192
+  petsc: a7b458a
+  libmesh: 9ed7d66
+  moose: c223a73
+  wasp: 3740200
+cc86332aae2bed3d2a7574c697dfaa3540f75edb: #26023 #25992
+  mpich: a3cf7c4
+  petsc: 6d6b91e
+  libmesh: 5b1363b
+  moose: 2e50f83
+  wasp: 3740200
+a2e8814e28b97171ff4a06e5343063fed6763dd0: #26102
+  mpich: 702900f
+  petsc: 684d2af
+  libmesh: bad5b94
+  moose-dev: 9831cd1
+  wasp: 91987a3
+0ad6cc9cb950aeb65dbaa97436650e5968d42bfa: #26327
+  mpich: 702900f
+  petsc: 684d2af
+  libmesh: bad5b94
+  moose-dev: 6b7bb74
+  wasp: 91987a3
+85f27a758ebb558b09df27385cecadf76b375058: #26374
+  mpich: 702900f
+  petsc: 684d2af
+  libmesh: bad5b94
+  moose-dev: 2cdf24d
+  wasp: 91987a3
+d5ed287fadcea6167a6c9d75924f1c11007ab51d: #26383
+  mpich: 702900f
+  petsc: 684d2af
+  libmesh: bad5b94
+  moose-dev: f8a2f21
+  wasp: 91987a3
+e6ada94b4f7b638bab0da284abc02315fcf63f3e: #26462
+  mpich: 702900f
+  petsc: b32e40b
+  libmesh: 7cd53c3
+  moose-dev: 4b9bf44
+  wasp: 91987a3

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'NSFVPumpMaterial.md INSFVPump.md INSFVRhieChowInterpolator.md'
+  design = 'NSFVPumpFunctorMaterial.md INSFVPump.md INSFVRhieChowInterpolator.md'
   issues = '#24775 #24776'
   [pump_loop]
     type = 'CSVDiff'

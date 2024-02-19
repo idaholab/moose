@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Moose.h"
 #include "Parser.h"
+#include "Builder.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "ActionFactory.h"
@@ -129,7 +130,7 @@ public:
    * MooseTestApp).
    * @return The the type of the object
    */
-  const std::string & type() const { return _type; }
+  const std::string & type() const;
 
   /**
    * The RankMap is a useful object for determining how the processes
@@ -209,9 +210,9 @@ public:
   const ActionWarehouse & actionWarehouse() const { return _action_warehouse; }
 
   /**
-   * Returns a writable reference to the parser
+   * Returns a writable reference to the builder
    */
-  Parser & parser() { return _parser; }
+  Moose::Builder & builder() { return _builder; }
 
   /**
    * Returns a writable reference to the syntax object.
@@ -219,17 +220,14 @@ public:
   Syntax & syntax() { return _syntax; }
 
   /**
-   * Set the input file name.
+   * @return the input file names set in the Parser
    */
-  void setInputFileName(const std::string & input_file_name);
+  const std::vector<std::string> & getInputFileNames() const;
 
   /**
-   * Returns the input file name that was set with setInputFileName
+   * @return The last input filename set (if any)
    */
-  std::string getInputFileName() const
-  {
-    return _input_filenames.empty() ? "" : _input_filenames.back();
-  }
+  const std::string & getLastInputFileName() const;
 
   /**
    * Override the selection of the output file base name.
@@ -349,6 +347,12 @@ public:
   void addExecutorParams(const std::string & type,
                          const std::string & name,
                          const InputParameters & params);
+
+  /**
+   * Deprecated helper function to link the new added Builder back to Parser. This function will be
+   *removed after new Parser and builder are merged
+   **/
+  Moose::Builder & parser();
 
 private:
   /**
@@ -1095,9 +1099,6 @@ protected:
   /// The MPI communicator this App is going to use
   const std::shared_ptr<Parallel::Communicator> _comm;
 
-  /// Input file names used
-  std::vector<std::string> _input_filenames;
-
   /// The output file basename
   std::string _output_file_base;
 
@@ -1139,7 +1140,10 @@ protected:
   OutputWarehouse _output_warehouse;
 
   /// Parser for parsing the input file
-  Parser _parser;
+  const std::shared_ptr<Parser> _parser;
+
+  /// Builder for building app related parser tree
+  Moose::Builder _builder;
 
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;
@@ -1333,12 +1337,14 @@ private:
    * Take an input relationship manager, clone it, and then initialize it with provided mesh and
    * optional \p dof_map
    * @param template_rm The relationship manager template from which we will clone
+   * @param moose_mesh The moose mesh to use for initialization
    * @param mesh The mesh to use for initialization
    * @param dof_map An optional parameter that, if provided, will be used to help init the cloned
    * relationship manager
    * @return a reference to the cloned and initialized relationship manager
    */
   RelationshipManager & createRMFromTemplateAndInit(const RelationshipManager & template_rm,
+                                                    MooseMesh & moose_mesh,
                                                     MeshBase & mesh,
                                                     const DofMap * dof_map = nullptr);
 

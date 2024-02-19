@@ -1,0 +1,16 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    rel_err = 1e-8
+    allow_test_objects = true
+    threading = '!pthreads'
+    required_objects = 'SalineMoltenSaltFluidProperties'
+    required_submodule = 'contrib/saline'
+    requirement = "The system shall be able to leverage the Saline submodule to compute composed "
+                  "salt fluid properties"
+    design = "SalineMoltenSaltFluidProperties.md"
+    issues = "#22724"
+  []
+[]

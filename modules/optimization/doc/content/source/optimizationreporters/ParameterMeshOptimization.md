@@ -4,7 +4,7 @@
 
 ## Overview
 
-This optimization reporter performs the same type of optimization as [OptimizationReporter.md], except the parameters are defined by a mesh and is meant to be used in conjunction with [ParameterMeshFunction.md]. The idea is that the parameters are defined as variables on the inputted mesh and the resulting values on the problem being optimized is based on the finite-element shape functions of the variable. The parameter mesh does not need to conform to the physics mesh, but every point in the physics mesh must be contained in parameter mesh. The parameters are defined with [!param](/OptimizationReporter/ParameterMeshOptimization/parameter_names) and each name has the following options assosciated with it:
+This optimization reporter performs the same type of optimization as [OptimizationReporter.md], except the parameters are defined by a mesh and is meant to be used in conjunction with [ParameterMeshFunction.md]. The idea is that the parameters are defined as variables on the inputted mesh and the resulting values on the problem being optimized is based on the finite-element shape functions of the variable. The parameter mesh does not need to conform to the physics mesh, but every point in the physics mesh must be contained in parameter mesh. The parameters are defined with [!param](/OptimizationReporter/ParameterMeshOptimization/parameter_names) and each name has the following options associated with it:
 
 - mesh ([!param](/OptimizationReporter/ParameterMeshOptimization/parameter_meshes)) (+Required+),
 - finite-element family ([!param](/OptimizationReporter/ParameterMeshOptimization/parameter_families)) where a single value input is applied to all parameters,

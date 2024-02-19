@@ -87,7 +87,6 @@
     app_type = ThermalHydraulicsApp
     input_files = sub.i
     execute_on = 'TIMESTEP_END'
-    bounding_box_padding = '0.1 0 0.1'
   []
 []
 

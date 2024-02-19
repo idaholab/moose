@@ -9,66 +9,66 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./layered_average_value]
+  [layered_average_value]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./axial_force]
+  [axial_force]
     type = ParsedFunction
-    value = 1000*y
-  [../]
+    expression = 1000*y
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./force]
+  []
+  [force]
     type = BodyForce
     variable = u
     function = axial_force
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./layered_aux]
+  [layered_aux]
     type = SpatialUserObjectAux
     variable = layered_average_value
     execute_on = timestep_end
     user_object = layered_average
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_average]
+  [layered_average]
     type = LayeredAverage
     variable = u
     direction = y
     num_layers = 4
-  [../]
+  []
 []
 
 [Executioner]

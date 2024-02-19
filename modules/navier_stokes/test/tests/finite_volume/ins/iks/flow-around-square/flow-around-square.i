@@ -238,7 +238,7 @@ h_conv = 50
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [functor_constants]
     type = ADGenericFunctorMaterial
     prop_names = 'cp k'
@@ -246,7 +246,7 @@ h_conv = 50
     block = 0
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T'
     rho = ${rho}
     block = 0
@@ -258,7 +258,7 @@ h_conv = 50
     block = 1
   []
   [solid_ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'Ts'
     rho = ${rho_s}
     cp = ${cp_s}

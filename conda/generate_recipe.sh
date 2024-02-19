@@ -40,7 +40,7 @@ function create_env()
     conda config --env --set always_yes true
     conda config --env --add channels conda-forge
     conda config --env --add channels https://conda.software.inl.gov/public
-    conda install conda-build mamba boa
+    conda install conda-build
 }
 
 function clean_repo()
@@ -57,7 +57,7 @@ function clean_repo()
 function string_replace()
 {
     printf "Creating recipes at $TMP_DIR/$RECIPES\n"
-    REPLACE=(APPLICATION FORMATTED_APPLICATION EXECUTABLE REPO BUILD VERSION MOOSE_JOBS MOOSE IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH)
+    REPLACE=(APPLICATION FORMATTED_APPLICATION EXECUTABLE REPO BUILD VERSION MOOSE_JOBS MOOSE IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH MOOSE_OPTIONS)
     for sfile in `find $SCRIPT_DIR/$TEMPLATE -type l`; do
         cat "$sfile" > "$TMP_DIR/$RECIPES/$(basename $sfile)"
     done
@@ -84,7 +84,7 @@ function conda_build()
         string_replace || exit 1
         cd "$TMP_DIR/$RECIPES" || exit 1
         mkdir -p "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
-        conda mambabuild . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
+        conda-build . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
         printf "Built: ${SCRIPT_DIR}/packages/${APPLICATION}/${ARCH}/${PREFIX_PACKAGE_WITH}${FORMATTED_APPLICATION}-${VERSION}-build_${BUILD}.tar.bz2\n"
     else
         TMP_DIR="$BUILD_ROOT"

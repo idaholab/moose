@@ -20,6 +20,11 @@
 !include framework_rtm.md start=pre-test-begin end=pre-test-finish replace=['framework_stp.md', 'python_stp.md']
 !template-end!
 
+!template! item key=log-revisions
+The changelog for all code residing in the MOOSE repository is located in the
+[MOOSE RTM](moose_rtm.md#log-revisions optional=True).
+!template-end!
+
 !template item key=functional-requirements
 !sqa requirements collections=FUNCTIONAL category=python
 

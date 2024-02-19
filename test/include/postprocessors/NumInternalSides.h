@@ -27,7 +27,6 @@ public:
   virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
   virtual void initialize() override;
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
   const unsigned int & count() const { return _count; }
 

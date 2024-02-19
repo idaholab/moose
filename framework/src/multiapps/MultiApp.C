@@ -30,6 +30,7 @@
 #include "Positions.h"
 #include "Transient.h"
 #include "Backup.h"
+#include "Parser.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -151,12 +152,13 @@ MultiApp::validParams()
   // Resetting subapps
   params.addParam<std::vector<Real>>(
       "reset_time",
-      std::vector<Real>(),
+      {},
       "The time(s) at which to reset Apps given by the 'reset_apps' parameter.  "
       "Resetting an App means that it is destroyed and recreated, possibly "
       "modeling the insertion of 'new' material for that app.");
   params.addParam<std::vector<unsigned int>>(
       "reset_apps",
+      {},
       "The Apps that will be reset when 'reset_time' is hit.  These are the App "
       "'numbers' starting with 0 corresponding to the order of the App positions.  "
       "Resetting an App means that it is destroyed and recreated, possibly modeling "
@@ -170,14 +172,15 @@ MultiApp::validParams()
 
   params.addParam<std::vector<unsigned int>>(
       "move_apps",
+      {},
       "Apps, designated by their 'numbers' starting with 0 corresponding to the order "
       "of the App positions, to be moved at move_time to move_positions");
-  params.addParam<std::vector<Point>>("move_positions",
-                                      "The positions corresponding to each move_app.");
+  params.addParam<std::vector<Point>>(
+      "move_positions", {}, "The positions corresponding to each move_app.");
 
   params.addParam<std::vector<CLIArgString>>(
       "cli_args",
-      std::vector<CLIArgString>(),
+      {},
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
@@ -195,16 +198,16 @@ MultiApp::validParams()
                                     "Set between 0 and 2.");
   params.addDeprecatedParam<std::vector<std::string>>(
       "relaxed_variables",
-      std::vector<std::string>(),
+      {},
       "Use transformed_variables.",
       "List of subapp variables to relax during Multiapp coupling iterations");
   params.addParam<std::vector<std::string>>(
       "transformed_variables",
-      std::vector<std::string>(),
+      {},
       "List of subapp variables to use coupling algorithm on during Multiapp coupling iterations");
   params.addParam<std::vector<PostprocessorName>>(
       "transformed_postprocessors",
-      std::vector<PostprocessorName>(),
+      {},
       "List of subapp postprocessors to use coupling "
       "algorithm on during Multiapp coupling iterations");
   params.addParam<bool>("keep_solution_during_restore",
@@ -403,7 +406,7 @@ void
 MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
-  _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+  _app.builder().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void
@@ -1099,17 +1102,42 @@ MultiApp::createApp(unsigned int i, Real start_time)
     if (displaced_problem)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
   }
+
+  // If only one input file was provided, use it for all the solves
+  const auto input_index = _input_files.size() == 1 ? 0 : _first_local_app + i;
+  const auto & input_file = _input_files[input_index];
+
+  // create new parser tree for the application and parse
+  auto parser = std::make_unique<Parser>(input_file);
+
+  if (input_file.size())
+  {
+    parser->parse();
+    const auto & app_type = parser->getAppType();
+    if (app_type.empty() && _app_type.empty())
+      mooseWarning("The application type is not specified for ",
+                   full_name,
+                   ". Please use [Application] block to specify the application type.");
+    if (!app_type.empty() && app_type != _app_type &&
+        !AppFactory::instance().isRegistered(app_type))
+      mooseError("In the ",
+                 full_name,
+                 ", '",
+                 app_type,
+                 "' is not a registered application. The registered application is named: '",
+                 _app_type,
+                 "'. Please double check the [Application] block to make sure the correct "
+                 "application is provided. \n");
+  }
+
+  if (parser->getAppType().empty())
+    parser->setAppType(_app_type);
+
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
-  std::string input_file = "";
-  if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
-    input_file = _input_files[0];
-  else
-    input_file = _input_files[_first_local_app + i];
-
   app->setGlobalTimeOffset(start_time);
-  app->setInputFileName(input_file);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());

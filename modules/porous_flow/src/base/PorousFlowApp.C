@@ -39,6 +39,10 @@ void
 PorousFlowApp::registerApps()
 {
   registerApp(PorousFlowApp);
+
+  TensorMechanicsApp::registerApps();
+  FluidPropertiesApp::registerApps();
+  ChemicalReactionsApp::registerApps();
 }
 
 static void

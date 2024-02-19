@@ -239,9 +239,9 @@ Physically this corresponds to the mass-flow through the boundary
 being proportional to $P-P_{e}$.  Here $P_{e}$ is a fixed
 "environmental" porepressure, and this acts as a source or sink of
 fluid.  $C$ is the "conductance" of the boundary.  Notice the
-appearence of $\rho \kappa/\mu$ in the LHS of this equation means that
+appearance of $\rho \kappa/\mu$ in the LHS of this equation means that
 this is truly a flux of fluid mass (measured in kg.m$^{-2}$.s$^{-1}$),
-and the appearence of $\rho\kappa/\mu$ on the RHS means that a [PorousFlowPiecewiseLinearFlux](sinks.md) may be used with `use_mobility=true`.
+and the appearance of $\rho\kappa/\mu$ on the RHS means that a [PorousFlowPiecewiseLinearFlux](sinks.md) may be used with `use_mobility=true`.
 
 The temperature boundary condition
 at the right-hand end of the bar is
@@ -252,10 +252,10 @@ at the right-hand end of the bar is
 \end{equation}
 Comparing this with [eq:ideal_mass_bdy], it is seen that
 this is exactly the heat loss (or gain) at the boundary corresponding
-to the loss (or gain) of the fluid.  Notice the appearence of $h\rho
+to the loss (or gain) of the fluid.  Notice the appearance of $h\rho
 \kappa/\mu$ in the LHS of this equation means that this is truly a
 flux of fluid mass (measured in J.m$^{-2}$.s$^{-1}$), and the
-appearence of $h\rho\kappa/\mu$ on the RHS means that a [PorousFlowPiecewiseLinearFlux](sinks.md) may be used with `use_mobility=true` and `use_enthalpy=true`.
+appearance of $h\rho\kappa/\mu$ on the RHS means that a [PorousFlowPiecewiseLinearFlux](sinks.md) may be used with `use_mobility=true` and `use_enthalpy=true`.
 
 There is a clear similarity between the fluid and heat equations.  The
 heat equation does not actually depend on temperature, and is simply

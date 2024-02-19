@@ -10,6 +10,7 @@
 #include "SetAdaptivityOptionsAction.h"
 #include "FEProblem.h"
 #include "RelationshipManager.h"
+#include "AddVariableAction.h"
 
 #include "libmesh/fe.h"
 
@@ -17,22 +18,16 @@ registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_opti
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_geometric_rm");
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_algebraic_rm");
 
+namespace Moose
+{
 InputParameters
-SetAdaptivityOptionsAction::validParams()
+commonAdaptivityParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Action for defining adaptivity parameters.");
-  params.addParam<MarkerName>("marker",
-                              "The name of the Marker to use to actually adapt the mesh.");
   params.addParam<unsigned int>(
       "steps", 0, "The number of adaptive steps to use when doing a Steady simulation.");
-  params.addParam<unsigned int>(
-      "initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
   params.addRangeCheckedParam<unsigned int>(
       "interval", 1, "interval>0", "The number of time steps betweeen each adaptivity phase");
-  params.addParam<MarkerName>(
-      "initial_marker",
-      "The name of the Marker to use to adapt the mesh during initial refinement.");
   params.addParam<unsigned int>(
       "max_h_level",
       0,
@@ -50,6 +45,28 @@ SetAdaptivityOptionsAction::validParams()
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
   params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
+  const auto families_enum = AddVariableAction::getNonlinearVariableFamilies();
+  MultiMooseEnum disable_p_refinement_for_families(families_enum.getRawNames());
+  params.addParam<MultiMooseEnum>("disable_p_refinement_for_families",
+                                  disable_p_refinement_for_families,
+                                  "What families we should disable p-refinement for.");
+  return params;
+}
+}
+
+InputParameters
+SetAdaptivityOptionsAction::validParams()
+{
+  InputParameters params = Moose::commonAdaptivityParams();
+  params.addClassDescription("Action for defining adaptivity parameters.");
+  params.addParam<MarkerName>("marker",
+                              "The name of the Marker to use to actually adapt the mesh.");
+  params.addParam<unsigned int>(
+      "initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
+  params.addParam<MarkerName>(
+      "initial_marker",
+      "The name of the Marker to use to adapt the mesh during initial refinement.");
+  params.addParamNamesToGroup("initial_steps initial_marker", "Initial Adaptivity");
   return params;
 }
 
@@ -139,6 +156,14 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.switchHToPRefinement();
+    {
+      auto disable_p_refinement_for_families =
+          getParam<MultiMooseEnum>("disable_p_refinement_for_families");
+      if (!isParamSetByUser("disable_p_refinement_for_families"))
+        // If the user has not set this parameter we will set a logicial default
+        disable_p_refinement_for_families =
+            "LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
+      adapt.doingPRefinement(true, disable_p_refinement_for_families);
+    }
   }
 }

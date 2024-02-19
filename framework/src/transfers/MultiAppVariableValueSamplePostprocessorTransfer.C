@@ -223,6 +223,11 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
         mooseError("MultiAppVariableValueSamplePostprocessorTransfer does not support transfer of "
                    "vector variables");
 
+      auto active_tags = _fe_problem.getActiveFEVariableCoupleableVectorTags(/*thread_id=*/0);
+      std::set<unsigned int> solution_tag = {_fe_problem.getVectorTagID(Moose::SOLUTION_TAG)};
+
+      _fe_problem.setActiveFEVariableCoupleableVectorTags(solution_tag, /*thread_id=*/0);
+
       MooseMesh & from_mesh = _fe_problem.mesh();
 
       std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
@@ -269,6 +274,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_postprocessor_name,
                                                                          value);
       }
+
+      _fe_problem.setActiveFEVariableCoupleableVectorTags(active_tags, /*thread_id=*/0);
 
       break;
     }

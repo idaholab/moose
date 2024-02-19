@@ -39,20 +39,20 @@
     input = 'test2.i'
     expect_err = "A node with the ID*"
     cli_args = "Mesh/inactive='mismatchSize modifyNode' --mesh-only"
-    requirement = "The system shall error if the node to be moved cannot be found in the mesh."
+    requirement = "The system shall report an error if the node to be moved cannot be found in the mesh."
   []
   [failure_mismatch]
     type = 'RunException'
     input = 'test2.i'
     expect_err = "Must be the same length as 'new_position'."
     cli_args = "Mesh/inactive='missingNode modifyNode' --mesh-only"
-    requirement = "The system shall error if the node position and node id arrays do not match in size"
+    requirement = "The system shall report an error if the node position and node id arrays do not match in size"
   []
   [failure_overspecified]
     type = RunException
     input = test3.i
     cli_args = 'Mesh/modifyNode/new_position="-1 0 0 0 1 0 0 2 0" --mesh-only'
     expect_err = "You must specify either 'shift_position' or 'new_position'! You have specified either both or none"
-    requirement = "The system shall error if both shifts and positions are specified"
+    requirement = "The system shall report an error if both shifts and positions are specified"
   []
 []

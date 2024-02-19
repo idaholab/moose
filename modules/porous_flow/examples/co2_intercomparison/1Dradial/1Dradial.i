@@ -12,10 +12,6 @@
   nx = 500
   xmax = 10000
   bias_x = 1.01
-[]
-
-[Problem]
-  type = FEProblem
   coord_type = 'RZ'
   rz_coord_axis = Y
 []
@@ -140,14 +136,14 @@
     type = CO2FluidProperties
   []
   [co2]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = co2sw
   []
   [water]
     type = Water97FluidProperties
   []
   [watertab]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = water
     temperature_min = 273.15
     temperature_max = 573.15

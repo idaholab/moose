@@ -30,7 +30,7 @@
 /framework/*/materials/Material* @roystgnr @loganharbour @lindsayad
 /framework/*/materials/Parsed* @dschwen @lindsayad
 /framework/*/mesh @roystgnr @GiudGiud @lindsayad
-/framework/*/meshgenerators @roystgnr @GiudGiud @lindsayad
+/framework/*/meshgenerators @roystgnr @GiudGiud
 /framework/*/multiapps @GiudGiud @lindsayad
 /framework/*/loops @GiudGiud @lindsayad
 /framework/*/outputs @roystgnr @lindsayad
@@ -49,13 +49,15 @@
 /modules/contact @bwspenc @lindsayad @recuero
 /modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
 /modules/doc/content/newsletter @cticenhour
+/modules/doc/content/sqa_reports.yml @GiudGiud
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @lindsayad
 /modules/fluid_properties @joshuahansel @GiudGiud
 /modules/fsi @lindsayad
-/modules/functional_expansion_tools @lindsayad
+/modules/functional_expansion_tools @lindsayad @GiudGiud
 /modules/heat_conduction @lindsayad
-/modules/navier_stokes @lindsayad @GiudGiud
+/modules/heat_transfer @lindsayad
+/modules/navier_stokes @lindsayad @GiudGiud @grmnptr
 /modules/optimization @zachmprince @dschwen
 /modules/phase_field @dschwen
 /modules/porous_flow @cpgr
@@ -64,11 +66,12 @@
 /modules/reactor @GiudGiud @loganharbour @roystgnr
 /modules/scalar_transport @lindsayad
 /modules/solid_properties @joshuahansel
-/modules/stochastic_tools @zachmprince
+/modules/stochastic_tools @zachmprince @grmnptr
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
 /modules/tensor_mechanics/*/lagrangian @bwspenc @dschwen @jiangwen84 @hugary1995
 /modules/tensor_mechanics/*/materials/cohesive_zone_model @bwspenc @dschwen @jiangwen84 @hugary1995
 /modules/tensor_mechanics/*/interfacekernels @bwspenc @dschwen @jiangwen84 @hugary1995
+/modules/tensor_mechanics/*/materials/crystal_plasticity @bwspenc @dschwen @jiangwen84 @sapitts
 /modules/thermal_hydraulics @joshuahansel
 /modules/xfem @bwspenc @jiangwen84
 

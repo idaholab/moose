@@ -40,6 +40,13 @@ public:
 
 private:
   /**
+   * SortedLocationNodes - type alias for set of nodes sorted by location
+   */
+  using SortedLocationNodes =
+      std::set<wasp::HITNodeView,
+               std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>>;
+
+  /**
    * Parse document for diagnostics - specific to this server implemention.
    * @param diagnosticsList - data array of diagnostics data objects to fill
    * @return - true if completed successfully - does not indicate parse fail
@@ -110,7 +117,7 @@ private:
 
   /**
    * Get all object parameters using requested object path to collection.
-   * @param valid_params - collection for filling action input parameters
+   * @param valid_params - collection for filling object input parameters
    * @param object_type - type of object where autocomplete was requested
    * @param obj_act_tasks - tasks to verify object type with valid syntax
    */
@@ -125,6 +132,7 @@ private:
    * @param existing_params - set of parameters already existing in input
    * @param request_line - line in input where autocomplete was requested
    * @param request_char - char in input where autocomplete was requested
+   * @return - true if filling of completion items completed successfully
    */
   bool addParametersToList(wasp::DataArray & completionItems,
                            const InputParameters & valid_params,
@@ -188,6 +196,25 @@ private:
   gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocations, int line, int character);
 
   /**
+   * Get set of nodes from associated path lookups matching value string.
+   * @param location_nodes - set to fill with lookup nodes matching value
+   * @param clean_type - cpp type string used for key finding input paths
+   * @param val_string - specified value used for gathering input lookups
+   */
+  void getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
+                                     const std::string & clean_type,
+                                     const std::string & val_string);
+
+  /**
+   * Add locations of lookups or parameter declarator to definition list.
+   * @param definitionLocations - data array of locations objects to fill
+   * @param location_nodes - set of nodes that have locations to be added
+   * @return - true if filling of location objects completed successfully
+   */
+  bool addLocationNodesToList(wasp::DataArray & definitionLocations,
+                              const SortedLocationNodes & location_nodes);
+
+  /**
    * Gather references locations - specific to this server implemention.
    * @param referencesLocations - data array of locations objects to fill
    * @param line - line to be used for locations gathering logic
@@ -203,10 +230,6 @@ private:
   /**
    * Gather formatting text edits - specific to this server implemention.
    * @param formattingTextEdits - data array of text edit objects to fill
-   * @param start_line - starting line to be used for formatting logic
-   * @param start_character - starting column to be used for formatting logic
-   * @param end_line - ending line to be used for formatting logic
-   * @param end_character - ending column to be used for formatting logic
    * @param tab_size - value of the size of a tab in spaces for formatting
    * @param insert_spaces - flag indicating whether to use spaces for tabs
    * @return - true if the gathering of text edits completed successfully
@@ -214,6 +237,15 @@ private:
   bool gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextEdits,
                                          int tab_size,
                                          bool insert_spaces);
+
+  /**
+   * Recursively walk down whole nodeview tree while formatting document.
+   * @param parent - nodeview for recursive tree traversal starting point
+   * @param prev_line - line of last print for blanks and inline comments
+   * @param level - current level in document tree to use for indentation
+   * @return - formatted string that gets appended to each recursive call
+   */
+  std::string formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, std::size_t level);
 
   /**
    * Gather document symbols - specific to this server implemention.
@@ -232,6 +264,26 @@ private:
                                        wasp::DataObject & data_parent);
 
   /**
+   * Get completion item kind value that client may use for icon in list.
+   * @param valid_params - valid parameters used for completion item kind
+   * @param param_name - name of input parameter for completion item kind
+   * @param clean_type - type to decide if reference completion item kind
+   * @param is_param - boolean denoting if kind is for parameter or value
+   * @return - enumerated kind value that client may use for icon in list
+   */
+  int getCompletionItemKind(const InputParameters & valid_params,
+                            const std::string & param_name,
+                            const std::string & clean_type,
+                            bool is_param);
+
+  /**
+   * Get document symbol kind value that client may use for outline icon.
+   * @param symbol_node - node that will be added to symbol tree for kind
+   * @return - enumerated kind value that client may use for outline icon
+   */
+  int getDocumentSymbolKind(wasp::HITNodeView symbol_node);
+
+  /**
    * Read from connection into object - specific to this server's connection.
    * @param object - reference to object to be read into
    * @return - true if the read from the connection completed successfully
@@ -244,6 +296,18 @@ private:
    * @return - true if the write to the connection completed successfully
    */
   bool connectionWrite(wasp::DataObject & object) { return _connection->write(object, errors); }
+
+  /**
+   * @return Whether or not the root is valid
+   *
+   * Will be true if the app is valid, the root is not nullptr, and the root node view is not null
+   */
+  bool rootIsValid() const;
+
+  /**
+   * @return The current root node
+   */
+  hit::Node & getRoot();
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
@@ -269,4 +333,9 @@ private:
    * @brief _type_to_input_paths - map of parameter types to lookup paths
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
+
+  /**
+   * @brief _formatting_tab_size - number of indent spaces for formatting
+   */
+  std::size_t _formatting_tab_size;
 };

@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#26244'
+  design = 'INSFVVelocityVariable.md INSFVPressureVariable.md'
+  [error_on_qp]
+    type = RunException
+    input = 'channel.i'
+    # Add adaptivity on pressure, that requires Qp calculations
+    # Use no-qp-calculation test variables
+    cli_args = "Variables/vel_x/type=INSFVVelocityNoQpComputation "
+               "Variables/vel_y/type=INSFVVelocityNoQpComputation "
+               "Variables/pressure/type=INSFVPressureNoQpComputation "
+               "Adaptivity/Markers/temp_marker/type=ValueRangeMarker "
+               "Adaptivity/Markers/temp_marker/lower_bound=0 "
+               "Adaptivity/Markers/temp_marker/upper_bound=1e5 "
+               "Adaptivity/Markers/temp_marker/variable=pressure"
+    requirement = "The system shall report an error if it tries to require quadrature point computations on variable that were deliberately set not to perform quadrature point calculations."
+    expect_err = "Qp-calculations should not be requested"
+    allow_test_objects = true
+  []
+  [no_error_normal_calc]
+    type = RunApp
+    input = 'channel.i'
+    requirement = 'The system shall be able to simulate flow in a channel using finite volume methods with an optimization that avoids computations / re-initialization on quadrature points.'
+    cli_args = "Variables/vel_x/type=INSFVVelocityNoQpComputation "
+               "Variables/vel_y/type=INSFVVelocityNoQpComputation "
+               "Variables/pressure/type=INSFVPressureNoQpComputation"
+    allow_test_objects = true
+  []
+[]

@@ -170,8 +170,14 @@ protected:
   /// Vector for computation of weighted gap with nodal normals
   ADRealVectorValue _qp_gap_nodal;
 
+  /// Vector for computation of relative displacement (determines mixity ratio in interface problems)
+  ADRealVectorValue _qp_displacement_nodal;
+
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
+
+  /// A map from node to weighted displacements
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_weighted_displacements;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

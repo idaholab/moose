@@ -32,16 +32,18 @@ public:
       const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate) override;
 
 protected:
+  usingTransientInterfaceMembers;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain_old;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_plasticity_strain;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::_plasticity_strain_old;
   using AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::isBlockDiagonal;
   using Material::_current_elem;
-  using Material::_dt;
   using Material::_q_point;
   using Material::_qp;
-  using Material::_t;
+  using Material::paramError;
+
+  virtual void initQpStatefulProperties() override;
 
   virtual void
   computeStressInitialize(const GenericDenseVector<is_ad> & stress_dev,
@@ -146,6 +148,7 @@ protected:
 
   GenericMaterialProperty<DenseMatrix<Real>, is_ad> & _alpha_matrix;
   GenericMaterialProperty<DenseVector<Real>, is_ad> & _sigma_tilde;
+  GenericMaterialProperty<DenseVector<Real>, is_ad> & _sigma_tilde_rotated;
 
   GenericReal<is_ad> _hardening_derivative;
   GenericReal<is_ad> _yield_condition;
@@ -154,6 +157,13 @@ protected:
   /// Hill tensor, when global axes do not (somehow) align with those of the material
   /// Example: Large rotation due to rigid body and/or large deformation kinematics
   const MaterialProperty<DenseMatrix<Real>> & _hill_tensor;
+
+  MaterialProperty<RankTwoTensor> & _rotation_matrix;
+  MaterialProperty<RankTwoTensor> & _rotation_matrix_transpose;
+  const MaterialProperty<RankTwoTensor> & _rotation_matrix_old;
+  const MaterialProperty<RankTwoTensor> & _rotation_matrix_transpose_old;
+  const bool _local_cylindrical_csys;
+  const enum class Axis { X, Y, Z } _axis;
 };
 
 typedef HillElastoPlasticityStressUpdateTempl<false> HillElastoPlasticityStressUpdate;

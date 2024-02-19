@@ -731,7 +731,7 @@ SystemBase::addVariable(const std::string & var_type,
   if (var_type == "ArrayMooseVariable")
   {
     if (fe_type.family == NEDELEC_ONE || fe_type.family == LAGRANGE_VEC ||
-        fe_type.family == MONOMIAL_VEC)
+        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
       mooseError("Vector family type cannot be used in an array variable");
 
     // Build up the variable names
@@ -839,10 +839,29 @@ SystemBase::isScalarVariable(unsigned int var_num) const
 unsigned int
 SystemBase::nVariables() const
 {
+  unsigned int n = nFieldVariables();
+  n += _vars[0].scalars().size();
+
+  return n;
+}
+
+unsigned int
+SystemBase::nFieldVariables() const
+{
   unsigned int n = 0;
   for (auto & var : _vars[0].fieldVariables())
     n += var->count();
-  n += _vars[0].scalars().size();
+
+  return n;
+}
+
+unsigned int
+SystemBase::nFVVariables() const
+{
+  unsigned int n = 0;
+  for (auto & var : _vars[0].fieldVariables())
+    if (var->isFV())
+      n += var->count();
 
   return n;
 }
@@ -1193,24 +1212,12 @@ SystemBase::update(const bool update_libmesh_system)
 {
   if (update_libmesh_system)
     system().update();
-  std::vector<VariableName> std_field_variables;
-  getStandardFieldVariableNames(std_field_variables);
-  cacheVarIndicesByFace(std_field_variables);
 }
 
 void
 SystemBase::solve()
 {
   system().solve();
-}
-
-void
-SystemBase::getStandardFieldVariableNames(std::vector<VariableName> & std_field_variables) const
-{
-  std_field_variables.clear();
-  for (auto & p : _vars[0].fieldVariables())
-    if (p->fieldType() == 0)
-      std_field_variables.push_back(p->name());
 }
 
 /**
@@ -1419,16 +1426,21 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
   for (MooseIndex(_vars) thread = 0; thread < _vars.size(); ++thread)
   {
     auto & field_variables = _vars[thread].fieldVariables();
-    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i] *
-                                        field_variables[i]->scalingFactor());
+    for (MooseIndex(field_variables) i = 0, p = 0; i < field_variables.size(); ++i)
+    {
+      auto factors = field_variables[i]->arrayScalingFactor();
+      for (unsigned int j = 0; j < field_variables[i]->count(); ++j, ++p)
+        factors[j] /= inverse_scaling_factors[p];
+
+      field_variables[i]->scalingFactor(factors);
+    }
 
     auto offset = field_variables.size();
 
     auto & scalar_variables = _vars[thread].scalars();
     for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-      scalar_variables[i]->scalingFactor(1. / inverse_scaling_factors[offset + i] *
-                                         scalar_variables[i]->scalingFactor());
+      scalar_variables[i]->scalingFactor(
+          {1. / inverse_scaling_factors[offset + i] * scalar_variables[i]->scalingFactor()});
 
     if (thread == 0 && _verbose)
     {
@@ -1439,8 +1451,13 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
       _console.precision(6);
 
       for (const auto & field_variable : field_variables)
-        _console << "  " << field_variable->name() << ": " << field_variable->scalingFactor()
-                 << "\n";
+      {
+        const auto & factors = field_variable->arrayScalingFactor();
+        _console << "  " << field_variable->name() << ":";
+        for (const auto i : make_range(field_variable->count()))
+          _console << " " << factors[i];
+        _console << "\n";
+      }
       for (const auto & scalar_variable : scalar_variables)
         _console << "  " << scalar_variable->name() << ": " << scalar_variable->scalingFactor()
                  << "\n";
@@ -1454,34 +1471,10 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 }
 
 void
-SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
-{
-  if (!_subproblem.haveFV())
-    return;
-
-  // prepare a vector of MooseVariables from names
-  std::vector<const MooseVariableFieldBase *> moose_vars;
-  for (auto & v : vars)
-  {
-    // first make sure this is not a scalar variable
-    if (hasScalarVariable(v))
-      mooseError("Variable ", v, " is a scalar variable");
-
-    // now make sure this is a standard variable [not array/vector]
-    if (getVariable(0, v).fieldType() != 0)
-      mooseError("Variable ", v, " not a standard field variable [either VECTOR or ARRAY].");
-    moose_vars.push_back(static_cast<MooseVariableFieldBase *>(&getVariable(0, v)));
-  }
-
-  _mesh.cacheVarIndicesByFace(moose_vars);
-  _mesh.computeFaceInfoFaceCoords();
-}
-
-void
 SystemBase::addScalingVector()
 {
   addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
-  _subproblem.hasScalingVector();
+  _subproblem.hasScalingVector(number());
 }
 
 bool

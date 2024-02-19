@@ -25,6 +25,8 @@ TaggingInterface::validParams()
   MultiMooseEnum vtags("nontime time", "nontime", true);
   MultiMooseEnum mtags("nontime system", "system", true);
 
+  params.addPrivateParam<bool>("matrix_only", false);
+
   params.addParam<MultiMooseEnum>(
       "vector_tags", vtags, "The tag for the vectors this Kernel should fill");
 
@@ -57,18 +59,23 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");
 
   if (!vector_tag_names.isValid())
-    mooseError("MUST provide at least one vector_tag for Kernel: ", _moose_object.name());
-
-  for (auto & vector_tag_name : vector_tag_names)
   {
-    const TagID vector_tag_id = _subproblem.getVectorTagID(vector_tag_name.name());
-    if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
-      mooseError("Vector tag '",
-                 vector_tag_name.name(),
-                 "' for Kernel '",
-                 _moose_object.name(),
-                 "' is not a residual vector tag");
-    _vector_tags.insert(vector_tag_id);
+    if (!_tag_params.get<bool>("matrix_only"))
+      mooseError("MUST provide at least one vector_tag for Kernel: ", _moose_object.name());
+  }
+  else
+  {
+    for (auto & vector_tag_name : vector_tag_names)
+    {
+      const TagID vector_tag_id = _subproblem.getVectorTagID(vector_tag_name.name());
+      if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
+        mooseError("Vector tag '",
+                   vector_tag_name.name(),
+                   "' for Kernel '",
+                   _moose_object.name(),
+                   "' is not a residual vector tag");
+      _vector_tags.insert(vector_tag_id);
+    }
   }
 
   // Add extra vector tags. These tags should be created in the System already, otherwise
@@ -105,11 +112,9 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
 
   auto & matrix_tag_names = _tag_params.get<MultiMooseEnum>("matrix_tags");
 
-  if (!matrix_tag_names.isValid())
-    mooseError("MUST provide at least one matrix_tag for Kernel: ", _moose_object.name());
-
-  for (auto & matrix_tag_name : matrix_tag_names)
-    _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name.name()));
+  if (matrix_tag_names.isValid())
+    for (auto & matrix_tag_name : matrix_tag_names)
+      _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name.name()));
 
   auto & extra_matrix_tags = _tag_params.get<std::vector<TagName>>("extra_matrix_tags");
 
@@ -396,13 +401,6 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
 }
 
 void
-TaggingInterface::accumulateTaggedNonlocalMatrix()
-{
-  for (auto & ke : _ke_blocks)
-    *ke += _nonlocal_ke;
-}
-
-void
 TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
                                               const unsigned int ivar,
                                               const unsigned int jvar,
@@ -419,6 +417,13 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
               "Passed-in k must match the blocks we are about to sum into");
   for (auto & ke : _ke_blocks)
     *ke += k;
+}
+
+void
+TaggingInterface::accumulateTaggedNonlocalMatrix()
+{
+  for (auto & ke : _ke_blocks)
+    *ke += _nonlocal_ke;
 }
 
 void

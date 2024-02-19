@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#19841'
+  design = 'JunctionParallelChannels1Phase.md'
   [equal_area_x_direction]
     type = 'CSVDiff'
     input = 'equal_area_with_junction.i'
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
+    requirement = "The system shall be able to connect an arbitrary number of parallel channels to another flow component."
   []
 
   [phy:unequal_area]
@@ -14,6 +17,7 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
+    requirement = "The system shall be able to connect an arbitrary number of single phase parallel channels with different flow areas to another flow component."
   []
 
   [phy:shower_syntax]
@@ -22,6 +26,7 @@
     check_input = true
     recover = false
     max_threads = 1
+    requirement = "The system shall be able to check the syntax for connecting two parallel channels with different single phase fluid temperatures and mix the flows."
   []
 
   [phy:shower]
@@ -31,6 +36,7 @@
     abs_zero = 8e-8
     rel_err = 0
     heavy = true
+    requirement = "The system shall be able to connect two parallel channels with different single phase fluid temperatures and mix the flows."
   []
 
   [calorically_imperfect_gas]
@@ -39,6 +45,7 @@
     csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
     abs_zero = 4e-5
     rel_err = 1e-5
+    requirement = "The system shall be able to connect an arbitrary number of parallel channels to another flow component, with a calorifically imperfect gas fluid."
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -46,6 +53,7 @@
     type = 'CSVDiff'
     input = 'conservation.i'
     csvdiff = 'conservation_out.csv'
+    requirement = 'The system shall be able to show conservation of mass and energy when connecting parallel channels.'
   []
   [conservation_1phase_K_crtl]
     type = 'CSVDiff'
@@ -53,6 +61,7 @@
     cli_args = "ControlLogic/active=K_crtl Outputs/file_base=conservation_K "
                "Outputs/out/show='dp_junction'"
     csvdiff = 'conservation_K.csv'
+    requirement = 'The system shall be able to show conservation of mass and energy when connecting parallel channels and leveraging the control system to dynamically control the simulation.'
   []
 
   # error checking
@@ -61,6 +70,7 @@
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p "
                  "initial_T initial_vel_x initial_vel_y initial_vel_z"
+    requirement = "The system shall report an error if no initial conditions were set in a parallel junction."
   []
 
   [err.non_parallel_channels]
@@ -69,6 +79,7 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use VolumeJunction1Phase "
                  "component instead."
+    requirement = "The system shall report an error if a parallel junction is set to connect non-parallel flow channels."
   []
 
   # jacobian test
@@ -81,5 +92,6 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when connecting parallel single phase channels.'
   []
 []

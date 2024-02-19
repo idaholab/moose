@@ -21,9 +21,9 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
 - If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
   instructions and then install our MOOSE Conda packages:
 
-  ```bash
-  mamba create -n moose moose-dev
-  ```
+  !package! code
+  conda create -n moose moose-dev=__MOOSE_DEV__
+  !package-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
 
@@ -117,10 +117,12 @@ either a Conda update, or rebuild PETSc/libMesh:
 
 - If +Personal Machine (Conda)+:
 
-  ```bash
-  mamba activate moose
-  mamba update moose-dev
-  ```
+  !package! code
+  conda activate base
+  conda env remove -n moose
+  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda activate moose
+  !package-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
 
@@ -133,6 +135,7 @@ either a Conda update, or rebuild PETSc/libMesh:
   cd ~/projects/{{binary}}/moose
   scripts/update_and_rebuild_petsc.sh
   scripts/update_and_rebuild_libmesh.sh
+  scripts/update_and_rebuild_wasp.sh
   ```
 
   For more information on the `METHODS` variable (and other influential environment variables) check out:

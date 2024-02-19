@@ -48,4 +48,5 @@ FilePositions::FilePositions(const InputParameters & parameters) : Positions(par
       _positions_2d[p_file_it].push_back(d);
     }
   }
+  _initialized = true;
 }

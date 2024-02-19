@@ -21,7 +21,7 @@
   [injection_area]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x<1.0001'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'injection_area'
     input = 'aquifer'
   []

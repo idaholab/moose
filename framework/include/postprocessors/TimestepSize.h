@@ -24,7 +24,6 @@ public:
   /**
    * This will return the current time step size.
    */
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

@@ -23,6 +23,11 @@ refined and could potentially smooth out the problem data on a coarser mesh. It,
 however, has problems on refined meshes and leads to an ill-conditioned problem,
 which can be difficult to solve.
 
+Users should instead use [VectorPenaltyDirichletBC.md] or
+[VectorDivPenaltyDirichletBC.md] if they wish to set a Dirichlet boundary
+condition via the penalty method on the vector variable itself or its
+divergence, respectively.
+
 ## Example Input File Syntax
 
 !listing test/tests/kernels/vector_fe/vector_kernel.i block=BCs

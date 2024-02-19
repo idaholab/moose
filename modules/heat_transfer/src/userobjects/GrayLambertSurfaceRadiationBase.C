@@ -23,14 +23,16 @@ GrayLambertSurfaceRadiationBase::validParams()
       5.670367e-8,
       "The Stefan-Boltzmann constant. Default value is in units of [W / m^2 K^4].");
   params.addRequiredCoupledVar("temperature", "The coupled temperature variable.");
-  params.addRequiredParam<std::vector<Real>>("emissivity", "Emissivities for each boundary.");
+  params.addRequiredParam<std::vector<FunctionName>>("emissivity",
+                                                     "Emissivities for each boundary.");
   params.addParam<std::vector<BoundaryName>>(
       "fixed_temperature_boundary",
+      {},
       "The list of boundary IDs from the mesh with fixed temperatures.");
-  params.addParam<std::vector<FunctionName>>("fixed_boundary_temperatures",
-                                             "The temperatures of the fixed boundary.");
+  params.addParam<std::vector<FunctionName>>(
+      "fixed_boundary_temperatures", {}, "The temperatures of the fixed boundary.");
   params.addParam<std::vector<BoundaryName>>(
-      "adiabatic_boundary", "The list of boundary IDs from the mesh that are adiabatic.");
+      "adiabatic_boundary", {}, "The list of boundary IDs from the mesh that are adiabatic.");
 
   params.addClassDescription(
       "This object implements the exchange of heat by radiation between sidesets.");
@@ -42,7 +44,6 @@ GrayLambertSurfaceRadiationBase::GrayLambertSurfaceRadiationBase(const InputPara
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
     _n_sides(boundaryIDs().size()),
     _temperature(coupledValue("temperature")),
-    _emissivity(getParam<std::vector<Real>>("emissivity")),
     _radiosity(_n_sides),
     _heat_flux_density(_n_sides),
     _side_temperature(_n_sides),
@@ -51,6 +52,12 @@ GrayLambertSurfaceRadiationBase::GrayLambertSurfaceRadiationBase(const InputPara
     _beta(_n_sides),
     _surface_irradiation(_n_sides)
 {
+  // get emissivity functions
+  auto & eps_names = getParam<std::vector<FunctionName>>("emissivity");
+  _emissivity.resize(eps_names.size());
+  for (unsigned int j = 0; j < _emissivity.size(); ++j)
+    _emissivity[j] = &getFunctionByName(eps_names[j]);
+
   // set up the map from the side id to the local index & check
   // note that boundaryIDs is not in the right order anymore!
   {
@@ -158,8 +165,8 @@ GrayLambertSurfaceRadiationBase::execute()
       temp = _fixed_side_temperature[iso_index]->value(_t, _q_point[qp]);
     }
 
-    _beta[index] += _JxW[qp] * _coord[qp] * _sigma_stefan_boltzmann * _emissivity[index] *
-                    MathUtils::pow(temp, 4);
+    _beta[index] += _JxW[qp] * _coord[qp] * _sigma_stefan_boltzmann *
+                    _emissivity[index]->value(temp, Point()) * MathUtils::pow(temp, 4);
     _side_temperature[index] += _JxW[qp] * _coord[qp] * temp;
   }
 }
@@ -208,7 +215,8 @@ GrayLambertSurfaceRadiationBase::finalize()
       if (_side_type[i] == ADIABATIC)
         matrix(i, j) -= _view_factors[i][j];
       else
-        matrix(i, j) -= (1 - _emissivity[i]) * _view_factors[i][j];
+        matrix(i, j) -=
+            (1 - _emissivity[i]->value(_side_temperature[i], Point())) * _view_factors[i][j];
     }
   }
 
@@ -228,10 +236,11 @@ GrayLambertSurfaceRadiationBase::finalize()
       _heat_flux_density[i] -= _view_factors[i][j] * radiosity(j);
 
     if (_side_type[i] == ADIABATIC)
-      _side_temperature[i] =
-          std::pow((radiosity(i) + (1 - _emissivity[i]) / _emissivity[i] * _heat_flux_density[i]) /
-                       _sigma_stefan_boltzmann,
-                   0.25);
+    {
+      Real e = _emissivity[i]->value(_side_temperature[i], Point());
+      _side_temperature[i] = std::pow(
+          (radiosity(i) + (1 - e) / e * _heat_flux_density[i]) / _sigma_stefan_boltzmann, 0.25);
+    }
 
     // compute the surface irradiation into i from the radiosities
     _surface_irradiation[i] = 0;
@@ -243,8 +252,7 @@ GrayLambertSurfaceRadiationBase::finalize()
 void
 GrayLambertSurfaceRadiationBase::threadJoin(const UserObject & y)
 {
-  const GrayLambertSurfaceRadiationBase & pps =
-      static_cast<const GrayLambertSurfaceRadiationBase &>(y);
+  const auto & pps = static_cast<const GrayLambertSurfaceRadiationBase &>(y);
 
   for (unsigned int j = 0; j < _n_sides; ++j)
   {
@@ -298,9 +306,10 @@ GrayLambertSurfaceRadiationBase::getSurfaceRadiosity(BoundaryID id) const
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceEmissivity(BoundaryID id) const
 {
-  if (_side_id_index.find(id) == _side_id_index.end())
+  auto p = _side_id_index.find(id);
+  if (p == _side_id_index.end())
     return 1;
-  return _emissivity[_side_id_index.find(id)->second];
+  return _emissivity[p->second]->value(_side_temperature[p->second], Point());
 }
 
 Real

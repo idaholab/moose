@@ -6,7 +6,7 @@
 | $A^{\kappa}$ | kg.kg$^{-1}$ | Mass of absorbed species $\kappa$ per mass of rock grain material |
 | $\mathcal{A}^{i}_{\beta}$ | symbolic | Chemical species $i$ in phase $\beta$ |
 | $A_{m}$ | m$^{2}$.L$^{-1}$ | specific reactive surface area for mineral $m$ |
-| $\alpha_{\beta,L}$ | m | Longitudional dispersivity of phase $\beta$ |
+| $\alpha_{\beta,L}$ | m | Longitudinal dispersivity of phase $\beta$ |
 | $\alpha_{\beta,T}$ | m | Transverse dispersivity of phase $\beta$ |
 | $\alpha_{B}$ | dimensionless | Biot coefficient |
 | $\alpha_{B}'$ | dimensionless | Biot coefficient that multiplies the porepressure term in the porosity.  Usually equal to $\alpha_{B}$, but may be $\neq\alpha_{B}$ for fracture-flow |
@@ -21,10 +21,10 @@
 | $C_{p}$ | J.kg$^{-1}$.K$^{-1}$ | Fluid specific heat capacity at constant pressure |
 | $\chi_{\beta}^{\kappa}$ | kg.kg$^{-1}$ | Mass fraction of component $\kappa$ present in phase $\beta$ |
 | ${\mathcal{D}}_{\beta}^{\kappa}$ | m$^{2}$.s$^{-1}$ | Fluid dispersion tensor for species $\kappa$ in phase $\beta$ |
-| $D_{\beta,L}^{\kappa}$ | m$^{2}$.s$^{-1}$ | Longitudional dispersion coefficient for species $\kappa$ in phase $\beta$ |
+| $D_{\beta,L}^{\kappa}$ | m$^{2}$.s$^{-1}$ | Longitudinal dispersion coefficient for species $\kappa$ in phase $\beta$ |
 | $D_{\beta,T}^{\kappa}$ | m$^{2}$.s$^{-1}$ | Transverse dispersion coefficient for species $\kappa$ in phase $\beta$ |
 | $d_{\beta}^{\kappa}$ | m$^{2}$.s$^{-1}$ | Molecular diffusion coefficient for component $\kappa$ in phase $\beta$ |
-| $\delta_{l \beta}$ | dimenionless | Kronecker delta, unity if $\beta=l$, else zero |
+| $\delta_{l \beta}$ | dimensionless | Kronecker delta, unity if $\beta=l$, else zero |
 | $\mathcal{E}$ | J.m$^{-3}$ | Energy density of the rock-fluid system |
 | $\mathcal{E}_{\beta}$ | J.kg$^{-1}$ | Internal energy of fluid phase $\beta$ |
 | $\epsilon_{ij}$ | dimensionless | Strain tensor of the porous solid ($(\nabla_{k}u_{l} + \nabla_{l}u_{k})/2$) |

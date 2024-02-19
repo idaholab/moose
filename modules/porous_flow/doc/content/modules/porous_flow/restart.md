@@ -62,7 +62,7 @@ The input file for this case is
 
 The input mesh for this problem is the output mesh from the gravity equilibrium simulation, which we uniformly refine once to increase the spatial resolution, translate horizontally and rotate about the Y-axis to form a two-dimensional mesh with an injection well at the centre
 
-!listing modules/porous_flow/examples/restart/gas_injection.i block=Mesh Problem
+!listing modules/porous_flow/examples/restart/gas_injection.i block=Mesh
 
 The initial condition for the liquid porepressure is read directly from the input mesh
 

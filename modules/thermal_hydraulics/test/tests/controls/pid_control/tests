@@ -1,8 +1,12 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'PIDControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
     rel_err = 1e-4
+    requirement = 'The system shall be able to use a proportional-integral-derivative law to adjust controllable flow parameters to be able to match a desired target quantity.'
   []
 []

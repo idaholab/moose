@@ -135,6 +135,7 @@
     type = ADComputeSmearedCrackingStress
     shear_retention_factor = 0.1
     cracking_stress = 3.e9
+    cracked_elasticity_type = FULL
     softening_models = exponential_softening
   [../]
   [./exponential_softening]

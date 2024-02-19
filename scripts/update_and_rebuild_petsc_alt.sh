@@ -24,20 +24,24 @@ echo "use only. Please use scripts/update_and_rebuild_petsc.sh instead."
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SCRIPT_DIR
 
-cd $SCRIPT_DIR/..
+if [ -z "$PETSC_SRC_DIR" ]; then
+  MOOSE_DIR=${SCRIPT_DIR}
+  PETSC_SRC_DIR=${MOOSE_DIR}/petsc
 
-# Initialize petsc submodule
-git_dir=`git rev-parse --show-cdup 2>/dev/null`
-if [[ $? == 0 && "x$git_dir" == "x" ]]; then
-  git submodule update --init --recursive petsc
-  if [[ $? != 0 ]]; then
-    echo "git submodule command failed, are your proxy settings correct?"
-    exit 1
+  # Initialize petsc submodule
+  cd $MOOSE_DIR
+  git_dir=`git rev-parse --show-cdup 2>/dev/null`
+  if [[ $? == 0 && "x$git_dir" == "x" ]]; then
+    git submodule update --init --recursive petsc
+    if [[ $? != 0 ]]; then
+      echo "git submodule command failed, are your proxy settings correct?"
+      exit 1
+    fi
   fi
 fi
 
 # Jump into PETSc dir
-cd $SCRIPT_DIR/../petsc
+cd ${PETSC_SRC_DIR}
 # I would like to control this number without touching civet recipe.
 # In the future, if I want to use another version of PETSc such as 3.12.0
 # as petsc-alt, I only need to change v3.11.4 to v3.12.0.

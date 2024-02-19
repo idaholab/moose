@@ -8,7 +8,7 @@ PorousFlow can be used to simulate flow through fractured porous media in the ca
 A [related page](/porous_flow/nomultiapp_flow_through_fractured_media.md) describes how to simulate porous flow in fractured porous media, assuming that the fractures can be incorporated directly into the mesh as lower dimensional elements, for instance, as 2D "fracture" elements inside a 3D "matrix" mesh.  Unfortunately, realistic fracture networks have such complicated geometry that meshing them is difficult, while incorporating their mesh directly into a higher-dimensional mesh is almost impossible.
 Example files are in [multiapp_fracture_flow](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/multiapp_fracture_flow).  There is also some [non-PorousFlow documentation](https://github.com/idaholab/moose/blob/master/modules/misc/doc/fracture_flow).
 
-In the following set of pages, it is illustrated that MOOSE's MultiApp system may be employed to solve this problem: the "fracture" mesh is governed by one App, which is seperate from the "matrix" mesh that is governed by another App.
+In the following set of pages, it is illustrated that MOOSE's MultiApp system may be employed to solve this problem: the "fracture" mesh is governed by one App, which is separate from the "matrix" mesh that is governed by another App.
 
 - [Introduction](multiapp_fracture_flow_introduction.md)
 - [Mathematics and physical interpretation](multiapp_fracture_flow_equations.md)

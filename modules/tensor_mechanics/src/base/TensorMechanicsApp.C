@@ -15,12 +15,13 @@
 InputParameters
 TensorMechanicsApp::validParams()
 {
-  InputParameters params = MooseApp::validParams();
-
+  auto params = MooseApp::validParams();
   params.set<bool>("automatic_automatic_scaling") = false;
-
   params.set<bool>("use_legacy_material_output") = false;
-
+  params.addCommandLineParam<bool>("parse_neml2_only",
+                                   "--parse-neml2-only",
+                                   false,
+                                   "Executes the [NEML2] block in the input file and terminate.");
   return params;
 }
 
@@ -32,6 +33,28 @@ TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : Moo
 }
 
 TensorMechanicsApp::~TensorMechanicsApp() {}
+
+void
+TensorMechanicsApp::setupOptions()
+{
+  MooseApp::setupOptions();
+
+  if (getParam<bool>("parse_neml2_only"))
+  {
+    // Let parse_neml2 run before anything else, and stop after that.
+    syntax().addDependency("determine_system_type", "parse_neml2");
+    actionWarehouse().setFinalTask("parse_neml2");
+  }
+}
+
+void
+TensorMechanicsApp::runInputFile()
+{
+  MooseApp::runInputFile();
+
+  if (getParam<bool>("parse_neml2_only"))
+    _ready_to_exit = true;
+}
 
 static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
@@ -80,6 +103,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
   addTaskDependency("setup_postprocessor_data", "validate_coordinate_systems");
+
+  registerTask("parse_neml2", /*required=*/true);
+  syntax.addDependency("add_material", "parse_neml2");
+  syntax.addDependency("add_user_object", "parse_neml2");
+  registerSyntax("NEML2Action", "NEML2");
 }
 
 void

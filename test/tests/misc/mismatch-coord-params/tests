@@ -2,7 +2,7 @@
   issues = '#21975'
   design = 'Mesh/index.md'
   [bad_params]
-    requirement = 'The system shall error if the user provides inconsistent parameter values to the mesh and problem for the parameters related to'
+    requirement = 'The system shall report an error if the user provides inconsistent parameter values to the mesh and problem for the parameters related to'
     [block]
       type = RunException
       input = mismatch.i
@@ -12,7 +12,8 @@
     [coord_type]
       type = RunException
       input = mismatch.i
-      expect_err = "Did you provide different parameter values for 'coord_type' to 'Mesh' and 'Problem'"
+      expect_err = "Did you provide different parameter values for 'coord_type' to 'Mesh' and "
+                   "'Problem'"
       detail = 'coordinate system types'
       cli_args = "Problem/block='0'"
     []

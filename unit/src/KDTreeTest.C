@@ -23,7 +23,7 @@ TEST(KDTree, radiusSearch)
                                       Point(0.2, 0.3, 0.2),
                                       Point(1.0, 0.3, 0.2)};
   KDTree _kd_tree(master_points, 50);
-  std::vector<std::pair<std::size_t, Real>> indices_dist;
+  std::vector<nanoflann::ResultItem<std::size_t, Real>> indices_dist;
 
   // get all points
   Point origin(-0.1, -0.2, 0.1);

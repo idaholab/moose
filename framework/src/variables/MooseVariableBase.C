@@ -104,12 +104,12 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
+    _scaling_factor(_count, 1.0),
     _use_dual(getParam<bool>("use_dual")),
     _is_array(getParam<bool>("array"))
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
-
   if (getParam<bool>("fv") && getParam<bool>("eigen"))
     paramError("eigen", "finite volume (fv=true) variables do not have eigen support");
   if (getParam<bool>("fv") && _fe_type.family != MONOMIAL)
@@ -130,6 +130,22 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   {
     mooseAssert(_count == 1, "component size of normal variable (_count) must be one");
     _var_name = _sys.system().variable(_var_num).name();
+  }
+
+  if (!blockRestricted())
+    _is_lower_d = false;
+  else
+  {
+    const auto & blk_ids = blockIDs();
+    mooseAssert(!blk_ids.empty(), "Every variable should have at least one subdomain");
+
+    _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
+#ifdef DEBUG
+    for (auto it = ++blk_ids.begin(); it != blk_ids.end(); ++it)
+      mooseAssert(_is_lower_d == _mesh.isLowerD(*it),
+                  "A user should not specify a mix of lower-dimensional and higher-dimensional "
+                  "blocks for a variable");
+#endif
   }
 }
 
@@ -172,27 +188,24 @@ MooseVariableBase::componentDofIndices(const std::vector<dof_id_type> & dof_indi
 }
 
 void
-MooseVariableBase::scalingFactor(Real factor)
-{
-  _scaling_factor.assign(_count, factor);
-}
-
-void
 MooseVariableBase::scalingFactor(const std::vector<Real> & factor)
 {
-  _scaling_factor = factor;
+  mooseAssert(factor.size() == _count, "Inconsistent scaling factor size");
+  for (const auto i : make_range(_count))
+    _scaling_factor[i] = factor[i];
 }
 
 void
 MooseVariableBase::initialSetup()
 {
   // Currently the scaling vector is only used through AD residual computing objects
-  if (_subproblem.haveADObjects() &&
+  if ((_var_kind == Moose::VAR_NONLINEAR) && _subproblem.haveADObjects() &&
       (_subproblem.automaticScaling() || (std::find_if(_scaling_factor.begin(),
                                                        _scaling_factor.end(),
                                                        [](const Real element) {
                                                          return !MooseUtils::absoluteFuzzyEqual(
                                                              element, 1.);
                                                        }) != _scaling_factor.end())))
+
     _sys.addScalingVector();
 }

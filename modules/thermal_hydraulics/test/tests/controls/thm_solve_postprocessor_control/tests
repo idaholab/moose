@@ -1,7 +1,11 @@
 [Tests]
+  design = 'THMSolvePostprocessorControl.md'
+  # sockeye#67
+  issues = '#26411'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to decide whether to solve a flow simulation problem depending on the value of a postprocessor.'
   []
 []

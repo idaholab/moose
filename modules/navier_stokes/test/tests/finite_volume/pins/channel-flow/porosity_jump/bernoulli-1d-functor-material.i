@@ -104,7 +104,7 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [porosity]
     type = ADPiecewiseByBlockFunctorMaterial
     prop_name = 'porosity'

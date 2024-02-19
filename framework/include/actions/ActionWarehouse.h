@@ -120,7 +120,18 @@ public:
       }
     }
     if (!p)
-      mooseError("Action with name being ", name, " does not exist");
+    {
+      std::vector<std::string> all_names;
+      for (auto act_ptr : _all_ptrs)
+        if (!act_ptr->name().empty())
+          all_names.push_back(act_ptr->name());
+        else
+          all_names.push_back("unnamed");
+      mooseError("Action with name '",
+                 name,
+                 "' does not exist.\n These are the Actions that do exist:",
+                 Moose::stringify(all_names));
+    }
     return *p;
   }
 

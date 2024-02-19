@@ -19,6 +19,6 @@
     type = RunException
     input = 'diffusion_override_scalar.i'
     expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
-    requirement = 'The system shall error if a derived object uses scalars and computes scalar residuals but does not override the quadrature point residual calculation routine.'
+    requirement = 'The system shall report an error if a derived object uses scalars and computes scalar residuals but does not override the quadrature point residual calculation routine.'
   []
 []

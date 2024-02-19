@@ -61,4 +61,5 @@ ReporterPositions::initialize()
       _positions_2d[r_it].push_back(d);
     }
   }
+  _initialized = true;
 }

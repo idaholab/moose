@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ParameterStudy` is meant to be a simplified syntax for running common parameter studies like the one described in [examples/parameter_study.md]. The idea with this syntax is users do not need to understand or go through the modular design of the stochastic tools module to run a basic parameter study. The [ParameterStudyAction.md] builds the necessary objects programmatically, objects including [distributions](Distributions/index.md), [samplers](Samplers/index.md), [multi-apps](MultiApps/index.md), and [transfers](Transfers/index.md). The following sections desribe in detail the capabilities of this system, but the basic functionalities include:
+`ParameterStudy` is meant to be a simplified syntax for running common parameter studies like the one described in [examples/parameter_study.md]. The idea with this syntax is users do not need to understand or go through the modular design of the stochastic tools module to run a basic parameter study. The [ParameterStudyAction.md] builds the necessary objects programmatically, objects including [distributions](Distributions/index.md), [samplers](Samplers/index.md), [multi-apps](MultiApps/index.md), and [transfers](Transfers/index.md). The following sections describe in detail the capabilities of this system, but the basic functionalities include:
 
 1. Defining parameters and quantities of interest (QoIs) within the given physics input.
 1. Perturbing the parameters using the specified sampling method.
@@ -21,7 +21,7 @@ The parameters being perturbed in the study are specified using the [!param](/Pa
 
 The QoIs for the study are specified using the [!param](/ParameterStudy/quantities_of_interest) parameter. This is a list of [reporter](Reporters/index.md) values with `<object_name>/<value_name>` syntax. [Postprocessor](Postprocessors/index.md) values use `<pp_name>/value` syntax. [Vector-postprocessor](VectorPostprocessors/index.md) values use `<vpp_name>/<vector_name>` syntax. This parameter is optional as users may want to do their own analysis using outputs, such as CSV or Exodus, generated from the physics input.
 
-Whether or not to computate statistics on the QoIs is defined by the [!param](/ParameterStudy/compute_statistics) parameter. The default for this parameter is `true`, so statistics will be computed by default if QoIs are specified with the [!param](/ParameterStudy/quantities_of_interest) parameter. A [StatisticsReporter.md] object is created, which by default computes the mean and standard deviation of the QoIs with 90%, 95%, and 99% confidence intervals. The type of statistics can be specified with [!param](/ParameterStudy/statistics) and the confidence interval computation can specified with [!param](/ParameterStudy/ci_levels) and [!param](/ParameterStudy/ci_replicates), see [StatisticsReporter.md] for more details on confidence interval computation.
+Whether or not to compute statistics on the QoIs is defined by the [!param](/ParameterStudy/compute_statistics) parameter. The default for this parameter is `true`, so statistics will be computed by default if QoIs are specified with the [!param](/ParameterStudy/quantities_of_interest) parameter. A [StatisticsReporter.md] object is created, which by default computes the mean and standard deviation of the QoIs with 90%, 95%, and 99% confidence intervals. The type of statistics can be specified with [!param](/ParameterStudy/statistics) and the confidence interval computation can specified with [!param](/ParameterStudy/ci_levels) and [!param](/ParameterStudy/ci_replicates), see [StatisticsReporter.md] for more details on confidence interval computation.
 
 ## Sampling Method id=sec:sampling
 
@@ -29,7 +29,7 @@ There are various methods of sampling included with the `ParameterStudy` syntax,
 
 ### Random Sampling id=sec:random
 
-The `monte-carlo` and `lhs` options in [!param](/ParameterStudy/sampling_type) implement random sampling using the [MonteCarloSampler.md] and [LatinHypercubeSampler.md] samplers, respectively. [!param](/ParameterStudy/num_samples) is a required parameter that defines the total number of samples. [!param](/ParameterStudy/distributions) is also a required parameter that defines the probablity distribution for each parameter. The available distributions are described in the following subsection. Each distribution type have their own set of required parameters that are specified via a list of values. For example, defining a random sampling with three parameters using `uniform`, `normal`, and `uniform` distributions is shown below:
+The `monte-carlo` and `lhs` options in [!param](/ParameterStudy/sampling_type) implement random sampling using the [MonteCarloSampler.md] and [LatinHypercubeSampler.md] samplers, respectively. [!param](/ParameterStudy/num_samples) is a required parameter that defines the total number of samples. [!param](/ParameterStudy/distributions) is also a required parameter that defines the probability distribution for each parameter. The available distributions are described in the following subsection. Each distribution type have their own set of required parameters that are specified via a list of values. For example, defining a random sampling with three parameters using `uniform`, `normal`, and `uniform` distributions is shown below:
 
 !listing!
 [ParameterStudy]
@@ -79,17 +79,17 @@ A pre-defined matrix for sampling can be implemented using the `csv` or `input-m
 
 ## Execution Mode
 
-The stochastic tools module has a number of different ways to perform stochastic sampling, as described in [batch_mode.md]. The permissable and most efficient mode is largely based on the type of parameters being perturbed and the problem's physics. There are five different mode options using the [!param](/ParameterStudy/multiapp_mode) parameter, which are described in the following subsections.
+The stochastic tools module has a number of different ways to perform stochastic sampling, as described in [batch_mode.md]. The permissible and most efficient mode is largely based on the type of parameters being perturbed and the problem's physics. There are five different mode options using the [!param](/ParameterStudy/multiapp_mode) parameter, which are described in the following subsections.
 
 Additionally, it is often useful to define the minimum processors to use when running the samples. Typically this is done for large models in batch mode to avoid excessive memory usage. The [!param](/ParameterStudy/min_procs_per_sample) will utilize this capability.
 
 ### Normal mode
 
-The `normal` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "normal" mode, which creates a sub-application for each sample. The sub-applications are created upfront and run sequentially. This mode is arguably the *least efficient* option as it can become extremely memory intensive. This option mainly exisits to replicate the typical execution mode for other MOOSE [MultiApps](MultiApps/index.md). It also serves as a useful debugging tool for stochastic tools module development.
+The `normal` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "normal" mode, which creates a sub-application for each sample. The sub-applications are created upfront and run sequentially. This mode is arguably the *least efficient* option as it can become extremely memory intensive. This option mainly exists to replicate the typical execution mode for other MOOSE [MultiApps](MultiApps/index.md). It also serves as a useful debugging tool for stochastic tools module development.
 
 ### Batch-Reset Mode
 
-The `batch-reset` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "batch-reset" mode, which creates a sub-appliction per processor, or set of processors, and re-initializes it for each sample. This mode is the recommended mode for general problems where the parameters are not (or not known to be) controllable. The controllability of objects can be found in their documentation; for instance, BCs/DirichletBC/[!param](/BCs/DirichletBC/value) is controllable, but Mesh/GeneratedMeshGenerator/[!param](/Mesh/GeneratedMeshGenerator/xmax) is not controllable.
+The `batch-reset` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "batch-reset" mode, which creates a sub-application per processor, or set of processors, and re-initializes it for each sample. This mode is the recommended mode for general problems where the parameters are not (or not known to be) controllable. The controllability of objects can be found in their documentation; for instance, BCs/DirichletBC/[!param](/BCs/DirichletBC/value) is controllable, but Mesh/GeneratedMeshGenerator/[!param](/Mesh/GeneratedMeshGenerator/xmax) is not controllable.
 
 ### Batch-Restore Mode
 
@@ -105,7 +105,7 @@ The `batch-no-restore` option for [!param](/ParameterStudy/multiapp_mode) runs t
 
 ### Automatic Mode Detection
 
-While the execution mode can be explicitly specifyied using the [!param](/ParameterStudy/multiapp_mode) parameter, if this parameter is unspecified, the action will attempt to run in the most efficient mode by reading the physics input file. First, it will determine if the perturbed [!param](/ParameterStudy/parameters) are all controllable. If not all the parameter are controllable, the action will use `batch-reset` mode. This detection is a bit rudimentary, so it might not detect all controllable parameters. Next, it will determine what type of execution is being performed. If the `Executioner/type` is [Steady.md] or [Eigenvalue.md], then it will use `batch-no-restore` mode. If the executioner is [Transient.md] with `steady_state_detection = true`, then it will assume the simulation is pseudo-transient and use `batch-keep-solution`. All other cases with controllable parameters will use `batch-restore`. This automatic detection is not meant to be exhaustive, so it is recommended that users fully understand the problem and use the [!param](/ParameterStudy/multiapp_mode) parameter.
+While the execution mode can be explicitly specified using the [!param](/ParameterStudy/multiapp_mode) parameter, if this parameter is unspecified, the action will attempt to run in the most efficient mode by reading the physics input file. First, it will determine if the perturbed [!param](/ParameterStudy/parameters) are all controllable. If not all the parameter are controllable, the action will use `batch-reset` mode. This detection is a bit rudimentary, so it might not detect all controllable parameters. Next, it will determine what type of execution is being performed. If the `Executioner/type` is [Steady.md] or [Eigenvalue.md], then it will use `batch-no-restore` mode. If the executioner is [Transient.md] with `steady_state_detection = true`, then it will assume the simulation is pseudo-transient and use `batch-keep-solution`. All other cases with controllable parameters will use `batch-restore`. This automatic detection is not meant to be exhaustive, so it is recommended that users fully understand the problem and use the [!param](/ParameterStudy/multiapp_mode) parameter.
 
 ## Outputs
 

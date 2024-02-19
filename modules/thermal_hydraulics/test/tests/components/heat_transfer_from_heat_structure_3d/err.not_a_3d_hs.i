@@ -2,12 +2,12 @@
   scaling_factor_1phase = '1 1 1e-3'
 []
 
-[Materials]
+[SolidProperties]
   [mat]
-    type = ADGenericConstantMaterial
-    block = 'blk:0'
-    prop_names = 'density specific_heat thermal_conductivity'
-    prop_values = '1000 100 30'
+    type = ThermalFunctionSolidProperties
+    rho = 1000
+    cp = 100
+    k = 30
   []
 []
 
@@ -72,7 +72,8 @@
     n_elems = 6
     n_part_elems = 1
     initial_T = T_init
-    materials = 'mat'
+    solid_properties = 'mat'
+    solid_properties_T_ref = '300'
     names = blk
   []
   [ht]

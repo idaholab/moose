@@ -16,7 +16,7 @@ Introduce the following:
 - $A_{m}$: gases of known fugacity that appear in the [basis](basis.md).
 - $A_{n}$: all gases.
 - $A_{q}$: sorbed species.  These do not get transported --- they are surface complexes.
-- $A_{p}$: sorbing sites.  In the Langmuir approch and ion-exchange approach there is just one of these, and all sorbing species compete to sorb.  In the "surface complexation" approach, there are an equal number of $A_{p}$ as $A_{q}$.
+- $A_{p}$: sorbing sites.  In the Langmuir approach and ion-exchange approach there is just one of these, and all sorbing species compete to sorb.  In the "surface complexation" approach, there are an equal number of $A_{p}$ as $A_{q}$.
 
 ## Basis
 
@@ -195,7 +195,7 @@ In addition, if surface complexation is present, [eq:psi] provides an equation f
 
 These equations relate $1 + N_{i} + N_{j} + N_{k} + N_{m} + N_{p} + N_{q}$ quantities, as well as the addition equation for $\Psi$ if relevant.  Once the basis species are known, the molalities of the secondary and any sorbed species may be worked out simply using the final two equations.
 
-The known conditions for the reactions can take a varity of forms:
+The known conditions for the reactions can take a variety of forms:
 
 - For H$_{2}$O: either $M_{w}$ (total number of moles) or $n_{w}$ (number of moles acting as the solute) is known.
 - For each primary species: either $M_{i}$ (bulk-composition number of moles) or $m_{i}$ (molality of free primary species) is known.  E.g. specifying pH specifies $m_{H^{+}}$.  Charge balance must hold.
@@ -274,7 +274,7 @@ After NR convergence, and substituting the result to find $n_{k}$ and $M_{k}$, i
 
 - All $n_{k}$ are computed.  If one or more a negative, then the one that is the most negative is removed from the basis.  It is replaced by secondary species $A_{j}$ that satisfies $\mathrm{max}_{j}(m_{j}|\nu_{kj}|)$.  The NR procedure is resolved.
 
-- The sauration index of each mineral, $A_{l}$, that can form in a reaction model is checked for supersaturation.  If one or more are supersaturated, the one with the largest saturation index is added into the basis, and something removed from the basis.  This "something is": preferably, a primary species satisfying $\mathrm{max}_{i}(|\nu_{il}|/m_{i})$; if no primary species appears in the reaction for $A_{l}$ then the mineral in the reaction for $A_{l}$ that satisfies $\mathrm{min}_{k}(n_{k}/\nu_{kl})$.  The NR procedure is re-solved (and checked for undersaturation and supersaturation, etc).  Finally, due to a multitute of complexities, this procedure involving supersaturation is undesirable --- the supersaturated mineral is ignored because the modeller knows it doesn't occur in reality.
+- The saturation index of each mineral, $A_{l}$, that can form in a reaction model is checked for supersaturation.  If one or more are supersaturated, the one with the largest saturation index is added into the basis, and something removed from the basis.  This "something is": preferably, a primary species satisfying $\mathrm{max}_{i}(|\nu_{il}|/m_{i})$; if no primary species appears in the reaction for $A_{l}$ then the mineral in the reaction for $A_{l}$ that satisfies $\mathrm{min}_{k}(n_{k}/\nu_{kl})$.  The NR procedure is re-solved (and checked for undersaturation and supersaturation, etc).  Finally, due to a multitude of complexities, this procedure involving supersaturation is undesirable --- the supersaturated mineral is ignored because the modeller knows it doesn't occur in reality.
 
 ### Primary species with low concentration
 

@@ -12,6 +12,7 @@
       valgrind = 'heavy'
       strumpack = true
       detail = 'in three dimensions, using a finite element discretization for all variables, and'
+      method = '!dbg'
     []
     [2d-fv]
       input = 2d-fv.i

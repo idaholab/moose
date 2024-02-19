@@ -21,10 +21,26 @@ This is executioner performs optimization using the [TAO](https://petsc.org/rele
 | Orthant-wise Limited Memory | `taoowlqn` | [TAOOWLQN](https://petsc.org/release/docs/manualpages/Tao/TAOOWLQN/) | `taoowlqn` |
 | Gradient Projection Conjugate Gradient | `taogpcg` | [TAOGPCG](https://petsc.org/release/docs/manualpages/Tao/TAOGPCG/) | `gpcg` |
 | Bundle Method for Regularized Risk Minimization | `taobmrm` | [TAOBMRM](https://petsc.org/release/docs/manualpages/Tao/TAOBMRM/) | `bmrm` |
+| Augmented Lagrangian Multiplier Method | `taoalmm` | [TAOALMM](https://petsc.org/release/manualpages/Tao/TAOALMM/) | `almm` |
 
-This executioner relies on a [OptimizationReporter](OptimizationReporter/index.md) to define the bounds, objective, and gradient of the form function. The objective is defined by the `computeObjective` member in the [OptimizationReporter](OptimizationReporter.h) class. the gradient is defined by `computeGradient` and the bounds are defined by `getUpperBounds` and `getLowerBounds`. Whether it is necessary to define each of these members is based on whether the selected algorithm needs it, see [Summary of Tao Solvers](https://petsc.org/release/overview/tao_solve_table/) for more information. The Hessian is computed using a matrix-free method, where it evaluates the action of the Hessian on the form function parameters (the values that are being optimized). It does this by evaluating a homogeneous version of the objective function and subsequently computes the gradient.
+This executioner relies on a
+[OptimizationReporter](OptimizationReporter/index.md) to define the constraints,
+bounds, objective, and gradient of the form function. The objective is defined by the
+`computeObjective` member in the [OptimizationReporter](OptimizationReporter.h)
+class. The gradient is defined by `computeGradient` and the bounds are defined
+by `getUpperBounds` and `getLowerBounds`. Whether it is necessary to define each
+of these members is based on whether the selected algorithm needs it, see
+[Summary of Tao Solvers](https://petsc.org/release/overview/tao_solve_table/)
+for more information. The Hessian is computed using a matrix-free method, where
+it evaluates the action of the Hessian on the form function parameters (the
+values that are being optimized). It does this by evaluating a homogeneous
+version of the objective function and subsequently computes the gradient. For
+constrained optimization the `taoalmm` algorithm needs to be used. When the
+`taoalmm` algorithm is selected the necessary methods for that algorithm are
+generated and only in an OptimizationReporter does the user need to provide
+the type and number of constraints.
 
-To aid in the computation of the objective, gradient, and Hessian, this execuationer includes additional execution flags that MOOSE objects (like [MultiApps](MultiApps/index.md)) can be evaluated on. Having `execute_on = forward` will execute the object(s) just before `computeObjective` is called and `execute_on = adjoint` will execute the object()s just before `computeGradient` is called.  Having `execute_on = homogeneous_forward` will execute the object(s) during the matrix-free Hessian computation, before calling `adjoint` and `computeGradient`.
+To aid in the computation of the objective, gradient, and Hessian, this executioner includes additional execution flags that MOOSE objects (like [MultiApps](MultiApps/index.md)) can be evaluated on. Having `execute_on = forward` will execute the object(s) just before `computeObjective` is called and `execute_on = adjoint` will execute the object()s just before `computeGradient` is called.  Having `execute_on = homogeneous_forward` will execute the object(s) during the matrix-free Hessian computation, before calling `adjoint` and `computeGradient`.
 
 The form function's parameters are represented as a vector of values and is tied to reporter values within the [OptimizationReporter](OptimizationReporter/index.md).
 

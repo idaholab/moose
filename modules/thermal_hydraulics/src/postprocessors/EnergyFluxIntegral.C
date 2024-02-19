@@ -31,7 +31,7 @@ EnergyFluxIntegral::EnergyFluxIntegral(const InputParameters & parameters)
 void
 EnergyFluxIntegral::threadJoin(const UserObject & y)
 {
-  const EnergyFluxIntegral & pps = static_cast<const EnergyFluxIntegral &>(y);
+  const auto & pps = static_cast<const EnergyFluxIntegral &>(y);
   _integral_value += pps._integral_value;
 }
 

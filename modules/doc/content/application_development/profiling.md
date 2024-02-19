@@ -58,6 +58,12 @@ contains `oprof` (or not if you wish to profile with another method and have spe
 scripts/update_and_rebuild_libmesh.sh
 ```
 
+WASP must also be built:
+
+```
+scripts/update_and_rebuild_wasp.sh
+```
+
 Finally, when building MOOSE, you set the GPERF_DIR environment variable to the location of a
 gperftools installation (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  Then you compile MOOSE
 like normal - it should look something like this:
@@ -121,7 +127,7 @@ does not use much memory. This example should generate files `run1_0.xxxx.heap`,
 Here `xxxx` denotes a sequence number, e.g., `0001` is the first dumped heap file,
 `0002` is the second dumped heap file, etc. More instructions on heap profiling
 can be found at [here](https://gperftools.github.io/gperftools/heapprofile.html).
-It is allowed to inclue a directory in the filename base.
+It is allowed to include a directory in the filename base.
 You can use a command-line argument `--gperf-profiler-on` with a comma-separated
 list of MPI ranks to generate the profiling files only on the selected ranks.
 For example `--gperf-profiler-on 0,2` with the above MOOSE_HEAP_BASE will generate

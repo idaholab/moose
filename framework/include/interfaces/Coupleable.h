@@ -552,6 +552,13 @@ protected:
                                                   unsigned int comp = 0) const;
 
   /**
+   * Returns the older values for all of a coupled variable's components
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each component of \p var_name
+   */
+  std::vector<const VariableValue *> coupledValuesOlder(const std::string & var_name) const;
+
+  /**
    * Returns value of previous Newton iterate of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -810,6 +817,16 @@ protected:
    */
   virtual const ArrayVariableGradient & coupledArrayGradientOlder(const std::string & var_name,
                                                                   unsigned int comp = 0) const;
+
+  /**
+   * Retun a gradient of a coupled array variable's time derivative
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableGradient containing the gradient of the time derivative
+   * the coupled array variable
+   */
+  virtual const ArrayVariableGradient & coupledArrayGradientDot(const std::string & var_name,
+                                                                unsigned int comp = 0) const;
 
   /**
    * Returns curl of a coupled variable
@@ -1083,6 +1100,16 @@ protected:
    */
   virtual const VariableValue & coupledDotDotDu(const std::string & var_name,
                                                 unsigned int comp = 0) const;
+
+  /**
+   * Time derivative of a coupled array variable with respect to the coefficients
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  const VariableValue & coupledArrayDotDu(const std::string & var_name,
+                                          unsigned int comp = 0) const;
 
   /**
    * Returns nodal values of a coupled variable

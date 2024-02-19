@@ -26,7 +26,7 @@ performed in two ways:
  mesh containing 1D elements.  *This method is only valid if flow
  across the fracture is very quick compared with flow through the
  bulk.  For instance, the method is valid for highly conductive
- fractures, but is not suitable for modelling aquitards.*  This is because the 2D fracture does not prevent fluid from moving across it: fluid/heat moving in the direction normal to the fracture does not even see the fracure.
+ fractures, but is not suitable for modelling aquitards.*  This is because the 2D fracture does not prevent fluid from moving across it: fluid/heat moving in the direction normal to the fracture does not even see the fracture.
 
 An overview of the mixed-dimensional method is presented along with a
 verification of the results for solute transport along a single
@@ -170,7 +170,7 @@ setting the permeability in the input file to $a^2/12$.
 How is this $a^2/12$ related to the formulae presented above?  Well,
 the user may set $k=a^2/12$, which would be appropriate if their
 fracture was well approximated by parallel plates, and then, assuming
-the fratures are modelled by 2D elements in a 3D mesh, use the
+the fractures are modelled by 2D elements in a 3D mesh, use the
 formula $\tilde{k}=ak$ to prescribe the permeability to the 2D
 fractures (probably along with $\phi=1$ which implies
 $\tilde{\phi}=a$).  But users don't strictly _need_ to do this: any
@@ -299,7 +299,7 @@ lower-dimensional fracture, with the result having units of m.s$^{-1}$.
 
 Identical methods may be used to simulate flow in 3D.  An example mesh
 and an input file may be found in
-[flow_through_fractured_media](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/flow_through_fractured_media).  Two intersecting eliptical fractures are embedded in a 3D porous material.  A porepressure gradient is established, and a tracer is injected at the edge of one of the fractures.  The tracer flows mainly along the fractures, but diffuses a little into the bulk material.  [3D_pic] shows the result at one time, and [3D_animation] shows an animation of the tracer concentration.
+[flow_through_fractured_media](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/flow_through_fractured_media).  Two intersecting elliptical fractures are embedded in a 3D porous material.  A porepressure gradient is established, and a tracer is injected at the edge of one of the fractures.  The tracer flows mainly along the fractures, but diffuses a little into the bulk material.  [3D_pic] shows the result at one time, and [3D_animation] shows an animation of the tracer concentration.
 
 !media media/porous_flow/fracture_flow_3D.png style=width:80%;margin-left:10px caption=Tracer mass fraction (red means high) in two intersecting 2D fractures contained in a 3D porous medium.  id=3D_pic
 
@@ -330,4 +330,4 @@ The results after some time of simulation are shown in [retard_mesh_result_fig].
 
 The reason for this is the following.  Heat flows into the system through the fracture's left side.  In each mesh it has to "fill up" the nodes on the top and bottom of the fracture.  The nodal volume of these nodes contains contributions from the matrix elements that they are joined to.  So the nodal volume of the nodes in Mesh A and B is quite large compared to Mesh C.  Hence, more heat energy is needed to raise their temperature, which means that the temperature changes more slowly in Mesh A and B compared with Mesh C.
 
-We call this "retardation" of the flow by the matrix.  It is not a real physical effect: it is due to the coarse resolution in the matrix.  Although this section has concentrated on the simple diffusion equation with no [numerical stabilization](stabilization.md), exactly the same phenomenom occurs in PorousFlow simulations, and users may need to be aware of this.
+We call this "retardation" of the flow by the matrix.  It is not a real physical effect: it is due to the coarse resolution in the matrix.  Although this section has concentrated on the simple diffusion equation with no [numerical stabilization](stabilization.md), exactly the same phenomenon occurs in PorousFlow simulations, and users may need to be aware of this.

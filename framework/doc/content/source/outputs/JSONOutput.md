@@ -17,7 +17,7 @@ provided at the top level and reporters values are nested within a list for the 
 
 ## Distributed Output
 
-If a Reporter value is computed with `REPORTER_MODE_DISTRIBUTED` (see [Reporters/index.md) a JSON
+If a Reporter value is computed with `REPORTER_MODE_DISTRIBUTED` (see [Reporters/index.md] a JSON
 file for each process will automatically be created with the distributed data and the total number
 of parts and part number for the file will be included in the output.
 

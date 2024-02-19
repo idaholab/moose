@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#19897'
+  design = 'HeatRateConvection.md'
   [test]
     type = 'CSVDiff'
     input = 'heat_rate_convection.i'
     csvdiff = 'heat_rate_convection.csv'
     recover = false
+    requirement = 'The system shall be able to compute the convective heat flux rate on a boundary.'
   []
 []

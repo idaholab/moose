@@ -35,4 +35,7 @@ protected:
 
   /// If set, indicates a particular subapp to transfer the reporter to/from
   const unsigned int & _subapp_index;
+
+private:
+  virtual void checkSiblingsTransferSupported() const override;
 };

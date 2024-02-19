@@ -31,7 +31,7 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
-TRACKING_LIBRARIES = ['mpich', 'petsc', 'libmesh', 'wasp', 'moose', 'app']
+TRACKING_LIBRARIES = ['mpich', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument
@@ -43,7 +43,8 @@ def undefined(arg, *args, **kwargs):
     return arg
 
 # Add your undefined template variables to call 'undefined' method above
-JINJA_CONFIG = {'pin_subpackage'        : undefined,
+JINJA_CONFIG = {'pin_compatible'        : undefined,
+                'pin_subpackage'        : undefined,
                 'compiler'              : undefined,
                 'base_mpich'            : undefined('mpich'),
                 'base_mpicc'            : undefined('mpicc'),
@@ -114,7 +115,7 @@ class Versioner:
         """ parses arguments """
         parser = argparse.ArgumentParser(description='Supplies a hash for a given library')
         parser.add_argument('library', nargs='?', metavar='library', choices=entities,
-                            help=f'choose from: {", ".join(entities)}', default='moose')
+                            help=f'choose from: {", ".join(entities)}', default='moose-dev')
         parser.add_argument('commit', nargs='?', metavar='commit', default='HEAD',
                             help='default %(default)s')
         parser.add_argument('-q', '--quiet', action='store_true', default=False,
@@ -346,10 +347,6 @@ class Versioner:
         root_command = ['git', 'rev-parse', '--show-toplevel']
         git_root = subprocess.check_output(root_command, encoding='utf-8').rstrip()
         app_name = os.path.basename(git_root).rstrip().lower()
-
-        # If we're nested within MOOSE_DIR, we're moose_combined app
-        if app_name == 'moose':
-            app_name = 'moose-combined'
 
         hash_command = ['git', 'rev-parse', 'HEAD']
         git_hash = subprocess.check_output(hash_command, encoding='utf-8').rstrip()[0:7]

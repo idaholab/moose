@@ -55,10 +55,6 @@ public:
   ///@}
 
 protected:
-  /// Type that we use in Actions for declaring coupling between the solutions
-  /// of different physics components
-  typedef std::vector<VariableName> CoupledName;
-
   /// Adds NS variables
   void addNSVariables();
   /// Adds NS initial conditions
@@ -1660,9 +1656,9 @@ NSFVBase<BaseType>::addINSMassKernels()
     else if (pin_type == "average")
       object_type = "FVIntegralValueConstraint";
     else if (pin_type == "average-uo")
-      object_type = "NSFVPressurePin";
+      object_type = "NSPressurePin";
     else
-      object_type = "NSFVPressurePin";
+      object_type = "NSPressurePin";
 
     // Create the average value postprocessor if needed
     if (pin_type == "average-uo")
@@ -1943,7 +1939,6 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
     params.template set<MooseFunctorName>(NS::density) = _density_name;
     params.template set<UserObjectName>("rhie_chow_user_object") =
         prefix() + "pins_rhie_chow_interpolator";
-    params.template set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
@@ -1967,10 +1962,16 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
         {
           const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
           if (upper_name == "DARCY")
+          {
+            params.template set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
             params.template set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
+          }
           else if (upper_name == "FORCHHEIMER")
+          {
             params.template set<MooseFunctorName>("Forchheimer_name") =
                 _friction_coeffs[block_i][type_i];
+            params.template set<MooseFunctorName>(NS::speed) = NS::speed;
+          }
         }
 
         getProblem().addFVKernel(kernel_type,
@@ -1990,7 +1991,6 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
         corr_params.template set<MooseFunctorName>(NS::density) = _density_name;
         corr_params.template set<UserObjectName>("rhie_chow_user_object") =
             prefix() + "pins_rhie_chow_interpolator";
-        corr_params.template set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
         corr_params.template set<Real>("consistent_scaling") =
             parameters().template get<Real>("consistent_scaling");
         for (unsigned int d = 0; d < _dim; ++d)
@@ -2001,11 +2001,17 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
           {
             const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
             if (upper_name == "DARCY")
+            {
+              corr_params.template set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
               corr_params.template set<MooseFunctorName>("Darcy_name") =
                   _friction_coeffs[block_i][type_i];
+            }
             else if (upper_name == "FORCHHEIMER")
+            {
               corr_params.template set<MooseFunctorName>("Forchheimer_name") =
                   _friction_coeffs[block_i][type_i];
+              corr_params.template set<MooseFunctorName>(NS::speed) = NS::speed;
+            }
           }
 
           getProblem().addFVKernel(correction_kernel_type,
@@ -2309,7 +2315,7 @@ NSFVBase<BaseType>::addINSInletBC()
       for (unsigned int d = 0; d < _dim; ++d)
       {
         params.template set<NonlinearVariableName>("variable") = _velocity_name[d];
-        params.template set<FunctionName>("function") =
+        params.template set<MooseFunctorName>("functor") =
             _momentum_inlet_function[velocity_pressure_counter][d];
 
         getProblem().addFVBC(bc_type, _velocity_name[d] + "_" + _inlet_boundaries[bc_ind], params);
@@ -2875,14 +2881,15 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::addEnthalpyMaterial()
 {
-  InputParameters params = getFactory().getValidParams("INSFVEnthalpyMaterial");
+  InputParameters params = getFactory().getValidParams("INSFVEnthalpyFunctorMaterial");
   assignBlocks(params, _blocks);
 
   params.template set<MooseFunctorName>(NS::density) = _density_name;
   params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   params.template set<MooseFunctorName>("temperature") = _fluid_temperature_name;
 
-  getProblem().addMaterial("INSFVEnthalpyMaterial", prefix() + "ins_enthalpy_material", params);
+  getProblem().addMaterial(
+      "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);
 }
 
 template <class BaseType>
@@ -3197,6 +3204,17 @@ NSFVBase<BaseType>::checkGeneralControlErrors()
   if (parameters().template get<MooseEnum>("porosity_interface_pressure_treatment") != "bernoulli")
     checkDependentParameterError("porosity_interface_pressure_treatment",
                                  {"pressure_allow_expansion_on_bernoulli_faces"});
+
+  if (!_create_velocity && _porous_medium_treatment)
+    for (const auto & name : NS::velocity_vector)
+    {
+      const auto & it = std::find(_velocity_name.begin(), _velocity_name.end(), name);
+      if (it != _velocity_name.end())
+        paramError("velocity_variable",
+                   "For porous medium simulations, functor name " + *it +
+                       " is already reserved for the automatically-computed interstitial velocity. "
+                       "Please choose another name for your external velocity variable!");
+    }
 }
 
 template <class BaseType>

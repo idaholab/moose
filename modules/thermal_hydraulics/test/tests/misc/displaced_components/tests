@@ -1,9 +1,13 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'DisplacedProblem.md'
   [displaced_components]
     type = 'Exodiff'
     input = 'displaced_components.i'
     exodiff = 'displaced_components_out.e'
     custom_cmp = 'displaced_components.exodiff'
     recover = false
+    requirement = 'The system shall be able to use mesh displacement with components.'
   []
 []

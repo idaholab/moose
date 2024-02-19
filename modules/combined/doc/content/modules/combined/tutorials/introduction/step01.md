@@ -44,7 +44,7 @@ the [!param](/Constraints/GapConductanceConstraint/secondary_variable) `T`, the
 temperature, enforcing the energy balance.
 
 We make sure to enable the evaluation of the constraint on the *displaced mesh*
-to capture large displacement and deformatio by setting the
+to capture large displacement and deformation by setting the
 [!param](/Constraints/GapConductanceConstraint/use_displaced_mesh) parameter to
 `true`. The displaced mesh is a copy of the mesh that has all nodes moved by
 their displacement variable values. Try setting this parameter to false and

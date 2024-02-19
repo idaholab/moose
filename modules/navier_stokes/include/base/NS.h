@@ -22,6 +22,7 @@ using namespace HeatConduction;
 static const std::string directions[3] = {"x", "y", "z"};
 
 // geometric quantities
+static const std::string pebble_diameter = "pebble_diameter";
 static const std::string infinite_porosity = "infinite_porosity";
 static const std::string axis = "axis";
 static const std::string center = "center";
@@ -119,6 +120,7 @@ static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
+static const std::string mu_t = "mu_t";
 static const std::string k = "k";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";
@@ -152,6 +154,16 @@ static const std::string C = "C";
 static const std::string Z = "Z";
 static const std::string K = "K";
 static const std::string mass_flux = "mass_flux";
+
+// Turbuelnce
+
+// Turbulence variables
+static const std::string TKE = "k";
+static const std::string TKED = "epsilon";
+
+// Turbulence constants
+static constexpr Real von_karman_constant = 0.4187;
+static constexpr Real E_turb_constant = 9.793;
 }
 
 namespace NS_DEFAULT_VALUES

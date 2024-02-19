@@ -33,12 +33,14 @@ EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int 
   if (_num_faces == 4)
   {
     _num_vertices = 4;
-    if (_num_nodes == 10)
+    if (_num_nodes == 14)
+      _num_interior_face_nodes = 4;
+    else if (_num_nodes == 10)
       _num_interior_face_nodes = 3;
     else if (_num_nodes == 4)
       _num_interior_face_nodes = 0;
     else
-      EFAError("In EFAelement3D the supported TET element types are TET4 and TET10");
+      EFAError("In EFAelement3D the supported TET element types are TET4, TET10 and TET14");
   }
   else if (_num_faces == 6)
   {
@@ -53,7 +55,8 @@ EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int 
       EFAError("In EFAelement3D the supported HEX element types are HEX8, HEX20 and HEX27");
   }
   else
-    EFAError("In EFAelement3D the supported element types are TET4, TET10, HEX8, HEX20 and HEX27");
+    EFAError("In EFAelement3D the supported element types are TET4, TET10, TET14, HEX8, HEX20 and "
+             "HEX27");
   setLocalCoordinates();
 }
 
@@ -230,6 +233,13 @@ EFAElement3D::setLocalCoordinates()
                   1
 
     */
+    /*
+      TET14 elements also include four face nodes:
+      Node 10, centroid on side 0, arithmetic mean of 0/1/2 or 4/5/6
+      Node 11, centroid on side 1, arithmetic mean of 0/1/3 or 4/7/8
+      Node 12, centroid on side 2, arithmetic mean of 1/2/3 or 5/8/9
+      Node 13, centroid on side 3, arithmetic mean of 0/2/3 or 6/7/9
+    */
     _local_node_coor.resize(_num_nodes);
     _local_node_coor[0] = EFAPoint(0.0, 0.0, 0.0);
     _local_node_coor[1] = EFAPoint(1.0, 0.0, 0.0);
@@ -244,6 +254,14 @@ EFAElement3D::setLocalCoordinates()
       _local_node_coor[7] = EFAPoint(0.0, 0.0, 0.5);
       _local_node_coor[8] = EFAPoint(0.5, 0.0, 0.5);
       _local_node_coor[9] = EFAPoint(0.0, 0.5, 0.5);
+    }
+
+    if (_num_nodes > 10)
+    {
+      _local_node_coor[10] = EFAPoint(1 / 3., 1 / 3., 0.0);
+      _local_node_coor[11] = EFAPoint(1 / 3., 0.0, 1 / 3.);
+      _local_node_coor[12] = EFAPoint(1 / 3., 1 / 3., 1 / 3.);
+      _local_node_coor[13] = EFAPoint(0.0, 1 / 3., 1 / 3.);
     }
   }
   else
@@ -1433,7 +1451,8 @@ EFAElement3D::createFaces()
                                               {10, 14, 18, 15, 23},
                                               {11, 15, 19, 12, 24},
                                               {16, 17, 18, 19, 25}};
-  int tet_interior_face_node_indices[4][3] = {{4, 5, 6}, {4, 7, 8}, {5, 8, 9}, {6, 7, 9}};
+  int tet_interior_face_node_indices[4][4] = {
+      {4, 5, 6, 10}, {4, 7, 8, 11}, {5, 8, 9, 12}, {6, 7, 9, 13}};
 
   _faces = std::vector<EFAFace *>(_num_faces, nullptr);
   if (_num_nodes == 8 || _num_nodes == 20 || _num_nodes == 27)
@@ -1450,7 +1469,7 @@ EFAElement3D::createFaces()
         _faces[i]->setInteriorFaceNode(k, _nodes[hex_interior_face_node_indices[i][k]]);
     }
   }
-  else if (_num_nodes == 4 || _num_nodes == 10)
+  else if (_num_nodes == 4 || _num_nodes == 10 || _num_nodes == 14)
   {
     if (_num_faces != 4)
       EFAError("num_faces of tets must be 4");

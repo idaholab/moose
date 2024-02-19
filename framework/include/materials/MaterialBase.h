@@ -37,6 +37,7 @@
 #include "SolutionInvalidInterface.h"
 
 #define usingMaterialBaseMembers                                                                   \
+  usingMooseObjectMembers;                                                                         \
   usingTransientInterfaceMembers;                                                                  \
   using MaterialBase::_subproblem;                                                                 \
   using MaterialBase::_fe_problem;                                                                 \
@@ -215,7 +216,7 @@ public:
    * @return The IDs corresponding to the material properties that
    * MUST be reinited before evaluating this object
    */
-  virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const = 0;
 
   /**
    * @return Whether this material has stateful properties
@@ -240,6 +241,13 @@ public:
   buildRequiredMaterials(const Consumers & mat_consumers,
                          const std::vector<std::shared_ptr<MaterialBase>> & mats,
                          const bool allow_stateful);
+
+  /**
+   * Set active properties of this material
+   * Note: This function is called by FEProblemBase::setActiveMaterialProperties in an element loop
+   *       typically when switching subdomains.
+   */
+  void setActiveProperties(const std::unordered_set<unsigned int> & needed_props);
 
 protected:
   /**
@@ -277,6 +285,14 @@ protected:
 
   virtual const QBase & qRule() const = 0;
 
+  /**
+   * Check whether a material property is active
+   */
+  bool isPropertyActive(const unsigned int prop_id) const
+  {
+    return _active_prop_ids.count(prop_id) > 0;
+  }
+
   SubProblem & _subproblem;
 
   FEProblemBase & _fe_problem;
@@ -308,6 +324,9 @@ protected:
   /// MaterialBase::computeProperties() without looking up the ids from
   /// the name strings each time.
   std::set<unsigned int> _supplied_prop_ids;
+
+  /// The ids of the current active supplied properties
+  std::unordered_set<unsigned int> _active_prop_ids;
 
   /// If False MOOSE does not compute this property
   const bool _compute;

@@ -14,8 +14,7 @@
     input = 'apps_from_positions.i'
     jsondiff = 'initial_positions.json'
     cli_args = "Outputs/file_base=initial_positions
-                Positions/file/initial_positions=input/positions_1d
-                Positions/input/initial_positions=file/positions_1d
+                Positions/input/initial_positions=file
                 Positions/input/positions='0 1 0 1 0 2 0 1 1 1 3 2'"
     # must be the same size at least as the initial positions
 
@@ -29,7 +28,7 @@
   []
 
   [error]
-    requirement = "The system shall error if"
+    requirement = "The system shall report an error if"
 
     [not_init]
       type = RunException
@@ -42,8 +41,8 @@
       type = RunException
       input = 'apps_from_positions.i'
       cli_args = "Outputs/file_base=initial_positions
-                  Positions/input/initial_positions=file/positions_1d
-                  Transfers/nn/type=MultiAppGeneralFieldNearestNodeTransfer
+                  Positions/input/initial_positions=file
+                  Transfers/nn/type=MultiAppGeneralFieldNearestLocationTransfer
                   Transfers/nn/from_multi_app=m1
                   Transfers/nn/source_variable=u
                   Transfers/nn/variable=u"

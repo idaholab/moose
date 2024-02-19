@@ -136,7 +136,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _calculate_xyz(false),
     _calculate_face_xyz(false),
     _calculate_curvatures(false),
-    _calculate_ad_coord(false)
+    _calculate_ad_coord(false),
+    _have_p_refinement(false)
 {
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   _building_helpers = true;
@@ -216,6 +217,10 @@ Assembly::~Assembly()
 
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     for (auto & it : _vector_fe_face_neighbor[dim])
+      delete it.second;
+
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+    for (auto & it : _vector_fe_lower[dim])
       delete it.second;
 
   for (auto & it : _ad_grad_phi_data)
@@ -401,7 +406,11 @@ Assembly::buildVectorLowerDFE(FEType type) const
   // Build an FE object for this type for each dimension up to the dimension of
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
+  const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
+  if (ending_dim < dim)
+    return;
+  for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
@@ -422,7 +431,11 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
   // Build an FE object for this type for each dimension up to the dimension of
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
+  const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
+  if (ending_dim < dim)
+    return;
+  for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
@@ -440,7 +453,7 @@ Assembly::buildVectorFE(FEType type) const
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -458,6 +471,8 @@ Assembly::buildVectorFE(FEType type) const
     _vector_fe[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe[dim][type]->get_div_phi();
     // Pre-request xyz.  We have always computed xyz, but due to
     // recent optimizations in libmesh, we now need to explicity
     // request it, since apps (Yak) may rely on it being computed.
@@ -471,7 +486,7 @@ Assembly::buildVectorFaceFE(FEType type) const
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -489,6 +504,8 @@ Assembly::buildVectorFaceFE(FEType type) const
     _vector_fe_face[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_face[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe_face[dim][type]->get_div_phi();
   }
 }
 
@@ -498,7 +515,7 @@ Assembly::buildVectorNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -516,6 +533,8 @@ Assembly::buildVectorNeighborFE(FEType type) const
     _vector_fe_neighbor[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_neighbor[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe_neighbor[dim][type]->get_div_phi();
   }
 }
 
@@ -525,7 +544,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -544,6 +563,8 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
     _vector_fe_face_neighbor[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_face_neighbor[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe_face_neighbor[dim][type]->get_div_phi();
   }
 }
 
@@ -775,6 +796,8 @@ Assembly::reinitFE(const Elem * elem)
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe.get_curl_phi()));
+    if (_need_div.find(fe_type) != _need_div.end())
+      fesd._div_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe.get_div_phi()));
   }
   if (!_unique_fe_helper.empty())
   {
@@ -1275,6 +1298,9 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face.get_curl_phi()));
+    if (_need_div.find(fe_type) != _need_div.end())
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_face.get_div_phi()));
   }
   if (!_unique_fe_face_helper.empty())
   {
@@ -1575,6 +1601,9 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
+    if (_need_div.find(fe_type) != _need_div.end())
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor.get_div_phi()));
   }
   if (!_unique_fe_face_neighbor_helper.empty())
   {
@@ -1582,6 +1611,9 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
                 "We should be in bounds here");
     _unique_fe_face_neighbor_helper[neighbor_dim]->reinit(neighbor, &reference_points);
   }
+
+  _current_q_points_face_neighbor.shallowCopy(
+      const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
 }
 
 void
@@ -1628,6 +1660,9 @@ Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & ref
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_neighbor.get_curl_phi()));
+    if (_need_div.find(fe_type) != _need_div.end())
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_neighbor.get_div_phi()));
   }
   if (!_unique_fe_neighbor_helper.empty())
   {
@@ -1640,8 +1675,11 @@ void
 Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
+  mooseAssert(_current_neighbor_subdomain_id == neighbor->subdomain_id(),
+              "Neighbor subdomain ID has not been correctly set");
 
-  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
+  ArbitraryQuadrature * neighbor_rule =
+      qrules(neighbor_dim, _current_neighbor_subdomain_id).neighbor.get();
   neighbor_rule->setPoints(reference_points);
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
@@ -1839,16 +1877,33 @@ Assembly::reinitFVFace(const FaceInfo & fi)
 
   _current_side_elem = &_current_side_elem_builder(*_current_elem, _current_side);
 
+  mooseAssert(_current_qrule_face->n_points() == 1,
+              "Our finite volume quadrature rule should always yield a single point");
+
   // We've initialized the reference points. Now we need to compute the physical location of the
   // quadrature points. We do not do any FE initialization so we cannot simply copy over FE results
   // like we do in reinitFEFace. Instead we handle the computation of the physical locations
   // manually
-  const auto num_qp = _current_qrule_face->n_points();
-  _current_q_points_face.resize(num_qp);
+  _current_q_points_face.resize(1);
   const auto & ref_points = _current_qrule_face->get_points();
-  for (const auto qp : make_range(num_qp))
-    _current_q_points_face[qp] =
-        FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_points[qp]);
+  const auto & ref_point = ref_points[0];
+  auto physical_point = FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_point);
+  _current_q_points_face[0] = physical_point;
+
+  if (_current_neighbor_elem)
+  {
+    mooseAssert(_current_neighbor_subdomain_id == _current_neighbor_elem->subdomain_id(),
+                "current neighbor subdomain has been set incorrectly");
+    // Now handle the neighbor qrule/qpoints
+    ArbitraryQuadrature * const neighbor_rule =
+        qrules(_current_neighbor_elem->dim(), _current_neighbor_subdomain_id).neighbor.get();
+    // Here we are setting a reference point that is correct for the neighbor *side* element. It
+    // would be wrong if this reference point is used for a volumetric FE reinit with the neighbor
+    neighbor_rule->setPoints(ref_points);
+    setNeighborQRule(neighbor_rule, _current_neighbor_elem->dim());
+    _current_q_points_face_neighbor.resize(1);
+    _current_q_points_face_neighbor[0] = std::move(physical_point);
+  }
 }
 
 QBase *
@@ -1941,33 +1996,19 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  const std::vector<Point> * reference_points_ptr;
-  std::vector<Point> reference_points;
-
   if (neighbor_reference_points)
-    reference_points_ptr = neighbor_reference_points;
+    _current_neighbor_ref_points = *neighbor_reference_points;
   else
-  {
-    FEInterface::inverse_map(
-        neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
-    reference_points_ptr = &reference_points;
-  }
+    FEInterface::inverse_map(neighbor_dim,
+                             FEType(),
+                             neighbor,
+                             _current_q_points_face.stdVector(),
+                             _current_neighbor_ref_points);
 
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
-  if (_need_JxW_neighbor)
-  {
-    // first do the side element. We need to do this to at a minimum get the correct JxW for the
-    // neighbor face.
-    reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
-
-    // compute JxW on the neighbor's face
-    _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-        _holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()]->get_JxW()));
-  }
-
-  reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
-  reinitNeighbor(neighbor, *reference_points_ptr);
+  reinitFEFaceNeighbor(neighbor, _current_neighbor_ref_points);
+  reinitNeighbor(neighbor, _current_neighbor_ref_points);
 }
 
 void
@@ -2034,6 +2075,9 @@ Assembly::reinitElemFaceRef(const Elem * elem,
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face.get_curl_phi()));
+    if (_need_div.find(fe_type) != _need_div.end())
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_face.get_div_phi()));
   }
   if (!_unique_fe_face_helper.empty())
   {
@@ -2149,7 +2193,8 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
+  ArbitraryQuadrature * neighbor_rule =
+      qrules(neighbor_dim, neighbor->subdomain_id()).neighbor.get();
   neighbor_rule->setPoints(*pts);
 
   // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
@@ -2198,6 +2243,9 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
+    if (_need_div.find(fe_type) != _need_div.end())
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor.get_div_phi()));
   }
   if (!_unique_fe_face_neighbor_helper.empty())
   {
@@ -2210,8 +2258,6 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // We need to dig out the q_points from it
   _current_q_points_face_neighbor.shallowCopy(
       const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
-  _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
-      _holder_fe_face_neighbor_helper[neighbor_dim]->get_normals()));
 }
 
 void
@@ -2365,23 +2411,31 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    unsigned int neighbor_side,
                                    const std::vector<Point> & physical_points)
 {
-  _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
-
-  std::vector<Point> reference_points;
-
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+  FEInterface::inverse_map(
+      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
 
-  // first do the side element
-  reinitFEFaceNeighbor(_current_neighbor_side_elem, reference_points);
-  reinitNeighbor(_current_neighbor_side_elem, reference_points);
-  // compute JxW on the neighbor's face
-  unsigned int neighbor_side_dim = _current_neighbor_side_elem->dim();
-  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-      _holder_fe_face_neighbor_helper[neighbor_side_dim]->get_JxW()));
+  if (_need_JxW_neighbor)
+  {
+    mooseAssert(
+        physical_points.size() == 1,
+        "If reinitializing with more than one point, then I am dubious of your use case. Perhaps "
+        "you are performing a DG type method and you are reinitializing using points from the "
+        "element face. In such a case your neighbor JxW must have its index order 'match' the "
+        "element JxW index order, e.g. imagining a vertical 1D face with two quadrature points, if "
+        "index 0 for elem JxW corresponds to the 'top' quadrature point, then index 0 for neighbor "
+        "JxW must also correspond to the 'top' quadrature point. And libMesh/MOOSE has no way to "
+        "guarantee that with multiple quadrature points.");
 
-  reinitFEFaceNeighbor(neighbor, reference_points);
-  reinitNeighbor(neighbor, reference_points);
+    _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
+
+    // With a single point our size-1 JxW should just be the element volume
+    _current_JxW_neighbor.resize(1);
+    _current_JxW_neighbor[0] = _current_neighbor_side_elem->volume();
+  }
+
+  reinitFEFaceNeighbor(neighbor, _current_neighbor_ref_points);
+  reinitNeighbor(neighbor, _current_neighbor_ref_points);
 
   // Save off the physical points
   _current_physical_points = physical_points;
@@ -2391,13 +2445,12 @@ void
 Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
-  std::vector<Point> reference_points;
-
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+  FEInterface::inverse_map(
+      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
 
-  reinitFENeighbor(neighbor, reference_points);
-  reinitNeighbor(neighbor, reference_points);
+  reinitFENeighbor(neighbor, _current_neighbor_ref_points);
+  reinitNeighbor(neighbor, _current_neighbor_ref_points);
   // Save off the physical points
   _current_physical_points = physical_points;
 }
@@ -2960,6 +3013,8 @@ Assembly::copyShapes(unsigned int var)
     copyShapes(v);
     if (v.computingCurl())
       curlPhi(v).shallowCopy(v.curlPhi());
+    if (v.computingDiv())
+      divPhi(v).shallowCopy(v.divPhi());
   }
   else
     mooseError("Unsupported variable field type!");
@@ -2995,6 +3050,8 @@ Assembly::copyFaceShapes(unsigned int var)
     copyFaceShapes(v);
     if (v.computingCurl())
       _vector_curl_phi_face.shallowCopy(v.curlPhi());
+    if (v.computingDiv())
+      _vector_div_phi_face.shallowCopy(v.divPhi());
   }
   else
     mooseError("Unsupported variable field type!");
@@ -3432,7 +3489,8 @@ Assembly::addCachedResiduals(GlobalDataKey, const std::vector<VectorTag> & tags)
   }
 }
 
-void Assembly::clearCachedResiduals(GlobalDataKey)
+void
+Assembly::clearCachedResiduals(GlobalDataKey)
 {
   for (const auto & vector_tag : _residual_vector_tags)
     clearCachedResiduals(vector_tag);
@@ -3746,7 +3804,8 @@ Assembly::elementVolume(const Elem * elem) const
   return vol;
 }
 
-void Assembly::addCachedJacobian(GlobalDataKey)
+void
+Assembly::addCachedJacobian(GlobalDataKey)
 {
   if (!_subproblem.checkNonlocalCouplingRequirement())
   {
@@ -3800,7 +3859,8 @@ Assembly::addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseV
                        jvar.dofIndices());
 }
 
-void Assembly::addJacobian(GlobalDataKey)
+void
+Assembly::addJacobian(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
     addJacobianCoupledVarPair(*it.first, *it.second);
@@ -3812,7 +3872,8 @@ void Assembly::addJacobian(GlobalDataKey)
     addJacobianCoupledVarPair(*it.first, *it.second);
 }
 
-void Assembly::addJacobianNonlocal(GlobalDataKey)
+void
+Assembly::addJacobianNonlocal(GlobalDataKey)
 {
   for (const auto & it : _cm_nonlocal_entry)
   {
@@ -3833,7 +3894,8 @@ void Assembly::addJacobianNonlocal(GlobalDataKey)
   }
 }
 
-void Assembly::addJacobianNeighbor(GlobalDataKey)
+void
+Assembly::addJacobianNeighbor(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3870,7 +3932,8 @@ void Assembly::addJacobianNeighbor(GlobalDataKey)
   }
 }
 
-void Assembly::addJacobianNeighborLowerD(GlobalDataKey)
+void
+Assembly::addJacobianNeighborLowerD(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3947,7 +4010,8 @@ void Assembly::addJacobianNeighborLowerD(GlobalDataKey)
   }
 }
 
-void Assembly::addJacobianLowerD(GlobalDataKey)
+void
+Assembly::addJacobianLowerD(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3983,7 +4047,8 @@ void Assembly::addJacobianLowerD(GlobalDataKey)
   }
 }
 
-void Assembly::cacheJacobian(GlobalDataKey)
+void
+Assembly::cacheJacobian(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
     cacheJacobianCoupledVarPair(*it.first, *it.second);
@@ -4012,7 +4077,8 @@ Assembly::cacheJacobianCoupledVarPair(const MooseVariableBase & ivar,
                          tag);
 }
 
-void Assembly::cacheJacobianNonlocal(GlobalDataKey)
+void
+Assembly::cacheJacobianNonlocal(GlobalDataKey)
 {
   for (const auto & it : _cm_nonlocal_entry)
   {
@@ -4033,7 +4099,8 @@ void Assembly::cacheJacobianNonlocal(GlobalDataKey)
   }
 }
 
-void Assembly::cacheJacobianNeighbor(GlobalDataKey)
+void
+Assembly::cacheJacobianNeighbor(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -4070,7 +4137,8 @@ void Assembly::cacheJacobianNeighbor(GlobalDataKey)
   }
 }
 
-void Assembly::cacheJacobianMortar(GlobalDataKey)
+void
+Assembly::cacheJacobianMortar(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -4374,7 +4442,8 @@ Assembly::addJacobianNeighborTags(SparseMatrix<Number> & jacobian,
         jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, GlobalDataKey{}, tag);
 }
 
-void Assembly::addJacobianScalar(GlobalDataKey)
+void
+Assembly::addJacobianScalar(GlobalDataKey)
 {
   for (const auto & it : _cm_ss_entry)
     addJacobianCoupledVarPair(*it.first, *it.second);
@@ -4410,7 +4479,8 @@ Assembly::cacheJacobian(numeric_index_type i,
       cacheJacobian(i, j, value, LocalDataKey{}, tag);
 }
 
-void Assembly::setCachedJacobian(GlobalDataKey)
+void
+Assembly::setCachedJacobian(GlobalDataKey)
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
@@ -4429,7 +4499,8 @@ void Assembly::setCachedJacobian(GlobalDataKey)
   clearCachedJacobian();
 }
 
-void Assembly::zeroCachedJacobian(GlobalDataKey)
+void
+Assembly::zeroCachedJacobian(GlobalDataKey)
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
@@ -4535,7 +4606,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::fePhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorLowerDFE(type);
   return _vector_fe_shape_data_lower[type]->_phi;
 }
 
@@ -4543,7 +4614,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::feDualPhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorDualLowerDFE(type);
   return _vector_fe_shape_data_dual_lower[type]->_phi;
 }
 
@@ -4551,7 +4622,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
 Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorLowerDFE(type);
   return _vector_fe_shape_data_lower[type]->_grad_phi;
 }
 
@@ -4559,7 +4630,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
 Assembly::feGradDualPhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorDualLowerDFE(type);
   return _vector_fe_shape_data_dual_lower[type]->_grad_phi;
 }
 
@@ -4674,6 +4745,42 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
 
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
+Assembly::feDivPhi<VectorValue<Real>>(FEType type) const
+{
+  _need_div[type] = true;
+  buildVectorFE(type);
+  return _vector_fe_shape_data[type]->_div_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
+Assembly::feDivPhiFace<VectorValue<Real>>(FEType type) const
+{
+  _need_div[type] = true;
+  buildVectorFaceFE(type);
+  return _vector_fe_shape_data_face[type]->_div_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
+Assembly::feDivPhiNeighbor<VectorValue<Real>>(FEType type) const
+{
+  _need_div[type] = true;
+  buildVectorNeighborFE(type);
+  return _vector_fe_shape_data_neighbor[type]->_div_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
+Assembly::feDivPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
+{
+  _need_div[type] = true;
+  buildVectorFaceNeighborFE(type);
+  return _vector_fe_shape_data_face_neighbor[type]->_div_phi;
+}
+
 const MooseArray<ADReal> &
 Assembly::adCurvatures() const
 {
@@ -4721,15 +4828,35 @@ Assembly::helpersRequestData()
 }
 
 void
-Assembly::havePRefinement()
+Assembly::havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for_families)
 {
+  if (_have_p_refinement)
+    // Already performed tasks for p-refinement
+    return;
+
+  const std::unordered_set<FEFamily> disable_families(disable_p_refinement_for_families.begin(),
+                                                      disable_p_refinement_for_families.end());
+
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   const FEType helper_type(helper_order, LAGRANGE);
-  auto setup_helpers = [&helper_type](auto & unique_helper_container,
-                                      auto & helper_container,
-                                      const unsigned int num_dimensionalities,
-                                      const bool user_added_helper_type,
-                                      auto & fe_container)
+  auto process_fe =
+      [&disable_families](const unsigned int num_dimensionalities, auto & fe_container)
+  {
+    if (!disable_families.empty())
+      for (const auto dim : make_range(num_dimensionalities))
+      {
+        auto fe_container_it = fe_container.find(dim);
+        if (fe_container_it != fe_container.end())
+          for (auto & [fe_type, fe_ptr] : fe_container_it->second)
+            if (disable_families.count(fe_type.family))
+              fe_ptr->add_p_level_in_reinit(false);
+      }
+  };
+  auto process_fe_and_helpers = [process_fe, &helper_type](auto & unique_helper_container,
+                                                           auto & helper_container,
+                                                           const unsigned int num_dimensionalities,
+                                                           const bool user_added_helper_type,
+                                                           auto & fe_container)
   {
     unique_helper_container.resize(num_dimensionalities);
     for (const auto dim : make_range(num_dimensionalities))
@@ -4745,42 +4872,53 @@ Assembly::havePRefinement()
       // perhaps silly helpers
       if (!user_added_helper_type)
       {
-        auto & fe_container_dim = fe_container[dim];
+        auto & fe_container_dim = libmesh_map_find(fe_container, dim);
         auto fe_it = fe_container_dim.find(helper_type);
         mooseAssert(fe_it != fe_container_dim.end(), "We should have the helper type");
         delete fe_it->second;
         fe_container_dim.erase(fe_it);
       }
     }
+
+    process_fe(num_dimensionalities, fe_container);
   };
 
-  setup_helpers(_unique_fe_helper,
-                _holder_fe_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_of_helper_type,
-                _fe);
-  setup_helpers(_unique_fe_face_helper,
-                _holder_fe_face_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_face_of_helper_type,
-                _fe_face);
-  setup_helpers(_unique_fe_face_neighbor_helper,
-                _holder_fe_face_neighbor_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_face_neighbor_of_helper_type,
-                _fe_face_neighbor);
-  setup_helpers(_unique_fe_neighbor_helper,
-                _holder_fe_neighbor_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_neighbor_of_helper_type,
-                _fe_neighbor);
-  setup_helpers(_unique_fe_lower_helper,
-                _holder_fe_lower_helper,
-                _mesh_dimension,
-                _user_added_fe_lower_of_helper_type,
-                _fe_lower);
+  // Handle scalar field families
+  process_fe_and_helpers(_unique_fe_helper,
+                         _holder_fe_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_of_helper_type,
+                         _fe);
+  process_fe_and_helpers(_unique_fe_face_helper,
+                         _holder_fe_face_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_face_of_helper_type,
+                         _fe_face);
+  process_fe_and_helpers(_unique_fe_face_neighbor_helper,
+                         _holder_fe_face_neighbor_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_face_neighbor_of_helper_type,
+                         _fe_face_neighbor);
+  process_fe_and_helpers(_unique_fe_neighbor_helper,
+                         _holder_fe_neighbor_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_neighbor_of_helper_type,
+                         _fe_neighbor);
+  process_fe_and_helpers(_unique_fe_lower_helper,
+                         _holder_fe_lower_helper,
+                         _mesh_dimension,
+                         _user_added_fe_lower_of_helper_type,
+                         _fe_lower);
+  // Handle vector field families
+  process_fe(_mesh_dimension + 1, _vector_fe);
+  process_fe(_mesh_dimension + 1, _vector_fe_face);
+  process_fe(_mesh_dimension + 1, _vector_fe_neighbor);
+  process_fe(_mesh_dimension + 1, _vector_fe_face_neighbor);
+  process_fe(_mesh_dimension, _vector_fe_lower);
 
   helpersRequestData();
+
+  _have_p_refinement = true;
 }
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,

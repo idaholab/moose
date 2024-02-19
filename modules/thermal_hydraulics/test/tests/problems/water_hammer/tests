@@ -1,9 +1,13 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'modules/thermal_hydraulics/index.md'
   [3eqn]
     type = 'Exodiff'
     input = '3eqn.i'
     exodiff = '3eqn_out.e'
     abs_zero = 1e-6
     max_parallel = 1
+    requirement = 'The system shall be able to simulate a water hammer with 1D single phase compressible flow.'
   []
 []

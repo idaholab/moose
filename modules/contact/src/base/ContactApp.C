@@ -60,6 +60,8 @@ void
 ContactApp::registerApps()
 {
   registerApp(ContactApp);
+
+  TensorMechanicsApp::registerApps();
 }
 
 void

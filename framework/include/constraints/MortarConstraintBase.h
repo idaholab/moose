@@ -128,9 +128,6 @@ protected:
   /// Whether to use the dual motar approach
   const bool _use_dual;
 
-  /// the normals along the primary face
-  const MooseArray<Point> & _normals_primary;
-
   /// Tangent vectors on the secondary faces (libmesh)
   const MooseArray<std::vector<Point>> & _tangents;
 

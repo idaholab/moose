@@ -19,9 +19,6 @@ u_inlet=1
     nx = 50
     ny = 5
   []
-[]
-
-[Problem]
   coord_type = 'RZ'
   rz_coord_axis = x
 []

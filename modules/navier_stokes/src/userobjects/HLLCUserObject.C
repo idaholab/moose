@@ -53,6 +53,11 @@ HLLCUserObject::HLLCUserObject(const InputParameters & parameters)
 void
 HLLCUserObject::initialSetup()
 {
+  // This means that we have no finite volume variables, so we need to build the
+  // finite volume information on the mesh so that we can still use this object
+  if (!_face_info.size())
+    _mesh.setupFiniteVolumeMeshData();
+
   for (unsigned int j = 0; j < _face_info.size(); ++j)
   {
     const Elem * elem = &_face_info[j]->elem();
@@ -123,7 +128,7 @@ HLLCUserObject::hasData(const Elem * const elem, const unsigned int side) const
 void
 HLLCUserObject::threadJoin(const UserObject & y)
 {
-  const HLLCUserObject & pps = static_cast<const HLLCUserObject &>(y);
+  const auto & pps = static_cast<const HLLCUserObject &>(y);
   for (auto & ws : pps._wave_speed)
   {
     const auto & it = _wave_speed.find(ws.first);

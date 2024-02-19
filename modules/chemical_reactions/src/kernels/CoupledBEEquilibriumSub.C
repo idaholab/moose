@@ -24,8 +24,8 @@ CoupledBEEquilibriumSub::validParams()
       "The stoichiometric coefficient of the primary species this kernel operates on");
   params.addCoupledVar(
       "gamma_u", 1.0, "Activity coefficient of primary species that this kernel operates on");
-  params.addParam<std::vector<Real>>("sto_v",
-                                     "The stoichiometric coefficients of coupled primary species");
+  params.addParam<std::vector<Real>>(
+      "sto_v", {}, "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("gamma_v", 1.0, "Activity coefficients of coupled primary species");
   params.addCoupledVar("gamma_eq", 1.0, "Activity coefficient of this equilibrium species");
   params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");

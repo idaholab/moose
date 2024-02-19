@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#19816'
+  design = 'ExternalAppConvectionHeatTransferBC.md'
   [test]
     type = 'PetscJacobianTester'
     input = 'external_app_convection_heat_transfer_bc.i'
@@ -7,5 +9,6 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = "The system shall be able to compute numerically accurate Jacobians when specifying an external convection boundary condition using data from an external application."
   []
 []

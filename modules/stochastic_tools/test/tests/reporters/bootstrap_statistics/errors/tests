@@ -3,7 +3,7 @@
   issues = '#14409 #16584'
 
   [errors]
-    requirement = "The system shall error when computing confidence level intervals when"
+    requirement = "The system shall report an error when computing confidence level intervals when"
 
     [no_ci_levels]
       type = RunException

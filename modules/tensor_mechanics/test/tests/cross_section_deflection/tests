@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#26165'
+  design = 'AverageSectionValueSampler.md'
+  [test_one_step]
+    type = 'CSVDiff'
+    input = 'test_one_step.i'
+    csvdiff = 'test_one_step_out_section_output_0001.csv'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross '
+                  'section defined by the user via a nodal vector.'
+  []
+  [test_one_step_heavy]
+    type = 'CSVDiff'
+    input = 'test_one_step.i'
+    csvdiff = 'test_one_step_out_section_output_0001.csv test_one_step_out_section_output_0002.csv '
+              'test_one_step_out_section_output_0003.csv test_one_step_out_section_output_0004.csv'
+    cli_args = 'Executioner/end_time=2.0'
+    heavy = true
+    requirement = 'The system shall compute the average of the nodal displacements of a cross '
+                  'section defined by the user via a nodal vector at multiple steps.'
+  []
+  [test_one_step_two_ducts]
+    type = 'CSVDiff'
+    input = 'test_one_step_two_ducts.i'
+    csvdiff = 'test_one_step_two_ducts_out_section_output_0001.csv '
+              'test_one_step_two_ducts_out_section_output_two_0001.csv'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross '
+                  'section defined by the user via two nodal vector and two reference points for two '
+                  'respective ducts.'
+  []
+[]

@@ -25,9 +25,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -47,7 +47,8 @@
     names = 'radial1 radial2 radial3'
     widths = '0.5 0.5 0.5'
     n_part_elems = '2 2 2'
-    materials = 'hs_mat hs_mat hs_mat'
+    solid_properties = 'hs_mat hs_mat hs_mat'
+    solid_properties_T_ref = '300 300 300'
 
     depth = 1.0
 

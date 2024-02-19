@@ -67,7 +67,7 @@
     expect_err = "'elemental1' already obtained a writable reference to 'v'. Only one object can "
                  "obtain such a reference per variable and subdomain in a simulation."
     cli_args = 'UserObjects/elemental1/block=1 UserObjects/elemental2/block="1 2"'
-    requirement = "The system shall error out if multiple objects with overlapping block "
+    requirement = "The system shall report an error if multiple objects with overlapping block "
                   "restrictions try to access a variable for writing"
   []
   [block2_error2]
@@ -76,7 +76,7 @@
     expect_err = "'elemental1' already obtained a writable reference to 'v'. Only one object can "
                  "obtain such a reference per variable and subdomain in a simulation."
     cli_args = 'UserObjects/elemental1/block=1'
-    requirement = "The system shall error out if multiple objects, of which at least one is not "
+    requirement = "The system shall report an error if multiple objects, of which at least one is not "
                   "block restricted, try to access a variable for writing"
   []
 

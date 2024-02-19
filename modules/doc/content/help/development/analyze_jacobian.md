@@ -79,7 +79,7 @@ residual/Jacobian of any given variable.
 
 ## Advanced
 
-To view the available commandline options for the Jacobian Debugger run the
+To view the available command line options for the Jacobian Debugger run the
 script with the `--help` option
 
 ```bash
@@ -90,7 +90,7 @@ Notable options are:
 
 - `-r`, `--resize-mesh`
 
-  - Perform resizing of generated meshs to speed up the testing.
+  - Perform resizing of generated meshes to speed up the testing.
   - This option will attempt to reduce the number of elements in a `type = GeneratedMesh`
     mesh by setting the `nx`, `ny`, and `nz` values to either 1 or
     the value given by option `-s`

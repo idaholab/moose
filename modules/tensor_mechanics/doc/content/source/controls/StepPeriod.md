@@ -10,7 +10,7 @@ For example, consider a simulation that contains two [Kernels] "diff0" and "diff
 code snippet demonstrates how this switching of kernels is achieved with the `TimePeriod` object.
 
 This object, unlike [TimePeriod](/TimePeriod.md), is controlled by the loading 'step' concept. The user defines time periods,
-i.e. steps, over which the boundary conditions and contraints are not disabled/enabled.
+i.e. steps, over which the boundary conditions and constraints are not disabled/enabled.
 A step number is thus a required input to this control object. At the beginning of this step number,
 boundary conditions and constraints are enabled or disabled, as directed by
 [StepUserObject](/StepUserObject.md). Only one step is allowed per `StepPeriod` object.

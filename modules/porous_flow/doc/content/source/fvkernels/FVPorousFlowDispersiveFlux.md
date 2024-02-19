@@ -2,7 +2,7 @@
 
 !syntax description /FVKernels/FVPorousFlowDispersiveFlux
 
-This `FVKernel` implements the weak form of
+This `FVKernel` implements the strong form of
 \begin{equation*}
   -\nabla\cdot \sum_{\beta}\rho_{\beta}{\mathcal{D}}_{\beta}^{\kappa}\nabla \chi_{\beta}^{\kappa}
 \end{equation*}

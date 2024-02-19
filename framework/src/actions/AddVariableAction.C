@@ -60,6 +60,7 @@ AddVariableAction::AddVariableAction(const InputParameters & params)
   : MooseObjectAction(params),
     _fe_type(feType(params)),
     _scalar_var(_fe_type.family == SCALAR),
+    _fv_var(false),
     _components(1)
 {
 }
@@ -69,7 +70,7 @@ AddVariableAction::getNonlinearVariableFamilies()
 {
   return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
                    "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC "
-                   "RATIONAL_BERNSTEIN SIDE_HIERARCHIC",
+                   "RAVIART_THOMAS RATIONAL_BERNSTEIN SIDE_HIERARCHIC",
                    "LAGRANGE");
 }
 
@@ -130,11 +131,11 @@ AddVariableAction::init()
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
   // Determine the MooseVariable type
-  const auto is_fv = _moose_object_pars.get<bool>("fv");
+  _fv_var = _moose_object_pars.get<bool>("fv");
   const auto is_array = _components > 1 || _moose_object_pars.get<bool>("array");
   if (_type == "MooseVariableBase")
-    _type = variableType(_fe_type, is_fv, is_array);
-  if (is_fv)
+    _type = variableType(_fe_type, _fv_var, is_array);
+  if (_fv_var)
     _problem->needFV();
 
   // Need static_cast to resolve overloads
@@ -175,7 +176,7 @@ AddVariableAction::createInitialConditionAction()
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   bool is_vector = (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE ||
-                    _fe_type.family == MONOMIAL_VEC);
+                    _fe_type.family == MONOMIAL_VEC || _fe_type.family == RAVIART_THOMAS);
 
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
@@ -184,7 +185,12 @@ AddVariableAction::createInitialConditionAction()
     if (is_vector)
       action_params.set<std::string>("type") = "VectorConstantIC";
     else
-      action_params.set<std::string>("type") = "ConstantIC";
+    {
+      if (_fv_var)
+        action_params.set<std::string>("type") = "FVConstantIC";
+      else
+        action_params.set<std::string>("type") = "ConstantIC";
+    }
   }
   else
   {
@@ -194,8 +200,13 @@ AddVariableAction::createInitialConditionAction()
   }
 
   // Create the action
-  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create("AddInitialConditionAction", long_name, action_params));
+  std::shared_ptr<MooseObjectAction> action;
+  if (_fv_var)
+    action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create("AddFVInitialConditionAction", long_name, action_params));
+  else
+    action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create("AddInitialConditionAction", long_name, action_params));
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
@@ -224,8 +235,8 @@ AddVariableAction::createInitialConditionAction()
 std::string
 AddVariableAction::determineType(const FEType & fe_type, unsigned int components, bool is_fv)
 {
-  mooseDeprecated("AddVariableAction::determineType() is deprecated. Use "
-                  "AddVariableAction::variableType() instead.");
+  ::mooseDeprecated("AddVariableAction::determineType() is deprecated. Use "
+                    "AddVariableAction::variableType() instead.");
   return variableType(fe_type, is_fv, components > 1);
 }
 
@@ -238,8 +249,8 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
   if (is_array)
   {
     if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-        fe_type.family == MONOMIAL_VEC)
-      mooseError("Vector finite element families do not currently have ArrayVariable support");
+        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
+      ::mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
   }
@@ -248,7 +259,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
   else if (fe_type.family == SCALAR)
     return "MooseVariableScalar";
   else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-           fe_type.family == MONOMIAL_VEC)
+           fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
     return "VectorMooseVariable";
   else
     return "MooseVariable";

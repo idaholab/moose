@@ -33,7 +33,7 @@ for normal contact. The AL approach solves the original MOOSE problem, in which 
 taking the necessary nonlinear iterations and updates "fixed" Lagrange multipliers in an outer loop. This
 process repeats until the contact-related tolerances are met. The "fixed" Lagrange multipliers represent
 accumulated normal tractions over the AL iterations (see [!citep](wriggers2006computational)),
-threby gradually fulfilling the contact constraints.
+thereby gradually fulfilling the contact constraints.
 Usage of AL with this mortar constraint allows for, simultaneously 1. Having a consistent contact formulation,
 2. Enforcement of the contact constraint to a user-prescribed tolerance (analogous to Lagrange multiplier
 enforcement, see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md)), and 3. Keeps

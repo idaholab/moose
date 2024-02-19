@@ -18,8 +18,10 @@ build:
   pin_depends: strict
   script_env:
     - MOOSE_JOBS
+    - MOOSE_OPTIONS
     - SKIP_DOCS={{ SKIP_DOCS }}
-
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 requirements:
   build:
     - {{ moose_dev }}

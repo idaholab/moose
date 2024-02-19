@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Apptainer moose-dev",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/opt/libmesh/include/**",
+                "/opt/petsc/include/**",
+                "/opt/mpich/include/**",
+                "/opt/wasp/include/**",
+                "/opt/rh/gcc-toolset-12/root/usr/include/**",
+                "/usr/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/rh/gcc-toolset-12/root/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+  }
+

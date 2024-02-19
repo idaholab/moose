@@ -3,8 +3,7 @@
   issues = '#4299 #6360 #5055 #6901 #5039 #14975 #15207 #18402'
 
   [analytic_derivatives]
-    requirement = 'The system shall be capable of producing analytic derivatives of material '
-                  'properties:'
+    requirement = 'The system shall be capable of producing analytic derivatives of material properties:'
 
     [property_names]
       type = 'RunApp'
@@ -44,8 +43,7 @@
       input = 'ad_construction_order.i'
       exodiff = 'ad_construction_order_out.e'
 
-      detail = 'so that construction order does not influence the outcome of the tests when using '
-               'automatic differentiation, and'
+      detail = 'so that construction order does not influence the outcome of the tests when using automatic differentiation, and'
     []
 
     [execution]
@@ -63,17 +61,15 @@
     exodiff = 'const_out.e'
     recover = false
 
-    requirement = 'The system shall support supplying a constant literal in place of a property name '
-                  'for material property derivative consumers.'
+    requirement = 'The system shall support supplying a constant literal in place of a property name for material property derivative consumers.'
   []
 
-  [mutliblock]
+  [multiblock]
     # Test the default property behavior of DerivativeMaterialInterface
     type = 'RunApp'
     input = 'multiblock.i'
 
-    requirement = 'The system shall support optional coupling where materials that do not exist are '
-                  'returned as valid objects containing zero.'
+    requirement = 'The system shall support optional coupling where materials that do not exist are returned as valid objects containing zero.'
   []
 
   [warn]
@@ -82,8 +78,7 @@
     expect_err = "The material property 'prop' does not exist."
     recover = false
 
-    requirement = 'The system shall issue an error when required derivative materials that are '
-                  'retrieved are never declared.'
+    requirement = 'The system shall issue an error when required derivative materials that are retrieved are never declared.'
   []
 
   [bad_evaluation]
@@ -189,8 +184,7 @@
   []
 
   [ad_analytic_derivatives]
-    requirement = 'The system shall be capable of producing analytic derivatives of material '
-                  'properties using dual numbers:'
+    requirement = 'The system shall be capable of producing analytic derivatives of material properties using dual numbers:'
 
     [jacobian]
       type = 'PetscJacobianTester'
@@ -223,7 +217,6 @@
       type = CSVDiff
       input = 'ad_material_chaining.i'
       csvdiff = 'ad_material_chaining_out.csv'
-
       detail = 'involving chain rules of material properties defined by function expressions, and'
     []
   []
@@ -252,8 +245,7 @@
     exodiff = 'ad_const_out.e'
     recover = false
 
-    requirement = 'The system shall support supplying a constant literal in place of a property name '
-                  'for material property derivative consumers that require dual numbers.'
+    requirement = 'The system shall support supplying a constant literal in place of a property name for material property derivative consumers that require dual numbers.'
   []
 
   [ad_mutliblock]
@@ -261,8 +253,7 @@
     type = 'RunApp'
     input = 'ad_multiblock.i'
 
-    requirement = 'The system shall support optional coupling where materials that do not exist are '
-                  'returned as valid objects containing zero, supporting dual numbers.'
+    requirement = 'The system shall support optional coupling where materials that do not exist are returned as valid objects containing zero, supporting dual numbers.'
   []
 
   [ad_warn]
@@ -271,8 +262,7 @@
     expect_err = "The material property 'prop' does not exist."
     recover = false
 
-    requirement = 'The system shall issue an error when required dual number derivative materials '
-                  'that are retrieved are never declared.'
+    requirement = 'The system shall issue an error when required dual number derivative materials that are retrieved are never declared.'
   []
 
   [ad_bad_evaluation]
@@ -358,44 +348,63 @@
     [parsed_material_requested_non_existing_derivative]
       type = RunException
       input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial '
-                 'Materials/prime/material_property_names="Q:=D[S,c,c]"'
-      expect_err = 'Material property \'d\^2S/dc\^2\', requested by \'prime\' is not defined on '
-                   'block 0'
-      detail = 'and error out for non-existing for explicitly requested derivatives in '
-               'ParsedMaterials'
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names="Q:=D[S,c,c]"'
+      expect_err = 'Material property \'d\^2S/dc\^2\', requested by \'prime\' is not defined on block 0'
+      detail = 'and error out for non-existing for explicitly requested derivatives in ParsedMaterials'
     []
     [parsed_material_requested_existing_derivative]
       type = RunApp
       input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial '
-                 'Materials/prime/material_property_names="Q:=D[S,c]"'
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names="Q:=D[S,c]"'
       detail = 'for explicitly requested derivatives in ParsedMaterials'
     []
     [parsed_material_requested_optimized_out_derivative]
       type = RunException
       input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 '
-                 'Materials/prime/material_property_names="Q:=D[S,c]"'
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 Materials/prime/material_property_names="Q:=D[S,c]"'
       expect_err = 'Material property \'dS/dc\', requested by \'prime\' is not defined on block 0'
-      detail = 'for explicitly requested derivatives but optimized out derivatives in '
-               'ParsedMaterials'
+      detail = 'for explicitly requested derivatives but optimized out derivatives in ParsedMaterials'
     []
     [allow_override]
       type = RunApp
       input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 '
-                 'Materials/prime/error_on_missing_material_properties=false '
-                 'Materials/prime/material_property_names="Q:=D[S,c]"'
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 Materials/prime/error_on_missing_material_properties=false Materials/prime/material_property_names="Q:=D[S,c]"'
       detail = 'but provide for a user override to default non-existing properties to zero'
     []
     [derivative_parsed_material]
       type = RunException
       input = required_property.i
-      cli_args = 'Materials/prime/type=DerivativeParsedMaterial '
-                 'Materials/prime/material_property_names=Q'
+      cli_args = 'Materials/prime/type=DerivativeParsedMaterial Materials/prime/material_property_names=Q'
       expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
       detail = 'in DerivativeParsedMaterials'
     []
+  []
+
+  [property_history]
+    requirement = 'The system shall make available the property states '
+    issues = '#26713'
+    [old]
+      type = CSVDiff
+      input = old_older.i
+      csvdiff = old.csv
+      cli_args = 'Materials/inactive=t2_older Postprocessors/inactive=t2_older Outputs/file_base=old'
+      detail = 'old, '
+    []
+    [older]
+      type = CSVDiff
+      input = old_older.i
+      csvdiff = older.csv
+      cli_args = 'Materials/inactive=t2_old Postprocessors/inactive=t2_old Outputs/file_base=older'
+      detail = 'older.'
+    []
+  []
+
+  [additional_symbols]
+    type = 'Exodiff'
+    input = 'extra_symbols.i'
+    exodiff = 'extra_symbols_out.e'
+    recover = false
+    requirement = 'The system shall make available current point location, simulation time, and current time step size.'
+    issues = '#26713'
   []
 []

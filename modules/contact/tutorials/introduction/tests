@@ -2,12 +2,12 @@
   [step01]
     type = RunApp
     input = step01.i
-    check_input = True
+    absent_out = 'Solve Did NOT Converge'
   []
   [step02]
     type = RunApp
     input = step02.i
-    check_input = True
+    absent_out = 'Solve Did NOT Converge'
   []
   [plot02]
     type = RunApp

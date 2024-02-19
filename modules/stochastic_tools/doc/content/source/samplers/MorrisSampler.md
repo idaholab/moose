@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Morris screening method is a one-at-a-time (OAT) pertabative sampling method for performing global sensitivity analaysis [!citep](morris1991factorial, saltelli2008global). The implementation is equivalent to the trajectory design described in the [GSA Module](https://gsa-module.readthedocs.io/en/stable/implementation/morris_screening_method.html) and implemented in [SALib](https://github.com/SALib/SALib). The stochastic tools module implementation is fully parallelized and is meant to be used with the [MorrisReporter.md] to calculate the sensitivity quantities.
+The Morris screening method is a one-at-a-time (OAT) perturbative sampling method for performing global sensitivity analysis [!citep](morris1991factorial, saltelli2008global). The implementation is equivalent to the trajectory design described in the [GSA Module](https://gsa-module.readthedocs.io/en/stable/implementation/morris_screening_method.html) and implemented in [SALib](https://github.com/SALib/SALib). The stochastic tools module implementation is fully parallelized and is meant to be used with the [MorrisReporter.md] to calculate the sensitivity quantities.
 
 ## Trajectory Design
 
@@ -23,14 +23,14 @@ where,
 - $b \equiv$ ($D+1$)-by-$D$ strictly lower triangular matrix of 1s,
 - $x^{*} \equiv$ ($D+1$)-by-$D$ matrix where each row is the same random starting point $[0, 1]^D$,
 - $d^{*} \equiv$ $D$-by-$D$ diagonal matrix with either a $1$ or $-1$ for each row, this determines the direction of the perturbations,
-- $p^{*} \equiv$ $D$-by-$D$ maxtrix where each row has a different column equal to 1 with no repeated columns, this determines which parameter is perturbed, and
+- $p^{*} \equiv$ $D$-by-$D$ matrix where each row has a different column equal to 1 with no repeated columns, this determines which parameter is perturbed, and
 - $j \equiv$ ($D+1$)-by-$D$ dense matrix of 1s.
 
-Each row of the resulting $b^{*}$ represents OAT perturbed sample between 0 and 1; each entry of the rows is put through the corresponding [!param](/Samplers/MorrisSampler/distributions)'s quantile to produce a $D+1$ samples. A seperate $b^{*}$ is produced for the number specified by [!param](/Samplers/MorrisSampler/trajectories).
+Each row of the resulting $b^{*}$ represents OAT perturbed sample between 0 and 1; each entry of the rows is put through the corresponding [!param](/Samplers/MorrisSampler/distributions)'s quantile to produce a $D+1$ samples. A separate $b^{*}$ is produced for the number specified by [!param](/Samplers/MorrisSampler/trajectories).
 
 ## Example Input Syntax
 
-The following input generates a 3-dimensional sampling matrix with 4 trajecteries, which creates $(D+1)\times N = 16$ samples.
+The following input generates a 3-dimensional sampling matrix with 4 trajectories, which creates $(D+1)\times N = 16$ samples.
 
 !listing samplers/morris/morris.i block=Samplers
 

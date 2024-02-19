@@ -18,6 +18,7 @@
 #include "MooseEnum.h"
 #include "MooseVariableFE.h"
 #include "RelationshipManager.h"
+#include "SetAdaptivityOptionsAction.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -31,16 +32,12 @@ registerMooseAction("MooseApp", AdaptivityAction, "add_algebraic_rm");
 InputParameters
 AdaptivityAction::validParams()
 {
-  InputParameters params = Action::validParams();
+  InputParameters params = Moose::commonAdaptivityParams();
   params.addClassDescription(
       "Add libMesh based adaptation schemes via the Executioner/Adaptivity input syntax.");
   MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator",
                        "KellyErrorEstimator");
 
-  params.addParam<unsigned int>(
-      "steps", 0, "The number of adaptivity steps to perform at any one time for steady state");
-  params.addRangeCheckedParam<unsigned int>(
-      "interval", 1, "interval>0", "The number of time steps betweeen each adaptivity phase");
   params.addParam<unsigned int>(
       "initial_adaptivity",
       0,
@@ -51,10 +48,6 @@ AdaptivityAction::validParams()
   params.addParam<Real>("coarsen_fraction",
                         0.0,
                         "The fraction of elements or error to coarsen. Should be between 0 and 1.");
-  params.addParam<unsigned int>(
-      "max_h_level",
-      0,
-      "Maximum number of times a single element can be refined. If 0 then infinite.");
   params.addParam<MooseEnum>(
       "error_estimator", estimators, "The class name of the error estimator you want to use.");
   params.addDeprecatedParam<bool>(
@@ -62,24 +55,14 @@ AdaptivityAction::validParams()
       false,
       "Determines whether information about the mesh is printed when adaptivity occurs",
       "Use the Console output parameter 'print_mesh_changed_info'");
-  params.addParam<Real>("start_time",
-                        -std::numeric_limits<Real>::max(),
-                        "The time that adaptivity will be active after.");
-  params.addParam<Real>("stop_time",
-                        std::numeric_limits<Real>::max(),
-                        "The time after which adaptivity will no longer be active.");
   params.addParam<std::vector<std::string>>(
-      "weight_names", "List of names of variables that will be associated with weight_values");
+      "weight_names", {}, "List of names of variables that will be associated with weight_values");
   params.addParam<std::vector<Real>>(
       "weight_values",
+      {},
       "List of values between 0 and 1 to weight the associated weight_names error by");
-  params.addParam<unsigned int>("cycles_per_step", 1, "The number of adaptivity cycles per step");
-
   params.addParam<bool>(
       "show_initial_progress", true, "Show the progress of the initial adaptivity");
-  params.addParam<bool>(
-      "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
-  params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
   return params;
 }
 
@@ -204,7 +187,7 @@ AdaptivityAction::act()
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
     adapt.setInterval(getParam<unsigned int>("interval"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.switchHToPRefinement();
+      adapt.doingPRefinement(true, getParam<MultiMooseEnum>("disable_p_refinement_for_families"));
   }
 }
 

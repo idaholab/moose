@@ -404,7 +404,15 @@ bool
 ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
                                                               const Elem & neighbor) const
 {
-  const dof_id_type elem_id = elem.id(), neighbor_id = neighbor.id();
+  auto level = [this](const auto & elem_arg)
+  {
+    if (_mesh.doingPRefinement())
+      return elem_arg.p_level();
+    else
+      return elem_arg.level();
+  };
+  const auto elem_id = elem.id(), neighbor_id = neighbor.id();
+  const auto elem_level = level(elem), neighbor_level = level(neighbor);
 
   // When looping over elements and then sides, we need to make sure that we do not duplicate
   // effort, e.g. if a face is shared by element 1 and element 2, then we do not want to do compute
@@ -412,8 +420,8 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
   // to only compute when we are visiting the element that has the lower element id when element and
   // neighbor are of the same adaptivity level, and then if they are not of the same level, then
   // we only compute when we are visiting the finer element
-  return (neighbor.active() && (neighbor.level() == elem.level()) && (elem_id < neighbor_id)) ||
-         (neighbor.level() < elem.level());
+  return (neighbor.active() && (neighbor_level == elem_level) && (elem_id < neighbor_id)) ||
+         (neighbor_level < elem_level);
 }
 
 template <typename RangeType>

@@ -46,8 +46,8 @@
   []
   [fv_var]
     type = MooseVariableFVReal
-    [InitialCondition]
-      type = FunctionIC
+    [FVInitialCondition]
+      type = FVFunctionIC
       function = '1 + x*x + y*y*y'
     []
   []

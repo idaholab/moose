@@ -20,6 +20,17 @@
 #include <iterator>
 #include <algorithm>
 
+// Make newer nanoflann API compatible with older nanoflann versions
+#if NANOFLANN_VERSION < 0x150
+namespace nanoflann
+{
+typedef SearchParams SearchParameters;
+
+template <typename T, typename U>
+using ResultItem = std::pair<T, U>;
+}
+#endif
+
 registerMooseObject("MooseApp", RadialAverage);
 
 // specialization for PointListAdaptor<RadialAverage::QPData>
@@ -193,7 +204,7 @@ RadialAverage::finalize()
 void
 RadialAverage::threadJoin(const UserObject & y)
 {
-  const RadialAverage & uo = static_cast<const RadialAverage &>(y);
+  const auto & uo = static_cast<const RadialAverage &>(y);
   _qp_data.insert(_qp_data.begin(), uo._qp_data.begin(), uo._qp_data.end());
   _average.insert(uo._average.begin(), uo._average.end());
 }
@@ -250,8 +261,8 @@ RadialAverage::updateCommunicationLists()
   mooseAssert(kd_tree != nullptr, "KDTree was not properly initialized.");
   kd_tree->buildIndex();
 
-  std::vector<std::pair<std::size_t, Real>> ret_matches;
-  nanoflann::SearchParams search_params;
+  std::vector<nanoflann::ResultItem<std::size_t, Real>> ret_matches;
+  nanoflann::SearchParameters search_params;
 
   // iterate over all boundary nodes and collect all boundary-near data points
   _boundary_data_indices.clear();

@@ -380,9 +380,6 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   oss << "execute_" << execute_data_name << "_on";
   std::string execute_on_name = oss.str();
 
-  // True if the postprocessors has been limited using 'outputs' parameter
-  bool has_limited_pps = false;
-
   std::vector<UserObject *> objs;
   _problem_ptr->theWarehouse()
       .query()
@@ -412,35 +409,19 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
       if (!_advanced_execute_on.contains(execute_data_name) ||
           (_advanced_execute_on[execute_data_name].isValid() &&
            _advanced_execute_on[execute_data_name].contains("none")))
-        mooseWarning(
-            "Postprocessor '",
-            pps->PPName(),
-            "' has requested to be output by the '",
-            name(),
-            "' output, but postprocessor output is not support by this type of output object.");
-    }
-
-    // Set the flag state for postprocessors that utilize 'outputs' parameter
-    if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
-      has_limited_pps = true;
-  }
-
-  // Produce the warning when 'outputs' is used, but postprocessor output is disabled
-  if (has_limited_pps && isParamValid(execute_on_name))
-  {
-    const ExecFlagEnum & pp_on = getParam<ExecFlagEnum>(execute_on_name);
-    if (pp_on.contains(EXEC_NONE))
-    {
-      if (execute_on_name == "execute_postprocessors_on")
-        mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor "
-                     "output is disabled for the '",
+      {
+        const bool is_pp_type = (execute_data_name == "postprocessors");
+        const std::string pp_type_str = is_pp_type ? "post-processor" : "vector post-processor";
+        mooseWarning("The ",
+                     pp_type_str,
+                     " '",
+                     pps->PPName(),
+                     "' has requested to be output by the '",
                      name(),
-                     "' output object.");
-      else if (execute_on_name == "execute_vectorpostprocessors_on")
-        mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector "
-                     "postprocessor output is disabled for the '",
-                     name(),
-                     "' output object.");
+                     "' output, but ",
+                     pp_type_str,
+                     " output is disabled for that output object.");
+      }
     }
   }
 }

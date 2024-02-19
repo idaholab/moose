@@ -40,27 +40,32 @@ GeochemicalModelDefinition::validParams()
       "disequilibrium (if any).");
   params.addParam<std::vector<std::string>>(
       "equilibrium_minerals",
+      {},
       "A list of minerals that are in equilibrium with the aqueous solution.  All members of this "
       "list must be in the 'minerals' section of the database file");
   params.addParam<std::vector<std::string>>(
       "equilibrium_gases",
+      {},
       "A list of gases that are in equilibrium with the aqueous solution and can have their "
       "fugacities fixed, at least for some time and spatial location.  All members of this list "
       "must be in the 'gas' section of the database file");
   params.addParam<std::vector<std::string>>(
       "kinetic_minerals",
+      {},
       "A list of minerals whose dynamics are governed by a rate law.  These are not in equilibrium "
       "with the aqueous solution.  All members of this list must be in the 'minerals' section of "
       "the database "
       "file.");
   params.addParam<std::vector<std::string>>(
       "kinetic_redox",
+      {},
       "A list alternative oxidation states (eg Fe+++) whose dynamics are governed by a rate law.  "
       "These are not in equilibrium with the aqueous solution.  All members of this list must be "
       "in the "
       "'redox couples' section of the database file.");
   params.addParam<std::vector<std::string>>(
       "kinetic_surface_species",
+      {},
       "A list surface sorbing species whose dynamics are governed by a rate law.  These are not in "
       "equilibrium with the aqueous solution.  All members of this list must be in the 'surface "
       "species' section of the database file.");
@@ -80,6 +85,7 @@ GeochemicalModelDefinition::validParams()
       "redox_electron is an equilibrium species");
   params.addParam<std::vector<UserObjectName>>(
       "kinetic_rate_descriptions",
+      {},
       "A list of GeochemistryKineticRate UserObject names that define the kinetic rates.  If a "
       "kinetic species has no rate prescribed to it, its reaction rate will be zero");
   params.addParam<bool>(

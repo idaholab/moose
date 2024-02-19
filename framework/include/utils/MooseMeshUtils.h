@@ -195,9 +195,9 @@ computeFaceInfoFaceCoord(FaceInfo & fi,
  * Crate a new set of element-wise IDs by finding unique combinations of existing extra ID values
  *
  * This function finds the unique combinations by recursively calling itself for extra ID inputs. In
- * the recursive calling, the new unique combitnations is determined by combining the extra ID value
+ * the recursive calling, the new unique combinations is determined by combining the extra ID value
  * of current level and the unique combination determined in the previous level in recursion. In the
- * lowest level of recursion, the base combination is set by the unqiue ID values of the
+ * lowest level of recursion, the base combination is set by the unique ID values of the
  * corresponding extra ID.
  *
  * @param mesh input mesh
@@ -268,14 +268,14 @@ bool hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name);
  * @param input mesh over which to determine boundary IDs
  * @param boundary ID
  */
-bool hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id);
+bool hasBoundaryID(const MeshBase & input_mesh, const BoundaryID id);
 
 /**
  * Whether a particular boundary name exists in the mesh
  * @param input mesh over which to determine boundary names
  * @param boundary name
  */
-bool hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name);
+bool hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name);
 
 /**
  * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes

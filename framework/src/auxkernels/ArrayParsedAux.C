@@ -30,9 +30,12 @@ ArrayParsedAux::validParams()
       false,
       "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
   params.addParam<std::vector<std::string>>(
-      "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+      "constant_names",
+      {},
+      "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;

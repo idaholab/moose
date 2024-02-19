@@ -40,7 +40,7 @@ strain increment are implemented in an updated Lagrangian incremental form. As
 such, all constitutive evolution equations should also be written in the Lagrangian
 form (and related to the reference frame).
 
-The corresponding second Piola-Kirchoff stress measure is used to determine
+The corresponding second Piola-Kirchhoff stress measure is used to determine
 local convergence, at each quadrature point, with in the crystal plasticity
 constitutive model base class. Once convergence is achieved within the
 user-specified tolerances, the equivalent Cauchy stress value is calculated.
@@ -182,7 +182,7 @@ Lagrangian strain tensor ($\boldsymbol{E}^e$) is utilized in the calculation of 
 
 In writing a constitutive equation the appropriate, corresponding strain and
 stress measures must be used: the work conjugate pairs. The work conjugate to
-the Lagrangian strain tensor is the second Piola-Kirchoff stress measure.
+the Lagrangian strain tensor is the second Piola-Kirchhoff stress measure.
 
 Both the first and second Piola-Kirchhoff stress measures are defined on the
 reference configuration, although only the second Piola-Kirchhoff stress tensor
@@ -207,7 +207,7 @@ Hexagonal Close Packed (HCP) crystals are often described with the 4-index Mille
   \label{eqn:millerBravaisHCPIndices}
   (HKIL) [UVTW]
 \end{equation}
-To compute the Schmid tensor from these slip direction and slip plane normals, the indices must first be transformed to the Cartesian coordinate system. Within the associated `ComputeMultipleCrystalPlasticityStress` implementation, this conversion uses the assumption that the a$_1$-axis, or the H index, align with the x-axis in the basal plane of the HCP crystal lattice, see [xtalpl_hcp_basalplane_notation]. The c-axis, the L index, is assumed to be paralled to the z-axis of the Cartesian system.
+To compute the Schmid tensor from these slip direction and slip plane normals, the indices must first be transformed to the Cartesian coordinate system. Within the associated `ComputeMultipleCrystalPlasticityStress` implementation, this conversion uses the assumption that the a$_1$-axis, or the H index, aligns with the x-axis in the basal plane of the HCP crystal lattice, see [xtalpl_hcp_basalplane_notation]. The c-axis, the L index, is assumed to be parallel to the z-axis of the Cartesian system.
 
 !media tensor_mechanics/crystal_plasticity/HCP_basal_plane_diagram.png
     id=xtalpl_hcp_basalplane_notation
@@ -240,9 +240,9 @@ The slip plane directions are transformed to the Cartesian system with the matri
 
 where a and c are the HCP unit cell lattice parameters in the basal and axial directions, respectively.
 A check is performed with the basal plane indices to ensure that those indices sum to zero ($U + V + W = 0$).
-If the slip direction indices are given as decimal values, nummerical round-off errors may require an increase in the value of the parameter `zero_tol` which is used within the code to set the allowable deviation from exact zero.
+If the slip direction indices are given as decimal values, numerical round-off errors may require an increase in the value of the parameter `zero_tol` which is used within the code to set the allowable deviation from exact zero.
 
-The slip plane normals are similiarly transformed as
+The slip plane normals are similarly transformed as
 \begin{equation}
   \label{eqn:hcpSlipPlaneNormalTransform}
   \begin{bmatrix}
@@ -300,24 +300,24 @@ the FEM residual calculation within the MOOSE framework.
 
 !media tensor_mechanics/crystal_plasticity/crystal_plasticity_stress_update_algorithm.png
     id=xtalpl_nr_pk2convergence
-    caption=The flowchart for the calculation of the stress and strain measures within the `ComputeMultipleCrystalPlasticityStress` class as implemented in the tensor mechanics module of MOOSE is shown here. The components involved in the Newton-Rhapson iteration are shown in light blue and the components shown in light orange are executed once per MOOSE iteration.
+    caption=The flowchart for the calculation of the stress and strain measures within the `ComputeMultipleCrystalPlasticityStress` class as implemented in the tensor mechanics module of MOOSE is shown here. The components involved in the Newton-Raphson iteration are shown in light blue and the components shown in light orange are executed once per MOOSE iteration.
     style=display:block;margin-left:auto;margin-right:auto;width:80%
 
-Using a Newton Rhapson approach, outlined below in [xtalpl_constitutive_convergence], we
+Using a Newton Raphson approach, outlined below in [xtalpl_constitutive_convergence], we
 consider the system converged when the residual of the second Piola-Kirchhoff
 stress increments from the current and previous iterations is within tolerances
 specified by the user.
 
-The Newton-Rhapson iteration algorithm implemented in `CrystalPlasticityStressUpdateBase`
+The Newton-Raphson iteration algorithm implemented in `CrystalPlasticityStressUpdateBase`
 separates the iteration over the second Piola-Kirchhoff stress residual
 from the physically based constitutive models used to calculate the plastic
 velocity gradient, see [xtalpl_constitutive_convergence]. The convergence algorithm
-for Newton-Rhapson iteration is taken from other approaches already implemented
+for Newton-Raphson iteration is taken from other approaches already implemented
 in MOOSE and is adapted for our crystal plasticity framework.
 
 !media tensor_mechanics/crystal_plasticity/multiple_crystal_plasticity_stress_update_constitutive_convergence.png
     id=xtalpl_constitutive_convergence
-    caption=The algorithm components of the Newton-Rhapson iteration are shown in light blue and the crystal plasticity constitutive model components, which should be overwritten by a specific constitutive model class inheriting from `CrystalPlasticityStressUpdateBase`, are shown in light green.
+    caption=The algorithm components of the Newton-Raphson iteration are shown in light blue and the crystal plasticity constitutive model components, which should be overwritten by a specific constitutive model class inheriting from `CrystalPlasticityStressUpdateBase`, are shown in light green.
     style=display:block;margin-left:auto;margin-right:auto;width:80%
 
 

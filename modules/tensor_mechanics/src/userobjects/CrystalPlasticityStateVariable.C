@@ -27,10 +27,12 @@ CrystalPlasticityStateVariable::validParams()
       intvar_read_options,
       "Read from options for initial value of internal variables: Default from .i file");
   params.addParam<std::vector<unsigned int>>("groups",
+                                             {},
                                              "To group the initial values on different "
                                              "slip systems 'format: [start end)', i.e.'0 "
                                              "4 8 11' groups 0-3, 4-7 and 8-11 ");
   params.addParam<std::vector<Real>>("group_values",
+                                     {},
                                      "The initial values corresponding to each "
                                      "group, i.e. '0.0 1.0 2.0' means 0-4 = 0.0, "
                                      "4-8 = 1.0 and 8-12 = 2.0 ");

@@ -18,4 +18,21 @@
       detail = 'and with the momentum pressure term integrated by parts.'
     []
   []
+  [supg_traction_form]
+    issues = '#25307'
+    design = 'cgfe.md'
+    requirement = 'The system shall be able to solve for incompressible fluid flowing through a 2D channel with only inlet velocity boundary conditions with streamline upwind Petrov Galerkin stabilization and a traction form for the viscous term'
+    [hand_coded]
+      type = Exodiff
+      input = traction-supg.i
+      exodiff = traction-supg_out.e
+      detail = 'using a hand-coded Jacobian, and'
+    []
+    [ad]
+      type = Exodiff
+      input = ad-traction-supg.i
+      exodiff = ad-traction-supg_out.e
+      detail = 'using an automatic differentiation computed Jacobian and compute identical results, indicating the traction implementations with second order derivatives for the viscous term in the stabilization term are identical.'
+    []
+  []
 []

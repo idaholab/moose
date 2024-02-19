@@ -18,7 +18,7 @@ The KKS system ([!cite](kim_phase-field_1999)) uses multiple MOOSE materials to 
 values for free energy  functions, the switching function $h(\eta)$, and the double
 well function $g(\eta)$. Providing these as materials allows the functions to be
 bundled in a single place, while being used by multiple kernels. Furthermore the
-automatic differentiation feature used in the parsed function materials prreplovides
+automatic differentiation feature used in the parsed function materials provides
 the necessary derivatives at no cost to the developer. The derivatives are stored
 in material properties and follow a naming scheme that is defined in `KKSBaseMaterial.C`.
 
@@ -268,7 +268,7 @@ the other terms in the Allen-Cahn equation.
 ## `KKSACBulkC`
 
 [`KKSACBulkC`](/KKSACBulkC.md) is the part with a direct composition dependence.
-An instance of this kernel is needed for each compnent of the problem.
+An instance of this kernel is needed for each component of the problem.
 
 ### Residual
 

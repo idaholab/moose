@@ -33,14 +33,17 @@ RadiationTransferAction::validParams()
       "boundary", "The boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<BoundaryName>>(
-      "adiabatic_boundary", "The adiabatic boundaries that participate in the radiative exchange.");
+      "adiabatic_boundary",
+      {},
+      "The adiabatic boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<BoundaryName>>(
       "fixed_temperature_boundary",
+      {},
       "The fixed temperature boundaries that participate in the radiative exchange.");
 
-  params.addParam<std::vector<FunctionName>>("fixed_boundary_temperatures",
-                                             "The temperatures of the fixed boundary.");
+  params.addParam<std::vector<FunctionName>>(
+      "fixed_boundary_temperatures", {}, "The temperatures of the fixed boundary.");
 
   params.addRequiredParam<std::vector<unsigned int>>("n_patches",
                                                      "Number of radiation patches per sideset.");
@@ -59,7 +62,8 @@ RadiationTransferAction::validParams()
                                   "Available options: x, y, z, radial");
 
   params.addRequiredParam<VariableName>("temperature", "The coupled temperature variable.");
-  params.addRequiredParam<std::vector<Real>>("emissivity", "Emissivities for each boundary.");
+  params.addRequiredParam<std::vector<FunctionName>>("emissivity",
+                                                     "Emissivities for each boundary.");
 
   MooseEnum view_factor_calculator("analytical ray_tracing", "ray_tracing");
   params.addParam<MooseEnum>(
@@ -317,7 +321,7 @@ RadiationTransferAction::addRadiationObject() const
   std::vector<std::vector<std::string>> radiation_patch_names = radiationPatchNames();
 
   // input parameter check
-  std::vector<Real> emissivity = getParam<std::vector<Real>>("emissivity");
+  std::vector<FunctionName> emissivity = getParam<std::vector<FunctionName>>("emissivity");
   if (emissivity.size() != _boundary_names.size())
     mooseError("emissivity parameter needs to be the same size as the boundary parameter.");
 
@@ -326,11 +330,11 @@ RadiationTransferAction::addRadiationObject() const
   InputParameters params = _factory.getValidParams("ViewFactorObjectSurfaceRadiation");
   params.set<std::vector<VariableName>>("temperature") = {getParam<VariableName>("temperature")};
 
-  std::vector<Real> extended_emissivity;
+  std::vector<FunctionName> extended_emissivity;
   for (unsigned int j = 0; j < _boundary_names.size(); ++j)
     for (unsigned int i = 0; i < nPatch(j); ++i)
       extended_emissivity.push_back(emissivity[j]);
-  params.set<std::vector<Real>>("emissivity") = extended_emissivity;
+  params.set<std::vector<FunctionName>>("emissivity") = extended_emissivity;
 
   // add boundary parameter
   std::vector<BoundaryName> boundary_names;

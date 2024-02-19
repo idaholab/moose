@@ -226,14 +226,14 @@ cp = 1
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [functor_constants]
     type = ADGenericFunctorMaterial
     prop_names = 'cp k'
     prop_values = '${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T'
     rho = ${rho}
     block = 0

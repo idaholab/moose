@@ -25,15 +25,28 @@ public:
   {
     /// Physical position of the connecting point
     Point _position;
+    /// Boundary element
+    const Elem * const _elem;
+    /// Boundary side
+    unsigned short int _side;
     /// Boundary node of connection (used by other components for connecting)
-    Node * _node;
+    const Node * const _node;
     /// Boundary id of this connection
     unsigned int _boundary_id;
     /// Outward norm (either 1 or -1) on boundaries
     Real _normal;
 
-    Connection(const Point & pt, Node * node, unsigned int bc_id, Real normal)
-      : _position(pt), _node(node), _boundary_id(bc_id), _normal(normal)
+    Connection(const Point & pt,
+               const Elem * elem,
+               unsigned short int side,
+               boundary_id_type bc_id,
+               Real normal)
+      : _position(pt),
+        _elem(elem),
+        _side(side),
+        _node(_elem->node_ptr(side)),
+        _boundary_id(bc_id),
+        _normal(normal)
     {
     }
   };

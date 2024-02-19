@@ -177,14 +177,14 @@ velocity_interp_method = 'average'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const]
     type = ADGenericFunctorMaterial
     prop_names = 'k cp'
     prop_values = '${k} ${cp}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'temperature'
     rho = ${rho}
   []

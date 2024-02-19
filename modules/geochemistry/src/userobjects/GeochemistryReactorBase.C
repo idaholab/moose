@@ -15,10 +15,12 @@ GeochemistryReactorBase::sharedParams()
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::string>>(
       "swap_out_of_basis",
+      {},
       "Species that should be removed from the model_definition's basis and be replaced with the "
       "swap_into_basis species");
   params.addParam<std::vector<std::string>>(
       "swap_into_basis",
+      {},
       "Species that should be removed from the model_definition's equilibrium species list and "
       "added to the basis.  There must be the same number of species in swap_out_of_basis and "
       "swap_into_basis.  These swaps are performed before any other computations during the "
@@ -83,6 +85,7 @@ GeochemistryReactorBase::sharedParams()
       "must be provided with a bulk_composition constraint_meaning.");
   params.addParam<std::vector<std::string>>(
       "prevent_precipitation",
+      {},
       "Mineral species in this list will be prevented from precipitating, irrespective of their "
       "saturation index (unless they are initially in the basis)");
   params.addParam<Real>(
@@ -189,23 +192,5 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
     _solver_output(_num_my_nodes),
     _tot_iter(_num_my_nodes, 0),
     _abs_residual(_num_my_nodes, 0.0)
-{
-}
-
-void
-GeochemistryReactorBase::initialize()
-{
-}
-void
-GeochemistryReactorBase::finalize()
-{
-}
-void
-GeochemistryReactorBase::threadJoin(const UserObject & /*uo*/)
-{
-}
-
-void
-GeochemistryReactorBase::execute()
 {
 }

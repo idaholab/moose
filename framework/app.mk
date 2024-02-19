@@ -79,24 +79,25 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # The idea here is that if all they have is src then it's a big jumble of stuff
 # that won't benefit from unity building
 # Also, exclude the base directory by default because it's another big jumble
-# of unrelated stuff
-non_unity_dirs := %.libs %/src %src/base $(app_non_unity_dirs)
+# of unrelated stuff.
+non_unity_dirs := %.libs %/src $(app_non_unity_dirs)
 
-# Find all of the individual subdirectories
+# Find all of the top-level subdirectories in our src folder(s)
 # We will create a Unity file for each individual subdirectory
 # The idea is that files grouped withing a subdirectory are closely related
 # and will benefit from a Unity build
-srcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
+srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -type d -not -path '*/.libs*')
+allsrcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
 
 # Filter out the paths we don't want to Unity build
 unity_srcsubdirs := $(filter-out $(non_unity_dirs), $(srcsubdirs))
-non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(allsrcsubdirs))
 
 # This is a biggie
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
@@ -203,12 +204,12 @@ include_files	:= $(shell find $(depend_dirs) -regex "[^\#~]*\.[hf]")
 all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 
 # header file links
-link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
+app_LINK := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(link_names)
+$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(app_LINK)
 app_INCLUDE = -I$(all_header_dir)
 
 else # No Header Symlinks
@@ -256,11 +257,15 @@ else
   app_plugin_deps :=
 endif
 
-app_LIBS       := $(app_LIB) $(app_LIBS)
+app_LIBS       += $(app_LIB)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
+# app_LINKS cumulatively lists all the header symlinks.
+# This is such that when used as a dependency for the module loader rule, it
+# establishes a dependence on the header symlinks of each individual module.
+app_LINKS      := $(app_LINK) $(app_LINKS)
 
 # WARNING: the += operator does NOT work here!
 ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | perl -pe 'y/a-z/A-Z/' | perl -pe 's/-//g')_ENABLED
@@ -335,12 +340,17 @@ ifeq (x$(app_HEADER_deps),x)
 endif
 
 # Target-specific Variable Values (See GNU-make manual)
-$(app_HEADER): curr_dir    := $(APPLICATION_DIR)
-$(app_HEADER): curr_app    := $(APPLICATION_NAME)
-$(app_HEADER): all_header_dir := $(all_header_dir)
+$(app_HEADER): curr_dir              := $(APPLICATION_DIR)
+$(app_HEADER): curr_app              := $(APPLICATION_NAME)
+$(app_HEADER): curr_installable_dirs := $(INSTALLABLE_DIRS)
+$(app_HEADER): all_header_dir        := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
-	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
+	$(shell REPO_LOCATION="$(curr_dir)" \
+	        HEADER_FILE="$@" \
+					APPLICATION_NAME="$(curr_app)" \
+					INSTALLABLE_DIRS="$(curr_installable_dirs)" \
+	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py)
 	@ln -sf $@ $(all_header_dir)
 
 #
@@ -353,10 +363,12 @@ $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_LIB): curr_deps := $(depend_libs)
 $(app_LIB): curr_libs := $(depend_libs_flags)
+$(app_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
+$(app_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
 $(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 ifeq ($(BUILD_TEST_OBJECTS_LIB),no)
@@ -370,10 +382,12 @@ $(app_test_LIB): curr_objs := $(app_test_objects)
 $(app_test_LIB): curr_dir  := $(APPLICATION_DIR)/test
 $(app_test_LIB): curr_deps := $(depend_libs)
 $(app_test_LIB): curr_libs := $(depend_libs_flags)
+$(app_test_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
+$(app_test_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
 $(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
-	@echo "Linking Library "$@"..."
+	@echo "Linking Test Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 endif
 
@@ -403,7 +417,7 @@ ifneq (,$(findstring mpicxx,$(CXX)))
 endif
 endif
 endif
-applibs :=  $(app_test_LIB) $(app_LIBS) $(depend_test_libs)
+applibs :=  $(app_test_LIB) $(app_LIBS) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
 applibs := $(call uniq,$(applibs))
 
 ifeq ($(libmesh_static),yes)
@@ -440,7 +454,7 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS) $(app_resource)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
@@ -508,7 +522,9 @@ install_lib_%: %
 	@cp $< $(la_installed)                   # Copy the library archive file
 	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
 	@$(call patch_la,$(la_installed),$(lib_install_dir))
+ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
+endif
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
 # These lines are critical in that they are a catch-all for nested applications. (e.g. These will properly remap MOOSE and the modules

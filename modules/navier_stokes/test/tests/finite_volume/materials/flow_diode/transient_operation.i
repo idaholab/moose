@@ -136,7 +136,7 @@ ny = 5
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [porosity]
     type = ADGenericFunctorMaterial
     prop_names = 'porosity'
@@ -145,15 +145,15 @@ ny = 5
   [base_friction]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'Darcy Forchheimer'
-    prop_values = '1 1 1 0.1 0.2 0.3'
+    prop_values = '220 240 260 0 0 0'
   []
 
   # Material definitions needed for the diode
   [diode]
-    type = NSFVFrictionFlowDiodeMaterial
+    type = NSFVFrictionFlowDiodeFunctorMaterial
     # Friction only in X direction
     direction = '-1 0 0'
-    additional_linear_resistance = '100 0 0'
+    additional_linear_resistance = '20000 0 0'
     additional_quadratic_resistance = '0 0 0'
     base_linear_friction_coefs = 'Darcy'
     base_quadratic_friction_coefs = 'Forchheimer'
@@ -201,7 +201,7 @@ ny = 5
   [time_based]
     type = BoolFunctionControl
     function = time_function
-    parameter = 'Materials/diode/turn_on_diode'
+    parameter = 'FunctorMaterials/diode/turn_on_diode'
     execute_on = timestep_begin
   []
 
@@ -210,7 +210,7 @@ ny = 5
   [pdrop_based]
     type = BoolFunctionControl
     function = pdrop_positive
-    parameter = 'Materials/diode/turn_on_diode'
+    parameter = 'FunctorMaterials/diode/turn_on_diode'
     execute_on = timestep_begin
   []
 
@@ -221,7 +221,7 @@ ny = 5
   [flow_based]
     type = BoolFunctionControl
     function = velocity_big_enough
-    parameter = 'Materials/diode/turn_on_diode'
+    parameter = 'FunctorMaterials/diode/turn_on_diode'
     execute_on = timestep_begin
   []
 []

@@ -51,8 +51,7 @@ void
 InterfaceIntegralPostprocessor::threadJoin(const UserObject & y)
 {
   InterfacePostprocessor::threadJoin(y);
-  const InterfaceIntegralPostprocessor & pps =
-      static_cast<const InterfaceIntegralPostprocessor &>(y);
+  const auto & pps = static_cast<const InterfaceIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

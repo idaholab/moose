@@ -71,7 +71,7 @@
     []
   []
   [vi]
-    design = ConstantBoundsAux.md
+    design = ConstantBounds.md
     requirement = 'The system shall be able to enforce an upper and lower bound on a variable using a variational inequality'
     [rsls]
       input = vi-bounding.i
@@ -114,7 +114,7 @@
     []
   []
   [unbounded]
-    design = ConstantBoundsAux.md
+    design = ConstantBounds.md
     requirement = 'The system shall show violation of bounds when a non-variational-inequality solver is used'
     type = Exodiff
     input = vi-bounding.i

@@ -68,7 +68,7 @@ SideValueSampler::finalize()
 void
 SideValueSampler::threadJoin(const UserObject & y)
 {
-  const SideValueSampler & vpp = static_cast<const SideValueSampler &>(y);
+  const auto & vpp = static_cast<const SideValueSampler &>(y);
 
   SamplerBase::threadJoin(vpp);
 }

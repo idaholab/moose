@@ -117,6 +117,7 @@ public:
   void push_back(const std::string & names);
   void push_back(const std::vector<std::string> & names);
   void push_back(const std::set<std::string> & names);
+  void push_back(const MultiMooseEnum & other_enum);
   ///@}
 
   /**
@@ -135,6 +136,10 @@ public:
    * @returns the id of the MooseEnumItem at the supplied index
    */
   unsigned int get(unsigned int i) const;
+
+  /// get the current values cast to a vector of enum type T
+  template <typename T>
+  std::vector<T> getEnum() const;
 
   ///@{
   /**
@@ -203,3 +208,17 @@ protected:
    */
   MultiMooseEnum(const MooseEnumBase & other_enum);
 };
+
+template <typename T>
+std::vector<T>
+MultiMooseEnum::getEnum() const
+{
+#ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
+  static_assert(std::is_enum<T>::value == true,
+                "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
+#endif
+  std::vector<T> enum_vec;
+  for (const auto & current : _current)
+    enum_vec.push_back(static_cast<T>(current.id()));
+  return enum_vec;
+}

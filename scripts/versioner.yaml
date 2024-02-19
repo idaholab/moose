@@ -42,26 +42,30 @@ packages:
       - conda/libmesh-vtk/build.sh
   wasp:
     influential:
+      - scripts/update_and_rebuild_wasp.sh
       - framework/contrib/wasp
       - conda/wasp/meta.yaml
       - conda/wasp/conda_build_config.yaml
       - conda/wasp/build.sh
-  moose:
+  moose-dev:
     dependencies:
       - libmesh
       - wasp
     apptainer:
       from: libmesh
     influential:
-      - apptainer/moose.def
+      - apptainer/moose-dev.def
       - apptainer/remove_channels.def
+      - conda/peacock/meta.yaml
+      - conda/peacock/conda_build_config.yaml
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
-      - conda/moose/build.sh
+      - conda/moose-dev/meta.yaml
+      - conda/moose-dev/conda_build_config.yaml
   app:
     dependencies:
-      - moose
+      - moose-dev
     apptainer:
-      from: moose
+      from: moose-dev
     influential:
       - apptainer/app.def

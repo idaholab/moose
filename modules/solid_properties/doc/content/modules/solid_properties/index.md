@@ -28,7 +28,7 @@ the overall type of property. The overall design of this module is as follows:
    solid properties are grouped together into different userobjects. For example,
    common solid properties used in thermal simulations (specific heat, thermal conductivity),
    are provided by derived classes of the [ThermalSolidProperties](/solidproperties/ThermalSolidProperties.md)
-   userobject. Mechanics properties (Youngs modulus, Poisson ratio), would be provided by
+   userobject. Mechanics properties (Young's modulus, Poisson ratio), would be provided by
    a separate "family" of userobjects.
 2. *Materials* call these userobject functions to compute the material properties at
    quadrature points. Like the userobjects, these materials are grouped into "categories."

@@ -4,9 +4,9 @@
   initial_from_file = 'steady_state_out.e'
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [mat1]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 16
     cp = 356.
     rho = 6.551400E+03
@@ -29,7 +29,8 @@
     n_elems = 3
     names = 'wall'
     n_part_elems = 1
-    materials = 'mat1'
+    solid_properties = 'mat1'
+    solid_properties_T_ref = '300'
     widths = 0.1
   []
 

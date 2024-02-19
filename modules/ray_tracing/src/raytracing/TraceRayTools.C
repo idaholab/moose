@@ -25,6 +25,7 @@
 #include "libmesh/cell_pyramid14.h"
 #include "libmesh/cell_tet4.h"
 #include "libmesh/cell_tet10.h"
+#include "libmesh/cell_tet14.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/enum_to_string.h"
 #include "libmesh/face_quad4.h"
@@ -37,7 +38,7 @@ namespace TraceRayTools
 {
 
 const std::set<int> TRACEABLE_ELEMTYPES = {
-    HEX8, HEX20, HEX27, QUAD4, QUAD8,    QUAD9,     TET4,      TET10,  TRI3,    TRI6,
+    HEX8, HEX20, HEX27, QUAD4, QUAD8,    QUAD9,     TET4,      TET10,  TET14,   TRI3,   TRI6,
     TRI7, EDGE2, EDGE3, EDGE4, PYRAMID5, PYRAMID13, PYRAMID14, PRISM6, PRISM15, PRISM18};
 const std::set<int> ADAPTIVITY_TRACEABLE_ELEMTYPES = {QUAD4, HEX8, TRI3, TET4, EDGE2};
 
@@ -290,6 +291,9 @@ findEdgeNeighbors(
             candidate, elem, node1, node2, edge_length, info);
       case TET10:
         return findEdgeNeighborsWithinEdgeInternal<Tet10>(
+            candidate, elem, node1, node2, edge_length, info);
+      case TET14:
+        return findEdgeNeighborsWithinEdgeInternal<Tet14>(
             candidate, elem, node1, node2, edge_length, info);
       case PYRAMID13:
         return findEdgeNeighborsWithinEdgeInternal<Pyramid13>(
@@ -597,6 +601,7 @@ withinEdge(const Elem * elem,
       return withinEdgeTempl<Hex8>(elem, point, extrema, tolerance);
     case TET4:
     case TET10:
+    case TET14:
       return withinEdgeTempl<Tet4>(elem, point, extrema, tolerance);
     case PYRAMID5:
     case PYRAMID13:
@@ -634,6 +639,7 @@ atVertexOnSide(const Elem * elem, const Point & point, const unsigned short side
       return atVertexOnSideTempl<Tri3>(elem, point, side);
     case TET4:
     case TET10:
+    case TET14:
       return atVertexOnSideTempl<Tet4>(elem, point, side);
     case PYRAMID5:
     case PYRAMID13:
@@ -699,6 +705,7 @@ withinEdgeOnSide(const Elem * const elem,
       return withinEdgeOnSideTempl<Hex8>(elem, point, side, extrema);
     case TET4:
     case TET10:
+    case TET14:
       return withinEdgeOnSideTempl<Tet4>(elem, point, side, extrema);
     case PYRAMID5:
     case PYRAMID13:

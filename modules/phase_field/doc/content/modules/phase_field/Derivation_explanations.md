@@ -49,7 +49,7 @@ the rule
 \frac{\delta F}{\delta c} = \frac{\partial f}{\partial c} - \nabla \cdot \frac{\partial f}{\partial\nabla c}.
 \end{equation}
 
-Note that the above formula is only valid up to first order derivivatives (i.e.
+Note that the above formula is only valid up to first order derivatives (i.e.
 $\nabla^1$). The general formula (required for some more advanced phase field
 models) for a functional
 
@@ -91,7 +91,7 @@ obtain
 \end{equation}
 
 The last term is converted into a surface integral using the _Divergence
-theorem_, tielding
+theorem_, yielding
 
 \begin{equation}
 - \left( \kappa\nabla\eta,\nabla(L\psi) \right)

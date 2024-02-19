@@ -73,7 +73,7 @@ instructions at the top of the input file.
 ## Results
 
 The results for the temperature profile after 13,000 seconds are shown in [fig:avdonin]. Good agreement is
-shown, however some numerical diffusion is obvserved. Similar results are obtained using TOUGH2 for upstream
+shown, however some numerical diffusion is observed. Similar results are obtained using TOUGH2 for upstream
 weighting, see [!citet](moridis1992).
 
 !media media/porous_flow/1d_avdonin.png

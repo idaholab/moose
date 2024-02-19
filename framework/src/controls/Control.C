@@ -27,6 +27,7 @@ Control::validParams()
 
   params.addParam<std::vector<std::string>>(
       "depends_on",
+      {},
       "The Controls that this control relies upon (i.e. must execute before this one)");
 
   return params;

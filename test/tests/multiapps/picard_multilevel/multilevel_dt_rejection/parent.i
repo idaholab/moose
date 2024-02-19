@@ -7,53 +7,53 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxKernels]
-  [./set_v]
+  [set_v]
     type = FunctionAux
     variable = v
     function = 't'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./coupled_force]
+  []
+  [coupled_force]
     type = CoupledForce
     variable = u
     v = v
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -67,21 +67,21 @@
 []
 
 [MultiApps]
-  [./sub1]
+  [sub1]
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = picard_sub.i
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./u_to_v2]
-    type = MultiAppNearestNodeTransfer
+  [u_to_v2]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub1
     source_variable = u
     variable = v2
-  [../]
+  []
   [time_to_sub]
     type = MultiAppPostprocessorTransfer
     from_postprocessor = time

@@ -73,4 +73,5 @@ FunctorPositions::initialize()
     _positions[i] = {(*_pos_functors[3 * i])(elem_origin, t),
                      (*_pos_functors[3 * i + 1])(elem_origin, t),
                      (*_pos_functors[3 * i + 2])(elem_origin, t)};
+  _initialized = true;
 }

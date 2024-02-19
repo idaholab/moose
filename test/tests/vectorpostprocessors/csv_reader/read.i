@@ -23,7 +23,7 @@
 
 [VectorPostprocessors]
   [./reader]
-    type = CSVReader
+    type = CSVReaderVectorPostprocessor
     csv_file = example.csv
   [../]
 []

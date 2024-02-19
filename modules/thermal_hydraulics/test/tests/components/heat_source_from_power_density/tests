@@ -1,4 +1,6 @@
 [Tests]
+  design = 'HeatSourceFromPowerDensity.md'
+  issues = '#19679'
   # physics
   [phy:power_density_shape]
     type = 'Exodiff'
@@ -18,6 +20,8 @@
     abs_zero = 1e-9
     # because output has execute_on = 'final'
     recover = false
+    requirement = "The system shall be able to apply a heat source, computed from a power density, "
+                  "onto a component whose mesh is loaded from a mesh file."
   []
 
   # Error checking
@@ -26,11 +30,15 @@
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hgen Components/hgen/regions='fuel'"
     expect_err = "hgen: The component 'hgen' is not of type 'HeatStructureInterface'"
+    requirement = "The system shall report an error if the heat structure specified to apply a heat source on "
+                  "is not of the adequate type."
   []
   [err:wrong_block_name]
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf'"
     expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
+    requirement = "The system shall report an error if the specified subdomain to apply a heat source on does "
+                  "not exist."
   []
 []

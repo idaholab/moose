@@ -35,8 +35,8 @@ PFCRFFVariablesAction::validParams()
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the variables and kernels");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the variables and kernels");
   return params;
 }
 

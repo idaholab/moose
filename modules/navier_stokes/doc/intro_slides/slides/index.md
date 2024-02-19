@@ -98,9 +98,9 @@ Utilizes the following techniques:
 # The Porous Navier-Stokes equations (contd.)
   style=font-size:26pt
 
-- These are supplemented by the conservarion of +energy+:
+- These are supplemented by the conservation of +energy+:
 
-  +Assumptions:+ Weakly-compressible fluid, kinteic energy of the fluid can be neglected
+  +Assumptions:+ Weakly-compressible fluid, kinetic energy of the fluid can be neglected
 
 !equation id=enthalpy-eq
 \frac{\partial \gamma \rho c_p T}{\partial t} + \nabla \cdot \left(  \rho c_p T \vec{u}\right)

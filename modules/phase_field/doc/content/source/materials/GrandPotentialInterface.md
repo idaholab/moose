@@ -17,7 +17,7 @@ To compute the parameters first either the median of all $\sigma_{\alpha i \beta
 j}$ is chosen or, if supplied by the user, the $\sigma_{\alpha i \beta j}$ entry
 with the index `sigma_index` is chosen (overriding the median computation).  The
 chosen $\sigma_{\alpha i \beta j}$ is assigned a value $\gamma_{\alpha i \beta
-j}=1.5$. For this gamma value a set of analytical expessions holds
+j}=1.5$. For this gamma value a set of analytical expressions holds
 
 \begin{equation}
 \begin{aligned}

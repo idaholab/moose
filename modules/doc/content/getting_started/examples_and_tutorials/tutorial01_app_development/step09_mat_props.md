@@ -73,7 +73,7 @@ In the constructor definition, two `Real` type properties by the names `"permeab
          id=pc-source
          caption=Source file for the `PackedColumn` class.
 
-The `DarcyPressure` class needs to be modified to consume the `"permeability"` and `"viscosity"` properties at each [!ac](QP) index. Consequently, it also no longer needs input for the corresponding values. In `DarcyPressure.h`, change the delcaration of the `_permeability` and `_viscosity` variables to the following:
+The `DarcyPressure` class needs to be modified to consume the `"permeability"` and `"viscosity"` properties at each [!ac](QP) index. Consequently, it also no longer needs input for the corresponding values. In `DarcyPressure.h`, change the declaration of the `_permeability` and `_viscosity` variables to the following:
 
 !listing tutorials/tutorial01_app_development/step09_mat_props/include/kernels/DarcyPressure.h
          link=False

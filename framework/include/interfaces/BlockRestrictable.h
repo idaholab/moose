@@ -104,14 +104,14 @@ public:
   /**
    * Return the block subdomain ids for this object
    * Note, if this is not block restricted, this function returns all mesh subdomain ids.
-   * @return a set of SudomainIDs that are valid for this object
+   * @return a set of SubdomainIDs that are valid for this object
    */
-  const virtual std::set<SubdomainID> & blockIDs() const;
+  virtual const std::set<SubdomainID> & blockIDs() const;
 
   /**
    * Return the largest mesh dimension of the elements in the blocks for this object
    */
-  unsigned int blocksMaxDimension() const { return _blk_dim; }
+  unsigned int blocksMaxDimension() const;
 
   /**
    * Test if the supplied block name is valid for this object
@@ -137,14 +137,14 @@ public:
   /**
    * Test if the supplied vector block ids are valid for this object
    * @param ids A vector of SubdomainIDs ids to check
-   * @return True if the all of the given ids are found within the ids for this object
+   * @return True if all of the given ids are found within the ids for this object
    */
   bool hasBlocks(const std::vector<SubdomainID> & ids) const;
 
   /**
    * Test if the supplied set of block ids are valid for this object
    * @param ids A std::set of SubdomainIDs to check
-   * @return True if the all of the given ids are found within the ids for this object
+   * @return True if all of the given ids are found within the ids for this object
    * \see isSubset
    */
   bool hasBlocks(const std::set<SubdomainID> & ids) const;

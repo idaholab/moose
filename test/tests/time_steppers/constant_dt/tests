@@ -13,7 +13,7 @@
     type = 'RunException'
     input = 'constant_dt.i'
     cli_args = 'Executioner/TimeStepper/dt=-1'
-    requirement = 'The system shall error if trying to take a negative time step.'
+    requirement = 'The system shall report an error if trying to take a negative time step.'
     expect_err = 'Negative time step detected'
   []
 []

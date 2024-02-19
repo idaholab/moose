@@ -35,6 +35,7 @@ MultiAppUserObjectTransfer::validParams()
   InputParameters params = MultiAppConservativeTransfer::validParams();
   //  MultiAppUserObjectTransfer does not need source variable since it query values from user
   //  objects
+  params.set<std::vector<VariableName>>("source_variable") = std::vector<VariableName>{};
   params.suppressParameter<std::vector<VariableName>>("source_variable");
   params.addRequiredParam<UserObjectName>(
       "user_object",
@@ -528,7 +529,7 @@ MultiAppUserObjectTransfer::execute()
             Real from_value = 0;
             {
               Moose::ScopedCommSwapper swapper(getFromMultiApp()->comm());
-              from_value = user_object.spatialValue(from_transform.mapBack(to_transform(point)));
+              from_value = user_object.spatialValue(from_transform.mapBack(point));
             }
 
             if (from_value == std::numeric_limits<Real>::infinity())

@@ -75,7 +75,7 @@ When flexure governs, the critical time step is given by:
 \Delta t^e_{crit} = \frac{2}{\sqrt{\frac{\kappa~G~A}{\rho~I}}}\\
 \end{equation}
 
-where $A$ and $I$ are the cross-sectional area and moment of interia, respectively.
+where $A$ and $I$ are the cross-sectional area and moment of inertia, respectively.
  For implementation, equations (4) and (6) are computed, and the minimum of these
  is treated as the critical time step.
 

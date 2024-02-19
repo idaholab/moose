@@ -21,7 +21,6 @@
 
 namespace Moose
 {
-std::map<std::string, QuadratureType> quadrature_type_to_enum;
 std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
 std::map<std::string, SolveType> solve_type_to_enum;
 std::map<std::string, EigenSolveType> eigen_solve_type_to_enum;
@@ -31,22 +30,6 @@ std::map<std::string, LineSearchType> line_search_type_to_enum;
 std::map<std::string, TimeIntegratorType> time_integrator_to_enum;
 std::map<std::string, MffdType> mffd_type_to_enum;
 std::map<std::string, RelationshipManagerType> rm_type_to_enum;
-
-void
-initQuadratureType()
-{
-  if (quadrature_type_to_enum.empty())
-  {
-    quadrature_type_to_enum["CLOUGH"] = QCLOUGH;
-    quadrature_type_to_enum["CONICAL"] = QCONICAL;
-    quadrature_type_to_enum["GAUSS"] = QGAUSS;
-    quadrature_type_to_enum["GRID"] = QGRID;
-    quadrature_type_to_enum["MONOMIAL"] = QMONOMIAL;
-    quadrature_type_to_enum["SIMPSON"] = QSIMPSON;
-    quadrature_type_to_enum["TRAP"] = QTRAP;
-    quadrature_type_to_enum["GAUSS_LOBATTO"] = QGAUSS_LOBATTO;
-  }
-}
 
 void
 initCoordinateSystemType()
@@ -182,15 +165,7 @@ template <>
 QuadratureType
 stringToEnum<QuadratureType>(const std::string & s)
 {
-  initQuadratureType();
-
-  std::string upper(s);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  if (!quadrature_type_to_enum.count(upper))
-    mooseError("Unknown quadrature type: ", upper);
-
-  return quadrature_type_to_enum[upper];
+  return Utility::string_to_enum<QuadratureType>("Q" + s);
 }
 
 template <>
@@ -370,53 +345,9 @@ stringify(const RelationshipManagerType & t)
 }
 
 std::string
-stringify(FEFamily f)
+stringify(libMesh::FEFamily f)
 {
-  switch (f)
-  {
-    case 0:
-      return "LAGRANGE";
-    case 1:
-      return "HIERARCHIC";
-    case 2:
-      return "MONOMIAL";
-    case 6:
-      return "L2_HIERARCHIC";
-    case 7:
-      return "L2_LAGRANGE";
-    case 3:
-      return "BERNSTEIN";
-    case 4:
-      return "SZABAB";
-    case 5:
-      return "XYZ";
-    case 11:
-      return "INFINITE_MAP";
-    case 12:
-      return "JACOBI_20_00";
-    case 13:
-      return "JACOBI_30_00";
-    case 14:
-      return "LEGENDRE";
-    case 21:
-      return "CLOUGH";
-    case 22:
-      return "HERMITE";
-    case 23:
-      return "SUBDIVISION";
-    case 31:
-      return "SCALAR";
-    case 41:
-      return "LAGRANGE_VEC";
-    case 42:
-      return "NEDELEC_ONE";
-    case 43:
-      return "MONOMIAL_VEC";
-    case 99:
-      return "INVALID_FE";
-    default:
-      mooseError("Unrecognized FEFamily ", static_cast<int>(f));
-  }
+  return libMesh::Utility::enum_to_string(f);
 }
 
 // Turn the warnings back on

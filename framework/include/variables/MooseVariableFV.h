@@ -71,6 +71,8 @@ public:
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
+  using FieldVariablePhiDivergence =
+      typename MooseVariableField<OutputType>::FieldVariablePhiDivergence;
   using FieldVariablePhiGradient =
       typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
   using FieldVariablePhiSecond = typename MooseVariableField<OutputType>::FieldVariablePhiSecond;
@@ -92,7 +94,7 @@ public:
   virtual bool isFV() const override { return true; }
 
   // TODO: many of these functions are not relevant to FV variables but are
-  // still called at various points from existing moose codepaths.  Ideally we
+  // still called at various points from existing moose code paths.  Ideally we
   // would figure out how to remove calls to these functions and then allow
   // throwing mooseError's from them instead of silently doing nothing (e.g.
   // reinitNodes, reinitAux, prepareLowerD, etc.).
@@ -196,6 +198,10 @@ public:
   {
     mooseError("nodalVectorTagValue not implemented for finite volume variables.");
   }
+  const DoFValue & nodalMatrixTagValue(TagID) const override
+  {
+    mooseError("nodalMatrixTagValue not implemented for finite volume variables.");
+  }
 
   const FieldVariableValue & vectorTagValue(TagID tag) const override
   {
@@ -205,7 +211,7 @@ public:
   {
     return _element_data->vectorTagDofValue(tag);
   }
-  const FieldVariableValue & matrixTagValue(TagID tag)
+  const FieldVariableValue & matrixTagValue(TagID tag) const override
   {
     return _element_data->matrixTagValue(tag);
   }
@@ -377,7 +383,8 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  void setDofValues(const DenseVector<OutputData> & values) override;
+  virtual void setDofValues(const DenseVector<OutputData> & values) override;
+  virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
 
   /// Get the current value of this variable on an element
   /// @param[in] elem   Element at which to get value
@@ -395,8 +402,9 @@ public:
   /// @return Variable value
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
 
-  virtual void insert(NumericVector<Number> & residual) override;
-  virtual void add(NumericVector<Number> & residual) override;
+  virtual void insert(NumericVector<Number> & vector) override;
+  virtual void insertLower(NumericVector<Number> & vector) override;
+  virtual void add(NumericVector<Number> & vector) override;
 
   const DoFValue & dofValues() const override;
   const DoFValue & dofValuesOld() const override;
@@ -469,7 +477,7 @@ public:
    * default for this base class but derived variable classes may choose not to unless this API is
    * called
    */
-  virtual void requireQpComputations() {}
+  virtual void requireQpComputations() const {}
 
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base
@@ -540,6 +548,8 @@ private:
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg &) const override final;
   GradientType evaluateGradient(const FaceArg & face, const StateArg &) const override final;
   DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
+  DotType evaluateDot(const FaceArg & face, const StateArg &) const override final;
+  DotType evaluateDot(const ElemQpArg & elem_qp, const StateArg &) const override final;
 
   /**
    * Setup the boundary to Dirichlet BC map
@@ -565,6 +575,7 @@ public:
 
   bool computingSecond() const override final { return false; }
   bool computingCurl() const override final { return false; }
+  bool computingDiv() const override final { return false; }
   bool usesSecondPhiNeighbor() const override final { return false; }
 
   const FieldVariablePhiValue & phi() const override final { return _phi; }
@@ -576,6 +587,10 @@ public:
   const FieldVariablePhiValue & curlPhi() const override final
   {
     mooseError("We don't currently implement curl for FV");
+  }
+  const FieldVariablePhiDivergence & divPhi() const override final
+  {
+    mooseError("We don't currently implement divergence for FV");
   }
 
   const FieldVariablePhiValue & phiFace() const override final { return _phi_face; }
@@ -676,6 +691,11 @@ private:
   /// Map from boundary ID to Dirichlet boundary conditions. Added to speed up Dirichlet BC lookups
   /// in \p getDirichletBC
   std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
+
+  /**
+   * Emit an error message for unsupported lower-d ops
+   */
+  [[noreturn]] void lowerDError() const;
 
 protected:
   /// A cache for storing gradients on elements
@@ -812,7 +832,14 @@ template <typename OutputType>
 const typename MooseVariableFV<OutputType>::FieldVariablePhiValue &
 MooseVariableFV<OutputType>::phiLower() const
 {
-  mooseError("Not defined for finite volume variables");
+  lowerDError();
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::lowerDError() const
+{
+  mooseError("Lower dimensional element support not implemented for finite volume variables");
 }
 
 template <>

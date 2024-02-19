@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19850'
+  design = 'SetRealValueControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to set a floating point parameter to the value of a floating point control data.'
   []
 []

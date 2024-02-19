@@ -20,7 +20,7 @@ class RunApp(Tester):
         params.addParam('test_name',          "The name of the test - populated automatically")
         params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
         params.addParam('errors',             ['ERROR', 'command not found', 'terminate called after throwing an instance of'], "The error messages to detect a failed run")
-        params.addParam('expect_out',         "A regular expression or literal string that must occur in the input in order for the test to be considered passing (see match_literal).")
+        params.addParam('expect_out',         "A regular expression or literal string that must occur in the output in order for the test to be considered passing (see match_literal).")
         params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
         params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
         params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")

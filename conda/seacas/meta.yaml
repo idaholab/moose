@@ -1,7 +1,7 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "1" %}
-{% set seacas_version = "2023.05.30" %}
-{% set seacas_git_rev = "v2023-05-30" %}
+{% set build = "0" %}
+{% set seacas_version = "2023.10.24" %}
+{% set seacas_git_rev = "v2023-10-24" %}
 {% set strbuild = "build_" + build|string %}
 
 package:
@@ -11,8 +11,6 @@ package:
 source:
   git_url: https://github.com/sandialabs/seacas
   git_rev: {{ seacas_git_rev }}
-  patches:
-    - use-curl-instead-of-wget.patch
 
 build:
   number: {{ build }}
@@ -29,6 +27,7 @@ requirements:
     - cmake
     - make
     - automake
+    - wget
   run:
     - xorg-libx11
     - python 3

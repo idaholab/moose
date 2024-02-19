@@ -29,7 +29,7 @@
     top_right = '1 2 0'
   []
   [explode]
-    type = ExplodeMeshGenerator
+    type = BreakMeshByElementGenerator
     input = add_subdomain_3
     subdomains = '1 2'
     interface_name = czm

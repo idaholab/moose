@@ -1,7 +1,12 @@
 [Tests]
+  # see relap-7#636
+  # idaholab/relap-7#19834
+  issues = '#26336'
+  design = 'ReynoldsNumberAux.md'
   [1phase]
     type = 'CSVDiff'
     input = '1phase.i'
     csvdiff = '1phase_out.csv'
+    requirement = 'The system shall be able to compute the local Reynolds number in a 1D single phase channel.'
   []
 []

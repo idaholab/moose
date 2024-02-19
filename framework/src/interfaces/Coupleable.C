@@ -342,7 +342,14 @@ Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp) con
     default_value_it = _default_value.find(var_name);
   }
 
-  return default_value_it->second[comp].get();
+  const auto & default_value_vec = default_value_it->second;
+  const auto n_default_vals = default_value_vec.size();
+  if (comp >= n_default_vals)
+    mooseError("Requested comp ",
+               comp,
+               " is equal to or greater than the number of default values ",
+               n_default_vals);
+  return default_value_vec[comp].get();
 }
 
 const VectorVariableValue *
@@ -765,7 +772,7 @@ Coupleable::coupledMatrixTagValue(const std::string & var_names,
                                   TagID tag,
                                   unsigned int index) const
 {
-  const auto * var = getVar(var_names, index);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_names, index);
   if (!var)
     mooseError(var_names, ": invalid variable name for coupledMatrixTagValue");
   checkFuncType(var_names, VarType::Ignore, FuncAge::Curr);
@@ -1427,6 +1434,31 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp) con
   }
 }
 
+const VariableValue &
+Coupleable::coupledArrayDotDu(const std::string & var_name, unsigned int comp) const
+{
+  const auto * const var = getArrayVar(var_name, comp);
+  if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
+    return _default_value_zero;
+  }
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDuDotDu();
+    return var->duDotDu();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDuDotDuNeighbor();
+    return var->duDotDuNeighbor();
+  }
+}
+
 const VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp) const
 {
@@ -1609,6 +1641,19 @@ Coupleable::coupledArrayGradientOlder(const std::string & var_name, unsigned int
   if (!_coupleable_neighbor)
     return var->gradSlnOlder();
   return var->gradSlnOlderNeighbor();
+}
+
+const ArrayVariableGradient &
+Coupleable::coupledArrayGradientDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * const var = getArrayVar(var_name, comp);
+  if (!var)
+    return _default_array_gradient;
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
+
+  if (!_coupleable_neighbor)
+    return var->gradSlnDot();
+  return var->gradSlnNeighborDot();
 }
 
 const VectorVariableCurl &
@@ -2516,6 +2561,13 @@ std::vector<const VariableValue *>
 Coupleable::coupledValuesOld(const std::string & var_name) const
 {
   auto func = [this, &var_name](unsigned int comp) { return &coupledValueOld(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledValuesOlder(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledValueOlder(var_name, comp); };
   return coupledVectorHelper<const VariableValue *>(var_name, func);
 }
 

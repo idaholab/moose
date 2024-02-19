@@ -90,6 +90,11 @@ FlowChannelBase::validParams()
       "Set to true if Dh, P_hf and A are going to be transferred in from an external source");
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
   params.addRequiredParam<std::string>("closures", "Closures type");
+  params.addParam<bool>("name_multiple_ht_by_index",
+                        true,
+                        "If true, when there are multiple heat transfer components connected to "
+                        "this flow channel, use their index for naming related quantities; "
+                        "otherwise, use the name of the heat transfer component.");
 
   params.setDocString(
       "orientation",
@@ -228,7 +233,7 @@ FlowChannelBase::addVariables()
   _flow_model->addVariables();
 
   // total heat flux perimeter
-  if (_n_heat_transfer_connections > 1)
+  if (_n_heat_transfer_connections > 1 && !_app.isRestarting())
   {
     const std::string class_name = "SumIC";
     InputParameters params = _factory.getValidParams(class_name);
@@ -367,7 +372,13 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
     if (it != _heat_transfer_names.end())
     {
       const unsigned int index = std::distance(_heat_transfer_names.begin(), it);
-      const std::string suffix = ":" + std::to_string(index + 1);
+
+      std::string suffix = ":";
+      if (getParam<bool>("name_multiple_ht_by_index"))
+        suffix += std::to_string(index + 1);
+      else
+        suffix += _heat_transfer_names[index];
+
       return suffix;
     }
     else

@@ -1,6 +1,6 @@
-l=10
-nx=80
-num_steps=2
+l = 10
+nx = 80
+num_steps = 2
 
 [Mesh]
   type = GeneratedMesh
@@ -15,24 +15,25 @@ num_steps=2
 []
 
 [AuxVariables]
-  [bounds][]
+  [bounds]
+  []
 []
 
 [Bounds]
-  [./u_upper_bounds]
-    type = ConstantBoundsAux
+  [u_upper_bounds]
+    type = ConstantBounds
     variable = bounds
     bounded_variable = u
     bound_type = upper
     bound_value = ${l}
-  [../]
-  [./u_lower_bounds]
-    type = ConstantBoundsAux
+  []
+  [u_lower_bounds]
+    type = ConstantBounds
     variable = bounds
     bounded_variable = u
     bound_type = lower
     bound_value = 0
-  [../]
+  []
 []
 
 [ICs]
@@ -113,7 +114,7 @@ num_steps=2
     type = GreaterThanLessThanPostprocessor
     variable = u
     execute_on = 'nonlinear timestep_end'
-    value = ${fparse 10+1e-8}
+    value = '${fparse 10+1e-8}'
     comparator = 'greater'
   []
   [lower_violations]
@@ -133,21 +134,21 @@ num_steps=2
 []
 
 [MultiApps]
-  [./coarse]
+  [coarse]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_begin
     positions = '0 0 0'
     input_files = vi-coarse.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./mesh_function_begin]
-    type = MultiAppShapeEvaluationTransfer
+  [mesh_function_begin]
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     from_multi_app = coarse
     source_variable = u
     variable = u
     execute_on = timestep_begin
-  [../]
+  []
 []

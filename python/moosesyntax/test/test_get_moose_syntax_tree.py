@@ -125,22 +125,22 @@ class TestSyntaxTree(unittest.TestCase):
         self.assertEqual(node['moose_base'], 'Postprocessor')
         self.assertEqual(node['parent_syntax'], 'UserObjects/*')
         self.assertFalse(node.removed)
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Bounds/ConstantAux')
+        node = moosetree.find(root, lambda n: n.fullpath() == '/Materials/GenericFunctorMaterial')
         self.assertFalse(node.removed)
 
         # With unregister(objects should be removed)
-        root = moosesyntax.get_moose_syntax_tree(self.json, unregister={'Postprocessor':'UserObjects/*', 'AuxKernel':'Bounds/*'})
+        root = moosesyntax.get_moose_syntax_tree(self.json, unregister={'Postprocessor':'UserObjects/*', 'FunctorMaterial':'Materials/*'})
         node = moosetree.find(root, lambda n: n.fullpath() == '/UserObjects/AreaPostprocessor')
         self.assertTrue(node.removed)
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Bounds/ConstantAux')
+        node = moosetree.find(root, lambda n: n.fullpath() == '/Materials/GenericFunctorMaterial')
         self.assertTrue(node.removed)
 
         # With dict of dict unregister
-        unregister={'framework':{'Postprocessor':'UserObjects/*', 'AuxKernel':'Bounds/*'}}
+        unregister={'framework':{'Postprocessor':'UserObjects/*', 'FunctorMaterial':'Materials/*'}}
         root = moosesyntax.get_moose_syntax_tree(self.json, unregister=unregister)
         node = moosetree.find(root, lambda n: n.fullpath() == '/UserObjects/AreaPostprocessor')
         self.assertTrue(node.removed)
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Bounds/ConstantAux')
+        node = moosetree.find(root, lambda n: n.fullpath() == '/Materials/GenericFunctorMaterial')
         self.assertTrue(node.removed)
 
     def testTestApp(self):

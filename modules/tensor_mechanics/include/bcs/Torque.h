@@ -60,9 +60,8 @@ protected:
   /// dummy point (zero) used in evaluating the time dependent prefactor
   const Point _dummy_point;
 
+  usingTransientInterfaceMembers;
   using TorqueParent<is_ad>::_i;
-  using TorqueParent<is_ad>::_t;
-  using TorqueParent<is_ad>::_dt;
   using TorqueParent<is_ad>::_qp;
   using TorqueParent<is_ad>::_test;
   using TorqueParent<is_ad>::_q_point;

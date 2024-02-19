@@ -61,7 +61,7 @@ h_fs = 0.01
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [constants]
     type = ADGenericFunctorMaterial
     prop_names = 'h_cv T_solid rho mu cp k'

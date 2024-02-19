@@ -18,7 +18,7 @@ ADFlowJunctionUserObject::validParams()
   params.addRequiredParam<std::vector<Real>>(
       "normals", "Flow channel outward normals or junction inward normals");
   params.addParam<std::vector<processor_id_type>>(
-      "processor_ids", "Processor IDs owning each connected flow channel element");
+      "processor_ids", {}, "Processor IDs owning each connected flow channel element");
 
   params.addClassDescription("Provides common interfaces for flow junction user objects");
 

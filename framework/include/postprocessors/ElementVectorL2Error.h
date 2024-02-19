@@ -13,6 +13,11 @@
 
 class Function;
 
+/**
+ * This postprocessor will print out the L2-seminorm of the difference
+ * between the computed solution and the passed function.
+ * ||u-f||_{L2} = sqrt( \int |u - f|^2 dx )
+ */
 class ElementVectorL2Error : public ElementIntegralPostprocessor
 {
 public:
@@ -20,17 +25,26 @@ public:
 
   ElementVectorL2Error(const InputParameters & parameters);
 
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:
   virtual Real computeQpIntegral() override;
 
+  /// vector or component-wise analytical solution to compare against
+  const Function & _func;
   const Function & _funcx;
   const Function & _funcy;
   const Function & _funcz;
 
-  const VariableValue & _u; // FE solution in x
-  const VariableValue & _v; // FE solution in y
-  const VariableValue & _w; // FE solution in z
+  /// vector or component-wise variable values
+  const VectorVariableValue & _u;
+  const VariableValue & _ux;
+  const VariableValue & _uy;
+  const VariableValue & _uz;
+
+  /// whether the user chose to use a vector or component-wise solution/variable
+  const bool _has_vector_function;
+  const bool _has_scalar_function;
+  const bool _has_vector_variable;
+  const bool _has_scalar_variable;
 };

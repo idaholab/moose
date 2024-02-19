@@ -38,9 +38,10 @@ FlexiblePatternGenerator::validParams()
                                     "the diameter of the CIRCLE boundary mesh.");
 
   params.addParam<std::vector<Point>>(
-      "extra_positions", "The extra non-patterned positions to set the input MeshGenerators.");
+      "extra_positions", {}, "The extra non-patterned positions to set the input MeshGenerators.");
   params.addParam<std::vector<unsigned int>>(
       "extra_positions_mg_indices",
+      {},
       "the indices of the input mesh generators for the extra position.");
 
   params.addParam<std::vector<std::vector<std::vector<unsigned int>>>>("hex_patterns",
@@ -84,6 +85,13 @@ FlexiblePatternGenerator::validParams()
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
   params.addParam<bool>("verify_holes", true, "Whether the holes are verified.");
+  params.addRangeCheckedParam<subdomain_id_type>(
+      "background_subdomain_id",
+      "background_subdomain_id>0",
+      "Subdomain id to set on the background area meshed by Delaunay algorithm.");
+  params.addParam<SubdomainName>(
+      "background_subdomain_name",
+      "Subdomain name to set on the background area meshed by Delaunay algorithm.");
 
   params.addParam<boundary_id_type>(
       "external_boundary_id",
@@ -102,7 +110,8 @@ FlexiblePatternGenerator::validParams()
       "circular_patterns circular_radii circular_origins circular_rotations", "Circular Pattern");
   params.addParamNamesToGroup("extra_positions extra_positions_mg_indices",
                               "Extra Positions (Free-Style Patterns)");
-  params.addParamNamesToGroup("desired_area desired_area_func verify_holes",
+  params.addParamNamesToGroup("desired_area desired_area_func verify_holes background_subdomain_id "
+                              "background_subdomain_name",
                               "Background Area Delaunay");
 
   return params;
@@ -151,7 +160,13 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                       : std::vector<Point>(_circ_patterns.size(), Point(0.0, 0.0, 0.0))),
     _circ_rotations(isParamValid("circular_rotations")
                         ? getParam<std::vector<Real>>("circular_rotations")
-                        : std::vector<Real>(_circ_patterns.size(), 0.0))
+                        : std::vector<Real>(_circ_patterns.size(), 0.0)),
+    _background_subdomain_id(isParamValid("background_subdomain_id")
+                                 ? getParam<subdomain_id_type>("background_subdomain_id")
+                                 : Moose::INVALID_BLOCK_ID),
+    _background_subdomain_name(isParamValid("background_subdomain_name")
+                                   ? getParam<SubdomainName>("background_subdomain_name")
+                                   : SubdomainName())
 {
   declareMeshesForSub("inputs");
 
@@ -170,6 +185,10 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
     input_usage_count[extra_positions_mg_indices[i]]++;
     _positions.push_back(std::make_pair(extra_positions[i], extra_positions_mg_indices[i]));
   }
+
+  if (_background_subdomain_name.size() && _background_subdomain_id == Moose::INVALID_BLOCK_ID)
+    paramError("background_subdomain_id",
+               "This parameter must be provided if background_subdomain_name is provided.");
 
   if (_boundary_type == BdryType::CUSTOM)
   {
@@ -438,7 +457,30 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
   params.set<BoundaryName>("output_boundary") = std::to_string(OUTER_SIDESET_ID);
   addMeshSubgenerator("XYDelaunayGenerator", name() + "_pattern", params);
 
-  _build_mesh = &getMeshByName(name() + "_pattern");
+  MeshGeneratorName final_mg_name(name() + "_pattern");
+  if (_background_subdomain_id != Moose::INVALID_BLOCK_ID)
+  {
+    auto params = _app.getFactory().getValidParams("RenameBlockGenerator");
+    params.set<MeshGeneratorName>("input") = name() + "_pattern";
+    params.set<std::vector<SubdomainName>>("old_block") = {"0"};
+    params.set<std::vector<SubdomainName>>("new_block") = {
+        std::to_string(_background_subdomain_id)};
+    addMeshSubgenerator("RenameBlockGenerator", name() + "_back_rename_1", params);
+    if (_background_subdomain_name.size())
+    {
+      auto params = _app.getFactory().getValidParams("RenameBlockGenerator");
+      params.set<MeshGeneratorName>("input") = name() + "_back_rename_1";
+      params.set<std::vector<SubdomainName>>("old_block") = {
+          std::to_string(_background_subdomain_id)};
+      params.set<std::vector<SubdomainName>>("new_block") = {_background_subdomain_name};
+      addMeshSubgenerator("RenameBlockGenerator", name() + "_back_rename_2", params);
+      final_mg_name = name() + "_back_rename_2";
+    }
+    else
+      final_mg_name = name() + "_back_rename_1";
+  }
+
+  _build_mesh = &getMeshByName(final_mg_name);
 }
 
 std::unique_ptr<MeshBase>

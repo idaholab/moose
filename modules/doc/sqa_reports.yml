@@ -9,8 +9,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
             - test/doc/remove.yml
-        log_stub_files: WARNING
-        show_warning: false
 
     chemical_reactions:
         exe_directory: modules/combined
@@ -22,7 +20,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
         log_stub_files: WARNING
-        show_warning: false
 
     contact:
         exe_directory: modules/combined
@@ -33,16 +30,13 @@ Applications:
             - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
-        log_missing_description: WARNING
         log_missing_markdown: WARNING
-        show_warning: false
 
     electromagnetics:
         exe_directory: modules/combined
         app_types:
             - ElectromagneticsApp
         content_directory: modules/electromagnetics/doc/content
-        show_warning: false
 
     external_petsc_solver:
         exe_directory: modules/combined
@@ -73,8 +67,6 @@ Applications:
             - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
-        log_stub_files: WARNING
-        show_warning: false
 
     fsi:
         exe_directory: modules/combined
@@ -105,9 +97,6 @@ Applications:
             - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
-        log_stub_files: WARNING
-        log_missing_description: WARNING
-        show_warning: false
 
     level_set:
         exe_directory: modules/combined
@@ -124,9 +113,6 @@ Applications:
         app_types:
             - MiscApp
         content_directory: modules/misc/doc/content
-        log_stub_files: WARNING
-        log_missing_description: WARNING
-        show_warning: false
 
     navier_stokes:
         exe_directory: modules/combined
@@ -138,7 +124,6 @@ Applications:
         unregister:
             - framework/doc/unregister.yml
         log_stub_files: WARNING
-        show_warning: false
 
     optimization:
         exe_directory: modules/combined
@@ -149,8 +134,6 @@ Applications:
             - framework/doc/remove.yml
         unregister:
             - framework/doc/unregister.yml
-        log_stub_files: WARNING
-        show_warning: false
 
     peridynamics:
         exe_directory: modules/combined
@@ -162,7 +145,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
         log_stub_files: WARNING
-        show_warning: false
 
     phase_field:
         exe_directory: modules/combined
@@ -175,7 +157,6 @@ Applications:
             - framework/doc/remove.yml
         log_stub_files: WARNING
         log_missing_description: WARNING
-        show_warning: false
 
     porous_flow:
         exe_directory: modules/combined
@@ -187,7 +168,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
         log_stub_files: WARNING
-        show_warning: false
 
     ray_tracing:
         exe_directory: modules/combined
@@ -249,8 +229,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
             - modules/stochastic_tools/doc/remove.yml
-        log_stub_files: WARNING
-        show_warning: false
 
     tensor_mechanics:
         exe_directory: modules/combined
@@ -263,7 +241,6 @@ Applications:
             - framework/doc/unregister.yml
         log_stub_files: WARNING
         log_missing_description: WARNING
-        show_warning: false
 
     THM:
         exe_directory: modules/combined
@@ -274,10 +251,6 @@ Applications:
             - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
-        log_stub_files: WARNING
-        log_missing_description: WARNING
-        log_missing_markdown: WARNING
-        show_warning: false
 
     XFEM:
         exe_directory: modules/combined
@@ -333,7 +306,6 @@ Requirements:
         directories:
             - python
         log_missing: WARNING
-        show_warning: false
 
     combined:
         directories:
@@ -344,13 +316,11 @@ Requirements:
         log_issue_format: WARNING
         log_design_files: WARNING
         log_duplicate_requirement: WARNING
-        show_warning: false
 
     chemical_reactions:
         directories:
             - modules/chemical_reactions
         log_missing: WARNING
-        show_warning: false
 
     contact:
         directories:
@@ -358,12 +328,10 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_missing_requirement: WARNING
-        show_warning: false
 
     electromagnetics:
         directories:
             - modules/electromagnetics
-        show_warning: false
 
     external_petsc_solver:
         directories:
@@ -373,7 +341,6 @@ Requirements:
         directories:
             - modules/fluid_properties
         log_missing: WARNING
-        show_warning: false
 
     fsi:
         directories:
@@ -395,14 +362,12 @@ Requirements:
         directories:
             - modules/level_set
         log_missing: WARNING
-        show_warning: false
 
     misc:
         directories:
             - modules/misc
         log_duplicate_requirement: WARNING
         log_missing: WARNING
-        show_warning: false
 
     navier_stokes:
         directories:
@@ -419,7 +384,6 @@ Requirements:
         log_missing: WARNING
         log_empty_issues: WARNING
         log_design_files: WARNING
-        show_warning: false
 
     porous_flow:
         directories:
@@ -428,14 +392,12 @@ Requirements:
         log_missing: WARNING
         log_issue_format: WARNING
         log_design_files: WARNING
-        show_warning: false
 
     peridynamics:
         directories:
             - modules/peridynamics
         log_duplicate_requirement: WARNING
         log_design_files: WARNING
-        show_warning: false
 
     ray_tracing:
         directories:
@@ -467,7 +429,6 @@ Requirements:
             - modules/stochastic_tools
         log_missing_requirement: WARNING
         log_top_level_detail: WARNING
-        show_warning: false
 
     tensor_mechanics:
         directories:
@@ -475,17 +436,10 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING
-        show_warning: false
 
     thermal_hydraulics:
         directories:
             - modules/thermal_hydraulics
-        log_missing: WARNING
-        log_missing_design: WARNING
-        log_missing_issues: WARNING
-        log_testable: WARNING
-        log_duplicate_requirement: WARNING
-        show_warning: false
 
     xfem:
         directories:

@@ -134,7 +134,7 @@ then the names in "vars" can be used in the definition of the equation in the "v
 
 ### $L_2$ Error
 
-The $L_2$-norm of the differnce between the computed and exact solution
+The $L_2$-norm of the difference between the computed and exact solution
 can be computed using the `NodalL2Error` object. This is created within the `[Postprocessors]` block
 along with the average element size.
 

@@ -1,0 +1,24 @@
+[Tests]
+  design = 'syntax/FunctorMaterials/index.md syntax/Outputs/index.md'
+  issues = '#19382'
+
+  [types]
+    requirement = "The system shall support the output of functor material data as field variables including"
+
+    [regular]
+      type = 'Exodiff'
+      input = 'output.i'
+      exodiff = 'output_out.e'
+
+      detail = 'outputting a functor property, defined within a functor material;'
+    []
+    [ad]
+      # Test the ability for Output objects to enable all material property output
+      type = 'Exodiff'
+      input = 'output_ad.i'
+      exodiff = 'output_ad_out.e'
+
+      detail = 'outputting a functor property with automatic differentiation, defined within a functor material.'
+    []
+  []
+[]

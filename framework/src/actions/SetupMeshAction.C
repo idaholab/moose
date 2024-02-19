@@ -132,11 +132,9 @@ SetupMeshAction::SetupMeshAction(const InputParameters & params)
 void
 SetupMeshAction::setupMesh(MooseMesh * mesh)
 {
-  std::vector<BoundaryName> ghosted_boundaries =
-      getParam<std::vector<BoundaryName>>("ghosted_boundaries");
-
-  for (const auto & bnd_name : ghosted_boundaries)
-    mesh->addGhostedBoundary(mesh->getBoundaryID(bnd_name));
+  if (isParamValid("ghosted_boundaries"))
+    for (const auto & bnd_name : getParam<std::vector<BoundaryName>>("ghosted_boundaries"))
+      mesh->addGhostedBoundary(mesh->getBoundaryID(bnd_name));
 
   if (isParamValid("ghosted_boundaries_inflation"))
   {
@@ -278,7 +276,7 @@ SetupMeshAction::act()
 
           // Since we changing the type on the fly, we'll have to manually extract parameters again
           // from the input file object.
-          _app.parser().extractParams(_registered_identifier, _moose_object_pars);
+          _app.builder().extractParams(_registered_identifier, _moose_object_pars);
         }
         else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
         {

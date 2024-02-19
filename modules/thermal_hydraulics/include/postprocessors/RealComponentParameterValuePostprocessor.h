@@ -18,7 +18,6 @@ public:
   RealComponentParameterValuePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
   virtual void execute() override;
 

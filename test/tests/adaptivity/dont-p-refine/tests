@@ -1,0 +1,93 @@
+[Tests]
+  issues = '#25105'
+  design = 'syntax/Adaptivity/index.md'
+  [disable_p_refinement]
+    requirement = 'The system shall be able to p-refine discontinuous variables while disabling p-refinement of'
+    [lagrange_first_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      detail = 'Lagrange variables on a first order mesh,'
+    []
+    [lagrange_second_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/lagrange_first_order_mesh'
+      cli_args = 'Mesh/second_order=true'
+      detail = 'Lagrange variables on a second order mesh,'
+    []
+    [hermite_first_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/lagrange_second_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="hermite" AuxVariables/test/family=HERMITE AuxVariables/test/order=THIRD'
+      detail = 'Hermite variables on a first order mesh,'
+    []
+    [hermite_second_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/hermite_first_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="hermite" AuxVariables/test/family=HERMITE AuxVariables/test/order=THIRD Mesh/second_order=true'
+      detail = 'Hermite variables on a second order mesh,'
+    []
+    [hierarchic_first_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/hermite_second_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="hierarchic" AuxVariables/test/family=HIERARCHIC'
+      detail = 'Hierarchic variables on a first order mesh,'
+    []
+    [hierarchic_second_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/hierarchic_first_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="hierarchic" AuxVariables/test/family=HIERARCHIC Mesh/second_order=true'
+      detail = 'Hierarchic variables on a second order mesh,'
+    []
+    [lagrange_vec_first_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/hierarchic_second_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="lagrange_vec" AuxVariables/test/family=LAGRANGE_VEC'
+      detail = 'Lagrange vector variables on a first order mesh,'
+    []
+    [lagrange_vec_second_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/lagrange_vec_first_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="lagrange_vec" AuxVariables/test/family=LAGRANGE_VEC Mesh/second_order=true'
+      detail = 'Lagrange vector variables on a second order mesh,'
+    []
+    [monomial_vec_first_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/lagrange_vec_second_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="monomial_vec" AuxVariables/test/family=MONOMIAL_VEC'
+      detail = 'Monomial vector variables on a first order mesh,'
+    []
+    [monomial_vec_second_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/monomial_vec_first_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="monomial_vec" AuxVariables/test/family=MONOMIAL_VEC Mesh/second_order=true'
+      detail = 'Monomial vector variables on a second order mesh,'
+    []
+    [nedelec_one_second_order_mesh]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      prereq = 'disable_p_refinement/monomial_vec_second_order_mesh'
+      cli_args = 'Adaptivity/disable_p_refinement_for_families="nedelec_one" AuxVariables/test/family=NEDELEC_ONE Mesh/second_order=true'
+      detail = 'Nedelec vector variables on a second order mesh,'
+    []
+  []
+[]

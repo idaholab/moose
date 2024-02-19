@@ -120,7 +120,6 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
     _test_dummy(),
     _use_dual(_var ? _var->useDual() : false),
-    _normals_primary(_assembly.neighborNormals()),
     _tangents(_assembly.tangents()),
     _coord(_assembly.mortarCoordTransformation()),
     _q_point(_assembly.qPointsMortar()),

@@ -37,10 +37,10 @@ The Tensor Mechanics module contains a wide variety of such models, including
 
 !alert note title=Compatible Inelastic +`StressUpdate`+ Material Models
 All of the inelastic material models that are compatible with
-+`ComputeMultipleInelasicStress`+ follow the nomenclature convention of +`StressUpdate`+
++`ComputeMultipleInelasticStress`+ follow the nomenclature convention of +`StressUpdate`+
 as a suffix to the class name.
 
-`ComputeMultipleInelasticStress` can accomodate as few as zero inelastic models (in which case the
+`ComputeMultipleInelasticStress` can accommodate as few as zero inelastic models (in which case the
 algorithm from [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md)
 is applied) to as many inelastic material models as is required by the physics.
 If more than one inelastic material model is supplied to `ComputeMultipleInelasticStress`,

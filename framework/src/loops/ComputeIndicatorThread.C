@@ -69,12 +69,11 @@ ComputeIndicatorThread::subdomainChanged()
       _subdomain, needed_var_vector_tags, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_var_vector_tags, _tid);
 
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   _indicator_whs.updateMatPropDependency(needed_mat_props, _tid);
   _internal_side_indicators.updateMatPropDependency(needed_mat_props, _tid);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
-  _fe_problem.prepareMaterials(_subdomain, _tid);
+  _fe_problem.prepareMaterials(needed_mat_props, _subdomain, _tid);
 }
 
 void

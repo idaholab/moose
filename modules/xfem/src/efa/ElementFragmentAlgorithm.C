@@ -134,15 +134,9 @@ ElementFragmentAlgorithm::add3DElement(const std::vector<unsigned int> & quad, u
 {
   unsigned int num_nodes = quad.size();
   unsigned int num_faces = 0;
-  if (num_nodes == 27)
+  if (num_nodes == 8 || num_nodes == 20 || num_nodes == 27)
     num_faces = 6;
-  else if (num_nodes == 20)
-    num_faces = 6;
-  else if (num_nodes == 8)
-    num_faces = 6;
-  else if (num_nodes == 4)
-    num_faces = 4;
-  else if (num_nodes == 10)
+  else if (num_nodes == 4 || num_nodes == 10 || num_nodes == 14)
     num_faces = 4;
   else
     EFAError("In add3DElement element with id: ", id, " has invalid num_nodes");

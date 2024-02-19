@@ -22,7 +22,7 @@ You will need to supply your INL HPC username, and your PIN+TOKEN to proceed.
 Once installation has finished (this can take a few minutes), you need to activate this environment:
 
 ```bash
-mamba activate {{ApplicationLower}}
+conda activate {{ApplicationLower}}
 $ ({{ApplicationLower}}) ~>
 ```
 
@@ -55,3 +55,15 @@ cd ./{{binary}}/tests
 ```
 
 One or two failures may indicate those tests have their tolerances set too tight. You likely can ignore a few failures.
+
+## Offline {{ApplicationName}} Documentation
+
+Documentation is included in the package and is available to peruse without the use of a network.
+The local location can be discovered by loading the environment and echoing the following variable:
+
+```bash
+conda activate {{ApplicationLower}}
+echo ${{ApplicationLower}}_DOCS
+```
+
+Copy and paste the results into your favorite web browser to view the documentation.

@@ -27,7 +27,7 @@ require_total = 87
 require_total = 37
 
 [electromagnetics]
-require_total = 95
+require_total = 94
 
 [external_petsc_solver]
 require_total = 85
@@ -39,7 +39,7 @@ require_total = 84
 require_total = 85
 
 [functional_expansion_tools]
-require_total = 82
+require_total = 81
 
 [geochemistry]
 require_total = 96
@@ -48,10 +48,10 @@ require_total = 96
 require_total = 87
 
 [level_set]
-require_total = 88
+require_total = 85
 
 [misc]
-require_total = 34
+require_total = 32
 
 [navier_stokes]
 require_total = 77
@@ -60,7 +60,7 @@ require_total = 77
 require_total = 86
 
 [peridynamics]
-require_total = 78
+require_total = 77
 
 [phase_field]
 require_total = 85
@@ -72,10 +72,13 @@ require_total = 95
 require_total = 93
 
 [rdg]
-require_total = 64
+require_total = 63
 
 [richards]
-require_total = 94
+require_total = 93
+
+[scalar_transport]
+require_total = 85
 
 [solid_properties]
 require_total = 83
@@ -86,8 +89,8 @@ require_total = 88
 [tensor_mechanics]
 require_total = 84
 
-[thm]
-require_total = 90
+[thermal_hydraulics]
+require_total = 89
 
 [xfem]
 require_total = 80

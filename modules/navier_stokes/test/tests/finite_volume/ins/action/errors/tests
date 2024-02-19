@@ -208,6 +208,15 @@
     expect_err = "The number of velocity variable names supplied to the NSFVAction is not 2 \(mesh "
                  "dimension\) or 3!"
   []
+  [velocity-name-error]
+    type = 'RunException'
+    input = 2d-rc-error-action-no-scalar.i
+    requirement = 'The system shall throw an error if the user supplies unallowed names for the external velocity components in a porous medium setting'
+    cli_args = "Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
+               "Modules/NavierStokesFV/porous_medium_treatment=true "
+               "Variables/vel_x/type=MooseVariableFVReal Variables/vel_y/type=MooseVariableFVReal"
+    expect_err = "For porous medium simulations, functor name vel\_x is already reserved for the automatically-computed interstitial velocity. Please choose another name for your external velocity variable!"
+  []
   [pressure-variable-error]
     type = 'RunException'
     input = 2d-rc-error-action.i

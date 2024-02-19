@@ -23,7 +23,7 @@ TV(u^{n+1}) \leq TV(u^n)
 ## Limiting Process
 
 Borrowing notation from [!citep](greenshields2010implementation), we will now
-discuss computation of limited quanties, represented by $\bm{\Psi}_{f\pm}$ where
+discuss computation of limited quantities, represented by $\bm{\Psi}_{f\pm}$ where
 $+$ represents one side of a face, and $-$ represents the other side. To be
 clear about notation: the equations that follow will have a lot of $\pm$ and
 $\mp$. When computing the top quantity (e.g. $+$ for $\pm$) we select the top

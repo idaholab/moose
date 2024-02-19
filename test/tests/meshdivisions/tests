@@ -1,0 +1,121 @@
+[Tests]
+  issues = '#25901 #26223'
+  design = 'syntax/MeshDivisions/index.md'
+  [mesh_div]
+    requirement = 'The system shall be able to divide the mesh using'
+    [blocks]
+      type = CSVDiff
+      input = 'block_division.i'
+      csvdiff = 'block_division_out.csv'
+      detail = 'subdomains defined on the mesh,'
+    []
+    [blocks_restricted]
+      type = CSVDiff
+      input = 'block_division.i'
+      cli_args = "MeshDivisions/block_div/block='0 1 2' Postprocessors/min_diff/block='0 1 2' "
+                 "Postprocessors/max_diff/block='0 1 2'"
+      csvdiff = 'block_division_out.csv'
+      detail = 'a selection of subdomains defined on the mesh,'
+    []
+    [extra_id]
+      type = CSVDiff
+      input = 'extra_elem_id_division.i'
+      csvdiff = 'extra_elem_id_division_out_div_out_0001.csv'
+      detail = 'extra element integers stored on elements in the mesh,'
+    []
+    [cartesian]
+      type = CSVDiff
+      input = 'cartesian_division.i'
+      csvdiff = 'cartesian_division_out_div_out_0001.csv'
+      detail = 'a regular Cartesian grid,'
+    []
+    [cartesian_center]
+      type = CSVDiff
+      input = 'cartesian_division.i'
+      cli_args = "MeshDivisions/active='cartesian_div_center' "
+                 "AuxKernels/mesh_div/mesh_division=cartesian_div_center"
+      csvdiff = 'cartesian_division_out_div_out_0001.csv'
+      detail = 'a regular Cartesian grid specified using its center and width,'
+    []
+    [cartesian_center_pos]
+      type = CSVDiff
+      input = 'cartesian_division.i'
+      cli_args = "MeshDivisions/active='cartesian_div_center_pos' "
+                 "AuxKernels/mesh_div/mesh_division=cartesian_div_center_pos"
+      csvdiff = 'cartesian_division_out_div_out_0001.csv'
+      detail = 'Cartesian grids with a fixed width and a group of center positions,'
+    []
+    [functor]
+      type = CSVDiff
+      input = 'functor_values_division.i'
+      csvdiff = 'functor_values_division_out_div_out_0001.csv'
+      detail = 'a mesh division based on the values of a functor,'
+    []
+    [positions]
+      type = CSVDiff
+      input = 'nearest_position_division.i'
+      csvdiff = 'nearest_position_division_out_div_out_0001.csv'
+      detail = 'a nearest-point/neighbor partition,'
+    []
+    [cylinder]
+      type = CSVDiff
+      input = 'cylindrical_division.i'
+      csvdiff = 'cylindrical_division_out_div_out_0001.csv'
+      detail = 'a regular cylindrical R-theta-Z grid,'
+    []
+    [cylinder_center_positions]
+      type = CSVDiff
+      input = 'cylindrical_division.i'
+      cli_args = 'MeshDivisions/active=cylindrical_div_positions AuxKernels/mesh_div/mesh_division=cylindrical_div_positions'
+      csvdiff = 'cylindrical_division_out_div_out_0001.csv'
+      detail = 'cylindrical R-theta-Z grids with a group of positions for the cylinder axis coordinates,'
+    []
+    [spherical]
+      type = CSVDiff
+      input = 'spherical_division.i'
+      csvdiff = 'spherical_division_out_div_out_0001.csv'
+      detail = 'a regular spherical radial grid,'
+    []
+    [spherical_center_positions]
+      type = CSVDiff
+      input = 'spherical_division.i'
+      cli_args = 'MeshDivisions/active=spherical_div_positions AuxKernels/mesh_div/mesh_division=spherical_div_positions'
+      csvdiff = 'spherical_division_out_div_out_0001.csv'
+      detail = 'spherical radial grids, using a group of positions for the sphere centers,'
+    []
+    [nested]
+      type = CSVDiff
+      input = 'nested_division.i'
+      csvdiff = 'nested_division_out_div_out_0001.csv'
+      detail = 'and a nesting of mesh divisions.'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall report an error if "
+    [cartesian_too_close]
+      type = RunException
+      input = 'cartesian_division.i'
+      cli_args = "MeshDivisions/active='cartesian_div_center_pos' Positions/center/positions='1 0 0 "
+                 "1.01 0 0' AuxKernels/mesh_div/mesh_division=cartesian_div_center "
+      detail = "Cartesian divisions from a group of co-planar center positions are overlapping, "
+      expect_err = "Cartesian grids centered on the positions are too close*"
+    []
+    [cylindrical_too_close]
+      type = RunException
+      input = 'cylindrical_division.i'
+      cli_args = "MeshDivisions/active='cylindrical_div_positions' Positions/center/positions='1 0 0 "
+                 "1.01 0 0' AuxKernels/mesh_div/mesh_division=cylindrical_div_center "
+      detail = "cylindrical divisions from a group of co-planar center positions are overlapping, "
+      expect_err = "Cylindrical grids centered on the positions are too close*"
+    []
+    [spherical_too_close]
+      type = RunException
+      input = 'spherical_division.i'
+      cli_args = "MeshDivisions/active='spherical_div_positions' Positions/center/positions='1 0 0 "
+                 "1.01 0 0' AuxKernels/mesh_div/mesh_division=spherical_div_center "
+      detail = "and spherical divisions from a group of co-planar center positions are overlapping."
+      expect_err = "Spherical grids centered on the positions are too close*"
+    []
+  []
+[]

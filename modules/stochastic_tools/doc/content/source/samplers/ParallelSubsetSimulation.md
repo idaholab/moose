@@ -105,6 +105,13 @@ chains, the `AdaptiveMonteCarloDecision` class
 is used for decision-making. Please refer to [AdaptiveMonteCarloDecision](AdaptiveMonteCarloDecision.md)
 for more details.
 
+If the parameter [!param](/Samplers/ParallelSubsetSimulation/use_absolute_value) is `True`, the absolute
+ value of [!param](/Samplers/ParallelSubsetSimulation/output_reporter) will be maximized. 
+As such, a least-squares fit optimization can be achieved by passing the negative of the sum-squared error
+into the value of [!param](/Samplers/ParallelSubsetSimulation/output_reporter) with
+ [!param](/Samplers/ParallelSubsetSimulation/use_absolute_value) set to `True`. Otherwise
+the value of [!param](/Samplers/ParallelSubsetSimulation/output_reporter) will be maximized after its absolute value is taken.
+
 ## Example Input Syntax
 
 The input file for using the PSS algorithm is somewhat similar to the other sampler
@@ -112,14 +119,17 @@ The input file for using the PSS algorithm is somewhat similar to the other samp
 
 !listing modules/stochastic_tools/test/tests/samplers/ParallelSubsetSimulation/pss.i block=Samplers
 
-where, `num_samplessub` is the number of samples per subset and `num_subsets` is the number of subsets.
-`inputs_reporter` and `output_reporter` are the reporter values which transfer
-information between the `ParallelSubsetSimulation` sampler and the `AdaptiveMonteCarloDecision` reporter. There is an optional input parameter `subset_probability` which has been defaulted to
+where, [!param](/Samplers/ParallelSubsetSimulation/num_samplessub) is the number of samples per subset and 
+[!param](/Samplers/ParallelSubsetSimulation/num_subsets) is the number of subsets.
+[!param](/Samplers/ParallelSubsetSimulation/inputs_reporter) and [!param](/Samplers/ParallelSubsetSimulation/output_reporter) 
+are the reporter values which transfer
+information between the `ParallelSubsetSimulation` sampler and the `AdaptiveMonteCarloDecision` reporter. There is an optional
+ input parameter [!param](/Samplers/ParallelSubsetSimulation/subset_probability) which has been defaulted to
 `0.1`, meaning that there are $1/0.1$ samples per Markov chain. This can, however, be
-changed as per the user preference. `num_parallel_chains` is also an optional parameter
+changed as per the user preference. [!param](/Samplers/ParallelSubsetSimulation/num_parallel_chains) is also an optional parameter
 that explicitly specifies the number of Markov chains to be run in parallel per subset.
-If `num_parallel_chains` is not specified, the number of parallel Markov chains per subset
-will be equal to the number of processors. Besides, `use_absolute_value` can be set to true
+If [!param](/Samplers/ParallelSubsetSimulation/num_parallel_chains) is not specified, the number of parallel Markov chains per subset
+will be equal to the number of processors. Besides, [!param](/Samplers/ParallelSubsetSimulation/use_absolute_value) can be set to true
 when failure is defined as a non-exceedance rather than an exceedance.
 
 Second, the `Reporters` block is presented below with the `AdaptiveMonteCarloDecision` reporter:
@@ -133,7 +143,7 @@ Third, the `Executioner` block is presented below:
 !listing modules/stochastic_tools/test/tests/samplers/ParallelSubsetSimulation/pss.i block=Executioner
 
 where it is noticed that unlike some other sampler classes, the `type` is transient.
-The number of time steps is automatically determined based on `num_samplessub`, `num_subsets` and the number of processors used.
+The number of time steps is automatically determined based on [!param](/Samplers/ParallelSubsetSimulation/num_samplessub), [!param](/Samplers/ParallelSubsetSimulation/num_subsets) and the number of processors used.
 
 
 ## Output format

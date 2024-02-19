@@ -41,7 +41,7 @@ This is a tip alert.
 which can contain inline markdown (see [/core.md#core-inline]).
 
 !devel! example id=alert-example-title
-                caption=Example use of the title setting wihtin the `!alert` command.
+                caption=Example use of the title setting within the `!alert` command.
 !alert warning title=This +is+ an =error=.
 Do not do this, *it is bad*, umk.
 !devel-end!
@@ -65,11 +65,11 @@ block version, which is demonstrated in [alert-example-block].
 ## Alert without Title
 
 It is also possible to create an alert without a title, which may be useful for simply highlighting
-regions of text, this is done by ommitting the title as well as setting the 'prefix' setting
+regions of text, this is done by omitting the title as well as setting the 'prefix' setting
 to false, as shown in [alert-example-no-title].
 
 !devel! example id=alert-example-no-title
-                caption=Example use of the title setting wihtin the `!alert` command.
+                caption=Example use of the title setting within the `!alert` command.
 !alert note prefix=False
 This is an alert without a title,
 which might be useful for highlighting text.

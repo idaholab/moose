@@ -370,7 +370,7 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [functor_constants_fluid]
     type = ADGenericFunctorMaterial
     prop_names = 'alpha_b cp k_fluid'
@@ -379,7 +379,7 @@ pressure_tag = "pressure_grad"
   []
 
   [density_fluid]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho_fluid}
     block = 'spacer_block porous_block'

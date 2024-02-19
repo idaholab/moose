@@ -7,7 +7,6 @@
     issues = '#22711'
     requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
 
-    max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -18,9 +17,43 @@
     exodiff = MoRu_out.e
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
-    requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
-    cli_args = 'ChemicalComposition/reinitialization_type=time'
-    max_threads = 1
+    requirement = 'The system shall be able to use reinitialization to speed up a nodal thermochimica solve'
+    cli_args = 'ChemicalComposition/thermo/reinitialization_type=time'
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [MoRu_FV]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_FV_out.e
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#25877'
+    requirement = 'The system shall be able to set up an elemental thermochemistry solve using an action'
+    cli_args = 'ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [MoRu_FV_reinit]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_FV_out.e
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#25877'
+    requirement = 'The system shall be able to use reinitialization to speed up an elemental thermochimica solve'
+    cli_args = 'ChemicalComposition/thermo/reinitialization_type=time ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [MoRu_subblock]
+    type = Exodiff
+    input = MoRu_subblock.i
+    exodiff = MoRu_subblock_out.e
+    design = 'CommonChemicalCompositionAction.md '
+    issues = '#26376'
+    requirement = 'The system shall be able to run different instances of Thermochimica on different sub-blocks'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -32,7 +65,6 @@
     design = 'ThermochimicaNodalData.md'
     issues = '#25661'
     requirement = 'The system shall be able to use graciously handle a missing element in Thermochimica'
-    max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -44,8 +76,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
     requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
-
-    max_threads = 1
+    cli_args = 'ChemicalComposition/tunit=K ChemicalComposition/punit=atm ChemicalComposition/munit=moles ChemicalComposition/output_species_unit=moles'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -57,9 +88,8 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#24552'
     requirement = 'The system shall be able to use pairs as MQMQA phase species'
-    cli_args = 'ChemicalComposition/output_species_unit=moles Outputs/exodus=true'
+    cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/exodus=true'
 
-    max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -72,10 +102,58 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#24552'
     requirement = 'The system shall be able to output moles of pairs for MQMQA phase species'
-    cli_args = 'ChemicalComposition/output_species_unit=moles Outputs/csv=true'
+    cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/csv=true'
 
-    max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [tunit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "The temperature unit must be specified for Thermochimica objects to be constructed"
+    cli_args = "ChemicalComposition/punit=atm ChemicalComposition/munit=moles "
+               "ChemicalComposition/output_species_unit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the temperature unit is not specified'
+    design = ChemicalCompositionAction.md
+
+    required_submodule = 'contrib/thermochimica'
+  []
+  [punit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "The pressure unit must be specified for Thermochimica objects to be constructed"
+    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/munit=moles "
+               "ChemicalComposition/output_species_unit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the pressure unit is not specified'
+    design = ChemicalCompositionAction.md
+
+    required_submodule = 'contrib/thermochimica'
+  []
+  [munit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "The mass unit must be specified for Thermochimica objects to be constructed"
+    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/punit=atm "
+               "ChemicalComposition/output_species_unit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the mass unit is not specified'
+    design = ChemicalCompositionAction.md
+
+    required_submodule = 'contrib/thermochimica'
+  []
+  [op_munit_error]
+    type = RunException
+    input = csv_ic.i
+    expect_err = "Output mass unit must be specified for Thermochimica user object to be constructed"
+    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/punit=atm "
+               "ChemicalComposition/munit=moles"
+    issues = '#26376'
+    requirement = 'The system shall throw an error if the output mass unit is not specified when species amount or amount of element in phase is requested'
+    design = ChemicalCompositionAction.md
+
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -88,7 +166,6 @@
     requirement = 'The system shall throw an error if an invalid output species format is detected'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
   [separator_error2]
@@ -100,7 +177,6 @@
     requirement = 'The system shall throw an error if an invalid element potential format is detected'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -113,7 +189,6 @@
     requirement = 'The system shall throw an error if an invalid element is specified'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -126,7 +201,6 @@
     requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
   [wrong_species2]
@@ -138,10 +212,8 @@
     requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
-
 
   [wrong_element1]
     type = RunException
@@ -152,7 +224,6 @@
     requirement = 'The system shall throw an error if an element absent from the simulation is specified for chemical potential output'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -160,12 +231,12 @@
     type = RunException
     input = MoRu.i
     expect_err = "Phase 'RandomPhase' was not found in the simulation."
-    cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
+    cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' "
+               "UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -178,20 +249,19 @@
     requirement = 'The system shall throw an error if a gas phase species name is not in correct format'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
   [wrong_vapor_pressure2]
     type = RunException
     input = MoRu.i
-    expect_err = "Phase 'HCPN' of vapor species 'vp:HCPN:Mo' is not a gas phase. Cannot calculate vapor pressure."
+    expect_err = "Phase 'HCPN' of vapor species 'vp:HCPN:Mo' is not a gas phase. Cannot calculate "
+                 "vapor pressure."
     cli_args = "GlobalParams/output_vapor_pressures='vp:HCPN:Mo'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a species in a phase other than the gas phase is specified for vapor pressure output'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -204,7 +274,6 @@
     requirement = 'The system shall throw an error if a species not present in gas phase is specified for vapor pressure output'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -212,12 +281,11 @@
     type = RunException
     input = MoRu.i
     expect_err = "Thermochimica data file cannot be parsed. 6"
-    cli_args = "ChemicalComposition/thermofile='SomeRandomFile.dat'"
+    cli_args = "ChemicalComposition/thermo/thermofile='SomeRandomFile.dat'"
     issues = '#24552'
     requirement = 'The system shall throw an error if the wrong datafile is specified'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -229,7 +297,6 @@
     issues = '#24552'
     requirement = 'The system shall be able to handle ALL option for elements by using all database elements'
 
-    max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -243,7 +310,6 @@
     requirement = 'The system shall throw an error if a wrong phase name is specified'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -256,7 +322,6 @@
     requirement = 'The system shall throw an error if a wrong element name is specified'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
 
@@ -269,8 +334,6 @@
     requirement = 'The system shall throw an error if the output elements in phase do not have enough tokens'
     design = ChemicalCompositionAction.md
 
-    max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
-
 []

@@ -72,7 +72,7 @@ p_outlet = 0
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'rho mu'

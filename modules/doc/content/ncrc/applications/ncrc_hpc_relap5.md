@@ -158,7 +158,7 @@ This command will place you back in your home directory. When running on an inte
 will need to load the application environment once more:
 
 ```bash
-module load use.exp_ctl relap53d
+module load use.exp_ctl relap53D
 ```
 
 ### (2) Run the simulation
@@ -224,7 +224,7 @@ you didn’t specify the output file name during execution, your plot file will 
 You will need to rename this file with the `.plt` extension to be able to open it in AptPlot.
 
 However, in many cases it is more desirable to view the results on your local machine. This is done
-by copying the results file from the remote machine to your local machine using scp or rsnyc.
+by copying the results file from the remote machine to your local machine using scp or rsync.
 
 
 !alert! tip title=Copying files from remote HPC machine to your machine
@@ -238,3 +238,4 @@ Example commands you would use with a terminal opened on your machine to copy fi
 scp <your hpc user id>@hpclogin:~/testing/input_out.e /path/to/the/local/destination
 ```
 !alert-end!
+

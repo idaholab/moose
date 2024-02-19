@@ -1,0 +1,255 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "PhysicsBase.h"
+#include "MooseUtils.h"
+#include "FEProblemBase.h"
+
+#include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
+#include "BlockRestrictable.h"
+
+InputParameters
+PhysicsBase::validParams()
+{
+  InputParameters params = Action::validParams();
+  params.addClassDescription("Creates all the objects necessary to solve a particular physics");
+
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Blocks that this Physics is active on. Components can add additional blocks");
+
+  MooseEnum transient_options("true false same_as_problem", "same_as_problem");
+  params.addParam<MooseEnum>(
+      "transient", transient_options, "Whether the physics is to be solved as a transient");
+
+  MooseEnum pc_options("default none", "none");
+  params.addParam<MooseEnum>(
+      "preconditioning", pc_options, "Which preconditioning to use for this Physics");
+  params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
+
+  // Restart parameters
+  params.addParam<bool>("initialize_variables_from_mesh_file",
+                        false,
+                        "Determines if the variables that are added by the action are initialized"
+                        "from the mesh file (only for Exodus format)");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
+  params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
+                              "Restart from Exodus");
+  return params;
+}
+
+PhysicsBase::PhysicsBase(const InputParameters & parameters)
+  : Action(parameters),
+    _sys_number(0),
+    _verbose(getParam<bool>("verbose")),
+    _preconditioning(getParam<MooseEnum>("preconditioning")),
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
+    _is_transient(getParam<MooseEnum>("transient"))
+{
+  checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
+                                        "initial_from_file_timestep");
+  prepareCopyNodalVariables();
+  addRequiredPhysicsTask("init_physics");
+}
+
+void
+PhysicsBase::act()
+{
+  mooseDoOnce(checkRequiredTasks());
+
+  if (_current_task == "init_physics")
+    initializePhysics();
+  else if (_current_task == "add_variable")
+    addNonlinearVariables();
+  else if (_current_task == "add_ic")
+    addInitialConditions();
+
+  else if (_current_task == "add_kernel")
+    addFEKernels();
+  else if (_current_task == "add_nodal_kernel")
+    addNodalKernels();
+  else if (_current_task == "add_fv_kernel")
+    addFVKernels();
+  else if (_current_task == "add_dirac_kernel")
+    addDiracKernels();
+  else if (_current_task == "add_dg_kernel")
+    addDGKernels();
+  else if (_current_task == "add_scalar_kernel")
+    addScalarKernels();
+  else if (_current_task == "add_interface_kernel")
+    addInterfaceKernels();
+  else if (_current_task == "add_fv_ik")
+    addFVInterfaceKernels();
+
+  else if (_current_task == "add_bc")
+    addFEBCs();
+  else if (_current_task == "add_nodal_bc")
+    addNodalBCs();
+  else if (_current_task == "add_fv_bc")
+    addFVBCs();
+  else if (_current_task == "add_periodic_bc")
+    addPeriodicBCs();
+  else if (_current_task == "add_function")
+    addFunctions();
+  else if (_current_task == "add_user_object")
+    addUserObjects();
+
+  else if (_current_task == "add_aux_variable")
+    addAuxiliaryVariables();
+  else if (_current_task == "add_aux_kernel")
+    addAuxiliaryKernels();
+  else if (_current_task == "add_material")
+    addMaterials();
+  else if (_current_task == "add_functor_material")
+    addFunctorMaterials();
+
+  else if (_current_task == "add_postprocessor")
+    addPostprocessors();
+  else if (_current_task == "add_vector_postprocessor")
+    addVectorPostprocessors();
+  else if (_current_task == "add_reporter")
+    addReporters();
+  else if (_current_task == "add_output")
+    addOutputs();
+  else if (_current_task == "add_preconditioning")
+    addPreconditioning();
+  else if (_current_task == "add_executioner")
+    addExecutioner();
+  else if (_current_task == "add_executor")
+    addExecutors();
+
+  // Lets a derived Physics class implement additional tasks
+  actOnAdditionalTasks();
+}
+
+void
+PhysicsBase::prepareCopyNodalVariables() const
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    _app.setExodusFileRestart(true);
+}
+
+bool
+PhysicsBase::isTransient() const
+{
+  if (_is_transient == "true")
+    return true;
+  else if (_is_transient == "false")
+    return false;
+  else
+    return getProblem().isTransient();
+}
+
+unsigned int
+PhysicsBase::dimension() const
+{
+  mooseAssert(_mesh, "We dont have a mesh yet");
+  mooseAssert(_dim < 4, "Dimension has not been set yet");
+  return _dim;
+}
+
+void
+PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
+{
+  if (blocks.size())
+  {
+    _blocks.insert(_blocks.end(), blocks.begin(), blocks.end());
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  }
+}
+
+void
+PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  InputParameters params = getAdditionalRMParams();
+  Action::addRelationshipManagers(input_rm_type, params);
+}
+
+void
+PhysicsBase::initializePhysics()
+{
+  mooseAssert(_mesh, "We should have a mesh to find the dimension");
+  if (_blocks.size())
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  else
+    _dim = _mesh->dimension();
+
+  if (_is_transient == "true" && !getProblem().isTransient())
+    paramError("transient", "We cannot solve a physics as transient in a steady problem");
+}
+
+void
+PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy)
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+  {
+    SystemBase & system = getProblem().getNonlinearSystemBase(_sys_number);
+
+    for (const auto & var_name : variables_to_copy)
+      system.addVariableToCopy(
+          var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
+  }
+}
+
+void
+PhysicsBase::checkParamsBothSetOrNotSet(const std::string & param1,
+                                        const std::string & param2) const
+{
+  if ((isParamValid(param1) + isParamValid(param2)) % 2 != 0)
+    paramError(param1,
+               "Parameters '" + param1 + "' and '" + param2 +
+                   "' must be either both set or both not set.");
+}
+
+void
+PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
+                                                   const std::string & param2) const
+{
+  mooseAssert(parameters().have_parameter<bool>(param1),
+              "Cannot check if parameter " + param1 +
+                  " is true if it's not a bool parameter of this object");
+  if (!getParam<bool>(param1) && isParamSetByUser(param2))
+    paramError(param2,
+               "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
+                   "' is set by the user");
+}
+
+bool
+PhysicsBase::nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const
+{
+  if (_problem->getNonlinearSystemBase(_sys_number).hasVariable(var_name))
+    return true;
+  else if (error_if_aux && _problem->getAuxiliarySystem().hasVariable(var_name))
+    mooseError("Variable '",
+               var_name,
+               "' is supposed to be nonlinear for physics '",
+               name(),
+               "' but it's already defined as auxiliary");
+  else
+    return false;
+}
+
+void
+PhysicsBase::checkRequiredTasks() const
+{
+  const auto registered_tasks = _action_factory.getTasksByAction(type());
+
+  // Check for missing tasks
+  for (const auto & required_task : _required_tasks)
+    if (!registered_tasks.count(required_task))
+      mooseWarning("Task '" + required_task +
+                   "' has been declared as required by a Physics parent class of derived class '" +
+                   type() +
+                   "' but this task is not registered to the derived class. Registered tasks for "
+                   "this Physics are: " +
+                   Moose::stringify(registered_tasks));
+}

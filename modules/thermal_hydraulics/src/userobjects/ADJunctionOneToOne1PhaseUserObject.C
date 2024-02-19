@@ -164,8 +164,7 @@ ADJunctionOneToOne1PhaseUserObject::execute()
 void
 ADJunctionOneToOne1PhaseUserObject::threadJoin(const UserObject & uo)
 {
-  const ADJunctionOneToOne1PhaseUserObject & junction_uo =
-      dynamic_cast<const ADJunctionOneToOne1PhaseUserObject &>(uo);
+  const auto & junction_uo = static_cast<const ADJunctionOneToOne1PhaseUserObject &>(uo);
 
   // Store the data computed/retrieved in the other threads
   for (unsigned int i = 0; i < junction_uo._connection_indices.size(); i++)

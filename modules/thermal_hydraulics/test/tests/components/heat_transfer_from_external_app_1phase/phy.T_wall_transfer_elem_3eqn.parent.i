@@ -80,10 +80,13 @@
 
 [Transfers]
   [T_to_child]
-    type = MultiAppUserObjectTransfer
+    type = MultiAppGeneralFieldUserObjectTransfer
     to_multi_app = thm
-    user_object = T_avg_uo
+    source_user_object = T_avg_uo
     variable = T_wall
+    greedy_search = true
+    use_bounding_boxes = false
+    error_on_miss = true
   []
 []
 

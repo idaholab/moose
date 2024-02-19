@@ -32,7 +32,7 @@ class CheckFiles(FileTester):
         return self.specs['check_files'] + self.specs['check_not_exists']
 
     def processResults(self, moose_dir, options, output):
-        output += FileTester.processResults(self, moose_dir, options, output)
+        FileTester.processResults(self, moose_dir, options, output)
 
         specs = self.specs
 

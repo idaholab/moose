@@ -98,7 +98,7 @@ LStableDirk3::solve()
     // This ensures that all the Output objects in the OutputWarehouse
     // have had solveSetup() called, and sets the default solver
     // parameters for PETSc.
-    _fe_problem.initPetscOutput();
+    _fe_problem.initPetscOutputAndSomeSolverSettings();
 
     _console << "Stage " << _stage << std::endl;
 

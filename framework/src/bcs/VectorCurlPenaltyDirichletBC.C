@@ -17,6 +17,9 @@ VectorCurlPenaltyDirichletBC::validParams()
 {
   InputParameters params = VectorIntegratedBC::validParams();
   params.addRequiredParam<Real>("penalty", "The penalty coefficient");
+  params.addParam<FunctionName>("function",
+                                "The boundary condition vector function, "
+                                "use as an alternative to a component-wise specification");
   params.addParam<FunctionName>("function_x", 0, "The function for the x component");
   params.addParam<FunctionName>("function_y", 0, "The function for the y component");
   params.addParam<FunctionName>("function_z", 0, "The function for the z component");
@@ -47,11 +50,11 @@ VectorCurlPenaltyDirichletBC::computeQpResidual()
                _function_y.value(_t, _q_point[_qp]),
                _function_z.value(_t, _q_point[_qp])};
   RealVectorValue Ncu = (_u[_qp] - u_exact).cross(_normals[_qp]);
-  return _penalty * Ncu * ((_test[_i][_qp]).cross(_normals[_qp]));
+  return _penalty * Ncu * _test[_i][_qp].cross(_normals[_qp]);
 }
 
 Real
 VectorCurlPenaltyDirichletBC::computeQpJacobian()
 {
-  return _penalty * (_phi[_j][_qp]).cross(_normals[_qp]) * (_test[_i][_qp]).cross(_normals[_qp]);
+  return _penalty * _phi[_j][_qp].cross(_normals[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
 }

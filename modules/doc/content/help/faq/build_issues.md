@@ -7,12 +7,14 @@ date.
 - Verify the Conda Environment is active and up to date, with the latest version of our moose
   packages:
 
-  ```bash
-  mamba activate moose
-  mamba update moose-dev
-  ```
+  !package! code
+  conda activate base
+  conda env remove -n moose
+  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda activate moose
+  !package-end!
 
-  if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
+  if `conda activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
   !alert note
   Whenever an update is performed in Conda, an update should also be performed on your MOOSE
@@ -92,10 +94,10 @@ date.
   ```
 
   If the above build fails, and you have the correct Conda environment loaded
-  (`mamba activate moose`), then something is failing beyond the scope of this document, and you
-  should now contact us via the [disussion forum](faq/discussion_forum.md).
+  (`conda activate moose`), then something is failing beyond the scope of this document, and you
+  should now contact us via the [discussion forum](faq/discussion_forum.md).
 
-  If the build was successfull, attempt to execute the hello word example:
+  If the build was successful, attempt to execute the hello word example:
 
   ```bash
   mpiexec -n 4 /tmp/a.out

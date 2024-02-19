@@ -1,6 +1,6 @@
 # SetRealValueControl
 
-!syntax description /Controls/SetRealValueControl
+!syntax description /ControlLogic/SetRealValueControl
 
 !alert note
 [ControlData.md] is only defined by the thermal hydraulics module control logic.
@@ -12,8 +12,8 @@ using the `value` [ControlData.md] of the `T_inlet_fn` ControlLogic.
 
 !listing test/tests/controls/set_real_value_control/test.i block=ControlLogic
 
-!syntax parameters /Controls/SetRealValueControl
+!syntax parameters /ControlLogic/SetRealValueControl
 
-!syntax inputs /Controls/SetRealValueControl
+!syntax inputs /ControlLogic/SetRealValueControl
 
-!syntax children /Controls/SetRealValueControl
+!syntax children /ControlLogic/SetRealValueControl

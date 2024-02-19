@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/FlexiblePatternGenerator.md'
-  issues = '#24938'
+  issues = '#24938 #26776'
   [test]
     requirement = "The system shall generate "
     [single_hex_pattern_hex]
@@ -96,7 +96,7 @@
       recover = false
       mesh_mode = 'REPLICATED'
       detail = "a patterned assembly mesh by stitching flexible patterned meshes."
-    []  
+    []
   []
   [error]
     requirement = 'The system shall throw an error '
@@ -109,13 +109,21 @@
       detail = "if the unit mesh used for the pattern is not provided in the input meshes."
     []
     [err_unused_input]
-        type = RunException
-        input = double_hex_pattern.i
-        cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0 0;0 0|0 0;0 0 0;0 0'
-                    --mesh-only err.e"
-        expect_err = "All the input mesh generator names are not used."
-        detail = "if some of the input meshes are not used in patterning."
-      []
+      type = RunException
+      input = double_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0 0;0 0|0 0;0 0 0;0 0'
+                  --mesh-only err.e"
+      expect_err = "All the input mesh generator names are not used."
+      detail = "if some of the input meshes are not used in patterning."
+    []
+    [err_missing_background_id]
+      type = RunException
+      input = double_hex_pattern.i
+      cli_args = "/Mesh/fpg/background_subdomain_name=background
+                  --mesh-only err.e"
+      expect_err = "This parameter must be provided if background_subdomain_name is provided."
+      detail = "if then subdomain name of the background is specified without providing a non-trivial subdomain id."
+    []
     [err_even_hex_pattern]
       type = RunException
       input = single_hex_pattern.i
@@ -137,7 +145,8 @@
       input = single_hex_pattern.i
       cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0;0 0'
                   --mesh-only err.e"
-      expect_err = "The two-dimentional array element of this parameter must have a correct hexagonal shape."
+      expect_err = "The two-dimentional array element of this parameter must have a correct "
+                   "hexagonal shape."
       detail = "if the hexagonal pattern provided has an incorrect, non-hexagonal, shape."
     []
     [err_wrong_hex_pitches_size]
@@ -146,7 +155,8 @@
       cli_args = "/Mesh/fpg/hex_pitches='6 6'
                   --mesh-only err.e"
       expect_err = "The length of this parameter must be the same as that of hex_patterns."
-      detail = "if the provided pitch values of the hexagonal patterns have a size that does not match the number of hexagonal patterns to be generated."
+      detail = "if the provided pitch values of the hexagonal patterns have a size that does not "
+               "match the number of hexagonal patterns to be generated."
     []
     [err_wrong_hex_origins_size]
       type = RunException
@@ -154,7 +164,8 @@
       cli_args = "/Mesh/fpg/hex_origins='0 0 0 0 0 0'
                   --mesh-only err.e"
       expect_err = "the length of this parameter must be the same as that of hex_patterns."
-      detail = "if the provided origin locations of the hexagonal patterns have a size that does not match the number of hexagonal patterns to be generated."
+      detail = "if the provided origin locations of the hexagonal patterns have a size that does not "
+               "match the number of hexagonal patterns to be generated."
     []
     [err_wrong_hex_rotations_size]
       type = RunException
@@ -162,14 +173,16 @@
       cli_args = "/Mesh/fpg/hex_rotations='0 0'
                   --mesh-only err.e"
       expect_err = "the length of this parameter must be the same as that of hex_patterns."
-      detail = "if the provided rotation angles of the hexagonal patterns have a size that does not match the number of hexagonal patterns to be generated."
+      detail = "if the provided rotation angles of the hexagonal patterns have a size that does not "
+               "match the number of hexagonal patterns to be generated."
     []
     [err_incorrect_rect_pattern]
       type = RunException
       input = single_rect_pattern.i
       cli_args = "/Mesh/fpg/rect_patterns='0 0;0 0 0'
                   --mesh-only err.e"
-      expect_err = "The two-dimensional array element of this parameter must have a correct rectangular shape."
+      expect_err = "The two-dimensional array element of this parameter must have a correct "
+                   "rectangular shape."
       detail = "if the rectangular pattern provided has a correct shape."
     []
     [err_wrong_rect_pitches_x_size]
@@ -178,7 +191,8 @@
       cli_args = "/Mesh/fpg/rect_pitches_x='6 6'
                   --mesh-only err.e"
       expect_err = "The length of this parameter must be the same as that of rect_patterns."
-      detail = "if the provided x pitch values of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+      detail = "if the provided x pitch values of the rectangular patterns have a size that does not "
+               "match the number of rectangular patterns to be generated."
     []
     [err_wrong_rect_pitches_y_size]
       type = RunException
@@ -186,7 +200,8 @@
       cli_args = "/Mesh/fpg/rect_pitches_y='8 8'
                   --mesh-only err.e"
       expect_err = "The length of this parameter must be the same as that of rect_patterns."
-      detail = "if the provided y pitch values of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+      detail = "if the provided y pitch values of the rectangular patterns have a size that does not "
+               "match the number of rectangular patterns to be generated."
     []
     [err_wrong_rect_origins_size]
       type = RunException
@@ -194,7 +209,8 @@
       cli_args = "/Mesh/fpg/rect_origins='0 0 0 0 0 0'
                   --mesh-only err.e"
       expect_err = "the length of this parameter must be the same as that of rect_patterns."
-      detail = "if the provided origin locations of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+      detail = "if the provided origin locations of the rectangular patterns have a size that does "
+               "not match the number of rectangular patterns to be generated."
     []
     [err_wrong_rect_rotations_size]
       type = RunException
@@ -202,7 +218,8 @@
       cli_args = "/Mesh/fpg/rect_rotations='0 0'
                   --mesh-only err.e"
       expect_err = "the length of this parameter must be the same as that of rect_patterns."
-      detail = "if the provided rotation angles of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+      detail = "if the provided rotation angles of the rectangular patterns have a size that does "
+               "not match the number of rectangular patterns to be generated."
     []
     [err_wrong_circ_radii_size]
       type = RunException
@@ -210,7 +227,8 @@
       cli_args = "/Mesh/fpg/circular_radii='7 7'
                   --mesh-only err.e"
       expect_err = "The length of this parameter must be the same as that of circular_patterns."
-      detail = "if the provided circular radii values of the rectangular patterns have a size that does not match the number of circular patterns to be generated."
+      detail = "if the provided circular radii values of the rectangular patterns have a size that "
+               "does not match the number of circular patterns to be generated."
     []
     [err_wrong_circ_origins_size]
       type = RunException
@@ -218,7 +236,8 @@
       cli_args = "/Mesh/fpg/circular_origins='0 0 0 0 0 0'
                   --mesh-only err.e"
       expect_err = "the length of this parameter must be the same as that of circular_patterns."
-      detail = "if the provided origin locations of the circular patterns have a size that does not match the number of circular patterns to be generated."
+      detail = "if the provided origin locations of the circular patterns have a size that does not "
+               "match the number of circular patterns to be generated."
     []
     [err_wrong_circ_rotations_size]
       type = RunException
@@ -226,7 +245,8 @@
       cli_args = "/Mesh/fpg/circular_rotations='0 0'
                   --mesh-only err.e"
       expect_err = "the length of this parameter must be the same as that of circular_patterns."
-      detail = "if the provided rotation angles of the circular patterns have a size that does not match the number of circular patterns to be generated."
+      detail = "if the provided rotation angles of the circular patterns have a size that does not "
+               "match the number of circular patterns to be generated."
     []
     [err_wrong_extra_mg_size]
       type = RunException
@@ -234,7 +254,8 @@
       cli_args = "/Mesh/fpg/extra_positions_mg_indices='0 0'
                   --mesh-only err.e"
       expect_err = "This parameter must have the same size as extra_positions."
-      detail = "if the provided mesh indices of the extra positioned meshes have a size that does not match the number of extra positions provided."
+      detail = "if the provided mesh indices of the extra positioned meshes have a size that does "
+               "not match the number of extra positions provided."
     []
     [err_no_custom_mesh]
       type = RunException
@@ -242,7 +263,8 @@
       cli_args = "/Mesh/fpg/boundary_type=CUSTOM
                   --mesh-only err.e"
       expect_err = "boundary_mesh must be specified for CUSTOM boundary_type."
-      detail = "if the boundary input mesh is not provided when the boundary type is selected to be custom."
+      detail = "if the boundary input mesh is not provided when the boundary type is selected to be "
+               "custom."
     []
     [err_custom_mesh_with_boundary_sector]
       type = RunException
@@ -250,7 +272,8 @@
       cli_args = "/Mesh/fpg/boundary_sectors=10
                   --mesh-only err.e"
       expect_err = "this parameter should not be provided for CUSTOM boundary_type."
-      detail = "if the boundary sector number is provided when the boundary type is selected to be custom."
+      detail = "if the boundary sector number is provided when the boundary type is selected to be "
+               "custom."
     []
     [err_custom_mesh_with_boundary_size]
       type = RunException
@@ -258,7 +281,8 @@
       cli_args = "/Mesh/fpg/boundary_size=10
                   --mesh-only err.e"
       expect_err = "this parameter should not be provided for CUSTOM boundary_type."
-      detail = "if the boundary pitch value is provided when the boundary type is selected to be custom."
+      detail = "if the boundary pitch value is provided when the boundary type is selected to be "
+               "custom."
     []
     [err_redundant_custom_mesh]
       type = RunException

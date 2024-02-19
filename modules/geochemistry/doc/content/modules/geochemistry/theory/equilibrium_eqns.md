@@ -56,7 +56,7 @@ In addition, if surface complexation is present, there are equations for the sur
 - $\gamma$ is an activity coefficient
 - $f$ is a gas fugacity
 - $K$ is an equilibrium constant
-- $\mathcal{C}$ is unity for the Langmuir approach to sorption, involves electonic charge for ion exchange, and involves the surface potential for the surface complexation approach
+- $\mathcal{C}$ is unity for the Langmuir approach to sorption, involves electronic charge for ion exchange, and involves the surface potential for the surface complexation approach
 - Note that the last two equations are not dimensionally consistent.  Instead, it is conventional to omit dimension-full factors of "1", and simply use consistent units of moles, kg, bars and Kelvin throughout all calculations.
 
 These equations relate $1 + N_{i} + N_{j} + N_{k} + N_{m} + N_{p} + N_{q}$ quantities, as well as $N_{p}$ additional equations for $\Psi_{p}$ if relevant.

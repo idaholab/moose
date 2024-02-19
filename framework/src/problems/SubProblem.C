@@ -25,6 +25,7 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/string_to_enum.h"
 
 #include <regex>
 
@@ -57,12 +58,12 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
     _output_functors(false),
-    _typed_vector_tags(2)
+    _typed_vector_tags(2),
+    _have_p_refinement(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
-  _active_material_property_ids.resize(n_threads);
 
   _active_fe_var_coupleable_matrix_tags.resize(n_threads);
   _active_fe_var_coupleable_vector_tags.resize(n_threads);
@@ -290,7 +291,7 @@ SubProblem::addMatrixTag(TagName tag_name)
 }
 
 bool
-SubProblem::matrixTagExists(const TagName & tag_name)
+SubProblem::matrixTagExists(const TagName & tag_name) const
 {
   auto tag_name_upper = MooseUtils::toUpper(tag_name);
 
@@ -298,13 +299,13 @@ SubProblem::matrixTagExists(const TagName & tag_name)
 }
 
 bool
-SubProblem::matrixTagExists(TagID tag_id)
+SubProblem::matrixTagExists(TagID tag_id) const
 {
   return _matrix_tag_id_to_tag_name.find(tag_id) != _matrix_tag_id_to_tag_name.end();
 }
 
 TagID
-SubProblem::getMatrixTagID(const TagName & tag_name)
+SubProblem::getMatrixTagID(const TagName & tag_name) const
 {
   auto tag_name_upper = MooseUtils::toUpper(tag_name);
 
@@ -963,7 +964,7 @@ SubProblem::cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool t
     DofMap & dof_map = eq.get_system(i).get_dof_map();
     std::shared_ptr<GhostingFunctor> clone_alg_gf = algebraic_gf.clone();
     std::dynamic_pointer_cast<RelationshipManager>(clone_alg_gf)
-        ->init(*algebraic_gf.get_mesh(), &dof_map);
+        ->init(mesh(), *algebraic_gf.get_mesh(), &dof_map);
     dof_map.add_algebraic_ghosting_functor(clone_alg_gf, to_mesh);
     clones_vec[i - 1] = clone_alg_gf;
   }
@@ -996,7 +997,7 @@ SubProblem::cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_
     DofMap & dof_map = systemBaseNonlinear(i).system().get_dof_map();
     std::shared_ptr<GhostingFunctor> clone_coupling_gf = coupling_gf.clone();
     std::dynamic_pointer_cast<RelationshipManager>(clone_coupling_gf)
-        ->init(*coupling_gf.get_mesh(), &dof_map);
+        ->init(mesh(), *coupling_gf.get_mesh(), &dof_map);
     dof_map.add_coupling_functor(clone_coupling_gf, to_mesh);
     clones_vec[i - 1] = clone_coupling_gf;
   }
@@ -1111,11 +1112,10 @@ SubProblem::automaticScaling() const
 }
 
 void
-SubProblem::hasScalingVector()
+SubProblem::hasScalingVector(const unsigned int nl_sys_num)
 {
   for (const THREAD_ID tid : make_range(libMesh::n_threads()))
-    for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-      assembly(tid, nl_sys_num).hasScalingVector();
+    assembly(tid, nl_sys_num).hasScalingVector();
 }
 
 void
@@ -1271,6 +1271,54 @@ void
 SubProblem::addCachedJacobian(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum()).addCachedJacobian(Assembly::GlobalDataKey{});
+}
+
+void
+SubProblem::doingPRefinement(const bool doing_p_refinement,
+                             const MultiMooseEnum & disable_p_refinement_for_families_enum)
+{
+  mesh().doingPRefinement(doing_p_refinement);
+
+  if (doing_p_refinement)
+  {
+    std::vector<FEFamily> disable_families(disable_p_refinement_for_families_enum.size());
+    for (const auto i : index_range(disable_families))
+      disable_families[i] =
+          Utility::string_to_enum<FEFamily>(disable_p_refinement_for_families_enum[i]);
+
+    for (const auto tid : make_range(libMesh::n_threads()))
+      for (const auto s : make_range(numNonlinearSystems()))
+        assembly(tid, s).havePRefinement(disable_families);
+
+    auto & eq = es();
+    for (const auto family : disable_families)
+      for (const auto i : make_range(eq.n_systems()))
+      {
+        auto & system = eq.get_system(i);
+        auto & dof_map = system.get_dof_map();
+        for (const auto vg : make_range(system.n_variable_groups()))
+        {
+          const auto & var_group = system.variable_group(vg);
+          if (var_group.type().family == family)
+            dof_map.should_p_refine(vg, false);
+        }
+      }
+
+    _have_p_refinement = true;
+  }
+}
+
+bool
+SubProblem::doingPRefinement() const
+{
+  return mesh().doingPRefinement();
+}
+
+void
+SubProblem::setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid)
+{
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    assembly(tid, nl_sys_num).setCurrentLowerDElem(lower_d_elem);
 }
 
 template MooseVariableFEBase &

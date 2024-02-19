@@ -125,7 +125,7 @@ The [Transfers](syntax/Transfers/index.md) block serves two purposes. First, the
 sub-block instantiates a [SamplerParameterTransfer.md] object that transfers each row of data from
 the Sampler object to a sub-application simulation. Within the sub-application the `parameters` listed
 in this sub-block replace the values in the sub-application. This substitution occurs using
-the aforementioned SamplerReciever object that exists in the Controls block of the sub-application
+the aforementioned SamplerReceiver object that exists in the Controls block of the sub-application
 input file. The receiver on the sub-application accepts the parameter names and values from the
 SamplerParameterTransfer object on the main application.
 
@@ -289,7 +289,7 @@ python ../../python/visualize_statistics.py main_time_out.json --line-plot \
 
 !media stochastic_tools/parameter_study/stats_time_line.png
 
-## Time Dependent Quatities with AccumulateReporter
+## Time Dependent Quantities with AccumulateReporter
 
 You might find that using [SamplerTransientMultiApp.md], like in the previous sections, is a bit
 restrictive. For instance, the time steps in the sub-app input must be defined by the steps in the main input.

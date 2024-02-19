@@ -35,7 +35,7 @@ Usage of this parameter is helpful to retain sequential numbering when dummy reg
 ## Example Syntax
 
 In this example, the `CartesianIDPatternedMeshGenerator` is used to generate
-a Cartesian assembly with pin reproting IDs (`pin_id`).
+a Cartesian assembly with pin reporting IDs (`pin_id`).
 
 !listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/assembly_reporting_id.i block=Mesh/assembly
 

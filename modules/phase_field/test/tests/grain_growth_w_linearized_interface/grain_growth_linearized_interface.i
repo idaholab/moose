@@ -132,28 +132,28 @@
 
 [Bounds]
   [phi0_upper_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = phi0
     bound_type = upper
     bound_value = 5.0
   []
   [phi0_lower_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = phi0
     bound_type = lower
     bound_value = -5.0
   []
   [phi1_upper_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = phi1
     bound_type = upper
     bound_value = 5.0
   []
   [phi1_lower_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = phi1
     bound_type = lower

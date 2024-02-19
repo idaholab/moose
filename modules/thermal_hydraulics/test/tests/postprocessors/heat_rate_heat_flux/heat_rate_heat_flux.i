@@ -9,9 +9,9 @@ S = ${fparse depth * L}
 Q = 5000
 q = ${fparse Q / S}
 
-[HeatStructureMaterials]
+[SolidProperties]
   [region1-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -28,7 +28,8 @@ q = ${fparse Q / S}
     n_elems = 50
 
     names = 'region1'
-    materials = 'region1-mat'
+    solid_properties = 'region1-mat'
+    solid_properties_T_ref = '300'
     widths = '${thickness}'
     n_part_elems = '5'
 

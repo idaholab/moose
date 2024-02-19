@@ -209,6 +209,14 @@
     exodiff = 'tag-array-grad_out.e'
     abs_zero = 1e-08
   []
+  [array_grad_dot]
+    type = 'Exodiff'
+    input = 'coupled_array_grad_dot.i'
+    issues = '#26385'
+    requirement = 'The system shall be able to populate auxiliary array variable values using the components of gradient of time derivative of coupled array variable.'
+    exodiff = 'coupled_array_grad_dot_out.e'
+    abs_zero = 1e-08
+  []
   [multiple_component_tag_interface]
     type = 'Exodiff'
     input = 2d_diffusion_tag_vector.i
@@ -221,5 +229,20 @@
     input = tag-fv.i
     exodiff = tag-fv_out.e
     requirement = 'The system shall be able to index solution vectors and residual vectors using the degree of freedom indices of a finite volume variable.'
+  []
+  [mass]
+    requirement = 'The system shall be able to use matrix tagging to compute a mass matrix'
+    [fv]
+      type = 'Exodiff'
+      input = mass-matrix.i
+      exodiff = mass-matrix_out.e
+      detail = 'for a finite volume variable, and'
+    []
+    [fe]
+      type = 'Exodiff'
+      input = fe-mass-matrix.i
+      exodiff = fe-mass-matrix_out.e
+      detail = 'for a finite element variable.'
+    []
   []
 []

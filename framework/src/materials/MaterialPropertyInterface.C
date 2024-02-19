@@ -12,6 +12,9 @@
 #include "MooseApp.h"
 #include "MaterialBase.h"
 
+const std::string MaterialPropertyInterface::_interpolated_old = "_interpolated_old";
+const std::string MaterialPropertyInterface::_interpolated_older = "_interpolated_older";
+
 InputParameters
 MaterialPropertyInterface::validParams()
 {
@@ -23,6 +26,11 @@ MaterialPropertyInterface::validParams()
                                         "An optional suffix parameter that can be appended to any "
                                         "attempt to retrieve/get material properties. The suffix "
                                         "will be prepended with a '_' character.");
+  params.addParam<bool>(
+      "use_interpolated_state",
+      false,
+      "For the old and older state use projected material properties interpolated at the "
+      "quadrature points. To set up projection use the ProjectedStatefulMaterialStorageAction.");
   return params;
 }
 
@@ -53,6 +61,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
+    _use_interpolated_state(_mi_params.get<bool>("use_interpolated_state")),
     _mi_boundary_restricted(moose::internal::boundaryRestricted(boundary_ids)),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
@@ -134,12 +143,6 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-MaterialBase &
-MaterialPropertyInterface::getMaterial(const std::string & name)
-{
-  return getMaterialByName(_mi_params.get<MaterialName>(name));
-}
-
 void
 MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
     std::shared_ptr<MaterialBase> discrete)
@@ -183,6 +186,12 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
 }
 
 MaterialBase &
+MaterialPropertyInterface::getMaterial(const std::string & name)
+{
+  return getMaterialByName(_mi_params.get<MaterialName>(name));
+}
+
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
   std::shared_ptr<MaterialBase> discrete =
@@ -190,6 +199,23 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
 
   checkBlockAndBoundaryCompatibility(discrete);
   return *discrete;
+}
+
+std::unordered_map<SubdomainID, std::vector<MaterialBase *>>
+MaterialPropertyInterface::buildRequiredMaterials(bool allow_stateful)
+{
+  std::unordered_map<SubdomainID, std::vector<MaterialBase *>> required_mats;
+  const auto & mwh = _mi_feproblem.getMaterialWarehouse();
+  for (const auto id : _mi_block_ids)
+  {
+    const auto & mats = mwh[_material_data_type].getActiveBlockObjects(id, _mi_tid);
+    std::array<const MaterialPropertyInterface *, 1> consumers = {{this}};
+    const auto block_required =
+        MaterialBase::buildRequiredMaterials(consumers, mats, allow_stateful);
+    required_mats[id].insert(
+        required_mats[id].begin(), block_required.begin(), block_required.end());
+  }
+  return required_mats;
 }
 
 void

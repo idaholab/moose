@@ -17,14 +17,14 @@ material.
 ### Softening Model
 
 The tensile stress response to cracking is calculated as a function of the number
-cracks, where the number of cracks reduces the stress reponse of the cracked material.
+cracks, where the number of cracks reduces the stress response of the cracked material.
 The calculated stress is the principle stress in the single direction of the crack.
 \begin{equation}
   \label{eqn:power_law_softening_stress}
   \sigma = k E \epsilon_{principle}
 \end{equation}
 where $k$ is the reduction factor applied to the initial stiffness each time a
-new crack initiates, $E$ is the Youngs' modulus, and $\epsilon_{principle}$ is the
+new crack initiates, $E$ is the Young's modulus, and $\epsilon_{principle}$ is the
 strain along the direction of the crack.
 The reduction factor in [eqn:power_law_softening_stress] is a function of the
 number of cracks

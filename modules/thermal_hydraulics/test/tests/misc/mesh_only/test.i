@@ -28,9 +28,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
      rho = 1
      cp = 1
      k = 1
@@ -59,7 +59,8 @@
     length = 1
     depth = 0.1
     names = 'blk'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
     n_part_elems = 1
     widths = '0.1'
   []
@@ -85,7 +86,8 @@
     length = 1
     depth = 0.1
     names = 'blk'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
     n_part_elems = 1
     widths = '0.1'
   []
@@ -111,7 +113,8 @@
     length = 1
     depth = 0.1
     names = 'blk'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
     n_part_elems = 1
     widths = '0.1'
   []

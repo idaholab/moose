@@ -1155,8 +1155,19 @@
     type = 'RunException'
     input = 'mesh_pointer_error_check.i'
     expect_err = 'appears to be a Git-LFS pointer'
+    cli_args = 'Mesh/file=mesh_pointer.e'
 
-    requirement = 'The system shall report an error when a git-lfs file pointer is encountered.'
+    requirement = 'The system shall report an error when a git-lfs file pointer is encountered for the mesh file.'
+    design = 'MooseUtils.md'
+    issues = '#17407'
+  []
+  [check_git_lfs_pointer_fmg]
+    type = 'RunException'
+    input = 'mesh_pointer_error_check.i'
+    expect_err = 'appears to be a Git-LFS pointer'
+    cli_args = 'Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=mesh_pointer.e'
+
+    requirement = 'The system shall report an error when a git-lfs file pointer is encountered for the mesh for a mesh generator.'
     design = 'MooseUtils.md'
     issues = '#17407'
   []

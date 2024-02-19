@@ -187,9 +187,9 @@ rho = 1.0
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [pump_mat]
-    type = NSFVPumpMaterial
+    type = NSFVPumpFunctorMaterial
     rho = ${rho}
     speed = 'U'
     pressure_head_function = 'pump_head'

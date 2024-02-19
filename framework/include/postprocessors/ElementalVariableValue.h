@@ -28,13 +28,13 @@ public:
 
   virtual void initialize() override {}
   virtual void execute() override;
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
   virtual void finalize() override;
+  virtual void initialSetup() override;
 
 protected:
-  MooseMesh & _mesh;
-  std::string _var_name;
-  Elem * _element;
+  const MooseMesh & _mesh;
+  const std::string & _var_name;
+  const Elem * _element;
   Real _value;
 };

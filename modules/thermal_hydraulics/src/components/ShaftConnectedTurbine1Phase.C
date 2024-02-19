@@ -25,6 +25,7 @@ ShaftConnectedTurbine1Phase::validParams()
   params.makeParamRequired<Real>("A_ref");
   params.addRequiredParam<BoundaryName>("inlet", "Turbine inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Turbine outlet");
+  params.set<std::vector<BoundaryName>>("connections") = {};
   params.suppressParameter<std::vector<BoundaryName>>("connections");
   params.addRequiredParam<Real>("omega_rated", "Rated turbine speed [rad/s]");
   params.addRequiredParam<Real>("D_wheel",
@@ -144,22 +145,21 @@ ShaftConnectedTurbine1Phase::addVariables()
   VolumeJunction1Phase::addVariables();
 
   getTHMProblem().addSimVariable(false, _delta_p_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_delta_p_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _power_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_power_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _driving_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_driving_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _flow_coeff_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_flow_coeff_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _friction_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _moment_of_inertia_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+
+  if (!_app.isRestarting())
+  {
+    getTHMProblem().addConstantScalarIC(_delta_p_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_power_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_driving_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_flow_coeff_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+  }
 }
 
 void

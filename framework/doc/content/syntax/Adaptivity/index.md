@@ -1,6 +1,6 @@
 # Adaptivity System
 
-MOOSE employs $h$-adaptivity to automatically refine or coarsen the mesh in regions of high or low
+MOOSE employs $h$-adaptivity and $p$-adaptivity to automatically refine or coarsen the mesh in regions of high or low
 estimated solution error, respectively. The idea is to concentrate degrees of freedom (DOFs) where
 the error is highest, while reducing DOFs where the solution is already well-captured. This is
 achieved through splitting and joining elements from the original mesh based on an error
@@ -20,6 +20,15 @@ higher than their parents.
 !media framework/adaptivity.png
        caption=Self-similar refinement pattern utilized by MOOSE for adaptivity for 1D linear,
                2D quadrilateral, and 3D hexahedron elements.
+
+## P-Refinement
+
+P-refinement level mismatches are not supported for continuous, non-hierarchic
+finite element families. Additionally, p-refinement of `NEDELEC_ONE` and `RAVIART_THOMAS`
+elements is not supported. Consequently, by default we disable p-refinement of the
+following bases: `LAGRANGE`, `NEDELEC_ONE`, `RAVIART_THOMAS`, `LAGRANGE_VEC`, `CLOUGH`,
+`BERNSTEIN`, and `RATIONAL_BERNSTEIN`. Users can control what families are disabled for
+p-refinement by setting the `disable_p_refinement_for_families` parameter.
 
 ## Cycles and Intervals
 

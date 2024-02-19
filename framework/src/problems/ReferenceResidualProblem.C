@@ -48,6 +48,7 @@ ReferenceResidualProblem::validParams()
       "provided, separated by semicolon)");
   params.addParam<std::vector<NonlinearVariableName>>(
       "converge_on",
+      {},
       "If supplied, use only these variables in the individual variable convergence check");
   MooseEnum Lnorm("global_L2 local_L2 global_Linf local_Linf", "global_L2");
   params.addParam<MooseEnum>(

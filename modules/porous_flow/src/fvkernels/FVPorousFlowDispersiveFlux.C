@@ -137,7 +137,7 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
     ADRealGradient gradp;
     ADRealTensorValue mobility;
 
-    // If we are on a boundary face, use the reconstructed gradient computed in _grad_p
+    // If we are on a boundary face, use the gradient computed in _grad_p
     if (onBoundary(*_face_info))
     {
       gradp = -_grad_p[_qp][p] + _density[_qp][p] * _gravity;

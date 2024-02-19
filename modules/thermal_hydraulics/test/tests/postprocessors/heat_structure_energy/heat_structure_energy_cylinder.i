@@ -26,15 +26,15 @@
 #
 # Finally, n_units * 2 pi * rho2 * cp2 * int(T * y) = 7.930950653987433e+04
 
-[HeatStructureMaterials]
+[SolidProperties]
   [region1-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
   []
   [region2-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 5
     rho = 3
@@ -60,7 +60,8 @@
     n_elems = 50
 
     names = 'region1 region2'
-    materials = 'region1-mat region2-mat'
+    solid_properties = 'region1-mat region2-mat'
+    solid_properties_T_ref = '300 300'
     widths = '4.0 3.0'
     n_part_elems = '5 50'
 

@@ -66,7 +66,7 @@ SpecificImpulse1Phase::SpecificImpulse1Phase(const InputParameters & parameters)
 void
 SpecificImpulse1Phase::threadJoin(const UserObject & y)
 {
-  const SpecificImpulse1Phase & pps = static_cast<const SpecificImpulse1Phase &>(y);
+  const auto & pps = static_cast<const SpecificImpulse1Phase &>(y);
   _thrust += pps._thrust;
   _mass_flow_rate += pps._mass_flow_rate;
 }

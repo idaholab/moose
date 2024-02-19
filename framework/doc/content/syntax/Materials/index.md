@@ -75,6 +75,14 @@ point. Recall that "_diffusivity" is a reference to a `MaterialProperty` type. T
 type is a container that stores the values of a property for each quadrature point. Therefore, this
 container must be indexed by `_qp` to compute the value for a specific quadrature point.
 
+!alert note
+`ExampleMaterial` can call `isPropertyActive(_diffusivity.id())` in its `computeQpProperties` to
+check whether this property is consumed during the run-time. This function provides a capability
+of skipping evaluations of certain material properties within a material when such evaluations are
+costly for performance optimization. MOOSE calls materials to do the evaluations when needed.
+This `isPropertyActive` routine gives code developers a finer control on the material property
+evaluation.
+
 ## Consuming Properties
 
 Objects that require material properties consume them using one of two functions
@@ -282,7 +290,7 @@ Newton iterations. This material declares a material property (`_p`) which is wh
 iterating on the material properties containing `f` and `f'` from `RecomputeMaterial`. The
 `_discrete` member is a reference to a `Material` object retrieved with `getMaterial`.
 
-!listing NewtonMaterial.C start=MOOSEDOCS_START include-start=Falseg
+!listing NewtonMaterial.C start=MOOSEDOCS_START include-start=False
 
 To create and use a "Discrete" `Material` use the following to guide the process.
 

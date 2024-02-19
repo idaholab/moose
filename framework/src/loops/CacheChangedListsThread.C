@@ -27,36 +27,51 @@ CacheChangedListsThread::~CacheChangedListsThread() {}
 void
 CacheChangedListsThread::onElement(const Elem * elem)
 {
-  // Cache any parents of local elements that have just been refined
-  // away.
-  //
-  // The parent itself might *not* be local, because only some of its
-  // new children are.  Make sure to cache every such case exactly once.
-  if (elem->refinement_flag() == Elem::JUST_REFINED)
+  if (_mesh.doingPRefinement())
   {
-    const Elem * const parent = elem->parent();
-    const unsigned int child_num = parent->which_child_am_i(elem);
-
-    bool im_the_lowest_local_child = true;
-    for (const auto c : make_range(child_num))
-      if (parent->child_ptr(c) && parent->child_ptr(c) != remote_elem &&
-          parent->child_ptr(c)->processor_id() == elem->processor_id())
-        im_the_lowest_local_child = false;
-
-    if (im_the_lowest_local_child)
-      _refined_elements.push_back(parent);
-  }
-
-  if (elem->refinement_flag() == Elem::JUST_COARSENED)
-  {
-    if (elem->has_children())
+    // When we p-refine an active child element this can lead to p-refinement of the parent as well.
+    // We don't care about inactive parents
+    if (elem->active())
     {
-      _coarsened_elements.push_back(elem);
+      if (elem->p_refinement_flag() == Elem::JUST_REFINED)
+        _refined_elements.push_back(elem);
+      else if (elem->p_refinement_flag() == Elem::JUST_COARSENED)
+        _coarsened_elements.push_back(elem);
+    }
+  }
+  else
+  {
+    // Cache any parents of local elements that have just been refined
+    // away.
+    //
+    // The parent itself might *not* be local, because only some of its
+    // new children are.  Make sure to cache every such case exactly once.
+    if (elem->refinement_flag() == Elem::JUST_REFINED)
+    {
+      const Elem * const parent = elem->parent();
+      const unsigned int child_num = parent->which_child_am_i(elem);
 
-      std::vector<const Elem *> & children = _coarsened_element_children[elem];
+      bool im_the_lowest_local_child = true;
+      for (const auto c : make_range(child_num))
+        if (parent->child_ptr(c) && parent->child_ptr(c) != remote_elem &&
+            parent->child_ptr(c)->processor_id() == elem->processor_id())
+          im_the_lowest_local_child = false;
 
-      for (unsigned int child = 0; child < elem->n_children(); child++)
-        children.push_back(elem->child_ptr(child));
+      if (im_the_lowest_local_child)
+        _refined_elements.push_back(parent);
+    }
+
+    else if (elem->refinement_flag() == Elem::JUST_COARSENED)
+    {
+      if (elem->has_children())
+      {
+        _coarsened_elements.push_back(elem);
+
+        std::vector<const Elem *> & children = _coarsened_element_children[elem];
+
+        for (unsigned int child = 0; child < elem->n_children(); child++)
+          children.push_back(elem->child_ptr(child));
+      }
     }
   }
 }

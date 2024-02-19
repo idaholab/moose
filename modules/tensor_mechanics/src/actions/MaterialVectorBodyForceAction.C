@@ -25,6 +25,7 @@ MaterialVectorBodyForceAction::validParams()
 
   params.addParam<std::vector<VariableName>>(
       "displacements",
+      {},
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addParam<FunctionName>(

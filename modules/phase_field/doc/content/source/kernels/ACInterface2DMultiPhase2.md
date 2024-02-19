@@ -7,7 +7,7 @@ energy contribution for the isotropic mobility case. Its weak form is
 \begin{equation}
 \left( \kappa \nabla \eta_{\alpha i}, \nabla (L \psi) \right),
 \end{equation}
-where $\kappa_i$ (`kappa_name`) is the gradient energy coefficent, $\eta_i$ the non-conserved
+where $\kappa_i$ (`kappa_name`) is the gradient energy coefficient, $\eta_i$ the non-conserved
 non-linear order parameter variable the kernel is acting on, $L$ (`mob_name`) is
 the scalar (isotropic) mobility associated with the order parameter, and $\psi$
 is the test function. It is assumed $\kappa$ is a function of $\nabla \eta_{\alpha}$

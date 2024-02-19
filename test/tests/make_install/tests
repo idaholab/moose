@@ -32,6 +32,7 @@
                  cp ../misc/version/tests ../../../share/moose_test/tests/version;
                  cp ../../testroot ../../../share/moose_test/tests/;
                  mkdir -p ../../../make_install_test'
+      use_shell = True
       installation_type = IN_TREE
 
       detail = 'from a pre-determined user-readable location;'
@@ -79,6 +80,7 @@
                  do
                  ln -sf $bin .
                  done'
+      use_shell = True
       working_directory = '../../../make_install_test/moose_test/tests'
       installation_type = IN_TREE
       prereq = 'test_copy_install/copy_warn_overwrite'

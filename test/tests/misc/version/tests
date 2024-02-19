@@ -3,14 +3,14 @@
   design = 'MooseApp.md'
   [./print_version_long]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '^Application Version:\s*\S+'
     cli_args = '--version'
     requirement = "The application executable shall report the version with the --version command line argument."
   [../]
   [./print_version_short]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '^Application Version:\s*\S+'
     cli_args = '-v'
     requirement = "The application executable shall report the version with the -v command line argument."

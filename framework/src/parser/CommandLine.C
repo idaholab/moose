@@ -12,12 +12,15 @@
 #include "MooseInit.h"
 #include "MooseUtils.h"
 #include "InputParameters.h"
+#include "MooseEnum.h"
 
 // Contrib RE
 #include "pcrecpp.h"
 
 // C++ includes
 #include <iomanip>
+
+CommandLine::CommandLine() {}
 
 CommandLine::CommandLine(int argc, char * argv[]) { addArguments(argc, argv); }
 
@@ -110,80 +113,58 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
 }
 
 void
-CommandLine::addCommandLineOptionsFromParams(InputParameters & params)
+CommandLine::addCommandLineOptionsFromParams(const InputParameters & params)
 {
-  for (const auto & it : params)
+  for (const auto & name_value_pair : params)
   {
-    Option cli_opt;
-    std::vector<std::string> syntax;
-    std::string orig_name = it.first;
-
-    cli_opt.description = params.getDocString(orig_name);
-    if (!params.isPrivate(orig_name))
-      // If a param is private then it shouldn't have any command line syntax.
-      syntax = params.getSyntax(orig_name);
-    cli_opt.cli_syntax = syntax;
-    cli_opt.required = false;
-
-    if (params.have_parameter<bool>(orig_name))
-      cli_opt.argument_type = CommandLine::NONE;
-    else
-      cli_opt.argument_type = CommandLine::REQUIRED;
-
-    addOption(orig_name, cli_opt);
+    const auto & name = name_value_pair.first;
+    if (params.isCommandLineParameter(name))
+    {
+      Option cli_opt;
+      cli_opt.description = params.getDocString(name);
+      cli_opt.cli_syntax = params.getCommandLineSyntax(name);
+      cli_opt.argument_type = params.getCommandLineArgumentType(name);
+      cli_opt.required = false;
+      addOption(name, cli_opt);
+    }
   }
 }
 
 void
 CommandLine::populateInputParams(InputParameters & params)
 {
-  for (const auto & it : params)
+#define trySetParameter(type)                                                                      \
+  if (dynamic_cast<const libMesh::Parameters::Parameter<type> *>(value.get()))                     \
+  {                                                                                                \
+    search(name, params.set<type>(name));                                                          \
+    continue;                                                                                      \
+  }
+
+  for (const auto & [name, value] : params)
   {
-    std::string orig_name = it.first;
-
-    if (search(orig_name))
+    if (params.isCommandLineParameter(name) && search(name))
     {
-      if (params.have_parameter<std::string>(orig_name))
-      {
-        search(orig_name, params.set<std::string>(orig_name));
-        continue;
-      }
+      trySetParameter(std::string);
+      trySetParameter(std::vector<std::string>);
+      trySetParameter(Real);
+      trySetParameter(unsigned int);
+      trySetParameter(int);
+      trySetParameter(bool);
+      trySetParameter(MooseEnum);
+#undef trySetParameter
 
-      if (params.have_parameter<std::vector<std::string>>(orig_name))
-      {
-        search(orig_name, params.set<std::vector<std::string>>(orig_name));
-        continue;
-      }
-
-      if (params.have_parameter<Real>(orig_name))
-      {
-        search(orig_name, params.set<Real>(orig_name));
-        continue;
-      }
-
-      if (params.have_parameter<unsigned int>(orig_name))
-      {
-        search(orig_name, params.set<unsigned int>(orig_name));
-        continue;
-      }
-
-      if (params.have_parameter<int>(orig_name))
-      {
-        search(orig_name, params.set<int>(orig_name));
-        continue;
-      }
-
-      if (params.have_parameter<bool>(orig_name))
-      {
-        search(orig_name, params.set<bool>(orig_name));
-        continue;
-      }
+      mooseError("Command-line parameter '",
+                 name,
+                 "' of type '",
+                 value->type(),
+                 "' is not of a consumable type.\n\nAdd an entry with this type to "
+                 "CommandLine::populateInputParams if it is needed.");
     }
-    else if (params.isParamRequired(orig_name))
+    else if (params.isParamRequired(name))
       mooseError("Missing required command-line parameter: ",
-                 orig_name,
+                 name,
                  "\nDoc String: ",
-                 params.getDocString(orig_name));
+                 params.getDocString(name));
   }
 }
 
@@ -253,8 +234,17 @@ CommandLine::getExecutableName() const
 {
   // Grab the first item out of argv
   std::string command(_args[0]);
-  command.substr(command.find_last_of("/\\") + 1);
-  return command;
+  return command.substr(command.find_last_of("/\\") + 1);
+}
+
+std::string
+CommandLine::getExecutableNameBase() const
+{
+  auto name = getExecutableName();
+  name = name.substr(0, name.find_last_of("-"));
+  if (name.find_first_of("/") != std::string::npos)
+    name = name.substr(name.find_first_of("/") + 1, std::string::npos);
+  return name;
 }
 
 void
@@ -286,6 +276,13 @@ CommandLine::printUsage() const
 template <>
 void
 CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & argument)
+{
+  argument = stream.str();
+}
+
+template <>
+void
+CommandLine::setArgument<MooseEnum>(std::stringstream & stream, MooseEnum & argument)
 {
   argument = stream.str();
 }

@@ -49,7 +49,7 @@ can be computed with the help of the `effectiveStrain` method.
 The integration of the effective increment is performed in [RankTwoInvariant.md],
 yielding the effective strain.
 
-## Hoop Stress in Cylinderical System
+## Hoop Stress in Cylindrical System
 
 `HoopStress` calculates the value of a Rank -2 tensor along the
 hoop direction of a cylinder, shown in [eq:hoop_stress_scalar_type].  The

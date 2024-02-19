@@ -10,7 +10,7 @@ strain increments as specified by the user.
   \label{eqn:sum_increment_tensor}
   \boldsymbol{T} = \boldsymbol{T}_{old} + \sum_n \Delta D_n
 \end{equation}
-where $\boldsymbol{T}$ is the calcuated tensor and $\boldsymbol{D}_n$ are the coupled tensor
+where $\boldsymbol{T}$ is the calculated tensor and $\boldsymbol{D}_n$ are the coupled tensor
 increments.
 
 ## Example Input File

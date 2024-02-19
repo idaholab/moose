@@ -338,7 +338,7 @@ LayeredBase::finalize()
 void
 LayeredBase::threadJoin(const UserObject & y)
 {
-  const LayeredBase & lb = dynamic_cast<const LayeredBase &>(y);
+  const auto & lb = dynamic_cast<const LayeredBase &>(y);
   for (const auto i : index_range(_layer_values))
     if (lb.layerHasValue(i))
       setLayerValue(i, getLayerValue(i) + lb._layer_values[i]);

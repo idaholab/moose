@@ -35,11 +35,13 @@ addAdvancedOutputParams(InputParameters & params)
   // Hide/show variable output options
   params.addParam<std::vector<VariableName>>(
       "hide",
+      {},
       "A list of the variables and postprocessors that should NOT be output to the Exodus "
       "file (may include Variables, ScalarVariables, and Postprocessor names).");
 
   params.addParam<std::vector<VariableName>>(
       "show",
+      {},
       "A list of the variables and postprocessors that should be output to the Exodus file "
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
@@ -150,6 +152,10 @@ AdvancedOutput::initialSetup()
 void
 AdvancedOutput::init()
 {
+  // Initialize the execution flags
+  for (auto & [name, input] : _advanced_execute_on)
+    initExecutionTypes(name, input);
+
   // Clear existing execute information lists
   _execute_data.reset();
 
@@ -185,10 +191,6 @@ AdvancedOutput::init()
   // Initialize the show/hide/output lists for each of the types of output
   for (auto & it : _execute_data)
     initOutputList(it.second);
-
-  // Initialize the execution flags
-  for (auto & it : _advanced_execute_on)
-    initExecutionTypes(it.first, it.second);
 }
 
 AdvancedOutput::~AdvancedOutput() {}
@@ -429,13 +431,19 @@ AdvancedOutput::initAvailableLists()
         if (var.isArray())
           vname = SubProblem::arrayVariableComponent(var_name, i);
 
-        if (type.order == CONSTANT && type.family != MONOMIAL_VEC)
+        // A note that if we have p-refinement we assume "worst-case" scenario that our constant
+        // monomial/monomial-vec families have been refined and we can no longer write them as
+        // elemental
+        if (type.order == CONSTANT && !_problem_ptr->havePRefinement() &&
+            type.family != MONOMIAL_VEC)
           _execute_data["elemental"].available.insert(vname);
         else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
-                 type.family == MONOMIAL_VEC)
+                 type.family == MONOMIAL_VEC || type.family == RAVIART_THOMAS)
         {
-          const auto geom_type =
-              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT)) ? "elemental" : "nodal";
+          const auto geom_type = ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) &&
+                                  !_problem_ptr->havePRefinement())
+                                     ? "elemental"
+                                     : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
@@ -519,7 +527,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
         if (type.order == CONSTANT)
           _execute_data["elemental"].show.insert(vname);
         else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
-                 type.family == MONOMIAL_VEC)
+                 type.family == MONOMIAL_VEC || type.family == RAVIART_THOMAS)
         {
           const auto geom_type =
               ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT)) ? "elemental" : "nodal";
@@ -574,7 +582,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
         if (type.order == CONSTANT)
           _execute_data["elemental"].hide.insert(vname);
         else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
-                 type.family == MONOMIAL_VEC)
+                 type.family == MONOMIAL_VEC || type.family == RAVIART_THOMAS)
         {
           switch (_es_ptr->get_mesh().spatial_dimension())
           {

@@ -3,7 +3,7 @@
 ## Introduction
 
 !media /phase_field/linearized_interface_function.png style=width:40%;margin-left:1%;float:right;
-       caption=Figure 1: Example of order parmeter values ($\phi_1$, $\phi_2$) and the linearized interface transformed variables ($\psi_1$, $\psi_2$),
+       caption=Figure 1: Example of order parameter values ($\phi_1$, $\phi_2$) and the linearized interface transformed variables ($\psi_1$, $\psi_2$),
 
 In a phase field grain growth model, like that developed by [!cite](moelans_quantitative_2008) and [implemented in MOOSE](Grain_Growth_Model.md), the order parameters that represent the grains tend to follow a $\tanh$ profile across the interface. A fine mesh is required to resolve this highly nonlinear profile, such that at least three elements are typically required across the grain boundaries. This fine mesh required at the grain boundaries makes the computational cost of grain growth simulations high.
 
@@ -17,7 +17,7 @@ where $\phi_i$ is the original order parameter and $\psi_i$ is the new variable.
 
 ## MOOSE Implementation
 
-Linearized interface has been implemented in the multiphase field grain growth model in MOOSE. The basic model is identical to the [standard phase field model in MOOSE](/Grain_Growth_Model.md), but it solves for the transformed linearized interface variables rather than the standard order parameters. The order parameters are created as AuxVariables, allowing them to be visualized. The grain boundary can be visualized using an AuxVariable equal to $\sum_i \phi_i^2$, calculated using [BndsCalcAux](/BndsCalcAux.md) in the usal manner.
+Linearized interface has been implemented in the multiphase field grain growth model in MOOSE. The basic model is identical to the [standard phase field model in MOOSE](/Grain_Growth_Model.md), but it solves for the transformed linearized interface variables rather than the standard order parameters. The order parameters are created as AuxVariables, allowing them to be visualized. The grain boundary can be visualized using an AuxVariable equal to $\sum_i \phi_i^2$, calculated using [BndsCalcAux](/BndsCalcAux.md) in the usual manner.
 
 The MOOSE objects used in the linearized interface grain growth model are listed, below:
 
@@ -37,7 +37,7 @@ The MOOSE objects used in the linearized interface grain growth model are listed
 
 ## Bounded Solve
 
-When solving the linearized interface version of the grain growth model, [!cite](gong2018fast) and [!cite](chadwick2021development) found that the solve is unstable unless bounds are placed on the possible values for the transformed variables. Therefore, upper and lower bounds must be defined in the `[Bounds]` block for each variable using [ConstantBoundsAux](/ConstantBoundsAux.md). A typical bounds range is $\pm5$. For example:
+When solving the linearized interface version of the grain growth model, [!cite](gong2018fast) and [!cite](chadwick2021development) found that the solve is unstable unless bounds are placed on the possible values for the transformed variables. Therefore, upper and lower bounds must be defined in the `[Bounds]` block for each variable using [ConstantBounds](/ConstantBounds.md). A typical bounds range is $\pm5$. For example:
 
 !listing modules/phase_field/test/tests/grain_growth_w_linearized_interface/grain_growth_linearized_interface.i block=Bounds
 

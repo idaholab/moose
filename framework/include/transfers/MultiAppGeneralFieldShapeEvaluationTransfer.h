@@ -26,10 +26,12 @@ public:
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
 
-  virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
-                                    std::vector<std::pair<Real, Real>> & outgoing_vals) override;
+  virtual void
+  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+                       std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
 private:
+  bool usesMooseAppCoordTransform() const override { return true; }
   /*
    * Build mesh functions local to the domain
    * @param[in] var_name the variable to build the mesh functions for
@@ -44,10 +46,11 @@ private:
    * @param[in] the points to evaluate the variable shape functions at
    * @param[out] the values of the variables
    */
-  void evaluateInterpValuesWithMeshFunctions(const std::vector<BoundingBox> & local_bboxes,
-                                             std::vector<MeshFunction> & local_meshfuns,
-                                             const std::vector<Point> & incoming_points,
-                                             std::vector<std::pair<Real, Real>> & outgoing_vals);
+  void evaluateInterpValuesWithMeshFunctions(
+      const std::vector<BoundingBox> & local_bboxes,
+      std::vector<MeshFunction> & local_meshfuns,
+      const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+      std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /*
    * Bounding boxes

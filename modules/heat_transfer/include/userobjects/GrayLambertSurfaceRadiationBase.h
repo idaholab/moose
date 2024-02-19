@@ -63,9 +63,6 @@ protected:
   /// the coupled temperature variable
   const VariableValue & _temperature;
 
-  /// constant emissivity for each boundary
-  const std::vector<Real> _emissivity;
-
   /// side id to index map, side ids can have holes or be out of order
   std::vector<const Function *> _fixed_side_temperature;
 
@@ -92,6 +89,9 @@ protected:
 
   /// the irradiation into each surface
   std::vector<Real> _surface_irradiation;
+
+  /// constant emissivity for each boundary
+  std::vector<const Function *> _emissivity;
 
   /// side id to index map for isothermal boundaries, side ids can have holes or be out of order
   std::map<unsigned int, unsigned int> _fixed_side_id_index;

@@ -1,13 +1,17 @@
 [Tests]
+  issues = '#19762'
+  design = 'TotalPower.md'
   [phy:constant_power]
     type = 'CSVDiff'
     input = 'phy.constant_power.i'
     csvdiff = 'phy.constant_power_out.csv'
+    requirement = 'The system shall be able to apply a heat source in a heat structure component.'
   []
 
   [clg:power]
     type = 'CSVDiff'
     input = 'clg.power.i'
     csvdiff = 'clg.power_out.csv'
+    requirement = 'The system shall be able to dynamically control the heat source in a heat structure component.'
   []
 []

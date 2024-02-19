@@ -159,7 +159,7 @@ linearInterpolation(const T & value1,
  * @param value2 Reference to value2 in the (1/(gc/value1+(1-gc)/value2)) expression
  * @param fi Reference to the FaceInfo of the face on which the interpolation is requested
  * @param one_is_elem Boolean indicating if the interpolation weight on FaceInfo belongs to the
- * elementcorresponding to value1
+ * element corresponding to value1
  * @return The interpolated value
  */
 template <typename T1, typename T2>
@@ -188,7 +188,9 @@ harmonicInterpolation(const T1 & value1,
     // so we assert that the input values shall be positive.
 #ifndef NDEBUG
     if (value1 * value2 <= 0)
-      mooseWarning("Input values must be of the same sign for harmonic interpolation");
+      mooseWarning("Input values (" + Moose::stringify(MetaPhysicL::raw_value(value1)) + " & " +
+                   Moose::stringify(MetaPhysicL::raw_value(value2)) +
+                   ") must be of the same sign for harmonic interpolation");
 #endif
     return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
   }
@@ -200,8 +202,10 @@ harmonicInterpolation(const T1 & value1,
     {
 #ifndef NDEBUG
       if (value1(i) * value2(i) <= 0)
-        mooseWarning("Component " + std::to_string(i) +
-                     "of input values must be of the same sign for harmonic interpolation");
+        mooseWarning("Component " + std::to_string(i) + " of input values (" +
+                     Moose::stringify(MetaPhysicL::raw_value(value1(i))) + " & " +
+                     Moose::stringify(MetaPhysicL::raw_value(value2(i))) +
+                     ") must be of the same sign for harmonic interpolation");
 #endif
       result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
     }
@@ -218,7 +222,10 @@ harmonicInterpolation(const T1 & value1,
 #ifndef NDEBUG
         if (value1(i, j) * value2(i, j) <= 0)
           mooseWarning("Component (" + std::to_string(i) + "," + std::to_string(j) +
-                       ") of input values must be of the same sign for harmonic interpolation");
+                       ") of input values (" +
+                       Moose::stringify(MetaPhysicL::raw_value(value1(i, j))) + " & " +
+                       Moose::stringify(MetaPhysicL::raw_value(value2(i, j))) +
+                       ") must be of the same sign for harmonic interpolation");
 #endif
         result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
       }
@@ -287,18 +294,25 @@ interpolate(InterpMethod m,
  * perform a possibly skew-corrected linear interpolation by evaluating the supplied functor with
  * the provided functor face argument
  */
-template <typename T>
+template <typename T, FunctorEvaluationKind FEK = FunctorEvaluationKind::Value>
 T
 linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
+  static_assert((FEK == FunctorEvaluationKind::Value) || (FEK == FunctorEvaluationKind::Dot),
+                "Only Value and Dot evaluations currently supported");
   mooseAssert(face.limiter_type == LimiterType::CentralDifference,
               "this interpolation method is meant for linear interpolations");
 
   mooseAssert(face.fi,
               "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
 
+  constexpr FunctorEvaluationKind GFEK = FunctorGradientEvaluationKind<FEK>::value;
+
   const auto elem_arg = face.makeElem();
   const auto neighbor_arg = face.makeNeighbor();
+
+  const auto elem_eval = functor.template genericEvaluate<FEK>(elem_arg, time);
+  const auto neighbor_eval = functor.template genericEvaluate<FEK>(neighbor_arg, time);
 
   if (face.correct_skewness)
   {
@@ -308,14 +322,13 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face, const 
     // 2nd order accuracy on skewed meshes with the minimum additional effort.
     FaceArg new_face(face);
     new_face.correct_skewness = false;
-    const auto surface_gradient = functor.gradient(new_face, time);
+    const auto surface_gradient = functor.template genericEvaluate<GFEK>(new_face, time);
 
     return skewCorrectedLinearInterpolation(
-        functor(elem_arg, time), functor(neighbor_arg, time), surface_gradient, *face.fi, true);
+        elem_eval, neighbor_eval, surface_gradient, *face.fi, true);
   }
   else
-    return linearInterpolation(
-        functor(elem_arg, time), functor(neighbor_arg, time), *face.fi, true);
+    return linearInterpolation(elem_eval, neighbor_eval, *face.fi, true);
 }
 
 /**
@@ -522,10 +535,16 @@ interpolate(const Limiter & limiter,
  * information neighbor. This pair should sum to unity. The second pair corresponds to the face
  * information functor element value and neighbor
  */
-template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+template <typename T,
+          FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
+          typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 std::pair<std::pair<T, T>, std::pair<T, T>>
 interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
+  static_assert((FEK == FunctorEvaluationKind::Value) || (FEK == FunctorEvaluationKind::Dot),
+                "Only Value and Dot evaluations currently supported");
+
+  constexpr FunctorEvaluationKind GFEK = FunctorGradientEvaluationKind<FEK>::value;
   typedef typename FunctorBase<T>::GradientType GradientType;
   static const GradientType zero(0);
 
@@ -534,8 +553,8 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
 
   const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
   const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
-  auto phi_upwind = functor(upwind_arg, time);
-  auto phi_downwind = functor(downwind_arg, time);
+  auto phi_upwind = functor.template genericEvaluate<FEK>(upwind_arg, time);
+  auto phi_downwind = functor.template genericEvaluate<FEK>(downwind_arg, time);
 
   std::pair<T, T> interp_coeffs;
   if (face.limiter_type == LimiterType::Upwind ||
@@ -544,7 +563,7 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
         interpCoeffs(*limiter, phi_upwind, phi_downwind, &zero, *face.fi, face.elem_is_upwind);
   else
   {
-    const auto grad_phi_upwind = functor.gradient(upwind_arg, time);
+    const auto grad_phi_upwind = functor.template genericEvaluate<GFEK>(upwind_arg, time);
     interp_coeffs = interpCoeffs(
         *limiter, phi_upwind, phi_downwind, &grad_phi_upwind, *face.fi, face.elem_is_upwind);
   }
@@ -558,16 +577,21 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
         std::make_pair(std::move(phi_downwind), std::move(phi_upwind)));
 }
 
-template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+template <typename T,
+          FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
+          typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 T
 interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
+  static_assert((FEK == FunctorEvaluationKind::Value) || (FEK == FunctorEvaluationKind::Dot),
+                "Only Value and Dot evaluations currently supported");
+
   // Special handling for central differencing as it is the only interpolation method which
   // currently supports skew correction
   if (face.limiter_type == LimiterType::CentralDifference)
-    return linearInterpolation(functor, face, time);
+    return linearInterpolation<T, FEK>(functor, face, time);
 
-  const auto [interp_coeffs, advected] = interpCoeffsAndAdvected(functor, face, time);
+  const auto [interp_coeffs, advected] = interpCoeffsAndAdvected<T, FEK>(functor, face, time);
   return interp_coeffs.first * advected.first + interp_coeffs.second * advected.second;
 }
 

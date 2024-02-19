@@ -1,0 +1,42 @@
+[Tests]
+  issues = '#22789'
+  design = 'MeshDivisionFunctorReductionVectorPostprocessor.md'
+
+  [mesh_division_reduction]
+    type = 'CSVDiff'
+    requirement = 'The system shall support reduction of functors on a division of the mesh.'
+
+    input = 'reduction.i'
+    csvdiff = 'reduction_out_average_0000.csv reduction_out_integral_0000.csv
+               reduction_out_max_0000.csv reduction_out_min_0000.csv
+               reduction_out_sample_max_0000.csv'
+  []
+  [errors]
+    requirement = 'The system shall report an error if'
+    [more_than_one_spatial_value]
+      type = RunException
+      input = reduction.i
+      cli_args = 'VectorPostprocessors/sample_max/userobject=min'
+      expect_err = "The spatialValue user object interface was not conceived for objects that "
+                   "compute multiple values"
+      detail = 'a spatial value is requested from a reduction object that can return multiple spatial values, one for each input functor,'
+    []
+    [spatial_value_sampling_oob]
+      type = RunException
+      input = reduction.i
+      cli_args = 'VectorPostprocessors/sample_max/points="10 0 0"'
+      expect_err = "Spatial value sampled outside of the mesh_division specified"
+      detail = 'and if a spatial value is requested from a reduction object outside of the range of validity of the mesh division.'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall emit a warning if'
+    [reduction_oob_for_the_mesh_division]
+      type = RunException
+      input = reduction.i
+      cli_args = 'MeshDivisions/mesh_div/r_min=1'
+      expect_err = "Spatial value sampled outside of the mesh_division"
+      detail = 'a reduction is trying to obtain indexes into a mesh division for points that lie outside of the mesh division.'
+    []
+  []
+[]

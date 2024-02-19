@@ -12,6 +12,8 @@
 // Moose Includes
 #include "MooseError.h"
 #include "Conversion.h"
+#include "MooseEnum.h"
+#include "InputParameters.h"
 
 #include "libmesh/parallel.h"
 
@@ -31,24 +33,19 @@ class InputParameters;
 class CommandLine
 {
 public:
-  /// Type of argument for a given option
-  enum ARGUMENT
-  {
-    NONE,
-    OPTIONAL,
-    REQUIRED
-  };
+  using ArgumentType = InputParameters::CommandLineMetadata::ArgumentType;
 
   struct Option
   {
     std::string description;
     std::vector<std::string> cli_syntax;
     bool required;
-    ARGUMENT argument_type;
+    ArgumentType argument_type;
     /// This gets filled in automagicaly when calling addOption()
     std::vector<std::string> cli_switch;
   };
 
+  CommandLine();
   CommandLine(int argc, char * argv[]);
   CommandLine(const CommandLine & other);
   virtual ~CommandLine();
@@ -73,7 +70,7 @@ public:
    */
   const std::vector<std::string> & getArguments() { return _argv; }
 
-  void addCommandLineOptionsFromParams(InputParameters & params);
+  void addCommandLineOptionsFromParams(const InputParameters & params);
 
   void populateInputParams(InputParameters & params);
 
@@ -110,6 +107,11 @@ public:
   std::string getExecutableName() const;
 
   /**
+   * Get the exectuable name base (the name without the -[opt,oprof,devel,dbg])
+   */
+  std::string getExecutableNameBase() const;
+
+  /**
    * Print the usage info for this command line
    */
   void printUsage() const;
@@ -139,10 +141,16 @@ public:
 
 protected:
   /**
-   * Used to set the argument value, allows specialization
+   * Helper for setting the argument value, allows specialization
    */
   template <typename T>
   void setArgument(std::stringstream & stream, T & argument);
+
+  /**
+   * Helper for setting the argument value; catches errors so we can provide more context
+   */
+  template <typename T>
+  void setArgument(std::stringstream & stream, T & argument, const std::string & cli_switch);
 
   /// Command line options
   std::map<std::string, Option> _cli_options;
@@ -167,40 +175,75 @@ CommandLine::setArgument(std::stringstream & stream, T & argument)
   stream >> argument;
 }
 
+template <typename T>
+void
+CommandLine::setArgument(std::stringstream & stream, T & argument, const std::string & cli_switch)
+{
+  // Keep track of and change the throw on error characteristics so that
+  // we can catch parsing errors for the argument
+  const auto throw_on_error_orig = Moose::_throw_on_error;
+  Moose::_throw_on_error = true;
+
+  const auto raw_value = stream.str();
+  try
+  {
+    setArgument(stream, argument);
+  }
+  catch (std::exception & e)
+  {
+    Moose::_throw_on_error = throw_on_error_orig;
+    mooseError("While parsing command line argument '",
+               cli_switch,
+               "' with value '",
+               raw_value,
+               "':\n\n",
+               e.what());
+  }
+
+  Moose::_throw_on_error = throw_on_error_orig;
+}
+
 // Specialization for std::string
 template <>
 void CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & argument);
+// Specialization for MooseEnum
+template <>
+void CommandLine::setArgument<MooseEnum>(std::stringstream & stream, MooseEnum & argument);
 
 template <typename T>
 bool
 CommandLine::search(const std::string & option_name, T & argument)
 {
-  std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
-  if (pos != _cli_options.end())
+  if (auto pos = _cli_options.find(option_name); pos != _cli_options.end())
   {
-    for (unsigned int i = 0; i < pos->second.cli_switch.size(); ++i)
-    {
-      for (size_t j = 0; j < _args.size(); j++)
+    const auto & option = pos->second;
+    for (const auto & cli_switch : option.cli_switch)
+      for (const auto arg_i : index_range(_args))
       {
-        auto arg = _args[j];
+        const auto & arg = _args[arg_i];
 
-        if (arg == pos->second.cli_switch[i])
+        if (arg == cli_switch)
         {
           // "Flag" CLI options are added as Boolean types, when we see them
           // we set the Boolean argument to true
-          if (pos->second.argument_type == NONE)
+          if (option.argument_type == ArgumentType::NONE)
             argument = true;
-          else if (j + 1 < _args.size())
+          else if (arg_i + 1 < _args.size())
           {
             std::stringstream ss;
-            ss << _args[j + 1];
+            ss << _args[arg_i + 1];
 
-            setArgument(ss, argument);
+            setArgument(ss, argument, cli_switch);
+          }
+          else if (option.argument_type == ArgumentType::REQUIRED)
+          {
+            mooseError("The command line argument '",
+                       cli_switch,
+                       "' requires a value and one was not provided.");
           }
           return true;
         }
       }
-    }
 
     if (pos->second.required)
     {
@@ -230,8 +273,11 @@ CommandLine::search(const std::string & option_name, std::vector<T> & argument)
           // "Flag" CLI options added vector of Boolean types may apprear multiple times on the
           // command line (like a repeated verbosity flag to increase verbosity), when we see them
           // we append a true value to the vector.
-          if (pos->second.argument_type == NONE)
+          if (pos->second.argument_type == ArgumentType::NONE)
             argument.push_back(T());
+          else if (pos->second.argument_type == ArgumentType::REQUIRED)
+            mooseError("Adding vector command line parameters with required arguments is not "
+                       "currently supported");
           else
             while (j + 1 < _argv.size() && _argv[j + 1][0] != '-' &&
                    _argv[j + 1].find("=") == std::string::npos)
@@ -240,7 +286,7 @@ CommandLine::search(const std::string & option_name, std::vector<T> & argument)
               ss << _argv[j + 1];
 
               T item;
-              setArgument(ss, item);
+              setArgument(ss, item, pos->second.cli_switch[i]);
               argument.push_back(item);
               ++j;
             }

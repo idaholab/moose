@@ -25,6 +25,6 @@
     input = nested_monte_carlo.i
     cli_args = "Samplers/nested_mc/num_rows='10 3'"
     expect_err = "There must be a set of distributions for each loop defined by 'num_rows'"
-    requirement = 'The system shall error out when the number of nested Monte Carlo loops does not match the number of sets of distributions.'
+    requirement = 'The system shall report an error when the number of nested Monte Carlo loops does not match the number of sets of distributions.'
   []
 []

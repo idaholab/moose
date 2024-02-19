@@ -26,7 +26,7 @@ public:
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void execute() override;
-  virtual void threadJoin(const UserObject & uo) override;
+  virtual void threadJoin(const UserObject & /*uo*/) override {}
 
 protected:
   AuxiliarySystem & _aux;

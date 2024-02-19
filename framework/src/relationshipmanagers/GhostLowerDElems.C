@@ -50,6 +50,8 @@ GhostLowerDElems::operator()(const MeshBase::const_element_iterator & range_begi
 {
   mooseAssert(_moose_mesh,
               "The MOOSE mesh must be non-null in order for this relationship manager to work.");
+  if (!_moose_mesh->hasLowerD())
+    return;
 
   static const CouplingMatrix * const null_mat = nullptr;
 

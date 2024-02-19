@@ -42,7 +42,7 @@ protected:
   /**
    * Updates the stress (PK2) at a quadrature point by calling constiutive
    * relationship as defined in a child class
-   * Solves stress residual equation using Newton - Rhapson: Updates slip
+   * Solves stress residual equation using Newton - Raphson: Updates slip
    * system resistances iteratively
    */
   virtual void updateStress(RankTwoTensor & cauchy_stress, RankFourTensor & jacobian_mult);

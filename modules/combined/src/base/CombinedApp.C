@@ -21,6 +21,7 @@
 #include "FsiApp.h"
 #include "FunctionalExpansionToolsApp.h"
 #include "GeochemistryApp.h"
+#include "HeatTransferApp.h"
 #include "HeatConductionApp.h"
 #include "LevelSetApp.h"
 #include "MiscApp.h"
@@ -64,6 +65,34 @@ void
 CombinedApp::registerApps()
 {
   registerApp(CombinedApp);
+
+  ChemicalReactionsApp::registerApps();
+  ContactApp::registerApps();
+  ElectromagneticsApp::registerApps();
+  ExternalPetscSolverApp::registerApps();
+  FluidPropertiesApp::registerApps();
+  FsiApp::registerApps();
+  FunctionalExpansionToolsApp::registerApps();
+  GeochemistryApp::registerApps();
+  HeatTransferApp::registerApps();
+  HeatConductionApp::registerApps();
+  LevelSetApp::registerApps();
+  MiscApp::registerApps();
+  NavierStokesApp::registerApps();
+  OptimizationApp::registerApps();
+  PeridynamicsApp::registerApps();
+  PhaseFieldApp::registerApps();
+  PorousFlowApp::registerApps();
+  RayTracingApp::registerApps();
+  RdgApp::registerApps();
+  ReactorApp::registerApps();
+  RichardsApp::registerApps();
+  ScalarTransportApp::registerApps();
+  SolidPropertiesApp::registerApps();
+  StochasticToolsApp::registerApps();
+  TensorMechanicsApp::registerApps();
+  ThermalHydraulicsApp::registerApps();
+  XFEMApp::registerApps();
 }
 
 void

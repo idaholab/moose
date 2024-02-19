@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/CoreMeshGenerator.md'
-  issues = '#19949'
+  issues = '#19949 #25396'
   [square]
     requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
     type = 'Exodiff'
@@ -188,6 +188,30 @@
     input = 'core_periphery_prmg.i'
     cli_args = '--mesh-only'
     exodiff = 'core_periphery_prmg_in.e'
+    recover = false
+  []
+  [depletion_id_pin]
+    requirement = 'The system shall generate a 3D hexagonal core mesh with pin-wise depletion IDs'
+    type = 'Exodiff'
+    input = 'core_hex.i'
+    cli_args = "Mesh/cmg/generate_depletion_id=true
+                Mesh/cmg/depletion_id_type=pin
+                Mesh/cmg/extrude=false
+                Outputs/file_base=core_hex_depl_pin_in
+                Outputs/out/extra_element_ids_to_output=depletion_id"
+    exodiff = 'core_hex_depl_pin_in.e'
+    recover = false
+  []
+  [depletion_id_pin_type]
+    requirement = 'The system shall generate a 3D hexagonal core mesh with pin type-wise depletion IDs'
+    type = 'Exodiff'
+    input = 'core_hex.i'
+    cli_args = "Mesh/cmg/generate_depletion_id=true
+                Mesh/cmg/depletion_id_type=pin_type
+                Mesh/cmg/extrude=false
+                Outputs/file_base=core_hex_depl_pin_type_in
+                Outputs/out/extra_element_ids_to_output=depletion_id"
+    exodiff = 'core_hex_depl_pin_type_in.e'
     recover = false
   []
 []

@@ -6,7 +6,7 @@
     expect_err = "variable1 does not exist on all the blocks specified by the subdomain1 parameter"
     cli_args = "FVInterfaceKernels/active='bad1'"
     design = 'FVInterfaceKernels/index.md'
-    requirement = 'The system shall error if a user specified variable on the 1st side of an interface does not actually exist on the 1st side.'
+    requirement = 'The system shall report an error if a user specified variable on the 1st side of an interface does not actually exist on the 1st side.'
   []
   [run_except2]
     type = RunException
@@ -14,7 +14,7 @@
     expect_err = "variable2 does not exist on all the blocks specified by the subdomain2 parameter"
     cli_args = "FVInterfaceKernels/active='bad2'"
     design = 'FVInterfaceKernels/index.md'
-    requirement = 'The system shall error if a user specified variable on the 2nd side of an interface does not actually exist on the 2nd side.'
+    requirement = 'The system shall report an error if a user specified variable on the 2nd side of an interface does not actually exist on the 2nd side.'
   []
   [run_except3]
     type = RunException
@@ -24,7 +24,7 @@
                  "was implicitly used on subdomain2"
     cli_args = "FVInterfaceKernels/active='bad3'"
     design = 'FVInterfaceKernels/index.md'
-    requirement = 'The system shall error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1st side of the interface should be used on the 2nd side, and the variable on the 1st side does not exist on the 2nd side.'
+    requirement = 'The system shall report an error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1st side of the interface should be used on the 2nd side, and the variable on the 1st side does not exist on the 2nd side.'
   []
   [first_order_convergence]
     requirement = 'The system shall be able to solve a diffusion problem with finite volumes with the domain split in half and show first order convergence due to its treatment of coefficient discontinuities both'
@@ -35,6 +35,7 @@
       test_case = TestFVOneVarDiffusionInterface
       detail = 'with an interfacing object'
       required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree # see #26480
     []
     [without-ik]
       type = PythonUnitTest
@@ -42,6 +43,7 @@
       test_case = TestFVNoInterface
       detail = 'without an interfacing object'
       required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree # see #26480
     []
   []
   [harmonic]
@@ -53,6 +55,7 @@
     input = test.py
     test_case = TestFVOneVarDiffusionInterfaceHarmonic
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
   []
   [resid_and_jac]
     requirement = 'The system shall be able to compute the residual and Jacobian together for a finite volume interface kernel.'

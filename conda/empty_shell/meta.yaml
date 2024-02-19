@@ -13,7 +13,12 @@ build:
   number: {{ build }}  # [linux,osx]
   string: {{ strbuild }}
   skip: true # [win]
-
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+requirements:
+  run:
+    - {{ moose_dev }}
 about:
   home: https://mooseframework.org/
   license: LGPL 2.1

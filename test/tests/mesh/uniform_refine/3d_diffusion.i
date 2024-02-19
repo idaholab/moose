@@ -1,18 +1,23 @@
 [Mesh]
-  [./square]
-    type = GeneratedMeshGenerator
+  [square]
+    type = AlwaysDeleteRemotesGeneratedMeshGenerator
     nx = 16
     ny = 16
     nz = 16
     dim = 3
-  [../]
-
+  []
+  uniform_refine = 1
+  skip_deletion_repartition_after_refine = true
   parallel_type = distributed
+  [Partitioner]
+    type = GridPartitioner
+    nx = 3
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
@@ -76,28 +81,28 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

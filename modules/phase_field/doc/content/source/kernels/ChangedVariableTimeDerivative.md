@@ -18,7 +18,7 @@ The kernel is defined in the input file using the syntax:
 
 !listing modules/phase_field/test/tests/grain_growth_w_linearized_interface/grain_growth_linearized_interface.i block=Kernels/phi0_ACInt
 
-Alternatively, this kernel is added automatically by the [GrainGrowthLiniearizedInterfaceAction](/GrainGrowthLinearizedInterfaceAction.md).
+Alternatively, this kernel is added automatically by the [GrainGrowthLinearizedInterfaceAction](/GrainGrowthLinearizedInterfaceAction.md).
 
 !! Describe and include an example of how to use the ChangedVariableTimeDerivative object.
 

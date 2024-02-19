@@ -55,9 +55,10 @@ single-component are instantiated with the template argument `Real`; these hold
 variables of finite element families `LAGRANGE`, `MONOMIAL`, `HERMITE`,
 etc. Multi-component vector finite element variables are instantiated with the
 template argument `RealVectorValue` and currently encompass the finite element
-families `NEDELEC_ONE` and `LAGRANGE_VEC`. The former is useful for
-electromagnetic applications or for general PDEs that involve a curl
-operation. The latter is potentially useful for tensor mechanic or Navier-Stokes
+families `LAGRANGE_VEC`, `MONOMIAL_VEC`, `NEDELEC_ONE` and `RAVIART_THOMAS`.
+`NEDELEC_ONE` and `RAVIART_THOMAS` are useful for electromagnetic applications
+or for general PDEs that involve a curl or a divergence operation, respectively.
+`LAGRANGE_VEC` is potentially useful for tensor mechanics or Navier-Stokes
 simulations where historically displacement or velocity variables have been
 broken up component-wise. To hide the templating of the Moose variable system
 from other framework code, `MooseVariableFE<Real>` and

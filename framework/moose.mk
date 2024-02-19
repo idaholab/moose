@@ -19,7 +19,6 @@ APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
-
 #
 # pcre
 #
@@ -74,9 +73,6 @@ endif
 wasp_LIBS           := $(notdir $(wasp_LIBS))
 wasp_LIBS           := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
 wasp_LIBS           := $(patsubst lib%,-l%,$(wasp_LIBS))
-ifeq ($(wasp_LIBS),)
-  $(error WASP does not seem to be available. Make sure to either run scripts/update_and_rebuild_wasp.sh in your MOOSE directory, or set WASP_DIR to a valid WASP install)
-endif
 wasp_CXXFLAGS     := -DWASP_ENABLED -I$(WASP_DIR)/include
 wasp_LDFLAGS      := -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 libmesh_CXXFLAGS  += $(wasp_CXXFLAGS)
@@ -178,7 +174,9 @@ endef
 include_files	:= $(shell find $(FRAMEWORK_DIR)/include \( -regex "[^\#~]*\.h" ! -name "*MooseConfig.h" \))
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
-# Create a rule for one symlink for one header file
+# Create a rule for one symlink for one header file.
+# The order-only prerequisite guarantees the target directory exists before
+# this rule attempts to create the symlink.
 # Args
 # 1: the header file
 # 2: the symlink to create
@@ -232,7 +230,9 @@ moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
 
-srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
+# Top level source directories in MOOSE
+srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -mindepth 1 -maxdepth 1 -type d -not -path '*/.libs*')
+allsrcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
 # This folder does not build with unity
 moose_non_unity := %/utils_nonunity
@@ -246,7 +246,7 @@ endif
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
 
 unity_srcsubdirs := $(filter-out $(moose_non_unity), $(srcsubdirs))
-non_unity_srcsubdirs := $(filter $(moose_non_unity), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(moose_non_unity), $(allsrcsubdirs))
 
 define unity_dir_rule
 $(1):
@@ -296,7 +296,7 @@ unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%
 # 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
 # 4a. Use find to pick up all .C files
 # 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
 
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
 
@@ -347,8 +347,11 @@ endif
 
 $(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
-	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
-	  $(moose_revision_header) MOOSE)
+	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
+	        HEADER_FILE="$(moose_revision_header)" \
+					APPLICATION_NAME="MOOSE" \
+					INSTALLABLE_DIRS= \
+	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py)
   # make sure the header generation step didn't fail
 	@if [ $(.SHELLSTATUS) -ne 0 ]; then \
 	echo "\nFailed to generate MooseRevision.h\n"; exit $(.SHELLSTATUS); \
@@ -367,7 +370,13 @@ endif
 libmesh_submodule_status:
 	@if [ x$(libmesh_message) != "x" ]; then printf $(libmesh_message); fi
 
-moose: $(moose_revision_header) $(moose_LIB)
+ifeq ($(wasp_LIBS),)
+  wasp_submodule_message = "\n***ERROR***\nWASP does not seem to be available.\nMake sure to either run scripts/update_and_rebuild_wasp.sh in your MOOSE directory,\nor set WASP_DIR to a valid WASP install\n"
+endif
+wasp_submodule_status:
+	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
+
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...

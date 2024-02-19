@@ -187,7 +187,7 @@ public:
   /**
    * Get a TagID from a TagName.
    */
-  virtual TagID getMatrixTagID(const TagName & tag_name);
+  virtual TagID getMatrixTagID(const TagName & tag_name) const;
 
   /**
    * Retrieve the name associated with a TagID
@@ -197,12 +197,12 @@ public:
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool matrixTagExists(const TagName & tag_name);
+  virtual bool matrixTagExists(const TagName & tag_name) const;
 
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool matrixTagExists(TagID tag_id);
+  virtual bool matrixTagExists(TagID tag_id) const;
 
   /**
    * The total number of tags
@@ -412,7 +412,7 @@ public:
   virtual void reinitOffDiagScalars(const THREAD_ID tid) = 0;
 
   /// sets the current boundary ID in assembly
-  void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid);
+  virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid);
 
   /**
    * reinitialize FE objects on a given element on a given side at a given set of reference
@@ -789,9 +789,10 @@ public:
   bool automaticScaling() const;
 
   /**
-   * Tells this problem that assembly involves a scaling vector
+   * Tells this problem that the assembly associated with the given nonlinear system number involves
+   * a scaling vector
    */
-  void hasScalingVector();
+  void hasScalingVector(const unsigned int nl_sys_num);
 
   /**
    * Whether we have a displaced problem in our simulation
@@ -920,6 +921,29 @@ public:
    */
   virtual bool hasNonlocalCoupling() const = 0;
 
+  /**
+   * Indicate whether the kind of adaptivity we're doing is p-refinement
+   * @param doing_p_refinement Whether we're doing p-refinement
+   * @param disable_p_refinement_for_families Families to disable p-refinement for
+   */
+  virtual void doingPRefinement(bool doing_p_refinement,
+                                const MultiMooseEnum & disable_p_refinement_for_families);
+
+  /**
+   * @returns whether the kind of adaptivity we're doing is p-refinement
+   */
+  [[nodiscard]] bool doingPRefinement() const;
+
+  /**
+   * Query whether p-refinement has been requested at any point during the simulation
+   */
+  [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
+
+  /**
+   * Set the current lower dimensional element. This can be null
+   */
+  virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -980,9 +1004,6 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
-
-  /// Set of material property ids that determine whether materials get reinited
-  std::vector<std::set<unsigned int>> _active_material_property_ids;
 
   std::vector<std::set<TagID>> _active_fe_var_coupleable_matrix_tags;
 
@@ -1101,6 +1122,9 @@ private:
   /// 0
   std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
+
+  /// Whether p-refinement has been requested at any point during the simulation
+  bool _have_p_refinement;
 
   friend class Restartable;
 };

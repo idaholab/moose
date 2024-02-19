@@ -28,7 +28,7 @@ NSFVAction::validParams()
   InputParameters params = NSFVBase<Action>::validParams();
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of blocks on which NS equations are defined on");
+      "block", {}, "The list of blocks on which NS equations are defined on");
 
   params.addClassDescription("This class allows us to set up Navier-Stokes equations for porous "
                              "medium or clean fluid flows using incompressible or weakly "

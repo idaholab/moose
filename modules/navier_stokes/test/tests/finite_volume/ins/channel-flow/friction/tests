@@ -24,8 +24,8 @@
     requirement = 'The system shall be able to model quadratic volumetric friction with an exponential friction factor correlation in a channel.'
     cli_args = "Outputs/file_base='2d-rc-friction-exp-factor_out' "
                "FVKernels/inactive='u_friction_linear v_friction_linear' "
-               "Materials/inactive='friction_coefficient'"
-    design = 'ExponentialFrictionMaterial.md'
+               "FunctorMaterials/inactive='friction_coefficient'"
+    design = 'ExponentialFrictionFunctorMaterial.md'
   []
   [exponential-friction-factor-jacobian]
     type = PetscJacobianTester
@@ -33,7 +33,7 @@
     requirement = 'The system shall be able to build the correct Jacobian using exponential correlation for the friction factor.'
     cli_args = "Outputs/file_base='2d-rc-friction-exp-factor_out' "
                "FVKernels/inactive='u_friction_linear v_friction_linear' "
-               "Materials/inactive='friction_coefficient' Mesh/gen/nx=4 Mesh/gen/ny=4 "
+               "FunctorMaterials/inactive='friction_coefficient' Mesh/gen/nx=4 Mesh/gen/ny=4 "
   []
   [linear-friction-action]
     type = 'Exodiff'
@@ -57,6 +57,6 @@
     cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' "
                "Modules/NavierStokesFV/friction_coeffs='friction_coefficient' "
                "Outputs/file_base='2d-rc-friction-exp-factor-action_out' "
-    design = 'ExponentialFrictionMaterial.md'
+    design = 'ExponentialFrictionFunctorMaterial.md'
   []
 []

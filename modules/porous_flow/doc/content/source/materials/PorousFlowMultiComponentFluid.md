@@ -38,7 +38,7 @@ No changes to the input or output of the FluidProperties module are required
 
 ### Temperature in Celsius
 
-Choosing the temperature unit to be Celcius means that 273.15 is added to all PorousFlow temperatures before feeding them to the FluidProperties module.
+Choosing the temperature unit to be Celsius means that 273.15 is added to all PorousFlow temperatures before feeding them to the FluidProperties module.
 
 Other input-file objects that may need to be specified in Celsius are boundary conditions, initial conditions, [PorousFlowSinks](PorousFlowSink.md), etc.
 

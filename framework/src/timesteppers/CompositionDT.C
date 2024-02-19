@@ -25,6 +25,7 @@ CompositionDT::compositionDTParams()
   params.addParam<Real>("initial_dt", "Initial value of dt");
   params.addParam<std::vector<std::string>>(
       "lower_bound",
+      {},
       "The maximum of these TimeSteppers will form the lower bound on the time "
       "step size. A single or multiple time steppers may be specified.");
 
@@ -59,7 +60,8 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
     if (std::find_if(time_steppers.begin(),
                      time_steppers.end(),
                      [&time_stepper_name](const auto & ts)
-                     { return ts->name() == time_stepper_name; }) == time_steppers.end())
+                     { return ts->name() == time_stepper_name; }) == time_steppers.end() &&
+        _lower_bound.size() != 0)
       paramError(
           "lower_bound", "Failed to find a timestepper with the name '", time_stepper_name, "'");
 }
@@ -243,7 +245,11 @@ void
 CompositionDT::step()
 {
   if (_current_time_stepper)
+  {
     _current_time_stepper->step();
+    if (!converged())
+      _failure_count++;
+  }
   else
     TimeStepper::step();
 }

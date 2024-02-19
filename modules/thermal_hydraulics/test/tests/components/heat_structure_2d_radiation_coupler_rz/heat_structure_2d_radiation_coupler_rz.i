@@ -1,9 +1,9 @@
 emissivity1 = 0.75
 emissivity2 = 0.5
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 15
     cp = 500
     rho = 8000
@@ -22,7 +22,8 @@ emissivity2 = 0.5
     names = 'region1'
     widths = '0.1'
     n_part_elems = '5'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
 
     initial_T = 300
   []
@@ -39,7 +40,8 @@ emissivity2 = 0.5
     names = 'region1'
     widths = '0.1'
     n_part_elems = '5'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
 
     initial_T = 1000
   []

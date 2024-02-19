@@ -43,7 +43,6 @@ OptimizationReporter::validParams()
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
   : OptimizationDataTempl<OptimizationReporterBase>(parameters)
 {
-  setICsandBounds();
 }
 void
 OptimizationReporter::setICsandBounds()

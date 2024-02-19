@@ -20,8 +20,8 @@
 [Variables]
   [pp]
     type = MooseVariableFVReal
-    [InitialCondition]
-      type = ConstantIC
+    [FVInitialCondition]
+      type = FVConstantIC
       value = 0
     []
   []

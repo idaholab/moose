@@ -22,9 +22,10 @@ Predictor::validParams()
   params.addRequiredParam<Real>("scale",
                                 "The scale factor for the predictor (can range from 0 to 1)");
   params.addParam<std::vector<Real>>(
-      "skip_times", "Skip the predictor if the current solution time is in this list of times");
+      "skip_times", {}, "Skip the predictor if the current solution time is in this list of times");
   params.addParam<std::vector<Real>>(
       "skip_times_old",
+      {},
       "Skip the predictor if the previous solution time is in this list of times");
   params.addParam<bool>("skip_after_failed_timestep",
                         false,

@@ -56,6 +56,7 @@
     # slight inflation to avoid floating point issues on borders
     bbox_factor = 1.000001
     search_value_conflicts = true
+    group_subapps = true
   []
   [app2_to_1_nodal_nodal]
     type = MultiAppGeneralFieldNearestLocationTransfer
@@ -66,6 +67,7 @@
     use_nearest_position = input_app2
     bbox_factor = 1.000001
     search_value_conflicts = true
+    group_subapps = true
   []
 
   # Elemental to elemental variables
@@ -78,6 +80,7 @@
     use_nearest_position = input_app1
     bbox_factor = 1.000001
     search_value_conflicts = true
+    group_subapps = true
   []
   [app2_to_1_elem_elem]
     type = MultiAppGeneralFieldNearestLocationTransfer
@@ -88,6 +91,7 @@
     use_nearest_position = input_app2
     bbox_factor = 1.000001
     search_value_conflicts = true
+    group_subapps = true
   []
 []
 

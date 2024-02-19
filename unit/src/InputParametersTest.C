@@ -412,6 +412,18 @@ TEST(InputParameters, getControllablePairs)
   }
 }
 
+TEST(InputParameters, getParamList)
+{
+  std::vector<std::string> num_words{"zero", "one", "two", "three"};
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<std::vector<std::string>>("first", num_words, "");
+  p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
+
+  std::set<std::string> param_list({"first", "second"});
+  EXPECT_EQ(p.getParametersList(), param_list);
+}
+
 TEST(InputParameters, transferParameters)
 {
   // Add parameters of various types to p1
@@ -517,4 +529,39 @@ TEST(InputParameters, transferParameters)
   EXPECT_EQ(p1.getDocString("od2"), p2.getDocString("od2"));
   EXPECT_EQ(p1.getDocString("od3a"), p2.getDocString("od3a"));
   EXPECT_EQ(p1.getDocString("od3b"), p2.getDocString("od3b"));
+}
+
+TEST(InputParameters, noDefaultValueError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("dummy_real", "a dummy real");
+  params.addParam<std::vector<Real>>("dummy_vector", "a dummy vector");
+
+  // Throw an error message when no default value is provided
+  try
+  {
+    params.getParamHelper<Real>("dummy_real", params, static_cast<Real *>(0));
+    FAIL() << "failed to get the parameter because the default value is missing";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("The parameter \"dummy_real\" is being retrieved before being set.") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    params.getParamHelper<std::vector<Real>>(
+        "dummy_vector", params, static_cast<std::vector<Real> *>(0));
+    FAIL() << "failed to get the parameter because the default value is missing";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("The parameter \"dummy_vector\" is being retrieved before being set.") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }

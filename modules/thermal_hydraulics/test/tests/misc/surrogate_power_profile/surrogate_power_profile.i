@@ -32,21 +32,21 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [fuel-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
   []
   [gap-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 0.6
     cp = 1.
     rho = 1.
   []
   [clad-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 21.5
     cp = 350.
     rho = 6.55e3
@@ -78,7 +78,8 @@
     names = 'fuel gap clad'
     widths = '0.004096 0.0001 0.000552'
     n_part_elems = '5 1 2'
-    materials = 'fuel-mat gap-mat clad-mat'
+    solid_properties = 'fuel-mat gap-mat clad-mat'
+    solid_properties_T_ref = '300 300 300'
   []
 
   [CCH1:hx]

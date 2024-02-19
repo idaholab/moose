@@ -2,9 +2,9 @@
 
 ## Overview
 
-`Function`s are used to define functions depending only on spatial position and
-time: $f(x,y,z,t)$. These objects can serve a wide variety of purposes, including
-(but not limited to) the following:
+`Function`s are used to define functions depending only on time and spatial
+position: $f(t,x,y,z)$. These objects can serve a wide variety of purposes,
+including (but not limited to) the following:
 
 - defining initial conditions,
 - defining residual contributions (sources, boundary conditions, etc.), and
@@ -25,7 +25,8 @@ Moose `Function`s should override the following member functions
 For vector valued functions
 
 - `RealVectorValue vectorValue(Real, Point)` - returning a vector value at a point in space and time
-- `RealVectorValue vectorCurl(Real, Point)` - returning the curl of the function at a point in space and time
+- `RealVectorValue curl(Real, Point)` - returning the curl of the function at a point in space and time
+- `Real div(Real, Point)` - returning the divergence of the function at a point in space and time
 
 can be overridden. The optional `Real integral()` and `Real average()` methods
 can also be overridden. Note that two overloads exist for the `value()` member

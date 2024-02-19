@@ -169,7 +169,7 @@ postprocessor to output time step size, etc.).
 
 In our model, we will add the following postprocessors to compute the pressure drop across the flow channel:
 
-1. `core_p_in` for monitoring core outlet pressure
+1. `core_p_in` for monitoring core inlet pressure
 
    !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
             block=Postprocessors/core_p_in
@@ -187,9 +187,9 @@ In our model, we will add the following postprocessors to compute the pressure d
             block=Postprocessors/core_delta_p
             link=False
 
-The first postprocessors are of [SideAverageValue](postprocessors/SideAverageValue.md) type which means they are computed on a side.
+The first two postprocessors are of [SideAverageValue](postprocessors/SideAverageValue.md) type which means they are computed on a side.
 The side is specified via the `boundary` parameter, and both postprocessors operate on the
-temperature variable `p`. Then we use a [ParsedPostProcessor](postprocessors/ParsedPostprocessor.md) to compute the difference.
+pressure variable `p`. Then we use a [ParsedPostProcessor](postprocessors/ParsedPostprocessor.md) to compute the difference.
 
 
 ## Executioner

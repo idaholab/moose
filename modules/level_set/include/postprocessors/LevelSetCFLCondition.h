@@ -24,7 +24,6 @@ public:
   void execute() override;
   void finalize() override;
   void threadJoin(const UserObject & user_object) override;
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
 
 private:

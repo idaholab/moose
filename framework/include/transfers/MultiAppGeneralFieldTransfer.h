@@ -20,6 +20,7 @@
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
 class Positions;
+class MeshDivision;
 
 /**
  * It is a general field transfer. It will do the following things
@@ -51,38 +52,61 @@ public:
   VariableName getToVarName(unsigned int var_index);
 
 protected:
+  /// Siblings transfers fully supported
+  virtual void checkSiblingsTransferSupported() const override {}
+
   /*
    * Prepare evaluation of interpolation values
+   * @param var_index index of the variable & component to prepare for. This routine is called once
+   *        for each variable and component to transfer
    */
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) = 0;
 
   /*
    * Evaluate interpolation values for incoming points
+   * @param incoming_points vector of point requests with an additional integer to add constraints
+   *                  on the source regions
+   * @param outgoing_vals vector of (evaluated value, distance to value location) for each of the
+   *                incoming point requests
    */
-  virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
-                                    std::vector<std::pair<Real, Real>> & outgoing_vals) = 0;
+  virtual void
+  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+                       std::vector<std::pair<Real, Real>> & outgoing_vals) = 0;
 
   /*
    * Local from bounding boxes for current processor
+   * @param local_bboxes vector of the local (to this process) bounding boxes
+   *        for the source applications
    */
   void extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes);
 
   /*
    * Whether all source mesh checks pass on the given points:
    * - within the source mesh bounding box
-   * - inside block restriction
-   * - inside boundary restriction / in an element near the origin boundary restriction
+   * - inside source block restriction
+   * - inside source boundary restriction / in an element near the origin boundary restriction
+   * - inside source mesh division and at the same index as in the target mesh division
    * - inside app mesh (if not already known to be inside a block or near a boundary)
    * @param i_from the index of the source problem/mesh
    * @param local_bboxes the bounding boxes for the local applications
-   * @param pt the point to consider
+   * @param pt the point to consider (in reference frame, not source or target frame)
+   * @param mesh_div index of the point to consider in the target mesh division.
+   *        If mesh divisions are used to match regions between two meshes, then the index
+   *        must match in the target and source mesh divisions
+   * @param distance distance from the point to the target mesh division. This may be used to favor
+   *        a point over another, for example in a nearest-positions algorithm where we want
+   *        to report the distance of the point pt to the closest position of the 1-NN partition
    */
   bool acceptPointInOriginMesh(unsigned int i_from,
                                const std::vector<BoundingBox> & local_bboxes,
-                               const Point & pt) const;
+                               const Point & pt,
+                               const unsigned int mesh_div,
+                               Real & distance) const;
 
   /*
    * Whether or not a given point is within the mesh of an origin (from) app
+   * @param pl locator for the mesh of the source app
+   * @param pt point in the local coordinates of the source app we're considering
    */
   bool inMesh(const PointLocatorBase * const pl, const Point & pt) const;
 
@@ -96,12 +120,19 @@ protected:
 
   /*
    * Whether or not a given node is part of an element in the given blocks
+   * @param blocks list of blocks to examine.
+   * @param mesh containing the element and the node
+   * @param node node to consider
+   * A node is in a block if an element it is part of is in that block
    */
   bool
   inBlocks(const std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
 
   /*
    * Whether or not a given point is part of an element in the given blocks
+   * @param blocks list of blocks to examine
+   * @param point locator to find the point in the blocks
+   * @param pt point to examine, in the local coordinates (same as the point locator)
    */
   bool inBlocks(const std::set<SubdomainID> & blocks,
                 const PointLocatorBase * const pl,
@@ -131,13 +162,25 @@ protected:
    *        Note: an empty set means ALL blocks should be considered
    * @param mesh the mesh to look for the boundaries in
    * @param pl the point locator that searches the mesh
-   * @param pt the point we want to know whether it is close to a boundary
+   * @param pt the point we want to know whether it is close to a boundary (local coordinates)
    */
   bool onBoundaries(const std::set<BoundaryID> & boundaries,
                     const std::set<SubdomainID> & block_restriction,
                     const MooseMesh & mesh,
                     const PointLocatorBase * const pl,
                     const Point & pt) const;
+
+  /**
+   * Whether a point lies inside the mesh division delineated by the MeshDivision object
+   * @param pt point to examine, in the local coordinates (source frame for from_direction=true)
+   * @param i_local the index of the problem to consider, holding the mesh division to examine
+   * @param only_from_this_mesh_div a mesh division index that must be matched when the
+   * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
+   * It is ignored otherwise
+   */
+  bool acceptPointMeshDivision(const Point & pt,
+                               const unsigned int i_local,
+                               const unsigned int only_from_this_mesh_div) const;
 
   /**
    * Whether a point is closest to a position at the index specified than any other position
@@ -152,6 +195,10 @@ protected:
 
   /// Target array/vector variable components
   const std::vector<unsigned int> _to_var_components;
+
+  /// Whether to use bounding boxes to determine the applications that may receive point requests
+  /// then send value data, and at other various checks
+  const bool _use_bounding_boxes;
 
   /// Whether to keep track of the distance from the requested point to the app position
   const bool _use_nearest_app;
@@ -182,11 +229,35 @@ protected:
   /// Origin boundary(ies) restriction
   std::set<BoundaryID> _from_boundaries;
 
+  /// Division of the origin mesh
+  std::vector<const MeshDivision *> _from_mesh_divisions;
+
+  /// Division of the target mesh
+  std::vector<const MeshDivision *> _to_mesh_divisions;
+
+  /// How to use the origin mesh divisions to restrict the transfer
+  const MooseEnum & _from_mesh_division_behavior;
+
+  /// How to use the target mesh divisions to restrict the transfer
+  const MooseEnum & _to_mesh_division_behavior;
+
+  /// Matching enum for the mesh division behaviors.
+  enum MeshDivisionTransferUse
+  {
+    RESTRICTION,
+    MATCH_DIVISION_INDEX,
+    MATCH_SUBAPP_INDEX
+  };
+
   /// Whether elemental variable boundary restriction is considered by element side or element nodes
   const bool _elemental_boundary_restriction_on_sides;
 
   /// Point locators, useful to examine point location with regards to domain restriction
   std::vector<std::unique_ptr<PointLocatorBase>> _from_point_locators;
+
+  /// First app each processor owns, indexed by processor
+  /// If no app on the processor, will have a -1 for the app start instead
+  std::vector<unsigned int> _global_app_start_per_proc;
 
   /// Whether or not a greedy strategy will be used
   /// If true, all the partitions will be checked for a given
@@ -225,14 +296,14 @@ private:
   std::vector<MooseVariableFieldBase *> _to_variables;
 
   /// A map from pid to a set of points
-  typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
+  typedef std::unordered_map<processor_id_type, std::vector<std::pair<Point, unsigned int>>>
+      ProcessorToPointVec;
 
   /// Point information
   struct PointInfo
   {
     unsigned int problem_id;   // problem id
     dof_id_type dof_object_id; // node or elem id
-    dof_id_type offset;        // Useful when there are more than one point in a given dof object
   };
 
   /// InterpInfo
@@ -272,11 +343,14 @@ private:
   /// Set the bounding box sizes manually
   std::vector<Real> _fixed_bbox_size;
 
-  /// Number of froms per processor
+  /// Number of source/from applications per processor. This vector is indexed by processor id
   std::vector<unsigned int> _froms_per_proc;
 
-  /// Bounding boxes for all processors
-  std::vector<BoundingBox> _bboxes;
+  /// Bounding boxes for all source applications. The indexing of this vector is similar to
+  ///'processor_id * n_local_subapps + i_local_subapp', except the number of local subapps can
+  /// be different on each processor. Use the _from_per_proc vector to find the start/end index for a given
+  /// processor. See MultiAppGeneralFieldTransfer::locatePointReceivers() for an example
+  std::vector<BoundingBox> _from_bboxes;
 
   /// A map from processor to pointInfo vector
   ProcessorToPointInfoVec _processor_to_pointInfoVec;
@@ -284,6 +358,7 @@ private:
   /// Keeps track of all local equidistant points to requested points, creating an indetermination
   /// in which values should be sent for that request
   /// We keep the origin problem ID, the dof ID, the point, and the distance origin-target
+  /// If using nearest-positions the origin problem ID is not set
   std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _local_conflicts;
 
   /// Keeps track of all received conflicts. Multiple problems (different subapps for example)
@@ -291,6 +366,11 @@ private:
   /// We keep the target problem ID, the point/dof ID, the point, and the origin-target distance.
   /// The distance indicates whether a potential conflict ended up materializing
   std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _received_conflicts;
+
+  /**
+   * Initialize supporting attributes like bounding boxes, processor app indexes etc
+   */
+  void prepareToTransfer();
 
   /**
    * Performs the transfer for the variable of index i
@@ -314,7 +394,7 @@ private:
       processor_id_type pid,
       const unsigned int var_index,
       std::vector<PointInfo> & pointInfoVec,
-      const std::vector<Point> & point_requests,
+      const std::vector<std::pair<Point, unsigned int>> & point_requests,
       const std::vector<std::pair<Real, Real>> & incoming_vals,
       DofobjectToInterpValVec & dofobject_to_valsvec, // for nodal + constant monomial
       InterpCaches & interp_caches,                   // for higher order elemental values
@@ -377,14 +457,14 @@ private:
    * @param p the point of interest
    * @param bbox the bounding box to find the minimum distance from
    */
-  Real bboxMinDistance(const Point & p, const BoundingBox & bbox);
+  Real bboxMinDistance(const Point & p, const BoundingBox & bbox) const;
 
   /**
    * Compute max distance
    * @param p the point of interest
    * @param bbox the bounding box to find the maximum distance from
    */
-  Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
+  Real bboxMaxDistance(const Point & p, const BoundingBox & bbox) const;
 
   /**
    * @brief Obtains the max dimensions to scale all points in the mesh
@@ -395,7 +475,13 @@ private:
   /**
    * Get from bounding boxes for given domains and boundaries
    */
-  std::vector<BoundingBox> getRestrictedFromBoundingBoxes();
+  std::vector<BoundingBox> getRestrictedFromBoundingBoxes() const;
+
+  /**
+   * Get global index for the first app each processes owns
+   * Requires a global communication, must be called on every domain simultaneously
+   */
+  std::vector<unsigned int> getGlobalStartAppPerProc() const;
 };
 
 // Anonymous namespace for data, functors to use with GenericProjector.

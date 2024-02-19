@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#19836'
+  design = 'syntax/Mesh/index.md'
   [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_in.e'
     cli_args = '--mesh-only'
     recover = False
+    requirement = "The system shall be able to only output the components' mesh and avoid running the rest of the simulation."
   []
 []

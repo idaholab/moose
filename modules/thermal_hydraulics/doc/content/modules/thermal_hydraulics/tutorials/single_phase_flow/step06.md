@@ -44,7 +44,7 @@ which does not create any of its own Materials:
          block=Closures
          link=False
 
-Then the name we gave this closures object (`no_closures`) is passed to the `closures` parameter in the `hx/pri` component. This will overwrite the `closures` parameter set in the `GlobalParams` block.
+Then the name we gave this closures object (`none_closures`) is passed to the `closures` parameter in the `hx/pri` component. This will overwrite the `closures` parameter set in the `GlobalParams` block.
 
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
@@ -76,7 +76,7 @@ To accomplish this, we define the Prandtl number using an [ADPrandtlNumberMateri
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          start=Pr_mat
-         end=HeatStructureMaterials
+         end=SolidProperties
          link=False
 
 !content pagination previous=tutorials/single_phase_flow/step05.md

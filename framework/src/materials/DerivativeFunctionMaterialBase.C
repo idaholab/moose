@@ -90,18 +90,19 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::initialSetup()
   // set the _prop_* pointers of all material properties that are not beeing used back to NULL
   bool needs_third_derivatives = false;
 
-  if (!_fe_problem.isMatPropRequested(_F_name))
+  if (!this->_fe_problem.isMatPropRequested(_F_name))
     _prop_F = NULL;
 
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    if (!_fe_problem.isMatPropRequested(this->derivativePropertyNameFirst(_F_name, _arg_names[i])))
+    if (!this->_fe_problem.isMatPropRequested(
+            this->derivativePropertyNameFirst(_F_name, _arg_names[i])))
       _prop_dF[i] = NULL;
 
     // second derivatives
     for (unsigned int j = i; j < _nargs; ++j)
     {
-      if (!_fe_problem.isMatPropRequested(
+      if (!this->_fe_problem.isMatPropRequested(
               this->derivativePropertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
         _prop_d2F[i][j] = _prop_d2F[j][i] = NULL;
 
@@ -110,7 +111,7 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::initialSetup()
       {
         for (unsigned int k = j; k < _nargs; ++k)
         {
-          if (!_fe_problem.isMatPropRequested(this->derivativePropertyNameThird(
+          if (!this->_fe_problem.isMatPropRequested(this->derivativePropertyNameThird(
                   _F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
             _prop_d3F[i][j][k] = _prop_d3F[k][i][j] = _prop_d3F[j][k][i] = _prop_d3F[k][j][i] =
                 _prop_d3F[j][i][k] = _prop_d3F[i][k][j] = NULL;

@@ -15,9 +15,9 @@ rho = 8000.0
 cp = 500.0
 k = 15.0
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs_mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = ${rho}
     cp = ${cp}
     k = ${k}
@@ -35,7 +35,8 @@ k = 15.0
     names = 'body'
     widths = '${radius}'
     n_part_elems = '${n_elems_radial}'
-    materials = 'hs_mat'
+    solid_properties = 'hs_mat'
+    solid_properties_T_ref = '300'
 
     initial_T = ${T_initial}
   []

@@ -1,0 +1,39 @@
+[Tests]
+  design = 'PseudoTimestep.md'
+  issues = '#25931'
+  [pseudotimestepSER]
+    type = 'CSVDiff'
+    input = 'fv_burgers_pseudo.i'
+    csvdiff = 'fv_burgers_SER_out.csv'
+    cli_args = "Postprocessors/pseudotimestep/method=SER 
+               Postprocessors/pseudotimestep/initial_dt=1 
+               Postprocessors/pseudotimestep/alpha=1.5 
+               Postprocessors/pseudotimestep/iterations_window=3 
+               Executioner/num_steps=5
+               Outputs/file_base=fv_burgers_SER_out"
+    requirement = 'The system shall be able to use the SER method to compute its next time step.'
+  []
+  [pseudotimestepRDM]
+    type = 'CSVDiff'
+    input = 'fv_burgers_pseudo.i'
+    csvdiff = 'fv_burgers_RDM_out.csv'
+    cli_args = "Postprocessors/pseudotimestep/method=RDM 
+               Postprocessors/pseudotimestep/initial_dt=1 
+               Postprocessors/pseudotimestep/alpha=4 
+               Executioner/num_steps=7
+               Outputs/file_base=fv_burgers_RDM_out"
+    requirement = 'The system shall be able to use the RDM method to compute its next time step.'
+  []
+  [pseudotimestepEXP]
+    type = 'CSVDiff'
+    input = 'fv_burgers_pseudo.i'
+    csvdiff = 'fv_burgers_EXP_out.csv'
+    cli_args = "Postprocessors/pseudotimestep/method=EXP 
+               Postprocessors/pseudotimestep/initial_dt=1 
+               Postprocessors/pseudotimestep/alpha=4 
+               Postprocessors/pseudotimestep/max_dt=1e5 
+               Executioner/num_steps=5
+               Outputs/file_base=fv_burgers_EXP_out"
+    requirement = 'The system shall be able to use the EXP method to compute its next time step.'
+  []
+[]

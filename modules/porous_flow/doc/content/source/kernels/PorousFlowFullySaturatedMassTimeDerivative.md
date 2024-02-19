@@ -3,7 +3,7 @@
 !syntax description /Kernels/PorousFlowFullySaturatedMassTimeDerivative
 
 Consider a fully-saturated, single-phase, single-component fluid in a
-THM simulation.  The time-derivatve terms from the [fluid governing equation](governing_equations.md) are
+THM simulation.  The time-derivative terms from the [fluid governing equation](governing_equations.md) are
 \begin{equation}
 \frac{\partial}{\partial t} \phi \rho + \phi\rho\dot{\epsilon}_{v} \ ,
 \end{equation}
@@ -55,10 +55,10 @@ comparison with analytical and numerical solutions of poro-mechanics.
 - $(\rho)(\dot{P}/M + \alpha_{B}\dot{\epsilon}_{v})$ for HM problems;
 - $(\rho)(\dot{P}/M + \alpha_{B}\dot{\epsilon}_{v} - A\dot{T})$ for THM problems.
 
-The `PorousFlowFullySaturatedMassTimeDerivative` Kernel does not employ lumping, which is largely unecessary in this single-phase, single-component situation.  This means only ``quad-point'' Materials are needed.  In fact, when using all the FullySaturated flow Kernels (see [governing equations](governing_equations.md)) standard Materials evaluated at the quadpoints are needed, which saves on computation time and input-file length.
+The `PorousFlowFullySaturatedMassTimeDerivative` Kernel does not employ lumping, which is largely unnecessary in this single-phase, single-component situation.  This means only ``quad-point'' Materials are needed.  In fact, when using all the FullySaturated flow Kernels (see [governing equations](governing_equations.md)) standard Materials evaluated at the quadpoints are needed, which saves on computation time and input-file length.
 
 In each case, the initial pre-multiplication by $\rho$ is optional
-(indicated by the parenthases around $\rho$).
+(indicated by the parentheses around $\rho$).
 
 When the Kernel is pre-multiplied by $\rho$, which is the default,
 it is computing the time derivative of fluid mass.  This allows

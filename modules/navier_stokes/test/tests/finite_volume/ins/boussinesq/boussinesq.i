@@ -193,14 +193,14 @@ temp_ref = '${fparse hot_temp / 2.}'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'alpha_b cp k'
     prop_values = '${alpha} ${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
   []

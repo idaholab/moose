@@ -34,7 +34,7 @@ DisplacedProblem::validParams()
       "A Problem object for providing access to the displaced finite element "
       "mesh and associated variables.");
   params.addPrivateParam<MooseMesh *>("mesh");
-  params.addPrivateParam<std::vector<std::string>>("displacements");
+  params.addPrivateParam<std::vector<std::string>>("displacements", {});
   return params;
 }
 
@@ -182,6 +182,9 @@ DisplacedProblem::init()
   _displaced_aux->update(/*update_libmesh_system=*/false);
 
   _mesh.meshChanged();
+
+  if (haveFV())
+    _mesh.setupFiniteVolumeMeshData();
 }
 
 void
@@ -278,7 +281,9 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   _mesh.getMesh().clear_point_locator();
 
   // The mesh has changed. Face information normals, areas, etc. must be re-calculated
-  _mesh.finiteVolumeInfoDirty();
+  if (haveFV())
+    _mesh.setupFiniteVolumeMeshData();
+
   for (auto & disp_nl : _displaced_nl)
     disp_nl->update(false);
   _displaced_aux->update(false);
@@ -416,7 +421,7 @@ DisplacedProblem::addMatrixTag(TagName tag_name)
 }
 
 TagID
-DisplacedProblem::getMatrixTagID(const TagName & tag_name)
+DisplacedProblem::getMatrixTagID(const TagName & tag_name) const
 {
   return _mproblem.getMatrixTagID(tag_name);
 }
@@ -428,13 +433,13 @@ DisplacedProblem::matrixTagName(TagID tag)
 }
 
 bool
-DisplacedProblem::matrixTagExists(const TagName & tag_name)
+DisplacedProblem::matrixTagExists(const TagName & tag_name) const
 {
   return _mproblem.matrixTagExists(tag_name);
 }
 
 bool
-DisplacedProblem::matrixTagExists(TagID tag_id)
+DisplacedProblem::matrixTagExists(TagID tag_id) const
 {
   return _mproblem.matrixTagExists(tag_id);
 }
@@ -1297,14 +1302,6 @@ const std::vector<VectorTag> &
 DisplacedProblem::currentResidualVectorTags() const
 {
   return _mproblem.currentResidualVectorTags();
-}
-
-void
-DisplacedProblem::havePRefinement()
-{
-  for (auto & assembly_vecs : _assembly)
-    for (auto & assembly : assembly_vecs)
-      assembly->havePRefinement();
 }
 
 bool

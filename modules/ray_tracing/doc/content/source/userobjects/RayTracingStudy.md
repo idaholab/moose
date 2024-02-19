@@ -20,7 +20,7 @@ If you know in advance the number of [Rays](Ray.md) that you are adding to the b
 
 ### Propagation
 
-The Ray propagation phase traces the [Rays](Ray.md) that were added to the buffer to be traced. This is done internally by the `propagatateRays()` method.
+The Ray propagation phase traces the [Rays](Ray.md) that were added to the buffer to be traced. This is done internally by the `propagateRays()` method.
 
 Note that additional [Ray.md] objects may be added to be traced during the propagation phase via [RayKernels/index.md] and [RayBCs/index.md]. For more information, see [RayKernels/index.md#creating-additional-rays] for creating a [Ray.md] within [RayKernels/index.md] and [RayBCs/index.md#creating-a-new-ray] for creating a [Ray.md] within [RayBCs/index.md].
 

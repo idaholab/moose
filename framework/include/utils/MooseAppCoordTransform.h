@@ -305,6 +305,12 @@ public:
   bool hasNonTranslationTransformation() const;
 
   /**
+   * @return whether there are any coordinate system type change because the mapping back from RZ
+   * to XYZ for example is non-unique and would error
+   */
+  bool hasCoordinateSystemTypeChange() const;
+
+  /**
    * @return our coordinate system
    */
   Moose::CoordinateSystemType coordinateSystem() const { return _our_app_transform._coord_type; }

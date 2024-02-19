@@ -1,15 +1,30 @@
 [Tests]
-  [phy:test]
-    type = Exodiff
-    input = 'phy.test.i'
-    exodiff = 'phy.test_out.e'
-  []
+  design = 'HeatStructurePlate.md'
+  issues = '#19837'
 
-  [phy:test_mats]
-    type = Exodiff
-    input = 'phy.test_mats.i'
-    exodiff = 'phy.test_out.e'
-    cli_args = 'Outputs/file_base=phy.test_out'
-    prereq = 'phy:test'
+  [physics]
+    requirement = 'The system shall be able to model heat conduction in a 2-D plate'
+
+    [by_hsmaterials]
+      type = Exodiff
+      input = 'by_hsmaterials.i'
+      exodiff = 'transient.e'
+      no_error_deprecated = True
+      detail = 'with properties defined by HeatStructureMaterials.'
+    []
+    [by_materials]
+      type = Exodiff
+      input = 'by_materials.i'
+      exodiff = 'transient.e'
+      prereq = 'physics/by_hsmaterials'
+      detail = 'with properties defined by Materials.'
+    []
+    [by_solid_properties]
+      type = Exodiff
+      input = 'by_solid_properties.i'
+      exodiff = 'transient.e'
+      prereq = 'physics/by_materials'
+      detail = 'with properties defined by SolidProperties.'
+    []
   []
 []

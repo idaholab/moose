@@ -57,7 +57,7 @@ The `PorousFlowDictator` is given the name `dictator` and the number of fluid ph
 
 ## Preconditioning and the linear solve
 
-In each nonlinear iteration (as MOOSE slowly converges to the solution for that given timestep) a linear solve must be performed to invert the Jacobian.  Often in PorousFlow simulations, the Jacobian is quite ill conditioned, so a strong precondioner is needed.  Typically, one of two choices are made:
+In each nonlinear iteration (as MOOSE slowly converges to the solution for that given timestep) a linear solve must be performed to invert the Jacobian.  Often in PorousFlow simulations, the Jacobian is quite ill conditioned, so a strong preconditioner is needed.  Typically, one of two choices are made:
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Preconditioning] end=[Executioner]
 
@@ -71,7 +71,7 @@ A detailed discussion of setting the nonlinear tolerances may be found in [conve
 \begin{equation}
 R \approx V|\kappa|\epsilon /\mu \approx 10^{-11} V\epsilon
 \end{equation}
-(The missing factor of $\rho_{0}$ between this formula and that in [convergence criteria](porous_flow/convergence.md) is because the DE solved in thie Page does not multiply by density, which is unusual for PorousFlow.)  Here $V$ is the volume of the "interesting region" in the model, and $\epsilon$ is the tolerable error in $\nabla P$.  Supposing that the "interesting region" is the $1\times 1\times 4\,$m$^{3}$ surrounding the borehole, and a tolerable error is 1$\,$Pa.m$^{-1}$, this yields $R\approx 10^{-10}$.  This provides a rough estimate for the nonlinear residual in the `Executioner` block:
+(The missing factor of $\rho_{0}$ between this formula and that in [convergence criteria](porous_flow/convergence.md) is because the DE solved in this page does not multiply by density, which is unusual for PorousFlow.)  Here $V$ is the volume of the "interesting region" in the model, and $\epsilon$ is the tolerable error in $\nabla P$.  Supposing that the "interesting region" is the $1\times 1\times 4\,$m$^{3}$ surrounding the borehole, and a tolerable error is 1$\,$Pa.m$^{-1}$, this yields $R\approx 10^{-10}$.  This provides a rough estimate for the nonlinear residual in the `Executioner` block:
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Executioner] end=[Outputs]
 

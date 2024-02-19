@@ -28,7 +28,7 @@ MassFluxIntegral::MassFluxIntegral(const InputParameters & parameters)
 void
 MassFluxIntegral::threadJoin(const UserObject & y)
 {
-  const MassFluxIntegral & pps = static_cast<const MassFluxIntegral &>(y);
+  const auto & pps = static_cast<const MassFluxIntegral &>(y);
   _integral_value += pps._integral_value;
 }
 

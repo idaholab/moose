@@ -1,7 +1,7 @@
 # PolycrystalVoronoi
 
 The PolycrystalVoronoi UserObject either generates a set of random points or
-reads a set of grain centroids from a file and performs a Voronoi tesslation to
+reads a set of grain centroids from a file and performs a Voronoi tessellation to
 produce a grain structure. The number of grains may be set by the user but a
 suitable number must be chosen that is supported by the mesh resolution and
 grain boundary width. Once the grain structure has been generated, a coloring

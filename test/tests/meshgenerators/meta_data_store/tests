@@ -31,7 +31,7 @@
     cli_args = '--test_getRestartableDataMap_error'
 
     expect_err = "Unable to find RestartableDataMap object for the supplied name"
-    requirement = "The system shall error if a invalid identifier is supplied when attempting to retrieve a restart meta data object."
+    requirement = "The system shall report an error if a invalid identifier is supplied when attempting to retrieve a restart meta data object."
   []
 
   [pre_split_mesh]

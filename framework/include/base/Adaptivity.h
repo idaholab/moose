@@ -32,6 +32,7 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class MooseEnum;
+class MultiMooseEnum;
 
 // Forward declare classes in libMesh
 namespace libMesh
@@ -129,9 +130,12 @@ public:
   void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
 
   /**
-   * Switch from h-refinement to p-refinement
+   * Indicate whether the kind of adaptivity we're doing is p-refinement
+   * @param doing_p_refinement Whether we're doing p-refinement
+   * @param disable_p_refinement_for_families Families to disable p-refinement for
    */
-  void switchHToPRefinement();
+  void doingPRefinement(bool doing_p_refinement,
+                        const MultiMooseEnum & disable_p_refinement_for_families);
 
   /**
    * Adapts the mesh based on the error estimator used

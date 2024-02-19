@@ -4,7 +4,7 @@
 
 `RayKernel` is the base class for the objects that calculate residual vector contributions of non-linear scalar field variables along a [Ray.md]. See also [ADRayKernel.md] for the AD version of this object. The most simple form of a `RayKernel` is a [LineSourceRayKernel.md], which implements a line source along a [Ray.md]. 
 
-The use of a `RayKernel` is the same of a standard [Kernel](Kernels/index.md). In a `RayKernel` subclass the `computeQpResidual()` function must be overridden. This is where you implement your PDE weak form terms. For non-AD objects the following member functions can optionally be overriden:
+The use of a `RayKernel` is the same of a standard [Kernel](Kernels/index.md). In a `RayKernel` subclass the `computeQpResidual()` function must be overridden. This is where you implement your PDE weak form terms. For non-AD objects the following member functions can optionally be overridden:
 
 - `computeQpJacobian()`
 - `computeQpOffDiagJacobian()`
@@ -30,7 +30,7 @@ Also available for override are:
 - `precalculateJacobian()`
 - `precalculateOffDiagJacobian()`
 
-which are insertion points immedtiately before computing residuals and Jacobians. These methods can be useful when computing cached values that are valid for all quadrature points.
+which are insertion points immediately before computing residuals and Jacobians. These methods can be useful when computing cached values that are valid for all quadrature points.
 
 Many other useful member variables exist that describe the [Ray.md] segment. For more information, see [Using a RayKernel](syntax/RayKernels/index.md#using-a-raykernel).
 

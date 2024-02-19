@@ -6,7 +6,7 @@
 - Constraint applied through NodalKernel
 - Resultant constraint source applied through Kernel
 - No PSPG-type stabilization for LM variable
-- Not solveable with `-pc_type hypre -pc_hypre_type boomeramg`
+- Not solvable with `-pc_type hypre -pc_hypre_type boomeramg`
 - Local oscillations in LM near discontinuity front and right boundary
 
 Postprocessor Values:
@@ -32,7 +32,7 @@ Postprocessor Values:
 - Constraint applied through NodalKernel
 - Resultant constraint source applied through NodalKernel
 - No PSPG-type stabilization for LM variable
-- Not solveable with `-pc_type hypre -pc_hypre_type boomeramg`
+- Not solvable with `-pc_type hypre -pc_hypre_type boomeramg`
 - No oscillations
 
 +----------------+----------------+----------------+
@@ -57,7 +57,7 @@ Postprocessor Values:
 - Constraint applied through NodalKernel
 - Resultant constraint source applied through Kernel
 - Includes PSPG-type stabilization for LM variable
-- Solveable with `-pc_type hypre -pc_hypre_type boomeramg`
+- Solvable with `-pc_type hypre -pc_hypre_type boomeramg`
 - Local oscillations in LM near discontinuity front
 
 +----------------+----------------+----------------+
@@ -82,7 +82,7 @@ Postprocessor Values:
 - Constraint applied through NodalKernel
 - Resultant constraint source applied through NodalKernel
 - PSPG-type stabilization for LM variable
-- Solveable with `-pc_type hypre -pc_hypre_type boomeramg`
+- Solvable with `-pc_type hypre -pc_hypre_type boomeramg`
 - Global oscillations in LM
 
 +----------------+----------------+----------------+
@@ -111,7 +111,7 @@ Postprocessor Values:
 - PSPG-type stabilization for LM variable
 - Requires `-snes_mf_operator` in order to get the `CoupledForceNodalKernel`
   Jacobian  right for internal node
-- Solveable with `-pc_type hypre -pc_hypre_type boomeramg`
+- Solvable with `-pc_type hypre -pc_hypre_type boomeramg`
 - Local oscillations in LM near right boundary
 
 +----------------+----------------+----------------+

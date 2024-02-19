@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#26336'
+  design = 'syntax/Controls/index.md'
   [test]
     type = CSVDiff
     input = 'test.i'
     csvdiff = 'test_out.csv'
     allow_test_objects = True
+    requirement = 'The system shall be able to execute controls at the beginning of simulation time steps.'
   []
 []

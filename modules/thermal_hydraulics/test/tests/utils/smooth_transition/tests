@@ -1,10 +1,14 @@
 [Tests]
+  # also idaholab/sockeye#99
+  issues = '#26411'
   [cubic_nonad]
     type = 'CSVDiff'
     input = 'smooth_transition.i'
     csvdiff = 'cubic_nonad_test_vpp_0000.csv'
     allow_test_objects = True
     recover = False
+    design = 'CubicTransition.md'
+    requirement = 'The system shall be able to compute a smooth cubic transition between two functions of a variable.'
   []
   [weighted_nonad]
     type = 'CSVDiff'
@@ -13,6 +17,8 @@
     csvdiff = 'weighted_nonad_test_vpp_0000.csv'
     allow_test_objects = True
     recover = False
+    design = 'CubicTransition.md'
+    requirement = 'The system shall be able to compute a smooth weighted transition between two functions of a variable.'
   []
   [cubic_derivative]
     type = 'PetscJacobianTester'
@@ -21,6 +27,8 @@
     difference_tol = 1e-9
     max_threads = 1
     allow_test_objects = True
+    design = 'CubicTransition.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when performing a smooth cubic transition between two functions of a variable, showing that derivatives were computed accurately.'
   []
   [weighted_derivative]
     type = 'PetscJacobianTester'
@@ -30,6 +38,8 @@
     difference_tol = 1e-7
     max_threads = 1
     allow_test_objects = True
+    design = 'WeightedTransition.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when performing a smooth weighted transition between two functions of a variable, showing that derivatives were computed accurately.'
   []
   [ad_cubic]
     type = 'CSVDiff'
@@ -40,6 +50,8 @@
       Outputs/file_base=ad_cubic"
     allow_test_objects = True
     recover = False
+    design = 'WeightedTransition.md'
+    requirement = 'The system shall be able to compute a smooth cubic transition between two functions of a variable and conserving derivatives with automatic differentiation.'
   []
   [ad_weighted]
     type = 'CSVDiff'
@@ -47,5 +59,7 @@
     csvdiff = 'ad_weighted_test_vpp_0000.csv'
     allow_test_objects = True
     recover = False
+    design = 'WeightedTransition.md'
+    requirement = 'The system shall be able to compute a smooth weighted transition between two functions of a variable and conserving derivatives with automatic differentiation.'
   []
 []

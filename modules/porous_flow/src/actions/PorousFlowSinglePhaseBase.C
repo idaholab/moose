@@ -53,6 +53,7 @@ PorousFlowSinglePhaseBase::validParams()
       "The name of the user object for fluid "
       "properties. Only needed if fluid_properties_type = PorousFlowSingleComponentFluid");
   params.addCoupledVar("mass_fraction_vars",
+                       {},
                        "List of variables that represent the mass fractions.  With only one fluid "
                        "component, this may be left empty.  With N fluid components, the format is "
                        "'f_0 f_1 f_2 ... f_(N-1)'.  That is, the N^th component need not be "
@@ -77,6 +78,7 @@ PorousFlowSinglePhaseBase::validParams()
       "The Biot coefficient (relevant only for mechanically-coupled simulations)");
   params.addParam<std::vector<AuxVariableName>>(
       "save_component_rate_in",
+      {},
       "List of AuxVariables into which the rate-of-change of each fluid component at each node "
       "will be saved.  There must be exactly N of these to match the N fluid components.  The "
       "result will be measured in kg/s, where the kg is the mass of the fluid component at the "
@@ -161,8 +163,8 @@ PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & par
     _nacl_name = getParam<VariableName>("nacl_name");
   }
 
-  if (params.isParamValid("save_component_rate_in") &&
-      _save_component_rate_in.size() != _num_mass_fraction_vars + 1)
+  auto save_component_rate_in_size = _save_component_rate_in.size();
+  if (save_component_rate_in_size && save_component_rate_in_size != _num_mass_fraction_vars + 1)
     paramError("save_component_rate_in",
                "The number of save_component_rate_in variables must be the number of fluid "
                "components + 1");

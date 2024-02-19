@@ -11,155 +11,148 @@
 []
 
 [Functions]
-  [./forcing_fnu]
+  [forcing_fnu]
     type = ParsedFunction
     expression = -6*(x+y)+x*x+y*y
-  [../]
-  [./forcing_fnv]
+  []
+  [forcing_fnv]
     type = ParsedFunction
     expression = -4+x*x*x-x+y*y*y-y
-  [../]
-  [./bc_fnut]
+  []
+  [bc_fnut]
     type = ParsedFunction
     expression = 3*y*y-1
-  [../]
-  [./bc_fnub]
+  []
+  [bc_fnub]
     type = ParsedFunction
     expression = -3*y*y+1
-  [../]
-  [./bc_fnul]
+  []
+  [bc_fnul]
     type = ParsedFunction
     expression = -3*x*x+1
-  [../]
-  [./bc_fnur]
+  []
+  [bc_fnur]
     type = ParsedFunction
     expression = 3*x*x-1
-  [../]
-  [./slnu]
+  []
+  [slnu]
     type = ParsedGradFunction
     expression = x*x*x-x+y*y*y-y
     grad_x = 3*x*x-1
     grad_y = 3*y*y-1
-  [../]
-  [./slnv]
+  []
+  [slnv]
     type = ParsedGradFunction
-    value = x*x+y*y
+    expression = x*x+y*y
     grad_x = 2*x
     grad_y = 2*y
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = THIRD
     family = HIERARCHIC
-  [../]
-  [./v]
+  []
+  [v]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff1]
+  [diff1]
     type = Diffusion
     variable = u
-  [../]
-  [./diff2]
+  []
+  [diff2]
     type = Diffusion
     variable = v
-  [../]
-  [./forceu]
+  []
+  [forceu]
     type = BodyForce
     variable = u
     function = forcing_fnu
-  [../]
-  [./forcev]
+  []
+  [forcev]
     type = BodyForce
     variable = v
     function = forcing_fnv
-  [../]
+  []
 []
 
 [BCs]
-  # active = 'bc_u bc_v'
-  # [./bc_u]
-  # type = FunctionDirichletBC
-  # variable = u
-  # function = slnu
-  # boundary = 'top left right bottom'
-  # [../]
-  [./bc_ut]
+  [bc_ut]
     type = FunctionDirichletBC
     variable = u
     boundary = top
     function = bc_fnut
-  [../]
-  [./bc_ub]
+  []
+  [bc_ub]
     type = FunctionDirichletBC
     variable = u
     boundary = bottom
     function = bc_fnub
-  [../]
-  [./bc_ul]
+  []
+  [bc_ul]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = bc_fnul
-  [../]
-  [./bc_ur]
+  []
+  [bc_ur]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = bc_fnur
-  [../]
-  [./bc_v]
+  []
+  [bc_v]
     type = FunctionDirichletBC
     variable = v
     function = slnv
     boundary = 'top left right bottom'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./prec]
+  [prec]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'num_vars'
-  [./dofs]
+  [dofs]
     type = NumDOFs
-  [../]
-  [./h]
+  []
+  [h]
     type = AverageElementSize
-  [../]
-  [./L2u]
+  []
+  [L2u]
     type = ElementL2Error
     variable = u
     function = slnu
-  [../]
-  [./L2v]
+  []
+  [L2v]
     type = ElementL2Error
     variable = v
     function = slnv
-  [../]
-  [./H1error]
+  []
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
-  [./H1Semierror]
+  []
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
-  [./num_vars]
+  []
+  [num_vars]
     type = NumVars
     system = 'NL'
-  [../]
+  []
 []
 
 [Executioner]

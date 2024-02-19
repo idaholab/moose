@@ -38,12 +38,12 @@ public:
   void gatherRCData(const FaceInfo & fi) override final;
   void initialSetup() override;
   using INSFVAdvectionKernel::computeResidual;
-  void computeResidual(const FaceInfo & fi) override;
+  void computeResidual(const FaceInfo & fi) override final;
   using INSFVAdvectionKernel::computeJacobian;
-  void computeJacobian(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override final;
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override final;
   virtual bool hasMaterialTimeDerivative() const override { return true; }
 
   /**
@@ -54,7 +54,7 @@ protected:
   /**
    * Helper method that computes the 'a' coefficients and AD residuals
    */
-  void computeResidualsAndAData(const FaceInfo & fi);
+  virtual void computeResidualsAndAData(const FaceInfo & fi);
 
   /// Density
   const Moose::Functor<ADReal> & _rho;

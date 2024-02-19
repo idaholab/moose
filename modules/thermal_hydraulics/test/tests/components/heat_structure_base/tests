@@ -1,22 +1,28 @@
 [Tests]
+  # relap 7 #636
+  issues = '#26336'
+  design = 'HeatStructurePlate.md HeatStructureCylindrical.md'
   [axial_regions]
     type = Exodiff
     input = 'axial_regions.i'
     cli_args = "Components/hs/axial_region_names='region1 region2 region3'"
     exodiff = 'axial_regions_out.e'
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for the thermal behavior of a heat structure with several axial regions.'
   []
 
   [phy:variable_init_t]
     type = Exodiff
     input = 'phy.variable_init_t.i'
     exodiff = 'phy.variable_init_t_out.e'
+    requirement = 'The system shall be able to initialize the temperature in a heat structure using a function.'
   []
 
   [phy:sub_discretization]
     type = Exodiff
     input = 'phy.sub_discretization.i'
     exodiff = 'phy.sub_discretization_out.e'
+    requirement = 'The system shall be able to solve for the thermal behavior of a heat structure with several axial regions with different axial discretizations.'
   []
 
   [inner_radial_boundary]
@@ -24,6 +30,7 @@
     input = 'inner_radial_boundary.i'
     csvdiff = 'inner_radial_boundary_out_test_vpp_0000.csv'
     recover = false
+    requirement = 'The system shall be able to discretize the inner boundary of a heat structure.'
   []
 
   [interior_axial_boundaries]
@@ -31,57 +38,68 @@
     input = 'interior_axial_boundaries.i'
     csvdiff = 'interior_axial_boundaries_out.csv'
     recover = false
+    requirement = 'The system shall be able to create interior axial boundaries in a heat structure.'
   []
 
   [2nd_order]
     type = 'RunApp'
     input = '2nd_order.i'
     expect_out = "Solve Converged"
+    requirement = 'The system shall be able to use a second order mesh in a heat structure.'
   []
 
-  [err:missing_axial_regions_parameter]
-    type = RunException
-    input = 'axial_regions.i'
-    expect_err = "If there is more than 1 axial region, then the parameter 'axial_region_names' must be specified."
-  []
+  [errors]
+    requirement = 'The system shall report an error if '
+    [err:missing_axial_regions_parameter]
+      type = RunException
+      input = 'axial_regions.i'
+      expect_err = "If there is more than 1 axial region, then the parameter 'axial_region_names' must be specified."
+      detail = 'several axial regions are specified but only one name for the axial regions is passed,'
+    []
 
-  [err:incorrect_size_axial_regions_parameter]
-    type = RunException
-    input = 'axial_regions.i'
-    cli_args = "Components/hs/axial_region_names='region1 region2'"
-    expect_err = "The number of entries in parameter 'axial_region_names' \(2\) must equal the number of entries of parameter 'length' \(3\)"
-  []
+    [err:incorrect_size_axial_regions_parameter]
+      type = RunException
+      input = 'axial_regions.i'
+      cli_args = "Components/hs/axial_region_names='region1 region2'"
+      expect_err = "The number of entries in parameter 'axial_region_names' \(2\) must equal the number of entries of parameter 'length' \(3\)"
+      detail = 'the user specified non-matching numbers of axial regions and axial lengths,'
+    []
 
-  [err:no_2nd_order_with_trap]
-    type = 'RunException'
-    input = 'err.no_2nd_order_with_trap.i'
-    expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
-  []
+    [err:no_2nd_order_with_trap]
+      type = 'RunException'
+      input = 'err.no_2nd_order_with_trap.i'
+      expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
+      detail = 'the user attempts to use a TRAP quadrature with second order elements,'
+    []
+    [err:no_T_ic]
+      type = 'RunException'
+      input = 'err.no_T_ic.i'
+      expect_err = "hs: Missing initial condition for temperature."
+      detail = 'the user does not specify the initial temperature to a heat structure component,'
+    []
 
-  [err:no_T_ic]
-    type = 'RunException'
-    input = 'err.no_T_ic.i'
-    expect_err = "hs: Missing initial condition for temperature."
-  []
+    [err:incorrect_size_of_n_part_elems]
+      type = 'RunException'
+      input = 'err.no_T_ic.i'
+      cli_args = 'Components/hs/n_part_elems=1'
+      expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'n_part_elems' \(1\)"
+      detail = 'the user does not specify a matching number of names and discretizations for every part in a cylindrical heat structure,'
+    []
 
-  [err:incorrect_size_of_n_part_elems]
-    type = 'RunException'
-    input = 'err.no_T_ic.i'
-    cli_args = 'Components/hs/n_part_elems=1'
-    expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'n_part_elems' \(1\)"
-  []
+    [err:incorrect_size_of_widths]
+      type = 'RunException'
+      input = 'err.no_T_ic.i'
+      cli_args = 'Components/hs/widths=1'
+      expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'widths' \(1\)"
+      detail = 'the user does not specify a matching number of names and widths for every part in a cylindrical heat structure,'
+    []
 
-  [err:incorrect_size_of_widths]
-    type = 'RunException'
-    input = 'err.no_T_ic.i'
-    cli_args = 'Components/hs/widths=1'
-    expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'widths' \(1\)"
-  []
-
-  [err:incorrect_size_of_materials]
-    type = 'RunException'
-    input = 'err.no_T_ic.i'
-    cli_args = 'Components/hs/materials=a'
-    expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'materials' \(1\)"
+    [err:incorrect_size_of_solid_properties]
+      type = 'RunException'
+      input = 'err.no_T_ic.i'
+      cli_args = 'Components/hs/solid_properties=a'
+      expect_err = "hs: The number of entries in parameter 'solid_properties' \(1\) must equal the number of entries of parameter 'names' \(3\)"
+      detail = 'the user does not specify a matching number of names and solid properties for every part in a cylindrical heat structure.'
+    []
   []
 []

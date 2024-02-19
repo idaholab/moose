@@ -12,10 +12,12 @@
 // MOOSE includes
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
+#include "MeshDivision.h"
 #include "MortarData.h"
 #include "ReporterData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
+#include "FVInitialConditionWarehouse.h"
 #include "ScalarInitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
@@ -580,20 +582,32 @@ public:
   void forceOutput();
 
   /**
-   * Reinitialize PETSc output for proper linear/nonlinear iteration display
+   * Reinitialize PETSc output for proper linear/nonlinear iteration display. This also may be used
+   * for some PETSc-related solver settings
    */
-  virtual void initPetscOutput();
+  virtual void initPetscOutputAndSomeSolverSettings();
 
   /**
    * Retrieve a writable reference the PETSc options (used by PetscSupport)
    */
   Moose::PetscSupport::PetscOptions & getPetscOptions() { return _petsc_options; }
 
+  /**
+   * Output information about the object just added to the problem
+   */
+  void logAdd(const std::string & system, const std::string & name, const std::string & type) const;
+
   // Function /////
   virtual void
   addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, const THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, const THREAD_ID tid = 0);
+
+  /// Add a MeshDivision
+  void
+  addMeshDivision(const std::string & type, const std::string & name, InputParameters & params);
+  /// Get a MeshDivision
+  MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
 
   /**
    * add a MOOSE line search
@@ -719,9 +733,9 @@ public:
 
   virtual void
   addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
-  void addFVInterfaceKernel(const std::string & fv_ik_name,
-                            const std::string & name,
-                            InputParameters & parameters);
+  virtual void addFVInterfaceKernel(const std::string & fv_ik_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
 
   // Interface /////
   virtual void addInterfaceKernel(const std::string & kernel_name,
@@ -732,6 +746,15 @@ public:
   virtual void addInitialCondition(const std::string & ic_name,
                                    const std::string & name,
                                    InputParameters & parameters);
+  /**
+   * Add an initial condition for a finite volume variables
+   * @param ic_name The name of the boundary condition object
+   * @param name The user-defined name from the input file
+   * @param parameters The input parameters for construction
+   */
+  virtual void addFVInitialCondition(const std::string & ic_name,
+                                     const std::string & name,
+                                     InputParameters & parameters);
 
   void projectSolution();
 
@@ -759,11 +782,19 @@ public:
                           InputParameters & parameters);
 
   /**
-   * Add the MooseVariables that the current materials depend on to the dependency list.
+   * Add the MooseVariables and the material properties that the current materials depend on to the
+   * dependency list.
+   * @param consumer_needed_mat_props The material properties needed by consumer objects (other than
+   * the materials themselves)
+   * @param blk_id The subdomain ID for which we are preparing our list of needed vars and props
+   * @param tid The thread ID we are preparing the requirements for
    *
-   * This MUST be done after the dependency list has been set for all the other objects!
+   * This MUST be done after the moose variable dependency list has been set for all the other
+   * objects using the \p setActiveElementalMooseVariables API!
    */
-  virtual void prepareMaterials(SubdomainID blk_id, const THREAD_ID tid);
+  void prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
+                        const SubdomainID blk_id,
+                        const THREAD_ID tid);
 
   void reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful = true);
 
@@ -828,15 +859,8 @@ public:
    *
    * @param tid The thread id
    */
-  void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
+  void setActiveMaterialProperties(const std::unordered_set<unsigned int> & mat_prop_ids,
                                    const THREAD_ID tid);
-
-  /**
-   * Get the material properties required by the current computing thread.
-   *
-   * @param tid The thread id
-   */
-  const std::set<unsigned int> & getActiveMaterialProperties(const THREAD_ID tid) const;
 
   /**
    * Method to check whether or not a list of active material roperties has been set. This method
@@ -1476,6 +1500,11 @@ public:
   const InitialConditionWarehouse & getInitialConditionWarehouse() const { return _ics; }
 
   /**
+   * Return FVInitialCondition storage
+   */
+  const FVInitialConditionWarehouse & getFVInitialConditionWarehouse() const { return _fv_ics; }
+
+  /**
    * Get the solver parameters
    */
   SolverParams & solverParams();
@@ -1573,6 +1602,9 @@ public:
    * Toggle parallel barrier messaging (defaults to on).
    */
   void setParallelBarrierMessaging(bool flag) { _parallel_barrier_messaging = flag; }
+
+  /// Make the problem be verbose
+  void setVerboseProblem(bool verbose);
 
   /**
    * Whether or not to use verbose printing for MultiApps.
@@ -2100,15 +2132,22 @@ public:
    */
   void clearCurrentResidualVectorTags();
 
-  /**
-   * Indicate that we have p-refinement
-   */
-  void havePRefinement();
+  using SubProblem::doingPRefinement;
+  virtual void doingPRefinement(bool doing_p_refinement,
+                                const MultiMooseEnum & disable_p_refinement_for_families) override;
 
   virtual void needFV() override { _have_fv = true; }
   virtual bool haveFV() const override { return _have_fv; }
 
   virtual bool hasNonlocalCoupling() const override { return _has_nonlocal_coupling; }
+
+  /**
+   * Whether to identify variable groups in nonlinear systems. This affects dof ordering
+   */
+  bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
+
+  virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
+  virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -2181,6 +2220,11 @@ protected:
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
+  /// Warehouse to store mesh divisions
+  /// NOTE: this could probably be moved to the MooseMesh instead of the Problem
+  /// Time (and people's uses) will tell where this fits best
+  MooseObjectWarehouse<MeshDivision> _mesh_divisions;
+
   /// functions
   MooseObjectWarehouse<Function> _functions;
 
@@ -2193,6 +2237,7 @@ protected:
   ///@{
   /// Initial condition storage
   InitialConditionWarehouse _ics;
+  FVInitialConditionWarehouse _fv_ics;
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
@@ -2365,6 +2410,9 @@ protected:
 
   std::vector<std::vector<const MooseVariableFEBase *>> _uo_jacobian_moose_vars;
 
+  /// Whether there are active material properties on each thread
+  std::vector<unsigned char> _has_active_material_properties;
+
   SolverParams _solver_params;
 
   /// Determines whether a check to verify an active kernel on every subdomain
@@ -2405,8 +2453,11 @@ protected:
   /// Whether or not information about how many transfers have completed is printed
   bool _parallel_barrier_messaging;
 
+  /// Whether or not to be verbose during setup
+  bool _verbose_setup;
+
   /// Whether or not to be verbose with multiapps
-  const bool _verbose_multiapps;
+  bool _verbose_multiapps;
 
   /// The error message to go with an exception
   std::string _exception_message;
@@ -2467,6 +2518,16 @@ private:
   std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
+
+  /**
+   * Checks if the variable of the initial condition is getting restarted and errors for specific
+   * cases
+   * @param ic_name The name of the initial condition
+   * @param var_name The name of the variable
+   */
+  void checkICRestartError(const std::string & ic_name,
+                           const std::string & name,
+                           const VariableName & var_name);
 
   /*
    * Test if stateful property redistribution is expected to be
@@ -2533,6 +2594,9 @@ private:
 
   /// When to print the execution of loops
   ExecFlagEnum _print_execution_on;
+
+  /// Whether to identify variable groups in nonlinear systems. This affects dof ordering
+  const bool _identify_variable_groups_in_nl;
 
   /// A data member to store the residual vector tag(s) passed into \p computeResidualTag(s). This
   /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
@@ -2604,6 +2668,7 @@ FEProblemBase::addObject(const std::string & type,
 {
   parallel_object_only();
 
+  logAdd(MooseUtils::prettyCppType<T>(), name, type);
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name, var_param_name);
 

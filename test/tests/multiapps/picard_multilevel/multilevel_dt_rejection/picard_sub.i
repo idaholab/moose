@@ -6,62 +6,62 @@
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./v2]
-  [../]
-  [./v3]
-  [../]
-  [./w]
-  [../]
+  [v2]
+  []
+  [v3]
+  []
+  [w]
+  []
 []
 
 [AuxKernels]
-  [./set_w]
+  [set_w]
     type = NormalizationAux
     variable = w
     source_variable = v
     normal_factor = 0.1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./coupled_force]
+  []
+  [coupled_force]
     type = CoupledForce
     variable = v
     v = v2
-  [../]
-  [./coupled_force2]
+  []
+  [coupled_force2]
     type = CoupledForce
     variable = v
     v = v3
-  [../]
-  [./td_v]
+  []
+  [td_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_v]
+  [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = left
     function = func
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Functions]
@@ -75,7 +75,7 @@
   [picard_its]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [parent_time]
     type = Receiver
     execute_on = 'timestep_end'
@@ -107,27 +107,27 @@
 []
 
 [MultiApps]
-  [./sub2]
+  [sub2]
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = picard_sub2.i
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
-  [./v_to_v3]
-    type = MultiAppNearestNodeTransfer
+  [v_to_v3]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub2
     source_variable = v
     variable = v3
-  [../]
-  [./w]
-    type = MultiAppNearestNodeTransfer
+  []
+  [w]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub2
     source_variable = w
     variable = w
-  [../]
+  []
   [time_to_sub]
     type = MultiAppPostprocessorTransfer
     from_postprocessor = time

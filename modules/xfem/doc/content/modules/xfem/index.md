@@ -3,7 +3,7 @@
 !row!
 !col! small=12 medium=6 large=9
 The XFEM module implements the extended finite element method (XFEM) in the MOOSE framework. It can
-be used in conjuction with any number of other physics modules to enrich the solutions to partial
+be used in conjunction with any number of other physics modules to enrich the solutions to partial
 differential equations (PDEs) with some form of discontinuity. XFEM theory and implementation are
 detailed in the theory manual:
 

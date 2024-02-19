@@ -31,7 +31,7 @@
   []
 
   [errors]
-    requirement = "The system shall error when computing layered averages of a variable if"
+    requirement = "The system shall report an error when computing layered averages of a variable if"
     design = '/LayeredAverage.md'
     issues = '#2941 #2567'
 

@@ -11,7 +11,7 @@ If you are operating on a Windows machine, please first follow
 ## Install Conda
 
 !style! halign=left
-Our preferred method for deliverying pre-built MOOSE binaries is via Conda.
+Our preferred method for delivering pre-built MOOSE binaries is via Conda.
 !style-end!
 
 !include getting_started/installation/install_miniconda.md
@@ -23,17 +23,17 @@ With Conda initialized, create the `moose` environment and install `moose`:
 !style-end!
 
 ```bash
-mamba create -n moose moose
+conda create -n moose moose
 ```
 
 After the installation completes, activate the new environment:
 
 ```bash
-mamba activate moose
+conda activate moose
 ```
 
 !alert note
-Know that you will need to `mamba activate moose` for +each terminal window you open, and each time
+Know that you will need to `conda activate moose` for +each terminal window you open, and each time
 you wish to perform MOOSE related work+. If you wish to make this automatic, you can add that
 command to the end of your shell profile.
 
@@ -43,7 +43,7 @@ Verify `moose` is available:
 moose --help
 ```
 
-Should produce the help page. This simple command demonstrates that you have sucessfully installed
+Should produce the help page. This simple command demonstrates that you have successfully installed
 the MOOSE Conda package.
 
 !template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$CONDA_PREFIX/moose/share/moose TUTORIAL=heat_conduction
@@ -65,14 +65,14 @@ environment. Conda makes this easy, but it will be up to you to watch your promp
 when to activate one or the other.
 !alert-end!
 
-The easiest sollution is to open two terminal windows. While in one, you have `moose` activated.
+The easiest solution is to open two terminal windows. While in one, you have `moose` activated.
 While in the other, you have `paraview` activated. Open a new terminal window now, and create the
 new `paraview` environment:
 
 ```bash
-mamba activate base # just in case you have `moose` auto-activating
-mamba create -n paraview paraview
-mamba activate paraview
+conda activate base # just in case you have `moose` auto-activating
+conda create -n paraview paraview
+conda activate paraview
 ```
 
 With paraview installed, you can now open `<the input file you chose>_in.e` with the following
@@ -90,7 +90,7 @@ Consecutive launches are quick.
 ## More Examples
 
 !style! halign=left
-Continue on to see more examples and tuturials using MOOSE! However, most of the next section is
+Continue on to see more examples and tutorials using MOOSE! However, most of the next section is
 geared towards developing your own application.
 !style-end!
 

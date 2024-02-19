@@ -59,7 +59,7 @@ public:
    * @param name Name of the object whose parameter we are requesting
    * @return Parameters of the object
    */
-  InputParameters getValidParams(const std::string & name);
+  InputParameters getValidParams(const std::string & name) const;
 
   /**
    * Build an object (must be registered) - THIS METHOD IS DEPRECATED (Use create<T>())
@@ -146,7 +146,7 @@ private:
    * Show the appropriate message for deprecated objects
    * @param obj_name Name of the deprecated object
    */
-  void deprecatedMessage(const std::string obj_name);
+  void deprecatedMessage(const std::string obj_name) const;
 
   /**
    * Prints error information when an object is not registered
@@ -177,7 +177,7 @@ private:
   std::set<std::string> _constructed_types;
 
   /// Set of deprecated object types that have been printed
-  std::set<std::string> _deprecated_types;
+  mutable std::set<std::string> _deprecated_types;
 
   /// set<label/appname, objectname> used to track if an object previously added is being added
   /// again - which is okay/allowed, while still allowing us to detect/reject cases of duplicate

@@ -169,6 +169,8 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
 
+  _sys.identify_variable_groups(_fe_problem.identifyVariableGroupsInNL());
+
   if (!_fe_problem.defaultGhosting())
   {
     auto & dof_map = _sys.get_dof_map();
@@ -432,6 +434,13 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _constraints.customSetup(exec_type);
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
+}
+
+void
+NonlinearSystemBase::setupDM()
+{
+  if (haveFieldSplitPreconditioner())
+    Moose::PetscSupport::petscSetupDM(*this, _decomposition_split);
 }
 
 void
@@ -3601,8 +3610,9 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
-bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                      THREAD_ID /*tid*/) const
+bool
+NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
+                                                 THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }
@@ -3887,17 +3897,19 @@ NonlinearSystemBase::assembleScalingVector()
        as_range(lm_mesh.active_local_elements_begin(), lm_mesh.active_local_elements_end()))
     for (const auto * const field_var : field_variables)
     {
-      mooseAssert(field_var->count() == 1,
-                  "Contact Alex Lindsay and tell him to make this work for array variables.");
-      dof_map.dof_indices(elem, dof_indices, field_var->number());
-      for (const auto dof : dof_indices)
-        scaling_vector.set(dof, field_var->scalingFactor());
+      const auto & factors = field_var->arrayScalingFactor();
+      for (const auto i : make_range(field_var->count()))
+      {
+        dof_map.dof_indices(elem, dof_indices, field_var->number() + i);
+        for (const auto dof : dof_indices)
+          scaling_vector.set(dof, factors[i]);
+      }
     }
 
   for (const auto * const scalar_var : scalar_variables)
   {
     mooseAssert(scalar_var->count() == 1,
-                "Contact Alex Lindsay and tell him to make this work for array variables.");
+                "Scalar variables should always have only one component.");
     dof_map.SCALAR_dof_indices(dof_indices, scalar_var->number());
     for (const auto dof : dof_indices)
       scaling_vector.set(dof, scalar_var->scalingFactor());

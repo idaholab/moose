@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "MooseTypes.h"
 #include "OptimizationReporterBase.h"
 #include "OptUtils.h"
 #include "libmesh/petsc_vector.h"
@@ -20,6 +21,10 @@ OptimizationReporterBase::validParams()
       "parameter_names", "List of parameter names, one for each group of parameters.");
   params.addRangeCheckedParam<Real>(
       "tikhonov_coeff", 0.0, "tikhonov_coeff >= 0", "Coefficient for Tikhonov Regularization.");
+  params.addParam<std::vector<ReporterValueName>>(
+      "equality_names", std::vector<ReporterValueName>(), "List of equality names.");
+  params.addParam<std::vector<ReporterValueName>>(
+      "inequality_names", std::vector<ReporterValueName>(), "List of inequality names.");
   params.registerBase("OptimizationReporterBase");
   return params;
 }
@@ -30,7 +35,15 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _nparams(_parameter_names.size()),
     _parameters(_nparams),
     _gradients(_nparams),
-    _tikhonov_coeff(getParam<Real>("tikhonov_coeff"))
+    _tikhonov_coeff(getParam<Real>("tikhonov_coeff")),
+    _equality_names(&getParam<std::vector<ReporterValueName>>("equality_names")),
+    _n_eq_cons(_equality_names->size()),
+    _eq_constraints(_n_eq_cons),
+    _eq_gradients(_n_eq_cons),
+    _inequality_names(&getParam<std::vector<ReporterValueName>>("inequality_names")),
+    _n_ineq_cons(_inequality_names->size()),
+    _ineq_constraints(_n_ineq_cons),
+    _ineq_gradients(_n_ineq_cons)
 {
   for (const auto & i : make_range(_nparams))
   {
@@ -39,8 +52,21 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _parameter_names[i],
                                                            REPORTER_MODE_REPLICATED);
   }
+  for (const auto & i : make_range(_n_eq_cons))
+  {
+    _eq_constraints[i] =
+        &declareValueByName<std::vector<Real>>(_equality_names->at(i), REPORTER_MODE_REPLICATED);
+    _eq_gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _equality_names->at(i),
+                                                              REPORTER_MODE_REPLICATED);
+  }
+  for (const auto & i : make_range(_n_ineq_cons))
+  {
+    _ineq_constraints[i] =
+        &declareValueByName<std::vector<Real>>(_inequality_names->at(i), REPORTER_MODE_REPLICATED);
+    _ineq_gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _inequality_names->at(i),
+                                                                REPORTER_MODE_REPLICATED);
+  }
 }
-
 
 void
 OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradient) const
@@ -71,7 +97,8 @@ OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradien
 void
 OptimizationReporterBase::setInitialCondition(libMesh::PetscVector<Number> & x)
 {
-  x.init(_ndof);
+  setICsandBounds();
+  x.init(getNumParams());
   OptUtils::copyReporterIntoPetscVector(_parameters, x);
 }
 
@@ -137,4 +164,48 @@ OptimizationReporterBase::fillParamsVector(std::string type, Real default_value)
     flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
 
   return flattened_data;
+}
+
+void
+OptimizationReporterBase::computeEqualityConstraints(
+    libMesh::PetscVector<Number> & eqs_constraints) const
+{
+  OptUtils::copyReporterIntoPetscVector(_eq_constraints, eqs_constraints);
+}
+
+void
+OptimizationReporterBase::computeInequalityConstraints(
+    libMesh::PetscVector<Number> & ineqs_constraints) const
+{
+  OptUtils::copyReporterIntoPetscVector(_ineq_constraints, ineqs_constraints);
+}
+
+void
+OptimizationReporterBase::computeEqualityGradient(libMesh::PetscMatrix<Number> & jacobian) const
+{
+  for (const auto & p : make_range(_n_eq_cons))
+    if (_eq_gradients[p]->size() != _ndof)
+      mooseError("The equality jacobian for parameter ",
+                 _parameter_names[p],
+                 " has changed, expected ",
+                 _ndof,
+                 " versus ",
+                 _eq_gradients[p]->size(),
+                 ".");
+  OptUtils::copyReporterIntoPetscMatrix(_eq_gradients, jacobian);
+}
+
+void
+OptimizationReporterBase::computeInequalityGradient(libMesh::PetscMatrix<Number> & jacobian) const
+{
+  for (const auto & p : make_range(_n_ineq_cons))
+    if (_ineq_gradients[p]->size() != _ndof)
+      mooseError("The inequality jacobian for parameter ",
+                 _parameter_names[p],
+                 " has changed, expected ",
+                 _ndof,
+                 " versus ",
+                 _ineq_gradients[p]->size(),
+                 ".");
+  OptUtils::copyReporterIntoPetscMatrix(_ineq_gradients, jacobian);
 }

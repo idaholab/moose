@@ -16,7 +16,7 @@
     expect_err = "Order of SCALAR variables do not match for sending and receiving data for the "
                  "MultiAppScalarToAuxScalarTransfer!"
 
-    requirement = "The system shall error if the variable order does not match when transferring "
+    requirement = "The system shall report an error if the variable order does not match when transferring "
                   "scalar variables to an application from sub-applications."
   []
 []

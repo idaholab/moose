@@ -92,7 +92,7 @@
     cli_args = 'Mesh/extrude/heights="1 2 -3" --mesh-only'
     expect_err = "Cannot have both positive and negative heights!"
 
-    requirement = "The system shall error if missing a consistent positive or negative extrusion "
+    requirement = "The system shall report an error if missing a consistent positive or negative extrusion "
                   "direction."
     design = "AdvancedExtruderGenerator.md"
     issues = "#21273"

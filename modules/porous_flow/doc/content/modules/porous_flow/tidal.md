@@ -130,7 +130,7 @@ Combining [eqn.tot_stress_bc] and [eqn.pp_bc] in the single-phase case means the
 \begin{equation}
 \sigma_{nn}^{\mathrm{eff}} = \sigma_{nn}^{\mathrm{tot}} + \alpha_{B}p = -(1 - \alpha_{B})p_{\mathrm{atm}} \ .
 \end{equation}
-The Biot coefficient, $\alpha_{B}$, can be interpreted as an effective way of accounting for pores that aren't filled with water.  When $\alpha_{B}=1$ all the porespace is filled with water, and the above equation reads $\sigma_{nn}^{\mathrm{eff}}=0$, so an increase in atmospheric pressure produces zero strain: the porewater pushes back on the porous skeleton with the same magnitude as the atmosphere.  When $\alpha_{B}<1$, the above equation means that an increase in atmospheric pressure results in a compression: the porewater doesn't fill tne entire porespace so isn't as effective at "pushing back" and can't match the load of the atmospheric pressure.
+The Biot coefficient, $\alpha_{B}$, can be interpreted as an effective way of accounting for pores that aren't filled with water.  When $\alpha_{B}=1$ all the porespace is filled with water, and the above equation reads $\sigma_{nn}^{\mathrm{eff}}=0$, so an increase in atmospheric pressure produces zero strain: the porewater pushes back on the porous skeleton with the same magnitude as the atmosphere.  When $\alpha_{B}<1$, the above equation means that an increase in atmospheric pressure results in a compression: the porewater doesn't fill the entire porespace so isn't as effective at "pushing back" and can't match the load of the atmospheric pressure.
 
 ### BCs: within a water-filled borehole
 

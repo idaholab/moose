@@ -5,7 +5,7 @@
 ## Overview
 
 [Surrogate models](Surrogates/index.md), once trained, can be output to a binary file for later
-use by using the SurrogateTrainerOutput object. All data within the model that was delcared using
+use by using the SurrogateTrainerOutput object. All data within the model that was declared using
 `declareTrainerData` is automatically stored in the generated file.
 
 ## Example Input File Syntax

@@ -80,7 +80,7 @@
     []
   []
   [diagonal]
-    requirement = 'The system shall error if a user attempts to use nonlocal residual objects without appropriate coupling specified in a preconditioning object. These residual objects include'
+    requirement = 'The system shall report an error if a user attempts to use nonlocal residual objects without appropriate coupling specified in a preconditioning object. These residual objects include'
     [kernels]
       type = RunException
       input = 'jacobian.i'

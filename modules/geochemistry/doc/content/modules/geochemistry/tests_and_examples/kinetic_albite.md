@@ -38,7 +38,7 @@ The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defin
 - The initial mole number for Albite
 - That the system is closed at time zero (by default) so the `free_molality` constraints becomes inactive (no SiO$_{2}$(aq) or Al$^{3+}$ are added or removed from the system by an external agent after this time)
 - The pH, via the `activity` constraint on H$^{+}$.  This constraint is not removed, so this effectively means HCl is continually added or removed from the system to maintain the pH (remember Cl$^{-}$ is the charge-balance species)
-- That the kinetic rates are updated during the Newton solve that finds the equilibrium configuration at each time step.  This helps with stability since it is an implicit approach.  [Geochemists Workbench](https://www.gwb.com/) appears to only compute the kinetic rates at the begining of the time step (an explicit approach).
+- That the kinetic rates are updated during the Newton solve that finds the equilibrium configuration at each time step.  This helps with stability since it is an implicit approach.  [Geochemists Workbench](https://www.gwb.com/) appears to only compute the kinetic rates at the beginning of the time step (an explicit approach).
 
 !listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i block=TimeDependentReactionSolver
 

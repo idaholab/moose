@@ -89,9 +89,11 @@ Extensions:
         source_links:
             action: source/actions/Action.md
             actions: source/actions/Action.md
+            application: Application/index.md
             auxkernels: AuxKernels/index.md
             auxscalarkernels: AuxScalarKernels/index.md
             bcs: syntax/BCs/index.md
+            bounds: syntax/Bounds/index.md
             closures: syntax/Closures/index.md
             components: syntax/Components/index.md
             constraints: syntax/Constraints/index.md
@@ -108,6 +110,7 @@ Extensions:
             functormaterials: syntax/FunctorMaterials/index.md
             fvbcs: syntax/FVBCs/index.md
             fviks: syntax/FVInterfaceKernels/index.md
+            fvics: syntax/FVICs/index.md
             fvkernels: syntax/FVKernels/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
@@ -118,6 +121,7 @@ Extensions:
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md
+            meshdivisions: syntax/MeshDivisions/index.md
             meshgenerators: syntax/Mesh/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
@@ -125,6 +129,7 @@ Extensions:
             outputs: syntax/Outputs/index.md
             parser: source/parser/Parser.md
             partitioner: syntax/Mesh/Partitioner/index.md
+            physics: syntax/Physics/index.md
             positions: syntax/Positions/index.md
             postprocessors: syntax/Postprocessors/index.md
             preconditioners: syntax/Preconditioning/index.md
@@ -140,6 +145,8 @@ Extensions:
             solidproperties: syntax/SolidProperties/index.md
             splits: syntax/Preconditioning/index.md
             surrogates: syntax/Surrogates/index.md
+            likelihoods: syntax/Likelihood/index.md
+            trainers: syntax/Trainers/index.md
             systems: syntax/Systems/index.md
             timeintegrators: syntax/Executioner/TimeIntegrator/index.md
             times: syntax/Times/index.md

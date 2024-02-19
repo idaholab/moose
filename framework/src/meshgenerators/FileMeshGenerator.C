@@ -71,6 +71,7 @@ FileMeshGenerator::generate()
   if (exodus)
   {
     auto exreader = std::make_shared<ExodusII_IO>(*mesh);
+    MooseUtils::checkFileReadable(_file_name);
 
     if (has_exodus_integers)
       exreader->set_extra_integer_vars(
@@ -108,6 +109,7 @@ FileMeshGenerator::generate()
 
     // Supports old suffix (xxxx_mesh.cpr -> xxxx-mesh.cpr) and LATEST
     const auto file_name = deduceCheckpointPath(*this, _file_name);
+    MooseUtils::checkFileReadable(file_name);
 
     mesh->skip_partitioning(_skip_partitioning);
     mesh->allow_renumbering(_allow_renumbering);

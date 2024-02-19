@@ -52,7 +52,7 @@ The primary wetting curve uses
 \begin{equation}
 S_{gr}^{\Delta} = S_{gr}^{max} \ ,
 \end{equation}
-where $0 \leq S_{gr}^{max} < 1 - S_{l,min}$ is a user input (as noted below $S_{gr}^{max}$ must be stricly positive for the cubic-spline modification of the water wetting relative permeability to be well-defined).  The other curves use other values of $S_{gr}^{\Delta}$ as described below.
+where $0 \leq S_{gr}^{max} < 1 - S_{l,min}$ is a user input (as noted below $S_{gr}^{max}$ must be strictly positive for the cubic-spline modification of the water wetting relative permeability to be well-defined).  The other curves use other values of $S_{gr}^{\Delta}$ as described below.
 
 !media media/porous_flow/hysteretic_cap_extensions.png caption=Various extensions of the hysteretic capillary pressure curve available in PorousFlow.  The primary wetting curve is shown, which has the property that $P_{c}\rightarrow 0$ as $S\rightarrow 1- S_{gr}^{max}$ (recall that the primary wetting curve uses the user-inputted $S_{gr}^{max}$ for $S_{gr}^{\Delta}$).  id=histeretic_cap_extensions_fig
 
@@ -224,7 +224,7 @@ Assuming the relative permeability values are constant outside the well-defined 
    - A "linear-like" extension, where the cubic's derivative at $S_{l} = S_{l, r}$ equals $(k_{r, g}^{max} - 1)/S_{l, r}$.  That is, the derivative is equal to the average slope in the extended region.  This means the final result has a discontinuous derivative at $S_{l, r}$, but the result often "looks better" to the eye (see figures below).
    - A "cubic" extension, where the cubic's derivative at $S_{l} = S_{l, r}$ equals the primary drying-curve's derivative at that point.  This means the drying curve is C1 continuous (the wetting curve is not).
 
-3. The water wetting curve is modified around the point $1 - S_{gr}^{\Delta}$, which is the point of infinite derivative.  Firstly, it is assumed that $S_{gr}^{max} > 0$.  If this is not the case then the following modification will not work, but may be unecessary anyway.  Two points are defined
+3. The water wetting curve is modified around the point $1 - S_{gr}^{\Delta}$, which is the point of infinite derivative.  Firstly, it is assumed that $S_{gr}^{max} > 0$.  If this is not the case then the following modification will not work, but may be unnecessary anyway.  Two points are defined
 
    - $S_{\mathrm{small}} = r(1 - S_{gr}^{\Delta})$, where $r$ is a (dimensionless) user-input satisfying $0 < r < 1$, and optimally $r$ should be close to 1, for example $r=0.9$.
    - $S_{\mathrm{big}} = 1 - S_{gr}^{\Delta} / 2$.  Note that [!citet](doughty2008) defines $S_{\mathrm{big}} = (2 - r)(1 - S_{gr}^{\Delta})$, but this can be greater than 1 and can result in a poor modification.
@@ -383,7 +383,7 @@ The remainder of the input file is standard, with the inclusion of the hystereti
 
 !listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[hys_order_material] end=[Postprocessors]
 
-The result is [hys_1phase_relperm_fig].  By altering the `flux`, the system may be dried, re-wet, dried and re-wet again, to generate results stuch as [hys_1phase_relperm_2_fig]
+The result is [hys_1phase_relperm_fig].  By altering the `flux`, the system may be dried, re-wet, dried and re-wet again, to generate results such as [hys_1phase_relperm_2_fig]
 
 !media media/porous_flow/hys_1phase_relperm.png caption=The result of a single-phase simulation in which an external pump removes and adds water to a porous material in order to observe the hysteretic relative permeability.  id=hys_1phase_relperm_fig
 

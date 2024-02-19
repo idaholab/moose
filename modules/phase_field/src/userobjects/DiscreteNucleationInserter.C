@@ -115,7 +115,7 @@ void
 DiscreteNucleationInserter::threadJoin(const UserObject & y)
 {
   // combine _local_nucleus_list entries from all threads on the current process
-  const DiscreteNucleationInserter & uo = static_cast<const DiscreteNucleationInserter &>(y);
+  const auto & uo = static_cast<const DiscreteNucleationInserter &>(y);
   _global_nucleus_list.insert(
       _global_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
 

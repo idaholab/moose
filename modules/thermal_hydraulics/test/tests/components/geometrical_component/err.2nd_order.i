@@ -16,9 +16,9 @@
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [hs-mat]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 1
     cp = 1
     rho = 1
@@ -36,7 +36,8 @@
     names = 'blk'
     widths = '1'
     n_part_elems = '2'
-    materials = 'hs-mat'
+    solid_properties = 'hs-mat'
+    solid_properties_T_ref = '300'
 
     initial_T = 350
   []

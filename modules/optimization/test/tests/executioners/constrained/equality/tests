@@ -1,0 +1,15 @@
+[Tests]
+  design = 'Optimize.md'
+  [quadraticObjCon]
+    type = CSVDiff
+    input = quadratic_minimize_constrained.i
+    csvdiff = quadratic_minimize_constrained_out_OptimizationReporter_0001.csv
+    rel_err = 1e-4
+    allow_test_objects = True
+    max_threads = 1 # Optimize executioner does not support multiple threads
+    petsc_version = ">=3.15"
+
+    issues = '#24930'
+    requirement = "The system shall minimize a constrained quadratic objective function from a test object using the TAO ALMM solver."
+  []
+[]

@@ -329,7 +329,7 @@ Recording the results into Postprocessors yields the results shown in [geotes_we
 
 ## Spatial aquifer geochemistry input file
 
-Having created the geochemical model at 92$^{\circ}$C, it is easy to create a version that includes spatial dependence.  Although the input file may be run by itself, no interesting phenomena will be observed since the temperature will be fiexed and source-species rates will be zero.  When coupled with a `porous_flow` input file (described below) the temperature and source-species rates will be non-trivial.  The input file begins with a [GeochemicalModelDefinition](GeochemicalModelDefinition.md):
+Having created the geochemical model at 92$^{\circ}$C, it is easy to create a version that includes spatial dependence.  Although the input file may be run by itself, no interesting phenomena will be observed since the temperature will be fixed and source-species rates will be zero.  When coupled with a `porous_flow` input file (described below) the temperature and source-species rates will be non-trivial.  The input file begins with a [GeochemicalModelDefinition](GeochemicalModelDefinition.md):
 
 !listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i block=UserObjects
 
@@ -480,7 +480,7 @@ before passing to the `porous_flow` simulation:
 
 A similar Transfer is used for the temperature of the injected fluid.
 
-The amount of precipitate of each mineral is recorded using a [GeochemstryQuantityAux](GeochemistryQuantityAux.md):
+The amount of precipitate of each mineral is recorded using a [GeochemistryQuantityAux](GeochemistryQuantityAux.md):
 
 !listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[dumped_Siderite_auxk] end=[dumped_Pyrrhotite_auxk]
 

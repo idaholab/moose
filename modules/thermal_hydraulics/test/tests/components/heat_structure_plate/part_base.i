@@ -1,0 +1,58 @@
+[Components]
+  [hs]
+    type = HeatStructurePlate
+    position = '0 0 0'
+    orientation = '1 0 0'
+
+    length = 1
+    n_elems = 5
+    names = 'blk'
+    widths = '1'
+    depth = 0.5
+    n_part_elems = '5'
+
+    initial_T = 350
+  []
+
+  [start]
+    type = HSBoundarySpecifiedTemperature
+    hs = hs
+    boundary = hs:start
+    T = 300
+  []
+
+  [end]
+    type = HSBoundarySpecifiedTemperature
+    hs = hs
+    boundary = hs:end
+    T = 400
+  []
+[]
+
+[Preconditioning]
+  [pc]
+    type = SMP
+    full = true
+  []
+[]
+
+[Executioner]
+  type = Transient
+  scheme = 'bdf2'
+
+  start_time = 0
+  dt = 1
+  num_steps = 10
+  abort_on_solve_fail = true
+
+  solve_type = 'NEWTON'
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+[]
+
+[Outputs]
+  file_base = transient
+  exodus = true
+[]

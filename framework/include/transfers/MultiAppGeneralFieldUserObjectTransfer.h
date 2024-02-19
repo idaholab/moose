@@ -27,10 +27,12 @@ public:
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int /* var_index */) override;
 
-  virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
-                                    std::vector<std::pair<Real, Real>> & outgoing_vals) override;
+  virtual void
+  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+                       std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
 private:
+  bool usesMooseAppCoordTransform() const override { return true; }
   /*
    * Evaluate interpolation values for incoming points
    * @param[in] bounding boxes to restrict the evaluation domain
@@ -38,9 +40,10 @@ private:
    * @param[in] the points to evaluate the variable shape functions at
    * @param[out] the values of the variables
    */
-  void evaluateInterpValuesWithUserObjects(const std::vector<BoundingBox> & local_bboxes,
-                                           const std::vector<Point> & incoming_points,
-                                           std::vector<std::pair<Real, Real>> & outgoing_vals);
+  void evaluateInterpValuesWithUserObjects(
+      const std::vector<BoundingBox> & local_bboxes,
+      const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+      std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /// Name of the source user object in all the source problems
   const std::string _user_object_name;

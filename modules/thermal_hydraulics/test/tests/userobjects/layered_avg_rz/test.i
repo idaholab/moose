@@ -33,21 +33,21 @@ length = 4
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [mat1]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
   []
   [mat2]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 0.6
     cp = 1.
     rho = 1.
   []
   [mat3]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     k = 21.5
     cp = 350.
     rho = 6.55e3
@@ -67,7 +67,8 @@ length = 4
     names = '1 2 3'
     widths = '0.004 0.0001 0.0005'
     n_part_elems = '10 1 2'
-    materials = 'mat1 mat2 mat3'
+    solid_properties = 'mat1 mat2 mat3'
+    solid_properties_T_ref = '300 300 300'
   []
 []
 

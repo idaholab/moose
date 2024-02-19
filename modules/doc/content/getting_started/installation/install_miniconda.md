@@ -1,40 +1,39 @@
 
-Follow the steps below depending on your platform to install Mambaforge. If you run into issues
+Follow the steps below depending on your platform to install Miniforge. If you run into issues
 during these steps, please visit our [Conda Troubleshooting](help/faq/conda_issues.md optional=True)
-guide. This installation guide relies on the utilization of `mamba`, an optimized package manager
-for Conda.
+guide.
 
 - +Linux Users:+
 
   ```bash
-  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-  bash Mambaforge-Linux-x86_64.sh -b -p ~/mambaforge3
+  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+  bash Miniforge3-Linux-x86_64.sh -b -p ~/miniforge
   ```
 
 - +Macintosh Users with Intel processors:+
 
   ```bash
-  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-MacOSX-x86_64.sh
-  bash Mambaforge-MacOSX-x86_64.sh -b -p ~/mambaforge3
+  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-x86_64.sh
+  bash Miniforge3-MacOSX-x86_64.sh -b -p ~/miniforge
   ```
 
 - +Macintosh Users with Apple Silicon processors:+
 
   ```bash
-  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-MacOSX-arm64.sh
-  bash Mambaforge-MacOSX-arm64.sh -b -p ~/mambaforge3
+  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
+  bash Miniforge3-MacOSX-arm64.sh -b -p ~/miniforge
   ```
 
-With Mambaforge installed in your home directory, export PATH so that it may be used:
+With Miniforge installed in your home directory, export PATH so that it may be used:
 
 ```bash
-export PATH=$HOME/mambaforge3/bin:$PATH
+export PATH=$HOME/miniforge/bin:$PATH
 ```
 
-Now that we can execute `mamba`, initialize it and then exit the terminal:
+Now that we can execute `conda`, initialize it and then exit the terminal:
 
 ```bash
-mamba init
+conda init --all
 exit
 ```
 
@@ -43,6 +42,13 @@ are in the base environment, and Conda is ready for operation:
 
 ```bash
 $ (base) ~>
+```
+
+The next thing you should do after a fresh install, is perform an update to the base Conda
+environment:
+
+```bash
+conda update --all --yes
 ```
 
 Add [!ac](INL)'s public channel to gain access to [!ac](INL)'s Conda package library:

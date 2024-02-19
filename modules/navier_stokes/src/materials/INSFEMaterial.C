@@ -32,9 +32,9 @@ INSFEMaterial::validParams()
   params.addParam<Real>("scaling_velocity", "Global scaling velocity");
 
   params.addParam<bool>(
-      "compute_turbulence_viscosity", false, "If turbulence viscosity will be computed.");
+      "compute_turbulence_viscosity", false, "If turbulent viscosity will be computed.");
   params.addParam<FunctionName>("mixing_length",
-                                "Prandtl mixing length to compute turbulence viscosity.");
+                                "Prandtl mixing length to compute turbulent viscosity.");
   params.addCoupledVar("turbulence_viscosity_var",
                        "An aux variable turbulence_viscosity will be computed from.");
   return params;
@@ -128,7 +128,7 @@ INSFEMaterial::computeQpProperties()
 
   grad_vel += grad_vel.transpose();
 
-  // Turbulence viscosity
+  // Turbulent viscosity
   _turbulence_viscosity[_qp] = 0.0;
   _k_turbulence[_qp] = 0.0;
   if (_compute_visc_turbulenc)

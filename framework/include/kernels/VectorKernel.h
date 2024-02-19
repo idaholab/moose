@@ -59,7 +59,7 @@ protected:
   virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
 
   /// This is a regular kernel so we cast to a regular MooseVariable
-  VectorMooseVariable & _var;
+  const VectorMooseVariable & _var;
 
   /// the current test function
   const VectorVariableTestValue & _test;

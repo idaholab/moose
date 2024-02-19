@@ -16,7 +16,7 @@ In 1D, the following quadratures are known to integrate exactly:
 - SIMPSON's rule is known to integrate exactly 1D polynomials of order up to 3
 
 In higher dimensions, the quadratures are defined differently based on the element types.
-The user is referred to the libmesh doxygen for each quadrature rule object. They generally may be either:
+The user is referred to the libMesh doxygen for each quadrature rule object. They generally may be either:
 
 - tensor product of 1D quadratures to be able to able to integrate exactly $x^a y^b z^c$ terms
   with $a\leq p, b\leq p, c\leq p$ with a quadrature of order $p$.

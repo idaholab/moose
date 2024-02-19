@@ -28,7 +28,7 @@ This is the simplest type of equation that PorousFlow solves.  It is often used 
 - $\rho$ is the fluid density (units kg.m$^{-3}$)
 - $g_{j}$ is the gravitational acceleration (units m.s$^{-2}$)
 
-The units suggested here are not manditory: any consistent unit system
+The units suggested here are not mandatory: any consistent unit system
 may be used in MOOSE.  For instance, in reservoir physics it is often
 convenient to express everything in MPa and years rather than Pa and
 seconds.

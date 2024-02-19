@@ -33,15 +33,18 @@ GeochemistrySpatialReactor::sharedParams()
                         "and free_moles_mineral_species to moles_bulk_species");
   params.addParam<std::vector<std::string>>(
       "remove_fixed_activity_name",
+      {},
       "The name of the species that should have their activity or fugacity constraint removed at "
       "time given in remove_fixed_activity_time.  There should be an equal number of these names "
       "as times given in remove_fixed_activity_time.  Each of these must be in the basis and have "
       "an activity or fugacity constraint");
   params.addParam<std::vector<Real>>("remove_fixed_activity_time",
+                                     {},
                                      "The times at which the species in remove_fixed_activity_name "
                                      "should have their activity or fugacity constraint removed.");
   params.addParam<std::vector<std::string>>(
       "source_species_names",
+      {},
       "The name of the species that are added at rates given in source_species_rates.  There must "
       "be an equal number of these as source_species_rates.");
   params.addCoupledVar("source_species_rates",
@@ -50,6 +53,7 @@ GeochemistrySpatialReactor::sharedParams()
                        "be careful that you don't cause negative mass problems!");
   params.addParam<std::vector<std::string>>(
       "controlled_activity_name",
+      {},
       "The names of the species that have their activity or fugacity constrained.  There should be "
       "an equal number of these names as values given in controlled_activity_value.  NOTE: if "
       "these species are not in the basis, or they do not have an activity (or fugacity) "
@@ -67,9 +71,11 @@ GeochemistrySpatialReactor::sharedParams()
       "of the current time step (ie, implement an explicit solve)");
   params.addParam<std::vector<std::string>>(
       "kinetic_species_name",
+      {},
       "Names of the kinetic species given initial values in kinetic_species_initial_value");
   params.addParam<std::vector<Real>>(
       "kinetic_species_initial_value",
+      {},
       "Initial number of moles, mass or volume (depending on kinetic_species_unit) for each of the "
       "species named in kinetic_species_name");
   MultiMooseEnum kin_species_unit("dimensionless moles molal kg g mg ug kg_per_kg_solvent "
@@ -444,7 +450,7 @@ void
 GeochemistrySpatialReactor::threadJoin(const UserObject & uo)
 {
   _nthreads += 1;
-  const GeochemistrySpatialReactor & gsr = static_cast<const GeochemistrySpatialReactor &>(uo);
+  const auto & gsr = static_cast<const GeochemistrySpatialReactor &>(uo);
   for (unsigned i = 0; i < _num_my_nodes; ++i)
   {
     if (!_execute_done[i] && gsr._execute_done[i])

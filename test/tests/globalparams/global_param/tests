@@ -16,7 +16,7 @@
     cli_args = "Adaptivity/Markers/boundary/use_displaced_mesh=true"
     expect_err = "The parameter 'Adaptivity/Markers/boundary/use_displaced_mesh' is a private parameter and should not be used in an input file."
     mesh_mode = REPLICATED
-    requirement = 'The system shall error if a private / suppressed parameter is set in the input file.'
+    requirement = 'The system shall report an error if a private / suppressed parameter is set in the input file.'
   []
   [test_ignore]
     type = 'RunApp'

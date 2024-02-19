@@ -164,12 +164,6 @@
     issues = '#10400'
     collections = 'FAILURE_ANALYSIS'
   []
-  [duplicate_test_names]
-    type = PythonUnitTest
-    input = test_DuplicateTestNames.py
-    requirement = "The system shall allow the test scheduler to gracefully skip tests having the same name contained within the same tests file for further checks against the test file parser."
-    issues = '#10424'
-  []
   [arbitrary_tests]
     type = PythonUnitTest
     input = test_ArbitrarySpecFile.py
@@ -286,5 +280,11 @@
     input = test_MachineType.py
     requirement = "The system shall skip tests not capable of being run depending on micro architecture"
     issues = '#25317'
+  []
+  [test_soft_heavy]
+    type = PythonUnitTest
+    input = test_SoftHeavyDependency.py
+    requirement = "The system shall not skip non-heavy tests for which heavy tests depend on"
+    issues = '#26215'
   []
 []

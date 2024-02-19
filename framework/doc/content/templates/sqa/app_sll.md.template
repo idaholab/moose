@@ -19,7 +19,7 @@ the [!ac](VVR) for {{app}} is dependent upon the following documents.
 ## MOOSE
 
 {{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework), which is
-summarized in the follwoing abstract [!cite](permann2020moose).
+summarized in the following abstract [!cite](permann2020moose).
 
 > Harnessing modern parallel computing resources to achieve complex multiphysics simulations is a
 > daunting task. The Multiphysics Object Oriented Simulation Environment (MOOSE) aims to enable such

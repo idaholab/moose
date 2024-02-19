@@ -1,20 +1,24 @@
 # Finite Volume Incompressible Porous media Navier Stokes
 
+!alert note
+The weakly compressible formulation is also implemented for porous flow finite volume.
+
 ## Equations
 
 This module implements the porous media Navier Stokes equations. They are expressed in terms of the superficial
-velocity $\vec{v}_d = \epsilon \vec{V}$ where $\epsilon$ is the porosity and $\vec{V}$ the interstitial velocity. The
+velocity $\vec{v}_D = \epsilon \vec{v}$ where $\epsilon$ is the porosity and $\vec{v}$ the interstitial velocity. The
 superficial velocity is also known as the extrinsic or Darcy velocity. The other non-linear variables used are
 pressure and temperature. This is known as the primitive superficial set of variables.
 
 Mass equation:
 \begin{equation}
-\nabla \cdot \rho \vec{v}_d = 0
+\nabla \cdot \rho \vec{v}_D = 0
 \end{equation}
 
 Momentum equation, with friction and gravity force as example forces:
 \begin{equation}
 \dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) = \nabla \cdot (\mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
+\label{eq:pinsfv_mom}
 \end{equation}
 
 Fluid phase energy equation, with a convective heat transfer term:
@@ -27,7 +31,7 @@ Solid phase energy equation, with convective heat transfer and an energy source 
 \dfrac{\partial (1-\epsilon) \rho c_{ps} T_s}{\partial t} = \nabla \cdot (\kappa_s \nabla T_s) + \alpha (T_f - T_s) + (1-\epsilon) \dot{Q}
 \end{equation}
 
-where $\rho$ is the fluid density, $\mu$ the viscosity, $c_p$ the specific heat capacity $\alpha$ the convective heat transfer coefficient.
+where $\rho$ is the fluid density, $\mu$ the dynamic viscosity, $c_p$ the specific heat capacity $\alpha$ the convective heat transfer coefficient. The effective diffusivities $\kappa$ include the effect of porosity, which is often approximated as $\epsilon k$ with $k$ the thermal diffusivity.
 
 ## Implementation for a straight channel
 
@@ -40,7 +44,7 @@ and the computation of their gradients on faces is specific to the treatment of 
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=Variables
 
-The porous media Navier Stokes equation are implemented by using `FVKernels` which correspond to
+The porous media Navier Stokes equations are implemented by using `FVKernels` which correspond to
 each term of the equations. In the following example, the first kernel is the mass advection kernel.
 This kernel corresponds to the conservation of mass. It acts on the pressure non-linear variable which
 appears in the mass equation through the Rhie Chow interpolation of the mass fluxes on the element faces, and

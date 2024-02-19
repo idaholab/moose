@@ -142,10 +142,24 @@ class JobDAG(object):
                 try:
                     self.__name_to_job[prereq_job]
                     self._addEdge(self.__name_to_job[prereq_job], job)
+                    # Fix heavy test corner cases
+                    self._fix_cornercases(self.__name_to_job[prereq_job], job)
 
                 # test file has invalid prereq set
                 except KeyError:
                     job.setStatus(job.error, 'unknown dependency')
+
+    def _fix_cornercases(self, prereq_job, job):
+        """
+        Fix skipped dependency when we have a heavy test depend on a not-heavy test
+        TODO: We discovered several other cases where tests may never run. However,
+              solving those issues is a rabbit hole better left to another PR: #26329
+        """
+        if self.options.heavy_tests and job.specs['heavy']:
+            prereq_tester = prereq_job.getTester()
+            if not prereq_tester.specs['heavy']:
+                prereq_tester.specs['heavy'] = True
+                prereq_tester.addCaveats(f'implicit heavy')
 
     def _hasDownStreamsWithFailures(self, job):
         """ Return True if any dependents of job has previous failures """

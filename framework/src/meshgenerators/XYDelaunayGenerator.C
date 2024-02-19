@@ -335,6 +335,8 @@ XYDelaunayGenerator::generate()
   // cheaper to do that once than to do it once-per-hole
   MeshSerializer serial(*mesh, doing_stitching);
 
+  // Define a reference map variable for subdomain map
+  auto & main_subdomain_map = mesh->set_subdomain_name_map();
   for (auto hole_i : index_range(hole_ptrs))
   {
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
@@ -363,7 +365,9 @@ XYDelaunayGenerator::generate()
         next_hole_boundary_point[mh.point(pi - 1)] = mh.point(pi);
       next_hole_boundary_point[mh.point(np - 1)] = mh.point(0);
 
+#ifndef NDEBUG
       int found_hole_sides = 0;
+#endif
       for (auto elem : hole_mesh.element_ptr_range())
       {
         if (elem->dim() != 2)
@@ -377,14 +381,18 @@ XYDelaunayGenerator::generate()
             if (it_s->second == elem->point((s + 1) % ns))
             {
               hole_boundary_info.add_side(elem, s, new_hole_bcid);
+#ifndef NDEBUG
               ++found_hole_sides;
+#endif
             }
         }
       }
       mooseAssert(found_hole_sides == np, "Failed to find full outer boundary of meshed hole");
 
       auto & mesh_boundary_info = mesh->get_boundary_info();
+#ifndef NDEBUG
       int found_inner_sides = 0;
+#endif
       for (auto elem : mesh->element_ptr_range())
       {
         auto ns = elem->n_sides();
@@ -395,11 +403,18 @@ XYDelaunayGenerator::generate()
             if (it_s->second == elem->point(s))
             {
               mesh_boundary_info.add_side(elem, s, inner_bcid);
+#ifndef NDEBUG
               ++found_inner_sides;
+#endif
             }
         }
       }
       mooseAssert(found_inner_sides == np, "Failed to find full boundary around meshed hole");
+
+      // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
+      // subdomain map
+      const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
+      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
       mesh->stitch_meshes(hole_mesh,
                           inner_bcid,
@@ -410,6 +425,13 @@ XYDelaunayGenerator::generate()
                           use_binary_search);
     }
   }
+  // Check if one SubdomainName is shared by more than one subdomain ids
+  std::set<SubdomainName> main_subdomain_map_name_list;
+  for (auto const & id_name_pair : main_subdomain_map)
+    main_subdomain_map_name_list.emplace(id_name_pair.second);
+  if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
+    paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
+
   mesh->prepare_for_use();
   return mesh;
 }

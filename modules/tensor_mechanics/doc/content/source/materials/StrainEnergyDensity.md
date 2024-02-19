@@ -22,7 +22,7 @@ In the incremental form the strain energy density integral takes the form
   u = u_{old} + \frac{1}{2} \sigma : \Delta \epsilon +
       \frac{1}{2}\sigma_{old} : \Delta \epsilon
 \end{equation}
-where $\Delta \epsilon$ is the mechancial strain increment.
+where $\Delta \epsilon$ is the mechanical strain increment.
 
 !alert note title=Monotonic Loading Only
 The +`StrainEnergyDensity`+ class is formulated only for monotonic loading and

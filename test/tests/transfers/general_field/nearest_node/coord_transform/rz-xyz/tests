@@ -1,0 +1,14 @@
+[Tests]
+  design = 'Transfers/index.md'
+  issues = '#12293'
+  [multi-app]
+    type = Exodiff
+    input = 3d-xyz.i
+    exodiff = '3d-xyz_out.e 3d-xyz_out_sub0.e'
+    cli_args = 'Transfers/to_sub/type=MultiAppGeneralFieldNearestLocationTransfer Transfers/from_sub/type=MultiAppGeneralFieldNearestLocationTransfer'
+    requirement = 'The system shall be able to transfer information between three-dimensional and two-dimensional axisymmetric simulations in which the cylinder axis lies along the z-axis in three-dimensional space, using the general field version of the nearest-location transfers.'
+    # From XYZ to RZ has multiple equidistant source points as one axis
+    # is folded
+    allow_warnings = true
+  []
+[]

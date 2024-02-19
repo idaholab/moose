@@ -30,7 +30,6 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
   : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid"))),
     _value(0)
 {
   // This class may be too dangerous to use if renumbering is enabled,
@@ -39,6 +38,16 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
   if (_mesh.getMesh().allow_renumbering())
     mooseError("ElementalVariableValue should only be used when node renumbering is disabled.");
 }
+
+void
+ElementalVariableValue::initialSetup()
+{
+  // Do this in initialSetup instead of the constructor because elements may be deleted after this
+  // object is constructed
+  _element = _mesh.queryElemPtr(getParam<unsigned int>("elementid"));
+  GeneralPostprocessor::initialSetup();
+}
+
 void
 ElementalVariableValue::execute()
 {

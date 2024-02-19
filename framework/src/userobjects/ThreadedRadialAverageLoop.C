@@ -10,6 +10,18 @@
 #include "ThreadedRadialAverageLoop.h"
 #include "Function.h"
 
+// Make newer nanoflann API spelling compatible with older nanoflann
+// versions
+#if NANOFLANN_VERSION < 0x150
+namespace nanoflann
+{
+typedef SearchParams SearchParameters;
+
+template <typename T, typename U>
+using ResultItem = std::pair<T, U>;
+}
+#endif
+
 ThreadedRadialAverageLoop::ThreadedRadialAverageLoop(RadialAverage & green) : _radavg(green) {}
 
 // Splitting Constructor
@@ -29,8 +41,8 @@ ThreadedRadialAverageLoop::operator()(const QPDataRange & qpdata_range)
   const auto & weights_type = _radavg._weights_type;
 
   // tree search data structures
-  std::vector<std::pair<std::size_t, Real>> ret_matches;
-  nanoflann::SearchParams search_params;
+  std::vector<nanoflann::ResultItem<std::size_t, Real>> ret_matches;
+  nanoflann::SearchParameters search_params;
 
   // result map entry
   const auto end_it = _radavg._average.end();

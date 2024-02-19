@@ -1,4 +1,4 @@
-# Saturation indieces of halite and anhyrite at Sebkhat El Melah
+# Saturation indices of halite and anhydrite at Sebkhat El Melah
 
 This example closely follows Section 8.4 of [!cite](bethke_2007).
 
@@ -43,7 +43,7 @@ The [Geochemists Workbench](https://www.gwb.com/) input file for the precipitati
 
 ## Results
 
-The `geochemistry` module and the [Geochemists Workbench](https://www.gwb.com/) both predict identical reuslts, in agreement with [!cite](bethke_2007):
+The `geochemistry` module and the [Geochemists Workbench](https://www.gwb.com/) both predict identical results, in agreement with [!cite](bethke_2007):
 
 - the saturation index of halite is approximately -0.94
 - the saturation index of anhydrite is approximately -1.7.

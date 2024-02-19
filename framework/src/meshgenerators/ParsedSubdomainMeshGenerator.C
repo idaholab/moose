@@ -39,11 +39,14 @@ ParsedSubdomainMeshGenerator::validParams()
       "A set of subdomain ids that will not changed even if "
       "they are inside/outside the combinatorial geometry",
       "excluded_subdomain_ids is deprecated, use excluded_subdomains (ids or names accepted)");
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<ExtraElementIDName>>(
+      "extra_element_id_names", {}, "Extra element integers used in the parsed expression");
   params.addClassDescription(
       "Uses a parsed expression (`combinatorial_geometry`) to determine if an "
       "element (via its centroid) is inside the region defined by the expression and "
@@ -60,7 +63,8 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
     _block_id(parameters.get<SubdomainID>("block_id")),
     _excluded_ids(isParamValid("excluded_subdomain_ids")
                       ? parameters.get<std::vector<subdomain_id_type>>("excluded_subdomain_ids")
-                      : std::vector<subdomain_id_type>())
+                      : std::vector<subdomain_id_type>()),
+    _eeid_names(getParam<std::vector<ExtraElementIDName>>("extra_element_id_names"))
 {
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -73,8 +77,13 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
                       getParam<std::vector<std::string>>("constant_names"),
                       getParam<std::vector<std::string>>("constant_expressions"));
 
+  // add the extra element integers
+  std::string symbol_str = "x,y,z";
+  for (const auto & eeid_name : _eeid_names)
+    symbol_str += "," + eeid_name;
+
   // parse function
-  if (_func_F->Parse(_function, "x,y,z") >= 0)
+  if (_func_F->Parse(_function, symbol_str) >= 0)
     mooseError("Invalid function\n",
                _function,
                "\nin ParsedSubdomainMeshGenerator ",
@@ -82,13 +91,17 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
                ".\n",
                _func_F->ErrorMsg());
 
-  _func_params.resize(3);
+  _func_params.resize(3 + _eeid_names.size());
 }
 
 std::unique_ptr<MeshBase>
 ParsedSubdomainMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  // the extra element ids would not have existed at construction so we only do this now
+  for (const auto & eeid_name : _eeid_names)
+    _eeid_indices.push_back(mesh->get_elem_integer_index(eeid_name));
 
   if (isParamValid("excluded_subdomains"))
   {
@@ -108,6 +121,8 @@ ParsedSubdomainMeshGenerator::generate()
     _func_params[0] = elem->vertex_average()(0);
     _func_params[1] = elem->vertex_average()(1);
     _func_params[2] = elem->vertex_average()(2);
+    for (const auto i : index_range(_eeid_indices))
+      _func_params[3 + i] = elem->get_extra_integer(_eeid_indices[i]);
     bool contains = evaluate(_func_F);
 
     if (contains && std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==

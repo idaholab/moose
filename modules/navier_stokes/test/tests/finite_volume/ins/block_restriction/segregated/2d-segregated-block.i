@@ -284,14 +284,14 @@ restricted_blocks = '1'
   print_fields = false
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'cp'
     prop_values = '2'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     temperature = 'T_fluid'
     block = ${restricted_blocks}

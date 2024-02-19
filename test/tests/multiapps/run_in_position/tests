@@ -22,7 +22,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if"
+    requirement = "The system shall report an error if"
     [output_and_run_in_position]
       type = RunException
       input = 'main-app.i'

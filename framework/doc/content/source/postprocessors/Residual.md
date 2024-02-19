@@ -3,7 +3,8 @@
 !syntax description /Postprocessors/Residual
 
 The nonlinear residual may be queried before a nonlinear iteration or after.
-More information about residuals may be found [here](resres).
+More information about residuals and their use in Newton's method may be found
+in [NonlinearSystem.md].
 
 The residual may be split by variables using the [VariableResidual.md] postprocessor.
 

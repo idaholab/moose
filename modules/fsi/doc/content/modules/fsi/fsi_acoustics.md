@@ -115,7 +115,7 @@ The above equation is the free surface gravity condition in terms of vertical di
     \frac{\partial^2p}{\partial t^2} + g~\frac{\partial p}{\partial z} = 0
 \end{equation}
 
-The above boundary condition is like a coupled Dirchlet and Neumann conditions. Term $\frac{\partial^2 p}{\partial t^2}$ represents a Dirichlet condition and term $\frac{\partial p}{\partial z}$ represents a Neumann condition. Free surface condition is implemented using the [FluidFreeSurfaceBC](/FluidFreeSurfaceBC.md) boundary condition.
+The above boundary condition is like a coupled Dirichlet and Neumann conditions. Term $\frac{\partial^2 p}{\partial t^2}$ represents a Dirichlet condition and term $\frac{\partial p}{\partial z}$ represents a Neumann condition. Free surface condition is implemented using the [FluidFreeSurfaceBC](/FluidFreeSurfaceBC.md) boundary condition.
 
 ## Fluid and structure interface modeling
 

@@ -1,9 +1,8 @@
 [Tests]
+  design = 'meshgenerators/XYDelaunayGenerator.md'
+  issues = '#20192 #26776'
   [xydelaunay]
-    design = 'meshgenerators/XYDelaunayGenerator.md'
-    issues = '#20192'
     requirement = "The system shall have the capability of triangulating a polyline boundary"
-
     [basic]
       type = 'Exodiff'
       input = 'xydelaunay_mesh_generator.i'
@@ -71,7 +70,8 @@
     [stitching]
       type = 'Exodiff'
       input = 'xydelaunay_stitching.i'
-      cli_args = '--mesh-only'
+      cli_args = 'Mesh/final_generator=triang
+                  --mesh-only'
       exodiff = 'xydelaunay_stitching_in.e'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh"
@@ -99,6 +99,18 @@
       exodiff = 'xydelaunay_area_func_in.e'
       recover = false
       detail = "with optional non-uniform refinement."
+    []
+  []
+  [errors]
+    requirement = "The system shall throw an error when triangulating a polyline boundary"
+    [err_conflicting_name_map]
+      type = RunException
+      input = 'xydelaunay_stitching.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/triang/stitch_holes="true true"
+                  Mesh/triang/holes="hole_1_name hole_2_name_2"'
+      expect_err = "The hole meshes contain subdomain name maps with conflicts."
+      detail = "if the input hole meshes contain subdomain name maps with conflicts"
     []
   []
 []

@@ -631,7 +631,7 @@ RayTracingStudy::segmentSubdomainSetup(const SubdomainID subdomain,
   _fe_problem.subdomainSetup(subdomain, tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
 
   // Get RayKernels and their dependencies and call subdomain setup
   getRayKernels(_threaded_current_ray_kernels[tid], subdomain, tid, ray_id);
@@ -652,8 +652,7 @@ RayTracingStudy::segmentSubdomainSetup(const SubdomainID subdomain,
       var->prepareAux();
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, tid);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, tid);
-  _fe_problem.prepareMaterials(subdomain, tid);
+  _fe_problem.prepareMaterials(needed_mat_props, subdomain, tid);
 }
 
 void

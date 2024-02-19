@@ -172,7 +172,7 @@ setSolverOptions(const SolverParams & solver_params)
 }
 
 void
-petscSetupDM(NonlinearSystemBase & nl)
+petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -196,7 +196,7 @@ petscSetupDM(NonlinearSystemBase & nl)
     if (ismoose)
       return;
   }
-  ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
+  ierr = DMCreateMoose(nl.comm().get(), nl, dm_name, &dm);
   CHKERRABORT(nl.comm().get(), ierr);
   ierr = DMSetFromOptions(dm);
   CHKERRABORT(nl.comm().get(), ierr);
@@ -815,12 +815,12 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
   }
 #endif
   // Set Preconditioner description
-  po.pc_description = pc_description;
+  po.pc_description += pc_description;
 
   // Turn off default options_left warnings added in 3.19.3 pre-release for all PETSc builds
   // (PETSc commit: 59f199a7), unless the user has set a preference.
 #if !PETSC_VERSION_LESS_THAN(3, 19, 2)
-  if (!options_left_set)
+  if (!options_left_set && !po.flags.contains("-options_left"))
     po.pairs.emplace_back("-options_left", "0");
 #endif
 }

@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#19709'
+  design = 'FormLossFromExternalApp1Phase.md'
   [phy:form_loss_1phase]
     type = 'Exodiff'
     input = 'phy.form_loss_1phase.parent.i'
     exodiff = 'phy.form_loss_1phase.parent_out_child0.e'
     rel_err = 1e-10
     recover = false
+    requirement = 'The system shall be able to compute a form loss using data transfered from a multiapp.'
   []
 []

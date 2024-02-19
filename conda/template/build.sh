@@ -3,6 +3,7 @@ set -eux
 export APPLICATION=<APPLICATION>
 export MOOSE_JOBS=<MOOSE_JOBS>
 export SKIP_DOCS=<SKIP_DOCS>
+export MOOSE_OPTIONS=<MOOSE_OPTIONS>
 export O_WORKDIR=`pwd`
 export INSTALL_DIR=${PREFIX}/${APPLICATION}
 
@@ -13,7 +14,7 @@ if [ "$SKIP_DOCS" == "True" ]; then
     export MOOSE_SKIP_DOCS="True"
 fi
 cd ${O_WORKDIR}<MOOSE>
-./configure --prefix=${INSTALL_DIR}
+./configure --prefix=${INSTALL_DIR} ${MOOSE_OPTIONS}
 cd ${O_WORKDIR}<IS_MOOSE>
 make -j <MOOSE_JOBS>
 make install -j <MOOSE_JOBS>
@@ -21,7 +22,9 @@ cd ${PREFIX}/bin
 ln -s ${INSTALL_DIR}/bin/<EXECUTABLE>-opt .
 ln -s ${INSTALL_DIR}/bin/moose_test_runner .
 cd ${PREFIX}/share
-ln -s ${INSTALL_DIR}/share/<APPLICATION> .
+if ! [ -d "<APPLICATION>" ]; then
+    ln -s ${INSTALL_DIR}/share/<APPLICATION> .
+fi
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export MOOSE_ADFPARSER_JIT_INCLUDE=${INSTALL_DIR}/include/moose/ADRealMonolithic.h

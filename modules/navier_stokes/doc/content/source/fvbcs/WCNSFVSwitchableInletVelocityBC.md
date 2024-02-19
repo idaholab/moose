@@ -14,7 +14,7 @@ The switch works as follows:
 - If `switch = false`: the boundary condition is not applied and a single sided extrapolation to the boundary
   is applied from internal extrapolation.
 
-In both cases, the interpolated value at the face is contoled by `face_limiter`.
+In both cases, the interpolated value at the face is controlled by `face_limiter`.
 By default, `face_limiter = 1.0`.
 `face_limiter` value is controllable during runtime.
 

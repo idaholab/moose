@@ -31,9 +31,12 @@ MultiAppDofCopyTransfer::validParams()
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
       "from_blocks",
+      {},
       "Subdomain restriction to transfer from (defaults to all the origin app domain)");
   params.addParam<std::vector<SubdomainName>>(
-      "to_blocks", "Subdomain restriction to transfer to, (defaults to all the target app domain)");
+      "to_blocks",
+      {},
+      "Subdomain restriction to transfer to, (defaults to all the target app domain)");
 
   params.addClassDescription(
       "Base class for copying degrees-of-freedom values (nonlinear and auxiliary) between apps "
@@ -43,7 +46,8 @@ MultiAppDofCopyTransfer::validParams()
 
 MultiAppDofCopyTransfer::MultiAppDofCopyTransfer(const InputParameters & parameters)
   : MultiAppFieldTransfer(parameters),
-    _has_block_restrictions(isParamValid("from_blocks") || isParamValid("to_blocks"))
+    _has_block_restrictions(!getParam<std::vector<SubdomainName>>("from_blocks").empty() ||
+                            !getParam<std::vector<SubdomainName>>("to_blocks").empty())
 {
 }
 
@@ -182,8 +186,6 @@ MultiAppDofCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & fr
     if (to_var.fieldType() != from_var.fieldType())
       mooseError(
           "Corresponding transfer variables must be same field type (STANDARD | VECTOR | ARRAY).");
-    if (to_var.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
-      mooseError("Unable to transfer vector variables.");
     if (to_var.count() != from_var.count())
       mooseError("Corresponding transfer variables must have same number of components.");
 

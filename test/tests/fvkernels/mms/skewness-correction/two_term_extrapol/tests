@@ -9,5 +9,6 @@
     method = '!dbg'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
+    installation_type = in_tree # see #26480
   []
 []

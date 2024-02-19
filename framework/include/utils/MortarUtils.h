@@ -102,7 +102,7 @@ loopOverMortarSegments(
   const auto & JxW_msm = assembly.jxWMortar();
 
   // Set required material properties
-  std::set<unsigned int> needed_mat_props;
+  std::unordered_set<unsigned int> needed_mat_props;
   for (const auto & consumer : consumers)
   {
     const auto & mp_deps = consumer->getMatPropDependencies();

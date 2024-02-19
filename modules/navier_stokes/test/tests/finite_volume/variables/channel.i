@@ -1,0 +1,1 @@
+../ins/channel-flow/2d-rc.i

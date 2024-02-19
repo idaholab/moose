@@ -201,6 +201,15 @@
 
       detail = 'tetrahedral elements of second order,'
     []
+    [tet_third_order]
+      type = 'RunException'
+      input = 'detect_amr_tet.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=TET14 Mesh/diag/search_for_adaptivity_nonconformality=ERROR --mesh-only'
+      expect_err = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 8'
+
+      detail = 'tetrahedral elements of third order,'
+    []
   []
 
   [amr_detection_avoid_false_positives]
@@ -216,7 +225,7 @@
     []
   []
   [errors]
-    requirement = 'The system shall error if'
+    requirement = 'The system shall report an error if'
     [no_diag]
       type = RunException
       input = all_at_once.i

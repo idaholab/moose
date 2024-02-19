@@ -60,13 +60,13 @@ protected:
   const RealVectorValue _gravity;
 
   /// Name of the mass-fraction variables (if any)
-  const std::vector<VariableName> & _mass_fraction_vars;
+  const std::vector<VariableName> _mass_fraction_vars;
 
   /// Number of mass-fraction variables
   const unsigned _num_mass_fraction_vars;
 
   /// Name of the temperature variable (if any)
-  const std::vector<VariableName> & _temperature_var;
+  const std::vector<VariableName> _temperature_var;
 
   /// Displacement NonlinearVariable names (if any)
   const std::vector<VariableName> & _displacements;

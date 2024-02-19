@@ -89,7 +89,7 @@ T_inlet = 200
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [kappa]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'kappa'

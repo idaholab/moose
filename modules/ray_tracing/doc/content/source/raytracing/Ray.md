@@ -9,7 +9,7 @@ The discussion of how to use and interact with a `Ray` is summarized into the fo
 - [Using Ray Data](#using-ray-data): How to best access and use the data stored on the `Ray`.
 - [Getting a Ray](#getting-a-ray): How to obtain a `Ray` to be used for tracing.
 
-Useful member variables avaiable on the `Ray` are:
+Useful member variables available on the `Ray` are:
 
 - `currentPoint()` - The current point of the `Ray`. Before being traced, this is the starting point. While being traced, this is the furthest point that the `Ray` has travelled (during RayKernel execution, this is the end of the segment). After being traced, this is the point where the `Ray` was killed.
 - `currentElem()` - The current element that the `Ray` is in. Before being traced, this is the starting element of the `Ray`. During tracing during [RayKernel](RayKernels/index.md) execution, this is the element that the segment is in. During tracing during [RayBC](RayBCs/index.md) execution, this is the element that the [RayBC](RayBCs/index.md) is being applied to. At the end of tracing, this is the element that the `Ray` died in.
@@ -38,6 +38,7 @@ Next, you must define where the `Ray` is to travel from its starting point. This
 
 - `setStartingEndPoint()` - Takes as an argument the desired end point for the `Ray`. It will be traced until it hits said end point within the mesh (but it can be killed by [RayKernels/index.md] or [RayBCs/index.md] along the way). Internally, this is handled by setting `maxDistance()` to the straight-line distance from the start point to the end point. `Ray`s initialized using this method that have end points on the boundary will not have [RayBCs/index.md] executed on them on the boundary. They will be killed internally before the execution of [RayBCs/index.md].
 - `setStartingDirection()` - Takes as an argument the desired direction for the `Ray` to travel. `Ray`s initialized by this method must be killed by either [RayKernels/index.md], by a [RayBCs/index.md], by the maximum distance `maxDistance()`, or by the [RayTracingStudy.md] maximum distance parameter `ray_max_distance`. If a `Ray` in this situation hits a boundary and is not killed, an error will be generated.
+- `setStationary()` - Sets the Ray to be stationary. That is, it will end as soon as it started. Can be useful for unit testing or for Rays that represent stationary particles.
 
 If you utilize the `setStartingDirection()` method, you may also utilize `setMaxDistance()` to set the maximum distance that the `Ray` is allowed to travel. If it reaches this distance, it will be killed after execution of [RayKernels/index.md]. If the `Ray` was initialized using the `setStartingEndPoint()` method, you cannot set the maximum distance for said `Ray` because it was set internally to the straight-line distance from the start to the user-set end.
 

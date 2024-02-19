@@ -7,6 +7,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    no_error_deprecated = true
+    issues = '#20662'
+    design = 'ADSolidMaterial.md'
+    requirement = 'The system shall be able to use the material property system to define solid properties for a solid energy equation.'
   []
   [constant_material]
     type = 'PetscJacobianTester'
@@ -16,6 +20,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # relap-7#639
+    issues = '#26336'
+    design = 'ConstantMaterial.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when using a constant material to define a property and its (null) derivatives with regards to the nonlinear conserved variables.'
   []
   [density_3eqn_material]
     type = 'PetscJacobianTester'
@@ -26,6 +34,9 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    issues = '#19747'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing density as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [dynamic_viscosity]
     type = 'PetscJacobianTester'
@@ -35,6 +46,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # idaholab/sockeye#41
+    issues = '#26411'
+    design = 'DynamicViscosityMaterial.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobiain when computing the dynamic viscosity and its derivatives with regards to the nonlinear conserved variables.'
   []
   [linear_test_material]
     type = 'PetscJacobianTester'
@@ -44,6 +59,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # relap-7#639
+    issues = '#26336'
+    design = 'syntax/Materials/index.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing the constant derivatives of material properties linearly dependent on the nonlinear conserved variables.'
   []
   [pressure_3eqn_material]
     type = 'PetscJacobianTester'
@@ -54,6 +73,9 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    issues = '#19747'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing pressure as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [specific_internal_energy_3eqn]
     type = 'PetscJacobianTester'
@@ -64,6 +86,9 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    issues = '#19747'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing specific internal energy as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [specific_volume_3eqn]
     type = 'PetscJacobianTester'
@@ -74,6 +99,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # relap-7#639
+    issues = '#26336'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing specific volume as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [velocity_3eqn]
     type = 'PetscJacobianTester'
@@ -84,6 +113,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # relap-7#639
+    issues = '#26336'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing velocity as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [enthalpy_3eqn]
     type = 'PetscJacobianTester'
@@ -94,6 +127,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # relap-7#639
+    issues = '#26336'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing specific enthalpy as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [reynolds_number]
     type = 'PetscJacobianTester'
@@ -103,6 +140,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # idaholab/sockeye#41
+    issues = '#26411'
+    design = 'ReynoldsNumberMaterial.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing the Reynolds number and its derivatives with regards to the nonlinear conserved variables.'
   []
   [temperature_3eqn_material]
     type = 'PetscJacobianTester'
@@ -113,6 +154,9 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    issues = '#19747'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing temperature as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [total_enthalpy_3eqn]
     type = 'PetscJacobianTester'
@@ -123,6 +167,9 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    issues = '#19747'
+    design = 'MaterialDerivativeTestKernel.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing total enthalpy as a fluid property and its derivatives with regards to the nonlinear conserved variables.'
   []
   [wall_friction_function]
     type = 'PetscJacobianTester'
@@ -132,6 +179,10 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    # idaholab/sockeye#41
+    issues = '#26411'
+    design = 'WallFrictionFunctionMaterial.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing a wall friction coefficient from functions and its derivatives with regards to the nonlinear conserved variables.'
   []
   [wall_friction_churchill]
     type = 'PetscJacobianTester'
@@ -141,5 +192,8 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    issues = '#19747'
+    design = 'WallFrictionChurchillMaterial.md'
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing a Churchill correlation wall friction coefficient and its derivatives with regards to the nonlinear conserved variables.'
   []
 []

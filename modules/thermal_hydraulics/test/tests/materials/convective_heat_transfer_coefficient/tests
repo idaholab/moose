@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19682'
+  design = 'ConvectiveHeatTransferCoefficientMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to compute the convective heat transfer coefficient from the Nusselt number and the hydraulic diamter, as a material property'
   []
 []
