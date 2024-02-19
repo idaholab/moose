@@ -10,6 +10,7 @@
 import re, os, shutil
 from Tester import Tester
 from TestHarness import util
+from shlex import quote
 
 class RunApp(Tester):
 
@@ -208,6 +209,10 @@ class RunApp(Tester):
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
 
+        # add required capabilities
+        if specs['capabilities']:
+            cli_args.append('--required-capabilities' + quote(' '.join(specs['capabilities'])))
+
         if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option
@@ -348,7 +353,14 @@ class RunApp(Tester):
             # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
-            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
+            if self.exit_code == 77:
+                output = output.split('CAPABILITIES_MISMATCH_BEGIN\n')[1]
+                output = output.split('CAPABILITIES_MISMATCH_END\n')[0]
+                output = output.split(' |')[0]
+                self.setStatus(self.skip, "ABORT")
+                self.addCaveats(output)
+                return ''
+            elif options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
                 reason = 'ERRMSG'
             elif exit_code == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
