@@ -227,8 +227,17 @@ std::string stripExtension(const std::string & s);
  *
  * If the supplied filename does not contain a path, it returns "." as the path
  */
+template <typename T>
 std::pair<std::filesystem::path, std::filesystem::path>
-splitFileName(const std::filesystem::path & full_file);
+splitFileName(const T & full_file)
+{
+  const auto p = std::filesystem::path(std::string(full_file));
+  // Error if path ends with /
+  if (!p.has_filename())
+    mooseError("Invalid full file name: ", p);
+
+  return {p.parent_path(), p.filename()};
+}
 
 /**
  * Returns the current working directory as a string. If there's a problem

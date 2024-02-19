@@ -415,16 +415,6 @@ stripExtension(const std::string & s)
   return s;
 }
 
-std::pair<std::filesystem::path, std::filesystem::path>
-splitFileName(const std::filesystem::path & p)
-{
-  // Error if path ends with /
-  if (!p.has_filename())
-    mooseError("Invalid full file name: ", p);
-
-  return {p.parent_path(), p.filename()};
-}
-
 std::string
 getCurrentWorkingDir()
 {
