@@ -1387,6 +1387,8 @@ MooseApp::setupOptions()
         Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"
                    << reason << "\nCAPABILITIES_MISMATCH_END" << std::endl;
         _ready_to_exit = true;
+        // we use code 77 as "skip" in the Testharness
+        _exit_code = 77;
         return;
       }
     }
