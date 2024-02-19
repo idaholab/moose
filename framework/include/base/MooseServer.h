@@ -323,14 +323,19 @@ private:
   hit::Node & getRoot();
 
   /**
+   * @return Input check application for document path from current operation
+   */
+  std::shared_ptr<MooseApp> getCheckApp() const;
+
+  /**
    * @brief _moose_app - reference to parent application that owns this server
    */
   MooseApp & _moose_app;
 
   /**
-   * @brief _check_app - application created to check input and access parser
+   * @brief _check_apps - map from document paths to input check applications
    */
-  std::shared_ptr<MooseApp> _check_app;
+  std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream

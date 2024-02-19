@@ -73,7 +73,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
 
   // create new application with parameters modified for input check run
-  _check_app = AppFactory::instance().createShared(
+  _check_apps[document_path] = AppFactory::instance().createShared(
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
@@ -85,7 +85,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // run input check application converting caught errors to diagnostics
   try
   {
-    _check_app->run();
+    getCheckApp()->run();
   }
   catch (std::exception & err)
   {
@@ -357,8 +357,8 @@ MooseServer::getActionParameters(InputParameters & valid_params,
                                  const std::string & object_path,
                                  std::set<std::string> & obj_act_tasks)
 {
-  Syntax & syntax = _check_app->syntax();
-  ActionFactory & action_factory = _check_app->getActionFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+  ActionFactory & action_factory = getCheckApp()->getActionFactory();
 
   // get registered syntax path identifier using actual object context path
   bool is_parent;
@@ -402,8 +402,8 @@ MooseServer::getObjectParameters(InputParameters & valid_params,
                                  std::string object_type,
                                  const std::set<std::string> & obj_act_tasks)
 {
-  Syntax & syntax = _check_app->syntax();
-  Factory & factory = _check_app->getFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+  Factory & factory = getCheckApp()->getFactory();
 
   // use type parameter default if it exists and is not provided from input
   if (object_type.empty() && valid_params.have_parameter<std::string>("type") &&
@@ -570,7 +570,7 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                 const std::string & filtering_prefix,
                                 bool request_on_block_decl)
 {
-  Syntax & syntax = _check_app->syntax();
+  Syntax & syntax = getCheckApp()->syntax();
 
   // set used to prevent reprocessing syntax paths for more than one action
   std::set<std::string> syntax_paths_processed;
@@ -669,8 +669,8 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                              int replace_line_end,
                              int replace_char_end)
 {
-  Syntax & syntax = _check_app->syntax();
-  Factory & factory = _check_app->getFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+  Factory & factory = getCheckApp()->getFactory();
 
   // get clean type for path associations and basic type for boolean values
   std::string dirty_type = valid_params.type(param_name);
@@ -839,7 +839,7 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
                                                int line,
                                                int character)
 {
-  Factory & factory = _check_app->getFactory();
+  Factory & factory = getCheckApp()->getFactory();
 
   // return without any definition locations added when parser root is null
   if (!rootIsValid())
@@ -942,7 +942,7 @@ MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
                                            const std::string & clean_type,
                                            const std::string & val_string)
 {
-  Syntax & syntax = _check_app->syntax();
+  Syntax & syntax = getCheckApp()->syntax();
 
   // build map from parameter types to input lookup paths and save to reuse
   if (_type_to_input_paths.empty())
@@ -1229,7 +1229,7 @@ MooseServer::getCompletionItemKind(const InputParameters & valid_params,
                                    bool is_param)
 {
   // set up completion item kind value that client may use for icon in list
-  auto associated_types = _check_app->syntax().getAssociatedTypes();
+  auto associated_types = getCheckApp()->syntax().getAssociatedTypes();
   if (is_param && valid_params.isParamRequired(param_name) &&
       !valid_params.isParamValid(param_name))
     return wasp::lsp::m_comp_kind_event;
@@ -1294,13 +1294,20 @@ MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
 bool
 MooseServer::rootIsValid() const
 {
-  return _check_app && _check_app->builder().root() &&
-         !_check_app->builder().root()->getNodeView().is_null();
+  return getCheckApp() && getCheckApp()->builder().root() &&
+         !getCheckApp()->builder().root()->getNodeView().is_null();
 }
 
 hit::Node &
 MooseServer::getRoot()
 {
   mooseAssert(rootIsValid(), "Not valid");
-  return *_check_app->builder().root();
+  return *getCheckApp()->builder().root();
+}
+
+std::shared_ptr<MooseApp>
+MooseServer::getCheckApp() const
+{
+  mooseAssert(_check_apps.count(document_path), "No check app for path");
+  return _check_apps.at(document_path);
 }
