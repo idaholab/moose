@@ -10,17 +10,39 @@
 #pragma once
 
 #include "ACGrGrBase.h"
+#include "ADGrainGrowthBase.h"
 
 /**
  * Several kernels use a material property called mu. If mu is not a constant,
  * then this kernel will calculate the bulk AC term where mu is the derivative term.
  * It currently only takes a single value for gamma.
  **/
-class ACBarrierFunction : public ACGrGrBase
+template <bool is_ad>
+using ACBarrierFunctionBase = typename std::conditional<is_ad, ADGrainGrowthBase, ACGrGrBase>::type;
+
+template <bool is_ad>
+class ACBarrierFunctionTempl : public ACBarrierFunctionBase<is_ad>
 {
 public:
   static InputParameters validParams();
 
+  ACBarrierFunctionTempl(const InputParameters & parameters);
+
+protected:
+  const NonlinearVariableName _uname;
+  const MaterialPropertyName _gamma_name;
+  const GenericMaterialProperty<Real, is_ad> & _gamma;
+  const GenericMaterialProperty<Real, is_ad> & _dmudvar;
+
+  using ACBarrierFunctionBase<is_ad>::_op_num;
+  using ACBarrierFunctionBase<is_ad>::_qp;
+  using ACBarrierFunctionBase<is_ad>::_vals;
+  using ACBarrierFunctionBase<is_ad>::_u;
+};
+
+class ACBarrierFunction : public ACBarrierFunctionTempl<false>
+{
+public:
   ACBarrierFunction(const InputParameters & parameters);
 
 protected:
@@ -28,10 +50,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _n_eta;
-  const NonlinearVariableName _uname;
-  const MaterialPropertyName _gamma_name;
-  const MaterialProperty<Real> & _gamma;
-  const MaterialProperty<Real> & _dmudvar;
   const MaterialProperty<Real> & _d2mudvar2;
 
   const std::vector<VariableName> _vname;
@@ -40,4 +58,13 @@ protected:
 
 private:
   Real calculateF0(); /// calculates the free energy function
+};
+
+class ADACBarrierFunction : public ACBarrierFunctionTempl<true>
+{
+public:
+  using ACBarrierFunctionTempl<true>::ACBarrierFunctionTempl;
+
+protected:
+  virtual ADReal computeDFDOP();
 };

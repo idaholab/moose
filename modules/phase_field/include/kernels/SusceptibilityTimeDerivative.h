@@ -10,32 +10,56 @@
 #pragma once
 
 #include "TimeDerivative.h"
+#include "ADTimeDerivative.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 /**
  * This calculates the time derivative for a variable multiplied by a generalized susceptibility
  */
-class SusceptibilityTimeDerivative
-  : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
+
+template <bool is_ad>
+using SusceptibilityTimeDerivativeBase =
+    typename std::conditional<is_ad, ADTimeDerivative, TimeDerivative>::type;
+
+template <bool is_ad>
+class SusceptibilityTimeDerivativeTempl
+  : public DerivativeMaterialInterface<
+        JvarMapKernelInterface<SusceptibilityTimeDerivativeBase<is_ad>>>
 {
 public:
   static InputParameters validParams();
 
-  SusceptibilityTimeDerivative(const InputParameters & parameters);
-  virtual void initialSetup();
+  SusceptibilityTimeDerivativeTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
   /// susceptibility
-  const MaterialProperty<Real> & _Chi;
+  const GenericMaterialProperty<Real, is_ad> & _Chi;
+};
+
+class SusceptibilityTimeDerivative : public SusceptibilityTimeDerivativeTempl<false>
+{
+public:
+  SusceptibilityTimeDerivative(const InputParameters & parameters);
+  virtual void initialSetup() override;
+
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// susceptibility derivative w.r.t. the kernel variable
   const MaterialProperty<Real> & _dChidu;
 
   /// susceptibility derivatives w.r.t. coupled variables
   std::vector<const MaterialProperty<Real> *> _dChidarg;
+};
+
+class ADSusceptibilityTimeDerivative : public SusceptibilityTimeDerivativeTempl<true>
+{
+public:
+  using SusceptibilityTimeDerivativeTempl<true>::SusceptibilityTimeDerivativeTempl;
+
+protected:
+  virtual ADReal precomputeQpResidual() override;
 };

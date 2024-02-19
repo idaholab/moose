@@ -91,4 +91,25 @@
     requirement = 'The system shall provide a Grand Potential based sintering model with ideal '
                   'solution defect free energies'
   []
+
+  [GrandPotentialMultiphase_ad]
+    type = 'Exodiff'
+    input = 'GrandPotentialMultiphase_AD.i'
+    exodiff = 'GrandPotentialMultiphase_out.e'
+    issues = '#15573'
+    design = '/ACSwitching.md /CoupledSwitchingTimeDerivative.md'
+    requirement = 'MOOSE shall provide a Grand Potential based multiphase model with AD option'
+  []
+
+  [ADGrandPotentialMultiphase_jac]
+    type = 'PetscJacobianTester'
+    input = 'GrandPotentialMultiphase_AD.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
+    ratio_tol = 1e-7
+    difference_tol = 1e-4
+    issues = '#15573'
+    design = '/ACSwitching.md /CoupledSwitchingTimeDerivative.md'
+    requirement = 'The jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
+  []
 []

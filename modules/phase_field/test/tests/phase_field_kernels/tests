@@ -200,4 +200,25 @@
     design = '/ACBarrierFunction.md'
     requirement = 'The system shall verify that the barrier height and gradient energy parameter must be permitted to depend on non-linear variables.'
   [../]
+
+  [./nonuniform_barrier_coefficient_AD]
+    type = 'Exodiff'
+    input = 'ADnonuniform_barrier_coefficient.i'
+    exodiff = 'nonuniform_barrier_coefficient_out.e'
+    issues = '#15573'
+    design = '/ACBarrierFunction.md /ACKappaFunction.md'
+    requirement = 'MOOSE shall have AD examples where the barrier height and gradient energy parameter depend on non-linear variables'
+  [../]
+
+  [./ADnonuniform_barrier_coefficient-jac]
+    type = 'PetscJacobianTester'
+    input = 'ADnonuniform_barrier_coefficient.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
+    ratio_tol = 1e-7
+    difference_tol = 2e-4
+    issues = '#15573'
+    design = '/ACBarrierFunction.md /ACKappaFunction.md'
+    requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
+  [../]
 []
