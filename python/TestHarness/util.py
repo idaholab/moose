@@ -618,9 +618,8 @@ def getCapabilities(exe):
         results = json.loads(output)
     except IndexError:
         return {}
-    except json.decoder.JSONDecodeError:
-        print(f'{exe} --show-capabilities, produced invalid JSON output')
-        sys.exit(1)
+    except json.decoder.JSONDecodeError as e:
+        raise Exception(f'{exe} --show-capabilities, produced invalid JSON output') from e
     return results
 
 def checkCapabilities(supported, test):
@@ -658,6 +657,11 @@ def checkCapabilities(supported, test):
         if capability[0] == '!':
             capability = capability[1:]
             negate = True
+
+        # simple existence check. If the capability is not advertised explicitly
+        # we need to run teh executable to check if dynamic linking may provide it.
+        if not capability in supported:
+            return (True, "Check if '"+capability +"' is provided through dynamic linking.");
 
         # simple existence non-false check (boolean)
         if capability in supported:

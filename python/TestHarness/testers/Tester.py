@@ -420,6 +420,16 @@ class Tester(MooseObject, OutputInterface):
         Gets the command that was actually ran.
 
         See setCommandRan() for the distinction.
+
+        exit_code = self.spawnSubprocessFromOptions(timer, options)
+        if exit_code == 77:
+            self.setStatus(self.skip, 'Requirements unmet')
+        elif exit_code: # Something went wrong
+            return
+
+        self.finishAndCleanupSubprocess(timer)
+
+    def killCommand(self):
         """
         return self.command_ran
 
