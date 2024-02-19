@@ -149,8 +149,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,           false);
   appendMooseObjectTask  ("add_interface_kernel",         VectorInterfaceKernel);
   registerMooseObjectTask("add_constraint",               Constraint,                false);
-  registerMooseObjectTask("add_hybridized_kernel",        HybridizedKernel,          false);
-  registerMooseObjectTask("add_hybridized_integrated_bc", HybridizedIntegratedBC,    false);
+  registerMooseObjectTask("add_hybridized_kernel",        HDGKernel,                 false);
+  registerMooseObjectTask("add_hybridized_integrated_bc", HDGIntegratedBC,           false);
 
   registerMooseObjectTask("add_ic",                       InitialCondition,          false);
   appendMooseObjectTask  ("add_ic",                       ScalarInitialCondition);
@@ -445,8 +445,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
-  registerSyntaxTask("AddHybridizedKernelAction", "HybridizedKernels/*", "add_hybridized_kernel");
-  registerSyntaxTask("AddHybridizedBCAction", "HybridizedBCs/*", "add_hybridized_integrated_bc");
+  registerSyntaxTask("AddHDGKernelAction", "HDGKernels/*", "add_hybridized_kernel");
+  registerSyntaxTask("AddHDGBCAction", "HDGBCs/*", "add_hybridized_integrated_bc");
 
   registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
 

@@ -2601,17 +2601,17 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 }
 
 void
-FEProblemBase::addHybridizedKernel(const std::string & kernel_name,
-                                   const std::string & name,
-                                   InputParameters & parameters)
+FEProblemBase::addHDGKernel(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters)
 {
   parallel_object_only();
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
   setResidualObjectParamsAndLog(
-      kernel_name, name, parameters, nl_sys_num, "HybridizedKernel", _reinit_displaced_elem);
+      kernel_name, name, parameters, nl_sys_num, "HDGKernel", _reinit_displaced_elem);
 
-  _nl[nl_sys_num]->addHybridizedKernel(kernel_name, name, parameters);
+  _nl[nl_sys_num]->addHDGKernel(kernel_name, name, parameters);
 }
 
 void
@@ -2702,9 +2702,9 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
-FEProblemBase::addHybridizedIntegratedBC(const std::string & bc_name,
-                                         const std::string & name,
-                                         InputParameters & parameters)
+FEProblemBase::addHDGIntegratedBC(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
 {
   parallel_object_only();
   const auto nl_sys_num =
@@ -2712,7 +2712,7 @@ FEProblemBase::addHybridizedIntegratedBC(const std::string & bc_name,
   setResidualObjectParamsAndLog(
       bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
 
-  _nl[nl_sys_num]->addHybridizedIntegratedBC(bc_name, name, parameters);
+  _nl[nl_sys_num]->addHDGIntegratedBC(bc_name, name, parameters);
 }
 
 void

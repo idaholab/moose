@@ -20,7 +20,7 @@
 #include "MooseTypes.h"
 #include "SolutionInvalidity.h"
 #include "PreCheckThread.h"
-#include "HybridizedKernel.h"
+#include "HDGKernel.h"
 #include "AuxiliarySystem.h"
 
 #include "libmesh/nonlinear_solver.h"
@@ -131,7 +131,7 @@ NonlinearSystem::init()
     _nl_implicit_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
 
   if (_hybridized_kernels.hasObjects())
-    addVector(HybridizedKernel::lm_increment_vector_name, true, GHOSTED);
+    addVector(HDGKernel::lm_increment_vector_name, true, GHOSTED);
 }
 
 void
@@ -396,14 +396,14 @@ NonlinearSystem::precheck(const NumericVector<Number> & /*precheck_soln*/,
   if (!_hybridized_kernels.hasActiveObjects())
     return;
 
-  auto & ghosted_increment = getVector(HybridizedKernel::lm_increment_vector_name);
+  auto & ghosted_increment = getVector(HDGKernel::lm_increment_vector_name);
   ghosted_increment.zero();
   // The search direction coming from PETSc is the negative of the solution update
   ghosted_increment -= search_direction;
 
   PARALLEL_TRY
   {
-    TIME_SECTION("Hybridized kernel primal solution update",
+    TIME_SECTION("HDG kernel primal solution update",
                  3 /*, "Computing hybridized kernel primal solution update"*/);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     PreCheckThread pre_thread(_fe_problem, _hybridized_kernels);

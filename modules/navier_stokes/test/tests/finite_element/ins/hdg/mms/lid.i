@@ -57,18 +57,18 @@ nu=1.1
   []
 []
 
-[HybridizedKernels]
+[HDGKernels]
   [ns]
-    type = NavierStokesHybridizedKernel
+    type = NavierStokesHDGKernel
     body_force_x = forcing_u
     body_force_y = forcing_v
     pressure_mms_forcing_function = forcing_p
   []
 []
 
-[HybridizedBCs]
+[HDGBCs]
   [exact]
-    type = NavierStokesHybridizedVelocityDirichletBC
+    type = NavierStokesHDGVelocityDirichletBC
     boundary = 'left right bottom top'
     dirichlet_u = 'exact_u'
     dirichlet_v = 'exact_v'

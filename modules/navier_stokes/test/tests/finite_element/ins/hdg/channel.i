@@ -53,24 +53,24 @@ nu=1
   []
 []
 
-[HybridizedKernels]
+[HDGKernels]
   [ns]
-    type = NavierStokesHybridizedKernel
+    type = NavierStokesHDGKernel
   []
 []
 
-[HybridizedBCs]
+[HDGBCs]
   [walls]
-    type = NavierStokesHybridizedVelocityDirichletBC
+    type = NavierStokesHDGVelocityDirichletBC
     boundary = 'bottom top'
   []
   [inlet]
-    type = NavierStokesHybridizedVelocityDirichletBC
+    type = NavierStokesHDGVelocityDirichletBC
     boundary = 'left'
     dirichlet_u = '1'
   []
   [outlet]
-    type = NavierStokesHybridizedOutflowBC
+    type = NavierStokesHDGOutflowBC
     boundary = 'right'
   []
 []
