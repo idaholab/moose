@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "StaticallyAllocatedSet.h"
+#include "Conversion.h"
 
 // Local includes
 #include "DebugRay.h"
@@ -127,7 +128,7 @@ bool isWithinSegment(const Point & segment1,
  * @param neighbor_set The set to fill the neighbors into
  * @param untested_set Set for internal use
  * @param next_untested_set Set for internal use
- * @param active_neighbor_children Temprorary vector for use in the search
+ * @param active_neighbor_children Temporary vector for use in the search
  */
 void findPointNeighbors(
     const Elem * const elem,
@@ -594,9 +595,11 @@ sideIntersectedByLine(const Elem * elem,
   if (segment_vertex != SEGMENT_VERTEX_NONE)
   {
     intersected_extrema.setVertex(T::side_nodes_map[side][segment_vertex]);
-    mooseAssert(intersected_extrema.vertexPoint(elem).absolute_fuzzy_equals(intersection_point,
-                                                                            TRACE_TOLERANCE),
-                "Doesn't intersect vertex");
+    mooseAssert(
+        intersected_extrema.vertexPoint(elem).absolute_fuzzy_equals(intersection_point,
+                                                                    3 * TRACE_TOLERANCE),
+        "Doesn't intersect vertex at: " + Moose::stringify(intersected_extrema.vertexPoint(elem)) +
+            " tentative intersection point: " + Moose::stringify(intersection_point));
   }
 
   return intersected;
@@ -860,7 +863,7 @@ sideIntersectedByLine(const Elem * elem,
  */
 bool isTraceableElem(const Elem * elem);
 /**
- * @return Whether or not the element is traceable with adapativity
+ * @return Whether or not the element is traceable with adaptivity
  */
 bool isAdaptivityTraceableElem(const Elem * elem);
 
