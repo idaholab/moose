@@ -57,19 +57,19 @@ nu=4e-3
   []
 []
 
-[HybridizedKernels]
+[HDGKernels]
   [ns]
-    type = NavierStokesHybridizedKernel
+    type = NavierStokesHDGKernel
   []
 []
 
-[HybridizedBCs]
+[HDGBCs]
   [walls]
-    type = NavierStokesHybridizedVelocityDirichletBC
+    type = NavierStokesHDGVelocityDirichletBC
     boundary = 'left right bottom'
   []
   [lid]
-    type = NavierStokesHybridizedVelocityDirichletBC
+    type = NavierStokesHDGVelocityDirichletBC
     boundary = 'top'
     dirichlet_u = '1'
   []

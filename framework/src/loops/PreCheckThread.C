@@ -10,10 +10,10 @@
 #include "PreCheckThread.h"
 #include "FEProblemBase.h"
 #include "MooseObjectWarehouse.h"
-#include "HybridizedKernel.h"
+#include "HDGKernel.h"
 
 PreCheckThread::PreCheckThread(FEProblemBase & fe_problem,
-                               MooseObjectWarehouse<HybridizedKernel> & hybridized_kernels)
+                               MooseObjectWarehouse<HDGKernel> & hybridized_kernels)
   : ThreadedElementLoop<ConstElemRange>(fe_problem), _hybridized_kernels(hybridized_kernels)
 {
   mooseAssert(

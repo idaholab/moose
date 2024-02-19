@@ -31,16 +31,16 @@
   []
 []
 
-[HybridizedKernels]
+[HDGKernels]
   [diff]
-    type = DiffusionHybridizedKernel
+    type = DiffusionHDGKernel
     source = 'forcing'
   []
 []
 
-[HybridizedBCs]
+[HDGBCs]
   [all]
-    type = DiffusionHybridizedDirichletBC
+    type = DiffusionHDGDirichletBC
     boundary = 'left right top bottom'
     function = 'exact'
   []

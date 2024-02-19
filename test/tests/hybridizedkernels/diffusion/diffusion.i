@@ -31,25 +31,25 @@
   []
 []
 
-[HybridizedKernels]
+[HDGKernels]
   [diff]
-    type = DiffusionHybridizedKernel
+    type = DiffusionHDGKernel
   []
 []
 
-[HybridizedBCs]
+[HDGBCs]
   [left]
-    type = DiffusionHybridizedDirichletBC
+    type = DiffusionHDGDirichletBC
     boundary = 'left'
     function = '0'
   []
   [right]
-    type = DiffusionHybridizedDirichletBC
+    type = DiffusionHDGDirichletBC
     boundary = 'right'
     function = '1'
   []
   [zero_flux]
-    type = DiffusionHybridizedZeroFluxBC
+    type = DiffusionHDGZeroFluxBC
     boundary = 'top bottom'
   []
 []

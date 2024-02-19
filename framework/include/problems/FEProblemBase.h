@@ -674,9 +674,9 @@ public:
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters);
-  virtual void addHybridizedKernel(const std::string & kernel_name,
-                                   const std::string & name,
-                                   InputParameters & parameters);
+  virtual void addHDGKernel(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters);
   virtual void addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters);
@@ -686,9 +686,9 @@ public:
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters);
-  virtual void addHybridizedIntegratedBC(const std::string & kernel_name,
-                                         const std::string & name,
-                                         InputParameters & parameters);
+  virtual void addHDGIntegratedBC(const std::string & kernel_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 

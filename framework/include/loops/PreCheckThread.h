@@ -18,13 +18,12 @@
 class FEProblemBase;
 template <typename>
 class MooseObjectWarehouse;
-class HybridizedKernel;
+class HDGKernel;
 
 class PreCheckThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  PreCheckThread(FEProblemBase & fe_problem,
-                 MooseObjectWarehouse<HybridizedKernel> & hybridized_kernels);
+  PreCheckThread(FEProblemBase & fe_problem, MooseObjectWarehouse<HDGKernel> & hybridized_kernels);
 
   // Splitting Constructor
   PreCheckThread(PreCheckThread & x, Threads::split split);
@@ -39,5 +38,5 @@ public:
 
 protected:
   /// the hybridized kernels we will call the pre-check method for
-  MooseObjectWarehouse<HybridizedKernel> & _hybridized_kernels;
+  MooseObjectWarehouse<HDGKernel> & _hybridized_kernels;
 };
