@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#25666'
+  design = 'NonlinearSystemBase.md'
+  [test_balance]
+    type = 'Exodiff'
+    input = 'test_balance.i'
+    exodiff = 'test_balance_out.e'
+    abs_zero = 1.0e-4
+    allow_test_objects = true
+    requirement = 'The system shall be able to allow overwriting of solution variables in node-face constraint objects.'
+  []
+[]
