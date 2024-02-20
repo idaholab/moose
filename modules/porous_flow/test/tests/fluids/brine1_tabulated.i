@@ -50,7 +50,7 @@
     type = Water97FluidProperties
   []
   [watertab]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = water
     save_file = false
   []

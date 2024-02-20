@@ -102,7 +102,6 @@
     to_multi_app = TF_sub
     source_variable = Layered_Average_elem
     variable = Temperature_elem
-    fixed_meshes = True
   []
 
   [from_sub_recover_layers]
@@ -110,14 +109,12 @@
     from_multi_app = TF_sub
     source_variable = Temperature
     variable = Subapp_Temp
-    fixed_meshes = True
   []
   [from_sub_recover_layers_elem]
     type = MultiAppNearestNodeTransfer
     from_multi_app = TF_sub
     source_variable = Temperature_elem
     variable = Subapp_Temp_elem
-    fixed_meshes = True
   []
 []
 

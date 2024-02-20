@@ -1,0 +1,112 @@
+@article{lindsay2022moose,
+   title = {2.0 - {MOOSE}: Enabling massively parallel multiphysics simulation},
+   author = {Alexander D. Lindsay and Derek R. Gaston and Cody J. Permann and Jason M. Miller and
+             David Andr{\v{s}} and Andrew E. Slaughter and Fande Kong and Joshua Hansel and
+             Robert W. Carlsen and Casey Icenhour and Logan Harbour and Guillaume L. Giudicelli
+             and Roy H. Stogner and Peter German and Jacob Badger and Sudipta Biswas and
+             Leora Chapuis and Christopher Green and Jason Hales and Tianchen Hu and Wen Jiang
+             and Yeon Sang Jung and Christopher Matthews and Yinbin Miao and April Novak and
+             John W. Peterson and Zachary M. Prince and Andrea Rovinelli and Sebastian Schunert
+             and Daniel Schwen and Benjamin W. Spencer and Swetha Veeraraghavan and Antonio Recuero
+             and Dewen Yushu and Yaqi Wang and Andy Wilkins and Christopher Wong},
+    year = {2022},
+ journal = {{SoftwareX}},
+  volume = {20},
+   pages = {101202},
+    issn = {2352-7110},
+     doi = {10.1016/j.softx.2022.101202},
+keywords = {Multiphysics, Object-oriented, Finite-element, Framework},
+}
+
+@techreport{relap7theory,
+title = {{RELAP-7} Theory Manual},
+author = {R. A. Berry and L. Zou and H. Zhao and H. Zhang and J. W. Peterson and R. C. Martineau and S. Y. Kadioglu and D. Andrs and Joshua E. Hansel},
+institution = {Idaho National Laboratory},
+number = {INL/EXT-14-31366-Rev003},
+month = mar,
+year = {2018},
+doi = {10.2172/1498781}
+}
+
+@article{hansel2021sockeye,
+  author = {Joshua E. Hansel and Ray A. Berry and David Andrs and Matthias S. Kunick and Richard C. Martineau},
+  title = {Sockeye: A One-Dimensional, Two-Phase, Compressible Flow Heat Pipe Application},
+  journal = {Nuclear Technology},
+  volume = {207},
+  number = {7},
+  pages = {1096-1117},
+  year  = {2021},
+  publisher = {Taylor & Francis},
+  doi = {10.1080/00295450.2020.1861879},
+  eprint = {https://doi.org/10.1080/00295450.2020.1861879}
+}
+
+@article{lindsay2023moose,
+  title={{MOOSE} {Navier}--{Stokes} module},
+  author={Lindsay, Alexander D. and Giudicelli, Guillaume and German, Peter and Peterson, John and Wang, Yaqi and Freile, Ramiro and Andrs, David and Balestra, Paolo and Tano, Mauricio and Hu, Rui and others},
+  journal={SoftwareX},
+  volume={23},
+  pages={101503},
+  doi={10.1016/j.softx.2023.101503},
+  year={2023},
+  publisher={Elsevier}
+}
+
+@article{slaughter2021continuous,
+author    = {Andrew E. Slaughter and Cody J. Permann and Jason M. Miller and Brian K. Alger and Stephen R. Novascone},
+title     = {Continuous Integration, In-Code Documentation, and Automation for Nuclear Quality Assurance Conformance},
+journal   = {Nuclear Technology},
+volume    = {207},
+number    = {7},
+pages     = {923--930},
+year      = {2021},
+publisher = {Taylor & Francis},
+doi       = {10.1080/00295450.2020.1826804}
+}
+
+@article{lindsay2021automatic,
+  title={Automatic Differentiation in {MetaPhysicL} and Its Applications in {MOOSE}},
+  author={Lindsay, Alexander D. and Stogner, Roy and Gaston, Derek and Schwen, Daniel and Matthews,
+  Christopher and Jiang, Wen and Aagesen, Larry K and Carlsen, Robert and Kong, Fande and Slaughter,
+  Andrew and Permann, Cody and Martineau, Richard},
+  journal={Nuclear Technology},
+  pages={905--922},
+  volume={207},
+  number={7},
+  year={2021},
+  publisher={Taylor \& Francis},
+  doi={10.1080/00295450.2020.1838877}
+}
+
+@techreport{sqa,
+  title={Software Quality Assurance Plan for {MOOSE} and {MOOSE}-Based Applications ({PLN}-4005)},
+  institution={Idaho National Laboratory},
+  year={2020},
+  note = {Revision 7},
+}
+
+@online{thm_website,
+  title={Thermal Hydraulics Module},
+  author={{Idaho National Laboratory}},
+  year={2023},
+  url={https://mooseframework.inl.gov/modules/thermal_hydraulics/index.html}
+}
+
+@article{valgrind,
+  author = {Nethercote, Nicholas and Seward, Julian},
+  title = {Valgrind: A Framework for Heavyweight Dynamic Binary Instrumentation},
+  year = {2007},
+  issue_date = {June 2007},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {42},
+  number = {6},
+  issn = {0362-1340},
+  doi = {10.1145/1273442.1250746},
+  abstract = {Dynamic binary instrumentation (DBI) frameworks make it easy to build dynamic binary analysis (DBA) tools such as checkers and profilers. Much of the focus on DBI frameworks has been on performance; little attention has been paid to their capabilities. As a result, we believe the potential of DBI has not been fully exploited.In this paper we describe Valgrind, a DBI framework designed for building heavyweight DBA tools. We focus on its unique support for shadow values-a powerful but previously little-studied and difficult-to-implement DBA technique, which requires a tool to shadow every register and memory value with another value that describes it. This support accounts for several crucial design features that distinguish Valgrind from other DBI frameworks. Because of these features, lightweight tools built with Valgrind run comparatively slowly, but Valgrind can be used to build more interesting, heavyweight tools that are difficult or impossible to build with other DBI frameworks such as Pin and DynamoRIO.},
+  journal = {SIGPLAN Not.},
+  month = {jun},
+  pages = {89--100},
+  numpages = {12},
+  keywords = {Valgrind, dynamic binary analysis, shadow values, Memcheck, dynamic binary instrumentation}
+}

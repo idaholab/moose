@@ -17,6 +17,12 @@
     ymin = -0.1
     ymax = 0.1
   []
+  [hole_1_name]
+    type = RenameBlockGenerator
+    input = hole_1
+    old_block = 0
+    new_block = hole
+  []
   [hole_2]
     type = GeneratedMeshGenerator
     dim = 2
@@ -27,10 +33,22 @@
     ymin = -0.1
     ymax = 0.1
   []
+  [hole_2_name_1]
+    type = RenameBlockGenerator
+    input = hole_2
+    old_block = 0
+    new_block = 1
+  []
+  [hole_2_name_2]
+    type = RenameBlockGenerator
+    input = hole_2_name_1
+    old_block = 1
+    new_block = hole
+  []
   [triang]
     type = XYDelaunayGenerator
     boundary = 'outer_bdy'
-    holes = 'hole_1
+    holes = 'hole_1_name
              hole_2'
     stitch_holes = 'true
                     false'

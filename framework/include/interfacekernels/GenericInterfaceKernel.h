@@ -51,7 +51,6 @@ using GenericInterfaceKernel = GenericInterfaceKernelTempl<Real, is_ad>;
   using GenericInterfaceKernelTempl<T, is_ad>::_test;                                              \
   using GenericInterfaceKernelTempl<T, is_ad>::_q_point;                                           \
   using GenericInterfaceKernelTempl<T, is_ad>::_var;                                               \
-  using GenericInterfaceKernelTempl<T, is_ad>::_name;                                              \
   using GenericInterfaceKernelTempl<T, is_ad>::_neighbor_value;                                    \
   using GenericInterfaceKernelTempl<T, is_ad>::_test_neighbor;                                     \
   using GenericInterfaceKernelTempl<T, is_ad>::_phi_neighbor;                                      \

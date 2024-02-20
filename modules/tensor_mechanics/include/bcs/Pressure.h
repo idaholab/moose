@@ -72,8 +72,8 @@ protected:
   /// Coordinate system type
   Moose::CoordinateSystemType _coord_type;
 
+  usingTransientInterfaceMembers;
   using PressureParent<is_ad>::_assembly;
-  using PressureParent<is_ad>::_dt;
   using PressureParent<is_ad>::_fe_problem;
   using PressureParent<is_ad>::_i;
   using PressureParent<is_ad>::_mesh;
@@ -82,7 +82,6 @@ protected:
   using PressureParent<is_ad>::_q_point;
   using PressureParent<is_ad>::_qp;
   using PressureParent<is_ad>::_sys;
-  using PressureParent<is_ad>::_t;
   using PressureParent<is_ad>::_test;
   using PressureParent<is_ad>::_var;
 };

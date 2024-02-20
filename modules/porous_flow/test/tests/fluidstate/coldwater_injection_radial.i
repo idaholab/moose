@@ -11,9 +11,6 @@
   xmin = 0.1
   xmax = 5
   bias_x = 1.05
-[]
-
-[Problem]
   rz_coord_axis = Y
   coord_type = RZ
 []

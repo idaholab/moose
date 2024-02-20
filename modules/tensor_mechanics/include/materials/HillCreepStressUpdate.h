@@ -35,11 +35,10 @@ public:
   HillCreepStressUpdateTempl(const InputParameters & parameters);
 
 protected:
+  usingTransientInterfaceMembers;
   using Material::_current_elem;
-  using Material::_dt;
   using Material::_q_point;
   using Material::_qp;
-  using Material::_t;
 
   virtual void
   computeStressInitialize(const GenericDenseVector<is_ad> & stress_dev,

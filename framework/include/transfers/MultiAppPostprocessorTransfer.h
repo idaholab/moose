@@ -35,6 +35,9 @@ public:
   };
 
 protected:
+  /// Siblings transfers only supported for a single origin app
+  virtual void checkSiblingsTransferSupported() const override;
+
   /// Name of the postprocessor to transfer data from
   PostprocessorName _from_pp_name;
 

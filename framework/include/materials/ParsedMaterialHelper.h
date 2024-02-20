@@ -46,6 +46,15 @@ public:
     USE_PARAM_NAMES
   };
 
+  enum class ExtraSymbols
+  {
+    x,
+    y,
+    z,
+    t,
+    dt
+  };
+
   ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
 
   static InputParameters validParams();
@@ -87,6 +96,9 @@ protected:
    * are MOOSE solution objects
    */
   std::vector<SymbolName> _symbol_names;
+
+  /// Extra symbols
+  const std::vector<ExtraSymbols> _extra_symbols;
 
   /// convenience typedef for the material property descriptors
   typedef std::vector<FunctionMaterialPropertyDescriptor<is_ad>> MatPropDescriptorList;

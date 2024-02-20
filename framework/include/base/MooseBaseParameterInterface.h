@@ -19,6 +19,16 @@
 
 #include <string>
 
+#define usingMooseBaseParameterInterfaceMembers                                                    \
+  using MooseBaseParameterInterface::parameters;                                                   \
+  using MooseBaseParameterInterface::uniqueName;                                                   \
+  using MooseBaseParameterInterface::isParamValid;                                                 \
+  using MooseBaseParameterInterface::isParamSetByUser;                                             \
+  using MooseBaseParameterInterface::paramError;                                                   \
+  using MooseBaseParameterInterface::_pars;                                                        \
+  using MooseBaseParameterInterface::_factory;                                                     \
+  using MooseBaseParameterInterface::_action_factory
+
 /**
  * Get canonical paramError prefix for param-related error/warning/info messages.
  *

@@ -31,7 +31,7 @@
 [Functions]
   [v]
     type = ParsedFunction
-    value = x+y-sin(z)
+    expression = x+y-sin(z)
   []
 []
 

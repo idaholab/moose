@@ -78,7 +78,7 @@
 
 [Transfers]
   [from_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub_app
     source_variable = u
     variable = v

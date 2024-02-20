@@ -174,7 +174,9 @@ endef
 include_files	:= $(shell find $(FRAMEWORK_DIR)/include \( -regex "[^\#~]*\.h" ! -name "*MooseConfig.h" \))
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
-# Create a rule for one symlink for one header file
+# Create a rule for one symlink for one header file.
+# The order-only prerequisite guarantees the target directory exists before
+# this rule attempts to create the symlink.
 # Args
 # 1: the header file
 # 2: the symlink to create

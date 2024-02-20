@@ -7,65 +7,65 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
+  [v]
     initial_condition = 1
-  [../]
-  [./inverse_v]
+  []
+  [inverse_v]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./force_u]
+  []
+  [force_u]
     type = CoupledForce
     variable = u
     v = inverse_v
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./invert_v]
+  [invert_v]
     type = QuotientAux
     variable = inverse_v
     denominator = v
     numerator = 20.0
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./Neumann_right]
+  []
+  [Neumann_right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [picard_its]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,26 +87,26 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_begin
     positions = '0 0 0'
     input_files = picard_relaxed_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./v_from_sub]
-    type = MultiAppNearestNodeTransfer
+  [v_from_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = v
     variable = v
-  [../]
-  [./u_to_sub]
-    type = MultiAppNearestNodeTransfer
+  []
+  [u_to_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = u
-  [../]
+  []
 []

@@ -85,8 +85,8 @@ protected:
   using BaseType::_communicator;
   using BaseType::_current_elem;
   using BaseType::isParamValid;
-  using BaseType::name;
   using BaseType::processor_id;
+  using MooseBase::name;
 };
 
 template <typename UserObjectType, typename BaseType>

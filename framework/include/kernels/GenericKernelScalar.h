@@ -43,7 +43,6 @@ public:
   using GenericKernelScalar<is_ad>::_test;                                                         \
   using GenericKernelScalar<is_ad>::_q_point;                                                      \
   using GenericKernelScalar<is_ad>::_var;                                                          \
-  using GenericKernelScalar<is_ad>::_name;                                                         \
   using GenericKernelScalar<is_ad>::getVar;                                                        \
   using GenericKernelScalar<is_ad>::_h;                                                            \
   using GenericKernelScalar<is_ad>::_l;                                                            \

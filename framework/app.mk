@@ -204,12 +204,12 @@ include_files	:= $(shell find $(depend_dirs) -regex "[^\#~]*\.[hf]")
 all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 
 # header file links
-link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
+app_LINK := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(link_names)
+$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(app_LINK)
 app_INCLUDE = -I$(all_header_dir)
 
 else # No Header Symlinks
@@ -257,11 +257,15 @@ else
   app_plugin_deps :=
 endif
 
-app_LIBS       := $(app_LIB) $(app_LIBS)
+app_LIBS       += $(app_LIB)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
+# app_LINKS cumulatively lists all the header symlinks.
+# This is such that when used as a dependency for the module loader rule, it
+# establishes a dependence on the header symlinks of each individual module.
+app_LINKS      := $(app_LINK) $(app_LINKS)
 
 # WARNING: the += operator does NOT work here!
 ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | perl -pe 'y/a-z/A-Z/' | perl -pe 's/-//g')_ENABLED
@@ -453,7 +457,7 @@ endif
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
 	@$(codesign)
 
 ###### install stuff #############

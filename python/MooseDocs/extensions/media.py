@@ -20,8 +20,8 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
-Image = tokens.newToken('Image', src='', tex='', dark='')
-Video = tokens.newToken('Video', src='', tex='', youtube=False,
+Image = tokens.newToken('Image', src='', tex='', dark='', href='')
+Video = tokens.newToken('Video', src='', tex='', quicktime='', youtube=False,
                         controls=True, poster=None, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtension(command.CommandExtension):
@@ -99,6 +99,7 @@ class ImageCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
         settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
+        settings['link'] = (None, "Anchor URL to navigate to upon being clicked")
         settings.update(floats.caption_settings())
         return settings
 
@@ -107,7 +108,7 @@ class ImageCommand(command.CommandComponent):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True, **self.attributes(settings))
         img = Image(flt, src=info['subcommand'], dark=settings['dark_src'],
-                    tex=settings['latex_src'])
+                    tex=settings['latex_src'], href=settings['link'])
         if flt is parent:
             img.attributes.update(**self.attributes(settings))
         return parent
@@ -160,7 +161,7 @@ class ScriptCommand(ImageCommand):
 
 class VideoCommand(command.CommandComponent):
     COMMAND = 'media'
-    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v', None)
+    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v', 'quicktime', None)
 
     @staticmethod
     def defaultSettings():
@@ -172,6 +173,7 @@ class VideoCommand(command.CommandComponent):
         settings['tstart'] = (None, "Time (sec) to start video.")
         settings['tstop'] = (None, "Time (sec) to stop video.")
         settings['poster'] = (None, "Add a 'poster' image the the video")
+        settings['quicktime'] = (None, "Video to utilize Macintosh codecs (for alpha transparencies)")
         settings.update(floats.caption_settings())
         return settings
 
@@ -188,7 +190,8 @@ class VideoCommand(command.CommandComponent):
                     loop=settings['loop'],
                     autoplay=settings['autoplay'],
                     tstart=settings['tstart'],
-                    tstop=settings['tstop'])
+                    tstop=settings['tstop'],
+                    quicktime=settings['quicktime'])
 
         if flt is parent:
             vid.attributes.update(**self.attributes(settings))
@@ -205,7 +208,12 @@ class RenderImage(components.RenderComponent):
             node = self.translator.findPage(src)
             src = str(node.relativeSource(page))
 
-        pic = html.Tag(parent, 'picture')
+        if token['href']:
+            # Remove any styles being set for the img tag so it does not pollute the anchor tag
+            pic_link = html.Tag(parent, 'a', token, href=token["href"], style=None)
+            pic = html.Tag(pic_link, 'picture')
+        else:
+            pic = html.Tag(parent, 'picture')
         if token['dark']:
             html.Tag(pic, 'source', srcset=token['dark'], media='(prefers-color-scheme: dark)')
         html.Tag(pic, 'img', token, src=src)
@@ -213,7 +221,8 @@ class RenderImage(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
         tag = self.createHTML(parent, token, page)
-        tag.addClass('materialboxed', 'moose-image')
+        if not token['href']:
+            tag.addClass('materialboxed', 'moose-image')
         return tag
 
     def createLatex(self, parent, token, page):
@@ -281,9 +290,13 @@ class RenderVideo(components.RenderComponent):
         div = html.Tag(parent, 'div', token, class_='moose-video-div')
         video = html.Tag(div, 'video', class_='moose-video')
         _, ext = os.path.splitext(src)
+
+        if token['quicktime']:
+            html.Tag(video, 'source', src=token['quicktime'], type='video/quicktime')
+
         source = html.Tag(video, 'source', src=src)
 
-        source["type"] = "video/{}".format(ext[1:])
+        source["type"] = f"video/{ext[1:]}"
 
         # Set attributes for HTML video element
         video['width'] = '100%'

@@ -795,14 +795,22 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
                  '.');
 }
 
-std::vector<std::string>
-InputParameters::getSyntax(const std::string & name_in) const
+bool
+InputParameters::isCommandLineParameter(const std::string & name) const
 {
-  const auto name = checkForRename(name_in);
-  auto it = _params.find(name);
-  if (it == _params.end())
-    mooseError("No parameter exists with the name ", name);
-  return it->second._cli_flag_names;
+  return at(checkForRename(name))._cl_data.has_value();
+}
+
+const std::vector<std::string> &
+InputParameters::getCommandLineSyntax(const std::string & name) const
+{
+  return getCommandLineMetadata(name).syntax;
+}
+
+InputParameters::CommandLineMetadata::ArgumentType
+InputParameters::getCommandLineArgumentType(const std::string & name) const
+{
+  return getCommandLineMetadata(name).argument_type;
 }
 
 std::string
@@ -1096,6 +1104,14 @@ InputParameters::addDeprecatedParam<std::vector<MooseEnum>>(
              "using addDeprecatedParam, even if the parameter is not required!");
 }
 
+std::string
+InputParameters::appendFunctorDescription(const std::string & doc_string) const
+{
+  return MooseUtils::trim(doc_string, ". ") +
+         ". A functor is any of the following: a variable, a functor material property, a "
+         "function, a post-processor, or a number.";
+}
+
 template <>
 void
 InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & /*name*/,
@@ -1238,6 +1254,15 @@ InputParameters::checkParamName(const std::string & name) const
   const static pcrecpp::RE valid("[\\w:/]+");
   if (!valid.FullMatch(name))
     mooseError("Invalid parameter name: '", name, "'");
+}
+
+const InputParameters::CommandLineMetadata &
+InputParameters::getCommandLineMetadata(const std::string & name) const
+{
+  const auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("The parameter '", name, "' is not a command line parameter.");
+  return *cl_data;
 }
 
 bool

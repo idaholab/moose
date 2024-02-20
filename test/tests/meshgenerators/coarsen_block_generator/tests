@@ -1,0 +1,250 @@
+[Tests]
+  issues = '#25280'
+  design = 'meshgenerators/CoarsenBlockGenerator.md'
+
+  [meshes_quad]
+    requirement = 'The system shall be able to generate a 2D quad-element mesh'
+    [multiple_block_uniform]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='1 1 1' --mesh-only "
+                 "single_uniform.e"
+      detail = 'for a mesh coarsening test with a uniformly refined mesh,'
+      recover = false
+    []
+    [multiple_block_nonuniform]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 1' --mesh-only "
+                 "single_nonuniform.e"
+      detail = 'for a mesh coarsening test with a non-uniformly refined mesh,'
+      recover = false
+    []
+    [multiple_levels]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 2' --mesh-only "
+                 "double_nonuniform.e"
+      detail = 'for a mesh coarsening test with twice-refined elements,'
+      recover = false
+    []
+    [external_refined]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
+                 "Mesh/refine_side/input=eg Mesh/refine_side/boundaries=top "
+                 "Mesh/refine_side/refinement='1' --mesh-only external_uniform.e"
+      detail = 'for a mesh coarsening test with an external boundary refined,'
+      recover = false
+    []
+    [internal_refined]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
+                 "Mesh/refine_side/input=add_internal Mesh/refine_side/boundaries=middle "
+                 "Mesh/refine_side/refinement='1' --mesh-only internal_uniform.e"
+      detail = 'and for a mesh coarsening test with an internal boundary refined.'
+      recover = false
+    []
+  []
+
+  [coarsen_quad]
+    requirement = 'The system shall support the ability to coarsen quadrilateral'
+    prereq = 'meshes_quad'
+    [single_block]
+      type = 'Exodiff'
+      input = 'coarsen_quad.i'
+      exodiff = 'coarsen_quad_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'elements within a non-uniformly refined mesh,'
+      mesh_mode = replicated
+    []
+    [multiple_block_uniform]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=single_uniform.e Mesh/coarsen/coarsening='1 1 1' --mesh-only"
+      detail = 'elements within multiple blocks within a multi-domain mesh,'
+      mesh_mode = replicated
+    []
+    [multiple_block_nonuniform]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=single_nonuniform.e Mesh/coarsen/coarsening='0 1 1' --mesh-only"
+      detail = 'elements within multiple blocks, both refined and unrefined, within a multi-domain mesh,'
+      mesh_mode = replicated
+    []
+    [multiple_levels]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=double_nonuniform.e Mesh/coarsen/coarsening='0 1 2' "
+                 "Mesh/coarsen/starting_point='2.5 3 0' --mesh-only"
+      detail = 'elements within multiple blocks at multiple levels of coarsening within a multi-domain mesh,'
+      mesh_mode = replicated
+    []
+    [external_boundary_single]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=external_uniform.e Mesh/coarsen/coarsening='1 1 1' "
+                 "Mesh/coarsen/starting_point='2 5 0' --mesh-only"
+      detail = 'elements near a refined external boundary,'
+      mesh_mode = replicated
+    []
+    [internal_boundary_single]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=internal_uniform.e Mesh/coarsen/coarsening='1 1 1' "
+                 "Mesh/coarsen/starting_point='3 5 0' --mesh-only"
+      detail = 'elements near a refined internal boundary.'
+      mesh_mode = replicated
+    []
+  []
+
+  [meshes_hex]
+    requirement = 'The system shall be able to generate a 3D hexahedral-element mesh'
+    [multiple_block_uniform]
+      type = RunApp
+      input = 'coarsen_hex_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='1 1 1' --mesh-only "
+                 "single_uniform_hex.e"
+      detail = 'for a mesh coarsening test with a uniformly refined mesh,'
+      recover = false
+    []
+    [multiple_block_nonuniform]
+      type = RunApp
+      input = 'coarsen_hex_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 1' --mesh-only "
+                 "single_nonuniform_hex.e"
+      detail = 'for a mesh coarsening test with a non-uniformly refined mesh,'
+      recover = false
+    []
+    [multiple_levels]
+      type = RunApp
+      input = 'coarsen_hex_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 2' --mesh-only "
+                 "double_nonuniform_hex.e"
+      detail = 'for a mesh coarsening test with twice-refined elements,'
+      recover = false
+    []
+    [external_refined]
+      type = RunApp
+      input = 'coarsen_hex_multi.i'
+      cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
+                 "Mesh/refine_side/input=eg Mesh/refine_side/boundaries=top "
+                 "Mesh/refine_side/refinement='1' --mesh-only external_uniform_hex.e"
+      detail = 'for a mesh coarsening test with an external boundary refined,'
+      recover = false
+    []
+    [internal_refined]
+      type = RunApp
+      input = 'coarsen_hex_multi.i'
+      cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
+                 "Mesh/refine_side/input=add_internal Mesh/refine_side/boundaries=middle "
+                 "Mesh/refine_side/refinement='1' --mesh-only internal_uniform_hex.e"
+      detail = 'and for a mesh coarsening test with an internal boundary refined.'
+      recover = false
+    []
+  []
+
+  [coarsen_hex]
+    requirement = 'The system shall support the ability to coarsen hexahedral'
+    prereq = 'meshes_hex'
+    [single_block]
+      type = 'Exodiff'
+      input = 'coarsen_hex.i'
+      exodiff = 'coarsen_hex_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'elements within a non-uniformly refined mesh,'
+      mesh_mode = replicated
+    []
+    [multiple_block_uniform]
+      type = 'Exodiff'
+      input = 'coarsen_hex_multi.i'
+      exodiff = 'coarsen_hex_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=single_uniform_hex.e Mesh/coarsen/coarsening='1 1 1' --mesh-only"
+      detail = 'elements within multiple blocks within a multi-domain mesh,'
+      mesh_mode = replicated
+    []
+    [multiple_block_nonuniform]
+      type = 'Exodiff'
+      input = 'coarsen_hex_multi.i'
+      exodiff = 'coarsen_hex_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=single_nonuniform_hex.e Mesh/coarsen/coarsening='0 1 1' "
+                 "--mesh-only"
+      detail = 'elements within multiple blocks, both refined and unrefined, within a multi-domain mesh,'
+      mesh_mode = replicated
+    []
+    [multiple_levels]
+      type = 'Exodiff'
+      input = 'coarsen_hex_multi.i'
+      exodiff = 'coarsen_hex_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=double_nonuniform_hex.e Mesh/coarsen/coarsening='0 1 2' "
+                 "Mesh/coarsen/starting_point='2.5 3.5 5' --mesh-only"
+      detail = 'elements within multiple blocks at multiple levels of coarsening within a multi-domain mesh,'
+      mesh_mode = replicated
+    []
+    [external_boundary_single]
+      type = 'Exodiff'
+      input = 'coarsen_hex_multi.i'
+      exodiff = 'coarsen_hex_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=external_uniform_hex.e Mesh/coarsen/coarsening='1 1 1' "
+                 "Mesh/coarsen/starting_point='2 5 0' Mesh/coarsen/maximum_volume_ratio=4 "
+                 "--mesh-only"
+      detail = 'elements near a refined external boundary,'
+      mesh_mode = replicated
+    []
+    [internal_boundary_single]
+      type = 'Exodiff'
+      input = 'coarsen_hex_multi.i'
+      exodiff = 'coarsen_hex_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=internal_uniform_hex.e Mesh/coarsen/coarsening='1 1 1' "
+                 "Mesh/coarsen/starting_point='2 3.5 0' Mesh/coarsen/maximum_volume_ratio=4 "
+                 "--mesh-only"
+      detail = 'elements near a refined internal boundary.'
+      mesh_mode = replicated
+    []
+  []
+
+  [errors]
+    requirement = "The system shall report an error if "
+    [invalid_block]
+      type = RunException
+      input = coarsen_quad.i
+      cli_args = 'Mesh/coarsen/block="missing"'
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = "attempting to coarsen a block that does not exist in the mesh, and "
+    []
+    [wrong_size_inputs]
+      type = RunException
+      input = coarsen_quad.i
+      cli_args = 'Mesh/coarsen/coarsening="1 2" --mesh-only'
+      expect_err = "The blocks and coarsening parameter vectors should be the same size"
+      detail = "if specifying a vector of coarsening levels that does not match the vector of "
+               "subdomains to coarsen,"
+    []
+    [wrong_starting_point]
+      type = RunException
+      input = coarsen_quad_multi.i
+      cli_args = 'Mesh/coarsen/coarsening="2 1 0" --mesh-only'
+      expect_err = "The starting element must be in the block set to be coarsened the most"
+      detail = "the coarsening starting element is not in the block to coarsen the most."
+      mesh_mode = replicated
+    []
+  []
+[]

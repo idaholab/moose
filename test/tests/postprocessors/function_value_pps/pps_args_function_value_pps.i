@@ -10,7 +10,7 @@
 [Functions]
   [fn]
     type = ParsedFunction
-    value = 't + 0.12 * x + 0.3 * y + 12 * z'
+    expression = 't + 0.12 * x + 0.3 * y + 12 * z'
   []
 []
 

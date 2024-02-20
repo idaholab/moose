@@ -124,7 +124,7 @@ public:
   /// Return underlying PicardSolve object.
   PicardSolve & picardSolve()
   {
-    mooseDeprecated("picardSolve() is deprecated. Use FixedPointSolve() instead.");
+    mooseDeprecated("picardSolve() is deprecated. Use fixedPointSolve() instead.");
     if (_iteration_method == "picard")
       return *(dynamic_cast<PicardSolve *>(_fixed_point_solve.get()));
     else

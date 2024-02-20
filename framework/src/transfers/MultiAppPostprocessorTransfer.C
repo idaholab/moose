@@ -70,15 +70,35 @@ MultiAppPostprocessorTransfer::execute()
     case BETWEEN_MULTIAPP:
       for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
       {
+        // Get source postprocessor value
+        Real pp_value = std::numeric_limits<Real>::max();
         if (getFromMultiApp()->hasLocalApp(i))
         {
-          // Get source postprocessor value
           FEProblemBase & from_problem = getFromMultiApp()->appProblemBase(i);
-          const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
-
-          if (getToMultiApp()->hasLocalApp(i))
-            getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
+          pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
         }
+
+        // Find the postprocessor value from another process
+        if (getFromMultiApp()->numGlobalApps() == 1)
+          _communicator.min(pp_value);
+        else
+          mooseAssert(pp_value != std::numeric_limits<Real>::max() ||
+                          !getToMultiApp()->hasLocalApp(i),
+                      "Source and target app parallel distribution must be the same");
+
+        // Case 1: a single source app, multiple target apps
+        // All target apps must be local
+        if (getFromMultiApp()->numGlobalApps() == 1)
+          for (const auto j : make_range(getToMultiApp()->numGlobalApps()))
+          {
+            if (getToMultiApp()->hasLocalApp(j))
+              getToMultiApp()->appProblemBase(j).setPostprocessorValueByName(_to_pp_name, pp_value);
+          }
+
+        // Case 2: same number of source and target apps
+        // The allocation of the child apps on the processors must be the same
+        else if (getToMultiApp()->hasLocalApp(i))
+          getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
       }
       break;
     case TO_MULTIAPP:
@@ -114,7 +134,7 @@ MultiAppPostprocessorTransfer::execute()
               "Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
-      const auto multi_app = getFromMultiApp() ? getFromMultiApp() : getToMultiApp();
+      const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
       for (unsigned int i = 0; i < multi_app->numGlobalApps(); i++)
       {
@@ -165,4 +185,25 @@ MultiAppPostprocessorTransfer::execute()
       break;
     }
   }
+}
+
+void
+MultiAppPostprocessorTransfer::checkSiblingsTransferSupported() const
+{
+  // Check that we are in one of the supported configurations
+  // Case 2: same number of source and target apps
+  // The allocation of the child apps on the processors must be the same
+  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
+  {
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
+        mooseError("Child application allocation on parallel processes must be the same to support "
+                   "siblings postprocessor transfer");
+  }
+  // Unsupported, we dont know how to choose a postprocessor value
+  // We could default to 'any' value is good enough in the future, but it would not be reproducible
+  // in parallel. Also every process will not necessarily have a 'source' value
+  else if (getFromMultiApp()->numGlobalApps() != 1)
+    mooseError("Number of source and target child apps must either match or only a single source "
+               "app may be used");
 }

@@ -2,7 +2,7 @@
 
 !syntax description /Mesh/FileMesh
 
-## Support File Formats
+## Supported File Formats
 
 The `FileMesh` is the default type for MOOSE and as the name suggests it reads the mesh from an external file. MOOSE
 supports reading and writing a large number of formats and could be extended to read more.

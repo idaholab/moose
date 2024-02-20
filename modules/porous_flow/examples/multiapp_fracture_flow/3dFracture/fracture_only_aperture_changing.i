@@ -220,7 +220,7 @@ injection_rate = 10 # kg/s
     type = Water97FluidProperties
   []
   [water]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = true_water
     temperature_min = 275 # K
     temperature_max = 600
@@ -239,7 +239,7 @@ injection_rate = 10 # kg/s
   []
   [permeability]
     type = PorousFlowPermeabilityKozenyCarman
-    k0 = 1E-15  # fracture perm = 1E-11 m^2, but must include fracture aperture of 1E-4
+    k0 = 1E-15 # fracture perm = 1E-11 m^2, but must include fracture aperture of 1E-4
     poroperm_function = kozeny_carman_phi0
     m = 0
     n = 3

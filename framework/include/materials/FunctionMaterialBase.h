@@ -13,14 +13,7 @@
 #include "DerivativeMaterialInterface.h"
 
 #define usingFunctionMaterialBaseMembers(T)                                                        \
-  using FunctionMaterialBase<T>::name;                                                             \
-  using FunctionMaterialBase<T>::_qp;                                                              \
-  using FunctionMaterialBase<T>::_qrule;                                                           \
-  using FunctionMaterialBase<T>::_name;                                                            \
-  using FunctionMaterialBase<T>::_tid;                                                             \
-  using FunctionMaterialBase<T>::_pars;                                                            \
-  using FunctionMaterialBase<T>::_material_data_type;                                              \
-  using FunctionMaterialBase<T>::_fe_problem;                                                      \
+  usingMaterialMembers;                                                                            \
   using FunctionMaterialBase<T>::_args;                                                            \
   using FunctionMaterialBase<T>::_F_name;                                                          \
   using FunctionMaterialBase<T>::_nargs;                                                           \
