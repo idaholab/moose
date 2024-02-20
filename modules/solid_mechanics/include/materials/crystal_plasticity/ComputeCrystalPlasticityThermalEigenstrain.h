@@ -27,9 +27,6 @@ public:
 
   ComputeCrystalPlasticityThermalEigenstrain(const InputParameters & parameters);
 
-  /// We need to set initial values for lattice thermal expansion coefficients
-  virtual void initQpStatefulProperties() override;
-
 protected:
   ///Compute the deformation gradient due to thermal expansion
   virtual void computeQpDeformationGradient() override;
