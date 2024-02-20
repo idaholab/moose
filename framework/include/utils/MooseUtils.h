@@ -35,7 +35,6 @@
 #include <vector>
 #include <map>
 #include <list>
-// #include <iterator>
 #include <filesystem>
 #include <deque>
 
@@ -236,7 +235,8 @@ splitFileName(const T & full_file)
   if (!p.has_filename())
     mooseError("Invalid full file name: ", p);
 
-  return {p.parent_path(), p.filename()};
+  const auto d = p.parent_path();
+  return {d.empty() ? "." : d, p.filename()};
 }
 
 /**
