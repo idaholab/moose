@@ -115,7 +115,7 @@ public:
 
   void residualSetup() override;
 
-  virtual const std::set<unsigned int> & getMatPropDependencies() const;
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const;
 
   /**
    * Whether (contact) constraint is of 'explicit dynamics' type.
@@ -308,7 +308,7 @@ protected:
   Real _secondary_residual;
 
   /// An empty material property dependency set for use with \p getMatPropDependencies
-  const std::set<unsigned int> _empty_mat_prop_deps;
+  const std::unordered_set<unsigned int> _empty_mat_prop_deps;
 
 public:
   std::vector<dof_id_type> _connected_dof_indices;
@@ -334,7 +334,7 @@ public:
   DenseMatrix<Number> _Ken;
 };
 
-inline const std::set<unsigned int> &
+inline const std::unordered_set<unsigned int> &
 NodeFaceConstraint::getMatPropDependencies() const
 {
   return _empty_mat_prop_deps;

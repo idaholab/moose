@@ -53,6 +53,7 @@ ExplicitDynamicsOverwrite::validParams()
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
+  params.addCoupledVar("gap_rate", "Gap rate for output (writable auxiliary variable).");
   params.addClassDescription(
       "Apply non-penetration constraints on the mechanical deformation in explicit dynamics "
       "using a node on face formulation by solving uncoupled momentum-balance equations.");
@@ -71,7 +72,8 @@ ExplicitDynamicsOverwrite::ExplicitDynamicsOverwrite(const InputParameters & par
     _has_mapped_primary_gap_offset(isCoupled("mapped_primary_gap_offset")),
     _mapped_primary_gap_offset_var(
         _has_mapped_primary_gap_offset ? getVar("mapped_primary_gap_offset", 0) : nullptr),
-    _overwrite_current_solution(true)
+    _overwrite_current_solution(true),
+    _gap_rate(&writableVariable("gap_rate"))
 {
   _overwrite_secondary_residual = false;
 
@@ -137,6 +139,7 @@ ExplicitDynamicsOverwrite::computeContactForce(const Node & node, PenetrationInf
   dof_id_type dof_x = node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
 
   _dof_to_gap[dof_x] = gap_size;
+  _gap_rate->setNodalValue(-1.23456);
 }
 
 Real
@@ -177,7 +180,7 @@ ExplicitDynamicsOverwrite::overwriteBoundaryVariables(NumericVector<Number> & so
     dof_id_type dof_z = secondary_node.dof_number(_sys.number(), _var_objects[2]->number(), 0);
     // Blatantly attached the 'cube' bottom surface to zero.
     // This doesn't do anything physical, just overwrites the z displacement to give the appearance
-    // of contact   .
+    // of contact.
     if (_dof_to_gap.find(dof_x) != _dof_to_gap.end())
       soln.set(dof_z, 0.0);
   }

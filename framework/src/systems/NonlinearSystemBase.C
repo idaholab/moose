@@ -1112,7 +1112,7 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
     {
       const auto & constraints =
           _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
-      std::set<unsigned int> needed_mat_props;
+      std::unordered_set<unsigned int> needed_mat_props;
       for (const auto & constraint : constraints)
       {
         const auto & mp_deps = constraint->getMatPropDependencies();

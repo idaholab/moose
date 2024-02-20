@@ -71,7 +71,7 @@ public:
    */
   virtual bool addCouplingEntriesToJacobian() override { return false; }
 
-  virtual const std::set<unsigned int> & getMatPropDependencies() const override;
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
 
   virtual void overwriteBoundaryVariables(NumericVector<Number> & soln,
                                           const Node & secondary_node) const override;
@@ -144,7 +144,7 @@ private:
   std::unordered_map<dof_id_type, Real> _dof_to_position;
 };
 
-inline const std::set<unsigned int> &
+inline const std::unordered_set<unsigned int> &
 ExplicitDynamicsContactConstraint::getMatPropDependencies() const
 {
   return TwoMaterialPropertyInterface::getMatPropDependencies();

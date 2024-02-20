@@ -89,6 +89,9 @@ protected:
   /// Whether to overwrite contact boundary nodal solution
   const bool _overwrite_current_solution;
 
+  /// Nodal gap rate (exercise writable variables from framework)
+  MooseWritableVariable * _gap_rate;
+
 private:
   std::unordered_map<dof_id_type, Real> _dof_to_gap;
 };

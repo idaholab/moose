@@ -66,8 +66,6 @@
 []
 
 [AuxVariables]
-  [gap_rate]
-  []
   [vel_x]
   []
   [accel_x]
@@ -79,6 +77,8 @@
   [vel_z]
   []
   [accel_z]
+  []
+  [gap_rate]
   []
 []
 
@@ -172,6 +172,7 @@
     boundary = 'base_front'
     component = 0
     variable = disp_x
+    gap_rate = gap_rate
   []
 []
 
