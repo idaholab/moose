@@ -168,7 +168,13 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   // we switch off forward mode derivatives until we have a converged solution
   const auto did_derivatives = ADReal::do_derivatives;
   if constexpr (is_ad)
-    ADReal::do_derivatives = false;
+  {
+    // We have the option of using dual numbers to compute the newton solve derivatives. In those
+    // cases we cannot simply switch of derivative calculation, or teh Newton iterations will never
+    // converge.
+    if (!_ad_derivative)
+      ADReal::do_derivatives = false;
+  }
   else
     libmesh_ignore(did_derivatives);
 
@@ -195,7 +201,6 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   }
   else
   {
-
     _residual_history.assign(_num_resids, std::numeric_limits<Real>::max());
     _residual_history[0] = MetaPhysicL::raw_value(_residual);
 
@@ -306,19 +311,21 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     }
   }
 
-  if (std::isnan(_residual) || std::isinf(MetaPhysicL::raw_value(_residual)))
-    return SolveState::NAN_INF;
-
   // recover derivatives
   if constexpr (is_ad)
   {
     ADReal::do_derivatives = did_derivatives;
-    if (did_derivatives)
+    if (did_derivatives && !_ad_derivative)
     {
+      // computeResidualAndDerivativeHelper(effective_trial_stress, scalar_old);
+      // scalar = scalar_old - _residual / _derivative;
       computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
-      scalar -= _residual / _derivative;
+      scalar = scalar - _residual / _derivative;
     }
   }
+
+  if (std::isnan(_residual) || std::isinf(MetaPhysicL::raw_value(_residual)))
+    return SolveState::NAN_INF;
 
   if (_iteration == _max_its)
     return SolveState::EXCEEDED_ITERATIONS;
