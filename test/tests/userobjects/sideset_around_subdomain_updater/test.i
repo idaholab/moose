@@ -8,13 +8,6 @@
     nx = 2
     ny = 2
     subdomain_ids = '0 0 1 1'
-
-    # nx = 4
-    # ny = 4
-    # subdomain_ids = '0 0 0 0
-    #                  0 0 0 0
-    #                  1 1 1 1
-    #                  1 1 1 1'
   []
 []
 

@@ -25,21 +25,21 @@ SidesetAroundSubdomainUpdater::validParams()
                                               "Subdomains that own the boundary");
   params.addParam<std::vector<SubdomainName>>("outer_subdomains",
                                               "Subdomains on the outside of the boundary");
-  params.addParam<bool>("assign_surface_sides",
+  params.addParam<bool>("assign_outer_surface_sides",
                         true,
                         "Assign sides of elements im `inner_subdomains` that have no neighbor.");
   params.addRequiredParam<BoundaryName>("update_sideset_name",
-                                        "The name of the sideset to be updated.");
+                                        "The name of the sideset to be updated. If the boundary "
+                                        "does not exist it will be added to the system.");
   return params;
 }
 
 SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParameters & parameters)
   : DomainUserObject(parameters),
-    _comm(_mesh.comm()),
-    _pid(_comm.rank()),
+    _pid(_communicator.rank()),
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
     _neighbor_side(_assembly.neighborSide()),
-    _assign_surface_sides(getParam<bool>("assign_surface_sides")),
+    _assign_outer_surface_sides(getParam<bool>("assign_outer_surface_sides")),
     _boundary_name(getParam<BoundaryName>("update_sideset_name")),
     _boundary_id(_mesh.getBoundaryID(_boundary_name)),
     _boundary_info(_mesh.getMesh().get_boundary_info()),
@@ -47,8 +47,8 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
         _displaced_problem ? &_displaced_problem->mesh().getMesh().get_boundary_info() : nullptr)
 {
   // subdomains
-  const auto inner_subdomains = getParam<std::vector<SubdomainName>>("inner_subdomains");
-  const auto outer_subdomains = getParam<std::vector<SubdomainName>>("outer_subdomains");
+  const auto & inner_subdomains = getParam<std::vector<SubdomainName>>("inner_subdomains");
+  const auto & outer_subdomains = getParam<std::vector<SubdomainName>>("outer_subdomains");
   for (const auto & name : inner_subdomains)
     if (!MooseMeshUtils::hasSubdomainName(_mesh.getMesh(), name))
       paramError("inner_subdomains", "The block '", name, "' was not found in the mesh");
@@ -72,19 +72,20 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
 }
 
 void
-SidesetAroundSubdomainUpdater::executeOnExternalSide(const Elem * elem, unsigned int side)
+SidesetAroundSubdomainUpdater::executeOnExternalSide()
 {
   // we should add the sideset only of the current element is in the "inner" set _and_ the user set
   // assign_surface_sides
-  if (_inner_ids.count(elem->subdomain_id()))
+  if (_inner_ids.count(_current_elem->subdomain_id()))
   {
-    if (!_boundary_info.has_boundary_id(elem, side, _boundary_id) && _assign_surface_sides)
-      _add[_pid].emplace_back(elem->id(), side);
+    if (_assign_outer_surface_sides &&
+        !_boundary_info.has_boundary_id(_current_elem, _current_side, _boundary_id))
+      _add[_pid].emplace_back(_current_elem->id(), _current_side);
   }
   else
   {
-    if (_boundary_info.has_boundary_id(elem, side, _boundary_id))
-      _remove[_pid].emplace_back(elem->id(), side);
+    if (_boundary_info.has_boundary_id(_current_elem, _current_side, _boundary_id))
+      _remove[_pid].emplace_back(_current_elem->id(), _current_side);
   }
 }
 
@@ -166,8 +167,8 @@ SidesetAroundSubdomainUpdater::finalize()
   };
 
   // communicate and act on remote and local changes
-  TIMPI::push_parallel_vector_data(_comm, _remove, remove_functor);
-  TIMPI::push_parallel_vector_data(_comm, _add, add_functor);
+  TIMPI::push_parallel_vector_data(_communicator, _remove, remove_functor);
+  TIMPI::push_parallel_vector_data(_communicator, _add, add_functor);
 
   auto sync = [](auto & mesh)
   {

@@ -27,7 +27,7 @@ public:
 
   virtual void initialize() override;
 
-  virtual void executeOnExternalSide(const Elem * elem, unsigned int side) override;
+  virtual void executeOnExternalSide() override;
   virtual void executeOnInternalSide() override;
 
   virtual void finalize() override;
@@ -39,8 +39,6 @@ protected:
                    unsigned short int primary_side,
                    const Elem * secondary_elem);
 
-  /// The Communicator
-  const Parallel::Communicator & _comm;
   /// The MPI rank of this processor
   const processor_id_type _pid;
 
@@ -56,7 +54,7 @@ protected:
   ///@}
 
   /// assign sideset to sides that have no neighbor elements
-  const bool _assign_surface_sides;
+  const bool _assign_outer_surface_sides;
 
   ///@{ Boundary / sideset to update
   BoundaryName _boundary_name;
