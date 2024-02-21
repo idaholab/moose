@@ -696,6 +696,8 @@ public:
    */
   void setupDM();
 
+  using SystemBase::reinitNodeFace;
+
 protected:
   /**
    * Compute the residual for a given tag
@@ -771,9 +773,13 @@ protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 
   /**
-   * Reinitialize quantities on the primary side of a secondary node primary face pair
+   * Reinitialize quantities such as variables, residuals, Jacobians, materials for node-face
+   * constraints
    */
-  void reinitNodeFaceFace(const PenetrationInfo & info, const bool displaced);
+  void reinitNodeFace(const Node & secondary_node,
+                      const BoundaryID secondary_boundary,
+                      const PenetrationInfo & info,
+                      const bool displaced);
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

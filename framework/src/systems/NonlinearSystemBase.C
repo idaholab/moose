@@ -1086,18 +1086,32 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 }
 
 void
-NonlinearSystemBase::reinitNodeFaceFace(const PenetrationInfo & info, const bool displaced)
+NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
+                                    const BoundaryID secondary_boundary,
+                                    const PenetrationInfo & info,
+                                    const bool displaced)
 {
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
 
   const Elem * primary_elem = info._elem;
   unsigned int primary_side = info._side_num;
-
   std::vector<Point> points;
   points.push_back(info._closest_point);
 
-  // Reinit variables and materials on the primary element's face at the contact point
+  // *These next steps MUST be done in this order!*
+  // ADL: This is a Chesterton's fence situation. I don't know which calls exactly the above comment
+  // is referring to. If I had to guess I would guess just the reinitNodeFace and prepareAssembly
+  // calls since the former will size the variable's dof indices and then the latter will resize the
+  // residual/Jacobian based off the variable's cached dof indices size
+
+  // This reinits the variables that exist on the secondary node
+  _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
+
+  // This will set aside residual and jacobian space for the variables that have dofs on
+  // the secondary node
+  _fe_problem.prepareAssembly(0);
+
   _fe_problem.setNeighborSubdomainID(primary_elem, 0);
 
   //
@@ -1176,12 +1190,7 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            // reinit variables at the node
-            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
-
-            _fe_problem.prepareAssembly(0);
-
-            reinitNodeFaceFace(info, displaced);
+            reinitNodeFace(secondary_node, secondary_boundary, info, displaced);
 
             for (const auto & nfc : constraints)
             {
@@ -1328,16 +1337,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            // *These next steps MUST be done in this order!*
-
-            // This reinits the variables that exist on the secondary node
-            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
-
-            // This will set aside residual and jacobian space for the variables that have dofs on
-            // the secondary node
-            _fe_problem.prepareAssembly(0);
-
-            reinitNodeFaceFace(info, displaced);
+            reinitNodeFace(secondary_node, secondary_boundary, info, displaced);
 
             for (const auto & nfc : constraints)
             {
@@ -2285,13 +2285,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            // reinit variables at the node
-            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
-
-            _fe_problem.prepareAssembly(0);
+            reinitNodeFace(secondary_node, secondary_boundary, info, displaced);
             _fe_problem.reinitOffDiagScalars(0);
-
-            reinitNodeFaceFace(info, displaced);
 
             for (const auto & nfc : constraints)
             {
