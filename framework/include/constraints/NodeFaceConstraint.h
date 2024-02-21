@@ -115,6 +115,9 @@ public:
 
   void residualSetup() override;
 
+  /**
+   * @returns material property dependencies
+   */
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const;
 
   /**
@@ -126,7 +129,14 @@ public:
    * Allows for overwriting boundary variables (explicit dynamics contact).
    */
   virtual void overwriteBoundaryVariables(NumericVector<Number> & /*soln*/,
-                                          const Node & /*secondary_node*/) const {};
+                                          const Node & /*secondary_node*/) const
+  {
+  }
+
+  /**
+   * @returns IDs of the subdomains that connect to the secondary boundary
+   */
+  std::set<SubdomainID> getSecondaryConnectedBlocks() const;
 
 protected:
   /**
@@ -232,12 +242,16 @@ protected:
     return coupledNeighborSecond(var_name, comp);
   }
 
+  /**
+   * Builds the \p _boundary_ids data member and returns it
+   * @returns a set containing the secondary and primary boundary IDs
+   */
   const std::set<BoundaryID> & buildBoundaryIDs();
 
   /// Boundary ID for the secondary surface
-  unsigned int _secondary;
+  BoundaryID _secondary;
   /// Boundary ID for the primary surface
-  unsigned int _primary;
+  BoundaryID _primary;
 
   MooseVariable & _var;
 
@@ -247,12 +261,8 @@ protected:
   /// the union of the secondary and primary boundary ids
   std::set<BoundaryID> _boundary_ids;
 
-public:
-  const std::set<SubdomainID> getSecondaryConnectedBlocks() const;
-
   PenetrationLocator & _penetration_locator;
 
-protected:
   /// current node being processed
   const Node * const & _current_node;
   const Elem * const & _current_primary;
@@ -310,7 +320,6 @@ protected:
   /// An empty material property dependency set for use with \p getMatPropDependencies
   const std::unordered_set<unsigned int> _empty_mat_prop_deps;
 
-public:
   std::vector<dof_id_type> _connected_dof_indices;
 
   /// The Jacobian corresponding to the derivatives of the neighbor/primary residual with respect to
@@ -332,6 +341,8 @@ public:
   /// overwriting the secondary residual we traditionally want to use a different scaling factor from the
   /// one associated with interior physics
   DenseMatrix<Number> _Ken;
+
+  friend class NonlinearSystemBase;
 };
 
 inline const std::unordered_set<unsigned int> &
