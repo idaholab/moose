@@ -130,28 +130,41 @@ private:
    * @param completionItems - list of completion objects to be filled out
    * @param valid_params - all valid parameters to add to completion list
    * @param existing_params - set of parameters already existing in input
-   * @param request_line - line in input where autocomplete was requested
-   * @param request_char - char in input where autocomplete was requested
+   * @param replace_line_beg - start line of autocompletion replace range
+   * @param replace_char_beg - start column of autocomplete replace range
+   * @param replace_line_end - end line of autocomplete replacement range
+   * @param replace_char_end - end column of autocompletion replace range
+   * @param filtering_prefix - beginning text to filter list if not empty
    * @return - true if filling of completion items completed successfully
    */
   bool addParametersToList(wasp::DataArray & completionItems,
                            const InputParameters & valid_params,
                            const std::set<std::string> & existing_params,
-                           int request_line,
-                           int request_char);
+                           int replace_line_beg,
+                           int replace_char_beg,
+                           int replace_line_end,
+                           int replace_char_end,
+                           const std::string & filtering_prefix);
 
   /**
    * Add subblocks to completion list for request path, line, and column.
    * @param completionItems - list of completion objects to be filled out
    * @param object_path - full node path where autocomplete was requested
-   * @param request_line - line in input where autocomplete was requested
-   * @param request_char - char in input where autocomplete was requested
+   * @param replace_line_beg - start line of autocompletion replace range
+   * @param replace_char_beg - start column of autocomplete replace range
+   * @param replace_line_end - end line of autocomplete replacement range
+   * @param replace_char_end - end column of autocompletion replace range
+   * @param filtering_prefix - beginning text to filter list if not empty
    * @return - true if filling of completion items completed successfully
    */
   bool addSubblocksToList(wasp::DataArray & completionItems,
                           const std::string & object_path,
-                          int request_line,
-                          int request_char);
+                          int replace_line_beg,
+                          int replace_char_beg,
+                          int replace_line_end,
+                          int replace_char_end,
+                          const std::string & filtering_prefix,
+                          bool request_on_block_decl);
 
   /**
    * Add parameter values to completion list for request line and column.
@@ -160,10 +173,10 @@ private:
    * @param existing_subblocks - active and inactive subblock name values
    * @param param_name - name of input parameter for value autocompletion
    * @param obj_act_tasks - tasks to verify object type with valid syntax
-   * @param replace_line_start - start line of autocomplete replace range
-   * @param replace_char_start - start char of autocomplete replace range
+   * @param replace_line_beg - start line of autocompletion replace range
+   * @param replace_char_beg - start column of autocomplete replace range
    * @param replace_line_end - end line of autocomplete replacement range
-   * @param replace_char_end - end char of autocomplete replacement range
+   * @param replace_char_end - end column of autocompletion replace range
    * @return - true if filling of completion items completed successfully
    */
   bool addValuesToList(wasp::DataArray & completionItems,
@@ -171,8 +184,8 @@ private:
                        const std::set<std::string> & existing_subblocks,
                        const std::string & param_name,
                        const std::set<std::string> & obj_act_tasks,
-                       int replace_line_start,
-                       int replace_char_start,
+                       int replace_line_beg,
+                       int replace_char_beg,
                        int replace_line_end,
                        int replace_char_end);
 
@@ -310,14 +323,19 @@ private:
   hit::Node & getRoot();
 
   /**
+   * @return Input check application for document path from current operation
+   */
+  std::shared_ptr<MooseApp> getCheckApp() const;
+
+  /**
    * @brief _moose_app - reference to parent application that owns this server
    */
   MooseApp & _moose_app;
 
   /**
-   * @brief _check_app - application created to check input and access parser
+   * @brief _check_apps - map from document paths to input check applications
    */
-  std::shared_ptr<MooseApp> _check_app;
+  std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream

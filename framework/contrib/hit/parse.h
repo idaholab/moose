@@ -510,7 +510,9 @@ private:
 /// contains any invalid hit syntax.  fname is label given as a convenience (and can be any
 /// string) used to prefix any error messages generated during the parsing process.  The caller
 /// accepts ownership of the returned root node and is responsible for destructing it.
-Node * parse(const std::string & fname, const std::string & input);
+/// if optional std::ostream * errors is provided then syntax errors are added to that stream
+/// on parse failure and the root is returned instead of this function throwing an exception.
+Node * parse(const std::string & fname, const std::string & input, std::ostream * errors = nullptr);
 
 /// parses the file checking for errors but does not return any node tree.
 inline void
