@@ -3,8 +3,8 @@
 !syntax description /Kernels/SolidMechanics/LegacyTensorMechanicsAction
 
 !alert warning title=Deprecated Action
-This legacy action will soon be deprecated in favor of the more inclusive
-+[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)+.
+This legacy action will soon be deprecated in favor of the new
++[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)+ syntax.
 See the description, example use, and parameters on the
 +[SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md)+ action system page.
 

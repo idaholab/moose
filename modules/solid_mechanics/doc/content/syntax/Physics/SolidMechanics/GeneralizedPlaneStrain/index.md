@@ -39,7 +39,7 @@ if different mesh subdomain has different generalized plane strain model, multip
 
 !listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 
-An example of using generalized plane strain action through the Solid Mechanics quasi-static physics with a different `out_of_plane_direction` than the default of $z$  is given by:
+An example of using generalized plane strain action through the Solid Mechanics quasi-static physics block with a different `out_of_plane_direction` than the default of $z$  is given by:
 
 !listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Physics/SolidMechanics/QuasiStatic/generalized_plane_strain
 

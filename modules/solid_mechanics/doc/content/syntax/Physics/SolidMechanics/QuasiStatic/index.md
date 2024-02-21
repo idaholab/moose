@@ -2,7 +2,7 @@
 
 !syntax description /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
-The Solid Mechanics Physics is a convenience object that simplifies part of the
+The Solid Mechanics Physics Action is a convenience [Action](Action.md) that simplifies part of the
 mechanics system setup.
 
 It applies to both the current kernel system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels
@@ -24,11 +24,11 @@ It performs
 
 ## Constructed MooseObjects
 
-The Solid Mechanics QuasiStatic Physics is used to construct the kernels, displacement variables, and strain materials in a consistent manner as required for a continuum mechanics simulation simulation. Optionally it generates aux variables and auxkernels to aid in the output of tensor components and scalar quantities.
+The Solid Mechanics QuasiStatic Physics Action is used to construct the kernels, displacement variables, and strain materials in a consistent manner as required for a continuum mechanics simulation simulation. Optionally it generates aux variables and auxkernels to aid in the output of tensor components and scalar quantities.
 
 ### For the `StressDivergenceTensors` Kernels
 
-!table id=tmMaster_action_table_sdt caption=Correspondence Among Action Functionality and MooseObjects for the Solid Mechanics QuasiStatic Physics, current kernel system
+!table id=tmMaster_action_table_sdt caption=Correspondence Among Action Functionality and MooseObjects for the Solid Mechanics QuasiStatic Physics Action, current kernel system
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
 | Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) and optionally [WeakPlaneStress](/WeakPlaneStress.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
@@ -44,7 +44,7 @@ Note that there are many variations for the calculation of the stress divergence
 
 ### For the New Lagrangian Kernel system
 
-!table id=tmMaster_action_table_lc caption=Correspondence Among Action Functionality and MooseObjects for the Solid Mechanics QuasiStatic Physics, new kernel system
+!table id=tmMaster_action_table_lc caption=Correspondence Among Action Functionality and MooseObjects for the Solid Mechanics QuasiStatic Physics Action, new kernel system
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
 | Calculate stress divergence equilibrium for the given coordinate system | [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) or [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) | `displacements` : a string of the displacement field variables, `formulation` : a MooseEnum controlling if the `UPDATED` or `TOTAL` Lagrangian formulation is used |
@@ -54,7 +54,7 @@ Note that there are many variations for the calculation of the stress divergence
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
 | Add the optional homogenization constraints | Adds all objects required to impose the [homogenization constraints](Homogenization.md) | `constraint_types` : MooseEnum controlling whether `strain` or `stress` constraints and imposed, `targets` : Functions providing the time-dependent targets  |
 
-!alert warning If the using the QuasiStaticSolidMechanicsPhysics with
+!alert warning If the using the `Physics/SolidMechanics/QuasiStatic` with
 `automatic_eigenstrain_names = true`, the eigenstrain_names will be populated
 under restrictive conditions for classes such as
 [CompositeEigenstrain](CompositeEigenstrain.md),
@@ -62,7 +62,7 @@ under restrictive conditions for classes such as
 [RankTwoTensorMaterialADConverter](MaterialADConverter.md).  The input components for
 these classes are not included in the
 [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/eigenstrain_names) passed to the
-`QuasiStaticSolidMechanicsPhysics`.  Set the `automatic_eigenstrain_names = false` and
+`Physics/SolidMechanics/QuasiStatic` block.  Set the `automatic_eigenstrain_names = false` and
 populate this list manually if these components need to be included.
 
 ## Example Input File Syntax
@@ -82,7 +82,7 @@ The following uses the action to setup homogenization constraints in a problem u
 
 ### Subblocks
 
-The subblocks of the QuasiStatic Physics are what triggers MOOSE objects to be built.
+The subblocks of the QuasiStatic Physics Action are what triggers MOOSE objects to be built.
 If none of the mechanics is subdomain restricted a single subblock can be used
 
 !listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Physics/SolidMechanics/QuasiStatic
@@ -93,7 +93,7 @@ can be used.
 !listing modules/solid_mechanics/test/tests/action/two_block_new.i block=Physics/SolidMechanics/QuasiStatic
 
 Parameters supplied at the `[Physics/SolidMechanics/QuasiStatic]` level act as
-defaults for the QuasiStatic Physics subblocks.
+defaults for the QuasiStatic Solid Mechanics Physics subblocks.
 
 !syntax parameters /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
