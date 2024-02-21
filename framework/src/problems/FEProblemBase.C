@@ -4302,41 +4302,40 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   for (const auto & uo : uos)
     execution_groups.insert(uo->getParam<int>("execution_order_group"));
 
-  try
+  // iterate over execution order groups
+  for (const auto execution_group : execution_groups)
   {
-    // iterate over execution order groups
-    for (const auto execution_group : execution_groups)
+    auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
+
+    std::vector<GeneralUserObject *> genobjs;
+    query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
+
+    std::vector<UserObject *> userobjs;
+    query.clone()
+        .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
+                                     Interfaces::InternalSideUserObject |
+                                     Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
+        .queryInto(userobjs);
+
+    std::vector<UserObject *> tgobjs;
+    query.clone()
+        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+        .queryInto(tgobjs);
+
+    std::vector<UserObject *> nodal;
+    query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
+
+    std::vector<MortarUserObject *> mortar;
+    query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
+
+    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
+      continue;
+
+    // Start the timer here since we have at least one active user object
+    std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
+
+    try
     {
-      auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
-
-      std::vector<GeneralUserObject *> genobjs;
-      query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
-
-      std::vector<UserObject *> userobjs;
-      query.clone()
-          .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                       Interfaces::InternalSideUserObject |
-                                       Interfaces::InterfaceUserObject |
-                                       Interfaces::DomainUserObject)
-          .queryInto(userobjs);
-
-      std::vector<UserObject *> tgobjs;
-      query.clone()
-          .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-          .queryInto(tgobjs);
-
-      std::vector<UserObject *> nodal;
-      query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
-
-      std::vector<MortarUserObject *> mortar;
-      query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
-
-      if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
-        continue;
-
-      // Start the timer here since we have at least one active user object
-      std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
-
       // Perform Residual/Jacobian setups
       if (type == EXEC_LINEAR)
       {
@@ -4487,33 +4486,36 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject),
                       true);
     }
-  }
-
-  catch (libMesh::LogicError & e)
-  {
-    setException("The following libMesh::LogicError was raised during UserObject evaluation in "
-                 "FEProblemBase:\n" +
-                 std::string(e.what()));
-  }
-  catch (MooseException & e)
-  {
-    setException(
-        "The following MooseException was raised during UserObject evaluation in FEProblemBase:\n" +
-        std::string(e.what()));
-  }
-  catch (MetaPhysicL::LogicError & e)
-  {
-    moose::translateMetaPhysicLError(e);
-  }
-  try
-  {
-    // Propagate the exception to all processes if we had one
-    checkExceptionAndStopSolve();
-  }
-  catch (MooseException &)
-  {
-    // Just end now. We've inserted our NaN into the residual vector
-    return;
+    catch (libMesh::LogicError & e)
+    {
+      setException(_current_execute_on_flag,
+                   "The following libMesh::LogicError was raised during UserObject evaluation in "
+                   "FEProblemBase:\n" +
+                       std::string(e.what()));
+    }
+    catch (MooseException & e)
+    {
+      setException(_current_execute_on_flag,
+                   "The following MooseException was raised during UserObject evaluation in "
+                   "FEProblemBase:\n" +
+                       std::string(e.what()));
+    }
+    catch (MetaPhysicL::LogicError & e)
+    {
+      moose::translateMetaPhysicLError(e);
+    }
+    try
+    {
+      // Propagate the exception to all processes if we had one
+      checkExceptionAndStopSolve();
+    }
+    catch (MooseException &)
+    {
+      mooseAssert("type == EXEC_LINEAR",
+                  "Recovering from an exception by inserting a NaN in the residual vector to make "
+                  "the solve fail can only be done during linear residual evaluations.");
+      return;
+    }
   }
 }
 
@@ -5857,14 +5859,14 @@ FEProblemBase::setException(const std::string & message)
 void
 FEProblemBase::setException(const ExecFlagType & type, const std::string & message)
 {
-  if (type == EXEC_LINEAR || type == EXEC_NONLINEAR)
+  if (type == EXEC_LINEAR || type == EXEC_NONE)
     // Handle the exception if it occurs at times when it can be handled by forcing the
     // solve to file, resulting in cutting back the time step
     setException(message);
   else
     // Otherwise we don't know what to do
     mooseError("The following exception was caught during " + Moose::stringify(type) +
-               " evaluation.\n" + message +
+               " evaluation:\n" + message +
                "\nBecause this did not occur during residual evaluation, there"
                " is no way to handle this, so the solution is aborting.\n");
 }
@@ -5890,11 +5892,11 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
     // Print the message
     if (_communicator.rank() == 0 && print_message)
     {
-      Moose::err << "The following exception was caught in FEProblemBase:\n";
-      Moose::err << _exception_message << "\n";
-      Moose::err << "To recover from this the solution will be forced to fail and will be "
-                    "re-attempted with a reduced time step."
-                 << std::endl;
+      _console << "\nThe following exception was caught in FEProblemBase:\n";
+      _console << _exception_message << "\n";
+      _console << "To recover, the solution will fail and then be re-attempted with a reduced time "
+                  "step.\n"
+               << std::endl;
     }
 
     // Stop the solve -- this entails setting
@@ -5927,7 +5929,7 @@ FEProblemBase::resetState()
   ADReal::do_derivatives = true;
   _current_execute_on_flag = EXEC_NONE;
   clearCurrentResidualVectorTags();
-};
+}
 
 bool
 FEProblemBase::nlConverged(const unsigned int nl_sys_num)
@@ -6294,15 +6296,17 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       }
       catch (libMesh::LogicError & e)
       {
-        setException("The following libMesh::LogicError was raised during the mortar mesh update "
+        setException(_current_execute_on_flag,
+                     "The following libMesh::LogicError was raised during the mortar mesh update "
                      "in FEProblemBase:\n" +
-                     std::string(e.what()));
+                         std::string(e.what()));
       }
       catch (MooseException & e)
       {
-        setException("The following MooseException was raised during the mortar mesh update in "
+        setException(_current_execute_on_flag,
+                     "The following MooseException was raised during the mortar mesh update in "
                      "FEProblemBase:\n" +
-                     std::string(e.what()));
+                         std::string(e.what()));
       }
       try
       {
@@ -6311,7 +6315,9 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       }
       catch (MooseException &)
       {
-        // Just end now. We've inserted our NaN into the residual vector
+        mooseAssert("_current_execute_on_flag == EXEC_LINEAR",
+                    "Recovering from an exception by inserting a NaN in the residual vector to "
+                    "make the solve fail can only be done during linear residual evaluations.");
         return;
       }
     }
@@ -6332,6 +6338,9 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     }
     catch (MooseException & e)
     {
+      mooseAssert("_current_execute_on_flag == EXEC_LINEAR",
+                  "Recovering from an exception by inserting a NaN in the residual vector to make "
+                  "the solve fail can only be done during linear residual evaluations.");
       // We know the next solve is going to fail, so there's no point in
       // computing anything else after this.  Plus, using incompletely
       // computed AuxVariables in subsequent calculations could lead to
@@ -6521,15 +6530,17 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     }
     catch (libMesh::LogicError & e)
     {
-      setException("The following libMesh::LogicError was raised during the mortar mesh update in "
+      setException(_current_execute_on_flag,
+                   "The following libMesh::LogicError was raised during the mortar mesh update in "
                    "FEProblemBase:\n" +
-                   std::string(e.what()));
+                       std::string(e.what()));
     }
     catch (MooseException & e)
     {
-      setException("The following MooseException was raised during the mortar mesh update in "
+      setException(_current_execute_on_flag,
+                   "The following MooseException was raised during the mortar mesh update in "
                    "FEProblemBase:\n" +
-                   std::string(e.what()));
+                       std::string(e.what()));
     }
     try
     {
@@ -6538,7 +6549,9 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     }
     catch (MooseException &)
     {
-      // Just end now. We've inserted our NaN into the residual vector
+      mooseAssert("_current_execute_on_flag == EXEC_LINEAR",
+                  "Recovering from an exception by inserting a NaN in the residual vector to make "
+                  "the solve fail can only be done during linear residual evaluations.");
       return;
     }
   }
@@ -6779,9 +6792,18 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
   _lower.swap(lower);
   _upper.swap(upper);
 
-  // BWS: In all other cases where this is called, it's within a try/catch to strip
-  // out the exception. Should that be done here too?
   checkExceptionAndStopSolve();
+  try
+  {
+    checkExceptionAndStopSolve();
+  }
+  catch (MooseException & e)
+  {
+    mooseError("The following exception that cannot be recovered from was caught in "
+               "FEProblemBase::computeBounds():\n" +
+               std::string(e.what()));
+    return;
+  }
 }
 
 void

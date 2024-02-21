@@ -501,13 +501,6 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
-private:
-  /**
-   * Reset state of this object in preparation for the next evaluation.
-   */
-  virtual void resetState();
-
-public:
   virtual bool nlConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
@@ -2558,6 +2551,11 @@ private:
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
+
+  /**
+   * Reset state of this object in preparation for the next evaluation.
+   */
+  virtual void resetState();
 
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
