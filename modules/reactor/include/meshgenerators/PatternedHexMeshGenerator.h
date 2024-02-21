@@ -80,15 +80,16 @@ protected:
   std::vector<SubdomainName> _peripheral_block_names;
   /// Whether reporting ID is added to mesh
   const bool _use_reporting_id;
+  /// names of reporting ID
+  std::vector<std::string> _reporting_id_name;
   /// reporting ID assignment type
-  const ReportingIDGeneratorUtils::AssignType _assign_type;
+  std::vector<ReportingIDGeneratorUtils::AssignType> _assign_type;
   /// flag to indicate if exclude_id is defined
   const bool _use_exclude_id;
   /// vector indicating which ids in the pattern to exclude (true at pattern positions to exclude)
   std::vector<bool> _exclude_ids;
-  /// hold reporting ID for each input pattern cell
-  std::vector<std::vector<dof_id_type>> _id_pattern;
-
+  /// hold ID patterns for each manual reporting ID. Individual ID pattern contains ID values for each pattern cell.
+  std::map<std::string, std::vector<std::vector<dof_id_type>>> _id_pattern;
   /**
    * Adds background and duct region mesh to stitched hexagon meshes. Note that the function works
    * for single unit hexagon mesh (corner or edge) separately before stitching.
