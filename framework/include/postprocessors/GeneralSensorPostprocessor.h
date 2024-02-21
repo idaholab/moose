@@ -31,11 +31,13 @@ public:
 protected:
   /// function I need
   // removes elements before t-tau-dt
-  void removeValuesBeforeTime(std::vector<double>& _time_values, std::vector<double>& _input_signal_values, double t_desired) const;
+  void removeValuesBeforeTime(std::vector<double>& _time_values, std::vector<double>& _input_signal_values, std::vector<Real>& exp_values, double t_desired) const;
   // Function to perform linear interpolation
   Real linearInterpolation(Real x1, Real x2, Real y1, Real y2, Real x);
   // describe
   Real linearInterpolationInVectors(std::vector<Real>& time, std::vector<Real>& y, Real desired_time);
+  // Function for element-wise multiplication of vectors
+  std::vector<Real> elementwiseMultiply(std::vector<Real>& vec1, std::vector<Real>& vec2); 
 
   /// A postprocessor used as the sensor input signal
   const PostprocessorValue & _input_signal;
@@ -52,10 +54,9 @@ protected:
   const Real _scaling_factor;
   /// Size of vector to be stored
   const Real _vector_size;
-  /// End time of simulation
-  const Real _end_time;
   /// The old value of the postprocessor
   const PostprocessorValue & _pp_old;
+
   /// New stuff
   /// Signal to noise factor
   //const Real _signalToNoise_value;
@@ -71,6 +72,10 @@ protected:
   const Function & _signalToNoise_function;
   /// Uncertainty std dev function
   const Function & _uncertainty_std_dev_function;
+    /// A weighing factor for the proportional term
+  const Real _proportional_weight;
+  /// A weighing factor for the integral term
+  const Real _integral_weight;
   /// for delay
   std::vector<Real> _time_values;
   std::vector<Real> _input_signal_values;

@@ -27,7 +27,6 @@ GeneralSensorPostprocessor::validParams()
   params.addParam<FunctionName>("drift_function", 0.0,
                                 "Drift function describing signal drift over time");
   params.addParam<Real>("vector_size", 500.0, "The maximum size of vector to be saved");
-  params.addParam<Real>("end_time_", "The end time of the simulation");
   params.addParam<Real>("scaling_factor", 1.0, "The scaling factor");
   params.addClassDescription("This is a GeneralSensorPostprocessor, and functions as a base class "
                              "for other sensor postprocessors");
@@ -41,6 +40,8 @@ GeneralSensorPostprocessor::validParams()
                                 "Delay function describing the delay over time");
   params.addParam<FunctionName>("uncertainty_std_dev_function", 0.1,
                                 "Standard deviation of uncertainty function describing uncertainty std dev over time");
+  params.addParam<Real>("proportional_weight", 0.5, "The weight assigned to the proportional term");
+  params.addParam<Real>("integral_weight", 0.5, "The weight assigned to the integral term");
   return params;
 }
 
@@ -50,13 +51,14 @@ GeneralSensorPostprocessor::GeneralSensorPostprocessor(const InputParameters & p
     _drift_function(getFunction("drift_function")),
     _scaling_factor(getParam<Real>("scaling_factor")),
     _vector_size(getParam<Real>("vector_size")),
-    _end_time(getParam<Real>("end_time_")),
     _pp_old(getPostprocessorValueOld("input_signal")),
     _efficiency_function(getFunction("efficiency_function")),
     _noise_std_dev_function(getFunction("noise_std_dev_function")),
     _delay_function(getFunction("delay_function")),
     _signalToNoise_function(getFunction("signalToNoise_function")),
-    _uncertainty_std_dev_function(getFunction("uncertainty_std_dev_function"))
+    _uncertainty_std_dev_function(getFunction("uncertainty_std_dev_function")),
+    _proportional_weight(getParam<Real>("proportional_weight")),
+    _integral_weight(getParam<Real>("integral_weight"))
 {
 }
 
@@ -158,14 +160,24 @@ void GeneralSensorPostprocessor::initialize()
 
 
   //-------------INTEGRAL-------------
-  Real for_int = (_input_signal_delayed + signalToNoise_value * 1) * exp((_end_time - _t)/delay_value); // + signalToNoise_value * normal_value;
+  Real for_int = (_input_signal_delayed + signalToNoise_value * 1) ; // + signalToNoise_value * normal_value;
   _for_int.push_back(for_int);
   
   // New vector for integration for this timestep only
   std::vector<Real> __for_int = _for_int;
   std::vector<Real> __time_values = _time_values;
+  std::vector<Real> _for_exp;
   Real integration_value;
+  std::vector<Real> integrand;
   
+  for (size_t i = 0; i < _time_values.size(); ++i) 
+    {
+        _for_exp.push_back(exp(-(_t - _time_values[i])/delay_value)); 
+    }
+  
+    // exact exponential at delay time
+    Real _for_exp_at_delay = exp(-(_t - delay_value)/delay_value);
+
   if (_t > delay_value && delay_value > _dt)
   {
     // linearly interpolation of for_int at delay time
@@ -173,13 +185,24 @@ void GeneralSensorPostprocessor::initialize()
     // push the delay and interpolated signal value into the new vector
     __for_int.push_back(_for_int_at_delay);
     __time_values.push_back(delay_value);
+    _for_exp.push_back(_for_exp_at_delay);
     // sort the vector in aascending order
     std::sort(__for_int.begin(), __for_int.end());
     std::sort(__time_values.begin(), __time_values.end());
-    // New vector for integration with all elements before delay removed from __for_int
-    removeValuesBeforeTime(__time_values, __for_int, delay_value); //changed
+    std::sort(_for_exp.begin(), _for_exp.end());
+    // New vector for integration with all elements before delay removed from __for_int and _for_exp
+    removeValuesBeforeTime(__time_values, __for_int, _for_exp, delay_value); 
+
+        // Output the elements of the vector
+    std::cout << "__for_int Elements: ";
+    for (const auto& element : __for_int) {
+        std::cout << element << " ";
+    }
+
+    cout << endl;
+    integrand = elementwiseMultiply(__for_int, _for_exp);
     //LinearInterpolation object with two vectors
-    LinearInterpolation integral(__time_values, __for_int);
+    LinearInterpolation integral(__time_values, integrand);
     //integrate the vectors
     integration_value = integral.integrate(); 
   }
@@ -191,12 +214,23 @@ void GeneralSensorPostprocessor::initialize()
     // push the delay and interpolated signal value into the new vector
     __for_int.push_back(_for_int_at_delay);
     __time_values.push_back(delay_value);
+    _for_exp.push_back(_for_exp_at_delay);
     // sort the vector in aascending order
     std::sort(__for_int.begin(), __for_int.end());
     std::sort(__time_values.begin(), __time_values.end());
+    std::sort(_for_exp.begin(), _for_exp.end());
+
+        // Output the elements of the vector
+    std::cout << "Exponential __for_int Elements: ";
+    for (const auto& element : __for_int) {
+        std::cout << element << " ";
+    }
+
+    cout << endl;
+    integrand = elementwiseMultiply(__for_int, _for_exp);
     // integrate the vector
     //LinearInterpolation object with two vectors
-    LinearInterpolation integral(__time_values, __for_int);
+    LinearInterpolation integral(__time_values, integrand);
     //integrate the vectors
     integration_value = integral.integrate();
   }
@@ -206,8 +240,24 @@ void GeneralSensorPostprocessor::initialize()
     integration_value = 0;
   }
 
+
+    // Output the elements of the vector
+    std::cout << "Exponential Vector Elements: ";
+    for (const auto& element : _for_exp) {
+        std::cout << element << " ";
+    }
+    cout << endl;
+
+    // Output the elements of the vector
+    std::cout << "Interand Elements: ";
+    for (const auto& element : integrand) {
+        std::cout << element << " ";
+    }
+    cout << endl;
+
   //-------------OUTPUT-------------
-  sensor_value = drift_value + efficiency_value * (_input_signal_delayed + signalToNoise_value * 1) + integration_value;
+  Real proportional_value = _input_signal_delayed + signalToNoise_value * 1;
+  sensor_value = drift_value + efficiency_value * (_proportional_weight * proportional_value + _integral_weight * integration_value);
 }
 
 PostprocessorValue
@@ -216,7 +266,7 @@ GeneralSensorPostprocessor::getValue() const
   return sensor_value;
 }
 
-void GeneralSensorPostprocessor::removeValuesBeforeTime(std::vector<Real>& _time_values, std::vector<Real>& _input_signal_values, Real t_desired) const 
+void GeneralSensorPostprocessor::removeValuesBeforeTime(std::vector<Real>& _time_values, std::vector<Real>& _input_signal_values, std::vector<Real>& exp_values, Real t_desired) const 
 {
   auto it = _time_values.begin();
 
@@ -240,6 +290,7 @@ void GeneralSensorPostprocessor::removeValuesBeforeTime(std::vector<Real>& _time
     // Erase elements from the beginning after (and including) the iterator pointing to the element before t_desired
     _time_values.erase(_time_values.begin(), lastBeforeTDesired+1);
     _input_signal_values.erase(_input_signal_values.begin(), _input_signal_values.begin() + std::distance(_time_values.begin(), lastBeforeTDesired+1));
+    exp_values.erase(exp_values.begin(), lastBeforeTDesired+1);
 }
 
 Real GeneralSensorPostprocessor::linearInterpolation(Real x1, Real x2, Real y1, Real y2, Real x)
@@ -271,4 +322,24 @@ Real GeneralSensorPostprocessor::linearInterpolationInVectors(std::vector<Real>&
     desired_y = fi_1 + (desired_time - t_1) * (fi_2 - fi_1) / (t_2-t_1);
     //------------end------------
     return desired_y;
+}
+
+std::vector<Real> GeneralSensorPostprocessor::elementwiseMultiply(std::vector<Real>& vec1, std::vector<Real>& vec2) 
+{
+    // Ensure both vectors have the same size
+    if (vec1.size() != vec2.size()) 
+    {
+        throw std::runtime_error("Vectors must have the same size for element-wise multiplication.");
+    }
+
+    // Create a result vector
+    std::vector<Real> result;
+
+    // Perform element-wise multiplication
+    for (size_t i = 0; i < vec1.size(); ++i) 
+    {
+        result.push_back(vec1[i] * vec2[i]);
+    }
+
+    return result;
 }
