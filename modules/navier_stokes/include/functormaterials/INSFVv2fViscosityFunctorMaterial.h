@@ -14,12 +14,13 @@
 /**
  * This is the material class used to compute the viscosity of the kEpsilon model
  */
-class INSFVv2fViscosityFunctorMaterial : public FunctorMaterial
+template <bool is_ad>
+class INSFVv2fViscosityFunctorMaterialTempl : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  INSFVv2fViscosityFunctorMaterial(const InputParameters & parameters);
+  INSFVv2fViscosityFunctorMaterialTempl(const InputParameters & parameters);
 
 protected:
   /// Turbulent kinetic energy
@@ -38,3 +39,6 @@ protected:
   const Real _C_mu_2;
   const Real _C_mu;
 };
+
+typedef INSFVv2fViscosityFunctorMaterialTempl<true> INSFVv2fViscosityFunctorMaterial;
+typedef INSFVv2fViscosityFunctorMaterialTempl<false> INSFVv2fViscosityFunctorMaterialReal;

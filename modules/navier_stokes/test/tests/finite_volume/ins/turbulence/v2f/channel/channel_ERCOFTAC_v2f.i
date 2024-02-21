@@ -32,16 +32,14 @@ C_mu = 0.09
 epsilon_scaling = 1.0
 
 ### Initial and Boundary Conditions ###
-intensity = 0.1
+intensity = 1.0
 k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H / epsilon_scaling}'
 
 ### Modeling parameters ###
 non_equilibrium_treatment = true
-bulk_wall_treatment = false
 walls = ''
 max_mixing_length = 1e10
-linearized_yplus_mu_t = false
 
 [Mesh]
   [gen]
@@ -135,7 +133,7 @@ linearized_yplus_mu_t = false
   [u_viscosity_turbulent]
     type = INSFVMomentumDiffusion
     variable = vel_x
-    mu = 'mu_t'
+    mu = 'mu_t_v2f'
     momentum_component = 'x'
     complete_expansion = true
     u = vel_x
@@ -164,7 +162,7 @@ linearized_yplus_mu_t = false
   [v_viscosity_turbulent]
     type = INSFVMomentumDiffusion
     variable = vel_y
-    mu = 'mu_t'
+    mu = 'mu_t_v2f'
     momentum_component = 'y'
     complete_expansion = true
     u = vel_x
@@ -404,7 +402,7 @@ linearized_yplus_mu_t = false
     v = vel_y
     rho = ${rho}
     mu = ${mu}
-    mu_t = 'mu_t'
+    mu_t = 'mu_t_v2f'
     k = TKE
   []
   [sym-u]
@@ -413,7 +411,7 @@ linearized_yplus_mu_t = false
     variable = vel_x
     u = vel_x
     v = vel_y
-    mu = 'mu_t'
+    mu = 'mu_t_v2f'
     momentum_component = x
   []
   [sym-v]
@@ -422,7 +420,7 @@ linearized_yplus_mu_t = false
     variable = vel_y
     u = vel_x
     v = vel_y
-    mu = 'mu_t'
+    mu = 'mu_t_v2f'
     momentum_component = y
   []
   [symmetry_pressure]
@@ -443,11 +441,6 @@ linearized_yplus_mu_t = false
 []
 
 [AuxVariables]
-  [mu_t]
-    type = MooseVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
-    two_term_boundary_expansion = false
-  []
   [mu_t_v2f]
     type = MooseVariableFVReal
     two_term_boundary_expansion = false
@@ -455,22 +448,6 @@ linearized_yplus_mu_t = false
 []
 
 [AuxKernels]
-  [compute_mu_t]
-    type = kEpsilonViscosityAux
-    variable = mu_t
-    C_mu = ${C_mu}
-    k = TKE
-    epsilon = TKED
-    mu = ${mu}
-    rho = ${rho}
-    u = vel_x
-    v = vel_y
-    bulk_wall_treatment = ${bulk_wall_treatment}
-    walls = ${walls}
-    linearized_yplus = ${linearized_yplus_mu_t}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    execute_on = 'NONLINEAR'
-  []
   [compute_mu_t_v2f]
     type = v2fViscosityAux
     variable = mu_t_v2f
@@ -494,6 +471,8 @@ linearized_yplus_mu_t = false
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.5 0.5 0.5 0.5'
+  turbulence_iterations_to_activate = '10 10 2 2'
+  turbulence_relaxation_decay_rate = '50 50 50 50'
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10

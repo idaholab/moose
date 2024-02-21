@@ -434,7 +434,7 @@ pressure_tag = "pressure_grad"
     cp = ${cp}
   []
   [v2f_viscosity_material]
-    type = INSFVv2fViscosityFunctorMaterial
+    type = INSFVv2fViscosityFunctorMaterialReal
     k = TKE
     epsilon = TKED
     v2 = TV2

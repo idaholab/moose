@@ -12,9 +12,11 @@
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVv2fViscosityFunctorMaterial);
+registerMooseObject("NavierStokesApp", INSFVv2fViscosityFunctorMaterialReal);
 
+template <bool is_ad>
 InputParameters
-INSFVv2fViscosityFunctorMaterial::validParams()
+INSFVv2fViscosityFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
 
@@ -37,7 +39,8 @@ INSFVv2fViscosityFunctorMaterial::validParams()
   return params;
 }
 
-INSFVv2fViscosityFunctorMaterial::INSFVv2fViscosityFunctorMaterial(
+template <bool is_ad>
+INSFVv2fViscosityFunctorMaterialTempl<is_ad>::INSFVv2fViscosityFunctorMaterialTempl(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _k(getFunctor<ADReal>(NS::TKE)),
@@ -48,16 +51,20 @@ INSFVv2fViscosityFunctorMaterial::INSFVv2fViscosityFunctorMaterial(
     _C_mu_2(getParam<Real>("C_mu_2")),
     _C_mu(getParam<Real>("C_mu"))
 {
-  addFunctorProperty<ADReal>(
+  addFunctorProperty<GenericReal<is_ad>>(
       NS::mu_t,
-      [this](const auto & r, const auto & t) -> ADReal
+      [this](const auto & r, const auto & t) -> GenericReal<is_ad>
       {
         const auto time_scale_keps = _k(r, t) / _epsilon(r, t);
         const auto time_scale =
             std::max(time_scale_keps, 6 * std::sqrt((_mu(r, t) / _rho(r, t)) / _epsilon(r, t)));
         const Real switcher =
             (_C_mu * _k(r, t) * time_scale_keps < _C_mu_2 * _v2(r, t) * time_scale) ? 1.0 : 0.0;
-        return _C_mu * _k(r, t) * time_scale_keps * switcher +
-               _C_mu_2 * _v2(r, t) * time_scale * (1. - switcher);
+        const auto mu_t_ad = _C_mu * _k(r, t) * time_scale_keps * switcher +
+                             _C_mu_2 * _v2(r, t) * time_scale * (1. - switcher);
+        if constexpr (!is_ad)
+          return MetaPhysicL::raw_value(mu_t_ad);
+        else
+          return mu_t_ad;
       });
 }
