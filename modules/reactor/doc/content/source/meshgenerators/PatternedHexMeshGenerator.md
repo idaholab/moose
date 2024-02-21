@@ -69,9 +69,9 @@ The ID values themselves are stored as extra element integers on the mesh.
 For example, the reporting IDs for individual pins (`pin_id`) can be assigned when assemblies are built because the IDs for pin level are uniquely determined from the pin arrangement within each assembly type.
 Similarly, the assembly reporting IDs (`assembly_id`) are assigned in the core construction process.
 
-The multiple `reporting IDs` can be assigned by defining the multiple name of the reporting ID variable, which are provided through the[!param](/Mesh/PatternedHexMeshGenerator/id_name).
-The correponding assignment scheme should be provided in [!param](/Mesh/PatternedHexMeshGenerator/assign_type) for each reporting ID names, accordingly.
-In case of multiple `manual` assign types are used, the same number of manual ID patterns should be provided in [!param](/Mesh/PatternedHexMeshGenerator/id_pattern).
+The multiple `reporting IDs` can be assigned by defining the multiple names of the reporting ID variable, which are provided through the[!param](/Mesh/PatternedHexMeshGenerator/id_name).
+The corresponding assignment scheme should be provided in [!param](/Mesh/PatternedHexMeshGenerator/assign_type) for each reporting ID names, accordingly.
+In the case that multiple `manual` `assign_type`s are used, the same number of manual ID patterns should be provided in [!param](/Mesh/PatternedHexMeshGenerator/id_pattern).
 Each manual pattern in [!param](/Mesh/PatternedHexMeshGenerator/id_pattern) should be separated by using the delimiter '|'.
 These defined ID patterns are sequentially assigned to the reporting IDs having `manual` assignment scheme.
 The below is an example of using multiple `reporting ID` assignment.

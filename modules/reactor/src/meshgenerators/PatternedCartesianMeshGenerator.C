@@ -112,8 +112,8 @@ PatternedCartesianMeshGenerator::validParams()
       "assign_type", option, "List of integer ID assignment types");
   params.addParam<std::vector<std::vector<std::vector<dof_id_type>>>>(
       "id_pattern",
-      "User-defined element IDs. A double-indexed array starting with the upper-left corner. In "
-      "case of providing multiple pattern, each pattern should be separated using '|'");
+      "User-defined element IDs. A double-indexed array starting with the upper-left corner. When "
+      "providing multiple patterns, each pattern should be separated using '|'");
   params.addParamNamesToGroup(
       "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
       "external_boundary_id external_boundary_name create_inward_interface_boundaries "
@@ -255,33 +255,34 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
   if (_use_reporting_id)
   {
     // get reporting id name input
-    _reporting_id_name = getParam<std::vector<std::string>>("id_name");
-    const unsigned int num_reporting_ids = _reporting_id_name.size();
+    _reporting_id_names = getParam<std::vector<std::string>>("id_name");
+    const unsigned int num_reporting_ids = _reporting_id_names.size();
     // get reporting id assign type input
-    const auto input_assign_type = getParam<std::vector<MooseEnum>>("assign_type");
-    if (input_assign_type.size() != num_reporting_ids)
+    const auto input_assign_types = getParam<std::vector<MooseEnum>>("assign_type");
+    if (input_assign_types.size() != num_reporting_ids)
       paramError("assign_type", "This parameter must have a length equal to length of id_name.");
     // list of reporting id names using manual id patterns;
     std::vector<std::string> manual_ids;
-    for (unsigned int i = 0; i < num_reporting_ids; ++i)
+    for (const auto i : make_range(num_reporting_ids))
     {
-      _assign_type.push_back(input_assign_type[i].getEnum<ReportingIDGeneratorUtils::AssignType>());
-      if (_assign_type[i] == ReportingIDGeneratorUtils::AssignType::manual)
-        manual_ids.push_back(_reporting_id_name[i]);
+      _assign_types.push_back(
+          input_assign_types[i].getEnum<ReportingIDGeneratorUtils::AssignType>());
+      if (_assign_types[i] == ReportingIDGeneratorUtils::AssignType::manual)
+        manual_ids.push_back(_reporting_id_names[i]);
     }
     // processing "id_pattern" input parameter
     if (manual_ids.size() > 0 && !isParamValid("id_pattern"))
       paramError("id_pattern", "required when 'manual' is defined in \"assign_type\"");
     if (isParamValid("id_pattern"))
     {
-      const auto input_id_pattern =
+      const auto input_id_patterns =
           getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("id_pattern");
-      if (input_id_pattern.size() != manual_ids.size())
+      if (input_id_patterns.size() != manual_ids.size())
         paramError("id_pattern",
                    "The number of patterns must be equal to the number of 'manual' types defined "
                    "in \"assign_type\".");
       for (unsigned int i = 0; i < manual_ids.size(); ++i)
-        _id_pattern[manual_ids[i]] = input_id_pattern[i];
+        _id_patterns[manual_ids[i]] = input_id_patterns[i];
     }
     // processing exlude id
     _exclude_ids.resize(_input_names.size());
@@ -974,10 +975,10 @@ PatternedCartesianMeshGenerator::addReportingIDs(
     std::unique_ptr<MeshBase> & mesh,
     const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const
 {
-  const unsigned int num_reporting_ids = _reporting_id_name.size();
+  const unsigned int num_reporting_ids = _reporting_id_names.size();
   for (unsigned int i = 0; i < num_reporting_ids; ++i)
   {
-    const std::string element_id_name = _reporting_id_name[i];
+    const std::string element_id_name = _reporting_id_names[i];
     unsigned int extra_id_index;
     if (!mesh->has_elem_integer(element_id_name))
       extra_id_index = mesh->add_elem_integer(element_id_name);
@@ -987,14 +988,16 @@ PatternedCartesianMeshGenerator::addReportingIDs(
       paramWarning(
           "id_name", "An element integer with the name '", element_id_name, "' already exists");
     }
+
     // assign reporting IDs to individual elements
     std::set<subdomain_id_type> background_block_ids;
     if (isParamValid("background_block_id"))
       background_block_ids.insert(getParam<subdomain_id_type>("background_block_id"));
-    const bool using_manual_id = (_assign_type[i] == ReportingIDGeneratorUtils::AssignType::manual);
+    const bool using_manual_id =
+        (_assign_types[i] == ReportingIDGeneratorUtils::AssignType::manual);
     ReportingIDGeneratorUtils::assignReportingIDs(mesh,
                                                   extra_id_index,
-                                                  _assign_type[i],
+                                                  _assign_types[i],
                                                   _use_exclude_id,
                                                   _exclude_ids,
                                                   _pattern_boundary == "expanded",
@@ -1002,7 +1005,7 @@ PatternedCartesianMeshGenerator::addReportingIDs(
                                                   from_meshes,
                                                   _pattern,
                                                   (using_manual_id)
-                                                      ? _id_pattern.at(element_id_name)
+                                                      ? _id_patterns.at(element_id_name)
                                                       : std::vector<std::vector<dof_id_type>>());
   }
 }
