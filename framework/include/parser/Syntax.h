@@ -165,6 +165,13 @@ public:
                                              const std::string & task = "");
 
   /**
+   * Retrieve the non-deprecated syntax associated with the passed in action type string. If a task
+   * string is also passed in, only syntax associated with that action+task combo will be returned.
+   */
+  std::vector<std::string> getNonDeprecatedSyntaxByAction(const std::string & action,
+                                                          const std::string & task = "");
+
+  /**
    * Method for determining whether a piece of syntax is associated with an Action
    * an optional syntax map may be given to traverse instead of _syntax_to_actions
    * TODO: I need a better name

@@ -227,6 +227,20 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
   return syntax;
 }
 
+std::vector<std::string>
+Syntax::getNonDeprecatedSyntaxByAction(const std::string & action, const std::string & task)
+{
+  auto syntaxes = getSyntaxByAction(action, task);
+  for (auto syntax_it = begin(syntaxes); syntax_it != end(syntaxes);)
+  {
+    if (isDeprecatedSyntax(*syntax_it))
+      syntax_it = syntaxes.erase(syntax_it);
+    else
+      ++syntax_it;
+  }
+  return syntaxes;
+}
+
 std::string
 Syntax::isAssociated(const std::string & real_id,
                      bool * is_parent,
