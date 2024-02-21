@@ -1086,6 +1086,51 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 }
 
 void
+NonlinearSystemBase::reinitNodeFaceFace(const PenetrationInfo & info, const bool displaced)
+{
+  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
+
+  const Elem * primary_elem = info._elem;
+  unsigned int primary_side = info._side_num;
+
+  std::vector<Point> points;
+  points.push_back(info._closest_point);
+
+  // Reinit variables and materials on the primary element's face at the contact point
+  _fe_problem.setNeighborSubdomainID(primary_elem, 0);
+
+  //
+  // Reinit material on undisplaced mesh
+  //
+
+  const Elem * const undisplaced_primary_elem =
+      displaced ? _mesh.elemPtr(primary_elem->id()) : primary_elem;
+  const Point undisplaced_primary_physical_point =
+      [&points, displaced, primary_elem, undisplaced_primary_elem]()
+  {
+    if (displaced)
+    {
+      const Point reference_point =
+          FEMap::inverse_map(primary_elem->dim(), primary_elem, points[0]);
+      return FEMap::map(primary_elem->dim(), undisplaced_primary_elem, reference_point);
+    }
+    else
+      // If our penetration locator is on the reference mesh, then our undisplaced
+      // physical point is simply the point coming from the penetration locator
+      return points[0];
+  }();
+
+  _fe_problem.reinitNeighborPhys(
+      undisplaced_primary_elem, primary_side, {undisplaced_primary_physical_point}, 0);
+  _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+
+  // Reinit points for constraint enforcement
+  if (displaced)
+    subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+}
+
+void
 NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & solution, bool displaced)
 {
 
@@ -1131,33 +1176,12 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            const Elem * primary_elem = info._elem;
-            unsigned int primary_side = info._side_num;
-
             // reinit variables at the node
             _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
 
             _fe_problem.prepareAssembly(0);
 
-            std::vector<Point> points;
-            points.push_back(info._closest_point);
-
-            // Reinit variables and materials on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-
-            // Reinit material on undisplaced mesh
-            std::vector<Point> reference_points;
-            FEInterface::inverse_map(
-                primary_elem->dim(), FEType(), primary_elem, points, reference_points);
-            Point neighbor_physical_points;
-            _fe_problem.getNeighborPoints(
-                _mesh.elemPtr(primary_elem->id()), &reference_points, neighbor_physical_points);
-            _fe_problem.reinitNeighborPhys(
-                _mesh.elemPtr(primary_elem->id()), primary_side, {neighbor_physical_points}, 0);
-            _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
-
-            // Reinit points for constraint enforcement
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            reinitNodeFaceFace(info, displaced);
 
             for (const auto & nfc : constraints)
             {
@@ -1304,9 +1328,6 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            const Elem * primary_elem = info._elem;
-            unsigned int primary_side = info._side_num;
-
             // *These next steps MUST be done in this order!*
 
             // This reinits the variables that exist on the secondary node
@@ -1316,25 +1337,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
             // the secondary node
             _fe_problem.prepareAssembly(0);
 
-            std::vector<Point> points;
-            points.push_back(info._closest_point);
-
-            // Reinit variables and materials on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-
-            // Reinit material on undisplaced mesh
-            std::vector<Point> reference_points;
-            FEInterface::inverse_map(
-                primary_elem->dim(), FEType(), primary_elem, points, reference_points);
-            Point neighbor_physical_points;
-            _fe_problem.getNeighborPoints(
-                _mesh.elemPtr(primary_elem->id()), &reference_points, neighbor_physical_points);
-            _fe_problem.reinitNeighborPhys(
-                _mesh.elemPtr(primary_elem->id()), primary_side, {neighbor_physical_points}, 0);
-            _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
-
-            // Reinit points for constraint enforcement
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            reinitNodeFaceFace(info, displaced);
 
             for (const auto & nfc : constraints)
             {
@@ -1587,23 +1590,21 @@ NonlinearSystemBase::overwriteContact(NumericVector<Number> & soln)
   {
     PenetrationLocator & pen_loc = *(it.second);
 
-    std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
-    BoundaryID secondary_boundary = pen_loc._secondary_boundary;
-    BoundaryID primary_boundary = pen_loc._primary_boundary;
+    const auto & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
+    const BoundaryID secondary_boundary = pen_loc._secondary_boundary;
+    const BoundaryID primary_boundary = pen_loc._primary_boundary;
 
     if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, true))
     {
       const auto & constraints =
           _constraints.getActiveNodeFaceConstraints(secondary_boundary, true);
-      for (unsigned int i = 0; i < secondary_nodes.size(); i++)
+      for (const auto i : index_range(secondary_nodes))
       {
-        dof_id_type secondary_node_num = secondary_nodes[i];
-        Node & secondary_node = _mesh.nodeRef(secondary_node_num);
+        const auto secondary_node_num = secondary_nodes[i];
+        const Node & secondary_node = _mesh.nodeRef(secondary_node_num);
 
         if (secondary_node.processor_id() == processor_id())
-        {
           if (pen_loc._penetration_info[secondary_node_num])
-          {
             for (const auto & nfc : constraints)
             {
               if (!nfc->isExplicitConstraint())
@@ -1619,8 +1620,6 @@ NonlinearSystemBase::overwriteContact(NumericVector<Number> & soln)
 
               nfc->overwriteBoundaryVariables(soln, secondary_node);
             }
-          }
-        }
       }
     }
   }
@@ -2286,37 +2285,13 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            const Elem * primary_elem = info._elem;
-            unsigned int primary_side = info._side_num;
-
             // reinit variables at the node
             _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
 
             _fe_problem.prepareAssembly(0);
             _fe_problem.reinitOffDiagScalars(0);
 
-            std::vector<Point> points;
-            points.push_back(info._closest_point);
-
-            // reinit variables on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-
-            // Reinit variables and materials on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-
-            // Reinit material on undisplaced mesh
-            std::vector<Point> reference_points;
-            FEInterface::inverse_map(
-                primary_elem->dim(), FEType(), primary_elem, points, reference_points);
-            Point neighbor_physical_points;
-            _fe_problem.getNeighborPoints(
-                _mesh.elemPtr(primary_elem->id()), &reference_points, neighbor_physical_points);
-            _fe_problem.reinitNeighborPhys(
-                _mesh.elemPtr(primary_elem->id()), primary_side, {neighbor_physical_points}, 0);
-            _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
-
-            // Reinit points for constraint enforcement
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            reinitNodeFaceFace(info, displaced);
 
             for (const auto & nfc : constraints)
             {

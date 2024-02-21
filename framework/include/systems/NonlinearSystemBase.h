@@ -44,6 +44,7 @@ class Split;
 class KernelBase;
 class BoundaryCondition;
 class ResidualObject;
+class PenetrationInfo;
 
 // libMesh forward declarations
 namespace libMesh
@@ -768,6 +769,11 @@ protected:
   virtual void postAddResidualObject(ResidualObject &) {}
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
+
+  /**
+   * Reinitialize quantities on the primary side of a secondary node primary face pair
+   */
+  void reinitNodeFaceFace(const PenetrationInfo & info, const bool displaced);
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
