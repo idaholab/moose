@@ -208,6 +208,7 @@
     issues = '#15573'
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
     requirement = 'MOOSE shall have AD examples where the barrier height and gradient energy parameter depend on non-linear variables'
+    installation_type = 'in_tree' # refs #26129
   [../]
 
   [./ADnonuniform_barrier_coefficient-jac]
@@ -220,5 +221,6 @@
     issues = '#15573'
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
     requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
+    installation_type = 'in_tree' # refs #26129
   [../]
 []
