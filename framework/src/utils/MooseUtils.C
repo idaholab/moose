@@ -33,6 +33,7 @@
 #include <fstream>
 #include <istream>
 #include <iterator>
+#include <filesystem>
 #include <ctime>
 #include <cstdlib>
 
@@ -53,10 +54,10 @@
 
 namespace MooseUtils
 {
-std::string
-pathjoin(const std::string & s)
+std::filesystem::path
+pathjoin(const std::filesystem::path & p)
 {
-  return s;
+  return p;
 }
 
 std::string
@@ -245,11 +246,7 @@ pathExists(const std::string & path)
 bool
 pathIsDirectory(const std::string & path)
 {
-  struct stat buffer;
-  // stat call fails?
-  if (stat(path.c_str(), &buffer))
-    return false;
-  return S_IFDIR & buffer.st_mode;
+  return std::filesystem::is_directory(path);
 }
 
 bool
@@ -416,36 +413,6 @@ stripExtension(const std::string & s)
   if (pos != std::string::npos)
     return s.substr(0, pos);
   return s;
-}
-
-std::pair<std::string, std::string>
-splitFileName(std::string full_file)
-{
-  // Error if path ends with /
-  if (full_file.empty() || *full_file.rbegin() == '/')
-    mooseError("Invalid full file name: ", full_file);
-
-  // Define the variables to output
-  std::string path;
-  std::string file;
-
-  // Locate the / sepearting the file from path
-  std::size_t found = full_file.find_last_of("/");
-
-  // If no / is found used "." for the path, otherwise seperate the two
-  if (found == std::string::npos)
-  {
-    path = ".";
-    file = full_file;
-  }
-  else
-  {
-    path = full_file.substr(0, found);
-    file = full_file.substr(found + 1);
-  }
-
-  // Return the path and file as a pair
-  return std::pair<std::string, std::string>(path, file);
 }
 
 std::string
@@ -1249,10 +1216,7 @@ fileSize(const std::string & filename)
 std::string
 realpath(const std::string & path)
 {
-  char dummy[PETSC_MAX_PATH_LEN];
-  if (PetscGetFullPath(path.c_str(), dummy, sizeof(dummy)))
-    mooseError("Failed to get real path for ", path);
-  return dummy;
+  return std::filesystem::absolute(path);
 }
 
 BoundingBox
