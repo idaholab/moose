@@ -63,6 +63,7 @@ Extensions:
                 Source Index: /source/index.md
                 A-to-Z Index: help/a-to-z.md
             Applications:
+                Thermal Hydraulics: applications/thermal_hydraulics.md
                 NCRC Applications: help/inl/applications.md
             Gallery: /gallery.md
             News: newsletter/index.md
