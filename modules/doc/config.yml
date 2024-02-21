@@ -56,13 +56,14 @@ Extensions:
                 Application Usage: application_usage/index.md
                 Application Development: application_development/index.md
                 Framework Development: framework_development/index.md
-                NCRC Applications: help/inl/applications.md
                 Modules: modules/index.md
                 MOOSEDocs: MooseDocs/index.md
                 Infrastructure: infrastructure/index.md
                 Syntax Index: syntax/index.md
                 Source Index: /source/index.md
                 A-to-Z Index: help/a-to-z.md
+            Applications:
+                NCRC Applications: help/inl/applications.md
             Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
