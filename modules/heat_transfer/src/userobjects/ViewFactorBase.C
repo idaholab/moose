@@ -278,7 +278,7 @@ ViewFactorBase::checkAndNormalizeViewFactor()
   Real max_sum_deviation_after_normalization = maxDevRowSum();
   Real max_reciprocity_deviation_after_normalization = maxDevReciprocity();
 
-  // print symmary
+  // print summary
   _console << std::endl;
   _console << COLOR_CYAN << "Summary of the view factor computation"
            << "\n"

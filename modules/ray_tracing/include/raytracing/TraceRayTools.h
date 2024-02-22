@@ -193,8 +193,8 @@ findNeighbors(
   while (!untested_set.empty())
   {
     // Loop over all the elements in the patch that haven't already been tested
-    for (const Elem * test_elem : untested_set)
-      for (auto current_neighbor : test_elem->neighbor_ptr_range())
+    for (const Elem * const test_elem : untested_set)
+      for (const auto * const current_neighbor : test_elem->neighbor_ptr_range())
         if (current_neighbor && current_neighbor != remote_elem &&
             current_neighbor != elem) // we have a real neighbor on elem side
         {
