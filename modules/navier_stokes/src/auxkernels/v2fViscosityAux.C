@@ -47,6 +47,8 @@ v2fViscosityAux::v2fViscosityAux(const InputParameters & params)
     _C_mu_2(getParam<Real>("C_mu_2")),
     _C_mu(getParam<Real>("C_mu"))
 {
+  if (_c_fe_problem.solverParams()._type == Moose::SolveType::ST_NEWTON)
+    mooseError("v2fViscosityAux shold not be used for NEWTON solver type.");
 }
 
 Real
