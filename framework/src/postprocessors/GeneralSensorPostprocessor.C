@@ -193,13 +193,6 @@ void GeneralSensorPostprocessor::initialize()
     // New vector for integration with all elements before delay removed from __for_int and _for_exp
     removeValuesBeforeTime(__time_values, __for_int, _for_exp, delay_value); 
 
-        // Output the elements of the vector
-    std::cout << "__for_int Elements: ";
-    for (const auto& element : __for_int) {
-        std::cout << element << " ";
-    }
-
-    cout << endl;
     integrand = elementwiseMultiply(__for_int, _for_exp);
     //LinearInterpolation object with two vectors
     LinearInterpolation integral(__time_values, integrand);
@@ -219,14 +212,6 @@ void GeneralSensorPostprocessor::initialize()
     std::sort(__for_int.begin(), __for_int.end());
     std::sort(__time_values.begin(), __time_values.end());
     std::sort(_for_exp.begin(), _for_exp.end());
-
-        // Output the elements of the vector
-    std::cout << "Exponential __for_int Elements: ";
-    for (const auto& element : __for_int) {
-        std::cout << element << " ";
-    }
-
-    cout << endl;
     integrand = elementwiseMultiply(__for_int, _for_exp);
     // integrate the vector
     //LinearInterpolation object with two vectors
@@ -239,21 +224,6 @@ void GeneralSensorPostprocessor::initialize()
   {
     integration_value = 0;
   }
-
-
-    // Output the elements of the vector
-    std::cout << "Exponential Vector Elements: ";
-    for (const auto& element : _for_exp) {
-        std::cout << element << " ";
-    }
-    cout << endl;
-
-    // Output the elements of the vector
-    std::cout << "Interand Elements: ";
-    for (const auto& element : integrand) {
-        std::cout << element << " ";
-    }
-    cout << endl;
 
   //-------------OUTPUT-------------
   Real proportional_value = _input_signal_delayed + signalToNoise_value * 1;
