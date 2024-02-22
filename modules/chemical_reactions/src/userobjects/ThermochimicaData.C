@@ -366,9 +366,10 @@ ThermochimicaDataBase<is_nodal>::server()
       mooseError("Failed to get index of phase '", _ph_names[i], "'");
     // Convert from 1-based (fortran) to 0-based (c++) indexing
     if (index - 1 < 0)
-      _shared_real_mem[idx++] = 0.0;
+      _shared_real_mem[idx] = 0.0;
     else
-      _shared_real_mem[idx++] = moles_phase[index - 1];
+      _shared_real_mem[idx] = moles_phase[index - 1];
+    idx++;
   }
 
   auto db_phases = Thermochimica::getPhaseNamesSystem();
@@ -436,9 +437,9 @@ ThermochimicaDataBase<is_nodal>::server()
         _species_phase_pairs[i].second); // can we somehow use IDs instead of strings here?
 
     if (idbg == 0)
-      _shared_real_mem[idx++] = fraction;
+      _shared_real_mem[idx] = fraction;
     else if (idbg == 1)
-      _shared_real_mem[idx++] = 0.0;
+      _shared_real_mem[idx] = 0.0;
 #ifndef NDEBUG
     else
       mooseError("Failed to get phase speciation for phase '",
@@ -448,20 +449,26 @@ ThermochimicaDataBase<is_nodal>::server()
                  "'. Thermochimica returned ",
                  idbg);
 #endif
+    idx++;
   }
 
   if (_output_element_potentials)
     for (const auto i : index_range(_element_potentials))
     {
       auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[i]);
-
       if (idbg == 0)
-        _shared_real_mem[idx++] = potential;
+        _shared_real_mem[idx] = potential;
       else if (idbg == 1)
         // element not present, just leave this at 0 for now
-        _shared_real_mem[idx++] = 0.0;
+        _shared_real_mem[idx] = 0.0;
+#ifndef NDEBUG
       else if (idbg == -1)
-        Moose::out << "getoutputchempot " << idbg << "\n";
+        mooseError("Failed to get element potential for element '",
+                   _element_potentials[i],
+                   "'. Thermochimica returned ",
+                   idbg);
+#endif
+      idx++;
     }
 
   if (_output_vapor_pressures)
@@ -472,9 +479,9 @@ ThermochimicaDataBase<is_nodal>::server()
       libmesh_ignore(moles);
 
       if (idbg == 0)
-        _shared_real_mem[idx++] = fraction * pressure;
+        _shared_real_mem[idx] = fraction * pressure;
       else if (idbg == 1)
-        _shared_real_mem[idx++] = 0.0;
+        _shared_real_mem[idx] = 0.0;
 #ifndef NDEBUG
       else
         mooseError("Failed to get vapor pressure for phase '",
@@ -484,6 +491,7 @@ ThermochimicaDataBase<is_nodal>::server()
                    "'. Thermochimica returned ",
                    idbg);
 #endif
+      idx++;
     }
 
   if (_output_element_phases)
@@ -493,9 +501,9 @@ ThermochimicaDataBase<is_nodal>::server()
                                                                  _phase_element_pairs[i].first);
 
       if (idbg == 0)
-        _shared_real_mem[idx++] = moles;
+        _shared_real_mem[idx] = moles;
       else if (idbg == 1)
-        _shared_real_mem[idx++] = 0.0;
+        _shared_real_mem[idx] = 0.0;
 #ifndef NDEBUG
       else
         mooseError("Failed to get moles of element '",
@@ -505,9 +513,9 @@ ThermochimicaDataBase<is_nodal>::server()
                    "'. Thermochimica returned ",
                    idbg);
 #endif
+      idx++;
     }
 #endif
-
   // Send message back to parent process
   notify('B');
 }
