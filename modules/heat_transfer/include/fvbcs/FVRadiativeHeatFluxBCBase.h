@@ -42,7 +42,7 @@ protected:
 
   /// Function describing the temperature of the body completely surrounding the surface, e.g. the
   /// temperature of the body we are in radiative heat transfer with
-  const Function & _tinf;
+  const Moose::Functor<ADReal> & _tinf;
 
   /// Emissivity of the boundary
   const Real _eps_boundary;
