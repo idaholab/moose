@@ -92,7 +92,7 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet functions does not match the number of inlet boundaries for a specific scalar variable.'
-    cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_functors='0 0;'"
+    cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_functors='0 0'"
     expect_err = "(Size \(1\) is not the same as the number of entries in "
                  "'passive_scalar_inlet_functors index 0' \(size 2\)|Vector of vector parameter "
                  "'passive_scalar_inlet_functors' \(total size 2\) is not the same size as "

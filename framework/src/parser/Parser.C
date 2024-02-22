@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 
 std::string
 FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
@@ -154,7 +155,7 @@ UnitsConversionEvaler::eval(hit::Field * n,
 Parser::Parser(const std::vector<std::string> & input_filenames,
                const std::optional<std::vector<std::string>> & input_text)
   : _root(nullptr),
-    _input_filenames(input_filenames),
+    _input_filenames(getAbsolutePaths(input_filenames)),
     _input_text(input_text),
     _app_type(std::string())
 {
@@ -286,6 +287,15 @@ Parser::getLastInputFileName() const
   if (_input_filenames.empty())
     mooseError("Parser::getLastInputFileName(): No inputs are set");
   return _input_filenames.back();
+}
+
+std::vector<std::string>
+Parser::getAbsolutePaths(const std::vector<std::string> & paths)
+{
+  std::vector<std::string> absolute_paths;
+  for (const auto & val : paths)
+    absolute_paths.push_back(std::filesystem::absolute(val));
+  return absolute_paths;
 }
 
 void

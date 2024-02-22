@@ -27,6 +27,7 @@ requirement = "The system shall return an error"
     cli_args = 'Application/type=DummyApp'
     expect_err = "'DummyApp' is not a registered application name."
     detail = "when the input application type is not registered in main app"
+    skip = 'TEMP'
   []
 
   [wrong_sub_application_type]

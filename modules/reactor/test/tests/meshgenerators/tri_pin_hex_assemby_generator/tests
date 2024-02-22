@@ -54,7 +54,7 @@
     input = 'tri_pin.i'
     cli_args = '--mesh-only tri_pin_err.e
                Mesh/assm_up/ring_radii="7 8;5 6"'
-    expect_err = 'This parameter must have a size of one or three if provided.'
+    expect_err = 'This parameter must have a size of one or three.'
     requirement = 'The system shall throw an error if the number of rings radii specified does not match either one or the number of pins'
   []
   [err_ring_radii_oversize]
@@ -169,9 +169,9 @@
     type = RunException
     input = 'tri_pin.i'
     cli_args = '--mesh-only tri_pin_err.e
-               Mesh/assm_up/ring_radii=" "
-               Mesh/assm_up/ring_intervals=" "
-               Mesh/assm_up/ring_block_ids=" "
+               Mesh/assm_up/ring_radii=""
+               Mesh/assm_up/ring_intervals=""
+               Mesh/assm_up/ring_block_ids=""
                Mesh/assm_up/background_intervals=1
                Mesh/assm_up/background_block_ids="30 40"'
     expect_err = 'If provided, the size of this parameter must be one if no sections have rings and background_intervals is one.'
@@ -181,9 +181,9 @@
     type = RunException
     input = 'tri_pin.i'
     cli_args = '--mesh-only tri_pin_err.e
-               Mesh/assm_up/ring_radii=" "
-               Mesh/assm_up/ring_intervals=" "
-               Mesh/assm_up/ring_block_ids=" "
+               Mesh/assm_up/ring_radii=""
+               Mesh/assm_up/ring_intervals=""
+               Mesh/assm_up/ring_block_ids=""
                Mesh/assm_up/background_intervals=1
                Mesh/assm_up/background_block_names="bg_1 bg_2"'
     expect_err = 'If provided, the size of this parameter must be one if no sections have rings and background_intervals is one.'

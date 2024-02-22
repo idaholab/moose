@@ -40,8 +40,9 @@ public:
    * - Any parameter already with an equal sign is not modified:
    *      param1=3.14;param2[0,1,2] -> param1=3.14 param2='row[0] row[1] row[2]'
    */
-  static std::string sampledCommandLineArgs(const std::vector<Real> & row,
-                                            const std::vector<std::string> & full_args_name);
+  static std::vector<std::string>
+  sampledCommandLineArgs(const std::vector<Real> & row,
+                         const std::vector<std::string> & full_args_name);
 
   /**
    * Helper for executing transfers when doing batch stochastic simulations
@@ -76,7 +77,7 @@ protected:
   dof_id_type _local_batch_app_index;
 
   /// Override to allow for batch mode to get correct cli_args
-  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app) override;
+  virtual std::vector<std::string> getCommandLineArgs(const unsigned int local_app) override;
 
 private:
   /**

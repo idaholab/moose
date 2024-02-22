@@ -19,7 +19,7 @@
   [coords]
     type=ConstantReporter
     real_vector_names = 'y z'
-    real_vector_values = '.51 .91; 0 0;'
+    real_vector_values = '.51 .91; 0 0'
     outputs=none
   []
 []

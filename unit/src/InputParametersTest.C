@@ -745,3 +745,19 @@ TEST(InputParametersTest, fileNames)
   run_test({{"../main.i", "!include " + include_file("simple_input.i")}},
            {{"object", relative_include_file("../foo")}});
 }
+
+TEST(InputParametersTest, alphaCommandLineParamSwitch)
+{
+  InputParameters params = emptyInputParameters();
+  try
+  {
+    params.addCommandLineParam<bool>("1value", "--1value", "Doc");
+    FAIL() << "non-alpha parameter switch was allowed";
+  }
+  catch (const std::exception & e)
+  {
+    ASSERT_EQ(std::string(e.what()),
+              "The switch '--1value' for the command line parameter '1value' is invalid. It must "
+              "begin with an alphabetical character.");
+  }
+}

@@ -42,14 +42,17 @@ AppFactory::createAppShared(const std::string & default_app_type,
                             std::unique_ptr<Parser> parser,
                             MPI_Comm comm_world_in)
 {
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
   auto which_app_param = emptyInputParameters();
-
   MooseApp::addAppParam(which_app_param);
-  command_line->addCommandLineOptionsFromParams(which_app_param);
 
-  std::string app_type;
-  if (!command_line->search("app_to_run", app_type))
+  {
+    CommandLine which_app_command_line(argc, argv);
+    which_app_command_line.parse();
+    which_app_command_line.populateCommandLineParams(which_app_param);
+  }
+
+  std::string app_type = which_app_param.get<std::string>("app_to_run");
+  if (app_type.empty())
     app_type = default_app_type;
   else
     mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
@@ -58,9 +61,12 @@ AppFactory::createAppShared(const std::string & default_app_type,
   auto app_params = AppFactory::instance().getValidParams(app_type);
   parser->setAppType(app_type);
 
+  auto command_line = std::make_unique<CommandLine>(argc, argv);
+  command_line->parse();
+
   app_params.set<int>("_argc") = argc;
   app_params.set<char **>("_argv") = argv;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
 
   // Take the front parser and add it to the parameters so that it can be retrieved in the
   // Application
@@ -78,29 +84,27 @@ AppFactory::createAppShared(const std::string & default_app_type,
   mooseDeprecated("Please update your main.C to adapt new main function in MOOSE framework, "
                   "see'test/src/main.C in MOOSE as an example of moose::main()'. ");
 
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
-  auto which_app_param = emptyInputParameters();
-
-  which_app_param.addCommandLineParam<std::vector<std::string>>(
+  auto command_line_params = emptyInputParameters();
+  command_line_params.addCommandLineParam<std::vector<std::string>>(
       "input_file",
       "-i <input_files>",
       "Specify one or multiple input files. Multiple files get merged into a single simulation "
       "input.");
+  MooseApp::addAppParam(command_line_params);
 
-  command_line->addCommandLineOptionsFromParams(which_app_param);
+  {
+    CommandLine pre_command_line(argc, argv);
+    pre_command_line.parse();
+    pre_command_line.populateCommandLineParams(command_line_params);
+  }
 
-  std::vector<std::string> input_filenames;
-  command_line->search("input_file", input_filenames);
-
+  const auto & input_filenames = command_line_params.get<std::vector<std::string>>("input_file");
   auto parser = std::make_unique<Parser>(input_filenames);
   if (input_filenames.size())
     parser->parse();
 
-  MooseApp::addAppParam(which_app_param);
-  command_line->addCommandLineOptionsFromParams(which_app_param);
-
-  std::string app_type;
-  if (!command_line->search("app_to_run", app_type))
+  std::string app_type = command_line_params.get<std::string>("app_to_run");
+  if (app_type.empty())
     app_type = default_app_type;
   else
     mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
@@ -111,7 +115,10 @@ AppFactory::createAppShared(const std::string & default_app_type,
 
   app_params.set<int>("_argc") = argc;
   app_params.set<char **>("_argv") = argv;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
+
+  auto command_line = std::make_unique<CommandLine>(argc, argv);
+  command_line->parse();
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
 
   // Take the front parser and add it to the parameters so that it can be retrieved in the
   // Application
@@ -148,8 +155,9 @@ AppFactory::createShared(const std::string & app_type,
 
   std::shared_ptr<CommandLine> command_line =
       parameters.get<std::shared_ptr<CommandLine>>("_command_line");
-  command_line->addCommandLineOptionsFromParams(parameters);
-  command_line->populateInputParams(parameters);
+  mooseAssert(command_line->hasParsed(), "Should have been parsed");
+
+  command_line->populateCommandLineParams(parameters);
 
   build_info->_app_creation_count++;
 

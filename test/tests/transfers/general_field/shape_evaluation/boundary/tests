@@ -50,7 +50,7 @@
       cli_args = "Outputs/file_base=internal
                   Transfers/from_sub/to_boundaries=internal Transfers/from_sub_elem/to_boundaries=internal Transfers/to_sub/to_boundaries=internal Transfers/to_sub_elem/to_boundaries=internal
                   Mesh/second_order=true AuxVariables/to_sub/order=SECOND
-                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;'"
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST'"
       detail = 'for internal boundaries,'
     []
 

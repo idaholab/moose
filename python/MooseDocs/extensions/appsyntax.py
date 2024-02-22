@@ -163,13 +163,13 @@ class AppSyntaxExtension(command.CommandExtension):
                                                                      unregister=self['unregister'],
                                                                      markdown=self['markdown'])
 
-                out = mooseutils.runExe(exe, ['--type'])
+                out = mooseutils.runExe(exe, ['--show-type'])
                 match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
                 if match:
                     self._app_type = match.group("type")
                 else:
                     msg = "Failed to determine application type by running the following:\n"
-                    msg += "    {} --type".format(exe)
+                    msg += "    {} --show-type".format(exe)
                     LOG.error(msg)
 
             except Exception as e:

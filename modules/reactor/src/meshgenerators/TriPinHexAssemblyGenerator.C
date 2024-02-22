@@ -80,29 +80,10 @@ TriPinHexAssemblyGenerator::validParams()
 
 TriPinHexAssemblyGenerator::TriPinHexAssemblyGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
-    _ring_radii(isParamValid("ring_radii")
-                    ? (getParam<std::vector<std::vector<Real>>>("ring_radii").size() == 1
-                           ? std::vector<std::vector<Real>>(
-                                 3, getParam<std::vector<std::vector<Real>>>("ring_radii").front())
-                           : getParam<std::vector<std::vector<Real>>>("ring_radii"))
-                    : std::vector<std::vector<Real>>(3, std::vector<Real>())),
-    _ring_intervals(
-        isParamValid("ring_intervals")
-            ? (getParam<std::vector<std::vector<unsigned int>>>("ring_intervals").size() == 1
-                   ? std::vector<std::vector<unsigned int>>(
-                         3,
-                         getParam<std::vector<std::vector<unsigned int>>>("ring_intervals").front())
-                   : getParam<std::vector<std::vector<unsigned int>>>("ring_intervals"))
-            : std::vector<std::vector<unsigned int>>(3, std::vector<unsigned int>())),
-    _ring_block_ids(
-        isParamValid("ring_block_ids")
-            ? (getParam<std::vector<std::vector<subdomain_id_type>>>("ring_block_ids").size() == 1
-                   ? std::vector<std::vector<subdomain_id_type>>(
-                         3,
-                         getParam<std::vector<std::vector<subdomain_id_type>>>("ring_block_ids")
-                             .front())
-                   : getParam<std::vector<std::vector<subdomain_id_type>>>("ring_block_ids"))
-            : std::vector<std::vector<subdomain_id_type>>(3, std::vector<subdomain_id_type>())),
+    _ring_radii(getRingParamValues<Real>("ring_radii")),
+    _has_rings({!_ring_radii[0].empty(), !_ring_radii[1].empty(), !_ring_radii[2].empty()}),
+    _ring_intervals(getRingParamValues<unsigned int>("ring_intervals")),
+    _ring_block_ids(getRingParamValues<subdomain_id_type>("ring_block_ids")),
     _ring_block_names(
         isParamValid("ring_block_names")
             ? (getParam<std::vector<std::vector<SubdomainName>>>("ring_block_names").size() == 1
@@ -156,37 +137,24 @@ TriPinHexAssemblyGenerator::TriPinHexAssemblyGenerator(const InputParameters & p
                                                   _num_sectors_per_side});
 
   /* Parameter checks */
-  if (_ring_radii.size() != 3)
-    paramError("ring_radii", "This parameter must have a size of one or three if provided.");
-  else
-    _has_rings = {!_ring_radii[0].empty(), !_ring_radii[1].empty(), !_ring_radii[2].empty()};
-
-  if (_ring_intervals.size() != 3)
-    paramError("ring_intervals", "This parameter must have a size of one or three.");
-  else
-    for (unsigned int i = 0; i < 3; i++)
-      if (_ring_intervals[i].size() != _ring_radii[i].size())
-        paramError("ring_intervals", "The parameter must be consistent with ring_radii.");
-  if (_ring_block_ids.size() != 3)
-    paramError("ring_block_ids", "This parameter must have a size of one or three if provided.");
-  else
-    for (unsigned int i = 0; i < 3; i++)
-    {
-      if (!_has_rings[i] && !_ring_block_ids[i].empty())
-        paramError("ring_block_ids",
-                   "The parameter must be consistent with ring_radii if provided.");
-      else if (!_ring_block_ids[i].empty() &&
-               _ring_block_ids[i].size() != (_ring_radii[i].size() + (_ring_intervals[i][0] > 1)))
-        paramError("ring_block_ids",
-                   "The parameter must be consistent with ring_radii if provided.");
-      if (!_has_rings[i] && !_ring_block_names[i].empty())
-        paramError("ring_block_names",
-                   "The parameter must be consistent with ring_radii if provided.");
-      else if (!_ring_block_names[i].empty() &&
-               _ring_block_names[i].size() != (_ring_radii[i].size() + (_ring_intervals[i][0] > 1)))
-        paramError("ring_block_names",
-                   "The parameter must be consistent with ring_radii if provided.");
-    }
+  for (unsigned int i = 0; i < 3; i++)
+    if (_ring_intervals[i].size() != _ring_radii[i].size())
+      paramError("ring_intervals", "The parameter must be consistent with ring_radii.");
+  for (unsigned int i = 0; i < 3; i++)
+  {
+    if (!_has_rings[i] && !_ring_block_ids[i].empty())
+      paramError("ring_block_ids", "The parameter must be consistent with ring_radii if provided.");
+    else if (!_ring_block_ids[i].empty() &&
+             _ring_block_ids[i].size() != (_ring_radii[i].size() + (_ring_intervals[i][0] > 1)))
+      paramError("ring_block_ids", "The parameter must be consistent with ring_radii if provided.");
+    if (!_has_rings[i] && !_ring_block_names[i].empty())
+      paramError("ring_block_names",
+                 "The parameter must be consistent with ring_radii if provided.");
+    else if (!_ring_block_names[i].empty() &&
+             _ring_block_names[i].size() != (_ring_radii[i].size() + (_ring_intervals[i][0] > 1)))
+      paramError("ring_block_names",
+                 "The parameter must be consistent with ring_radii if provided.");
+  }
   if (!_background_block_ids.empty())
   {
     if (_has_rings[0] && _has_rings[1] && _has_rings[2] && _background_block_ids.size() != 1)
