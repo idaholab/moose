@@ -279,7 +279,7 @@ We point out in this section a few things to look for.
   the flux will depend on the orientation of the sideset.
 - MOOSE generally does not support non-conformal meshes for regular kernels, except when they arise from online mesh refinement.
   When inspecting your mesh, you should not see any hanging nodes or surfaces not exactly touching. If you are using such
-  a mesh, you **MUST** use interface kernels, mortar or other advanced numerical treatments.
+  a mesh, you +MUST+ use interface kernels, mortar or other advanced numerical treatments.
 - Many physics will give better results with high element quality and smooth distributions of element volumes.
   You may examine the spatial distribution of these quantities using the [ElementQualityAux.md] and [VolumeAux.md]
   respectively.

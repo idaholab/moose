@@ -69,7 +69,7 @@
 | $\rho$ | kg.m$^{-3}$ | Fluid density |
 | $\rho_{R}$ | kg.m$^{-3}$ | Grain density of the rock (so that $(1-\phi)\rho_{R}$ is the density of the dry porous rock) |
 | $\rho_{\mathrm{mat}}$ | kg.m$^{-3}$ | The mass-density of the fluid-filled porous solid $\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} + \phi\sum_{\beta}S_{\beta}\rho_{\beta}$ |
-| $\rho_{L}$ | kg.m$^{-3}$ | Langmuir density|
+| $\rho_{L}$ | kg.m$^{-3}$ | Langmuir density |
 | $S$ | dimensionless | Saturation |
 | $S_{l}$ | dimensionless | Saturation of aqueous phase |
 | $\sigma^{\mathrm{tot}}_{ij}$ | Pa | Total stress.  An externally applied mechanical force will create a nonzero $\sigma^{\mathrm{tot}}$, and conversely, resolving $\sigma^{\mathrm{tot}}$ into forces yields the forces on nodes in the finite-element mesh |

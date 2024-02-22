@@ -1,8 +1,8 @@
-# SusceptibilityTimeDerivative
+# SusceptibilityTimeDerivative / ADSusceptibilityTimeDerivative
 
 !syntax description /Kernels/SusceptibilityTimeDerivative
 
-Implements
+`SusceptibilityTimeDerivative` (and its automatic differentiation version, `ADSusceptibilityTimeDerivative`) implements
 
 \begin{equation}
 F(u,a,b,\dots)\cdot\frac{\partial u}{\partial t},

@@ -75,7 +75,7 @@ Although there are no kernels directly provided by this module (yet), these thre
 
 | Name | Description |
 | - | - |
-| [`MultiAppFXTransfer`](/MultiAppFXTransfer.md) | This transfers the FX coefficients, or moments, between named FX objects in the multi and sub apps. Supported objects that contain coefficients for transferring are instances of `FunctionSeries` and any `FX...UserObject`.|
+| [`MultiAppFXTransfer`](/MultiAppFXTransfer.md) | This transfers the FX coefficients, or moments, between named FX objects in the multi and sub apps. Supported objects that contain coefficients for transferring are instances of `FunctionSeries` and any `FX...UserObject`. |
 
 
 ### UserObjects

@@ -3,7 +3,7 @@
 !syntax description /AuxKernels/SecondTimeDerivativeAux
 
 The [!param](/AuxKernels/SecondTimeDerivativeAux/factor) multiplies the output of the second time derivative operation.
-The time derivative of the [!param](/AuxKernels/SecondTimeDerivativeAux/factor) is **not** computed.
+The time derivative of the [!param](/AuxKernels/SecondTimeDerivativeAux/factor) is +not+ computed.
 
 !alert warning
 The `SecondTimeDerivativeAux` can only output a non-zero time derivative when the [time integrator](syntax/Executioner/TimeIntegrator/index.md) has implemented the second time derivative. Only [CentralDifference.md] and [NewmarkBeta.md] have as of early 2023, but contributions are welcome!

@@ -8,11 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SwitchingFunctionMultiPhaseMaterial.h"
+#include "MooseException.h"
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionMultiPhaseMaterial);
+registerMooseObject("PhaseFieldApp", ADSwitchingFunctionMultiPhaseMaterial);
 
+template <bool is_ad>
 InputParameters
-SwitchingFunctionMultiPhaseMaterial::validParams()
+SwitchingFunctionMultiPhaseMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>(
@@ -24,32 +27,33 @@ SwitchingFunctionMultiPhaseMaterial::validParams()
   return params;
 }
 
-SwitchingFunctionMultiPhaseMaterial::SwitchingFunctionMultiPhaseMaterial(
+template <bool is_ad>
+SwitchingFunctionMultiPhaseMaterialTempl<is_ad>::SwitchingFunctionMultiPhaseMaterialTempl(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
-    _h_name(getParam<MaterialPropertyName>("h_name")),
+    _h_name(this->getParam<MaterialPropertyName>("h_name")),
     _num_eta_p(coupledComponents("phase_etas")),
-    _eta_p(coupledValues("phase_etas")),
+    _eta_p(coupledGenericValues<is_ad>("phase_etas")),
     _eta_p_names(coupledNames("phase_etas")),
     _num_eta(coupledComponents("all_etas")),
-    _eta(coupledValues("all_etas")),
+    _eta(coupledGenericValues<is_ad>("all_etas")),
     _eta_names(coupledNames("all_etas")),
     _is_p(_num_eta),
-    _prop_h(declareProperty<Real>(_h_name)),
+    _prop_h(declareGenericProperty<Real, is_ad>(_h_name)),
     _prop_dh(_num_eta),
     _prop_d2h(_num_eta)
 {
   // Declare h derivative properties
   for (unsigned int i = 0; i < _num_eta; ++i)
-    _prop_d2h[i].resize(_num_eta);
+    _prop_d2h[i].resize(_num_eta, NULL);
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
-    _prop_dh[i] = &declarePropertyDerivative<Real>(_h_name, _eta_names[i]);
+    _prop_dh[i] = &this->template declarePropertyDerivative<Real, is_ad>(_h_name, _eta_names[i]);
     for (unsigned int j = i; j < _num_eta; ++j)
     {
-      _prop_d2h[i][j] = _prop_d2h[j][i] =
-          &declarePropertyDerivative<Real>(_h_name, _eta_names[i], _eta_names[j]);
+      _prop_d2h[i][j] = _prop_d2h[j][i] = &this->template declarePropertyDerivative<Real, is_ad>(
+          _h_name, _eta_names[i], _eta_names[j]);
     }
   }
 
@@ -65,11 +69,12 @@ SwitchingFunctionMultiPhaseMaterial::SwitchingFunctionMultiPhaseMaterial(
   }
 }
 
+template <bool is_ad>
 void
-SwitchingFunctionMultiPhaseMaterial::computeQpProperties()
+SwitchingFunctionMultiPhaseMaterialTempl<is_ad>::computeQpProperties()
 {
-  Real sum_p = 0.0;
-  Real sum_all = 0.0;
+  GenericReal<is_ad> sum_p = 0.0;
+  GenericReal<is_ad> sum_all = 0.0;
 
   for (unsigned int i = 0; i < _num_eta_p; ++i)
     sum_p += (*_eta_p[i])[_qp] * (*_eta_p[i])[_qp];
@@ -77,7 +82,7 @@ SwitchingFunctionMultiPhaseMaterial::computeQpProperties()
   for (unsigned int i = 0; i < _num_eta; ++i)
     sum_all += (*_eta[i])[_qp] * (*_eta[i])[_qp];
 
-  Real sum_notp = sum_all - sum_p;
+  GenericReal<is_ad> sum_notp = sum_all - sum_p;
 
   _prop_h[_qp] = sum_p / sum_all;
 
@@ -115,3 +120,7 @@ SwitchingFunctionMultiPhaseMaterial::computeQpProperties()
     }
   }
 }
+
+// explicit instantiation
+template class SwitchingFunctionMultiPhaseMaterialTempl<true>;
+template class SwitchingFunctionMultiPhaseMaterialTempl<false>;

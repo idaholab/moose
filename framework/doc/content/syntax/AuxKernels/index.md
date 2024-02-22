@@ -26,7 +26,7 @@ file snippet creates an auxiliary variable suitable for use with an `VectorAuxKe
 There are two flavors of AuxKernel objects: nodal and elemental. The distinction is based on the
 type of variable that is being operated on by the object. If the variable family is `LAGRANGE` or
 `LAGRANGE_VEC` then the AuxKernel will behave as nodal. If the variable family is `MONOMIAL` then
-the AuxKernel will behave as an elemental.
+the AuxKernel will behave as elemental.
 
 The difference is based on how the `computeValue` method of the object is called when the kernel
 is executed. In the nodal case the `computeValue` method will be executed on each +node+ within the

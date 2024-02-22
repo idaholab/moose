@@ -21,7 +21,7 @@ The following units are currently supported
 
 | Symbol | Base units | Name | Description |
 | - | - | - | - |
-| `Ohm` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-3}\cdot \text{A}^{-2}$ | Ohm | resistance, impedance, reactance|
+| `Ohm` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-3}\cdot \text{A}^{-2}$ | Ohm | resistance, impedance, reactance |
 | `atm` | $101325\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Standard atmosphere | pressure |
 | `eV` | $1.60218\cdot10^{-19}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | electron Volt | energy |
 | `erg` | $10^{-7}\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | Erg | energy |
@@ -35,7 +35,7 @@ The following units are currently supported
 | `s` | $\text{s}$ | second | time |
 | `A` | $\text{A}$ | Ampere | electric current |
 | `K` | $\text{K}$ | Kelvin | temperature |
-| `mol` | $6.02214\cdot10^{23}\, \text{at}$ | mole | amount of substance|
+| `mol` | $6.02214\cdot10^{23}\, \text{at}$ | mole | amount of substance |
 | `cd` | $\text{cd}$ | candela | luminous intensity |
 | `N` | $\text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | Newton | force, weight |
 | `Pa` | $\text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Pascal | pressure, stress |
@@ -45,7 +45,7 @@ The following units are currently supported
 | `V` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-3}\cdot \text{A}^{-1}$ | Volt | voltage (electrical potential), emf |
 | `F` | $\text{kg}^{-1}\cdot \text{m}^{-2}\cdot \text{s}^{4}\cdot \text{A}^{2}$ | Farad | capacitance |
 | `S` | $\text{kg}^{-1}\cdot \text{m}^{-2}\cdot \text{s}^{3}\cdot \text{A}^{2}$ | Siemens | electrical conductance |
-| `Wb` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}\cdot \text{A}^{-1}$ | Weber | magnetic flux|
+| `Wb` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}\cdot \text{A}^{-1}$ | Weber | magnetic flux |
 | `T` | $\text{kg}\cdot \text{s}^{-2}\cdot \text{A}^{-1}$ | Tesla | magnetic flux density |
 | `H` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}\cdot \text{A}^{-2}$ | Henry | inductance |
 | `Ba` | $0.1\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | barye | Pressure |
@@ -58,7 +58,7 @@ The following units are currently supported
 | `BTU` | $1055.06\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | ISO 31-4 British thermal unit | heat |
 | `bar` | $10^5\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Bar | pressure, stress |
 | `h` | $3600\, \text{s}$ | hour | time |
-| `day` | $86400\, \text{s}$ | day | time (`d` would create an ambiguity between centi-day and candela)|
+| `day` | $86400\, \text{s}$ | day | time (`d` would create an ambiguity between centi-day and candela) |
 | `l` | $0.001\, \text{m}^{3}$ | liter | volume |
 | `u` | $1.66054\cdot10^{-27}\, \text{kg}^{3}$ | unified atomic mass unit | mass |
 | `at` | $\text{at}$ | atom | single count of substance |

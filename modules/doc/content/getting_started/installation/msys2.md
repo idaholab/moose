@@ -73,10 +73,10 @@ cd $MOOSE_DIR/petsc
 
 Follow the instructions printed at the end of the configure output on how to run make.
 
-Once PETSc is built do **not** run the `make install` command. We'll leave the built
+Once PETSc is built do +not+ run the `make install` command. We'll leave the built
 PETSc where it is and add two exports for the `PETSC_DIR` and `PETSC_ARCH` to your `~/.bashrc`.
 
-**IMPORTANT:** make sure you prepend `C:/msys64` to the `PETSC_DIR`. The lines in your
++IMPORTANT:+ make sure you prepend `C:/msys64` to the `PETSC_DIR`. The lines in your
 `~/.bashrc` should look something like this:
 
 ```

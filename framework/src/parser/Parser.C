@@ -328,7 +328,10 @@ Parser::parse()
 
     try
     {
-      std::unique_ptr<hit::Node> root(hit::parse(corrected_filename, input));
+      // provide stream to hit parse function to capture any syntax errors,
+      // set parser root node, then throw those errors if any were captured
+      std::stringstream input_errors;
+      std::unique_ptr<hit::Node> root(hit::parse(corrected_filename, input, &input_errors));
       hit::explode(root.get());
       DupParamWalker dw;
       root->walk(&dw, hit::NodeType::Field);
@@ -339,6 +342,9 @@ Parser::parse()
         root->walk(&opw, hit::NodeType::Field);
         hit::merge(root.get(), _root.get());
       }
+
+      if (!input_errors.str().empty())
+        throw hit::ParseError(input_errors.str());
 
       for (auto & msg : dw.errors)
         errmsg += msg + "\n";

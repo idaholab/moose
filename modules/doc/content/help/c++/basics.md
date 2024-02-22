@@ -19,12 +19,12 @@
 
 | Basic Type | Variant(s) |
 | :- | :- |
-|bool | |
-|char | unsigned |
+| bool | - |
+| char | unsigned |
 | int | unsigned, long, short |
-| float | |
+| float | - |
 | double | long |
-| void | |
+| void | - |
 
 !alert note
 `void` is the "anti-datatype", used for example in functions returning nothing.

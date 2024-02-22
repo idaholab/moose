@@ -17,7 +17,7 @@ All functor materials support caching in some capacity. This can avoid expensive
 disabled by default due to the potential memory cost. The reader is referred to the [Functors caching documentation](syntax/Functors/index.md#caching).
 
 !alert warning
-Functor material properties and regular material properties are generally **NOT** compatible with each other. Functor material properties can only be used as regular material properties using a
+Functor material properties and regular material properties are generally +NOT+ compatible with each other. Functor material properties can only be used as regular material properties using a
 [MaterialFunctorConverter.md] to process them.
 
 Functor materials are created within the `[FunctorMaterials]` block.

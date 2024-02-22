@@ -44,7 +44,7 @@ mesh at least about *five* elements through the wall thickness!
 
 The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the
 two separate pillar mesh objects into a single mesh object that contains all
-elements from both meshes. Note that this does **not** mean the two meshes are
+elements from both meshes. Note that this does +not+ mean the two meshes are
 glued together or connected in any way! Also, in contrast to the previous step
 the mesh generators do not form a *chain*, but they form a tree structure. The
 important thing for MOOSE is that a single generator sits at the end of such a

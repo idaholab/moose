@@ -153,7 +153,7 @@ public:
   /**
    * This method adds a parameter and documentation string to the InputParameters
    * object that will be extracted from the input file.  If the parameter is
-   * missing in the input file, and error will be thrown
+   * missing in the input file, an error will be thrown
    */
   template <typename T>
   void addRequiredParam(const std::string & name, const std::string & doc_string);

@@ -10,42 +10,52 @@
 #include "ACKappaFunction.h"
 
 registerMooseObject("PhaseFieldApp", ACKappaFunction);
+registerMooseObject("PhaseFieldApp", ADACKappaFunction);
 
+template <bool is_ad>
 InputParameters
-ACKappaFunction::validParams()
+ACKappaFunctionTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Gradient energy term for when kappa as a function of the variable");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa function name");
   params.addCoupledVar("v", "Vector of order parameters");
   return params;
 }
+template <bool is_ad>
+ACKappaFunctionTempl<is_ad>::ACKappaFunctionTempl(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>(parameters),
+    _L(this->template getGenericMaterialProperty<Real, is_ad>("mob_name")),
+    _kappa_name(this->template getParam<MaterialPropertyName>("kappa_name")),
+    _dkappadvar(this->template getGenericMaterialProperty<Real, is_ad>(
+        this->derivativePropertyNameFirst(_kappa_name, _var.name()))),
+    _v_num(this->coupledComponents("v")),
+    _grad_v(_v_num)
+{
+  for (unsigned int i = 0; i < _v_num; ++i)
+    _grad_v[i] = &this->template coupledGenericGradient<is_ad>("v", i);
+}
 
 ACKappaFunction::ACKappaFunction(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _L(getMaterialProperty<Real>("mob_name")),
+  : ACKappaFunctionTempl<false>(parameters),
     _dLdvar(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
-    _kappa_name(getParam<MaterialPropertyName>("kappa_name")),
-    _dkappadvar(getMaterialPropertyDerivative<Real>(_kappa_name, _var.name())),
     _d2kappadvar2(getMaterialPropertyDerivative<Real>(_kappa_name, _var.name(), _var.name())),
-    _v_num(coupledComponents("v")),
     _v_map(getParameterJvarMap("v")),
-    _grad_v(_v_num),
     _dLdv(_v_num),
     _d2kappadvardv(_v_num)
 {
   for (unsigned int i = 0; i < _v_num; ++i)
   {
     auto v_name = coupledName("v", i);
-    _grad_v[i] = &coupledGradient("v", i);
     _dLdv[i] = &getMaterialPropertyDerivative<Real>("mob_name", v_name);
     _d2kappadvardv[i] = &getMaterialPropertyDerivative<Real>(_kappa_name, _var.name(), v_name);
   }
 }
 
-Real
-ACKappaFunction::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+ACKappaFunctionTempl<is_ad>::computeQpResidual()
 {
   return 0.5 * _test[_i][_qp] * _L[_qp] * _dkappadvar[_qp] * computeFg();
 }
@@ -75,10 +85,11 @@ ACKappaFunction::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-Real
-ACKappaFunction::computeFg()
+template <bool is_ad>
+GenericReal<is_ad>
+ACKappaFunctionTempl<is_ad>::computeFg()
 {
-  Real sum_grad_etai2 = 0.0;
+  GenericReal<is_ad> sum_grad_etai2 = 0.0;
   for (unsigned int i = 0; i < _v_num; ++i)
     sum_grad_etai2 += (*_grad_v[i])[_qp] * (*_grad_v[i])[_qp];
 

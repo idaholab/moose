@@ -8,12 +8,12 @@ select a scalar component from the property value.
 
 | Material property type | `component` parameter example |
 | - | - |
-|`Real` | _none_ |
-|`RealVectorValue` | `component = 1`|
-|`std::vector<Real>` | `component = 7`|
-|`RankTwoTensor` | `component = "0 2"`|
-|`RankThreeTensor` | `component = "1 2 0"`|
-|`RankFourTensor` | `component = "1 0 1 2"`|
+| `Real` | _none_ |
+| `RealVectorValue` | `component = 1` |
+| `std::vector<Real>` | `component = 7` |
+| `RankTwoTensor` | `component = "0 2"` |
+| `RankThreeTensor` | `component = "1 2 0"` |
+| `RankFourTensor` | `component = "1 0 1 2"` |
 
 To use this utility class declare a member in your class header
 
