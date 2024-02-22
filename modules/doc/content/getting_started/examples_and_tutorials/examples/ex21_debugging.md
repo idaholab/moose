@@ -23,7 +23,7 @@ Segmentation fault: 11`
 
 - This example is similar to Example 3, except that a common error has been introduced.
 - In `ExampleDiffusion.h`, a `VariableValue` that should be declared as a reference is not: `const VariableValue _coupled_coef`
-- Not storing this as a reference will cause a **copy** of the `VariableValue` to be made.
+- Not storing this as a reference will cause a +copy+ of the `VariableValue` to be made.
 - That copy will never be resized, nor will it ever have values written to it.
 - Attempting to access that `VariableValue` results in a segfault when running in optimized mode:
 

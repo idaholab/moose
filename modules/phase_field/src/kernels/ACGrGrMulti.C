@@ -10,11 +10,13 @@
 #include "ACGrGrMulti.h"
 
 registerMooseObject("PhaseFieldApp", ACGrGrMulti);
+registerMooseObject("PhaseFieldApp", ADACGrGrMulti);
 
+template <bool is_ad>
 InputParameters
-ACGrGrMulti::validParams()
+ACGrGrMultiTempl<is_ad>::validParams()
 {
-  InputParameters params = ACGrGrBase::validParams();
+  InputParameters params = ACGrGrMultiBase<is_ad>::validParams();
   params.addClassDescription("Multi-phase poly-crystalline Allen-Cahn Kernel");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "gamma_names",
@@ -23,26 +25,32 @@ ACGrGrMulti::validParams()
   return params;
 }
 
-ACGrGrMulti::ACGrGrMulti(const InputParameters & parameters)
-  : ACGrGrBase(parameters),
-    _gamma_names(getParam<std::vector<MaterialPropertyName>>("gamma_names")),
+template <bool is_ad>
+ACGrGrMultiTempl<is_ad>::ACGrGrMultiTempl(const InputParameters & parameters)
+  : ACGrGrMultiBase<is_ad>(parameters),
+    _gamma_names(this->template getParam<std::vector<MaterialPropertyName>>("gamma_names")),
     _num_j(_gamma_names.size()),
-    _prop_gammas(_num_j),
-    _uname(getParam<NonlinearVariableName>("variable")),
-    _dmudu(getMaterialPropertyDerivative<Real>("mu", _uname)),
-    _vname(getParam<std::vector<VariableName>>("v")),
-    _dmudEtaj(_num_j)
+    _prop_gammas(_num_j)
 {
   // check passed in parameter vectors
-  if (_num_j != coupledComponents("v"))
-    paramError("gamma_names",
-               "Need to pass in as many gamma_names as coupled variables in v in ACGrGrMulti");
+  if (_num_j != this->coupledComponents("v"))
+    this->paramError(
+        "gamma_names",
+        "Need to pass in as many gamma_names as coupled variables in v in ACGrGrMulti");
 
   for (unsigned int n = 0; n < _num_j; ++n)
-  {
-    _prop_gammas[n] = &getMaterialPropertyByName<Real>(_gamma_names[n]);
-    _dmudEtaj[n] = &getMaterialPropertyDerivative<Real>("mu", _vname[n]);
-  }
+    _prop_gammas[n] = &this->template getGenericMaterialProperty<Real, is_ad>(_gamma_names[n]);
+}
+
+ACGrGrMulti::ACGrGrMulti(const InputParameters & parameters)
+  : ACGrGrMultiTempl<false>(parameters),
+    _uname(this->template getParam<NonlinearVariableName>("variable")),
+    _dmudu(this->template getMaterialPropertyDerivative<Real>("mu", _uname)),
+    _vname(this->template getParam<std::vector<VariableName>>("v")),
+    _dmudEtaj(_num_j)
+{
+  for (unsigned int n = 0; n < _num_j; ++n)
+    _dmudEtaj[n] = &this->template getMaterialPropertyDerivative<Real>("mu", _vname[n]);
 }
 
 Real
@@ -50,7 +58,7 @@ ACGrGrMulti::computeDFDOP(PFFunctionType type)
 {
   // Sum all other order parameters
   Real SumGammaEtaj = 0.0;
-  for (unsigned int i = 0; i < _op_num; ++i)
+  for (const auto i : make_range(_op_num))
     SumGammaEtaj += (*_prop_gammas[i])[_qp] * (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
   // Calculate either the residual or Jacobian of the grain growth free energy
@@ -72,6 +80,17 @@ ACGrGrMulti::computeDFDOP(PFFunctionType type)
   }
 }
 
+ADReal
+ADACGrGrMulti::computeDFDOP()
+{
+  // Sum all other order parameters
+  ADReal SumGammaEtaj = 0.0;
+  for (const auto i : make_range(_op_num))
+    SumGammaEtaj += (*_prop_gammas[i])[_qp] * (*_vals[i])[_qp] * (*_vals[i])[_qp];
+
+  return _mu[_qp] * computedF0du();
+}
+
 Real
 ACGrGrMulti::computeQpOffDiagJacobian(unsigned int jvar)
 {
@@ -89,12 +108,16 @@ ACGrGrMulti::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-Real
-ACGrGrMulti::computedF0du()
+template <bool is_ad>
+GenericReal<is_ad>
+ACGrGrMultiTempl<is_ad>::computedF0du()
 {
-  Real SumGammaEtaj = 0.0;
-  for (unsigned int i = 0; i < _op_num; ++i)
+  GenericReal<is_ad> SumGammaEtaj = 0.0;
+  for (const auto i : make_range(_op_num))
     SumGammaEtaj += (*_prop_gammas[i])[_qp] * (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
   return _u[_qp] * _u[_qp] * _u[_qp] - _u[_qp] + 2.0 * _u[_qp] * SumGammaEtaj;
 }
+
+template class ACGrGrMultiTempl<false>;
+template class ACGrGrMultiTempl<true>;

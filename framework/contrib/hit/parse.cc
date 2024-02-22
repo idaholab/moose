@@ -913,7 +913,7 @@ Field::strVal()
 // starting LexFunc.  Parsing is implemented as recursive-descent with the functions in this file
 // named "parse[Bla]".
 Node *
-parse(const std::string & fname, const std::string & input)
+parse(const std::string & fname, const std::string & input, std::ostream * errors)
 {
   std::stringstream input_errors;
   std::shared_ptr<wasp::DefaultHITInterpreter> interpreter =
@@ -921,7 +921,14 @@ parse(const std::string & fname, const std::string & input)
 
   std::stringstream input_stream(input);
   if (!interpreter->parseStream(input_stream, fname))
-    throw ParseError(input_errors.str());
+  {
+    // add syntax errors to stream if provided and continue to build hit tree
+    // and return root otherwise throw exception if error stream not provided
+    if (errors)
+      *errors << input_errors.str();
+    else
+      throw ParseError(input_errors.str());
+  }
 
   std::unique_ptr<Node> root(new Section(interpreter, interpreter->root()));
 

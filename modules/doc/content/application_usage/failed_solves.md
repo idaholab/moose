@@ -76,7 +76,7 @@ maybe only a few of the auxiliary `AuxVariables`. For example in this flow simul
 []
 ```
 
-However, if we **cannot** guess a better initialization for the solution, a sound approach to these problems is to relax
+However, if we +cannot+ guess a better initialization for the solution, a sound approach to these problems is to relax
 or linearize the equations to obtain an initial condition,
 then progressively remove this numerical treatment in order to restore the original equation solution and/or
 the expected order of numerical convergence. A few of these techniques are implemented very simply as shown below:
@@ -124,7 +124,7 @@ This can help stabilize a nonlinear solve. As mentioned in the relevant
   petsc_options_value = '0.5'
 ```
 
-- turning off **temporarily** some physics through the [Controls](syntax/Controls/index.md) system. Some equations, such as
+- turning off +temporarily+ some physics through the [Controls](syntax/Controls/index.md) system. Some equations, such as
   advection, can be singular, have a saddle point, ill-conditioned or simply not in the hyperbolic/elliptic regime that the solver
   can handle with a poor initialization. The equations can be modified dynamically during the simulation. Kernels can be
   turned on/off over part of the simulation as needed. In the example below, we turn on the `Diff0` kernel from 0s to 0.49s
@@ -187,8 +187,8 @@ Additional resources on linear solve issues may be found in the
 
 First, it is important to understand where the Jacobian may come into play because this sets the bar for how accurate the
 Jacobian needs to be.
-For Newton's method, the linear solve is essentially the inversion of the Jacobian (an explicit inverse is generally **NOT** formed)
-and its action on the residual vector. As such, we generally consider that it is **essential** that the Jacobian be accurate.
+For Newton's method, the linear solve is essentially the inversion of the Jacobian (an explicit inverse is generally +NOT+ formed)
+and its action on the residual vector. As such, we generally consider that it is +essential+ that the Jacobian be accurate.
 A solve with a poor Jacobian is unlikely to converge.
 For PJFNK, the linear systems are formed by computing the action of the Jacobian rather than the Jacobian. But the preconditioning
 often relies on forming the Jacobian. By default, only the diagonal of the Jacobian is computed for preconditioning. To form
@@ -235,7 +235,7 @@ conditioned. For diagnosing and combating ill-conditioned systems, please see
 []
 ```
 
-If the svd monitor reports **ANY** singular value, your problem is ill-posed. This usually means you forgot a boundary condition,
+If the svd monitor reports +ANY+ singular value, your problem is ill-posed. This usually means you forgot a boundary condition,
 a subdomain-restriction on a kernel, or that your current solution (or initialization) is at a saddle point.
 MOOSE can use PETSc to remove the nullspace and still output a solution, but this is generally not recommended. You need
 to work on making sure the Jacobian is correct and the numerical problem is well-posed.

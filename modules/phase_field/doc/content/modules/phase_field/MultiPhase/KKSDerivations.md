@@ -74,7 +74,7 @@ J &=& \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a
 
 ## KKSCHBulk
 
-[`KKSCHBulk`](/KKSCHBulk.md) is the non-split version, which is **not fully implemented**.
+[`KKSCHBulk`](/KKSCHBulk.md) is the non-split version, which is +not fully implemented+.
 The non-linear variable for this Kernel is the concentration $c$.
 
 ### Residual

@@ -11,24 +11,33 @@
 #include "libmesh/utility.h"
 
 registerMooseObject("PhaseFieldApp", ACBarrierFunction);
+registerMooseObject("PhaseFieldApp", ADACBarrierFunction);
 
+template <bool is_ad>
 InputParameters
-ACBarrierFunction::validParams()
+ACBarrierFunctionTempl<is_ad>::validParams()
 {
-  InputParameters params = ACGrGrBase::validParams();
+  InputParameters params = ACBarrierFunctionBase<is_ad>::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "gamma", "The interface profile coefficient to use with the kernel");
   params.addClassDescription("Allen-Cahn kernel used when 'mu' is a function of variables");
   return params;
 }
 
+template <bool is_ad>
+ACBarrierFunctionTempl<is_ad>::ACBarrierFunctionTempl(const InputParameters & parameters)
+  : ACBarrierFunctionBase<is_ad>(parameters),
+    _uname(this->template getParam<NonlinearVariableName>("variable")),
+    _gamma_name(this->template getParam<MaterialPropertyName>("gamma")),
+    _gamma(this->template getGenericMaterialProperty<Real, is_ad>(_gamma_name)),
+    _dmudvar(this->template getGenericMaterialProperty<Real, is_ad>(
+        this->derivativePropertyNameFirst("mu", _uname)))
+{
+}
+
 ACBarrierFunction::ACBarrierFunction(const InputParameters & parameters)
-  : ACGrGrBase(parameters),
+  : ACBarrierFunctionTempl<false>(parameters),
     _n_eta(_vals.size()),
-    _uname(getParam<NonlinearVariableName>("variable")),
-    _gamma_name(getParam<MaterialPropertyName>("gamma")),
-    _gamma(getMaterialPropertyByName<Real>(_gamma_name)),
-    _dmudvar(getMaterialPropertyDerivative<Real>("mu", _uname)),
     _d2mudvar2(getMaterialPropertyDerivative<Real>("mu", _uname, _uname)),
     _vname(getParam<std::vector<VariableName>>("v")),
     _d2mudvardeta(_n_eta),
@@ -61,6 +70,23 @@ ACBarrierFunction::computeDFDOP(PFFunctionType type)
     default:
       mooseError("Invalid type passed in");
   }
+}
+
+ADReal
+ADACBarrierFunction::computeDFDOP()
+{
+  ADReal f0 = 0.25 + 0.25 * _u[_qp] * _u[_qp] * _u[_qp] * _u[_qp] - 0.5 * _u[_qp] * _u[_qp];
+  ADReal sum_etaj = _u[_qp] * _u[_qp];
+
+  for (unsigned int i = 0; i < _op_num; ++i)
+  {
+    for (unsigned int j = i + 1; j < _op_num; ++j)
+      sum_etaj += (*_vals[j])[_qp] * (*_vals[j])[_qp];
+
+    f0 += 0.25 * Utility::pow<4>((*_vals[i])[_qp]) - 0.5 * Utility::pow<2>((*_vals[i])[_qp]);
+    f0 += sum_etaj * Utility::pow<2>((*_vals[i])[_qp]) * _gamma[_qp];
+  }
+  return _dmudvar[_qp] * f0;
 }
 
 Real
@@ -110,3 +136,6 @@ ACBarrierFunction::calculateF0()
   }
   return 0.25 + var_phase + eta_phase + eta_interface;
 }
+
+template class ACBarrierFunctionTempl<false>;
+template class ACBarrierFunctionTempl<true>;

@@ -1,8 +1,8 @@
-# ACInterface
+# ACInterface / ADACInterface
 
 !syntax description /Kernels/ACInterface
 
-Implements the Allen-Cahn term for the $\frac{\kappa_i}2|\nabla \eta_i|^2$
+`ACInterface` (and its automatic differentiation version, `ADACInterface`) implements the Allen-Cahn term for the $\frac{\kappa_i}2|\nabla \eta_i|^2$
 gradient energy contribution for the isotropic mobility case. Its weak form is
 
 \begin{equation}

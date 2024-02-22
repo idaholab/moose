@@ -10,11 +10,13 @@
 #include "SusceptibilityTimeDerivative.h"
 
 registerMooseObject("PhaseFieldApp", SusceptibilityTimeDerivative);
+registerMooseObject("PhaseFieldApp", ADSusceptibilityTimeDerivative);
 
+template <bool is_ad>
 InputParameters
-SusceptibilityTimeDerivative::validParams()
+SusceptibilityTimeDerivativeTempl<is_ad>::validParams()
 {
-  InputParameters params = TimeDerivative::validParams();
+  InputParameters params = SusceptibilityTimeDerivativeBase<is_ad>::validParams();
   params.addClassDescription(
       "A modified time derivative Kernel that multiplies the time derivative "
       "of a variable by a generalized susceptibility");
@@ -25,9 +27,17 @@ SusceptibilityTimeDerivative::validParams()
   return params;
 }
 
+template <bool is_ad>
+SusceptibilityTimeDerivativeTempl<is_ad>::SusceptibilityTimeDerivativeTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<SusceptibilityTimeDerivativeBase<is_ad>>>(
+        parameters),
+    _Chi(this->template getGenericMaterialProperty<Real, is_ad>("f_name"))
+{
+}
+
 SusceptibilityTimeDerivative::SusceptibilityTimeDerivative(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>(parameters),
-    _Chi(getMaterialProperty<Real>("f_name")),
+  : SusceptibilityTimeDerivativeTempl<false>(parameters),
     _dChidu(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _dChidarg(_n_args)
 {
@@ -46,6 +56,12 @@ Real
 SusceptibilityTimeDerivative::computeQpResidual()
 {
   return TimeDerivative::computeQpResidual() * _Chi[_qp];
+}
+
+ADReal
+ADSusceptibilityTimeDerivative::precomputeQpResidual()
+{
+  return _u_dot[_qp] * _Chi[_qp];
 }
 
 Real

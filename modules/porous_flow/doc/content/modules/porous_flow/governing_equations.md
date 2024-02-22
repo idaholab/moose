@@ -418,7 +418,7 @@ input file.
 | $\mathcal{E}\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowHeatVolumetricExpansion`](PorousFlowHeatVolumetricExpansion.md) |
 | $-\nu (1-\phi)\sigma^{\mathrm{eff}}_{ij}\frac{\partial}{\partial t}\epsilon_{ij}^{\mathrm{plastic}}$ | [`PorousFlowPlasticHeatEnergy`](PorousFlowPlasticHeatEnergy.md) |
 | $\phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowMassVolumetricExpansion`](PorousFlowMassVolumetricExpansion.md) |
-| $\left((1 - \phi)C^{\kappa}\right)\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowDesorpedMassVolumetricExpansion`](PorousFlowDesorpedMassVolumetricExpansion.md)|
+| $\left((1 - \phi)C^{\kappa}\right)\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowDesorpedMassVolumetricExpansion`](PorousFlowDesorpedMassVolumetricExpansion.md) |
 | $\Lambda \phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}$ | [`PorousFlowMassRadioactiveDecay`](PorousFlowMassRadioactiveDecay.md) |
 | $\phi I_{\mathrm{chem}}$ | [`PorousFlowPreDis`](PorousFlowPreDis.md) |
 | $\nabla\cdot(\mathbf{v}_{\beta} u)$ | [`PorousFlowBasicAdvection`](PorousFlowBasicAdvection.md) |

@@ -73,7 +73,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
 
   // create new application with parameters modified for input check run
-  _check_app = AppFactory::instance().createShared(
+  _check_apps[document_path] = AppFactory::instance().createShared(
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
@@ -85,7 +85,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // run input check application converting caught errors to diagnostics
   try
   {
-    _check_app->run();
+    getCheckApp()->run();
   }
   catch (std::exception & err)
   {
@@ -177,16 +177,89 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
 {
   // add only root level blocks to completion list when parser root is null
   if (!rootIsValid())
-    return addSubblocksToList(completionItems, "/", line, character);
+    return addSubblocksToList(completionItems, "/", line, character, line, character, "", false);
 
-  // find hit node for zero based request line and column number from input
+  // lambdas that will be used for checking completion request context type
+  auto is_request_in_open_block = [](wasp::HITNodeView request_context) {
+    return request_context.type() == wasp::OBJECT || request_context.type() == wasp::DOCUMENT_ROOT;
+  };
+  auto is_request_on_param_decl = [](wasp::HITNodeView request_context)
+  {
+    return request_context.type() == wasp::DECL && request_context.has_parent() &&
+           (request_context.parent().type() == wasp::KEYED_VALUE ||
+            request_context.parent().type() == wasp::ARRAY);
+  };
+  auto is_request_on_block_decl = [](wasp::HITNodeView request_context)
+  {
+    return request_context.type() == wasp::DECL && request_context.has_parent() &&
+           request_context.parent().type() == wasp::OBJECT;
+  };
+
+  // get document tree root used to find node under request line and column
   wasp::HITNodeView view_root = getRoot().getNodeView();
-  wasp::HITNodeView request_context =
-      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+  wasp::HITNodeView request_context;
+
+  // find node under request location if it is not past all defined content
+  if (line + 1 < (int)view_root.last_line() ||
+      (line + 1 == (int)view_root.last_line() && character <= (int)view_root.last_column()))
+    request_context = wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // otherwise find last node in document with last line and column of tree
+  else
+  {
+    request_context =
+        wasp::findNodeUnderLineColumn(view_root, view_root.last_line(), view_root.last_column());
+
+    // change context to be parent block or grandparent if block terminator
+    wasp::HITNodeView object_context = request_context;
+    while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+      object_context = object_context.parent();
+    if (request_context.type() == wasp::OBJECT_TERM && object_context.has_parent())
+      object_context = object_context.parent();
+    request_context = object_context;
+  }
+
+  // change context to equal sign if it is preceding node and in open block
+  if (is_request_in_open_block(request_context))
+  {
+    wasp::HITNodeView backup_context = request_context;
+    for (int backup_char = character; backup_context == request_context && --backup_char > 0;)
+      backup_context = wasp::findNodeUnderLineColumn(request_context, line + 1, backup_char + 1);
+    if (backup_context.type() == wasp::ASSIGN)
+      request_context = backup_context;
+  }
+
+  // use request context type to set up replacement range and prefix filter
+  int replace_line_beg = line;
+  int replace_char_beg = character;
+  int replace_line_end = line;
+  int replace_char_end = character;
+  std::string filtering_prefix;
+  if (request_context.type() == wasp::DECL || request_context.type() == wasp::VALUE)
+  {
+    // completion on existing block name, parameter name, or value replaces
+    replace_line_beg = request_context.line() - 1;
+    replace_char_beg = request_context.column() - 1;
+    replace_line_end = request_context.last_line() - 1;
+    replace_char_end = request_context.last_column();
+    filtering_prefix = request_context.data();
+
+    // empty block name columns are same as bracket so bump replace columns
+    if (is_request_on_block_decl(request_context) && filtering_prefix.empty())
+    {
+      replace_char_beg++;
+      replace_char_end++;
+    }
+  }
+
+  // get name of request context direct parent node so it can be used later
+  const auto & parent_name = request_context.has_parent() ? request_context.parent().name() : "";
 
   // get object context and value of type parameter for request if provided
   wasp::HITNodeView object_context = request_context;
   while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+    object_context = object_context.parent();
+  if (is_request_on_block_decl(request_context))
     object_context = object_context.parent();
   const std::string & object_path = object_context.path();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
@@ -208,44 +281,41 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
 
   bool pass = true;
 
-  // use context of request to pick types of items added to completion list
-  if (request_context.type() == wasp::OBJECT || request_context.type() == wasp::DOCUMENT_ROOT)
-  {
-    // add gathered parameters to completion list at request input location
-    pass &= addParametersToList(completionItems, valid_params, existing_params, line, character);
-
-    // add all valid subblock objects to completion list for request object
-    pass &= addSubblocksToList(completionItems, object_path, line, character);
-  }
-  else if (request_context.type() == wasp::VALUE)
-  {
-    // get name of parameter in input and zero based line and column ranges
-    std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
-    int replace_line_start = request_context.line() - 1;
-    int replace_char_start = request_context.column() - 1;
-    int replace_line_end = request_context.last_line() - 1;
-    int replace_char_end = request_context.last_column();
-
-    // add options to completion list for request value if parameter exists
-    for (const auto & valid_params_iter : valid_params)
-    {
-      const std::string & valid_param_name = valid_params_iter.first;
-
-      if (param_name == valid_param_name)
-      {
-        pass &= addValuesToList(completionItems,
+  // add gathered parameters to completion list with input range and prefix
+  if (is_request_in_open_block(request_context) || is_request_on_param_decl(request_context))
+    pass &= addParametersToList(completionItems,
                                 valid_params,
-                                existing_subblocks,
-                                param_name,
-                                obj_act_tasks,
-                                replace_line_start,
-                                replace_char_start,
+                                existing_params,
+                                replace_line_beg,
+                                replace_char_beg,
                                 replace_line_end,
-                                replace_char_end);
-        break;
-      }
-    }
-  }
+                                replace_char_end,
+                                filtering_prefix);
+
+  // add all valid subblocks to completion list with input range and prefix
+  if (is_request_in_open_block(request_context) || is_request_on_param_decl(request_context) ||
+      is_request_on_block_decl(request_context))
+    pass &= addSubblocksToList(completionItems,
+                               object_path,
+                               replace_line_beg,
+                               replace_char_beg,
+                               replace_line_end,
+                               replace_char_end,
+                               filtering_prefix,
+                               is_request_on_block_decl(request_context));
+
+  // add valid parameter value options to completion list using input range
+  if ((request_context.type() == wasp::VALUE || request_context.type() == wasp::ASSIGN) &&
+      valid_params.getParametersList().count(parent_name))
+    pass &= addValuesToList(completionItems,
+                            valid_params,
+                            existing_subblocks,
+                            parent_name,
+                            obj_act_tasks,
+                            replace_line_beg,
+                            replace_char_beg,
+                            replace_line_end,
+                            replace_char_end);
 
   is_incomplete = !pass;
 
@@ -287,8 +357,8 @@ MooseServer::getActionParameters(InputParameters & valid_params,
                                  const std::string & object_path,
                                  std::set<std::string> & obj_act_tasks)
 {
-  Syntax & syntax = _check_app->syntax();
-  ActionFactory & action_factory = _check_app->getActionFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+  ActionFactory & action_factory = getCheckApp()->getActionFactory();
 
   // get registered syntax path identifier using actual object context path
   bool is_parent;
@@ -332,8 +402,8 @@ MooseServer::getObjectParameters(InputParameters & valid_params,
                                  std::string object_type,
                                  const std::set<std::string> & obj_act_tasks)
 {
-  Syntax & syntax = _check_app->syntax();
-  Factory & factory = _check_app->getFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+  Factory & factory = getCheckApp()->getFactory();
 
   // use type parameter default if it exists and is not provided from input
   if (object_type.empty() && valid_params.have_parameter<std::string>("type") &&
@@ -384,8 +454,11 @@ bool
 MooseServer::addParametersToList(wasp::DataArray & completionItems,
                                  const InputParameters & valid_params,
                                  const std::set<std::string> & existing_params,
-                                 int request_line,
-                                 int request_char)
+                                 int replace_line_beg,
+                                 int replace_char_beg,
+                                 int replace_line_end,
+                                 int replace_char_end,
+                                 const std::string & filtering_prefix)
 {
   bool pass = true;
 
@@ -400,6 +473,10 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     if (deprecated || is_private || existing_params.count(param_name))
       continue;
 
+    // filter out parameters that do not begin with prefix if one was given
+    if (param_name.rfind(filtering_prefix, 0) != 0)
+      continue;
+
     // process parameter description and type to use in input default value
     std::string dirty_type = valid_params.type(param_name);
     std::string clean_type = MooseUtils::prettyCppType(dirty_type);
@@ -408,7 +485,7 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     MooseUtils::escape(doc_string);
 
     // use basic type to decide if parameter is array and quotes are needed
-    std::string array_quote = basic_type.compare(0, 6, "Array:") == 0 ? "'" : "";
+    bool is_array = basic_type.compare(0, 6, "Array:") == 0;
 
     // remove any array prefixes from basic type string and leave base type
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
@@ -437,45 +514,29 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
       default_value = oss.str();
     }
 
-    // otherwise if parameter is enum then use first item for default value
-    if (default_value.empty())
-    {
-      std::map<std::string, std::string> options_and_descs;
-
-      if (valid_params.have_parameter<MooseEnum>(param_name))
-        getEnumsAndDocs(valid_params.get<MooseEnum>(param_name), options_and_descs);
-      else if (valid_params.have_parameter<MultiMooseEnum>(param_name))
-        getEnumsAndDocs(valid_params.get<MultiMooseEnum>(param_name), options_and_descs);
-      else if (valid_params.have_parameter<ExecFlagEnum>(param_name))
-        getEnumsAndDocs(valid_params.get<ExecFlagEnum>(param_name), options_and_descs);
-      else if (valid_params.have_parameter<std::vector<MooseEnum>>(param_name))
-        getEnumsAndDocs(valid_params.get<std::vector<MooseEnum>>(param_name)[0], options_and_descs);
-
-      if (!options_and_descs.empty())
-        default_value = options_and_descs.begin()->first;
-    }
-
-    // otherwise use parameter basic type to pick appropriate default value
-    if (default_value.empty())
-    {
-      if (basic_type == "Boolean")
-        default_value = "true";
-      else if (basic_type == "Integer")
-        default_value = "0";
-      else if (basic_type == "Real")
-        default_value = "0.0";
-      else
-        default_value = "value";
-    }
-
     // switch 1 to true or 0 to false if boolean parameter as default value
     if (basic_type == "Boolean" && default_value == "1")
       default_value = "true";
     else if (basic_type == "Boolean" && default_value == "0")
       default_value = "false";
 
+    // wrap default value with single quotes if it exists and type is array
+    std::string array_quote = is_array && !default_value.empty() ? "'" : "";
+
+    // choose format of insertion text based on if client supports snippets
+    int text_format;
+    std::string insert_text;
+    if (client_snippet_support && !default_value.empty())
+    {
+      text_format = wasp::lsp::m_text_format_snippet;
+      insert_text = param_name + " = " + array_quote + "${1:" + default_value + "}" + array_quote;
+    }
+    else
+    {
+      text_format = wasp::lsp::m_text_format_plaintext;
+      insert_text = param_name + " = " + array_quote + default_value + array_quote;
+    }
     // finally build full insertion from parameter name, quote, and default
-    std::string embed_text = param_name + " = " + array_quote + default_value + array_quote;
 
     // add parameter label, insert text, and description to completion list
     completionItems.push_back(wasp::DataObject());
@@ -483,16 +544,17 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     pass &= wasp::lsp::buildCompletionObject(*item,
                                              errors,
                                              param_name,
-                                             request_line,
-                                             request_char,
-                                             request_line,
-                                             request_char,
-                                             embed_text,
+                                             replace_line_beg,
+                                             replace_char_beg,
+                                             replace_line_end,
+                                             replace_char_end,
+                                             insert_text,
                                              complete_kind,
                                              "",
                                              doc_string,
                                              false,
-                                             false);
+                                             false,
+                                             text_format);
   }
 
   return pass;
@@ -501,10 +563,14 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
 bool
 MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                 const std::string & object_path,
-                                int request_line,
-                                int request_char)
+                                int replace_line_beg,
+                                int replace_char_beg,
+                                int replace_line_end,
+                                int replace_char_end,
+                                const std::string & filtering_prefix,
+                                bool request_on_block_decl)
 {
-  Syntax & syntax = _check_app->syntax();
+  Syntax & syntax = getCheckApp()->syntax();
 
   // set used to prevent reprocessing syntax paths for more than one action
   std::set<std::string> syntax_paths_processed;
@@ -540,21 +606,32 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
   {
     for (const auto & subblock_name : _syntax_to_subblocks[registered_syntax])
     {
+      // filter subblock if it does not begin with prefix and one was given
+      if (subblock_name != "*" && subblock_name.rfind(filtering_prefix, 0) != 0)
+        continue;
+
       std::string doc_string;
-      std::string embed_text;
+      std::string insert_text;
       int complete_kind;
+
+      // choose format for insert text based on if client supports snippets
+      int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
+                                               : wasp::lsp::m_text_format_plaintext;
 
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
         doc_string = "custom user named block";
-        embed_text = "[block_name]\n  \n[]";
+        insert_text = (request_on_block_decl ? "" : "[") +
+                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]\n  " +
+                      (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
         doc_string = "application named block";
-        embed_text = "[" + subblock_name + "]\n  \n[]";
+        insert_text = (request_on_block_decl ? "" : "[") + subblock_name + "]\n  " +
+                      (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
@@ -564,16 +641,17 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       pass &= wasp::lsp::buildCompletionObject(*item,
                                                errors,
                                                subblock_name,
-                                               request_line,
-                                               request_char,
-                                               request_line,
-                                               request_char,
-                                               embed_text,
+                                               replace_line_beg,
+                                               replace_char_beg,
+                                               replace_line_end,
+                                               replace_char_end,
+                                               insert_text,
                                                complete_kind,
                                                "",
                                                doc_string,
                                                false,
-                                               false);
+                                               false,
+                                               text_format);
     }
   }
 
@@ -586,13 +664,13 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                              const std::set<std::string> & existing_subblocks,
                              const std::string & param_name,
                              const std::set<std::string> & obj_act_tasks,
-                             int replace_line_start,
-                             int replace_char_start,
+                             int replace_line_beg,
+                             int replace_char_beg,
                              int replace_line_end,
                              int replace_char_end)
 {
-  Syntax & syntax = _check_app->syntax();
-  Factory & factory = _check_app->getFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+  Factory & factory = getCheckApp()->getFactory();
 
   // get clean type for path associations and basic type for boolean values
   std::string dirty_type = valid_params.type(param_name);
@@ -707,22 +785,37 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
     const std::string & option = option_and_desc.first;
     const std::string & dscrpt = option_and_desc.second;
 
+    // choose format of insertion text based on if client supports snippets
+    int text_format;
+    std::string insert_text;
+    if (client_snippet_support)
+    {
+      text_format = wasp::lsp::m_text_format_snippet;
+      insert_text = "${1:" + option + "}";
+    }
+    else
+    {
+      text_format = wasp::lsp::m_text_format_plaintext;
+      insert_text = option;
+    }
+
     // add option name, insertion range, and description to completion list
     completionItems.push_back(wasp::DataObject());
     wasp::DataObject * item = completionItems.back().to_object();
     pass &= wasp::lsp::buildCompletionObject(*item,
                                              errors,
                                              option,
-                                             replace_line_start,
-                                             replace_char_start,
+                                             replace_line_beg,
+                                             replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             option,
+                                             insert_text,
                                              complete_kind,
                                              "",
                                              dscrpt,
                                              false,
-                                             false);
+                                             false,
+                                             text_format);
   }
 
   return pass;
@@ -746,7 +839,7 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
                                                int line,
                                                int character)
 {
-  Factory & factory = _check_app->getFactory();
+  Factory & factory = getCheckApp()->getFactory();
 
   // return without any definition locations added when parser root is null
   if (!rootIsValid())
@@ -849,7 +942,7 @@ MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
                                            const std::string & clean_type,
                                            const std::string & val_string)
 {
-  Syntax & syntax = _check_app->syntax();
+  Syntax & syntax = getCheckApp()->syntax();
 
   // build map from parameter types to input lookup paths and save to reuse
   if (_type_to_input_paths.empty())
@@ -980,7 +1073,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
   // formatted string that will be built recursively by appending each call
   std::string format_string;
 
-  // walk over all children of this node context and build document symbols
+  // walk over all children of this node context and build formatted string
   for (const auto i : make_range(parent.child_count()))
   {
     // walk must be index based to catch file include and skip its children
@@ -1010,7 +1103,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
 
       const std::string render_val = hit::extractValue(child.data());
       std::size_t val_column = child.child_count() > 2 ? child.child_at(2).column() : 0;
-      size_t prefix_len = prefix.size() - 1;
+      std::size_t prefix_len = prefix.size() - 1;
 
       format_string += blank + prefix + hit::formatValue(render_val, val_column, prefix_len);
     }
@@ -1057,7 +1150,7 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
     wasp::DataObject * data_child = documentSymbols.back().to_object();
     pass &= wasp::lsp::buildDocumentSymbolObject(*data_child,
                                                  errors,
-                                                 name,
+                                                 (name.empty() ? "void" : name),
                                                  detail,
                                                  symbol_kind,
                                                  false,
@@ -1109,7 +1202,7 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
     wasp::DataObject & data_child = wasp::lsp::addDocumentSymbolChild(data_parent);
     pass &= wasp::lsp::buildDocumentSymbolObject(data_child,
                                                  errors,
-                                                 name,
+                                                 (name.empty() ? "void" : name),
                                                  detail,
                                                  symbol_kind,
                                                  false,
@@ -1136,7 +1229,7 @@ MooseServer::getCompletionItemKind(const InputParameters & valid_params,
                                    bool is_param)
 {
   // set up completion item kind value that client may use for icon in list
-  auto associated_types = _check_app->syntax().getAssociatedTypes();
+  auto associated_types = getCheckApp()->syntax().getAssociatedTypes();
   if (is_param && valid_params.isParamRequired(param_name) &&
       !valid_params.isParamValid(param_name))
     return wasp::lsp::m_comp_kind_event;
@@ -1201,13 +1294,20 @@ MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
 bool
 MooseServer::rootIsValid() const
 {
-  return _check_app && _check_app->builder().root() &&
-         !_check_app->builder().root()->getNodeView().is_null();
+  return getCheckApp() && getCheckApp()->builder().root() &&
+         !getCheckApp()->builder().root()->getNodeView().is_null();
 }
 
 hit::Node &
 MooseServer::getRoot()
 {
   mooseAssert(rootIsValid(), "Not valid");
-  return *_check_app->builder().root();
+  return *getCheckApp()->builder().root();
+}
+
+std::shared_ptr<MooseApp>
+MooseServer::getCheckApp() const
+{
+  mooseAssert(_check_apps.count(document_path), "No check app for path");
+  return _check_apps.at(document_path);
 }

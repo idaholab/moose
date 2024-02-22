@@ -51,7 +51,7 @@ the stress and strain calculations are performed on the correct material configu
 | Theoretical Formulation                           | Tensor Mechanics Classes    |
 |---------------------------------------------------|-----------------------------|
 | Linearized elasticity total small strain problems | [ComputeLinearElasticStress](/ComputeLinearElasticStress.md) and [ComputeSmallStrain](/ComputeSmallStrain.md) (in the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) use the argument `strain = SMALL`) |
-| Linearized elasticity incremental small strain    | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) and [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) (in the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) `strain = SMALL` and `incremental = true` )|
+| Linearized elasticity incremental small strain    | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) and [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) (in the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) `strain = SMALL` and `incremental = true` ) |
 | Large deformation problems, including elasticity and/or plasticity | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md), or other inelastic stress material class, and [ComputeFiniteStrain](/ComputeFiniteStrain.md) (in the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) use `strain = FINITE`) |
 
 ### Linearized Elasticity Problems

@@ -20,7 +20,7 @@ where the $\psi_i$ are the test functions, and $u_h$ are the trial solutions in
 the finite dimensional space $\mathcal{S}^h$ for the unknown ($u$).
 
 The Jacobian term for this kernel is zero: $\frac{\partial R_i(u_h)}{\partial u_j} = 0$, since
-it is assumed that $f$ **is not** a function of the unknown $u$.
+it is assumed that $f$ +is not+ a function of the unknown $u$.
 
 The force is constructed through a user supplied constant $c$,
 [function](/Functions/index.md) value evaluated at the current time and

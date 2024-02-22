@@ -9,7 +9,7 @@ the main app frame of reference. This position can be used to align the meshes f
 for outputting the `MultiApps` [Exodus results](Exodus.md) at the translated positions.
 
 !alert warning
-This should **not** be used to generate new `MultiApps`. The `MultiApps` have already
+This should +not+ be used to generate new `MultiApps`. The `MultiApps` have already
 been created when the positions are gathered.
 
 ## Example MultiApp File Syntax

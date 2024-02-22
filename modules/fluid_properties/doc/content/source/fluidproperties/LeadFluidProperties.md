@@ -5,7 +5,7 @@
 These properties are based on experiments reported in the Handbook on Lead-bismuth Eutectic Alloy and Lead
 Properties, Materials Compatibility, Thermal-hydraulics and Technologies [!citep](Fazio).
 Most properties only depend on temperature; the fluid is considered incompressible.
-The fluid properties are summarized in Table [tab:lead], which reports the formulas used and their origin.
+The fluid properties are summarized in [tab:lead], which reports the formulas used and their origin.
 
 !table id=tab:lead caption=Table of properties and references to the equations in [!citep](Fazio).
 | Properties                     | Equation       | Equation/Table # |

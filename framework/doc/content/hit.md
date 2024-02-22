@@ -179,7 +179,7 @@ hit common file1.i file2.i ... > common_parameters.i
 ```
 
 Will extract all parameters that are common to the specified input files (and
-have the same values). This can be used as the **first step** in factoring out
+have the same values). This can be used as the +first step+ in factoring out
 common settings into a single input file.
 
 ## `hit subtract` - Removing common parameters parameters
@@ -189,7 +189,7 @@ hit subtract simulation_1_full.i common_parameters.i > simulation_1.i
 ```
 
 removes the parameters in `common_parameters.i` from `simulation_1_full.i`,
-creating `simulation_1.i`. This is the **second step** in factoring out common
+creating `simulation_1.i`. This is the +second step+ in factoring out common
 parameters from a set of input files. The resulting file can be run as
 `./mooseapp-opt -i common.i simulation_1.i` and will result in the same
 simulation as `./mooseapp-opt -i simulation_1_full.i`.

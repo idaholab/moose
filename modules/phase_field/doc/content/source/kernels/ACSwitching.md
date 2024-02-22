@@ -1,8 +1,8 @@
-# ACSwitching
+# ACSwitching / ADACSwitching
 
 !syntax description /Kernels/ACSwitching
 
-Implements the terms of the form
+`ACSwitching` (and its automatic differentiation version, `ADACSwitching`) implements the terms of the form
 \begin{equation}
 \frac{\partial h_a}{\partial\eta_{ai}} F_a + \frac{\partial h_b}{\partial\eta_{ai}} F_b + \dots,
 \end{equation}
