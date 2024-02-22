@@ -49,10 +49,6 @@ ParsedGenerateSideset::validParams()
       "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
       "neighbor is in this set",
       "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
-  params.addParam<Point>(
-      "normal",
-      Point(),
-      "If provided specifies the normal vector on sides that are added to the new ");
   params.addParam<std::vector<std::string>>(
       "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
@@ -77,14 +73,12 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
                       isParamValid("included_subdomains")),
     _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
                                isParamValid("included_neighbors")),
-    _check_normal(parameters.isParamSetByUser("normal")),
     _included_ids(isParamValid("included_subdomain_ids")
                       ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
                       : std::vector<SubdomainID>()),
     _included_neighbor_ids(isParamValid("included_neighbor_ids")
                                ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
-                               : std::vector<SubdomainID>()),
-    _normal(getParam<Point>("normal"))
+                               : std::vector<SubdomainID>())
 {
   // Handle deprecated parameters
   if (isParamValid("included_subdomain_ids") && isParamValid("included_subdomains"))
@@ -211,7 +205,7 @@ ParsedGenerateSideset::generate()
       }
 
       // check normal if requested
-      if (_check_normal && std::abs(1.0 - _normal * normals[0]) > _variance)
+      if (_using_normal && !normalsWithinTol(_normal, normals[0]))
         continue;
 
       // check that boundary is within the list of included boundaries

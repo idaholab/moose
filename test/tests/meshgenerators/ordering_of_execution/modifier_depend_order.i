@@ -16,7 +16,7 @@
     normals = ' 0.70710678118  0.70710678118  0
                -0.70710678118 -0.70710678118  0'
     new_boundary = 'up_right down_left'
-    variance = 1e-3
+    normal_tol = 1e-3
     fixed_normal = true
 
   []

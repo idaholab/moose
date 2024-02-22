@@ -12,7 +12,7 @@
                0 -1  0'
     fixed_normal = true
     new_boundary = 'front back'
-    variance = 0.5
+    normal_tol = 0.5
   []
 []
 

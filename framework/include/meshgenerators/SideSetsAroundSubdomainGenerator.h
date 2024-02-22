@@ -31,17 +31,4 @@ public:
 protected:
   /// names of the sidesets to which the faces will be added
   std::vector<BoundaryName> _boundary_names;
-
-  /// true if only faces close to "normal" will be added
-  bool _using_normal;
-
-  /**
-   * if normal is specified, then faces are only added
-   * if face_normal.normal_hat <= 1 - normal_tol
-   * where normal_hat = _normal/|_normal|
-   */
-  Real _normal_tol;
-
-  /// if specified, then faces are only added if their normal is close to this
-  Point _normal;
 };

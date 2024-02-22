@@ -41,6 +41,8 @@ SideSetsFromPointsGenerator::validParams()
   params.addRequiredParam<std::vector<Point>>(
       "points", "A list of points from which to start painting sidesets");
 
+  params.suppressParameter<Point>("normal");
+
   return params;
 }
 
@@ -98,7 +100,7 @@ SideSetsFromPointsGenerator::generate()
 
           // If we *already* found a good but different side to paint
           // our sideset with, we've got an ambiguity here.
-          if (elem_to_flood && (std::abs(1.0 - normal_to_flood * normals[0]) > _variance ||
+          if (elem_to_flood && (!normalsWithinTol(normal_to_flood, normals[0]) ||
                                 elem_to_flood->which_neighbor_am_i(elem) == libMesh::invalid_uint))
             mooseError("Two ambiguous potential sideset sources found for boundary `",
                        _boundary_names[i],

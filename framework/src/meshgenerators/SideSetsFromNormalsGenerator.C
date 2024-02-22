@@ -41,6 +41,8 @@ SideSetsFromNormalsGenerator::validParams()
       "normals", "A list of normals for which to start painting sidesets");
   params.addParam<Real>("tolerance", 1e-5, "Tolerance for comparing the face nornmal");
 
+  params.suppressParameter<Point>("normal");
+
   return params;
 }
 

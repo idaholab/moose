@@ -30,6 +30,8 @@ AllSideSetsByNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
+  params.suppressParameter<Point>("normal");
+
   params.addClassDescription("Adds sidesets to the entire mesh based on unique normals.");
   return params;
 }

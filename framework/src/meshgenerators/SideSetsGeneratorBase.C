@@ -25,8 +25,6 @@ SideSetsGeneratorBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<Real>(
-      "variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
   params.addParam<bool>("fixed_normal",
                         false,
                         "This Boolean determines whether we fix our normal "
@@ -52,19 +50,37 @@ SideSetsGeneratorBase::validParams()
       false,
       "Whether to only include sides that are already part of an existing sideset.");
 
+  params.addParam<Point>("normal",
+                         Point(),
+                         "If supplied, only faces with normal equal to this, up to "
+                         "normal_tol, will be added to the sidesets specified");
+  params.addRangeCheckedParam<Real>("normal_tol",
+                                    0.1,
+                                    "normal_tol>=0 & normal_tol<=2",
+                                    "If normal is supplied then faces are "
+                                    "only added if face_normal.normal_hat >= "
+                                    "1 - normal_tol, where normal_hat = "
+                                    "normal/|normal|");
+  params.addDeprecatedParam<Real>("variance",
+                                  "The variance allowed when comparing normals",
+                                  "Deprecated, use 'normal_tol' instead");
+  params.deprecateParam("variance", "normal_tol", "4/01/2024");
+
   return params;
 }
 
 SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _variance(getParam<Real>("variance")),
     _fixed_normal(getParam<bool>("fixed_normal")),
     _replace(getParam<bool>("replace")),
     _include_only_external_sides(getParam<bool>("include_only_external_sides")),
     _skip_if_part_of_existing_sideset(getParam<bool>("skip_if_part_of_existing_sideset")),
     _include_only_if_part_of_existing_sideset(
-        getParam<bool>("include_only_if_part_of_existing_sideset"))
+        getParam<bool>("include_only_if_part_of_existing_sideset")),
+    _normal(getParam<Point>("normal")),
+    _using_normal(isParamSetByUser("normal")),
+    _normal_tol(getParam<Real>("normal_tol"))
 {
 }
 
@@ -122,7 +138,7 @@ SideSetsGeneratorBase::flood(const Elem * elem,
     const std::vector<Point> normals = _fe_face->get_normals();
 
     // We'll just use the normal of the first qp
-    if (std::abs(1.0 - normal * normals[0]) <= _variance)
+    if (normalsWithinTol(normal, normals[0]))
     {
       if (_replace)
         mesh.get_boundary_info().remove_side(elem, side);
@@ -138,4 +154,17 @@ SideSetsGeneratorBase::flood(const Elem * elem,
       }
     }
   }
+}
+
+bool
+SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1, const Point & normal_2) const
+{
+  return std::abs(1.0 - normal_1 * normal_2) <= _normal_tol;
+}
+
+bool
+addSideToBoundary(const Elem * elem, const unsigned int side) const
+{
+  if (elem->neighbor_ptr(side) && _include_only_external_sides)
+    return false;
 }

@@ -29,16 +29,6 @@ SideSetsAroundSubdomainGenerator::validParams()
       "new_boundary", "The list of boundary names to create on the supplied subdomain");
   params.addRequiredParam<std::vector<SubdomainName>>("block",
                                                       "The blocks around which to create sidesets");
-  params.addParam<Point>("normal",
-                         "If supplied, only faces with normal equal to this, up to "
-                         "normal_tol, will be added to the sidesets specified");
-  params.addRangeCheckedParam<Real>("normal_tol",
-                                    0.1,
-                                    "normal_tol>=0 & normal_tol<=2",
-                                    "If normal is supplied then faces are "
-                                    "only added if face_normal.normal_hat >= "
-                                    "1 - normal_tol, where normal_hat = "
-                                    "normal/|normal|");
 
   params.addClassDescription(
       "Adds element faces that are on the exterior of the given block to the sidesets specified");
@@ -49,10 +39,7 @@ SideSetsAroundSubdomainGenerator::validParams()
 SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
     const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
-    _using_normal(isParamValid("normal")),
-    _normal_tol(getParam<Real>("normal_tol")),
-    _normal(_using_normal ? getParam<Point>("normal") : Point())
+    _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary"))
 {
   if (_using_normal)
   {
@@ -126,7 +113,7 @@ SideSetsAroundSubdomainGenerator::generate()
           const std::vector<Point> & normals = _fe_face->get_normals();
           _fe_face->reinit(elem, side);
           face_normal = normals[0];
-          add_to_bdy = (_normal * face_normal >= 1.0 - _normal_tol);
+          add_to_bdy = normalsWithinTol(_normal, face_normal);
         }
 
         // Add the boundaries, if appropriate
@@ -184,7 +171,7 @@ SideSetsAroundSubdomainGenerator::generate()
             const std::vector<Point> & normals = _fe_face->get_normals();
             _fe_face->reinit(elem, side);
             face_normal = normals[0];
-            add_to_bdy = (_normal * face_normal >= 1.0 - _normal_tol);
+            add_to_bdy = normalsWithinTol(_normal, face_normal);
           }
 
           // Add the boundaries, if appropriate
