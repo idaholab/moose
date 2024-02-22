@@ -32,7 +32,7 @@
     type = 'RunException'
     input = 'no_neighbor.i'
     cli_args = '--mesh-only'
-    expect_err = "elem 0 doesn't have a neighbor through side 1 therefore it can't be flipped"
+    expect_err = "elem 0 does not have a neighbor through side 1 therefore it cannot be flipped"
     requirement = "The system shall produce a reasonable error when switching the normal orientation of a sideset if the sideset cannot be flipped"
     mesh_mode = 'replicated'
   []
