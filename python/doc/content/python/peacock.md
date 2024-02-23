@@ -127,19 +127,19 @@ Finally, if you would like to save your current input file, you can click the "S
 ## Parameter Editor
 
 !style! halign=left
-With the Iput File tab active, double-clicking to edit an item or right-clicking and selecting "Add..." for an item in the Tree View will cause the "Parameter Editor" window (shown below) to open. This window is where you choose what type of item you are adding and edit ther parameters for that object.
+With the Input File tab active, double-clicking to edit an item or right-clicking and selecting "Add..." for an item in the Tree View will cause the "Parameter Editor" window (shown below) to open. This window is where you choose what type of item you are adding and edit the parameters for that object.
 !style-end!
 
 !media large_media/peacock/param_editor_with_text_no_alpha.png
        style=width:50%;
 
-## Selecting a type
+### Selecting a type
 
 !style! halign=left
 The first thing you'll want to do in the Parameter Editor window is use the large drop-down menu at the top to select the type of object you are editing. Note that sometimes there are no options there and only an asterisk ("*") will be shown (such as when adding a Variable).
 !style-end!
 
-## Parameter Table
+### Parameter Table
 
 !style! halign=left
 After selecting a type, the Parameter Table will be filled with the possible parameters for that object, including: Name, Value, Options, Description, and any Comments associated with each parameter.  Let's talk about each one of these columns in detail:
@@ -153,7 +153,7 @@ After selecting a type, the Parameter Table will be filled with the possible par
 
 - +Comment+: The comment column allows you to add a comment that is associated with that parameter.  That comment will be saved to the input file if you use the Save button in the Input File tab.  (Note: Do not use the comment character "#" here... it is automatically inserted by Peacock.)  If you opened an input file with in-line comments after the parameters, those comments will be shown automatically in this column.
 
-## Block Comment
+### Block Comment
 
 !style! halign=left
 Below the Parameter Table is the Block Comment box. Any text entered into this box will be displayed as a comment at the beginning of the block in question (see the Equivalent Input File Text in the above image). You can use "newlines" to create a multi-line comment, comment characters are not required -- they will be automatically inserted by Peacock.
@@ -189,7 +189,7 @@ The Execute Tab (shown below) allows you to run the current application with the
 ### MPI and Threads
 
 !style! halign=left
-Allows you to run in parallel using combinations of distributed - and shared- memory parallelism. Leave both boxes blank if you want to run serially
+Allows you to run in parallel using combinations of distributed- and shared- memory parallelism. Leave both boxes blank if you want to run serially.
 !style-end!
 
 ### Other Options
@@ -255,10 +255,10 @@ The Visualize Tab is not intended to be a replacement for Paraview, Ensight, ViS
 !media large_media/peacock/visualize_with_text_no_alpha.png
        style=width:50%;
 
-## Result View
+### Result View
 
 !style! halign=left
-The main view on this tab is a 3D view of the result. Left-click and drag to rotate the result. Right-click and drag to zoom. Middle-click ans drag or shift-left-click to pan.
+The main view on this tab is a 3D view of the result. Left-click and drag to rotate the result. Right-click and drag to zoom. Middle-click and drag or shift-left-click to pan.
 !style-end!
 
 ### Show Blocks

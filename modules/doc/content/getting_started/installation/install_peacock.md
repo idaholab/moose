@@ -22,4 +22,4 @@ config activate peacock
 ```
 
 !alert note
-When ever you wish to run Peacock, it will be necessary to activate this environment.
+Whenever you wish to run Peacock, it will be necessary to activate this environment.
