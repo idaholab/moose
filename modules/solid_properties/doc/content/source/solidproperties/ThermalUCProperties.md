@@ -4,8 +4,7 @@
 
 ## Description
 
-This userobject provides
-thermal properties for Uranium monocarbide as a function of temperature.
+This `SolidProperties` object provides thermal properties for Uranium monocarbide as a function of temperature.
 
 !include solid_properties_units.md
 
@@ -22,7 +21,7 @@ Thermal conductivity is calculated from [!cite](Vasudevamurthy2022) as:
 
 For 323 K $\le$ T $\le$ 923 K
 \begin{equation}
-k=21.7-3.04\times 10^{-3} * T+3.61\times 10^{-6} * T^2 
+k=21.7-3.04\times 10^{-3} * T+3.61\times 10^{-6} * T^2
 \end{equation}
 
 And for 924 K $\le$ T $\le$ 2573 K, the thermal conductivity is:
@@ -31,7 +30,7 @@ k=20.2+1.48\times 10^{-3} T
 \end{equation}
 
 The density is assumed constant.
-A default value is provided [!cite](Vasudevamurthy2022) as 
+A default value is provided [!cite](Vasudevamurthy2022) as
 
 \begin{equation}
 \rho= 13824.7
