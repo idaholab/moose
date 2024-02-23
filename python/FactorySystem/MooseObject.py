@@ -34,7 +34,7 @@ class MooseObject(object):
     ##
     # Return the name of the object
     #
-    # If the object was built with name, params arguements it will return the
+    # If the object was built with name, params arguments it will return the
     # supplied name in the constructor. If the name was not given in the constructor
     # and the "name" parameter is defined it will return the value of this parameter.
     # Otherwise None will be returned.
