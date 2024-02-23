@@ -8,17 +8,13 @@
       type = CSVDiff
       input = forward_exact.i
       csvdiff = forward_exact_csv_sample_0011.csv
-      heavy = True
       allow_test_objects = true
-
       detail = 'creating synthetic data, '
     []
     [parameter_mesh]
       type = Exodiff
       input = parameter_mesh.i
       exodiff = parameter_mesh_out.e
-      heavy = True
-
       detail = 'creating a mesh defining parameter space, '
     []
     [forward_and_adjoint]
@@ -27,8 +23,6 @@
       cli_args = 'Outputs/console=true'
       exodiff = forward_and_adjoint_out.e
       prereq = 'diffusion_reaction/forward_exact diffusion_reaction/parameter_mesh'
-      heavy = True
-
       detail = 'performing a forward and adjoint simulation, and '
     []
     [optimize]
@@ -36,7 +30,6 @@
       input = optimize.i
       exodiff = optimize_out_forward0.e
       prereq = diffusion_reaction/forward_and_adjoint
-      heavy = True
       rel_err = 1e-3
       abs_zero = 0.01
       detail = 'use TAO to perform optimization.'

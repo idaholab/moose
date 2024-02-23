@@ -61,10 +61,10 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taobqnls #taobqnktr
+  tao_solver = taobqnls
   petsc_options_iname = '-tao_gttol -tao_max_it'
-  petsc_options_value = '1e-5 100' #use this to get results for paper
-  # petsc_options_value = '1e-5 5'
+  #petsc_options_value = '1e-5 100' #use this to get results for paper
+  petsc_options_value = '1e-5 5'
   solve_on = 'NONE'
   verbose = true
 []
