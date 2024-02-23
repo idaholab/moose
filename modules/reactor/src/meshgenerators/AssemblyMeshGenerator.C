@@ -270,9 +270,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         params.set<bool>("uniform_mesh_on_sides") = true;
       }
     }
-    params.set<std::string>("id_name") = "pin_id";
-    params.set<MooseEnum>("assign_type") =
-        "cell"; // give elems IDs relative to position in assembly
+    params.set<std::vector<std::string>>("id_name") = {"pin_id"};
+    params.set<std::vector<MooseEnum>>("assign_type") = {
+        MooseEnum("cell", "cell")}; // give elems IDs relative to position in assembly
     params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
     params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
     params.set<bool>("create_outward_interface_boundaries") = false;

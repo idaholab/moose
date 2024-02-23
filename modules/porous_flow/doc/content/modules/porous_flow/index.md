@@ -1,6 +1,11 @@
 # PorousFlow module
 
-!media porous_flow/1phase_convection.gif style=width:80%;margin-left:10px caption=Density driven [convective mixing](porous_flow/lava_lamp.md) of CO2 in brine  id=1phase_convection_anim
+!media large_media/porous_flow/examples/fluidflower/fluidflower.mp4
+       style=width:80%;margin-left:10px
+       autoplay=True
+       loop=True
+       caption=CO$_2$ injection and dissolution in [complex geometry](porous_flow/fluidflower.md)
+       id=fluidflower
 
 The PorousFlow module is a library of physics for fluid and heat flow in porous
 media. It is formulated in an extremely general manner, so is capable of solving

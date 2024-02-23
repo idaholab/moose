@@ -79,5 +79,12 @@
       detail = 'for Cartesian cores with regular square core boundary'
       recover = false
     []
+    [multi_id]
+      type = 'Exodiff'
+      input = 'patterned_cartesian_assembly_reporting_multi_id.i'
+      exodiff = 'patterned_cartesian_assembly_reporting_multi_id_out.e'
+      detail = 'for having different reporting ID assignment schemes for each pattern'
+      recover = false
+    []
   []
 []
