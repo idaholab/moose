@@ -106,14 +106,16 @@ PatternedHexMeshGenerator::validParams()
   params.addParam<bool>("deform_non_circular_region",
                         true,
                         "Whether the non-circular region (outside the rings) can be deformed.");
-  params.addParam<std::string>("id_name", "Name of extra integer ID set");
+  params.addParam<std::vector<std::string>>("id_name", "List of extra integer ID set names");
   params.addParam<std::vector<MeshGeneratorName>>(
       "exclude_id", "Name of input meshes to be excluded in ID generation");
-  MooseEnum option("cell pattern manual", "cell");
-  params.addParam<MooseEnum>("assign_type", option, "Type of integer ID assignment");
-  params.addParam<std::vector<std::vector<dof_id_type>>>(
+  std::vector<MooseEnum> option = {MooseEnum("cell pattern manual", "cell")};
+  params.addParam<std::vector<MooseEnum>>(
+      "assign_type", option, "List of integer ID assignment types");
+  params.addParam<std::vector<std::vector<std::vector<dof_id_type>>>>(
       "id_pattern",
-      "User-defined element IDs. A double-indexed array starting with the upper-left corner");
+      "User-defined element IDs. A double-indexed array starting with the upper-left corner. When "
+      "providing multiple patterns, each pattern should be separated using '|'");
   params.addParamNamesToGroup(
       "background_block_id background_block_name duct_block_ids "
       "duct_block_names external_boundary_id external_boundary_name "
@@ -165,8 +167,6 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _use_reporting_id(isParamValid("id_name")),
-    _assign_type(
-        getParam<MooseEnum>("assign_type").getEnum<ReportingIDGeneratorUtils::AssignType>()),
     _use_exclude_id(isParamValid("exclude_id"))
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
@@ -257,14 +257,37 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
 
   if (_use_reporting_id)
   {
-    if (_use_exclude_id && _assign_type != ReportingIDGeneratorUtils::AssignType::cell)
-      paramError("exclude_id", "works only when \"assign_type\" is equal 'cell'");
-    if (!isParamValid("id_pattern") &&
-        _assign_type == ReportingIDGeneratorUtils::AssignType::manual)
-      paramError("id_pattern", "required when \"assign_type\" is equal to 'manual'");
-
-    if (_assign_type == ReportingIDGeneratorUtils::AssignType::manual)
-      _id_pattern = getParam<std::vector<std::vector<dof_id_type>>>("id_pattern");
+    // get reporting id name input
+    _reporting_id_names = getParam<std::vector<std::string>>("id_name");
+    const unsigned int num_reporting_ids = _reporting_id_names.size();
+    // get reporting id assign type input
+    const auto input_assign_types = getParam<std::vector<MooseEnum>>("assign_type");
+    if (input_assign_types.size() != num_reporting_ids)
+      paramError("assign_type", "This parameter must have a length equal to length of id_name.");
+    // list of reporting id names using manual id patterns;
+    std::vector<std::string> manual_ids;
+    for (const auto i : make_range(num_reporting_ids))
+    {
+      _assign_types.push_back(
+          input_assign_types[i].getEnum<ReportingIDGeneratorUtils::AssignType>());
+      if (_assign_types[i] == ReportingIDGeneratorUtils::AssignType::manual)
+        manual_ids.push_back(_reporting_id_names[i]);
+    }
+    // processing "id_pattern" input parameter
+    if (manual_ids.size() > 0 && !isParamValid("id_pattern"))
+      paramError("id_pattern", "required when 'manual' is defined in \"assign_type\"");
+    if (isParamValid("id_pattern"))
+    {
+      const auto input_id_patterns =
+          getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("id_pattern");
+      if (input_id_patterns.size() != manual_ids.size())
+        paramError("id_pattern",
+                   "The number of patterns must be equal to the number of 'manual' types defined "
+                   "in \"assign_type\".");
+      for (unsigned int i = 0; i < manual_ids.size(); ++i)
+        _id_patterns[manual_ids[i]] = input_id_patterns[i];
+    }
+    // processing exlude id
     _exclude_ids.resize(_input_names.size());
     if (_use_exclude_id)
     {
@@ -1053,29 +1076,37 @@ PatternedHexMeshGenerator::addReportingIDs(
     std::unique_ptr<MeshBase> & mesh,
     const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const
 {
-  unsigned int extra_id_index;
-  const std::string element_id_name = getParam<std::string>("id_name");
-  if (!mesh->has_elem_integer(element_id_name))
-    extra_id_index = mesh->add_elem_integer(element_id_name);
-  else
+  const unsigned int num_reporting_ids = _reporting_id_names.size();
+  for (unsigned int i = 0; i < num_reporting_ids; ++i)
   {
-    extra_id_index = mesh->get_elem_integer_index(element_id_name);
-    paramWarning(
-        "id_name", "An element integer with the name '", element_id_name, "' already exists");
-  }
+    const std::string element_id_name = _reporting_id_names[i];
+    unsigned int extra_id_index;
+    if (!mesh->has_elem_integer(element_id_name))
+      extra_id_index = mesh->add_elem_integer(element_id_name);
+    else
+    {
+      extra_id_index = mesh->get_elem_integer_index(element_id_name);
+      paramWarning(
+          "id_name", "An element integer with the name '", element_id_name, "' already exists");
+    }
 
-  // assign reporting IDs to individual elements
-  std::set<subdomain_id_type> background_block_ids;
-  if (isParamValid("background_block_id"))
-    background_block_ids.insert(getParam<subdomain_id_type>("background_block_id"));
-  ReportingIDGeneratorUtils::assignReportingIDs(mesh,
-                                                extra_id_index,
-                                                _assign_type,
-                                                _use_exclude_id,
-                                                _exclude_ids,
-                                                _pattern_boundary == "hexagon",
-                                                background_block_ids,
-                                                from_meshes,
-                                                _pattern,
-                                                _id_pattern);
+    // assign reporting IDs to individual elements
+    std::set<subdomain_id_type> background_block_ids;
+    if (isParamValid("background_block_id"))
+      background_block_ids.insert(getParam<subdomain_id_type>("background_block_id"));
+    const bool using_manual_id =
+        (_assign_types[i] == ReportingIDGeneratorUtils::AssignType::manual);
+    ReportingIDGeneratorUtils::assignReportingIDs(mesh,
+                                                  extra_id_index,
+                                                  _assign_types[i],
+                                                  _use_exclude_id,
+                                                  _exclude_ids,
+                                                  _pattern_boundary == "hexagon",
+                                                  background_block_ids,
+                                                  from_meshes,
+                                                  _pattern,
+                                                  (using_manual_id)
+                                                      ? _id_patterns.at(element_id_name)
+                                                      : std::vector<std::vector<dof_id_type>>());
+  }
 }

@@ -42,4 +42,11 @@
     requirement = 'The system shall support the generation of reporting IDs for hexagonal cores with removal of certain assemblies on periphery'
     recover = false
   []
+  [multi_id]
+    type = 'Exodiff'
+    input = 'assembly_reporting_multi_id.i'
+    exodiff = 'assembly_reporting_multi_id_out.e'
+    requirement = 'The system shall support the generation of multiple reporting IDs for hexagonal assemblies with different assignment schemes'
+    recover = false
+  []
 []
