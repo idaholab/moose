@@ -54,6 +54,10 @@
     prop_values = 'rxn_func'
     prop_names = rxn_prop
   []
+  #ADMatReaction includes a negative sign in residual evaluation, so we need to
+  #reverse this with a negative reaction rate. However, we wanted the parameter
+  #to remain positive, which is why there is one object to evaluate function
+  #and another to flip it's sign for the kernel
   [ad_neg_rxn_prop]
     type = ADParsedMaterial
     expression = '-rxn_prop'

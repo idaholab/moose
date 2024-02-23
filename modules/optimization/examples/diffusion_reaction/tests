@@ -32,6 +32,9 @@
       prereq = diffusion_reaction/forward_and_adjoint
       rel_err = 1e-3
       abs_zero = 0.01
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      # steady solve
+      recover = false
       detail = 'use TAO to perform optimization.'
     []
   []
