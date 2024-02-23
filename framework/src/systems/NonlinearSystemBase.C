@@ -1398,6 +1398,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
     if (has_writable_variables)
     {
+      // Explicit contact dynamic constraints write to auxiliary variables and update the old
+      // displacement solution on the constraint boundaries. Close solutions and update system
+      // accordingly.
       _fe_problem.getAuxiliarySystem().solution().close();
       _fe_problem.getAuxiliarySystem().system().update();
       solutionOld().close();
@@ -1578,7 +1581,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 }
 
 void
-NonlinearSystemBase::overwriteContact(NumericVector<Number> & soln)
+NonlinearSystemBase::overwriteNodeFace(NumericVector<Number> & soln)
 {
   // Overwrite results from integrator in case we have explicit dynamics contact constraints
   auto & subproblem = _fe_problem.getDisplacedProblem()

@@ -366,7 +366,7 @@ public:
    * Called from explicit time stepping to overwrite boundary positions (explicit dynamics). This
    * will close/assemble the passed-in \p soln after overwrite
    */
-  void overwriteContact(NumericVector<Number> & soln);
+  void overwriteNodeFace(NumericVector<Number> & soln);
 
   /**
    * Update active objects of Warehouses owned by NonlinearSystemBase
