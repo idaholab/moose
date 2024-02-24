@@ -1,24 +1,35 @@
 [Tests]
-  [./test]
+  parallel_scheduling = true
+  [volumetric_eigenstrain]
     type = 'CSVDiff'
     input = 'volumetric_eigenstrain.i'
     csvdiff = 'volumetric_eigenstrain_out.csv'
-    requirement = "The ComputeVolumetricEigenStrainClass shall correctly compute an eigenstrain tensor"
-                  " that results in a solution that exactly recovers the specified volumetric expansion,"
-                  " and the reported volumetric strain computed by RankTwoScalarAux shall match the"
-                  " prescribed volumetric strain."
+    requirement = "The system shall correctly compute an eigenstrain "
+                  "tensor that results in a solution that exactly recovers the specified volumetric "
+                  "expansion, and the reported volumetric strain computed by RankTwoScalarAux shall "
+                  "match the prescribed volumetric strain."
     design = "source/materials/ComputeVolumetricEigenstrain.md RankTwoScalarAux.md"
     issues = "#8615 #11743"
-  [../]
-  [./test_mechanical]
+  []
+  [ad_volumetric_eigenstrain]
+    type = 'CSVDiff'
+    input = 'ad_volumetric_eigenstrain.i'
+    csvdiff = 'ad_volumetric_eigenstrain_out.csv'
+    requirement = "The system shall correctly compute an eigenstrain using AD "
+                  "tensor that results in a solution that exactly recovers the specified volumetric "
+                  "expansion, and the reported volumetric strain computed by RankTwoScalarAux shall "
+                  "match the prescribed volumetric strain."
+    design = "source/materials/ADComputeVolumetricEigenstrain.md RankTwoScalarAux.md"
+    issues = "#8615 #11743 #26880"
+  []
+  [volumetric_mechanical]
     type = 'CSVDiff'
     input = 'volumetric_mechanical.i'
     csvdiff = 'volumetric_mechanical_out.csv'
-    prereq = test
-    requirement = "The volumetric strain computed using RankTwoScalarAux for a unit cube with imposed"
-                  " displacements shall be identical to that obtained by imposing an eigenstrain that"
-                  " causes the same deformation of that model."
+    requirement = "The volumetric strain computed using RankTwoScalarAux for a unit cube with "
+                  "imposed displacements shall be identical to that obtained by imposing an "
+                  "eigenstrain that causes the same deformation of that model."
     design = "source/materials/ComputeVolumetricEigenstrain.md RankTwoScalarAux.md"
     issues = "#8615 #11743"
-  [../]
+  []
 []
