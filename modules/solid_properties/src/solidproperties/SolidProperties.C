@@ -23,6 +23,7 @@ SolidProperties::validParams()
 
 SolidProperties::SolidProperties(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
+    SolutionInvalidInterface(this),
     _allow_imperfect_jacobians(getParam<bool>("allow_imperfect_jacobians"))
 {
 }
