@@ -84,7 +84,7 @@ std::set<SubdomainID> getCellBlockIDs(const std::vector<std::unique_ptr<Replicat
  * @return list of block ids in the assembly duct region
  **/
 std::map<SubdomainID, unsigned int>
-getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
+getDuckBlockIDs(const MeshBase & mesh,
                 const bool has_assembly_boundary,
                 const std::set<subdomain_id_type> background_blk_ids,
                 const std::set<SubdomainID> & blks);
@@ -104,7 +104,7 @@ getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
  * @param id_pattern user-defined integer ID for each input pattern cell
  * @return output mesh file having reporting IDs
  **/
-void assignReportingIDs(std::unique_ptr<MeshBase> & mesh,
+void assignReportingIDs(MeshBase & mesh,
                         const unsigned int extra_id_index,
                         const ReportingIDGeneratorUtils::AssignType assign_type,
                         const bool use_exclude_id,

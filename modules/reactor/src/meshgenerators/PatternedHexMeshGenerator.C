@@ -842,6 +842,10 @@ PatternedHexMeshGenerator::generate()
     }
   }
 
+  // before return, add reporting IDs if _use_reporting_id is set true
+  if (_use_reporting_id)
+    addReportingIDs(*out_mesh, meshes);
+
   // Assign customized peripheral block ids and names
   if (!_peripheral_block_ids.empty())
     for (const auto & elem : out_mesh->active_element_ptr_range())
@@ -885,9 +889,6 @@ PatternedHexMeshGenerator::generate()
 
   out_mesh->set_isnt_prepared();
   auto mesh = dynamic_pointer_cast<MeshBase>(out_mesh);
-  // before return, add reporting IDs if _use_reporting_id is set true
-  if (_use_reporting_id)
-    addReportingIDs(mesh, meshes);
   return mesh;
 }
 
@@ -1073,27 +1074,29 @@ PatternedHexMeshGenerator::positionSetup(std::vector<std::pair<Real, Real>> & po
 
 void
 PatternedHexMeshGenerator::addReportingIDs(
-    std::unique_ptr<MeshBase> & mesh,
-    const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const
+    MeshBase & mesh, const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const
 {
   const unsigned int num_reporting_ids = _reporting_id_names.size();
   for (unsigned int i = 0; i < num_reporting_ids; ++i)
   {
     const std::string element_id_name = _reporting_id_names[i];
     unsigned int extra_id_index;
-    if (!mesh->has_elem_integer(element_id_name))
-      extra_id_index = mesh->add_elem_integer(element_id_name);
+    if (!mesh.has_elem_integer(element_id_name))
+      extra_id_index = mesh.add_elem_integer(element_id_name);
     else
     {
-      extra_id_index = mesh->get_elem_integer_index(element_id_name);
+      extra_id_index = mesh.get_elem_integer_index(element_id_name);
       paramWarning(
           "id_name", "An element integer with the name '", element_id_name, "' already exists");
     }
 
     // assign reporting IDs to individual elements
-    std::set<subdomain_id_type> background_block_ids;
-    if (isParamValid("background_block_id"))
-      background_block_ids.insert(getParam<subdomain_id_type>("background_block_id"));
+    // NOTE: background block id should be set "PERIPHERAL_ID_SHIFT" because this function is called
+    // before assigning the user-defined background block id
+    std::set<subdomain_id_type> background_block_ids =
+        (isParamValid("background_block_id")) ? std::set<subdomain_id_type>({PERIPHERAL_ID_SHIFT})
+                                              : std::set<subdomain_id_type>();
+
     const bool using_manual_id =
         (_assign_types[i] == ReportingIDGeneratorUtils::AssignType::manual);
     ReportingIDGeneratorUtils::assignReportingIDs(mesh,
