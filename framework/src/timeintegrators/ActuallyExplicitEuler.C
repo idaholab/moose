@@ -97,7 +97,7 @@ ActuallyExplicitEuler::solve()
 
   // Constraints may be solved in an uncoupled way. For example, momentum-balance equations may be
   // solved node-wise and then the solution (e.g. velocities or positions)can be applied to those
-  // nodes without solve such constraints on a system level. This strategy is being used for
+  // nodes without solving for such constraints on a system level. This strategy is being used for
   // node-face contact in explicit dynamics.
   _nl.overwriteNodeFace(*_nonlinear_implicit_system->solution);
 

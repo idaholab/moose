@@ -27,12 +27,6 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
 
-// Counter for naming auxiliary kernels
-static unsigned int ed_contact_auxkernel_counter = 0;
-
-// Counter for naming nodal area user objects
-static unsigned int ed_contact_userobject_counter = 0;
-
 // Counter for distinct contact action objects
 static unsigned int ed_contact_action_counter = 0;
 
@@ -124,6 +118,7 @@ ExplicitDynamicsContactAction::act()
     if (!_problem->getDisplacedProblem())
       mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                  "Mesh block.");
+    unsigned int pair_number(0);
     // Create auxiliary kernels for each contact pairs
     for (const auto & contact_pair : _boundary_pairs)
     {
@@ -151,8 +146,8 @@ ExplicitDynamicsContactAction::act()
           params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
               getParam<VariableName>("mapped_primary_gap_offset")};
         params.set<bool>("use_displaced_mesh") = true;
-        std::string name = _name + "_contact_" + Moose::stringify(ed_contact_auxkernel_counter++);
-
+        std::string name = _name + "_contact_" + Moose::stringify(pair_number);
+        pair_number++;
         _problem->addAuxKernel("PenetrationAux", name, params);
       }
     }
@@ -237,10 +232,8 @@ ExplicitDynamicsContactAction::act()
       var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject("NodalArea",
-                              "nodal_area_object_" +
-                                  Moose::stringify(ed_contact_userobject_counter),
-                              var_params);
+      _problem->addUserObject(
+          "NodalArea", "nodal_area_object_" + Moose::stringify(name()), var_params);
     }
     // Add nodal density and nodal wave speed user
     {
@@ -263,10 +256,8 @@ ExplicitDynamicsContactAction::act()
       var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject("NodalDensity",
-                              "nodal_density_object_" +
-                                  Moose::stringify(ed_contact_userobject_counter),
-                              var_params);
+      _problem->addUserObject(
+          "NodalDensity", "nodal_density_object_" + Moose::stringify(name()), var_params);
     }
     {
       // Add wave speed
@@ -288,10 +279,8 @@ ExplicitDynamicsContactAction::act()
       var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject("NodalWaveSpeed",
-                              "nodal_wavespeed_object_" +
-                                  Moose::stringify(ed_contact_userobject_counter++),
-                              var_params);
+      _problem->addUserObject(
+          "NodalWaveSpeed", "nodal_wavespeed_object_" + Moose::stringify(name()), var_params);
     }
   }
 }
@@ -304,6 +293,7 @@ ExplicitDynamicsContactAction::addContactPressureAuxKernel()
 
   // Increment counter for contact action objects
   ed_contact_action_counter++;
+
   // Add auxiliary kernel if we are the last contact action object.
   if (ed_contact_action_counter == actions.size())
   {
