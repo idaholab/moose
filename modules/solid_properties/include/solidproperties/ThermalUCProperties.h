@@ -18,16 +18,16 @@ public:
 
   ThermalUCProperties(const InputParameters & parameters);
 
+  using ThermalSolidProperties::k_from_T;
   virtual Real k_from_T(const Real & T) const override;
-
   virtual void k_from_T(const Real & T, Real & k, Real & dk_dT) const override;
 
+  using ThermalSolidProperties::cp_from_T;
   virtual Real cp_from_T(const Real & T) const override;
-
   virtual void cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const override;
 
+  using ThermalSolidProperties::rho_from_T;
   virtual Real rho_from_T(const Real & T) const override;
-
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
 
 protected:
