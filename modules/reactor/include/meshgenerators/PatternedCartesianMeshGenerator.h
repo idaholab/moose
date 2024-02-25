@@ -133,6 +133,6 @@ protected:
    * @param  mesh input mesh to add the reporting IDs onto
    * @param from_meshes meshes to take reporting IDs from
    */
-  void addReportingIDs(std::unique_ptr<MeshBase> & mesh,
+  void addReportingIDs(MeshBase & mesh,
                        const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const;
 };

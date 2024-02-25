@@ -85,7 +85,7 @@ ReportingIDGeneratorUtils::getCellBlockIDs(
 }
 
 std::map<SubdomainID, unsigned int>
-ReportingIDGeneratorUtils::getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
+ReportingIDGeneratorUtils::getDuckBlockIDs(const MeshBase & mesh,
                                            const bool has_assembly_boundary,
                                            const std::set<subdomain_id_type> background_blk_ids,
                                            const std::set<SubdomainID> & blks)
@@ -94,7 +94,7 @@ ReportingIDGeneratorUtils::getDuckBlockIDs(const std::unique_ptr<MeshBase> & mes
   if (has_assembly_boundary)
   {
     std::set<SubdomainID> mesh_blks;
-    mesh->subdomain_ids(mesh_blks);
+    mesh.subdomain_ids(mesh_blks);
     unsigned int i = 0;
     for (const auto mesh_blk : mesh_blks)
       if (!blks.count(mesh_blk) && !background_blk_ids.count(mesh_blk))
@@ -108,7 +108,7 @@ ReportingIDGeneratorUtils::getDuckBlockIDs(const std::unique_ptr<MeshBase> & mes
 
 void
 ReportingIDGeneratorUtils::assignReportingIDs(
-    std::unique_ptr<MeshBase> & mesh,
+    MeshBase & mesh,
     const unsigned int extra_id_index,
     const ReportingIDGeneratorUtils::AssignType assign_type,
     const bool use_exclude_id,
@@ -142,7 +142,7 @@ ReportingIDGeneratorUtils::assignReportingIDs(
     unsigned int i = 0;
     unsigned int id = integer_ids[i];
     unsigned old_id = id;
-    for (auto elem : mesh->element_ptr_range())
+    for (auto elem : mesh.element_ptr_range())
     {
       auto blk = elem->subdomain_id();
       // check whether the current element belongs to duct/surrouding regions or not
@@ -171,7 +171,7 @@ ReportingIDGeneratorUtils::assignReportingIDs(
   {
     // assign reporting IDs to individual elements
     unsigned int i = 0;
-    for (auto & elem : mesh->element_ptr_range())
+    for (auto & elem : mesh.element_ptr_range())
       elem->set_extra_integer(extra_id_index, integer_ids[i++]);
   }
 }

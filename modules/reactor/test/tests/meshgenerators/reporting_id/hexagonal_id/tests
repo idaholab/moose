@@ -1,6 +1,6 @@
 [Tests]
-  design = 'meshgenerators/HexIDPatternedMeshGenerator.md'
-  issues = '#19217'
+  design = 'meshgenerators/PatternedHexMeshGenerator.md meshgenerators/HexIDPatternedMeshGenerator.md'
+  issues = '#19217 #26862'
   [assembly]
     requirement = 'The system shall support the generation of reporting IDs for hexagonal assemblies assigned'
     [cell]
@@ -47,6 +47,19 @@
     input = 'assembly_reporting_multi_id.i'
     exodiff = 'assembly_reporting_multi_id_out.e'
     requirement = 'The system shall support the generation of multiple reporting IDs for hexagonal assemblies with different assignment schemes'
+    recover = false
+  []
+  [user_background_block_id]
+    type = 'Exodiff'
+    input = 'assembly_reporting_id.i'
+    exodiff = 'assembly_reporting_id_user_background_out.e'
+    cli_args = "Mesh/pin1/background_block_ids=10
+                Mesh/pin2/background_block_ids=10
+                Mesh/assembly/background_block_id=10
+                Mesh/assembly/duct_block_ids='11 12'
+                Mesh/assembly/assign_type='pattern'
+                Outputs/file_base='assembly_reporting_id_user_background_out'"
+    requirement = 'The system shall support the generation of reporting IDs for hexagonal assemblies with the same user-defined background block id settings for both the pins and the assembly.'
     recover = false
   []
 []

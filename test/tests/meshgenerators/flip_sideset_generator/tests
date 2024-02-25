@@ -1,0 +1,39 @@
+[Tests]
+  issues = '#25528'
+  design = 'FlipSidesetGenerator.md'
+  [flux_2D]
+    type = 'CSVDiff'
+    input = 'flux_flip_2D.i'
+    csvdiff = 'flux_flip_2D_out.csv'
+    recover = false
+    requirement = 'The system shall support switching the normal orientation of a sideset in a two-dimensional mesh'
+    mesh_mode = 'replicated'
+  []
+
+  [flux_3D]
+    type = 'CSVDiff'
+    input = 'flux_flip_3D.i'
+    csvdiff = 'flux_flip_3D_out.csv'
+    recover = false
+    requirement = 'The system shall support switching the normal orientation of a sideset in a three-dimensional mesh'
+    mesh_mode = 'replicated'
+  []
+  
+  [no_sideset_exception]
+    type = 'RunException'
+    input = 'no_sideset.i'
+    cli_args = '--mesh-only'
+    expect_err = "The boundary 'bad_side' was not found"
+    requirement = "The system shall produce a reasonable error when switching the normal orientation of a sideset if the sideset does not exist"
+    mesh_mode = 'replicated'
+  []
+    
+  [no_neighbor_exception]
+    type = 'RunException'
+    input = 'no_neighbor.i'
+    cli_args = '--mesh-only'
+    expect_err = "elem 0 does not have a neighbor through side 1 therefore it cannot be flipped"
+    requirement = "The system shall produce a reasonable error when switching the normal orientation of a sideset if the sideset cannot be flipped"
+    mesh_mode = 'replicated'
+  []
+[]
