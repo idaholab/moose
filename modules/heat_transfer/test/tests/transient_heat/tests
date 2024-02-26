@@ -1,10 +1,29 @@
 [Tests]
-  issues = '#7759'
-  design = 'SpecificHeatConductionTimeDerivative.md'
-  [./test]
+  [transient_heat]
     type = 'Exodiff'
     input = 'transient_heat.i'
     exodiff = 'transient_heat_out.e'
     requirement = 'The system shall compute the time derivative term of the heat equation'
-  [../]
+    issues = '#7759'
+    design = 'SpecificHeatConductionTimeDerivative.md'
+  []
+  [transient_heat_derivatives]
+    type = 'CSVDiff'
+    input = 'transient_heat_derivatives.i'
+    csvdiff = 'transient_heat_derivatives_out.csv'
+    requirement = 'The system shall compute the time derivative term of the heat equation and '
+                  'utilize the derivative of the specific heat, thermal conductivity, and density '
+                  'to solve a heat conduction problem'
+    issues = '#26647'
+    design = 'HeatConductionTimeDerivative.md'
+  []
+  [transient_heat_t_limit]
+    type = 'RunException'
+    input = 'transient_heat_derivatives.i'
+    expect_err = 'is below min_T'
+    cli_args = 'Materials/constant/min_T=10'
+    requirement = 'The system shall use a lower temperature limit to compute the specific heat'
+    issues = '#26647'
+    design = 'HeatConductionTimeDerivative.md'
+  []
 []

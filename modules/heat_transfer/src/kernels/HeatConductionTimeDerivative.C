@@ -24,7 +24,11 @@ HeatConductionTimeDerivative::validParams()
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addParam<MaterialPropertyName>(
-      "specific_heat", "specific_heat", "Property name of the specific heat material property");
+      "specific_heat", "specific_heat", "Name of the specific heat material property");
+  params.addParam<MaterialPropertyName>(
+      "specific_heat_dT",
+      "Name of the material property for the derivative of the specific heat with respect "
+      "to the variable.");
 
   /**
    * We would like to rename this input parameter to 'density' but gratuitous use of
@@ -33,13 +37,21 @@ HeatConductionTimeDerivative::validParams()
    */
   params.addParam<MaterialPropertyName>(
       "density_name", "density", "Property name of the density material property");
+  params.addParam<MaterialPropertyName>(
+      "density_name_dT",
+      "Name of material property for the derivative of the density with respect to the variable.");
   return params;
 }
 
 HeatConductionTimeDerivative::HeatConductionTimeDerivative(const InputParameters & parameters)
   : TimeDerivative(parameters),
     _specific_heat(getMaterialProperty<Real>("specific_heat")),
-    _density(getMaterialProperty<Real>("density_name"))
+    _specific_heat_dT(isParamValid("specific_heat_dT")
+                          ? &getMaterialProperty<Real>("specific_heat_dT")
+                          : nullptr),
+    _density(getMaterialProperty<Real>("density_name")),
+    _density_dT(isParamValid("density_name_dT") ? &getMaterialProperty<Real>("density_name_dT")
+                                                : nullptr)
 {
 }
 
@@ -52,5 +64,12 @@ HeatConductionTimeDerivative::computeQpResidual()
 Real
 HeatConductionTimeDerivative::computeQpJacobian()
 {
-  return _specific_heat[_qp] * _density[_qp] * TimeDerivative::computeQpJacobian();
+  auto jac = _specific_heat[_qp] * _density[_qp] * TimeDerivative::computeQpJacobian();
+  if (_specific_heat_dT)
+    jac += (*_specific_heat_dT)[_qp] * _density[_qp] * _phi[_j][_qp] *
+           TimeDerivative::computeQpResidual();
+  if (_density_dT)
+    jac += _specific_heat[_qp] * (*_density_dT)[_qp] * _phi[_j][_qp] *
+           TimeDerivative::computeQpResidual();
+  return jac;
 }
