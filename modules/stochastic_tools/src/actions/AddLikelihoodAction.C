@@ -10,7 +10,7 @@
 #include "AddLikelihoodAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
-#include "LikelihoodFunctionBase.h"
+#include "LikelihoodFunctionBaseVector.h"
 
 registerMooseAction("StochasticToolsApp", AddLikelihoodAction, "add_likelihood");
 
@@ -29,6 +29,6 @@ AddLikelihoodAction::AddLikelihoodAction(const InputParameters & params) : Moose
 void
 AddLikelihoodAction::act()
 {
-  _problem->addObject<LikelihoodFunctionBase>(
+  _problem->addObject<LikelihoodFunctionBaseVector>(
       _type, _name, _moose_object_pars, /* threaded = */ false);
 }

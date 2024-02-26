@@ -87,7 +87,7 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   addTaskDependency("setup_executioner", "auto_create_executioner");
   // Likelihood functions (Bayesian inference)
   registerSyntaxTask("AddLikelihoodAction", "Likelihood/*", "add_likelihood");
-  registerMooseObjectTask("add_likelihood", LikelihoodFunctionBase, false);
+  registerMooseObjectTask("add_likelihood", LikelihoodFunctionBaseVector, false);
   addTaskDependency("add_likelihood", "add_user_object");
   addTaskDependency("add_distribution", "add_likelihood");
 
