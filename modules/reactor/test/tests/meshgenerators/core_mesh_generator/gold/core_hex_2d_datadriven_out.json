@@ -159,10 +159,6 @@
                         "type": "bool",
                         "value": false
                     },
-                    "MeshMetaData/pin1/is_single_pin": {
-                        "type": "bool",
-                        "value": false
-                    },
                     "MeshMetaData/pin1/pin_block_names": {
                         "type": "std::vector<std::vector<std::string>>",
                         "value": []

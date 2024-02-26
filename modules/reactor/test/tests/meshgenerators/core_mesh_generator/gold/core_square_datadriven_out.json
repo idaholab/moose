@@ -205,10 +205,6 @@
                         "type": "bool",
                         "value": false
                     },
-                    "MeshMetaData/pin1/is_single_pin": {
-                        "type": "bool",
-                        "value": false
-                    },
                     "MeshMetaData/pin1/pin_block_names": {
                         "type": "std::vector<std::vector<std::string>>",
                         "value": []
@@ -278,10 +274,6 @@
                         "type": "bool",
                         "value": false
                     },
-                    "MeshMetaData/pin2/is_single_pin": {
-                        "type": "bool",
-                        "value": false
-                    },
                     "MeshMetaData/pin2/pin_block_names": {
                         "type": "std::vector<std::vector<std::string>>",
                         "value": []
@@ -342,10 +334,6 @@
                         "value": false
                     },
                     "MeshMetaData/pin3/is_homogenized": {
-                        "type": "bool",
-                        "value": false
-                    },
-                    "MeshMetaData/pin3/is_single_pin": {
                         "type": "bool",
                         "value": false
                     },
