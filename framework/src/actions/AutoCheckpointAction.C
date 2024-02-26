@@ -33,11 +33,9 @@ AutoCheckpointAction::act()
   if (num_checkpoints > 1)
   {
     // Get most recently added Checkpoint object and error
-    checkpoints.back()->paramError(
-        "_type",
-        "Multiple checkpoints are not allowed. Check the input to ensure there "
-        "is only one Checkpoint defined in the 'Outputs' block, including the "
-        "shortcut syntax 'Outputs/checkpoint=true'.");
+    mooseError("Multiple checkpoints are not allowed. Check the input to ensure there "
+               "is only one Checkpoint defined in the 'Outputs' block, including the "
+               "shortcut syntax 'Outputs/checkpoint=true'.");
   }
 
   // We don't want to set up automatic checkpoints if we are not in the master app
