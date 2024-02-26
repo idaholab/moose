@@ -619,8 +619,9 @@ CoreMeshGenerator::generate()
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
 
-  // If mesh generation is requested and bypass_mesh is true, return a null mesh. generate()
-  // should not be called with this option specified
+  // If bypass_mesh is true, return a null mesh. In this mode, an output mesh is not
+  // generated and only metadata is defined on the generator, so logic related to
+  // generation of output mesh will not be called
   if (getReactorParam<bool>(RGMB::bypass_meshgen))
   {
     auto null_mesh = nullptr;
