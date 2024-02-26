@@ -20,6 +20,15 @@ These applications are developed as part of the
 | [Porous Flow Module](modules/porous_flow/index.md)                      | Coarse-Mesh CFD                        | Incompressible, Weakly-Compressible, or Fully-Compressible Porous Flow (no inertial term) \\ \\ Single- or Multi-Phase \\ \\ Single- or Multi-Component Flow | Typically, 2D, 2D axisymmetric, or 3D \\ \\ Can also be used in 1D | 10,000                | 1 minute        | Flow through fractured porous media \\ \\ Underground coal mining \\ \\ CO storage in saline aquifers                                                                                                  |
 | [Scalar Kernels System](syntax/ScalarKernels/index.md)                  | 0D ODE                                 | Incompressible                                                                                                                                               | 0D                                                                 | 10                    | 1 second        | Bernoulli-like formulations for pressure drop                                                                                                                                                          |
 
+## Open-Source Applications for Advanced Engineering Modeling
+
+Open-source applications for thermal-fluid modeling provide additional capabilities.
+
+| Application Name                                               | Based On                  | Added Features                                                                                                                                         |
+| :------------------------------------------------------------- | :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Cardinal](https://cardinal.cels.anl.gov/) | [NekRS](https://github.com/Nek5000/nekRS) CFD      | CPU and GPU capabilities for RANS, LES, and DNS. Additional features include Lagrangian particle transport, an ALE mesh solver, overset meshes, and more.                                       |
+
+
 ## NCRC Applications for Advanced Engineering Modeling
 
 Via the [Nuclear Computational Resource Center (NCRC)](https://inl.gov/ncrc/), several additional applications are supported for enhanced engineering modeling. See [help/inl/applications.md] for more information.
