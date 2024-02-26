@@ -53,7 +53,7 @@ static const std::string duct_region_ids = "duct_region_ids";
 static const std::string duct_block_names = "duct_block_names";
 static const std::string peripheral_ring_region_id = "peripheral_ring_region_id";
 
-// Quantities related to bypassing mesh generation
+// Name of a boolean metadata that indicates whether or not we skipped mesh generation in favor of only generate the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
 }
 

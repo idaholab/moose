@@ -243,6 +243,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   else
     _has_duct_block_names = false;
 
+  // No subgenerators will be called if option to bypass mesh generators is enabled
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
     // Declare dependency of inputs to sub generator calls. If mesh generation

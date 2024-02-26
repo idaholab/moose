@@ -271,6 +271,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
   }
 
+  // No subgenerators will be called if option to bypass mesh generators is enabled
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
     // Declare that all of the meshes in the "inputs" parameter are to be used by
