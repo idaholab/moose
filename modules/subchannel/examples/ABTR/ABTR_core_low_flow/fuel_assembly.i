@@ -136,7 +136,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 []
 
 [Problem]
-  type = LiquidWaterSubChannel1PhaseProblem # Not solving heat conduction yet
+  type = QuadSubChannel1PhaseProblem # Not solving heat conduction yet
   fp = sodium
   n_blocks = 25
   P_out = ${P_out}

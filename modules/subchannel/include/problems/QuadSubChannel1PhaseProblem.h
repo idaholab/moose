@@ -17,14 +17,14 @@
 #include "SubChannel1PhaseProblem.h"
 #include "QuadSubChannelMesh.h"
 
-class LiquidWaterSubChannel1PhaseProblem;
+class QuadSubChannel1PhaseProblem;
 /**
  * Steady state subchannel solver for 1-phase quad liquid water coolant
  */
-class LiquidWaterSubChannel1PhaseProblem : public SubChannel1PhaseProblem
+class QuadSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 {
 public:
-  LiquidWaterSubChannel1PhaseProblem(const InputParameters & params);
+  QuadSubChannel1PhaseProblem(const InputParameters & params);
 
 protected:
   virtual void initializeSolution() override;

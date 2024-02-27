@@ -85,7 +85,7 @@ heated_length = 1.0 # m
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   n_blocks = 1
   fp = water
   beta = 0.006
@@ -112,7 +112,7 @@ heated_length = 1.0 # m
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 1000  # W
+    power = 1000 # W
     filename = "power_profile.txt"
     axial_heat_rate = axial_heat_rate
   []
@@ -252,7 +252,7 @@ heated_length = 1.0 # m
     execute_on = 'timestep_end'
   []
 
-###### Transfers to the detailedMesh at the end of the coupled simulations
+  ###### Transfers to the detailedMesh at the end of the coupled simulations
   [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz

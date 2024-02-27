@@ -1,6 +1,6 @@
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.0 / 3600.}
+mass_flux_in = '${fparse 1e+6 * 17.0 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
@@ -34,7 +34,7 @@ P_out = 4.923e6 # Pa
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
   beta = 0.006
