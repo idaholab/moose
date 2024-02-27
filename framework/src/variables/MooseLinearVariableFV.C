@@ -43,8 +43,27 @@ MooseLinearVariableFV<OutputType>::validParams()
 
 template <typename OutputType>
 MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters & parameters)
-  : MooseVariableField<OutputType>(parameters), _needs_cell_gradients(false)
+  : MooseVariableField<OutputType>(parameters),
+    _needs_cell_gradients(false),
+    _solution(this->_sys.currentSolution()),
+    // The following members are needed to be able to interface with the postprocessor and
+    // auxiliary systems
+    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_face_neighbor(
+        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_face_neighbor(
+        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_neighbor(
+        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 {
+  _element_data = std::make_unique<MooseVariableDataLinearFV<OutputType>>(
+      *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
+  _neighbor_data = std::make_unique<MooseVariableDataLinearFV<OutputType>>(
+      *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 }
 
 template <typename OutputType>
@@ -206,7 +225,7 @@ template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::DotType
 MooseLinearVariableFV<OutputType>::evaluateDot(const ElemArg &, const StateArg &) const
 {
-  mooseError("evaluateDot not implemented for this class of finite volume variables");
+  timeIntegratorError();
 }
 
 template <>
@@ -214,7 +233,7 @@ ADReal
 MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & /*elem_arg*/,
                                          const StateArg & /*state*/) const
 {
-  mooseError("Not implemented yet");
+  timeIntegratorError();
 }
 
 template <typename OutputType>
@@ -256,6 +275,649 @@ MooseLinearVariableFV<OutputType>::getBoundaryCondition(const BoundaryID bd_id) 
     return nullptr;
   else
     return iter->second;
+}
+
+template <typename OutputType>
+const Elem * const &
+MooseLinearVariableFV<OutputType>::currentElem() const
+{
+  return _assembly.elem();
+}
+
+// ****************************************************************************
+// The functions below are used for interfacing the auxiliary and
+// postprocessor/userobject systems. Most of the postprocessors/
+// auxkernels require quadrature-based evaluations and we provide that
+// interface with the functions below.
+// ****************************************************************************
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::getDofIndices(const Elem * elem,
+                                                 std::vector<dof_id_type> & dof_indices) const
+{
+  dof_indices.clear();
+  const auto & elem_info = this->_mesh.elemInfo(elem->id());
+  dof_indices.push_back(elem_info.dofIndices()[this->sys().number()][this->number()]);
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+{
+  _element_data->setDofValue(value, index);
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
+{
+  _element_data->setDofValues(values);
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::clearDofIndices()
+{
+  _element_data->clearDofIndices();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValues() const
+{
+  return _element_data->dofValues();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesNeighbor() const
+{
+  return _neighbor_data->dofValues();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesOld() const
+{
+  return _element_data->dofValuesOld();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesOlder() const
+{
+  return _element_data->dofValuesOlder();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesPreviousNL() const
+{
+  return _element_data->dofValuesPreviousNL();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesOldNeighbor() const
+{
+  return _neighbor_data->dofValuesOld();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesOlderNeighbor() const
+{
+  return _neighbor_data->dofValuesOlder();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesPreviousNLNeighbor() const
+{
+  return _neighbor_data->dofValuesPreviousNL();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDot() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotDot() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotOld() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotDotOld() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotNeighbor() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotDotNeighbor() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotOldNeighbor() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::dofValuesDotDotOldNeighbor() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseLinearVariableFV<OutputType>::dofValuesDuDotDu() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseLinearVariableFV<OutputType>::dofValuesDuDotDotDu() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseLinearVariableFV<OutputType>::dofValuesDuDotDuNeighbor() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseLinearVariableFV<OutputType>::dofValuesDuDotDotDuNeighbor() const
+{
+  timeIntegratorError();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeElemValues()
+{
+  _element_data->setGeometry(Moose::Volume);
+  _element_data->computeValues();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeElemValuesFace()
+{
+  _element_data->setGeometry(Moose::Face);
+  _element_data->computeValues();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeNeighborValuesFace()
+{
+  _neighbor_data->setGeometry(Moose::Face);
+  _neighbor_data->computeValues();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeNeighborValues()
+{
+  _neighbor_data->setGeometry(Moose::Volume);
+  _neighbor_data->computeValues();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeLowerDValues()
+{
+  lowerDError();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeNodalNeighborValues()
+{
+  nodalError();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeNodalValues()
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseLinearVariableFV<OutputType>::dofIndices() const
+{
+  return _element_data->dofIndices();
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseLinearVariableFV<OutputType>::dofIndicesNeighbor() const
+{
+  return _neighbor_data->dofIndices();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::setLowerDofValues(const DenseVector<OutputData> &)
+{
+  lowerDError();
+}
+
+template <typename OutputType>
+unsigned int
+MooseLinearVariableFV<OutputType>::oldestSolutionStateRequested() const
+{
+  unsigned int state = 0;
+  state = std::max(state, _element_data->oldestSolutionStateRequested());
+  state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
+  return state;
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::clearAllDofIndices()
+{
+  _element_data->clearDofIndices();
+  _neighbor_data->clearDofIndices();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::nodalVectorTagValue(TagID) const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::nodalMatrixTagValue(TagID) const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseLinearVariableFV<OutputType>::dofIndicesLower() const
+{
+  lowerDError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiValue &
+MooseLinearVariableFV<OutputType>::phiLower() const
+{
+  lowerDError();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::insert(NumericVector<Number> & vector)
+{
+  _element_data->insert(vector);
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::insertLower(NumericVector<Number> & /*residual*/)
+{
+  mooseError("We don't support value insertion to residuals in MooseLinearVariableFV!");
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::add(NumericVector<Number> & /*residual*/)
+{
+  mooseError("We don't support value addition to residuals in MooseLinearVariableFV!");
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::setActiveTags(const std::set<TagID> & vtags)
+{
+  _element_data->setActiveTags(vtags);
+  _neighbor_data->setActiveTags(vtags);
+}
+
+template <typename OutputType>
+const MooseArray<OutputType> &
+MooseLinearVariableFV<OutputType>::nodalValueArray() const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const MooseArray<OutputType> &
+MooseLinearVariableFV<OutputType>::nodalValueOldArray() const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const MooseArray<OutputType> &
+MooseLinearVariableFV<OutputType>::nodalValueOlderArray() const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+std::size_t
+MooseLinearVariableFV<OutputType>::phiLowerSize() const
+{
+  lowerDError();
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::vectorTagValue(TagID tag) const
+{
+  return _element_data->vectorTagValue(tag);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::DoFValue &
+MooseLinearVariableFV<OutputType>::vectorTagDofValue(TagID tag) const
+{
+  return _element_data->vectorTagDofValue(tag);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::matrixTagValue(TagID tag) const
+{
+  return _element_data->matrixTagValue(tag);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiSecond &
+MooseLinearVariableFV<OutputType>::secondPhi() const
+{
+  mooseError("We don't currently implement second derivatives for FV");
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiValue &
+MooseLinearVariableFV<OutputType>::curlPhi() const
+{
+  mooseError("We don't currently implement curl for FV");
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiDivergence &
+MooseLinearVariableFV<OutputType>::divPhi() const
+{
+  mooseError("We don't currently implement divergence for FV");
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiSecond &
+MooseLinearVariableFV<OutputType>::secondPhiFace() const
+{
+  mooseError("We don't currently implement second derivatives for FV");
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiSecond &
+MooseLinearVariableFV<OutputType>::secondPhiFaceNeighbor() const
+{
+  mooseError("We don't currently implement second derivatives for FV");
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariablePhiSecond &
+MooseLinearVariableFV<OutputType>::secondPhiNeighbor() const
+{
+  mooseError("We don't currently implement second derivatives for FV");
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::sln() const
+{
+  return _element_data->sln(Moose::Current);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::slnOld() const
+{
+  return _element_data->sln(Moose::Old);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::slnOlder() const
+{
+  return _element_data->sln(Moose::Older);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableGradient &
+MooseLinearVariableFV<OutputType>::gradSln() const
+{
+  return _element_data->gradSln(Moose::Current);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableGradient &
+MooseLinearVariableFV<OutputType>::gradSlnOld() const
+{
+  return _element_data->gradSln(Moose::Old);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::slnNeighbor() const
+{
+  return _neighbor_data->sln(Moose::Current);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableValue &
+MooseLinearVariableFV<OutputType>::slnOldNeighbor() const
+{
+  return _neighbor_data->sln(Moose::Old);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableGradient &
+MooseLinearVariableFV<OutputType>::gradSlnNeighbor() const
+{
+  return _neighbor_data->gradSln(Moose::Current);
+}
+
+template <typename OutputType>
+const typename MooseLinearVariableFV<OutputType>::FieldVariableGradient &
+MooseLinearVariableFV<OutputType>::gradSlnOldNeighbor() const
+{
+  return _neighbor_data->gradSln(Moose::Old);
+}
+
+template <typename OutputType>
+const ADTemplateVariableSecond<OutputType> &
+MooseLinearVariableFV<OutputType>::adSecondSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adUDot() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adUDotDot() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnDot() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableSecond<OutputType> &
+MooseLinearVariableFV<OutputType>::adSecondSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adUDotNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adUDotDotNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnNeighborDot() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseLinearVariableFV<OutputType>::adDofValues() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseLinearVariableFV<OutputType>::adDofValuesNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const dof_id_type &
+MooseLinearVariableFV<OutputType>::nodalDofIndex() const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+const dof_id_type &
+MooseLinearVariableFV<OutputType>::nodalDofIndexNeighbor() const
+{
+  nodalError();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::timeIntegratorError() const
+{
+  mooseError("MooseLinearVariableFV does not support time integration at the moment! The variable "
+             "which is causing the issue: ",
+             this->name());
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::lowerDError() const
+{
+  mooseError("Lower dimensional element support not implemented for finite volume variables!The "
+             "variable which is causing the issue: ",
+             this->name());
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::nodalError() const
+{
+  mooseError("FV variables don't support nodal variable treatment! The variable which is causing "
+             "the issue: ",
+             this->name());
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::adError() const
+{
+  mooseError("Linear FV variable does not support automatic differentiation, the variable which is "
+             "attempting it is: ",
+             this->name());
 }
 
 template class MooseLinearVariableFV<Real>;

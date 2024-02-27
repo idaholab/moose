@@ -1964,8 +1964,8 @@ FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
 void
 FEProblemBase::reinitElem(const Elem * elem, const THREAD_ID tid)
 {
-  for (auto & nl : _nl)
-    nl->reinitElem(elem, tid);
+  for (auto & sys : _solver_systems)
+    sys->reinitElem(elem, tid);
   _aux->reinitElem(elem, tid);
 
   if (_displaced_problem && _reinit_displaced_elem)
@@ -1980,10 +1980,10 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
   mooseAssert(_mesh.queryElemPtr(elem->id()) == elem,
               "Are you calling this method with a displaced mesh element?");
 
-  for (const auto i : index_range(_nl))
+  for (const auto i : index_range(_solver_systems))
   {
     _assembly[tid][i]->reinitAtPhysical(elem, phys_points_in_elem);
-    _nl[i]->prepare(tid);
+    _solver_systems[i]->prepare(tid);
     _assembly[tid][i]->prepare();
     if (_has_nonlocal_coupling)
       _assembly[tid][i]->prepareNonlocal();
@@ -2890,7 +2890,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _aux.get();
-    parameters.set<SystemBase *>("_nl_sys") = _nl[0].get();
+    parameters.set<SystemBase *>("_nl_sys") = _solver_systems[0].get();
   }
 
   logAdd("AuxKernel", name, kernel_name);

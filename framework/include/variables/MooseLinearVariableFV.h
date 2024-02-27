@@ -13,7 +13,7 @@
 #include "MooseVariableField.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
-#include "MooseVariableDataFV.h"
+#include "MooseVariableDataLinearFV.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -137,7 +137,34 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
+  virtual void prepareIC() override {}
+
+  virtual bool isNodal() const override final { return false; }
+
+  virtual bool hasDoFsOnNodes() const override final { return false; }
+
+  virtual bool isNodalDefined() const override final { return false; }
+
+  virtual const Elem * const & currentElem() const override;
+
+  virtual bool computingSecond() const override final { return false; }
+  virtual bool computingCurl() const override final { return false; }
+  virtual bool computingDiv() const override final { return false; }
+  virtual bool usesSecondPhiNeighbor() const override final { return false; }
+
 protected:
+  /// Throw an error when somebody requests time-related data from this variable
+  [[noreturn]] void timeIntegratorError() const;
+
+  /// Throw and error when somebody requests lower-dimensional data from this variable
+  [[noreturn]] void lowerDError() const;
+
+  /// Throw an error when somebody wants to use this variable as a nodal variable
+  [[noreturn]] void nodalError() const;
+
+  /// Throw an error when somebody wants to use this variable with automatic differentiation
+  [[noreturn]] void adError() const;
+
   usingMooseVariableBaseMembers;
 
   /// Boolean to check if this variable needs gradient computations.
@@ -148,6 +175,16 @@ protected:
 
   /// Temporary storage for the cell gradient to avoid unnecessary allocations.
   mutable RealVectorValue _cell_gradient;
+
+  /// Holder for all the data associated with the "main" element. The data in this is
+  /// mainly used by finite element-based loops such as the postprocessor and auxkernel
+  /// loops
+  std::unique_ptr<MooseVariableDataLinearFV<OutputType>> _element_data;
+
+  /// Holder for all the data associated with the "neighbor" element. The data in this is
+  /// mainly used by finite element-based loops such as the postprocessor and auxkernel
+  /// loops
+  std::unique_ptr<MooseVariableDataLinearFV<OutputType>> _neighbor_data;
 
   friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
 
@@ -173,8 +210,6 @@ private:
                                         const StateArg &) const override final;
   virtual DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
 
-  unsigned int oldestSolutionStateRequested() const override final { return 0; }
-
   /**
    * Setup the boundary to Dirichlet BC map
    */
@@ -184,94 +219,64 @@ private:
   /// We assume that each boundary has one boundary condition only.
   std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
+  /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
+  /// because the solution might not exist at the time that this variable is constructed, so we
+  /// cannot safely dereference at that time
+  const NumericVector<Number> * const & _solution;
+
+  /// Shape functions, only used when we are postprocessing or using this variable
+  /// in an auxiliary system
+  const FieldVariablePhiValue & _phi;
+  const FieldVariablePhiGradient & _grad_phi;
+  const FieldVariablePhiValue & _phi_face;
+  const FieldVariablePhiGradient & _grad_phi_face;
+  const FieldVariablePhiValue & _phi_face_neighbor;
+  const FieldVariablePhiGradient & _grad_phi_face_neighbor;
+  const FieldVariablePhiValue & _phi_neighbor;
+  const FieldVariablePhiGradient & _grad_phi_neighbor;
+
 public:
-  /*---------------------------------------------------------------------------
-   * The overridden functions below are necessary to ensure that this variable can still be used
-   * with most interfaces but should not be used due to the fact that they are FEM and Newton method
-   * assembly specific
-   * ---------------------------------------------------------------------------*/
+  // *********************************************************************************
+  // *********************************************************************************
+  // The following functions are separated here because they are not essential for the
+  // solver but are necessary to interface with the auxiliary and postprocessor
+  // systems.
+  // *********************************************************************************
+  // *********************************************************************************
 
-  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final
-  {
-    mooseError("dofIndicesLower not supported by MooseLinearVariableFVBase");
-  }
+  virtual void setDofValue(const OutputData & /*value*/, unsigned int /*index*/) override;
 
-  virtual const FieldVariablePhiValue & phiLower() const override
-  {
-    mooseError("phiLower not supported by MooseLinearVariableFVBase");
-  }
+  virtual void getDofIndices(const Elem * elem,
+                             std::vector<dof_id_type> & dof_indices) const override;
 
-  virtual void residualSetup() override
-  {
-    mooseError("residualSetup not supported by MooseLinearVariableFVBase");
-  }
+  virtual void setDofValues(const DenseVector<OutputData> & values) override;
 
-  virtual void jacobianSetup() override
-  {
-    mooseError("jacobianSetup not supported by MooseLinearVariableFVBase");
-  }
+  virtual void clearDofIndices() override;
 
-  void clearDofIndices() override final {}
+  virtual unsigned int numberOfDofs() const override final { return 1; }
+  virtual unsigned int numberOfDofsNeighbor() override final { return 1; }
 
-  virtual void prepareIC() override {}
+  virtual unsigned int oldestSolutionStateRequested() const override final;
 
-  unsigned int numberOfDofs() const override final
-  {
-    mooseError("numberOfDofsNeighbor not supported by MooseLinearVariableFVBase");
-  }
+  virtual void clearAllDofIndices() override final;
 
-  virtual unsigned int numberOfDofsNeighbor() override final
-  {
-    mooseError("numberOfDofs not supported by MooseLinearVariableFVBase");
-  }
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final;
+  virtual const FieldVariablePhiValue & phiLower() const override;
 
-  virtual bool isNodal() const override final { return false; }
+  // Overriding these to make sure nothing happens during residual/jacobian setup.
+  // The only time this can actually happen is when residual setup is called on the auxiliary
+  // system.
+  virtual void residualSetup() override {}
+  virtual void jacobianSetup() override {}
 
-  bool hasDoFsOnNodes() const override final { return false; }
+  virtual FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
 
-  FEContinuity getContinuity() const override final
-  {
-    mooseError("getContinuity not supported by MooseLinearVariableFVBase");
-  };
+  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
-  virtual bool isNodalDefined() const override final { return false; }
+  virtual const DoFValue & nodalVectorTagValue(TagID) const override;
 
-  virtual void setNodalValue(const OutputType & /*value*/, unsigned int /*idx = 0*/) override
-  {
-    mooseError("currentElem not supported by MooseLinearVariableFVBase");
-  }
-
-  virtual void setDofValue(const OutputData & /*value*/, unsigned int /*index*/) override
-  {
-    mooseError("currentElem not supported by MooseLinearVariableFVBase");
-  }
-
-  void clearAllDofIndices() final {}
-
-  const DoFValue & nodalVectorTagValue(TagID) const override
-  {
-    mooseError("nodalVectorTagValue not implemented for finite volume variables.");
-  }
-
-  virtual const Elem * const & currentElem() const override
-  {
-    mooseError("currentElem not supported by MooseLinearVariableFVBase");
-  }
-
-  virtual void getDofIndices(const Elem * /*elem*/,
-                             std::vector<dof_id_type> & /*dof_indices*/) const override
-  {
-    mooseError("getDofIndices not supported by MooseLinearVariableFVBase");
-  }
-
-  virtual const std::vector<dof_id_type> & dofIndices() const final
-  {
-    mooseError("dofIndices not supported by MooseLinearVariableFVBase");
-  }
-  virtual const std::vector<dof_id_type> & dofIndicesNeighbor() const final
-  {
-    mooseError("dofIndicesNeighbor not supported by MooseLinearVariableFVBase");
-  }
+  virtual const std::vector<dof_id_type> & dofIndices() const final;
+  virtual const std::vector<dof_id_type> & dofIndicesNeighbor() const final;
 
   virtual void prepare() override final {}
   virtual void prepareNeighbor() override final {}
@@ -283,313 +288,122 @@ public:
   virtual void reinitAuxNeighbor() override final {}
   virtual void prepareLowerD() override final {}
 
-  virtual void computeElemValuesFace() override {}
-  virtual void computeNeighborValuesFace() override {}
-  virtual void computeNeighborValues() override {}
-  virtual void computeLowerDValues() override final {}
-  virtual void computeNodalNeighborValues() override final {}
-  virtual void computeNodalValues() override final {}
+  virtual void computeElemValuesFace() override;
+  virtual void computeNeighborValuesFace() override;
+  virtual void computeNeighborValues() override;
+  virtual void computeLowerDValues() override final;
 
-  virtual void computeElemValues() override {}
+  virtual void computeNodalNeighborValues() override final;
+  virtual void computeNodalValues() override final;
+
+  virtual void computeElemValues() override;
   virtual void computeFaceValues(const FaceInfo & /*fi*/) override {}
-  void setDofValues(const DenseVector<OutputData> & /*values*/) override {}
-  virtual void setLowerDofValues(const DenseVector<OutputData> & /*values*/) override {}
-  virtual void insert(NumericVector<Number> & /*residual*/) override {}
-  virtual void insertLower(NumericVector<Number> & /*residual*/) override {}
-  virtual void add(NumericVector<Number> & /*residual*/) override {}
-  void setActiveTags(const std::set<TagID> & /*vtags*/) override
-  {
-    mooseError("setActiveTags is not implemented for MooseLinearVariableFV!");
-  }
-  const MooseArray<OutputType> & nodalValueArray() const override
-  {
-    mooseError("Finite volume variables do not have defined values at nodes.");
-  }
-  const MooseArray<OutputType> & nodalValueOldArray() const override
-  {
-    mooseError("Finite volume variables do not have defined values at nodes.");
-  }
-  const MooseArray<OutputType> & nodalValueOlderArray() const override
-  {
-    mooseError("Finite volume variables do not have defined values at nodes.");
-  }
-  bool computingSecond() const override final { return false; }
-  bool computingCurl() const override final { return false; }
-  bool computingDiv() const override final { return false; }
-  bool usesSecondPhiNeighbor() const override final { return false; }
-  const FieldVariablePhiValue & phi() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiGradient & gradPhi() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiSecond & secondPhi() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiValue & curlPhi() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiDivergence & divPhi() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiValue & phiFace() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiGradient & gradPhiFace() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiSecond & secondPhiFace() const override final
-  {
-    mooseError("We don't currently implement second derivatives for FV");
-  }
-  const FieldVariablePhiValue & phiFaceNeighbor() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiGradient & gradPhiFaceNeighbor() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final
-  {
-    mooseError("We don't currently implement second derivatives for FV");
-  }
-  const FieldVariablePhiValue & phiNeighbor() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiGradient & gradPhiNeighbor() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariablePhiSecond & secondPhiNeighbor() const override final
-  {
-    mooseError("We don't currently have shape functions for linear FV variables");
-  }
-  const FieldVariableValue & vectorTagValue(TagID /*tag*/) const override
-  {
-    mooseError("vectorTagValue is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & vectorTagDofValue(TagID /*tag*/) const override
-  {
-    mooseError("vectorTagDofValue is not implemented for MooseLinearVariableFV!");
-  }
-  virtual const DoFValue & nodalMatrixTagValue(TagID /*tag*/) const override
-  {
-    mooseError("nodalMatrixTagValue is not implemented for MooseLinearVariableFV!");
-  }
-  virtual const FieldVariableValue & matrixTagValue(TagID /*tag*/) const override
-  {
-    mooseError("matrixTagValue is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableValue & sln() const override
-  {
-    mooseError("sln is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableValue & slnOld() const override
-  {
-    mooseError("slnOld is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableValue & slnOlder() const override
-  {
-    mooseError("slnOlder is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableGradient & gradSln() const override
-  {
-    mooseError("gradSln is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableGradient & gradSlnOld() const override
-  {
-    mooseError("gradSlnOld is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableValue & slnNeighbor() const override
-  {
-    mooseError("slnNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableValue & slnOldNeighbor() const override
-  {
-    mooseError("slnOldNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableGradient & gradSlnNeighbor() const override
-  {
-    mooseError("gradSlnNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const FieldVariableGradient & gradSlnOldNeighbor() const override
-  {
-    mooseError("gradSlnOldNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
-  {
-    mooseError("adSecondSln is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableValue<OutputType> & adUDot() const override
-  {
-    mooseError("adUDot is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableValue<OutputType> & adUDotDot() const override
-  {
-    mooseError("adUDotDot is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const override
-  {
-    mooseError("adGradSlnDot is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
-  {
-    mooseError("adSlnNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override
-  {
-    mooseError("adGradSlnNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override
-  {
-    mooseError("adSecondSlnNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override
-  {
-    mooseError("adUDotNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableValue<OutputType> & adUDotDotNeighbor() const override
-  {
-    mooseError("adUDotDotNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const override
-  {
-    mooseError("adGradSlnNeighborDot is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableValue<OutputType> & adSln() const override
-  {
-    mooseError("adSln is not implemented for MooseLinearVariableFV!");
-  }
-  const ADTemplateVariableGradient<OutputType> & adGradSln() const override
-  {
-    mooseError("adGradSln is not implemented for MooseLinearVariableFV!");
-  }
 
-  const DoFValue & dofValues() const override
+  virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
+
+  virtual void insert(NumericVector<Number> & vector) override;
+  virtual void insertLower(NumericVector<Number> & vector) override;
+  virtual void add(NumericVector<Number> & vector) override;
+
+  virtual void setActiveTags(const std::set<TagID> & vtags) override;
+
+  virtual const MooseArray<OutputType> & nodalValueArray() const override;
+  virtual const MooseArray<OutputType> & nodalValueOldArray() const override;
+  virtual const MooseArray<OutputType> & nodalValueOlderArray() const override;
+
+  virtual const FieldVariablePhiValue & phi() const override final { return _phi; }
+  virtual const FieldVariablePhiGradient & gradPhi() const override final { return _grad_phi; }
+  virtual const FieldVariablePhiSecond & secondPhi() const override final;
+  const FieldVariablePhiValue & curlPhi() const override final;
+  const FieldVariablePhiDivergence & divPhi() const override final;
+
+  virtual const FieldVariablePhiValue & phiFace() const override final { return _phi_face; }
+  virtual const FieldVariablePhiGradient & gradPhiFace() const override final
   {
-    mooseError("add is not implemented for MooseLinearVariableFV!");
+    return _grad_phi_face;
   }
-  const DoFValue & dofValuesOld() const override
+  virtual const FieldVariablePhiSecond & secondPhiFace() const override final;
+
+  virtual const FieldVariablePhiValue & phiFaceNeighbor() const override final
   {
-    mooseError("dofValues is not implemented for MooseLinearVariableFV!");
+    return _phi_face_neighbor;
   }
-  const DoFValue & dofValuesOlder() const override
+  virtual const FieldVariablePhiGradient & gradPhiFaceNeighbor() const override final
   {
-    mooseError("dofValuesOlder is not implemented for MooseLinearVariableFV!");
+    return _grad_phi_face_neighbor;
   }
-  const DoFValue & dofValuesPreviousNL() const override
+  virtual const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
+
+  virtual const FieldVariablePhiValue & phiNeighbor() const override final { return _phi_neighbor; }
+  virtual const FieldVariablePhiGradient & gradPhiNeighbor() const override final
   {
-    mooseError("dofValuesPreviousNL is not implemented for MooseLinearVariableFV!");
+    return _grad_phi_neighbor;
   }
-  const DoFValue & dofValuesNeighbor() const override
-  {
-    mooseError("dofValuesNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesOldNeighbor() const override
-  {
-    mooseError("dofValuesOldNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesOlderNeighbor() const override
-  {
-    mooseError("dofValuesOlderNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesPreviousNLNeighbor() const override
-  {
-    mooseError("dofValuesPreviousNLNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDot() const override
-  {
-    mooseError("dofValuesDot is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotNeighbor() const override
-  {
-    mooseError("dofValuesDotNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotOld() const override
-  {
-    mooseError("dofValuesDotOld is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotOldNeighbor() const override
-  {
-    mooseError("dofValuesDotOldNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotDot() const override
-  {
-    mooseError("dofValuesDotDot is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotDotNeighbor() const override
-  {
-    mooseError("dofValuesDotDotNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotDotOld() const override
-  {
-    mooseError("dofValuesDotDotOld is not implemented for MooseLinearVariableFV!");
-  }
-  const DoFValue & dofValuesDotDotOldNeighbor() const override
-  {
-    mooseError("dofValuesDotDotOldNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const MooseArray<Number> & dofValuesDuDotDu() const override
-  {
-    mooseError("dofValuesDuDotDu is not implemented for MooseLinearVariableFV!");
-  }
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override
-  {
-    mooseError("dofValuesDuDotDuNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const MooseArray<Number> & dofValuesDuDotDotDu() const override
-  {
-    mooseError("dofValuesDuDotDotDu is not implemented for MooseLinearVariableFV!");
-  }
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override
-  {
-    mooseError("dofValuesDuDotDotDuNeighbor is not implemented for MooseLinearVariableFV!");
-  }
-  const MooseArray<ADReal> & adDofValues() const override
-  {
-    mooseError("adDofValues is not supported for MooseLinearVariableFV.");
-  }
-  const MooseArray<ADReal> & adDofValuesNeighbor() const override
-  {
-    mooseError("adDofValuesNeighbor is not supported for MooseLinearVariableFV.");
-  }
-  virtual const dof_id_type & nodalDofIndex() const override final
-  {
-    mooseError("nodalDofIndex not supported by MooseLinearVariableFV");
-  }
-  virtual const dof_id_type & nodalDofIndexNeighbor() const override final
-  {
-    mooseError("nodalDofIndexNeighbor not supported by MooseLinearVariableFV");
-  }
-  virtual std::size_t phiSize() const override final
-  {
-    mooseError("phiSize not supported by MooseLinearVariableFVBase");
-  }
-  virtual std::size_t phiFaceSize() const override final
-  {
-    mooseError("phiFaceSize not supported by MooseLinearVariableFVBase");
-  }
-  virtual std::size_t phiNeighborSize() const override final
-  {
-    mooseError("phiNeighborSize not supported by MooseLinearVariableFVBase");
-  }
+  virtual const FieldVariablePhiSecond & secondPhiNeighbor() const override final;
+
+  virtual const FieldVariableValue & vectorTagValue(TagID tag) const override;
+  virtual const DoFValue & vectorTagDofValue(TagID tag) const override;
+  virtual const DoFValue & nodalMatrixTagValue(TagID tag) const override;
+  virtual const FieldVariableValue & matrixTagValue(TagID tag) const override;
+
+  virtual const FieldVariableValue & sln() const override;
+  virtual const FieldVariableValue & slnOld() const override;
+  virtual const FieldVariableValue & slnOlder() const override;
+  virtual const FieldVariableGradient & gradSln() const override;
+  virtual const FieldVariableGradient & gradSlnOld() const override;
+  virtual const FieldVariableValue & slnNeighbor() const override;
+  virtual const FieldVariableValue & slnOldNeighbor() const override;
+  virtual const FieldVariableGradient & gradSlnNeighbor() const override;
+  virtual const FieldVariableGradient & gradSlnOldNeighbor() const override;
+
+  virtual const ADTemplateVariableSecond<OutputType> & adSecondSln() const override;
+  virtual const ADTemplateVariableValue<OutputType> & adUDot() const override;
+  virtual const ADTemplateVariableValue<OutputType> & adUDotDot() const override;
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const override;
+  virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override;
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override;
+  virtual const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override;
+  virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override;
+  virtual const ADTemplateVariableValue<OutputType> & adUDotDotNeighbor() const override;
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const override;
+  virtual const ADTemplateVariableValue<OutputType> & adSln() const override;
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const override;
+
+  virtual const DoFValue & dofValues() const override;
+  virtual const DoFValue & dofValuesOld() const override;
+
+  virtual const DoFValue & dofValuesOlder() const override;
+  virtual const DoFValue & dofValuesPreviousNL() const override;
+  virtual const DoFValue & dofValuesNeighbor() const override;
+  virtual const DoFValue & dofValuesOldNeighbor() const override;
+  virtual const DoFValue & dofValuesOlderNeighbor() const override;
+  virtual const DoFValue & dofValuesPreviousNLNeighbor() const override;
+  virtual const DoFValue & dofValuesDot() const override;
+  virtual const DoFValue & dofValuesDotNeighbor() const override;
+  virtual const DoFValue & dofValuesDotOld() const override;
+  virtual const DoFValue & dofValuesDotOldNeighbor() const override;
+  virtual const DoFValue & dofValuesDotDot() const override;
+  virtual const DoFValue & dofValuesDotDotNeighbor() const override;
+  virtual const DoFValue & dofValuesDotDotOld() const override;
+  virtual const DoFValue & dofValuesDotDotOldNeighbor() const override;
+  virtual const MooseArray<Number> & dofValuesDuDotDu() const override;
+  virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
+  virtual const MooseArray<Number> & dofValuesDuDotDotDu() const override;
+  virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
+
+  virtual const MooseArray<ADReal> & adDofValues() const override;
+  virtual const MooseArray<ADReal> & adDofValuesNeighbor() const override;
+  virtual const dof_id_type & nodalDofIndex() const override final;
+  virtual const dof_id_type & nodalDofIndexNeighbor() const override final;
+
+  virtual std::size_t phiSize() const override final { return _phi.size(); }
+  virtual std::size_t phiFaceSize() const override final { return _phi_face.size(); }
+  virtual std::size_t phiNeighborSize() const override final { return _phi_neighbor.size(); }
   virtual std::size_t phiFaceNeighborSize() const override final
   {
-    mooseError("phiFaceNeighborSize not supported by MooseLinearVariableFVBase");
+    return _phi_face_neighbor.size();
   }
-  virtual std::size_t phiLowerSize() const override final
-  {
-    mooseError("phiLowerSize not supported by MooseLinearVariableFVBase");
-  }
+  virtual std::size_t phiLowerSize() const override final;
 };
 
 template <typename OutputType>

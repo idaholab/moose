@@ -45,6 +45,11 @@ public:
                                  InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
+  // Overriding these to make sure the linear systems don't do anything during
+  // residual/jacobian setup
+  virtual void residualSetup() override {}
+  virtual void jacobianSetup() override {}
+
   /**
    * Compute the right hand side and the system matrix of the system for given tags.
    * @param vector_tags The IDs of the vector tags whose right hand side contribution should be

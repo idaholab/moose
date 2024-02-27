@@ -104,6 +104,8 @@ PointVariableSamplerBase::execute()
           values[j] = (dynamic_cast<MooseVariableField<Real> *>(_coupled_moose_vars[j]))->sln()[0] *
                       _pp_value; // The zero is for the "qp"
 
+        std::cout << Moose::stringify(values) << std::endl;
+
         _found_points[i] = true;
       }
     }

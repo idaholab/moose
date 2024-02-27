@@ -356,7 +356,11 @@ MooseVariableInterface<T>::mooseVariableField()
   else
   {
     if (!_fv_variable)
-      mooseError("Either _variable or _fv_variable must be non-null in MooseVariableInterface");
+    {
+      if (!_linear_fv_variable)
+        mooseError("Either _variable or _fv_variable must be non-null in MooseVariableInterface");
+      return *_linear_fv_variable;
+    }
 
     return *_fv_variable;
   }

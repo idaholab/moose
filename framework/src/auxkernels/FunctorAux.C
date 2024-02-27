@@ -31,7 +31,8 @@ FunctorAux::FunctorAux(const InputParameters & parameters)
     _factor(getFunctor<Real>("factor")),
     _is_fe(dynamic_cast<MooseVariableFE<Real> *>(&_var))
 {
-  if (!_is_fe && !dynamic_cast<MooseVariableFV<Real> *>(&_var))
+  if (!_is_fe && !(dynamic_cast<MooseVariableFV<Real> *>(&_var) ||
+                   dynamic_cast<MooseLinearVariableFV<Real> *>(&_var)))
     paramError(
         "variable",
         "The variable must be a non-vector, non-array finite-volume/finite-element variable.");
