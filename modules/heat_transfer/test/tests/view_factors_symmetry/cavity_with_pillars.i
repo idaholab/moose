@@ -26,7 +26,7 @@
   [add_new_back]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'abs(z) < 1e-10'
-    included_subdomain_ids = '1'
+    included_subdomains = '1'
     normal = '0 0 -1'
     new_sideset_name = back_2
     input = add_obstruction

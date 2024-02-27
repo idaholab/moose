@@ -41,19 +41,10 @@ SideSetsGeneratorBase::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "included_subdomains",
       "A set of subdomain names or ids whose sides will be included in the new sidesets");
-  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
-      "included_subdomain_ids",
-      "A set of subdomain ids whose sides will be included in the new sidesets",
-      "included_subdomain_ids is deprecated, use included_subdomains with names or ids");
   params.addParam<std::vector<SubdomainName>>("included_neighbors",
                                               "A set of neighboring subdomain names or ids. A face "
                                               "is only added if the subdomain id of the "
                                               "neighbor is in this set");
-  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
-      "included_neighbor_ids",
-      "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
-      "neighbor is in this set",
-      "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
   params.addParam<bool>(
       "include_only_external_sides",
       false,
@@ -76,8 +67,8 @@ SideSetsGeneratorBase::validParams()
   params.deprecateParam("variance", "normal_tol", "4/01/2024");
 
   // Sideset restriction param group
-  params.addParamNamesToGroup("included_boundaries included_subdomains included_subdomain_ids "
-                              "included_neighbor_ids include_only_external_sides normal normal_tol",
+  params.addParamNamesToGroup("included_boundaries included_subdomains included_neighbors "
+                              "include_only_external_sides normal normal_tol",
                               "Sideset restrictions");
 
   return params;

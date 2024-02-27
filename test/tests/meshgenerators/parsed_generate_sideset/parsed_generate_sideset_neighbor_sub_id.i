@@ -11,7 +11,7 @@
     type = ParsedGenerateSideset
     input = cmg
     combinatorial_geometry = 'abs(x - 1) < 1e-6'
-    included_neighbor_ids = '1'
+    included_neighbors = '1'
     new_sideset_name = interior
   []
 []

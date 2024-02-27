@@ -39,7 +39,7 @@ ParsedGenerateSideset::validParams()
   params.addClassDescription("A MeshGenerator that adds element sides to a sideset if the "
                              "centroid satisfies the `combinatorial_geometry` expression. "
                              "Optionally, element sides are also added if they are included in "
-                             "`included_subdomain_ids` and if they feature the designated normal.");
+                             "`included_subdomains` and if they feature the designated normal.");
 
   return params;
 }
@@ -50,14 +50,6 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name"))
 {
-  // Handle deprecated parameters
-  if (isParamValid("included_subdomain_ids") && isParamValid("included_subdomains"))
-    paramError("included_subdomain_ids",
-               "included_subdomain_ids is deprecated, only specify included_subdomains");
-  if (isParamValid("included_neighbor_ids") && isParamValid("included_neighbors"))
-    paramError("included_neighbor_ids",
-               "included_neighbor_ids is deprecated, only specify included_neighbors");
-
   // Handle incompatible parameters
   if (_include_only_external_sides && _check_neighbor_subdomains)
     paramError("include_only_external_sides", "External sides dont have neighbors");
