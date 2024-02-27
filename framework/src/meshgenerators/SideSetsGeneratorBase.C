@@ -35,20 +35,29 @@ SideSetsGeneratorBase::validParams()
                         "If true, replace the old sidesets. If false, the current sidesets (if "
                         "any) will be preserved.");
 
+  params.addParam<std::vector<BoundaryName>>(
+      "included_boundaries",
+      "A set of boundary names or ids whose sides will be included in the new sidesets");
+  params.addParam<std::vector<SubdomainName>>(
+      "included_subdomains",
+      "A set of subdomain names or ids whose sides will be included in the new sidesets");
+  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
+      "included_subdomain_ids",
+      "A set of subdomain ids whose sides will be included in the new sidesets",
+      "included_subdomain_ids is deprecated, use included_subdomains with names or ids");
+  params.addParam<std::vector<SubdomainName>>("included_neighbors",
+                                              "A set of neighboring subdomain names or ids. A face "
+                                              "is only added if the subdomain id of the "
+                                              "neighbor is in this set");
+  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
+      "included_neighbor_ids",
+      "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
+      "neighbor is in this set",
+      "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
   params.addParam<bool>(
       "include_only_external_sides",
       false,
       "Whether to only include external sides when considering sides to add to the sideset");
-
-  params.addParam<bool>(
-      "skip_if_part_of_existing_sideset",
-      false,
-      "Whether to only include sides that are not already part of an existing sideset.");
-
-  params.addParam<bool>(
-      "include_only_if_part_of_existing_sideset",
-      false,
-      "Whether to only include sides that are already part of an existing sideset.");
 
   params.addParam<Point>("normal",
                          Point(),
@@ -66,6 +75,11 @@ SideSetsGeneratorBase::validParams()
                                   "Deprecated, use 'normal_tol' instead");
   params.deprecateParam("variance", "normal_tol", "4/01/2024");
 
+  // Sideset restriction param group
+  params.addParamNamesToGroup("included_boundaries included_subdomains included_subdomain_ids "
+                              "included_neighbor_ids include_only_external_sides normal normal_tol",
+                              "Sideset restrictions");
+
   return params;
 }
 
@@ -74,10 +88,18 @@ SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
     _input(getMesh("input")),
     _fixed_normal(getParam<bool>("fixed_normal")),
     _replace(getParam<bool>("replace")),
+    _check_boundaries(isParamValid("included_boundaries")),
+    _check_subdomains(isParamValid("included_subdomain_ids") ||
+                      isParamValid("included_subdomains")),
+    _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
+                               isParamValid("included_neighbors")),
+    _included_ids(isParamValid("included_subdomain_ids")
+                      ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
+                      : std::vector<SubdomainID>()),
+    _included_neighbor_ids(isParamValid("included_neighbor_ids")
+                               ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
+                               : std::vector<SubdomainID>()),
     _include_only_external_sides(getParam<bool>("include_only_external_sides")),
-    _skip_if_part_of_existing_sideset(getParam<bool>("skip_if_part_of_existing_sideset")),
-    _include_only_if_part_of_existing_sideset(
-        getParam<bool>("include_only_if_part_of_existing_sideset")),
     _normal(getParam<Point>("normal")),
     _using_normal(isParamSetByUser("normal")),
     _normal_tol(getParam<Real>("normal_tol"))
@@ -160,11 +182,4 @@ bool
 SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1, const Point & normal_2) const
 {
   return std::abs(1.0 - normal_1 * normal_2) <= _normal_tol;
-}
-
-bool
-addSideToBoundary(const Elem * elem, const unsigned int side) const
-{
-  if (elem->neighbor_ptr(side) && _include_only_external_sides)
-    return false;
 }

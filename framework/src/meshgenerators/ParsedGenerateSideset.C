@@ -30,25 +30,6 @@ ParsedGenerateSideset::validParams()
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<BoundaryName>("new_sideset_name", "The name of the new sideset");
-  params.addParam<std::vector<BoundaryName>>(
-      "included_boundaries",
-      "A set of boundary names or ids whose sides will be included in the new sidesets");
-  params.addParam<std::vector<SubdomainName>>(
-      "included_subdomains",
-      "A set of subdomain names or ids whose sides will be included in the new sidesets");
-  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
-      "included_subdomain_ids",
-      "A set of subdomain ids whose sides will be included in the new sidesets",
-      "included_subdomain_ids is deprecated, use included_subdomains with names or ids");
-  params.addParam<std::vector<SubdomainName>>("included_neighbors",
-                                              "A set of neighboring subdomain names or ids. A face "
-                                              "is only added if the subdomain id of the "
-                                              "neighbor is in this set");
-  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
-      "included_neighbor_ids",
-      "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
-      "neighbor is in this set",
-      "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
   params.addParam<std::vector<std::string>>(
       "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
@@ -67,18 +48,7 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
     FunctionParserUtils<false>(parameters),
     _function(parameters.get<std::string>("combinatorial_geometry")),
-    _sideset_name(getParam<BoundaryName>("new_sideset_name")),
-    _check_boundaries(isParamValid("included_boundaries")),
-    _check_subdomains(isParamValid("included_subdomain_ids") ||
-                      isParamValid("included_subdomains")),
-    _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
-                               isParamValid("included_neighbors")),
-    _included_ids(isParamValid("included_subdomain_ids")
-                      ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
-                      : std::vector<SubdomainID>()),
-    _included_neighbor_ids(isParamValid("included_neighbor_ids")
-                               ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
-                               : std::vector<SubdomainID>())
+    _sideset_name(getParam<BoundaryName>("new_sideset_name"))
 {
   // Handle deprecated parameters
   if (isParamValid("included_subdomain_ids") && isParamValid("included_subdomains"))

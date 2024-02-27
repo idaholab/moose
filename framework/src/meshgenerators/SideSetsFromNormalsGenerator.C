@@ -42,6 +42,11 @@ SideSetsFromNormalsGenerator::validParams()
   params.addParam<Real>("tolerance", 1e-5, "Tolerance for comparing the face nornmal");
 
   params.suppressParameter<Point>("normal");
+  params.suppressParameter<bool>("include_only_external_sides");
+  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
+  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
+  params.suppressParameter<std::vector<subdomain_id_type>>("included_subdomain_ids");
+  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
 
   return params;
 }

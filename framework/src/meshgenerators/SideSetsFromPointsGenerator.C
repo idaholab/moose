@@ -42,6 +42,11 @@ SideSetsFromPointsGenerator::validParams()
       "points", "A list of points from which to start painting sidesets");
 
   params.suppressParameter<Point>("normal");
+  params.suppressParameter<bool>("include_only_external_sides");
+  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
+  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
+  params.suppressParameter<std::vector<subdomain_id_type>>("included_subdomain_ids");
+  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
 
   return params;
 }

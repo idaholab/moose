@@ -54,8 +54,6 @@ protected:
 
   bool normalsWithinTol(const Point & normal_1, const Point & normal_2) const;
 
-  bool addSideToBoundary(const Elem * elem, const unsigned int side) const;
-
   /// the mesh to add the sidesets to
   std::unique_ptr<MeshBase> & _input;
 
@@ -64,17 +62,23 @@ protected:
   /// Whether or not to remove the old sidesets (if any) when adding sidesets
   const bool _replace;
 
+  /// whether to check boundary ids when adding sides or not
+  const bool _check_boundaries;
+
+  /// whether to check subdomain ids when adding sides or not
+  const bool _check_subdomains;
+
+  /// whether to check neighbor subdomain ids when adding sides or not
+  const bool _check_neighbor_subdomains;
+
+  /// A list of included subdomain ids that the side has to be part of
+  std::vector<subdomain_id_type> _included_ids;
+
+  /// A list of included neighbor subdomain ids
+  std::vector<subdomain_id_type> _included_neighbor_ids;
+
   /// Whether to only include external side when considering sides to add to the sideset
   const bool _include_only_external_sides;
-
-  /// Whether to skip side if it is already part of existing sideset
-  const bool _skip_if_part_of_existing_sideset;
-
-  /// Whether to only include if side is already part of existing sideset
-  const bool _include_only_if_part_of_existing_sideset;
-
-  ///// Whether to only include if side is touching a subdomain
-  // const bool _include_only_if_touching_subdomain;
 
   /// if specified, then faces are only added if their normal is close to this
   Point _normal;
