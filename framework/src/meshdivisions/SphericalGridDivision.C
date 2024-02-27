@@ -29,7 +29,7 @@ SphericalGridDivision::validParams()
 
   // Spatial bounds of the sphere
   params.addRangeCheckedParam<Real>(
-      "r_min", 0, "r_min>0", "Minimum radial coordinate (for a hollow sphere)");
+      "r_min", 0, "r_min>=0", "Minimum radial coordinate (for a hollow sphere)");
   params.addRequiredRangeCheckedParam<Real>("r_max", "r_max>0", "Maximum radial coordinate");
 
   // Number of bins
