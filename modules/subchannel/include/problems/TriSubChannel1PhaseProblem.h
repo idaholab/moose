@@ -19,7 +19,7 @@
 class TriSubChannel1PhaseProblem;
 class TriSubChannelMesh;
 /**
- * Steady state subchannel solver for 1-phase hex liquid metal coolants
+ * Triangular subchannel solver
  */
 class TriSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 {

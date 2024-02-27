@@ -1,5 +1,5 @@
 T_in = 360.0
-mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
+mass_flux_in = '${fparse 1e+4 * 17.0 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [QuadInterWrapperMesh]
@@ -59,7 +59,7 @@ P_out = 4.923e6 # Pa
 []
 
 [SubChannel]
-  type = LiquidWaterInterWrapper1PhaseProblem
+  type = QuadInterWrapper1PhaseProblem
   fp = water
   n_blocks = 1
   beta = 0.08
