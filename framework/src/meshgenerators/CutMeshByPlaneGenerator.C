@@ -130,8 +130,11 @@ CutMeshByPlaneGenerator::generate()
       // Check if any elements to be processed are not first order
       if ((*elem_it)->default_order() != Order::FIRST)
         mooseError("Only first order elements are supported for cutting.");
+      // We use elem_vertices_counter_2 > 0 instead of elem_vertices_counter_1 > 0 here so that
+      // those elements with one face on the plane are also processed to have the cut face boundary
+      // assigned.
       cross_and_remained_elems_pre_convert.push_back(
-          std::make_pair((*elem_it)->id(), elem_vertices_counter_1 > 0));
+          std::make_pair((*elem_it)->id(), elem_vertices_counter_2 > 0));
     }
   }
 

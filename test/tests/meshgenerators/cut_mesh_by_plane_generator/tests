@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/CutMeshByPlaneGenerator.md'
-  issues = '#26579'
+  issues = '#26579 #26902'
   [test]
     requirement = "The system shall be able to "
     [simple_hex_cut]
@@ -12,6 +12,19 @@
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='cut a 3D mesh consisting of only HEX8 elements with the cut face id automatically assigned.'
+    []
+    [simple_hex_cut_aligned]
+      type = 'Exodiff'
+      input = 'simple_cut.i'
+      exodiff = 'simple_hex_cut_aligned_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only simple_hex_cut_aligned_in.e 
+                  Mesh/gmg/elem_type=HEX8
+                  Mesh/cut/plane_point="0.5 0.5 0.0"
+                  Mesh/cut/plane_normal="0.0 1.0 0.0"'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='cut a 3D mesh consisting of only HEX8 elements using a cutting plane overlapped with some element faces.'
     []
     [simple_prism_cut]
       type = 'Exodiff'
