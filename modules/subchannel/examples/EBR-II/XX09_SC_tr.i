@@ -105,7 +105,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 []
 
 [Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
+  type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}

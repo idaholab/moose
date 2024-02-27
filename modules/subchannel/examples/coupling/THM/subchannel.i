@@ -89,7 +89,7 @@ heated_length = 1.0
 []
 
 [Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
+  type = TriSubChannel1PhaseProblem
   fp = Sodium
   n_blocks = 1
   P_out = report_pressure_outlet
