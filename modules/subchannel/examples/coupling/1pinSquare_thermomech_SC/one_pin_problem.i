@@ -88,7 +88,7 @@ heated_length = 1.0
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
   beta = 0.006

@@ -137,5 +137,5 @@ public:
 
   friend class QuadSubChannelMeshGenerator;
   friend class QuadPinMeshGenerator;
-  friend class LiquidWaterSubChannel1PhaseProblem;
+  friend class QuadSubChannel1PhaseProblem;
 };

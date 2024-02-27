@@ -91,7 +91,7 @@ pitch = 0.0126
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 2.6
@@ -340,7 +340,7 @@ pitch = 0.0126
   #   execute_on = 'timestep_end'
   # []
 
-    ###### Transfers to the detailedMesh at the end of the coupled simulations
+  ###### Transfers to the detailedMesh at the end of the coupled simulations
   [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz
