@@ -127,7 +127,7 @@ unheated_length_exit = 0.855 #m
 []
 
 [Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
+  type = TriSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
   P_out = ${P_out}
