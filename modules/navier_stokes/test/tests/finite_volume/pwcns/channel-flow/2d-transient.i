@@ -293,7 +293,7 @@ velocity_interp_method = 'rc'
     fp = fp
     pressure = 'pressure'
     T_fluid = 'T_fluid'
-    speed = 'velocity_norm'
+    speed = 'speed'
 
     # To initialize with a high viscosity
     mu_rampdown = 'mu_rampdown'
