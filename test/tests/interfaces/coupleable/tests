@@ -1,0 +1,10 @@
+[Tests]
+  design = 'NeighborCoupleable.md'
+  issues = '#21989'
+  [neighbor_coupleable]
+    type = CSVDiff
+    input = 'states.i'
+    csvdiff = 'states_out.csv'
+    requirement = 'The system shall be able to compute the old and older values of a variable in the neighbor cell.'
+  []
+[]
