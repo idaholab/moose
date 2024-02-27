@@ -113,7 +113,7 @@
   [umat]
     type = AbaqusUMATStress
     constant_properties = '1.0e6 0.3'
-    plugin = '../../../../tensor_mechanics/test/plugins/elastic_temperature'
+    plugin = '../../../../solid_mechanics/test/plugins/elastic_temperature'
     num_state_vars = 0
     temperature = temp
     use_one_based_indexing = true

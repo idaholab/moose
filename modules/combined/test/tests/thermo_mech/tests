@@ -1,21 +1,23 @@
 [Tests]
-  [./youngs_modulus_func_temp]
+  [youngs_modulus_func_temp]
     type = Exodiff
     input = 'youngs_modulus_function_temp.i'
     exodiff = 'youngs_modulus_function_temp_out.e'
-    requirement = "ComputeFiniteStrainElasticStress shall be able to accept a variable elasticity tensor that changes as a function of temperature."
+    requirement = "ComputeFiniteStrainElasticStress shall be able to accept a variable elasticity "
+                  "tensor that changes as a function of temperature."
     design = "ComputeFiniteStrainElasticStress.md"
     issues = "#6978"
-  [../]
-  [./ad-youngs_modulus_func_temp]
+  []
+  [ad-youngs_modulus_func_temp]
     type = Exodiff
     input = 'ad-youngs_modulus_function_temp.i'
     exodiff = 'ad-youngs_modulus_function_temp_out.e'
-    requirement = "ADComputeVariableIsotropicElasticityTensor shall be able to replicate non AD methods for creating an elasticity tensor as a function of temperature."
+    requirement = "ADComputeVariableIsotropicElasticityTensor shall be able to replicate non AD "
+                  "methods for creating an elasticity tensor as a function of temperature."
     design = "ADComputeVariableIsotropicElasticityTensor.md"
     issues = "#13224"
-  [../]
-  [./ad-youngs_modulus_func_temp-jac]
+  []
+  [ad-youngs_modulus_func_temp-jac]
     type = 'PetscJacobianTester'
     input = 'ad-youngs_modulus_function_temp.i'
     ratio_tol = 3e-7
@@ -26,27 +28,29 @@
     requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a perfect jacobian'
     design = "jacobian_definition.md"
     issues = "#12633"
-  [../]
+  []
 
-  [./thermo_mech]
+  [thermo_mech]
     type = 'Exodiff'
     input = 'thermo_mech.i'
     exodiff = 'thermo_mech_out.e'
     scale_refine = 1
     issues = "#8642"
-    requirement = "The system shall be able to run coupled thermo-mechanics simulations and match the deprecated solid mechanics methods"
-    design = "modules/heat_conduction/index.md tensor_mechanics/index.md"
-  [../]
-  [./ad-thermo_mech]
+    requirement = "The system shall be able to run coupled thermo-mechanics simulations and match "
+                  "the deprecated solid mechanics methods"
+    design = "modules/heat_transfer/index.md solid_mechanics/index.md"
+  []
+  [ad-thermo_mech]
     type = 'Exodiff'
     input = 'ad-thermo_mech.i'
     exodiff = 'ad-thermo_mech_out.e'
     scale_refine = 1
     issues = "#13224"
-    requirement = "The system shall be able to run coupled thermo-mechanics simulations using the AD system and match non-AD methods"
-    design = "modules/heat_conduction/index.md tensor_mechanics/index.md jacobian_definition.md"
-  [../]
-  [./ad-thermo_mech-jac]
+    requirement = "The system shall be able to run coupled thermo-mechanics simulations using the AD "
+                  "system and match non-AD methods"
+    design = "modules/heat_transfer/index.md solid_mechanics/index.md jacobian_definition.md"
+  []
+  [ad-thermo_mech-jac]
     type = 'PetscJacobianTester'
     input = 'ad-thermo_mech.i'
     ratio_tol = 1e-8
@@ -57,16 +61,17 @@
     requirement = 'Coupled thermo-mechanics simulations with AD shall calculate a perfect jacobian'
     design = "jacobian_definition.md"
     issues = "#12633"
-  [../]
-  [./thermo_mech_smp]
+  []
+  [thermo_mech_smp]
     type = 'Exodiff'
     input = 'thermo_mech_smp.i'
     exodiff = 'thermo_mech_smp_out.e'
     custom_cmp = 'thermo_mech.cmp'
     max_parallel = 1
     issues = "#8642"
-    requirement = "The system shall be able to run coupled thermo-mechanics simulations using the SMP preconditioner and match the deprecated solid mechanics methods"
-    design = "modules/heat_conduction/index.md tensor_mechanics/index.md"
+    requirement = "The system shall be able to run coupled thermo-mechanics simulations using the "
+                  "SMP preconditioner and match the deprecated solid mechanics methods"
+    design = "modules/heat_transfer/index.md solid_mechanics/index.md"
     no_error_deprecated = true
-  [../]
+  []
 []

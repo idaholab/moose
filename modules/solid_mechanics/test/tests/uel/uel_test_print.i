@@ -127,7 +127,7 @@
   [uel]
     type = AbaqusUserElement
     variables = 'disp_x disp_y disp_z'
-    plugin = '../../../../tensor_mechanics/examples/uel_build_tests/uel'
+    plugin = '../../../../solid_mechanics/examples/uel_build_tests/uel'
     use_displaced_mesh = false
 
     external_fields = 'temperature voltage'

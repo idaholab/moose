@@ -95,7 +95,7 @@
   [uel]
     type = AbaqusUserElement
     variables = 'disp_x disp_y'
-    plugin = '../../../../tensor_mechanics/examples/uel_build/uel'
+    plugin = '../../../../solid_mechanics/examples/uel_build/uel'
     use_displaced_mesh = false
 
     #temperature = temperature # TODO

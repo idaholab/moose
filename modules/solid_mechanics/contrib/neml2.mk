@@ -18,7 +18,7 @@
 #                will terminate with an error message if ENABLE_NEML2 is true
 #                AND a NEML2 checkout cannot be found.
 
-NEML2_DIR ?= $(MOOSE_DIR)/modules/tensor_mechanics/contrib/neml2
+NEML2_DIR ?= $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2
 ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
 _ENABLE_NEML2_DEFAULT = false
 else
