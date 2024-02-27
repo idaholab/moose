@@ -16,17 +16,17 @@
 
 #include "SubChannel1PhaseProblem.h"
 
-class LiquidMetalSubChannel1PhaseProblem;
+class TriSubChannel1PhaseProblem;
 class TriSubChannelMesh;
 /**
  * Steady state subchannel solver for 1-phase hex liquid metal coolants
  */
-class LiquidMetalSubChannel1PhaseProblem : public SubChannel1PhaseProblem
+class TriSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 {
 public:
-  LiquidMetalSubChannel1PhaseProblem(const InputParameters & params);
+  TriSubChannel1PhaseProblem(const InputParameters & params);
 
-  virtual ~LiquidMetalSubChannel1PhaseProblem();
+  virtual ~TriSubChannel1PhaseProblem();
 
 protected:
   virtual void initializeSolution() override;

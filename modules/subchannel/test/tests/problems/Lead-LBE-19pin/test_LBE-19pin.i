@@ -56,7 +56,7 @@ P_out = 1.0e5 # Pa
 []
 
 [Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
+  type = TriSubChannel1PhaseProblem
   fp = LBE
   n_blocks = 1
   P_out = 1.0e5

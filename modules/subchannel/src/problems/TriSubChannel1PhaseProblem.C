@@ -12,14 +12,14 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "LiquidMetalSubChannel1PhaseProblem.h"
+#include "TriSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 #include "TriSubChannelMesh.h"
 
-registerMooseObject("SubChannelApp", LiquidMetalSubChannel1PhaseProblem);
+registerMooseObject("SubChannelApp", TriSubChannel1PhaseProblem);
 
 InputParameters
-LiquidMetalSubChannel1PhaseProblem::validParams()
+TriSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
   params.addClassDescription("Solver class for metal-cooled subchannels in a triangular lattice "
@@ -27,8 +27,7 @@ LiquidMetalSubChannel1PhaseProblem::validParams()
   return params;
 }
 
-LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
-    const InputParameters & params)
+TriSubChannel1PhaseProblem::TriSubChannel1PhaseProblem(const InputParameters & params)
   : SubChannel1PhaseProblem(params),
     _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
 {
@@ -43,7 +42,7 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
   createPetscVector(_hc_sweep_enthalpy_rhs, _block_size * _n_channels);
 }
 
-LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
+TriSubChannel1PhaseProblem::~TriSubChannel1PhaseProblem()
 {
   // Clean up heat conduction system
   MatDestroy(&_hc_axial_heat_conduction_mat);
@@ -55,7 +54,7 @@ LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
 }
 
 void
-LiquidMetalSubChannel1PhaseProblem::initializeSolution()
+TriSubChannel1PhaseProblem::initializeSolution()
 {
   if (_deformation)
   {
@@ -204,7 +203,7 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
 }
 
 Real
-LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
+TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;
@@ -385,7 +384,7 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
 }
 
 void
-LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
+TriSubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -511,7 +510,7 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
 }
 
 Real
-LiquidMetalSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
+TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
 {
   auto dz = _z_grid[iz] - _z_grid[iz - 1];
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
@@ -565,7 +564,7 @@ LiquidMetalSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsig
 }
 
 void
-LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
+TriSubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;

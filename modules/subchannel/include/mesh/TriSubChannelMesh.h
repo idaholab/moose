@@ -247,7 +247,7 @@ public:
   friend class TriDuctMeshGenerator;
   friend class TriPinMeshGenerator;
   friend class DetailedTriPinMeshGenerator;
-  friend class LiquidMetalSubChannel1PhaseProblem;
+  friend class TriSubChannel1PhaseProblem;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;
