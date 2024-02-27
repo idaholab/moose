@@ -247,6 +247,14 @@ ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int co
   return getScalarVar(var_name, comp)->uDot();
 }
 
+const ADVariableValue &
+ScalarCoupleable::adCoupledScalarDot(const std::string & var_name, unsigned int comp) const
+{
+  checkVar(var_name);
+  validateExecutionerType(var_name, "adCoupledScalarDot");
+  return getScalarVar(var_name, comp)->adUDot();
+}
+
 const VariableValue &
 ScalarCoupleable::coupledScalarDotDot(const std::string & var_name, unsigned int comp) const
 {
