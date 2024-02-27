@@ -6,7 +6,11 @@ energy, deformation energy, and GB energy. Various modeling approaches have been
 applied to model GB migration. While all of the various methods predict
 similar behavior, the phase-field method has emerged as one of the more popular due to its flexibility.
 
-In MOOSE, we have implemented the multiphase grain growth model from [!cite](moelans_quantitative_2008). The variables evolve to reduce the overall free energy of the system, representing GB migration. The evolution of each grain's order parameter is defined with the Allen-Cahn equation:
+In MOOSE, we have implemented the multiphase grain growth model originally developed in
+[!cite](ChenYang1994) and [!cite](Chen1995) and further developed in
+[!cite](moelans_quantitative_2008). The variables evolve to reduce the overall free energy of
+the system, representing GB migration. The evolution of each grain's order parameter is defined
+with the Allen-Cahn equation:
 \begin{equation}
   \frac{\partial \eta_i}{\partial t} = - L \frac{\delta F}{\delta \eta_i},
 \end{equation}
