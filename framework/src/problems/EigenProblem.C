@@ -459,7 +459,7 @@ EigenProblem::postScaleEigenVector()
 
     unsigned int itr = 0;
 
-    while (!MooseUtils::absoluteFuzzyEqual(v, c))
+    while (!MooseUtils::relativeFuzzyEqual(v, c))
     {
       // If postprocessor is not defined on eigen variables, scaling might not work
       if (itr > 10)
