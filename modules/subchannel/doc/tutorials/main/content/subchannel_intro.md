@@ -1,4 +1,4 @@
-# Introduction to Pronghorn-SC
+# Introduction to MOOSE-SubChannel
 
 !---
 

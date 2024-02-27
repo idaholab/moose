@@ -61,7 +61,7 @@ The subchannel code results vs the experimental measurements are shown in Figure
 
 The code predicted average values in all three cases are lower than the measured experimental values. That's because the experimental results are point-wise instantaneous velocity measurements while the subchannel code results are the surface averaged velocities in each subchannel.
 
-The experimental maximum values measured at the subchannel centers are less than the analytically predicted value of $U_{max} = 2 \times U_{average}$ for laminar flow inside a circular pipe. Where a good prediction for $U_{average}$ would be the subchannel code calculation.  This happens because of turbulence (modeled in Pronghorn-SC with closure models) which tends to flatten the velocity profiles. In turbulent flows momentum is transferred towards the wall regions, hence the maximum velocity in a turbulent profile is less than that in the laminar case.
+The experimental maximum values measured at the subchannel centers are less than the analytically predicted value of $U_{max} = 2 \times U_{average}$ for laminar flow inside a circular pipe. Where a good prediction for $U_{average}$ would be the subchannel code calculation.  This happens because of turbulence (modeled in MOOSE-SubChannel with closure models) which tends to flatten the velocity profiles. In turbulent flows momentum is transferred towards the wall regions, hence the maximum velocity in a turbulent profile is less than that in the laminar case.
 
 Furthermore, when the power ratio is reduced (case 13 vs case 9), the velocity profile gets more flat. The code prediction follows that trend. Buoyancy effects are more pronounced when there are more extreme gradients in heat rate in the radial direction.
 
