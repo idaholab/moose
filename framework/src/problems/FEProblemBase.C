@@ -4488,17 +4488,15 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     }
     catch (libMesh::LogicError & e)
     {
-      setException(_current_execute_on_flag,
-                   "The following libMesh::LogicError was raised during UserObject evaluation in "
+      setException("The following libMesh::LogicError was raised during UserObject evaluation in "
                    "FEProblemBase:\n" +
-                       std::string(e.what()));
+                   std::string(e.what()));
     }
     catch (MooseException & e)
     {
-      setException(_current_execute_on_flag,
-                   "The following MooseException was raised during UserObject evaluation in "
+      setException("The following MooseException was raised during UserObject evaluation in "
                    "FEProblemBase:\n" +
-                       std::string(e.what()));
+                   std::string(e.what()));
     }
     catch (MetaPhysicL::LogicError & e)
     {
@@ -4511,9 +4509,6 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     }
     catch (MooseException &)
     {
-      mooseAssert("type == EXEC_LINEAR",
-                  "Recovering from an exception by inserting a NaN in the residual vector to make "
-                  "the solve fail can only be done during linear residual evaluations.");
       return;
     }
   }
@@ -5857,21 +5852,6 @@ FEProblemBase::setException(const std::string & message)
 }
 
 void
-FEProblemBase::setException(const ExecFlagType & type, const std::string & message)
-{
-  if (type == EXEC_LINEAR || type == EXEC_NONE)
-    // Handle the exception if it occurs at times when it can be handled by forcing the
-    // solve to file, resulting in cutting back the time step
-    setException(message);
-  else
-    // Otherwise we don't know what to do
-    mooseError("The following exception was caught during " + Moose::stringify(type) +
-               " evaluation:\n" + message +
-               "\nBecause this did not occur during residual evaluation, there"
-               " is no way to handle this, so the solution is aborting.\n");
-}
-
-void
 FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 {
   if (_skip_exception_check)
@@ -5889,37 +5869,68 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
   {
     _communicator.broadcast(_exception_message, processor_id);
 
-    // Print the message
-    if (_communicator.rank() == 0 && print_message)
+    // BWS TODO: The code in this should really just run on LINEAR, but a lot of tests fail:
+    //          LINEAR only: 10 in moose/tests, 3 in modules
+    //
+    //          The following tests fail because this gets called on NONLINEAR:
+    //          misc/exception.parallel_exception_jacobian_transient
+    //          materials/material.exception/serial
+    //          modules/solid_mechanics/test:power_law_creep.exception/non
+    //          modules/solid_mechanics/test:power_law_creep.exception/ad
+    //
+    //          The following tests fail because this gets called on NONE:
+    //          dampers/interactions.interacting_node_elem1
+    //          dampers/min_damping.min_nodal_damping
+    //          dampers/bounding_value_nodal_damper.bounding_value_max
+    //          dampers/bounding_value_element_damper.bounding_value_max
+    //          dampers/interactions.interacting_node_elem2
+    //          outputs/debug.show_execution_order/elem_dampers
+    //          dampers/min_damping.min_elem_damping
+    //          dampers/min_damping.min_general_damping
+    //          modules/solid_mechanics/test:ad_return_mapping.reference  (autoscaling issue)
+    //
+    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR ||
+        _current_execute_on_flag == EXEC_NONE)
     {
-      _console << "\nThe following exception was caught in FEProblemBase:\n";
-      _console << _exception_message << "\n";
-      _console << "To recover, the solution will fail and then be re-attempted with a reduced time "
-                  "step.\n"
-               << std::endl;
+      // Print the message
+      if (_communicator.rank() == 0 && print_message)
+      {
+        _console << "\nThe following exception was caught in FEProblemBase:\n";
+        _console << _exception_message << "\n";
+        _console
+            << "To recover, the solution will fail and then be re-attempted with a reduced time "
+               "step.\n"
+            << std::endl;
+      }
+
+      // Stop the solve -- this entails setting
+      // SNESSetFunctionDomainError() or directly inserting NaNs in the
+      // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
+      _current_nl_sys->stopSolve();
+
+      // and close Aux system (we MUST do this here; see #11525)
+      _aux->solution().close();
+
+      // We've handled this exception, so we no longer have one.
+      _has_exception = false;
+
+      // Force the next non-linear convergence check to fail (and all further residual evaluation to
+      // be skipped).
+      _fail_next_nonlinear_convergence_check = true;
+
+      // Reset the state to prepare for the next evaluation
+      resetState();
+
+      // Repropagate the exception, so it can be caught at a higher level, typically
+      // this is NonlinearSystem::computeResidual().
+      throw MooseException(_exception_message);
     }
-
-    // Stop the solve -- this entails setting
-    // SNESSetFunctionDomainError() or directly inserting NaNs in the
-    // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
-    _current_nl_sys->stopSolve();
-
-    // and close Aux system (we MUST do this here; see #11525)
-    _aux->solution().close();
-
-    // We've handled this exception, so we no longer have one.
-    _has_exception = false;
-
-    // Force the next non-linear convergence check to fail (and all further residual evaluation to
-    // be skipped).
-    _fail_next_nonlinear_convergence_check = true;
-
-    // Reset the state to prepare for the next evaluation
-    resetState();
-
-    // Repropagate the exception, so it can be caught at a higher level, typically
-    // this is NonlinearSystem::computeResidual().
-    throw MooseException(_exception_message);
+    else
+      mooseError("The following parallel-communicated exception was detected during " +
+                 Moose::stringify(_current_execute_on_flag) + " evaluation:\n" +
+                 _exception_message +
+                 "\nBecause this did not occur during residual evaluation, there"
+                 " is no way to handle this, so the solution is aborting.\n");
   }
 }
 
@@ -6296,17 +6307,15 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       }
       catch (libMesh::LogicError & e)
       {
-        setException(_current_execute_on_flag,
-                     "The following libMesh::LogicError was raised during the mortar mesh update "
+        setException("The following libMesh::LogicError was raised during the mesh update "
                      "in FEProblemBase:\n" +
-                         std::string(e.what()));
+                     std::string(e.what()));
       }
       catch (MooseException & e)
       {
-        setException(_current_execute_on_flag,
-                     "The following MooseException was raised during the mortar mesh update in "
+        setException("The following MooseException was raised during the mesh update in "
                      "FEProblemBase:\n" +
-                         std::string(e.what()));
+                     std::string(e.what()));
       }
       try
       {
@@ -6315,9 +6324,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       }
       catch (MooseException &)
       {
-        mooseAssert("_current_execute_on_flag == EXEC_LINEAR",
-                    "Recovering from an exception by inserting a NaN in the residual vector to "
-                    "make the solve fail can only be done during linear residual evaluations.");
         return;
       }
     }
@@ -6338,9 +6344,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     }
     catch (MooseException & e)
     {
-      mooseAssert("_current_execute_on_flag == EXEC_LINEAR",
-                  "Recovering from an exception by inserting a NaN in the residual vector to make "
-                  "the solve fail can only be done during linear residual evaluations.");
       // We know the next solve is going to fail, so there's no point in
       // computing anything else after this.  Plus, using incompletely
       // computed AuxVariables in subsequent calculations could lead to
@@ -6530,17 +6533,15 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     }
     catch (libMesh::LogicError & e)
     {
-      setException(_current_execute_on_flag,
-                   "The following libMesh::LogicError was raised during the mortar mesh update in "
+      setException("The following libMesh::LogicError was raised during the mesh update in "
                    "FEProblemBase:\n" +
-                       std::string(e.what()));
+                   std::string(e.what()));
     }
     catch (MooseException & e)
     {
-      setException(_current_execute_on_flag,
-                   "The following MooseException was raised during the mortar mesh update in "
+      setException("The following MooseException was raised during the mesh update in "
                    "FEProblemBase:\n" +
-                       std::string(e.what()));
+                   std::string(e.what()));
     }
     try
     {
@@ -6549,9 +6550,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     }
     catch (MooseException &)
     {
-      mooseAssert("_current_execute_on_flag == EXEC_LINEAR",
-                  "Recovering from an exception by inserting a NaN in the residual vector to make "
-                  "the solve fail can only be done during linear residual evaluations.");
       return;
     }
   }

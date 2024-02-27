@@ -466,22 +466,12 @@ public:
   /**
    * Set an exception, which is stored at this point by toggling a member variable in
    * this class, and which must be followed up with by a call to
-   * checkExceptionAndStopSolve().  Usually this should not be directly called, but
-   * should be called through the mooseException() macro.
+   * checkExceptionAndStopSolve().
    *
-   * @param message The error message describing the exception.
+   * @param message The error message describing the exception, which will get printed
+   *                when checkExceptionAndStopSolve() is called
    */
   virtual void setException(const std::string & message);
-
-  /**
-   * Set an exception, as documented in setException(const std::string & message),
-   * only for phases during residual evaluation when the exception can be handled
-   * by causing the solve to fail and cutting the step back. Generate an error otherwise.
-   *
-   * @param type    The ExecFlagType indiciating the current phase of computation
-   * @param message The error message describing the exception.
-   */
-  virtual void setException(const ExecFlagType & type, const std::string & message);
 
   /**
    * Whether or not an exception has occurred.
@@ -489,15 +479,20 @@ public:
   virtual bool hasException() { return _has_exception; }
 
   /**
-   * Check to see if an exception has occurred on any processor and stop the solve.
-   * The exception must be registered by calling setException() prior to calling this.
+   * Check to see if an exception has occurred on any processor and, if possible,
+   * force the solve to fail, which will result in the time step being cut.
    *
-   * Note: Collective on MPI!  Must be called simultaneously by all processors!
+   * Notes:
+   *  * The exception have be registered by calling setException() prior to calling this.
+   *  * This is collective on MPI, and must be called simultaneously by all processors!
+   *  * If called when the solve can be interruped, it will do so and also throw a
+   *    MooseException, which must be handled.
+   *  * If called at a stage in the execution when the solve cannot be interupted (i.e.,
+   *    there is no solve active), it will generate an error and terminate the application.
+   *  * DO NOT CALL THIS IN A THREADED REGION! This is meant to be called just after a
+   *    threaded section.
    *
-   * Also: This will throw a MooseException!
-   *
-   * Note: DO NOT CALL THIS IN A THREADED REGION!  This is meant to be called just after a threaded
-   * section.
+   * @param print_message whether to print a message with exception information
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
