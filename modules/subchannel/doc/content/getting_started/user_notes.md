@@ -1,4 +1,4 @@
-# Pronghorn-SC User Notes
+# MOOSE-SubChannel User Notes
 
 The following page is dedicated to various notes concerning SubChannel functionality
 that might be helpful to both new and seasoned users. This page will be updated
@@ -6,7 +6,7 @@ periodically, so check back often!
 
 ## SubChannel index notation
 
-Pronghorn-SC follows the following index notation for the subchannels, where black is the subchannel
+MOOSE-SubChannel follows the following index notation for the subchannels, where black is the subchannel
 index, white is the fuel-pin index and red is the gap index.
 
 ## Square lattice
@@ -25,7 +25,7 @@ index, white is the fuel-pin index and red is the gap index.
 
 ## Pressure boundary condition caveat
 
-Prongorn-SC's solver is designed to solve for relative pressure: $P_{relative} = P_{absolute} - P_{boundary}$, such that the relative pressure at the outlet boundary is zero. The pressure boundary condition is only explicitly used in the calculation of fluid properties. The user should be careful to initialize/set the pressure at the assembly outlet to zero (not setting it at all will also define the default value of zero).
+MOOSE-SC solver is designed to solve for relative pressure: $P_{relative} = P_{absolute} - P_{boundary}$, such that the relative pressure at the outlet boundary is zero. The pressure boundary condition is only explicitly used in the calculation of fluid properties. The user should be careful to initialize/set the pressure at the assembly outlet to zero (not setting it at all will also define the default value of zero).
 
 ## Related articles/papers
 
