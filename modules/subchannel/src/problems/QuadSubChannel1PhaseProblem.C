@@ -12,13 +12,13 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "LiquidWaterSubChannel1PhaseProblem.h"
+#include "QuadSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 
-registerMooseObject("SubChannelApp", LiquidWaterSubChannel1PhaseProblem);
+registerMooseObject("SubChannelApp", QuadSubChannel1PhaseProblem);
 
 InputParameters
-LiquidWaterSubChannel1PhaseProblem::validParams()
+QuadSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
   params.addClassDescription(
@@ -38,8 +38,7 @@ LiquidWaterSubChannel1PhaseProblem::validParams()
   return params;
 }
 
-LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
-    const InputParameters & params)
+QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters & params)
   : SubChannel1PhaseProblem(params),
     _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh)),
     _beta(getParam<Real>("beta")),
@@ -49,7 +48,7 @@ LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
 }
 
 void
-LiquidWaterSubChannel1PhaseProblem::initializeSolution()
+QuadSubChannel1PhaseProblem::initializeSolution()
 {
   /// update surface area, wetted perimeter based on: Dpin, displacement
   if (_deformation)
@@ -171,7 +170,7 @@ LiquidWaterSubChannel1PhaseProblem::initializeSolution()
 }
 
 Real
-LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
+QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;
@@ -319,7 +318,7 @@ LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
 }
 
 void
-LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
+QuadSubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -534,7 +533,7 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
 }
 
 Real
-LiquidWaterSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
+QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
 {
   auto dz = _z_grid[iz] - _z_grid[iz - 1];
   if (_pin_mesh_exist)
@@ -559,7 +558,7 @@ LiquidWaterSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsig
 }
 
 void
-LiquidWaterSubChannel1PhaseProblem::computeh(int iblock)
+QuadSubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;

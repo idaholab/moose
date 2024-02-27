@@ -78,7 +78,7 @@ P_out = 101325 # Pa
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   n_blocks = 1
   fp = water
   beta = 0.006
@@ -100,11 +100,11 @@ P_out = 101325 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
-     type = QuadPowerIC
-     variable = q_prime
-     power = 1000  # W
-     filename = "power_profile.txt"
+  [q_prime_IC]
+    type = QuadPowerIC
+    variable = q_prime
+    power = 1000 # W
+    filename = "power_profile.txt"
   []
 
   [T_ic]

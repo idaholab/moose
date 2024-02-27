@@ -128,7 +128,7 @@ P_out = 14.72e6 # Pa
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
   beta = 0.006

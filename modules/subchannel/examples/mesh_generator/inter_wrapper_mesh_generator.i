@@ -1,5 +1,5 @@
 T_in = 360.0
-mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
+mass_flux_in = '${fparse 1e+4 * 17.0 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [QuadInterWrapperMesh]
@@ -59,7 +59,7 @@ P_out = 4.923e6 # Pa
 []
 
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
   beta = 0.08
@@ -165,7 +165,7 @@ P_out = 4.923e6 # Pa
     file_base = "Temp_Out.txt"
     height = 3.658
   []
-    [mdot_Out_MATRIX]
+  [mdot_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
