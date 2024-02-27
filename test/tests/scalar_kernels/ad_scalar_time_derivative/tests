@@ -1,11 +1,20 @@
 [Tests]
-  [test]
-    type = CSVDiff
-    input = 'ad_scalar_time_derivative.i'
-    csvdiff = 'ad_scalar_time_derivative_out.csv'
-    # AD scalar kernels only work with global AD indexing
-    design = 'ADScalarTimeDerivative.md'
-    issues = '#18535'
-    requirement = 'The system shall provide the ability to compute the time derivative of a scalar variable and have its Jacobian computed using automatic differentiation.'
+  design = 'ADScalarTimeDerivative.md'
+  issues = '#18535'
+  [dot]
+    requirement = 'The system shall provide the ability to compute the time derivative of a scalar variable and have its Jacobian computed using automatic differentiation, and'
+    [test]
+      type = CSVDiff
+      input = 'ad_scalar_time_derivative.i'
+      csvdiff = 'ad_scalar_time_derivative_out.csv'
+      detail = 'applied using standard kernel variable interfaces, or'
+    []
+    [test_coupled]
+      type = CSVDiff
+      input = 'ad_scalar_time_derivative.i'
+      csvdiff = 'coupled.csv'
+      detail = 'applied using coupling interfaces.'
+      cli_args = "Outputs/file_base=coupled ScalarKernels/inactive='time'"
+    []
   []
 []
