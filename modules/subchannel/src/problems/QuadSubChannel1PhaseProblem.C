@@ -22,7 +22,7 @@ QuadSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
   params.addClassDescription(
-      "Solver class for water-cooled subchannels in a square lattice assembly and bare fuel rods");
+      "Solver class for subchannels in a square lattice assembly and bare fuel rods");
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow. This "
                                 "parameter in not user defined in triangular subchannels");

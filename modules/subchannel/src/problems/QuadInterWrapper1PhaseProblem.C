@@ -12,27 +12,26 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "LiquidWaterInterWrapper1PhaseProblem.h"
+#include "QuadInterWrapper1PhaseProblem.h"
 
-registerMooseObject("SubChannelApp", LiquidWaterInterWrapper1PhaseProblem);
+registerMooseObject("SubChannelApp", QuadInterWrapper1PhaseProblem);
 
 InputParameters
-LiquidWaterInterWrapper1PhaseProblem::validParams()
+QuadInterWrapper1PhaseProblem::validParams()
 {
   InputParameters params = InterWrapper1PhaseProblem::validParams();
   params.addClassDescription(
-      "Solver class for water-cooled interwrapper of assemblies in a square-lattice arrangement");
+      "Solver class for interwrapper of assemblies in a square-lattice arrangement");
   return params;
 }
 
-LiquidWaterInterWrapper1PhaseProblem::LiquidWaterInterWrapper1PhaseProblem(
-    const InputParameters & params)
+QuadInterWrapper1PhaseProblem::QuadInterWrapper1PhaseProblem(const InputParameters & params)
   : InterWrapper1PhaseProblem(params)
 {
 }
 
 double
-LiquidWaterInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
+QuadInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
 {
   Real a, b;
   if (Re < 1)

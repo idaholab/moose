@@ -16,15 +16,15 @@
 
 #include "InterWrapper1PhaseProblem.h"
 
-class LiquidWaterInterWrapper1PhaseProblem;
+class QuadInterWrapper1PhaseProblem;
 
 /**
- * Steady state subchannel solver for 1-phase liquid water coolant
+ * Quadrilateral interwrapper solver
  */
-class LiquidWaterInterWrapper1PhaseProblem : public InterWrapper1PhaseProblem
+class QuadInterWrapper1PhaseProblem : public InterWrapper1PhaseProblem
 {
 public:
-  LiquidWaterInterWrapper1PhaseProblem(const InputParameters & params);
+  QuadInterWrapper1PhaseProblem(const InputParameters & params);
 
 protected:
   virtual Real computeFrictionFactor(Real Re) override;

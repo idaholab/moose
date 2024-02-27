@@ -1,5 +1,5 @@
 T_in = 360.0
-mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
+mass_flux_in = '${fparse 1e+4 * 17.0 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [QuadInterWrapperMesh]
@@ -15,7 +15,6 @@ P_out = 4.923e6 # Pa
     heated_length = 3.0
   []
 []
-
 
 [AuxVariables]
   [mdot]
@@ -53,16 +52,14 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [FluidProperties]
   [water]
     type = Water97FluidProperties
   []
 []
 
-
 [SubChannel]
-  type = LiquidWaterInterWrapper1PhaseProblem
+  type = QuadInterWrapper1PhaseProblem
   fp = water
   n_blocks = 1
   beta = 0.08
@@ -78,7 +75,6 @@ P_out = 4.923e6 # Pa
   staggered_pressure = false
   monolithic_thermal = false
 []
-
 
 [ICs]
   [S_IC]
@@ -145,7 +141,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [AuxKernels]
   [T_in_bc]
     type = ConstantAux
@@ -164,12 +159,10 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [Outputs]
   exodus = true
   checkpoint = false
 []
-
 
 [Executioner]
   type = Steady
