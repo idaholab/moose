@@ -19,7 +19,7 @@
 
 class QuadSubChannel1PhaseProblem;
 /**
- * Steady state subchannel solver for 1-phase quad liquid water coolant
+ * Quadrilateral subchannel solver
  */
 class QuadSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 {

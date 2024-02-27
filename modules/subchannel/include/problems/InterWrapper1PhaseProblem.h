@@ -28,7 +28,7 @@
 class InterWrapper1PhaseProblem;
 
 /**
- * Base class for the 1-phase steady-state/transient sub channel solver.
+ * Base class for the 1-phase steady-state/transient interwrapper solver.
  */
 class InterWrapper1PhaseProblem : public ExternalProblem
 {

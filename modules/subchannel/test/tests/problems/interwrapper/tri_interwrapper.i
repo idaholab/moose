@@ -1,7 +1,6 @@
 T_in = 360.0
 P_out = 4.923e6 # Pa
 
-
 [TriInterWrapperMesh]
   [sub_channel]
     type = TriInterWrapperMeshGenerator
@@ -15,117 +14,117 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxVariables]
-    [mdot]
-    []
-    [SumWij]
-    []
-    [P]
-    []
-    [DP]
-    []
-    [h]
-    []
-    [T]
-    []
-    [rho]
-    []
-    [mu]
-    []
-    [S]
-    []
-    [w_perim]
-    []
-    [q_prime]
-    []
+  [mdot]
+  []
+  [SumWij]
+  []
+  [P]
+  []
+  [DP]
+  []
+  [h]
+  []
+  [T]
+  []
+  [rho]
+  []
+  [mu]
+  []
+  [S]
+  []
+  [w_perim]
+  []
+  [q_prime]
+  []
 []
 
 [FluidProperties]
-    [sodium]
-        type = PBSodiumFluidProperties
-    []
+  [sodium]
+    type = PBSodiumFluidProperties
+  []
 []
 
 [ICs]
-    [S_IC]
-        type = TriInterWrapperFlowAreaIC
-        variable = S
-    []
+  [S_IC]
+    type = TriInterWrapperFlowAreaIC
+    variable = S
+  []
 
-    [w_perim_IC]
-        type = TriInterWrapperWettedPerimIC
-        variable = w_perim
-    []
+  [w_perim_IC]
+    type = TriInterWrapperWettedPerimIC
+    variable = w_perim
+  []
 
-    [q_prime_IC]
-        type = TriInterWrapperPowerIC
-        variable = q_prime
-    []
+  [q_prime_IC]
+    type = TriInterWrapperPowerIC
+    variable = q_prime
+  []
 
-    [T_ic]
-        type = ConstantIC
-        variable = T
-        value = ${T_in}
-    []
+  [T_ic]
+    type = ConstantIC
+    variable = T
+    value = ${T_in}
+  []
 
-    [P_ic]
-        type = ConstantIC
-        variable = P
-        value = 0.0
-    []
+  [P_ic]
+    type = ConstantIC
+    variable = P
+    value = 0.0
+  []
 
-    [DP_ic]
-        type = ConstantIC
-        variable = DP
-        value = 0.0
-    []
+  [DP_ic]
+    type = ConstantIC
+    variable = DP
+    value = 0.0
+  []
 
-    [Viscosity_ic]
-        type = ViscosityIC
-        variable = mu
-        p = ${P_out}
-        T = T
-        fp = sodium
-    []
+  [Viscosity_ic]
+    type = ViscosityIC
+    variable = mu
+    p = ${P_out}
+    T = T
+    fp = sodium
+  []
 
-    [rho_ic]
-        type = RhoFromPressureTemperatureIC
-        variable = rho
-        p = ${P_out}
-        T = T
-        fp = sodium
-    []
+  [rho_ic]
+    type = RhoFromPressureTemperatureIC
+    variable = rho
+    p = ${P_out}
+    T = T
+    fp = sodium
+  []
 
-    [h_ic]
-        type = SpecificEnthalpyFromPressureTemperatureIC
-        variable = h
-        p = ${P_out}
-        T = T
-        fp = sodium
-    []
+  [h_ic]
+    type = SpecificEnthalpyFromPressureTemperatureIC
+    variable = h
+    p = ${P_out}
+    T = T
+    fp = sodium
+  []
 
-    [mdot_ic]
-        type = ConstantIC
-        variable = mdot
-        value = 0.1
-    []
+  [mdot_ic]
+    type = ConstantIC
+    variable = mdot
+    value = 0.1
+  []
 []
 
 [SubChannel]
-    type = LiquidMetalInterWrapper1PhaseProblem
-    fp = sodium
-    n_blocks = 1
-    beta = 0.1
-    P_out = 2.0e5
-    CT = 1.0
-    compute_density = true
-    compute_viscosity = true
-    compute_power = false
-    P_tol = 1.0e-6
-    T_tol = 1.0e-6
-    implicit = false
-    segregated = true
-    staggered_pressure = false
-    monolithic_thermal = false
+  type = TriInterWrapper1PhaseProblem
+  fp = sodium
+  n_blocks = 1
+  beta = 0.1
+  P_out = 2.0e5
+  CT = 1.0
+  compute_density = true
+  compute_viscosity = true
+  compute_power = false
+  P_tol = 1.0e-6
+  T_tol = 1.0e-6
+  implicit = false
+  segregated = true
+  staggered_pressure = false
+  monolithic_thermal = false
 []
 
 [AuxKernels]

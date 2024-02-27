@@ -22,8 +22,8 @@ InputParameters
 TriSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
-  params.addClassDescription("Solver class for metal-cooled subchannels in a triangular lattice "
-                             "assembly and bare/wire-wrapped fuel rods");
+  params.addClassDescription("Solver class for subchannels in a triangular lattice assembly and "
+                             "bare/wire-wrapped fuel rods");
   return params;
 }
 

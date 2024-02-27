@@ -67,9 +67,9 @@ P_out = 4.923e6 # Pa
   []
 
   [P_ic]
-      type = ConstantIC
-      variable = P
-      value = 0.0
+    type = ConstantIC
+    variable = P
+    value = 0.0
   []
 
   [DP_ic]
@@ -110,7 +110,7 @@ P_out = 4.923e6 # Pa
 []
 
 [SubChannel]
-  type = LiquidMetalInterWrapper1PhaseProblem
+  type = TriInterWrapper1PhaseProblem
   fp = sodium
   n_blocks = 2
   beta = 0.1

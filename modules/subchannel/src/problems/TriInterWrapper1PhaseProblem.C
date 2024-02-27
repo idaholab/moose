@@ -12,30 +12,29 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "LiquidMetalInterWrapper1PhaseProblem.h"
+#include "TriInterWrapper1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 #include "TriInterWrapperMesh.h"
 
-registerMooseObject("SubChannelApp", LiquidMetalInterWrapper1PhaseProblem);
+registerMooseObject("SubChannelApp", TriInterWrapper1PhaseProblem);
 
 InputParameters
-LiquidMetalInterWrapper1PhaseProblem::validParams()
+TriInterWrapper1PhaseProblem::validParams()
 {
   InputParameters params = InterWrapper1PhaseProblem::validParams();
-  params.addClassDescription("Solver class for metal-cooled interwrapper of assemblies in a "
-                             "triangular-lattice arrangement");
+  params.addClassDescription(
+      "Solver class for interwrapper of assemblies in a triangular-lattice arrangement");
   return params;
 }
 
-LiquidMetalInterWrapper1PhaseProblem::LiquidMetalInterWrapper1PhaseProblem(
-    const InputParameters & params)
+TriInterWrapper1PhaseProblem::TriInterWrapper1PhaseProblem(const InputParameters & params)
   : InterWrapper1PhaseProblem(params),
     _tri_sch_mesh(dynamic_cast<TriInterWrapperMesh &>(_subchannel_mesh))
 {
 }
 
 double
-LiquidMetalInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
+TriInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
 {
   Real a, b;
   if (Re < 1)
@@ -61,7 +60,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
 }
 
 void
-LiquidMetalInterWrapper1PhaseProblem::computeDP(int iblock)
+TriInterWrapper1PhaseProblem::computeDP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -138,7 +137,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeDP(int iblock)
 }
 
 double
-LiquidMetalInterWrapper1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
+TriInterWrapper1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
 {
   auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
   // initialize massflow
@@ -170,7 +169,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch
 }
 
 void
-LiquidMetalInterWrapper1PhaseProblem::enforceUniformDPDZAtInlet()
+TriInterWrapper1PhaseProblem::enforceUniformDPDZAtInlet()
 {
   _console
       << "Edit mass flow boundary condition in order to have uniform Pressure drop at the inlet\n";
@@ -234,7 +233,7 @@ LiquidMetalInterWrapper1PhaseProblem::enforceUniformDPDZAtInlet()
 }
 
 void
-LiquidMetalInterWrapper1PhaseProblem::computeInletMassFlowDist()
+TriInterWrapper1PhaseProblem::computeInletMassFlowDist()
 {
   auto mass_flow = 0.0;
   // inlet pressure
@@ -298,7 +297,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeInletMassFlowDist()
 }
 
 void
-LiquidMetalInterWrapper1PhaseProblem::computeh(int iblock)
+TriInterWrapper1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -497,7 +496,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeh(int iblock)
 }
 
 void
-LiquidMetalInterWrapper1PhaseProblem::externalSolve()
+TriInterWrapper1PhaseProblem::externalSolve()
 {
   initializeSolution();
   _console << "Executing subchannel solver\n";

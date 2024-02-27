@@ -16,15 +16,15 @@
 
 #include "InterWrapper1PhaseProblem.h"
 
-class LiquidMetalInterWrapper1PhaseProblem;
+class TriInterWrapper1PhaseProblem;
 class TriInterWrapperMesh;
 /**
- * Steady state subchannel solver for 1-phase liquid metal coolants
+ * Triangular interwrapper solver
  */
-class LiquidMetalInterWrapper1PhaseProblem : public InterWrapper1PhaseProblem
+class TriInterWrapper1PhaseProblem : public InterWrapper1PhaseProblem
 {
 public:
-  LiquidMetalInterWrapper1PhaseProblem(const InputParameters & params);
+  TriInterWrapper1PhaseProblem(const InputParameters & params);
 
 protected:
   /**

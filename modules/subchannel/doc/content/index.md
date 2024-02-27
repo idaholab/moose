@@ -4,8 +4,7 @@
 
 !style halign=center
 MOOSE-SubChannel is a Subchannel application for performing reactor core, single-phase thermal-hydraulic
-simulations, for water-cooled, bare rod, square lattice bundles or metal-cooled (sodium, lead), wire-wrapped/bare rod, triangular lattice bundles. It is based on the [MOOSE framework](https://mooseframework.inl.gov), and builds on the framework
-and modules for many of its capabilities.
+simulations, for bare rod, square lattice bundles or wire-wrapped/bare rod, triangular lattice bundles. It can model water cooled or metal cooled (lead, sodium, LBE) bundles. It is based on the [MOOSE framework](https://mooseframework.inl.gov), and builds on the framework and modules for many of its capabilities.
 
 !row!
 !col! small=12 medium=4 large=4 icon=get_app
@@ -37,10 +36,10 @@ validation and verification of Pronhorn-SC. These cases can be found [here](v&v/
 !col-end!
 !row-end!
 
-## `MOOSE-SubChannel` is a MOOSE application within `MOOSE` style=clear:both
+## `MOOSE-SubChannel` is a `MOOSE` application style=clear:both
 
 !style halign=left
-MOOSE-SubChannel is a [MOOSE] subchannel application. It leverages the [PETSc](https://petsc.org/release/) library capabilities to solve the subchannel equations using an Newton non-linear solver. It permits seamless coupling with other [MOOSE] applications/modules like [BISON](https://mooseframework.inl.gov/bison/)/[heat-conduction](https://mooseframework.inl.gov/modules/heat_conduction/index.html). This affords the solution of coupled physics problems of varying size and dimensionality. These can be solved using computer hardware appropriate for the model size, ranging from
+MOOSE-SubChannel is a [MOOSE] thermal hydraulic subchannel analysis application. It leverages the [PETSc](https://petsc.org/release/) library capabilities to solve the subchannel equations using an Newton non-linear solver. It permits seamless coupling with other [MOOSE] applications/modules like [BISON](https://mooseframework.inl.gov/bison/)/[heat-conduction](https://mooseframework.inl.gov/modules/heat_conduction/index.html). This affords the solution of coupled physics problems of varying size and dimensionality. These can be solved using computer hardware appropriate for the model size, ranging from
 laptops and workstations to large high performance computers.
 
 !media large_media/framework/inl_blue.png style=float:right;width:30%;margin-left:30px;
