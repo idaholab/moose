@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Convergence.h"
+#include "PerfGraphInterface.h"
 
 // PETSc includes
 #include <petsc.h>
@@ -24,6 +25,13 @@ public:
 
   static InputParameters commonParams();
 
+  virtual bool checkRelativeConvergence(const PetscInt it,
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real abstol,
+                                        std::ostringstream & oss);
+
   Convergence::MooseAlgebraicConvergence
   checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
@@ -31,6 +39,8 @@ protected:
   FEProblemBase & _fe_problem;
 
   bool _initialized;
+
+  PerfID _perf_nonlinear;
 
   // Variables for the convergence criteria
   Real _atol; // absolute convergence tolerance

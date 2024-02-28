@@ -2290,6 +2290,20 @@ FEProblemBase::addConvergence(const std::string & type,
   }
 }
 
+void
+FEProblemBase::addDefaultConvergence()
+{
+  // parallel_object_only();
+  std::string class_name = "ResidualConvergence";
+  InputParameters params = _factory.getValidParams(class_name);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::shared_ptr<Convergence> func =
+        _factory.create<Convergence>(class_name, _nonlinear_convergence_name, params, tid);
+    _convergences.addObject(func, tid);
+  }
+}
+
 bool
 FEProblemBase::hasFunction(const std::string & name, const THREAD_ID tid)
 {
@@ -2354,18 +2368,25 @@ FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid)
   // for all threads if one is missing.
   // Threads::spin_mutex::scoped_lock lock(get_function_mutex);
 
-  if (!hasConvergence(name, tid))
-  {
-    // mooseError("Unable to find convergence criteria " + name);
-    std::string class_name = "ResidualConvergence";
-    InputParameters params = _factory.getValidParams(class_name);
-    setNonlinearConvergenceObject("default");
-    addConvergence(class_name, _nonlinear_convergence_name, params);
-  }
-
   auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());
   if (!ret)
     mooseError("No convergence criteria named ", name, " of appropriate type");
+
+  return *ret;
+}
+
+Convergence &
+FEProblemBase::getDefaultConvergence(const THREAD_ID tid)
+{
+  // This thread lock is necessary since this method will create functions
+  // for all threads if one is missing.
+  // Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+
+  auto * const ret = dynamic_cast<Convergence *>(
+      _convergences.getActiveObject(_nonlinear_convergence_name, tid).get());
+  if (!ret)
+    mooseError("No default convergence available for this problem.  Please add a convergence "
+               "criteria to the input file.");
 
   return *ret;
 }

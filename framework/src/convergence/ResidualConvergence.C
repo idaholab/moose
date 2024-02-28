@@ -31,6 +31,7 @@ ResidualConvergence::validParams()
 {
   InputParameters params = Convergence::validParams();
   params += FEProblemSolve::commonParams();
+  // params += PerfGraphInterface::validParams();
 
   params.addClassDescription("Check ResidualConvergence of the set up problem.");
 
@@ -40,6 +41,8 @@ ResidualConvergence::validParams()
 ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   : Convergence(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _perf_nonlinear(
+        registerTimedSection("checkNoonlinearConvergence", 5, "Checking Nonlinear Convergence")),
     _initialized(false)
 {
   EquationSystems & es = _fe_problem.es();
@@ -127,10 +130,28 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   }
 }
 
+bool
+ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
+                                              const Real fnorm,
+                                              const Real the_residual,
+                                              const Real rtol,
+                                              const Real /*abstol*/,
+                                              std::ostringstream & oss)
+{
+  if (_fe_problem.getFailNextNonlinearConvergenceCheck())
+    return false;
+  if (fnorm <= the_residual * rtol)
+  {
+    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol << ")\n";
+    return true;
+  }
+  return false;
+}
+
 Convergence::MooseAlgebraicConvergence
 ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm)
 {
-  // registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
+  TIME_SECTION("checkNonlinearConvergence", 5, "Checking Algebraic Convergence");
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
   MooseAlgebraicConvergence reason = MooseAlgebraicConvergence::ITERATING;
@@ -141,9 +162,9 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
   // To check if the nonlinear iterations should abort
   bool terminate = _fe_problem.getFailNextNonlinearConvergenceCheck();
 
-  // Let's be nice and always check PETSc error codes.
+  // To check PETSc error codes.
   PetscErrorCode ierr = 0;
-  SNES snes = system.getSNES(); // system.getSNES();
+  SNES snes = system.getSNES();
 
   // Ask the SNES object about its tolerances.
   ierr = SNESGetTolerances(snes, &_atol, &_rtol, &_stol, &_maxit, &_maxf);
@@ -242,7 +263,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
     Real the_residual = system._compute_initial_residual_before_preset_bcs
                             ? system._initial_residual_before_preset_bcs
                             : system._initial_residual_after_preset_bcs;
-    if (_fe_problem.checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
+    if (checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
       reason = MooseAlgebraicConvergence::CONVERGED;
     else if (snorm < _stol * xnorm)
     {

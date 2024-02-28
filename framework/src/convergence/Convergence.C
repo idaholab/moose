@@ -15,6 +15,7 @@ Convergence::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params += SetupInterface::validParams();
+  params += PerfGraphInterface::validParams();
 
   params.registerBase("Convergence");
   // params.registerSystemAttributeName("ConvergenceName");
@@ -24,6 +25,6 @@ Convergence::validParams()
 }
 
 Convergence::Convergence(const InputParameters & parameters)
-  : MooseObject(parameters), SetupInterface(this)
+  : MooseObject(parameters), SetupInterface(this), PerfGraphInterface(this)
 {
 }

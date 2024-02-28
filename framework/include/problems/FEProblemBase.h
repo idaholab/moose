@@ -589,10 +589,8 @@ public:
   addConvergence(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0);
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0);
-
-  /// Nonlinear convergence name
-  ConvergenceName _nonlinear_convergence_name;
-
+  virtual void addDefaultConvergence();
+  virtual Convergence & getDefaultConvergence(const THREAD_ID tid = 0);
   /**
    * add a MOOSE line search
    */
@@ -2165,6 +2163,9 @@ private:
 
 protected:
   bool _initialized;
+
+  /// Nonlinear convergence name
+  ConvergenceName _nonlinear_convergence_name;
 
   std::set<TagID> _fe_vector_tags;
 

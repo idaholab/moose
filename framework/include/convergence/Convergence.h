@@ -11,8 +11,9 @@
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
+#include "PerfGraphInterface.h"
 
-class Convergence : public MooseObject, public SetupInterface
+class Convergence : public MooseObject, public SetupInterface, public PerfGraphInterface
 {
 public:
   static InputParameters validParams();

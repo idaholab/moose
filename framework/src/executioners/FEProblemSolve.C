@@ -236,6 +236,11 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   if (isParamValid("nonlinear_convergence"))
     _problem.setNonlinearConvergenceObject(getParam<ConvergenceName>("nonlinear_convergence"));
+  else
+  {
+    _problem.setNonlinearConvergenceObject("default_convergence");
+    _problem.addDefaultConvergence();
+  }
 
   _nl.setDecomposition(_splitting);
 
