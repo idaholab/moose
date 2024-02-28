@@ -116,6 +116,10 @@ PatternedHexMeshGenerator::validParams()
       "id_pattern",
       "User-defined element IDs. A double-indexed array starting with the upper-left corner. When "
       "providing multiple patterns, each pattern should be separated using '|'");
+  params.addParam<std::vector<std::vector<boundary_id_type>>>(
+      "interface_boundary_id_shift_pattern",
+      "User-defined shift values for each pattern cell. A double-indexed array starting with the "
+      "upper-left corner.");
   params.addParamNamesToGroup(
       "background_block_id background_block_name duct_block_ids "
       "duct_block_names external_boundary_id external_boundary_name "
@@ -167,7 +171,8 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _use_reporting_id(isParamValid("id_name")),
-    _use_exclude_id(isParamValid("exclude_id"))
+    _use_exclude_id(isParamValid("exclude_id")),
+    _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern"))
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
   declareMeshProperty("input_pitch_meta", 0.0);
@@ -254,6 +259,25 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
                  "This parameter and background_block_name must not be set when the "
                  "pattern_boundary is none.");
   }
+
+  if (_use_interface_boundary_id_shift)
+  {
+    // check "interface_boundary_id_shift_pattern" parameter
+    _interface_boundary_id_shift_pattern =
+        getParam<std::vector<std::vector<boundary_id_type>>>("interface_boundary_id_shift_pattern");
+    if (_interface_boundary_id_shift_pattern.size() != _pattern.size())
+      paramError("interface_boundary_id_shift_pattern",
+                 "This parameter, if provided, should have the same two-dimensional array shape as "
+                 "the 'pattern' parameter. First dimension does not match");
+    for (const auto i : make_range(_pattern.size()))
+      if (_interface_boundary_id_shift_pattern[i].size() != _pattern[i].size())
+        paramError("interface_boundary_id_shift_pattern",
+                   "This parameter, if provided, should have the same two-dimensional array shape "
+                   "as the 'pattern' parameter.");
+  }
+  // declare metadata for internal interface boundaries
+  declareMeshProperty<bool>("interface_boundaries", false);
+  declareMeshProperty<std::set<boundary_id_type>>("interface_boundary_ids", {});
 
   if (_use_reporting_id)
   {
@@ -502,6 +526,31 @@ PatternedHexMeshGenerator::generate()
 
   setMeshProperty("pattern_pitch_meta", _pattern_pitch);
 
+  // create a list of interface boundary ids for each input mesh
+  // NOTE: list of interface boundary ids is stored in mesh metadata
+  std::vector<std::set<boundary_id_type>> input_interface_boundary_ids;
+  input_interface_boundary_ids.resize(_input_names.size());
+  if (_use_interface_boundary_id_shift)
+  {
+    for (const auto i : make_range(_input_names.size()))
+    {
+      if (!hasMeshProperty<bool>("interface_boundaries", _input_names[i]))
+        mooseError("Metadata 'interface_boundaries' could not be found on the input mesh: ",
+                   _input_names[i]);
+      if (!getMeshProperty<bool>("interface_boundaries", _input_names[i]))
+        mooseError("Interface boundary ids were not constructed in the input mesh",
+                   _input_names[i]);
+      if (!hasMeshProperty<std::set<boundary_id_type>>("interface_boundary_ids", _input_names[i]))
+        mooseError("Metadata 'interface_boundary_ids' could not be found on the input mesh: ",
+                   _input_names[i]);
+    }
+  }
+  for (const auto i : make_range(_input_names.size()))
+    if (_use_interface_boundary_id_shift ||
+        hasMeshProperty<std::set<boundary_id_type>>("interface_boundary_ids", _input_names[i]))
+      input_interface_boundary_ids[i] =
+          getMeshProperty<std::set<boundary_id_type>>("interface_boundary_ids", _input_names[i]);
+
   int x_mov = 0;
 
   const Real input_pitch((_pattern_boundary == "hexagon" || !_generate_core_metadata)
@@ -548,6 +597,11 @@ PatternedHexMeshGenerator::generate()
                 "control_drum_id",
                 true,
                 is_control_drum_array[pattern] ? control_drum_azimuthals.size() : 0);
+          // Reassign interface boundary ids
+          if (_use_interface_boundary_id_shift)
+            reassignBoundaryIDs(*out_mesh,
+                                _interface_boundary_id_shift_pattern[i][j],
+                                input_interface_boundary_ids[pattern]);
           continue;
         }
       }
@@ -649,6 +703,12 @@ PatternedHexMeshGenerator::generate()
           if (extra_dist_shift != 0)
             cutOffPolyDeform(*tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type);
 
+          // Reassign interface boundary ids
+          if (_use_interface_boundary_id_shift)
+            reassignBoundaryIDs(*tmp_peripheral_mesh,
+                                _interface_boundary_id_shift_pattern[i][j],
+                                input_interface_boundary_ids[pattern]);
+
           if (i == 0 && j == 0)
             out_mesh = std::move(tmp_peripheral_mesh);
           else
@@ -694,6 +754,11 @@ PatternedHexMeshGenerator::generate()
         main_subdomain_map_name_list.emplace(id_name_pair.second);
       if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
         paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
+      // Shift interface boundary ids
+      if (_use_interface_boundary_id_shift)
+        reassignBoundaryIDs(pattern_mesh,
+                            _interface_boundary_id_shift_pattern[i][j],
+                            input_interface_boundary_ids[pattern]);
 
       out_mesh->stitch_meshes(pattern_mesh,
                               OUTER_SIDESET_ID,
@@ -705,6 +770,12 @@ PatternedHexMeshGenerator::generate()
       // Translate back now that we've stitched so that anyone else that uses this mesh has it at
       // the origin
       MeshTools::Modification::translate(pattern_mesh, -(deltax + j * input_pitch), -deltay, 0);
+      // Roll back the changes in interface boundary ids for the same reason
+      if (_use_interface_boundary_id_shift)
+        reassignBoundaryIDs(pattern_mesh,
+                            _interface_boundary_id_shift_pattern[i][j],
+                            input_interface_boundary_ids[pattern],
+                            true);
     }
   }
 
@@ -885,6 +956,22 @@ PatternedHexMeshGenerator::generate()
     new_sideset_map.insert(input_sideset_map.begin(), input_sideset_map.end());
     const auto input_nodeset_map = meshes[i]->get_boundary_info().get_nodeset_name_map();
     new_nodeset_map.insert(input_nodeset_map.begin(), input_nodeset_map.end());
+  }
+
+  // set mesh metadata related with interface boundary ids
+  const std::set<boundary_id_type> boundary_ids = out_mesh->get_boundary_info().get_boundary_ids();
+  const std::set<boundary_id_type> interface_boundary_ids = getInterfaceBoundaryIDs(
+      _pattern,
+      _interface_boundary_id_shift_pattern,
+      boundary_ids,
+      input_interface_boundary_ids,
+      _use_interface_boundary_id_shift,
+      _create_inward_interface_boundaries || _create_outward_interface_boundaries,
+      extra_dist.size());
+  if (interface_boundary_ids.size() > 0)
+  {
+    setMeshProperty("interface_boundaries", true);
+    setMeshProperty("interface_boundary_ids", interface_boundary_ids);
   }
 
   out_mesh->set_isnt_prepared();
