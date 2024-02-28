@@ -125,7 +125,7 @@ public:
   /**
    * Get the solution value for the provided element and seed the derivative for the corresponding
    * dof index
-   * @param elem_info The element to retrieive the solution value for
+   * @param elem_info The element to retrieve the solution value for
    * @param state State argument which describes at what time / solution iteration state we want to
    * evaluate the variable
    */

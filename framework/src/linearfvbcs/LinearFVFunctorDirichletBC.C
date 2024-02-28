@@ -15,8 +15,9 @@ InputParameters
 LinearFVFunctorDirichletBC::validParams()
 {
   InputParameters params = LinearFVBoundaryCondition::validParams();
-  params.addClassDescription("Adds a dirichlet BC which can be used for the assembly of non-Newton "
-                             "systems and whose face values are determined using a functor.");
+  params.addClassDescription(
+      "Adds a dirichlet BC which can be used for the assembly of linear "
+      "finite volume system and whose face values are determined using a functor.");
   params.addRequiredParam<MooseFunctorName>("functor", "The functor for this boundary condition.");
   return params;
 }

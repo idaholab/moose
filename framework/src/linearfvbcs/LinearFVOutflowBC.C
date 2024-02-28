@@ -15,8 +15,8 @@ InputParameters
 LinearFVOutflowBC::validParams()
 {
   InputParameters params = LinearFVBoundaryCondition::validParams();
-  params.addClassDescription(
-      "Adds a boundary condition which represents a surface with outflowing material.");
+  params.addClassDescription("Adds a boundary condition which represents a surface with outflowing "
+                             "material with a constant velocity.");
   params.addParam<bool>(
       "use_two_term_expansion",
       false,
@@ -83,8 +83,8 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
   // don't need to add anything to the right hand side
   Real contribution = 0.0;
 
-  // If we have linear extrapolation, we need to add the linear term to
-  // the right hand side.
+  // If we have linear extrapolation, we chose to add the linear term to
+  // the right hand side instead of the system matrix.
   if (_two_term_expansion)
   {
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM

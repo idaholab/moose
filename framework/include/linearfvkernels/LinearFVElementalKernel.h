@@ -37,10 +37,10 @@ public:
    */
   void setCurrentElemInfo(const ElemInfo * elem_info) { _current_elem_info = elem_info; }
 
-  /// Computes the system matrix contribution for the current element
+  /// Computes the system matrix contribution for the given variable on the current element
   virtual Real computeMatrixContribution() = 0;
 
-  /// Computes the right hand side contribution for the current element
+  /// Computes the right hand side contribution for the given variable on the current element
   virtual Real computeRightHandSideContribution() = 0;
 
 protected:

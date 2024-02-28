@@ -40,6 +40,8 @@ LinearFVReaction::computeMatrixContribution()
 Real
 LinearFVReaction::computeRightHandSideContribution()
 {
-  // We don't have any contributions to the right hand side
+  // We don't have any contributions to the right hand side as the reaction term is
+  // treated implicitly. If we treated it explicitly, the contribution to the RHS would be
+  // c * u * elem_volume
   return 0.0;
 }

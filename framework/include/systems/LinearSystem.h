@@ -92,7 +92,7 @@ public:
   virtual const System & system() const override { return _sys; }
 
   ///@{
-  /// Accersors of important tag IDs
+  /// Accessors of important tag IDs
   TagID rightHandSideTimeVectorTag() const { return _rhs_time_tag; }
   TagID rightHandSideNonTimeVectorTag() const { return _rhs_non_time_tag; }
   TagID rightHandSideVectorTag() const { return _rhs_tag; }

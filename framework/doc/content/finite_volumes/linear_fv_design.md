@@ -17,7 +17,7 @@ Jacobian and a residual.
 
 - We assume a Picard-style iteration where the system matrix and right hand side
   are assembled using the previous solution vector.
-- We rely on the `LinearSystem` object in MOOSE which is a wrapper around
+- We rely on the `LinearSystem` class in MOOSE which is a wrapper around
   the `LinearImplicit` system class of `libMesh`. The corresponding kernels will
   directly contribute to the system matrix and right hand side owned by the
   `LinearSystem` class.
@@ -29,17 +29,17 @@ Jacobian and a residual.
 
 ## Linear FV Variables
 
-Linear variables provide moose interfaces for variables which contribute to
+Linear variables are designed only to contribute to
 linear systems. The following list summarizes the main differences compared to
-FV moose variables that contribute to a Newton system:
+[finite volume variables](MooseVariableFVReal.md) that contribute to a Newton system:
 
 - The linear variable does not support automatic differentiation.
 - The gradient computation is not located within the variable, it is populated
   in an external loop. This will be further discussed below.
-- There are no data members for holding and computing
-  quadrature-point-based quantities.
-- The linear variable only supports data interaction with other moose systems
-  through the functor system.
+- The data members that enable quadrature-based evaluation of the variable are only used
+  when interfacing with other MOOSE systems such as [UserObjects](UserObject.md),
+  [AuxKernels](AuxKernel.md) or [Postprocessors](Postprocessor.md). These data members
+  are not used during the solve.
 
 ## Linear FV Kernels
 
@@ -52,7 +52,7 @@ side of a linear system directly.
 
 Similarly to the nonlinear approach with the Newton system, we often encounter
 terms in the partial differential equations which contain face fluxes in
-the discretized form. To represent such terms, we added `LinearFVFluxKernel` which
+the discretized form. To represent such terms, we added a `LinearFVFluxKernel` base class which
 should be used for inheritance to populate matrices and right hand sides through a
 face loop. Good examples are the advection and diffusion terms in most transport
 equations. Within these functions the following functions need to be overridden:
@@ -77,7 +77,7 @@ equations. Within these functions the following functions need to be overridden:
 For volumetric effects, an element-based evaluation is necessary. Good examples are
 external source terms or reaction terms in the partial differential equations.
 To manage the contributions of these terms to the linear system, a
-`LinearFVElementalKernel` has been added which can be used for inheritance.
+`LinearFVElementalKernel` base class has been added which can be used for inheritance.
 The derived kernels need to override the following functions:
 
 - `computeMatrixContribution` which computes the matrix contributions to the degree of
@@ -102,8 +102,9 @@ terms that need cell gradients are lagged. Such terms include:
 - The linear terms in the extrapolated boundary conditions.
 - The nonorthogonal correctors in the surface normal gradient computation.
 
-The explicit treatment of these terms allows us to have one ghosted layer in
-parallel simulations, minimizing the linear solve time and parallel communication
+The explicit treatment of these terms allows us to keep only one ghosted layer
+(of elements shared between processes) in parallel simulations, minimizing the
+linear solve time and parallel communication
 time over an iteration. The setbacks of this design choice are:
 
 - We need corrector iterations to resolve extrapolated boundary conditions

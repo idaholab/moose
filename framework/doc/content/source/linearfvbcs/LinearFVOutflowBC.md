@@ -8,7 +8,7 @@ of a linear finite volume matrix using the following advective flux:
 !equation
 \int\limits_{S_b} \vec{v} \cdot \vec{n} u dS  \approx \vec{v}_f \cdot \vec{n} u_f |S_b|~,
 
-where $\vec{v}_f$, $\vec{n}$ and $|S_f|$ are the outlet face velocity, outward pointing surface vector
+where $\vec{v}_f$, $\vec{n}$ and $|S_b|$ are the outlet face velocity, outward pointing surface vector
 and the surface area, respectively. The velocity in this case can be defined using
 the [!param](/LinearFVBCs/LinearFVOutflowBC/velocity) parameter.
 

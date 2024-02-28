@@ -80,7 +80,7 @@ LinearFVFluxKernel::addMatrixContribution()
 void
 LinearFVFluxKernel::addRightHandSideContribution()
 {
-  // If we are on an internal face, we populate the two entries in the system matrix
+  // If we are on an internal face, we populate the two entries in the right hand side
   // which touch the face
   if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {

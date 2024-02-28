@@ -106,7 +106,7 @@ LinearPicardSteady::LinearPicardSteady(const InputParameters & parameters)
       paramError("petsc_options_value",
                  "The size of petsc option values for system " + _linear_sys_names[i] + " (" +
                      std::to_string(enum_pair_keys.size()) +
-                     ") doesn ot match the size of the input arguments (" +
+                     ") does not match the size of the input arguments (" +
                      std::to_string(enum_pair_values.size()) + ")!");
 
     std::vector<std::pair<MooseEnumItem, std::string>> raw_iname_value_pairs;

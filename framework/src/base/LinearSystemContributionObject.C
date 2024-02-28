@@ -26,7 +26,7 @@ LinearSystemContributionObject::validParams()
   vector_tag_enum = vtags;
 
   params.addRequiredParam<LinearVariableName>(
-      "variable", "The name of the variable that this residual object operates on");
+      "variable", "The name of the variable whose linear system this object contributes to");
 
   params.declareControllable("enable");
   params.set<bool>("_residual_object") = false;

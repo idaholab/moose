@@ -13,7 +13,8 @@ while $A$ and $\vec{b}$ are the corresponding system matrix and right hand side,
 
 !alert note
 This variable can only be used with linear systems and cannot be used for systems which need
-Jacobian and residual evaluations.
+Jacobian and residual evaluations, such as nonlinear systems being solved by Newton or
+quasi-Newton methods.
 
 Similarly to [MooseVariableFV.md], this variable describes a field which has been discretized
 using the cell-centered finite volume method and can be evaluated using the

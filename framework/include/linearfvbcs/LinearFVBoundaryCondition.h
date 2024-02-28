@@ -160,7 +160,7 @@ protected:
   /// Reference to the linear finite volume variable object
   MooseLinearVariableFV<Real> & _var;
 
-  /// Reference to SystemBase
+  /// Reference to system base class in MOOSE
   SystemBase & _sys;
 
   /// Reference to the libmesh linear system this object contributes to

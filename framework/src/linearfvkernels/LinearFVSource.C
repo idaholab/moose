@@ -32,7 +32,8 @@ LinearFVSource::LinearFVSource(const InputParameters & params)
 Real
 LinearFVSource::computeMatrixContribution()
 {
-  // This doesn't contribute to the matrix
+  // This doesn't contribute to the matrix as we assumed it was independent of
+  // the solution
   return 0.0;
 }
 

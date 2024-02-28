@@ -16,6 +16,10 @@
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 
+/**
+ * Base class for finite volume kernels that contribute to a linear
+ * systems.
+ */
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
                        public NonADFunctorInterface,
