@@ -32,13 +32,8 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-<<<<<<< HEAD:modules/solid_mechanics/test/tests/volumetric_eigenstrain/volumetric_eigenstrain.i
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
-=======
-[Modules/TensorMechanics/Master]
   [master]
->>>>>>> 8cb19c01d1 (Add ADComputeVolumetricEigenstrain):modules/tensor_mechanics/test/tests/volumetric_eigenstrain/volumetric_eigenstrain.i
     strain = FINITE
     eigenstrain_names = eigenstrain
     decomposition_method = EigenSolution #Necessary for exact solution

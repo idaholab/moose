@@ -10,7 +10,7 @@
 #include "ADComputeVolumetricEigenstrain.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeVolumetricEigenstrain);
+registerMooseObject("SolidMechanicsApp", ADComputeVolumetricEigenstrain);
 
 InputParameters
 ADComputeVolumetricEigenstrain::validParams()
