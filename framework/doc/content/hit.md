@@ -64,10 +64,10 @@ hit find Outputs/file_base **/*.i
 ```
 
 ```
-hit find -v Modules/TensorMechanics/Master/* **/*.i
+hit find -v Physics/SolidMechanics/QuasiStatic/* **/*.i
 ```
 
-Will find all files that do not (`-v`) contain use of the TensorMechanics master
+Will find all files that do not (`-v`) contain use of the SolidMechanics QuasiStatic Physics
 action.
 
 ```

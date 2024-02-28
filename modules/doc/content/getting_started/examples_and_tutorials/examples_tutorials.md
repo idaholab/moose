@@ -88,7 +88,7 @@ for some of the individual physics modules as listed below.
 - [Porous Flow](modules/porous_flow/porous_flow_examples.md)
 - [Reconstructed Discontinuous Galerkin](modules/rdg/index.md#example)
 - [Stochastic Tools](modules/stochastic_tools/examples/index.md)
-- [Tensor Mechanics](modules/tensor_mechanics/examples_index.md)
+- [Solid Mechanics](modules/solid_mechanics/examples_index.md)
 
 ## C++ Programming References id=programming
 

@@ -7,7 +7,7 @@
 #
 # Framework coverage is enforced by the 'framework' section and individual
 # module coverage is handled by the section with the same name as the
-# module, i.e., 'tensor_mechanics'. The 'default' section applies to all
+# module, i.e., 'solid_mechanics'. The 'default' section applies to all
 # other cases.
 
 [default]
@@ -86,7 +86,7 @@ require_total = 83
 [stochastic_tools]
 require_total = 88
 
-[tensor_mechanics]
+[solid_mechanics]
 require_total = 84
 
 [thermal_hydraulics]

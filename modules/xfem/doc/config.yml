@@ -1,7 +1,7 @@
 Content:
     - framework/doc/content
     - modules/xfem/doc/content
-    - modules/tensor_mechanics/doc/content
+    - modules/solid_mechanics/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -20,7 +20,7 @@ Extensions:
         includes:
             - framework/include
             - modules/xfem/include
-            - modules/tensor_mechanics/include
+            - modules/solid_mechanics/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -33,4 +33,4 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+            solid_mechanics: !include modules/solid_mechanics/doc/sqa_solid_mechanics.yml

@@ -12,9 +12,9 @@ make
 
 within the application directory.
 
-Consider an application named `Frog` that depends on two of the physics modules `tensor_mechanics`
-and `heat_conduction`.  Typing `make` within the `frog` directory will automatically build
-`framework`, `tensor_mechanics`, `heat_conduction` and `frog`.
+Consider an application named `Frog` that depends on two of the physics modules `solid_mechanics`
+and `heat_transfer`.  Typing `make` within the `frog` directory will automatically build
+`framework`, `solid_mechanics`, `heat_transfer` and `frog`.
 
 In addition, the Makefiles in the MOOSE system are designed for parallel building.  Using the `-j`
 flag when running `make` will allow you to build much faster.  For instance, if you have 8 processors

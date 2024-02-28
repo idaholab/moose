@@ -74,14 +74,14 @@
 #ifdef SCALAR_TRANSPORT_ENABLED
 #include "ScalarTransportApp.h"
 #endif
+#ifdef SOLID_MECHANICS_ENABLED
+#include "SolidMechanicsApp.h"
+#endif
 #ifdef SOLID_PROPERTIES_ENABLED
 #include "SolidPropertiesApp.h"
 #endif
 #ifdef STOCHASTIC_TOOLS_ENABLED
 #include "StochasticToolsApp.h"
-#endif
-#ifdef TENSOR_MECHANICS_ENABLED
-#include "TensorMechanicsApp.h"
 #endif
 #ifdef THERMAL_HYDRAULICS_ENABLED
 #include "ThermalHydraulicsApp.h"
@@ -190,16 +190,16 @@ ModulesApp::registerAllObjects(Factory & f, ActionFactory & af, Syntax & s)
   ScalarTransportApp::registerAll(f, af, s);
 #endif
 
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerAll(f, af, s);
+#endif
+
 #ifdef SOLID_PROPERTIES_ENABLED
   SolidPropertiesApp::registerAll(f, af, s);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerAll(f, af, s);
-#endif
-
-#ifdef TENSOR_MECHANICS_ENABLED
-  TensorMechanicsApp::registerAll(f, af, s);
 #endif
 
 #ifdef THERMAL_HYDRAULICS_ENABLED

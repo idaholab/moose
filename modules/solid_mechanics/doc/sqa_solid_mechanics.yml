@@ -1,0 +1,8 @@
+directories:
+    - ${MOOSE_DIR}/modules/solid_mechanics/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/solid_mechanics/doc/sqa_reports.yml

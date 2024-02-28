@@ -58,7 +58,7 @@ template argument `RealVectorValue` and currently encompass the finite element
 families `LAGRANGE_VEC`, `MONOMIAL_VEC`, `NEDELEC_ONE` and `RAVIART_THOMAS`.
 `NEDELEC_ONE` and `RAVIART_THOMAS` are useful for electromagnetic applications
 or for general PDEs that involve a curl or a divergence operation, respectively.
-`LAGRANGE_VEC` is potentially useful for tensor mechanics or Navier-Stokes
+`LAGRANGE_VEC` is potentially useful for solid mechanics or Navier-Stokes
 simulations where historically displacement or velocity variables have been
 broken up component-wise. To hide the templating of the Moose variable system
 from other framework code, `MooseVariableFE<Real>` and

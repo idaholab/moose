@@ -1,0 +1,227 @@
+[Tests]
+  issues = "#7555 #15871"
+  [two_block_base_name]
+    type = Exodiff
+    input = "two_block_base_name.i"
+    exodiff = "two_block_base_name_out.e"
+    issues = "#13860"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall support changing the base name when "
+                  "creating a consistent strain calculator material and stress divergence kernel and "
+                  "shall generate different sets of outputs for different mesh subblocks with the "
+                  "appropriate base name."
+  []
+
+  [two_block_new]
+    type = Exodiff
+    input = "two_block_new.i"
+    exodiff = "two_block_new_out.e"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall create a consistent strain calculator "
+                  "material and stress divergence kernel and shall generate different sets of "
+                  "outputs for different mesh subblocks."
+  []
+
+  [two_block]
+    type = Exodiff
+    input = "two_block.i"
+    exodiff = "two_block_out.e"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/block1/block=1"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain "
+                  "calculator material and stress divergence kernel pairs for different mesh "
+                  "subblocks requesting different strain formulations."
+  []
+
+  [two_block_lagrangian]
+    type = Exodiff
+    input = "two_block_lagrangian.i"
+    exodiff = "two_block_lagrangian_out.e"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/block1/block=1"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain "
+                  "calculator material and stress divergence kernel pairs for different mesh "
+                  "subblocks requesting different strain formulations with the new kernel system."
+  []
+
+  [two_block.error_unrestricted]
+    type = RunException
+    input = "two_block.i"
+    expect_err = "No SolidMechanics/QuasiStatic action can be block unrestricted if more than one "
+                 "SolidMechanics/QuasiStatic action is specified."
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall error if an input file does not specify "
+                  "block restrictions for the MasterAction in input files with more than one "
+                  "instance of the MasterAction block."
+  []
+
+  [two_block.error_overlapping]
+    type = RunException
+    input = "two_block.i"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/block1/block=2"
+    expect_err = "The block restrictions in the SolidMechanics/QuasiStatic actions must be "
+                 "non-overlapping."
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall error if an input file specifies "
+                  "overlapping block restrictions for the MasterAction in input files with more than "
+                  "one instance of the MasterAction block."
+  []
+
+  [no_block]
+    type = RunException
+    input = "no_block.i"
+    cli_args = "--error"
+    expect_err = "Common parameters are supplied, but not used in"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall warn if global Master action parameters "
+                  "are supplied but no Master action subblock have been added."
+  []
+
+  [two_coord]
+    type = Exodiff
+    input = "two_coord.i"
+    exodiff = "two_coord_out.e"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain "
+                  "calculator material and stress divergence kernel pairs for different mesh "
+                  "subblocks using different coordinate systems."
+  []
+
+  [two_coord.error_different_coords]
+    type = RunException
+    input = "two_coord.i"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/active=error"
+    expect_err = "The SolidMechanics action requires all subdomains to have the same coordinate "
+                 "system."
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall error if an input file assigns the same "
+                  "QuasiStatic SolidMechanics Physics block to mesh blocks with different coordinate "
+                  "systems."
+  []
+
+  [action_eigenstrain]
+    type = RunApp
+    input = "action_eigenstrain.i"
+    expect_out = "solid: eigenstrain1, eigenstrain2"
+    match_literal = true
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from material "
+                  "classes and correctly output these names to the console."
+  []
+
+  [action_multi_eigenstrain]
+    type = RunApp
+    input = "action_multi_eigenstrain.i"
+    expect_out = "block1: eigenstrain1\n.*\nblock2: eigenstrain2\n"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from material "
+                  "classes and correctly output these names to the console."
+  []
+
+  [action_multi_eigenstrain_same_conditions]
+    type = RunApp
+    input = "action_multi_eigenstrain_same_conditions.i"
+    expect_out = "block1: eigenstrain\n.*\nblock2: eigenstrain\n"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from material "
+                  "classes and correctly output these names to the console."
+  []
+
+  [ad_converter_action_multi_eigenstrain]
+    type = RunApp
+    input = "ad_converter_action_multi_eigenstrain.i"
+    expect_out = "block1: eigenstrain1\n.*\nblock2: eigenstrain2\n"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from material "
+                  "classes and correctly output these names to the console."
+  []
+
+  [reduced_eigenstrain_action]
+    type = RunApp
+    input = "reduced_eigenstrain_action.i"
+    expect_out = "all: reduced_eigenstrain"
+    match_literal = true
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from material "
+                  "classes and correctly output these names to the console."
+  []
+
+  [composite_eigenstrain]
+    type = RunApp
+    input = "composite_eigenstrain.i"
+    expect_out = "solid: eigenstrain"
+    match_literal = true
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from material "
+                  "classes and correctly output these names to the console."
+  []
+
+  [material_output_order.empty]
+    type = RunApp
+    input = "material_output_order.i"
+    expect_out = "all: CONSTANT CONSTANT CONSTANT\n.*\nall: MONOMIAL MONOMIAL MONOMIAL\n"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/verbose=true"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall determine the necessary orders and "
+                  "families to apply to material outputs."
+  []
+  [material_output_order.single]
+    type = RunApp
+    input = "material_output_order.i"
+    expect_out = "all: FIRST FIRST FIRST\n.*\nall: MONOMIAL MONOMIAL MONOMIAL\n"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/verbose=true "
+               "Physics/SolidMechanics/QuasiStatic/material_output_order=FIRST"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall apply a single given output order to all "
+                  "output variables."
+  []
+  [material_output_order.family_single]
+    type = RunApp
+    input = "material_output_order.i"
+    expect_out = "all: FIRST FIRST FIRST\n.*\nall: LAGRANGE LAGRANGE LAGRANGE\n"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/verbose=true "
+               "Physics/SolidMechanics/QuasiStatic/material_output_order=FIRST "
+               "Physics/SolidMechanics/QuasiStatic/material_output_family=LAGRANGE"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall apply a single given output family to all "
+                  "output variables."
+  []
+  [material_output_order.error1]
+    type = RunException
+    input = "material_output_order.i"
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/material_output_family="LAGRANGE MONOMIAL"'
+    expect_err = "The number of families assigned to material outputs must be: 0 to be assigned "
+                 "MONOMIAL; 1 to assign all outputs the same value, or the same size as the number "
+                 "of generate outputs listed."
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall error if an the material outputs and or "
+                  "families do not match the number of material outputs."
+  []
+  [material_output_first_lagrange_manual]
+    type = Exodiff
+    input = "material_output_first_lagrange_manual.i"
+    exodiff = "material_output_first_lagrange_manual_out.e"
+    max_parallel = 1
+    max_threads = 1
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall determine the necessary orders and "
+                  "families to apply to material outputs."
+  []
+  [material_output_first_lagrange_automatic]
+    type = Exodiff
+    input = "material_output_first_lagrange_automatic.i"
+    exodiff = "material_output_first_lagrange_automatic_out.e"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall determine the necessary orders and "
+                  "families to apply to material outputs."
+  []
+
+  [custom_output]
+    type = Exodiff
+    input = "custom_output.i"
+    exodiff = "custom_output_out.e"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    requirement = "The QuasiStatic SolidMechanics Physics shall permit scalar quantity output from "
+                  "arbitrary tensors."
+  []
+[]

@@ -1,4 +1,4 @@
-# This input file contains objects only available in phase_field
+# This input file contains objects only available in solid_mechanics
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -13,10 +13,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 15.0
       x2 = 35.0
@@ -25,43 +25,43 @@
       inside = 1.0
       outside = -0.8
       variable = c
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
-  [./CHSolid]
+  []
+  [CHSolid]
     type = CHMath
     variable = c
     mob_name = M
-  [../]
-  [./CHInterface]
+  []
+  [CHInterface]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
-    prop_names  = 'M kappa_c'
+    prop_names = 'M kappa_c'
     prop_values = '1.0 1.0'
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,6 +83,6 @@
 
 # Here we'll load the wrong library and check for the correct error condition
 [Problem]
-  register_objects_from = 'TensorMechanicsApp'
-  library_path = '../../../../../tensor_mechanics/lib'
+  register_objects_from = 'SolidMechanicsApp'
+  library_path = '../../../../../solid_mechanics/lib'
 []

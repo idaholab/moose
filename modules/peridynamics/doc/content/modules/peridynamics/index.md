@@ -3,7 +3,7 @@
 !media pd_fuel_fracture_examples.png style=width:380px;padding-left:20px;float:right;
        caption=Peridynamics results of 3D fuel fragmentation
 
-The MOOSE peridynamic module is a library for solving classical solid mechanics and heat transfer problems using the peridynamics theory. For advanced deformation modeling, such as plasticity and creep, the peridynamics module should be used in conjunction with material classes from tensor mechanics module. More information about this module is found below:
+The MOOSE peridynamic module is a library for solving classical solid mechanics and heat transfer problems using the peridynamics theory. For advanced deformation modeling, such as plasticity and creep, the peridynamics module should be used in conjunction with material classes from solid mechanics module. More information about this module is found below:
 
 - [System Documentation List](peridynamics/systems.md)
 
@@ -27,11 +27,11 @@ The MOOSE peridynamic module is a library for solving classical solid mechanics 
 
 ## Using Materials From Tensor Mechanics in Correspondence Material Models
 
-In peridynamic correspondence material model, concepts such as strain and stress tensors from classical Continuum Mechanics still apply, i.e., given the nonlocal deformation gradient calculated in peridynamics, calculations based on nonlocal deformation gradient to establish the constitutive relationship between stress and strain follows the same methodology as in local continuum theory. Strain and stress tensors from Continuum Mechanics reside at each discrete material point rather than quadrature point in peridynamic correspondence material model. Plasticity and creep material models from tensor mechanics can be directly used in peridynamics for nonlinear deformation modeling.
+In peridynamic correspondence material model, concepts such as strain and stress tensors from classical Continuum Mechanics still apply, i.e., given the nonlocal deformation gradient calculated in peridynamics, calculations based on nonlocal deformation gradient to establish the constitutive relationship between stress and strain follows the same methodology as in local continuum theory. Strain and stress tensors from Continuum Mechanics reside at each discrete material point rather than quadrature point in peridynamic correspondence material model. Plasticity and creep material models from solid mechanics can be directly used in peridynamics for nonlinear deformation modeling.
 
-- [Strains](tensor_mechanics/Strains.md)
+- [Strains](solid_mechanics/Strains.md)
 
-- [Stresses](tensor_mechanics/Stresses.md)
+- [Stresses](solid_mechanics/Stresses.md)
 
 ## Spatial Discretization
 

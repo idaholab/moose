@@ -1,4 +1,4 @@
-- kim_phase-field_1999 # referenced in both Tensor Mechanics and Phase Field
-- hales15homogenization # referenced in both Tensor Mechanics and Heat Conduction
+- kim_phase-field_1999 # referenced in both Solid Mechanics and Phase Field
+- hales15homogenization # referenced in both Solid Mechanics and Heat Conduction
 - greenshields2010implementation # referenced in both Navier Stokes and Framework
 - jasak1996error # referenced in both Navier Stokes and Darcy Flow tutorial

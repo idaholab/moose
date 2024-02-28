@@ -73,14 +73,14 @@
 #ifdef SCALAR_TRANSPORT_ENABLED
 #include "ScalarTransportApp.h"
 #endif
+#ifdef SOLID_MECHANICS_ENABLED
+#include "SolidMechanicsApp.h"
+#endif
 #ifdef SOLID_PROPERTIES_ENABLED
 #include "SolidPropertiesApp.h"
 #endif
 #ifdef STOCHASTIC_TOOLS_ENABLED
 #include "StochasticToolsApp.h"
-#endif
-#ifdef TENSOR_MECHANICS_ENABLED
-#include "TensorMechanicsApp.h"
 #endif
 #ifdef THERMAL_HYDRAULICS_ENABLED
 #include "ThermalHydraulicsApp.h"
@@ -175,16 +175,16 @@ ModulesApp::registerApps()
   RichardsApp::registerApps();
 #endif
 
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerApps();
+#endif
+
 #ifdef SOLID_PROPERTIES_ENABLED
   SolidPropertiesApp::registerApps();
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerApps();
-#endif
-
-#ifdef TENSOR_MECHANICS_ENABLED
-  TensorMechanicsApp::registerApps();
 #endif
 
 #ifdef THERMAL_HYDRAULICS_ENABLED
@@ -264,16 +264,16 @@ ModulesApp::registerObjects(Factory & factory)
   RichardsApp::registerObjects(factory);
 #endif
 
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerObjects(factory);
+#endif
+
 #ifdef SOLID_PROPERTIES_ENABLED
   SolidPropertiesApp::registerObjects(factory);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerObjects(factory);
-#endif
-
-#ifdef TENSOR_MECHANICS_ENABLED
-  TensorMechanicsApp::registerObjects(factory);
 #endif
 
 #ifdef THERMAL_HYDRAULICS_ENABLED
@@ -355,16 +355,16 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RichardsApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef SOLID_PROPERTIES_ENABLED
   SolidPropertiesApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::associateSyntax(syntax, action_factory);
-#endif
-
-#ifdef TENSOR_MECHANICS_ENABLED
-  TensorMechanicsApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef THERMAL_HYDRAULICS_ENABLED
@@ -442,16 +442,16 @@ ModulesApp::registerExecFlags(Factory & factory)
   RichardsApp::registerExecFlags(factory);
 #endif
 
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerExecFlags(factory);
+#endif
+
 #ifdef SOLID_PROPERTIES_ENABLED
   SolidPropertiesApp::registerExecFlags(factory);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerExecFlags(factory);
-#endif
-
-#ifdef TENSOR_MECHANICS_ENABLED
-  TensorMechanicsApp::registerExecFlags(factory);
 #endif
 
 #ifdef THERMAL_HYDRAULICS_ENABLED
@@ -548,16 +548,16 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ScalarTransportApp::registerAll(f, af, s);
 #endif
 
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerAll(f, af, s);
+#endif
+
 #ifdef SOLID_PROPERTIES_ENABLED
   SolidPropertiesApp::registerAll(f, af, s);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerAll(f, af, s);
-#endif
-
-#ifdef TENSOR_MECHANICS_ENABLED
-  TensorMechanicsApp::registerAll(f, af, s);
 #endif
 
 #ifdef THERMAL_HYDRAULICS_ENABLED

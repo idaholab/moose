@@ -1,6 +1,6 @@
 Content:
     - framework/doc/content
-    - modules/tensor_mechanics/doc/content
+    - modules/solid_mechanics/doc/content
     - modules/peridynamics/doc/content
 
 Renderer:
@@ -20,7 +20,7 @@ Extensions:
         includes:
             - framework/include
             - modules/peridynamics/include
-            - modules/tensor_mechanics/include
+            - modules/solid_mechanics/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:

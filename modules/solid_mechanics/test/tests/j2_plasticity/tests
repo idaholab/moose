@@ -1,0 +1,44 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'solid_mechanics_j2plasticity.i'
+    exodiff = 'out.e'
+  []
+
+  [small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  []
+  [small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  []
+  [small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  []
+
+  [hard1]
+    type = 'CSVDiff'
+    input = 'hard1.i'
+    csvdiff = 'hard1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  []
+  [hard2]
+    type = 'CSVDiff'
+    input = 'hard2.i'
+    csvdiff = 'hard2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  []
+[]

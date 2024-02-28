@@ -1,0 +1,167 @@
+[Tests]
+  issues = '#3878 #4150 #4507'
+  design = '/SolidMechanicsPlasticWeakPlaneShear.md'
+  [except1]
+    type = 'RunException'
+    input = 'except1.i'
+    expect_err = 'Weak-Plane-Shear friction angle must not be less than Weak-Plane-Shear dilation angle'
+    requirement = 'The system shall not allow a weak plane shear friction angle '
+                  'less than the dilation angle.'
+  []
+  [except2]
+    type = 'RunException'
+    input = 'except2.i'
+    expect_err = 'ComputeMultiPlasticityStress: transverse_direction vector must not have zero length'
+    requirement = 'The system shall not allow a zero length transverse direction vector'
+  []
+  [except3]
+    type = 'RunException'
+    input = 'large_deform1.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/decomposition_method=TaylorExpansion'
+    expect_err = 'Cannot take square root of a number less than or equal to '
+                 'zero in the calculation of C1 for the Rashid approximation '
+                 'for the rotation tensor. This zero or negative number may '
+                 'occur when elements become heavily distorted.'
+    issues = '#19067'
+    design = '/ComputeFiniteStrain.md'
+    requirement = 'The system shall cut the timestep through a mooseException '
+                  'when the loading conditions deform the element enough to '
+                  'produce a negative number under a square root term in the '
+                  'Rashid approximation for the rotation tensor'
+  []
+
+  [small_deformations]
+    requirement = 'For the case of small deformations the system shall '
+    [small1]
+      type = 'CSVDiff'
+      input = 'small_deform1.i'
+      csvdiff = 'small_deform1_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-3
+      recover = false
+      detail = 'return a value of shear of 1 and a normal stress value of 0 '
+               'when the apex of the shear envelope is (0,2);'
+    []
+    [small2]
+      type = 'CSVDiff'
+      input = 'small_deform2.i'
+      csvdiff = 'small_deform2_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-3
+      recover = false
+      detail = 'utlize the small smoother parameter under both pure tension and '
+               'pure shear to solve;'
+    []
+    [small3]
+      type = 'CSVDiff'
+      input = 'small_deform3.i'
+      csvdiff = 'small_deform3_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-6
+      heavy = true
+      detail = 'return the stress state to the yield surface under random loading;'
+    []
+    [small4]
+      type = 'CSVDiff'
+      input = 'small_deform4.i'
+      csvdiff = 'small_deform4_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-6
+      recover = false
+      detail = 'utilize the cap smoothing functionality under both pure tension '
+               'and pure shear to solve the simulation.'
+    []
+  []
+
+  [large_deformation]
+    requirement = 'For large deformation cases the system shall '
+    [large1]
+      type = 'Exodiff'
+      input = 'large_deform1.i'
+      exodiff = 'large_deform1_out.e'
+      abs_zero = 1.0E-6
+      detail = 'produce a solution without plasticity after the mesh is rotated '
+               'by 90 degrees;'
+    []
+    [large2]
+      type = 'Exodiff'
+      input = 'large_deform2.i'
+      exodiff = 'large_deform2_out.e'
+      abs_zero = 1.0E-1
+      detail = 'return the stress state to the yield surface under pure tensile '
+               'loading conditions after the mesh is rotated by 45 degrees;'
+    []
+    [large3]
+      type = 'CSVDiff'
+      input = 'large_deform3.i'
+      csvdiff = 'large_deform3_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-6
+      heavy = true
+      detail = 'return the stress state to the yield surface under pseudo-random '
+               'loading directions;'
+    []
+    [large4]
+      type = 'CSVDiff'
+      input = 'large_deform4.i'
+      csvdiff = 'large_deform4_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-6
+      heavy = true
+      detail = 'return the stress state to the yield surface under pseudo-random '
+               'loading while using the cap-tip yeild surface scheme.'
+    []
+  []
+
+  [small_deformation_hardening]
+    requirement = 'Under small deformation loading selected to induce cohesion '
+                  'hardening the system shall'
+    [small_harden1]
+      type = 'CSVDiff'
+      input = 'small_deform_harden1.i'
+      csvdiff = 'small_deform_harden1_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-6
+      recover = false
+      detail = 'with repeated stretch loading;'
+    []
+    [small_harden2]
+      type = 'CSVDiff'
+      input = 'small_deform_harden2.i'
+      csvdiff = 'small_deform_harden2_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-3
+      recover = false
+      detail = 'for pure tension and then pure shear to map out the yield function;'
+    []
+    [small_harden3]
+      type = 'CSVDiff'
+      input = 'small_deform_harden3.i'
+      csvdiff = 'small_deform_harden3_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-3
+      recover = false
+      detail = 'with linearly increasing loading and an exponential hardening model;'
+    []
+    [small_harden4]
+      type = 'CSVDiff'
+      input = 'small_deform_harden4.i'
+      csvdiff = 'small_deform_harden4_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-3
+      recover = false
+      detail = 'with a linearly increasing load and a cubic hardening model.'
+    []
+  []
+
+  [large_harden3]
+    type = 'CSVDiff'
+    input = 'large_deform_harden3.i'
+    csvdiff = 'large_deform_harden3_out.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-3
+    heavy = true
+    requirement = 'The system shall return the stress state to the yield surface '
+                  'under random large deformation loads.'
+  []
+[]

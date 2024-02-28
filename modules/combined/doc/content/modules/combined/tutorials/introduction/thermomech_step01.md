@@ -1,12 +1,12 @@
 # Step 1 - Basic Thermal/Mechanical Coupling
 
-In the tutorials for the Heat Transfer and Tensor Mechanics modules,
+In the tutorials for the Heat Transfer and Solid Mechanics modules,
 basic thermal and mechanical problems were developed. The Heat Transfer tutorial
 culminated with a [model](heat_transfer/tutorials/introduction/therm_step03a.md)
 that solves the heat equation on a simple rectangular domain, including terms
 for heat conduction, time-dependent effects, and volumetric heating.
 
-The Tensor Mechanics tutorial includes a [model](tensor_mechanics/tutorials/introduction/step03a.md)
+The Solid Mechanics tutorial includes a [model](solid_mechanics/tutorials/introduction/step03a.md)
 that shows how thermal expansion can be accounted for using a prescribed
 temperature field.
 
@@ -25,7 +25,7 @@ The `Variables` block in this input files looks just like it does for a thermal-
 problem. A single variable,`T`, is defined, with an initial condition of 300 Kelvin.
 An obvious question is why no variables are defined for mechanics. Coupled physics
 problems are usually defined in MOOSE by defining multiple variables and their associated
-Kernels. This is actually done in this model, but the `Modules/TensorMechanics/Master` Action
+Kernels. This is actually done in this model, but the `Physics/SolidMechanics/QuasiStatic` Action
 block automatically sets up the displacement variables, so they don't explicitly
 appear in the `Variables` block in the input file. That Action sets up variables
 with the names defined by the `displacements` parameter, which is defined in
@@ -38,14 +38,14 @@ with the names defined by the `displacements` parameter, which is defined in
 
 Similar to the `Variables` block, only the kernels related to the temperature solution
 are defined in the `Kernels` block in this case. This is again due to the fact
-that the `Modules/TensorMechanics/Master` Action automates setting up the Kernels associated
+that the `Physics/SolidMechanics/QuasiStatic` Action automates setting up the Kernels associated
 with the displacement variables, so they don't explicitly appear in the input file.
 This model includes kernels for the conduction, time derivative, and volumetric terms
 in the heat equation.
 
 !listing modules/combined/tutorials/introduction/thermal_mechanical/thermomech_step01.i block=Kernels
 
-### `Modules/TensorMechanics/Master`
+### `Physics/SolidMechanics/QuasiStatic`
 
 This block automates the process of setting up multiple objects related to solution of
 a mechanics problem. The objects set up by this block include the Variables and
@@ -53,7 +53,7 @@ Kernels for the displacement solution, the Material that computes the strain, an
 objects associated with outputting stresses. In addition to simplifying the input,
 this ensures that a consistent set of options are selected for the desired formulation.
 
-!listing modules/combined/tutorials/introduction/thermal_mechanical/thermomech_step01.i block=Modules/TensorMechanics/Master/all
+!listing modules/combined/tutorials/introduction/thermal_mechanical/thermomech_step01.i block=Physics/SolidMechanics/QuasiStatic/all
 
 ### `Materials`
 

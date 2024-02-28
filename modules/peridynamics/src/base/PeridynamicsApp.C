@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PeridynamicsApp.h"
-#include "TensorMechanicsApp.h" // tensor mechanics dependency
+#include "SolidMechanicsApp.h" // tensor mechanics dependency
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -39,7 +39,7 @@ PeridynamicsApp::registerApps()
 {
   registerApp(PeridynamicsApp);
 
-  TensorMechanicsApp::registerApps();
+  SolidMechanicsApp::registerApps();
 }
 
 void
@@ -64,14 +64,14 @@ PeridynamicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"PeridynamicsApp"});
   associateSyntaxInner(s, af);
 
-  TensorMechanicsApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, s);
 }
 
 void
 PeridynamicsApp::registerObjectDepends(Factory & factory)
 {
   mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  TensorMechanicsApp::registerObjects(factory);
+  SolidMechanicsApp::registerObjects(factory);
 }
 
 void
@@ -86,7 +86,7 @@ void
 PeridynamicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
 {
   mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+  SolidMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
 void
