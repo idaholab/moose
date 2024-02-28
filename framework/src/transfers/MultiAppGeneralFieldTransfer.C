@@ -166,6 +166,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),
     _search_value_conflicts(getParam<bool>("search_value_conflicts")),
+    _search_value_conflicts_once(false),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _default_extrapolation_value(getParam<Real>("extrapolation_constant")),
     _bbox_factor(getParam<Real>("bbox_factor")),
@@ -462,6 +463,19 @@ MultiAppGeneralFieldTransfer::prepareToTransfer()
 
   // Get the index for the first source app every processor owns
   _global_app_start_per_proc = getGlobalStartAppPerProc();
+
+  // No need to keep searching for conflicts if the mesh has not changed
+  if (_search_value_conflicts && _search_value_conflicts_once && !_displaced_source_mesh &&
+      !_displaced_target_mesh)
+    _search_value_conflicts = false;
+}
+
+void
+MultiAppGeneralFieldTransfer::postExecute()
+{
+  MultiAppConservativeTransfer::postExecute();
+  if (_search_value_conflicts)
+    _search_value_conflicts_once = true;
 }
 
 void
@@ -1313,7 +1327,7 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
   {
     if (isParamSetByUser("search_value_conflict"))
       mooseInfo("Automated diagnosis did not detect floating point indetermination in transfer");
-    else if (_to_problems.size() > 10 || _from_problems.size() > 10)
+    else if (_to_problems.size() > 10 || _from_problems.size() > 10 || _communicator.size() > 10)
       mooseInfo("Automated diagnosis did not detect any floating point indetermination in "
                 "transfer. You may consider turning it off using `search_value_conflicts=false` "
                 "to improve performance/scalability.");
