@@ -271,6 +271,9 @@ protected:
   /// Whether the search for value happened once
   bool _search_value_conflicts_once;
 
+  /// How many conflicts are output to console
+  const unsigned int _search_value_conflicts_max_log;
+
   /**
    * @brief Detects whether two source values are valid and equidistant for a desired target
    * location
