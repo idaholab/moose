@@ -20,16 +20,10 @@ registerMooseObject("MooseApp", SideSetsBetweenSubdomainsGenerator);
 InputParameters
 SideSetsBetweenSubdomainsGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<std::vector<SubdomainName>>(
+  params.addRequiredParam<std::vector<SubdomainName>>(
       "primary_block", "The primary set of blocks for which to draw a sideset between");
-  params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "master_block",
-      "The primary set of blocks for which to draw a sideset between",
-      "The 'master_block' param is deprecated and will be removed on January 1, 2021. Please use "
-      "the 'primary_block' parameter instead.");
   params.addRequiredParam<std::vector<SubdomainName>>(
       "paired_block", "The paired set of blocks for which to draw a sideset between");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
@@ -37,21 +31,28 @@ SideSetsBetweenSubdomainsGenerator::validParams()
   params.addClassDescription("MeshGenerator that creates a sideset composed of the nodes located "
                              "between two or more subdomains.");
 
+  params.suppressParameter<Point>("normal");
+  params.suppressParameter<Real>("normal_tol");
+  params.suppressParameter<bool>("fixed_normal");
+  params.suppressParameter<bool>("replace");
+  params.suppressParameter<bool>("include_only_external_sides");
+  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
+  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
+  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
+
   return params;
 }
 
 SideSetsBetweenSubdomainsGenerator::SideSetsBetweenSubdomainsGenerator(
     const InputParameters & parameters)
-  : MeshGenerator(parameters), _input(getMesh("input"))
+  : SideSetsGeneratorBase(parameters)
 {
 }
 
 std::unique_ptr<MeshBase>
 SideSetsBetweenSubdomainsGenerator::generate()
 {
-  auto primary_block = isParamValid("primary_block")
-                           ? getParam<std::vector<SubdomainName>>("primary_block")
-                           : getParam<std::vector<SubdomainName>>("master_block");
+  auto primary_block = getParam<std::vector<SubdomainName>>("primary_block");
 
   auto paired_block = getParam<std::vector<SubdomainName>>("paired_block");
 

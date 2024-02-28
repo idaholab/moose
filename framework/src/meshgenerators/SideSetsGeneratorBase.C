@@ -84,12 +84,8 @@ SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
                       isParamValid("included_subdomains")),
     _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
                                isParamValid("included_neighbors")),
-    _included_ids(isParamValid("included_subdomain_ids")
-                      ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
-                      : std::vector<SubdomainID>()),
-    _included_neighbor_ids(isParamValid("included_neighbor_ids")
-                               ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
-                               : std::vector<SubdomainID>()),
+    _included_ids(std::vector<SubdomainID>()),
+    _included_neighbor_ids(std::vector<SubdomainID>()),
     _include_only_external_sides(getParam<bool>("include_only_external_sides")),
     _normal(getParam<Point>("normal")),
     _using_normal(isParamSetByUser("normal")),

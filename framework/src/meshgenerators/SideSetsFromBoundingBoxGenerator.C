@@ -24,9 +24,8 @@ registerMooseObject("MooseApp", SideSetsFromBoundingBoxGenerator);
 InputParameters
 SideSetsFromBoundingBoxGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Defines new sidesets using currently-defined sideset IDs inside or "
                              "outside of a bounding box.");
 
@@ -59,13 +58,21 @@ SideSetsFromBoundingBoxGenerator::validParams()
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
 
+  params.suppressParameter<Point>("normal");
+  params.suppressParameter<Real>("normal_tol");
+  params.suppressParameter<bool>("fixed_normal");
+  params.suppressParameter<bool>("replace");
+  params.suppressParameter<bool>("include_only_external_sides");
+  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
+  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
+  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
+
   return params;
 }
 
 SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
     const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input(getMesh("input")),
+  : SideSetsGeneratorBase(parameters),
     _location(parameters.get<MooseEnum>("location")),
     _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
                                                parameters.get<RealVectorValue>("top_right"))),
