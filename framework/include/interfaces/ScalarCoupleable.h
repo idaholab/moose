@@ -162,6 +162,17 @@ protected:
   const VariableValue & coupledScalarDot(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
+   * Returns the time derivative of a scalar coupled variable, including its dependence on the
+   * nonlinear degrees of freedom through automatic differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to the time derivative at quadrature points for the coupled variable,
+   * including automatic differentiation information
+   */
+  const ADVariableValue & adCoupledScalarDot(const std::string & var_name,
+                                             unsigned int comp = 0) const;
+
+  /**
    * Returns the second time derivative of a scalar coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
