@@ -23,7 +23,7 @@ public:
 
   ResidualConvergence(const InputParameters & parameters);
 
-  static InputParameters commonParams();
+  // static InputParameters commonParams();
 
   virtual bool checkRelativeConvergence(const PetscInt it,
                                         const Real fnorm,
@@ -38,9 +38,9 @@ public:
 protected:
   FEProblemBase & _fe_problem;
 
-  bool _initialized;
-
   PerfID _perf_nonlinear;
+
+  bool _initialized;
 
   // Variables for the convergence criteria
   Real _atol; // absolute convergence tolerance

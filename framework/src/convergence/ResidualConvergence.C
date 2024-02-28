@@ -31,7 +31,6 @@ ResidualConvergence::validParams()
 {
   InputParameters params = Convergence::validParams();
   params += FEProblemSolve::commonParams();
-  // params += PerfGraphInterface::validParams();
 
   params.addClassDescription("Check ResidualConvergence of the set up problem.");
 
@@ -42,7 +41,7 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   : Convergence(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _perf_nonlinear(
-        registerTimedSection("checkNoonlinearConvergence", 5, "Checking Nonlinear Convergence")),
+        registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence")),
     _initialized(false)
 {
   EquationSystems & es = _fe_problem.es();
@@ -151,7 +150,7 @@ ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
 Convergence::MooseAlgebraicConvergence
 ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm)
 {
-  TIME_SECTION("checkNonlinearConvergence", 5, "Checking Algebraic Convergence");
+  TIME_SECTION(_perf_nonlinear);
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
   MooseAlgebraicConvergence reason = MooseAlgebraicConvergence::ITERATING;
@@ -161,6 +160,11 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
 
   // To check if the nonlinear iterations should abort
   bool terminate = _fe_problem.getFailNextNonlinearConvergenceCheck();
+  if (terminate)
+  {
+    _fe_problem.resetFailNextNonlinearConvergenceCheck();
+    reason = MooseAlgebraicConvergence::DIVERGED;
+  }
 
   // To check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -263,7 +267,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
     Real the_residual = system._compute_initial_residual_before_preset_bcs
                             ? system._initial_residual_before_preset_bcs
                             : system._initial_residual_after_preset_bcs;
-    if (checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
+    if (_fe_problem.checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
       reason = MooseAlgebraicConvergence::CONVERGED;
     else if (snorm < _stol * xnorm)
     {
@@ -288,12 +292,6 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
       oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
       reason = MooseAlgebraicConvergence::DIVERGED;
     }
-  }
-
-  if (terminate)
-  {
-    _fe_problem.setFailNextNonlinearConvergenceCheck();
-    reason = MooseAlgebraicConvergence::DIVERGED;
   }
 
   system._last_nl_rnorm = fnorm;

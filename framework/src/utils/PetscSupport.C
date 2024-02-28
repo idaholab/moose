@@ -283,12 +283,11 @@ petscAlgebraicTest(SNES snes,
                    void * ctx)
 {
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
-  // TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
 
   // Error message that was set by the FEProblemBase and now is not used
   std::string msg;
 
-  auto & convergence = problem.getDefaultConvergence();
+  auto & convergence = problem.getConvergence(problem.getActiveConvergenceName());
   Convergence::MooseAlgebraicConvergence mreason =
       convergence.checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
 

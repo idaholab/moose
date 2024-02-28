@@ -590,7 +590,9 @@ public:
   virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0);
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0);
   virtual void addDefaultConvergence();
-  virtual Convergence & getDefaultConvergence(const THREAD_ID tid = 0);
+  virtual void updateReferenceResidual(){};
+  // virtual Convergence & getDefaultConvergence(const THREAD_ID tid = 0);
+  // virtual Convergence & getActiveConvergence(const THREAD_ID tid = 0);
   /**
    * add a MOOSE line search
    */
@@ -2038,6 +2040,7 @@ public:
     _set_nonlinear_convergence_name = true;
   }
 
+  const ConvergenceName getActiveConvergenceName() { return _nonlinear_convergence_name; }
   /**
    * Setter for whether we're computing the scaling jacobian
    */
@@ -2084,6 +2087,10 @@ public:
    */
   void setFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = true; }
 
+  /**
+   * Do not skip further residual evaluations and fail the next nonlinear convergence check
+   */
+  void resetFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = false; }
   /*
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on

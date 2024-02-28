@@ -54,8 +54,8 @@ AugmentedLagrangianContactConvergence::checkAlgebraicConvergence(int it,
                                                                  Real snorm,
                                                                  Real fnorm)
 {
-  Real my_max_funcs = std::numeric_limits<int>::max();
-  Real my_div_threshold = std::numeric_limits<Real>::max();
+  // Real my_max_funcs = std::numeric_limits<int>::max();
+  // Real my_div_threshold = std::numeric_limits<Real>::max();
 
   Convergence::MooseAlgebraicConvergence reason =
       ResidualConvergence::checkAlgebraicConvergence(it, xnorm, snorm, fnorm);

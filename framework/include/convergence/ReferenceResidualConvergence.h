@@ -9,36 +9,38 @@
 
 #pragma once
 
+#include "Convergence.h"
 #include "FEProblem.h"
+#include "PerfGraphInterface.h"
+
+// PETSc includes
+#include <petsc.h>
+#include <petscmat.h>
+
 #include "libmesh/enum_norm_type.h"
 
-/**
- * FEProblemBase derived class to enable convergence checking relative to a user-specified
- * postprocessor
- */
-class ReferenceResidualProblem : public FEProblem
+class ReferenceResidualConvergence : public Convergence
 {
 public:
   static InputParameters validParams();
 
-  static InputParameters commonParams();
+  ReferenceResidualConvergence(const InputParameters & parameters);
 
-  ReferenceResidualProblem(const InputParameters & params);
+  void setupReferenceResidual();
 
-  virtual void initialSetup() override;
+  void updateReferenceResidual();
 
-  virtual void updateReferenceResidual() override;
+  void nonlinearConvergenceSetup();
 
-  virtual void nonlinearConvergenceSetup() override;
+  bool checkRelativeConvergence(const PetscInt it,
+                                const Real fnorm,
+                                const Real the_residual,
+                                const Real rtol,
+                                const Real abstol,
+                                std::ostringstream & oss);
 
-  virtual void addDefaultConvergence() override;
-
-  virtual bool checkRelativeConvergence(const PetscInt it,
-                                        const Real fnorm,
-                                        const Real the_residual,
-                                        const Real rtol,
-                                        const Real abstol,
-                                        std::ostringstream & oss) override;
+  Convergence::MooseAlgebraicConvergence
+  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
   /**
    * Check the convergence by comparing the norm of each variable separately against
@@ -74,16 +76,6 @@ public:
     LOCAL_LINF = 3
   };
 
-  Real getAcceptableMultipliers() { return _accept_mult; }
-  int getAcceptableIterations() { return _accept_iters; }
-  void setNormType(NormalizationType norm_type) { _norm_type_enum = norm_type; }
-  int getNormType()
-  {
-    int castEnum = static_cast<int>(_norm_type_enum);
-    return castEnum;
-  }
-  std::vector<std::vector<NonlinearVariableName>> getGroupVars() { return _group_variables; }
-  TagName getReferenceVectorTag() { return _reference_vector_tag; }
   class ReferenceVectorTagIDKey
   {
     friend class TaggingInterface;
@@ -94,6 +86,44 @@ public:
   TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_vector_tag_id; }
 
 protected:
+  FEProblemBase & _fe_problem;
+
+  PerfID _perf_nonlinear;
+
+  // Variables for the convergence criteria
+  Real _atol; // absolute convergence tolerance
+  Real _rtol; // relative convergence tolerance
+  Real _stol; // convergence (step) tolerance in terms of the norm of the change in the
+              // solution between steps
+
+  Real _div_threshold = std::numeric_limits<Real>::max();
+  /// the absolute non linear divergence tolerance
+  Real _nl_abs_div_tol = -1;
+  Real _divtol; // relative divergence tolerance
+
+  Real _nl_rel_tol;
+  Real _nl_abs_tol;
+  Real _nl_rel_step_tol;
+  Real _nl_abs_step_tol;
+
+  int _nl_forced_its = 0; // the number of forced nonlinear iterations
+  PetscInt _nfuncs = 0;
+
+  unsigned int _nl_max_its;
+  unsigned int _nl_max_funcs;
+
+  PetscInt _maxit; // maximum number of iterations
+  PetscInt _maxf;  // maximum number of function evaluations
+
+  // Linear solver convergence criteria
+  Real _l_tol;
+  Real _l_abs_tol;
+  unsigned int _l_max_its;
+
+  /// maximum number of ping-pong iterations
+  unsigned int _n_nl_pingpong = 0;
+  unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
+
   ///@{
   /// List of solution variable names whose reference residuals will be stored,
   /// and the residual variable names that will store them.
@@ -141,6 +171,9 @@ protected:
   /// True if any variables are grouped
   bool _use_group_variables;
 
+  /// Container for convergence treatment when the reference residual is zero
+  const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;
+
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
 
@@ -153,20 +186,15 @@ protected:
   /// Container for normalization type
   FEMNormType _norm_type;
 
-  // To be used in getNormType
-  NormalizationType _norm_type_enum;
-
-  /// Container for convergence treatment when the reference residual is zero
-  const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;
-
   /// The reference vector tag id
   TagID _reference_vector_tag_id;
-  TagName _reference_vector_tag;
+
+  bool _initialized;
 };
 
 template <typename T>
 void
-ReferenceResidualProblem::addGroupVariables(const std::set<T> & group_vars)
+ReferenceResidualConvergence::addGroupVariables(const std::set<T> & group_vars)
 {
   _group_variables.push_back(
       std::vector<NonlinearVariableName>(group_vars.begin(), group_vars.end()));

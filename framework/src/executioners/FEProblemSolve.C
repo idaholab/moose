@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "ResidualConvergence.h"
+#include "ReferenceResidualConvergence.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -235,7 +236,9 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
   if (isParamValid("nonlinear_convergence"))
+  {
     _problem.setNonlinearConvergenceObject(getParam<ConvergenceName>("nonlinear_convergence"));
+  }
   else
   {
     _problem.setNonlinearConvergenceObject("default_convergence");
