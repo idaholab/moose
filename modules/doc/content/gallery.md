@@ -1,5 +1,12 @@
 !gallery! large=6
 
+!card! gallery/weld.mp4 title=Welding simulation of a pressure vessel
+Simulation of the laser welding process (with a total of 8 weld passes) joining two separate vessel segments. The animation shows the complete transient of temperature, equivalent plastic strain, and von Mises stress. The coupled thermomechanical simulation is set up using the MALAMUTE app. Deposition of the weld material is modeled using element subdomain modifiers.
+
+!style fontsize=90% fontweight=100
+*Credit:*  Bipul Barua (ANL), Gary Hu (ANL), and Mark Messner (ANL)
+!card-end!
+
 !card! gallery/3D_SSB.mp4 title=Charge-discharge cycle of a full solid-state battery
 A complete charge-discharge cycle of a 3D full solid-state battery. The results are generated using EEL developed by the Argonne National Laboratory. The theoretical framework is described in [Hu, T., Messner, M. C., Barai, P., & Barua, B. (2022)](https://doi.org/10.2172/1891097).
 
