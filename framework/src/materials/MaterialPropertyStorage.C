@@ -605,6 +605,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
         {
           std::stringstream out;
           dataStore(out, entry, nullptr);
+          out.seekg(0, std::ios::beg);
           dataStoreSkippable(stream, out, nullptr);
         }
       }
@@ -696,7 +697,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
     // Need to deal with new materials with a property that we previously stored
   }
 
-  std::vector<std::optional<unsigned int>> to_stateful_ids(storage.statefulProps().size());
+  std::vector<std::optional<unsigned int>> to_stateful_ids(from_stateful_prop_id_to_prop_id.size());
 
   auto & to_prop_records = storage._prop_records;
 
@@ -772,6 +773,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 
         std::size_t num_props;
         dataLoad(stream, num_props, nullptr);
+        mooseAssert(num_props <= to_stateful_ids.size(), "Missized map");
 
         std::size_t num_q_points;
         dataLoad(stream, num_q_points, nullptr);
