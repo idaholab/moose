@@ -71,6 +71,9 @@ heated_length = 1.0
   [mu]
     block = subchannel
   []
+  [displacement]
+    block = subchannel
+  []
   [q_prime]
     block = fuel_pins
   []
@@ -122,7 +125,7 @@ heated_length = 1.0
   [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 2000 #W
+    power = 10000 #W
     filename = "pin_power_profile19.txt"
   []
 
