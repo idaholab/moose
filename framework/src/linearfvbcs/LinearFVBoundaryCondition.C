@@ -60,8 +60,7 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
     _var(*mooseLinearVariableFV()),
     _sys(_var.sys()),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
-    _includes_material_multiplier(false)
+    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system()))
 {
   addMooseVariableDependency(&_var);
 }

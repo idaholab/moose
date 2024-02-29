@@ -115,16 +115,7 @@ public:
    * property multipler. For dirichlet boundary conditions this is false, but for flux boundary
    * conditions this can be true (like Neumann BC for diffusion problems).
    */
-  bool includesMaterialPropertyMultiplier() const { return _includes_material_multiplier; }
-
-  /**
-   * Set function for the material property multiplier switch.
-   * @param new_setting what the new setting should be
-   */
-  void setIncludesMaterialPropertyMultiplier(const bool new_setting)
-  {
-    _includes_material_multiplier = new_setting;
-  }
+  virtual bool includesMaterialPropertyMultiplier() const { return false; }
 
   /// Set current face info
   void setCurrentFaceInfo(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type);
@@ -165,9 +156,6 @@ protected:
 
   /// Reference to the libmesh linear system this object contributes to
   libMesh::LinearImplicitSystem & _linear_system;
-
-  /// Boolean to indicate if the boundary condition includes the material property multipliers ot not
-  bool _includes_material_multiplier;
 
   /// Pointer to the face info we are operating on right now
   const FaceInfo * _current_face_info;

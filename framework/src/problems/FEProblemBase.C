@@ -2502,17 +2502,10 @@ FEProblemBase::addVariable(const std::string & var_type,
 
   logAdd("Variable", var_name, var_type);
 
-  const bool should_be_linear = params.isParamValid("linear_sys");
-  const bool should_be_nonlinear = params.isParamSetByUser("nl_sys");
-  if (should_be_linear && should_be_nonlinear)
-    mooseError("'linear_sys' and 'nl_sys' should not be both used as a parameter for variable ",
-               var_name);
-
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_SOLVER;
-  SolverSystemName sys_name = should_be_linear
-                                  ? SolverSystemName(params.get<LinearSystemName>("linear_sys"))
-                                  : SolverSystemName(params.get<NonlinearSystemName>("nl_sys"));
+  SolverSystemName sys_name = params.get<SolverSystemName>("solver_sys");
+
   const auto solver_system_number = solverSysNum(sys_name);
   _solver_systems[solver_system_number]->addVariable(var_type, var_name, params);
   if (_displaced_problem)
@@ -7004,11 +6997,11 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
-  _aux->residualSetup();
+  _aux->jacobianSetup();
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _functions.residualSetup(tid);
+    _functions.jacobianSetup(tid);
   }
 
   try
@@ -7031,7 +7024,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
   computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
   executeControls(EXEC_NONLINEAR);
 
-  _app.getOutputWarehouse().residualSetup();
+  _app.getOutputWarehouse().jacobianSetup();
 
   _safe_access_tagged_vectors = false;
   _safe_access_tagged_matrices = false;

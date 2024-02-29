@@ -110,7 +110,7 @@ public:
    * Get the variable gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    */
-  const VectorValue<Real> & gradSln(const ElemInfo & elem_info) const;
+  const VectorValue<Real> gradSln(const ElemInfo & elem_info) const;
 
   /**
    * Compute interpolated gradient on the provided face.

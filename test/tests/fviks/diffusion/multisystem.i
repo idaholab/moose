@@ -23,12 +23,12 @@
 [Variables]
   [u]
     type = MooseVariableFVReal
-    nl_sys = 'u'
+    solver_sys = 'u'
     block = 0
   []
   [v]
     type = MooseVariableFVReal
-    nl_sys = 'v'
+    solver_sys = 'v'
     block = 1
   []
 []

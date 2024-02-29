@@ -128,7 +128,7 @@ MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo & elem_info,
 }
 
 template <typename OutputType>
-const VectorValue<Real> &
+const VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
 {
   if (_needs_cell_gradients)
@@ -155,7 +155,7 @@ MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg &
   // If we have a neighbor then we interpolate between the two to the face.
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
-    const auto & elem_two_grad = gradSln(*elem_two);
+    const auto elem_two_grad = gradSln(*elem_two);
     return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
   }
   else

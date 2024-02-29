@@ -65,13 +65,10 @@ MooseVariableBase::validParams()
                         false,
                         "True to make this variable a array variable regardless of number of "
                         "components. If 'components' > 1, this will automatically be set to true.");
-  params.addParam<NonlinearSystemName>("nl_sys",
-                                       "nl0",
-                                       "If this variable is a nonlinear variable, this is the "
-                                       "nonlinear system to which it should be added.");
-  params.addParam<LinearSystemName>("linear_sys",
-                                    "If this variable is a linear variable, this is the "
-                                    "linear system to which it should be added.");
+  params.addParam<SolverSystemName>("solver_sys",
+                                    "nl0",
+                                    "If this variable is a solver variable, this is the "
+                                    "solver system to which it should be added.");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");

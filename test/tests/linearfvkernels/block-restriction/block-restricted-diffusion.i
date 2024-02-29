@@ -37,7 +37,7 @@
 [Variables]
   [u]
     type = MooseLinearVariableFVReal
-    linear_sys = 'u_sys'
+    solver_sys = 'u_sys'
     initial_condition = 1.0
     block = 2
   []
