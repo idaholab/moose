@@ -1,13 +1,4 @@
-[Mesh/gmg]
-  type = GeneratedMeshGenerator
-  dim = 1
-  nx = 5
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
-[]
+!include advanced_stateful_material_base.i
 
 [Materials]
   [test]
@@ -16,11 +7,6 @@
     real_values = '1 2'
     real_stateful_names = 'a b'
   []
-[]
-
-[Executioner]
-  type = Transient
-  num_steps = 1
 []
 
 [Outputs]

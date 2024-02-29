@@ -1,13 +1,7 @@
-[Mesh/gmg]
-  type = GeneratedMeshGenerator
-  dim = 1
-  nx = 5
-[]
+!include advanced_stateful_material_base.i
 
 [Problem]
-  kernel_coverage_check = false
   restart_file_base = advanced_stateful_material_out_cp/LATEST
-  solve = false
 []
 
 [Materials]
@@ -20,7 +14,5 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 1
   start_time = 1
 []
