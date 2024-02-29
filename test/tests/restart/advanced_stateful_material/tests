@@ -30,16 +30,16 @@
       detail = 'a stateful property for a single material object is added'
     []
     # not sure if this test is valid anymore
-    [other_object]
-      type = RunApp
+    [object_rename]
+      type = RunException
       input = 'advanced_stateful_material_restart.i'
       cli_args = "Materials/active='new'
                   Materials/new/type=RestartStatefulMaterial
                   Materials/new/real_names='a'
                   Materials/new/real_stateful_names='a'"
-      # expect_err = 'The stateful material property \'a\' was stored in checkpoint in RestartStatefulMaterial "test" but is now declared in RestartStatefulMaterial \'new\'.'
+      expect_err = 'The stateful material property \'a\' is now declared in RestartStatefulMaterial "new" but was not declared in that object on checkpoint.'
       prereq = checkpoint
-      detail = 'a stateful object changed names'
+      detail = 'a previously checkpointed stateful property is declared in a new material'
     []
     [different_type]
       type = RunException

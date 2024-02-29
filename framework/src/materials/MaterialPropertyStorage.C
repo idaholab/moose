@@ -694,7 +694,24 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
       }
     }
 
-    // Need to deal with new materials with a property that we previously stored
+    // We can easily support this, but have chosen not to due to ambiguity and we
+    // don't yet know how to express this ambiguity. Just removing this error
+    // _should_ make it work without issue because to_stateful_ids below for this
+    // property will be an empty optional, which means simply don't load it. Or,
+    // we could load it into the new property.
+    for (const auto & [from_prop, from_objects] : from_prop_to_objects)
+      if (const auto find_objects = prop_to_objects.find(from_prop);
+          find_objects != prop_to_objects.end())
+        for (const auto & object : find_objects->second)
+          if (!from_objects.count(object))
+            mooseError(
+                "The stateful material property '",
+                from_prop,
+                "' was declared in ",
+                object,
+                " but was not declared in that object on checkpoint.\n\nThis is not currently "
+                "supported due to ambiguity.\n\nPlease contact the development team on "
+                "GitHub if you desire this capability.");
   }
 
   std::vector<std::optional<unsigned int>> to_stateful_ids(from_stateful_prop_id_to_prop_id.size());
