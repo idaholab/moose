@@ -29,7 +29,6 @@
       prereq = checkpoint
       detail = 'a stateful property for a single material object is added'
     []
-    # not sure if this test is valid anymore
     [object_rename]
       type = RunException
       input = 'advanced_stateful_material_restart.i'
