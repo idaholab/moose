@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseHashing.h"
 #include "HashMap.h"
 #include "MaterialProperty.h"
 #include "MaterialPropertyRegistry.h"
