@@ -375,7 +375,10 @@ MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
       // Load from the cached binary backup into place
       for (auto & [stateful_id, datum_ptr] : materials_to_restart_find->second)
         for (const auto state : index_range(*datum_ptr))
+        {
+          (*datum_ptr)[state].seekg(0, std::ios::beg);
           dataLoad((*datum_ptr)[state], (*props[state])[stateful_id], nullptr);
+        }
     }
   }
 
@@ -795,6 +798,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
               if (!in_place_entry)
                 in_place_entry = &storage.setProps(elem, side, state);
 
+              data.seekg(0, std::ios::beg);
               dataLoad(data, (*in_place_entry)[to_stateful_id], nullptr);
             }
             // Properties aren't initialized, so load the data into
