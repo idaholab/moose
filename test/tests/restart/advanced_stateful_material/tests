@@ -36,7 +36,7 @@
                   Materials/new/type=RestartStatefulMaterial
                   Materials/new/real_names='a'
                   Materials/new/real_stateful_names='a'"
-      expect_err = 'The stateful material property \'a\' is now declared in RestartStatefulMaterial "new" but was not declared in that object on checkpoint.'
+      expect_err = 'The stateful material property \'a\' was declared in RestartStatefulMaterial "new" but was not declared in that object on checkpoint.'
       prereq = checkpoint
       detail = 'a previously checkpointed stateful property is declared in a new material'
     []
