@@ -791,6 +791,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
             // or not to load it in place or to cache it to load later
             std::stringstream data;
             dataLoadSkippable(stream, data, nullptr);
+            data.seekg(0, std::ios::beg);
 
             // Load the data directly into _storage
             if (storage._restart_in_place)
@@ -798,7 +799,6 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
               if (!in_place_entry)
                 in_place_entry = &storage.setProps(elem, side, state);
 
-              data.seekg(0, std::ios::beg);
               dataLoad(data, (*in_place_entry)[to_stateful_id], nullptr);
             }
             // Properties aren't initialized, so load the data into
