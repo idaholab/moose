@@ -331,12 +331,10 @@ private:
   /**
    * @return Input check application for document path from current operation
    */
+  ///@{
   MooseApp & getCheckApp();
-
-  /**
-   * @return Whether or not the check app exists for the current document path
-   */
   MooseApp * queryCheckApp();
+  ///@}
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
