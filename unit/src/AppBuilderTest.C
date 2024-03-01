@@ -120,7 +120,7 @@ TEST(AppBuilderTest, buildParamsFromCommandLineErrors)
 
     auto params = MooseApp::validParams();
     params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
-
+    params.set<std::string>("_type") = "MooseApp";
     auto parser = std::make_shared<Parser>(std::vector<std::string>());
     parser->parse();
 
