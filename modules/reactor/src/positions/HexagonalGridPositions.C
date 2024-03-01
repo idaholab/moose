@@ -21,7 +21,7 @@ HexagonalGridPositions::validParams()
       "counterclockwise, then expanding outwards from the inner ring, then axially. "
       "Inner-numbering is within a radial ring, outer-numbering is axial divisions");
 
-  params.addParam<Point>("center", "Center of the hexagonal grid");
+  params.addRequiredParam<Point>("center", "Center of the hexagonal grid");
   params.addRequiredRangeCheckedParam<Real>(
       "lattice_flat_to_flat",
       "lattice_flat_to_flat>0",
@@ -58,10 +58,15 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
         std::set<unsigned int>(getParam<std::vector<unsigned int>>("include_in_pattern").begin(),
                                getParam<std::vector<unsigned int>>("include_in_pattern").end()))
 {
-  if (_pin_pitch > _lattice_flat_to_flat)
-    paramError("lattice_flat_to_flat", "Pin pitch should be smaller than bundle pitch");
-  if (_include_in_pattern.size() > _pattern.size())
-    paramError("include_in_pattern", "The 'pattern' parameter is either missing or too small");
+  if (MooseUtils::absoluteFuzzyGreaterThan(_nr * _pin_pitch * sqrt(3), _lattice_flat_to_flat))
+    paramError("lattice_flat_to_flat",
+               "Bundle pitch is too small to fit this many rings at that pin pitch");
+  if ((_include_in_pattern.empty() && _pattern.size()) ||
+      (_include_in_pattern.size() && _pattern.empty()))
+    paramError(
+        "include_in_pattern",
+        "The 'pattern' parameter and the include_in_pattern must be both specified or both not "
+        "specified by the user.");
   for (const auto include : _include_in_pattern)
   {
     bool found = false;
