@@ -19,7 +19,7 @@
       type = JSONDiff
       input = iteration_info.i
       jsondiff = limit_out.json
-      cli_args = 'Reporters/iteration_info/items=time timestep Outputs/file_base=limit_out'
+      cli_args = 'Reporters/iteration_info/items="time timestep" Outputs/file_base=limit_out'
       recover = false # iteration info changes with --recover
       skip_keys = 'part number_of_parts'
       keep_reporter_types = true

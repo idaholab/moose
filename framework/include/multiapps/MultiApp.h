@@ -386,10 +386,7 @@ public:
 
 protected:
   /// function that provides cli_args to subapps
-  virtual std::vector<std::string> cliArgs() const
-  {
-    return std::vector<std::string>(_cli_args.begin(), _cli_args.end());
-  }
+  virtual std::vector<std::string> cliArgs() const;
 
   /**
    * _must_ fill in _positions with the positions of the sub-aps
@@ -428,12 +425,15 @@ protected:
   /// call back executed right before app->runInputFile()
   virtual void preRunInputFile();
 
-  /** Method to aid in getting the "cli_args" parameters.
+  /**
+   * @return The command line arguments to be applied to the subapp
+   * with index \p local_app
    *
-   * The method is virtual because it is needed to allow for batch runs within the stochastic tools
-   * module, see SamplerFullSolveMultiApp for an example.
+   * The method is virtual because it is needed to allow for batch runs
+   * within the stochastic tools module; see SamplerFullSolveMultiApp for
+   * an example.
    */
-  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app);
+  virtual std::vector<std::string> getCommandLineArgs(const unsigned int local_app);
 
   /**
    * Build communicators and reserve backups.
@@ -481,7 +481,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The type of application to build if set in app_type (to be deprecated)
-  const std::optional<std::string> _app_type;
+  const std::string _app_type;
 
   /// The positions of all of the apps, using input constant vectors (to be deprecated)
   std::vector<Point> _positions;
@@ -587,7 +587,7 @@ protected:
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
 
-  /// CommandLine arguments
+  /// CommandLine arguments (controllable!)
   const std::vector<CLIArgString> & _cli_args;
 
   /// CommandLine arguments from files
@@ -617,6 +617,10 @@ protected:
   const PerfID _backup_timer;
   const PerfID _restore_timer;
   const PerfID _reset_timer;
+
+private:
+  /// The parameter that was used to set the command line args, if any
+  mutable std::optional<std::string> _cli_args_param;
 };
 
 void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);

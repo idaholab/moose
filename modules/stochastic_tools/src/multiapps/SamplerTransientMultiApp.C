@@ -214,10 +214,10 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
   return output;
 }
 
-std::string
-SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
+std::vector<std::string>
+SamplerTransientMultiApp::getCommandLineArgs(const unsigned int local_app)
 {
-  std::string args;
+  std::vector<std::string> args;
 
   // With multiple processors per app, there are no local rows for non-root processors
   if (isRootProcessor())
@@ -226,9 +226,8 @@ SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     // sampler data and combine them to get full command line option strings.
     updateRowData(_mode == StochasticTools::MultiAppMode::NORMAL ? local_app
                                                                  : _local_batch_app_index);
-    const std::vector<std::string> & cli_args_name =
-        MooseUtils::split(TransientMultiApp::getCommandLineArgsParamHelper(local_app), ";");
-    args = SamplerFullSolveMultiApp::sampledCommandLineArgs(_row_data, cli_args_name);
+    args = SamplerFullSolveMultiApp::sampledCommandLineArgs(
+        _row_data, TransientMultiApp::getCommandLineArgs(local_app));
   }
 
   _my_communicator.broadcast(args);

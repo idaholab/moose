@@ -1,42 +1,57 @@
 {
-    "reporters": {
-        "iteration_info": {
-            "type": "IterationInfo",
-            "values": {
-                "time": {
-                    "type": "double"
-                }
-            }
+  "app_name": "main",
+  "current_time": "Wed Feb 21 20:23:53 2024",
+  "executable": "/data/harblh/worktrees/moose/command_line_rewrite/test/moose_test-opt",
+  "executable_time": "Wed Feb 21 20:22:11 2024",
+  "libmesh_version": "31948b018e9bea83c138035e952d48065458ba4a",
+  "moose_version": "git commit 514922b3fd on 2024-02-07",
+  "petsc_version": "3.20.3",
+  "reporters": {
+    "iteration_info": {
+      "type": "IterationInfo",
+      "values": {
+        "time": {
+          "type": "double"
+        },
+        "timestep": {
+          "type": "unsigned int"
         }
+      }
+    }
+  },
+  "slepc_version": "3.20.1",
+  "time_steps": [
+    {
+      "iteration_info": {
+        "time": 0.0,
+        "timestep": 0
+      },
+      "time": 0.0,
+      "time_step": 0
     },
-    "time_steps": [
-        {
-            "iteration_info": {
-                "time": 0.0
-            },
-            "time": 0.0,
-            "time_step": 0
-        },
-        {
-            "iteration_info": {
-                "time": 1.0
-            },
-            "time": 1.0,
-            "time_step": 1
-        },
-        {
-            "iteration_info": {
-                "time": 2.0
-            },
-            "time": 2.0,
-            "time_step": 2
-        },
-        {
-            "iteration_info": {
-                "time": 3.0
-            },
-            "time": 3.0,
-            "time_step": 3
-        }
-    ]
+    {
+      "iteration_info": {
+        "time": 1.0,
+        "timestep": 1
+      },
+      "time": 1.0,
+      "time_step": 1
+    },
+    {
+      "iteration_info": {
+        "time": 2.0,
+        "timestep": 2
+      },
+      "time": 2.0,
+      "time_step": 2
+    },
+    {
+      "iteration_info": {
+        "time": 3.0,
+        "timestep": 3
+      },
+      "time": 3.0,
+      "time_step": 3
+    }
+  ]
 }

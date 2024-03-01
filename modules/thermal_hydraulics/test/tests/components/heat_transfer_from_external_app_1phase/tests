@@ -22,9 +22,9 @@
     input = 'phy.T_wall_transfer_3eqn.parent.i'
     exodiff = 'phy.T_wall_transfer_ext_3eqn.e phy.T_wall_transfer_ext_3eqn_thm0_out.e'
     cli_args = "Outputs/file_base=phy.T_wall_transfer_ext_3eqn Transfers/T_to_child/variable=T_ext "
-               "thm:AuxVariables/T_ext thm:AuxVariables/T_ext/initial_condition=300 "
+               "thm:AuxVariables/T_ext/initial_condition=300 "
                "thm:Components/hxconn/T_ext=T_ext thm:Outputs/out/show='T_ext'"
-               requirement = 'The system shall be able to solve for single phase heat transfer in a component with the exterior temperature provided by an external application.'
+    requirement = 'The system shall be able to solve for single phase heat transfer in a component with the exterior temperature provided by an external application.'
   []
 
   [phy:T_wall_transfer_elem_3eqn]

@@ -142,11 +142,6 @@ public:
    */
   const std::optional<std::string> & getInputAppType() const { return _input_app_type; }
 
-  /*
-   * Set the application type in parser
-   */
-  void setInputAppType(const std::string & input_app_type) { _input_app_type = input_app_type; }
-
   /**
    * @return The file name of the last input
    */

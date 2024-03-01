@@ -67,12 +67,11 @@ SamplerParameterTransfer::execute()
     // Populate the row of data to transfer
     std::vector<Real> row = _sampler_ptr->getNextLocalRow();
 
-    // Get the parameters in command-line format
-    const std::string cmd_line =
-        SamplerFullSolveMultiApp::sampledCommandLineArgs(row, _parameter_names);
+    // Get the command line arguments
+    const auto args = SamplerFullSolveMultiApp::sampledCommandLineArgs(row, _parameter_names);
 
     // Get the sub-app SamplerReceiver objects and transfer param-values map
-    for (auto & ptr : getReceivers(row_index, cmd_line))
+    for (auto & ptr : getReceivers(row_index, args))
       ptr.first->transfer(ptr.second);
   }
 }
@@ -82,18 +81,18 @@ SamplerParameterTransfer::executeToMultiapp()
 {
   if (getToMultiApp()->isRootProcessor())
   {
-    // Get the parameters in command-line format
-    const std::string cmd_line =
-        SamplerFullSolveMultiApp::sampledCommandLineArgs(_row_data, _parameter_names);
+    // Get the command line arguments
+    const auto args = SamplerFullSolveMultiApp::sampledCommandLineArgs(_row_data, _parameter_names);
 
     // Get the sub-app SamplerReceiver objects and transfer param-values map
-    for (auto & ptr : getReceivers(_app_index, cmd_line))
+    for (auto & ptr : getReceivers(_app_index, args))
       ptr.first->transfer(ptr.second);
   }
 }
 
 std::map<SamplerReceiver *, std::map<std::string, std::vector<Real>>>
-SamplerParameterTransfer::getReceivers(unsigned int app_index, const std::string & cmd_line)
+SamplerParameterTransfer::getReceivers(unsigned int app_index,
+                                       const std::vector<std::string> & args)
 {
   // These are the receivers we are returning
   std::map<SamplerReceiver *, std::map<std::string, std::vector<Real>>> ptrs;
@@ -101,12 +100,8 @@ SamplerParameterTransfer::getReceivers(unsigned int app_index, const std::string
   // Split all the input parameters to retrieve receivers and set param-values pairs
   // Cache the multiapp-reciever mapping
   std::unordered_map<std::string, std::vector<SamplerReceiver *>> multiapp_receivers;
-  for (const auto & param : MooseUtils::split(cmd_line, ";"))
+  for (const auto & param : args)
   {
-    // Command-line has a ';' at the end, which will cause an empty string for the last vector entry
-    if (param.empty())
-      continue;
-
     // Get MultiApp Name
     std::string multiapp_name = getToMultiApp()->name();
     const auto pos = param.rfind(":");
@@ -115,7 +110,7 @@ SamplerParameterTransfer::getReceivers(unsigned int app_index, const std::string
     // Get parameter name
     const auto pos2 = param.rfind("=");
     if (pos2 == std::string::npos)
-      mooseError("Internal error: Improper command-line format\n   ", cmd_line, ".");
+      mooseError("Internal error: Improper command-line format\n   ", param, ".");
     const std::string param_name = param.substr(pos + 1, pos2 - pos - 1);
 
     // Get values
@@ -124,7 +119,7 @@ SamplerParameterTransfer::getReceivers(unsigned int app_index, const std::string
     const auto vpos2 = vstr.rfind("'");
     std::vector<Real> value;
     if (!MooseUtils::tokenizeAndConvert(vstr.substr(vpos1 + 1, vpos2 - vpos1 - 1), value, " "))
-      mooseError("Internal error: Improper command-line format\n   ", cmd_line, ".");
+      mooseError("Internal error: Improper command-line format\n   ", param, ".");
 
     // Find receivers if we haven't already found them
     if (multiapp_receivers.find(multiapp_name) == multiapp_receivers.end())

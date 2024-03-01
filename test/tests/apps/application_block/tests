@@ -43,12 +43,5 @@
       requirement = "The system shall report a reasonable error when specifying the application type using the deprecated method and the current method"
       expect_err = 'You cannot specify the command-line options --type and --app together.'
     []
-    [unregistered]
-      type = 'RunException'
-      input = 'application_block.i'
-      cli_args = 'Application/type=DummyApp'
-      expect_err = "A 'DummyApp' is not a registered object"
-      detail = "return an error message when the application type is not registered."
-    []
   []
 []

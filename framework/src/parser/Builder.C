@@ -372,23 +372,17 @@ void
 Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused)
 {
   UnusedWalker uw(_extracted_vars, *this);
-  root().walk(&uw);
-
   UnusedWalker uwcli(_extracted_vars, *this);
-  auto & cli_root = _app_builder_state.cli_root;
-  mooseAssert(cli_root, "Not set");
-  cli_root->walk(&uwcli);
+
+  root().walk(&uw);
+  _app_builder_state.cli_root->walk(&uwcli);
 
   auto cli = _app.commandLine();
   if (warn_unused)
   {
-    for (auto arg : cli->unused(comm))
-      _warnmsg += hit::errormsg("CLI_ARG",
-                                nullptr,
-                                "unused command line parameter '",
-                                cli->getArguments()[arg],
-                                "'") +
-                  "\n";
+    for (const auto & arg : _app.commandLine()->unusedHitParams(comm))
+      _warnmsg +=
+          hit::errormsg("CLI_ARG", nullptr, "unused command line parameter '", arg, "'") + "\n";
     for (auto & msg : uwcli.errors)
       _warnmsg += msg + "\n";
     for (auto & msg : uw.errors)
@@ -396,13 +390,9 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
   }
   else if (err_unused)
   {
-    for (auto arg : cli->unused(comm))
-      _errmsg += hit::errormsg("CLI_ARG",
-                               nullptr,
-                               "unused command line parameter '",
-                               cli->getArguments()[arg],
-                               "'") +
-                 "\n";
+    for (const auto & arg : cli->unusedHitParams(comm))
+      _errmsg +=
+          hit::errormsg("CLI_ARG", nullptr, "unused command line parameter '", arg, "'") + "\n";
     for (auto & msg : uwcli.errors)
       _errmsg += msg + "\n";
     for (auto & msg : uw.errors)

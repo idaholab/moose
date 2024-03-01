@@ -12,6 +12,7 @@
 #include "CommandLine.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
+#include "MooseMain.h"
 
 namespace Moose
 {
@@ -33,41 +34,59 @@ AppBuilder::buildParams(const std::string & default_type,
   // Start with either Application/type= in input, or the default app type
   std::string type = parser().getInputAppType() ? *parser().getInputAppType() : default_type;
 
-  // Search for application type via command line
+  // Determine the overriden command line type, if any
   {
     CommandLine type_command_line(argc, argv);
-    auto params = emptyInputParameters();
-    MooseApp::addTypeParam(params);
-    type_command_line.addCommandLineOptionsFromParams(params);
+    type_command_line.parse();
 
-    // Search for Application/[type,app]= on command line
-    auto cli_root = parseCLIArgs(name, type_command_line);
+    // Get the hit command line parameters
+    auto cli_root = parseCLIArgs(type_command_line);
+
+    // Don't allow Application/app= on command line
     if (cli_root->find("Application/app"))
       mooseError("The command-line input option Application/app is not supported. Please use "
                  "Application/type= or --type instead.");
-    if (const auto node = cli_root->find("Application/type"))
-      type = node->param<std::string>();
+    // Check for Application/type= on command line
+    const auto cli_hit_type_node = cli_root->find("Application/type");
+    if (cli_hit_type_node)
+      type = cli_hit_type_node->param<std::string>();
 
-    // Search for --[type,app] on command line
-    const bool has_cli_type = type_command_line.search("type", type);
-    if (type_command_line.search("app", type))
+    // Search for --app and --type on command line
+    auto params = emptyInputParameters();
+    MooseApp::addTypeParam(params);
+    type_command_line.populateCommandLineParams(params);
+    const auto has_cli_app = params.isParamSetByUser("app");
+
+    // Check for --type on command line
+    if (params.isParamSetByUser("type"))
     {
-      if (has_cli_type)
+      if (cli_hit_type_node)
+        mooseError("You cannot specify --type and Application/type together on the command line");
+      if (has_cli_app)
         mooseError("You cannot specify the command-line options --type and --app together.");
-      else
-        mooseDeprecated("Please use Application/type= or --type <AppName> via command line "
-                        "to specify application type; '--app <AppName>' is deprecated and will be "
-                        "removed in a future release.");
+      type = params.get<std::string>("type");
+    }
+    // Check for --app on command line
+    if (has_cli_app)
+    {
+      mooseDeprecated("Please use Application/type= or --type <AppName> via command line "
+                      "to specify application type; '--app <AppName>' is deprecated and will be "
+                      "removed in a future release.");
+      type = params.get<std::string>("app");
     }
   }
+
+  if (!AppFactory::instance().isRegistered(type))
+    mooseError("The application type '", type, "' is not registered.");
+
+  // Setup the command line
+  auto command_line = std::make_shared<CommandLine>(argc, argv);
+  command_line->parse();
 
   auto params = AppFactory::instance().getValidParams(type);
   params.set<std::string>("_type") = type;
   params.set<int>("_argc") = argc;
   params.set<char **>("_argv") = argv;
-
-  // Setup the command line
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
   params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
 
   // Setup the rest of the state, extract the Application/* parameters
@@ -81,6 +100,8 @@ AppBuilder::buildParamsFromCommandLine(const std::string & name,
                                        InputParameters & params,
                                        MPI_Comm comm_world_in)
 {
+  mooseAssert(params.get<std::string>("_type").size(), "_type param is not set");
+
   params.set<std::string>("_app_name") = name;
   params.set<std::shared_ptr<Parser>>("_parser") = _parser;
 
@@ -92,14 +113,30 @@ AppBuilder::buildParamsFromCommandLine(const std::string & name,
   auto state = std::make_shared<AppBuilder::State>();
   params.set<std::shared_ptr<AppBuilder::State>>("_app_builder_state") = state;
 
-  // Get the command line
   auto command_line = params.get<std::shared_ptr<CommandLine>>("_command_line");
   mooseAssert(command_line, "_command_line not set");
+  // Populate the command line arguments
+  command_line->populateCommandLineParams(params);
+  // Populate the command line hit arguments
+  state->cli_root = mergeCLIArgs(*command_line);
 
-  // Merge in CLI arguments
-  // We keep track of this so that we can do error checking on it later in the Builder
-  // once all of the input has been processed
-  state->cli_root = mergeCLIArgs(name, *command_line);
+  // Make sure that we don't have a cli switch and a hit param for the same thing
+  for (const auto & name_value_pair : params)
+  {
+    const auto & name = name_value_pair.first;
+    if (const auto cl_metadata_ptr = params.queryCommandLineMetadata(name))
+      if (cl_metadata_ptr->set_by_switch && state->cli_root->find("Application/" + name))
+        mooseError("The command-line option '",
+                   *cl_metadata_ptr->set_by_switch,
+                   "' and the command-line parameter 'Application/",
+                   name,
+                   "' apply to the same value and cannot be set together.");
+  }
+
+  // Make sure that Application/input_file= is not used
+  if (state->cli_root->find("Application/input_file"))
+    mooseError("The command-line parameter 'Application/input_file=' cannot be used. Use the "
+               "command-line option '-i <input file(s)> instead.");
 
   // Do the initial walk, which does expansion and as much early error checking as we
   // can do on the _entire_ input, not just [Application]
@@ -111,10 +148,6 @@ AppBuilder::buildParamsFromCommandLine(const std::string & name,
   // Store the extracted variables so that they can be used in unused variable checking
   // later on in the Builder when we have all the things extracted
   state->extracted_vars = _extracted_vars;
-
-  // Fill the command line arguments (non hit params) from command line
-  command_line->addCommandLineOptionsFromParams(params);
-  command_line->populateInputParams(params);
 
   // Check required parameters
   params.checkParams("");

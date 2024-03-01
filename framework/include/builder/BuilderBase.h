@@ -48,22 +48,11 @@ public:
   hit::Node & root() { return parser().root(); }
 
   /**
-   * Filters command line arguments from \p command_line into a string of valid hit syntax.
-   *
-   * \p appname is required as this will also parse out the relevant input
-   * given a subapp or a main application
-   *
-   * @return The filtered syntax
-   */
-  static std::string hitCLIFilter(const std::string & appname, CommandLine & command_line);
-
-  /**
    * Parses the hit command-line arguments from \p command_line into a hit tree.
    *
    * @return The root node of rhe tree
    */
-  static std::unique_ptr<hit::Node> parseCLIArgs(const std::string & app_name,
-                                                 CommandLine & command_line);
+  static std::unique_ptr<hit::Node> parseCLIArgs(CommandLine & command_line);
 
 protected:
   /**
@@ -84,7 +73,7 @@ protected:
    *
    * @return The root node of the tree that represents just the filtered hit params
    */
-  std::unique_ptr<hit::Node> mergeCLIArgs(const std::string & app_name, CommandLine & command_line);
+  std::unique_ptr<hit::Node> mergeCLIArgs(CommandLine & command_line);
 
   /// The parser we're getting input from
   const std::shared_ptr<Parser> _parser;

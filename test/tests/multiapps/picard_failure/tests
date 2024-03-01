@@ -29,7 +29,7 @@
     compiler = '!INTEL'
 
     # Turn off Exodus and turn on CSV globally
-    cli_args = ':Outputs/csv=true :Outputs/exodus=false'
+    cli_args = 'Outputs/csv=true Outputs/exodus=false :Outputs/csv=true :Outputs/exodus=false'
 
     design = '/MultiApps/index.md'
     requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'

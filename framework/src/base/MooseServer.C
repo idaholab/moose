@@ -22,9 +22,12 @@
 #include "ExecFlagEnum.h"
 #include "JsonSyntaxTree.h"
 #include "FileLineInfo.h"
+#include "CommandLine.h"
+
 #include "pcrecpp.h"
 #include "hit.h"
 #include "waspcore/utils.h"
+
 #include <algorithm>
 #include <vector>
 #include <sstream>
@@ -149,10 +152,11 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   }
 
   // Build the parameters for the application
-  // The AppBuilder does an initial walk and could throw values from the evalers
+  // The AppBuilder does an initial walk and could throw values from the evalers,
+  // but those that do not affect the application's parameters will be caught
   Moose::AppBuilder app_builder(check_data.parser, /* catch_parse_errors = */ true);
   auto params = app_builder.buildParams(_moose_app.type(),
-                                        _moose_app.name(),
+                                        "check_" + _moose_app.name(),
                                         _moose_app.parameters().get<int>("_argc"),
                                         _moose_app.parameters().get<char **>("_argv"),
                                         _moose_app.getCommunicator()->get());
@@ -167,9 +171,9 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   params.set<bool>("error_unused") = true;
   params.set<bool>("error") = true;
   params.set<bool>("error_deprecated") = true;
-  params.set<std::string>("color") = "off";
+  params.set<MooseEnum>("color") = "off";
   params.set<bool>("disable_perf_graph_live") = true;
-  params.remove("language_server");
+  params.set<bool>("language_server") = false;
 
   // turn output off so input check application does not affect messages
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);

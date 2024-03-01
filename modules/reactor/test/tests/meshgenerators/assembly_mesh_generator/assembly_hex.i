@@ -40,7 +40,7 @@
     inputs = 'pin1 pin2'
     pattern = '1 1;
               1 0 1;
-               1 1;'
+               1 1'
     background_intervals = 1
     background_region_id = '6 16'
     duct_halfpitch = '3.5'

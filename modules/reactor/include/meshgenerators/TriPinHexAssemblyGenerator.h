@@ -27,6 +27,8 @@ public:
 protected:
   /// Radii of concentric circles in the three diamond sections
   const std::vector<std::vector<Real>> _ring_radii;
+  /// Whether the generated mesh contains ring regions
+  const std::vector<bool> _has_rings;
   /// Numbers of radial layers in each ring region in the three diamond sections
   const std::vector<std::vector<unsigned int>> _ring_intervals;
   /// Block ids of the ring regions in the three diamond sections
@@ -61,8 +63,6 @@ protected:
   const std::vector<dof_id_type> _pin_id_values;
   /// MeshMetaData: maximum node id of the background region
   dof_id_type & _node_id_background_meta;
-  /// Whether the generated mesh contains ring regions
-  std::vector<bool> _has_rings;
 
   /**
    * Generates a single-pin diamond section mesh, which is one-third of the triple-pin hexagonal
@@ -91,4 +91,31 @@ protected:
                         const unsigned int background_intervals,
                         const std::vector<subdomain_id_type> block_ids_new,
                         dof_id_type & node_id_background_meta);
+
+private:
+  /**
+   * Helper for getting a parameter that describes rings
+   */
+  template <typename T>
+  std::vector<std::vector<T>> getRingParamValues(const std::string & param_name) const;
 };
+
+template <typename T>
+std::vector<std::vector<T>>
+TriPinHexAssemblyGenerator::getRingParamValues(const std::string & param_name) const
+{
+  std::vector<std::vector<T>> value = {{}, {}, {}};
+
+  if (isParamValid(param_name))
+  {
+    const auto & param_value = getParam<std::vector<std::vector<T>>>(param_name);
+    if (param_value.size() == 1)
+      value = {param_value[0], param_value[0], param_value[0]};
+    else if (param_value.size() == 3)
+      value = param_value;
+    else if (param_value.size() != 0) // override case where you want to unset it
+      paramError(param_name, "This parameter must have a size of one or three.");
+  }
+
+  return value;
+}

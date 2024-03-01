@@ -25,20 +25,26 @@ namespace Moose
 std::shared_ptr<MooseApp>
 createMooseApp(const std::string & default_app_name, int argc, char * argv[])
 {
-  // Create a simple command line just to look for the input file
+  // Setup a command line to search for the input file
   CommandLine command_line(argc, argv);
-  {
-    auto input_param = emptyInputParameters();
-    MooseApp::addInputFileParam(input_param);
-    command_line.addCommandLineOptionsFromParams(input_param);
-  }
-  std::vector<std::string> input_filenames;
-  command_line.search("input_file", input_filenames);
+  command_line.parse();
 
+  // Parse the -i command line option
+  auto input_param = emptyInputParameters();
+  MooseApp::addInputFileParam(input_param); // adds -i
+  command_line.populateCommandLineParams(input_param);
+  std::vector<std::string> input_filenames =
+      input_param.get<std::vector<std::string>>("input_file");
+
+  // Parse the input files (if any)
   auto parser = std::make_unique<Parser>(input_filenames);
   parser->parse();
+
+  // Build the application's parameters
   auto app_builder = std::make_unique<Moose::AppBuilder>(std::move(parser));
   auto params = app_builder->buildParams(default_app_name, "main", argc, argv, MPI_COMM_WORLD);
+
+  // Build the application
   return AppFactory::instance().createShared(params);
 }
 }

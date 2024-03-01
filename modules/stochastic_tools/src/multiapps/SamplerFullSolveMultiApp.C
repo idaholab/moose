@@ -82,7 +82,8 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
                "Conditionally run sampler multiapp only works in batch modes.");
 }
 
-void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
+void
+SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 {
   // Reinitialize MultiApp size
   const auto num_rows = _sampler.getNumberOfRows();
@@ -335,10 +336,10 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
   return output;
 }
 
-std::string
-SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
+std::vector<std::string>
+SamplerFullSolveMultiApp::getCommandLineArgs(const unsigned int local_app)
 {
-  std::string args;
+  std::vector<std::string> args;
 
   // With multiple processors per app, there are no local rows for non-root processors
   if (isRootProcessor())
@@ -348,9 +349,7 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     updateRowData(_mode == StochasticTools::MultiAppMode::NORMAL ? local_app
                                                                  : _local_batch_app_index);
 
-    const std::vector<std::string> & full_args_name =
-        MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
-    args = sampledCommandLineArgs(_row_data, full_args_name);
+    args = sampledCommandLineArgs(_row_data, FullSolveMultiApp::getCommandLineArgs(local_app));
   }
 
   _my_communicator.broadcast(args);
@@ -384,11 +383,11 @@ SamplerFullSolveMultiApp::updateRowData(dof_id_type local_index)
               "Local index must be equal or one greater than the index previously called.");
 }
 
-std::string
+std::vector<std::string>
 SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                                                  const std::vector<std::string> & full_args_name)
 {
-  std::ostringstream oss;
+  std::vector<std::string> args;
 
   // Find parameters that are meant to be assigned by sampler values
   std::vector<std::string> cli_args_name;
@@ -398,7 +397,7 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
     if (fan.find("=") == std::string::npos)
       cli_args_name.push_back(fan);
     else
-      oss << fan << ";";
+      args.push_back(fan);
   }
 
   // Make sure the parameters either all have brackets, or none of them do
@@ -425,15 +424,14 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
           MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
 
       // Loop through indices and assign parameter: param='row[0] 3.14 row[1]'
-      oss << vector_param[0] << "='";
-      std::string sep = "";
+      std::vector<std::string> values;
       for (const auto & istr : index_string)
       {
-        oss << sep;
-        sep = " ";
+        Real value;
+
         // If the value is enclosed in parentheses, then it isn't an index, it's a value
         if (istr.find("(") != std::string::npos)
-          oss << std::stod(istr.substr(istr.find("(") + 1));
+          value = std::stod(istr.substr(istr.find("(") + 1));
         // Assign the value from row if it is an index
         else
         {
@@ -444,17 +442,18 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                          ") for ",
                          vector_param[0],
                          " is out of bound.");
-          oss << Moose::stringifyExact(row[index]);
+          value = row[index];
         }
+
+        values.push_back(Moose::stringifyExact(value));
       }
-      oss << "';";
+
+      args.push_back(vector_param[0] + "='" + MooseUtils::stringJoin(values) + "'");
     }
     // Assign scalar parameters
     else
-    {
-      oss << cli_args_name[i] << "=" << Moose::stringifyExact(row[i]) << ";";
-    }
+      args.push_back(cli_args_name[i] + "=" + Moose::stringifyExact(row[i]));
   }
 
-  return oss.str();
+  return args;
 }
