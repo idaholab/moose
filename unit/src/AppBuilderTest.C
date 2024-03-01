@@ -144,3 +144,36 @@ TEST(AppBuilderTest, buildParamsFromCommandLineErrors)
        "The command-line parameter 'Application/input_file=' cannot be used. Use the command-line "
        "option '-i <input file(s)> instead.");
 }
+
+TEST(AppBuilderTest, extractParams)
+{
+  auto params = MooseApp::validParams();
+  params.addParam<std::vector<std::string>>("string_values", "Doc1");
+  params.addParam<bool>("bool_value", "Doc2");
+  params.addParam<int>("int_value", "Doc3");
+  params.addParam<unsigned int>("unsigned_int_value", "Doc4");
+
+  const std::vector<std::string> string_values = {"abcd", "1234"};
+  const bool bool_value = true;
+  const int int_value = -100;
+
+  auto command_line = std::make_unique<CommandLine>();
+  command_line->addArgument("Application/bool_value=" + std::to_string(bool_value));
+  command_line->parse();
+  params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
+
+  std::string input_contents;
+  input_contents += "Application/string_values='" + MooseUtils::stringJoin(string_values) + "'\n";
+  input_contents += "Application/int_value=" + std::to_string(int_value) + "\n";
+
+  auto parser = std::make_unique<Parser>("foo.i", std::optional<std::string>(input_contents));
+  parser->parse();
+
+  Moose::AppBuilder app_builder(std::move(parser));
+  app_builder.buildParamsFromCommandLine("main", params, MPI_COMM_WORLD);
+
+  EXPECT_EQ(params.get<std::vector<std::string>>("string_values"), string_values);
+  EXPECT_EQ(params.get<bool>("bool_value"), bool_value);
+  EXPECT_EQ(params.get<int>("int_value"), int_value);
+  EXPECT_FALSE(params.isParamSetByUser("unsigned_int_value"));
+}
