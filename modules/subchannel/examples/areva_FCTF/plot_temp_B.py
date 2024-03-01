@@ -108,9 +108,9 @@ plt.ylabel(r'Pressure Drop [Pa]', fontsize=14)
 plt.legend(fontsize=12)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
-plt.ylim(0, 55)
+plt.ylim(0, 45)
 plt.xlim(-4, 9)
-plt.yticks(np.arange(0, 51, 5), fontsize=14)  # Set y-axis ticks every 1, starting from 0
+plt.yticks(np.arange(0, 45, 5), fontsize=14)  # Set y-axis ticks every 1, starting from 0
 # Initialize minor ticks
 plt.minorticks_on()
 
@@ -119,4 +119,3 @@ plt.grid(which='both', linestyle='--', linewidth=0.5)
 
 plt.savefig("DP-B.png")
 plt.show()
-

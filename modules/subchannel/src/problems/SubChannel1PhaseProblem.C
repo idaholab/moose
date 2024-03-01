@@ -2969,13 +2969,14 @@ SubChannel1PhaseProblem::externalSolve()
     _console << " ======================================= " << std::endl;
     _console << " ======== Subchannel Print Outs ======== " << std::endl;
     _console << " ======================================= " << std::endl;
-    _console << "Total Surface Area :" << Total_surface_area << " m^2" << std::endl;
-    _console << "Assembly wise hydraulic diameter :" << bulk_Dh << " m" << std::endl;
-    _console << "Assembly wise Re number :" << bulk_Re << " -" << std::endl;
+    _console << "Total flow area :" << Total_surface_area << " m^2" << std::endl;
+    _console << "Assembly hydraulic diameter :" << bulk_Dh << " m" << std::endl;
+    _console << "Assembly Re number :" << bulk_Re << " [-]" << std::endl;
     _console << "Bulk coolant temperature at outlet :" << T_bulk_out << " K" << std::endl;
-    _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
-    _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " kg/sec" << std::endl;
-    _console << "Outlet Pressure is: " << _P_out << " Pa" << std::endl;
+    _console << "Power added to coolant is : " << power_out - power_in << " Watt" << std::endl;
+    _console << "Mass flow rate in is : " << mass_flow_in << " kg/sec" << std::endl;
+    _console << "Mass balance is : " << mass_flow_out - mass_flow_in << " kg/sec" << std::endl;
+    _console << "User defined outlet pressure is : " << _P_out << " Pa" << std::endl;
     _console << " ======================================= " << std::endl;
   }
 }
