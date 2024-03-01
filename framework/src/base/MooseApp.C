@@ -229,9 +229,8 @@ MooseApp::validParams()
       "Comma-separated list of numbers of chunks to split the mesh into");
 
   // TODO: remove the logic now that this is global
-  params.addCommandLineParam<std::string>("split_file",
-                                          "--split-file <filename>",
-                                          "Optional name of split mesh file(s) to write/read");
+  params.addCommandLineParam<std::string>(
+      "split_file", "--split-file <filename>", "Optional name of split mesh file(s) to write/read");
 
   params.addCommandLineParam<bool>("use_split", "--use-split", "Use split distributed mesh files");
 
@@ -1019,8 +1018,7 @@ MooseApp::setupOptions()
 
     mooseError("No input files specified. Add -i <inputfile> to your command line.");
   }
-  else if (getParam<bool>("language_server")
-  )
+  else if (getParam<bool>("language_server"))
   {
     _perf_graph.disableLivePrint();
 
