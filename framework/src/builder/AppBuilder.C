@@ -69,10 +69,11 @@ AppBuilder::buildParams(const std::string & default_type,
     // Check for --app on command line
     if (has_cli_app)
     {
-      mooseDeprecated("Please use Application/type= or --type <AppName> via command line "
-                      "to specify application type; '--app <AppName>' is deprecated and will be "
-                      "removed in a future release.");
       type = params.get<std::string>("app");
+      mooseDeprecated("The specified command line option '--app ",
+                      type,
+                      "' is deprecated and will be removed in a future release.\n\nPlease use "
+                      "'--type' via command line or 'Application/type' in input.");
     }
   }
 
