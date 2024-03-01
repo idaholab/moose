@@ -67,7 +67,7 @@
   [results]
     type = ConstantReporter
     real_vector_names = 'center_temp env_temp reward top_flux log_prob_top_flux'
-    real_vector_values = '0; 0; 0; 0; 0;'
+    real_vector_values = '0; 0; 0; 0; 0'
     outputs = csv
     execute_on = timestep_begin
   []
