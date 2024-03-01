@@ -56,7 +56,8 @@ TEST(AppBuilderTest, buildParamsTypes)
 {
   const auto test = [](std::vector<std::string> args,
                        const std::string & expected_type,
-                       const std::optional<std::string> input_contents = {})
+                       const std::optional<std::string> input_contents = {},
+                       const std::optional<std::string> deprecated_error = {})
   {
     std::shared_ptr<Parser> parser;
     if (input_contents)
@@ -75,6 +76,10 @@ TEST(AppBuilderTest, buildParamsTypes)
                    std::back_inserter(argv),
                    [](std::string & s) { return s.data(); });
 
+    const auto deprecated_before = Moose::_deprecated_is_error;
+    if (deprecated_error)
+      Moose::_deprecated_is_error = true;
+
     try
     {
       app_builder.buildParams("DefaultApp", "main", argv.size(), argv.data(), MPI_COMM_WORLD);
@@ -82,15 +87,25 @@ TEST(AppBuilderTest, buildParamsTypes)
     }
     catch (const std::exception & err)
     {
-      EXPECT_EQ(std::string(err.what()),
-                std::string("The application type '" + expected_type + "' is not registered."));
+      if (deprecated_error)
+        EXPECT_TRUE(std::string(err.what()).find(*deprecated_error) != std::string::npos);
+      else
+        EXPECT_EQ(std::string(err.what()),
+                  std::string("The application type '" + expected_type + "' is not registered."));
     }
+
+    if (deprecated_error)
+      Moose::_deprecated_is_error = deprecated_before;
   };
 
   test({}, "DefaultApp");
   test({}, "AppFromInput", "Application/type=AppFromInput");
   test({"--type=AppFromType"}, "AppFromType");
-  test({"--app=AppFromApp"}, "AppFromApp");
+  test({"--app=AppFromApp"},
+       "Unused",
+       {},
+       "The specified command line option '--app AppFromApp' is deprecated and will be removed in "
+       "a future release.");
 }
 
 TEST(AppBuilderTest, buildParamsFromCommandLineErrors)
