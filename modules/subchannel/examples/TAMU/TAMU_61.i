@@ -4,7 +4,7 @@
 T_in = 300
 flow_area = 0.00799219 #m2
 Dh = 0.00768504 #m
-mass_flux_in = '${fparse 23.86/flow_area}'
+mass_flux_in = '${fparse 23.86/flow_area}' # [kg/sm2]
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
