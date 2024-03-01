@@ -369,8 +369,7 @@
                  "Materials/czm_mat/maximum_normal_traction=10 "
                  "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
                  "BCs/right_x/function=0*t BCs/right_y/function=1*t BCs/right_z/function=0*t "
-                 "Outputs/out/file_base=czm_3DC_load_shear_y_out Executioner/dt=0.25  "
-                 "Outputs/out/file_base=3DC_shear_load_y_out"
+                 "Executioner/dt=0.25 Outputs/out/file_base=3DC_shear_load_y_out"
       mesh_mode = 'REPLICATED'
       recover = false
       detail = "The 3DC traction separation shall produce only a shear traction y when a only a "
@@ -387,7 +386,6 @@
                  "Materials/czm_mat/maximum_normal_traction=10 "
                  "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
                  "BCs/right_x/function=0*t BCs/right_y/function=0*t BCs/right_z/function=1*t "
-                 "Outputs/out/file_base=czm_3DC_load_shear_z_out Executioner/dt=0.25 "
                  "Executioner/dt=0.25  Outputs/out/file_base=3DC_shear_load_z_out"
       mesh_mode = 'REPLICATED'
       recover = false
