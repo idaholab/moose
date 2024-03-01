@@ -268,8 +268,8 @@ protected:
   /// Whether to look for conflicts between origin points, multiple valid values for a target point
   bool _search_value_conflicts;
 
-  /// Whether the search for value happened once
-  bool _search_value_conflicts_once;
+  /// Whether we already output the search value conflicts
+  bool _already_output_search_value_conflicts;
 
   /// How many conflicts are output to console
   const unsigned int _search_value_conflicts_max_log;
