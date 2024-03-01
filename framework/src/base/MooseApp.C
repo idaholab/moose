@@ -230,8 +230,7 @@ MooseApp::validParams()
 
   // TODO: remove the logic now that this is global
   params.addCommandLineParam<std::string>("split_file",
-                                          "--split-file <optional filename>",
-                                          "",
+                                          "--split-file <filename>",
                                           "Optional name of split mesh file(s) to write/read");
 
   params.addCommandLineParam<bool>("use_split", "--use-split", "Use split distributed mesh files");
@@ -513,7 +512,7 @@ MooseApp::MooseApp(InputParameters parameters)
 #endif
 
   // If this will be a language server then turn off output until that starts
-  if (isParamValid("language_server") && getParam<bool>("language_server"))
+  if (getParam<bool>("language_server"))
     _output_buffer_cache = Moose::out.rdbuf(nullptr);
 
   Registry::addKnownLabel(_type);
@@ -718,11 +717,11 @@ MooseApp::setupOptions()
     _perf_graph.setActive(false);
   }
 
-  if (isParamSetByUser("trap_fpe") && isParamSetByUser("no_trap_fpe"))
+  if (getParam<bool>("trap_fpe") && getParam<bool>("no_trap_fpe"))
     mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
-  if (isParamSetByUser("trap_fpe"))
+  if (getParam<bool>("trap_fpe"))
     _trap_fpe = true;
-  else if (isParamSetByUser("no_trap_fpe"))
+  else if (getParam<bool>("no_trap_fpe"))
     _trap_fpe = false;
 
   // Turn all warnings in MOOSE to errors (almost see next logic block)
@@ -1020,7 +1019,8 @@ MooseApp::setupOptions()
 
     mooseError("No input files specified. Add -i <inputfile> to your command line.");
   }
-  else if (isParamValid("language_server") && getParam<bool>("language_server"))
+  else if (getParam<bool>("language_server")
+  )
   {
     _perf_graph.disableLivePrint();
 
@@ -1548,7 +1548,7 @@ MooseApp::run()
 bool
 MooseApp::showInputs() const
 {
-  if (isParamSetByUser("show_inputs"))
+  if (getParam<bool>("show_inputs"))
   {
     auto copy_syntax = _pars.getCommandLineMetadata("copy_inputs").switches;
     std::vector<std::string> dirs;
