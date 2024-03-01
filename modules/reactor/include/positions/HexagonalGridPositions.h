@@ -41,6 +41,12 @@ protected:
   /// Number of rings in the radial direction
   const unsigned int _nr;
 
+  /// 2D pattern of the pins to select (if specified)
+  std::vector<std::vector<unsigned int>> _pattern;
+
+  /// List of the pattern locations to include. Include all if empty
+  std::set<unsigned int> _include_in_pattern;
+
   /// Hexagonal lattice utility object
   std::unique_ptr<HexagonalLatticeUtils> _hex_latt;
 };
