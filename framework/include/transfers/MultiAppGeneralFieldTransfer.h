@@ -44,6 +44,7 @@ public:
   virtual void initialSetup() override;
   virtual void getAppInfo() override;
   virtual void execute() override;
+  virtual void postExecute() override;
 
   /// Get the source variable name, with the suffix for array/vector variables
   VariableName getFromVarName(unsigned int var_index);
@@ -265,7 +266,13 @@ protected:
   bool _greedy_search;
 
   /// Whether to look for conflicts between origin points, multiple valid values for a target point
-  const bool _search_value_conflicts;
+  bool _search_value_conflicts;
+
+  /// Whether we already output the search value conflicts
+  bool _already_output_search_value_conflicts;
+
+  /// How many conflicts are output to console
+  const unsigned int _search_value_conflicts_max_log;
 
   /**
    * @brief Detects whether two source values are valid and equidistant for a desired target
