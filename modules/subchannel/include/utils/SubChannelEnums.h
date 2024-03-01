@@ -21,3 +21,23 @@ enum class EChannelType
   EDGE,
   CORNER
 };
+
+// Declare the operator<< overload for EChannelType as inline
+inline std::ostringstream &
+operator<<(std::ostringstream & oss, const EChannelType & channelType)
+{
+  // Convert EChannelType to string representation and stream it into oss
+  switch (channelType)
+  {
+    case EChannelType::CENTER:
+      oss << "CENTER";
+      break;
+    case EChannelType::EDGE:
+      oss << "EDGE";
+      break;
+    case EChannelType::CORNER:
+      oss << "CORNER";
+      break;
+  }
+  return oss;
+}
