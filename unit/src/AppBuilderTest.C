@@ -177,3 +177,50 @@ TEST(AppBuilderTest, extractParams)
   EXPECT_EQ(params.get<int>("int_value"), int_value);
   EXPECT_FALSE(params.isParamSetByUser("unsigned_int_value"));
 }
+
+TEST(AppBuilderTest, catchParseErrors)
+{
+  auto test = [](const std::vector<std::string> & input_lines,
+                 const std::vector<std::string> & parse_errors,
+                 const std::optional<std::string> hard_error = {})
+  {
+    auto params = MooseApp::validParams();
+    params.set<std::string>("_type") = "MooseApp";
+
+    auto command_line = std::make_unique<CommandLine>();
+    command_line->parse();
+    params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
+
+    auto parser = std::make_unique<Parser>(
+        "foo.i", std::optional<std::string>(MooseUtils::stringJoin(input_lines, "\n")));
+    parser->parse();
+
+    Moose::AppBuilder app_builder(std::move(parser), true);
+
+    if (hard_error)
+    {
+      try
+      {
+        app_builder.buildParamsFromCommandLine("main", params, MPI_COMM_WORLD);
+        FAIL();
+      }
+      catch (const std::exception & err)
+      {
+        EXPECT_TRUE(std::string(err.what()).find(*hard_error) != std::string::npos);
+      }
+    }
+    else
+      app_builder.buildParamsFromCommandLine("main", params, MPI_COMM_WORLD);
+
+    EXPECT_EQ(parse_errors.size(), app_builder.getParseErrors().size());
+    for (const auto i : index_range(parse_errors))
+      EXPECT_EQ(app_builder.getParseErrors()[i].message(), parse_errors[i]);
+  };
+
+  test({"parse_var = ${fparse foo}"},
+       {"no variable 'foo' found for use in function parser expression"});
+  test({}, {});
+  test({"parse_var = ${fparse foo}", "Application/parse_var=${fparse bar}"},
+       {"no variable 'foo' found for use in function parser expression"},
+       "foo.i:2.1: no variable 'bar' found for use in function parser expression");
+}
