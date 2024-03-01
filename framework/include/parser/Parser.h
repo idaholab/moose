@@ -118,7 +118,7 @@ public:
   /**
    * Parses the input(s)
    */
-  void parse(const bool throw_on_error = true);
+  void parse();
 
   /**
    * @return The root hit node

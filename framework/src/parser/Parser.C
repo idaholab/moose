@@ -273,7 +273,7 @@ Parser::getLastInputFileName() const
 }
 
 void
-Parser::parse(const bool throw_on_error)
+Parser::parse()
 {
   mooseAssert(!_root, "Already parsed");
 
