@@ -16,7 +16,10 @@
 namespace Moose
 {
 
-AppBuilder::AppBuilder(std::shared_ptr<Parser> parser) : BuilderBase(parser) {}
+AppBuilder::AppBuilder(std::shared_ptr<Parser> parser, const bool catch_parse_errors)
+  : BuilderBase(parser), _catch_parse_errors(catch_parse_errors)
+{
+}
 
 InputParameters
 AppBuilder::buildParams(const std::string & default_type,
@@ -59,6 +62,7 @@ AppBuilder::buildParams(const std::string & default_type,
   }
 
   auto params = AppFactory::instance().getValidParams(type);
+  params.set<std::string>("_type") = type;
   params.set<int>("_argc") = argc;
   params.set<char **>("_argv") = argv;
 
@@ -119,6 +123,18 @@ AppBuilder::buildParamsFromCommandLine(const std::string & name,
 void
 AppBuilder::initialWalk()
 {
+  std::string error_message;
+  const auto add_errors = [this, &error_message](auto & errors)
+  {
+    for (auto & error : errors)
+    {
+      if (!_catch_parse_errors || error.node().fullpath().rfind("Application/", 0) == 0)
+        error_message += error.fullMessage();
+      else
+        _parse_errors.emplace_back(error);
+    }
+  };
+
   // expand ${bla} parameter values and mark/include variables used in expansions as "used".  This
   // MUST occur before parameter extraction - otherwise parameters will get wrong values.
   hit::RawEvaler raw;
@@ -135,18 +151,16 @@ AppBuilder::initialWalk()
   root().walk(&exw);
   for (auto & var : exw.used)
     _extracted_vars.insert(var);
-  for (auto & msg : exw.errors)
-    _errmsg += msg + "\n";
+  add_errors(exw.errors);
 
   // Now that we have accumulated the command line hit parameters, we can make this check
   BadActiveWalker bw;
   root().walk(&bw, hit::NodeType::Section);
-  for (auto & msg : bw.errors)
-    _errmsg += msg + "\n";
+  add_errors(bw.errors);
 
-  // Print parse errors related to brace expansion early
-  if (_errmsg.size() > 0)
-    mooseError(_errmsg);
+  // Print parse errors if we have any to report
+  if (error_message.size())
+    mooseError(error_message);
 }
 
 }

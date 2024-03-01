@@ -47,7 +47,7 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
   if (ret != -1)
   {
-    exp.errors.push_back(hit::errormsg(n, "fparse error: ", fp.ErrorMsg()));
+    exp.errors.emplace_back(*n, "fparse error: ", fp.ErrorMsg());
     return n->val();
   }
 
@@ -69,8 +69,8 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
     }
 
     if (curr == nullptr)
-      exp.errors.push_back(hit::errormsg(
-          n, "\n    no variable '", var, "' found for use in function parser expression"));
+      exp.errors.emplace_back(
+          *n, "no variable '", var, "' found for use in function parser expression");
   }
 
   if (exp.errors.size() != n_errs)
@@ -102,10 +102,10 @@ UnitsConversionEvaler::eval(hit::Field * n,
   // conversion
   if (argv.size() != 4 || (argv.size() >= 3 && argv[2] != "->"))
   {
-    exp.errors.push_back(
-        hit::errormsg(n,
-                      "units error: Expected 4 arguments ${units number from_unit -> to_unit} or "
-                      "2 arguments  ${units number unit}"));
+    exp.errors.emplace_back(
+        *n,
+        "units error: Expected 4 arguments ${units number from_unit -> to_unit} or "
+        "2 arguments  ${units number unit}");
     return n->val();
   }
 
@@ -114,16 +114,16 @@ UnitsConversionEvaler::eval(hit::Field * n,
   auto to_unit = MooseUnits(argv[3]);
   if (!from_unit.conformsTo(to_unit))
   {
-    exp.errors.push_back(hit::errormsg(n,
-                                       "units error: ",
-                                       argv[1],
-                                       " (",
-                                       from_unit,
-                                       ") does not convert to ",
-                                       argv[3],
-                                       " (",
-                                       to_unit,
-                                       ")"));
+    exp.errors.emplace_back(*n,
+                            "units error: ",
+                            argv[1],
+                            " (",
+                            from_unit,
+                            ") does not convert to ",
+                            argv[3],
+                            " (",
+                            to_unit,
+                            ")");
     return n->val();
   }
 
@@ -216,8 +216,7 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
   if (actives && inactives && actives->type() == hit::NodeType::Field &&
       inactives->type() == hit::NodeType::Field && actives->parent() == inactives->parent())
   {
-    errors.push_back(
-        hit::errormsg(section, "'active' and 'inactive' parameters both provided in section"));
+    errors.emplace_back(*section, "'active' and 'inactive' parameters both provided in section");
     return;
   }
 
@@ -234,12 +233,12 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
     if (msg.size() > 0)
     {
       msg = msg.substr(0, msg.size() - 2);
-      errors.push_back(hit::errormsg(section,
-                                     "variables listed as active (",
-                                     msg,
-                                     ") in section '",
-                                     section->fullpath(),
-                                     "' not found in input"));
+      errors.emplace_back(*section,
+                          "variables listed as active (",
+                          msg,
+                          ") in section '",
+                          section->fullpath(),
+                          "' not found in input");
     }
   }
   // ensures we don't recheck deeper nesting levels
@@ -255,12 +254,12 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
     if (msg.size() > 0)
     {
       msg = msg.substr(0, msg.size() - 2);
-      errors.push_back(hit::errormsg(section,
-                                     "variables listed as inactive (",
-                                     msg,
-                                     ") in section '",
-                                     section->fullpath(),
-                                     "' not found in input"));
+      errors.emplace_back(*section,
+                          "variables listed as inactive (",
+                          msg,
+                          ") in section '",
+                          section->fullpath(),
+                          "' not found in input");
     }
   }
 }
@@ -274,7 +273,7 @@ Parser::getLastInputFileName() const
 }
 
 void
-Parser::parse()
+Parser::parse(const bool throw_on_error)
 {
   mooseAssert(!_root, "Already parsed");
 
@@ -340,7 +339,7 @@ Parser::parse()
       }
 
       if (!input_errors.str().empty())
-        throw hit::ParseError(input_errors.str());
+        throw hit::ParseException(input_errors.str());
 
       for (auto & msg : dw.errors)
         errmsg += msg + "\n";
@@ -348,7 +347,7 @@ Parser::parse()
       dw_errmsg.push_back(errmsg);
       root().walk(&cpw, hit::NodeType::Field);
     }
-    catch (hit::ParseError & err)
+    catch (hit::ParseException & err)
     {
       mooseError(err.what());
     }
@@ -357,14 +356,6 @@ Parser::parse()
   // warn about overridden parameters in multiple inputs
   if (!opw.warnings.empty())
     mooseInfo(Moose::stringify(opw.warnings), "\n");
-
-  // do as much error checking as early as possible so that errors are more useful instead
-  // of surprising and disconnected from what caused them.
-  BadActiveWalker bw;
-  root().walk(&bw, hit::NodeType::Section);
-
-  for (auto & msg : bw.errors)
-    errmsg += msg + "\n";
 
   // Print parse errors related to bad active early
   if (errmsg.size() > 0)

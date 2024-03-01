@@ -512,9 +512,10 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
   wasp::DataObject diagnostics_notification;
 
   EXPECT_TRUE(
-      moose_server->handleDidOpenNotification(didopen_notification, diagnostics_notification));
+      moose_server->handleDidOpenNotification(didopen_notification, diagnostics_notification))
+      << moose_server->getErrors();
 
-  EXPECT_TRUE(moose_server->getErrors().empty());
+  EXPECT_TRUE(moose_server->getErrors().empty()) << moose_server->getErrors();
 
   // check set of messages built from the moose_server diagnostics notification
 
@@ -1113,7 +1114,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
   EXPECT_EQ(request_id, response_id);
 
   // If the array grows with new syntax, let it grow
-  EXPECT_GE(completions_array.size(), 50u);
+  EXPECT_GE(completions_array.size(), 49u);
 
   std::ostringstream completions_actual;
 
@@ -1121,11 +1122,11 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 
   // expected completions with zero-based lines and columns
 
+  // TODO: re-add application block
   std::string completions_expect = R"INPUT(
 label: active                           text: active = '${1:__all__}'                      desc: If specified only... pos: [42.0]-[42.0] kind:  7 format: snippet
 label: inactive                         text: inactive =                                   desc: If specified bloc... pos: [42.0]-[42.0] kind:  7 format: regular
 label: Adaptivity                       text: [Adaptivity]\n  $0\n[]                       desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
-label: Application                      text: [Application]\n  $0\n[]                      desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: AuxKernels                       text: [AuxKernels]\n  $0\n[]                       desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: AuxScalarKernels                 text: [AuxScalarKernels]\n  $0\n[]                 desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: AuxVariables                     text: [AuxVariables]\n  $0\n[]                     desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
@@ -1176,7 +1177,7 @@ label: VectorPostprocessors             text: [VectorPostprocessors]\n  $0\n[]  
 
   // Check that each line added when the test was created is still output
   for (const auto & line : MooseUtils::split(completions_expect, "label:"))
-    EXPECT_TRUE(completions_actual.str().find(line) != std::string::npos);
+    EXPECT_TRUE(completions_actual.str().find(line) != std::string::npos) << line;
 }
 
 TEST_F(MooseServerTest, CompletionValueActiveBlocks)

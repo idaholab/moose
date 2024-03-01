@@ -69,7 +69,7 @@ ReplaceEvaler::eval(Field * n, const std::list<std::string> & args, BraceExpande
     }
   }
 
-  exp.errors.push_back(errormsg(n, "no variable '", var, "' found for substitution expression"));
+  exp.errors.emplace_back(*n, "no variable '", var, "' found for substitution expression");
   return n->val();
 }
 
@@ -87,7 +87,7 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
 {
   auto f = dynamic_cast<Field *>(n);
   if (!f)
-    throw Error("BraceExpander cannot walk non-Field-type nodes");
+    throw Exception("BraceExpander cannot walk non-Field-type nodes");
 
   try
   {
@@ -104,9 +104,9 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
     if (errors.size() == 0)
       f->setVal(s);
   }
-  catch (Error & err)
+  catch (Exception & err)
   {
-    errors.push_back(errormsg(f, err.what()));
+    errors.emplace_back(*f, err.what());
     return;
   }
 }
@@ -154,7 +154,7 @@ BraceExpander::expand(Field * n, BraceNode & expr)
 
   auto cmd = expanded_args.front();
   if (_evalers.count(cmd) == 0)
-    throw hit::Error("invalid brace-expression command '" + cmd + "'");
+    throw hit::Exception("invalid brace-expression command '" + cmd + "'");
   expanded_args.pop_front();
   return _evalers[cmd]->eval(n, expanded_args, *this);
 }
@@ -185,7 +185,7 @@ parseBraceNode(const std::string & input, size_t start, BraceNode & n)
   start = parseBraceBody(input, start, n);
   start = skipSpace(input, start);
   if (input[start] != '}')
-    throw Error("missing closing '}' in brace expression");
+    throw hit::Exception("missing closing '}' in brace expression");
   start++; // eat closing "}"
   n.len() = start - n.offset();
   return start;

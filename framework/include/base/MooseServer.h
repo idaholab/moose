@@ -329,12 +329,38 @@ private:
   hit::Node & getRoot();
 
   /**
-   * @return Input check application for document path from current operation
+   * The objects required for checking
    */
-  ///@{
+  struct CheckData
+  {
+    std::shared_ptr<Parser> parser;
+    std::shared_ptr<MooseApp> app;
+  };
+
+  /**
+   * @return The Parser associated with the current document
+   */
+  Parser & getCheckParser();
+  /**
+   * @return The Parser associated with the current document, if any
+   */
+  Parser * queryCheckParser();
+  /**
+   * @return The MooseApp associated with the current document
+   */
   MooseApp & getCheckApp();
+  /**
+   * @return The MooseApp associated with the current document, if any
+   */
   MooseApp * queryCheckApp();
-  ///@}
+  /**
+   * @return The CheckData associated with the current document
+   */
+  const CheckData & getCheckData();
+  /**
+   * @return The CheckData associated with the current document, if any
+   */
+  const CheckData * queryCheckData();
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
@@ -342,9 +368,9 @@ private:
   MooseApp & _moose_app;
 
   /**
-   * @brief _check_apps - map from document paths to input check applications
+   * @brief _check_data - map from document paths to check objects
    */
-  std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
+  std::map<std::string, CheckData> _check_data;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream

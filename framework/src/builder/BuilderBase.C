@@ -112,7 +112,7 @@ BuilderBase::hitCLIFilter(const std::string & appname, CommandLine & command_lin
         hit_text += "''";
       command_line.markHitParamUsed(i);
     }
-    catch (hit::ParseError & err)
+    catch (hit::ParseException & err)
     {
       // bash might have eaten quotes around a hit string value or vector
       // so try quoting after the "=" and reparse
@@ -126,7 +126,7 @@ BuilderBase::hitCLIFilter(const std::string & appname, CommandLine & command_lin
         hit_text += " " + quoted;
         command_line.markHitParamUsed(i);
       }
-      catch (hit::ParseError & err)
+      catch (hit::ParseException & err)
       {
         mooseError("invalid hit in arg '", arg, "': ", err.what());
       }
@@ -146,7 +146,7 @@ BuilderBase::parseCLIArgs(const std::string & app_name, CommandLine & command_li
     cli_root.reset(hit::parse("CLI_ARGS", cli_input));
     hit::explode(cli_root.get());
   }
-  catch (hit::ParseError & err)
+  catch (hit::ParseException & err)
   {
     mooseError(err.what());
   }
@@ -738,7 +738,7 @@ BuilderBase::mergeCLIArgs(const std::string & app_name, CommandLine & command_li
   {
     hit::merge(cli_root.get(), &root());
   }
-  catch (hit::ParseError & err)
+  catch (hit::ParseException & err)
   {
     mooseError(err.what());
   }
@@ -772,7 +772,7 @@ BuilderBase::setScalarParameter(const std::string & full_name,
   {
     param->set() = root().param<Base>(full_name);
   }
-  catch (hit::Error & err)
+  catch (hit::Exception & err)
   {
     auto strval = root().param<std::string>(full_name);
 
@@ -880,7 +880,7 @@ BuilderBase::setVectorParameter(const std::string & full_name,
       for (auto val : tmp)
         vec.push_back(val);
     }
-    catch (hit::Error & err)
+    catch (hit::Exception & err)
     {
       _errmsg += hit::errormsg(root().find(full_name), err.what()) + "\n";
       return;
@@ -981,7 +981,7 @@ BuilderBase::setMapParameter(const std::string & full_name,
         }
       }
     }
-    catch (hit::Error & err)
+    catch (hit::Exception & err)
     {
       _errmsg += hit::errormsg(root().find(full_name), err.what()) + "\n";
       return;
@@ -1166,7 +1166,7 @@ BuilderBase::setScalarComponentParameter(const std::string & full_name,
   {
     vec = root().param<std::vector<double>>(full_name);
   }
-  catch (hit::Error & err)
+  catch (hit::Exception & err)
   {
     _errmsg += hit::errormsg(root().find(full_name), err.what()) + "\n";
     return;
@@ -1210,7 +1210,7 @@ BuilderBase::setVectorComponentParameter(const std::string & full_name,
   {
     vec = root().param<std::vector<double>>(full_name);
   }
-  catch (hit::Error & err)
+  catch (hit::Exception & err)
   {
     _errmsg += hit::errormsg(root().find(full_name), err.what()) + "\n";
     return;
@@ -1356,7 +1356,7 @@ BuilderBase::setScalarParameter<RealEigenVector, RealEigenVector>(
   {
     vec = root().param<std::vector<double>>(full_name);
   }
-  catch (hit::Error & err)
+  catch (hit::Exception & err)
   {
     _errmsg += hit::errormsg(root().find(full_name), err.what()) + "\n";
     return;

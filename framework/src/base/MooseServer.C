@@ -118,36 +118,49 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
     }
   };
 
+  auto add_hit_error = [this, &pass, &diagnosticsList](auto & hit_error)
+  {
+    diagnosticsList.push_back(wasp::DataObject());
+    wasp::DataObject * diagnostic = diagnosticsList.back().to_object();
+    pass &= wasp::lsp::buildDiagnosticObject(*diagnostic,
+                                             errors,
+                                             hit_error.node().line() - 1,
+                                             hit_error.node().column() - 1,
+                                             hit_error.node().line() - 1,
+                                             hit_error.node().column() - 1,
+                                             1,
+                                             "moose_srv",
+                                             "check_inp",
+                                             hit_error.message());
+  };
+
   // Construct the parser and parse
-  auto parser = std::make_shared<Parser>(parse_file_path, document_text);
+  auto & check_data = _check_data[document_path];
+  check_data.parser = std::make_shared<Parser>(parse_file_path, document_text);
+  check_data.app = nullptr;
   // Initial parsing could throw
   try
   {
-    parser->parse();
+    check_data.parser->parse();
   }
   catch (std::exception & err)
   {
     catch_err(err);
-    return pass;
   }
 
   // Build the parameters for the application
   // The AppBuilder does an initial walk and could throw values from the evalers
-  Moose::AppBuilder app_builder(parser);
-  InputParameters params = emptyInputParameters();
-  try
-  {
-    params = app_builder.buildParams(_moose_app.type(),
-                                     _moose_app.name(),
-                                     _moose_app.parameters().get<int>("_argc"),
-                                     _moose_app.parameters().get<char **>("_argv"),
-                                     _moose_app.getCommunicator()->get());
-  }
-  catch (std::exception & err)
-  {
-    catch_err(err);
-    return pass;
-  }
+  Moose::AppBuilder app_builder(check_data.parser, /* catch_parse_errors = */ true);
+  auto params = app_builder.buildParams(_moose_app.type(),
+                                        _moose_app.name(),
+                                        _moose_app.parameters().get<int>("_argc"),
+                                        _moose_app.parameters().get<char **>("_argv"),
+                                        _moose_app.getCommunicator()->get());
+
+  // Add any parse errors that we have accumulated that don't apply to the Application
+  const auto & app_parse_errors = app_builder.getParseErrors();
+  for (auto & hit_error : app_parse_errors)
+    add_hit_error(hit_error);
 
   // Set the parameters we need for this check app
   params.set<bool>("check_input") = true;
@@ -161,12 +174,12 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // turn output off so input check application does not affect messages
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
 
-  // create new application with parameters modified for input check run
-  _check_apps[document_path] = AppFactory::instance().createShared(params);
-
-  // disable logs and enable error exceptions with initial values cached
-  bool cached_throw_on_error = Moose::_throw_on_error;
+  // Disable logs and enable error exceptions with initial values cached
+  const bool cached_throw_on_error = Moose::_throw_on_error;
   Moose::_throw_on_error = true;
+
+  // create new application with parameters modified for input check run
+  check_data.app = AppFactory::instance().createShared(params);
 
   // run input check application converting caught errors to diagnostics
   try
@@ -207,7 +220,9 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
                                            int line,
                                            int character)
 {
-  // add only root level blocks to completion list when parser root is null
+  mooseAssert(queryCheckApp(), "Must have an app");
+
+  // add only root level blocks to completion list when app is not available
   if (!rootIsValid())
     return addSubblocksToList(completionItems, "/", line, character, line, character, "", false);
 
@@ -871,8 +886,6 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
                                                int line,
                                                int character)
 {
-  Factory & factory = getCheckApp().getFactory();
-
   // return without any definition locations added when parser root is null
   if (!rootIsValid())
     return true;
@@ -885,6 +898,12 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
   // return without any definition locations added when node not value type
   if (request_context.type() != wasp::VALUE)
     return true;
+
+  auto app_ptr = queryCheckApp();
+  if (!app_ptr)
+    return true;
+
+  Factory & factory = app_ptr->getFactory();
 
   // get name of parameter node parent of value and value string from input
   std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
@@ -1358,33 +1377,72 @@ MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
 bool
 MooseServer::rootIsValid()
 {
-  auto app = queryCheckApp();
-  if (!app)
-    return false;
-  return app->parser().hasParsed() && app->parser().root().getNodeView().is_null();
+  if (const auto parser_ptr = queryCheckParser())
+    return parser_ptr->hasParsed() && !parser_ptr->root().getNodeView().is_null();
+  return false;
 }
 
 hit::Node &
 MooseServer::getRoot()
 {
   mooseAssert(rootIsValid(), "Not valid");
-  return getCheckApp().parser().root();
+  return getCheckParser().root();
+}
+
+Parser &
+MooseServer::getCheckParser()
+{
+  if (auto parser_ptr = queryCheckParser())
+    return *parser_ptr;
+
+  mooseError("Check parser is not available");
+}
+
+Parser *
+MooseServer::queryCheckParser()
+{
+  if (const auto check_data = queryCheckData())
+  {
+    if (check_data->parser && check_data->app)
+      mooseAssert(check_data->parser.get() == &check_data->app->parser(), "Inconsistent parser");
+    return check_data->parser.get();
+  }
+
+  return nullptr;
 }
 
 MooseApp &
 MooseServer::getCheckApp()
 {
-  auto app = queryCheckApp();
-  if (!app)
-    mooseError("No check app for path '", document_path, "'");
-  return *app;
+  if (auto app_ptr = queryCheckApp())
+    return *app_ptr;
+
+  mooseError("Check app is not available");
 }
 
 MooseApp *
 MooseServer::queryCheckApp()
 {
-  auto it = _check_apps.find(document_path);
-  if (it == _check_apps.end())
-    return nullptr;
-  return it->second.get();
+  if (const auto check_data = queryCheckData())
+    return check_data->app.get();
+
+  return nullptr;
+}
+
+const MooseServer::CheckData &
+MooseServer::getCheckData()
+{
+  if (auto check_data = queryCheckData())
+    return *check_data;
+
+  mooseError("No check data for '", document_path, "'");
+}
+
+const MooseServer::CheckData *
+MooseServer::queryCheckData()
+{
+  if (const auto it = _check_data.find(document_path); it != _check_data.end())
+    return &it->second;
+
+  return nullptr;
 }

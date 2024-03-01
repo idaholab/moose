@@ -76,7 +76,7 @@ enum class NodeType
   Comment, /// Represents comments that are not directly part of the actual hit document.
   Field,   /// Represents field-value pairs (i.e. paramname=val).
   Blank,   /// Represents a blank line
-  Other, /// Represents any other type of node
+  Other,   /// Represents any other type of node
 };
 
 /// Traversal order for walkers. Determines if the walker on a node is executed before or
@@ -91,19 +91,67 @@ class Node;
 
 /// Error is the superclass for all hit parser related errors.  This includes errors for
 /// requesting values of the wrong type from a parsed hit tree.
-class Error : public std::exception
+class Exception : public std::exception
 {
 public:
-  Error(const std::string & msg);
+  Exception(const std::string & msg);
   virtual const char * what() const noexcept override;
   std::string msg;
 };
 
-/// ParserError represents a parsing error (i.e. bad syntax, invalid characters, etc.).
-class ParseError : public Error
+/// ParseException represents a parsing error (i.e. bad syntax, invalid characters, etc.).
+class ParseException : public Exception
 {
 public:
-  ParseError(const std::string & msg);
+  ParseException(const std::string & msg);
+};
+
+/**
+ * Simple structure for containing an error and where it occurred
+ */
+class Error
+{
+public:
+  Error(Node & node, const std::string & message) : _node(node), _message(message) {}
+  template <typename... Args>
+  Error(Node & node, Args const &... args) : Error(node, stringer(args...))
+  {
+  }
+
+  /**
+   * @return The node where the error occurred
+   */
+  ///@{
+  const Node & node() const { return _node; }
+  Node & node() { return _node; }
+  ///@}
+  /**
+   * @return The error message
+   */
+  const std::string & message() const { return _message; }
+
+  /**
+   * @return The full error message, which contains the location prefix
+   */
+  ///@{
+  std::string fullMessage() const;
+  operator std::string() const { return fullMessage(); }
+  ///@}
+
+private:
+  /// The node where the error occurred
+  Node & _node;
+  /// The error message
+  const std::string _message;
+
+  template <typename... Args>
+  static std::string stringer(Args const &... args)
+  {
+    std::ostringstream stream;
+    using List = int[];
+    (void)List{0, ((void)(stream << args), 0)...};
+    return stream.str();
+  }
 };
 
 /// Walker is an interface that can be implemented to perform operations that traverse a
@@ -187,12 +235,12 @@ public:
   std::string fullpath();
   /// line returns the line number of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
-  int line();
+  int line() const;
   /// column returns the starting column number of this node in the original parsed input
-  int column();
+  int column() const;
   /// name returns the file name of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
-  const std::string & filename();
+  const std::string & filename() const;
 
   /// the following functions return the stored value of the node (if any exists) of the type
   /// indicated in the function name. If the node holds a value of a different type or doesn't hold
@@ -266,7 +314,7 @@ public:
     if (path != "")
       n = find(path);
     if (n == nullptr)
-      throw Error("no parameter named '" + path + "'");
+      throw Exception("no parameter named '" + path + "'");
     return paramInner<T>(n);
   }
 
@@ -285,11 +333,10 @@ protected:
   wasp::HITNodeView _hnv;
 
 private:
-
   template <typename T>
   T paramInner(Node *)
   {
-    throw Error("unsupported c++ type '" + std::string(typeid(T).name()) + "'");
+    throw Exception("unsupported c++ type '" + std::string(typeid(T).name()) + "'");
   }
 
   std::string _override_path;
@@ -320,8 +367,8 @@ inline unsigned int
 Node::paramInner(Node * n)
 {
   if (n->intVal() < 0)
-    throw Error("negative value read from file '" + n->filename() + "' on line " +
-                std::to_string(n->line()));
+    throw Exception("negative value read from file '" + n->filename() + "' on line " +
+                    std::to_string(n->line()));
   return n->intVal();
 }
 template <>
@@ -363,8 +410,8 @@ Node::paramInner(Node * n)
   for (auto val : tmp)
   {
     if (val < 0)
-      throw Error("negative value read from file '" + n->filename() + "' on line " +
-                  std::to_string(n->line()));
+      throw Exception("negative value read from file '" + n->filename() + "' on line " +
+                      std::to_string(n->line()));
     vec.push_back(val);
   }
   return vec;
@@ -694,3 +741,5 @@ void buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
                   std::size_t & previous_line);
 
 } // namespace hit
+
+std::ostream & operator<<(std::ostream & os, const hit::Error & error);

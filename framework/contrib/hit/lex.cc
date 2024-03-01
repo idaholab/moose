@@ -379,7 +379,7 @@ lexString(Lexer * l)
       l->emit(TokType::String);
       return lexHit;
     }
-    catch (Error & err)
+    catch (Exception & err)
     {
       return l->error(err.what());
     }

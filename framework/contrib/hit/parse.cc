@@ -78,15 +78,15 @@ toBool(const std::string & val, bool * dst)
   return false;
 }
 
-Error::Error(const std::string & msg) : msg(msg) {}
+Exception::Exception(const std::string & msg) : msg(msg) {}
 
 const char *
-Error::what() const throw()
+Exception::what() const throw()
 {
   return msg.c_str();
 }
 
-ParseError::ParseError(const std::string & msg) : Error(msg) {}
+ParseException::ParseException(const std::string & msg) : Exception(msg) {}
 
 std::string
 strRepeat(const std::string & s, int n)
@@ -136,6 +136,17 @@ pathJoin(const std::vector<std::string> & paths)
     fullpath += "/" + p;
   }
   return fullpath.substr(1);
+}
+
+std::string
+Error::fullMessage() const
+{
+  const auto & filename = node().filename();
+  std::stringstream ss;
+  if (filename.size())
+    ss << filename << ":" << node().line() << "." << node().column() << ": ";
+  ss << message();
+  return ss.str();
 }
 
 Node::Node() : _parent(nullptr)
@@ -218,24 +229,24 @@ Node::getNodeView()
 }
 
 const std::string &
-Node::filename()
+Node::filename() const
 {
   return _hnv.node_pool()->stream_name();
 }
 
 int
-Node::line()
+Node::line() const
 {
   return _hnv.line();
 }
 
 int
-Node::column()
+Node::column() const
 {
   return _hnv.column();
 }
 
-#define valthrow() throw Error("non-field node '" + fullpath() + "' has no value to retrieve")
+#define valthrow() throw Exception("non-field node '" + fullpath() + "' has no value to retrieve")
 
 bool
 Node::boolVal()
@@ -425,9 +436,7 @@ Comment::render(int indent, const std::string & indent_text, int /*maxlen*/)
 }
 
 Node *
-Comment::clone(bool
-                   absolute_path
-)
+Comment::clone(bool absolute_path)
 {
   auto n = new Comment(_dhi, _hnv);
   n->setInline(_isinline);
@@ -800,7 +809,7 @@ Field::vecBoolVal()
   {
     bool converted_val = false;
     if (!toBool(s, &converted_val))
-      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to bool");
+      throw Exception("cannot convert field '" + fullpath() + "' value '" + s + "' to bool");
     vec.push_back(converted_val);
   }
   return vec;
@@ -815,7 +824,7 @@ Field::vecIntVal()
     std::istringstream iss(s);
     int conversion;
     if ((iss >> conversion).fail() || !iss.eof())
-      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to integer");
+      throw Exception("cannot convert field '" + fullpath() + "' value '" + s + "' to integer");
     vec.push_back(conversion);
   }
   return vec;
@@ -830,7 +839,7 @@ Field::vecFloatVal()
     std::istringstream iss(s);
     double conversion;
     if ((iss >> conversion).fail() || !iss.eof())
-      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to float");
+      throw Exception("cannot convert field '" + fullpath() + "' value '" + s + "' to float");
     vec.push_back(conversion);
   }
   return vec;
@@ -858,8 +867,8 @@ Field::boolVal()
   {
     std::string str_value = val();
     if (!toBool(str_value, &bool_value))
-      throw Error("field node '" + fullpath() + "' does not hold a bool-typed value (val='" +
-                  str_value + "')");
+      throw Exception("field node '" + fullpath() + "' does not hold a bool-typed value (val='" +
+                      str_value + "')");
   }
   return bool_value;
 }
@@ -871,7 +880,8 @@ Field::intVal()
   std::istringstream iss(str_value);
   int64_t converted_val;
   if ((iss >> converted_val).fail() || !iss.eof())
-    throw Error("cannot convert field '" + fullpath() + "' value '" + str_value + "' to integer");
+    throw Exception("cannot convert field '" + fullpath() + "' value '" + str_value +
+                    "' to integer");
   return converted_val;
 }
 
@@ -882,7 +892,7 @@ Field::floatVal()
   std::istringstream iss(str_value);
   double converted_val;
   if ((iss >> converted_val).fail() || !iss.eof())
-    throw Error("cannot convert field '" + fullpath() + "' value '" + str_value + "' to float");
+    throw Exception("cannot convert field '" + fullpath() + "' value '" + str_value + "' to float");
   return converted_val;
 }
 
@@ -927,7 +937,7 @@ parse(const std::string & fname, const std::string & input, std::ostream * error
     if (errors)
       *errors << input_errors.str();
     else
-      throw ParseError(input_errors.str());
+      throw ParseException(input_errors.str());
   }
 
   std::unique_ptr<Node> root(new Section(interpreter, interpreter->root()));
@@ -1275,3 +1285,10 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
 }
 
 } // namespace hit
+
+std::ostream &
+operator<<(std::ostream & os, const hit::Error & error)
+{
+  os << error.fullMessage();
+  return os;
+}

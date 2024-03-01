@@ -65,7 +65,7 @@ public:
   virtual void walk(const std::string & /*fullpath*/,
                     const std::string & /*nodepath*/,
                     hit::Node * section) override;
-  std::vector<std::string> errors;
+  std::vector<hit::Error> errors;
 };
 
 class CompileParamWalker : public hit::Walker
@@ -118,7 +118,7 @@ public:
   /**
    * Parses the input(s)
    */
-  void parse();
+  void parse(const bool throw_on_error = true);
 
   /**
    * @return The root hit node

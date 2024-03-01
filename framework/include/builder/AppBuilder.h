@@ -25,7 +25,7 @@ namespace Moose
 class AppBuilder : public BuilderBase
 {
 public:
-  AppBuilder(std::shared_ptr<Parser> parser);
+  AppBuilder(std::shared_ptr<Parser> parser, const bool catch_parse_errors = false);
 
   /**
    * Build an application's parameters from command line arguments, with a
@@ -93,13 +93,26 @@ public:
     std::set<std::string> extracted_vars;
   };
 
-protected:
+  /**
+   * @return The recoverable (those that didn't affect the app parameter construction)
+   * parse errors that were encountered
+   *
+   * Only collected when catch_parse_errors = true
+   */
+  const std::vector<hit::Error> & getParseErrors() const { return _parse_errors; }
+
+private:
   /**
    * Performs the initial walk.
    *
    * Expands things and does some simple error checking
    */
   void initialWalk();
+
+  /// Whether or not to catch recoverable parse errors
+  const bool _catch_parse_errors;
+  /// The recoverable parse errors
+  std::vector<hit::Error> _parse_errors;
 };
 
 }

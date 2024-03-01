@@ -62,7 +62,7 @@ TEST(HitTests, FailCases)
   for (size_t i = 0; i < sizeof(cases) / sizeof(PassFailCase); i++)
   {
     auto test = cases[i];
-    EXPECT_THROW(hit::parse("TESTCASE", test.input), hit::Error)
+    EXPECT_THROW(hit::parse("TESTCASE", test.input), hit::Exception)
         << "case " << i + 1 << " FAIL (" << test.name << "): parser failed to error on bad input '"
         << test.input << "'";
   }
@@ -117,7 +117,7 @@ TEST(HitTests, LineNumbers)
       LineWalker w(i, test.line_nums);
       root->walk(&w, hit::NodeType::All);
     }
-    catch (hit::Error & err)
+    catch (hit::Exception & err)
     {
       FAIL() << "case " << i + 1 << " FAIL: unexpected parser error on valid input '" << test.input
              << "': " << err.what();
@@ -148,7 +148,7 @@ TEST(HitTests, PassCases)
     {
       hit::parse("TESTCASE", test.input);
     }
-    catch (hit::Error & err)
+    catch (hit::Exception & err)
     {
       FAIL() << "case " << i + 1 << " FAIL (" << test.name
              << "): unexpected parser error on valid input '" << test.input << "': " << err.what();
