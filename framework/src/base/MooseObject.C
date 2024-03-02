@@ -50,7 +50,7 @@ MooseObject::MooseObject(const InputParameters & parameters)
               *parameters.getCheckedPointerParam<MooseApp *>("_moose_app"),
               parameters),
     MooseBaseParameterInterface(*this, parameters),
-    MooseBaseErrorInterface(*this, parameters),
+    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     DataFileInterface<MooseObject>(*this),
     _enabled(getParam<bool>("enable"))

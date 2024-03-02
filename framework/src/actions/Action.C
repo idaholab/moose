@@ -45,7 +45,7 @@ Action::Action(const InputParameters & parameters)
               *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor"),
               parameters),
     MooseBaseParameterInterface(*this, parameters),
-    MooseBaseErrorInterface(*this, parameters),
+    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
     MeshMetaDataInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     PerfGraphInterface(

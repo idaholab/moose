@@ -20,7 +20,7 @@
 class MooseBaseErrorInterface : public ConsoleStreamInterface
 {
 public:
-  MooseBaseErrorInterface(const MooseBase & base, const InputParameters & params);
+  MooseBaseErrorInterface(const MooseBase & base);
 
   /**
    * Emits an error prefixed with object name and type.
@@ -76,12 +76,6 @@ public:
   }
 
 private:
-  /// The MOOSE application this is associated with
-  MooseApp & _app;
-
   /// The MooseBase class deriving from this interface
   const MooseBase & _moose_base;
-
-  /// The parameters used to create this object
-  const InputParameters & _params;
 };

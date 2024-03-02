@@ -13,11 +13,7 @@
 
 #include "parse.h"
 
-MooseBaseErrorInterface::MooseBaseErrorInterface(const MooseBase & base,
-                                                 const InputParameters & params)
-  : ConsoleStreamInterface(base.getMooseApp()),
-    _app(base.getMooseApp()),
-    _moose_base(base),
-    _params(params)
+MooseBaseErrorInterface::MooseBaseErrorInterface(const MooseBase & base)
+  : ConsoleStreamInterface(base.getMooseApp()), _moose_base(base)
 {
 }
