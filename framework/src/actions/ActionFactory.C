@@ -61,6 +61,13 @@ ActionFactory::create(const std::string & action,
         std::string("Unable to find buildable Action from supplied InputParameters Object for ") +
         action_name);
 
+  // If we currently are in an action, that means that we're creating an
+  // action from within an action. Associate the action creating this one
+  // with the new action's parameters so that errors can be associated with it
+  if (!action_params.getHitNode())
+    if (const auto hit_node = _app.getCurrentActionHitNode())
+      action_params.setHitNode(*hit_node);
+
   // Add the name to the parameters and create the object
   action_params.set<std::string>("_action_name") = action_name;
   action_params.set<std::string>("_unique_action_name") = unique_action_name;

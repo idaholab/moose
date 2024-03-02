@@ -9,13 +9,14 @@
 
 #pragma once
 
-// MOOSE includes
+#include "MooseBaseErrorInterface.h"
+
 #include "MooseBase.h"
 #include "InputParameters.h"
 #include "Registry.h"
 #include "MooseUtils.h"
 #include "MooseObjectParameterName.h"
-#include "MooseBaseErrorInterface.h"
+#include "MooseBase.h"
 
 #include <string>
 
@@ -43,7 +44,7 @@ std::string paramErrorPrefix(const InputParameters & params, const std::string &
 class MooseBaseParameterInterface
 {
 public:
-  MooseBaseParameterInterface(const InputParameters & parameters, const MooseBase * base);
+  MooseBaseParameterInterface(const MooseBase & base, const InputParameters & parameters);
 
   virtual ~MooseBaseParameterInterface() = default;
 
@@ -53,7 +54,7 @@ public:
   MooseObjectParameterName uniqueParameterName(const std::string & parameter_name) const
   {
     return MooseObjectParameterName(
-        _pars.get<std::string>("_moose_base"), _moose_base->name(), parameter_name);
+        _pars.get<std::string>("_moose_base"), _moose_base.name(), parameter_name);
   }
 
   /**
@@ -146,11 +147,6 @@ public:
   void paramInfo(const std::string & param, Args... args) const;
 
   /**
-   * A descriptive prefix for errors for an object
-   */
-  std::string objectErrorPrefix(const std::string & error_type) const;
-
-  /**
    * Connect controllable parameter of this action with the controllable parameters of the
    * objects added by this action.
    * @param parameter Name of the controllable parameter of this action
@@ -175,7 +171,7 @@ protected:
 
 private:
   /// The MooseBase object that inherits this class
-  const MooseBase * const _moose_base;
+  const MooseBase & _moose_base;
 
   template <typename... Args>
   std::string paramErrorMsg(const std::string & param, Args... args) const
@@ -184,7 +180,7 @@ private:
 
     // With no input location information, append object info (name + type)
     const std::string object_prefix =
-        _pars.inputLocation(param).empty() ? objectErrorPrefix("parameter error") : "";
+        _pars.inputLocation(param).empty() ? _moose_base.objectErrorPrefix("parameter error") : "";
 
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
@@ -243,8 +239,8 @@ template <typename... Args>
 MooseBaseParameterInterface::paramError(const std::string & param, Args... args) const
 {
   Moose::show_trace = false;
-  std::string msg = paramErrorMsg(param, std::forward<Args>(args)...);
-  callMooseErrorRaw(msg, &_moose_base->getMooseApp());
+  _moose_base.callMooseError(paramErrorMsg(param, std::forward<Args>(args)...),
+                             /* with_prefix = */ false);
   Moose::show_trace = true;
 }
 

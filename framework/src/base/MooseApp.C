@@ -2415,6 +2415,14 @@ MooseApp::restartFolderBase(const std::filesystem::path & folder_base) const
   return RestartableDataIO::restartableDataFolder(folder);
 }
 
+const hit::Node *
+MooseApp::getCurrentActionHitNode() const
+{
+  if (const auto action = _action_warehouse.getCurrentAction())
+    return action->parameters().getHitNode();
+  return nullptr;
+}
+
 bool
 MooseApp::hasRMClone(const RelationshipManager & template_rm, const MeshBase & mesh) const
 {

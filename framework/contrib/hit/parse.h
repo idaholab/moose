@@ -176,23 +176,26 @@ public:
   wasp::HITNodeView getNodeView();
 
   /// type returns the type of the node (e.g. one of Field, Section, Comment, etc.)
-  NodeType type();
+  NodeType type() const;
   /// path returns this node's local/direct contribution its full hit path.  For section nodes, this
   /// is the section name, for field nodes, this is the field/parameter name, for other nodes this
   /// is empty. if setOverridePath (wasp) has been called for this Node, then that set path is
   /// returned.
-  virtual std::string path();
+  virtual std::string path() const;
   /// fullpath returns the full hit path to this node (including all parent sections
   /// recursively) starting from the tree's root node.
-  std::string fullpath();
+  std::string fullpath() const;
   /// line returns the line number of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
-  int line();
+  int line() const;
   /// column returns the starting column number of this node in the original parsed input
-  int column();
+  int column() const;
   /// name returns the file name of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
-  const std::string & filename();
+  const std::string & filename() const;
+  /// returns the file location in the form <filename()>:<line()>.<column()> where
+  /// the column is optional defined by \p with_column
+  std::string fileLocation(const bool with_column = true) const;
 
   /// the following functions return the stored value of the node (if any exists) of the type
   /// indicated in the function name. If the node holds a value of a different type or doesn't hold
@@ -203,7 +206,7 @@ public:
   /// strVal is special in that it only throws an exception if the node doesn't hold a value at
   /// all.  All nodes with a value hold data that was originally represented as a string in the
   /// parsed input - so this returns that raw string.
-  virtual std::string strVal();
+  virtual std::string strVal() const;
   /// the vec-prefixed value retrieval functions assume the node holds a string-typed value holding
   /// whitespace delimited entries of the element type indicated in the function name.
   virtual std::vector<double> vecFloatVal();
@@ -442,7 +445,7 @@ public:
   void clearLegacyMarkers();
 
   /// path returns the hit path located in the section's header i.e. the section's name.
-  virtual std::string path() override;
+  virtual std::string path() const override;
 
   virtual std::string
   render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
@@ -472,7 +475,7 @@ public:
   Field(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
 
   /// path returns the hit Field name (i.e. content before the "=")
-  virtual std::string path() override;
+  virtual std::string path() const override;
 
   virtual std::string
   render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
@@ -490,7 +493,7 @@ public:
   void setVal(const std::string & value, Kind kind = Kind::None);
   /// val returns the raw text of the field's value as it was read from the hit input.  This is
   /// the value set by setVal.
-  std::string val();
+  std::string val() const;
 
   virtual std::vector<double> vecFloatVal() override;
   virtual std::vector<bool> vecBoolVal() override;
@@ -499,7 +502,7 @@ public:
   virtual bool boolVal() override;
   virtual int64_t intVal() override;
   virtual double floatVal() override;
-  virtual std::string strVal() override;
+  virtual std::string strVal() const override;
 
 private:
   Kind _kind;

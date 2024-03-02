@@ -40,6 +40,10 @@ class MooseEnum;
 class MooseObject;
 class MultiMooseEnum;
 class Problem;
+namespace hit
+{
+class Node;
+}
 
 /**
  * The main MOOSE class responsible for handling user-defined
@@ -529,6 +533,11 @@ public:
   void registerBase(const std::string & value);
 
   /**
+   * @return The base system of the object these parameters are for, if any
+   */
+  std::optional<std::string> getBase() const;
+
+  /**
    * This method is used to define the MOOSE system name that is used by the TheWarehouse object
    * for storing objects to be retrieved for execution. The base class of every object class
    * that will be called for execution (e.g., UserObject objects) should call this method.
@@ -842,60 +851,47 @@ public:
    */
   std::set<std::string> reservedValues(const std::string & name) const;
 
-  ///@{
   /**
-   * Get/set a string representing the location (i.e. filename,linenum) in the input text for the
+   * @return A string representing the location (i.e. filename,linenum) in the input text for the
    * block containing parameters for this object.
    */
-  std::string & blockLocation() { return _block_location; }
-  const std::string & blockLocation() const { return _block_location; }
-  ///@}
+  std::string blockLocation() const;
 
-  ///@{
   /**
-   * Get/set a string representing the full HIT parameter path from the input file (e.g.
+   * @return A string representing the full HIT parameter path from the input file (e.g.
    * "Mesh/foo") for the block containing parameters for this object.
    */
-  std::string & blockFullpath() { return _block_fullpath; }
-  const std::string & blockFullpath() const { return _block_fullpath; }
-  ///@}
+  std::string blockFullpath() const;
 
-  ///@{
   /**
-   * Get/set a string representing the location in the input text the parameter originated from
-   * (i.e. filename,linenum) for the given param.
+   * @return The hit node associated with setting the parameter \p param, if any
    */
-  const std::string & inputLocation(const std::string & param) const
-  {
-    return at(param)._input_location;
-  }
-  std::string & inputLocation(const std::string & param) { return at(param)._input_location; }
-  ///@}
-
-  ///@{
+  const hit::Node * getHitNode(const std::string & param) const;
   /**
-   * Get/set a string representing the full HIT parameter path from the input file (e.g.
+   * Sets the hit node associated with the parameter \p param to \p node
+   */
+  void setHitNode(const std::string & param, const hit::Node & node);
+
+  /**
+   * @return A string representing the location in the input text the parameter originated from
+   * (i.e. filename,linenum) for the given param
+   */
+  std::string inputLocation(const std::string & param) const;
+
+  /**
+   * @return A string representing the full HIT parameter path from the input file (e.g.
    * "Mesh/foo/bar" for param "bar") for the given param.
    */
-  const std::string & paramFullpath(const std::string & param) const
-  {
-    return at(param)._param_fullpath;
-  }
-  std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; }
-  ///@}
+  std::string paramFullpath(const std::string & param) const;
 
   /// generate error message prefix with parameter name and location (if available)
   std::string errorPrefix(const std::string & param) const;
 
   /**
-   * Get/set a string representing the raw, unmodified token text for the given param.  This is
-   * usually only set/useable for file-path type parameters.
+   * @return A string representing the raw, unmodified token text for the given param.
+   * This is only set if this parameter is parsed from hit
    */
-  std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; }
-  const std::string & rawParamVal(const std::string & param) const
-  {
-    return _params.at(param)._raw_val;
-  }
+  std::string rawParamVal(const std::string & param) const;
 
   /**
    * Informs this object that values for this parameter set from the input file or from the command
@@ -1008,6 +1004,17 @@ public:
    */
   std::vector<std::string> paramAliases(const std::string & param_name) const;
 
+  /**
+   * @return The hit node that represents the syntax responsible for creating
+   * these parameters, if any
+   */
+  const hit::Node * getHitNode() const { return _hit_node; }
+  /**
+   * Sets the hit node that represents the syntax responsible for creating
+   * these parameters
+   */
+  void setHitNode(const hit::Node & node) { _hit_node = &node; }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1071,10 +1078,8 @@ private:
     std::set<std::string> _reserved_values;
     /// If non-empty, this parameter is deprecated.
     std::string _deprecation_message;
-    /// original location of parameter (i.e. filename,linenum) - used for nice error messages.
-    std::string _input_location;
-    /// full HIT path of the parameter from the input file - used for nice error messages.
-    std::string _param_fullpath;
+    /// Original location of parameter node; used for error messages
+    const hit::Node * _hit_node;
     /// raw token text for a parameter - usually only set for filepath type params.
     std::string _raw_val;
     /// True if the parameters is controllable
@@ -1190,6 +1195,9 @@ private:
   /// A map from derived-class/blessed parameter names to associated base-class/deprecated parameter
   /// names
   std::multimap<std::string, std::string> _new_to_old_names;
+
+  /// The hit node representing the syntax that created these parameters, if any
+  const hit::Node * _hit_node = nullptr;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();

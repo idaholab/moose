@@ -11,21 +11,13 @@
 #include "MooseBase.h"
 #include "MooseApp.h"
 
-std::string
-MooseBaseErrorInterface::errorPrefix(const std::string & error_type) const
-{
-  std::stringstream oss;
-  oss << "The following " << error_type << " occurred in the object \"" << _moose_base->name()
-      << "\", of type \"" << _moose_base->type() << "\".\n\n";
-  return oss.str();
-}
+#include "parse.h"
 
-[[noreturn]] void
-callMooseErrorRaw(std::string & msg, MooseApp * app)
+MooseBaseErrorInterface::MooseBaseErrorInterface(const MooseBase & base,
+                                                 const InputParameters & params)
+  : ConsoleStreamInterface(base.getMooseApp()),
+    _app(base.getMooseApp()),
+    _moose_base(base),
+    _params(params)
 {
-  app->getOutputWarehouse().mooseConsole();
-  std::string prefix;
-  if (!app->isUltimateMaster())
-    prefix = app->name();
-  moose::internal::mooseErrorRaw(msg, prefix);
 }

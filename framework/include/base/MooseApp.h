@@ -55,6 +55,10 @@ namespace libMesh
 {
 class ExodusII_IO;
 }
+namespace hit
+{
+class Node;
+}
 
 /**
  * Base class for MOOSE-based applications
@@ -939,6 +943,15 @@ public:
                                                   const std::string & map_suffix);
   /// The file suffix for restartable data
   std::filesystem::path restartFolderBase(const std::filesystem::path & folder_base) const;
+
+  /**
+   * @return The hit node that is responsible for creating the current action that is running,
+   * if any
+   *
+   * Can be used to link objects that are created by an action to the action that
+   * created them in input
+   */
+  const hit::Node * getCurrentActionHitNode() const;
 
 private:
   /**

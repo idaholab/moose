@@ -47,9 +47,10 @@ MooseObject::validParams()
 MooseObject::MooseObject(const InputParameters & parameters)
   : MooseBase(parameters.get<std::string>("_type"),
               parameters.get<std::string>("_object_name"),
-              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    MooseBaseParameterInterface(parameters, this),
-    MooseBaseErrorInterface(this),
+              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app"),
+              parameters),
+    MooseBaseParameterInterface(*this, parameters),
+    MooseBaseErrorInterface(*this, parameters),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     DataFileInterface<MooseObject>(*this),
     _enabled(getParam<bool>("enable"))

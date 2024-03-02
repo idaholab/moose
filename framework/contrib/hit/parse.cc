@@ -218,19 +218,29 @@ Node::getNodeView()
 }
 
 const std::string &
-Node::filename()
+Node::filename() const
 {
   return _hnv.node_pool()->stream_name();
 }
 
+std::string
+Node::fileLocation(const bool with_column /* = true */) const
+{
+  std::stringstream ss;
+  ss << filename() << ":" << line();
+  if (with_column)
+    ss << "." << column();
+  return ss.str();
+}
+
 int
-Node::line()
+Node::line() const
 {
   return _hnv.line();
 }
 
 int
-Node::column()
+Node::column() const
 {
   return _hnv.column();
 }
@@ -253,7 +263,7 @@ Node::floatVal()
   valthrow();
 }
 std::string
-Node::strVal()
+Node::strVal() const
 {
   valthrow();
 }
@@ -280,7 +290,7 @@ Node::vecStrVal()
 #undef valthrow
 
 NodeType
-Node::type()
+Node::type() const
 {
   if (_hnv.type() == wasp::BLANK_LINE)
     return NodeType::Blank;
@@ -334,7 +344,7 @@ Node::root()
 }
 
 std::string
-Node::path()
+Node::path() const
 {
   if (!_override_path.empty())
     return _override_path;
@@ -343,7 +353,7 @@ Node::path()
 }
 
 std::string
-Node::fullpath()
+Node::fullpath() const
 {
   if (_parent == nullptr)
     return "";
@@ -425,9 +435,7 @@ Comment::render(int indent, const std::string & indent_text, int /*maxlen*/)
 }
 
 Node *
-Comment::clone(bool
-                   absolute_path
-)
+Comment::clone(bool absolute_path)
 {
   auto n = new Comment(_dhi, _hnv);
   n->setInline(_isinline);
@@ -468,7 +476,7 @@ Section::clearLegacyMarkers()
 }
 
 std::string
-Section::path()
+Section::path() const
 {
   return Node::path();
 }
@@ -531,7 +539,7 @@ Field::Field(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView
 }
 
 std::string
-Field::path()
+Field::path() const
 {
   return Node::path();
 }
@@ -740,7 +748,7 @@ Field::setVal(const std::string & value, Kind kind)
 }
 
 std::string
-Field::val()
+Field::val() const
 {
   return extractValue(_hnv.data());
 }
@@ -887,7 +895,7 @@ Field::floatVal()
 }
 
 std::string
-Field::strVal()
+Field::strVal() const
 {
   const auto value = val();
   std::string s = value;

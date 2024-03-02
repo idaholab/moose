@@ -106,6 +106,14 @@ Factory::create(const std::string & obj_name,
   InputParameters & params =
       _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
 
+  // Add the hit node from the action if it isn't set already (it might be set
+  // already because someone had a better option than just the action)
+  // If it isn't set, it typically means that this object was created by a
+  // non-MooseObjectAction Action
+  if (!params.getHitNode())
+    if (const auto hit_node = _app.getCurrentActionHitNode())
+      params.setHitNode(*hit_node);
+
   // Set the _type parameter
   params.set<std::string>("_type") = obj_name;
 

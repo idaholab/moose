@@ -21,6 +21,7 @@
 #include "libmesh/simple_range.h"
 
 #include "pcrecpp.h"
+#include "parse.h"
 
 #include <cmath>
 
@@ -70,6 +71,7 @@ InputParameters::clear()
   _block_location = "";
   _old_to_new_name_and_dep.clear();
   _new_to_old_names.clear();
+  _hit_node = nullptr;
 }
 
 void
@@ -168,6 +170,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _block_location = rhs._block_location;
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
+  _hit_node = rhs._hit_node;
 
   return *this;
 }
@@ -458,6 +461,14 @@ InputParameters::registerBase(const std::string & value)
 {
   InputParameters::set<std::string>("_moose_base") = value;
   _params["_moose_base"]._is_private = true;
+}
+
+std::optional<std::string>
+InputParameters::getBase() const
+{
+  if (have_parameter<std::string>("_moose_base"))
+    return get<std::string>("_moose_base");
+  return {};
 }
 
 void
@@ -954,6 +965,10 @@ InputParameters::applyParameter(const InputParameters & common,
     set_attributes(local_name, false);
     _params[local_name]._set_by_add_param =
         libmesh_map_find(common._params, common_name)._set_by_add_param;
+    // Keep track of where this param came from if we can. This will enable us to
+    // produce param errors from objects created within an action that link to
+    // the parameter in the action
+    at(local_name)._hit_node = common.getHitNode(common_name);
   }
 
   // Enable deprecated message printing
@@ -1249,6 +1264,51 @@ InputParameters::reservedValues(const std::string & name_in) const
   return it->second._reserved_values;
 }
 
+std::string
+InputParameters::blockLocation() const
+{
+  if (const auto hit_node = getHitNode())
+    return hit_node->fileLocation(/* with_column = */ false);
+  return "";
+}
+
+std::string
+InputParameters::blockFullpath() const
+{
+  if (const auto hit_node = getHitNode())
+    return hit_node->fullpath();
+  return "";
+}
+
+const hit::Node *
+InputParameters::getHitNode(const std::string & param) const
+{
+  return at(param)._hit_node;
+}
+
+void
+InputParameters::setHitNode(const std::string & param, const hit::Node & node)
+{
+  mooseAssert(node.type() == hit::NodeType::Field, "Must be a field");
+  at(param)._hit_node = &node;
+}
+
+std::string
+InputParameters::inputLocation(const std::string & param) const
+{
+  if (const auto hit_node = getHitNode(param))
+    return hit_node->fileLocation(/* with_column = */ false);
+  return "";
+}
+
+std::string
+InputParameters::paramFullpath(const std::string & param) const
+{
+  if (const auto hit_node = getHitNode(param))
+    return hit_node->fullpath();
+  return "";
+}
+
 void
 InputParameters::checkParamName(const std::string & name) const
 {
@@ -1312,6 +1372,14 @@ InputParameters::errorPrefix(const std::string & param) const
   if (!inputLocation(param).empty())
     prefix = inputLocation(param) + ": (" + paramFullpath(param) + ")";
   return prefix;
+}
+
+std::string
+InputParameters::rawParamVal(const std::string & param) const
+{
+  if (const auto hit_node = getHitNode(param))
+    return hit_node->strVal();
+  return "";
 }
 
 std::string
