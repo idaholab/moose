@@ -78,8 +78,8 @@ LinearFVDiffusion::computeFluxMatrixContribution()
                        : _current_face_info->dCNMag();
 
     // Cache the matrix contribution
-    _flux_matrix_contribution = _diffusion_coeff(face_arg, determineState()) / d *
-                                _current_face_info->faceArea() * _current_face_info->faceCoord();
+    _flux_matrix_contribution =
+        _diffusion_coeff(face_arg, determineState()) / d * _current_face_area;
     _cached_matrix_contribution = true;
   }
 
@@ -114,7 +114,7 @@ LinearFVDiffusion::computeFluxRHSContribution()
     _flux_rhs_contribution =
         _diffusion_coeff(face_arg, state_arg) *
         (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
-        correction_vector * _current_face_info->faceArea() * _current_face_info->faceCoord();
+        correction_vector * _current_face_area;
     _cached_rhs_contribution = true;
   }
 
@@ -124,8 +124,7 @@ LinearFVDiffusion::computeFluxRHSContribution()
 Real
 LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  auto grad_contrib = bc.computeBoundaryGradientMatrixContribution() *
-                      _current_face_info->faceArea() * _current_face_info->faceCoord();
+  auto grad_contrib = bc.computeBoundaryGradientMatrixContribution() * _current_face_area;
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
   if (!bc.includesMaterialPropertyMultiplier())
@@ -141,8 +140,7 @@ Real
 LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
   const auto face_arg = singleSidedFaceArg(_current_face_info);
-  auto grad_contrib = bc.computeBoundaryGradientRHSContribution() * _current_face_info->faceArea() *
-                      _current_face_info->faceCoord();
+  auto grad_contrib = bc.computeBoundaryGradientRHSContribution() * _current_face_area;
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
@@ -159,7 +157,7 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
 
     grad_contrib += _diffusion_coeff(face_arg, determineState()) *
                     _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
-                    _current_face_info->faceArea() * _current_face_info->faceCoord();
+                    _current_face_area;
   }
 
   return grad_contrib;

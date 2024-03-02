@@ -50,14 +50,23 @@ public:
   MooseVariableBase * mooseVariableBase() const { return _var; };
 
   /**
-   * Return the \p MooseVariableField<T> object that this interface acts on
+   * Return the \p MooseVariableField object that this interface acts on
    */
   MooseVariableField<T> & mooseVariableField();
 
+  /**
+   * Return the \p MooseVariableFE object that this interface acts on
+   */
   MooseVariableFE<T> * mooseVariable() const;
 
+  /**
+   * Return the \p MooseVariableFV object that this interface acts on
+   */
   MooseVariableFV<T> * mooseVariableFV() const;
 
+  /**
+   * Return the \p MooseLinearVariableFV object that this interface acts on
+   */
   MooseLinearVariableFV<T> * mooseLinearVariableFV() const;
 
   virtual ~MooseVariableInterface();

@@ -76,34 +76,6 @@ MooseLinearVariableFV<OutputType>::isExtrapolatedBoundaryFace(
 }
 
 template <typename OutputType>
-Moose::VarFieldType
-MooseLinearVariableFV<OutputType>::fieldType() const
-{
-  if (std::is_same<OutputType, Real>::value)
-    return Moose::VarFieldType::VAR_FIELD_STANDARD;
-  else if (std::is_same<OutputType, RealVectorValue>::value)
-    return Moose::VarFieldType::VAR_FIELD_VECTOR;
-  else if (std::is_same<OutputType, RealEigenVector>::value)
-    return Moose::VarFieldType::VAR_FIELD_ARRAY;
-  else
-    mooseError("Unknown variable field type");
-}
-
-template <typename OutputType>
-bool
-MooseLinearVariableFV<OutputType>::isArray() const
-{
-  return std::is_same<OutputType, RealEigenVector>::value;
-}
-
-template <typename OutputType>
-bool
-MooseLinearVariableFV<OutputType>::isVector() const
-{
-  return std::is_same<OutputType, RealVectorValue>::value;
-}
-
-template <typename OutputType>
 Real
 MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo & elem_info,
                                                 const StateArg & state) const
@@ -203,9 +175,6 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
       bc_pointer->setCurrentFaceInfo(fi, face_type);
 
     const auto boundary_value = bc_pointer->computeBoundaryValue();
-
-    if (fi != original_face_info)
-      bc_pointer->setCurrentFaceInfo(original_face_info, original_face_type);
 
     return boundary_value;
   }

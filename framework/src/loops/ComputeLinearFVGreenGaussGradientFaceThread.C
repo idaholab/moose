@@ -80,7 +80,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::onInternalFace(const FaceInfo & fac
   const auto dof_id_neighbor =
       face_info.neighborInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
 
-  const auto & solution = *_linear_system.solution;
+  const auto & solution = *_linear_system.current_local_solution;
   const auto face_value = Moose::FV::linearInterpolation(
       solution(dof_id_elem), solution(dof_id_neighbor), face_info, true);
 

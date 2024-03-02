@@ -81,20 +81,6 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
 }
 
 template <typename OutputType>
-Moose::VarFieldType
-MooseVariableFE<OutputType>::fieldType() const
-{
-  if (std::is_same<OutputType, Real>::value)
-    return Moose::VarFieldType::VAR_FIELD_STANDARD;
-  else if (std::is_same<OutputType, RealVectorValue>::value)
-    return Moose::VarFieldType::VAR_FIELD_VECTOR;
-  else if (std::is_same<OutputType, RealEigenVector>::value)
-    return Moose::VarFieldType::VAR_FIELD_ARRAY;
-  else
-    mooseError("Unknown variable field type");
-}
-
-template <typename OutputType>
 void
 MooseVariableFE<OutputType>::clearDofIndices()
 {
@@ -722,20 +708,6 @@ MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual,
                                               const OutputData & v)
 {
   _element_data->insertNodalValue(residual, v);
-}
-
-template <typename OutputType>
-bool
-MooseVariableFE<OutputType>::isArray() const
-{
-  return std::is_same<OutputType, RealEigenVector>::value;
-}
-
-template <typename OutputType>
-bool
-MooseVariableFE<OutputType>::isVector() const
-{
-  return std::is_same<OutputType, RealVectorValue>::value;
 }
 
 template <typename OutputType>

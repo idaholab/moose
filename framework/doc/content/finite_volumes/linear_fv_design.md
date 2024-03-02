@@ -39,7 +39,8 @@ linear systems. The following list summarizes the main differences compared to
 - The data members that enable quadrature-based evaluation of the variable are only used
   when interfacing with other MOOSE systems such as [UserObjects](UserObject.md),
   [AuxKernels](AuxKernel.md) or [Postprocessors](Postprocessor.md). These data members
-  are not used during the solve.
+  are not used during the solve. For this reason, the preferred avenue for interfacing
+  with these variables should be the [functor system](Functors/index.md).
 
 ## Linear FV Kernels
 
@@ -85,7 +86,6 @@ The derived kernels need to override the following functions:
 - `computeRightHandSideContribution` which computes the right hand side contributions
   to the degree of freedom corresponding to the element.
 
-## Looping over Faces and Elements
 
 The population of the system matrix and right hand side with face terms
 (from flux kernels) is done in a face loop: `ComputeLinearFVFaceThread`.
@@ -97,7 +97,8 @@ loop: `ComputeLinearFVElementalThread`.
 ## Gradient Computation
 
 Considering that the linear finite volume system is used in a Picard-style iteration,
-terms that need cell gradients are lagged. Such terms include:
+terms that need cell gradients are lagged. Treating gradient-based terms explicitly results
+in faster linear solves due to the matrix containing fewer entries. Such terms include:
 
 - The linear terms in the extrapolated boundary conditions.
 - The nonorthogonal correctors in the surface normal gradient computation.

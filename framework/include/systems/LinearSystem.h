@@ -78,11 +78,6 @@ public:
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) override;
 
-  ///@{
-  /// System Integrity Checks
-  void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
-  ///@}
-
   /**
    * Return the number of linear iterations
    */

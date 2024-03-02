@@ -37,6 +37,12 @@ public:
    */
   void setCurrentElemInfo(const ElemInfo * elem_info) { _current_elem_info = elem_info; }
 
+  /**
+   * Set the coordinate system specific volume
+   * @param volume the new coordinate specific volume
+   */
+  void setCurrentElemVolume(const Real volume) { _current_elem_volume = volume; }
+
   /// Computes the system matrix contribution for the given variable on the current element
   virtual Real computeMatrixContribution() = 0;
 
@@ -46,4 +52,7 @@ public:
 protected:
   /// Pointer to the current element info
   const ElemInfo * _current_elem_info;
+
+  /// The coordinate-specific element volume
+  Real _current_elem_volume;
 };

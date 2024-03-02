@@ -48,9 +48,12 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
     if (_subdomain != _old_subdomain || _neighbor_subdomain != _old_neighbor_subdomain)
       fetchSystemContributionObjects();
 
+    Real face_area = face_info->faceArea() * face_info->faceCoord();
+
     for (auto kernel : _fv_flux_kernels)
     {
       kernel->setCurrentFaceInfo(face_info);
+      kernel->setCurrentFaceArea(face_area);
       if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
           _mode == Moose::FV::LinearFVComputationMode::FullSystem)
         kernel->addMatrixContribution();

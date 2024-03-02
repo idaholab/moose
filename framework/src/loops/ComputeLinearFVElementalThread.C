@@ -52,9 +52,12 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
     _subdomain = elem_info->subdomain_id();
     if (_subdomain != _old_subdomain)
       fetchSystemContributionObjects();
+
+    const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
     for (auto kernel : _fv_kernels)
     {
       kernel->setCurrentElemInfo(elem_info);
+      kernel->setCurrentElemVolume(elem_volume);
       if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
           _mode == Moose::FV::LinearFVComputationMode::FullSystem)
         kernel->addMatrixContribution();

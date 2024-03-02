@@ -39,6 +39,12 @@ public:
    */
   void setCurrentFaceInfo(const FaceInfo * face_info);
 
+  /**
+   * Set the coordinate system specific face area for the assembly
+   * @param area the face area
+   */
+  void setCurrentFaceArea(const Real area) { _current_face_area = area; };
+
   /// Computes the system matrix contribution from an element side on an internal face
   virtual Real computeElemMatrixContribution() = 0;
 
@@ -78,6 +84,9 @@ protected:
 
   /// Pointer to the face info we are operating on right now
   const FaceInfo * _current_face_info;
+
+  /// The current, coordinate system specific face area
+  Real _current_face_area;
 
   /// Face ownership information for the current face
   FaceInfo::VarFaceNeighbors _current_face_type;

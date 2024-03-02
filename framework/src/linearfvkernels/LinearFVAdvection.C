@@ -37,8 +37,7 @@ LinearFVAdvection::computeElemMatrixContribution()
 {
   const auto interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
-  return interp_coeffs.first * (_velocity * _current_face_info->normal()) *
-         _current_face_info->faceArea() * _current_face_info->faceCoord();
+  return interp_coeffs.first * (_velocity * _current_face_info->normal()) * _current_face_area;
 }
 
 Real
@@ -46,8 +45,7 @@ LinearFVAdvection::computeNeighborMatrixContribution()
 {
   const auto interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
-  return interp_coeffs.second * (_velocity * _current_face_info->normal()) *
-         _current_face_info->faceArea() * _current_face_info->faceCoord();
+  return interp_coeffs.second * (_velocity * _current_face_info->normal()) * _current_face_area;
 }
 
 Real
@@ -70,8 +68,7 @@ LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return value_contrib * factor * (_velocity * _current_face_info->normal()) *
-         _current_face_info->faceArea() * _current_face_info->faceCoord();
+  return value_contrib * factor * (_velocity * _current_face_info->normal()) * _current_face_area;
 }
 
 Real
@@ -81,6 +78,5 @@ LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
   const auto value_contrib = bc.computeBoundaryValueRHSContribution();
-  return -value_contrib * factor * (_velocity * _current_face_info->normal()) *
-         _current_face_info->faceArea() * _current_face_info->faceCoord();
+  return -value_contrib * factor * (_velocity * _current_face_info->normal()) * _current_face_area;
 }

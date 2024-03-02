@@ -212,12 +212,6 @@ LinearSystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
 }
 
 void
-LinearSystem::checkKernelCoverage(const std::set<SubdomainID> & /*mesh_subdomains*/) const
-{
-  // FIXME
-}
-
-void
 LinearSystem::solve()
 {
   TIME_SECTION("LinearSystem::solve", 2, "Solving linear system");

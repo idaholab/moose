@@ -67,6 +67,34 @@ MooseVariableField<OutputType>::getSolution(const Moose::StateArg & state) const
                             : this->_sys.solutionState(state.state, state.iteration_type);
 }
 
+template <typename OutputType>
+Moose::VarFieldType
+MooseVariableField<OutputType>::fieldType() const
+{
+  if (std::is_same<OutputType, Real>::value)
+    return Moose::VarFieldType::VAR_FIELD_STANDARD;
+  else if (std::is_same<OutputType, RealVectorValue>::value)
+    return Moose::VarFieldType::VAR_FIELD_VECTOR;
+  else if (std::is_same<OutputType, RealEigenVector>::value)
+    return Moose::VarFieldType::VAR_FIELD_ARRAY;
+  else
+    mooseError("Unknown variable field type");
+}
+
+template <typename OutputType>
+bool
+MooseVariableField<OutputType>::isArray() const
+{
+  return std::is_same<OutputType, RealEigenVector>::value;
+}
+
+template <typename OutputType>
+bool
+MooseVariableField<OutputType>::isVector() const
+{
+  return std::is_same<OutputType, RealVectorValue>::value;
+}
+
 template class MooseVariableField<Real>;
 template class MooseVariableField<RealVectorValue>;
 template class MooseVariableField<RealEigenVector>;

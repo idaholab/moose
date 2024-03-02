@@ -34,7 +34,7 @@ LinearFVReaction::computeMatrixContribution()
 {
   // The matrix contribution is c_C*V_C
   return _coefficient(makeElemArg(_current_elem_info->elem()), determineState()) *
-         _current_elem_info->volume() * _current_elem_info->coordFactor();
+         _current_elem_volume;
 }
 
 Real

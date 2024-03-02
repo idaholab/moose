@@ -42,5 +42,5 @@ LinearFVSource::computeRightHandSideContribution()
 {
   // The contribution to the right hand side is s_C*V_C
   return _source_density(makeElemArg(_current_elem_info->elem()), determineState()) *
-         _current_elem_info->volume() * _current_elem_info->coordFactor();
+         _current_elem_volume;
 }

@@ -83,10 +83,6 @@ public:
 
   virtual bool isFV() const override { return true; }
 
-  virtual Moose::VarFieldType fieldType() const override;
-  virtual bool isArray() const override;
-  virtual bool isVector() const override;
-
   /**
    * Switch to request cell gradient computations.
    */
