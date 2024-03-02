@@ -63,12 +63,13 @@ LinearFVAdvection::computeNeighborRightHandSideContribution()
 Real
 LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto value_contrib = bc.computeBoundaryValueMatrixContribution();
+  const auto boundary_value_matrix_contrib = bc.computeBoundaryValueMatrixContribution();
 
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return value_contrib * factor * (_velocity * _current_face_info->normal()) * _current_face_area;
+  return boundary_value_matrix_contrib * factor * (_velocity * _current_face_info->normal()) *
+         _current_face_area;
 }
 
 Real
@@ -77,6 +78,7 @@ LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
-  const auto value_contrib = bc.computeBoundaryValueRHSContribution();
-  return -value_contrib * factor * (_velocity * _current_face_info->normal()) * _current_face_area;
+  const auto boundary_value_rhs_contrib = bc.computeBoundaryValueRHSContribution();
+  return -boundary_value_rhs_contrib * factor * (_velocity * _current_face_info->normal()) *
+         _current_face_area;
 }

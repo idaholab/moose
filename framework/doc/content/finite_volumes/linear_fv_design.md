@@ -9,13 +9,13 @@ solve which may require orders of magnitude more iterations for convergence.
 
 To distinguish from the classical parts of MOOSE that solve nonlinear equations
 implicity using the Newton (or quasi-Newton) method, the new linear class names
-include a `Linear` sub-string denoting that they contribute to a linear system
-containing a matrix of coefficients and a right hand side instead of a
+include a `Linear` sub-string denoting that they contribute to a [linear system
+containing a matrix of coefficients and a right hand side](LinearSystem.md) instead of a
 Jacobian and a residual.
 
 ## Design Choices for Finite Volume Linear System Assembly
 
-- We assume a Picard-style iteration where the system matrix and right hand side
+- We assume a Picard-style iteration where the [system matrix and right hand side](LinearSystem.md)
   are assembled using the previous solution vector.
 - We rely on the `LinearSystem` class in MOOSE which is a wrapper around
   the `LinearImplicit` system class of `libMesh`. The corresponding kernels will
@@ -31,7 +31,7 @@ Jacobian and a residual.
 
 Linear variables are designed only to contribute to
 linear systems. The following list summarizes the main differences compared to
-[finite volume variables](MooseVariableFVReal.md) that contribute to a Newton system:
+[finite volume variables](MooseVariableFV.md) that contribute to a Newton system:
 
 - The linear variable does not support automatic differentiation.
 - The gradient computation is not located within the variable, it is populated

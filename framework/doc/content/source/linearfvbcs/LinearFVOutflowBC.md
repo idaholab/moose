@@ -3,7 +3,8 @@
 ## Description
 
 `LinearFVOutflowBC` will contribute to the system matrix and right hand side
-of a linear finite volume matrix using the following advective flux:
+of a linear finite volume system. The contributions can be derived using the
+integral of the advective flux over a boundary face ($S_b$) of a boundary element:
 
 !equation
 \int\limits_{S_b} \vec{v} \cdot \vec{n} u dS  \approx \vec{v}_f \cdot \vec{n} u_f |S_b|~,
