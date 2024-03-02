@@ -15,6 +15,7 @@
 #include "MooseLinearVariableFV.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
+#include "FVRelationshipManagerInterface.h"
 
 /**
  * Base class for finite volume kernels that contribute to a linear
@@ -23,14 +24,13 @@
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
                        public NonADFunctorInterface,
+                       public FVRelationshipManagerInterface,
                        public MooseVariableInterface<Real>,
                        public MooseVariableDependencyInterface
 {
 public:
   static InputParameters validParams();
-  static void setRMParams(const InputParameters & obj_params,
-                          InputParameters & rm_params,
-                          unsigned short ghost_layers);
+
   LinearFVKernel(const InputParameters & params);
 
   virtual const MooseLinearVariableFV<Real> & variable() const override { return _var; }
