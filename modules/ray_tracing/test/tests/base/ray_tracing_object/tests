@@ -18,7 +18,7 @@
       input = 'errors.i'
       cli_args = 'RayKernels/test/get_study_bad=true'
       allow_test_objects = true
-      expect_err = 'The following error occurred in the object "test", of type "RayTracingObjectTest"..*Supplied study of type RayTracingStudyTest is not the required study type RepeatableRayStudy'
+      expect_err = 'Supplied study of type RayTracingStudyTest is not the required study type RepeatableRayStudy'
       detail = 'the study is provided by default and is of the wrong type'
     []
   []
