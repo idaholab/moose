@@ -60,6 +60,12 @@ protected:
   /// we transition from one block to another.
   void fetchSystemContributionObjects();
 
+  /// Print list of object types executed and in which order
+  void printGeneralExecutionInformation() const;
+
+  /// Print ordering of objects executed on each block
+  void printBlockExecutionInformation() const;
+
   /// Reference to the problem
   FEProblemBase & _fe_problem;
 

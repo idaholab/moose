@@ -46,12 +46,17 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
 
   _old_subdomain = Moose::INVALID_BLOCK_ID;
 
+  printGeneralExecutionInformation();
+
   // Iterate over all the elements in the range
   for (const auto & elem_info : range)
   {
     _subdomain = elem_info->subdomain_id();
     if (_subdomain != _old_subdomain)
+    {
       fetchSystemContributionObjects();
+      printBlockExecutionInformation();
+    }
 
     const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
     for (auto kernel : _fv_kernels)
@@ -93,4 +98,37 @@ ComputeLinearFVElementalThread::fetchSystemContributionObjects()
   _old_subdomain = _subdomain;
 
   _fv_kernels = std::set<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
+}
+
+void
+ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  auto & console = _fe_problem.console();
+  auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning linear finite volume elemental objects loop on " << execute_on
+          << std::endl;
+  mooseDoOnce(console << "[DBG] Loop on elements (ElemInfo), objects ordered on each face: "
+                      << std::endl;
+              console << "[DBG] - linear finite volume kernels" << std::endl;);
+}
+
+void
+ComputeLinearFVElementalThread::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_kernels.size())
+    return;
+
+  auto & console = _fe_problem.console();
+  console << "[DBG] Linear FV elemental kernels on block "
+          << _fe_problem.mesh().getSubdomainName(_subdomain);
+
+  // Print the list of objects
+  std::vector<MooseObject *> kernels_to_print;
+  for (const auto & kernel : _fv_kernels)
+    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+  console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(kernels_to_print),
+                                        "[DBG]")
+          << std::endl;
 }

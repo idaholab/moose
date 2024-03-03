@@ -39,6 +39,8 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   _old_subdomain = Moose::INVALID_BLOCK_ID;
   _old_neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
+  printGeneralExecutionInformation();
+
   // Iterate over all the elements in the range
   for (const auto & face_info : range)
   {
@@ -46,7 +48,10 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
     _neighbor_subdomain =
         face_info->neighborPtr() ? face_info->neighbor().subdomain_id() : _subdomain;
     if (_subdomain != _old_subdomain || _neighbor_subdomain != _old_neighbor_subdomain)
+    {
       fetchSystemContributionObjects();
+      printBlockExecutionInformation();
+    }
 
     Real face_area = face_info->faceArea() * face_info->faceCoord();
 
@@ -112,4 +117,43 @@ ComputeLinearFVFaceThread::fetchSystemContributionObjects()
     _old_neighbor_subdomain = _neighbor_subdomain;
   }
   _fv_flux_kernels.insert(_neighbor_fv_flux_kernels.begin(), _neighbor_fv_flux_kernels.end());
+}
+
+void
+ComputeLinearFVFaceThread::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  auto & console = _fe_problem.console();
+  auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning linear finite volume flux objects loop on " << execute_on
+          << std::endl;
+  mooseDoOnce(console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: "
+                      << std::endl;
+              console << "[DBG] - linear finite volume flux kernels" << std::endl);
+}
+
+void
+ComputeLinearFVFaceThread::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_flux_kernels.size())
+    return;
+
+  // Print the location of the execution
+  auto & console = _fe_problem.console();
+  console << "[DBG] Linear flux kernels on block "
+          << _fe_problem.mesh().getSubdomainName(_subdomain);
+  if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+    console << " and neighbor " << _fe_problem.mesh().getSubdomainName(_neighbor_subdomain)
+            << std::endl;
+  else
+    console << " with no neighbor block" << std::endl;
+
+  // Print the list of objects
+  std::vector<MooseObject *> kernels_to_print;
+  for (const auto & kernel : _fv_flux_kernels)
+    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+  console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(kernels_to_print),
+                                        "[DBG]")
+          << std::endl;
 }
