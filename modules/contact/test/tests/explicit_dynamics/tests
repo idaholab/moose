@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#25666'
+  design = 'ExplicitDynamicsContactConstraint.md'
+  [block_penalty]
+    type = 'CSVDiff'
+    input = 'first_test.i'
+    csvdiff = 'first_test_out.csv'
+    abs_zero = 1.0e-4
+    rel_err = 5.0e-5
+    allow_warnings = true
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics.'
+  []
+  [test_balance]
+    type = 'Exodiff'
+    input = 'test_balance.i'
+    exodiff = 'test_balance_out.e'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    method = '!dbg'                  
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance.'
+  []
+  [test_balance_overwrite]
+    type = 'CSVDiff'
+    input = 'test_balance.i'
+    csvdiff = 'test_balance_overwrite_out.csv'
+    cli_args = 'ExplicitDynamicsContact/my_contact/overwrite_current_solution=true Outputs/file_base=test_balance_overwrite_out'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    method = '!dbg'                  
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
+                  ' and overwrite boundary variables after applying the time stepper scheme.'
+  []
+  [test_balance_short]
+    type = 'Exodiff'
+    input = 'test_balance.i'
+    exodiff = 'test_balance_short_out.e'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    cli_args = 'Outputs/file_base=test_balance_short_out Executioner/end_time=-0.009'            
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance in debug mode.'
+  []
+  [test_balance_overwrite_short]
+    type = 'CSVDiff'
+    input = 'test_balance.i'
+    csvdiff = 'test_balance_overwrite_short_out.csv'
+    cli_args = 'ExplicitDynamicsContact/my_contact/overwrite_current_solution=true Outputs/file_base=test_balance_overwrite_short_out Executioner/end_time=-0.009'
+    abs_zero = 1.0e-4
+    allow_warnings = true               
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
+                  ' and overwrite boundary variables after applying the time stepper scheme in debug mode.'
+  []
+  [settlement]
+    type = 'CSVDiff'
+    input = 'settlement.i'
+    csvdiff = 'settlement_out.csv'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
+                  'during an impact-settling under gravity acceleration.'
+    heavy = true
+  []
+[]

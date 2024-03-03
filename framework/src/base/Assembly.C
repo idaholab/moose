@@ -1867,8 +1867,8 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   if (_current_qrule_face != qrules(dim).fv_face.get())
   {
     setFaceQRule(qrules(dim).fv_face.get(), dim);
-    // The order of the element that is used for initing here doesn't matter since this will just be
-    // used for constant monomials (which only need a single integration point)
+    // The order of the element that is used for initing here doesn't matter since this will just
+    // be used for constant monomials (which only need a single integration point)
     if (dim == 3)
       _current_qrule_face->init(QUAD4);
     else
@@ -1881,9 +1881,9 @@ Assembly::reinitFVFace(const FaceInfo & fi)
               "Our finite volume quadrature rule should always yield a single point");
 
   // We've initialized the reference points. Now we need to compute the physical location of the
-  // quadrature points. We do not do any FE initialization so we cannot simply copy over FE results
-  // like we do in reinitFEFace. Instead we handle the computation of the physical locations
-  // manually
+  // quadrature points. We do not do any FE initialization so we cannot simply copy over FE
+  // results like we do in reinitFEFace. Instead we handle the computation of the physical
+  // locations manually
   _current_q_points_face.resize(1);
   const auto & ref_points = _current_qrule_face->get_points();
   const auto & ref_point = ref_points[0];
@@ -2344,12 +2344,12 @@ Assembly::reinitLowerDElem(const Elem * elem,
 
   if (pts && !weights)
   {
-    // We only have dummy weights so the JxWs computed during our FE reinits are meaningless and we
-    // cannot use them
+    // We only have dummy weights so the JxWs computed during our FE reinits are meaningless and
+    // we cannot use them
 
     if (_subproblem.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
-      // We are in a Cartesian coordinate system and we can just use the element volume method which
-      // has fast computation for certain element types
+      // We are in a Cartesian coordinate system and we can just use the element volume method
+      // which has fast computation for certain element types
       _current_lower_d_elem_volume = elem->volume();
     else
       // We manually compute the volume taking the curvilinear coordinate transformations into
@@ -2422,8 +2422,10 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
         "If reinitializing with more than one point, then I am dubious of your use case. Perhaps "
         "you are performing a DG type method and you are reinitializing using points from the "
         "element face. In such a case your neighbor JxW must have its index order 'match' the "
-        "element JxW index order, e.g. imagining a vertical 1D face with two quadrature points, if "
-        "index 0 for elem JxW corresponds to the 'top' quadrature point, then index 0 for neighbor "
+        "element JxW index order, e.g. imagining a vertical 1D face with two quadrature points, "
+        "if "
+        "index 0 for elem JxW corresponds to the 'top' quadrature point, then index 0 for "
+        "neighbor "
         "JxW must also correspond to the 'top' quadrature point. And libMesh/MOOSE has no way to "
         "guarantee that with multiple quadrature points.");
 
@@ -2844,11 +2846,12 @@ Assembly::prepareLowerD()
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
     {
-      // To cover all possible cases we should have 9 combinations below for every 2-permutation of
-      // Lower,Secondary,Primary. However, 4 cases will in general be covered by calls to prepare()
-      // and prepareNeighbor(). These calls will cover SecondarySecondary (ElementElement),
-      // SecondaryPrimary (ElementNeighbor), PrimarySecondary (NeighborElement), and PrimaryPrimary
-      // (NeighborNeighbor). With these covered we only need to prepare the 5 remaining below
+      // To cover all possible cases we should have 9 combinations below for every 2-permutation
+      // of Lower,Secondary,Primary. However, 4 cases will in general be covered by calls to
+      // prepare() and prepareNeighbor(). These calls will cover SecondarySecondary
+      // (ElementElement), SecondaryPrimary (ElementNeighbor), PrimarySecondary (NeighborElement),
+      // and PrimaryPrimary (NeighborNeighbor). With these covered we only need to prepare the 5
+      // remaining below
 
       // derivatives w.r.t. lower dimensional residuals
       jacobianBlockMortar(Moose::LowerLower, vi, vj, LocalDataKey{}, tag)
@@ -4787,8 +4790,8 @@ Assembly::adCurvatures() const
   _calculate_curvatures = true;
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   const FEType helper_type(helper_order, LAGRANGE);
-  // Must prerequest the second derivatives. Sadly because there is only one _need_second_derivative
-  // map for both volumetric and face FE objects we must request both here
+  // Must prerequest the second derivatives. Sadly because there is only one
+  // _need_second_derivative map for both volumetric and face FE objects we must request both here
   feSecondPhi<Real>(helper_type);
   feSecondPhiFace<Real>(helper_type);
   return _ad_curvatures;
@@ -4820,8 +4823,8 @@ Assembly::helpersRequestData()
 
   for (unsigned int dim = 0; dim < _mesh_dimension; dim++)
   {
-    // We need these computations in order to compute correct lower-d element volumes in curvilinear
-    // coordinates
+    // We need these computations in order to compute correct lower-d element volumes in
+    // curvilinear coordinates
     _holder_fe_lower_helper[dim]->get_xyz();
     _holder_fe_lower_helper[dim]->get_JxW();
   }
@@ -4868,8 +4871,8 @@ Assembly::havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for
       helper_container[dim] = unique_helper.get();
 
       // If the user did not request the helper type then we should erase it from our FE container
-      // so that they're not penalized (in the "we should be able to do p-refinement sense") for our
-      // perhaps silly helpers
+      // so that they're not penalized (in the "we should be able to do p-refinement sense") for
+      // our perhaps silly helpers
       if (!user_added_helper_type)
       {
         auto & fe_container_dim = libmesh_map_find(fe_container, dim);

@@ -157,6 +157,9 @@
     prop_names = density
     prop_values = 1e4
   [../]
+  [wave_speed]
+    type = WaveSpeed
+  []
 []
 
 [Executioner]

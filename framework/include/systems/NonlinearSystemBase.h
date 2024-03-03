@@ -44,6 +44,7 @@ class Split;
 class KernelBase;
 class BoundaryCondition;
 class ResidualObject;
+class PenetrationInfo;
 
 // libMesh forward declarations
 namespace libMesh
@@ -360,6 +361,12 @@ public:
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
   virtual void setSolution(const NumericVector<Number> & soln);
+
+  /**
+   * Called from explicit time stepping to overwrite boundary positions (explicit dynamics). This
+   * will close/assemble the passed-in \p soln after overwrite
+   */
+  void overwriteNodeFace(NumericVector<Number> & soln);
 
   /**
    * Update active objects of Warehouses owned by NonlinearSystemBase
@@ -689,6 +696,8 @@ public:
    */
   void setupDM();
 
+  using SystemBase::reinitNodeFace;
+
 protected:
   /**
    * Compute the residual for a given tag
@@ -762,6 +771,15 @@ protected:
   virtual void postAddResidualObject(ResidualObject &) {}
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
+
+  /**
+   * Reinitialize quantities such as variables, residuals, Jacobians, materials for node-face
+   * constraints
+   */
+  void reinitNodeFace(const Node & secondary_node,
+                      const BoundaryID secondary_boundary,
+                      const PenetrationInfo & info,
+                      const bool displaced);
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

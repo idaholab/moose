@@ -34,8 +34,8 @@
   [multi_update_error]
     type = RunException
     input = multi_update_var_error.i
-    expect_err = "writableVariable\(\) can only be called from AuxKernels, ElementUserObjects, or "
-                 "NodalUserObjects\. 'all' is neither of those\."
+    expect_err = "writableVariable\(\) can only be called from AuxKernels, ElementUserObjects, "
+                 "NodalUserObjects, or NodeFaceConstraints\. 'all' is none of those\."
     issues = '#22563'
     allow_deprecated = true
     requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
