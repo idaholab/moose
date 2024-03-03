@@ -148,4 +148,4 @@ RayTracingObject::getStudy()
   usingFunctionInterfaceMembers;                                                                   \
   usingPostprocessorInterfaceMembers;                                                              \
   usingTransientInterfaceMembers;                                                                  \
-  using RayTracingObject::currentRay;
+  using RayTracingObject::currentRay
