@@ -101,6 +101,10 @@ The multiple contact pairs feature is not yet available for mortar contact.
 
 !listing test/tests/multiple_contact_pairs/multiple_pairs.i block=Contact
 
+## Explicit dynamics
+
+For explicit dynamics contact setup, the action [ExplicitDynamicsContactAction](/actions/ExplicitDynamicsContactAction.md) is to be used.
+
 ## Example Input syntax id=example
 
 Node/face frictionless contact:

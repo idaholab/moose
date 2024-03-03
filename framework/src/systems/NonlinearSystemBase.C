@@ -96,6 +96,7 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/diagonal_matrix.h"
+#include "libmesh/fe_interface.h"
 
 #include <ios>
 
@@ -1085,6 +1086,65 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 }
 
 void
+NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
+                                    const BoundaryID secondary_boundary,
+                                    const PenetrationInfo & info,
+                                    const bool displaced)
+{
+  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
+
+  const Elem * primary_elem = info._elem;
+  unsigned int primary_side = info._side_num;
+  std::vector<Point> points;
+  points.push_back(info._closest_point);
+
+  // *These next steps MUST be done in this order!*
+  // ADL: This is a Chesterton's fence situation. I don't know which calls exactly the above comment
+  // is referring to. If I had to guess I would guess just the reinitNodeFace and prepareAssembly
+  // calls since the former will size the variable's dof indices and then the latter will resize the
+  // residual/Jacobian based off the variable's cached dof indices size
+
+  // This reinits the variables that exist on the secondary node
+  _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
+
+  // This will set aside residual and jacobian space for the variables that have dofs on
+  // the secondary node
+  _fe_problem.prepareAssembly(0);
+
+  _fe_problem.setNeighborSubdomainID(primary_elem, 0);
+
+  //
+  // Reinit material on undisplaced mesh
+  //
+
+  const Elem * const undisplaced_primary_elem =
+      displaced ? _mesh.elemPtr(primary_elem->id()) : primary_elem;
+  const Point undisplaced_primary_physical_point =
+      [&points, displaced, primary_elem, undisplaced_primary_elem]()
+  {
+    if (displaced)
+    {
+      const Point reference_point =
+          FEMap::inverse_map(primary_elem->dim(), primary_elem, points[0]);
+      return FEMap::map(primary_elem->dim(), undisplaced_primary_elem, reference_point);
+    }
+    else
+      // If our penetration locator is on the reference mesh, then our undisplaced
+      // physical point is simply the point coming from the penetration locator
+      return points[0];
+  }();
+
+  _fe_problem.reinitNeighborPhys(
+      undisplaced_primary_elem, primary_side, {undisplaced_primary_physical_point}, 0);
+  _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+
+  // Reinit points for constraint enforcement
+  if (displaced)
+    subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+}
+
+void
 NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & solution, bool displaced)
 {
 
@@ -1111,6 +1171,13 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
     {
       const auto & constraints =
           _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
+      std::unordered_set<unsigned int> needed_mat_props;
+      for (const auto & constraint : constraints)
+      {
+        const auto & mp_deps = constraint->getMatPropDependencies();
+        needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+      }
+      _fe_problem.setActiveMaterialProperties(needed_mat_props, /*tid=*/0);
 
       for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
@@ -1123,23 +1190,12 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            const Elem * primary_elem = info._elem;
-            unsigned int primary_side = info._side_num;
-
-            // reinit variables at the node
-            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
-
-            _fe_problem.prepareAssembly(0);
-
-            std::vector<Point> points;
-            points.push_back(info._closest_point);
-
-            // reinit variables on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            reinitNodeFace(secondary_node, secondary_boundary, info, displaced);
 
             for (const auto & nfc : constraints)
             {
+              if (nfc->isExplicitConstraint())
+                continue;
               // Return if this constraint does not correspond to the primary-secondary pair
               // prepared by the outer loops.
               // This continue statement is required when, e.g. one secondary surface constrains
@@ -1152,6 +1208,16 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
               {
                 constraints_applied = true;
                 nfc->computeSecondaryValue(solution);
+              }
+
+              if (nfc->hasWritableCoupledVariables())
+              {
+                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                for (auto * var : nfc->getWritableCoupledVariables())
+                {
+                  if (var->isNodalDefined())
+                    var->insert(_fe_problem.getAuxiliarySystem().solution());
+                }
               }
             }
           }
@@ -1253,6 +1319,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     BoundaryID secondary_boundary = pen_loc._secondary_boundary;
     BoundaryID primary_boundary = pen_loc._primary_boundary;
 
+    bool has_writable_variables(false);
+
     if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
       const auto & constraints =
@@ -1269,24 +1337,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            const Elem * primary_elem = info._elem;
-            unsigned int primary_side = info._side_num;
-
-            // *These next steps MUST be done in this order!*
-
-            // This reinits the variables that exist on the secondary node
-            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
-
-            // This will set aside residual and jacobian space for the variables that have dofs on
-            // the secondary node
-            _fe_problem.prepareAssembly(0);
-
-            std::vector<Point> points;
-            points.push_back(info._closest_point);
-
-            // reinit variables on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            reinitNodeFace(secondary_node, secondary_boundary, info, displaced);
 
             for (const auto & nfc : constraints)
             {
@@ -1328,11 +1379,33 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                   _fe_problem.cacheResidual(0);
                 _fe_problem.cacheResidualNeighbor(0);
               }
+              if (nfc->hasWritableCoupledVariables())
+              {
+                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                has_writable_variables = true;
+                for (auto * var : nfc->getWritableCoupledVariables())
+                {
+                  if (var->isNodalDefined())
+                    var->insert(_fe_problem.getAuxiliarySystem().solution());
+                }
+              }
             }
           }
         }
       }
     }
+    _communicator.max(has_writable_variables);
+
+    if (has_writable_variables)
+    {
+      // Explicit contact dynamic constraints write to auxiliary variables and update the old
+      // displacement solution on the constraint boundaries. Close solutions and update system
+      // accordingly.
+      _fe_problem.getAuxiliarySystem().solution().close();
+      _fe_problem.getAuxiliarySystem().system().update();
+      solutionOld().close();
+    }
+
     if (_assemble_constraints_separately)
     {
       // Make sure that secondary contribution to primary are assembled, and ghosts have been
@@ -1505,6 +1578,55 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
   // We may have additional tagged vectors that also need to be accumulated
   _fe_problem.addCachedResidual(0);
+}
+
+void
+NonlinearSystemBase::overwriteNodeFace(NumericVector<Number> & soln)
+{
+  // Overwrite results from integrator in case we have explicit dynamics contact constraints
+  auto & subproblem = _fe_problem.getDisplacedProblem()
+                          ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                          : static_cast<SubProblem &>(_fe_problem);
+  const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
+
+  for (const auto & it : penetration_locators)
+  {
+    PenetrationLocator & pen_loc = *(it.second);
+
+    const auto & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
+    const BoundaryID secondary_boundary = pen_loc._secondary_boundary;
+    const BoundaryID primary_boundary = pen_loc._primary_boundary;
+
+    if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, true))
+    {
+      const auto & constraints =
+          _constraints.getActiveNodeFaceConstraints(secondary_boundary, true);
+      for (const auto i : index_range(secondary_nodes))
+      {
+        const auto secondary_node_num = secondary_nodes[i];
+        const Node & secondary_node = _mesh.nodeRef(secondary_node_num);
+
+        if (secondary_node.processor_id() == processor_id())
+          if (pen_loc._penetration_info[secondary_node_num])
+            for (const auto & nfc : constraints)
+            {
+              if (!nfc->isExplicitConstraint())
+                continue;
+
+              // Return if this constraint does not correspond to the primary-secondary pair
+              // prepared by the outer loops.
+              // This continue statement is required when, e.g. one secondary surface constrains
+              // more than one primary surface.
+              if (nfc->secondaryBoundary() != secondary_boundary ||
+                  nfc->primaryBoundary() != primary_boundary)
+                continue;
+
+              nfc->overwriteBoundaryVariables(soln, secondary_node);
+            }
+      }
+    }
+  }
+  soln.close();
 }
 
 void
@@ -2166,23 +2288,13 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
           {
             PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
-            const Elem * primary_elem = info._elem;
-            unsigned int primary_side = info._side_num;
-
-            // reinit variables at the node
-            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
-
-            _fe_problem.prepareAssembly(0);
+            reinitNodeFace(secondary_node, secondary_boundary, info, displaced);
             _fe_problem.reinitOffDiagScalars(0);
 
-            std::vector<Point> points;
-            points.push_back(info._closest_point);
-
-            // reinit variables on the primary element's face at the contact point
-            _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
             for (const auto & nfc : constraints)
             {
+              if (nfc->isExplicitConstraint())
+                continue;
               // Return if this constraint does not correspond to the primary-secondary pair
               // prepared by the outer loops.
               // This continue statement is required when, e.g. one secondary surface constrains
@@ -2788,7 +2900,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   PARALLEL_TRY
   {
     // Add in Jacobian contributions from other Constraints
-    if (_fe_problem._has_constraints)
+    if (_fe_problem._has_constraints && tags.count(systemMatrixTag()))
     {
       // Some constraints need values from the Jacobian
       closeTaggedMatrices(tags);

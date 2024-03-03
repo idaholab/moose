@@ -37,6 +37,7 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntax("ContactAction", "Contact/*");
+  registerSyntax("ExplicitDynamicsContactAction", "ExplicitDynamicsContact/*");
 
   registerTask("output_penetration_info_vars", false);
   registerTask("add_contact_aux_variable", false);

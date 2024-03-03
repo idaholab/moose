@@ -21,6 +21,7 @@
 #include "AuxKernel.h"
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
+#include "NodeFaceConstraint.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
@@ -862,12 +863,13 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   const auto * aux = dynamic_cast<const AuxKernel *>(this);
   const auto * euo = dynamic_cast<const ElementUserObject *>(this);
   const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
+  const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
 
-  if (!aux && !euo && !nuo)
-    mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, or "
-               "NodalUserObjects. '",
+  if (!aux && !euo && !nuo && !nfc)
+    mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
+               "NodalUserObjects, or NodeFaceConstraints. '",
                _obj->name(),
-               "' is neither of those.");
+               "' is none of those.");
 
   if (aux && !aux->isNodal() && var->isNodal())
     mooseError("The elemental AuxKernel '",
@@ -929,14 +931,23 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
 void
 Coupleable::checkWritableVar(MooseWritableVariable * var)
 {
-  // check block restrictions for compatibility
+  // check domain restrictions for compatibility
   const auto * br = dynamic_cast<const BlockRestrictable *>(this);
-  if (!var->hasBlocks(br->blockIDs()))
+  const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
+
+  if (br && !var->hasBlocks(br->blockIDs()))
     mooseError("The variable '",
                var->name(),
                "' must be defined on all blocks '",
                _obj->name(),
-               "' is defined on");
+               "' is defined on.");
+
+  if (nfc && !var->hasBlocks(nfc->getSecondaryConnectedBlocks()))
+    mooseError("The variable '",
+               var->name(),
+               " must be defined on all blocks '",
+               _obj->name(),
+               "'s secondary surface is defined on.");
 
   // make sure only one object can access a variable
   for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
@@ -947,6 +958,8 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
       const auto * br_other = dynamic_cast<const BlockRestrictable *>(ci);
       if (br && br_other && br->blockRestricted() && br_other->blockRestricted() &&
           !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
+        continue;
+      else if (nfc)
         continue;
 
       mooseError("'",
@@ -960,6 +973,7 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
   // var is unique across threads, so we could forego having a separate set per thread, but we
   // need quick access to the list of all variables that need to be inserted into the solution
   // vector by a given thread.
+
   _writable_coupled_variables[_c_tid].insert(var);
 }
 

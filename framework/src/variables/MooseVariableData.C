@@ -1309,6 +1309,7 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
   for (unsigned int qp = 0; qp < u.size(); qp++)
   {
     u[qp] = (*_phi)[0][qp] * dof_values[0];
+
     for (unsigned int i = 1; i < dof_values.size(); i++)
       u[qp] += (*_phi)[i][qp] * dof_values[i];
   }
