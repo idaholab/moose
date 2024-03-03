@@ -35,6 +35,8 @@ class FunctionParserBase
 
 // Forward declarations
 class Action;
+class ActionFactory;
+class Factory;
 class InputParameters;
 class MooseEnum;
 class MooseObject;
@@ -43,6 +45,10 @@ class Problem;
 namespace hit
 {
 class Node;
+}
+namespace Moose
+{
+class Builder;
 }
 
 /**
@@ -75,6 +81,30 @@ public:
     std::vector<std::string> syntax;
     /// The type of argument
     ArgumentType argument_type;
+  };
+
+  /**
+   * Class that is used as a parameter to setHitNode() that allows only
+   * relevant classes to set the hit node
+   */
+  class SetHitNodeKey
+  {
+    friend class ActionFactory;
+    friend class Moose::Builder;
+    friend class Factory;
+    SetHitNodeKey() {}
+    SetHitNodeKey(const SetHitNodeKey &) {}
+  };
+
+  /**
+   * Class that is used as a parameter to setHitNode(param) that allows only
+   * relevant classes to set the hit node
+   */
+  class SetParamHitNodeKey
+  {
+    friend class Moose::Builder;
+    SetParamHitNodeKey() {}
+    SetParamHitNodeKey(const SetParamHitNodeKey &) {}
   };
 
   /**
@@ -869,8 +899,10 @@ public:
   const hit::Node * getHitNode(const std::string & param) const;
   /**
    * Sets the hit node associated with the parameter \p param to \p node
+   *
+   * Is protected to be called by only the Builder via the SetParamHitNodeKey.
    */
-  void setHitNode(const std::string & param, const hit::Node & node);
+  void setHitNode(const std::string & param, const hit::Node & node, const SetParamHitNodeKey);
 
   /**
    * @return A string representing the location in the input text the parameter originated from
@@ -1012,8 +1044,11 @@ public:
   /**
    * Sets the hit node that represents the syntax responsible for creating
    * these parameters
+   *
+   * Is protected to be called by only the ActionFactory, Builder, and Factory
+   * via the SetHitNodeKey.
    */
-  void setHitNode(const hit::Node & node) { _hit_node = &node; }
+  void setHitNode(const hit::Node & node, const SetHitNodeKey) { _hit_node = &node; }
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.

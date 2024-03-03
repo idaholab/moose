@@ -112,7 +112,7 @@ Factory::create(const std::string & obj_name,
   // non-MooseObjectAction Action
   if (!params.getHitNode())
     if (const auto hit_node = _app.getCurrentActionHitNode())
-      params.setHitNode(*hit_node);
+      params.setHitNode(*hit_node, {});
 
   // Set the _type parameter
   params.set<std::string>("_type") = obj_name;

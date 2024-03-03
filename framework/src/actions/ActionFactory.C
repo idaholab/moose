@@ -66,7 +66,7 @@ ActionFactory::create(const std::string & action,
   // with the new action's parameters so that errors can be associated with it
   if (!action_params.getHitNode())
     if (const auto hit_node = _app.getCurrentActionHitNode())
-      action_params.setHitNode(*hit_node);
+      action_params.setHitNode(*hit_node, {});
 
   // Add the name to the parameters and create the object
   action_params.set<std::string>("_action_name") = action_name;

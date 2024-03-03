@@ -259,7 +259,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
 
     params = _action_factory.getValidParams(it->second._action);
     params.set<ActionWarehouse *>("awh") = &_action_wh;
-    params.setHitNode(*n);
+    params.setHitNode(*n, {});
 
     extractParams(curr_identifier, params);
 
@@ -282,7 +282,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
       if (object_action)
       {
         auto & object_params = object_action->getObjectParams();
-        object_params.setHitNode(*n);
+        object_params.setHitNode(*n, {});
         extractParams(curr_identifier, object_params);
         object_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
@@ -950,7 +950,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
       auto node = root()->find(full_name);
       if (node && node->type() == hit::NodeType::Field)
       {
-        p.setHitNode(param_name, *node);
+        p.setHitNode(param_name, *node, {});
         p.set_attributes(param_name, false);
         // Check if we have already printed the deprecated param message.
         // If we haven't, add it to the tracker, and print it.
@@ -968,7 +968,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         node = root()->find(full_name);
         if (node)
         {
-          p.setHitNode(param_name, *node);
+          p.setHitNode(param_name, *node, {});
           p.set_attributes(param_name, false);
           _extracted_vars.insert(
               full_name); // Keep track of all variables extracted from the input file

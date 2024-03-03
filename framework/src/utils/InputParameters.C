@@ -1287,7 +1287,9 @@ InputParameters::getHitNode(const std::string & param) const
 }
 
 void
-InputParameters::setHitNode(const std::string & param, const hit::Node & node)
+InputParameters::setHitNode(const std::string & param,
+                            const hit::Node & node,
+                            const InputParameters::SetParamHitNodeKey)
 {
   mooseAssert(node.type() == hit::NodeType::Field, "Must be a field");
   at(param)._hit_node = &node;
