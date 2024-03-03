@@ -89,6 +89,7 @@ public:
    */
   class SetHitNodeKey
   {
+    friend class Action;
     friend class ActionFactory;
     friend class Moose::Builder;
     friend class Factory;

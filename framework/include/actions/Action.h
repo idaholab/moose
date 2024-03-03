@@ -120,6 +120,34 @@ protected:
    */
   virtual void act() = 0;
 
+  /**
+   * Associates the object's parameters \p params with the input location from this
+   * Action's parameter with the name \p param_name, if one exists.
+   *
+   * For example, you have a parameter in this action of type bool with name "add_mesh".
+   * You then add an action within this action that creates a mesh if this param is
+   * true. If you call associateWithParameter("add_mesh", action_params) where
+   * action_params are the parameters for the action, we then associate that action
+   * with the "add_mesh" parameter. Therefore, the resulting created mesh will also
+   * be associated with the "add_mesh" param and any errors that are non-parameter errors
+   * (i.e., mooseError/mooseWarning) will have the line context of the "add_mesh"
+   * parameter in this action. The same goes for any errors that are produce within
+   * the created action.
+   */
+  void associateWithParameter(const std::string & param_name, InputParameters & params) const;
+
+  /**
+   * The same as associateWithParameter() without \p from_params, but instead
+   * allows you to associate this with another object's parameters instead of the
+   * parameters from this action.
+   *
+   * An example here is when you want to associate the creation of an action with
+   * an arugment from the aplication.
+   */
+  void associateWithParameter(const InputParameters & from_params,
+                              const std::string & param_name,
+                              InputParameters & params) const;
+
   // The registered syntax for this block if any
   std::string _registered_identifier;
 

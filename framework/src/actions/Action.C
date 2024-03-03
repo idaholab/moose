@@ -152,3 +152,19 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
 
   return added;
 }
+
+void
+Action::associateWithParameter(const std::string & param_name, InputParameters & params) const
+{
+  associateWithParameter(parameters(), param_name, params);
+}
+
+void
+Action::associateWithParameter(const InputParameters & from_params,
+                               const std::string & param_name,
+                               InputParameters & params) const
+{
+  if (!params.getHitNode())
+    if (const auto hit_node = from_params.getHitNode(param_name))
+      params.setHitNode(*hit_node, {});
+}
