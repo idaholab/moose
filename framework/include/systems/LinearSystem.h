@@ -45,6 +45,8 @@ public:
                                  InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
+  virtual void initialSetup() override;
+
   // Overriding these to make sure the linear systems don't do anything during
   // residual/jacobian setup
   virtual void residualSetup() override {}

@@ -125,6 +125,17 @@ public:
 
 protected:
   /**
+   * Compute the distance between the cell center and the face.
+   */
+  Real computeCellToFaceDistance() const;
+
+  /**
+   * Computes the vector connecting the cell and boundary face centers.
+   * It is needed because sometimes boundaries can be assigned to internal faces as well.
+   */
+  RealVectorValue computeCellToFaceVector() const;
+
+  /**
    * Determine the single sided face argument when evaluating a functor on a face.
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average

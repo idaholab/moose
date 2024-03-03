@@ -39,10 +39,6 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  /// Compute the distance for the gradient approximation. We need this because
-  /// the sideset associated within this boundary condition might be within the mesh.
-  Real computeCellToFaceDistance() const;
-
   /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;
 };

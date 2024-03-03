@@ -83,3 +83,24 @@ LinearFVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
   mooseAssert(fi, "FaceInfo should not be null!");
   return makeFace(*fi, limiter_type, true, correct_skewness);
 }
+
+Real
+LinearFVBoundaryCondition::computeCellToFaceDistance() const
+{
+  const auto cell_to_face_vector = computeCellToFaceVector();
+  return std::abs(cell_to_face_vector * _current_face_info->normal());
+}
+
+RealVectorValue
+LinearFVBoundaryCondition::computeCellToFaceVector() const
+{
+  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
+  const auto defined_on_elem =
+      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
+  if (is_on_mesh_boundary)
+    return _current_face_info->dCN();
+  else
+    return (_current_face_info->faceCentroid() - (defined_on_elem
+                                                      ? _current_face_info->elemCentroid()
+                                                      : _current_face_info->neighborCentroid()));
+}

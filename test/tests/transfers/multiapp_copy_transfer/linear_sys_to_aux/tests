@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#25722'
+  design = 'MooseLinearVariableFV.md'
+
+  [test]
+    type = Exodiff
+    input = nonlinear_main.i
+    exodiff = 'nonlinear_main_out.e'
+    requirement = "The system shall support the transfer of linear finit volume variables."
+  []
+[]

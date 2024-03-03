@@ -96,7 +96,21 @@ LinearSystem::addTimeIntegrator(const std::string & /*type*/,
                                 const std::string & /*name*/,
                                 InputParameters & /*parameters*/)
 {
-  mooseError("LinearSystem doesn ot support timeintegrators yet!");
+  mooseError("LinearSystem does not support time integrators yet!");
+}
+
+void
+LinearSystem::initialSetup()
+{
+  SystemBase::initialSetup();
+
+  // Checking if somebody accidentally assigned nonlinear variables to this system
+  const auto & var_names = _vars[0].names();
+  for (const auto & name : var_names)
+    if (!dynamic_cast<MooseLinearVariableFVReal *>(_vars[0].getVariable(name)))
+      mooseError("You are trying to add a nonlinear variable to a linear system! The variable "
+                 "which is assigned to the wrong system: ",
+                 name);
 }
 
 void

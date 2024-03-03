@@ -2550,6 +2550,10 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2617,6 +2621,10 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a ScalarKernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2650,6 +2658,11 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError(
+        "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
+        "supported at the moment!");
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2705,6 +2718,9 @@ FEProblemBase::addConstraint(const std::string & c_name,
 
   const auto nl_sys_num =
       determineSolverSystem(parameters.varName(determine_var_param_name(), name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Constraint to a linear variable/system, which is not "
+               "supported at the moment!");
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2930,6 +2946,10 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a DiracKernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2966,6 +2986,9 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a DGKernel to a linear variable/system, which is not "
+               "supported at the moment!");
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -3054,6 +3077,9 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a InterfaceKernel to a linear variable/system, which is not "
+               "supported at the moment!");
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -4704,6 +4730,10 @@ FEProblemBase::addDamper(const std::string & damper_name,
           ? determineSolverSystem(parameters.varName("variable", name), true).second
           : (unsigned int)0;
 
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a DGKernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
 
@@ -6231,8 +6261,8 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   parameters.set<SubProblem *>("_subproblem") = this;
   logAdd("TimeIntegrator", name, type);
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
-  for (auto & nl : _nl)
-    nl->addTimeIntegrator(type, name + ":" + nl->name(), parameters);
+  for (auto & sys : _solver_systems)
+    sys->addTimeIntegrator(type, name + ":" + sys->name(), parameters);
   _has_time_integrator = true;
 
   // add vectors to store u_dot, u_dotdot, udot_old, u_dotdot_old and
@@ -6258,6 +6288,9 @@ FEProblemBase::addPredictor(const std::string & type,
                             InputParameters & parameters)
 {
   parallel_object_only();
+
+  if (!_problem->numNonlinearSystems() && _problem->numLinearSystems())
+    mooseError("Vector bounds cannot be used with LinearSystems!");
 
   parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);

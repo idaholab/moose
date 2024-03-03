@@ -163,6 +163,8 @@ LinearPicardSteady::execute()
     }
   }
 
+  _last_solve_converged = true;
+
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
   _problem.execute(EXEC_TIMESTEP_END);

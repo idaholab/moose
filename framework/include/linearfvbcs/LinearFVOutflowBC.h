@@ -43,10 +43,6 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  /// Computes the vector connecting the cell and boundary face centers.
-  /// It is needed because sometimes boundaries can be assigned to internal faces as well.
-  RealVectorValue computeCellToFaceVector() const;
-
   /// Switch for enabling linear extrapolation for the boundary face value
   const bool _two_term_expansion;
 

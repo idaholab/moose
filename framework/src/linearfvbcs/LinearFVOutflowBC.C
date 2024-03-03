@@ -107,17 +107,3 @@ LinearFVOutflowBC::computeBoundaryGradientRHSContribution() const
 {
   return computeBoundaryNormalGradient();
 }
-
-RealVectorValue
-LinearFVOutflowBC::computeCellToFaceVector() const
-{
-  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
-  const auto defined_on_elem =
-      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  if (is_on_mesh_boundary)
-    return _current_face_info->dCN();
-  else
-    return (_current_face_info->faceCentroid() - (defined_on_elem
-                                                      ? _current_face_info->elemCentroid()
-                                                      : _current_face_info->neighborCentroid()));
-}

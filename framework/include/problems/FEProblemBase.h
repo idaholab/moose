@@ -2177,6 +2177,9 @@ public:
 
   virtual std::size_t numSolverSystems() const override { return _num_nl_sys + _num_linear_sys; }
 
+  /// Check if the solver system is nonlinear
+  bool isSolverSystemNonlinear(const unsigned int sys_num) { return sys_num < _num_nl_sys; }
+
   virtual unsigned int currentNlSysNum() const override;
 
   virtual unsigned int currentLinearSysNum() const override;

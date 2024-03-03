@@ -76,18 +76,3 @@ LinearFVFunctorDirichletBC::computeBoundaryGradientRHSContribution() const
   return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
          computeCellToFaceDistance();
 }
-
-Real
-LinearFVFunctorDirichletBC::computeCellToFaceDistance() const
-{
-  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
-  const auto defined_on_elem =
-      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  if (is_on_mesh_boundary)
-    return std::abs(_current_face_info->dCN() * _current_face_info->normal());
-  else
-    return std::abs((_current_face_info->faceCentroid() -
-                     (defined_on_elem ? _current_face_info->elemCentroid()
-                                      : _current_face_info->neighborCentroid())) *
-                    _current_face_info->normal());
-}

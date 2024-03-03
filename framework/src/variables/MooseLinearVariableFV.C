@@ -12,6 +12,8 @@
 #include "NonlinearSystemBase.h"
 #include "DisplacedSystem.h"
 #include "SystemBase.h"
+#include "LinearSystem.h"
+#include "AuxiliarySystem.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "MathFVUtils.h"
@@ -60,6 +62,10 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _grad_phi_neighbor(
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 {
+  if (!dynamic_cast<LinearSystem *>(&_sys) && !dynamic_cast<AuxiliarySystem *>(&_sys))
+    this->paramError("solver_sys",
+                     "The assigned system is not a linear or an auxiliary system! Linear variables "
+                     "can only be assigned to linear or auxiliary systems!");
   _element_data = std::make_unique<MooseVariableDataLinearFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
   _neighbor_data = std::make_unique<MooseVariableDataLinearFV<OutputType>>(
@@ -169,8 +175,6 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
     mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
 
     const auto * const original_face_info = bc_pointer->currentFaceInfo();
-    const auto original_face_type = bc_pointer->currentFaceType();
-
     if (fi != original_face_info)
       bc_pointer->setCurrentFaceInfo(fi, face_type);
 
