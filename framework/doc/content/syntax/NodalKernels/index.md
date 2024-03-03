@@ -12,7 +12,7 @@ Some examples include:
   - [LowerBoundNodalKernel.md]
   - [UpperBoundNodalKernel.md]
 
-- assigning mass to nodes instead of elements, as performed in the Tensor Mechanics module
+- assigning mass to nodes instead of elements, as performed in the SolidMechanics module
   (see [NodalGravity](nodalkernels/NodalGravity.md optional=True) for example)
 
 

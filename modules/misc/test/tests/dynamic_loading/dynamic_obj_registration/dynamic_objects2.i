@@ -1,4 +1,4 @@
-# This input file contains some objects only available through heat_conduction
+# This input file contains some objects only available through heat_transfer
 [Mesh]
   type = GeneratedMesh
   dim = 2

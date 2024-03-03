@@ -3,7 +3,7 @@
 This tutorial provides an introduction to setting up models that combine models
 of heat transfer and mechanical deformation, including contact. This builds on the material in the
 [Introduction to Heat Transfer](heat_transfer/tutorials/introduction/index.md),
-[Introduction to Tensor Mechanics](tensor_mechanics/tutorials/introduction/index.md), and
+[Introduction to Solid Mechanics](solid_mechanics/tutorials/introduction/index.md), and
 [Introduction to Contact](contact/tutorials/introduction/index.md)
 tutorials, the completion of which is recommended prior to this tutorial.
 
@@ -13,7 +13,7 @@ There are three parts to this tutorial, which build in complexity.
 
 This is a basic problem that solves a coupled system of equations for the thermal
 and mechanical response of a single block. This builds on the single-block problems
-in the Introduction to Heat Transfer and Introduction to Tensor Mechanics tutorials.
+in the Introduction to Heat Transfer and Introduction to Solid Mechanics tutorials.
 
 ## [Thermal/mechanical contact](combined/tutorials/introduction/step01.md)
 

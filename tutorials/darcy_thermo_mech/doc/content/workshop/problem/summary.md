@@ -92,7 +92,7 @@ within the solution domain.
 ## [#step09]
 
 Thermal expansion of the porous media can be added to the coupled set of equations
-using the "tensor mechanics" module, without adding additional code.
+using the "solid mechanics" module, without adding additional code.
 
 !---
 

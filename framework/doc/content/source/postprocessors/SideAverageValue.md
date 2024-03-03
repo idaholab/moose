@@ -15,7 +15,7 @@ computing the value of a variable on the centerline of an axisymmetric simulatio
 
 ## Example Input Syntax
 
-!listing modules/tensor_mechanics/tutorials/basics/part_2.3.i block=Postprocessors
+!listing modules/solid_mechanics/tutorials/basics/part_2.3.i block=Postprocessors
 
 !syntax parameters /Postprocessors/SideAverageValue
 

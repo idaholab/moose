@@ -7,7 +7,7 @@ computes the spatial average value of the property over the radius.
 
 ## Applications
 
-This can be used for nonlocal damage models in the `TensorMechanics` module
+This can be used for nonlocal damage models in the `SolidMechanics` module
 where the damage_index that is used for computing the damage stress is average
 over a certain radius $r_0$. This can help alleviate mesh sensitivity in certain
 cases. This can be accomplished by running the RadialAverage object on a local

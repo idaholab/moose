@@ -255,9 +255,9 @@ applications. Capabilities include:
 
 !---
 
-## Tensor Mechanics
+## Solid Mechanics
 
-The Tensor Mechanics module is a library of simulation tools that solve continuum mechanics
+The Solid Mechanics module is a library of simulation tools that solve continuum mechanics
 problems. The module can be used to simulation both linear and finite strain
 mechanics, including Elasticity and Cosserat elasticity, Plasticity and micromechanics plasticity,
 Creep, and Damage due to cracking and property degradation.

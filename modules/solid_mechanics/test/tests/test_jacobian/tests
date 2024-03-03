@@ -1,0 +1,266 @@
+[Tests]
+  design = "Strains.md Stresses.md"
+  issues = "#8235"
+  parallel_scheduling = true
+  [./smallstrain_3D]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for 3D problems using small strain."
+  [../]
+  [./incrementalstrain_3D]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_3D'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for 3D problems using incremental small strain."
+  [../]
+  [./finitestrain_3D]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_3D'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for 3D problems using finite strain."
+  [../]
+  [./smallstrain_3D_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'finitestrain_3D'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for 3D problems using small strain and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./incrementalstrain_3D_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_3D_Bbar'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for 3D problems using incremental small strain and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./finitestrain_3D_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_3D_Bbar'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for 3D problems using finite strain and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./smallstrain_RZ]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for RZ problems using small strain."
+  [../]
+  [./incrementalstrain_RZ]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_RZ'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for RZ problems using incremental small strain."
+  [../]
+  [./finitestrain_RZ]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_RZ'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for RZ problems using finite strain."
+  [../]
+  [./smallstrain_RZ_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'finitestrain_RZ'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for RZ problems using small strain and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./incrementalstrain_RZ_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_RZ_Bbar'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for RZ problems using incremental small strain and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./finitestrain_RZ_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=FINITE
+                Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_RZ_Bbar'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for RZ problems using finite strain and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./smallplanestrain]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneSmallStrain
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for planestrain problems using small strain."
+  [../]
+  [./incrementalplanestrain]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneIncrementalStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallplanestrain'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for planestrain problems using incremental small strain."
+  [../]
+  [./finiteplanestrain]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneFiniteStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalplanestrain'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for planestrain problems using finite strain."
+  [../]
+  [./smallplanestrain_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneSmallStrain
+                Materials/stress/type=ComputeLinearElasticStress
+                GlobalParams/volumetric_locking_correction=true'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'finiteplanestrain'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for planestrain problems using small strain and volumetric"
+                  " locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./incrementalplanestrain_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneIncrementalStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress
+                GlobalParams/volumetric_locking_correction=true'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallplanestrain_Bbar'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for planestrain problems using incremental small strain"
+                  " and volumetric locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./finiteplanestrain_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneFiniteStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress
+                GlobalParams/volumetric_locking_correction=true'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalplanestrain_Bbar'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for planestrain problems using finite strain and volumetric"
+                  " locking correction."
+    design = "VolumetricLocking.md"
+  [../]
+  [./smallstrain_spherical]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_spherical.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL'
+    ratio_tol = 2e-10
+    difference_tol = 2e5
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for spherical problems using small strain."
+  [../]
+  [./incrementalstrain_spherical]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_spherical.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 2e-10
+    difference_tol = 2e5
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for spherical problems using small, incremental strain."
+  [../]
+  [./incstrn_pressure_spherical]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_pressure_spherical.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
+                Physics/SolidMechanics/QuasiStatic/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 2e-10
+    difference_tol = 2e5
+    design = 'Pressure.md'
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for spherical problems using small, incremental strain."
+  [../]
+[]

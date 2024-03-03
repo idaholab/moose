@@ -1,6 +1,6 @@
 # Mechanics Coupling
 
-Coupled phase field and mechanics simulations require a MOOSE executable that combine the `phase_field` and `tensor_mechanics` modules. One such executable can be built under `moose/modules/combined`. That directory also contains a set of examples that are worth looking at.
+Coupled phase field and mechanics simulations require a MOOSE executable that combine the `phase_field` and `solid_mechanics` modules. One such executable can be built under `moose/modules/combined`. That directory also contains a set of examples that are worth looking at.
 
 Full coupling between *phase field* and *mechanics* goes both ways:
 

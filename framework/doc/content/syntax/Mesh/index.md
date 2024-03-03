@@ -187,7 +187,7 @@ Calculations can take place in either the initial mesh configuration or, when re
 "displaced" configuration. To enable displacements, provide a vector of displacement variable names
 for each spatial dimension in the 'displacements' parameters within the Mesh block.
 
-!listing modules/tensor_mechanics/test/tests/truss/truss_2d.i block=Mesh
+!listing modules/solid_mechanics/test/tests/truss/truss_2d.i block=Mesh
 
 Once enabled, the any object that should operate on the displaced configuration should set the
 "use_displaced_mesh" to true. For example, the following snippet enables the computation of a

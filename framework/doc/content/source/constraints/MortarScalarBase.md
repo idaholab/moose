@@ -77,7 +77,7 @@ so consult the examples of these methods below in [#MSB-examples] for how to que
 using logical tests.
 
 Also, there are some pre-calculation routines that are called
-within the quadrature loop once before the loop over spatial variable test and shape functions as well as 
+within the quadrature loop once before the loop over spatial variable test and shape functions as well as
 before the loop over scalar components. These methods are useful for material or stabilization calculations.
 
 - `initScalarQpResidual()`: evaluations depending on qp but independent of test functions
@@ -101,8 +101,8 @@ value. Examples of the source codes below demonstrate this fact.
 
 ## Examples from Source Code id=MSB-examples
 
-As mentioned, the `computeScalarQpResidual` method +should+ be overridden for both flavors of 
-mortar constraints, non-AD and AD. As an example, consider the scalar residual weak form terms of the 
+As mentioned, the `computeScalarQpResidual` method +should+ be overridden for both flavors of
+mortar constraints, non-AD and AD. As an example, consider the scalar residual weak form terms of the
 [`PeriodicSegmentalConstraint`](/PeriodicSegmentalConstraint.md) class:
 
 \begin{equation}
@@ -117,7 +117,7 @@ provided in [PSC-non-ad-residual], where `_kappa_aux` is equal to $\sigma$.
          caption=The C++ weak-form residual statement of [eq:eq1].
 
 Meanwhile, the contribution to the lower spatial variable residual of this object is associated with [eq:eq2]
-and implemented in [lower-non-ad-residual] (note that the scalar variable `_kappa` is termed as 
+and implemented in [lower-non-ad-residual] (note that the scalar variable `_kappa` is termed as
 $\vec{\epsilon}$ in this weak form).
 
 \begin{equation}
@@ -139,7 +139,7 @@ and implemented in [EVC-non-ad-residual] within the [`EqualValueConstraint`](/Eq
          re=case Moose::MortarType::Lower.*?}
          caption=The C++ weak-form residual statement of [eq:eq3].
 
-For an example of the contributions to `_primary_var` and `_secondary_var` residuals, consider the 
+For an example of the contributions to `_primary_var` and `_secondary_var` residuals, consider the
 penalty version of the periodic constraint associated with [eq:eq4]
 and implemented in [PPSC-non-ad-residual] within the [`PenaltyPeriodicSegmentalConstraint`](/PenaltyPeriodicSegmentalConstraint.md) class.
 
@@ -186,7 +186,7 @@ methods listed in [#MSB-coupling] need to be overridden.
 
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the `MortarConstraint` class, each focusing on one scalar from the list. This approach is
-similar to how Tensor Mechanics module classes operator on one component variable of the displacement vector
+similar to how SolidMechanics module classes operator on one component variable of the displacement vector
 field and are coupled to the other components. The developer can decide how to organize the coupling
 and off-diagonal Jacobian terms in a logical way and document this for the user.
 

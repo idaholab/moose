@@ -6,7 +6,7 @@
 # plot vm_stress vs intnl to see constant hardening
 #
 # Original test located at:
-# tensor_mechanics/tests/j2_plasticity/hard1.i
+# solid_mechanics/tests/j2_plasticity/hard1.i
 
 [Mesh]
   type = GeneratedMesh
@@ -24,137 +24,136 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./intnl]
+  []
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vm_stress]
+  []
+  [vm_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./eq_pl_strain]
+  []
+  [eq_pl_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./intnl]
+  []
+  [intnl]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_internal_parameter
     variable = intnl
-  [../]
-  [./eq_pl_strain]
+  []
+  [eq_pl_strain]
     type = RankTwoScalarAux
     rank_two_tensor = plastic_strain
     scalar_type = EffectiveStrain
     variable = eq_pl_strain
-  [../]
-  [./vm_stress]
+  []
+  [vm_stress]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     scalar_type = VonMisesStress
     variable = vm_stress
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = 't/60'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = TensorMechanicsHardeningConstant
     value = 2.4e2
-  [../]
-  [./j2]
+  []
+  [j2]
     type = TensorMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     #with E = 2.1e5 and nu = 0.3
     #Hooke's law: E-nu to Lambda-G
     C_ijkl = '121154 80769.2'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = j2
     tangent_operator = elastic
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient
@@ -179,24 +178,24 @@
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./intnl]
+  []
+  [intnl]
     type = ElementAverageValue
     variable = intnl
-  [../]
-  [./eq_pl_strain]
+  []
+  [eq_pl_strain]
     type = PointValue
     point = '0 0 0'
     variable = eq_pl_strain
-  [../]
-  [./vm_stress]
+  []
+  [vm_stress]
     type = PointValue
     point = '0 0 0'
     variable = vm_stress
-  [../]
+  []
 []
 
 [Outputs]

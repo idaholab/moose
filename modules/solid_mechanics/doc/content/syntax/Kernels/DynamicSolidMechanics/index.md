@@ -1,0 +1,1 @@
+!template load file=stubs/moose_system.md.template name=DynamicSolidMechanics syntax=/Kernels/DynamicSolidMechanics

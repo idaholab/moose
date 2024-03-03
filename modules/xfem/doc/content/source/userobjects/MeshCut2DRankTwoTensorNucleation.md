@@ -6,7 +6,7 @@
 
 The XFEM nucleation UserObject `MeshCut2DRankTwoTensorNucleation` defines new cracks that are added to the cutter
 mesh used by [MeshCut2DFractureUserObject.md] when a user-defined nucleation criterion is met.
-The nucleation criterion is based on the [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/scalar_type) extracted from a `RankTwoTensor` specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/tensor) (used to store stresses and strains in TensorMechanics),
+The nucleation criterion is based on the [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/scalar_type) extracted from a `RankTwoTensor` specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/tensor) (used to store stresses and strains in SolidMechanics),
 such as a principal stress or a component of stress.
 
 If the scalar exceeds a threshold specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/nucleation_threshold), a line segment with a length specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/nucleation_length) will be inserted

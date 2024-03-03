@@ -25,7 +25,7 @@ application.
 - [Richards](modules/richards/index.md)
 - [Solid Properties](modules/solid_properties/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)
-- [Tensor Mechanics](modules/tensor_mechanics/index.md)
+- [Tensor Mechanics](modules/solid_mechanics/index.md)
 - [Thermal Hydraulics](modules/thermal_hydraulics/index.md)
 - [XFEM](modules/xfem/index.md)
 

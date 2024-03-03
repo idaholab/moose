@@ -7,7 +7,7 @@
 
 The MOOSE phase field module is a library for simplifying the implementation of simulation tools that
 employ the phase field model. Multiphysics capability that includes mechanics and heat conduction can
-be obtained by employing the tensor mechanics and heat transfer modules. More information about
+be obtained by employing the solid mechanics and heat transfer modules. More information about
 this module is found below:
 
 ## Basic Phase Field Model Information

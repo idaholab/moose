@@ -1,1 +1,0 @@
-!syntax complete groups=TensorMechanicsApp

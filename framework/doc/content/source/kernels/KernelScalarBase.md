@@ -49,10 +49,10 @@ already been implemented within other MOOSE classes.
 - `computeScalarQpOffDiagJacobianScalar(svar_num)`: off-diagonal Jacobian component d-`_kappa`-residual / d-`svar`
 
 Examples of some of these methods are shown below in [#KSB-examples]. Loops over the coupled variables wrap around these quadrature loops. The integer for the spatial variable is `jvar_num` and the integer for the
-scalar variable is `svar_num`. 
+scalar variable is `svar_num`.
 
 Also, there are some pre-calculation routines that are called
-within the quadrature loop once before the loop over spatial variable test and shape functions as well as 
+within the quadrature loop once before the loop over spatial variable test and shape functions as well as
 before the loop over scalar components. These methods are useful for material or stabilization calculations.
 
 - `initScalarQpResidual()`: evaluations depending on qp but independent of test functions
@@ -75,7 +75,7 @@ value. Examples of the source codes below demonstrate this fact.
 `ADKernelScalarBase` only works with MOOSE configured with global AD indexing (the default).
 
 !alert note title=Parallelization of scalar contributions
-While these quadrature loops are convenient for implementation in a single object, the speed of 
+While these quadrature loops are convenient for implementation in a single object, the speed of
 parallel execution may be slower due to the sequential assembly needed from each element assembling
 to the same scalar variable `_kappa`. For greater speed, the developer may instead implement the
 terms for `computeScalarQpResidual()` and `computeScalarQpJacobian()` through a derived class of `ElementIntegralUserObject` as discussed at [ScalarKernels/index.md#couple-spatial].
@@ -83,7 +83,7 @@ terms for `computeScalarQpResidual()` and `computeScalarQpJacobian()` through a 
 ## Examples from Source Code id=KSB-examples
 
 As mentioned, the `computeScalarQpResidual` method +should+ be overridden for both flavors of kernels, non-AD
-and AD. As an example, consider the scalar residual weak form term of the 
+and AD. As an example, consider the scalar residual weak form term of the
 [`ScalarLMKernel`](/ScalarLMKernel.md) class:
 
 \begin{equation}
@@ -92,7 +92,7 @@ and AD. As an example, consider the scalar residual weak form term of the
 
 The [`ScalarLMKernel`](/ScalarLMKernel.md) class is implemented using the
 [`GenericKernelScalar`](/GenericKernelScalar.md) template class to contain both the AD and non-AD
-versions within the same source files; the test sources files in the Tensor Mechanics module described
+versions within the same source files; the test sources files in the SolidMechanics module described
 at the bottom of this section appear more simply since they are non-AD only: [HTLSDR-header].
 The `computeScalarQpResidual` method for this class is
 provided in [scalar-kernel-non-ad-residual], where `_value/_pp_value` is equal to $V_0$.
@@ -102,7 +102,7 @@ provided in [scalar-kernel-non-ad-residual], where `_value/_pp_value` is equal t
          caption=The C++ weak-form residual statement of [eq:eq1].
 
 Meanwhile, the contribution to the spatial variable residual of this object is associated with [eq:eq2]
-and implemented in [kernel-non-ad-residual] (note that the scalar variable `_kappa` is termed as 
+and implemented in [kernel-non-ad-residual] (note that the scalar variable `_kappa` is termed as
 $\lambda^h$ in this weak form).
 
 \begin{equation}
@@ -136,12 +136,12 @@ Depending upon the weak form and its coupling terms between spatial and scalar v
 methods listed in [#KSB-coupling] need to be overridden.
 
 The AD version of this object, [`ADScalarLMKernel`](/ADScalarLMKernel.md), only requires the residual
-implementation. A solely AD source file would only need to override `computeScalarQpResidual` and `computeQpResidual` and leave all the Jacobian methods as base definitions, which return zero. See 
+implementation. A solely AD source file would only need to override `computeScalarQpResidual` and `computeQpResidual` and leave all the Jacobian methods as base definitions, which return zero. See
 [MortarScalarBase](source/constraints/MortarScalarBase.md) for examples of AD-only and non-AD separate classes.
 
-As a more complicated example of the scalar augmentation system for kernels, the Tensor Mechanics test
+As a more complicated example of the scalar augmentation system for kernels, the SolidMechanics test
 app contains headers, source, and test files for an alternative implementation of the
-"HomogenizedTotalLagrangianStressDivergence" system from the Tensor Mechanics module. This Kernel is
+"HomogenizedTotalLagrangianStressDivergence" system from the SolidMechanics module. This Kernel is
 designated with the suffix "S" to distinguish from the existing objects in the module. Also, there are
 other intermediate classes such as "TotalLagrangianStressDivergence" that are also designated with
 an "S" suffix. These other classes are needed since the lower class needs to also derive from
@@ -151,29 +151,29 @@ about leaving this parameter blank.
 
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the Kernel class, each focusing on one scalar from the list. This approach is similar
-to how Tensor Mechanics module classes operator on one component variable of the displacement vector
+to how SolidMechanics module classes operator on one component variable of the displacement vector
 field and are coupled to the other components. The developer can decide how to organize the coupling
 and off-diagonal Jacobian terms in a logical way and document this for the user.
 
 Examples of two schemes for decomposing the coupling terms and having multiple scalar variables are
-contained in the source files of the Tensor Mechanics module test directory as well as input files
+contained in the source files of the SolidMechanics module test directory as well as input files
 `2drow.i` and `2dsole.i`, with listings below. The comments within these header and source files
 serve as documentation and should be consulted to visualize how the rows and columns of the relevant
 residual and Jacobian contributions are handled. The suffix "R" refers to assembling the entire row
 of the Jacobian in one object, and the suffix "A" refers to assembling symmetric pairs of the residual
 and Jacobian; see the header file for clarification.
 
-!listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceR.h id=HTLSDR-header
+!listing modules/solid_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceR.h id=HTLSDR-header
          re=/// Total Lagrangian formulation.*?}
          caption=Organization of spatial and scalar variable contributions by row.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2drow.i block=Kernels
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2drow.i block=Kernels
 
-!listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceA.h id=HTLSDA-header
+!listing modules/solid_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceA.h id=HTLSDA-header
          re=/// Total Lagrangian formulation.*?}
          caption=Organization of spatial and scalar variable contributions by symmetric pairs.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2dsole.i block=Kernels
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2dsole.i block=Kernels
 
 !alert note title=Displaced mesh features untested
 The displaced mesh features are not yet tested for the scalar augmentation system.

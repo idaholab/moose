@@ -1,7 +1,7 @@
 Content:
     - framework/doc/content
     - modules/porous_flow/doc/content
-    - modules/tensor_mechanics/doc/content
+    - modules/solid_mechanics/doc/content
     - modules/fluid_properties/doc/content
     - modules/chemical_reactions/doc/content
 
@@ -22,7 +22,7 @@ Extensions:
         includes:
             - framework/include
             - modules/porous_flow/include
-            - modules/tensor_mechanics/include
+            - modules/solid_mechanics/include
             - modules/fluid_properties/include
             - modules/chemical_reactions/include
     MooseDocs.extensions.common:

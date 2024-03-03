@@ -13,9 +13,15 @@
 []
 
 [ScalarKernels]
+  inactive = 'coupled_dot'
   [time]
     type = ADScalarTimeDerivative
     variable = u
+  []
+  [coupled_dot]
+    type = ADCoupledScalarDot
+    variable = u
+    v = u
   []
   [source]
     type = ParsedODEKernel

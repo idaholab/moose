@@ -41,7 +41,7 @@
 #include "StochasticToolsTestApp.h"
 #include "ScalarTransportTestApp.h"
 #include "SolidPropertiesTestApp.h"
-#include "TensorMechanicsTestApp.h"
+#include "SolidMechanicsTestApp.h"
 #include "ThermalHydraulicsTestApp.h"
 #include "XFEMTestApp.h"
 
@@ -94,7 +94,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     ScalarTransportTestApp::registerAll(f, af, s, use_test_objs);
     SolidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
     StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
-    TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
+    SolidMechanicsTestApp::registerAll(f, af, s, use_test_objs);
     ThermalHydraulicsTestApp::registerAll(f, af, s, use_test_objs);
     XFEMTestApp::registerAll(f, af, s, use_test_objs);
   }
@@ -129,7 +129,7 @@ CombinedTestApp::registerApps()
   ScalarTransportTestApp::registerApps();
   SolidPropertiesTestApp::registerApps();
   StochasticToolsTestApp::registerApps();
-  TensorMechanicsTestApp::registerApps();
+  SolidMechanicsTestApp::registerApps();
   ThermalHydraulicsTestApp::registerApps();
   XFEMTestApp::registerApps();
 }

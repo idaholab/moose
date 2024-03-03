@@ -230,11 +230,11 @@ Applications:
             - framework/doc/remove.yml
             - modules/stochastic_tools/doc/remove.yml
 
-    tensor_mechanics:
+    solid_mechanics:
         exe_directory: modules/combined
         app_types:
-            - TensorMechanicsApp
-        content_directory: modules/tensor_mechanics/doc/content
+            - SolidMechanicsApp
+        content_directory: modules/solid_mechanics/doc/content
         remove:
             - framework/doc/remove.yml
         unregister:
@@ -430,9 +430,9 @@ Requirements:
         log_missing_requirement: WARNING
         log_top_level_detail: WARNING
 
-    tensor_mechanics:
+    solid_mechanics:
         directories:
-            - modules/tensor_mechanics
+            - modules/solid_mechanics
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING

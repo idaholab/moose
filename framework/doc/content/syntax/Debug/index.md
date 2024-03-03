@@ -6,7 +6,7 @@ The `[Debug]` input file block is designed to contain options to enable debuggin
 simulation. For example, the input file snippet below demonstrates how to enable the material
 property debugging tool. This tool automatically outputs material properties as fields in the
 [outputs/Exodus.md] file.
-A complete list of the available options is provided in [#debug-params].
+A complete list of the available options is provided in the parameter list at the bottom of this page.
 
 !listing show_material_props_debug.i block=Debug
 

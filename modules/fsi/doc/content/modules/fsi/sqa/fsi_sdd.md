@@ -14,7 +14,7 @@ Specific details unique to the module are outlined in this document.
 The {{module}} module inherits the
 [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
 as well as the dependencies and limitations of the [Navier-Stokes](navier_stokes_sdd.md#dependencies-and-limitations)
-and [tensor mechanics](tensor_mechanics_sdd.md#dependencies-and-limitations) modules. The {{module}}
+and [solid mechanics](solid_mechanics_sdd.md#dependencies-and-limitations) modules. The {{module}}
 module is in its relative infancy, so it may not have all the features desired by potential users.
 Currently there is relatively little programmatic funding at Idaho National Laboratory to support
 development of the {{module}} module, so this may limit they growth in capability.

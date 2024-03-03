@@ -121,7 +121,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
   if (action->specificTaskName() != "") // Case 1
     tasks.insert(action->specificTaskName());
   else if (registered_identifier == "" &&
-           _syntax.getSyntaxByAction(action->type()).size() > 1) // Case 2
+           _syntax.getNonDeprecatedSyntaxByAction(action->type()).size() > 1) // Case 2
   {
     std::set<std::string> local_tasks = action->getAllTasks();
     mooseAssert(local_tasks.size() == 1, "More than one task inside of the " << action->name());

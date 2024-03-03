@@ -124,7 +124,7 @@
   [dynamic_object_loading_wrong_app]
     type = 'RunException'
     input = 'dynamic_wrong_lib.i'
-    expect_err = 'We loaded objects from the following libraries.*\n\tlibtensor_mechanics'
+    expect_err = 'We loaded objects from the following libraries.*\n\tlibsolid_mechanics'
     library_mode = 'DYNAMIC'
     group = 'dynamic_loading'
 

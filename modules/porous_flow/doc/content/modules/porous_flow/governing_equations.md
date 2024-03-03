@@ -245,7 +245,7 @@ $\mathbf{F}_{\beta}$ is the advective Darcy flux.
 ## Solid mechanics
 
 Most of the solid mechanics used by the Porous Flow module is handled by the
-[Tensor Mechanics](/tensor_mechanics/index.md) module.  This section provides a
+[Solid Mechanics](/solid_mechanics/index.md) module.  This section provides a
 brief overview, concentrating on the aspects that differ from pure solid
 mechanics.
 

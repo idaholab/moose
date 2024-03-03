@@ -1,0 +1,1 @@
+!template load file=stubs/moose_object.md.template name=SolidMechanicsPlasticJ2 syntax=/UserObjects/SolidMechanicsPlasticJ2

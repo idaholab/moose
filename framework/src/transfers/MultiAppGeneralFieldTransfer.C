@@ -134,6 +134,11 @@ MultiAppGeneralFieldTransfer::validParams()
                         true,
                         "Whether to look for potential conflicts between two valid and different "
                         "source values for any target point");
+  params.addParam<unsigned int>(
+      "value_conflicts_output",
+      10,
+      "Maximum number of conflicts to output if value-conflicts, from equidistant sources to a "
+      "given transfer target location, search is turned on");
 
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction "
@@ -166,6 +171,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),
     _search_value_conflicts(getParam<bool>("search_value_conflicts")),
+    _already_output_search_value_conflicts(false),
+    _search_value_conflicts_max_log(getParam<unsigned int>("value_conflicts_output")),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _default_extrapolation_value(getParam<Real>("extrapolation_constant")),
     _bbox_factor(getParam<Real>("bbox_factor")),
@@ -462,6 +469,18 @@ MultiAppGeneralFieldTransfer::prepareToTransfer()
 
   // Get the index for the first source app every processor owns
   _global_app_start_per_proc = getGlobalStartAppPerProc();
+
+  // No need to keep searching for conflicts if the mesh has not changed
+  if (_already_output_search_value_conflicts && !_displaced_source_mesh && !_displaced_target_mesh)
+    _search_value_conflicts = false;
+}
+
+void
+MultiAppGeneralFieldTransfer::postExecute()
+{
+  MultiAppConservativeTransfer::postExecute();
+  if (_search_value_conflicts)
+    _already_output_search_value_conflicts = true;
 }
 
 void
@@ -1214,14 +1233,18 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
   const std::string rank_str = std::to_string(_communicator.rank());
   if (_local_conflicts.size())
   {
+    unsigned int num_outputs = 0;
     std::string local_conflicts_string = "";
     std::string potential_reasons =
         "Are some points in target mesh equidistant from the sources "
         "(nodes/centroids/apps/positions, depending on transfer) in origin mesh(es)?\n";
+    if (hasFromMultiApp() && _from_problems.size() > 1)
+      potential_reasons += "Are multiple subapps overlapping?\n";
     for (const auto & conflict : _local_conflicts)
     {
       const unsigned int problem_id = std::get<0>(conflict);
       Point p = std::get<2>(conflict);
+      num_outputs++;
 
       std::string origin_domain_message;
       if (hasFromMultiApp() && !_nearest_positions_obj)
@@ -1250,12 +1273,15 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       else
         origin_domain_message = "In source parent app mesh,";
 
-      if (hasFromMultiApp() && _from_problems.size() > 1)
-        mooseDoOnce(potential_reasons += "Are multiple subapps overlapping?\n";);
-
-      local_conflicts_string += origin_domain_message + " point: (" + std::to_string(p(0)) + ", " +
-                                std::to_string(p(1)) + ", " + std::to_string(p(2)) +
-                                "), equi-distance: " + std::to_string(std::get<3>(conflict)) + "\n";
+      if (num_outputs < _search_value_conflicts_max_log)
+        local_conflicts_string += origin_domain_message + " point: (" + std::to_string(p(0)) +
+                                  ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) +
+                                  "), equi-distance: " + std::to_string(std::get<3>(conflict)) +
+                                  "\n";
+      else if (num_outputs == _search_value_conflicts_max_log)
+        local_conflicts_string +=
+            "Maximum output of the search for value conflicts has been reached. Further conflicts "
+            "will not be output.\nIncrease 'search_value_conflicts_max_log' to output more.";
     }
     // Explicitly name source to give more context
     std::string source_str = "unknown";
@@ -1275,15 +1301,19 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
   // Output the conflicts discovered when receiving values from multiple origin problems
   if (_received_conflicts.size())
   {
-    std::string received_conflict_string = "";
+    unsigned int num_outputs = 0;
+    std::string received_conflicts_string = "";
     std::string potential_reasons =
         "Are some points in target mesh equidistant from the sources "
         "(nodes/centroids/apps/positions, depending on transfer) in origin mesh(es)?\n";
+    if (hasToMultiApp() && _to_problems.size() > 1)
+      potential_reasons += "Are multiple subapps overlapping?\n";
     for (const auto & conflict : _received_conflicts)
     {
       // Extract info for the potential overlap
       const unsigned int problem_id = std::get<0>(conflict);
       const Point p = std::get<2>(conflict);
+      num_outputs++;
 
       std::string target_domain_message;
       if (hasToMultiApp())
@@ -1294,29 +1324,33 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       else
         target_domain_message = "In target parent app mesh,";
 
-      if (hasToMultiApp() && _to_problems.size() > 1)
-        mooseDoOnce(potential_reasons += "Are multiple subapps overlapping?\n";);
-      received_conflict_string += target_domain_message + " point: (" + std::to_string(p(0)) +
-                                  ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) +
-                                  "), equi-distance: " + std::to_string(std::get<3>(conflict)) +
-                                  "\n";
+      if (num_outputs < _search_value_conflicts_max_log)
+        received_conflicts_string += target_domain_message + " point: (" + std::to_string(p(0)) +
+                                     ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) +
+                                     "), equi-distance: " + std::to_string(std::get<3>(conflict)) +
+                                     "\n";
+      else if (num_outputs == _search_value_conflicts_max_log)
+        received_conflicts_string +=
+            "Maximum output of the search for value conflicts has been reached. Further conflicts "
+            "will not be output.\nIncrease 'search_value_conflicts_max_log' to output more.";
     }
     mooseWarning("On rank " + rank_str +
                  ", multiple valid values from equidistant points were "
                  "received for target variable '" +
                  getToVarName(var_index) + "' for " + std::to_string(_received_conflicts.size()) +
                  " target points.\n" + potential_reasons + "Conflicts detected at :\n" +
-                 received_conflict_string);
+                 received_conflicts_string);
   }
 
   if (_local_conflicts.empty() && _received_conflicts.empty())
   {
     if (isParamSetByUser("search_value_conflict"))
       mooseInfo("Automated diagnosis did not detect floating point indetermination in transfer");
-    else if (_to_problems.size() > 10 || _from_problems.size() > 10)
-      mooseInfo("Automated diagnosis did not detect any floating point indetermination in "
-                "transfer. You may consider turning it off using `search_value_conflicts=false` "
-                "to improve performance/scalability.");
+    else if (_to_problems.size() > 10 || _from_problems.size() > 10 || _communicator.size() > 10)
+      mooseInfo(
+          "Automated diagnosis did not detect any floating point indetermination in "
+          "the transfer. You may consider turning it off using `search_value_conflicts=false` "
+          "to improve performance/scalability.");
   }
 
   // Reset the conflicts vectors, to be used for checking conflicts when transferring the next

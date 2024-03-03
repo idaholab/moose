@@ -112,18 +112,16 @@ CutMeshByPlaneGenerator::generate()
        elem_it++)
   {
     const unsigned int & n_vertices = (*elem_it)->n_vertices();
-    unsigned short elem_vertices_counter_1(0);
-    unsigned short elem_vertices_counter_2(0);
+    unsigned short elem_vertices_counter(0);
     for (unsigned int i = 0; i < n_vertices; i++)
     {
-      if (pointPlaneRelation((*(*elem_it)->node_ptr(i)), _plane_point, _plane_normal) ==
-          PointPlaneRelationIndex::plane_normal_side)
-        elem_vertices_counter_1++;
+      // We define elem_vertices_counter in this way so that those elements with one face on the
+      // plane are also processed to have the cut face boundary assigned.
       if (pointPlaneRelation((*(*elem_it)->node_ptr(i)), _plane_point, _plane_normal) !=
           PointPlaneRelationIndex::opposite_plane_normal_side)
-        elem_vertices_counter_2++;
+        elem_vertices_counter++;
     }
-    if (elem_vertices_counter_2 == n_vertices)
+    if (elem_vertices_counter == n_vertices)
       (*elem_it)->subdomain_id() = block_id_to_remove;
     else
     {
@@ -131,7 +129,7 @@ CutMeshByPlaneGenerator::generate()
       if ((*elem_it)->default_order() != Order::FIRST)
         mooseError("Only first order elements are supported for cutting.");
       cross_and_remained_elems_pre_convert.push_back(
-          std::make_pair((*elem_it)->id(), elem_vertices_counter_1 > 0));
+          std::make_pair((*elem_it)->id(), elem_vertices_counter > 0));
     }
   }
 

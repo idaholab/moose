@@ -12,15 +12,15 @@ the screen and Moose will halt execution.
 
 ## Example
 
-The input file `two_block_new.i` is a test for the TensorMechanics master action, an action
+The input file `two_block_new.i` is a test for the SolidMechanics Physics action, an action
 that sets up (aux)variables, (aux)kernels, and materials for mechanics problems. Let's
 see if we can examine what exactly a particular action block (`[./block2]`) in this file sets
 up.
 
-Compile the tensor_mechanics module executable and run
+Compile the solid_mechanics module executable and run
 
 ```
-./tensor_mechanics-opt -i test/tests/action/two_block_new.i Problem/type=DumpObjectsProblem Problem/dump_path=Modules/TensorMechanics/Master/block2
+./solid_mechanics-opt -i test/tests/action/two_block_new.i Problem/type=DumpObjectsProblem Problem/dump_path=Physics/SolidMechanics/QuasiStatic/block2
 ```
 
 You should obtain the output
@@ -99,7 +99,7 @@ You should obtain the output
 
 which is what the
 
-!listing test/tests/action/two_block_new.i block=Modules/TensorMechanics/Master
+!listing test/tests/action/two_block_new.i block=Physics/SolidMechanics/QuasiStatic
 
 block in this input file creates.
 
