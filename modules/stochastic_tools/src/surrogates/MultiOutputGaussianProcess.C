@@ -56,29 +56,18 @@ MultiOutputGaussianProcess::evaluate(const std::vector<Real> & x, std::vector<Re
     test_points(0, ii) = x[ii];
 
   // Inputs
-  std::cout << "Test: " << Moose::stringify(test_points) << std::endl;
   _mogp_handler.getParamStandardizer().getStandardized(test_points);
-  // std::cout << "Test: " << Moose::stringify(test_points) << std::endl;
   RealEigenMatrix K_train = _mogp_handler.getK();
   RealEigenMatrix K_train_test(test_points.rows(), K_train.rows());
-  // RealEigenMatrix batch_inp = _mogp_handler.getBatchInputs();
+  RealEigenMatrix K_test(test_points.rows(), test_points.rows());
   _mogp_handler.getCovarFunction().computeCovarianceMatrix(
-      K_train_test, test_points, _training_params, false); // batch_inp
-
-  // std::cout << "Test: " << Moose::stringify(_training_params.row(0)) << std::endl;
-  // RealEigenMatrix K_train = _mogp_handler.getK();
-  // RealEigenMatrix K_train_test(test_points.rows(), K_train.rows());
-  // RealEigenMatrix batch_inp = _mogp_handler.getBatchInputs();
-  // _mogp_handler.getCovarFunction().computeCovarianceMatrix(
-  //     K_train_test, _training_params.row(0), batch_inp, false);
+      K_train_test, test_points, _training_params, false);
+  _mogp_handler.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   // Outputs
   RealEigenMatrix B = _mogp_handler.getB();
   RealEigenMatrix kappa_results_solve = _mogp_handler.getKappaResultsSolve();
-  // std::cout << Moose::stringify(kappa_results_solve) << std::endl;
-  // std::cout << kappa_results_solve.rows() << " cols " << kappa_results_solve.cols() << std::endl;
   RealEigenMatrix kappa_train_test;
-  // K_train_test = K_train_test.transpose();
   _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_train_test, K_train_test, B);
 
   // KEY PIECE OF THE CODE
@@ -95,30 +84,10 @@ MultiOutputGaussianProcess::evaluate(const std::vector<Real> & x, std::vector<Re
     }
   }
 
-  // for (unsigned int i = 0; i < kappa_train_test_new.cols(); ++i)
-  // {
-  //   std::cout << kappa_train_test_new(1, i) << "," << std::endl;
-  // }
-  // RealEigenMatrix mogp_mean = kappa_train_test * kappa_results_solve;
   RealEigenMatrix mogp_mean = kappa_train_test_new * kappa_results_solve;
-  // std::cout << Moose::stringify(mogp_mean) << std::endl;
-  _mogp_handler.getDataStandardizer().getDestandardizedCovariance(mogp_mean); //
+  _mogp_handler.getDataStandardizer().getDestandardizedCovariance(mogp_mean);
 
-  // _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_train_test, K_train_test.transpose(), B);
-  // std::cout << Moose::stringify(B) << std::endl;
-
-  std::cout << Moose::stringify(mogp_mean) << std::endl;
-
-  // RealEigenMatrix test(2,1);
-  // test(0, 0) = 836.5923827409;
-  // test(1, 0) = 517.89436917846;
-  // _mogp_handler.getDataStandardizer().getStandardizedCovariance(test);
-  // std::cout << "True " << Moose::stringify(test) << std::endl;
-
-  // RealEigenMatrix kappa_test;
-  // _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_test, B, K_test);
-
-  y.resize(mogp_mean.rows());
+  y.assign(mogp_mean.rows(), 0.0);
   for (unsigned int i = 0; i < mogp_mean.rows(); ++i)
     y[i] = mogp_mean(i, 0);
 }

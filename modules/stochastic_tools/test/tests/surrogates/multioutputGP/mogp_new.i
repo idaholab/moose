@@ -74,7 +74,7 @@
     model = mogp_surrogate
     response_type = vector_real
     parallel_type = ROOT
-    execute_on = final
+    execute_on = timestep_end
     sampler = test
   []
 []
@@ -118,7 +118,16 @@
   []
 []
 
+[VectorPostprocessors]
+  [data]
+    type = SamplerData
+    sampler = test
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Outputs]
+  csv = true
   [out]
     type = JSON
     execute_on = timestep_end
