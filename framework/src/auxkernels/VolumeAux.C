@@ -28,7 +28,6 @@ VolumeAux::VolumeAux(const InputParameters & parameters) : AuxKernel(parameters)
 Real
 VolumeAux::computeValue()
 {
-  std::cout << (_bnd ? _current_side_volume : _current_elem_volume) << std::endl;
   return _bnd ? _current_side_volume : _current_elem_volume;
 }
 

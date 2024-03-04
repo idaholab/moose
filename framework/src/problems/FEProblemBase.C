@@ -6289,7 +6289,7 @@ FEProblemBase::addPredictor(const std::string & type,
 {
   parallel_object_only();
 
-  if (!_problem->numNonlinearSystems() && _problem->numLinearSystems())
+  if (!numNonlinearSystems() && numLinearSystems())
     mooseError("Vector bounds cannot be used with LinearSystems!");
 
   parameters.set<SubProblem *>("_subproblem") = this;

@@ -17,4 +17,10 @@
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree # see #26480
   []
+  [diff-react-exact]
+    type = CSVDiff
+    input = block-restricted-diffusion-react.i
+    csvdiff = block-restricted-diffusion-react_csv.csv
+    requirement = 'The system should be able to exactly solve a problem with a constant source and diffusion and reaction kernels restricted to two different subdomains.'
+  []
 []

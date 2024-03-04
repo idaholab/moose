@@ -857,40 +857,4 @@ MooseLinearVariableFV<OutputType>::nodalDofIndexNeighbor() const
   nodalError();
 }
 
-template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::timeIntegratorError() const
-{
-  mooseError("MooseLinearVariableFV does not support time integration at the moment! The variable "
-             "which is causing the issue: ",
-             this->name());
-}
-
-template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::lowerDError() const
-{
-  mooseError("Lower dimensional element support not implemented for finite volume variables!The "
-             "variable which is causing the issue: ",
-             this->name());
-}
-
-template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::nodalError() const
-{
-  mooseError("FV variables don't support nodal variable treatment! The variable which is causing "
-             "the issue: ",
-             this->name());
-}
-
-template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::adError() const
-{
-  mooseError("Linear FV variable does not support automatic differentiation, the variable which is "
-             "attempting it is: ",
-             this->name());
-}
-
 template class MooseLinearVariableFV<Real>;

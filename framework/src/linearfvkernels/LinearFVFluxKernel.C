@@ -47,10 +47,18 @@ LinearFVFluxKernel::addMatrixContribution()
     const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
 
     // Populate matrix
-    (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, elem_matrix_contribution);
-    (*_linear_system.matrix).add(dof_id_elem, dof_id_neighbor, neighbor_matrix_contribution);
-    (*_linear_system.matrix).add(dof_id_neighbor, dof_id_elem, -elem_matrix_contribution);
-    (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, -neighbor_matrix_contribution);
+
+    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
+    {
+      (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, elem_matrix_contribution);
+      (*_linear_system.matrix).add(dof_id_elem, dof_id_neighbor, neighbor_matrix_contribution);
+    }
+
+    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
+    {
+      (*_linear_system.matrix).add(dof_id_neighbor, dof_id_elem, -elem_matrix_contribution);
+      (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, -neighbor_matrix_contribution);
+    }
   }
   else if (auto * bc_pointer =
                _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
@@ -95,8 +103,10 @@ LinearFVFluxKernel::addRightHandSideContribution()
     const auto neighbor_rhs_contribution = computeNeighborRightHandSideContribution();
 
     // Populate right hand side
-    (*_linear_system.rhs).add(dof_id_elem, elem_rhs_contribution);
-    (*_linear_system.rhs).add(dof_id_neighbor, neighbor_rhs_contribution);
+    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
+      (*_linear_system.rhs).add(dof_id_elem, elem_rhs_contribution);
+    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
+      (*_linear_system.rhs).add(dof_id_neighbor, neighbor_rhs_contribution);
   }
   else if (auto * bc_pointer =
                _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
