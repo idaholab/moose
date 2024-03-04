@@ -38,4 +38,6 @@ protected:
 
 private:
   virtual void checkSiblingsTransferSupported() const override;
+
+  bool _distribute_reporter_vector;
 };

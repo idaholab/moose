@@ -31,6 +31,10 @@ MultiAppReporterTransfer::validParams()
       "sub-application. If unset and transferring to the sub-applications then all "
       "sub-applications will receive data. The value must be set when transferring from a "
       "sub-application.");
+  params.addParam<bool>(
+      "distribute_reporter_vector",
+      false,
+      "Reporters will be transfered in a distributed fashion. N to 1 or 1 to N type of transfer.");
   return params;
 }
 
@@ -39,7 +43,8 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
     ReporterTransferInterface(this),
     _from_reporter_names(getParam<std::vector<ReporterName>>("from_reporters")),
     _to_reporter_names(getParam<std::vector<ReporterName>>("to_reporters")),
-    _subapp_index(getParam<unsigned int>("subapp_index"))
+    _subapp_index(getParam<unsigned int>("subapp_index")),
+    _distribute_reporter_vector(getParam<bool>("distribute_reporter_vector"))
 {
   if (_from_reporter_names.size() != _to_reporter_names.size())
     paramError("to_reporters", "from_reporters and to_reporters must be the same size.");
@@ -63,7 +68,7 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
           "The supplied sub-application index is greater than the number of sub-applications.");
     else if (_directions.contains(FROM_MULTIAPP) &&
              _subapp_index == std::numeric_limits<unsigned int>::max() &&
-             multi_app->numGlobalApps() > 1)
+             multi_app->numGlobalApps() > 1 && !_distribute_reporter_vector)
       paramError("from_multi_app",
                  "subapp_index must be provided when more than one subapp is present.");
   }
@@ -120,11 +125,21 @@ MultiAppReporterTransfer::executeToMultiapp()
     if (getToMultiApp()->hasLocalApp(ind) &&
         (!hasFromMultiApp() || getFromMultiApp()->hasLocalApp(ind)))
       for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
-        transferReporter(_from_reporter_names[n],
-                         _to_reporter_names[n],
-                         hasFromMultiApp() ? getFromMultiApp()->appProblemBase(ind)
-                                           : getToMultiApp()->problemBase(),
-                         getToMultiApp()->appProblemBase(ind));
+      {
+        if (_distribute_reporter_vector)
+          transferFromVectorReporter(_from_reporter_names[n],
+                                     _to_reporter_names[n],
+                                     hasFromMultiApp() ? getFromMultiApp()->appProblemBase(ind)
+                                                       : getToMultiApp()->problemBase(),
+                                     getToMultiApp()->appProblemBase(ind),
+                                     ind);
+        else
+          transferReporter(_from_reporter_names[n],
+                           _to_reporter_names[n],
+                           hasFromMultiApp() ? getFromMultiApp()->appProblemBase(ind)
+                                             : getToMultiApp()->problemBase(),
+                           getToMultiApp()->appProblemBase(ind));
+      }
 }
 
 void
@@ -133,15 +148,58 @@ MultiAppReporterTransfer::executeFromMultiapp()
   if (!hasFromMultiApp())
     return;
 
-  unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
-  if (getFromMultiApp()->hasLocalApp(ind) &&
-      (!hasToMultiApp() || getToMultiApp()->hasLocalApp(ind)))
-    for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
-      transferReporter(_from_reporter_names[n],
-                       _to_reporter_names[n],
-                       getFromMultiApp()->appProblemBase(ind),
+  std::vector<unsigned int> indices;
+  if (_subapp_index == std::numeric_limits<unsigned int>::max() || _distribute_reporter_vector)
+  {
+    indices.resize(getFromMultiApp()->numGlobalApps());
+    std::iota(indices.begin(), indices.end(), 0);
+  }
+  else
+    indices = {_subapp_index};
+
+  if (_distribute_reporter_vector)
+    for (const auto & ind : indices)
+      for (unsigned int n = 0; n < _to_reporter_names.size(); ++n)
+      {
+        auto size = getFromMultiApp()->numGlobalApps();
+        clearVectorReporter(_to_reporter_names[n],
+                            hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
+                                            : getFromMultiApp()->problemBase());
+        resizeReporter(_to_reporter_names[n],
                        hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
-                                       : getFromMultiApp()->problemBase());
+                                       : getFromMultiApp()->problemBase(),
+                       size);
+      }
+
+  for (const auto & ind : indices)
+    if (getFromMultiApp()->hasLocalApp(ind) &&
+        (!hasToMultiApp() || getToMultiApp()->hasLocalApp(ind)))
+      for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+      {
+        if (_distribute_reporter_vector)
+        {
+          if (getFromMultiApp()->appProblemBase(ind).processor_id() == 0) // Subapp Root Rank only
+            transferToVectorReporter(_from_reporter_names[n],
+                                     _to_reporter_names[n],
+                                     getFromMultiApp()->appProblemBase(ind),
+                                     hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
+                                                     : getFromMultiApp()->problemBase(),
+                                     ind);
+        }
+        else
+          transferReporter(_from_reporter_names[n],
+                           _to_reporter_names[n],
+                           getFromMultiApp()->appProblemBase(ind),
+                           hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
+                                           : getFromMultiApp()->problemBase());
+      }
+  if (_distribute_reporter_vector)
+    for (unsigned int n = 0; n < _to_reporter_names.size(); ++n)
+    {
+      sumVectorReporter(_to_reporter_names[n],
+                        hasToMultiApp() ? getToMultiApp()->appProblemBase(0)
+                                        : getFromMultiApp()->problemBase());
+    }
 }
 
 void

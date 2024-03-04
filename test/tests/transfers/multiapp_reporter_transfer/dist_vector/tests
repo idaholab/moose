@@ -1,0 +1,33 @@
+[Tests]
+    issues = '#26953'
+    design = 'MultiAppReporterTransfer.md'
+    [vec_rep]
+        requirement = "The system shall support the ability to transfer reporter data in a N to 1 and 1 to N fashion when"
+      [reporter_transfer]
+        type = 'JSONDiff'
+        input = 'main.i'
+        jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
+        detail = "the number of procs per app is default,"
+      []
+      [reporter_transfer_min_procs_2]
+        type = 'JSONDiff'
+        cli_args = ""Multiapps/sub/min_procs_per_app=2
+        input = 'main.i'
+        jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
+        min_parallel = 2
+        max_parallel = 1
+        detail = "the number of procs per app is less than the number of apps,"
+      []
+      [reporter_transfer_min_procs_5]
+        type = 'JSONDiff'
+        cli_args = ""Multiapps/sub/min_procs_per_app=5
+        input = 'main.i'
+        jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
+        min_parallel = 5
+        max_parallel = 1
+        detail = "the number of procs per app is larger than the number of apps,"
+      []
+
+  []
+[]
+

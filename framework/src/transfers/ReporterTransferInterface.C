@@ -67,6 +67,22 @@ ReporterTransferInterface::transferToVectorReporter(const ReporterName & from_re
 }
 
 void
+ReporterTransferInterface::transferFromVectorReporter(const ReporterName & from_reporter,
+                                                      const ReporterName & to_reporter,
+                                                      const FEProblemBase & from_problem,
+                                                      FEProblemBase & to_problem,
+                                                      dof_id_type index,
+                                                      unsigned int time_index)
+{
+  checkHasReporterValue(from_reporter, from_problem);
+  checkHasReporterValue(to_reporter, to_problem);
+  from_problem.getReporterData()
+      .getReporterContextBase(from_reporter)
+      .transferFromVector(
+          to_problem.getReporterData(ReporterData::WriteKey()), to_reporter, index, time_index);
+}
+
+void
 ReporterTransferInterface::hideVariableHelper(const ReporterName & reporter,
                                               FEProblemBase & problem)
 {
@@ -169,6 +185,19 @@ ReporterTransferInterface::resizeReporter(const ReporterName & name,
 {
   checkHasReporterValue(name, problem);
   problem.getReporterData(ReporterData::WriteKey()).getReporterContextBase(name).resize(n);
+}
+void
+ReporterTransferInterface::clearVectorReporter(const ReporterName & name, FEProblemBase & problem)
+{
+  checkHasReporterValue(name, problem);
+  problem.getReporterData(ReporterData::WriteKey()).getReporterContextBase(name).clear();
+}
+
+void
+ReporterTransferInterface::sumVectorReporter(const ReporterName & name, FEProblemBase & problem)
+{
+  checkHasReporterValue(name, problem);
+  problem.getReporterData(ReporterData::WriteKey()).getReporterContextBase(name).vectorSum();
 }
 
 std::vector<ReporterName>
