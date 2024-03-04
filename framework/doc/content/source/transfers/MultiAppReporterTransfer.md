@@ -17,6 +17,24 @@ in the source MultiApp matches the number of subapps in the target MultiApp, and
 the same way on the parallel processes. Each source app is then matched to the target app with the same
 subapp index.
 
+## Distributed Vector Transfer
+
+The MultiAppReporterTransfer also supports transferring reporter vectors in a distributed fashion using the [!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector) parameter.
+In this mode, the transfer assumes a one-to-many or many-to-one relationship
+between the reporter values in the main application and the sub-applications.
+The reporter value in the main application is expected to be a vector with a
+size matching the number of sub-applications. Each sub-application will
+send/receive its respective component of the vector based on its index. The main
+app reporter is assumed to be replicated while the subapp reporters are assumed
+to be root or replicated.
+
+| Main App | Sub App 1 | Sub App 2 | Sub App 3 | Sub App 4 |
+|---|---|---|---|---|
+| $\begin{pmatrix}1\\2\\3\\4\end{pmatrix}$ | 1 | 2 | 3 | 4 |
+|
+| $\begin{pmatrix}1\\2\end{pmatrix}$ $\begin{pmatrix}3\\4\\5\end{pmatrix}$ $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ $\begin{pmatrix}10\\11\\12\end{pmatrix}$ | $\begin{pmatrix}1\\2\end{pmatrix}$ | $\begin{pmatrix}3\\4\\5\end{pmatrix}$ | $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ | $\begin{pmatrix}10\\11\\12\end{pmatrix}$ |
+
+
 ## Example Input File Syntax
 
 !alert! tip
@@ -71,6 +89,20 @@ Here, we are transferring integer and string data between reporters:
 !listing reporter_transfer/sub0.i block=Reporters caption=Sub-application reporters
 
 !listing reporter_transfer/main.i block=int_to_int int_from_int string_from_string string_to_string caption=Main application reporter transfers
+   indent=2 header=[Transfers] footer=[]
+
+
+
+### Distributed Reporter
+
+Here we are transferring a vector reporter and a vector of vectors reporter in a
+scatter and gather fashion.
+
+!listing dist_vector/main.i block=Reporters caption=Main application reporters
+
+!listing dist_vector/sub.i block=Reporters caption=Sub-application reporters
+
+!listing dist_vector/main.i block=Transfers caption=Main application reporter transfers
    indent=2 header=[Transfers] footer=[]
 
 !syntax parameters /Transfers/MultiAppReporterTransfer

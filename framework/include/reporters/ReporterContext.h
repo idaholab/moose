@@ -499,44 +499,52 @@ template <typename T>
 void
 ReporterGeneralContext<T>::vectorSum()
 {
-
-  // Case 1: T is type that we can sum
-  if constexpr (std::is_arithmetic<T>::value &&
-                !std::is_same<T, bool>::value) // We can't sum bools.
+  // Case 1: T is a numeric type that we can sum (excluding bool)
+  if constexpr (std::is_arithmetic<T>::value && !std::is_same<T, bool>::value)
   {
+    // Perform summation of the scalar value across all processors
     this->comm().sum(this->_state.value());
     return;
   }
-  // Case 2: T is a vector
+  // Case 2: T is a vector type
   else if constexpr (is_std_vector<T>::value)
   {
-    using ValueType = typename T::value_type;
-    // Check if the ValueType is a a type we can sum
-    if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
+    using VectorValueType = typename T::value_type;
+
+    // Check if the vector elements are of a numeric type
+    if constexpr (std::is_arithmetic<VectorValueType>::value && !std::is_same<VectorValueType, bool>::value)
     {
+      // Perform summation of the vector elements across all processors
       this->comm().sum(this->_state.value());
       return;
     }
-    // check if ValueType is a vector
-    else if constexpr (is_std_vector<ValueType>::value)
+    // Check if the vector elements are also vectors
+    else if constexpr (is_std_vector<VectorValueType>::value)
     {
-      using ValueType2 = typename ValueType::value_type;
-      // check if Valuetype2 is a type we can sum
-      if constexpr (std::is_arithmetic<ValueType2>::value && !std::is_same<ValueType2, bool>::value)
+      using InnerValueType = typename VectorValueType::value_type;
+
+      // Check if the inner vector elements are of a numeric type
+      if constexpr (std::is_arithmetic<InnerValueType>::value && !std::is_same<InnerValueType, bool>::value)
       {
-        for (auto & val_vec : this->_state.value())
+        // Iterate over each inner vector in the outer vector
+        for (auto& innerVector : this->_state.value())
         {
-          dof_id_type size_vec = val_vec.size();
-          this->comm().max(size_vec);
-          val_vec.resize(size_vec);
-          this->comm().sum(val_vec);
+          // Get the maximum size of the inner vector across all processors
+          dof_id_type maxInnerSize = innerVector.size();
+          this->comm().max(maxInnerSize);
+
+          // Resize the inner vector to the maximum size
+          innerVector.resize(maxInnerSize);
+
+          // Perform summation of the inner vector elements across all processors
+          this->comm().sum(innerVector);
         }
         return;
       }
     }
   }
 
-  mooseError("Cannot sum non vector-type reporter values.");
+  mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
 }
 /**
  * A context that broadcasts the Reporter value from the root processor
@@ -741,6 +749,7 @@ public:
    * Since we know that the _state value is a vector type, we can clear it.
    */
   virtual void clear() override { this->_state.value().clear(); }
+
   virtual void vectorSum() override
   {
     // this->_state.value() returns std::vector<T>
