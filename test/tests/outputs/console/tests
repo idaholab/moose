@@ -59,7 +59,7 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out'
     check_files = 'console_file_system_information_out.txt'
-    check_not_exist = 'console_file_system_information_out_0.txt console_file_system_information_out_1.txt'
+    check_not_exists = 'console_file_system_information_out_0.txt console_file_system_information_out_1.txt'
     recover = false
     min_parallel = 2
     max_parallel = 2
