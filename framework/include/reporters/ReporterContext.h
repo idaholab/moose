@@ -512,7 +512,8 @@ ReporterGeneralContext<T>::vectorSum()
     using VectorValueType = typename T::value_type;
 
     // Check if the vector elements are of a numeric type
-    if constexpr (std::is_arithmetic<VectorValueType>::value && !std::is_same<VectorValueType, bool>::value)
+    if constexpr (std::is_arithmetic<VectorValueType>::value &&
+                  !std::is_same<VectorValueType, bool>::value)
     {
       // Perform summation of the vector elements across all processors
       this->comm().sum(this->_state.value());
@@ -524,10 +525,11 @@ ReporterGeneralContext<T>::vectorSum()
       using InnerValueType = typename VectorValueType::value_type;
 
       // Check if the inner vector elements are of a numeric type
-      if constexpr (std::is_arithmetic<InnerValueType>::value && !std::is_same<InnerValueType, bool>::value)
+      if constexpr (std::is_arithmetic<InnerValueType>::value &&
+                    !std::is_same<InnerValueType, bool>::value)
       {
         // Iterate over each inner vector in the outer vector
-        for (auto& innerVector : this->_state.value())
+        for (auto & innerVector : this->_state.value())
         {
           // Get the maximum size of the inner vector across all processors
           dof_id_type maxInnerSize = innerVector.size();
