@@ -72,7 +72,3 @@
     sort_by = x
   []
 []
-
-# [Outputs]
-#   csv=true
-# []

@@ -242,8 +242,9 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
   }
   if (show_optimization_details)
   {
-    Moose::out << "OPTIMIZED MOGP HYPER-PARAMETERS:" << std::endl;
+    Moose::out << "OPTIMIZED MOGP HYPER-PARAMETERS (INPUT COVARIANCE):" << std::endl;
     theta.print();
+    Moose::out << "OPTIMIZED MOGP HYPER-PARAMETERS (OUTPUT COVARIANCE):" << std::endl;
     Moose::out << Moose::stringify(_latent) << std::endl;
     store_loss = getLoss(inputs, vectorize_out);
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
