@@ -61,8 +61,6 @@
     check_files = 'console_file_system_information_out.txt'
     check_not_exists = 'console_file_system_information_out_0.txt console_file_system_information_out_1.txt'
     recover = false
-    min_parallel = 2
-    max_parallel = 2
 
     requirement = 'The system shall support outputting head processor console information to a file when run in parallel.'
     issues = '#26174'
@@ -75,9 +73,8 @@
     check_files = 'console_file_system_information_out_0.txt console_file_system_information_out_1.txt'
     recover = false
     min_parallel = 2
-    max_parallel = 2
 
-    requirement = "The system shall support outputting all processors' console information to separate files when run in parallel with --keep-cout."
+    requirement = "The system shall support outputting all processors' console information to separate files when run in parallel with the --keep-cout command line option."
     issues = '#26174'
   [../]
   [./file_postprocessor]
