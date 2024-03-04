@@ -633,157 +633,154 @@ ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject 
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
 }
 
-  template <typename T>
-  void
-  ReporterScatterContext<T>::finalize()
-  {
-    this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_REPLICATED});
+template <typename T>
+void
+ReporterScatterContext<T>::finalize()
+{
+  this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_REPLICATED});
 
-    mooseAssert(this->processor_id() == 0 ? _values.size() == this->n_processors() : true,
-                "Vector to be scattered must be sized to match the number of processors");
-    mooseAssert(
-        this->processor_id() > 0 ? _values.size() == 0 : true,
-        "Vector to be scattered must be sized to zero on processors except for the root processor");
-    this->comm().scatter(_values, this->_state.value());
-  }
+  mooseAssert(this->processor_id() == 0 ? _values.size() == this->n_processors() : true,
+              "Vector to be scattered must be sized to match the number of processors");
+  mooseAssert(
+      this->processor_id() > 0 ? _values.size() == 0 : true,
+      "Vector to be scattered must be sized to zero on processors except for the root processor");
+  this->comm().scatter(_values, this->_state.value());
+}
+
+/**
+ * A context that gathers the Reporter value to the root processor
+ */
+template <typename T>
+class ReporterGatherContext : public ReporterGeneralContext<T>
+{
+public:
+  ReporterGatherContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
+                        ReporterState<T> & state);
+  ReporterGatherContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
+                        ReporterState<T> & state,
+                        const T & default_value);
+
+  virtual void finalize() override;
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
+};
+
+template <typename T>
+ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
+                                                ReporterState<T> & state)
+  : ReporterGeneralContext<T>(other, producer, state)
+{
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
+}
+
+template <typename T>
+ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
+                                                ReporterState<T> & state,
+                                                const T & default_value)
+  : ReporterGeneralContext<T>(other, producer, state, default_value)
+{
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
+}
+
+template <typename T>
+void
+ReporterGatherContext<T>::finalize()
+{
+  this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_ROOT});
+  this->comm().gather(0, this->_state.value());
+}
+
+/**
+ * This context is specific for vector types of reporters, mainly for declaring a vector
+ * of the type from another context. As well as resizing the vector of data.
+ *
+ * @see ReporterGeneralContext::declareVectorClone and ReporterTransferInterface
+ */
+template <typename T>
+class ReporterVectorContext : public ReporterContext<std::vector<T>>
+{
+public:
+  ReporterVectorContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
+                        ReporterState<std::vector<T>> & state);
+  ReporterVectorContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
+                        ReporterState<std::vector<T>> & state,
+                        const std::vector<T> & default_value);
 
   /**
-   * A context that gathers the Reporter value to the root processor
+   * This simply throws an error to avoid infinite instantiations.
+   * It is defined in ReporterData.h to avoid cyclic included.
    */
-  template <typename T>
-  class ReporterGatherContext : public ReporterGeneralContext<T>
-  {
-  public:
-    ReporterGatherContext(const libMesh::ParallelObject & other,
-                          const MooseObject & producer,
-                          ReporterState<T> & state);
-    ReporterGatherContext(const libMesh::ParallelObject & other,
-                          const MooseObject & producer,
-                          ReporterState<T> & state,
-                          const T & default_value);
-
-    virtual void finalize() override;
-    virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
-  };
-
-  template <typename T>
-  ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
-                                                  const MooseObject & producer,
-                                                  ReporterState<T> & state)
-    : ReporterGeneralContext<T>(other, producer, state)
-  {
-    this->_producer_enum.clear();
-    this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
-  }
-
-  template <typename T>
-  ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
-                                                  const MooseObject & producer,
-                                                  ReporterState<T> & state,
-                                                  const T & default_value)
-    : ReporterGeneralContext<T>(other, producer, state, default_value)
-  {
-    this->_producer_enum.clear();
-    this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
-  }
-
-  template <typename T>
-  void
-  ReporterGatherContext<T>::finalize()
-  {
-    this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_ROOT});
-    this->comm().gather(0, this->_state.value());
-  }
+  virtual void declareClone(ReporterData & r_data,
+                            const ReporterName & r_name,
+                            const ReporterMode & mode,
+                            const MooseObject & producer) const final;
 
   /**
-   * This context is specific for vector types of reporters, mainly for declaring a vector
-   * of the type from another context. As well as resizing the vector of data.
-   *
-   * @see ReporterGeneralContext::declareVectorClone and ReporterTransferInterface
+   * This simply throws an error to avoid infinite instantiations.
+   * It is defined in ReporterData.h to avoid cyclic included.
    */
-  template <typename T>
-  class ReporterVectorContext : public ReporterContext<std::vector<T>>
+  virtual void declareVectorClone(ReporterData & r_data,
+                                  const ReporterName & r_name,
+                                  const ReporterMode & mode,
+                                  const MooseObject & producer) const final;
+
+  /**
+   * Since we know that the _state value is a vector type, we can resize it based
+   * on @param local_size
+   */
+  virtual void resize(dof_id_type local_size) override { this->_state.value().resize(local_size); }
+
+  /**
+   * Since we know that the _state value is a vector type, we can clear it.
+   */
+  virtual void clear() override { this->_state.value().clear(); }
+  virtual void vectorSum() override
   {
-  public:
-    ReporterVectorContext(const libMesh::ParallelObject & other,
-                          const MooseObject & producer,
-                          ReporterState<std::vector<T>> & state);
-    ReporterVectorContext(const libMesh::ParallelObject & other,
-                          const MooseObject & producer,
-                          ReporterState<std::vector<T>> & state,
-                          const std::vector<T> & default_value);
-
-    /**
-     * This simply throws an error to avoid infinite instantiations.
-     * It is defined in ReporterData.h to avoid cyclic included.
-     */
-    virtual void declareClone(ReporterData & r_data,
-                              const ReporterName & r_name,
-                              const ReporterMode & mode,
-                              const MooseObject & producer) const final;
-
-    /**
-     * This simply throws an error to avoid infinite instantiations.
-     * It is defined in ReporterData.h to avoid cyclic included.
-     */
-    virtual void declareVectorClone(ReporterData & r_data,
-                                    const ReporterName & r_name,
-                                    const ReporterMode & mode,
-                                    const MooseObject & producer) const final;
-
-    /**
-     * Since we know that the _state value is a vector type, we can resize it based
-     * on @param local_size
-     */
-    virtual void resize(dof_id_type local_size) override
+    // this->_state.value() returns std::vector<T>
+    // Case 1: T is type that we can sum
+    if constexpr (std::is_arithmetic<T>::value &&
+                  !std::is_same<T, bool>::value) // We can't sum bools.
     {
-      this->_state.value().resize(local_size);
+      this->comm().sum(this->_state.value());
     }
-
-    /**
-     * Since we know that the _state value is a vector type, we can clear it.
-     */
-    virtual void clear() override { this->_state.value().clear(); }
-    virtual void vectorSum() override
+    // Case 2: T is a vector
+    else if constexpr (is_std_vector<T>::value)
     {
-      // this->_state.value() returns std::vector<T>
-      // Case 1: T is type that we can sum
-      if constexpr (std::is_arithmetic<T>::value &&
-                    !std::is_same<T, bool>::value) // We can't sum bools.
-      {
-        this->comm().sum(this->_state.value());
-      }
-      // Case 2: T is a vector
-      else if constexpr (is_std_vector<T>::value)
-      {
-        using ValueType = typename T::value_type;
-        // Check if the ValueType is a vector
-        if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
-          for (auto & val_vec : this->_state.value()) //_state.value()-> vector<vector<R>
-            this->comm().sum(val_vec);
-        else
-          mooseError("Cannot perform sum operation on vector of vectors of vectors.");
-      }
+      using ValueType = typename T::value_type;
+      // Check if the ValueType is a vector
+      if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
+        for (auto & val_vec : this->_state.value()) //_state.value()-> vector<vector<R>
+          this->comm().sum(val_vec);
       else
-        mooseError("Can only perform sum opertations on vectors.");
+        mooseError("Cannot perform sum operation on vector of vectors of vectors.");
     }
-
-    virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
-  };
-
-  template <typename T>
-  ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
-                                                  const MooseObject & producer,
-                                                  ReporterState<std::vector<T>> & state)
-    : ReporterContext<std::vector<T>>(other, producer, state)
-  {
+    else
+      mooseError("Can only perform sum opertations on vectors.");
   }
 
-  template <typename T>
-  ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
-                                                  const MooseObject & producer,
-                                                  ReporterState<std::vector<T>> & state,
-                                                  const std::vector<T> & default_value)
-    : ReporterContext<std::vector<T>>(other, producer, state, default_value)
-  {
-  }
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
+};
+
+template <typename T>
+ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
+                                                ReporterState<std::vector<T>> & state)
+  : ReporterContext<std::vector<T>>(other, producer, state)
+{
+}
+
+template <typename T>
+ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
+                                                ReporterState<std::vector<T>> & state,
+                                                const std::vector<T> & default_value)
+  : ReporterContext<std::vector<T>>(other, producer, state, default_value)
+{
+}
