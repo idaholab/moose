@@ -567,6 +567,10 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
   // Store the prop -> record map
   dataStore(stream, storage._prop_records, nullptr);
 
+  // Store the number of states
+  auto num_states = storage.numStates();
+  dataStore(stream, num_states, nullptr);
+
   // Store every property
   for (const auto state : storage.stateIndexRange())
   {
@@ -605,8 +609,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
         {
           std::stringstream out;
           dataStore(out, entry, nullptr);
-          out.seekg(0, std::ios::beg);
-          dataStoreSkippable(stream, out, nullptr);
+          dataStore(stream, out, nullptr);
         }
       }
     }
@@ -628,6 +631,9 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 
   decltype(storage._prop_records) from_prop_records;
   dataLoad(stream, from_prop_records, nullptr);
+
+  decltype(storage.numStates()) num_states;
+  dataLoad(stream, num_states, nullptr);
 
   {
     // Build maps of material object -> properties and property -> material objects
@@ -769,7 +775,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   }
 
   // Load the properties
-  for (const auto state : storage.stateIndexRange())
+  for (const auto state : make_range(num_states))
   {
     std::size_t num_elems;
     dataLoad(stream, num_elems, nullptr);
@@ -801,16 +807,17 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 
         // Load each stateful property
         for (const auto from_stateful_id : make_range(num_props))
+        {
+          // Load the binary data, which lets us choose in a moment whether
+          // or not to load it in place or to cache it to load later
+          std::stringstream data;
+          dataLoad(stream, data, nullptr);
+          data.seekg(0, std::ios::beg);
+
           // We have a property to load into
           if (const auto to_stateful_id_ptr = to_stateful_ids[from_stateful_id])
           {
             const auto to_stateful_id = *to_stateful_id_ptr;
-
-            // Load the binary data, which lets us choose in a moment whether
-            // or not to load it in place or to cache it to load later
-            std::stringstream data;
-            dataLoadSkippable(stream, data, nullptr);
-            data.seekg(0, std::ios::beg);
 
             // Load the data directly into _storage
             if (storage._restart_in_place)
@@ -834,9 +841,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
               mat_entry[state] = std::move(data);
             }
           }
-          // We do not have a property to load into, so skip
-          else
-            dataLoadSkip(stream);
+        }
       }
     }
   }
