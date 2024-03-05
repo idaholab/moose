@@ -2140,6 +2140,11 @@ public:
    */
   void clearCurrentResidualVectorTags();
 
+  /**
+   * Clear the current Jacobian vector tag data structure ... if someone creates it
+   */
+  void clearCurrentJacobianVectorTags() {}
+
   using SubProblem::doingPRefinement;
   virtual void doingPRefinement(bool doing_p_refinement,
                                 const MultiMooseEnum & disable_p_refinement_for_families) override;

@@ -5937,9 +5937,11 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 void
 FEProblemBase::resetState()
 {
+  // Our default state is to allow computing derivatives
   ADReal::do_derivatives = true;
   _current_execute_on_flag = EXEC_NONE;
   clearCurrentResidualVectorTags();
+  clearCurrentJacobianVectorTags();
 }
 
 bool
