@@ -400,7 +400,9 @@ std::vector<RayData> &
 Ray::data()
 {
   mooseAssert(_data.size() == 0 || _data.size() == _study.rayDataSize(),
-              "Ray data size is not zero or the size required by study");
+              "Ray data size of " + std::to_string(_data.size()) +
+                  " is not zero or the size required by the study of " +
+                  std::to_string(_study.rayDataSize()));
   _data.resize(_study.rayDataSize());
   return _data;
 }

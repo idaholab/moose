@@ -175,9 +175,11 @@ RepeatableRayStudy::defineRays()
 
     // Set the data if the user requested so
     if (_initial_ray_data)
-      ray->data() = (*_initial_ray_data)[i];
+      for (const auto data_index : _ray_data_indices)
+        ray->data(data_index) = (*_initial_ray_data)[data_index][i];
     if (_initial_ray_aux_data)
-      ray->auxData() = (*_initial_ray_aux_data)[i];
+      for (const auto data_index : _ray_aux_data_indices)
+        ray->auxData(data_index) = (*_initial_ray_aux_data)[data_index][i];
 
     // User set max-distances
     if (_max_distances)
