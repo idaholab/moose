@@ -1,7 +1,9 @@
-[Mesh/generate]
-  type = GeneratedMeshGenerator
-  nx = 4
-  dim = 1
+[Mesh]
+  [generate]
+    type = GeneratedMeshGenerator
+    nx = 4
+    dim = 1
+  []
 []
 
 [Problem]
@@ -28,7 +30,6 @@
     execute_on = INITIAL
     outputs = out
   []
-
 []
 [Positions]
   [elem]
@@ -72,5 +73,4 @@
     execute_system_information_on = NONE
     execute_on = TIMESTEP_END
   []
-
 []

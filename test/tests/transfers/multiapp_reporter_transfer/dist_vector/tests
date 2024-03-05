@@ -6,6 +6,7 @@
       [reporter_transfer]
         type = 'JSONDiff'
         input = 'main.i'
+        recover = false
         jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
         detail = "the number of procs per app is default,"
       []
@@ -23,6 +24,7 @@
         input = 'main.i'
         jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
         min_parallel = 5
+        recover = false
         detail = "the number of procs per app is larger than the number of apps,"
       []
 
