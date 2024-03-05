@@ -5889,8 +5889,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
     //          dampers/min_damping.min_general_damping
     //          modules/solid_mechanics/test:ad_return_mapping.reference  (autoscaling issue)
     //
-    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR ||
-        _current_execute_on_flag == EXEC_NONE)
+    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR)
     {
       // Print the message
       if (_communicator.rank() == 0 && print_message)
@@ -5914,8 +5913,8 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // We've handled this exception, so we no longer have one.
       _has_exception = false;
 
-      // Force the next non-linear convergence check to fail (and all further residual evaluation to
-      // be skipped).
+      // Force the next non-linear convergence check to fail (and all further residual evaluation
+      // to be skipped).
       _fail_next_nonlinear_convergence_check = true;
 
       // Reset the state to prepare for the next evaluation

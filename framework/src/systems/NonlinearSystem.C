@@ -238,22 +238,18 @@ NonlinearSystem::stopSolve()
 {
   PetscNonlinearSolver<Real> & solver =
       static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
-  SNESSetFunctionDomainError(solver.snes());
+  if (_fe_problem.currentlyComputingResidual() ||
+      _fe_problem.currentlyComputingResidualAndJacobian())
+    SNESSetFunctionDomainError(solver.snes());
+  else if (_fe_problem.currentlyComputingJacobian())
+    SNESSetJacobianDomainError(solver.snes());
+  else
+    mooseError("This method should only be called when computing a residual or Jacobian");
 
-  // Insert a NaN into the residual vector.  As of PETSc-3.6, this
-  // should make PETSc return DIVERGED_NANORINF the next time it does
-  // a reduction.  We'll write to the first local dof on every
-  // processor that has any dofs.
-  _nl_implicit_sys.rhs->close();
-
-  if (_nl_implicit_sys.rhs->local_size())
-    _nl_implicit_sys.rhs->set(_nl_implicit_sys.rhs->first_local_index(),
-                              std::numeric_limits<Real>::quiet_NaN());
-  _nl_implicit_sys.rhs->close();
-
-  // Clean up by getting other vectors into a valid state for a
+  // Clean up by getting vectors into a valid state for a
   // (possible) subsequent solve.  There may be more than just
   // these...
+  _nl_implicit_sys.rhs->close();
   if (_Re_time)
     _Re_time->close();
   _Re_non_time->close();
