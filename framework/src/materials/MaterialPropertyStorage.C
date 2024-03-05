@@ -97,10 +97,9 @@ bool
 MaterialPropertyStorage::isRestoredProperty(const std::string & name) const
 {
   const auto & record = getPropRecord(_registry.getID(name));
-  const auto restored = getPropRecord(_registry.getID(name)).restored;
   if (!record.stateful())
-    mooseAssert(!restored, "Stateful properties should not be restored");
-  return restored;
+    mooseAssert(!record.restored, "Stateful properties should not be restored");
+  return record.restored;
 }
 
 void
