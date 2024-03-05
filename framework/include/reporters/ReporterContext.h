@@ -484,7 +484,10 @@ ReporterGeneralContext<T>::resize(dof_id_type size)
   if constexpr (is_std_vector<T>::value)
     this->_state.value().resize(size);
   else
+  {
+    (void)size;
     mooseError("Cannot resize non vector-type reporter values.");
+  }
 }
 template <typename T>
 void
@@ -754,12 +757,12 @@ public:
 
   virtual void vectorSum() override
   {
-    // this->_state.value() returns std::vector<T>
     // Case 1: T is type that we can sum
     if constexpr (std::is_arithmetic<T>::value &&
                   !std::is_same<T, bool>::value) // We can't sum bools.
     {
       this->comm().sum(this->_state.value());
+      return;
     }
     // Case 2: T is a vector
     else if constexpr (is_std_vector<T>::value)
@@ -767,13 +770,14 @@ public:
       using ValueType = typename T::value_type;
       // Check if the ValueType is a vector
       if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
-        for (auto & val_vec : this->_state.value()) //_state.value()-> vector<vector<R>
+        for (auto & val_vec : this->_state.value())
+        { //_state.value()-> vector<vector<R>
           this->comm().sum(val_vec);
-      else
-        mooseError("Cannot perform sum operation on vector of vectors of vectors.");
+          return;
+        }
     }
     else
-      mooseError("Can only perform sum opertations on vectors.");
+      mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
   }
 
   virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }

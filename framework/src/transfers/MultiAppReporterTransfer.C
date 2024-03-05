@@ -149,17 +149,21 @@ MultiAppReporterTransfer::executeFromMultiapp()
     return;
 
   std::vector<unsigned int> indices;
-  if (_subapp_index == std::numeric_limits<unsigned int>::max() || _distribute_reporter_vector)
+  if (_distribute_reporter_vector)
   {
     indices.resize(getFromMultiApp()->numGlobalApps());
     std::iota(indices.begin(), indices.end(), 0);
+  }
+  else if (_subapp_index == std::numeric_limits<unsigned int>::max())
+  {
+    indices = {0};
   }
   else
     indices = {_subapp_index};
 
   if (_distribute_reporter_vector)
     for (const auto & ind : indices)
-      for (unsigned int n = 0; n < _to_reporter_names.size(); ++n)
+      for (unsigned int n : make_range(_to_reporter_names.size()))
       {
         auto size = getFromMultiApp()->numGlobalApps();
         clearVectorReporter(_to_reporter_names[n],
@@ -174,7 +178,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
   for (const auto & ind : indices)
     if (getFromMultiApp()->hasLocalApp(ind) &&
         (!hasToMultiApp() || getToMultiApp()->hasLocalApp(ind)))
-      for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+      for (unsigned int n : make_range(_from_reporter_names.size()))
       {
         if (_distribute_reporter_vector)
         {
@@ -194,7 +198,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
                                            : getFromMultiApp()->problemBase());
       }
   if (_distribute_reporter_vector)
-    for (unsigned int n = 0; n < _to_reporter_names.size(); ++n)
+    for (unsigned int n : make_range(_to_reporter_names.size()))
     {
       sumVectorReporter(_to_reporter_names[n],
                         hasToMultiApp() ? getToMultiApp()->appProblemBase(0)

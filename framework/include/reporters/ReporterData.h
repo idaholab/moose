@@ -535,8 +535,14 @@ ReporterContext<T>::transferFromVector(ReporterData & r_data,
     r_data.setReporterValue<R>(r_name, _state.value()[index], time_index);
   }
   else
+  {
+    (void)r_data;
+    (void)r_name;
+    (void)index;
+    (void)time_index;
     mooseError("transferFromVector can only be used for reporter types that are specializatons of "
                "std::vector.");
+  }
 }
 
 // This is defined here to avoid cyclic includes, see ReporterContext.h
