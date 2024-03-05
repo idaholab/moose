@@ -60,6 +60,8 @@ public:
     unsigned int stateful_id = invalid_uint;
     /// The max state requrested for this property (0 = current, 1 = old, ...)
     unsigned int state = 0;
+    /// Whether or not this property was restored (stateful only)
+    bool restored = false;
   };
 
   /**
@@ -349,6 +351,11 @@ public:
    * Get the property record associated with the material with id \p id
    */
   const PropRecord & getPropRecord(const unsigned int id) const;
+
+  /**
+   * @return Whether or not the material property with name \p name was restored
+   */
+  bool isRestoredProperty(const std::string & name) const;
 
 protected:
   /// The actual storage

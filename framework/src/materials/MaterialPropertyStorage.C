@@ -93,6 +93,16 @@ MaterialPropertyStorage::getPropRecord(const unsigned int id) const
   return *prop_record_ptr;
 }
 
+bool
+MaterialPropertyStorage::isRestoredProperty(const std::string & name) const
+{
+  const auto & record = getPropRecord(_registry.getID(name));
+  const auto restored = getPropRecord(_registry.getID(name)).restored;
+  if (!record.stateful())
+    mooseAssert(!restored, "Stateful properties should not be restored");
+  return restored;
+}
+
 void
 MaterialPropertyStorage::updateStatefulPropsForPRefinement(
     const processor_id_type libmesh_dbg_var(pid),
@@ -724,6 +734,11 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 
   auto & to_prop_records = storage._prop_records;
 
+  // Mark everything as not restored in the event that we call this again
+  for (auto & record_ptr : to_prop_records)
+    if (record_ptr)
+      record_ptr->restored = false;
+
   // Fill the mapping from previous ID to current stateful ID
   for (const auto from_stateful_id : index_range(from_stateful_prop_id_to_prop_id))
   {
@@ -767,6 +782,10 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
         mooseAssert(to_stateful_id != invalid_uint, "Not stateful");
 
         to_stateful_ids[from_stateful_id] = to_stateful_id;
+
+        // Mark that we're going to restore this property
+        to_record.restored = true;
+        mooseAssert(storage.isRestoredProperty(name), "Restored mismatch");
 
         if (storage._recovering)
           mooseAssert(from_stateful_id == to_stateful_id, "Does not have direct mapping");
