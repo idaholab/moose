@@ -798,6 +798,19 @@ FEProblemBase::initialSetup()
       _app.restore(_app.restartFolderBase(_app.getRestartRecoverFileBase()), _app.isRestarting());
     else
       _app.restoreFromInitialBackup(_app.isRestarting());
+
+    /**
+     * If this is a restart run, the user may want to override the start time, which we already set
+     * in the constructor. "_time" however will have been "restored" from the restart file. We need
+     * to honor the original request of the developer now that the restore has been completed.
+     */
+    if (_app.isRestarting())
+    {
+      if (_app.hasStartTime())
+        _time = _time_old = _app.getStartTime();
+      else
+        _time_old = _time;
+    }
   }
   else
   {
