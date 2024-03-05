@@ -222,6 +222,9 @@ protected:
   /// Time format
   TimeFormatEnum _time_format;
 
+  /// Whether to write all processors to files
+  const bool _write_all_procs_to_files;
+
 private:
   /**
    * Add a message to the output streams
