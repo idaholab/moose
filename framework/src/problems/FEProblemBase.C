@@ -6791,7 +6791,6 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
   _lower.swap(lower);
   _upper.swap(upper);
 
-  checkExceptionAndStopSolve();
   try
   {
     checkExceptionAndStopSolve();
