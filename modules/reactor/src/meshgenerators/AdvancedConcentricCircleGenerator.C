@@ -172,15 +172,16 @@ AdvancedConcentricCircleGenerator::generate()
   std::vector<Real> ring_radii_corr;
   std::vector<Real> mod_azimuthal_angles;
 
-  for (unsigned int i = 1; i<_azimuthal_angles.size(); i++)
+  for (unsigned int i = 1; i < _azimuthal_angles.size(); i++)
   {
-    mod_azimuthal_angles.push_back(_azimuthal_angles[i-1]);
+    mod_azimuthal_angles.push_back(_azimuthal_angles[i - 1]);
     if (_order == 2)
-      mod_azimuthal_angles.push_back((_azimuthal_angles[i-1] + _azimuthal_angles[i]) / 2.0);
+      mod_azimuthal_angles.push_back((_azimuthal_angles[i - 1] + _azimuthal_angles[i]) / 2.0);
   }
   mod_azimuthal_angles.push_back(_azimuthal_angles.back());
   if (_order == 2)
-    mod_azimuthal_angles.push_back((_azimuthal_angles.back() + _azimuthal_angles.front() + 360.0) / 2.0);
+    mod_azimuthal_angles.push_back((_azimuthal_angles.back() + _azimuthal_angles.front() + 360.0) /
+                                   2.0);
 
   const Real corr_factor = _preserve_volumes ? radiusCorrectionFactor(mod_azimuthal_angles) : 1.0;
 
