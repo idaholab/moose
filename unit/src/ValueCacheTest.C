@@ -83,3 +83,23 @@ TEST(ValueCacheTest, rebuildTree)
   EXPECT_EQ(out, 57);
   EXPECT_NEAR(d2, 0.3 * 0.3, 1e-9);
 }
+
+TEST(ValueCacheTest, persistence)
+{
+  {
+    ValueCache<std::vector<Real>> cache("test.cache", 3);
+    cache.clear(); // clear it in case a file was hanging around from a previous test
+    cache.insert({4.2, 2.7, 1.6}, {1, 2});
+    cache.insert({3.1, 1.2, 0.1}, {3, 4});
+  }
+
+  {
+    ValueCache<std::vector<Real>> cache("test.cache", 3);
+    auto nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
+    EXPECT_EQ(nearest_neighbors.size(), 2);
+    auto [key, value, distance] = nearest_neighbors[0];
+    EXPECT_NEAR(key[0], 3.1, 1e-9);
+    EXPECT_NEAR(key[1], 1.2, 1e-9);
+    EXPECT_NEAR(key[2], 0.1, 1e-9);
+  }
+}
