@@ -228,6 +228,15 @@ private:
                               const SortedLocationNodes & location_nodes);
 
   /**
+   * Get hover display text - logic specific to this server implemention.
+   * @param display_text - string reference to add hover text for display
+   * @param line - zero-based line to use for finding node and hover text
+   * @param character - zero-based column for finding node and hover text
+   * @return - true if display text was added or left empty without error
+   */
+  bool getHoverDisplayText(std::string & display_text, int line, int character);
+
+  /**
    * Gather references locations - specific to this server implemention.
    * @param referencesLocations - data array of locations objects to fill
    * @param line - line to be used for locations gathering logic

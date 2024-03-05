@@ -329,6 +329,36 @@ protected:
     EXPECT_EQ(expect_items, "\n" + actual_items.str());
   }
 
+  // build hover request, handle request with moose_server, check response
+  void check_hover(int request_id,
+                   const std::string & request_uri,
+                   int request_line,
+                   int request_char,
+                   const std::string & expect_text) const
+  {
+    // build the request with the provided parameters for the moose_server
+    wasp::DataObject hover_request;
+    std::stringstream hover_errors;
+    EXPECT_TRUE(wasp::lsp::buildHoverRequest(
+        hover_request, hover_errors, request_id, request_uri, request_line, request_char));
+    EXPECT_TRUE(hover_errors.str().empty());
+
+    // handle the request built from the parameters using the moose_server
+    wasp::DataObject hover_response;
+    EXPECT_TRUE(moose_server->handleHoverRequest(hover_request, hover_response));
+    EXPECT_TRUE(moose_server->getErrors().empty());
+
+    // check the dissected values of the response sent by the moose_server
+    std::stringstream response_errors;
+    int response_id;
+    std::string actual_text;
+    EXPECT_TRUE(
+        wasp::lsp::dissectHoverResponse(hover_response, response_errors, response_id, actual_text));
+    EXPECT_TRUE(response_errors.str().empty());
+    EXPECT_EQ(request_id, response_id);
+    EXPECT_EQ(expect_text, actual_text);
+  }
+
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
@@ -437,7 +467,7 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
   EXPECT_FALSE(server_capabilities[wasp::lsp::m_references_provider].to_bool());
 
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].is_bool());
-  EXPECT_FALSE(server_capabilities[wasp::lsp::m_hover_provider].to_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].to_bool());
 
   // build initialized notification which takes no extra parameters
 
@@ -948,10 +978,17 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
   [term_uo]
     type = Terminator
     expression = 'expr'
-    error_level = NONE
+    error_level = INFO
   []
 []
 
+[Outputs]
+  [console]
+    type = Console
+    system_info = AUX
+    execute_on = LINEAR
+  []
+[]
 )INPUT";
 
   // build didchange notification and handle it with the moose_server
@@ -1598,6 +1635,52 @@ document_uri: "file:///test/input/path"    definition_start: [19.5]    definitio
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
 
+TEST_F(MooseServerTest, HoverDocumentationRequests)
+{
+  // check hover 01 - on boundary parameter key in BCs block of VacuumBC type
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int request_id = 13;
+  int request_line = 24;
+  int request_char = 10;
+  std::string expect_text = "The list of boundary IDs from the mesh where this object applies";
+  check_hover(request_id, doc_uri, request_line, request_char, expect_text);
+
+  // check hover 02 - on value of VacuumBC for type parameter in BCs subblock
+  request_id = 14;
+  request_line = 23;
+  request_char = 15;
+  expect_text = "Vacuum boundary condition for diffusion.";
+  check_hover(request_id, doc_uri, request_line, request_char, expect_text);
+
+  // check hover 03 - on error_level MooseEnum INFO with documentation string
+  request_id = 15;
+  request_line = 39;
+  request_char = 20;
+  expect_text = "Output an information message once.";
+  check_hover(request_id, doc_uri, request_line, request_char, expect_text);
+
+  // check hover 04 - on system_info MultiMooseEnum AUX with no documentation
+  request_id = 16;
+  request_line = 46;
+  request_char = 20;
+  expect_text = "";
+  check_hover(request_id, doc_uri, request_line, request_char, expect_text);
+
+  // check hover 05 - on execute_on ExecFlagEnum LINEAR with no documentation
+  request_id = 17;
+  request_line = 47;
+  request_char = 20;
+  expect_text = "";
+  check_hover(request_id, doc_uri, request_line, request_char, expect_text);
+
+  // check hover 06 - on Output subblock name which is unsupported hover type
+  request_id = 18;
+  request_line = 44;
+  request_char = 7;
+  expect_text = "";
+  check_hover(request_id, doc_uri, request_line, request_char, expect_text);
+}
+
 TEST_F(MooseServerTest, CompletionPartialInputCases)
 {
   // didchange test parameters - update for partial input completion checking
@@ -1644,7 +1727,7 @@ TEST_F(MooseServerTest, CompletionPartialInputCases)
       moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
 
   // check partial input completion 01 - on incomplete ghos parameter in Mesh
-  int request_id = 13;
+  int request_id = 19;
   int request_line = 3;
   int request_char = 6;
   std::size_t expect_count = 4;
@@ -1657,7 +1740,7 @@ label: *                            text: [ghos]\n  $0\n[]                desc: 
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check partial input completion 02 - on missing block name in Variables/u
-  request_id = 14;
+  request_id = 20;
   request_line = 7;
   request_char = 5;
   expect_count = 2;
@@ -1668,7 +1751,7 @@ label: InitialCondition   text: InitialCondition]\n  $0\n[]   desc: application 
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check partial input completion 03 - on missing lookup value for variable
-  request_id = 15;
+  request_id = 21;
   request_line = 16;
   request_char = 15;
   expect_count = 2;
@@ -1679,7 +1762,7 @@ label: v text: ${1:v} desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 form
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check partial input completion 04 - on incomplete Executioner block name
-  request_id = 16;
+  request_id = 22;
   request_line = 21;
   request_char = 6;
   expect_count = 3;
@@ -1691,7 +1774,7 @@ label: TimeSteppers   text: TimeSteppers]\n  $0\n[]   desc: application named...
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check partial input completion 05 - on missing value with unclosed block
-  request_id = 17;
+  request_id = 23;
   request_line = 27;
   request_char = 23;
   expect_count = 5;
@@ -1705,7 +1788,7 @@ label: PROBLEM_DIMENSION text: ${1:PROBLEM_DIMENSION} desc:  pos: [27.23]-[27.23
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check partial input completion 06 - on incomplete decl in unclosed block
-  request_id = 18;
+  request_id = 24;
   request_line = 28;
   request_char = 7;
   expect_count = 3;
@@ -1721,7 +1804,7 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // references test parameters
 
-  int request_id = 19;
+  int request_id = 25;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 0;
   int character = 0;
@@ -1839,7 +1922,7 @@ expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 
 
   // formatting test parameters
 
-  int request_id = 20;
+  int request_id = 26;
   int tab_size = 4;
   int insert_spaces = true;
 
@@ -1982,7 +2065,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 21;
+  int request_id = 27;
 
   // build shutdown request with the test parameters
 

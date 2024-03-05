@@ -46,7 +46,7 @@ MooseServer::MooseServer(MooseApp & moose_app)
   server_capabilities[wasp::lsp::m_doc_format_provider] = true;
   server_capabilities[wasp::lsp::m_definition_provider] = true;
   server_capabilities[wasp::lsp::m_references_provider] = false;
-  server_capabilities[wasp::lsp::m_hover_provider] = false;
+  server_capabilities[wasp::lsp::m_hover_provider] = true;
 }
 
 bool
@@ -1008,6 +1008,88 @@ MooseServer::addLocationNodesToList(wasp::DataArray & definitionLocations,
   }
 
   return pass;
+}
+
+bool
+MooseServer::getHoverDisplayText(std::string & display_text, int line, int character)
+{
+  Factory & factory = getCheckApp()->getFactory();
+  Syntax & syntax = getCheckApp()->syntax();
+
+  // return and leave display text as empty string when parser root is null
+  if (!rootIsValid())
+    return true;
+
+  // find hit node for zero based request line and column number from input
+  wasp::HITNodeView view_root = getRoot().getNodeView();
+  wasp::HITNodeView request_context =
+      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // return and leave display text as empty string when not on key or value
+  if ((request_context.type() != wasp::DECL && request_context.type() != wasp::VALUE) ||
+      !request_context.has_parent() ||
+      (request_context.parent().type() != wasp::KEYED_VALUE &&
+       request_context.parent().type() != wasp::ARRAY))
+    return true;
+
+  // get name of parameter node and value string that is specified in input
+  std::string paramkey = request_context.parent().name();
+  std::string paramval = request_context.last_as_string();
+
+  // get object context path and object type value for request if it exists
+  wasp::HITNodeView object_context = request_context;
+  while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+    object_context = object_context.parent();
+  const std::string object_path = object_context.path();
+  wasp::HITNodeView type_node = object_context.first_child_by_name("type");
+  const std::string object_type =
+      type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
+
+  // gather global, action, and object parameters in request object context
+  InputParameters valid_params = emptyInputParameters();
+  std::set<std::string> obj_act_tasks;
+  getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
+
+  // use class description as display text when request is valid type value
+  if (request_context.type() == wasp::VALUE && paramkey == "type" && factory.isRegistered(paramval))
+  {
+    const InputParameters & object_params = factory.getValidParams(paramval);
+    if (object_params.have_parameter<std::string>("_moose_base"))
+    {
+      const std::string moose_base = object_params.get<std::string>("_moose_base");
+      for (const auto & obj_act_task : obj_act_tasks)
+      {
+        if (syntax.verifyMooseObjectTask(moose_base, obj_act_task))
+        {
+          display_text = object_params.getClassDescription();
+          break;
+        }
+      }
+    }
+  }
+
+  // use item documentation as display text when request is enum type value
+  else if (request_context.type() == wasp::VALUE)
+  {
+    std::map<std::string, std::string> options_and_descs;
+    if (valid_params.have_parameter<MooseEnum>(paramkey))
+      getEnumsAndDocs(valid_params.get<MooseEnum>(paramkey), options_and_descs);
+    else if (valid_params.have_parameter<MultiMooseEnum>(paramkey))
+      getEnumsAndDocs(valid_params.get<MultiMooseEnum>(paramkey), options_and_descs);
+    else if (valid_params.have_parameter<ExecFlagEnum>(paramkey))
+      getEnumsAndDocs(valid_params.get<ExecFlagEnum>(paramkey), options_and_descs);
+    else if (valid_params.have_parameter<std::vector<MooseEnum>>(paramkey))
+      getEnumsAndDocs(valid_params.get<std::vector<MooseEnum>>(paramkey)[0], options_and_descs);
+    if (options_and_descs.count(paramval))
+      display_text = options_and_descs.find(paramval)->second;
+  }
+
+  // use parameter documentation as display text when request is valid name
+  else if (request_context.type() == wasp::DECL && valid_params.getParametersList().count(paramkey))
+    display_text = valid_params.getDocString(paramkey);
+
+  MooseUtils::escape(display_text);
+  return true;
 }
 
 bool
