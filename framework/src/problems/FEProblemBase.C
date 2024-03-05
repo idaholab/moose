@@ -5869,27 +5869,8 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
   {
     _communicator.broadcast(_exception_message, processor_id);
 
-    // BWS TODO: The code in this should really just run on LINEAR, but a lot of tests fail:
-    //          LINEAR only: 10 in moose/tests, 3 in modules
-    //
-    //          The following tests fail because this gets called on NONLINEAR:
-    //          misc/exception.parallel_exception_jacobian_transient
-    //          materials/material.exception/serial
-    //          modules/solid_mechanics/test:power_law_creep.exception/non
-    //          modules/solid_mechanics/test:power_law_creep.exception/ad
-    //
-    //          The following tests fail because this gets called on NONE:
-    //          dampers/interactions.interacting_node_elem1
-    //          dampers/min_damping.min_nodal_damping
-    //          dampers/bounding_value_nodal_damper.bounding_value_max
-    //          dampers/bounding_value_element_damper.bounding_value_max
-    //          dampers/interactions.interacting_node_elem2
-    //          outputs/debug.show_execution_order/elem_dampers
-    //          dampers/min_damping.min_elem_damping
-    //          dampers/min_damping.min_general_damping
-    //          modules/solid_mechanics/test:ad_return_mapping.reference  (autoscaling issue)
-    //
-    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR)
+    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR ||
+        _current_execute_on_flag == EXEC_POSTCHECK)
     {
       // Print the message
       if (_communicator.rank() == 0 && print_message)
@@ -5905,7 +5886,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // Stop the solve -- this entails setting
       // SNESSetFunctionDomainError() or directly inserting NaNs in the
       // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
-      _current_nl_sys->stopSolve();
+      _current_nl_sys->stopSolve(_current_execute_on_flag);
 
       // and close Aux system (we MUST do this here; see #11525)
       _aux->solution().close();
@@ -6873,6 +6854,8 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   TIME_SECTION("computePostCheck", 2, "Computing Post Check");
 
+  _current_execute_on_flag = EXEC_POSTCHECK;
+
   // MOOSE's FEProblemBase doesn't update the solution during the
   // postcheck, but FEProblemBase-derived classes might.
   if (_has_dampers || shouldUpdateSolution())
@@ -6928,6 +6911,8 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   // MOOSE doesn't change the search_direction
   changed_search_direction = false;
+
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 Real

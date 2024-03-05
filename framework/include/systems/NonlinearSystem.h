@@ -37,7 +37,7 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve() override;
+  virtual void stopSolve(const ExecFlagType & exec_flag) override;
 
   /**
    * Returns the current nonlinear iteration number.  In libmesh, this is

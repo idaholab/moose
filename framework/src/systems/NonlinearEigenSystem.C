@@ -313,7 +313,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
 }
 
 void
-NonlinearEigenSystem::stopSolve()
+NonlinearEigenSystem::stopSolve(const ExecFlagType &)
 {
   mooseError("did not implement yet \n");
 }

@@ -83,7 +83,7 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve() = 0;
+  virtual void stopSolve(const ExecFlagType & exec_flag) = 0;
 
   virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 

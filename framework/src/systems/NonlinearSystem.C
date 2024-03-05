@@ -234,25 +234,27 @@ NonlinearSystem::solve()
 }
 
 void
-NonlinearSystem::stopSolve()
+NonlinearSystem::stopSolve(const ExecFlagType & exec_flag)
 {
   PetscNonlinearSolver<Real> & solver =
       static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
-  if (_fe_problem.currentlyComputingResidual() ||
-      _fe_problem.currentlyComputingResidualAndJacobian())
+
+  if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
+  {
     SNESSetFunctionDomainError(solver.snes());
-  else if (_fe_problem.currentlyComputingJacobian())
+
+    // Clean up by getting vectors into a valid state for a
+    // (possible) subsequent solve.  There may be more than just
+    // these...
+    _nl_implicit_sys.rhs->close();
+    if (_Re_time)
+      _Re_time->close();
+    _Re_non_time->close();
+  }
+  else if (exec_flag == EXEC_NONLINEAR)
     SNESSetJacobianDomainError(solver.snes());
   else
-    mooseError("This method should only be called when computing a residual or Jacobian");
-
-  // Clean up by getting vectors into a valid state for a
-  // (possible) subsequent solve.  There may be more than just
-  // these...
-  _nl_implicit_sys.rhs->close();
-  if (_Re_time)
-    _Re_time->close();
-  _Re_non_time->close();
+    mooseError("Unsupported execute flag: ", Moose::stringify(exec_flag));
 }
 
 void
