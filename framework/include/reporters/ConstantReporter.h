@@ -104,15 +104,6 @@ template <typename T>
 std::vector<std::vector<std::vector<T>> *>
 ConstantReporter::declareConstantVectorVectorReporterValues(const std::string & prefix)
 {
-  // Adjust the prefix to match the expected parameter names for vector of vectors
-  auto declaredVectorVectors =
-      declareConstantReporterValues<std::vector<std::vector<T>>>(prefix + "_vector_vector");
-
-  std::vector<std::vector<std::vector<T>> *> vectors;
-  for (auto & item : declaredVectorVectors)
-  {
-    vectors.push_back(item);
-  }
-
-  return vectors;
+  return this->declareConstantReporterValues<std::vector<std::vector<T>>>(prefix +
+                                                                          "_vector_vector");
 }
