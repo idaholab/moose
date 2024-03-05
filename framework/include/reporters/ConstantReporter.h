@@ -108,13 +108,11 @@ ConstantReporter::declareConstantVectorVectorReporterValues(const std::string & 
   auto declaredVectorVectors =
       declareConstantReporterValues<std::vector<std::vector<T>>>(prefix + "_vector_vector");
 
-  std::vector<std::vector<std::vector<T>> *> result;
+  std::vector<std::vector<std::vector<T>> *> vectors;
   for (auto & item : declaredVectorVectors)
   {
-    // Assuming item is a pointer to a vector of vectors, directly add it to the result
-    // This assumes declareConstantReporterValues correctly initializes these objects
-    result.push_back(item);
+    vectors.push_back(item);
   }
 
-  return result;
+  return vectors;
 }

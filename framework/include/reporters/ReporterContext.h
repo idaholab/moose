@@ -191,14 +191,12 @@ public:
   /**
    * Helper for clearing vector data
    *
-   * @param local_size Number of elements to resize vector to
    */
   virtual void clear() = 0;
 
   /**
    * Helper for summing reporter value.
    *
-   * @param local_size Number of elements to resize vector to
    */
   virtual void vectorSum() = 0;
 
