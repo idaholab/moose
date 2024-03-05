@@ -163,10 +163,27 @@ RepeatableRayStudy::defineRays()
       ray->setStartingDirection((*_directions)[i]);
 
     // Set the data if the user requested so
-    for (const auto index_i : _ray_data_indices)
-      ray->data(_ray_data_indices[index_i]) = (*_initial_ray_data)[i][index_i];
-    for (const auto index_i : _ray_aux_data_indices)
-      ray->auxData(_ray_aux_data_indices[index_i]) = (*_initial_ray_aux_data)[i][index_i];
+    const auto set_data = [this, &ray, &i](const bool aux)
+    {
+      const auto indices = aux ? _ray_aux_data_indices : _ray_data_indices;
+      const auto data = aux ? _initial_ray_aux_data : _initial_ray_data;
+      if (data)
+      {
+        mooseAssert(data->size() == _names.size(), "Size mismatch");
+        mooseAssert((*data)[i].size() == indices.size(), "Size mismatch");
+        for (const auto index_i : indices)
+        {
+          const auto data_index = indices[index_i];
+          const auto value = (*data)[i][index_i];
+          if (aux)
+            ray->auxData(data_index) = value;
+          else
+            ray->data(data_index) = value;
+        }
+      }
+    };
+    set_data(false);
+    set_data(true);
 
     // User set max-distances
     if (_max_distances)
