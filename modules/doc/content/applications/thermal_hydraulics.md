@@ -1,45 +1,40 @@
-# Thermal Hydraulics Applications
+# Thermal Hydraulics
 
-MOOSE provides versatile, general-purpose thermal-hydraulics applications. These applications solve for mass, momentum, and energy conservation in multicomponent, multiphase flows using incompressible, weakly-compressible, or fully compressible formulations for steady-state or transients in lumped parameters and/or multidimensional (1, 2, or full 3D) geometries.
+## MOOSE Modules for Thermal Hydraulics Modeling
 
-These applications are developed as part of the
-[Nuclear Energy Advanced Modeling and Simulation (NEAMS) program](https://neams.inl.gov/).
+MOOSE includes modules providing versatile, general-purpose thermal hydraulics capabilities. Collectively, these modules solve for mass, momentum, and energy conservation in multicomponent, multiphase flows using incompressible, weakly-compressible, or fully compressible formulations for steady-state or transient calculations in 1D, 2D, or 3D geometries. These capabilities range in fidelity and computational expense, as illustrated in [TH_Scales].
 
 !media thermal_hydraulics/misc/TH_scales_new.png
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
-       caption=MOOSE modules support from Reynold-Average Navier Stokes (RANS) Computational Fluid Dynamics (CFD) modeling to 0D lumped parameters modeling.
+       caption=MOOSE modules support from Reynolds-Average Navier Stokes (RANS) Computational Fluid Dynamics (CFD) modeling to 0D lumped-parameters modeling.
        id=TH_Scales
 
-## MOOSE-based Modules for Thermal-Hydraulics Modeling
+The following table summarizes the MOOSE modules providing thermal hydraulics capabilities:
 
 | Module                                                                  | Scale                                  | Flow-Formulation                                                                                                                                             | Dimension                                                          | Typical Element Count | Typical Runtime | Typical Simulations                                                                                                                                                                                    |
 | :---------------------------------------------------------------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | :-------------------- | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Navier-Stokes Modue](navier_stokes/index.md)                           | Coarse-Mesh CFD \\ \\ RANS simulations | Incompressible, Weakly-Compressible, or Fully-Compressible\\ \\ Single- or Multi-Phase \\ \\ Single- or Multi-Component Flow                                 | Typically, 2D, 2D axisymmetric, or 3D \\ \\ Can also be used in 1D | 10,000                | 1 minute        | Flow through nuclear reactor core or plena \\ \\ 3D multi-phase flow in pipes \\ \\ Natural convection flow in open cavities                                                                           |
-| [Subchannel Module](https://subchannel-dev.hpc.inl.gov/site/index.html) | Subchannel Scale                       | Incompressible or Weakly-Compressible \\ \\ Single-Phase \\ \\ Single- or Multi-Component Flow                                                               | Typically, 3D \\ \\ Can be used in 1D and 2D                       | 100,000               | 10 seconds      | Flow development through nuclear reactor fuel assembly \\ \\ Thermal-hydraulics analysis of nuclear reactor assembly blockage \\ \\ Natural convection cooling in nuclear reactors low-flow assemblies |
-| [Thermal-Hydraulics Module](modules/thermal_hydraulics/index.md)        | Lumped-Parameters Simulations          | Compressible \\ \\ Single-Phase; Single-Component Flow                                                                                                       | 1D, 0D                                                             | 100                   | 10 seconds      | Heat extraction unit from nuclear reactor core \\ \\ Thermal loops with significant compressibility effects                                                                                            |
+| [Navier-Stokes](navier_stokes/index.md)                           | Coarse-Mesh CFD \\ \\ RANS simulations | Incompressible, Weakly-Compressible, or Fully-Compressible\\ \\ Single- or Multi-Phase \\ \\ Single- or Multi-Component Flow                                 | Typically, 2D, 2D axisymmetric, or 3D \\ \\ Can also be used in 1D | 10,000                | 1 minute        | Flow through nuclear reactor core or plena \\ \\ 3D multi-phase flow in pipes \\ \\ Natural convection flow in open cavities                                                                           |
+| [Subchannel](https://subchannel-dev.hpc.inl.gov/site/index.html) | Subchannel Scale                       | Incompressible or Weakly-Compressible \\ \\ Single-Phase \\ \\ Single- or Multi-Component Flow                                                               | Typically, 3D \\ \\ Can be used in 1D and 2D                       | 100,000               | 10 seconds      | Flow development through nuclear reactor fuel assembly \\ \\ Thermal hydraulics analysis of nuclear reactor assembly blockage \\ \\ Natural convection cooling in nuclear reactors low-flow assemblies |
+| [Thermal Hydraulics](modules/thermal_hydraulics/index.md)        | Lumped-Parameters Simulations          | Compressible \\ \\ Single-Phase; Single-Component Flow                                                                                                       | 1D, 0D                                                             | 100                   | 10 seconds      | Heat extraction unit from nuclear reactor core \\ \\ Thermal loops with significant compressibility effects                                                                                            |
 | [Porous Flow Module](modules/porous_flow/index.md)                      | Coarse-Mesh CFD                        | Incompressible, Weakly-Compressible, or Fully-Compressible Porous Flow (no inertial term) \\ \\ Single- or Multi-Phase \\ \\ Single- or Multi-Component Flow | Typically, 2D, 2D axisymmetric, or 3D \\ \\ Can also be used in 1D | 10,000                | 1 minute        | Flow through fractured porous media \\ \\ Underground coal mining \\ \\ CO storage in saline aquifers                                                                                                  |
-| [Scalar Kernels System](syntax/ScalarKernels/index.md)                  | 0D ODE                                 | Incompressible                                                                                                                                               | 0D                                                                 | 10                    | 1 second        | Bernoulli-like formulations for pressure drop                                                                                                                                                          |
 
-## Open-Source Applications for Advanced Engineering Modeling
+## MOOSE-Based Applications for Thermal Hydraulics Modeling
 
-Open-source applications for thermal-fluid modeling provide additional capabilities.
+Here we note a selection of MOOSE-based thermal hydraulics applications, which
+are developed as part of the
+[Nuclear Energy Advanced Modeling and Simulation (NEAMS) program](https://neams.inl.gov/).
+Some of these applications are open-source, whereas some are export-controlled
+and distributed via the [Nuclear Computational Resource Center (NCRC)](https://inl.gov/ncrc/);
+see [help/inl/applications.md] for more information.
 
-| Application Name                                               | Based On                  | Added Features                                                                                                                                         |
-| :------------------------------------------------------------- | :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Cardinal](https://cardinal.cels.anl.gov/) | [NekRS](https://github.com/Nek5000/nekRS) CFD      | CPU and GPU capabilities for RANS, LES, and DNS. Additional features include Lagrangian particle transport, an ALE mesh solver, overset meshes, and more.                                       |
+| Application Name                                               | Distribution | Based On                  | Added Features                                                                                                                                         |
+| :------------------------------------------------------------- | :----------- | :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Cardinal](https://cardinal.cels.anl.gov/) | Open-source | [NekRS](https://github.com/Nek5000/nekRS) CFD | CPU and GPU capabilities for RANS, LES, and DNS. Additional features include Lagrangian particle transport, an ALE mesh solver, overset meshes, and more. |
+| Pronghorn                                                      | [NCRC](https://inl.gov/ncrc/) | Navier-Stokes Module      | Export-controlled correlations for pressure drop, heat exchange, and mass transfer in advanced nuclear reactors.                                       |
+| SAM                                                            | [NCRC](https://inl.gov/ncrc/) | MOOSE Framework           | Additional lumped parameters components for realistic plant modeling and proprietary correlations for pressure drop, heat exchange, and mass transfer. |
+| Sockeye                                                        | [NCRC](https://inl.gov/ncrc/) | Thermal Hydraulics Module | Adapted correlations and specific 1D and 2D models for high-temperature heat pipes.                                                                    |
 
-
-## NCRC Applications for Advanced Engineering Modeling
-
-Via the [Nuclear Computational Resource Center (NCRC)](https://inl.gov/ncrc/), several additional applications are supported for enhanced engineering modeling. See [help/inl/applications.md] for more information.
-
-| Application Name                                               | Based On                  | Added Features                                                                                                                                         |
-| :------------------------------------------------------------- | :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Pronghorn](https://pronghorn-dev.hpc.inl.gov/site/index.html) | Navier-Stokes Module      | Export controlled correlations for pressure drop, heat exchange, and mass transfer in advanced nuclear reactors.                                       |
-| SAM                                                            | MOOSE Framework           | Additional lumped parameters components for realistic plant modeling and proprietary correlations for pressure drop, heat exchange, and mass transfer. |
-| [Sockeye](https://sockeye-dev.hpc.inl.gov/site/)               | Thermal-Hydraulics Module | Adapted correlations and specific 1D and 2D models for high-temperature heat pipes.                                                                    |
-
-## Applications Examples Gallery
+## Examples Gallery
 
 !row!
 !col! small=4 medium=4 large=4
