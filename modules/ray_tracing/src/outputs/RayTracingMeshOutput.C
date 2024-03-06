@@ -486,35 +486,32 @@ RayTracingMeshOutput::setupEquationSystem()
     // The data index -> variable result
     std::vector<std::pair<RayDataIndex, unsigned int>> vars;
 
-    const auto output_data = aux ? _output_aux_data : _output_data;
-    const auto output_data_nodal = aux ? false : _output_data_nodal;
-    const auto output_names = aux ? _output_aux_data_names : _output_data_names;
+    const auto from_names =
+        aux ? (_output_aux_data ? &_study.rayAuxDataNames() : _output_aux_data_names)
+            : (_output_data ? &_study.rayDataNames() : _output_data_names);
 
     // Nothing to output
-    if (!output_data && !output_names)
+    if (!from_names)
       return vars;
 
-    const auto & all_output_names = aux ? _study.rayAuxDataNames() : _study.rayDataNames();
-    const auto & from_names = output_data ? all_output_names : *output_names;
-    const std::string names_param = aux ? "output_aux_data_names" : "output_data_names";
-    const std::string var_prefix = aux ? "aux_" : "";
+    const auto output_data_nodal = aux ? false : _output_data_nodal;
 
-    if (from_names.size() && all_output_names.empty())
-      paramError(names_param, "Cannot output data because no data is registered");
-
-    for (const auto & name : from_names)
+    for (const auto & name : *from_names)
     {
-      const auto it = std::find(from_names.begin(), from_names.end(), name);
-      if (it == from_names.end())
+      const auto data_index =
+          aux ? _study.getRayAuxDataIndex(name, true) : _study.getRayDataIndex(name, true);
+      if (data_index == Ray::INVALID_RAY_DATA_INDEX)
       {
-        mooseAssert(!output_data, "Should only hit if selecting specific data");
-        paramError(names_param, "The ray data '", name, "' is not registered");
+        const std::string names_param = aux ? "output_aux_data_names" : "output_data_names";
+        const std::string data_prefix = aux ? "aux " : "";
+        paramError(names_param, "The ray ", data_prefix, "data '", name, "' is not registered");
       }
+
+      const std::string var_prefix = aux ? "aux_" : "";
       if (output_data_nodal)
         _sys->add_variable(var_prefix + name, FIRST, LAGRANGE);
       else
         _sys->add_variable(var_prefix + name, CONSTANT, MONOMIAL);
-      const auto data_index = std::distance(from_names.begin(), it);
       const auto var_num = _sys->variable_number(var_prefix + name);
       vars.emplace_back(data_index, var_num);
     }

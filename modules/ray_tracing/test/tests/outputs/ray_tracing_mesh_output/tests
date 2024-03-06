@@ -247,7 +247,27 @@
                   Outputs/rays/output_aux_data_names=unused'
       expect_err = "Cannot be used in addition to 'output_aux_data_names'"
 
-      detail = 'and when all aux data and specific aux data are both requested'
+      detail = 'when all aux data and specific aux data are both requested'
+    []
+    [missing_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  UserObjects/study/always_cache_traces=true
+                  Outputs/rays/output_data_names=no_exist'
+      expect_err = "The ray data 'no_exist' is not registered"
+
+      detail = 'requesting to output aux data and the data does not exist'
+    []
+    [missing_aux_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/aux_data_on_cache_traces=true
+                  UserObjects/study/always_cache_traces=true
+                  Outputs/rays/output_aux_data_names=no_exist'
+      expect_err = "The ray aux data 'no_exist' is not registered"
+
+      detail = 'requesting to output aux data and the data does not exist'
     []
   []
 
