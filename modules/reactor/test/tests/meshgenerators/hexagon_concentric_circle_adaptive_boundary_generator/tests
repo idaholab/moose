@@ -53,5 +53,6 @@
                 --mesh-only "hex_2d_err.e"'
     expect_err = 'the order of the input mesh to be adapted to does not match'
     requirement = "The system shall throw an error if input mesh to adapt to has a different order than the order of the hexagonal mesh to be generated."
+    mesh_mode = 'REPLICATED'
   []
 []
