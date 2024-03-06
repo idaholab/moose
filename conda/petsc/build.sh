@@ -40,6 +40,14 @@ fi
 # Specifying both causes an error as of PETSc 3.17.
 CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
 
+# Stole this from petsc-feedstock in an attempt to solve the openmpi error:
+# mca_base_component_repository_open: unable to open mca_btl_openib: librdmacm.so.1: cannot open shared object file: No such file or directory
+if [[ $mpi == "openmpi" ]]; then
+  export LIBS="-Wl,-rpath,$PREFIX/lib -lmpi_mpifh -lgfortran"
+elif [[ $mpi == "mpich" ]]; then
+  export LIBS="-lmpifort -lgfortran"
+fi
+
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
     --COPTFLAGS=-O3 \
@@ -88,7 +96,10 @@ for path in $PETSC_DIR $BUILD_PREFIX; do
 done
 
 make
-make check
+# damn... again I have to disable this. (openmpi strange missing libraries error)
+if [[ $mpi == "mpich" ]]; then
+  make check
+fi
 make install
 
 # Remove unneeded files

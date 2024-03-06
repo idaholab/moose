@@ -10,7 +10,7 @@ TEMP_CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
 # to the conda build process. Finally, `-std=c++17` can be appended to the end.
 ACTIVATION_CXXFLAGS=${TEMP_CXXFLAGS%%-fdebug-prefix-map*}-std=c++17
 
-# Set MPICH environment variables for those that need it, and set CXXFLAGS using our ACTIVATION_CXXFLAGS variable
+# Set MPI environment variables for those that need it, and set CXXFLAGS using our ACTIVATION_CXXFLAGS variable
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77 C_INCLUDE_PATH=${PREFIX}/include MOOSE_NO_CODESIGN=true MPIHOME=${PREFIX} CXXFLAGS="$ACTIVATION_CXXFLAGS" HDF5_DIR=${PREFIX}
