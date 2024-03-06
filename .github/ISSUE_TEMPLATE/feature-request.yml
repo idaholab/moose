@@ -1,0 +1,30 @@
+name: Feature or Enhancement Request
+description: New Features or enhancements to existing capabilities
+labels: 'T: task'
+
+body:
+- type: textarea
+  attributes:
+    label: Motivation
+    description: |
+      Why do you need this feature or enhancement?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Design
+    description: |
+      A concise description (design) of the feature or enhancement.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Impact
+    description: |
+      Will the enhancement change existing APIs or add something new?
+  validations:
+    required: true
+- type: markdown
+  attributes:
+    value: >
+      Thanks for contributing!
