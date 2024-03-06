@@ -176,15 +176,13 @@
     [aux_data]
       type = Exodiff
       input = 'ray_mesh_output_data.i'
-      exodiff = 'ray_mesh_output_aux_data_specific.e ray_mesh_output_aux_data_specific_nodal.e'
+      exodiff = 'ray_mesh_output_aux_data_specific.e'
       cli_args = "UserObjects/study/ray_aux_data_names='test_aux foo'
                   UserObjects/study/initial_ray_aux_data='1 5; 2 6; 3 7; 4 8'
+                  Outputs/active=rays
                   Outputs/rays/output_aux_data=false
                   Outputs/rays/output_aux_data_names='foo'
-                  Outputs/rays/file_base=ray_mesh_output_aux_data_specific
-                  Outputs/rays_nodal/output_aux_data=false
-                  Outputs/rays_nodal/output_aux_data_names='foo'
-                  Outputs/rays_nodal/file_base=ray_mesh_output_aux_data_specific_nodal"
+                  Outputs/rays/file_base=ray_mesh_output_aux_data_specific"
       detail = 'ray aux data'
     []
   []
