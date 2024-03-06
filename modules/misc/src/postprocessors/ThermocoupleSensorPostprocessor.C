@@ -235,7 +235,7 @@ ThermocoupleSensorPostprocessor::getValue() const
   //  return pp_value;
 }
 
-Real ThermocoupleSensorPostprocessor::evaluateEMF(Real t_90, const std::vector<Real>& coefficients) // formula different for K type thermocouple
+Real ThermocoupleSensorPostprocessor::evaluateEMF(Real t_90, const std::vector<Real>& coefficients) // formula different for K type thermocouple for above 0degreeC
 {
     Real emf = 0.0;
     Real t_power = 1.0;
@@ -263,4 +263,19 @@ Real ThermocoupleSensorPostprocessor::evaluateEMFTypeK(Real t90, const std::vect
     result += additionalCoefficients[0] * std::exp(additionalCoefficients[1] * std::pow(t90 - additionalCoefficients[2], 2.0));
 
     return result;
+}
+
+Real ThermocoupleSensorPostprocessor::evaluateT(Real E, const std::vector<Real>& coefficients) 
+{
+    Real t_90 = 0.0;
+    Real E_power = 1.0;
+
+    // Evaluate the polynomial expression
+    for (Real coefficient : coefficients) 
+    {
+        t_90 += coefficient * E_power;
+        E_power *= E;
+    }
+
+    return t_90;
 }

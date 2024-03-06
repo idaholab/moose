@@ -188,6 +188,244 @@ protected:
     0.118597600000e0, -0.118343200000e-3, 0.126968600000e3
   };
 
-    // Coefficients for thermocouple types (constants) for conversion from emf to temp
+  // Coefficients for thermocouple types (constants) for conversion from emf to temp
+  // Coefficients and error range vectors for Thermocouple Type B in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_B_0_291_to_2_431 =
+  {
+    9.8423321e1, 6.9971500e2, -8.4765304e2, 1.0052644e3,
+    -8.3345952e2, 4.5508542e2, -1.5523037e2, 2.9886750e1,
+    -2.4742860e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_B_2_431_to_13_82 =
+  {
+    2.1315071e2, 2.8510504e2, -5.2742887e1, 9.9160804e0,
+    -1.2965303e0, 1.1195870e-1, -6.0625199e-3, 1.8661696e-4,
+    -2.4878585e-6
+  };
+  const std::vector<Real> error_range_thermo_type_B_0_291_to_2_431 =
+  {
+    -0.02, 0.03
+  };
+  const std::vector<Real> error_range_thermo_type_B_2_431_to_13_82 =
+  {
+    -0.01, 0.02
+  };
+  
+  // Coefficients and error range vectors for Thermocouple Type E in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_E_minus_8_825_to_0 =
+  {
+    0.0000000e0, 1.6977288e1, -4.3514970e-1, -1.5859697e-1,
+    -9.2502871e-2, -2.6084314e-2, -4.1360199e-3, -3.4034030e-4,
+    -1.1564890e-5, 0.0000000e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_E_0_to_76_373 =
+  {
+    0.0000000e0, 1.7057035e1, -2.3301759e-1, 6.5435585e-3,
+    -7.3562749e-5, -1.7896001e-6, 8.4036165e-8, -1.3735879e-9,
+    1.0629823e-11, -3.2447087e-14
+  };
+  const std::vector<Real> error_range_thermo_type_E_minus_8_825_to_0 =
+  {
+    -0.01, 0.03
+  };
+  const std::vector<Real> error_range_thermo_type_E_0_to_76_373 =
+  {
+    -0.02, 0.02
+  };
 
-};
+  // Coefficients and error range vectors for Thermocouple Type J in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_J_minus_8_095_to_0 =
+  {
+    0.0000000e0, 1.9528268e1, -1.2286185e0, -1.0752178e0,
+    -5.9086933e-1, -1.7256713e-1, -2.8131513e-2, -2.3963370e-3,
+    -8.3823321e-5
+  };
+  const std::vector<Real> coeff_d_thermo_type_J_0_to_42_919 =
+  {
+    0.0000000e0, 1.978425e1, -2.001204e-1, 1.036969e-2,
+    -2.549687e-4, 3.585153e-6, -5.344285e-8, 5.099890e-10,
+    0.0000000e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_J_42_919_to_69_553 =
+  {
+    -3.11358187e3, 3.00543684e2, -9.94773230e0, 1.70276630e-1,
+    -1.43033468e-3, 4.73886084e-6, 0.0000000e0, 0.0000000e0,
+    0.0000000e0
+  };
+  const std::vector<Real> error_range_thermo_type_J_minus_8_095_to_0 =
+  {
+    -0.05, 0.03
+  };
+  const std::vector<Real> error_range_thermo_type_J_0_to_42_919 =
+  {
+    -0.04, 0.04
+  };
+  const std::vector<Real> error_range_thermo_type_J_42_919_to_69_553 =
+  {
+    -0.04, 0.03
+  };
+
+  // Coefficients and error range vectors for Thermocouple Type K in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_K_minus_5_891_to_0 =
+  {
+    0.0000000e0, 2.5173462e1, -1.1662878e0, -1.0833638e0,
+    -8.9773540e-1, -3.7342377e-1, -8.6632643e-2, -1.0450598e-2,
+    -5.1920577e-4, 0.0000000e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_K_0_to_20_644 =
+  {
+    0.0000000e0, 2.508355e1, 7.860106e-2, -2.503131e-1,
+    8.315270e-2, -1.228034e-2, 9.804036e-4, -4.413030e-5,
+    1.057734e-6, -1.052755e-8
+  };
+  const std::vector<Real> coeff_d_thermo_type_K_20_644_to_54_886 =
+  {
+    -1.318058e2, 4.830222e1, -1.646031e0, 5.464731e-2,
+    -9.650715e-4, 8.802193e-6, -3.110810e-8, 0.0000000e0,
+    0.0000000e0
+  };
+  const std::vector<Real> error_range_thermo_type_K_minus_5_891_to_0 =
+  {
+    -0.02, 0.04
+  };
+  const std::vector<Real> error_range_thermo_type_K_0_to_20_644 =
+  {
+    -0.05, 0.04
+  };
+  const std::vector<Real> error_range_thermo_type_K_20_644_to_54_886 =
+  {
+    -0.05, 0.06
+  };
+
+  // Coefficients and error range vectors for Thermocouple Type N in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_N_minus_3_990_to_0 =
+  {
+    0.0000000e0, 3.8436847e1, 1.1010485e0, 5.2229312e0,
+    7.2060525e0, 5.8488586e0, 2.7754916e0, 7.7075166e-1,
+    1.1582665e-1, 7.3138868e-3
+  };
+ const std::vector<Real> coeff_d_thermo_type_N_0_to_20_613 =
+  {
+    0.0000000e0, 3.86896e1, -1.08267e0, 4.70205e-2,
+    -2.12169e-6, -1.17272e-4, 5.39280e-6, -7.98156e-8,
+    0.0000000e0, 0.0000000e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_N_20_613_to_47_513 =
+  {
+    1.972485e1, 3.300943e1, -3.915159e-1, 9.855391e-3,
+    -1.274371e-4, 7.767022e-7, 0.0000000e0, 0.0000000e0,
+    0.0000000e0
+  };
+  const std::vector<Real> error_range_thermo_type_N_minus_3_990_to_0 =
+  {
+    -0.02, 0.03
+  };
+  const std::vector<Real> error_range_thermo_type_N_0_to_20_613 =
+  {
+    -0.02, 0.03
+  };
+  const std::vector<Real> error_range_thermo_type_N_20_613_to_47_513 =
+  {
+    -0.04, 0.02
+  };
+
+  // Coefficients and error range vectors for Thermocouple Type R in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_R_minus_0_226_to_1_923 =
+  {
+    0.0000000e0, 1.334584505e1, -9.3835290e1, 1.3068619e2,
+    -2.2703580e2, 3.5145659e2, -3.8953900e2, 2.8239471e2,
+    -1.2607281e2, 3.1353611e1, -3.3187769e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_R_1_923_to_13_228 =
+  {
+    1.8891380e2, 1.472644573e2, -1.844024844e1, 4.031129726e0,
+    -6.249428360e-1, 6.468412046e-2, -4.458750426e-3, 1.994710149e-4,
+    -5.313401790e-6, 6.481976217e-8
+  };
+  const std::vector<Real> coeff_d_thermo_type_R_11_361_to_19_739 =
+  {
+    -8.199599416e1, 1.553962042e2, -8.342197663e0, 4.279433549e-1,
+    -1.191577910e-2, 1.492290091e-4, 0.0, 0.0, 0.0, 0.0
+  };
+  const std::vector<Real> coeff_d_thermo_type_R_19_739_to_21_103 =
+  {
+    3.406177836e4, -7.023729171e3, 5.582903813e2, -1.952394635e1,
+    2.560740231e-1, 0.0, 0.0, 0.0, 0.0, 0.0
+  };
+  const std::vector<Real> error_range_thermo_type_R_minus_0_226_to_1_923 =
+  {
+    -0.02, 0.02
+  };
+  const std::vector<Real> error_range_thermo_type_R_1_923_to_13_228 =
+  {
+    -0.005, 0.005
+  };
+  const std::vector<Real> error_range_thermo_type_R_11_361_to_19_739 =
+  {
+    -0.0005, 0.001
+  };
+  const std::vector<Real> error_range_thermo_type_R_19_739_to_21_103 =
+  {
+    -0.001, 0.002
+  };
+
+  // Coefficients and error range vectors for Thermocouple Type S in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_S_minus_0_235_to_1_874 =
+  {
+    0.00000000e0, 1.291507177e1, -8.00504062e1, 1.02237430e2,
+    -1.52248592e2, 1.88821343e2, -1.59085941e2, 8.23027880e1,
+    -2.34181944e1, 2.79786260e0
+  };
+  const std::vector<Real> coeff_d_thermo_type_S_1_874_to_11_950 =
+  {
+    1.84949460e2, 1.466298863e2, -1.534713402e1, 3.145945973e0,
+    -4.163257839e-1, 3.187963771e-2, -1.291637500e-3, 2.183475087e-5,
+    -1.447379511e-7, 8.211272125e-9
+  };
+  const std::vector<Real> coeff_d_thermo_type_S_10_332_to_17_536 =
+  {
+    -8.087801117e1, 1.621573104e2, -8.536869453e0, 4.719686976e-1,
+    -1.441693666e-2, 2.081618890e-4, 0.0, 0.0, 0.0, 0.0
+  };
+  const std::vector<Real> coeff_d_thermo_type_S_17_536_to_18_693 =
+  {
+    5.333875126e4, -1.235892298e4, 1.092657613e3, -4.265693686e1,
+    6.247205420e-1, 0.0, 0.0, 0.0, 0.0, 0.0
+  };
+  const std::vector<Real> error_range_thermo_type_S_minus_0_235_to_1_874 =
+  {
+    -0.02, 0.02
+  };
+  const std::vector<Real> error_range_thermo_type_S_1_874_to_11_950 =
+  {
+    -0.01, 0.01
+  };
+  const std::vector<Real> error_range_thermo_type_S_10_332_to_17_536 =
+  {
+    -0.0002, 0.0002
+  };
+  const std::vector<Real> error_range_thermo_type_S_17_536_to_18_693 =
+  {
+    -0.002, 0.002
+  };
+
+  // Coefficients and error range vectors for Thermocouple Type S in mV and degreeC
+  const std::vector<Real> coeff_d_thermo_type_T_minus_5_603_to_0 =
+  {
+    0.0000000e0, 2.5949192e1, -2.1316967e-1, 7.9018692e-1,
+    4.2527777e-1, 1.3304473e-1, 2.0241446e-2, 1.2668171e-3
+  };
+  const std::vector<Real> coeff_d_thermo_type_T_0_to_20_872 =
+  {
+    0.000000e0, 2.592800e1, -7.602961e-1, 4.637791e-2,
+    -2.165394e-3, 6.048144e-5, -7.293422e-7, 0.0
+  };
+  const std::vector<Real> error_range_thermo_type_T_minus_5_603_to_0 =
+  {
+    -0.02, 0.04
+  };
+  const std::vector<Real> error_range_thermo_type_T_0_to_20_872 =
+  {
+    -0.03, 0.03
+  };
+  };
