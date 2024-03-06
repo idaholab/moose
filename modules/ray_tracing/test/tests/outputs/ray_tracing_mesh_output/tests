@@ -255,7 +255,7 @@
                   Outputs/rays/output_data_names=no_exist'
       expect_err = "The ray data 'no_exist' is not registered"
 
-      detail = 'requesting to output aux data and the data does not exist'
+      detail = 'requesting to output data and the data does not exist'
     []
     [missing_aux_data]
       type = RunException
@@ -265,7 +265,7 @@
                   Outputs/rays/output_aux_data_names=no_exist'
       expect_err = "The ray aux data 'no_exist' is not registered"
 
-      detail = 'requesting to output aux data and the data does not exist'
+      detail = 'requesting to output aux data and the aux data does not exist'
     []
   []
 
