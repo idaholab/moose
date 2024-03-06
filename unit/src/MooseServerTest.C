@@ -2039,7 +2039,7 @@ textedit_new_text:
 
 TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
 {
-  // didchange test parameters - create empty diagnostic that gets included
+  // didchange test parameters - create empty diagnostic which is not added
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int doc_version = 6;
   std::string doc_text_change = R"INPUT(
@@ -2073,9 +2073,8 @@ TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
   format_diagnostics(diagnostics_array, diagnostics_list_actual);
 
   // check that diagnostics array size and message contents are as expected
-  std::size_t diagnostics_size_expect = 2;
+  std::size_t diagnostics_size_expect = 1;
   std::string diagnostics_list_expect = R"INPUT(
-line:11 column:2 - 
 line:11 column:2 -     no variable 'undefined' found for use in function parser expression
 )INPUT";
 
