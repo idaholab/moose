@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "MooseError.h"
 #include "MultiAppReporterTransfer.h"
 #include "MultiApp.h"
 
@@ -81,6 +82,10 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
           "subapp_index",
           "The supplied sub-application index is greater than the number of sub-applications.");
   }
+
+  if (_distribute_reporter_vector && hasToMultiApp() && hasFromMultiApp())
+    paramError("distribute_reporter_vector",
+               "Distributing reporter vectors is not compatible with sibling transfers.");
 }
 
 void
@@ -129,8 +134,7 @@ MultiAppReporterTransfer::executeToMultiapp()
         if (_distribute_reporter_vector)
           transferFromVectorReporter(_from_reporter_names[n],
                                      _to_reporter_names[n],
-                                     hasFromMultiApp() ? getFromMultiApp()->appProblemBase(ind)
-                                                       : getToMultiApp()->problemBase(),
+                                     getToMultiApp()->problemBase(),
                                      getToMultiApp()->appProblemBase(ind),
                                      ind);
         else
@@ -162,18 +166,15 @@ MultiAppReporterTransfer::executeFromMultiapp()
     indices = {_subapp_index};
 
   if (_distribute_reporter_vector)
-    for (const auto & ind : indices)
-      for (unsigned int n : make_range(_to_reporter_names.size()))
-      {
-        auto size = getFromMultiApp()->numGlobalApps();
-        clearVectorReporter(_to_reporter_names[n],
-                            hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
-                                            : getFromMultiApp()->problemBase());
-        resizeReporter(_to_reporter_names[n],
-                       hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
-                                       : getFromMultiApp()->problemBase(),
-                       size);
-      }
+    for (unsigned int n : make_range(_to_reporter_names.size()))
+    {
+      // Clear all vector reporters and resize to the number of subapps.
+      // The summing process later will make sure the reporter values are
+      // consistent across the processors.
+      auto size = getFromMultiApp()->numGlobalApps();
+      clearVectorReporter(_to_reporter_names[n], getFromMultiApp()->problemBase());
+      resizeReporter(_to_reporter_names[n], getFromMultiApp()->problemBase(), size);
+    }
 
   for (const auto & ind : indices)
     if (getFromMultiApp()->hasLocalApp(ind) &&
@@ -186,23 +187,20 @@ MultiAppReporterTransfer::executeFromMultiapp()
             transferToVectorReporter(_from_reporter_names[n],
                                      _to_reporter_names[n],
                                      getFromMultiApp()->appProblemBase(ind),
-                                     hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
-                                                     : getFromMultiApp()->problemBase(),
+                                     getFromMultiApp()->problemBase(),
                                      ind);
         }
         else
           transferReporter(_from_reporter_names[n],
                            _to_reporter_names[n],
                            getFromMultiApp()->appProblemBase(ind),
-                           hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
+                           hasToMultiApp() ? getToMultiApp()->appProblemBase(ind) // !
                                            : getFromMultiApp()->problemBase());
       }
   if (_distribute_reporter_vector)
     for (unsigned int n : make_range(_to_reporter_names.size()))
     {
-      sumVectorReporter(_to_reporter_names[n],
-                        hasToMultiApp() ? getToMultiApp()->appProblemBase(0)
-                                        : getFromMultiApp()->problemBase());
+      sumVectorReporter(_to_reporter_names[n], getFromMultiApp()->problemBase());
     }
 }
 

@@ -483,7 +483,7 @@ ReporterGeneralContext<T>::resize(dof_id_type size)
     this->_state.value().resize(size);
   else
   {
-    (void)size;
+    libmesh_ignore(size);
     mooseError("Cannot resize non vector-type reporter values.");
   }
 }

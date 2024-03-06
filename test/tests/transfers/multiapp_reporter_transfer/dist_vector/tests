@@ -2,7 +2,11 @@
     issues = '#26953'
     design = 'MultiAppReporterTransfer.md'
     [vec_rep]
-        requirement = "The system shall support the ability to transfer reporter data in a N to 1 and 1 to N fashion when"
+        requirement = "The system shall support the ability to transfer reporter
+        data in a N to 1 and 1 to N fashion when"
+        # We only allow recover testing on a single example. During recover
+        # testing checkpoints are overwritten and used by the wrong test leading
+        # to an incorrect test failure.
       [reporter_transfer]
         type = 'JSONDiff'
         input = 'main.i'

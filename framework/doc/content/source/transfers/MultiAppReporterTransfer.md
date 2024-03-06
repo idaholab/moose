@@ -34,6 +34,10 @@ to be root or replicated.
 |
 | $\begin{pmatrix}1\\2\end{pmatrix}$ $\begin{pmatrix}3\\4\\5\end{pmatrix}$ $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ $\begin{pmatrix}10\\11\\12\end{pmatrix}$ | $\begin{pmatrix}1\\2\end{pmatrix}$ | $\begin{pmatrix}3\\4\\5\end{pmatrix}$ | $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ | $\begin{pmatrix}10\\11\\12\end{pmatrix}$ |
 
+!alert Caution title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector) only works with certain reporter modes.
+The main
+app reporter is assumed to be replicated while the subapp reporters are assumed
+to be root or replicated. Using distributed reporter modes might not give correct answers.
 
 ## Example Input File Syntax
 
