@@ -395,7 +395,7 @@ public:
 
 protected:
   /// Check the input variables
-  void checkVariables(Real pressure, Real temperature) const;
+  virtual void checkVariables(Real pressure, Real temperature) const;
 
   /**
    * Cubic function to smoothly interpolate between the low temperature and elevated
