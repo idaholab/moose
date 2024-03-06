@@ -2037,6 +2037,52 @@ textedit_new_text:
   std::remove("include_variables.i");
 }
 
+TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
+{
+  // didchange test parameters - create empty diagnostic that gets included
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int doc_version = 6;
+  std::string doc_text_change = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Executioner]
+  type = Steady
+[]
+[Problem]
+  solve = false
+[]
+  globalvar = ${fparse undefined}
+)INPUT";
+
+  // build didchange notification from parameters and handle it with server
+  wasp::DataObject didchange_notification, diagnostics_notification;
+  std::stringstream errors;
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
+  // dissect diagnostics notification from server and create formatted list
+  std::string response_uri;
+  wasp::DataArray diagnostics_array;
+  std::ostringstream diagnostics_list_actual;
+  EXPECT_TRUE(wasp::lsp::dissectPublishDiagnosticsNotification(
+      diagnostics_notification, errors, response_uri, diagnostics_array));
+  format_diagnostics(diagnostics_array, diagnostics_list_actual);
+
+  // check that diagnostics array size and message contents are as expected
+  std::size_t diagnostics_size_expect = 2;
+  std::string diagnostics_list_expect = R"INPUT(
+line:11 column:2 - 
+line:11 column:2 -     no variable 'undefined' found for use in function parser expression
+)INPUT";
+
+  EXPECT_EQ(diagnostics_size_expect, diagnostics_array.size());
+  EXPECT_EQ(diagnostics_list_expect, "\n" + diagnostics_list_actual.str());
+}
+
 TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 {
   // check moose_server can share connection it will use to read and write
