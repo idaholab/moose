@@ -21,6 +21,7 @@
 #include <vector>
 #include <tuple>
 #include <optional>
+#include <exception>
 
 template <typename T>
 class ValueCache;
@@ -53,12 +54,13 @@ public:
   /// insert a new value out_value at the position in_val
   void insert(const std::vector<Real> & in_val, const T & out_val);
 
-  /// get the closest value and distance to in_val
-  bool guess(const std::vector<Real> & in_val, T & out_val, Real & distance_sqr);
+  /// get a single neighbor of in_val along with stored values and distances
+  std::tuple<const std::vector<Real> &, const T &, Real>
+  getNeighbor(const std::vector<Real> & in_val);
 
   /// get a list of up to k neighbors of in_val along with stored values and distances
   std::vector<std::tuple<const std::vector<Real> &, const T &, Real>>
-  kNearestNeighbors(const std::vector<Real> & in_val, const std::size_t k);
+  getNeighbors(const std::vector<Real> & in_val, const std::size_t k);
 
   /// return the number of cache entries
   std::size_t size();
@@ -174,27 +176,28 @@ ValueCache<T>::insert(const std::vector<Real> & in_val, const T & out_val)
     _kd_tree->addPoints(id, id);
 }
 
+/**
+ * Retrieve a single closest neighbor to in_val. Throws an exception if no values are stored.
+ */
 template <typename T>
-bool
-ValueCache<T>::guess(const std::vector<Real> & in_val, T & out_val, Real & distance_sqr)
+std::tuple<const std::vector<Real> &, const T &, Real>
+ValueCache<T>::getNeighbor(const std::vector<Real> & in_val)
 {
-  // cache is empty
+  // throw an exception if this is called on an empty cache
   if (_location_data.empty())
-    return false;
+    throw std::runtime_error("Attempting to retrieve a neighbor from an empty ValueCache.");
 
+  // buffers for the kNN search
   nanoflann::KNNResultSet<Real> result_set(1);
   std::size_t return_index;
-  result_set.init(&return_index, &distance_sqr);
+  Real distance;
 
-  // perform search
+  // kNN search
+  result_set.init(&return_index, &distance);
   _kd_tree->findNeighbors(result_set, in_val.data());
 
-  // no result found
-  if (result_set.size() != 1)
-    return false;
-
-  out_val = _location_data[return_index].second;
-  return true;
+  const auto & [location, data] = _location_data[return_index];
+  return {std::cref(location), std::cref(data), distance};
 }
 
 /**
@@ -203,23 +206,27 @@ ValueCache<T>::guess(const std::vector<Real> & in_val, T & out_val, Real & dista
  */
 template <typename T>
 std::vector<std::tuple<const std::vector<Real> &, const T &, Real>>
-ValueCache<T>::kNearestNeighbors(const std::vector<Real> & in_val, const std::size_t k)
+ValueCache<T>::getNeighbors(const std::vector<Real> & in_val, const std::size_t k)
 {
-  std::vector<std::tuple<const std::vector<Real> &, const T &, Real>> nearest_neighbors;
+  // return early if no points are stored
+  if (_location_data.empty())
+    return {};
 
+  // buffers for the kNN search
   nanoflann::KNNResultSet<Real> result_set(std::min(k, size()));
   std::vector<std::size_t> return_indices(std::min(k, size()));
   std::vector<Real> distances(std::min(k, size()));
 
-  result_set.init(return_indices.data(), distances.data());
-
   // kNN search
+  result_set.init(return_indices.data(), distances.data());
   _kd_tree->findNeighbors(result_set, in_val.data());
 
+  // prepare results to be returned
+  std::vector<std::tuple<const std::vector<Real> &, const T &, Real>> nearest_neighbors;
   for (const auto i : index_range(result_set))
   {
     const auto & [location, data] = _location_data[return_indices[i]];
-    nearest_neighbors.push_back(std::tie(location, data, distances[i]));
+    nearest_neighbors.emplace_back(std::cref(location), std::cref(data), distances[i]);
   }
   return nearest_neighbors;
 }
