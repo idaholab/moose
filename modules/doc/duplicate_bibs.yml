@@ -2,3 +2,4 @@
 - hales15homogenization # referenced in both Solid Mechanics and Heat Conduction
 - greenshields2010implementation # referenced in both Navier Stokes and Framework
 - jasak1996error # referenced in both Navier Stokes and Darcy Flow tutorial
+- puso2008segment # referenced in both Contact and Framework
