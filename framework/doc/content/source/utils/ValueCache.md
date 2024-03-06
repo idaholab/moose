@@ -10,9 +10,9 @@ When the object is constructed using the
 ValueCache(const std::string & file_name, std::size_t in_dim, std::size_t max_leaf_size = 10);
 ```
 
-constructor, the state of the cache is saved to a file upon destuction of the cache object (usually at teh ond of a simulation), and read in at construction of the cache object. Thus teh cached knowledge from a previous simulation will be available in future runs.
+constructor, the state of the cache is saved to a file upon destruction of the cache object (usually at the ond of a simulation), and read in at construction of the cache object. Thus the cached knowledge from a previous simulation will be available in future runs.
 
 !alert warning
-It is up to the developer to ensure that the cache state from previous runs is applicable to the following runs when teh persistence feature is used!
+It is up to the developer to ensure that the cache state from previous runs is applicable to the following runs when the persistence feature is used!
 
 Note that overloads for `dataLoad` and `dataStore` for type `T` must be implemented. If full persistence is not desired the cache object can still be declared as restartable.

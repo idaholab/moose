@@ -41,8 +41,13 @@ template <typename T>
 class ValueCache
 {
 public:
+  /// Construct a ValueCache with indices in in_dim dimensions
   ValueCache(std::size_t in_dim, std::size_t max_leaf_size = 10);
+
+  /// Same as above, but provide a filename for storing/restoring the cache content between runs
   ValueCache(const std::string & file_name, std::size_t in_dim, std::size_t max_leaf_size = 10);
+
+  /// Object destructor. If the cache was constructed with a file name, it gets written here.
   ~ValueCache();
 
   /// insert a new value out_value at the position in_val
