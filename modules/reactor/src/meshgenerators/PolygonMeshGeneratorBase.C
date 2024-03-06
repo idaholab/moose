@@ -1397,3 +1397,75 @@ PolygonMeshGeneratorBase::setRingExtraIDs(MeshBase & mesh,
       (*elem_it)->set_extra_integer(extra_id_index, 0);
   }
 }
+
+void
+PolygonMeshGeneratorBase::reassignBoundaryIDs(MeshBase & mesh,
+                                              const boundary_id_type id_shift,
+                                              const std::set<boundary_id_type> & boundary_ids,
+                                              const bool reverse)
+{
+  const std::set<boundary_id_type> existing_boundary_ids =
+      mesh.get_boundary_info().get_boundary_ids();
+  for (const auto id : boundary_ids)
+  {
+
+    const boundary_id_type old_id = (!reverse) ? id : id + id_shift;
+    const boundary_id_type new_id = (!reverse) ? id + id_shift : id;
+    auto it = existing_boundary_ids.find(old_id);
+    if (it != existing_boundary_ids.end())
+      MooseMesh::changeBoundaryId(mesh, old_id, new_id, true);
+  }
+}
+
+std::set<boundary_id_type>
+PolygonMeshGeneratorBase::getInterfaceBoundaryIDs(
+    const std::vector<std::vector<unsigned int>> & pattern,
+    const std::vector<std::vector<boundary_id_type>> & interface_boundary_id_shift_pattern,
+    const std::set<boundary_id_type> & boundary_ids,
+    const std::vector<std::set<boundary_id_type>> & input_interface_boundary_ids,
+    const bool use_interface_boundary_id_shift,
+    const bool create_interface_boundary_id,
+    const unsigned int num_extra_layers) const
+{
+  std::set<boundary_id_type> interface_boundary_ids;
+  // add existing interface boundary ids from input meshes
+  if (use_interface_boundary_id_shift)
+  {
+    for (const auto i : make_range(pattern.size()))
+      for (const auto j : make_range(pattern[i].size()))
+      {
+        const auto & ids = input_interface_boundary_ids[pattern[i][j]];
+        for (const auto & id : ids)
+        {
+          const boundary_id_type new_id = id + interface_boundary_id_shift_pattern[i][j];
+          auto it = boundary_ids.find(new_id);
+          if (it != boundary_ids.end())
+            interface_boundary_ids.insert(new_id);
+        }
+      }
+  }
+  else
+  {
+    for (const auto & ids : input_interface_boundary_ids)
+      for (const auto & id : ids)
+      {
+        auto it = boundary_ids.find(id);
+        if (it != boundary_ids.end())
+          interface_boundary_ids.insert(id);
+      }
+  }
+  // add unshifted interface boundary ids for the duct & background regions
+  if (create_interface_boundary_id)
+    for (const auto i : make_range(num_extra_layers))
+    {
+      boundary_id_type id = SLICE_ALT + i * 2 + 1;
+      auto it = boundary_ids.find(id);
+      if (it != boundary_ids.end())
+        interface_boundary_ids.insert(id);
+      id = SLICE_ALT + i * 2;
+      it = boundary_ids.find(id);
+      if (it != boundary_ids.end())
+        interface_boundary_ids.insert(id);
+    }
+  return interface_boundary_ids;
+}

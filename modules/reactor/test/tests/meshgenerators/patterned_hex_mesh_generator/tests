@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148 #20514 #23367 #24508'
+  issues = '#18628 #20148 #20514 #23367 #24508 #26921'
   [hexagon_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -246,6 +246,14 @@
                 --mesh-only "patterned_err.e"'
     expect_err = 'for each input mesh, the number of sectors on each side must be greater than unity'
     requirement = 'The system shall throw an error if hexagon boundary needs to be generated for simple unit hexagon mesh.'
+    recover = false
+  []
+  [interface_boundary_id_shift_pattern]
+    type = 'Exodiff'
+    input = 'interface_boundary_id_shift_pattern.i'
+    exodiff = 'interface_boundary_id_shift_pattern_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall be able to shift boundary IDs of hexagonal mesh geometry based on the user-defined pattern, for each cell, of shifts in boundary ids of interfaces.'
     recover = false
   []
 []
