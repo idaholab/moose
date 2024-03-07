@@ -149,8 +149,11 @@ public:
   /// The serialized batch data is stored in a vector
   typedef std::vector<InputType> InputVector;
 
-  /// get a reference to the output data
+  /// get a readonly reference to the output data
   const OutputVector & getOutputData() const { return _output_data; }
+
+  /// get a writable reference to the output data
+  OutputVector & setOutputData() { return _output_data; }
 
   /// get a reference to the input data
   const InputVector & getInputData() const { return _input_data; }
