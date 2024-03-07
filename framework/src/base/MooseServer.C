@@ -97,10 +97,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
     // walk over caught message line by line adding each as a diagnostic
     for (std::string error_line; std::getline(caught_msg, error_line);)
     {
-      // skip over lines that are blank or consist totally of whitespace
-      if (error_line.find_first_not_of(" \t") == std::string::npos)
-        continue;
-
       // check if this error line already has the input file path prefix
       if (error_line.rfind(parse_file_path + ":", 0) == 0)
       {
@@ -129,6 +125,10 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
           error_line = match_error_line;
         }
       }
+
+      // skip adding diagnostic when message is empty or only whitespace
+      if (error_line.find_first_not_of(" \t") == std::string::npos)
+        continue;
 
       // build zero based line and column diagnostic and add to the list
       diagnosticsList.push_back(wasp::DataObject());
