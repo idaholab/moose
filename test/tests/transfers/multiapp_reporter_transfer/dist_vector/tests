@@ -29,7 +29,21 @@
         min_parallel = 5
         detail = "the number of procs per app is larger than the number of apps,"
       []
-
+      [reporter_send_error]
+        type = 'RunException'
+        input = 'main_dist.i'
+        expect_err = 'The Reporter value "main/dis_vec" is being produced in DISTRIBUTED mode, but the MultiAppReporterTransfer "to_sub" is requesting to consume it in REPLICATED mode, which is not supported.'
+        allow_test_objects=true
+        detail = "but not when the reporter being tranferred is distributed in the main app,"
+      []
+      [reporter_rec_error]
+        type = 'RunException'
+        input = 'main_dist.i'
+        expect_err ='The Reporter value "sub_rep/dis_vec" is being produced in DISTRIBUTED mode, but the MultiAppReporterTransfer "from_sub" is requesting to consume it in ROOT mode, which is not supported.'
+        cli_args = "Transfers/active=from_sub"
+        allow_test_objects=true
+        detail = "or when the reporter being tranferred is distributed in the sub app."
+      []
   []
 []
 
