@@ -9,8 +9,9 @@
 
 #include "CauchyStressFromNEML2UO.h"
 #include "NEML2Utils.h"
+#include "neml2/misc/math.h"
 
-registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2UO);
+registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2UO);
 
 InputParameters
 CauchyStressFromNEML2UO::validParams()
@@ -55,19 +56,20 @@ CauchyStressFromNEML2UO::batchCompute()
 {
   try
   {
+    initModel(_input_data.size());
+
     // Allocate the input and output
     if (_t_step == 0)
     {
-      _in = neml2::LabeledVector::zeros(_input_data.size(), {&model().input()});
-      _out = neml2::LabeledVector::zeros(_input_data.size(), {&model().output()});
+      _in = neml2::LabeledVector::zeros(_input_data.size(), {&model().input_axis()});
+      _out = neml2::LabeledVector::zeros(_input_data.size(), {&model().output_axis()});
     }
 
     updateForces();
 
     if (_t_step > 0)
     {
-      if (model().implicit())
-        applyPredictor();
+      applyPredictor();
 
       solve();
 
@@ -107,9 +109,9 @@ void
 CauchyStressFromNEML2UO::advanceStep()
 {
   // Set old state variables and old forces
-  if (model().input().has_subaxis("old_state") && model().output().has_subaxis("state"))
+  if (model().input_axis().has_subaxis("old_state") && model().output_axis().has_subaxis("state"))
     _in.slice("old_state").fill(_out.slice("state"));
-  if (model().input().has_subaxis("old_forces") && model().input().has_subaxis("forces"))
+  if (model().input_axis().has_subaxis("old_forces") && model().input_axis().has_subaxis("forces"))
     _in.slice("old_forces").fill(_in.slice("forces"));
 }
 
@@ -126,8 +128,8 @@ CauchyStressFromNEML2UO::updateForces()
       // NEML2 variable accessors
       {strain(), temperature()},
       // Pointer to the batched data
-      model().input().has_variable(strain()) ? &std::get<0>(input) : nullptr,
-      model().input().has_variable(temperature()) ? &std::get<1>(input) : nullptr);
+      model().input_axis().has_variable(strain()) ? &std::get<0>(input) : nullptr,
+      model().input_axis().has_variable(temperature()) ? &std::get<1>(input) : nullptr);
 
   NEML2Utils::set(
       // The input LabeledVector
@@ -135,7 +137,7 @@ CauchyStressFromNEML2UO::updateForces()
       // NEML2 variable accessors
       {time()},
       // Pointer to the unbatched data
-      model().input().has_variable(time()) ? &_t : nullptr);
+      model().input_axis().has_variable(time()) ? &_t : nullptr);
 }
 
 void
@@ -144,7 +146,8 @@ CauchyStressFromNEML2UO::applyPredictor()
   // Set trial state variables (i.e., initial guesses).
   // Right now we hard-code to use the old state as the trial state.
   // TODO: implement other predictors
-  _in.slice("state").fill(_in.slice("old_state"));
+  if (model().input_axis().has_subaxis("state") && model().input_axis().has_subaxis("old_state"))
+    _in.slice("state").fill(_in.slice("old_state"));
 }
 
 void

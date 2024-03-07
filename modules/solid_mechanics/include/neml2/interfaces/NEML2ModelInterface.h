@@ -41,6 +41,9 @@ protected:
    */
   virtual void validateModel() const;
 
+  /// Initialize the model with a batch shape
+  void initModel(torch::IntArrayRef batch_shape);
+
   /// Get the NEML2 model
   neml2::Model & model() const { return _model; }
 
@@ -48,12 +51,12 @@ protected:
   const torch::Device & device() const { return _device; }
 
   /**
-   * @brief Convert a raw string to a LabeledAxisAccessor
+   * @brief Convert a raw string to a neml2::VariableName
    *
    * @param raw_str
-   * @return neml2::LabeledAxisAccessor
+   * @return neml2::VariableName
    */
-  neml2::LabeledAxisAccessor getLabeledAxisAccessor(const std::string & raw_str) const;
+  neml2::VariableName getNEML2VariableName(const std::string & raw_str) const;
 
 private:
   /// The NEML2 material model
@@ -104,8 +107,6 @@ NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&
     _model(neml2::Factory::get_object<neml2::Model>("Models", params.get<std::string>("model"))),
     _device(params.get<std::string>("device"))
 {
-  // Send the model to the compute device
-  _model.to(_device);
 }
 
 template <class T>
@@ -114,28 +115,36 @@ NEML2ModelInterface<T>::validateModel() const
 {
   // Forces and old forces on the input axis must match, i.e. all the variables on the old_forces
   // subaxis must also exist on the forces subaxis:
-  if (_model.input().has_subaxis("old_forces"))
-    for (auto var : _model.input().subaxis("old_forces").variable_accessors(/*recursive=*/true))
-      if (!_model.input().subaxis("forces").has_variable(var))
+  if (_model.input_axis().has_subaxis("old_forces"))
+    for (auto var :
+         _model.input_axis().subaxis("old_forces").variable_accessors(/*recursive=*/true))
+      if (!_model.input_axis().subaxis("forces").has_variable(var))
         mooseError("The NEML2 model has old force variable ",
                    var,
                    " as input, but does not have the corresponding force variable as input.");
 
   // Similarly, state (on the output axis) and old state (on the input axis) must match, i.e. all
   // the variables on the input's old_state subaxis must also exist on the output's state subaxis:
-  if (_model.input().has_subaxis("old_state"))
-    for (auto var : _model.input().subaxis("old_state").variable_accessors(/*recursive=*/true))
-      if (!_model.output().subaxis("state").has_variable(var))
+  if (_model.input_axis().has_subaxis("old_state"))
+    for (auto var : _model.input_axis().subaxis("old_state").variable_accessors(/*recursive=*/true))
+      if (!_model.output_axis().subaxis("state").has_variable(var))
         mooseError("The NEML2 model has old state variable ",
                    var,
                    " as input, but does not have the corresponding state variable as output.");
 }
 
 template <class T>
-neml2::LabeledAxisAccessor
-NEML2ModelInterface<T>::getLabeledAxisAccessor(const std::string & raw_str) const
+void
+NEML2ModelInterface<T>::initModel(torch::IntArrayRef batch_shape)
 {
-  return neml2::utils::parse<neml2::LabeledAxisAccessor>(raw_str);
+  _model.reinit(batch_shape, /*deriv_order=*/1, _device, /*dtype=*/torch::kFloat64);
+}
+
+template <class T>
+neml2::VariableName
+NEML2ModelInterface<T>::getNEML2VariableName(const std::string & raw_str) const
+{
+  return neml2::utils::parse<neml2::VariableName>(raw_str);
 }
 
 #endif // NEML2_ENABLED

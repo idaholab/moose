@@ -31,7 +31,7 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
 }
 #endif
 
-registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2);
+registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2);
 
 #ifdef NEML2_ENABLED
 
@@ -46,24 +46,29 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
 
   // Get the old mechanical strain if the NEML2 model need it
   _mechanical_strain_old =
-      model().input().has_variable(strainOld())
+      model().input_axis().has_variable(strainOld())
           ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")
           : nullptr;
 
   // Get the temperature if the NEML2 model need it
   _temperature =
-      model().input().has_variable(temperature()) ? &coupledValue("temperature") : nullptr;
+      model().input_axis().has_variable(temperature()) ? &coupledValue("temperature") : nullptr;
 
   // Get the old temperature if the NEML2 model need it
-  _temperature =
-      model().input().has_variable(temperatureOld()) ? &coupledValueOld("temperature") : nullptr;
+  _temperature = model().input_axis().has_variable(temperatureOld())
+                     ? &coupledValueOld("temperature")
+                     : nullptr;
 
   // Find the stateful state variables.
   // A state variable is said to be stateful if it exists on the input's old_state axis as well as
   // on the output's state axis.
-  if (model().input().has_subaxis("old_state"))
-    for (auto var : model().input().subaxis("old_state").variable_accessors(/*recursive=*/true))
+  if (model().input_axis().has_subaxis("old_state"))
+    for (auto var :
+         model().input_axis().subaxis("old_state").variable_accessors(/*recursive=*/true))
     {
+      if (!model().output_axis().has_variable(var.on("state")))
+        mooseError("NEML2 model has nonconformal input's old_state and output's state");
+
       _state_vars[var.on("state")] = &declareProperty<std::vector<Real>>(Moose::stringify(var));
       _state_vars_old[var.on("old_state")] =
           &getMaterialPropertyOld<std::vector<Real>>(Moose::stringify(var));
@@ -86,7 +91,7 @@ CauchyStressFromNEML2::initQpStatefulProperties()
 
   // TODO: provide a mechanism to initialize the internal variables to non-zeros
   for (auto && [var, prop] : _state_vars)
-    (*prop)[_qp] = std::vector<Real>(model().output().storage_size(var), 0);
+    (*prop)[_qp] = std::vector<Real>(model().output_axis().storage_size(var), 0);
 }
 
 void
@@ -94,15 +99,16 @@ CauchyStressFromNEML2::computeProperties()
 {
   try
   {
+    initModel(_qrule->n_points());
+
     // Allocate input
-    _in = neml2::LabeledVector::zeros(_qrule->n_points(), {&model().input()});
+    _in = neml2::LabeledVector::zeros(_qrule->n_points(), {&model().input_axis()});
 
     advanceStep();
 
     updateForces();
 
-    if (model().implicit())
-      applyPredictor();
+    applyPredictor();
 
     solve();
   }
@@ -164,7 +170,7 @@ CauchyStressFromNEML2::advanceStep()
       // NEML2 variable accessors
       {timeOld()},
       // Pointer to the unbatched data
-      model().input().has_variable(timeOld()) ? &t_old : nullptr);
+      model().input_axis().has_variable(timeOld()) ? &t_old : nullptr);
 }
 
 void
@@ -185,7 +191,7 @@ CauchyStressFromNEML2::updateForces()
       // NEML2 variable accessors
       {time()},
       // Pointer to the unbatched data
-      model().input().has_variable(time()) ? &_t : nullptr);
+      model().input_axis().has_variable(time()) ? &_t : nullptr);
 }
 
 void
@@ -194,7 +200,8 @@ CauchyStressFromNEML2::applyPredictor()
   // Set trial state variables (i.e., initial guesses).
   // Right now we hard-code to use the old state as the trial state.
   // TODO: implement other predictors
-  _in.slice("state").fill(_in.slice("old_state"));
+  if (model().input_axis().has_subaxis("state") && model().input_axis().has_subaxis("old_state"))
+    _in.slice("state").fill(_in.slice("old_state"));
 }
 
 void
