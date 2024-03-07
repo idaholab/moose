@@ -2821,6 +2821,12 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
            i++) // Add any Jacobian contributions still hanging around
         _fe_problem.addCachedJacobian(i);
 
+      // Check whether any exceptions were thrown and propagate this information for parallel
+      // consistency before
+      // 1) we do parallel communication when closing tagged matrices
+      // 2) early returning before reaching our PARALLEL_CATCH below
+      _fe_problem.checkExceptionAndStopSolve();
+
       closeTaggedMatrices(tags);
 
       return;
