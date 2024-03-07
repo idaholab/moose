@@ -59,6 +59,9 @@ public:
   /// De-standardizes (de-centered and de-scaled) the assumed standardized input considering covariances
   void getDestandardizedCovariance(RealEigenMatrix & input) const;
 
+  /// De-scales the assumed standardized input considering covariances
+  void getDescaledCovariance(RealEigenVector & input) const;
+
   /// De-scales the assumed scaled input
   void getDescaled(RealEigenMatrix & input) const;
 
@@ -67,8 +70,6 @@ protected:
   std::vector<Real> _stdev;
   RealEigenMatrix _mean_colwise;
   RealEigenMatrix _cov;
-  // RealEigenMatrix _cov_inv;
-  // Eigen::LLT<RealEigenMatrix> _cov_inv;
 };
 
 } // StochasticTools namespace

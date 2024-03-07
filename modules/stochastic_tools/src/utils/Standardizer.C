@@ -82,7 +82,6 @@ Standardizer::computeCovariance(const RealEigenMatrix & input)
   _mean_colwise = input;
   RealEigenMatrix centered = input.rowwise() - _mean_colwise.colwise().mean();
   _cov = (centered.adjoint() * centered) / double(input.rows() - 1);
-  // _cov_inv = _cov.llt(); // _cov.completeOrthogonalDecomposition().pseudoInverse();
 }
 
 void
@@ -108,32 +107,22 @@ Standardizer::getStandardizedCovariance(RealEigenMatrix & input) const
   Eigen::LDLT<RealEigenMatrix> _cov_inv;
   _cov_inv = _cov.ldlt();
   RealEigenMatrix centered = input.rowwise() - _mean_colwise.colwise().mean();
-  // input = _cov_inv.solve(centered);
-  // std::cout << Moose::stringify(input) << std::endl;
   for (unsigned int i = 0; i < centered.rows(); ++i)
     input.row(i) = _cov_inv.solve(centered.row(i).transpose());
-
-  // RealEigenMatrix tmp(1, input.cols());
-  // for (unsigned int i = 0; i < input.rows(); ++i)
-  // {
-  //   for (unsigned int j = 0; j < input.cols(); ++j)
-  //   {
-  //     tmp = ;
-  //   }
-  // }
-    // input = centered * _cov_inv;
 }
 
 void
 Standardizer::getDestandardizedCovariance(RealEigenMatrix & input) const
 {
   RealEigenMatrix covariated = input.transpose() * _cov;
-  input = covariated + _mean_colwise.colwise().mean(); // .rowwise()
+  input = covariated + _mean_colwise.colwise().mean();
   input = input.transpose();
+}
 
-  // RealEigenMatrix covariated = _cov * input.transpose();
-  // input = covariated + _mean_colwise.colwise().mean(); // .rowwise()
-  // input = input.transpose();
+void
+Standardizer::getDescaledCovariance(RealEigenVector & input) const
+{
+  input = _cov * input;
 }
 
 void

@@ -295,13 +295,14 @@ R=1.8257418583505537e-4 # m
 []
 
 [Outputs]
-  [exodus]
-    type = Exodus
-    output_material_properties = true
-    show_material_properties = 'mu'
-  []
-  checkpoint = true
-  perf_graph = true
+  csv = true
+  # [exodus]
+  #   type = Exodus
+  #   output_material_properties = true
+  #   show_material_properties = 'mu'
+  # []
+  # checkpoint = true
+  # perf_graph = true
 []
 
 [Debug]
@@ -355,5 +356,48 @@ R=1.8257418583505537e-4 # m
   [tot_nl]
     type = CumulativeValuePostprocessor
     postprocessor = 'nl'
+  []
+[]
+
+[VectorPostprocessors]
+  [vel_y_vec]
+    type = LineValueSampler
+    variable = vel_y_aux
+    start_point = '-.45e-3 0 0'
+    end_point = '0.45e-3 0 0'
+    num_points = 5
+    sort_by = x
+  []
+  [vel_x_vec]
+    type = LineValueSampler
+    variable = vel_x_aux
+    start_point = '-.45e-3 0 0'
+    end_point = '0.45e-3 0 0'
+    num_points = 5
+    sort_by = x
+  []
+  [disp_y_vec]
+    type = LineValueSampler
+    variable = disp_y
+    start_point = '-.45e-3 0 0'
+    end_point = '0.45e-3 0 0'
+    num_points = 5
+    sort_by = x
+  []
+  [disp_x_vec]
+    type = LineValueSampler
+    variable = disp_x
+    start_point = '-.45e-3 0 0'
+    end_point = '0.45e-3 0 0'
+    num_points = 5
+    sort_by = x
+  []
+  [T_vec]
+    type = LineValueSampler
+    variable = T
+    start_point = '-.45e-3 0 0'
+    end_point = '0.45e-3 0 0'
+    num_points = 5
+    sort_by = x
   []
 []

@@ -2,39 +2,31 @@
 []
 
 [Distributions]
-  [k_dist]
-    type = Uniform
-    lower_bound = 1.0
-    upper_bound = 10.0
-  []
-  [L_dist]
-    type = Uniform
-    lower_bound = 2.0
-    upper_bound = 10.0
-  []
-  [bc_dist]
+  [surfacetemp]
     type = Uniform
     lower_bound = 100.0
-    upper_bound = 1000.0
+    upper_bound = 500.0
   []
-  [body_dist]
+  [power]
     type = Uniform
-    lower_bound = 50.0
-    upper_bound = 100.0
+    lower_bound = 90.0
+    upper_bound = 290.0
   []
 []
 
 [Samplers]
   [sample]
     type = LatinHypercube
-    num_rows = 100 # 50 # 200
-    distributions = 'k_dist bc_dist L_dist body_dist' #
+    num_rows = 2 # 100
+    distributions = 'surfacetemp power'
     execute_on = PRE_MULTIAPP_SETUP
+    # min_procs_per_app = 10
+    # max_procs_per_app = 10
   []
   [test]
     type = LatinHypercube
-    num_rows = 10 # 10 # 200
-    distributions = 'k_dist bc_dist L_dist body_dist' #
+    num_rows = 100
+    distributions = 'surfacetemp power'
   []
 []
 
@@ -45,10 +37,11 @@
 [MultiApps]
   [sub]
     type = SamplerFullSolveMultiApp
-    input_files = sub_vector.i
+    input_files = 2d.i
     mode = batch-reset
     execute_on = initial
-    # min_procs_per_app = 2
+    # min_procs_per_app = 10
+    # max_procs_per_app = 10
   []
 []
 
@@ -56,7 +49,7 @@
   [cmdline]
     type = MultiAppSamplerControl
     multi_app = sub
-    param_names = 'Materials/conductivity/prop_values BCs/right/value L Kernels/source/value' #
+    param_names = 'surfacetemp power'
   []
 []
 
@@ -65,7 +58,7 @@
     type = SamplerReporterTransfer
     from_multi_app = sub
     stochastic_reporter = results
-    from_reporter = 'T_vec/T T_vec/x'
+    from_reporter = 'vel_y_vec/vel_y_aux'
   []
 []
 
@@ -74,28 +67,36 @@
     type = StochasticReporter
     outputs = none
   []
-  [eval]
+  [eval_test]
     type = EvaluateSurrogate
     model = mogp_surrogate
     response_type = vector_real
     parallel_type = ROOT
-    execute_on = final
+    execute_on = timestep_end
     sampler = test
+  []
+  [eval_train]
+    type = EvaluateSurrogate
+    model = mogp_surrogate
+    response_type = vector_real
+    parallel_type = ROOT
+    execute_on = timestep_end
+    sampler = sample
   []
 []
 
 [Trainers]
   [mogp]
     type = MultiOutputGaussianProcessTrainer
-    response = results/data:T_vec:T
+    response = results/data:vel_y_vec:vel_y_aux
     response_type = vector_real
     execute_on = initial
     covariance_function = 'covar'
     output_covariance = 'outcovar'
     sampler = sample
     tune_parameters = 'signal_variance length_factor'
-    iterations = 1000
-    batch_size = 50
+    iterations = 20000
+    batch_size = 40
     learning_rate = 5e-4
     show_optimization_details = true
   []
@@ -103,11 +104,10 @@
 
 [Covariance]
   [covar]
-    type= SquaredExponentialCovariance # MaternHalfIntCovariance #
-    # p = 1
-    signal_variance = 2.76658083
+    type= SquaredExponentialCovariance
+    signal_variance = 1.0
     noise_variance = 0.0
-    length_factor = '3.67866381 2.63421705 1.52975445 3.41603576' #          # There needs to be an error check
+    length_factor = '1.0 1.0'
   []
 []
 
@@ -124,9 +124,28 @@
   []
 []
 
+[VectorPostprocessors]
+  [train_data]
+    type = SamplerData
+    sampler = sample
+    execute_on = 'timestep_end'
+  []
+  [data]
+    type = SamplerData
+    sampler = test
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Outputs]
+  # csv = true
   [out]
     type = JSON
+    execute_on = timestep_end
+    vectorpostprocessors_as_reporters = true
+  []
+  [out1]
+    type = CSV
     execute_on = timestep_end
   []
 []
