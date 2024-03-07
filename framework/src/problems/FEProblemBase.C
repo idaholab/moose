@@ -6431,17 +6431,21 @@ FEProblemBase::handleException(const std::string & calling_method)
   {
     throw;
   }
-  catch (libMesh::LogicError & e)
+  catch (const libMesh::LogicError & e)
   {
     setException(create_exception_message("libMesh::LogicError", e));
   }
-  catch (MooseException & e)
+  catch (const MooseException & e)
   {
     setException(create_exception_message("MooseException", e));
   }
-  catch (MetaPhysicL::LogicError & e)
+  catch (const MetaPhysicL::LogicError & e)
   {
     moose::translateMetaPhysicLError(e);
+  }
+  catch (const std::exception & e)
+  {
+    setException(create_exception_message("std::exception", e));
   }
 
   checkExceptionAndStopSolve();
