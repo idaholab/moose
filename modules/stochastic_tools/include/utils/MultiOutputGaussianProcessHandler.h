@@ -156,7 +156,8 @@ public:
   const RealEigenMatrix & getKappa() const { return _kappa; }
   const std::vector<Real> & getLatent() const { return _latent; }
   const RealEigenMatrix & getKappaResultsSolve() const { return _kappa_results_solve; }
-  // const Eigen::LLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
+  const Eigen::LDLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp;
+  }
   const RealEigenMatrix & getBatchInputs() const { return _batch_inputs; }
   const RealEigenMatrix & getBatchOutputs() const { return _batch_outputs; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
@@ -186,7 +187,7 @@ public:
   RealEigenMatrix & kappa() { return _kappa; }
   std::vector<Real> & latent() { return _latent; }
   RealEigenMatrix & kappaResultsSolve() { return _kappa_results_solve; }
-  // Eigen::LLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
+  Eigen::LDLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
   RealEigenMatrix & batchInputs() { return _batch_inputs; }
   RealEigenMatrix & batchOutputs() { return _batch_outputs; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
@@ -278,11 +279,6 @@ protected:
 };
 
 } // StochasticTools namespace
-
-// template <>
-// void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-// template <>
-// void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
 void dataStore(std::ostream & stream,

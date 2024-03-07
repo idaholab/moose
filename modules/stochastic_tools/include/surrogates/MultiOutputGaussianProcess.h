@@ -27,13 +27,6 @@ public:
   using SurrogateModel::evaluate;
   virtual void evaluate(const std::vector<Real> & x, std::vector<Real> & y) const override;
 
-  // /**
-  //  * This function is called by LoadCovarianceDataAction when the surrogate is
-  //  * loading training data from a file. The action must recreate the covariance
-  //  * object before this surrogate can set the correct pointer.
-  //  */
-  // virtual void setupCovariance(UserObjectName _covar_name);
-
   StochasticTools::MultiOutputGaussianProcessHandler & mogpHandler() { return _mogp_handler; }
   const StochasticTools::MultiOutputGaussianProcessHandler & getmoGPHandler() const
   {
@@ -45,4 +38,16 @@ private:
 
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
+
+  /// Cholesky decomposition Eigen object
+  const Eigen::LDLT<RealEigenMatrix> & _kappa_cho_decomp;
+
+  /// Training input covariance matrix
+  const RealEigenMatrix & _K_train;
+
+  /// Output covariance matrix
+  const RealEigenMatrix & _B;
+
+  /// Get inverse of training covariance times output vector
+  const RealEigenMatrix & _kappa_results_solve;
 };
