@@ -153,31 +153,9 @@ NonlinearSystem::solve()
                << _initial_residual_before_preset_bcs << std::endl;
   }
 
-  // Clear the iteration counters
-  _current_l_its.clear();
-  _current_nl_its = 0;
-
-  // Initialize the solution vector using a predictor and known values from nodal bcs
-  setInitialSolution();
-
-  // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
-  // to determine variable scaling factors
-  if (_automatic_scaling)
-  {
-    if (_compute_scaling_once)
-    {
-      if (!_computed_scaling)
-      {
-        computeScaling();
-        _computed_scaling = true;
-      }
-    }
-    else
-      computeScaling();
-  }
-  // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
-  // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
-  assembleScalingVector();
+  const bool presolve_succeeded = preSolve();
+  if (!presolve_succeeded)
+    return;
 
   if (_use_finite_differenced_preconditioner)
   {
@@ -357,7 +335,7 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 bool
 NonlinearSystem::converged()
 {
-  if (_fe_problem.hasException())
+  if (_fe_problem.hasException() || _fe_problem.getFailNextNonlinearConvergenceCheck())
     return false;
   if (!_fe_problem.allowInvalidSolution() && _solution_is_invalid)
   {
