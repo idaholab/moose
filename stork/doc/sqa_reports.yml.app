@@ -1,5 +1,5 @@
 Applications:
-    raccoon:
+    stork:
         exe_directory: ${ROOT_DIR}
         exe_name: stork
         app_types:
