@@ -94,10 +94,8 @@ NEML2Action::act()
     if (_verbose)
     {
       auto & model = neml2::Factory::get_object<neml2::Model>("Models", _mname);
-      model.to(_device);
 
-      _console << COLOR_YELLOW << "*** BEGIN NEML2 INFO***" << std::endl;
-      _console << std::endl << "Device: " << _device << std::endl << std::endl;
+      _console << COLOR_YELLOW << "*** BEGIN NEML2 INFO ***" << std::endl;
       _console << model << std::endl;
       _console << "*** END NEML2 INFO ***" << COLOR_DEFAULT << std::endl;
     }
