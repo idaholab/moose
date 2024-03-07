@@ -5855,12 +5855,12 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // Print the message
       if (_communicator.rank() == 0 && print_message)
       {
-        _console << "\nThe following exception was caught in FEProblemBase:\n";
-        _console << _exception_message << "\n";
-        _console
-            << "To recover, the solution will fail and then be re-attempted with a reduced time "
-               "step.\n"
-            << std::endl;
+        _console << "\n" << _exception_message << "\n";
+        if (isTransient())
+          _console
+              << "To recover, the solution will fail and then be re-attempted with a reduced time "
+                 "step.\n"
+              << std::endl;
       }
 
       // Stop the solve -- this entails setting
@@ -6423,7 +6423,7 @@ FEProblemBase::handleException(const std::string & calling_method)
   auto create_exception_message =
       [&calling_method](const std::string & exception_type, const auto & exception)
   {
-    return std::string("The following " + exception_type + " was raised during FEProblemBase::" +
+    return std::string("A " + exception_type + " was raised during FEProblemBase::" +
                        calling_method + "\n" + std::string(exception.what()));
   };
 
