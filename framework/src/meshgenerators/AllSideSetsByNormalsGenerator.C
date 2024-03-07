@@ -36,6 +36,7 @@ AllSideSetsByNormalsGenerator::validParams()
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
   params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
+  params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
   params.addClassDescription("Adds sidesets to the entire mesh based on unique normals.");
   return params;

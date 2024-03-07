@@ -31,9 +31,6 @@ protected:
   /// function expression
   std::string _function;
 
-  /// name of the new sideset
-  BoundaryName _sideset_name;
-
   /// function parser object describing the combinatorial geometry
   SymFunctionPtr _func_F;
 

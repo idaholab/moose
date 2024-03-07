@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "SideSetsGeneratorBase.h"
+#include "MeshGenerator.h"
 
 /**
  * MeshGenerator for constructing side Sets from node sets
  */
-class SideSetsFromNodeSetsGenerator : public SideSetsGeneratorBase
+class SideSetsFromNodeSetsGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
@@ -23,4 +23,8 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> generate() override;
+
+private:
+  /// Input mesh the operation will be applied to
+  std::unique_ptr<MeshBase> & _input;
 };

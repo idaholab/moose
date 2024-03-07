@@ -26,11 +26,10 @@ SideSetsBetweenSubdomainsGenerator::validParams()
       "primary_block", "The primary set of blocks for which to draw a sideset between");
   params.addRequiredParam<std::vector<SubdomainName>>(
       "paired_block", "The paired set of blocks for which to draw a sideset between");
-  params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
-                                                     "The name of the boundary to create");
   params.addClassDescription("MeshGenerator that creates a sideset composed of the nodes located "
                              "between two or more subdomains.");
 
+  // TODO: Implement each of these in the generate() routine using utilities in SidesetGeneratorBase
   params.suppressParameter<Point>("normal");
   params.suppressParameter<Real>("normal_tol");
   params.suppressParameter<bool>("fixed_normal");
@@ -52,20 +51,20 @@ SideSetsBetweenSubdomainsGenerator::SideSetsBetweenSubdomainsGenerator(
 std::unique_ptr<MeshBase>
 SideSetsBetweenSubdomainsGenerator::generate()
 {
+  std::unique_ptr<MeshBase> mesh = std::move(_input);
+
   auto primary_block = getParam<std::vector<SubdomainName>>("primary_block");
 
   auto paired_block = getParam<std::vector<SubdomainName>>("paired_block");
 
   // Check that the block ids/names exist in the mesh
   for (const auto & b : primary_block)
-    if (!MooseMeshUtils::hasSubdomainName(*_input, b))
+    if (!MooseMeshUtils::hasSubdomainName(*mesh, b))
       paramError("primary_block", "The block '", b, "' was not found within the mesh");
 
   for (const auto & b : paired_block)
-    if (!MooseMeshUtils::hasSubdomainName(*_input, b))
+    if (!MooseMeshUtils::hasSubdomainName(*mesh, b))
       paramError("paired_block", "The block '", b, "' was not found within the mesh");
-
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   // Make sure that the mesh is prepared
   if (!mesh->is_prepared())
@@ -79,9 +78,8 @@ SideSetsBetweenSubdomainsGenerator::generate()
       MooseMeshUtils::getSubdomainIDs(*mesh, paired_block);
   std::set<subdomain_id_type> paired_ids(vec_paired_ids.begin(), vec_paired_ids.end());
 
-  std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
   std::vector<boundary_id_type> boundary_ids =
-      MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
+      MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -192,7 +190,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
   }
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-    boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
+    boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

@@ -39,25 +39,18 @@ SideSetsFromBoundingBoxGenerator::validParams()
       "block_id",
       "Subdomain id to set for inside/outside the bounding box",
       "The parameter 'block_id' is not used.");
-  params.addDeprecatedParam<std::vector<BoundaryName>>(
-      "boundary_id_old",
-      "Boundary id on specified block within the bounding box to select",
-      "boundary_id_old is deprecated, use boundaries_old with names or ids");
-  params.addDeprecatedParam<BoundaryName>(
-      "boundary_id_new",
-      "Boundary id on specified block within the bounding box to assign",
-      "boundary_id_new is deprecated, use boundary_new with a name or id");
   params.addParam<std::vector<BoundaryName>>(
       "boundaries_old",
       "The list of boundaries on the specified block within the bounding box to be modified");
-  params.addParam<BoundaryName>("boundary_new",
-                                "Boundary on specified block within the bounding box to assign");
+  params.addRequiredParam<BoundaryName>(
+      "boundary_new", "Boundary on specified block within the bounding box to assign");
   params.addParam<bool>("boundary_id_overlap",
                         false,
                         "Set to true if boundaries need to overlap on sideset to be detected.");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
 
+  // TODO: Implement each of these in the generate() routine using utilities in SidesetGeneratorBase
   params.suppressParameter<Point>("normal");
   params.suppressParameter<Real>("normal_tol");
   params.suppressParameter<bool>("fixed_normal");
@@ -66,6 +59,7 @@ SideSetsFromBoundingBoxGenerator::validParams()
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
   params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
+  params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
   return params;
 }
@@ -85,12 +79,7 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
   else
     mooseError("Either boundaries_old or boundary_id_old (deprecated) must be specified.");
 
-  if (parameters.isParamSetByUser("boundary_new"))
-    _boundary_new = parameters.get<BoundaryName>("boundary_new");
-  else if (parameters.isParamSetByUser("boundary_id_new"))
-    _boundary_new = parameters.get<BoundaryName>("boundary_id_new");
-  else
-    mooseError("Either boundary_new or boundary_id_new (deprecated) must be specified.");
+  _boundary_names.push_back(parameters.get<BoundaryName>("boundary_new"));
 }
 
 std::unique_ptr<MeshBase>
@@ -118,7 +107,7 @@ SideSetsFromBoundingBoxGenerator::generate()
           "boundaries", "The boundary '", _boundaries_old[i], "' was not found within the mesh");
 
   // Attempt to get the new boundary id from the name
-  auto boundary_id_new = MooseMeshUtils::getBoundaryID(_boundary_new, *mesh);
+  auto boundary_id_new = MooseMeshUtils::getBoundaryID(_boundary_names[0], *mesh);
 
   // If the new boundary id is not valid, make it instead
   if (boundary_id_new == Moose::INVALID_BOUNDARY_ID)
@@ -126,8 +115,8 @@ SideSetsFromBoundingBoxGenerator::generate()
     boundary_id_new = MooseMeshUtils::getNextFreeBoundaryID(*mesh);
 
     // Write the name alias of the boundary id to the mesh boundary info
-    boundary_info.sideset_name(boundary_id_new) = _boundary_new;
-    boundary_info.nodeset_name(boundary_id_new) = _boundary_new;
+    boundary_info.sideset_name(boundary_id_new) = _boundary_names[0];
+    boundary_info.nodeset_name(boundary_id_new) = _boundary_names[0];
   }
 
   if (!_boundary_id_overlap)

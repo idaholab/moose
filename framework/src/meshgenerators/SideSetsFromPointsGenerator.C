@@ -36,8 +36,6 @@ SideSetsFromPointsGenerator::validParams()
 
   params.addClassDescription("Adds a new sideset starting at the specified point containing all "
                              "connected element faces with the same normal.");
-  params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
-                                                     "The name of the boundaries to create");
   params.addRequiredParam<std::vector<Point>>(
       "points", "A list of points from which to start painting sidesets");
 
@@ -52,9 +50,7 @@ SideSetsFromPointsGenerator::validParams()
 }
 
 SideSetsFromPointsGenerator::SideSetsFromPointsGenerator(const InputParameters & parameters)
-  : SideSetsGeneratorBase(parameters),
-    _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
-    _points(getParam<std::vector<Point>>("points"))
+  : SideSetsGeneratorBase(parameters), _points(getParam<std::vector<Point>>("points"))
 {
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");

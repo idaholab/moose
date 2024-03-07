@@ -27,8 +27,4 @@ public:
   SideSetsAroundSubdomainGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
-
-protected:
-  /// names of the sidesets to which the faces will be added
-  std::vector<BoundaryName> _boundary_names;
 };

@@ -25,8 +25,6 @@ SideSetsAroundSubdomainGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<std::vector<BoundaryName>>(
-      "new_boundary", "The list of boundary names to create on the supplied subdomain");
   params.addRequiredParam<std::vector<SubdomainName>>("block",
                                                       "The blocks around which to create sidesets");
 
@@ -42,8 +40,7 @@ SideSetsAroundSubdomainGenerator::validParams()
 
 SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
     const InputParameters & parameters)
-  : SideSetsGeneratorBase(parameters),
-    _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary"))
+  : SideSetsGeneratorBase(parameters)
 {
   if (_using_normal)
   {

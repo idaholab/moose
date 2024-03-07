@@ -25,6 +25,8 @@ SideSetsGeneratorBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "new_boundary", "The list of boundary names to create on the supplied subdomain");
   params.addParam<bool>("fixed_normal",
                         false,
                         "This Boolean determines whether we fix our normal "
@@ -64,7 +66,7 @@ SideSetsGeneratorBase::validParams()
   params.addDeprecatedParam<Real>("variance",
                                   "The variance allowed when comparing normals",
                                   "Deprecated, use 'normal_tol' instead");
-  params.deprecateParam("variance", "normal_tol", "4/01/2024");
+  params.deprecateParam("variance", "normal_tol", "4/01/2025");
 
   // Sideset restriction param group
   params.addParamNamesToGroup("included_boundaries included_subdomains included_neighbors "
@@ -77,20 +79,22 @@ SideSetsGeneratorBase::validParams()
 SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
+    _boundary_names(std::vector<BoundaryName>()),
     _fixed_normal(getParam<bool>("fixed_normal")),
     _replace(getParam<bool>("replace")),
     _check_boundaries(isParamValid("included_boundaries")),
-    _check_subdomains(isParamValid("included_subdomain_ids") ||
-                      isParamValid("included_subdomains")),
-    _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
-                               isParamValid("included_neighbors")),
-    _included_ids(std::vector<SubdomainID>()),
-    _included_neighbor_ids(std::vector<SubdomainID>()),
+    _check_subdomains(isParamValid("included_subdomains")),
+    _check_neighbor_subdomains(isParamValid("included_neighbors")),
+    _restricted_boundary_ids(std::vector<boundary_id_type>()),
+    _included_subdomain_ids(std::vector<subdomain_id_type>()),
+    _included_neighbor_subdomain_ids(std::vector<subdomain_id_type>()),
     _include_only_external_sides(getParam<bool>("include_only_external_sides")),
     _normal(getParam<Point>("normal")),
     _using_normal(isParamSetByUser("normal")),
     _normal_tol(getParam<Real>("normal_tol"))
 {
+  if (isParamValid("new_boundary"))
+    _boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
 }
 
 SideSetsGeneratorBase::~SideSetsGeneratorBase() {}
@@ -111,6 +115,51 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
   _fe_face = FEBase::build(dim, fe_type);
   _qface = std::make_unique<QGauss>(dim - 1, FIRST);
   _fe_face->attach_quadrature_rule(_qface.get());
+
+  // Handle incompatible parameters
+  if (_include_only_external_sides && _check_neighbor_subdomains)
+    paramError("include_only_external_sides", "External sides dont have neighbors");
+  if (_check_boundaries)
+  {
+    const auto & included_boundaries = getParam<std::vector<BoundaryName>>("included_boundaries");
+    // TODO: add RunException test?
+    for (const auto & boundary_name : _boundary_names)
+      if (std::find(included_boundaries.begin(), included_boundaries.end(), boundary_name) !=
+          included_boundaries.end())
+        paramError(
+            "new_boundary",
+            "A boundary cannot be both the new boundary and be included in the list of included "
+            "boundaries. If you are trying to restrict an existing boundary, you must use a "
+            "different name for 'new_boundary', delete the old boundary, and then rename the "
+            "new boundary to the old boundary.");
+  }
+
+  if (_check_boundaries)
+    _restricted_boundary_ids = MooseMeshUtils::getBoundaryIDs(
+        mesh, getParam<std::vector<BoundaryName>>("included_boundaries"), false);
+
+  // Get the boundary ids from the names
+  if (parameters().isParamValid("included_subdomains"))
+  {
+    // check that the subdomains exist in the mesh
+    const auto subdomains = getParam<std::vector<SubdomainName>>("included_subdomains");
+    for (const auto & name : subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
+        paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
+
+    _included_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+  }
+
+  if (parameters().isParamValid("included_neighbors"))
+  {
+    // check that the subdomains exist in the mesh
+    const auto subdomains = getParam<std::vector<SubdomainName>>("included_neighbors");
+    for (const auto & name : subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
+        paramError("included_neighbors", "The block '", name, "' was not found in the mesh");
+
+    _included_neighbor_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+  }
 
   // We will want to Change the below code when we have more fine-grained control over advertising
   // what we need and how we satisfy those needs. For now we know we need to have neighbors per
@@ -137,11 +186,31 @@ SideSetsGeneratorBase::flood(const Elem * elem,
   if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
     return;
 
+  // Skip if element is not in specified subdomains
+  if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+    return;
+
   _visited[side_id].insert(elem);
+
   for (const auto side : make_range(elem->n_sides()))
   {
-    if (elem->neighbor_ptr(side))
+    // Skip if side has neighbor and we only want external sides
+    if ((elem->neighbor_ptr(side) && _include_only_external_sides))
       continue;
+
+    // Skip if side is not part of included boundaries
+    if (_check_boundaries && !elementSideInIncludedBoundaries(elem, side, mesh))
+      continue;
+
+    // Skip if element does no have neighbor in specified subdomains
+    if (_check_neighbor_subdomains)
+    {
+      const Elem * neighbor = elem->neighbor_ptr(side);
+      // if the neighbor does not exist, then skip this face; we only add sidesets
+      // between existing elems if _check_neighbor_subdomains is true
+      if (!(neighbor && elementSubdomainIdInList(neighbor, _included_neighbor_subdomain_ids)))
+        continue;
+    }
 
     _fe_face->reinit(elem, side);
     const std::vector<Point> normals = _fe_face->get_normals();
@@ -168,5 +237,25 @@ SideSetsGeneratorBase::flood(const Elem * elem,
 bool
 SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1, const Point & normal_2) const
 {
-  return std::abs(1.0 - normal_1 * normal_2) <= _normal_tol;
+  return (1.0 - normal_1 * normal_2) <= _normal_tol;
+}
+
+bool
+SideSetsGeneratorBase::elementSubdomainIdInList(
+    const Elem * elem, const std::vector<subdomain_id_type> & subdomain_id_list)
+{
+  subdomain_id_type curr_subdomain = elem->subdomain_id();
+  return std::find(subdomain_id_list.begin(), subdomain_id_list.end(), curr_subdomain) !=
+         subdomain_id_list.end();
+}
+
+bool
+SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * elem,
+                                                       const uint & side,
+                                                       MeshBase & mesh)
+{
+  for (const auto bid : _restricted_boundary_ids)
+    if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
+      return true;
+  return false;
 }

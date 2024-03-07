@@ -25,8 +25,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// holds the boundary names for the sidesets
-  std::vector<BoundaryName> _boundary_names;
   /// holds the points used to generate sidesets
   std::vector<Point> _points;
 };

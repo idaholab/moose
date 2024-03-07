@@ -16,23 +16,16 @@ registerMooseObject("MooseApp", SideSetsFromNodeSetsGenerator);
 InputParameters
 SideSetsFromNodeSetsGenerator::validParams()
 {
-  InputParameters params = SideSetsGeneratorBase::validParams();
-
-  params.suppressParameter<Point>("normal");
-  params.suppressParameter<Real>("normal_tol");
-  params.suppressParameter<bool>("fixed_normal");
-  params.suppressParameter<bool>("replace");
-  params.suppressParameter<bool>("include_only_external_sides");
-  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
-  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
-  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
+  InputParameters params = MeshGenerator::validParams();
 
   params.addClassDescription("Mesh generator which constructs side sets from node sets");
+  params.addRequiredParam<MeshGeneratorName>("input",
+                                             "Input mesh the operation will be applied to");
   return params;
 }
 
 SideSetsFromNodeSetsGenerator::SideSetsFromNodeSetsGenerator(const InputParameters & parameters)
-  : SideSetsGeneratorBase(parameters)
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
 }
 
