@@ -29,8 +29,8 @@ TransformedPositions::validParams()
       "vector_value",
       "The value to use for the transformation. When using TRANSLATE or SCALE, the "
       "xyz coordinates are applied in each direction respectively. When using "
-      "ROTATE_XYZ, the values are interpreted as rotations around the X, Y and Z axis, in that "
-      "order.");
+      "ROTATE_XYZ, the values are interpreted as rotations in degrees around the X, Y and Z axis, "
+      "in that order.");
 
   // Use base position ordering
   params.set<bool>("auto_sort") = false;
@@ -49,8 +49,7 @@ TransformedPositions::TransformedPositions(const InputParameters & parameters)
     _transform(getParam<MooseEnum>("transform")),
     _vector_value(getParam<RealVectorValue>("vector_value"))
 {
-
-  const auto base_name = getParam<PositionsName>("base_positions");
+  const auto & base_name = getParam<PositionsName>("base_positions");
   if (_fe_problem.hasUserObject(base_name))
     _base_positions = &_fe_problem.getPositionsObject(base_name);
   else
@@ -76,7 +75,7 @@ TransformedPositions::initialize()
 
   for (const auto i : make_range(n_positions))
   {
-    const auto base_point = _base_positions->getPosition(i, initial);
+    const auto & base_point = _base_positions->getPosition(i, initial);
     if (_transform == "ROTATE_XYZ")
       _positions[i] = geom_utils::rotatePointAboutAxis(
           geom_utils::rotatePointAboutAxis(

@@ -22,14 +22,14 @@ public:
   TransformedPositions(const InputParameters & parameters);
   virtual ~TransformedPositions() = default;
 
-  void initialize() override;
+  virtual void initialize() override;
 
 private:
   /// Position object providing the transformed positions
   const Positions * _base_positions;
 
   /// Transformation to perform
-  const MooseEnum _transform;
+  const MooseEnum & _transform;
 
   /// Vector to use for the operation
   const Point _vector_value;

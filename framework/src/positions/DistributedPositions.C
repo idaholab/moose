@@ -36,8 +36,7 @@ DistributedPositions::validParams()
 DistributedPositions::DistributedPositions(const InputParameters & parameters)
   : Positions(parameters)
 {
-
-  const auto base_names = getParam<std::vector<PositionsName>>("positions");
+  const auto & base_names = getParam<std::vector<PositionsName>>("positions");
   for (const auto & base_name : base_names)
     if (_fe_problem.hasUserObject(base_name))
       _positions_objs.push_back(&_fe_problem.getPositionsObject(base_name));
@@ -60,13 +59,13 @@ DistributedPositions::initialize()
   const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
 
   // Check that everything is initialized
-  for (const auto pos_obj : _positions_objs)
+  for (const auto * const pos_obj : _positions_objs)
     if (!pos_obj->initialized(initial))
       mooseError("Positions '", pos_obj->name(), "' is not initialized.");
 
   // Size new positions vector
   unsigned int n_positions = 1;
-  for (const auto pos_obj : _positions_objs)
+  for (const auto * const pos_obj : _positions_objs)
   {
     const auto n_pos_obj = pos_obj->getNumPositions(initial);
     if (n_pos_obj == 0)
@@ -80,7 +79,7 @@ DistributedPositions::initialize()
   unsigned int current_index = 1;
   for (const auto pos_i : index_range(_positions_objs))
   {
-    const auto current_positions = _positions_objs[_positions_objs.size() - 1 - pos_i];
+    const auto * const current_positions = _positions_objs[_positions_objs.size() - 1 - pos_i];
     for (const auto i : make_range(current_index))
     {
       unsigned int j = 0;

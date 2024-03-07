@@ -13,8 +13,8 @@
 #include "Positions.h"
 
 /**
- * Positions created by distributing Positions objects onto on another. The first positions object
- * create the base positions onto which the later ones are translated from.
+ * Positions created by distributing Positions objects onto one another. The first positions object
+ * creates the base positions onto which the later ones are translated from.
  */
 class DistributedPositions : public Positions
 {
@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
   DistributedPositions(const InputParameters & parameters);
 
-  void initialize() override;
+  virtual void initialize() override;
 
 private:
   /// Pointers to positions objects that will be distributed
