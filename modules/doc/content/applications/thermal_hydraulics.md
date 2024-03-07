@@ -32,6 +32,7 @@ see [help/inl/applications.md] for more information.
 | [Cardinal](https://cardinal.cels.anl.gov/) | [Open-source](https://github.com/neams-th-coe/cardinal) | [NekRS](https://github.com/Nek5000/nekRS) CFD | CPU and GPU capabilities for RANS, LES, and DNS. Additional features include Lagrangian particle transport, an ALE mesh solver, overset meshes, and more. |
 | Pronghorn | [NCRC](https://inl.gov/ncrc/) | Navier-Stokes Module | Export-controlled correlations for pressure drop, heat exchange, and mass transfer in advanced nuclear reactors. |
 | [SAM](https://www.anl.gov/nse/system-analysis-module) | [NCRC](https://inl.gov/ncrc/) | MOOSE Framework | Additional physics and component models for realistic plant modeling and reactor safety analysis. |
+| RELAP-7 | [NCRC](https://inl.gov/ncrc/) | Thermal Hydraulics Module | Two-phase flow model and component models with additional closures appropriate for LWRs. |
 | Sockeye | [NCRC](https://inl.gov/ncrc/) | Thermal Hydraulics Module | Adapted correlations and specific 1D and 2D models for high-temperature heat pipes. |
 
 ## Examples Gallery
