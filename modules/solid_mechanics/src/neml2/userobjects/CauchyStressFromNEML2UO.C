@@ -11,7 +11,7 @@
 #include "NEML2Utils.h"
 #include "neml2/misc/math.h"
 
-registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2UO);
+registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2UO);
 
 InputParameters
 CauchyStressFromNEML2UO::validParams()

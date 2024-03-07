@@ -31,7 +31,7 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
 }
 #endif
 
-registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2);
+registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2);
 
 #ifdef NEML2_ENABLED
 
