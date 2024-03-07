@@ -4285,57 +4285,58 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                                           const Moose::AuxGroup & group,
                                           TheWarehouse::Query & primary_query)
 {
-  TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
-
-  // Add group to query
-  if (group == Moose::PRE_IC)
-    primary_query.condition<AttribPreIC>(true);
-  else if (group == Moose::PRE_AUX)
-    primary_query.condition<AttribPreAux>(type);
-  else if (group == Moose::POST_AUX)
-    primary_query.condition<AttribPostAux>(type);
-
-  // query everything first to obtain a list of execution groups
-  std::vector<UserObject *> uos;
-  primary_query.clone().queryIntoUnsorted(uos);
-  std::set<int> execution_groups;
-  for (const auto & uo : uos)
-    execution_groups.insert(uo->getParam<int>("execution_order_group"));
-
-  // iterate over execution order groups
-  for (const auto execution_group : execution_groups)
+  try
   {
-    auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
+    TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
 
-    std::vector<GeneralUserObject *> genobjs;
-    query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
+    // Add group to query
+    if (group == Moose::PRE_IC)
+      primary_query.condition<AttribPreIC>(true);
+    else if (group == Moose::PRE_AUX)
+      primary_query.condition<AttribPreAux>(type);
+    else if (group == Moose::POST_AUX)
+      primary_query.condition<AttribPostAux>(type);
 
-    std::vector<UserObject *> userobjs;
-    query.clone()
-        .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                     Interfaces::InternalSideUserObject |
-                                     Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
-        .queryInto(userobjs);
+    // query everything first to obtain a list of execution groups
+    std::vector<UserObject *> uos;
+    primary_query.clone().queryIntoUnsorted(uos);
+    std::set<int> execution_groups;
+    for (const auto & uo : uos)
+      execution_groups.insert(uo->getParam<int>("execution_order_group"));
 
-    std::vector<UserObject *> tgobjs;
-    query.clone()
-        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-        .queryInto(tgobjs);
-
-    std::vector<UserObject *> nodal;
-    query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
-
-    std::vector<MortarUserObject *> mortar;
-    query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
-
-    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
-      continue;
-
-    // Start the timer here since we have at least one active user object
-    std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
-
-    try
+    // iterate over execution order groups
+    for (const auto execution_group : execution_groups)
     {
+      auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
+
+      std::vector<GeneralUserObject *> genobjs;
+      query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
+
+      std::vector<UserObject *> userobjs;
+      query.clone()
+          .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
+                                       Interfaces::InternalSideUserObject |
+                                       Interfaces::InterfaceUserObject |
+                                       Interfaces::DomainUserObject)
+          .queryInto(userobjs);
+
+      std::vector<UserObject *> tgobjs;
+      query.clone()
+          .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+          .queryInto(tgobjs);
+
+      std::vector<UserObject *> nodal;
+      query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
+
+      std::vector<MortarUserObject *> mortar;
+      query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
+
+      if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
+        continue;
+
+      // Start the timer here since we have at least one active user object
+      std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
+
       // Perform Residual/Jacobian setups
       if (type == EXEC_LINEAR)
       {
@@ -4486,31 +4487,10 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject),
                       true);
     }
-    catch (libMesh::LogicError & e)
-    {
-      setException("The following libMesh::LogicError was raised during UserObject evaluation in "
-                   "FEProblemBase:\n" +
-                   std::string(e.what()));
-    }
-    catch (MooseException & e)
-    {
-      setException("The following MooseException was raised during UserObject evaluation in "
-                   "FEProblemBase:\n" +
-                   std::string(e.what()));
-    }
-    catch (MetaPhysicL::LogicError & e)
-    {
-      moose::translateMetaPhysicLError(e);
-    }
-    try
-    {
-      // Propagate the exception to all processes if we had one
-      checkExceptionAndStopSolve();
-    }
-    catch (MooseException &)
-    {
-      return;
-    }
+  }
+  catch (...)
+  {
+    handleException("computeUserObjectsInternal");
   }
 }
 
@@ -5898,9 +5878,6 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // to be skipped).
       _fail_next_nonlinear_convergence_check = true;
 
-      // Reset the state to prepare for the next evaluation
-      resetState();
-
       // Repropagate the exception, so it can be caught at a higher level, typically
       // this is NonlinearSystem::computeResidual().
       throw MooseException(_exception_message);
@@ -5920,8 +5897,22 @@ FEProblemBase::resetState()
   // Our default state is to allow computing derivatives
   ADReal::do_derivatives = true;
   _current_execute_on_flag = EXEC_NONE;
+
   clearCurrentResidualVectorTags();
   clearCurrentJacobianVectorTags();
+
+  _safe_access_tagged_vectors = true;
+  _safe_access_tagged_matrices = true;
+
+  setCurrentlyComputingResidual(false);
+  setCurrentlyComputingJacobian(false);
+  setCurrentlyComputingResidualAndJacobian(false);
+  if (_displaced_problem)
+  {
+    _displaced_problem->setCurrentlyComputingResidual(false);
+    _displaced_problem->setCurrentlyComputingJacobian(false);
+    _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
+  }
 }
 
 bool
@@ -6206,177 +6197,131 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
                                           NumericVector<Number> & residual,
                                           SparseMatrix<Number> & jacobian)
 {
-  // vector tags
-  {
-    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
-    const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
-
-    // We filter out tags which do not have associated vectors in the current nonlinear
-    // system. This is essential to be able to use system-dependent residual tags.
-    selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
-
-    setCurrentResidualVectorTags(_fe_vector_tags);
-  }
-
-  // matrix tags
-  {
-    _fe_matrix_tags.clear();
-
-    auto & tags = getMatrixTags();
-    for (auto & tag : tags)
-      _fe_matrix_tags.insert(tag.second);
-  }
-
   try
   {
-    _current_nl_sys->setSolution(soln);
-
-    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
-    _current_nl_sys->associateMatrixToTag(jacobian, _current_nl_sys->systemMatrixTag());
-
-    for (const auto tag : _fe_matrix_tags)
-      if (_current_nl_sys->hasMatrix(tag))
+    try
+    {
+      // vector tags
       {
-        auto & matrix = _current_nl_sys->getMatrix(tag);
-        matrix.zero();
-        if (haveADObjects())
-          // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
-          // diagonal dependence. With global AD indexing we only add non-zero
-          // dependence, so PETSc will scream at us unless we artificially add the diagonals.
-          for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
-            matrix.add(index, index, 0);
+        _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+        const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+
+        // We filter out tags which do not have associated vectors in the current nonlinear
+        // system. This is essential to be able to use system-dependent residual tags.
+        selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
+
+        setCurrentResidualVectorTags(_fe_vector_tags);
       }
 
-    _aux->zeroVariablesForResidual();
-
-    unsigned int n_threads = libMesh::n_threads();
-
-    _current_execute_on_flag = EXEC_LINEAR;
-
-    // Random interface objects
-    for (const auto & it : _random_data_objects)
-      it.second->updateSeeds(EXEC_LINEAR);
-
-    setCurrentlyComputingResidual(true);
-    setCurrentlyComputingJacobian(true);
-    setCurrentlyComputingResidualAndJacobian(true);
-    if (_displaced_problem)
-    {
-      _displaced_problem->setCurrentlyComputingResidual(true);
-      _displaced_problem->setCurrentlyComputingJacobian(true);
-      _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
-    }
-
-    execTransfers(EXEC_LINEAR);
-
-    execMultiApps(EXEC_LINEAR);
-
-    for (unsigned int tid = 0; tid < n_threads; tid++)
-      reinitScalars(tid);
-
-    computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
-    _aux->residualSetup();
-
-    if (_displaced_problem)
-    {
-      _aux->compute(EXEC_PRE_DISPLACE);
-      try
+      // matrix tags
       {
+        _fe_matrix_tags.clear();
+
+        auto & tags = getMatrixTags();
+        for (auto & tag : tags)
+          _fe_matrix_tags.insert(tag.second);
+      }
+
+      _current_nl_sys->setSolution(soln);
+
+      _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+      _current_nl_sys->associateMatrixToTag(jacobian, _current_nl_sys->systemMatrixTag());
+
+      for (const auto tag : _fe_matrix_tags)
+        if (_current_nl_sys->hasMatrix(tag))
+        {
+          auto & matrix = _current_nl_sys->getMatrix(tag);
+          matrix.zero();
+          if (haveADObjects())
+            // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
+            // diagonal dependence. With global AD indexing we only add non-zero
+            // dependence, so PETSc will scream at us unless we artificially add the diagonals.
+            for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
+              matrix.add(index, index, 0);
+        }
+
+      _aux->zeroVariablesForResidual();
+
+      unsigned int n_threads = libMesh::n_threads();
+
+      _current_execute_on_flag = EXEC_LINEAR;
+
+      // Random interface objects
+      for (const auto & it : _random_data_objects)
+        it.second->updateSeeds(EXEC_LINEAR);
+
+      setCurrentlyComputingResidual(true);
+      setCurrentlyComputingJacobian(true);
+      setCurrentlyComputingResidualAndJacobian(true);
+      if (_displaced_problem)
+      {
+        _displaced_problem->setCurrentlyComputingResidual(true);
+        _displaced_problem->setCurrentlyComputingJacobian(true);
+        _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
+      }
+
+      execTransfers(EXEC_LINEAR);
+
+      execMultiApps(EXEC_LINEAR);
+
+      for (unsigned int tid = 0; tid < n_threads; tid++)
+        reinitScalars(tid);
+
+      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
+
+      _aux->residualSetup();
+
+      if (_displaced_problem)
+      {
+        _aux->compute(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
         if (_mortar_data.hasDisplacedObjects())
           updateMortarMesh();
       }
-      catch (libMesh::LogicError & e)
-      {
-        setException("The following libMesh::LogicError was raised during the mesh update "
-                     "in FEProblemBase:\n" +
-                     std::string(e.what()));
-      }
-      catch (MooseException & e)
-      {
-        setException("The following MooseException was raised during the mesh update in "
-                     "FEProblemBase:\n" +
-                     std::string(e.what()));
-      }
-      try
-      {
-        // Propagate the exception to all processes if we had one
-        checkExceptionAndStopSolve();
-      }
-      catch (MooseException &)
-      {
-        return;
-      }
-    }
 
-    for (THREAD_ID tid = 0; tid < n_threads; tid++)
-    {
-      _all_materials.residualSetup(tid);
-      _functions.residualSetup(tid);
-    }
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      {
+        _all_materials.residualSetup(tid);
+        _functions.residualSetup(tid);
+      }
 
-    // Where is the aux system done? Could the non-current nonlinear systems also be done there?
-    for (auto & nl : _nl)
-      nl->computeTimeDerivatives();
+      // Where is the aux system done? Could the non-current nonlinear systems also be done there?
+      for (auto & nl : _nl)
+        nl->computeTimeDerivatives();
 
-    try
-    {
       _aux->compute(EXEC_LINEAR);
+
+      computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
+
+      executeControls(EXEC_LINEAR);
+
+      _app.getOutputWarehouse().residualSetup();
+
+      _safe_access_tagged_vectors = false;
+      _safe_access_tagged_matrices = false;
+
+      _current_nl_sys->computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
+
+      _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
+      _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
     }
-    catch (MooseException & e)
+    catch (...)
     {
-      // We know the next solve is going to fail, so there's no point in
-      // computing anything else after this.  Plus, using incompletely
-      // computed AuxVariables in subsequent calculations could lead to
-      // other errors or unhandled exceptions being thrown.
-      return;
+      handleException("computeResidualAndJacobian");
     }
-
-    computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
-
-    executeControls(EXEC_LINEAR);
-
-    _app.getOutputWarehouse().residualSetup();
-
-    _safe_access_tagged_vectors = false;
-    _safe_access_tagged_matrices = false;
-
-    _current_nl_sys->computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
-
-    _safe_access_tagged_vectors = true;
-    _safe_access_tagged_matrices = true;
-
-    _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
-    _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
-
-    setCurrentlyComputingResidual(false);
-    setCurrentlyComputingJacobian(false);
-    setCurrentlyComputingResidualAndJacobian(false);
-    if (_displaced_problem)
-    {
-      _displaced_problem->setCurrentlyComputingResidual(false);
-      _displaced_problem->setCurrentlyComputingJacobian(false);
-      _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
-    }
-
-    clearCurrentResidualVectorTags();
   }
-  catch (MooseException & e)
+  catch (const MooseException &)
   {
-    // If a MooseException propagates all the way to here, it means
-    // that it was thrown from a MOOSE system where we do not
-    // (currently) properly support the throwing of exceptions, and
-    // therefore we have no choice but to error out.  It may be
-    // *possible* to handle exceptions from other systems, but in the
-    // meantime, we don't want to silently swallow any unhandled
-    // exceptions here.
-    mooseError("An unhandled MooseException was raised during residual computation.  Please "
-               "contact the MOOSE team for assistance.");
+    // The buck stops here, we have already handled the exception by
+    // calling the system's stopSolve() method, it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+  catch (...)
+  {
+    mooseError("Unexpected exception type");
   }
 
-  // Reset execution flag as after this point we are no longer on LINEAR
-  _current_execute_on_flag = EXEC_NONE;
+  resetState();
 }
 
 void
@@ -6473,101 +6418,116 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 }
 
 void
+FEProblemBase::handleException(const std::string & calling_method)
+{
+  auto create_exception_message =
+      [&calling_method](const std::string & exception_type, const auto & exception)
+  {
+    return std::string("The following " + exception_type + " was raised during FEProblemBase::" +
+                       calling_method + "\n" + std::string(exception.what()));
+  };
+
+  try
+  {
+    throw;
+  }
+  catch (libMesh::LogicError & e)
+  {
+    setException(create_exception_message("libMesh::LogicError", e));
+  }
+  catch (MooseException & e)
+  {
+    setException(create_exception_message("MooseException", e));
+  }
+  catch (MetaPhysicL::LogicError & e)
+  {
+    moose::translateMetaPhysicLError(e);
+  }
+
+  checkExceptionAndStopSolve();
+}
+
+void
 FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   parallel_object_only();
 
-  TIME_SECTION("computeResidualTags", 5, "Computing Residual");
-
-  ADReal::do_derivatives = false;
-
-  setCurrentResidualVectorTags(tags);
-
-  _aux->zeroVariablesForResidual();
-
-  unsigned int n_threads = libMesh::n_threads();
-
-  _current_execute_on_flag = EXEC_LINEAR;
-
-  // Random interface objects
-  for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_LINEAR);
-
-  execTransfers(EXEC_LINEAR);
-
-  execMultiApps(EXEC_LINEAR);
-
-  for (unsigned int tid = 0; tid < n_threads; tid++)
-    reinitScalars(tid);
-
-  computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
-  _aux->residualSetup();
-
-  if (_displaced_problem)
-  {
-    _aux->compute(EXEC_PRE_DISPLACE);
-    try
-    {
-      _displaced_problem->updateMesh();
-      if (_mortar_data.hasDisplacedObjects())
-        updateMortarMesh();
-    }
-    catch (libMesh::LogicError & e)
-    {
-      setException("The following libMesh::LogicError was raised during the mesh update in "
-                   "FEProblemBase:\n" +
-                   std::string(e.what()));
-    }
-    catch (MooseException & e)
-    {
-      setException("The following MooseException was raised during the mesh update in "
-                   "FEProblemBase:\n" +
-                   std::string(e.what()));
-    }
-    try
-    {
-      // Propagate the exception to all processes if we had one
-      checkExceptionAndStopSolve();
-    }
-    catch (MooseException &)
-    {
-      return;
-    }
-  }
-
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-  {
-    _all_materials.residualSetup(tid);
-    _functions.residualSetup(tid);
-  }
-
-  // Where is the aux system done? Could the non-current nonlinear systems also be done there?
-  for (auto & nl : _nl)
-    nl->computeTimeDerivatives();
-
   try
   {
-    _aux->compute(EXEC_LINEAR);
+    try
+    {
+      TIME_SECTION("computeResidualTags", 5, "Computing Residual");
+
+      ADReal::do_derivatives = false;
+
+      setCurrentResidualVectorTags(tags);
+
+      _aux->zeroVariablesForResidual();
+
+      unsigned int n_threads = libMesh::n_threads();
+
+      _current_execute_on_flag = EXEC_LINEAR;
+
+      // Random interface objects
+      for (const auto & it : _random_data_objects)
+        it.second->updateSeeds(EXEC_LINEAR);
+
+      execTransfers(EXEC_LINEAR);
+
+      execMultiApps(EXEC_LINEAR);
+
+      for (unsigned int tid = 0; tid < n_threads; tid++)
+        reinitScalars(tid);
+
+      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
+
+      _aux->residualSetup();
+
+      if (_displaced_problem)
+      {
+        _aux->compute(EXEC_PRE_DISPLACE);
+        _displaced_problem->updateMesh();
+        if (_mortar_data.hasDisplacedObjects())
+          updateMortarMesh();
+      }
+
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      {
+        _all_materials.residualSetup(tid);
+        _functions.residualSetup(tid);
+      }
+
+      // Where is the aux system done? Could the non-current nonlinear systems also be done there?
+      for (auto & nl : _nl)
+        nl->computeTimeDerivatives();
+
+      _aux->compute(EXEC_LINEAR);
+
+      computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
+
+      executeControls(EXEC_LINEAR);
+
+      _app.getOutputWarehouse().residualSetup();
+
+      _safe_access_tagged_vectors = false;
+      _current_nl_sys->computeResidualTags(tags);
+    }
+    catch (...)
+    {
+      handleException("computeResidualTags");
+    }
   }
-  catch (MooseException & e)
+  catch (const MooseException &)
   {
-    // We know the next solve is going to fail, so there's no point in
-    // computing anything else after this.  Plus, using incompletely
-    // computed AuxVariables in subsequent calculations could lead to
-    // other errors or unhandled exceptions being thrown.
-    return;
+    // The buck stops here, we have already handled the exception by
+    // calling the system's stopSolve() method, it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+  catch (...)
+  {
+    mooseError("Unexpected exception type");
   }
 
-  computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
-
-  executeControls(EXEC_LINEAR);
-
-  _app.getOutputWarehouse().residualSetup();
-
-  _safe_access_tagged_vectors = false;
-  _current_nl_sys->computeResidualTags(tags);
-  _safe_access_tagged_vectors = true;
   resetState();
 }
 
@@ -6628,91 +6588,106 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
 void
 FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
-  if (!_has_jacobian || !_const_jacobian)
+  try
   {
-    TIME_SECTION("computeJacobianTags", 5, "Computing Jacobian");
-
-    for (auto tag : tags)
-      if (_current_nl_sys->hasMatrix(tag))
+    try
+    {
+      if (!_has_jacobian || !_const_jacobian)
       {
-        auto & matrix = _current_nl_sys->getMatrix(tag);
-        matrix.zero();
-        if (haveADObjects())
-          // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
-          // diagonal dependence. With global AD indexing we only add non-zero
-          // dependence, so PETSc will scream at us unless we artificially add the diagonals.
-          for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
-            matrix.add(index, index, 0);
+        TIME_SECTION("computeJacobianTags", 5, "Computing Jacobian");
+
+        for (auto tag : tags)
+          if (_current_nl_sys->hasMatrix(tag))
+          {
+            auto & matrix = _current_nl_sys->getMatrix(tag);
+            matrix.zero();
+            if (haveADObjects())
+              // PETSc algorithms require diagonal allocations regardless of whether there is
+              // non-zero diagonal dependence. With global AD indexing we only add non-zero
+              // dependence, so PETSc will scream at us unless we artificially add the diagonals.
+              for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
+                matrix.add(index, index, 0);
+          }
+
+        _aux->zeroVariablesForJacobian();
+
+        unsigned int n_threads = libMesh::n_threads();
+
+        // Random interface objects
+        for (const auto & it : _random_data_objects)
+          it.second->updateSeeds(EXEC_NONLINEAR);
+
+        _current_execute_on_flag = EXEC_NONLINEAR;
+        _currently_computing_jacobian = true;
+        if (_displaced_problem)
+          _displaced_problem->setCurrentlyComputingJacobian(true);
+
+        execTransfers(EXEC_NONLINEAR);
+        execMultiApps(EXEC_NONLINEAR);
+
+        for (unsigned int tid = 0; tid < n_threads; tid++)
+          reinitScalars(tid);
+
+        computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
+
+        _aux->jacobianSetup();
+
+        if (_displaced_problem)
+        {
+          _aux->compute(EXEC_PRE_DISPLACE);
+          _displaced_problem->updateMesh();
+        }
+
+        for (unsigned int tid = 0; tid < n_threads; tid++)
+        {
+          _all_materials.jacobianSetup(tid);
+          _functions.jacobianSetup(tid);
+        }
+
+        // When computing the initial Jacobian for automatic variable scaling we need to make sure
+        // that the time derivatives have been calculated. So we'll call down to the nonlinear
+        // system here. Note that if we are not doing this initial Jacobian calculation we will
+        // just exit in that class to avoid redundant calculation (the residual function also
+        // computes time derivatives)
+        _current_nl_sys->computeTimeDerivatives(/*jacobian_calculation =*/true);
+
+        _aux->compute(EXEC_NONLINEAR);
+
+        computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
+
+        executeControls(EXEC_NONLINEAR);
+
+        _app.getOutputWarehouse().jacobianSetup();
+
+        _safe_access_tagged_matrices = false;
+
+        _current_nl_sys->computeJacobianTags(tags);
+
+        // For explicit Euler calculations for example we often compute the Jacobian one time and
+        // then re-use it over and over. If we're performing automatic scaling, we don't want to
+        // use that kernel, diagonal-block only Jacobian for our actual matrix when performing
+        // solves!
+        if (!_current_nl_sys->computingScalingJacobian())
+          _has_jacobian = true;
       }
-
-    _aux->zeroVariablesForJacobian();
-
-    unsigned int n_threads = libMesh::n_threads();
-
-    // Random interface objects
-    for (const auto & it : _random_data_objects)
-      it.second->updateSeeds(EXEC_NONLINEAR);
-
-    _current_execute_on_flag = EXEC_NONLINEAR;
-    _currently_computing_jacobian = true;
-    if (_displaced_problem)
-      _displaced_problem->setCurrentlyComputingJacobian(true);
-
-    execTransfers(EXEC_NONLINEAR);
-    execMultiApps(EXEC_NONLINEAR);
-
-    for (unsigned int tid = 0; tid < n_threads; tid++)
-      reinitScalars(tid);
-
-    computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
-
-    _aux->jacobianSetup();
-
-    if (_displaced_problem)
-    {
-      _aux->compute(EXEC_PRE_DISPLACE);
-      _displaced_problem->updateMesh();
     }
-
-    for (unsigned int tid = 0; tid < n_threads; tid++)
+    catch (...)
     {
-      _all_materials.jacobianSetup(tid);
-      _functions.jacobianSetup(tid);
+      handleException("computeJacobianTags");
     }
-
-    // When computing the initial Jacobian for automatic variable scaling we need to make sure
-    // that the time derivatives have been calculated. So we'll call down to the nonlinear system
-    // here. Note that if we are not doing this initial Jacobian calculation we will just exit in
-    // that class to avoid redundant calculation (the residual function also computes time
-    // derivatives)
-    _current_nl_sys->computeTimeDerivatives(/*jacobian_calculation =*/true);
-
-    _aux->compute(EXEC_NONLINEAR);
-
-    computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
-
-    executeControls(EXEC_NONLINEAR);
-
-    _app.getOutputWarehouse().jacobianSetup();
-
-    _safe_access_tagged_matrices = false;
-
-    _current_nl_sys->computeJacobianTags(tags);
-
-    // For explicit Euler calculations for example we often compute the Jacobian one time and then
-    // re-use it over and over. If we're performing automatic scaling, we don't want to use that
-    // kernel, diagonal-block only Jacobian for our actual matrix when performing solves!
-    if (!_current_nl_sys->computingScalingJacobian())
-      _has_jacobian = true;
-
-    _currently_computing_jacobian = false;
-    if (_displaced_problem)
-      _displaced_problem->setCurrentlyComputingJacobian(false);
-    _safe_access_tagged_matrices = true;
+  }
+  catch (const MooseException &)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling the system's stopSolve() method, it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+  catch (...)
+  {
+    mooseError("Unexpected exception type");
   }
 
-  // Reset execute_on flag as after this point we are no longer on NONLINEAR
-  _current_execute_on_flag = EXEC_NONE;
+  resetState();
 }
 
 void
@@ -6752,36 +6727,42 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                              NumericVector<Number> & lower,
                              NumericVector<Number> & upper)
 {
-  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
-              "I expect these system numbers to be the same");
-
-  if (!_current_nl_sys->hasVector("lower_bound") || !_current_nl_sys->hasVector("upper_bound"))
-    return;
-
-  TIME_SECTION("computeBounds", 1, "Computing Bounds");
-
-  NumericVector<Number> & _lower = _current_nl_sys->getVector("lower_bound");
-  NumericVector<Number> & _upper = _current_nl_sys->getVector("upper_bound");
-  _lower.swap(lower);
-  _upper.swap(upper);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _all_materials.residualSetup(tid);
-
-  _aux->residualSetup();
-  _aux->compute(EXEC_LINEAR);
-  _lower.swap(lower);
-  _upper.swap(upper);
-
   try
   {
-    checkExceptionAndStopSolve();
+    try
+    {
+      mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+                  "I expect these system numbers to be the same");
+
+      if (!_current_nl_sys->hasVector("lower_bound") || !_current_nl_sys->hasVector("upper_bound"))
+        return;
+
+      TIME_SECTION("computeBounds", 1, "Computing Bounds");
+
+      NumericVector<Number> & _lower = _current_nl_sys->getVector("lower_bound");
+      NumericVector<Number> & _upper = _current_nl_sys->getVector("upper_bound");
+      _lower.swap(lower);
+      _upper.swap(upper);
+      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+        _all_materials.residualSetup(tid);
+
+      _aux->residualSetup();
+      _aux->compute(EXEC_LINEAR);
+      _lower.swap(lower);
+      _upper.swap(upper);
+    }
+    catch (...)
+    {
+      handleException("computeBounds");
+    }
   }
   catch (MooseException & e)
   {
-    mooseError("The following exception that cannot be recovered from was caught in "
-               "FEProblemBase::computeBounds():\n" +
-               std::string(e.what()));
-    return;
+    mooseError("Irrecoverable exception: " + std::string(e.what()));
+  }
+  catch (...)
+  {
+    mooseError("Unexpected exception type");
   }
 }
 

@@ -2502,6 +2502,12 @@ protected:
 
 private:
   /**
+   * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
+   * caller of this method must determine how to handle the thrown exception
+   */
+  void handleException(const std::string & calling_method);
+
+  /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
    * and displaced parameters, given some initial set
    */
