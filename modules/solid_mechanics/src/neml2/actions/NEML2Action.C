@@ -95,7 +95,7 @@ NEML2Action::act()
     {
       auto & model = neml2::Factory::get_object<neml2::Model>("Models", _mname);
 
-      _console << COLOR_YELLOW << "*** BEGIN NEML2 INFO***" << std::endl;
+      _console << COLOR_YELLOW << "*** BEGIN NEML2 INFO ***" << std::endl;
       _console << model << std::endl;
       _console << "*** END NEML2 INFO ***" << COLOR_DEFAULT << std::endl;
     }
