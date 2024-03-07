@@ -36,15 +36,7 @@ ENABLE_NEML2 = $(_ENABLE_NEML2_DEFAULT)
 _ENABLE_NEML2_SET_BY_USER = false
 endif
 
-ifneq ($(ENABLE_NEML2),true)
-
-ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
-$(info Not compiling MOOSE with NEML2 because ENABLE_NEML2 is set to false.)
-else
-$(info Not compiling MOOSE with NEML2 because NEML2_DIR is not a valid NEML2 checkout and/or libtorch is not enabled.)
-endif
-
-else
+ifeq ($(ENABLE_NEML2),true)
 
 ifneq ($(ENABLE_LIBTORCH),true)
 $(error Attempting to compile MOOSE with NEML2, but libTorch is not enabled. \
