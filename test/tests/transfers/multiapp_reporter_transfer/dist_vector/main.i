@@ -15,7 +15,7 @@
   [to_sub_rep]
     type = ConstantReporter
     real_vector_vector_names = 'sent_vec'
-    real_vector_vector_values = '1. ; 2. 1003.;-5.0 -10 1000;3.3'
+    real_vector_vector_values = '1.; 2. 1003.;-5.0 -10 1000;3.3'
     real_vector_names = 'sent_real'
     real_vector_values = "1. 2. 3. 4."
     execute_on = INITIAL
@@ -31,6 +31,7 @@
     outputs = out
   []
 []
+
 [Positions]
   [elem]
     type = ElementCentroidPositions

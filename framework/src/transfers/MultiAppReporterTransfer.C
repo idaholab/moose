@@ -82,10 +82,6 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
           "subapp_index",
           "The supplied sub-application index is greater than the number of sub-applications.");
   }
-
-  if (_distribute_reporter_vector && hasToMultiApp() && hasFromMultiApp())
-    paramError("distribute_reporter_vector",
-               "Distributing reporter vectors is not compatible with sibling transfers.");
 }
 
 void
@@ -106,9 +102,18 @@ MultiAppReporterTransfer::initialSetup()
     problem_ptr = &getFromMultiApp()->appProblemBase(_subapp_index);
 
   // Tell ReporterData to consume with replicated
-  if (problem_ptr)
+  if (problem_ptr && !_distribute_reporter_vector)
     for (const auto & fn : _from_reporter_names)
       addReporterTransferMode(fn, REPORTER_MODE_REPLICATED, *problem_ptr);
+
+  // Check that we have the correct reporter modes setup.
+  if (_distribute_reporter_vector)
+  {
+    if (hasFromMultiApp())
+      setVectorReporterTransferModes(getFromMultiApp(), _to_reporter_names, _from_reporter_names);
+    else if (hasToMultiApp())
+      setVectorReporterTransferModes(getToMultiApp(), _from_reporter_names, _to_reporter_names);
+  }
 }
 
 void
@@ -218,6 +223,11 @@ MultiAppReporterTransfer::execute()
 void
 MultiAppReporterTransfer::checkSiblingsTransferSupported() const
 {
+
+  if (_distribute_reporter_vector)
+    paramError("distribute_reporter_vector",
+               "Distributing reporter vectors is not compatible with sibling transfers.");
+
   // Check that we are in the supported configuration: same number of source and target apps
   // The allocation of the child apps on the processors must be the same
   if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
@@ -229,4 +239,27 @@ MultiAppReporterTransfer::checkSiblingsTransferSupported() const
   }
   else
     mooseError("Number of source and target child apps must match for siblings transfer");
+}
+
+// Helper function to check reporter modes
+void
+MultiAppReporterTransfer::setVectorReporterTransferModes(
+    const std::shared_ptr<MultiApp> & main_app,
+    const std::vector<ReporterName> & main_app_rep_names,
+    const std::vector<ReporterName> & sub_app_rep_names)
+{
+  // Set reporter transfer modes for the main app.
+  for (const auto & rn : main_app_rep_names)
+    addReporterTransferMode(rn, REPORTER_MODE_REPLICATED, main_app->problemBase());
+
+  std::vector<unsigned int> indices(main_app->numGlobalApps());
+  std::iota(indices.begin(), indices.end(), 0);
+
+  // Set reporter transfer modes for sub app.
+  // Setting to ROOT means this works for ROOT and REPLICATED reports with no
+  // change to users.
+  for (const auto & ind : indices)
+    if (main_app->hasLocalApp(ind))
+      for (const auto & rn : sub_app_rep_names)
+        addReporterTransferMode(rn, REPORTER_MODE_ROOT, main_app->appProblemBase(ind));
 }

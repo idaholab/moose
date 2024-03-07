@@ -36,8 +36,9 @@ to be root or replicated.
 
 !alert Caution title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector) only works with certain reporter modes.
 The main
-app reporter is assumed to be replicated while the subapp reporters are assumed
-to be root or replicated. Using distributed reporter modes might not give correct answers.
+app reporter is assumed to be `REPORTER_MODE_REPLICATED` while the subapp reporters are assumed
+to be `REPORTER_MODE_ROOT` or `REPORTER_MODE_REPLICATED`. This operation cannot be performed with reporters that
+are `REPORTER_MODE_DISTRIBUTED`.
 
 ## Example Input File Syntax
 
@@ -100,7 +101,13 @@ Here, we are transferring integer and string data between reporters:
 ### Distributed Reporter
 
 Here we are transferring a vector reporter and a vector of vectors reporter in a
-scatter and gather fashion.
+scatter and gather fashion. The main application holds a vector of vectors and a
+single vector,while each subapp has a vector and a Real (scalar) reporter.
+This test shows the
+scatter operation by distributing a vector and a single Real to each subapp and
+shows the gather operation by aggregating the same values into a
+different set of reporters. This is to demonstrate that order of the
+scatter/gather operations are consistent.
 
 !listing dist_vector/main.i block=Reporters caption=Main application reporters
 

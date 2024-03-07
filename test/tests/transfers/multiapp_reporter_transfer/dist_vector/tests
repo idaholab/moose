@@ -3,32 +3,30 @@
     design = 'MultiAppReporterTransfer.md'
     [vec_rep]
         requirement = "The system shall support the ability to transfer reporter
-        data in a N to 1 and 1 to N fashion when"
+        data in a N subapp to 1 parent app, and 1 parent app to N subapp fashion when"
         # We only allow recover testing on a single example. During recover
         # testing checkpoints are overwritten and used by the wrong test leading
         # to an incorrect test failure.
       [reporter_transfer]
         type = 'JSONDiff'
         input = 'main.i'
-        recover = false
         jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
         detail = "the number of procs per app is default,"
       []
       [reporter_transfer_min_procs_2]
         type = 'JSONDiff'
-        cli_args = "MultiApps/sub/min_procs_per_app=2"
+        cli_args = "MultiApps/sub/min_procs_per_app=2 Outputs/file_base=main_2_out"
         input = 'main.i'
-        jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
+        jsondiff = 'main_2_out.json main_2_out_sub0_out.json main_2_out_sub1_out.json main_2_out_sub2_out.json main_2_out_sub3_out.json'
         min_parallel = 2
         detail = "the number of procs per app is less than the number of apps,"
       []
       [reporter_transfer_min_procs_5]
         type = 'JSONDiff'
-        cli_args = "MultiApps/sub/min_procs_per_app=5"
+        cli_args = "MultiApps/sub/min_procs_per_app=5 Outputs/file_base=main_5_out"
         input = 'main.i'
-        jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
+        jsondiff = 'main_5_out.json main_5_out_sub0_out.json  main_5_out_sub1_out.json main_5_out_sub2_out.json  main_5_out_sub3_out.json'
         min_parallel = 5
-        recover = false
         detail = "the number of procs per app is larger than the number of apps,"
       []
 

@@ -9,7 +9,6 @@
 []
 
 [Reporters]
-
   [from_main_rep]
     type = ConstantReporter
     real_vector_names = 'rec_vec'
@@ -17,7 +16,6 @@
     real_names = 'rec_real'
     real_values = '-1.'
   []
-
 []
 
 [Executioner]

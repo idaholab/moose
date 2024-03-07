@@ -40,4 +40,8 @@ private:
   virtual void checkSiblingsTransferSupported() const override;
 
   bool _distribute_reporter_vector;
+
+  void setVectorReporterTransferModes(const std::shared_ptr<MultiApp> & main_app,
+                                      const std::vector<ReporterName> & main_app_rep_names,
+                                      const std::vector<ReporterName> & sub_app_rep_names);
 };
