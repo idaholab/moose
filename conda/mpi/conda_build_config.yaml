@@ -11,7 +11,7 @@ zip_keys:
   - mpi_version
 
 moose_libgfortran5:
-  - libgfortran5 13.2.0 ha4646dd_3                          # [linux]
+  - libgfortran5 13.2.0 ha4646dd_5                          # [linux]
   - libgfortran5 13.2.0 h2873a65_3                          # [not arm64 and osx]
   - libgfortran5 13.2.0 hf226fd6_3                          # [arm64]
 

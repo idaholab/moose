@@ -28,10 +28,10 @@ build:
 
 requirements:
   build:
-    - {{ mpi }}
-    - {{ mpi }}-mpicc {{ mpi_version }}
-    - {{ mpi }}-mpicxx {{ mpi_version }}
-    - {{ mpi }}-mpifort {{ mpi_version }}
+    - {{ mpi }} {{ mpi_version }}
+    - {{ mpi }}-mpicc
+    - {{ mpi }}-mpicxx
+    - {{ mpi }}-mpifort
     - {{ moose_libgfortran5 }}
     - {{ moose_clangcc }}                     # [osx]
     - {{ moose_clangxx }}                     # [osx]
@@ -39,14 +39,16 @@ requirements:
     - gfortran
 
   run:
-    - {{ mpi }}
-    - {{ mpi }}-mpicc {{ mpi_version }}
-    - {{ mpi }}-mpicxx {{ mpi_version }}
-    - {{ mpi }}-mpifort {{ mpi_version }}
+    - {{ mpi }} {{ mpi_version }}
+    - {{ mpi }}-mpicc
+    - {{ mpi }}-mpicxx
+    - {{ mpi }}-mpifort
     - {{ moose_libgfortran5 }}
     - {{ moose_clangcc }}                     # [osx]
     - {{ moose_clangxx }}                     # [osx]
     - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+    # Cuda pinning runtime requirement
+    - kernel-headers_linux-64 4.18.0          # [linux]
     - automake 1.16.5
     - bison 3.4
     - zfp 0.5.5
