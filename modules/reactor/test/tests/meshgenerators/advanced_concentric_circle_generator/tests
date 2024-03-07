@@ -186,7 +186,7 @@
                   Mesh/accg/quad_element_type=QUAD9
                   --mesh-only err.e"
       expect_err = 'the element types of triangular and quadrilateral elements must be compatible'
-      detail = 'the elements of the circular mesh to be generated have incompatible types.'
+      detail = 'if the elements of the circular mesh to be generated have incompatible types.'
     []
   []
 []

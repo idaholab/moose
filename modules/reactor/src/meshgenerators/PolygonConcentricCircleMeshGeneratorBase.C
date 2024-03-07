@@ -258,7 +258,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   if (_quad_center_elements)
   {
     if (tri_order != quad_order)
-      _tri_elem_type = quad_order == 1 ? TRI_ELEM_TYPE::TRI3 : TRI_ELEM_TYPE::TRI7;
+      _tri_elem_type = quad_order == 1 ? TRI_ELEM_TYPE::TRI3 : TRI_ELEM_TYPE::TRI6;
   }
   else if (_ring_radii.empty() && _background_intervals == 1 &&
            _background_inner_boundary_layer_params.intervals == 0 &&
