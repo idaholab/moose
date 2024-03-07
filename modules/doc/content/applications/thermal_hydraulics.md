@@ -9,7 +9,10 @@ MOOSE includes modules providing versatile, general-purpose thermal hydraulics c
        caption=MOOSE modules support from Reynolds-Average Navier Stokes (RANS) Computational Fluid Dynamics (CFD) modeling to 0D lumped-parameters modeling.
        id=TH_Scales
 
-The following table summarizes the MOOSE modules providing thermal hydraulics capabilities:
+The following table summarizes the MOOSE modules providing thermal hydraulics capabilities.
+The "Typical Runtime" column corresponds to a rough estimate of how much time it takes
+to run 100 time steps for a problem with the number of elements equal to the "Typical Element Count"
+value, using serial execution of the application.
 
 | Module                                                                  | Scale                                  | Flow-Formulation                                                                                                                                             | Dimension                                                          | Typical Element Count | Typical Runtime | Typical Simulations                                                                                                                                                                                    |
 | :---------------------------------------------------------------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | :-------------------- | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
