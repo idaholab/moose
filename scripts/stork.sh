@@ -117,6 +117,7 @@ rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
 rm -f $dir/test/src/base/StorkTestApp.C.*
 rm -f $dir/doc/config.yml.*
+rm -f $dir/doc/sqa_reports.yml.*
 rm -f $dir/doc/moosedocs.py.*
 
 if [[ "$kind" == "app" ]]; then
