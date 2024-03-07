@@ -1,6 +1,6 @@
 [Solvers]
   [newton]
-    type = NewtonNonlinearSolver
+    type = Newton
     max_its = 1 # Force an exception
   []
 []
