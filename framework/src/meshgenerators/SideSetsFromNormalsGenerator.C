@@ -73,6 +73,8 @@ SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters
       mooseError("Normal is zero");
     normal /= normal.norm();
   }
+
+  _using_normal = true;
 }
 
 std::unique_ptr<MeshBase>
@@ -103,7 +105,8 @@ SideSetsFromNormalsGenerator::generate()
 
       for (const auto i : make_range(boundary_ids.size()))
       {
-        if (normalsWithinTol(_normals[i], normals[0]))
+        _normal = _normals[i];
+        if (normalsWithinTol(_normal, normals[0]))
           flood(elem, _normals[i], boundary_ids[i], *mesh);
       }
     }

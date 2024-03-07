@@ -64,13 +64,21 @@ protected:
    * Determines whether the given element's subdomain id is in the given subdomain_id_list.
    */
   bool elementSubdomainIdInList(const Elem * elem,
-                                const std::vector<subdomain_id_type> & subdomain_id_list);
+                                const std::vector<subdomain_id_type> & subdomain_id_list) const;
 
   /**
    * Determines whether the boundary id of the given side of an element is in the
    * included_boundaries parameter.
    */
-  bool elementSideInIncludedBoundaries(const Elem * elem, const uint & side, MeshBase & mesh);
+  bool elementSideInIncludedBoundaries(const Elem * elem,
+                                       const uint & side,
+                                       const MeshBase & mesh) const;
+
+  bool elemSideSatisfiesRequirements(const Elem * elem,
+                                     const uint & side,
+                                     const MeshBase & mesh,
+                                     const Point & normal,
+                                     const Point & face_normal);
 
   /// the mesh to add the sidesets to
   std::unique_ptr<MeshBase> & _input;

@@ -105,29 +105,10 @@ ParsedGenerateSideset::generate()
 
     for (const auto side : make_range(elem->n_sides()))
     {
-      const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
+      const Point & face_normal = _fe_face->get_normals()[0];
 
-      // Skip if side has neighbor and we only want external sides
-      if (_include_only_external_sides && elem->neighbor_ptr(side))
-        continue;
-
-      // Skip if side is not part of included boundaries
-      if (_check_boundaries && !elementSideInIncludedBoundaries(elem, side, *mesh))
-        continue;
-
-      // Skip if element does no have neighbor in specified subdomains
-      if (_check_neighbor_subdomains)
-      {
-        const Elem * neighbor = elem->neighbor_ptr(side);
-        // if the neighbor does not exist, then skip this face; we only add sidesets
-        // between existing elems if _check_neighbor_subdomains is true
-        if (!(neighbor && elementSubdomainIdInList(neighbor, _included_neighbor_subdomain_ids)))
-          continue;
-      }
-
-      // check normal if requested
-      if (_using_normal && !normalsWithinTol(_normal, normals[0]))
+      if (!elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
         continue;
 
       // check expression

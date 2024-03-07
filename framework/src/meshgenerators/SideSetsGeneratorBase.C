@@ -194,42 +194,24 @@ SideSetsGeneratorBase::flood(const Elem * elem,
 
   for (const auto side : make_range(elem->n_sides()))
   {
-    // Skip if side has neighbor and we only want external sides
-    if ((elem->neighbor_ptr(side) && _include_only_external_sides))
-      continue;
-
-    // Skip if side is not part of included boundaries
-    if (_check_boundaries && !elementSideInIncludedBoundaries(elem, side, mesh))
-      continue;
-
-    // Skip if element does no have neighbor in specified subdomains
-    if (_check_neighbor_subdomains)
-    {
-      const Elem * neighbor = elem->neighbor_ptr(side);
-      // if the neighbor does not exist, then skip this face; we only add sidesets
-      // between existing elems if _check_neighbor_subdomains is true
-      if (!(neighbor && elementSubdomainIdInList(neighbor, _included_neighbor_subdomain_ids)))
-        continue;
-    }
 
     _fe_face->reinit(elem, side);
-    const std::vector<Point> normals = _fe_face->get_normals();
+    const Point face_normal = _fe_face->get_normals()[0];
 
-    // We'll just use the normal of the first qp
-    if (normalsWithinTol(normal, normals[0]))
+    if (!elemSideSatisfiesRequirements(elem, side, mesh, normal, face_normal))
+      continue;
+
+    if (_replace)
+      mesh.get_boundary_info().remove_side(elem, side);
+
+    mesh.get_boundary_info().add_side(elem, side, side_id);
+    for (const auto neighbor : make_range(elem->n_sides()))
     {
-      if (_replace)
-        mesh.get_boundary_info().remove_side(elem, side);
-
-      mesh.get_boundary_info().add_side(elem, side, side_id);
-      for (const auto neighbor : make_range(elem->n_sides()))
-      {
-        // Flood to the neighboring elements using the current matching side normal from this
-        // element.
-        // This will allow us to tolerate small changes in the normals so we can "paint" around a
-        // curve.
-        flood(elem->neighbor_ptr(neighbor), _fixed_normal ? normal : normals[0], side_id, mesh);
-      }
+      // Flood to the neighboring elements using the current matching side normal from this
+      // element.
+      // This will allow us to tolerate small changes in the normals so we can "paint" around a
+      // curve.
+      flood(elem->neighbor_ptr(neighbor), _fixed_normal ? normal : face_normal, side_id, mesh);
     }
   }
 }
@@ -242,7 +224,7 @@ SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1, const Point & no
 
 bool
 SideSetsGeneratorBase::elementSubdomainIdInList(
-    const Elem * elem, const std::vector<subdomain_id_type> & subdomain_id_list)
+    const Elem * elem, const std::vector<subdomain_id_type> & subdomain_id_list) const
 {
   subdomain_id_type curr_subdomain = elem->subdomain_id();
   return std::find(subdomain_id_list.begin(), subdomain_id_list.end(), curr_subdomain) !=
@@ -252,10 +234,42 @@ SideSetsGeneratorBase::elementSubdomainIdInList(
 bool
 SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * elem,
                                                        const uint & side,
-                                                       MeshBase & mesh)
+                                                       const MeshBase & mesh) const
 {
   for (const auto bid : _restricted_boundary_ids)
     if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
       return true;
   return false;
+}
+
+bool
+SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * elem,
+                                                     const uint & side,
+                                                     const MeshBase & mesh,
+                                                     const Point & desired_normal,
+                                                     const Point & face_normal)
+{
+  // Skip if side has neighbor and we only want external sides
+  if ((elem->neighbor_ptr(side) && _include_only_external_sides))
+    return false;
+
+  // Skip if side is not part of included boundaries
+  if (_check_boundaries && !elementSideInIncludedBoundaries(elem, side, mesh))
+    return false;
+
+  // Skip if element does no have neighbor in specified subdomains
+  if (_check_neighbor_subdomains)
+  {
+    const Elem * neighbor = elem->neighbor_ptr(side);
+    // if the neighbor does not exist, then skip this face; we only add sidesets
+    // between existing elems if _check_neighbor_subdomains is true
+    if (!(neighbor && elementSubdomainIdInList(neighbor, _included_neighbor_subdomain_ids)))
+      return false;
+  }
+
+  // We'll just use the normal of the first qp
+  if (_using_normal && !normalsWithinTol(desired_normal, face_normal))
+    return false;
+
+  return true;
 }
