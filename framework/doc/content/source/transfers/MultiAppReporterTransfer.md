@@ -37,8 +37,8 @@ to be root or replicated.
 !alert warning title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector) only works with certain reporter modes.
 The main
 app reporter is assumed to be `REPORTER_MODE_REPLICATED` while the subapp reporters are assumed
-to be `REPORTER_MODE_ROOT` or `REPORTER_MODE_REPLICATED`. This operation cannot
-be performed with any reporters that
+to be `REPORTER_MODE_ROOT` or `REPORTER_MODE_REPLICATED`. This operation will
+error out with any reporters that
 are `REPORTER_MODE_DISTRIBUTED`.
 
 ## Example Input File Syntax
