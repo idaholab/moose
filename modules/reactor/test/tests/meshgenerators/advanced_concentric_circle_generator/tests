@@ -16,11 +16,26 @@
       type = Exodiff
       input = accg.i
       cli_args = "Mesh/accg/num_sectors=8
-                  Mesh/accg/order=2
+                  Mesh/accg/tri_element_type=TRI7
+                  Mesh/accg/quad_element_type=QUAD9
                   --mesh-only accg_quadratic.e"
       exodiff = accg_quadratic.e
       recover = false
       detail = "a volume preserved concentric circles mesh with quadratic elements."
+    []
+    [one_layer_quadratic]
+      type = Exodiff
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/ring_radii='2'
+                  Mesh/accg/ring_intervals='1'
+                  Mesh/accg/ring_block_ids='10'
+                  Mesh/accg/ring_block_names='inner_tri'
+                  Mesh/accg/tri_element_type=TRI7
+                  --mesh-only accg_one_layer_quadratic.e"
+      exodiff = accg_one_layer_quadratic.e
+      recover = false
+      detail = "a one-element-layer volume preserved concentric circles mesh with quadratic TRI7 elements."
     []
     [no_volume_preserve]
       type = Exodiff
@@ -45,7 +60,8 @@
       type = Exodiff
       input = accg.i
       cli_args = "Mesh/accg/customized_azimuthal_angles='15 45 80 120 150 200 240 300 345'
-                  Mesh/accg/order=2
+                  Mesh/accg/tri_element_type=TRI7
+                  Mesh/accg/quad_element_type=QUAD9
                   --mesh-only accg_custom_azi_quadratic_in.e"
       exodiff = accg_custom_azi_quadratic_in.e
       recover = false
@@ -162,6 +178,15 @@
                   --mesh-only err.e"
       expect_err = "This parameter must be strictly ascending"
       detail = "if provided radius array of the ring regions is not strictly ascending."
+    []
+    [err_quadratic_wrong_elem_types]
+      type = 'RunException'
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/quad_element_type=QUAD9
+                  --mesh-only err.e"
+      expect_err = 'the element types of triangular and quadrilateral elements must be compatible'
+      detail = 'the elements of the circular mesh to be generated have incompatible types.'
     []
   []
 []

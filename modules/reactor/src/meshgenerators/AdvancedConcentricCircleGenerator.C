@@ -30,8 +30,6 @@ AdvancedConcentricCircleGenerator::validParams()
       "customized_azimuthal_angles",
       "customized_azimuthal_angles>=0&customized_azimuthal_angles<360",
       "List of the user-specified azimuthal angles of the nodes.");
-  params.addRangeCheckedParam<unsigned short>(
-      "order", 1, "order>=1 & order<=2", "The order of the elements to be generated.");
 
   params.addParamNamesToGroup("num_sectors customized_azimuthal_angles", "Azimuthal Mesh Density");
 
@@ -48,9 +46,26 @@ AdvancedConcentricCircleGenerator::AdvancedConcentricCircleGenerator(
                           ? getParam<std::vector<Real>>("customized_azimuthal_angles")
                           : std::vector<Real>()),
     _num_sectors(isParamValid("num_sectors") ? getParam<unsigned int>("num_sectors")
-                                             : _azimuthal_angles.size()),
-    _order(getParam<unsigned short>("order"))
+                                             : _azimuthal_angles.size())
 {
+  const unsigned short tri_order = _tri_elem_type == TRI_ELEM_TYPE::TRI3 ? 1 : 2;
+  const unsigned short quad_order = _quad_elem_type == QUAD_ELEM_TYPE::QUAD4 ? 1 : 2;
+  // 1. If the generated mesh has only one ring layer of triangular elements, then no
+  // quad elements are generated;
+  // 2. Otherwise, both types of elements are generated.
+  _order = tri_order;
+  if (_ring_radii.size() == 1 && _ring_intervals.front() == 1 &&
+      _ring_inner_boundary_layer_params.intervals.front() == 0 &&
+      _ring_outer_boundary_layer_params.intervals.front() == 0)
+  {
+    if (tri_order != quad_order)
+      _quad_elem_type = tri_order == 1 ? QUAD_ELEM_TYPE::QUAD4 : QUAD_ELEM_TYPE::QUAD9;
+  }
+  else if (tri_order != quad_order)
+    paramError("tri_element_type",
+               "the element types of triangular and quadrilateral elements must be compatible if "
+               "both types of elements are generated.");
+
   if (_num_sectors == 0)
     paramError(
         "num_sectors",
@@ -229,7 +244,8 @@ AdvancedConcentricCircleGenerator::generate()
                          _interface_boundary_id_shift,
                          1.0,
                          true,
-                         _order);
+                         _tri_elem_type,
+                         _quad_elem_type);
   MeshTools::Modification::rotate(*mesh, -_azimuthal_angles[0], 0, 0);
 
   for (unsigned int i = 1; i < _num_sectors; i++)
@@ -262,7 +278,8 @@ AdvancedConcentricCircleGenerator::generate()
                                _interface_boundary_id_shift,
                                1.0,
                                true,
-                               _order);
+                               _tri_elem_type,
+                               _quad_elem_type);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, -_azimuthal_angles[i], 0, 0);

@@ -9,12 +9,52 @@
     requirement = 'The system shall generate a hexagon mesh without rings and ducts.'
     recover = false
   []
-  [back_only_quadratic]
+  [back_only_quadratic_tri7_quad9]
     type = 'Exodiff'
     input = 'poly_2d.i'
-    exodiff = 'poly_2d_back_only_quadratic.e'
-    cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out" Mesh/gen/order=2 --mesh-only "poly_2d_back_only_quadratic.e"'
-    requirement = 'The system shall generate a hexagon mesh without rings and ducts with quadratic elements.'
+    exodiff = 'poly_2d_back_only_quadratic_tri7_quad9.e'
+    cli_args = 'Mesh/gen/background_block_ids="30 35"
+                Mesh/gen/background_block_names="back_in back_out"
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD9
+                --mesh-only "poly_2d_back_only_quadratic_tri7_quad9.e"'
+    requirement = 'The system shall generate a hexagon mesh without rings and ducts with quadratic TRI7 and QUAD9 elements.'
+    recover = false
+  []
+  [back_only_quadratic_tri6_quad8]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_quadratic_tri6_quad8.e'
+    cli_args = 'Mesh/gen/background_block_ids="30 35"
+                Mesh/gen/background_block_names="back_in back_out"
+                Mesh/gen/tri_element_type=TRI6
+                Mesh/gen/quad_element_type=QUAD8
+                --mesh-only "poly_2d_back_only_quadratic_tri6_quad8.e"'
+    requirement = 'The system shall generate a hexagon mesh without rings and ducts with quadratic TRI6 and QUAD8 elements.'
+    recover = false
+  []
+  [back_only_quadratic_tri7_quad8]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_quadratic_tri7_quad8.e'
+    cli_args = 'Mesh/gen/background_block_ids="30 35"
+                Mesh/gen/background_block_names="back_in back_out"
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD8
+                --mesh-only "poly_2d_back_only_quadratic_tri7_quad8.e"'
+    requirement = 'The system shall generate a hexagon mesh without rings and ducts with quadratic TRI7 and QUAD8 elements.'
+    recover = false
+  []
+  [back_only_quadratic_tri6_quad9]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_quadratic_tri6_quad9.e'
+    cli_args = 'Mesh/gen/background_block_ids="30 35"
+                Mesh/gen/background_block_names="back_in back_out"
+                Mesh/gen/tri_element_type=TRI6
+                Mesh/gen/quad_element_type=QUAD9
+                --mesh-only "poly_2d_back_only_quadratic_tri6_quad9.e"'
+    requirement = 'The system shall generate a hexagon mesh without rings and ducts with quadratic TRI6 and QUAD9 elements.'
     recover = false
   []
   [back_only_no_side_specific_bdry]
@@ -34,12 +74,17 @@
     requirement = 'The system shall generate a polygon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name.'
     recover = false
   []
-  [back_only_single_block_quadratic]
+  [back_only_single_block_quadratic_tri7_quad9]
     type = 'Exodiff'
     input = 'poly_2d.i'
-    exodiff = 'poly_2d_back_only_sb_quadratic.e'
-    cli_args = 'Mesh/gen/quad_center_elements=true Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back" Mesh/gen/order=2 --mesh-only "poly_2d_back_only_sb_quadratic.e"'
-    requirement = 'The system shall generate a polygon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name with quadratic elements.'
+    exodiff = 'poly_2d_back_only_sb_quadratic_tri7_quad9.e'
+    cli_args = 'Mesh/gen/quad_center_elements=true
+                Mesh/gen/background_block_ids="30"
+                Mesh/gen/background_block_names="back"
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD9
+                --mesh-only "poly_2d_back_only_sb_quadratic_tri7_quad9.e"'
+    requirement = 'The system shall generate a polygon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name with quadratic TRI7 and QUAD9 elements.'
     recover = false
   []
   [back_only_flat_up]
@@ -65,6 +110,19 @@
     requirement = 'The system shall generate a hexagon mesh with only one radial layer of elements without rings and ducts.'
     recover = false
   []
+  [back_only_one_layer_quadratic_tri7]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_one_layer_quadratic_tri7.e'
+    cli_args = 'Mesh/gen/background_intervals=1
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/background_block_ids=30
+                Mesh/gen/background_block_names="back"
+                Mesh/gen/interface_boundary_id_shift=100
+                --mesh-only "poly_2d_back_only_one_layer_quadratic_tri7.e"'
+    requirement = 'The system shall generate a hexagon mesh with only one radial layer of elements without rings and ducts with quadratic TRI7 elements.'
+    recover = false
+  []
   [back_only_one_layer_quad]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -75,15 +133,15 @@
     requirement = 'The system shall generate a hexagon mesh with only one radial layer of specially patterned quad elements without rings and ducts.'
     recover = false
   []
-  [back_only_one_layer_quad_quadratic]
+  [back_only_one_layer_quad_quadratic_quad9]
     type = 'Exodiff'
     input = 'poly_2d.i'
-    exodiff = 'poly_2d_back_only_one_layer_quad_quadratic.e'
+    exodiff = 'poly_2d_back_only_one_layer_quad_quadratic_quad9.e'
     cli_args = 'Mesh/gen/background_intervals=1
-                Mesh/gen/order=2
+                Mesh/gen/quad_element_type=QUAD9
                 Mesh/gen/quad_center_elements=true
-                --mesh-only "poly_2d_back_only_one_layer_quad_quadratic.e"'
-    requirement = 'The system shall generate a hexagon mesh with only one radial layer of specially patterned quad elements without rings and ducts with quadratic elements.'
+                --mesh-only "poly_2d_back_only_one_layer_quad_quadratic_quad9.e"'
+    requirement = 'The system shall generate a hexagon mesh with only one radial layer of specially patterned quad elements without rings and ducts with quadratic QUAD9 elements.'
     recover = false
   []
   [rings]
@@ -228,12 +286,13 @@
     requirement = 'The system shall generate a hexagon mesh with rings and ducts including boundary layers.'
     recover = false
   []
-  [full_boundary_layers_quadratic]
+  [full_boundary_layers_quadratic_tri7_quad9]
     type = 'Exodiff'
     input = 'poly_2d.i'
-    exodiff = 'poly_2d_full_boundary_layers_quadratic.e'
+    exodiff = 'poly_2d_full_boundary_layers_quadratic_tri7_quad9.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
-                Mesh/gen/order="2" 
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD9
                 Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                 Mesh/gen/ring_inner_boundary_layer_widths="0.0 0.3" Mesh/gen/ring_inner_boundary_layer_intervals="0 3"
                 Mesh/gen/ring_inner_boundary_layer_biases="1.0 2.0"
@@ -251,8 +310,8 @@
                 Mesh/gen/background_inner_boundary_layer_bias=2.0
                 Mesh/gen/background_outer_boundary_layer_width=0.15 Mesh/gen/background_outer_boundary_layer_intervals=3
                 Mesh/gen/background_outer_boundary_layer_bias=0.5
-                --mesh-only "poly_2d_full_boundary_layers_quadratic.e"'
-    requirement = 'The system shall generate a hexagon mesh with rings and ducts including boundary layers with quadratic elements.'
+                --mesh-only "poly_2d_full_boundary_layers_quadratic_tri7_quad9.e"'
+    requirement = 'The system shall generate a hexagon mesh with rings and ducts including boundary layers with quadratic TRI7 and QUAD9 elements.'
     recover = false
   []
   [full_quad]
@@ -691,6 +750,16 @@
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'this parameter should not be set if no interface boundaries are created.'
       detail = 'interface boundary id shift parameter is provided but neither inward and outward boundaries are set to be created.'
+    []
+    [err_quadratic_wrong_elem_types]
+      type = 'RunException'
+      input = 'poly_2d.i'  
+      cli_args = 'Mesh/gen/background_block_ids="30 35"
+                  Mesh/gen/background_block_names="back_in back_out"
+                  Mesh/gen/quad_element_type=QUAD9
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'the element types of triangular and quadrilateral elements must be compatible'
+      detail = 'the elements of the polygon mesh to be generated have incompatible types.'
     []
   []
 []

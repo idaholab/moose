@@ -127,7 +127,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const bool create_outward_interface_boundaries,
     const boundary_id_type boundary_id_shift,
     const bool generate_side_specific_boundaries,
-    const unsigned int order)
+    const TRI_ELEM_TYPE tri_elem_type,
+    const QUAD_ELEM_TYPE quad_elem_type)
 {
   return buildSlice(ring_radii,
                     ring_layers,
@@ -157,7 +158,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                     boundary_id_shift,
                     1.0,
                     generate_side_specific_boundaries,
-                    order);
+                    tri_elem_type,
+                    quad_elem_type);
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -190,8 +192,15 @@ PolygonMeshGeneratorBase::buildSlice(
     const boundary_id_type boundary_id_shift,
     const Real pitch_scale_factor,
     const bool generate_side_specific_boundaries,
-    const unsigned int order)
+    const TRI_ELEM_TYPE tri_elem_type,
+    const QUAD_ELEM_TYPE quad_elem_type)
 {
+  const unsigned short order = quad_elem_type == QUAD_ELEM_TYPE::QUAD4 ? 1 : 2;
+  if (order != (tri_elem_type == TRI_ELEM_TYPE::TRI3 ? 1 : 2))
+    mooseError("In mesh generator ",
+               this->name(),
+               ", an incompatible elements type combination is used when calling "
+               "PolygonMeshGeneratorBase::buildSlice().");
   // In order to create quadratic elements (i.e., order = 2), we creates nodes with double mesh
   // density. Thus, the related parameters need to be modified accordingly. A prefix "mod_" is used
   // to indicate the modified parameters.
@@ -513,18 +522,23 @@ PolygonMeshGeneratorBase::buildSlice(
                    // outer boundary layer. Same in cenTriElemDef()
                    side_index,
                    generate_side_specific_boundaries,
-                   order);
+                   quad_elem_type);
   else
-    cenTriElemDef(*mesh,
-                  num_sectors_per_side,
-                  azimuthal_tangent,
-                  block_id_shift,
-                  create_outward_interface_boundaries && is_central_region_independent,
-                  boundary_id_shift,
-                  (!has_rings) && (!has_ducts) && (background_intervals == 1),
-                  side_index,
-                  generate_side_specific_boundaries,
-                  order);
+    cenTriElemDef(
+        *mesh,
+        num_sectors_per_side,
+        azimuthal_tangent,
+        block_id_shift,
+        create_outward_interface_boundaries && is_central_region_independent,
+        boundary_id_shift,
+        ((!has_rings) && (!has_ducts) && (background_intervals == 1)) ||
+            ((!has_background) &&
+             (std::accumulate(total_ring_layers.begin(), total_ring_layers.end(), 0) == 1)),
+        // Only for ACCG, it is possible that the entire mesh is a single-layer ring.
+        // cenQuadElemDef() does not need this as it does not work for ACCG.
+        side_index,
+        generate_side_specific_boundaries,
+        tri_elem_type);
 
   // Add Quad4 mesh into outer circle
   // total number of mesh should be all the rings for pin regions + background regions;
@@ -574,8 +588,9 @@ PolygonMeshGeneratorBase::buildSlice(
               create_outward_interface_boundaries,
               boundary_id_shift,
               generate_side_specific_boundaries,
-              order);
-
+              quad_elem_type);
+  if (tri_elem_type == TRI_ELEM_TYPE::TRI6 || quad_elem_type == QUAD_ELEM_TYPE::QUAD8)
+    mesh->remove_orphaned_nodes();
   return mesh;
 }
 
@@ -865,7 +880,7 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
                                          const bool assign_external_boundary,
                                          const unsigned int side_index,
                                          const bool generate_side_specific_boundaries,
-                                         const unsigned int order) const
+                                         const QUAD_ELEM_TYPE quad_elem_type) const
 {
 
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -878,7 +893,7 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
     for (unsigned int j = 0; j < 2 * i + 1; j++)
     {
       std::unique_ptr<Elem> new_elem;
-      if (order == 1)
+      if (quad_elem_type == QUAD_ELEM_TYPE::QUAD4)
       {
         new_elem = std::make_unique<Quad4>();
         new_elem->set_node(0) = nodes[id_x][id_y];
@@ -887,9 +902,14 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
         new_elem->set_node(1) = nodes[id_x + 1][id_y];
         new_elem->subdomain_id() = 1 + block_id_shift;
       }
-      else // 2
+      else // QUAD8/QUAD9
       {
-        new_elem = std::make_unique<Quad9>();
+        new_elem = std::make_unique<Quad8>();
+        if (quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
+        {
+          new_elem = std::make_unique<Quad9>();
+          new_elem->set_node(8) = nodes[id_x * 2 + 1][id_y * 2 + 1];
+        }
         new_elem->set_node(0) = nodes[id_x * 2][id_y * 2];
         new_elem->set_node(3) = nodes[id_x * 2][id_y * 2 + 2];
         new_elem->set_node(2) = nodes[id_x * 2 + 2][id_y * 2 + 2];
@@ -898,7 +918,6 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
         new_elem->set_node(5) = nodes[id_x * 2 + 2][id_y * 2 + 1];
         new_elem->set_node(6) = nodes[id_x * 2 + 1][id_y * 2 + 2];
         new_elem->set_node(7) = nodes[id_x * 2][id_y * 2 + 1];
-        new_elem->set_node(8) = nodes[id_x * 2 + 1][id_y * 2 + 1];
         new_elem->subdomain_id() = 1 + block_id_shift;
       }
       Elem * elem_Quad = mesh.add_elem(std::move(new_elem));
@@ -917,7 +936,7 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
   for (unsigned int i = (div_num - 1) * (div_num - 1); i < div_num * div_num - 1; i++)
   {
     std::unique_ptr<Elem> new_elem;
-    if (order == 1)
+    if (quad_elem_type == QUAD_ELEM_TYPE::QUAD4)
     {
       new_elem = std::make_unique<Quad4>();
       new_elem->set_node(0) = mesh.node_ptr(i);
@@ -925,9 +944,16 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
       new_elem->set_node(2) = mesh.node_ptr(i + 2 * div_num);
       new_elem->set_node(1) = mesh.node_ptr(i + 1);
     }
-    else // 2
+    else // QUAD8/QUAD9
     {
-      new_elem = std::make_unique<Quad9>();
+      new_elem = std::make_unique<Quad8>();
+      if (quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
+      {
+        new_elem = std::make_unique<Quad9>();
+        new_elem->set_node(8) =
+            mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                          (i - (div_num - 1) * (div_num - 1)) * 2 + 1 + ((div_num - 1) * 4 + 1));
+      }
       new_elem->set_node(0) = mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
                                             (i - (div_num - 1) * (div_num - 1)) * 2);
       new_elem->set_node(3) =
@@ -949,9 +975,6 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
       new_elem->set_node(7) =
           mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
                         (i - (div_num - 1) * (div_num - 1)) * 2 + ((div_num - 1) * 4 + 1));
-      new_elem->set_node(8) =
-          mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                        (i - (div_num - 1) * (div_num - 1)) * 2 + 1 + ((div_num - 1) * 4 + 1));
     }
 
     Elem * elem_Quad = mesh.add_elem(std::move(new_elem));
@@ -984,8 +1007,9 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
                                         const bool assign_external_boundary,
                                         const unsigned int side_index,
                                         const bool generate_side_specific_boundaries,
-                                        const unsigned int order) const
+                                        const TRI_ELEM_TYPE tri_elem_type) const
 {
+  const unsigned short order = tri_elem_type == TRI_ELEM_TYPE::TRI3 ? 1 : 2;
   unsigned int angle_number = azimuthal_tangent.size() == 0
                                   ? num_sectors_per_side
                                   : ((azimuthal_tangent.size() - 1) / order);
@@ -994,23 +1018,27 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
   for (unsigned int i = 1; i <= angle_number; i++)
   {
     std::unique_ptr<Elem> new_elem;
-    if (order == 1)
+    if (tri_elem_type == TRI_ELEM_TYPE::TRI3)
     {
       new_elem = std::make_unique<Tri3>();
       new_elem->set_node(0) = mesh.node_ptr(0);
       new_elem->set_node(2) = mesh.node_ptr(i);
       new_elem->set_node(1) = mesh.node_ptr(i + 1);
     }
-    else // 2
+    else // TRI6/TRI7
     {
-      new_elem = std::make_unique<Tri7>();
+      new_elem = std::make_unique<Tri6>();
+      if (tri_elem_type == TRI_ELEM_TYPE::TRI7)
+      {
+        new_elem = std::make_unique<Tri7>();
+        new_elem->set_node(6) = mesh.node_ptr(i * 2);
+      }
       new_elem->set_node(0) = mesh.node_ptr(0);
       new_elem->set_node(2) = mesh.node_ptr(i * 2 + angle_number * order);
       new_elem->set_node(1) = mesh.node_ptr((i + 1) * 2 + angle_number * order);
       new_elem->set_node(3) = mesh.node_ptr(i * 2 + 1);
       new_elem->set_node(5) = mesh.node_ptr(i * 2 - 1);
       new_elem->set_node(4) = mesh.node_ptr(i * 2 + 1 + angle_number * order);
-      new_elem->set_node(6) = mesh.node_ptr(i * 2);
     }
 
     Elem * elem = mesh.add_elem(std::move(new_elem));
@@ -1045,8 +1073,9 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
                                       const bool create_outward_interface_boundaries,
                                       const boundary_id_type boundary_id_shift,
                                       const bool generate_side_specific_boundaries,
-                                      const unsigned int order) const
+                                      const QUAD_ELEM_TYPE quad_elem_type) const
 {
+  const unsigned short order = quad_elem_type == QUAD_ELEM_TYPE::QUAD4 ? 1 : 2;
   unsigned int angle_number = azimuthal_tangent.size() == 0
                                   ? num_sectors_per_side
                                   : ((azimuthal_tangent.size() - 1) / order);
@@ -1060,7 +1089,7 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
       for (unsigned int i = 1; i <= angle_number; i++)
       {
         std::unique_ptr<Elem> new_elem;
-        if (order == 1)
+        if (quad_elem_type == QUAD_ELEM_TYPE::QUAD4)
         {
           new_elem = std::make_unique<Quad4>();
           new_elem->set_node(0) = mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * j);
@@ -1069,9 +1098,15 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
               mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1) + 1);
           new_elem->set_node(3) = mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1));
         }
-        else // 2
+        else // QUAD8/QUAD9
         {
-          new_elem = std::make_unique<Quad9>();
+          new_elem = std::make_unique<Quad8>();
+          if (quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
+          {
+            new_elem = std::make_unique<Quad9>();
+            new_elem->set_node(8) =
+                mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 2));
+          }
           new_elem->set_node(0) =
               mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 1));
           new_elem->set_node(1) =
@@ -1088,8 +1123,6 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
               mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 3));
           new_elem->set_node(7) =
               mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 2));
-          new_elem->set_node(8) =
-              mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 2));
         }
         Elem * elem = mesh.add_elem(std::move(new_elem));
         if (i == 1)

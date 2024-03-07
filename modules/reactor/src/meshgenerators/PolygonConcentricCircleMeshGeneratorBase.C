@@ -129,9 +129,6 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       false,
       "Whether to rotate the generated polygon mesh to ensure that one flat side faces up.");
 
-  params.addRangeCheckedParam<unsigned short>(
-      "order", 1, "order>=1 & order<=2", "The order of the elements to be generated.");
-
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names",
       "Customized Subdomain/Boundary");
@@ -242,7 +239,6 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _sides_to_adapt(isParamValid("sides_to_adapt")
                         ? getParam<std::vector<unsigned int>>("sides_to_adapt")
                         : std::vector<unsigned int>()),
-    _order(getParam<unsigned short>("order")),
     _node_id_background_meta(declareMeshProperty<dof_id_type>("node_id_background_meta", 0)),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
 {
@@ -251,6 +247,31 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   declareMeshProperty<Real>("pattern_pitch_meta", 0.0);
   declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>());
   declareMeshProperty<Real>("max_radius_meta", 0.0);
+
+  const unsigned short tri_order = _tri_elem_type == TRI_ELEM_TYPE::TRI3 ? 1 : 2;
+  const unsigned short quad_order = _quad_elem_type == QUAD_ELEM_TYPE::QUAD4 ? 1 : 2;
+  // 1. If the central elements are quad, then no triangular elements are generated;
+  // 2. If the generated mesh has only one radial layer of triangular elements, then no
+  // quad elements are generated; (For PCCMG, that layer must be background)
+  // 3. Otherwise, both types of elements are generated.
+  _order = quad_order;
+  if (_quad_center_elements)
+  {
+    if (tri_order != quad_order)
+      _tri_elem_type = quad_order == 1 ? TRI_ELEM_TYPE::TRI3 : TRI_ELEM_TYPE::TRI7;
+  }
+  else if (_ring_radii.empty() && _background_intervals == 1 &&
+           _background_inner_boundary_layer_params.intervals == 0 &&
+           _background_outer_boundary_layer_params.intervals == 0 && _duct_sizes.empty())
+  {
+    _order = tri_order;
+    if (tri_order != quad_order)
+      _quad_elem_type = tri_order == 1 ? QUAD_ELEM_TYPE::QUAD4 : QUAD_ELEM_TYPE::QUAD9;
+  }
+  else if (tri_order != quad_order)
+    paramError("tri_element_type",
+               "the element types of triangular and quadrilateral elements must be compatible if "
+               "both types of elements are generated.");
 
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
@@ -356,9 +377,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_inner_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _ring_inner_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "ring_inner_boundary_layer_intervals",
-            "Ring inner boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("ring_inner_boundary_layer_intervals",
+                   "Ring inner boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
     for (unsigned int i = 0; i < _ring_outer_boundary_layer_params.fractions.size(); i++)
     {
       if (MooseUtils::absoluteFuzzyEqual(_ring_outer_boundary_layer_params.fractions[i], 0.0) &&
@@ -368,9 +389,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_outer_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _ring_outer_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "ring_outer_boundary_layer_intervals",
-            "Ring outer boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("ring_outer_boundary_layer_intervals",
+                   "Ring outer boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
       if (_ring_inner_boundary_layer_params.fractions[i] +
               _ring_outer_boundary_layer_params.fractions[i] >=
           1.0)
@@ -441,9 +462,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_inner_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _duct_inner_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "duct_inner_boundary_layer_intervals",
-            "Duct inner boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("duct_inner_boundary_layer_intervals",
+                   "Duct inner boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
     for (unsigned int i = 0; i < _duct_outer_boundary_layer_params.fractions.size(); i++)
     {
       if (MooseUtils::absoluteFuzzyEqual(_duct_outer_boundary_layer_params.fractions[i], 0.0) &&
@@ -453,9 +474,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_outer_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _duct_outer_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "duct_outer_boundary_layer_intervals",
-            "Duct outer boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("duct_outer_boundary_layer_intervals",
+                   "Duct outer boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
       if (_duct_inner_boundary_layer_params.fractions[i] +
               _duct_outer_boundary_layer_params.fractions[i] >=
           1.0)
@@ -513,7 +534,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
     if ((_order == 1 && (*input[i]->elements_begin())->default_order() != FIRST) ||
         (_order == 2 && (*input[i]->elements_begin())->default_order() == FIRST))
-      paramError("order",
+      paramError("tri_element_type",
                  "the order of the input mesh to be adapted to does not match the order of the "
                  "mesh to be generated.");
   }
@@ -613,7 +634,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _create_outward_interface_boundaries,
                                 _interface_boundary_id_shift,
                                 _generate_side_specific_boundaries,
-                                _order);
+                                _tri_elem_type,
+                                _quad_elem_type);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
@@ -644,7 +666,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _create_outward_interface_boundaries,
                                      _interface_boundary_id_shift,
                                      _generate_side_specific_boundaries,
-                                     _order);
+                                     _tri_elem_type,
+                                     _quad_elem_type);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);
