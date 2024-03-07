@@ -9,7 +9,10 @@
 
 #include "CauchyStressFromNEML2UO.h"
 #include "NEML2Utils.h"
+
+#ifdef NEML2_ENABLED
 #include "neml2/misc/math.h"
+#endif
 
 registerMooseObject("SolidMechanicsApp", CauchyStressFromNEML2UO);
 
