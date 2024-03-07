@@ -97,7 +97,7 @@ done
 
 make
 # damn... again I have to disable this. (openmpi strange missing libraries error)
-if [[ $mpi == "mpich" ]]; then
+if [[ $mpi == "mpich" ]] && [[ $(uname) == Linux ]]; then
   make check
 fi
 make install
