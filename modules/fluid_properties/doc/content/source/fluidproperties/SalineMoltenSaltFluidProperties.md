@@ -16,7 +16,7 @@ Saline must be installed alongside MOOSE using the `contrib/saline` submodule in
 module to be able to use this fluid property object. To initialize/download the saline submodule:
 
 ```bash
-git submodule update --init contrib/saline
+git submodule update --init --checkout modules/fluid_properties/contrib/saline
 ```
 
 !alert-end!
