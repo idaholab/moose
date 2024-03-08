@@ -23,3 +23,27 @@
     path = modules/solid_mechanics/contrib/neml2
     url = https://github.com/reverendbedford/neml2.git
     update = none
+[submodule "modules/fluid_properties/contrib/sodium"]
+	path = modules/fluid_properties/contrib/sodium
+	url = https://github.com/idaholab/sodium.git
+    update = none
+[submodule "modules/fluid_properties/contrib/potassium"]
+	path = modules/fluid_properties/contrib/potassium
+	url = https://github.com/idaholab/potassium.git
+    update = none
+[submodule "modules/fluid_properties/contrib/nitrogen"]
+	path = modules/fluid_properties/contrib/nitrogen
+	url = https://github.com/idaholab/nitrogen.git
+    update = none
+[submodule "modules/fluid_properties/contrib/helium"]
+	path = modules/fluid_properties/contrib/helium
+	url = https://github.com/idaholab/helium.git
+    update = none
+[submodule "modules/fluid_properties/contrib/air"]
+	path = modules/fluid_properties/contrib/air
+	url = https://github.com/idaholab/air.git
+    update = none
+[submodule "modules/fluid_properties/contrib/carbon_dioxide"]
+	path = modules/fluid_properties/contrib/carbon_dioxide
+	url = https://github.com/idaholab/carbon_dioxide.git
+    update = none
