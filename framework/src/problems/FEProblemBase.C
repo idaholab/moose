@@ -118,6 +118,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/enum_norm_type.h"
+#include "libmesh/petsc_solver_exception.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -6449,6 +6450,20 @@ FEProblemBase::handleException(const std::string & calling_method)
   catch (const MetaPhysicL::LogicError & e)
   {
     moose::translateMetaPhysicLError(e);
+  }
+  catch (const libMesh::PetscSolverException & e)
+  {
+    // One PETSc solver exception that we cannot currently recover from are new nonzero errors. In
+    // particular I have observed the following scenario in a parallel test:
+    // - Both processes throw because of a new nonzero during MOOSE's computeJacobianTags
+    // - We potentially handle the exceptions nicely here
+    // - When the matrix is closed in libMesh's libmesh_petsc_snes_solver, there is a new nonzero
+    //   throw which we do not catch here in MOOSE and the simulation terminates. This only appears
+    //   in parallel (and not all the time; a test I was examining threw with distributed mesh, but
+    //   not with replicated). In serial there are no new throws from libmesh_petsc_snes_solver.
+    // So for uniformity of behavior across serial/parallel, we will choose to abort here and always
+    // produce a non-zero exit code
+    mooseError(create_exception_message("libMesh::PetscSolverException", e));
   }
   catch (const std::exception & e)
   {
