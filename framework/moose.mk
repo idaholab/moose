@@ -92,6 +92,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
     # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
+		libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/c10
 
     # Dynamically linking with the available pytorch library
     libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib
