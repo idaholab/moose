@@ -24,7 +24,7 @@
     scaling = 10
   []
   [lam_T]
-    nl_sys = adjoint
+    solver_sys = adjoint
     scaling = 1e3
   []
 []

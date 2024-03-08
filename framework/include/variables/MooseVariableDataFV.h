@@ -55,6 +55,17 @@ initDofIndices(T & data, const Elem & elem)
 }
 }
 
+namespace
+{
+template <typename T, typename T2>
+void
+assignForAllQps(const T & value, T2 & array, const unsigned int nqp)
+{
+  for (const auto qp : make_range(nqp))
+    array[qp] = value;
+}
+}
+
 template <typename OutputType>
 class MooseVariableDataFV : public MooseVariableDataBase<OutputType>, public MeshChangedInterface
 {

@@ -213,7 +213,7 @@
       type = RunApp
       input = 'show_execution_linear_fv_flux.i'
       cli_args = '--color off'
-      expect_out = '\[DBG\] diffusion_1 diffusion_2'
+      expect_out = '\[DBG\] (diffusion_1|diffusion_2) (diffusion_2|diffusion_1)'
       detail = 'linear finite volume flux kernels,'
       # in parallel, no guarantee block 1 is present on rank 0
       max_parallel = 1

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableDataLinearFV.h"
+#include "MooseVariableDataFV.h"
 #include "MooseVariableField.h"
 #include "Assembly.h"
 #include "MooseError.h"

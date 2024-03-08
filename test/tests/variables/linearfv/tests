@@ -6,6 +6,7 @@
     input = 'diffusion-1d-pp.i'
     csvdiff = "diffusion-1d-pp_csv.csv diffusion-1d-pp_vpp_csv_line-sample_0001.csv"
     requirement = 'The system shall be able to evaluate linear finite volume variables with basic postprocessors.'
+    mesh_mode = REPLICATED # Node numbering needs to be disabled for ElementVariableValue
   []
   [basic_aux]
     type = Exodiff

@@ -254,7 +254,7 @@ template <typename OutputType>
 const Elem * const &
 MooseLinearVariableFV<OutputType>::currentElem() const
 {
-  return _assembly.elem();
+  return this->_assembly.elem();
 }
 
 // ****************************************************************************

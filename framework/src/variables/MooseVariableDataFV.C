@@ -265,17 +265,6 @@ MooseVariableDataFV<OutputType>::curlSln(Moose::SolutionState state) const
   }
 }
 
-namespace
-{
-template <typename T, typename T2>
-void
-assignForAllQps(const T & value, T2 & array, const unsigned int nqp)
-{
-  for (const auto qp : make_range(nqp))
-    array[qp] = value;
-}
-}
-
 template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::initializeSolnVars()
