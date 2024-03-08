@@ -75,6 +75,7 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = nucleation_threshold
     initiate_on_boundary = 'left right'
+    # crack_length_scale = 0.497
     nucleation_length = .2
   []
   [cut_mesh2]
