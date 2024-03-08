@@ -56,7 +56,7 @@ public:
     std::set<std::string> declarers;
     /// The type of this property
     std::string type;
-    /// The stateful id in _stroage used for this property, if any
+    /// The stateful id in _storage used for this property, if any
     unsigned int stateful_id = invalid_uint;
     /// The max state requrested for this property (0 = current, 1 = old, ...)
     unsigned int state = 0;
