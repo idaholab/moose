@@ -291,6 +291,12 @@ FEProblemBase::validParams()
       true,
       "Whether to identify variable groups in nonlinear systems. This affects dof ordering");
 
+  params.addParam<bool>(
+      "regard_general_exceptions_as_errors",
+      false,
+      "If we catch an exception during residual/Jacobian evaluaton for which we don't have "
+      "specific handling, immediately error instead of allowing the time step to be cut");
+
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
       "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
@@ -413,7 +419,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_mortar(false),
     _num_grid_steps(0),
     _print_execution_on(),
-    _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl"))
+    _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl")),
+    _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors"))
 {
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
@@ -6445,7 +6452,11 @@ FEProblemBase::handleException(const std::string & calling_method)
   }
   catch (const std::exception & e)
   {
-    setException(create_exception_message("std::exception", e));
+    const auto message = create_exception_message("std::exception", e);
+    if (_regard_general_exceptions_as_errors)
+      mooseError(message);
+    else
+      setException(message);
   }
 
   checkExceptionAndStopSolve();

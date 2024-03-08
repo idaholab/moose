@@ -2629,6 +2629,10 @@ private:
 
   /// Whether we are performing some calculations with finite volume discretizations
   bool _have_fv = false;
+
+  /// If we catch an exception during residual/Jacobian evaluaton for which we don't have specific
+  /// handling, immediately error instead of allowing the time step to be cut
+  const bool _regard_general_exceptions_as_errors;
 };
 
 using FVProblemBase = FEProblemBase;
