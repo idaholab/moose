@@ -9,11 +9,12 @@
 
 #include "MeshCut2DRankTwoTensorNucleation.h"
 
+#include "MooseError.h"
+#include "MooseTypes.h"
 #include "libmesh/quadrature.h"
 #include "RankTwoTensor.h"
 #include "RankTwoScalarTools.h"
 #include "Assembly.h"
-#include <limits>
 
 registerMooseObject("XFEMApp", MeshCut2DRankTwoTensorNucleation);
 
@@ -23,6 +24,16 @@ MeshCut2DRankTwoTensorNucleation::validParams()
   InputParameters params = MeshCut2DNucleationBase::validParams();
   params.addClassDescription(
       "Nucleate a crack in MeshCut2D UO based on a scalar extracted from a RankTwoTensor");
+  params.addRangeCheckedParam<Real>(
+      "crack_length_scale",
+      1e-5,
+      "crack_length_scale >= 0",
+      "Crack length scaling factor to extend the nucleated crack beyond the cut element edges.");
+  params.addRangeCheckedParam<Real>("nucleation_length",
+                                    0,
+                                    "nucleation_length >= 0",
+                                    "Size of crack to Nucleate.  If less than element size, "
+                                    "nucleated crack bisects one element.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -31,7 +42,6 @@ MeshCut2DRankTwoTensorNucleation::validParams()
   params.addRequiredCoupledVar(
       "nucleation_threshold",
       "Threshold for the scalar quantity of the RankTwoTensor to nucleate new cracks");
-  params.addRequiredParam<Real>("nucleation_length", "Nucleated crack length.");
   params.addParam<Point>(
       "point1",
       Point(0, 0, 0),
@@ -46,12 +56,13 @@ MeshCut2DRankTwoTensorNucleation::validParams()
 MeshCut2DRankTwoTensorNucleation::MeshCut2DRankTwoTensorNucleation(
     const InputParameters & parameters)
   : MeshCut2DNucleationBase(parameters),
+    _crack_length_scale(getParam<Real>("crack_length_scale")),
+    _nucleation_length(getParam<Real>("nucleation_length")),
     _tensor(getMaterialProperty<RankTwoTensor>(getParam<std::string>("tensor"))),
     _nucleation_threshold(coupledValue("nucleation_threshold")),
     _scalar_type(getParam<MooseEnum>("scalar_type")),
     _point1(parameters.get<Point>("point1")),
     _point2(parameters.get<Point>("point2")),
-    _nucleation_length(getParam<Real>("nucleation_length")),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation())
 {
@@ -84,13 +95,120 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
 
   if (tensor_quantity > average_threshold)
   {
-    const Point elem_center(_current_elem->vertex_average());
     does_it_crack = true;
+
+    const Point elem_center(_current_elem->vertex_average());
     Point crack_dir = point_dir.cross(Point(0, 0, 1));
-    RealVectorValue point_0 = elem_center - _nucleation_length / 2.0 * crack_dir.unit();
-    RealVectorValue point_1 = elem_center + _nucleation_length / 2.0 * crack_dir.unit();
+
+    // get max element length to use for ray length
+    std::unique_ptr<const Elem> edge;
+    Real circumference = 0;
+    for (const auto e : _current_elem->edge_index_range())
+    {
+      _current_elem->build_edge_ptr(edge, e);
+      circumference += edge->length(0, 1);
+    }
+
+    // Temproraries for doing things below
+    Real intersection_distance;
+
+    Point point_0;
+    Point point_1;
+    bool is_point_0_on_external_boundary = false;
+    bool is_point_1_on_external_boundary = false;
+    for (const auto e : _current_elem->edge_index_range())
+    {
+      _current_elem->build_edge_ptr(edge, e);
+      const auto & edge0 = edge->point(0);
+      const auto & edge1 = edge->point(1);
+      if (lineLineIntersect2D(
+              elem_center, -crack_dir, circumference, edge0, edge1, point_0, intersection_distance))
+      {
+        is_point_0_on_external_boundary = (_current_elem->neighbor_ptr(e) == nullptr);
+      }
+      else if (lineLineIntersect2D(elem_center,
+                                   crack_dir,
+                                   circumference,
+                                   edge0,
+                                   edge1,
+                                   point_1,
+                                   intersection_distance))
+      {
+        is_point_1_on_external_boundary = (_current_elem->neighbor_ptr(e) == nullptr);
+      }
+    }
+
+    Real bisect_length = (point_0 - point_1).norm();
+    Real extend_length = (bisect_length * _crack_length_scale) / 2.0;
+    if (_nucleation_length > bisect_length)
+      extend_length = (_nucleation_length - bisect_length) / 2.0;
+
+    if (is_point_0_on_external_boundary && is_point_1_on_external_boundary)
+    {
+      point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
+      point_1 = point_1 + (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
+      std::cout << "****** case 1,   point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
+    }
+    else if (is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
+    {
+      point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
+      point_1 = point_1 + extend_length * crack_dir.unit();
+      std::cout << "****** case 2,   point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
+    }
+    else if (is_point_1_on_external_boundary && !is_point_0_on_external_boundary)
+    {
+      point_0 = point_0 - extend_length * crack_dir.unit();
+      point_1 = point_1 + (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
+      std::cout << "****** case 3,  point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
+    }
+    else if (!is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
+    {
+      point_0 = point_0 - extend_length * crack_dir.unit();
+      point_1 = point_1 + extend_length * crack_dir.unit();
+      std::cout << "****** case 4,   point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
+    }
+    else
+    {
+      mooseError("Nucleated cutter element is intersecting mesh element in an unexepected way.");
+    }
     cutterElemNodes = {point_0, point_1};
   }
 
   return does_it_crack;
+}
+
+bool
+MeshCut2DRankTwoTensorNucleation::lineLineIntersect2D(const Point & start,
+                                                      const Point & direction,
+                                                      const Real length,
+                                                      const Point & v0,
+                                                      const Point & v1,
+                                                      Point & intersection_point,
+                                                      Real & intersection_distance)
+{
+  const auto r = direction * length;
+  const auto s = v1 - v0;
+  const auto rxs = r(0) * s(1) - r(1) * s(0);
+
+  // Lines are parallel or colinear
+  if (std::abs(rxs) < TRACE_TOLERANCE)
+    return false;
+
+  const auto v0mu0 = v0 - start;
+  const auto t = (v0mu0(0) * s(1) - v0mu0(1) * s(0)) / rxs;
+  if (0 >= t + TRACE_TOLERANCE || t - TRACE_TOLERANCE > 1.0)
+  {
+    return false;
+  }
+
+  const auto u = (v0mu0(0) * r(1) - v0mu0(1) * r(0)) / rxs;
+  if (0 < u + TRACE_TOLERANCE && u - TRACE_TOLERANCE <= 1.0)
+  {
+    intersection_point = start + r * t;
+    intersection_distance = t * length;
+    return true;
+  }
+
+  // Not parallel, but don't intersect
+  return false;
 }

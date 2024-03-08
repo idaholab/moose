@@ -21,6 +21,12 @@ public:
   virtual ~MeshCut2DRankTwoTensorNucleation() {}
 
 protected:
+  /// scaling factor to extend the nucleated crack beyond the element edges.
+  const Real _crack_length_scale;
+
+  /// size of crack to nucleate, if unset, the nucleated crack is the length of one mesh element
+  const Real _nucleation_length;
+
   /// The tensor from which the scalar quantity used as a nucleating criterion is extracted
   const MaterialProperty<RankTwoTensor> & _tensor;
 
@@ -34,13 +40,22 @@ protected:
   const Point _point1;
   const Point _point2;
 
-  /// Length of crack to be nucleated
-  const Real _nucleation_length;
-
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
   virtual bool
   doesElementCrack(std::pair<RealVectorValue, RealVectorValue> & cutterElemNodes) override;
+
+  // FIXME Lynn Copy from TraceRayTools.C in rayTracing module.  Remove once this function migrates
+  // to libmesh.
+  /// The standard "looser" tolerance to use in ray tracing when having difficulty finding intersection
+  const Real TRACE_TOLERANCE = 1e-5;
+  bool lineLineIntersect2D(const Point & start,
+                           const Point & direction,
+                           const Real length,
+                           const Point & v0,
+                           const Point & v1,
+                           Point & intersection_point,
+                           Real & intersection_distance);
 };

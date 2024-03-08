@@ -52,8 +52,8 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = 180
     initiate_on_boundary = 'left'
-    nucleation_length = .2
     nucleation_radius = .21
+    crack_length_scale = 2e-5
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -141,6 +141,5 @@
 
 [Outputs]
   csv=true
-  exodus=true
   execute_on = TIMESTEP_END
 []
