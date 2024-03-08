@@ -28,19 +28,19 @@ operator<<(std::ostream & os, const Model & model)
   };
 
   os << "Input:" << std::endl;
-  print_axis(os, model.input());
+  print_axis(os, model.input_axis());
 
   os << std::endl;
 
   os << "Output:" << std::endl;
-  print_axis(os, model.output());
+  print_axis(os, model.output_axis());
 
   os << std::endl;
 
   os << "Parameters: " << std::endl;
   VariadicTable<std::string, std::string> table({"Parameter", "Requires grad"});
-  for (auto && [name, value] : model.named_parameters(/*recursive=*/true))
-    table.addRow(name, value.requires_grad() ? "True" : "False");
+  for (auto && [name, param] : model.named_parameters())
+    table.addRow(name, BatchTensor(param).requires_grad() ? "True" : "False");
   table.print(os);
 
   return os;
@@ -58,7 +58,7 @@ template <>
 neml2::BatchTensor
 toNEML2(const Real & v)
 {
-  return neml2::Scalar(v, neml2::default_tensor_options);
+  return neml2::Scalar(v, neml2::default_tensor_options());
 }
 
 // FIXME: This is an unfortunately specialization because the models I included for testing use
@@ -82,7 +82,7 @@ template <>
 neml2::BatchTensor
 toNEML2(const std::vector<Real> & v)
 {
-  return neml2::BatchTensor(torch::tensor(v, neml2::default_tensor_options), 0);
+  return neml2::BatchTensor(torch::tensor(v, neml2::default_tensor_options()), 0);
 }
 
 template <>

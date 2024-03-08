@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#23587'
+  design = 'HexagonalGridPositions.md'
+
+  [test]
+    requirement = "The system shall be able to compute positions from"
+    [hex_centroids]
+      type = 'JSONDiff'
+      input = 'hexagonal_grid_positions.i'
+      jsondiff = 'hexagonal_grid_positions_out.json'
+      detail = 'a regular hexagonal grid,'
+    []
+    [hex_pattern_2rings]
+      type = 'JSONDiff'
+      input = 'hexagonal_grid_positions.i'
+      jsondiff = 'hexagonal_grid_positions_2r_out.json'
+      cli_args = 'Positions/active=hex_grid_2rings_exclusions Outputs/file_base=hexagonal_grid_positions_2r_out'
+      detail = 'a two-ring hexagonal grid with some positions excluded,'
+    []
+    [hex_pattern_3rings]
+      type = 'JSONDiff'
+      input = 'hexagonal_grid_positions.i'
+      jsondiff = 'hexagonal_grid_positions_3r_out.json'
+      cli_args = 'Positions/active=hex_grid_3rings_exclusions Outputs/file_base=hexagonal_grid_positions_3r_out'
+      detail = 'a three-ring hexagonal grid with some positions excluded,'
+    []
+    [cartesian_centroids]
+      type = 'JSONDiff'
+      input = 'cartesian_grid_positions.i'
+      jsondiff = 'cartesian_grid_positions_out.json'
+      detail = 'a regular cartesian grid,'
+    []
+    [cartesian_pattern_2d_pattern]
+      type = 'JSONDiff'
+      input = 'cartesian_grid_positions.i'
+      jsondiff = 'cartesian_grid_positions_2d_out.json'
+      cli_args = 'Positions/active=cart_grid_exclusions_2D Outputs/file_base=cartesian_grid_positions_2d_out'
+      detail = 'a two-dimensional cartesian grid with some positions excluded, and'
+    []
+    [cartesian_pattern_3d_pattern]
+      type = 'JSONDiff'
+      input = 'cartesian_grid_positions.i'
+      jsondiff = 'cartesian_grid_positions_3d_out.json'
+      cli_args = 'Positions/active=cart_grid_exclusions_2D Outputs/file_base=cartesian_grid_positions_3d_out'
+      detail = 'a three-dimensional cartesian grid with some positions excluded.'
+    []
+  []
+[]

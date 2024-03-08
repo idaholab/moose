@@ -59,4 +59,19 @@
       detail = 'and one or more multiapp mesh centroids.'
     []
   []
+  [operations]
+    requirement = 'The system shall be able to perform'
+    [transform]
+      type = JSONDiff
+      input = 'transformed_positions.i'
+      jsondiff = transformed_positions_out.json
+      detail = 'simple linear operations such as scaling, translation and rotation to positions, and'
+    []
+    [distribution]
+      type = JSONDiff
+      input = 'distributed_positions.i'
+      jsondiff = 'distributed_positions_out.json'
+      detail = 'a distribution, through translations, of positions from one set of positions onto another.'
+    []
+  []
 []
