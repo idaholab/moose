@@ -1869,31 +1869,31 @@ public:
 #endif
 
   /// Set boolean flag to true to store solution time derivative
-  virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; };
+  virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; }
 
   /// Set boolean flag to true to store solution second time derivative
   virtual void setUDotDotRequested(const bool u_dotdot_requested)
   {
     _u_dotdot_requested = u_dotdot_requested;
-  };
+  }
 
   /// Set boolean flag to true to store old solution time derivative
   virtual void setUDotOldRequested(const bool u_dot_old_requested)
   {
     _u_dot_old_requested = u_dot_old_requested;
-  };
+  }
 
   /// Set boolean flag to true to store old solution second time derivative
   virtual void setUDotDotOldRequested(const bool u_dotdot_old_requested)
   {
     _u_dotdot_old_requested = u_dotdot_old_requested;
-  };
+  }
 
   /// Get boolean flag to check whether solution time derivative needs to be stored
-  virtual bool uDotRequested() { return _u_dot_requested; };
+  virtual bool uDotRequested() { return _u_dot_requested; }
 
   /// Get boolean flag to check whether solution second time derivative needs to be stored
-  virtual bool uDotDotRequested() { return _u_dotdot_requested; };
+  virtual bool uDotDotRequested() { return _u_dotdot_requested; }
 
   /// Get boolean flag to check whether old solution time derivative needs to be stored
   virtual bool uDotOldRequested()
@@ -1904,7 +1904,7 @@ public:
                  "true using setUDotRequested.");
 
     return _u_dot_old_requested;
-  };
+  }
 
   /// Get boolean flag to check whether old solution second time derivative needs to be stored
   virtual bool uDotDotOldRequested()
@@ -1914,7 +1914,7 @@ public:
                  "second time derivation of solution should also be stored. Please set "
                  "`u_dotdot_requested` to true using setUDotDotRequested.");
     return _u_dotdot_old_requested;
-  };
+  }
 
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;
@@ -2044,7 +2044,7 @@ public:
   }
 
   /// method returning the number of forced nonlinear iterations
-  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; };
+  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; }
 
   /// method setting the absolute divergence tolerance
   void setNonlinearAbsoluteDivergenceTolerance(const Real nl_abs_div_tol)
@@ -2102,7 +2102,7 @@ public:
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
    */
-  void setExecutionPrinting(const ExecFlagEnum & print_exec) { _print_execution_on = print_exec; };
+  void setExecutionPrinting(const ExecFlagEnum & print_exec) { _print_execution_on = print_exec; }
 
   /**
    * Check whether the problem should output execution orders at this time
