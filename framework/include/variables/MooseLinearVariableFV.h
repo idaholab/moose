@@ -256,8 +256,8 @@ public:
 
   virtual void clearAllDofIndices() override final;
 
-  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final;
-  virtual const FieldVariablePhiValue & phiLower() const override;
+  [[noreturn]] virtual const std::vector<dof_id_type> & dofIndicesLower() const override final;
+  [[noreturn]] virtual const FieldVariablePhiValue & phiLower() const override;
 
   // Overriding these to make sure nothing happens during residual/jacobian setup.
   // The only time this can actually happen is when residual setup is called on the auxiliary
@@ -269,7 +269,7 @@ public:
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
-  virtual const DoFValue & nodalVectorTagValue(TagID) const override;
+  [[noreturn]] virtual const DoFValue & nodalVectorTagValue(TagID) const override;
 
   virtual const std::vector<dof_id_type> & dofIndices() const final;
   virtual const std::vector<dof_id_type> & dofIndicesNeighbor() const final;
@@ -303,22 +303,22 @@ public:
 
   virtual void setActiveTags(const std::set<TagID> & vtags) override;
 
-  virtual const MooseArray<OutputType> & nodalValueArray() const override;
-  virtual const MooseArray<OutputType> & nodalValueOldArray() const override;
-  virtual const MooseArray<OutputType> & nodalValueOlderArray() const override;
+  [[noreturn]] virtual const MooseArray<OutputType> & nodalValueArray() const override;
+  [[noreturn]] virtual const MooseArray<OutputType> & nodalValueOldArray() const override;
+  [[noreturn]] virtual const MooseArray<OutputType> & nodalValueOlderArray() const override;
 
   virtual const FieldVariablePhiValue & phi() const override final { return _phi; }
   virtual const FieldVariablePhiGradient & gradPhi() const override final { return _grad_phi; }
-  virtual const FieldVariablePhiSecond & secondPhi() const override final;
-  const FieldVariablePhiValue & curlPhi() const override final;
-  const FieldVariablePhiDivergence & divPhi() const override final;
+  [[noreturn]] virtual const FieldVariablePhiSecond & secondPhi() const override final;
+  [[noreturn]] const FieldVariablePhiValue & curlPhi() const override final;
+  [[noreturn]] const FieldVariablePhiDivergence & divPhi() const override final;
 
   virtual const FieldVariablePhiValue & phiFace() const override final { return _phi_face; }
   virtual const FieldVariablePhiGradient & gradPhiFace() const override final
   {
     return _grad_phi_face;
   }
-  virtual const FieldVariablePhiSecond & secondPhiFace() const override final;
+  [[noreturn]] virtual const FieldVariablePhiSecond & secondPhiFace() const override final;
 
   virtual const FieldVariablePhiValue & phiFaceNeighbor() const override final
   {
@@ -328,18 +328,18 @@ public:
   {
     return _grad_phi_face_neighbor;
   }
-  virtual const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
+  [[noreturn]] virtual const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
 
   virtual const FieldVariablePhiValue & phiNeighbor() const override final { return _phi_neighbor; }
   virtual const FieldVariablePhiGradient & gradPhiNeighbor() const override final
   {
     return _grad_phi_neighbor;
   }
-  virtual const FieldVariablePhiSecond & secondPhiNeighbor() const override final;
+  [[noreturn]] virtual const FieldVariablePhiSecond & secondPhiNeighbor() const override final;
 
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const override;
   virtual const DoFValue & vectorTagDofValue(TagID tag) const override;
-  virtual const DoFValue & nodalMatrixTagValue(TagID tag) const override;
+  [[noreturn]] virtual const DoFValue & nodalMatrixTagValue(TagID tag) const override;
   virtual const FieldVariableValue & matrixTagValue(TagID tag) const override;
 
   virtual const FieldVariableValue & sln() const override;
@@ -352,18 +352,22 @@ public:
   virtual const FieldVariableGradient & gradSlnNeighbor() const override;
   virtual const FieldVariableGradient & gradSlnOldNeighbor() const override;
 
-  virtual const ADTemplateVariableSecond<OutputType> & adSecondSln() const override;
-  virtual const ADTemplateVariableValue<OutputType> & adUDot() const override;
-  virtual const ADTemplateVariableValue<OutputType> & adUDotDot() const override;
-  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const override;
-  virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override;
-  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override;
-  virtual const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override;
-  virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override;
-  virtual const ADTemplateVariableValue<OutputType> & adUDotDotNeighbor() const override;
-  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const override;
-  virtual const ADTemplateVariableValue<OutputType> & adSln() const override;
-  virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableSecond<OutputType> & adSecondSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adUDot() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adUDotDot() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
+  adGradSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableSecond<OutputType> &
+  adSecondSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> &
+  adUDotDotNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
+  adGradSlnNeighborDot() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const override;
 
   virtual const DoFValue & dofValues() const override;
   virtual const DoFValue & dofValuesOld() const override;
@@ -374,23 +378,23 @@ public:
   virtual const DoFValue & dofValuesOldNeighbor() const override;
   virtual const DoFValue & dofValuesOlderNeighbor() const override;
   virtual const DoFValue & dofValuesPreviousNLNeighbor() const override;
-  virtual const DoFValue & dofValuesDot() const override;
-  virtual const DoFValue & dofValuesDotNeighbor() const override;
-  virtual const DoFValue & dofValuesDotOld() const override;
-  virtual const DoFValue & dofValuesDotOldNeighbor() const override;
-  virtual const DoFValue & dofValuesDotDot() const override;
-  virtual const DoFValue & dofValuesDotDotNeighbor() const override;
-  virtual const DoFValue & dofValuesDotDotOld() const override;
-  virtual const DoFValue & dofValuesDotDotOldNeighbor() const override;
-  virtual const MooseArray<Number> & dofValuesDuDotDu() const override;
-  virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
-  virtual const MooseArray<Number> & dofValuesDuDotDotDu() const override;
-  virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDot() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotNeighbor() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotOld() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotOldNeighbor() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotDot() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotDotNeighbor() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotDotOld() const override;
+  [[noreturn]] virtual const DoFValue & dofValuesDotDotOldNeighbor() const override;
+  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDu() const override;
+  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
+  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDotDu() const override;
+  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
 
-  virtual const MooseArray<ADReal> & adDofValues() const override;
-  virtual const MooseArray<ADReal> & adDofValuesNeighbor() const override;
-  virtual const dof_id_type & nodalDofIndex() const override final;
-  virtual const dof_id_type & nodalDofIndexNeighbor() const override final;
+  [[noreturn]] virtual const MooseArray<ADReal> & adDofValues() const override;
+  [[noreturn]] virtual const MooseArray<ADReal> & adDofValuesNeighbor() const override;
+  [[noreturn]] virtual const dof_id_type & nodalDofIndex() const override final;
+  [[noreturn]] virtual const dof_id_type & nodalDofIndexNeighbor() const override final;
 
   virtual std::size_t phiSize() const override final { return _phi.size(); }
   virtual std::size_t phiFaceSize() const override final { return _phi_face.size(); }
@@ -399,7 +403,7 @@ public:
   {
     return _phi_face_neighbor.size();
   }
-  virtual std::size_t phiLowerSize() const override final;
+  [[noreturn]] virtual std::size_t phiLowerSize() const override final;
 };
 
 template <typename OutputType>
