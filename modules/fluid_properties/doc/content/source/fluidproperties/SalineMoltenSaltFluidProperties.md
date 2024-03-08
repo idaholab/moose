@@ -12,11 +12,12 @@ The following properties can be computed:
 - thermal diffusivity
 
 !alert! note
-Saline must be installed alongside MOOSE using the `contrib/saline` submodule in the fluid properties
-module to be able to use this fluid property object. To initialize/download the saline submodule:
+Saline must be installed alongside MOOSE using the `contrib/saline` submodule in the Fluid Properties
+module to be able to use this fluid property object. To initialize/download the Saline submodule:
 
 ```bash
-git submodule update --init contrib/saline
+cd <directory where moose is downloaded>
+git submodule update --init --checkout modules/fluid_properties/contrib/saline
 ```
 
 !alert-end!
