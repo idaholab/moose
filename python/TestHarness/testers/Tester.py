@@ -86,7 +86,7 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
-        params.addParam('capabilities',      [], "A test that only runs if all listed capabilities are supported by the executable")
+        params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed are set")

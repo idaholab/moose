@@ -1152,7 +1152,7 @@ protected:
                                  const std::string & data) const;
   ///@{ register a new capability
   static void addCapability(const std::string & capability,
-                            Moose::Capabilities::CapabilityType value,
+                            CapabilityUtils::Type value,
                             const std::string & doc);
   static void
   addCapability(const std::string & capability, const char * value, const std::string & doc);

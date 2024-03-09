@@ -14,6 +14,7 @@ from collections import OrderedDict
 import json
 import yaml
 import sys
+import pycapabilities
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -626,97 +627,8 @@ def checkCapabilities(supported, test):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
-    from operator import lt, gt, le, ge, ne, eq
-    ops = {
-        '<': lt,
-        '>': gt,
-        '<=': le,
-        '>=': ge,
-        '!=': ne,
-        '==': eq,
-        '=': eq
-    }
-
-    # compare
-    reasons = []
-    all_supported = True
-    for capability in test['capabilities']:
-        negate = False
-        condition = capability
-
-        # split by operator
-        match = re.search(r'(.[^><=!]*)(=|!=|==|>=|<=|<|>)(.+)', capability)
-        if match is not None:
-            capability, op, value = match.groups()
-        else:
-            op, value = None, ''
-        capability = capability.lower()
-        value = value.lower()
-
-        # check for negation
-        if capability[0] == '!':
-            capability = capability[1:]
-            negate = True
-
-        # simple existence check. If the capability is not advertised explicitly
-        # we need to run teh executable to check if dynamic linking may provide it.
-        if not capability in supported:
-            return (True, "Check if '"+capability +"' is provided through dynamic linking.");
-
-        # simple existence non-false check (boolean)
-        if capability in supported:
-            if negate and op is None:
-                all_supported = False
-                reasons.append(capability + ' supported')
-
-            if isinstance(supported[capability], bool) and supported[capability] == negate:
-                all_supported = False
-                if negate:
-                    reasons.append(capability + ' supported')
-                else:
-                    reasons.append(capability + ' not supported')
-                continue
-        else:
-            if not negate:
-                all_supported = False
-                reasons.append(capability + ' not supported')
-                continue
-
-        # if there is no operator we're done here
-        if op is None:
-            continue
-
-        # int comparison
-        if isinstance(supported[capability], int):
-            match = re.search(r'^\d+$', value)
-            if match is None:
-                raise Exception("Expected integer value in '%s'." % condition)
-            if ops[op](supported[capability], int(value)) == negate:
-                all_supported = False
-                reasons.append(condition + ' not fulfilled')
-
-        # string comparison
-        if isinstance(supported[capability], str):
-            if value == '':
-                raise Exception("Empty value in condition '%s'." % condition)
-            # check for version number
-            match1 = re.search(r'^(\d+|\d[\d.]*\d)$', supported[capability])
-            match2 = re.search(r'^(\d+|\d[\d.]*\d)$', value)
-            if match1 and match2:
-                # version number comparison logic
-                values1 = [int(i) for i in supported[capability].split('.')]
-                values2 = [int(i) for i in value.split('.')]
-                if ops[op](values1, values2) == negate:
-                    all_supported = False
-                    reasons.append(condition + ' version not matched')
-            else:
-                # simple string comparison
-                if ops[op](supported[capability], value) == negate:
-                    all_supported = False
-                    reasons.append(condition + ' not fulfilled')
-
-    return (all_supported, ', '.join(reasons))
-
+    [status, message, doc] = pycapabilities.check(test['capabilities'], supported)
+    return (status == pycapabilities.CERTAIN_PASS, message)
 
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])

@@ -28,7 +28,9 @@ Capabilities::getCapabilityRegistry()
 }
 
 void
-Capabilities::add(const std::string & raw_capability, CapabilityType value, const std::string & doc)
+Capabilities::add(const std::string & raw_capability,
+                  CapabilityUtils::Type value,
+                  const std::string & doc)
 {
   const auto capability = MooseUtils::toLower(raw_capability);
   if (std::holds_alternative<std::string>(value))
@@ -61,160 +63,25 @@ Capabilities::dump() const
   for (const auto & [capability, value_doc] : _capability_registry)
   {
     const auto & value = value_doc.first;
+    const auto & doc = value_doc.second;
     if (std::holds_alternative<bool>(value))
-      root[capability] = std::get<bool>(value);
+      root[capability] = {std::get<bool>(value), doc};
     else if (std::holds_alternative<int>(value))
-      root[capability] = std::get<int>(value);
+      root[capability] = {std::get<int>(value), doc};
     else if (std::holds_alternative<std::string>(value))
-      root[capability] = std::get<std::string>(value);
+      root[capability] = {std::get<std::string>(value), doc};
     else
       mooseError("Unknown type in capabilities registry");
   }
   return root.dump(2);
 }
 
-std::pair<bool, std::string>
+std::tuple<bool, std::string, std::string>
 Capabilities::check(const std::string & requested_capabilities) const
 {
-  // results from each condition
-  std::vector<std::pair<bool, std::string>> results;
-
-  // break up list into individual capability checks
-  std::vector<std::string> conditions;
-  MooseUtils::tokenize<std::string>(
-      MooseUtils::toLower(requested_capabilities), conditions, 1, " ");
-
-  // operators (order matters to avoid matching < in 'a<=b')
-  static const std::vector<std::string> ops = {"<=", ">=", "<", ">", "!=", "==", "="};
-  // comparator
-  auto comp = [](std::size_t i, auto a, auto b)
-  {
-    switch (i)
-    {
-      case 0:
-        return a <= b;
-      case 1:
-        return a >= b;
-      case 2:
-        return a < b;
-      case 3:
-        return a > b;
-      case 4:
-        return a != b;
-      case 5:
-      case 6:
-        return a == b;
-    }
-    return false;
-  };
-
-  for (const auto & condition : conditions)
-  {
-    // is the current condition negated?
-    bool negate = (condition[0] == '!');
-
-    // check if an operator is used
-    std::size_t op = 0;
-    std::size_t pos = std::string::npos;
-    for (; op < ops.size(); ++op)
-      if (pos = condition.find(ops[op]); pos != std::string::npos)
-        break;
-    std::string capability, test_value;
-
-    if (op == ops.size())
-    {
-      // no operator
-      capability = condition.substr(negate);
-      test_value = "";
-    }
-    else
-    {
-      capability = condition.substr(negate, pos - negate);
-      test_value = condition.substr(pos + ops[op].size());
-      if (test_value.empty())
-        throw std::invalid_argument(condition + " is missing a right hand side");
-    }
-
-    // simple existence non-false check (boolean)
-    const auto it = _capability_registry.find(capability);
-    if (it == _capability_registry.end())
-    {
-      // capability is not registered at all
-      results.emplace_back(
-          negate,
-          capability + " not supported | This input likely needs to be run with a different MOOSE "
-                       "application, or requires dynamically linking another module or "
-                       "application. Please also make sure your applications are up to date.");
-      continue;
-    }
-
-    // capability is registered by the app
-    const auto & [app_value, doc] = it->second;
-
-    // if no operator is found we can check for existence where it shouldn't exist
-    if (op == ops.size())
-    {
-      if (std::holds_alternative<bool>(app_value))
-      {
-        results.emplace_back(std::get<bool>(app_value) != negate,
-                             capability + (negate ? " supported" : " not supported") + " | " + doc);
-        continue;
-      }
-
-      results.emplace_back(!negate,
-                           capability + (negate ? " supported" : " not supported") + " | " + doc);
-      continue;
-    }
-
-    if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == negate)
-    {
-      results.emplace_back(false,
-                           capability + (negate ? " supported" : " not supported") + " | " + doc);
-      continue;
-    }
-
-    // if there is no operator we're done here
-    if (op == ops.size())
-      continue;
-
-    // int comparison
-    if (std::holds_alternative<int>(app_value) &&
-        comp(op, std::get<int>(app_value), std::stoi(test_value)) == negate)
-    {
-      results.emplace_back(false, condition + " not fulfilled" + " | " + doc);
-      continue;
-    }
-
-    // string comparison
-    if (std::holds_alternative<std::string>(app_value))
-    {
-      // check for version number
-      std::vector<int> version1, version2;
-      if (MooseUtils::tokenizeAndConvert(std::get<std::string>(app_value), version1, ".") &&
-          MooseUtils::tokenizeAndConvert(test_value, version2, "."))
-      {
-        if (comp(op, version1, version2) == negate)
-        {
-          results.emplace_back(false, condition + " version not matched | " + doc);
-          continue;
-        }
-      }
-      else
-      {
-        if (comp(op, std::get<std::string>(app_value), test_value) == negate)
-        {
-          results.emplace_back(false, condition + " not fulfilled | " + doc);
-          continue;
-        }
-      }
-    }
-  }
-
-  for (const auto & [pass, reason] : results)
-    if (!pass)
-      return {false, reason};
-
-  return {true, ""};
+  const auto & [status, message, doc] =
+      CapabilityUtils::check(requested_capabilities, _capability_registry);
+  return {status >= CapabilityUtils::POSSIBLE_PASS, message, doc};
 }
 
 } // namespace Moose
