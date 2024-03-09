@@ -64,10 +64,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
       }
 
       for (const auto i : index_range(grad_container))
-      {
-        _new_gradient[i]->close();
         grad_container[i] = std::move(_new_gradient[i]);
-      }
     }
   }
 }
