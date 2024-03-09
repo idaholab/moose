@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include <variant>
-#include <string>
-#include <map>
+#include "CapabilityUtils.h"
 
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
@@ -38,13 +36,10 @@ class Capabilities
 public:
   virtual ~Capabilities() {}
 
-  /// A capability can have a bool, int, or string value
-  typedef std::variant<bool, int, std::string> CapabilityType;
-
   static Capabilities & getCapabilityRegistry();
 
   /// register a new capability
-  void add(const std::string & capability, CapabilityType value, const std::string & doc);
+  void add(const std::string & capability, CapabilityUtils::Type value, const std::string & doc);
   void add(const std::string & capability, const char * value, const char * doc);
 
   /// create a JSON dump of the capabilities registry
@@ -67,7 +62,7 @@ protected:
    * --show-capabilities command line option. Capabilities are used by the test harness
    * to conditionally enable/disable tests that rely on optional capabilities.
    */
-  std::map<std::string, std::pair<CapabilityType, std::string>> _capability_registry;
+  std::map<std::string, std::pair<CapabilityUtils::Type, std::string>> _capability_registry;
 
 private:
   // Private constructor for singleton pattern
