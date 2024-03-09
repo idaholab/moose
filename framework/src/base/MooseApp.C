@@ -1380,12 +1380,13 @@ MooseApp::setupOptions()
     {
       _perf_graph.disableLivePrint();
 
-      auto [fulfilled, reason] = Moose::Capabilities::getCapabilityRegistry().check(
+      auto [fulfilled, reason, doc] = Moose::Capabilities::getCapabilityRegistry().check(
           getParam<std::string>("required_capabilities"));
       if (!fulfilled)
       {
         Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"
-                   << reason << "\nCAPABILITIES_MISMATCH_END" << std::endl;
+                   << reason << "\n"
+                   << doc << "\nCAPABILITIES_MISMATCH_END" << std::endl;
         _ready_to_exit = true;
         // we use code 77 as "skip" in the Testharness
         _exit_code = 77;
@@ -3381,7 +3382,7 @@ MooseApp::outputMachineReadableData(const std::string & param const,
 
 void
 MooseApp::addCapability(const std::string & capability,
-                        Moose::Capabilities::CapabilityType value,
+                        CapabilityUtils::Type value,
                         const std::string & doc)
 {
   Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
