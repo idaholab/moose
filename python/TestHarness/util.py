@@ -674,11 +674,12 @@ def checkCapabilities(supported, test):
 
         # simple existence non-false check (boolean)
         if capability in supported:
+            state = supported[capability][0]
             if negate and op is None:
                 all_supported = False
                 reasons.append(capability + ' supported')
 
-            if isinstance(supported[capability], bool) and supported[capability] == negate:
+            if isinstance(state, bool) and state == negate:
                 all_supported = False
                 if negate:
                     reasons.append(capability + ' supported')
@@ -696,31 +697,31 @@ def checkCapabilities(supported, test):
             continue
 
         # int comparison
-        if isinstance(supported[capability], int):
+        if isinstance(state, int):
             match = re.search(r'^\d+$', value)
             if match is None:
                 raise Exception("Expected integer value in '%s'." % condition)
-            if ops[op](supported[capability], int(value)) == negate:
+            if ops[op](state, int(value)) == negate:
                 all_supported = False
                 reasons.append(condition + ' not fulfilled')
 
         # string comparison
-        if isinstance(supported[capability], str):
+        if isinstance(state, str):
             if value == '':
                 raise Exception("Empty value in condition '%s'." % condition)
             # check for version number
-            match1 = re.search(r'^(\d+|\d[\d.]*\d)$', supported[capability])
+            match1 = re.search(r'^(\d+|\d[\d.]*\d)$', state)
             match2 = re.search(r'^(\d+|\d[\d.]*\d)$', value)
             if match1 and match2:
                 # version number comparison logic
-                values1 = [int(i) for i in supported[capability].split('.')]
+                values1 = [int(i) for i in state.split('.')]
                 values2 = [int(i) for i in value.split('.')]
                 if ops[op](values1, values2) == negate:
                     all_supported = False
                     reasons.append(condition + ' version not matched')
             else:
                 # simple string comparison
-                if ops[op](supported[capability], value) == negate:
+                if ops[op](state, value) == negate:
                     all_supported = False
                     reasons.append(condition + ' not fulfilled')
 
