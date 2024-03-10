@@ -7,9 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 /**
  * This file should contain utility functions that have no dependencies besides the C++ standard
- * library.
+ * library (and header-only stuff).
  */
 
 #include "InfixIterator.h"

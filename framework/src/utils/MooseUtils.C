@@ -131,18 +131,6 @@ docsDir(const std::string & app_name)
 }
 
 std::string
-replaceAll(std::string str, const std::string & from, const std::string & to)
-{
-  size_t start_pos = 0;
-  while ((start_pos = str.find(from, start_pos)) != std::string::npos)
-  {
-    str.replace(start_pos, from.length(), to);
-    start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
-  }
-  return str;
-}
-
-std::string
 convertLatestCheckpoint(std::string orig)
 {
   auto slash_pos = orig.find_last_of("/");
@@ -190,34 +178,6 @@ levenshteinDist(const std::string & s1, const std::string & s2)
   auto result = column[s1len];
   delete[] column;
   return result;
-}
-
-void
-escape(std::string & str)
-{
-  std::map<char, std::string> escapes;
-  escapes['\a'] = "\\a";
-  escapes['\b'] = "\\b";
-  escapes['\f'] = "\\f";
-  escapes['\n'] = "\\n";
-  escapes['\t'] = "\\t";
-  escapes['\v'] = "\\v";
-  escapes['\r'] = "\\r";
-
-  for (const auto & it : escapes)
-    for (size_t pos = 0; (pos = str.find(it.first, pos)) != std::string::npos;
-         pos += it.second.size())
-      str.replace(pos, 1, it.second);
-}
-
-std::string
-trim(const std::string & str, const std::string & white_space)
-{
-  const auto begin = str.find_first_not_of(white_space);
-  if (begin == std::string::npos)
-    return ""; // no content
-  const auto end = str.find_last_not_of(white_space);
-  return str.substr(begin, end - begin + 1);
 }
 
 bool

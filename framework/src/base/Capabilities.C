@@ -63,12 +63,13 @@ Capabilities::dump() const
   for (const auto & [capability, value_doc] : _capability_registry)
   {
     const auto & value = value_doc.first;
+    const auto & doc = value_doc.second;
     if (std::holds_alternative<bool>(value))
-      root[capability] = std::get<bool>(value);
+      root[capability][0] = {std::get<bool>(value), doc};
     else if (std::holds_alternative<int>(value))
-      root[capability] = std::get<int>(value);
+      root[capability][0] = {std::get<int>(value), doc};
     else if (std::holds_alternative<std::string>(value))
-      root[capability] = std::get<std::string>(value);
+      root[capability][0] = {std::get<std::string>(value), doc};
     else
       mooseError("Unknown type in capabilities registry");
   }

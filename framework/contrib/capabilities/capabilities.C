@@ -13,12 +13,17 @@ capabilities_check(PyObject *self, PyObject *args)
   const char *requirement;
   PyObject *capdict;
   if (!PyArg_ParseTuple(args, "sO", &requirement, &capdict))
+  {
+    PyErr_SetString(PyExc_ValueError,
+                    "capabilities.check requires two arguments, a requirements string and a "
+                    "dictionary with string keys and tuple values.");
     return NULL;
+  }
 
   // make sure argument 2 is a dictionary
   if (!PyDict_Check(capdict))
   {
-    // TODO: set exception
+    PyErr_SetString(PyExc_ValueError, "The second argument must be a dictionary.");
     return NULL;
   }
 
@@ -34,7 +39,8 @@ capabilities_check(PyObject *self, PyObject *args)
     // check if the item is a tuple
     if (!PyTuple_Check(item) || PyTuple_Size(item) != 2)
     {
-      // TODO: set exception
+      PyErr_SetString(PyExc_ValueError,
+                      "Items of the capability dictionary myst be tuples (internal error).");
       return NULL;
     }
 
@@ -44,24 +50,26 @@ capabilities_check(PyObject *self, PyObject *args)
     // ensure key is a string
     if (!PyUnicode_Check(key_obj))
     {
-      // TODO: set exception
+      PyErr_SetString(PyExc_ValueError, "The dictionary keys must be strings.");
       return NULL;
     }
     const std::string key(PyUnicode_AsUTF8(key_obj));
 
     // split value_doc into value and doc string
-    if (!PyTuple_Check(value_doc) || PyTuple_Size(item) != 2)
+    if (!PyList_Check(value_doc) || PyList_Size(value_doc) != 2)
     {
-      // TODO: set exception
+      PyErr_SetString(PyExc_ValueError, "The dictionary values must be lists of length two.");
       return NULL;
     }
-    PyObject * value = PyTuple_GetItem(item, 0);
-    PyObject * doc_obj = PyTuple_GetItem(item, 1);
+    PyObject * value = PyList_GetItem(value_doc, 0);
+    PyObject * doc_obj = PyList_GetItem(value_doc, 1);
 
     // make sure doc is a string
     if (!PyUnicode_Check(doc_obj))
     {
-      // TODO: set exception
+      PyErr_SetString(
+          PyExc_ValueError,
+          "The second list item in the dictionary values must be strings (documentation).");
       return NULL;
     }
     const std::string doc = PyUnicode_AsUTF8(doc_obj);
@@ -77,7 +85,7 @@ capabilities_check(PyObject *self, PyObject *args)
       capabilities[key] = {std::string(PyUnicode_AsUTF8(value)), doc};
     else
     {
-      // TODO: set exception
+      PyErr_SetString(PyExc_ValueError, "The capability values must be Bool, Number, or Str.");
       return NULL;
     }
   }
