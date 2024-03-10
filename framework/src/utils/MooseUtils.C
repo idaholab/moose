@@ -1033,22 +1033,6 @@ convert<unsigned long long int>(const std::string & str, bool throw_on_failure)
   return convertStringToInt<unsigned long long int>(str, throw_on_failure);
 }
 
-std::string
-toUpper(const std::string & name)
-{
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-  return upper;
-}
-
-std::string
-toLower(const std::string & name)
-{
-  std::string lower(name);
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  return lower;
-}
-
 ExecFlagEnum
 getDefaultExecFlagEnum()
 {
@@ -1106,46 +1090,6 @@ linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type 
     // First chunk after the first section + the number of chunks after that
     return leftovers + (new_item_id / global_num_local_items);
   }
-}
-
-std::vector<std::string>
-split(const std::string & str, const std::string & delimiter, std::size_t max_count)
-{
-  std::vector<std::string> output;
-  std::size_t count = 0;
-  size_t prev = 0, pos = 0;
-  do
-  {
-    pos = str.find(delimiter, prev);
-    output.push_back(str.substr(prev, pos - prev));
-    prev = pos + delimiter.length();
-    count += 1;
-  } while (pos != std::string::npos && count < max_count);
-
-  if (pos != std::string::npos)
-    output.push_back(str.substr(prev));
-
-  return output;
-}
-
-std::vector<std::string>
-rsplit(const std::string & str, const std::string & delimiter, std::size_t max_count)
-{
-  std::vector<std::string> output;
-  std::size_t count = 0;
-  size_t prev = str.length(), pos = str.length();
-  do
-  {
-    pos = str.rfind(delimiter, prev);
-    output.insert(output.begin(), str.substr(pos + delimiter.length(), prev - pos));
-    prev = pos - delimiter.length();
-    count += 1;
-  } while (pos != std::string::npos && pos > 0 && count < max_count);
-
-  if (pos != std::string::npos)
-    output.insert(output.begin(), str.substr(0, pos));
-
-  return output;
 }
 
 void

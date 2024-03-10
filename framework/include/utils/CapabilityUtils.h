@@ -19,21 +19,30 @@
 namespace CapabilityUtils
 {
 
-/// A capability can have a bool, int, or string value
-typedef std::variant<bool, int, std::string> Type;
-
-typedef std::map<std::string, std::pair<CapabilityType, std::string>> Registry;
-
-/// Check return status
-enum class Status
+/**
+ * Return state for check. We use a plain enum because we rely on implicit conversion to int.
+ * Capability checks are run in the test harness using the JSON dump exported from the executable
+ * using `--show-capabilities`. This static check does not take dynamic loading into account,
+ * so some capabilites might not be registered at all. Whenever a test agains an unregistered
+ * capability is made the result is returned as POSSIBLE_FAIL/POSSIBLE_PASS (in case of predicate
+ * negation).
+ * The test harness will run the test unless the result of the check is CERTAIN_FAIL. The runtime
+ * check in the executable will terminate if the result is either CERTAIN_FAIL or POSSIBLE_FAIL.
+ */
+enum CheckState
 {
-  PASS = 0,    // Requirement is fulfilled
-  UNKNOWN = 1, // An unregistred requirement is encountered
-  FAIL = 2     // A requirement is explicitly violated
+  CERTAIN_FAIL = 0,
+  POSSIBLE_FAIL = 1,
+  POSSIBLE_PASS = 2,
+  CERTAIN_PASS = 3
 };
 
+/// A capability can have a bool, int, or string value
+typedef std::variant<bool, int, std::string> Type;
+typedef std::pair<CheckState, std::string> Result;
+typedef std::map<std::string, std::pair<Type, std::string>> Registry;
+
 /// Check a requirement against a capabilities registry
-std::pair<Status, std::string> Status check(const std::string & requirement,
-                                            const Registry & capabilities);
+Result check(const std::string & requirement, const Registry & capabilities);
 
 } // namespace CapabilityUtils

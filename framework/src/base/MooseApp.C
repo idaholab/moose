@@ -3261,7 +3261,7 @@ MooseApp::outputMachineReadableData(const std::string & param,
 
 void
 MooseApp::addCapability(const std::string & capability,
-                        Moose::Capabilities::CapabilityType value,
+                        CapabilityUtils::Type value,
                         const std::string & doc)
 {
   Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);

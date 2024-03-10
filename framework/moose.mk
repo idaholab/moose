@@ -57,7 +57,7 @@ pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HI
 # capabilities python bindings
 #
 CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/capabilities
-capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C $(MOOSE_DIR)/framework/src/utils/CapabilityUtils.C
+capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C $(MOOSE_DIR)/framework/src/utils/CapabilityUtils.C $(MOOSE_DIR)/framework/src/utils/MooseUtilsStandalone.C
 
 #
 # Dynamic library suffix
@@ -149,7 +149,7 @@ capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS)
 
 capabilities $(capabilities_LIB) : $(capabilities_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $^ $(capabilities_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(capabilities_LIB))'
+	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $^ $(moose_INCLUDE) $(capabilities_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(capabilities_LIB))'
 
 #
 # gtest
@@ -487,12 +487,14 @@ install_exodiff: all
 	@mkdir -p $(bin_install_dir)
 	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
-install_python:
+install_python: $(pyhit_LIB) $(capabilities_LIB)
 	@echo "Installing python utilities"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
-	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/
+	@cp -f $(pyhit_LIB) $(python_install_dir)/
+	@cp -f $(capabilities_LIB) $(python_install_dir)/
+
 
 install_harness: install_python
 	@echo "Installing TestHarness"
