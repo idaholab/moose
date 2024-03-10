@@ -636,7 +636,7 @@ def checkCapabilities(supported, test):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
-    [status, message] = pycapabilities.check(test['capabilities'], supported)
+    [status, message, doc] = pycapabilities.check(test['capabilities'], supported)
     return (status == pycapabilities.CERTAIN_PASS, message)
 
 def getIfAsioExists(moose_dir):

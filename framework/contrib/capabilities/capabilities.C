@@ -91,8 +91,11 @@ capabilities_check(PyObject *self, PyObject *args)
   }
 
   // call capabilities C++ code with capabilities map
-  auto [status, message] = CapabilityUtils::check(requirement, capabilities);
-  return Py_BuildValue("(NN)", PyLong_FromLong(status), PyUnicode_FromString(message.c_str()));
+  auto [status, message, doc] = CapabilityUtils::check(requirement, capabilities);
+  return Py_BuildValue("(NNN)",
+                       PyLong_FromLong(status),
+                       PyUnicode_FromString(message.c_str()),
+                       PyUnicode_FromString(doc.c_str()));
 }
 
 static PyMethodDef CapabilitiesMethods[] = {

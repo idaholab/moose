@@ -80,11 +80,11 @@ check(const std::string & requirements, const Registry & capabilities)
     if (it == capabilities.end())
     {
       // capability is not registered at all
-      results.emplace_back(
-          negate ? POSSIBLE_PASS : POSSIBLE_FAIL,
-          capability + " not supported. This input likely needs to be run with a different MOOSE "
-                       "application, or requires dynamically linking another module or "
-                       "application. Please also make sure your applications are up to date. ");
+      results.emplace_back(negate ? POSSIBLE_PASS : POSSIBLE_FAIL,
+                           capability + " not supported.",
+                           "This input likely needs to be run with a different MOOSE "
+                           "application, or requires dynamically linking another module or "
+                           "application. Please also make sure your applications are up to date. ");
       continue;
     }
 
@@ -97,22 +97,21 @@ check(const std::string & requirements, const Registry & capabilities)
       if (std::holds_alternative<bool>(app_value))
       {
         results.emplace_back(std::get<bool>(app_value) != negate ? CERTAIN_PASS : CERTAIN_FAIL,
-                             capability + (negate ? " supported" : " not supported") + " (" + doc +
-                                 "). ");
+                             capability + (negate ? " supported" : " not supported"),
+                             doc);
         continue;
       }
 
       results.emplace_back(negate ? CERTAIN_FAIL : CERTAIN_PASS,
-                           capability + (negate ? " supported" : " not supported") + " (" + doc +
-                               "). ");
+                           capability + (negate ? " supported" : " not supported"),
+                           doc);
       continue;
     }
 
     if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == negate)
     {
-      results.emplace_back(CERTAIN_FAIL,
-                           capability + (negate ? " supported" : " not supported") + " (" + doc +
-                               "). ");
+      results.emplace_back(
+          CERTAIN_FAIL, capability + (negate ? " supported" : " not supported"), doc);
       continue;
     }
 
@@ -124,8 +123,7 @@ check(const std::string & requirements, const Registry & capabilities)
     if (std::holds_alternative<int>(app_value) &&
         comp(op, std::get<int>(app_value), std::stoi(test_value)) == negate)
     {
-      results.emplace_back(CERTAIN_FAIL, condition + " not fulfilled (" + doc + "). ");
-      continue;
+      results.emplace_back(CERTAIN_FAIL, condition + " not fulfilled", doc);
     }
 
     // string comparison
@@ -138,7 +136,7 @@ check(const std::string & requirements, const Registry & capabilities)
       {
         if (comp(op, version1, version2) == negate)
         {
-          results.emplace_back(CERTAIN_FAIL, condition + " version not matched (" + doc + "). ");
+          results.emplace_back(CERTAIN_FAIL, condition + " version not matched", doc);
           continue;
         }
       }
@@ -146,7 +144,7 @@ check(const std::string & requirements, const Registry & capabilities)
       {
         if (comp(op, std::get<std::string>(app_value), test_value) == negate)
         {
-          results.emplace_back(CERTAIN_FAIL, condition + " not fulfilled. " + doc);
+          results.emplace_back(CERTAIN_FAIL, condition + " not fulfilled", doc);
           continue;
         }
       }
@@ -156,14 +154,18 @@ check(const std::string & requirements, const Registry & capabilities)
   // reduce result
   CheckState state = CERTAIN_PASS;
   std::string reason;
-  for (const auto & [item_state, item_reason] : results)
+  std::string doc;
+  for (const auto & [item_state, item_reason, item_doc] : results)
   {
     state = std::min(state, item_state);
     if (item_state <= POSSIBLE_FAIL)
-      reason += item_reason;
+    {
+      reason += (doc.empty() ? "" : ", ") + item_reason;
+      doc += (doc.empty() ? "" : " ") + item_doc;
+    }
   }
 
-  return {state, reason};
+  return {state, reason, doc};
 }
 
 } // namespace CapabilityUtils

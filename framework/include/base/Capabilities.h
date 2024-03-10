@@ -45,8 +45,9 @@ public:
   /// create a JSON dump of the capabilities registry
   std::string dump() const;
 
-  /// check if the given required capabilities are fulfilled, returns a bool and a reason
-  std::pair<bool, std::string> check(const std::string & requested_capabilities) const;
+  /// check if the given required capabilities are fulfilled, returns a bool, a reason, and a verbose documentation
+  std::tuple<bool, std::string, std::string>
+  check(const std::string & requested_capabilities) const;
 
   ///@{ Don't allow creation through copy/move construction or assignment
   Capabilities(Capabilities const &) = delete;

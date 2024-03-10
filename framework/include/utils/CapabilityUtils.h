@@ -39,7 +39,7 @@ enum CheckState
 
 /// A capability can have a bool, int, or string value
 typedef std::variant<bool, int, std::string> Type;
-typedef std::pair<CheckState, std::string> Result;
+typedef std::tuple<CheckState, std::string, std::string> Result;
 typedef std::map<std::string, std::pair<Type, std::string>> Registry;
 
 /// Check a requirement against a capabilities registry
