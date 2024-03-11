@@ -37,7 +37,7 @@
     vtk = true
     xmldiff = '2d_diffusion_iga_out_002.pvtu 2d_diffusion_iga_out_002_0.vtu'
 
-    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases in ExodusII format.'
+    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases and output spline results in VTK format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
@@ -52,7 +52,7 @@
     # See #24187
     petsc_version = '>=3.12.0'
     exodiff = '2d_diffusion_iga_out.e'
-    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases in ExodusII format.'
+    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases and output spline results in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
@@ -72,7 +72,7 @@
     vtk = true
     xmldiff = '2d_diffusion_iga_nosplines_out_002.pvtu 2d_diffusion_iga_nosplines_out_002_0.vtu'
 
-    requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes.'
+    requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes and output Bernstein-Bezier results in VTK format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
@@ -88,7 +88,7 @@
     petsc_version = '>=3.12.0'
     exodiff = '2d_diffusion_iga_nosplines_out.e'
 
-    requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes.'
+    requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes and output Bernstein-Bezier results in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
