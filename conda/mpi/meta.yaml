@@ -48,7 +48,8 @@ requirements:
     - {{ moose_clangxx }}                     # [osx]
     - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
     # Cuda pinning runtime requirement
-    - kernel-headers_linux-64 4.18.0          # [linux]
+    - kernel-headers_linux-64 3.10.0          # [linux]
+    - libxt-devel-cos7-x86_64 1.1.5           # [linux]
     - automake 1.16.5
     - bison 3.4
     - zfp 0.5.5
