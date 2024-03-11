@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import mooseutils
 
 """
 First, attempt to import capabilities. If that fails, try adding the capabilities source directory to the path

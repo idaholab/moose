@@ -412,7 +412,7 @@ $(hit_LIB): $(hit_objects)
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(capabilities_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
@@ -439,6 +439,7 @@ sa: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/hit/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/capabilities/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pugixml/src/*.d)
 
 #
@@ -531,11 +532,11 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 #
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit
+.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit capabilities
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(capabilities_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 
