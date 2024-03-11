@@ -4,7 +4,6 @@
     file = test_2edge.e
     discontinuous_spline_extraction = true
   []
-  allow_renumbering = false
 []
 
 [Variables]

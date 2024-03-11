@@ -4,7 +4,6 @@
     file = PressurizedCyl_Patch6_4Elem.e
     discontinuous_spline_extraction = true
   []
-  allow_renumbering = false
 []
 
 [Variables]

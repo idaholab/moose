@@ -4,7 +4,6 @@
     file = test_quadratic.e
     discontinuous_spline_extraction = true
   []
-  allow_renumbering = false
 []
 
 [Variables]
