@@ -1,6 +1,6 @@
 # AdjointStrainStressGradNEML2InnerProduct
 
-!syntax description /UserObjects/AdjointStrainStressGradNEML2InnerProduct
+!syntax description /VectorPostprocessors/AdjointStrainStressGradNEML2InnerProduct
 
 ## Description
 
@@ -8,4 +8,4 @@ This component is designed to compute the gradient of the objective function con
 
 ## Example Input Syntax
 
-!syntax parameters /UserObjects/AdjointStrainStressGradNEML2InnerProduct
+!syntax parameters /VectorPostprocessors/AdjointStrainStressGradNEML2InnerProduct

@@ -55,6 +55,10 @@ ifeq ($(THERMAL_HYDRAULICS),yes)
         MISC                        := yes
 endif
 
+ifeq ($(SOLID_MECHANICS),yes)
+        OPTIMIZATION                := yes
+endif
+
 ifeq ($(FSI),yes)
         NAVIER_STOKES               := yes
         SOLID_MECHANICS             := yes
@@ -68,10 +72,6 @@ endif
 
 ifeq ($(SOLID_PROPERTIES),yes)
         HEAT_TRANSFER               := yes
-endif
-
-ifeq ($(SOLID_MECHANICS),yes)
-        OPTIMIZATION                := yes
 endif
 
 ifeq ($(CONTACT),yes)
@@ -223,15 +223,16 @@ ifeq ($(STOCHASTIC_TOOLS),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+# The modules that follow are purposefully ordered such that all of their
+# dependencies are defined first
+
+# Depended on by solid_mechanics
 ifeq ($(OPTIMIZATION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/optimization
   APPLICATION_NAME   := optimization
   SUFFIX             := opt
   include $(FRAMEWORK_DIR)/app.mk
 endif
-
-# The modules that follow are purposefully ordered such that all of their
-# dependencies are defined first
 
 # Depended on by navier_stokes, fsi (through navier_stokes)
 ifeq ($(HEAT_TRANSFER),yes)

@@ -11,5 +11,6 @@
     max_threads = 1
     # steady solve
     recover = false
+    required_submodule = 'contrib/neml2'
   []
 []
