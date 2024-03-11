@@ -45,7 +45,7 @@ public:
   void computeMisfit();
 
   /**
-   *  Compute half the sum of the misfit values
+   * Compute half the sum of the misfit (squared) values
    * @return 1/2 of the sum of the misfit values.
    */
   Real computeMisfitValue();

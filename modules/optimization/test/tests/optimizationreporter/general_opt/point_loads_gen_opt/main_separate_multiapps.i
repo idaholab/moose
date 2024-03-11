@@ -86,15 +86,13 @@ measurement_values = '293 304 315 320'
   # HESSIAN transfers.  Same as forward.
   [toHomoForward]
     type = MultiAppReporterTransfer
-    multi_app = homogeneousForward
-    direction = to_multiapp
+    to_multi_app = homogeneousForward
     from_reporters = 'OptimizationReporter/parameter_results'
     to_reporters = 'point_source/value'
   []
   [fromHomoForward]
     type = MultiAppReporterTransfer
-    multi_app = homogeneousForward
-    direction = from_multiapp
+    from_multi_app = homogeneousForward
     # Note: We are transferring the simulation values into misfit
     # this has to be done when using general opt and homogenous forward.
     from_reporters = 'measure_data/simulation_values'

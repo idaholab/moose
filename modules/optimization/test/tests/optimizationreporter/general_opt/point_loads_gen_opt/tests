@@ -49,7 +49,7 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = 'the measurment data defined on the seperate subapps and using regularization;'
+      detail = 'the measurment data defined on the separate subapps and using regularization;'
     []
   []
 []
