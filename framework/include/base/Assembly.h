@@ -321,15 +321,25 @@ public:
   const MooseArray<std::vector<Point>> & tangents() const { return _current_tangents; }
 
   /**
+   * Number of extra element integers Assembly tracked
+   */
+  unsigned int numExtraElemIntegers() const { return _extra_elem_ids.size() - 1; }
+
+  /**
    * Returns an integer ID of the current element given the index associated with the integer
    */
-  const dof_id_type & extraElemID(unsigned int id) const { return _extra_elem_ids[id]; }
+  const dof_id_type & extraElemID(unsigned int id) const
+  {
+    mooseAssert(id < _extra_elem_ids.size(), "An invalid extra element integer id");
+    return _extra_elem_ids[id];
+  }
 
   /**
    * Returns an integer ID of the current element given the index associated with the integer
    */
   const dof_id_type & extraElemIDNeighbor(unsigned int id) const
   {
+    mooseAssert(id < _neighbor_extra_elem_ids.size(), "An invalid extra element integer id");
     return _neighbor_extra_elem_ids[id];
   }
 
