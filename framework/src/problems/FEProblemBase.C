@@ -1999,10 +1999,10 @@ FEProblemBase::reinitElemFace(const Elem * elem,
                               BoundaryID bnd_id,
                               const THREAD_ID tid)
 {
-  for (const auto i : index_range(_nl))
+  for (const auto i : index_range(_solver_systems))
   {
     _assembly[tid][i]->reinit(elem, side);
-    _nl[i]->reinitElemFace(elem, side, bnd_id, tid);
+    _solver_systems[i]->reinitElemFace(elem, side, bnd_id, tid);
   }
   _aux->reinitElemFace(elem, side, bnd_id, tid);
 
