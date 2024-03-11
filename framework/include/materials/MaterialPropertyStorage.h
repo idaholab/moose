@@ -10,10 +10,13 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseHashing.h"
 #include "HashMap.h"
 #include "MaterialProperty.h"
 #include "MaterialPropertyRegistry.h"
 #include "MaterialData.h"
+
+#include <variant>
 
 // Forward declarations
 class MaterialBase;
@@ -41,6 +44,25 @@ class MaterialPropertyStorage
 {
 public:
   MaterialPropertyStorage(MaterialPropertyRegistry & registry);
+
+  /**
+   * Basic structure for storing information about a property
+   */
+  struct PropRecord
+  {
+    /// Whether or not this property is stateful
+    bool stateful() const { return state > 0; }
+    /// The material (type,name) that have declared this property
+    std::set<std::string> declarers;
+    /// The type of this property
+    std::string type;
+    /// The stateful id in _storage used for this property, if any
+    unsigned int stateful_id = invalid_uint;
+    /// The max state requrested for this property (0 = current, 1 = old, ...)
+    unsigned int state = 0;
+    /// Whether or not this property was restored (stateful only)
+    bool restored = false;
+  };
 
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the
@@ -140,6 +162,9 @@ public:
    * @param n_qpoints Number of quadrature points
    * @param elem Element we are on
    * @param side Side of the element 'elem' (0 for volumetric material properties)
+   *
+   * If restartable stateful information is available, this will load from restart
+   * instead of calling initStatefulProperties()
    */
   void initStatefulProps(const THREAD_ID tid,
                          const std::vector<std::shared_ptr<MaterialBase>> & mats,
@@ -242,25 +267,27 @@ public:
   bool hasProperty(const std::string & prop_name) const { return _registry.hasProperty(prop_name); }
 
   /**
-   * Adds a property with the name \p prop_name and state \p state (0 = current, 1 = old, etc)
+   * Adds a property with the name \p prop_name, type \p type, and state \p state (0 = current, 1 =
+   * old, etc)
    *
    * This is idempotent - calling multiple times with the same name will provide the same id and
    * works fine.
+   *
+   * \p declarer should be specified by the object declaring the property if it is being declared.
    */
-  unsigned int addProperty(const std::string & prop_name, const unsigned int state);
+  unsigned int addProperty(const std::string & prop_name,
+                           const std::type_info & type,
+                           const unsigned int state,
+                           const MaterialBase * const declarer);
 
   const std::vector<unsigned int> & statefulProps() const { return _stateful_prop_id_to_prop_id; }
-  const std::unordered_map<unsigned int, std::string> & statefulPropNames() const
-  {
-    return _stateful_prop_names;
-  }
 
   const MaterialPropertyRegistry & getMaterialPropertyRegistry() const { return _registry; }
 
-  bool isStatefulProp(const std::string & prop_name) const
-  {
-    return _stateful_prop_names.count(_registry.getID(prop_name));
-  }
+  /**
+   * @return The name of the stateful property with id \p id, if any.
+   */
+  std::optional<std::string> queryStatefulPropName(const unsigned int id) const;
 
   /**
    * Remove the property storage and element pointer from internal data structures
@@ -300,12 +327,43 @@ public:
    */
   MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
 
+  /**
+   * Sets the loading of stateful material properties to recover
+   *
+   * This enforces the requirement of one-to-one stateful material properties,
+   * disabling advanced restart of stateful properties
+   */
+  void setRecovering() { _recovering = true; }
+
+  /**
+   * Sets the loading of stateful material properties in place
+   *
+   * On init, this cannot be set because we must first call initProps()
+   * to properly initialize the dynamic types within _storage. After
+   * the first sweep through with initProps(), we can then load the stateful
+   * props directly in place into _storage
+   *
+   * Also clears _restartable_map, as it should no longer be needed
+   */
+  void setRestartInPlace();
+
+  /**
+   * Get the property record associated with the material with id \p id
+   */
+  const PropRecord & getPropRecord(const unsigned int id) const;
+
+  /**
+   * @return Whether or not the material property with name \p name was restored
+   */
+  bool isRestoredProperty(const std::string & name) const;
+
 protected:
   /// The actual storage
   std::array<PropsType, MaterialData::max_state + 1> _storage;
 
-  /// Mapping from stateful property ID to property name
-  std::unordered_map<unsigned int, std::string> _stateful_prop_names;
+  /// Property records indexed by property id (may be null)
+  std::vector<std::optional<PropRecord>> _prop_records;
+
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
@@ -314,14 +372,15 @@ protected:
 private:
   /// Initializes hashmap entries for element and side to proper qpoint and
   /// property count sizes.
-  void initProps(const THREAD_ID tid, const Elem * elem, unsigned int side, unsigned int n_qpoints);
+  std::vector<MaterialProperties *>
+  initProps(const THREAD_ID tid, const Elem * elem, unsigned int side, unsigned int n_qpoints);
 
   /// Initializes just one hashmap's entries
-  void initProps(const THREAD_ID tid,
-                 const unsigned int state,
-                 const Elem * elem,
-                 unsigned int side,
-                 unsigned int n_qpoints);
+  MaterialProperties & initProps(const THREAD_ID tid,
+                                 const unsigned int state,
+                                 const Elem * elem,
+                                 unsigned int side,
+                                 unsigned int n_qpoints);
 
   ///@{
   /**
@@ -364,6 +423,18 @@ private:
 
   /// The threaded material data
   std::vector<MaterialData> _material_data;
+
+  typedef std::unordered_map<std::pair<const Elem *, unsigned int>,
+                             std::map<unsigned int, std::vector<std::stringstream>>>
+      RestartableMapType;
+
+  /// The restartable data to be loaded in initStatefulProps() later
+  RestartableMapType _restartable_map;
+
+  /// Whether or not we want to restart stateful properties in place
+  bool _restart_in_place;
+  /// Whether or not we're recovering; enforces a one-to-one mapping of stateful properties
+  bool _recovering;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
@@ -412,3 +483,6 @@ MaterialPropertyStorage::setProps(const unsigned int state)
 {
   return const_cast<MaterialPropertyStorage::PropsType &>(std::as_const(*this).props(state));
 }
+
+void dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void * context);
+void dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void * context);

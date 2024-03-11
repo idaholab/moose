@@ -85,6 +85,11 @@ public:
    */
   auto idsToNamesRange() const { return libMesh::SimpleRange(idsToNamesBegin(), idsToNamesEnd()); }
 
+  /**
+   * @return The number of registered properties
+   */
+  std::size_t size() const { return _id_to_name.size(); }
+
 private:
   /// Map of material property name -> material property id
   std::unordered_map<std::string, unsigned int> _name_to_id;

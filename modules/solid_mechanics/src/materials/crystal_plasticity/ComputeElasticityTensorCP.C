@@ -74,18 +74,6 @@ ComputeElasticityTensorCP::assignEulerAngles()
 }
 
 void
-ComputeElasticityTensorCP::initQpStatefulProperties()
-{
-  if (!_user_provided_rotation_matrix)
-  {
-    assignEulerAngles();
-    _crysrot[_qp] = _R.transpose();
-  }
-  else
-    _crysrot[_qp] = _rotation_matrix.transpose();
-}
-
-void
 ComputeElasticityTensorCP::computeQpElasticityTensor()
 {
   // Properties assigned at the beginning of every call to material calculation
