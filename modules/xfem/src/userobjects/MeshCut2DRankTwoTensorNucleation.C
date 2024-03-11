@@ -29,11 +29,11 @@ MeshCut2DRankTwoTensorNucleation::validParams()
       1e-5,
       "crack_length_scale >= 0",
       "Crack length scaling factor to extend the nucleated crack beyond the cut element edges.");
-  params.addRangeCheckedParam<Real>("nucleation_length",
-                                    0,
-                                    "nucleation_length >= 0",
-                                    "Size of crack to Nucleate.  If less than element size, "
-                                    "nucleated crack bisects one element.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "nucleation_length",
+      "nucleation_length >= 0",
+      "Size of crack to Nucleate.  If less than element size, "
+      "nucleated crack bisects one element.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -139,33 +139,38 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
     }
 
     Real bisect_length = (point_0 - point_1).norm();
-    Real extend_length = (bisect_length * _crack_length_scale) / 2.0;
-    if (_nucleation_length > bisect_length)
-      extend_length = (_nucleation_length - bisect_length) / 2.0;
+    Real extend_length = (_nucleation_length - bisect_length) / 2.0;
+    if (_nucleation_length < bisect_length)
+      mooseError(
+          "Trying to nucleated crack smaller than element length, increase nucleation_length.\n  "
+          "location of crack being nucleated: ",
+          point_0,
+          "\n  nucleation_length: ",
+          _nucleation_length,
+          "\n  length to bisect element: ",
+          bisect_length);
 
     if (is_point_0_on_external_boundary && is_point_1_on_external_boundary)
     {
       point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
       point_1 = point_1 + (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
-      std::cout << "****** case 1,   point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
     }
     else if (is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
     {
       point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
-      point_1 = point_1 + extend_length * crack_dir.unit();
-      std::cout << "****** case 2,   point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
+      point_1 = point_1 + 2.0 * extend_length * crack_dir.unit();
     }
     else if (is_point_1_on_external_boundary && !is_point_0_on_external_boundary)
     {
-      point_0 = point_0 - extend_length * crack_dir.unit();
+      point_0 = point_0 - 2.0 * extend_length * crack_dir.unit();
       point_1 = point_1 + (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
-      std::cout << "****** case 3,  point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
     }
-    else if (!is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
+    // bulk nucleation or element bisects single element with two boundaries.
+    else if ((!is_point_0_on_external_boundary && !is_point_1_on_external_boundary) ||
+             (is_point_0_on_external_boundary && is_point_1_on_external_boundary))
     {
       point_0 = point_0 - extend_length * crack_dir.unit();
       point_1 = point_1 + extend_length * crack_dir.unit();
-      std::cout << "****** case 4,   point_0: " << point_0 << "  point_1: " << point_1 << std::endl;
     }
     else
     {
