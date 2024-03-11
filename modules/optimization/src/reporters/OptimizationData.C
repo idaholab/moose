@@ -50,7 +50,7 @@ OptimizationDataTempl<T>::validParams()
   params.addParam<std::vector<VariableName>>(
       "variable", "Vector of variable names to sample at measurement points.");
   params.addParam<ReporterValueName>("objective_name",
-                                     "Preferred name of reporter value defining the objective.");
+                                     "Name of reporter value defining the objective.");
   params.addParamNamesToGroup("measurement_points measurement_values measurement_times",
                               "Input Measurement Data");
   params.addParamNamesToGroup("measurement_file file_xcoord file_ycoord file_zcoord file_time "
@@ -135,7 +135,7 @@ void
 OptimizationDataTempl<T>::execute()
 {
   computeMisfit();
-  _objective_val = computeMisfitNorm();
+  _objective_val = computeMisfitValue();
 }
 
 template <typename T>
@@ -324,7 +324,7 @@ OptimizationDataTempl<T>::errorCheckDataSize()
 
 template <typename T>
 Real
-OptimizationDataTempl<T>::computeMisfitNorm()
+OptimizationDataTempl<T>::computeMisfitValue()
 {
   Real val = 0.0;
   for (auto & misfit : _misfit_values)

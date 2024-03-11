@@ -39,9 +39,16 @@ public:
   virtual void execute() override;
   virtual void finalize() override {}
 
+  /**
+   * Compute misfit vectors from the simulations and measurement values.
+   */
   void computeMisfit();
 
-  Real computeMisfitNorm();
+  /**
+   *  Compute half the sum of the misfit values
+   * @return 1/2 of the sum of the misfit values.
+   */
+  Real computeMisfitValue();
 
 protected:
   ///@{
@@ -57,7 +64,7 @@ protected:
   /// difference between simulation and measurement values at measurement xyzt
   std::vector<Real> & _misfit_values;
 
-  /// Reporter that will hold the objective value
+  /// Reporter value that will hold the objective value
   Real & _objective_val;
 
 private:
