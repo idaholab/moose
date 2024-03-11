@@ -217,7 +217,7 @@ PropertyReadFile::initVoronoiCenterPoints()
   else
   {
     for (const auto i : make_range(_nvoronoi))
-      for (const auto j : make_range(_mesh.dimension()))
+      for (const auto j : make_range(Moose::dim))
         _center[i](j) = _reader.getData(i)[j];
   }
 }
@@ -331,7 +331,9 @@ PropertyReadFile::getVoronoiData(const Point & point, const unsigned int prop_nu
       ivoronoi = i;
     }
   }
-  return _reader.getData(ivoronoi)[prop_num];
+  // add an offset to consistently to avoid having to code the offset in objects
+  // calling getData, and having to adapt for the user object read_type
+  return _reader.getData(ivoronoi)[prop_num + Moose::dim];
 }
 
 // TODO: this should probably use the built-in min periodic distance!
