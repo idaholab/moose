@@ -40,6 +40,8 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
   if (!(_variable = dynamic_cast<MooseVariableFE<T> *>(_var)))
     if (!(_fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var)))
       _linear_fv_variable = dynamic_cast<MooseLinearVariableFV<T> *>(_var);
+  if (!(_field_variable = dynamic_cast<MooseVariableField<T> *>(_var)))
+    mooseError("The variable supplied to the variable interface is not of field type");
 
   _mvi_assembly =
       &problem.assembly(tid, (_var->kind() == Moose::VAR_SOLVER) ? _var->sys().number() : 0);
@@ -351,19 +353,7 @@ template <typename T>
 MooseVariableField<T> &
 MooseVariableInterface<T>::mooseVariableField()
 {
-  if (_variable)
-    return *_variable;
-  else
-  {
-    if (!_fv_variable)
-    {
-      if (!_linear_fv_variable)
-        mooseError("Either _variable or _fv_variable must be non-null in MooseVariableInterface");
-      return *_linear_fv_variable;
-    }
-
-    return *_fv_variable;
-  }
+  return *_field_variable;
 }
 
 template class MooseVariableInterface<Real>;

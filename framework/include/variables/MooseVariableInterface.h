@@ -227,6 +227,7 @@ protected:
   MooseVariableFE<T> * _variable = nullptr;
   MooseVariableFV<T> * _fv_variable = nullptr;
   MooseLinearVariableFV<T> * _linear_fv_variable = nullptr;
+  MooseVariableField<T> * _field_variable = nullptr;
 
 protected:
   Assembly * _mvi_assembly;
