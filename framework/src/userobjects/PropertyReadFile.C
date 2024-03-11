@@ -217,7 +217,7 @@ PropertyReadFile::initVoronoiCenterPoints()
   else
   {
     for (const auto i : make_range(_nvoronoi))
-      for (const auto j : make_range(_mesh.dimension()))
+      for (const auto j : make_range(Moose::dim))
         _center[i](j) = _reader.getData(i)[j];
   }
 }
