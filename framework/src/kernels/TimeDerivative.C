@@ -16,50 +16,66 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("MooseApp", TimeDerivative);
+registerMooseObject("MooseApp", VectorTimeDerivative);
 
+template <typename TK>
 InputParameters
-TimeDerivative::validParams()
+TimeDerivativeTempl<TK>::validParams()
 {
-  InputParameters params = TimeKernel::validParams();
-  params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
-                             "\\frac{\\partial u_h}{\\partial t})$.");
+  InputParameters params = TK::validParams();
+  if (std::is_same_v<TK, TimeKernel>)
+    params.addClassDescription("The time derivative operator with weak form "
+                               "$(\\psi_i, k\\frac{\\partial u_h}{\\partial t})$.");
+  else if (std::is_same_v<TK, VectorTimeKernel>)
+    params.addClassDescription("The vector time derivative operator with weak form "
+                               "$(\\vec{\\psi_i}, k\\frac{\\partial \\vec{u_h}}{\\partial t})$.");
   params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");
-
+  params.addParam<Real>("coeff", 1.0, "The constant coefficient");
   return params;
 }
 
-TimeDerivative::TimeDerivative(const InputParameters & parameters)
-  : TimeKernel(parameters), _lumping(getParam<bool>("lumping"))
+template <typename TK>
+TimeDerivativeTempl<TK>::TimeDerivativeTempl(const InputParameters & parameters)
+  : TK(parameters),
+    _lumping(TK::template getParam<bool>("lumping")),
+    _coeff(TK::template getParam<Real>("coeff"))
 {
 }
 
+template <typename TK>
 Real
-TimeDerivative::computeQpResidual()
+TimeDerivativeTempl<TK>::computeQpResidual()
 {
-  return _test[_i][_qp] * _u_dot[_qp];
+  return _coeff * TK::_test[TK::_i][TK::_qp] * TK::_u_dot[TK::_qp];
 }
 
+template <typename TK>
 Real
-TimeDerivative::computeQpJacobian()
+TimeDerivativeTempl<TK>::computeQpJacobian()
 {
-  return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
+  return _coeff * TK::_test[TK::_i][TK::_qp] * TK::_phi[TK::_j][TK::_qp] * TK::_du_dot_du[TK::_qp];
 }
 
+template <typename TK>
 void
-TimeDerivative::computeJacobian()
+TimeDerivativeTempl<TK>::computeJacobian()
 {
   if (_lumping)
   {
-    prepareMatrixTag(_assembly, _var.number(), _var.number());
+    TK::prepareMatrixTag(TK::_assembly, TK::_var.number(), TK::_var.number());
 
-    precalculateJacobian();
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+    TK::precalculateJacobian();
+    for (TK::_i = 0; TK::_i < TK::_test.size(); TK::_i++)
+      for (TK::_j = 0; TK::_j < TK::_phi.size(); TK::_j++)
+        for (TK::_qp = 0; TK::_qp < TK::_qrule->n_points(); TK::_qp++)
+          TK::_local_ke(TK::_i, TK::_i) +=
+              TK::_JxW[TK::_qp] * TK::_coord[TK::_qp] * computeQpJacobian();
 
-    accumulateTaggedLocalMatrix();
+    TK::accumulateTaggedLocalMatrix();
   }
   else
-    TimeKernel::computeJacobian();
+    TK::computeJacobian();
 }
+
+template class TimeDerivativeTempl<TimeKernel>;
+template class TimeDerivativeTempl<VectorTimeKernel>;

@@ -10,13 +10,15 @@
 #pragma once
 
 #include "TimeKernel.h"
+#include "VectorTimeKernel.h"
 
-class TimeDerivative : public TimeKernel
+template <typename TK>
+class TimeDerivativeTempl : public TK
 {
 public:
   static InputParameters validParams();
 
-  TimeDerivative(const InputParameters & parameters);
+  TimeDerivativeTempl(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
 
@@ -25,4 +27,8 @@ protected:
   virtual Real computeQpJacobian() override;
 
   bool _lumping;
+  Real _coeff;
 };
+
+using TimeDerivative = TimeDerivativeTempl<TimeKernel>;
+using VectorTimeDerivative = TimeDerivativeTempl<VectorTimeKernel>;
