@@ -193,7 +193,12 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
        {MooseUnits::BaseUnit::SECOND, -2}}}},                        // bar (unit of pressure)
     {"h", {60 * 60, 0, {{MooseUnits::BaseUnit::SECOND, 1}}}},        // hour
     {"day", {60 * 60 * 24, 0, {{MooseUnits::BaseUnit::SECOND, 1}}}}, // day
-    {"l", {1e-3, 0, {{MooseUnits::BaseUnit::METER, 3}}}},            // liter
+    {"year",
+     {60 * 60 * 24 * 365.25,
+      0,
+      {{MooseUnits::BaseUnit::SECOND, 1}}}}, // year (equal to an annum, we did not use a for the
+    // symbol as 1 Pa would be both 1 Pascal and 1e15 annums)
+    {"l", {1e-3, 0, {{MooseUnits::BaseUnit::METER, 3}}}}, // liter
     {"u",
      {1.66053906660e-27, 0, {{MooseUnits::BaseUnit::KILOGRAM, 3}}}}, // unified atomic mass unit
     {"at", {1, 0, {{MooseUnits::BaseUnit::COUNT, 1}}}}               // 1 single count (atom)
@@ -430,7 +435,8 @@ MooseUnits::parse(const std::string & unit_string)
 
   // consistency check
   if (out.size() != 1)
-    mooseError("Internal parse error. Remaining output stach size sould be 1, but is ", out.size());
+    mooseError("Internal parse error. Remaining output stack size should be 1, but is ",
+               out.size());
 
   *this = out.top();
   simplify();

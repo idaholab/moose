@@ -107,7 +107,9 @@ TEST(Units, convert)
       {{1.0, "K/m"}, {1.0, "degC/m"}},
       {{9.0, "degF/m"}, {5.0, "degC/m"}},
       // other conversions
-      {{96.48533212, "kJ/mol"}, {1.0, "eV/at"}}};
+      {{96.48533212, "kJ/mol"}, {1.0, "eV/at"}},
+      {{1, "day"}, {86400, "s"}},
+      {{1, "year"}, {365.25, "day"}}};
 
   for (const auto & p : pairs)
   {
