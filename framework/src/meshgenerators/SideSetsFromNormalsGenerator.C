@@ -49,10 +49,6 @@ SideSetsFromNormalsGenerator::validParams()
   params.setParameters("include_only_external_sides", true);
   params.suppressParameter<bool>("include_only_external_sides");
 
-  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
-  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
-  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
-
   return params;
 }
 
@@ -106,7 +102,7 @@ SideSetsFromNormalsGenerator::generate()
       for (const auto i : make_range(boundary_ids.size()))
       {
         _normal = _normals[i];
-        if (normalsWithinTol(_normal, normals[0]))
+        if (normalsWithinTol(_normal, normals[0], _normal_tol))
           flood(elem, _normals[i], boundary_ids[i], *mesh);
       }
     }

@@ -41,10 +41,6 @@ SideSetsFromPointsGenerator::validParams()
 
   params.suppressParameter<Point>("normal");
   params.suppressParameter<Real>("normal_tol");
-  params.suppressParameter<bool>("include_only_external_sides");
-  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
-  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
-  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
 
   return params;
 }
@@ -101,7 +97,7 @@ SideSetsFromPointsGenerator::generate()
 
           // If we *already* found a good but different side to paint
           // our sideset with, we've got an ambiguity here.
-          if (elem_to_flood && (!normalsWithinTol(normal_to_flood, normals[0]) ||
+          if (elem_to_flood && (!normalsWithinTol(normal_to_flood, normals[0], _normal_tol) ||
                                 elem_to_flood->which_neighbor_am_i(elem) == libMesh::invalid_uint))
             mooseError("Two ambiguous potential sideset sources found for boundary `",
                        _boundary_names[i],

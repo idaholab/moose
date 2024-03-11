@@ -39,9 +39,12 @@ SideSetsFromBoundingBoxGenerator::validParams()
       "block_id",
       "Subdomain id to set for inside/outside the bounding box",
       "The parameter 'block_id' is not used.");
-  params.addParam<std::vector<BoundaryName>>(
+  params.makeParamRequired<std::vector<BoundaryName>>("included_boundaries");
+  params.addDeprecatedParam<std::vector<BoundaryName>>(
       "boundaries_old",
-      "The list of boundaries on the specified block within the bounding box to be modified");
+      "The list of boundaries on the specified block within the bounding box to be modified",
+      "Deprecated, use 'included_boundaries' instead");
+  params.deprecateParam("boundaries_old", "included_boundaries", "4/01/2025");
   params.addRequiredParam<BoundaryName>(
       "boundary_new", "Boundary on specified block within the bounding box to assign");
   params.addParam<bool>("boundary_id_overlap",
@@ -51,14 +54,7 @@ SideSetsFromBoundingBoxGenerator::validParams()
       "location", location, "Control of where the subdomain id is to be set");
 
   // TODO: Implement each of these in the generate() routine using utilities in SidesetGeneratorBase
-  params.suppressParameter<Point>("normal");
-  params.suppressParameter<Real>("normal_tol");
   params.suppressParameter<bool>("fixed_normal");
-  params.suppressParameter<bool>("replace");
-  params.suppressParameter<bool>("include_only_external_sides");
-  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
-  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
-  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
   params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
   return params;
@@ -72,12 +68,17 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
                                                parameters.get<RealVectorValue>("top_right"))),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
 {
-  if (parameters.isParamSetByUser("boundaries_old"))
-    _boundaries_old = parameters.get<std::vector<BoundaryName>>("boundaries_old");
-  else if (parameters.isParamSetByUser("boundary_id_old"))
-    _boundaries_old = parameters.get<std::vector<BoundaryName>>("boundary_id_old");
-  else
-    mooseError("Either boundaries_old or boundary_id_old (deprecated) must be specified.");
+  if (_boundary_id_overlap)
+  {
+    const std::vector<std::string> incompatible_params = {"normal",
+                                                          "replace",
+                                                          "include_only_external_sides",
+                                                          "included_subdomains",
+                                                          "included_neighbors"};
+    for (const auto & param_name : incompatible_params)
+      if (isParamSetByUser(param_name))
+        paramError(param_name, "Parameter should not be used with boundary_id_overlap = true.");
+  }
 
   _boundary_names.push_back(parameters.get<BoundaryName>("boundary_new"));
 }
@@ -89,6 +90,9 @@ SideSetsFromBoundingBoxGenerator::generate()
   if (!mesh->is_replicated())
     mooseError("SideSetsFromBoundingBoxGenerator is not implemented for distributed meshes");
 
+  // construct the FE object so we can compute normals of faces
+  setup(*mesh);
+
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   boundary_info.build_node_list_from_side_list();
@@ -96,15 +100,6 @@ SideSetsFromBoundingBoxGenerator::generate()
   bool found_element = false;
   bool found_side_sets = false;
   const bool inside = (_location == "INSIDE");
-
-  // Get the list of boundary ids from the boundary names
-  auto boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _boundaries_old, false);
-
-  // Check that the old boundary ids/names exist in the mesh
-  for (std::size_t i = 0; i < boundary_ids.size(); ++i)
-    if (boundary_ids[i] == Moose::INVALID_BOUNDARY_ID)
-      paramError(
-          "boundaries", "The boundary '", _boundaries_old[i], "' was not found within the mesh");
 
   // Attempt to get the new boundary id from the name
   auto boundary_id_new = MooseMeshUtils::getBoundaryID(_boundary_names[0], *mesh);
@@ -132,16 +127,20 @@ SideSetsFromBoundingBoxGenerator::generate()
       {
         found_element = true;
         // loop over sides of elements within bounding box
-        for (unsigned int side = 0; side < elem->n_sides(); side++)
-          // loop over provided boundary vector to check all side sets for all boundary ids
-          for (auto boundary_id : boundary_ids)
-            // check if side has same boundary id that you are looking for
-            if (boundary_info.has_boundary_id(elem, side, boundary_id))
-            {
-              // assign new boundary value to boundary which meets meshmodifier criteria
-              boundary_info.add_side(elem, side, boundary_id_new);
-              found_side_sets = true;
-            }
+        for (const auto & side : make_range(elem->n_sides()))
+        {
+          _fe_face->reinit(elem, side);
+          const Point face_normal = _fe_face->get_normals()[0];
+
+          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+          {
+            // assign new boundary value to boundary which meets meshmodifier criteria
+            if (_replace)
+              boundary_info.remove_side(elem, side);
+            boundary_info.add_side(elem, side, boundary_id_new);
+            found_side_sets = true;
+          }
+        }
       }
     }
     if (!found_element && inside)
@@ -156,9 +155,9 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   else if (_boundary_id_overlap)
   {
-    if (boundary_ids.size() < 2)
+    if (_restricted_boundary_ids.size() < 2)
       mooseError("boundary_id_old out of bounds: ",
-                 boundary_ids.size(),
+                 _restricted_boundary_ids.size(),
                  " Must be 2 boundary inputs or more.");
 
     bool found_node = false;
@@ -175,14 +174,14 @@ SideSetsFromBoundingBoxGenerator::generate()
 
         // sort boundary ids on node and sort boundary ids provided in input file
         std::sort(node_boundary_ids.begin(), node_boundary_ids.end());
-        std::sort(boundary_ids.begin(), boundary_ids.end());
+        std::sort(_restricted_boundary_ids.begin(), _restricted_boundary_ids.end());
 
         // check if input boundary ids are all contained in the node
         // if true, write new boundary id on respective node
         if (std::includes(node_boundary_ids.begin(),
                           node_boundary_ids.end(),
-                          boundary_ids.begin(),
-                          boundary_ids.end()))
+                          _restricted_boundary_ids.begin(),
+                          _restricted_boundary_ids.end()))
         {
           boundary_info.add_node(*node, boundary_id_new);
           found_node = true;

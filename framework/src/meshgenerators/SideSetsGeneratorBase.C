@@ -119,10 +119,10 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
   // Handle incompatible parameters
   if (_include_only_external_sides && _check_neighbor_subdomains)
     paramError("include_only_external_sides", "External sides dont have neighbors");
+
   if (_check_boundaries)
   {
     const auto & included_boundaries = getParam<std::vector<BoundaryName>>("included_boundaries");
-    // TODO: add RunException test?
     for (const auto & boundary_name : _boundary_names)
       if (std::find(included_boundaries.begin(), included_boundaries.end(), boundary_name) !=
           included_boundaries.end())
@@ -132,11 +132,17 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
             "boundaries. If you are trying to restrict an existing boundary, you must use a "
             "different name for 'new_boundary', delete the old boundary, and then rename the "
             "new boundary to the old boundary.");
-  }
 
-  if (_check_boundaries)
-    _restricted_boundary_ids = MooseMeshUtils::getBoundaryIDs(
-        mesh, getParam<std::vector<BoundaryName>>("included_boundaries"), false);
+    _restricted_boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, included_boundaries, false);
+
+    // Check that the included boundary ids/names exist in the mesh
+    for (const auto & i : make_range(_restricted_boundary_ids.size()))
+      if (_restricted_boundary_ids[i] == Moose::INVALID_BOUNDARY_ID)
+        paramError("boundaries",
+                   "The boundary '",
+                   included_boundaries[i],
+                   "' was not found within the mesh");
+  }
 
   // Get the boundary ids from the names
   if (parameters().isParamValid("included_subdomains"))
@@ -217,9 +223,11 @@ SideSetsGeneratorBase::flood(const Elem * elem,
 }
 
 bool
-SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1, const Point & normal_2) const
+SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1,
+                                        const Point & normal_2,
+                                        const Real tol)
 {
-  return (1.0 - normal_1 * normal_2) <= _normal_tol;
+  return (1.0 - normal_1 * normal_2) <= tol;
 }
 
 bool
@@ -268,7 +276,7 @@ SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * elem,
   }
 
   // We'll just use the normal of the first qp
-  if (_using_normal && !normalsWithinTol(desired_normal, face_normal))
+  if (_using_normal && !normalsWithinTol(desired_normal, face_normal, _normal_tol))
     return false;
 
   return true;

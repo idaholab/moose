@@ -118,6 +118,8 @@ ParsedGenerateSideset::generate()
       _func_params[2] = curr_side->vertex_average()(2);
       if (evaluate(_func_F))
       {
+        if (_replace)
+          boundary_info.remove_side(elem, side);
         boundary_info.add_side(elem, side, boundary_ids[0]);
       }
     }

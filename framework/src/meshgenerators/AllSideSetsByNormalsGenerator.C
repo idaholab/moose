@@ -30,12 +30,12 @@ AllSideSetsByNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
+  params.setParameters("include_only_external_sides", true);
+  params.suppressParameter<bool>("include_only_external_sides");
+
+  params.suppressParameter<bool>("fixed_normal");
   params.suppressParameter<Point>("normal");
   params.suppressParameter<Real>("normal_tol");
-  params.suppressParameter<bool>("include_only_external_sides");
-  params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
-  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
-  params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
   params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
   params.addClassDescription("Adds sidesets to the entire mesh based on unique normals.");
@@ -67,9 +67,6 @@ AllSideSetsByNormalsGenerator::generate()
   for (const auto & elem : mesh->element_ptr_range())
     for (const auto side : make_range(elem->n_sides()))
     {
-      if (elem->neighbor_ptr(side))
-        continue;
-
       const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
 
@@ -77,7 +74,7 @@ AllSideSetsByNormalsGenerator::generate()
         // See if we've seen this normal before (linear search)
         const std::map<BoundaryID, RealVectorValue>::value_type * item = nullptr;
         for (const auto & id_pair : _boundary_to_normal_map)
-          if (std::abs(1.0 - id_pair.second * normals[0]) < 1e-5)
+          if (normalsWithinTol(id_pair.second, normals[0], 1e-5))
           {
             item = &id_pair;
             break;

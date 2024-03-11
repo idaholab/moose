@@ -25,12 +25,15 @@ SideSetsAroundSubdomainGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<std::vector<SubdomainName>>("block",
-                                                      "The blocks around which to create sidesets");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "block",
+      "The blocks around which to create sidesets",
+      "Deprecated, use 'included_subdomains' instead");
+  params.deprecateParam("block", "included_subdomains", "4/01/25");
 
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
-  params.suppressParameter<std::vector<SubdomainName>>("included_subdomains");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
+  params.suppressParameter<bool>("fixed_normal");
 
   params.addClassDescription(
       "Adds element faces that are on the exterior of the given block to the sidesets specified");
@@ -55,24 +58,13 @@ SideSetsAroundSubdomainGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  std::vector<SubdomainName> block_names = getParam<std::vector<SubdomainName>>("block");
-  // check that the blocks exist in the mesh
-  for (const auto & name : block_names)
-    if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-      paramError("block", "The block '", name, "' was not found in the mesh");
-
-  auto blocks = MooseMeshUtils::getSubdomainIDs(*mesh, block_names);
-  std::set<subdomain_id_type> block_ids(blocks.begin(), blocks.end());
+  // construct the FE object so we can compute normals of faces
+  setup(*mesh);
 
   // Create the boundary IDs from the list of names provided (the true flag creates ids from unknown
   // names)
   std::vector<boundary_id_type> boundary_ids =
       MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
-
-  // construct the FE object so we can compute normals of faces
-  setup(*mesh);
-  Point face_normal;
-  bool add_to_bdy = true;
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -87,10 +79,8 @@ SideSetsAroundSubdomainGenerator::generate()
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {
-    subdomain_id_type curr_subdomain = elem->subdomain_id();
-
     // We only need to loop over elements in the source subdomain
-    if (block_ids.count(curr_subdomain) == 0)
+    if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
       continue;
 
     for (const auto side : make_range(elem->n_sides()))
@@ -104,23 +94,18 @@ SideSetsAroundSubdomainGenerator::generate()
       {
         queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
       }
-      else if (neighbor == nullptr || // element on boundary OR
-               (!_include_only_external_sides &&
-                block_ids.count(neighbor->subdomain_id()) ==
-                    0)) // neighboring element is on a different subdomain
+      else
       {
-        if (_using_normal)
-        {
-          const std::vector<Point> & normals = _fe_face->get_normals();
-          _fe_face->reinit(elem, side);
-          face_normal = normals[0];
-          add_to_bdy = normalsWithinTol(_normal, face_normal);
-        }
-
+        _fe_face->reinit(elem, side);
+        const Point & face_normal = _fe_face->get_normals()[0];
         // Add the boundaries, if appropriate
-        if (add_to_bdy)
+        if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+        {
+          if (_replace)
+            boundary_info.remove_side(elem, side);
           for (const auto & boundary_id : boundary_ids)
             boundary_info.add_side(elem, side, boundary_id);
+        }
       }
     }
   }
@@ -161,24 +146,11 @@ SideSetsAroundSubdomainGenerator::generate()
       {
         const Elem * elem = mesh->elem_ptr(q.first);
         const unsigned int side = q.second;
-        const Elem * neighbor = elem->neighbor_ptr(side);
 
-        if (neighbor == nullptr || // element on boundary OR
-            block_ids.count(neighbor->subdomain_id()) ==
-                0) // neighboring element is on a different subdomain
-        {
-          if (_using_normal)
-          {
-            const std::vector<Point> & normals = _fe_face->get_normals();
-            _fe_face->reinit(elem, side);
-            face_normal = normals[0];
-            add_to_bdy = normalsWithinTol(_normal, face_normal);
-          }
-
-          // Add the boundaries, if appropriate
-          if (add_to_bdy)
-            responses[p - 1].push_back(std::make_pair(elem->id(), side));
-        }
+        _fe_face->reinit(elem, side);
+        const Point & face_normal = _fe_face->get_normals()[0];
+        if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+          responses[p - 1].push_back(std::make_pair(elem->id(), side));
       }
 
       mesh->comm().send(source_pid, responses[p - 1], request, replies_tag);
@@ -199,6 +171,8 @@ SideSetsAroundSubdomainGenerator::generate()
         const Elem * elem = mesh->elem_ptr(r.first);
         const unsigned int side = r.second;
 
+        if (_replace)
+          boundary_info.remove_side(elem, side);
         for (const auto & boundary_id : boundary_ids)
           boundary_info.add_side(elem, side, boundary_id);
       }

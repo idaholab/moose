@@ -56,9 +56,10 @@ protected:
    * Determines whether two normal vectors are within normal_tol of each other.
    * @param normal_1 The first normal vector to compare to normal_2.
    * @param normal_2 The second normal vector to compare to normal_1.
-   * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= normal_tol.
+   * @param tol The comparison tolerance.
+   * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= tol.
    */
-  bool normalsWithinTol(const Point & normal_1, const Point & normal_2) const;
+  static bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real tol);
 
   /**
    * Determines whether the given element's subdomain id is in the given subdomain_id_list.
@@ -74,6 +75,10 @@ protected:
                                        const uint & side,
                                        const MeshBase & mesh) const;
 
+  /**
+   * Determines whether the given element's side satisfies the following parameters:
+   * include_only_external_sides, included_boundaries, included_neighbor_subdomains and normal
+   */
   bool elemSideSatisfiesRequirements(const Elem * elem,
                                      const uint & side,
                                      const MeshBase & mesh,
