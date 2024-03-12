@@ -275,8 +275,6 @@ LinearSystem::solve()
 
   system().solve();
 
-  _linear_implicit_system.solution->close();
-
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
   // store info about the solve
