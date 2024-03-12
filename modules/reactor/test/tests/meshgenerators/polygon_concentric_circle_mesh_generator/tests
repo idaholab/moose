@@ -74,7 +74,7 @@
     requirement = 'The system shall generate a polygon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name.'
     recover = false
   []
-  [back_only_single_block_quadratic_tri7_quad9]
+  [back_only_single_block_quadratic_quad9]
     type = 'Exodiff'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only_sb_quadratic_quad9.e'
