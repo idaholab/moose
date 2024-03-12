@@ -11,14 +11,14 @@ such as a principal stress or a component of stress.
 
 If the scalar exceeds a threshold specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/nucleation_threshold), a line segment with a length specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/nucleation_length) will be inserted
 into the [MeshCut2DFractureUserObject.md] cutter mesh.
-Cracks are only allowed to initiate from elements on boundaries specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/initiate_on_boundary).
+Cracks will nucleate on the domain interior or boundary.  Crack nucleation can be limited to elements on boundaries specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/initiate_on_boundary).
 Once the nucleation criterion is reached, a line segment of the specified length is inserted into the cutter mesh,
 centered on the element centroid it nucleates from.
 The direction of the nucleated crack is normal to the direction returned by the `RankTwoTensor` scalar.
 For example, `MaxInPlanePrincipal` returns the direction of the maximum in-plane principal component and the crack direction is normal to this.
-The nucleation length should be at least the length of the element it nucleates in so that the nucleated crack will completely cut the element.
+It is an error for [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/nucleation_length) to be smaller than element the crack nucleates in .
 A crack will only be nucleated if it is at least a distance specified by [!param](/UserObjects/MeshCut2DRankTwoTensorNucleation/nucleation_radius) away from existing or nucleated cracks.
-If multiple cracks nucleate in the same xfem update and are within the specified `nucleation_radius`, the crack nucleated from the element with the lowest id will be retained and no other cracks within the `nucleation_radius` will be nucleated.
+If multiple cracks nucleate in the same xfem update and are within the specified `nucleation_radius`, the crack nucleated from the element with the lowest id will be retained and no other cracks within the `nucleation_radius` will be nucleated.  The `nucleation_radius` is a good way to limit the number of cracks that nucleate within a region which can lead to XFEM errors related to cutting element fragments where an element contains more than one XFEM cut.
 
 `MeshCut2DRankTwoTensorNucleation` copies several features available in the [XFEMRankTwoTensorMarkerUserObject.md].
 These include the nucleation threshold being provided as a coupled variable and the computation of the maximum value of the scalar
