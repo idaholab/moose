@@ -94,24 +94,28 @@ ComputeLinearFVGreenGaussGradientFaceThread::onInternalFace(const FaceInfo & fac
 void
 ComputeLinearFVGreenGaussGradientFaceThread::onBoundaryFace(const FaceInfo & face_info)
 {
-  if (auto * bc_pointer = _current_var->getBoundaryCondition(*face_info.boundaryIDs().begin()))
-  {
-    const auto face_type =
-        face_info.faceType(std::make_pair(_current_var->number(), _linear_system.number()));
+  auto * bc_pointer = _current_var->getBoundaryCondition(*face_info.boundaryIDs().begin());
+
+  const auto face_type =
+      face_info.faceType(std::make_pair(_current_var->number(), _linear_system.number()));
+  if (bc_pointer)
     bc_pointer->setCurrentFaceInfo(&face_info, face_type);
 
-    const auto dof_id =
-        face_type == FaceInfo::VarFaceNeighbors::ELEM
-            ? face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()]
-            : face_info.neighborInfo()
-                  ->dofIndices()[_linear_system.number()][_current_var->number()];
+  const auto * const elem_info = face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                     ? face_info.elemInfo()
+                                     : face_info.neighborInfo();
+  const auto state = Moose::currentState();
 
-    const auto contribution = face_info.normal() * face_info.faceArea() * face_info.faceCoord() *
-                              bc_pointer->computeBoundaryValue();
+  const auto dof_id = elem_info->dofIndices()[_linear_system.number()][_current_var->number()];
 
-    for (const auto i : make_range(_dim))
-      _new_gradient[i]->add(dof_id, contribution(i));
-  }
+  // If we don't have a boundary condition, then it's a natural condition. We'll use a one-term
+  // expansion approximation in that case
+  const auto contribution = face_info.normal() * face_info.faceArea() * face_info.faceCoord() *
+                            (bc_pointer ? bc_pointer->computeBoundaryValue()
+                                        : _current_var->getElemValue(*elem_info, state));
+
+  for (const auto i : make_range(_dim))
+    _new_gradient[i]->add(dof_id, contribution(i));
 }
 
 void
