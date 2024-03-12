@@ -11,6 +11,7 @@
 #include "Parser.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
