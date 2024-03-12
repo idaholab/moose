@@ -1,0 +1,45 @@
+name: Bug Report
+description: Report a bug that is preventing proper operation of the framework or an application
+labels: 'T: defect, P: normal'
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      #### Before submitting a bug, please make sure the issue hasn't been already addressed by searching through [the existing and past issues](https://github.com/idaholab/moose/issues).
+- type: textarea
+  attributes:
+    label: Bug Description
+    description: |
+      A clear and concise description of the problem (Note: A missing feature is not a bug).
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Steps to Reproduce
+    description: |
+      Steps to reproduce the behavior (input file, or modifications to an existing input file, etc.)
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Impact
+    description: |
+      Does this prevent you from getting your work done, or is it more of an annoyance?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: "[Optional] Diagnostics"
+    description: |
+      **Please note that the diagnostics contain information about your system.** 
+      To expedite the debugging process, please run the following and paste the output below.
+      ```sh
+      ./scripts/diagnostics.sh
+      ```
+  validations:
+    required: false
+- type: markdown
+  attributes:
+    value: >
+      Thanks for contributing!

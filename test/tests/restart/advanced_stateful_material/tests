@@ -1,0 +1,62 @@
+[Tests]
+  issues = '#25840'
+  design = 'syntax/Materials/index.md'
+
+  [checkpoint]
+    type = RunApp
+    input = advanced_stateful_material.i
+    requirement = 'The system shall be able to generate a checkpoint of stateful material properties that supports the advanced restart of the properties'
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when using advanced stateful restart when'
+
+    [remove_prop]
+      type = RunException
+      input = 'advanced_stateful_material_restart.i'
+      cli_args = "Materials/test/real_names='a'
+                  Materials/test/real_stateful_names='a'"
+      expect_err = 'The stateful material properties in RestartStatefulMaterial "test" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
+      prereq = checkpoint
+      detail = 'a stateful property for a single material object is removed'
+    []
+    [add_prop]
+      type = RunException
+      input = 'advanced_stateful_material_restart.i'
+      cli_args = "Materials/test/real_names='a b c'
+                  Materials/test/real_stateful_names='a b c'"
+      expect_err = 'The stateful material properties in RestartStatefulMaterial "test" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
+      prereq = checkpoint
+      detail = 'a stateful property for a single material object is added'
+    []
+    [object_rename]
+      type = RunException
+      input = 'advanced_stateful_material_restart.i'
+      cli_args = "Materials/active='new'
+                  Materials/new/type=RestartStatefulMaterial
+                  Materials/new/real_names='a'
+                  Materials/new/real_stateful_names='a'"
+      expect_err = 'The stateful material property \'a\' was declared in RestartStatefulMaterial "new" but was not declared in that object on checkpoint.'
+      prereq = checkpoint
+      detail = 'a previously checkpointed stateful property is declared in a new material'
+    []
+    [different_type]
+      type = RunException
+      input = 'advanced_stateful_material_restart.i'
+      cli_args = "Materials/test/real_names='a'
+                  Materials/test/real_stateful_names='a'
+                  Materials/test/int_names='b'"
+      expect_err = 'The type for the restarted stateful material property \'b\' does not match'
+      prereq = checkpoint
+      detail = 'the type of a restored stateful property has changed'
+    []
+    [different_state]
+      type = RunException
+      input = 'advanced_stateful_material_restart.i'
+      cli_args = "Materials/test/real_older_stateful_names='a'"
+      expect_err = 'The number of states for the restarted stateful material property \'a\' do not match.'
+      prereq = checkpoint
+      detail = 'the requested state of a restored stateful property has changed'
+    []
+  []
+[]

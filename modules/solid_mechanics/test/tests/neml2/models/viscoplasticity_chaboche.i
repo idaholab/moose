@@ -1,6 +1,6 @@
 [Solvers]
   [newton]
-    type = NewtonNonlinearSolver
+    type = Newton
   []
 []
 
@@ -25,7 +25,7 @@
     type = SR2Invariant
     invariant_type = 'VONMISES'
     tensor = 'state/internal/O'
-    invariant = 'state/internal/sm'
+    invariant = 'state/internal/s'
   []
   [yield]
     type = YieldFunction

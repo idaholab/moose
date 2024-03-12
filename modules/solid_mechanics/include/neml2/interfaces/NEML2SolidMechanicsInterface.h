@@ -26,34 +26,34 @@ public:
 
 #ifdef NEML2_ENABLED
 protected:
-  using NEML2ModelInterface<T>::getLabeledAxisAccessor;
+  using NEML2ModelInterface<T>::getNEML2VariableName;
   using NEML2ModelInterface<T>::model;
 
   virtual void validateModel() const override;
 
   // @{ Getters for NEML2 variable accessors
-  const neml2::LabeledAxisAccessor & stress() const { return _neml2_stress; }
-  const neml2::LabeledAxisAccessor & strain() const { return _neml2_strain; }
-  const neml2::LabeledAxisAccessor & temperature() const { return _neml2_temperature; }
-  const neml2::LabeledAxisAccessor & time() const { return _neml2_time; }
+  const neml2::VariableName & stress() const { return _neml2_stress; }
+  const neml2::VariableName & strain() const { return _neml2_strain; }
+  const neml2::VariableName & temperature() const { return _neml2_temperature; }
+  const neml2::VariableName & time() const { return _neml2_time; }
 
-  const neml2::LabeledAxisAccessor & stressOld() const { return _neml2_stress_n; }
-  const neml2::LabeledAxisAccessor & strainOld() const { return _neml2_strain_n; }
-  const neml2::LabeledAxisAccessor & temperatureOld() const { return _neml2_temperature_n; }
-  const neml2::LabeledAxisAccessor & timeOld() const { return _neml2_time_n; }
+  const neml2::VariableName & stressOld() const { return _neml2_stress_n; }
+  const neml2::VariableName & strainOld() const { return _neml2_strain_n; }
+  const neml2::VariableName & temperatureOld() const { return _neml2_temperature_n; }
+  const neml2::VariableName & timeOld() const { return _neml2_time_n; }
   // @}
 
 private:
   // @{ Variable accessors for the NEML2 material model
-  const neml2::LabeledAxisAccessor _neml2_stress;
-  const neml2::LabeledAxisAccessor _neml2_strain;
-  const neml2::LabeledAxisAccessor _neml2_temperature;
-  const neml2::LabeledAxisAccessor _neml2_time;
+  const neml2::VariableName _neml2_stress;
+  const neml2::VariableName _neml2_strain;
+  const neml2::VariableName _neml2_temperature;
+  const neml2::VariableName _neml2_time;
 
-  const neml2::LabeledAxisAccessor _neml2_stress_n;
-  const neml2::LabeledAxisAccessor _neml2_strain_n;
-  const neml2::LabeledAxisAccessor _neml2_temperature_n;
-  const neml2::LabeledAxisAccessor _neml2_time_n;
+  const neml2::VariableName _neml2_stress_n;
+  const neml2::VariableName _neml2_strain_n;
+  const neml2::VariableName _neml2_temperature_n;
+  const neml2::VariableName _neml2_time_n;
   // @}
 #endif // NEML2_ENABLED
 };
@@ -79,12 +79,12 @@ NEML2SolidMechanicsInterface<T>::NEML2SolidMechanicsInterface(const InputParamet
   : NEML2ModelInterface<T>(params, args...)
 #ifdef NEML2_ENABLED
     ,
-    // The LabeledAxisAccessors for the NEML2 variables:
-    _neml2_stress(getLabeledAxisAccessor(params.get<std::string>("neml2_stress")).on("state")),
-    _neml2_strain(getLabeledAxisAccessor(params.get<std::string>("neml2_strain")).on("forces")),
+    // The VariableNames for the NEML2 variables:
+    _neml2_stress(getNEML2VariableName(params.get<std::string>("neml2_stress")).on("state")),
+    _neml2_strain(getNEML2VariableName(params.get<std::string>("neml2_strain")).on("forces")),
     _neml2_temperature(
-        getLabeledAxisAccessor(params.get<std::string>("neml2_temperature")).on("forces")),
-    _neml2_time(getLabeledAxisAccessor(params.get<std::string>("neml2_time")).on("forces")),
+        getNEML2VariableName(params.get<std::string>("neml2_temperature")).on("forces")),
+    _neml2_time(getNEML2VariableName(params.get<std::string>("neml2_time")).on("forces")),
     // and their corresponding old state/forces:
     _neml2_stress_n(_neml2_stress.slice(1).on("old_state")),
     _neml2_strain_n(_neml2_strain.slice(1).on("old_forces")),
@@ -102,11 +102,11 @@ NEML2SolidMechanicsInterface<T>::validateModel() const
   NEML2ModelInterface<T>::validateModel();
 
   // The NEML2 model should have strain as an input
-  if (!model().input().has_variable(_neml2_strain))
+  if (!model().input_axis().has_variable(_neml2_strain))
     mooseError("The NEML2 model does not have ", _neml2_strain, " as an input.");
 
   // The NEML2 model should have stress as an output
-  if (!model().output().has_variable(_neml2_stress))
+  if (!model().output_axis().has_variable(_neml2_stress))
     mooseError("The NEML2 model does not have ", _neml2_stress, " as an output.");
 }
 #endif

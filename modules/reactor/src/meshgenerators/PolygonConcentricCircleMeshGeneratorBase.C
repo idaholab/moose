@@ -492,6 +492,10 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   else
     declareMeshProperty<subdomain_id_type>("quad_center_block_id",
                                            libMesh::Elem::invalid_subdomain_id);
+
+  // declare metadata for internal interface boundaries
+  declareMeshProperty<bool>("interface_boundaries", false);
+  declareMeshProperty<std::set<boundary_id_type>>("interface_boundary_ids", {});
 }
 
 std::unique_ptr<MeshBase>
@@ -781,6 +785,44 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                     _ring_intervals,
                     getParam<MooseEnum>("ring_id_assign_type") == "ring_wise",
                     _quad_center_elements);
+
+  // add internal side set info to metadata
+  if (_create_inward_interface_boundaries || _create_outward_interface_boundaries)
+  {
+    setMeshProperty("interface_boundaries", true);
+    // lists boundary ids assigned to interfaces
+    std::set<boundary_id_type> boundary_ids = mesh0->get_boundary_info().get_boundary_ids();
+    std::set<boundary_id_type> interface_boundary_ids;
+    if (_create_outward_interface_boundaries)
+    {
+      const unsigned int num_boundary_ids = boundary_ids.size();
+      for (const auto i : make_range(num_boundary_ids))
+      {
+        const unsigned int id = i * 2 + 1 + _interface_boundary_id_shift;
+        auto it = boundary_ids.find(id);
+        if (it != boundary_ids.end())
+        {
+          boundary_ids.erase(it);
+          interface_boundary_ids.insert(id);
+        }
+      }
+    }
+    if (_create_inward_interface_boundaries)
+    {
+      const unsigned int num_boundary_ids = boundary_ids.size();
+      for (const auto i : make_range(num_boundary_ids))
+      {
+        const unsigned int id = i * 2 + 2 + _interface_boundary_id_shift;
+        auto it = boundary_ids.find(id);
+        if (it != boundary_ids.end())
+        {
+          boundary_ids.erase(it);
+          interface_boundary_ids.insert(id);
+        }
+      }
+    }
+    setMeshProperty("interface_boundary_ids", interface_boundary_ids);
+  }
 
   bool flat_side_up = getMeshProperty<bool>("flat_side_up", name());
   if (flat_side_up)

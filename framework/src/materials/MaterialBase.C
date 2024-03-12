@@ -45,6 +45,11 @@ MaterialBase::validParams()
   params.addPrivateParam<bool>("_neighbor", false);
   params.addPrivateParam<bool>("_interface", false);
 
+  // Forces the calling of initStatefulProperties() even when this material
+  // does not declare any properties that are stateful. Right now,
+  // this is only used for porous_flow... pretty please keep it that way?
+  params.addPrivateParam<bool>("_force_stateful_init", false);
+
   // Outputs
   params += OutputInterface::validParams();
   params.set<std::vector<OutputName>>("outputs") = {"none"};
@@ -106,7 +111,8 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
     _has_stateful_property(false),
-    _declare_suffix(getParam<MaterialPropertyName>("declare_suffix"))
+    _declare_suffix(getParam<MaterialPropertyName>("declare_suffix")),
+    _force_stateful_init(getParam<bool>("_force_stateful_init"))
 {
 }
 
@@ -120,8 +126,8 @@ MaterialBase::initStatefulProperties(unsigned int n_points)
   // because owned props might have been promoted to stateful by calls to
   // getMaterialProperty[Old/Older] from other objects.  In these cases, this
   // object won't otherwise know that it owns stateful properties.
-  for (auto & prop : _supplied_props)
-    if (materialData().getMaterialPropertyStorage().isStatefulProp(prop) &&
+  for (const auto id : _supplied_prop_ids)
+    if (materialData().getMaterialPropertyStorage().getPropRecord(id).stateful() &&
         !_overrides_init_stateful_props)
       mooseWarning(std::string("Material \"") + name() +
                    "\" provides one or more stateful "

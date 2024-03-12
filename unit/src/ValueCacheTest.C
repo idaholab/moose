@@ -14,61 +14,64 @@
 TEST(ValueCacheTest, empty)
 {
   ValueCache<int> cache(2);
-
-  int out;
-  Real d2;
-  EXPECT_EQ(cache.guess({1, 1}, out, d2), false);
+  EXPECT_THROW(cache.getNeighbor({1, 1}), std::runtime_error);
+  EXPECT_EQ(cache.getNeighbors({1, 1}, 1).size(), 0);
 }
 
-TEST(ValueCacheTest, guess)
+TEST(ValueCacheTest, getNeighbor)
 {
+  // retrieving a single value
   ValueCache<std::vector<Real>> cache(3);
   cache.insert({4.2, 2.7, 1.6}, {1, 2});
   cache.insert({3.1, 1.2, 0.1}, {3, 4});
   cache.insert({5.8, 1.9, 3.6}, {5, 6});
 
-  std::vector<Real> out;
-  Real d2;
-
-  EXPECT_EQ(cache.guess({0, 0, 0}, out, d2), true);
-  EXPECT_EQ(out[0], 3);
-  EXPECT_EQ(out[1], 4);
-  EXPECT_NEAR(d2, 3.1 * 3.1 + 1.2 * 1.2 + 0.1 * 0.1, 1e-9);
+  const auto & [point, value, distance] = cache.getNeighbor({0, 0, 0});
+  EXPECT_EQ(value[0], 3);
+  EXPECT_EQ(value[1], 4);
+  EXPECT_EQ(point[0], 3.1);
+  EXPECT_EQ(point[1], 1.2);
+  EXPECT_EQ(point[2], 0.1);
+  EXPECT_NEAR(distance, 3.1 * 3.1 + 1.2 * 1.2 + 0.1 * 0.1, 1e-9);
 }
 
-TEST(ValueCacheTest, kNN)
+TEST(ValueCacheTest, getNeighbors)
 {
+  // retrieving multiple neighbors
   ValueCache<std::vector<Real>> cache(3);
-
   cache.insert({4.2, 2.7, 1.6}, {1, 2});
   cache.insert({3.1, 1.2, 0.1}, {3, 4});
 
-  auto nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
+  auto nearest_neighbors = cache.getNeighbors({0, 0, 0}, 3);
   EXPECT_EQ(nearest_neighbors.size(), 2);
 
   cache.insert({5.8, 1.9, 3.6}, {5, 6});
   cache.insert({7.1, 2.2, 4.1}, {7, 8});
   cache.insert({2.8, 2.1, 0.6}, {9, 10});
 
-  nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
+  nearest_neighbors = cache.getNeighbors({0, 0, 0}, 3);
 
   // First nearest neighbor
-  auto [key, value, distance] = nearest_neighbors[0];
-  EXPECT_NEAR(key[0], 3.1, 1e-9);
-  EXPECT_NEAR(key[1], 1.2, 1e-9);
-  EXPECT_NEAR(key[2], 0.1, 1e-9);
-  EXPECT_EQ(value[0], 3);
-  EXPECT_EQ(value[1], 4);
-  EXPECT_NEAR(distance, 3.1 * 3.1 + 1.2 * 1.2 + 0.1 * 0.1, 1e-9);
+  {
+    auto [key, value, distance] = nearest_neighbors[0];
+    EXPECT_NEAR(key[0], 3.1, 1e-9);
+    EXPECT_NEAR(key[1], 1.2, 1e-9);
+    EXPECT_NEAR(key[2], 0.1, 1e-9);
+    EXPECT_EQ(value[0], 3);
+    EXPECT_EQ(value[1], 4);
+    EXPECT_NEAR(distance, 3.1 * 3.1 + 1.2 * 1.2 + 0.1 * 0.1, 1e-9);
+  }
 
   // Second nearest neighbor
-  std::tie(key, value, distance) = nearest_neighbors[1];
-  EXPECT_NEAR(key[0], 2.8, 1e-9);
-  EXPECT_NEAR(key[1], 2.1, 1e-9);
-  EXPECT_NEAR(key[2], 0.6, 1e-9);
-  EXPECT_EQ(value[0], 9);
-  EXPECT_EQ(value[1], 10);
-  EXPECT_NEAR(distance, 2.8 * 2.8 + 2.1 * 2.1 + 0.6 * 0.6, 1e-9);
+  {
+    auto [key, value, distance] = nearest_neighbors[1];
+    EXPECT_NEAR(key[0], 2.8, 1e-9);
+    EXPECT_NEAR(key[1], 2.1, 1e-9);
+    EXPECT_NEAR(key[2], 0.6, 1e-9);
+    EXPECT_EQ(value[0], 9);
+    EXPECT_EQ(value[1], 10);
+    EXPECT_NEAR(distance, 2.8 * 2.8 + 2.1 * 2.1 + 0.6 * 0.6, 1e-9);
+  }
 }
 
 TEST(ValueCacheTest, rebuildTree)
@@ -77,9 +80,28 @@ TEST(ValueCacheTest, rebuildTree)
   for (int i = 0; i < 110; ++i)
     cache.insert({Real(i)}, i);
 
-  int out;
-  Real d2;
-  EXPECT_EQ(cache.guess({57.3}, out, d2), true);
-  EXPECT_EQ(out, 57);
-  EXPECT_NEAR(d2, 0.3 * 0.3, 1e-9);
+  const auto & [point, value, distance] = cache.getNeighbor({57.3});
+  EXPECT_EQ(value, 57);
+  EXPECT_EQ(point[0], 57.0);
+  EXPECT_NEAR(distance, 0.3 * 0.3, 1e-9);
+}
+
+TEST(ValueCacheTest, persistence)
+{
+  {
+    ValueCache<std::vector<Real>> cache("test.cache", 3);
+    cache.clear(); // clear it in case a file was hanging around from a previous test
+    cache.insert({4.2, 2.7, 1.6}, {1, 2});
+    cache.insert({3.1, 1.2, 0.1}, {3, 4});
+  }
+
+  {
+    ValueCache<std::vector<Real>> cache("test.cache", 3);
+    auto nearest_neighbors = cache.getNeighbors({0, 0, 0}, 3);
+    EXPECT_EQ(nearest_neighbors.size(), 2);
+    auto [key, value, distance] = nearest_neighbors[0];
+    EXPECT_NEAR(key[0], 3.1, 1e-9);
+    EXPECT_NEAR(key[1], 1.2, 1e-9);
+    EXPECT_NEAR(key[2], 0.1, 1e-9);
+  }
 }

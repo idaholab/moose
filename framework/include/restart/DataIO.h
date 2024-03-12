@@ -34,6 +34,7 @@
 #include <map>
 #include <unordered_map>
 #include <memory>
+#include <optional>
 
 namespace libMesh
 {
@@ -94,6 +95,12 @@ template <typename P, typename Q>
 inline void storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, void * context);
 
 /**
+ * Optional helper routine
+ */
+template <typename P>
+inline void storeHelper(std::ostream & stream, std::optional<P> & data, void * context);
+
+/**
  * HashMap helper routine
  */
 template <typename P, typename Q>
@@ -140,6 +147,12 @@ inline void loadHelper(std::istream & stream, std::map<P, Q> & data, void * cont
  */
 template <typename P, typename Q>
 inline void loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, void * context);
+
+/**
+ * Optional helper routine
+ */
+template <typename P>
+inline void loadHelper(std::istream & stream, std::optional<P> & data, void * context);
 
 /**
  * Hashmap helper routine
@@ -314,6 +327,17 @@ dataStore(std::ostream & stream, std::unordered_map<T, U> & m, void * context)
 
     storeHelper(stream, it->second, context);
   }
+}
+
+template <typename T>
+inline void
+dataStore(std::ostream & stream, std::optional<T> & m, void * context)
+{
+  bool has_value = m.has_value();
+  dataStore(stream, has_value, nullptr);
+
+  if (has_value)
+    storeHelper(stream, *m, context);
 }
 
 template <typename T, typename U>
@@ -614,6 +638,22 @@ dataLoad(std::istream & stream, std::unordered_map<T, U> & m, void * context)
   }
 }
 
+template <typename T>
+inline void
+dataLoad(std::istream & stream, std::optional<T> & m, void * context)
+{
+  bool has_value;
+  dataLoad(stream, has_value, nullptr);
+
+  if (has_value)
+  {
+    m = T{};
+    loadHelper(stream, *m, context);
+  }
+  else
+    m.reset();
+}
+
 template <typename T, typename U>
 inline void
 dataLoad(std::istream & stream, HashMap<T, U> & m, void * context)
@@ -819,6 +859,14 @@ storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, void * conte
   dataStore(stream, data, context);
 }
 
+// Optional Helper Function
+template <typename P>
+inline void
+storeHelper(std::ostream & stream, std::optional<P> & data, void * context)
+{
+  dataStore(stream, data, context);
+}
+
 // HashMap Helper Function
 template <typename P, typename Q>
 inline void
@@ -879,6 +927,14 @@ loadHelper(std::istream & stream, std::map<P, Q> & data, void * context)
 template <typename P, typename Q>
 inline void
 loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, void * context)
+{
+  dataLoad(stream, data, context);
+}
+
+// Optional Helper Function
+template <typename P>
+inline void
+loadHelper(std::istream & stream, std::optional<P> & data, void * context)
 {
   dataLoad(stream, data, context);
 }
@@ -965,59 +1021,3 @@ public:
 } // namespace libMesh
 
 #endif
-
-/**
- * Stores the data \p v in a "skippable" sense. That is, when it is loaded,
- * its data can be skipped through.
- *
- * The resulting data _must_ be loaded with dataLoadSkippable or dataLoadSkip.
- */
-template <typename T>
-void dataStoreSkippable(std::ostream & stream, T & v, void * context);
-/**
- * Loads a piece of "skippable" data. See dataStoreSkippable.
- */
-template <typename T>
-void dataLoadSkippable(std::istream & stream, T & v, void * context);
-/**
- * Skips a piece of "skippable" data. See dataStoreSkippable.
- */
-void dataLoadSkip(std::istream & stream);
-
-template <typename T>
-inline void
-dataStoreSkippable(std::ostream & stream, T & v, void * context)
-{
-  std::stringstream data_stream;
-  dataStore(data_stream, v, context);
-
-  // We have an extra std::size_t value because the store of
-  // std::stringstream also stores the size
-  std::size_t data_stream_size =
-      static_cast<std::size_t>(data_stream.tellp()) + sizeof(std::size_t);
-  dataStore(stream, data_stream_size, nullptr);
-
-  dataStore(stream, data_stream, nullptr);
-}
-
-template <typename T>
-inline void
-dataLoadSkippable(std::istream & stream, T & v, void * context)
-{
-  std::size_t data_stream_size;
-  dataLoad(stream, data_stream_size, nullptr);
-
-  std::stringstream data_stream;
-  dataLoad(stream, data_stream, nullptr);
-
-  dataLoad(data_stream, v, context);
-}
-
-inline void
-dataLoadSkip(std::istream & stream)
-{
-  std::size_t data_stream_size;
-  dataLoad(stream, data_stream_size, nullptr);
-
-  stream.seekg(data_stream_size, std::ios::cur);
-}

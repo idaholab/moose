@@ -105,6 +105,13 @@ public:
   bool lastGapInRing(const unsigned int gap_index) const;
 
   /**
+   * Get the index of the ring for a certain pin index
+   * @param[in] pin pin index
+   * @return ring index
+   */
+  unsigned int ringIndex(const unsigned int pin) const;
+
+  /**
    * Get the unit normals for all of the gaps
    * @return gap unit normals
    */
@@ -583,7 +590,19 @@ public:
    */
   bool insideLattice(const Point & point) const;
 
-  std::pair<int, int> sortedGap(const int & id0, const int & id1) const;
+  /**
+   * Conversion from lattice pin indexing to the 2D input file index. The indexing matches like
+   * this. Note that you have a 30 degree rotation between the 2D input and the positions output
+   *  2 1
+   * 3 0 6
+   *  4 5
+   * @param pin_index index of the pin in the utility ring-wise indexing
+   * @param row_index row index (from the top) in the 2D input
+   * @param within_row_index index within the row
+   */
+  void get2DInputPatternIndex(const unsigned int pin_index,
+                              unsigned int & row_index,
+                              unsigned int & within_row_index) const;
 
 protected:
   /**

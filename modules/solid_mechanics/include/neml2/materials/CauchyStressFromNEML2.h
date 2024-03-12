@@ -71,10 +71,10 @@ protected:
   neml2::LabeledMatrix _dout_din;
 
   /// The state variables of the NEML2 material model (stored as MOOSE material properties)
-  std::map<neml2::LabeledAxisAccessor, MaterialProperty<std::vector<Real>> *> _state_vars;
+  std::map<neml2::VariableName, MaterialProperty<std::vector<Real>> *> _state_vars;
 
   /// The old state variables of the NEML2 material model (stored as MOOSE material properties)
-  std::map<neml2::LabeledAxisAccessor, const MaterialProperty<std::vector<Real>> *> _state_vars_old;
+  std::map<neml2::VariableName, const MaterialProperty<std::vector<Real>> *> _state_vars_old;
 
 #endif // NEML2_ENABLED
 };

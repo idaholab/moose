@@ -101,7 +101,7 @@ SymmetricRankFourTensor toMOOSE(const neml2::BatchTensor & t);
  */
 template <size_t I = 0, typename T, typename... Ts>
 void set(neml2::LabeledVector & v,
-         const std::vector<neml2::LabeledAxisAccessor> & indices,
+         const std::vector<neml2::VariableName> & indices,
          const T * t0,
          const Ts *... t);
 
@@ -111,7 +111,7 @@ void set(neml2::LabeledVector & v,
  */
 template <size_t I = 0, typename T, typename... Ts>
 void setBatched(neml2::LabeledVector & v,
-                const std::vector<neml2::LabeledAxisAccessor> & indices,
+                const std::vector<neml2::VariableName> & indices,
                 const T * t0,
                 const Ts *... t);
 
@@ -172,7 +172,7 @@ homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
 template <size_t I, typename T, typename... Ts>
 void
 set(neml2::LabeledVector & v,
-    const std::vector<neml2::LabeledAxisAccessor> & indices,
+    const std::vector<neml2::VariableName> & indices,
     const T * t0,
     const Ts *... t)
 {
@@ -188,7 +188,7 @@ set(neml2::LabeledVector & v,
 template <size_t I, typename T, typename... Ts>
 void
 setBatched(neml2::LabeledVector & v,
-           const std::vector<neml2::LabeledAxisAccessor> & indices,
+           const std::vector<neml2::VariableName> & indices,
            const T * t0,
            const Ts *... t)
 {

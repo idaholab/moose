@@ -105,6 +105,7 @@ mv "$dir/test/src/base/${srcname}TestApp.C.${kind}" "$dir/test/src/base/${dstnam
 mv "$dir/include/base/${srcname}App.h" "$dir/include/base/${dstname}App.h"
 mv "$dir/test/include/base/${srcname}TestApp.h" "$dir/test/include/base/${dstname}TestApp.h"
 mv "$dir/doc/config.yml.${kind}" "$dir/doc/config.yml"
+mv "$dir/doc/sqa_reports.yml.${kind}" "$dir/doc/sqa_reports.yml"
 mv "$dir/doc/moosedocs.py.${kind}" "$dir/doc/moosedocs.py"
 chmod a+x "$dir/doc/moosedocs.py"
 chmod a+x "$dir/run_tests"
@@ -116,6 +117,7 @@ rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
 rm -f $dir/test/src/base/StorkTestApp.C.*
 rm -f $dir/doc/config.yml.*
+rm -f $dir/doc/sqa_reports.yml.*
 rm -f $dir/doc/moosedocs.py.*
 
 if [[ "$kind" == "app" ]]; then

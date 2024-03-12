@@ -873,7 +873,7 @@ Assembly::reinitFE(const Elem * elem)
     }
   }
 
-  auto n = _extra_elem_ids.size() - 1;
+  auto n = numExtraElemIntegers();
   for (auto i : make_range(n))
     _extra_elem_ids[i] = _current_elem->get_extra_integer(i);
   _extra_elem_ids[n] = _current_elem->subdomain_id();
@@ -1331,7 +1331,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
   if (_xfem != nullptr)
     modifyFaceWeightsDueToXFEM(elem, side);
 
-  auto n = _extra_elem_ids.size() - 1;
+  auto n = numExtraElemIntegers();
   for (auto i : make_range(n))
     _extra_elem_ids[i] = _current_elem->get_extra_integer(i);
   _extra_elem_ids[n] = _current_elem->subdomain_id();
@@ -1708,7 +1708,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
       _current_neighbor_volume += JxW[qp] * _coord_neighbor[qp];
   }
 
-  auto n = _neighbor_extra_elem_ids.size() - 1;
+  auto n = numExtraElemIntegers();
   for (auto i : make_range(n))
     _neighbor_extra_elem_ids[i] = _current_neighbor_elem->get_extra_integer(i);
   _neighbor_extra_elem_ids[n] = _current_neighbor_elem->subdomain_id();

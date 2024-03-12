@@ -43,7 +43,7 @@ As discussed earlier, the ELEMENT mode and the ALL mode produce input vectors wi
 Only two verbosity levels are currently implemented, e.g., `verbose = true` and `verbose = false`. In the verbose mode, additional information about the NEML2 material model is printed to the console. An example output is listed below
 
 ```text
-** BEGIN NEML2 INFO***
+*** BEGIN NEML2 INFO ***
 
 Input:
 ----------------------------------------

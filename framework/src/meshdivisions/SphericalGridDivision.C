@@ -29,7 +29,7 @@ SphericalGridDivision::validParams()
 
   // Spatial bounds of the sphere
   params.addRangeCheckedParam<Real>(
-      "r_min", 0, "r_min>0", "Minimum radial coordinate (for a hollow sphere)");
+      "r_min", 0, "r_min>=0", "Minimum radial coordinate (for a hollow sphere)");
   params.addRequiredRangeCheckedParam<Real>("r_max", "r_max>0", "Maximum radial coordinate");
 
   // Number of bins
@@ -87,7 +87,7 @@ SphericalGridDivision::initialize()
     // Note that if the positions are not co-planar, the distance reported would be bigger but there
     // could still be an overlap. Looking at min_center_dist is not enough
     if (MooseUtils::absoluteFuzzyGreaterThan(min_dist, min_center_dist))
-      mooseError(
+      mooseWarning(
           "Spherical grids centered on the positions are too close to each other (min distance: ",
           min_center_dist,
           "), closer than the radial extent of each grid. Mesh division is ill-defined");
@@ -120,7 +120,7 @@ SphericalGridDivision::divisionIndex(const Point & pt) const
     // If distributing using positions, find the closest position
     const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
     const auto nearest_center_index = _center_positions->getNearestPositionIndex(pt, initial);
-    offset = nearest_center_index * getNumDivisions();
+    offset = nearest_center_index * _n_radial;
     pc(0) = (pt - _center_positions->getPosition(nearest_center_index, initial)).norm();
   }
 

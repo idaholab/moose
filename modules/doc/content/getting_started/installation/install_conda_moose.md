@@ -21,4 +21,12 @@ If you are running into errors, please see our
 !alert note
 Know that you will need to `conda activate moose` for +each terminal window you open, and each time
 you wish to perform MOOSE related work+. If you wish to make this automatic, you can add that
-command to the end of your shell profile.
+command to the end of your shell profile with the command below:
+
+```bash
+if [[ "$0" = *"bash" ]]; then
+    echo "conda activate moose" >> ~/.bash_profile
+elif [[ "$0" = "zsh" ]]; then
+    echo "conda activate moose" >> ~/.zshrc
+fi
+```

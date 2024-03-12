@@ -49,17 +49,12 @@ ComputeCrystalPlasticityThermalEigenstrain::ComputeCrystalPlasticityThermalEigen
 }
 
 void
-ComputeCrystalPlasticityThermalEigenstrain::initQpStatefulProperties()
-{
-  ComputeCrystalPlasticityEigenstrainBase::initQpStatefulProperties();
-  // rotate the thermal deforamtion gradient for crystals based on Euler angles
-  _lattice_thermal_expansion_coefficients[_qp] =
-      _thermal_expansion_coefficients.rotated(_crysrot[_qp]);
-}
-
-void
 ComputeCrystalPlasticityThermalEigenstrain::computeQpDeformationGradient()
 {
+  // rotate the thermal deformation gradient for crystals based on Euler angles
+  _lattice_thermal_expansion_coefficients[_qp] =
+      _thermal_expansion_coefficients.rotated(_crysrot[_qp]);
+
   // compute the deformation gradient due to thermal expansion
   Real dtheta = (_temperature[_qp] - _temperature_old[_qp]) * _substep_dt / _dt;
   RankTwoTensor residual_equivalent_thermal_expansion_increment =

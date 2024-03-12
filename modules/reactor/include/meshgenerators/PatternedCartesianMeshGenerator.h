@@ -88,6 +88,10 @@ protected:
   std::vector<bool> _exclude_ids;
   /// hold ID patterns for each manual reporting ID. Individual ID pattern contains ID values for each pattern cell.
   std::map<std::string, std::vector<std::vector<dof_id_type>>> _id_patterns;
+  /// whether the interface boundary ids from input meshes are shifted, using a user-defined pattern of values for each pattern cell
+  const bool _use_interface_boundary_id_shift;
+  /// hold user-defined shift values for each pattern cell
+  std::vector<std::vector<boundary_id_type>> _interface_boundary_id_shift_pattern;
 
   /**
    * Adds background and duct region mesh to each part outer part of stitched square meshes. Note

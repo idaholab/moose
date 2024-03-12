@@ -105,7 +105,7 @@ CartesianGridDivision::initialize()
     // Note that if the positions are not co-planar, the distance reported would be bigger but there
     // could still be an overlap. Looking at min_center_dist is not enough
     if (MooseUtils::absoluteFuzzyGreaterThan(min_dist, min_center_dist))
-      mooseError(
+      mooseWarning(
           "Cartesian grids centered on the positions are too close to each other (min distance: ",
           min_center_dist,
           "), closer than the extent of each grid. Mesh division is ill-defined");
@@ -148,7 +148,7 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
     // look at the relative position of the point compared to that position
     const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
     const auto nearest_grid_center_index = _center_positions->getNearestPositionIndex(pt, initial);
-    offset = nearest_grid_center_index * getNumDivisions();
+    offset = nearest_grid_center_index * _nx * _ny * _nz;
     const auto nearest_grid_center =
         _center_positions->getPosition(nearest_grid_center_index, initial);
     bottom_left = -_widths / 2;

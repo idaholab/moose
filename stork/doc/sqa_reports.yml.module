@@ -1,0 +1,10 @@
+Applications:
+    stork:
+        exe_directory: ${MOOSE_DIR}/modules/stork
+        app_types:
+            - StorkApp
+        content_directory: ${MOOSE_DIR}/modules/stork/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml

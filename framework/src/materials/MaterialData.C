@@ -10,6 +10,7 @@
 #include "MaterialData.h"
 #include "Material.h"
 #include "MaterialPropertyStorage.h"
+#include "MaterialBase.h"
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage, const THREAD_ID tid)
   : _storage(storage), _tid(tid), _n_qpoints(0), _swapped(false), _resize_only_if_smaller(false)
@@ -88,7 +89,18 @@ MaterialData::eraseProperty(const Elem * elem)
 }
 
 unsigned int
-MaterialData::addPropertyHelper(const std::string & prop_name, const unsigned int state)
+MaterialData::addPropertyHelper(const std::string & prop_name,
+                                const std::type_info & type,
+                                const unsigned int state,
+                                const MaterialBase * const declarer)
 {
-  return _storage.addProperty(prop_name, state);
+  return _storage.addProperty(prop_name, type, state, declarer);
+}
+
+const MaterialBase &
+MaterialData::castRequestorToDeclarer(const MooseObject & requestor) const
+{
+  const auto declarer = dynamic_cast<const MaterialBase *>(&requestor);
+  mooseAssert(declarer, "Not a MaterialBase");
+  return *declarer;
 }

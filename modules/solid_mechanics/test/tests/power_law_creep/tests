@@ -69,6 +69,7 @@
       exodiff = 'restart2_out.e'
       detail = 'that shall be restartable with a response that matches the original run.'
       exodiff_opts = '-TM'
+      prereq = nonad/restart1
     []
     [smallstrain]
       type = Exodiff
@@ -99,6 +100,7 @@
       exodiff = 'ad_restart2_out.e'
       detail = 'that shall be restartable with a response that matches the original run.'
       exodiff_opts = '-TM'
+      prereq = ad/restart1
     []
     [smallstrain]
       type = Exodiff

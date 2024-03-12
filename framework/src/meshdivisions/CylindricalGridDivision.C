@@ -130,7 +130,7 @@ CylindricalGridDivision::initialize()
     // Note that if the positions are not co-planar, the distance reported would be bigger but there
     // could still be an overlap. Looking at min_center_dist is not enough
     if (MooseUtils::absoluteFuzzyGreaterThan(min_dist, min_center_dist))
-      mooseError(
+      mooseWarning(
           "Cylindrical grids centered on the positions are too close to each other (min distance: ",
           min_center_dist,
           "), closer than the radial extent of each grid. Mesh division is ill-defined");
@@ -167,7 +167,7 @@ CylindricalGridDivision::divisionIndex(const Point & pt) const
     // If dividing using positions, find the closest position
     const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
     const auto nearest_center_index = _center_positions->getNearestPositionIndex(pt, initial);
-    offset = nearest_center_index * getNumDivisions();
+    offset = nearest_center_index * _n_radial * _n_azim * _n_axial;
     const auto new_center = _center_positions->getPosition(nearest_center_index, initial);
     pc(2) = (pt - new_center) * _direction;
     in_plane = (pt - new_center) - pc(2) * _direction;

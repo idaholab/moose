@@ -24,7 +24,7 @@
 #include "SymmetricRankFourTensor.h"
 
 typedef BatchMaterial<BatchMaterialUtils::TupleStd,
-                      // Outputs: stress, internal variables, dstress/dstrain
+                      // Outputs: stress, dstress/dstrain
                       std::tuple<RankTwoTensor, RankFourTensor>,
                       // Inputs:
                       //   strain

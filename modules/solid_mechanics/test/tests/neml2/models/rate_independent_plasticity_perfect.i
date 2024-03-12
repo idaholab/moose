@@ -1,6 +1,6 @@
 [Solvers]
   [newton]
-    type = NewtonNonlinearSolver
+    type = Newton
   []
 []
 
@@ -20,7 +20,7 @@
     type = SR2Invariant
     invariant_type = 'VONMISES'
     tensor = 'state/internal/M'
-    invariant = 'state/internal/sm'
+    invariant = 'state/internal/s'
   []
   [yield]
     type = YieldFunction
@@ -58,10 +58,10 @@
     type = ImplicitUpdate
     implicit_model = 'surface'
     solver = 'newton'
-    additional_outputs = 'state/internal/Ep'
   []
   [model]
     type = ComposedModel
     models = 'return_map elastic_strain elasticity'
+    additional_outputs = 'state/internal/Ep'
   []
 []

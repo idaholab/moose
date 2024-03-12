@@ -2912,7 +2912,8 @@ void
 NSFVBase<BaseType>::addMixingLengthMaterial()
 {
   const std::string u_names[3] = {"u", "v", "w"};
-  InputParameters params = getFactory().getValidParams("MixingLengthTurbulentViscosityMaterial");
+  InputParameters params =
+      getFactory().getValidParams("MixingLengthTurbulentViscosityFunctorMaterial");
   assignBlocks(params, _blocks);
 
   for (unsigned int d = 0; d < _dim; ++d)

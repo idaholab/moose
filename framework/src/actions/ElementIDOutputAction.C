@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "AddOutputAction.h"
+#include "Assembly.h"
 
 registerMooseAction("MooseApp", ElementIDOutputAction, "add_aux_kernel");
 
@@ -55,7 +56,7 @@ ElementIDOutputAction::act()
         auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
         auto kernel_params = _factory.getValidParams("ExtraElementIDAux");
         kernel_params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
-        for (unsigned int i = 0; i < _mesh->getMesh().n_elem_integers(); ++i)
+        for (unsigned int i = 0; i < _problem->assembly(0, 0).numExtraElemIntegers(); ++i)
         {
           auto & var_name = _mesh->getMesh().get_elem_integer_name(i);
           if (!has_element_id_names ||

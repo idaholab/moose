@@ -800,6 +800,11 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
           center_side_opposite_node = side_index;
       const auto neighbor_on_other_side_of_opposite_center_side =
           center_elem->neighbor_ptr(center_side_opposite_node);
+
+      // Element is on a boundary, cannot form a coarse element
+      if (!neighbor_on_other_side_of_opposite_center_side)
+        continue;
+
       fine_elements.insert(neighbor_on_other_side_of_opposite_center_side);
       for (const auto & tri_node : neighbor_on_other_side_of_opposite_center_side->node_ref_range())
         if (neighbor_on_other_side_of_opposite_center_side->is_vertex(

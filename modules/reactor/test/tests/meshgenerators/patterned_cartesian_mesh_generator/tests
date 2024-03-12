@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedCartesianMeshGenerator.md'
-  issues = '#22828 #23367'
+  issues = '#22828 #23367 #26921'
   [square_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -234,5 +234,13 @@
                   --mesh-only "patterned_err.e"'
     expect_err = 'the assembly is cut off so much that the internal structure that should not be altered is compromised.'
     requirement = 'The system shall throw an error if the circular regions or protected non-circular regions of the input cartesian mesh geometry are cut off.'
+  []
+  [interface_boundary_id_shift_pattern]
+    type = 'Exodiff'
+    input = 'interface_boundary_id_shift.i'
+    exodiff = 'interface_boundary_id_shift_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall be able to shift boundary IDs of cartesian mesh geometry based on the user-defined pattern, for each cell, of shifts in boundary ids of interfaces.'
+    recover = false
   []
 []

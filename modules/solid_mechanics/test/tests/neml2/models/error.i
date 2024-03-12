@@ -1,6 +1,6 @@
 [Solvers]
   [newton]
-    type = NewtonNonlinearSolver
+    type = Newton
     max_its = 1 # Force an exception
   []
 []
@@ -13,7 +13,7 @@
     type = SR2Invariant
     invariant_type = 'VONMISES'
     tensor = 'state/internal/M'
-    invariant = 'state/internal/sm'
+    invariant = 'state/internal/s'
   []
   [yield]
     type = YieldFunction

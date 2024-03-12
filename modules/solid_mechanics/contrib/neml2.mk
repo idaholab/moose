@@ -36,15 +36,7 @@ ENABLE_NEML2 = $(_ENABLE_NEML2_DEFAULT)
 _ENABLE_NEML2_SET_BY_USER = false
 endif
 
-ifneq ($(ENABLE_NEML2),true)
-
-ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
-$(info Not compiling MOOSE with NEML2 because ENABLE_NEML2 is set to false.)
-else
-$(info Not compiling MOOSE with NEML2 because NEML2_DIR is not a valid NEML2 checkout and/or libtorch is not enabled.)
-endif
-
-else
+ifeq ($(ENABLE_NEML2),true)
 
 ifneq ($(ENABLE_LIBTORCH),true)
 $(error Attempting to compile MOOSE with NEML2, but libTorch is not enabled. \
@@ -97,7 +89,7 @@ $(NEML2_DIR)/src/%.$(obj-suffix) : $(NEML2_DIR)/src/%.cxx
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 ADDITIONAL_INCLUDES  += -iquote$(NEML2_INCLUDE)
-ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED -DDTYPE=Float64
+ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED -DDTYPE=Float64 -DINT_DTYPE=Int64
 ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD)
 ADDITIONAL_DEPEND_LIBS += $(NEML2_LIB)
 

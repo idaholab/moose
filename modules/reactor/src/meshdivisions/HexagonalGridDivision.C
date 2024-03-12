@@ -93,7 +93,7 @@ HexagonalGridDivision::initialize()
     // this bound is not sufficiently strict. The simplest example would be non-coplanar
     // points, which can be a great distance away axially but be on the same axis
     if (MooseUtils::absoluteFuzzyGreaterThan(_lattice_flat_to_flat, min_center_dist))
-      mooseError(
+      mooseWarning(
           "Hexagonal grids centered on the positions are too close to each other (min distance: ",
           min_center_dist,
           "), closer than the extent of each grid (",

@@ -713,6 +713,46 @@ HexagonalLatticeUtils::insideLattice(const Point & point) const
 }
 
 void
+HexagonalLatticeUtils::get2DInputPatternIndex(const unsigned int pin_index,
+                                              unsigned int & row_index,
+                                              unsigned int & within_row_index) const
+{
+
+  // First compute the ring on which the pin is
+  const auto ring_index = ringIndex(pin_index);
+  row_index = _n_rings - ring_index;
+  within_row_index = _n_rings - 1;
+
+  const auto n_pin_sectors = pins(ring_index) / 6;
+  // Loop around the center until we reach the pin_index
+  // We start on the diagonal at the top
+
+  for (const auto local_i : make_range(pin_index - firstPinInRing(ring_index)))
+  {
+    if (local_i < n_pin_sectors)
+      within_row_index--;
+    else if (local_i < 3 * n_pin_sectors)
+      row_index++;
+    else if (local_i < 4 * n_pin_sectors)
+      within_row_index++;
+    else if (local_i < 5 * n_pin_sectors)
+    {
+      row_index--;
+      within_row_index++;
+    }
+    else
+    {
+      row_index--;
+      within_row_index--;
+    }
+  }
+
+  // Underflow (row_index is invalid_uint) will also fail this assert
+  mooseAssert(row_index < 2 * _n_rings - 1, "Inverse indexing failed");
+  mooseAssert(within_row_index < 2 * _n_rings - 1, "Inverse indexing failed");
+}
+
+void
 HexagonalLatticeUtils::computeGapIndices()
 {
   std::set<std::pair<int, int>> indices;
@@ -907,6 +947,17 @@ HexagonalLatticeUtils::lastPinInRing(const unsigned int ring) const
     return 0;
   else
     return totalPins(ring) - 1;
+}
+
+unsigned int
+HexagonalLatticeUtils::ringIndex(const unsigned int pin) const
+{
+  for (const auto i : make_range(_n_rings))
+  {
+    if (pin <= lastPinInRing(i + 1))
+      return i + 1;
+  }
+  mooseError("Should not reach here. Pin index: ", pin, " for ", _n_rings, " rings.");
 }
 
 bool

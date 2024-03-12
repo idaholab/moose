@@ -5,7 +5,7 @@
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 0 %}
-{% set version = "2024.01.23" %}
+{% set version = "2024.02.28" %}
 {% set vtk_friendly_version = "9.2" %}
 
 # permanent

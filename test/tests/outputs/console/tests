@@ -53,6 +53,30 @@
     requirement = 'The system shall support outputting console information to a file.'
     issues = '#1927'
   [../]
+  [./file_system_information_2procs_head]
+    # Test that file contains regex
+    type = CheckFiles
+    input = 'console.i'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out'
+    check_files = 'console_file_system_information_out.txt'
+    check_not_exists = 'console_file_system_information_out_0.txt console_file_system_information_out_1.txt'
+    recover = false
+
+    requirement = 'The system shall support outputting head processor console information to a file when run in parallel.'
+    issues = '#26174'
+  [../]
+  [./file_system_information_2procs_all]
+    # Test that file contains regex
+    type = CheckFiles
+    input = 'console.i'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out --keep-cout'
+    check_files = 'console_file_system_information_out_0.txt console_file_system_information_out_1.txt'
+    recover = false
+    min_parallel = 2
+
+    requirement = "The system shall support outputting all processors' console information to separate files when run in parallel with the --keep-cout command line option."
+    issues = '#26174'
+  [../]
   [./file_postprocessor]
     # Test that file contains regex
     type = CheckFiles

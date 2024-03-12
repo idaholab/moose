@@ -1,6 +1,6 @@
 [Solvers]
   [newton]
-    type = NewtonNonlinearSolver
+    type = Newton
   []
 []
 
@@ -25,7 +25,7 @@
     type = SR2Invariant
     invariant_type = 'VONMISES'
     tensor = 'state/internal/M'
-    invariant = 'state/internal/sm'
+    invariant = 'state/internal/s'
   []
   [yield]
     type = YieldFunction
@@ -89,16 +89,16 @@
     type = ImplicitUpdate
     implicit_model = 'implicit_rate'
     solver = 'newton'
-    additional_outputs = 'state/internal/gamma'
   []
   [model0]
     type = ComposedModel
     models = "trial_state return_map trial_flow_rate
               plastic_strain_rate plastic_strain"
-    additional_outputs = 'state/internal/Ep'
+    additional_outputs = 'state/internal/gamma'
   []
   [model]
     type = ComposedModel
     models = 'model0 elastic_strain cauchy_stress'
+    additional_outputs = 'state/internal/Ep'
   []
 []

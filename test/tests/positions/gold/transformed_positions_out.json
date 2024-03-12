@@ -1,0 +1,91 @@
+{
+    "reporters": {
+        "rotate": {
+            "type": "TransformedPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        },
+        "scale": {
+            "type": "TransformedPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        },
+        "translate": {
+            "type": "TransformedPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "rotate": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 6.123233995736766e-17,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": -1.0,
+                        "y": 6.123233995736766e-17,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "scale": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2,
+            "translate": {
+                "positions_1d": [
+                    {
+                        "x": 10.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 11.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 10.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                ]
+            }
+        }
+    ]
+}

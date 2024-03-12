@@ -18,11 +18,13 @@
 
 #include <vector>
 #include <memory>
+#include <typeinfo>
 
 class MaterialPropertyStorage;
 class MooseObject;
 class Material;
 class XFEM;
+class MaterialBase;
 
 /**
  * Proxy for accessing MaterialPropertyStorage.
@@ -204,7 +206,10 @@ private:
   /// The underlying property data
   std::array<MaterialProperties, max_state + 1> _props;
 
-  unsigned int addPropertyHelper(const std::string & prop_name, const unsigned int state);
+  unsigned int addPropertyHelper(const std::string & prop_name,
+                                 const std::type_info & type,
+                                 const unsigned int state,
+                                 const MaterialBase * const declarer);
 
   template <typename T, bool is_ad, bool declare>
   GenericMaterialProperty<T, is_ad> & getPropertyHelper(const std::string & prop_name,
@@ -212,6 +217,11 @@ private:
                                                         const MooseObject & requestor);
 
   static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);
+
+  /**
+   * Helper for casting \p requestor to a MaterialBase in addPropertyHepler() (templated)
+   */
+  const MaterialBase & castRequestorToDeclarer(const MooseObject & requestor) const;
 
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
@@ -263,7 +273,8 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
     mooseAssert(state == 0, "Cannot declare properties for states other than zero");
 
   // Register/get the ID of the property
-  const auto prop_id = addPropertyHelper(prop_name, state);
+  const auto prop_id = addPropertyHelper(
+      prop_name, typeid(T), state, declare ? &castRequestorToDeclarer(requestor) : nullptr);
 
   // Initialize the states that we need
   const auto size = prop_id + 1;

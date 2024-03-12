@@ -40,7 +40,13 @@ Console::validParams()
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
-  params.addParam<bool>("output_file", false, "Output to the file");
+  params.addParam<bool>("output_file",
+                        false,
+                        "Output to the file. The default behavior is to write to file only from "
+                        "the head processor. If \"--keep-cout\" is passed to the executable, then "
+                        "each processor will write to its own file. The same parallel behaviour "
+                        "can also be achieved by passing \"--keep-cout --redirect-stdout\" to the "
+                        "executable without setting this parameter to true.");
   params.addParam<bool>(
       "show_multiapp_name", false, "Indent multiapp output using the multiapp name");
 
@@ -188,6 +194,7 @@ Console::Console(const InputParameters & parameters)
     _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _time_format(getParam<MooseEnum>("time_format").getEnum<TimeFormatEnum>()),
+    _write_all_procs_to_files(_app.getParam<bool>("keep_cout")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -296,7 +303,15 @@ Console::initialSetup()
 std::string
 Console::filename()
 {
-  return _file_base + ".txt";
+  std::string file_name;
+  if (_write_all_procs_to_files)
+  {
+    std::string pid = std::to_string(processor_id());
+    file_name = _file_base + "_" + pid + ".txt";
+  }
+  else
+    file_name = _file_base + ".txt";
+  return file_name;
 }
 
 void
@@ -381,7 +396,7 @@ Console::output()
 void
 Console::writeStreamToFile(bool append)
 {
-  if (!_write_file)
+  if (!_write_file || (!_write_all_procs_to_files && processor_id() > 0))
     return;
 
   // Create the stream

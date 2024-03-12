@@ -1,0 +1,57 @@
+{
+    "reporters": {
+        "hex_grid": {
+            "type": "HexagonalGridPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "hex_grid": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

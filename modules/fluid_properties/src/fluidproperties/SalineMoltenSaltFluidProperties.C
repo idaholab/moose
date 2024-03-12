@@ -60,7 +60,7 @@ SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputPara
   _fluid_name = MooseUtils::join(name, "-");
 #else
   mooseError("Saline was not made available during the build and cannot be used. Make sure you "
-             "have the contrib/saline submodule checked out.");
+             "have the 'modules/fluid_properties/contrib/saline' submodule checked out.");
 #endif
 }
 

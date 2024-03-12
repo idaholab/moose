@@ -59,6 +59,7 @@ The following units are currently supported
 | `bar` | $10^5\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Bar | pressure, stress |
 | `h` | $3600\, \text{s}$ | hour | time |
 | `day` | $86400\, \text{s}$ | day | time (`d` would create an ambiguity between centi-day and candela) |
+| `year` | $365.25\, \text{day}$ | annum | time (Julian calendar year, `a` would create an ambiguity between Peta-annum and Pascal) |
 | `l` | $0.001\, \text{m}^{3}$ | liter | volume |
 | `u` | $1.66054\cdot10^{-27}\, \text{kg}^{3}$ | unified atomic mass unit | mass |
 | `at` | $\text{at}$ | atom | single count of substance |
