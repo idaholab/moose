@@ -13,10 +13,10 @@
 [gen]
   type = GeneratedMeshGenerator
   dim = 2
-  nx = 20
+  nx = 60
   ny = 10
-  xmin = 0
-  xmax = 2
+  xmin = -3
+  xmax = 3
   ymin = 0.0
   ymax = 1.0
   elem_type = QUAD4
@@ -24,29 +24,61 @@
 [top_left]
   type = BoundingBoxNodeSetGenerator
   new_boundary = pull_top_left
-  bottom_left = '-0.01 0.99 0'
-  top_right = '0.11 1.01 0'
+  bottom_left = '-3.01 0.99 0'
+  top_right = '-2.99 1.01 0'
   input = gen
+[]
+[top_mid_left]
+  type = BoundingBoxNodeSetGenerator
+  new_boundary = pull_mid_left
+  bottom_left = '-1.01 0.99 0'
+  top_right = '-0.99 1.01 0'
+  input = top_left
+[]
+[top_mid_right]
+  type = BoundingBoxNodeSetGenerator
+  new_boundary = pull_mid_right
+  bottom_left = '0.99 0.99 0'
+  top_right = '1.01 1.01 0'
+  input = top_mid_left
 []
 [top_right]
   type = BoundingBoxNodeSetGenerator
   new_boundary = pull_top_right
-  bottom_left = '1.89 0.99 0'
-  top_right = '2.01 1.01 0'
-  input = top_left
+  bottom_left = '2.99 0.99 0'
+  top_right = '3.01 1.01 0'
+  input = top_mid_right
 []
-[top_middle_ss]
+
+[top_mid_left_ss]
   type = SideSetsFromBoundingBoxGenerator
   input = top_right
-  bottom_left = '0.79 0.89 0'
-  top_right = '1.21 1.01 0'
-  block_id = '0'
-  boundary_new = top_middle_ss
+  bottom_left = '-2.21 0.89 0'
+  top_right = '-1.79 1.01 0'
+  boundary_new = top_mid_left_ss
   boundaries_old = top
 []
-[nucleate]
+[top_mid_ss]
+  type = SideSetsFromBoundingBoxGenerator
+  input = top_mid_left_ss
+  bottom_left = '-0.21 0.89 0'
+  top_right = '0.21 1.01 0'
+  boundary_new = top_mid_ss
+  boundaries_old = top
+[]
+[top_mid_right_ss]
+  type = SideSetsFromBoundingBoxGenerator
+  input = top_mid_ss
+  bottom_left = '1.79 0.89 0'
+  top_right = '2.21 1.01 0'
+  boundary_new = top_mid_right_ss
+  boundaries_old = top
+[]
+
+[nucleation_strip]
+  # strip in middle of domain where cracks can nucleate
   type = ParsedSubdomainMeshGenerator
-  input = top_middle_ss
+  input = top_mid_right_ss
   combinatorial_geometry = 'y > 0.39 & y < 0.51'
   block_id = 10
 []
@@ -74,8 +106,9 @@
     tensor = stress
     scalar_type = MaxPrincipal
     nucleation_threshold = nucleation_threshold
-    initiate_on_boundary = 'left right'
-    nucleation_length = 0.15
+    # initiate_on_boundary = 'left right'
+    nucleation_radius = .41
+    nucleation_length = 0.21
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -109,38 +142,56 @@
 [Functions]
   [nucleation_x]
     type = ParsedFunction
-    expression = '300+x*50'
+    expression = 'A*cos(pi*x)+D'
+    symbol_names = 'A D'
+    symbol_values = '100 200'
   []
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
+[Physics/SolidMechanics/QuasiStatic]
+  [all]
     strain = FINITE
     planar_formulation = plane_strain
     add_variables = true
     generate_output = 'stress_xx stress_yy vonmises_stress max_principal_stress'
-  [../]
+  []
 []
 
 [Functions]
-  [bc_pull_top]
+  [bc_pull_edge]
+    type = ParsedFunction
+    expression = 0.0004*t
+  []
+  [bc_pull_mid]
     type = ParsedFunction
     expression = 0.0005*t
   []
 []
 
 [BCs]
-  [top_edges]
+  [top_edge_nodes]
       type = FunctionDirichletBC
       boundary = 'pull_top_left pull_top_right'
       variable = disp_y
-      function = bc_pull_top
+      function = bc_pull_edge
   []
+  [top_mid_nodes]
+      type = FunctionDirichletBC
+      boundary = 'pull_mid_left pull_mid_right'
+      variable = disp_y
+      function = bc_pull_mid
+  []
+  # [top_middle]
+  #   type = NeumannBC
+  #   boundary = 'top_mid_left_ss top_mid_ss top_mid_right_ss'
+  #   variable = disp_y
+  #   value = -2000
+  # []
   [top_middle]
-    type = NeumannBC
-    boundary = top_middle_ss
+    type = DirichletBC
+    boundary = 'top_mid_left_ss top_mid_ss top_mid_right_ss'
     variable = disp_y
-    value = -2000
+    value = 0
   []
   [bottom_x]
     type = DirichletBC
@@ -193,13 +244,14 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 5
+  end_time = 10
   max_xfem_update = 100
 []
 
 [Outputs]
   csv=true
-  execute_on = TIMESTEP_END
+  execute_on = FINAL
+  # exodus=true
   # [xfemcutter]
   #   type=XFEMCutMeshOutput
   #   xfem_cutter_uo=cut_mesh2
