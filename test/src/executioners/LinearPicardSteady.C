@@ -162,6 +162,8 @@ LinearPicardSteady::execute()
       solveSystem(sys_number, &options);
     }
   }
+  for (const auto sys_number : _linear_sys_numbers)
+    _problem.getLinearSystem(sys_number).computeGradients();
 
   _last_solve_converged = true;
 

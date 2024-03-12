@@ -32,6 +32,7 @@
 #include "LinearFVKernel.h"
 #include "UserObject.h"
 #include "SolutionInvalidity.h"
+#include "MooseLinearVariableFV.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -138,6 +139,51 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 }
 
 void
+LinearSystem::computeGradients()
+{
+  TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
+
+  using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+  ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                _fe_problem.mesh().ownedElemInfoEnd());
+
+  using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+  FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
+                                _fe_problem.mesh().ownedFaceInfoEnd());
+
+  PARALLEL_TRY
+  {
+    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
+        _fe_problem, _fe_problem.linearSysNum(name()));
+    Threads::parallel_reduce(face_info_range, gradient_face_thread);
+  }
+  PARALLEL_CATCH;
+
+  // We must assemble here since we may have added face contributions to cells owned by neighboring
+  // processes, and we must perform all our face summations before performing division by the cell
+  // volumes in our volume thread
+  for (const auto tid : make_range(libMesh::n_threads()))
+    for (auto * const base_var : getVariables(tid))
+    {
+      auto * const linear_fv_var = dynamic_cast<MooseLinearVariableFV<Real> *>(base_var);
+      mooseAssert(linear_fv_var,
+                  "This should be a linear FV variable, did we somehow add a nonlinear variable to "
+                  "the linear system?");
+      auto & gradient = linear_fv_var->gradientContainer();
+      for (auto & grad_component : gradient)
+        grad_component->close();
+    }
+
+  PARALLEL_TRY
+  {
+    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
+        _fe_problem, _fe_problem.linearSysNum(name()));
+    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
+  }
+  PARALLEL_CATCH;
+}
+
+void
 LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
                                           const std::set<TagID> & matrix_tags)
 {
@@ -160,6 +206,8 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     }
   }
 
+  computeGradients();
+
   // linear contributions from the domain
   PARALLEL_TRY
   {
@@ -172,14 +220,6 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        _fe_problem, _fe_problem.linearSysNum(name()));
-    Threads::parallel_reduce(face_info_range, gradient_face_thread);
-
-    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        _fe_problem, _fe_problem.linearSysNum(name()));
-    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
 
     ComputeLinearFVElementalThread elem_thread(_fe_problem,
                                                _fe_problem.linearSysNum(name()),

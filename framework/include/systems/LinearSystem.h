@@ -96,6 +96,11 @@ public:
   virtual TagID systemMatrixTag() const override { return _system_matrix_tag; }
   ///@}
 
+  /**
+   * Compute the Green-Gauss gradients
+   */
+  void computeGradients();
+
 protected:
   /**
    * Compute the right hand side and system matrix for given tags
