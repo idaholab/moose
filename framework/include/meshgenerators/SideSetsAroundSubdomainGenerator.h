@@ -27,4 +27,9 @@ public:
   SideSetsAroundSubdomainGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
+
+  /**
+   * Determine whether the given side of an element resides on an external or internal boundary
+   */
+  static bool elemSideOnBoundary(const Elem * elem, const uint & side);
 };

@@ -94,7 +94,7 @@ SideSetsAroundSubdomainGenerator::generate()
       {
         queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
       }
-      else
+      else if (elemSideOnBoundary(elem, side))
       {
         _fe_face->reinit(elem, side);
         const Point & face_normal = _fe_face->get_normals()[0];
@@ -149,7 +149,8 @@ SideSetsAroundSubdomainGenerator::generate()
 
         _fe_face->reinit(elem, side);
         const Point & face_normal = _fe_face->get_normals()[0];
-        if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+        if (elemSideOnBoundary(elem, side) &&
+            elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
           responses[p - 1].push_back(std::make_pair(elem->id(), side));
       }
 
@@ -188,4 +189,11 @@ SideSetsAroundSubdomainGenerator::generate()
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+bool
+SideSetsAroundSubdomainGenerator::elemSideOnBoundary(const Elem * elem, const uint & side)
+{
+  const Elem * neighbor = elem->neighbor_ptr(side);
+  return neighbor == nullptr or elem->subdomain_id() != neighbor->subdomain_id();
 }

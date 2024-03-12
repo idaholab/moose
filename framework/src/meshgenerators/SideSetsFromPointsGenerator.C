@@ -42,6 +42,10 @@ SideSetsFromPointsGenerator::validParams()
   params.suppressParameter<Point>("normal");
   params.suppressParameter<Real>("normal_tol");
 
+  // It doesn't make sense to allow internal sides for this side set generator.
+  params.setParameters("include_only_external_sides", true);
+  params.suppressParameter<bool>("include_only_external_sides");
+
   return params;
 }
 
@@ -50,6 +54,7 @@ SideSetsFromPointsGenerator::SideSetsFromPointsGenerator(const InputParameters &
 {
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");
+  _using_normal = true;
 }
 
 std::unique_ptr<MeshBase>
