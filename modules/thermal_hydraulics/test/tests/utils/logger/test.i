@@ -9,7 +9,7 @@
 
 [Components]
   [warn]
-    type = LogWarningComponent
+    type = LoggerTestComponent
   []
 
   [hs]

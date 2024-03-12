@@ -12,12 +12,12 @@
 #include "Component.h"
 
 /**
- * Component that logs a warning
+ * Component for testing Logger
  */
-class LogWarningComponent : public Component
+class LoggerTestComponent : public Component
 {
 public:
-  LogWarningComponent(const InputParameters & params);
+  LoggerTestComponent(const InputParameters & params);
 
 public:
   static InputParameters validParams();

@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LogWarningComponent.h"
+#include "LoggerTestComponent.h"
 
-registerMooseObject("ThermalHydraulicsTestApp", LogWarningComponent);
+registerMooseObject("ThermalHydraulicsTestApp", LoggerTestComponent);
 
 InputParameters
-LogWarningComponent::validParams()
+LoggerTestComponent::validParams()
 {
   InputParameters params = Component::validParams();
-  params.addClassDescription("Component that logs a warning.");
+  params.addClassDescription("Component for testing Logger.");
   return params;
 }
 
-LogWarningComponent::LogWarningComponent(const InputParameters & params) : Component(params)
+LoggerTestComponent::LoggerTestComponent(const InputParameters & params) : Component(params)
 {
   logWarning("This is a warning.");
 }
