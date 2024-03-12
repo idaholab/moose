@@ -208,6 +208,8 @@ class CSVDiffer(CSVTools):
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
         self.ignore = args.ignore_fields
+        if (not self.ignore):
+            self.ignore = []
         self.__only_compare_custom = False
 
     def __enter__(self):
@@ -284,12 +286,12 @@ class CSVDiffer(CSVTools):
         elif len(keys1) < len(keys2):
             (large, small) = (keys2, keys1)
             for key in large:
-                if key not in small:
+                if key not in small and key not in self.ignore:
                     self.addError(
                         self.files[0], "Header '" + key + "' is missing")
         elif len(keys1) > len(keys2):
             for key in large:
-                if key not in small:
+                if key not in small and key not in self.ignore:
                     self.addError(
                         self.files[1], "Header '" + key + "' is missing")
         else:
@@ -301,7 +303,7 @@ class CSVDiffer(CSVTools):
 
         # now check that each column is the same length
         for key in keys1:
-            if len(table1[key]) != len(table2[key]):
+            if key not in self.ignore and len(table1[key]) != len(table2[key]):
                 self.addError(
                     self.files[0], "Columns with header '" + key + "' aren't the same length")
                 # assume all columns are the same length, so don't report the other errors
@@ -312,11 +314,11 @@ class CSVDiffer(CSVTools):
 
         # now check all the values in the table
         for key in keys1:
+            if key in self.ignore:
+                continue
             for val1, val2 in zip(table1[key], table2[key]):
                 # if customized tolerances specified use them otherwise
                 # use the default
-                if self.ignore and key in self.ignore:
-                    break
                 if self.custom_columns:
                     try:
                         abs_zero = abs_zero_map[key]
