@@ -32,8 +32,7 @@ MeshCut2DRankTwoTensorNucleation::validParams()
   params.addRequiredRangeCheckedParam<Real>(
       "nucleation_length",
       "nucleation_length >= 0",
-      "Size of crack to Nucleate.  If less than element size, "
-      "nucleated crack bisects one element.");
+      "Size of crack to Nucleate.  Must be larger than element length crack is nucleated in.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -150,12 +149,7 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
           "\n  length to bisect element: ",
           bisect_length);
 
-    if (is_point_0_on_external_boundary && is_point_1_on_external_boundary)
-    {
-      point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
-      point_1 = point_1 + (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
-    }
-    else if (is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
+    if (is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
     {
       point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
       point_1 = point_1 + 2.0 * extend_length * crack_dir.unit();
