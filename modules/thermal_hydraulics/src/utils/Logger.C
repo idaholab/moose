@@ -18,6 +18,34 @@ Logger::~Logger()
 }
 
 void
+Logger::emitLoggedErrors() const
+{
+  if (_n_errors > 0)
+  {
+    std::ostringstream oss;
+    oss << "The following errors were encountered:\n";
+    for (const auto & msg_it : _msgs)
+      if (msg_it->_type == ERROR)
+        oss << "  - " << msg_it->_msg << "\n";
+    mooseError(oss.str());
+  }
+}
+
+void
+Logger::emitLoggedWarnings() const
+{
+  if (_n_warnings > 0)
+  {
+    std::ostringstream oss;
+    oss << "The following warnings were encountered:\n";
+    for (const auto & msg_it : _msgs)
+      if (msg_it->_type == WARNING)
+        oss << "  - " << msg_it->_msg << "\n";
+    mooseWarning(oss.str());
+  }
+}
+
+void
 Logger::print() const
 {
   // errors

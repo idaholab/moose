@@ -62,6 +62,16 @@ public:
   void print() const;
 
   /**
+   * Calls mooseError if there are any logged errors
+   */
+  void emitLoggedErrors() const;
+
+  /**
+   * Calls mooseWarning if there are any logged warnings
+   */
+  void emitLoggedWarnings() const;
+
+  /**
    * Return the number of errors
    *
    * @return The number of errors in this log

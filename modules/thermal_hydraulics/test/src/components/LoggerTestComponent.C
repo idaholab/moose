@@ -15,11 +15,26 @@ InputParameters
 LoggerTestComponent::validParams()
 {
   InputParameters params = Component::validParams();
+  params.addRequiredParam<bool>("log_errors", "True to log some errors.");
+  params.addRequiredParam<bool>("log_warnings", "True to log some warnings.");
   params.addClassDescription("Component for testing Logger.");
   return params;
 }
 
-LoggerTestComponent::LoggerTestComponent(const InputParameters & params) : Component(params)
+LoggerTestComponent::LoggerTestComponent(const InputParameters & params)
+  : Component(params),
+    _log_errors(getParam<bool>("log_errors")),
+    _log_warnings(getParam<bool>("log_warnings"))
 {
-  logWarning("This is a warning.");
+  if (_log_errors)
+    logError("error 1");
+
+  if (_log_warnings)
+    logWarning("warning 1");
+
+  if (_log_errors)
+    logError("error 2");
+
+  if (_log_warnings)
+    logWarning("warning 2");
 }

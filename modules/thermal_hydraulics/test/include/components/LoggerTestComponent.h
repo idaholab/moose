@@ -19,6 +19,10 @@ class LoggerTestComponent : public Component
 public:
   LoggerTestComponent(const InputParameters & params);
 
+private:
+  const bool _log_errors;
+  const bool _log_warnings;
+
 public:
   static InputParameters validParams();
 };
