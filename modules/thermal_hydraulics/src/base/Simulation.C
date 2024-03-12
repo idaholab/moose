@@ -49,9 +49,6 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
   HeatConductionModel::_fe_type =
       second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
-
-  if (Moose::_warnings_are_errors)
-    _log.setWarningsAsErrors();
 }
 
 Simulation::~Simulation()

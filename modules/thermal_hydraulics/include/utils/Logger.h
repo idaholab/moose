@@ -36,16 +36,11 @@ public:
   {
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, args...);
-    // std::string msg = mooseMsgFmt(oss.str(), "*** Info ***", COLOR_CYAN);
 
-    EMessageType msg_type = type;
-    if (type == Logger::WARNING && _warnings_are_errors)
-      msg_type = Logger::ERROR;
-
-    Logger::Message * msg = new Logger::Message(msg_type, oss.str());
+    Logger::Message * msg = new Logger::Message(type, oss.str());
     _msgs.push_back(msg);
 
-    switch (msg_type)
+    switch (type)
     {
       case ERROR:
         _n_errors++;
@@ -55,11 +50,6 @@ public:
         break;
     }
   }
-
-  /**
-   * This will print the message log
-   */
-  void print() const;
 
   /**
    * Calls mooseError if there are any logged errors
@@ -85,11 +75,6 @@ public:
    */
   unsigned int getNumberOfWarnings() const;
 
-  /**
-   * Treat warnings as errors
-   */
-  void setWarningsAsErrors();
-
 protected:
   /**
    * Simple data structure to hold the messages
@@ -109,17 +94,6 @@ protected:
     std::string _msg;
   };
 
-  void printMessage() const;
-
-  template <typename T, typename... Args>
-  void printMessage(T && val, Args &&... args) const
-  {
-    Moose::err << val;
-    printMessage(std::forward<Args>(args)...);
-  }
-
-  /// Treat warnings as errors
-  bool _warnings_are_errors;
   /// The number of errors
   unsigned int _n_errors;
   /// The number of warnings
