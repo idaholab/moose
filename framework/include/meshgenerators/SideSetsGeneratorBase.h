@@ -10,15 +10,13 @@
 #pragma once
 
 #include "MeshGenerator.h"
+#include "libmesh/fe_base.h"
 
 // libMesh forward declarations
 namespace libMesh
 {
 class QGauss;
 class Elem;
-template <typename>
-class FEGenericBase;
-typedef FEGenericBase<Real> FEBase;
 }
 
 /*
