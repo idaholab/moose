@@ -75,8 +75,7 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = nucleation_threshold
     initiate_on_boundary = 'left right'
-    # crack_length_scale = 0.497
-    nucleation_length = .2
+    nucleation_length = 0.15
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -205,7 +204,6 @@
   #   type=XFEMCutMeshOutput
   #   xfem_cutter_uo=cut_mesh2
   # []
-  # console = false
   [./console]
     type = Console
     output_linear = false

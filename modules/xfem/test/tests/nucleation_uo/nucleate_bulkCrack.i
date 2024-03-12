@@ -20,13 +20,7 @@
   ymax = 2.0
   elem_type = QUAD4
 []
-[top_left]
-  type = BoundingBoxNodeSetGenerator
-  new_boundary = pull_top_left
-  bottom_left = '-0.01 1.99 0'
-  top_right = '0.11 2.01 0'
-  input = gen
-[]
+
 []
 
 [DomainIntegral]
@@ -38,11 +32,28 @@
   crack_direction_method = CurvedCrackFront
   radius_inner = '0.15'
   radius_outer = '0.45'
-  poissons_ratio = 0.3
+  poissons_ratio = 0.0
   youngs_modulus = 207000
   block = 0
   incremental = true
   used_by_xfem_to_grow_crack = true
+[]
+
+[AuxVariables]
+[strength]
+  order = CONSTANT
+  family = MONOMIAL
+[]
+[]
+
+[ICs]
+[strength]
+  type = VolumeWeightedWeibull
+  variable = strength
+  reference_volume = 1e-2
+  weibull_modulus = 1
+  median = 5000
+[]
 []
 
 [UserObjects]
@@ -50,11 +61,10 @@
     type = MeshCut2DRankTwoTensorNucleation
     tensor = stress
     scalar_type = MaxPrincipal
-    nucleation_threshold = 180
-    initiate_on_boundary = 'left'
+    nucleation_threshold = strength
     nucleation_radius = .21
-    crack_length_scale = 2e-5
-    nucleation_length = 0.11
+    crack_length_scale = 1e-4
+    nucleation_length = .21
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -84,7 +94,7 @@
 [BCs]
   [top_edges]
       type = FunctionDirichletBC
-      boundary = 'pull_top_left'
+      boundary = 'top'
       variable = disp_y
       function = bc_pull_top
   []
@@ -106,7 +116,7 @@
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
-    poissons_ratio = 0.3
+    poissons_ratio = 0.0
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
@@ -137,10 +147,14 @@
   start_time = 0.0
   dt = 1.0
   end_time = 5
-  max_xfem_update = 100
+  max_xfem_update = 1
 []
 
 [Outputs]
   csv=true
-  execute_on = TIMESTEP_END
+  execute_on = final
+  # [xfemcutter]
+  #   type=XFEMCutMeshOutput
+  #   xfem_cutter_uo=cut_mesh2
+  # []
 []
