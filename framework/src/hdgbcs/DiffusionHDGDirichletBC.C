@@ -21,7 +21,7 @@ DiffusionHDGDirichletBC::validParams()
   auto params = HDGIntegratedBC::validParams();
   params += DiffusionHDGAssemblyHelper::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
-                             "hybridized discretization of diffusion equation");
+                             "hybridized discretization of a diffusion equation");
   params.addParam<FunctionName>("function", 0, "The Dirichlet value for the diffusing specie");
   return params;
 }

@@ -12,12 +12,6 @@
 #include "HDGIntegratedBC.h"
 #include "DiffusionHDGAssemblyHelper.h"
 
-#include <vector>
-
-template <typename>
-class MooseArray;
-class Function;
-
 /**
  * Implements a zero-flux boundary condition for use with a hybridized discretization of the
  * diffusion equation

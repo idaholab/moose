@@ -43,6 +43,8 @@ public:
 
   virtual void initialSetup() override;
 
+  /// The name of the \p NumericVector that holds the changes in all the global (dual) degrees of
+  /// freedom from one Newton iteration to the next
   static const std::string lm_increment_vector_name;
 
 protected:
