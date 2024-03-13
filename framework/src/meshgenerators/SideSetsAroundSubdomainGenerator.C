@@ -33,7 +33,6 @@ SideSetsAroundSubdomainGenerator::validParams()
 
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
-  params.suppressParameter<bool>("fixed_normal");
 
   params.addClassDescription(
       "Adds element faces that are on the exterior of the given block to the sidesets specified");
