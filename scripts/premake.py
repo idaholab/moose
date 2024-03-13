@@ -101,8 +101,10 @@ class PreMake:
                 current += f'={build}'
                 required += f'={required_build}'
 
-            full_message = "Conda package 'moose-dev' is currently at version "
-            full_message += f"'{current}', but the required version is '{required}'."
+            full_message = f"Conda package '{package}' is currently at version "
+            full_message += f"'{current}', but the required version is '{required}'.\n\n"
+            full_message += "The correct version can be installed via:\n\n"
+            full_message += f"    conda install {package}={required}\n"
             if msg:
                 full_message += f'\n{msg}'
             Exception.__init__(self, full_message)
