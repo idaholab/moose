@@ -1,12 +1,18 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [getActiveFilenames]
     type = PythonUnitTest
     input = test_get_active_filenames.py
     display_required = true
+    requirement = "The system shall able to gather a list of the active files, and determine which "
+                  "ones have been recently written (are active)."
   []
   [animate]
     type = PythonUnitTest
     input = test_animate.py
     display_required = true
+    requirement = "The system shall be able to animate plotted results by switching to a different "
+                  "frame at a given time."
   []
 []

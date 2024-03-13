@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [default]
     # Test contour object with default settings
     type = ImageDiff
@@ -6,6 +8,7 @@
     imagediff = 'default.png'
     allowed_linux = 0.97
     display_required = true
+    requirement = "The system shall be able to create contour plots with the default settings."
   []
 
   [blocks]
@@ -14,6 +17,7 @@
     command = block.py
     imagediff = 'block.png'
     display_required = true
+    requirement = "The system shall be able to create contour plots with block-restricted contours."
   []
 
   [block_elem]
@@ -21,6 +25,7 @@
     command = block_elem.py
     expect_err = "ContourFilter currently only works with nodal variables."
     display_required = true
+    requirement = "The system shall error if contouring plots are requested for plotting nodal variables."
   []
 
   [levels]
@@ -29,6 +34,7 @@
     command = levels.py
     imagediff = 'levels.png'
     display_required = true
+    requirement = "The system shall be able to create contour plots with user-specified contour levels."
   []
 
   [combo]
@@ -37,6 +43,7 @@
     command = combo.py
     imagediff = 'combo.png'
     display_required = true
+    requirement = "The system shall be able to create plots that feature both a volume plot and a contour plot."
   []
 
   [inline]
@@ -45,6 +52,7 @@
     imagediff = 'inline.png'
     allowed_linux = 0.97
     display_required = true
+    requirement = "The system shall be able to create contour plots without the colorbar."
   []
 
   [inline_clip]
@@ -52,5 +60,6 @@
     command = inline_clip.py
     imagediff = 'inline_clip.png'
     display_required = true
+    requirement = "The system shall be able to create contour plots clipped using a plane."
   []
 []

@@ -1,7 +1,6 @@
 [Tests]
   design = python/chigger/index.md
   issues = '#7451'
-
   [default]
     type = ImageDiff
     command = line.py

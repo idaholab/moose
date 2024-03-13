@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [warn_time_timestep]
     type = RunApp
     command = time_timestep.py
     expect_out = "Both \'time\' \(1.0\) and \'timestep\' \(1\) are set, \'timestep\' is being used."
     display_required = true
+    requirement = "The system shall output a message when both the desired time and timesteps are specified by the user for a plot."
   []
 
   [result_given_file]
@@ -11,5 +14,6 @@
     command = result_given_file.py
     expect_err = "The supplied object of type str is not supported, only ExodusReader and MultiAppExodusReader objects may be utilized."
     display_required = true
+    requirement = "The system shall report an error if the wrong object type is specified as an input to the ExodusResult class."
   []
 []

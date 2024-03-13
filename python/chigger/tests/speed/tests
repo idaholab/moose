@@ -4,8 +4,7 @@
   [test]
     type = RunApp
     command = speed.py
-    imagediff = 'scale.png'
-    expect_out 'sec'
+    expect_out = 'sec'
     display_required = true
     requirement = "The system shall be able to print timed section durations while plotting."
   []

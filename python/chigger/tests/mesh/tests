@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [view_mesh]
     type = ImageDiff
     command = mesh.py
@@ -6,5 +8,6 @@
     allowed_linux = 0.97
     allowed_darwin = 0.95
     display_required = true
+    requirement = 'The system shall be able to plot a mesh.'
   []
 []
