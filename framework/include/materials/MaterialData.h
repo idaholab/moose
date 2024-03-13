@@ -229,6 +229,9 @@ private:
   /// Use non-destructive resize of material data (calling resize() will not reduce size).
   /// Default is false (normal resize behaviour)
   bool _resize_only_if_smaller;
+
+  /// maximum state id requested for a property
+  std::vector<unsigned int> _max_state_requested;
 };
 
 inline const MaterialProperties &
@@ -275,20 +278,28 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
   // Register/get the ID of the property
   const auto prop_id = addPropertyHelper(
       prop_name, typeid(T), state, declare ? &castRequestorToDeclarer(requestor) : nullptr);
+  const auto size = prop_id + 1;
+
+  // get the maximum state id requested for this property so far
+  if (_max_state_requested.size() < size)
+    _max_state_requested.resize(size, 0);
+  const auto max_state = std::max(_max_state_requested[prop_id], state);
+  _max_state_requested[prop_id] = state;
 
   // Initialize the states that we need
-  const auto size = prop_id + 1;
-  for (const auto state_i : make_range(state + 1))
+  for (const auto state_i : make_range(max_state + 1))
   {
     auto & entry = props(state_i);
     if (entry.size() < size)
       entry.resize(size, {});
-    if (!entry.hasValue(prop_id))
+    // if we are not declaring the property we initialize only what we need (the requested state)
+    if (!entry.hasValue(prop_id) && (declare || state_i == state))
     {
-      std::unique_ptr<PropertyValue> value =
-          state_i == 0 ? std::make_unique<GenericMaterialProperty<T, is_ad>>(prop_id)
-                       : _props[0][prop_id].clone(0);
-      entry.setPointer(prop_id, std::move(value), {});
+      if (state == 0)
+        entry.setPointer(
+            prop_id, std::move(std::make_unique<GenericMaterialProperty<T, is_ad>>(prop_id)), {});
+      else
+        entry.setPointer(prop_id, std::move(std::make_unique<MaterialProperty<T>>(prop_id)), {});
     }
   }
 

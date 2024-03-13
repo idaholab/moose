@@ -57,6 +57,11 @@
     requirement = 'The system shall be able to promote normal material properties to stateful when '
                   'old/older properties are requested.'
   []
+  [implicit_stateful_ad]
+    type = 'RunApp'
+    input = 'implicit_stateful_ad.i'
+    requirement = 'The system shall be able to declare a property as AD after the old state has been requested.'
+  []
 
   [computing_initial_residual_test]
     type = 'Exodiff'
