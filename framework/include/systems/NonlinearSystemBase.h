@@ -149,7 +149,7 @@ public:
                          InputParameters & parameters);
 
   /**
-   * Adds a hybridized kernel
+   * Adds a hybridized discontinuous Galerkin (HDG) kernel
    * @param kernel_name The type of the hybridized kernel
    * @param name The name of the hybridized kernel
    * @param parameters HDG kernel parameters
@@ -159,7 +159,7 @@ public:
                             InputParameters & parameters);
 
   /**
-   * Adds a hybridized bc
+   * Adds a hybridized discontinuous Galerkin (HDG) bc
    * @param bc_name The type of the hybridized bc
    * @param name The name of the hybridized bc
    * @param parameters HDG bc parameters

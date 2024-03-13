@@ -40,6 +40,9 @@ DiffusionHDGPrescribedGradientBC::onBoundary()
 {
   resizeData(*this);
 
+  // For notation, please read "A superconvergent LDG-hybridizable Galerkin method for second-order
+  // elliptic problems" by Cockburn
+
   // qu, u, lm_u
   vectorFaceResidual(*this, 0, _lm_u_sol);
   vectorFaceJacobian(*this, 0, 0);
