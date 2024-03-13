@@ -377,7 +377,7 @@ wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
 # pre-make for checking current dependency versions and showing useful warnings
-# if things like conda packaged are out of date
+# if things like conda packages are out of date
 premake:
 	@-python $(FRAMEWORK_DIR)/../scripts/premake.py
 
