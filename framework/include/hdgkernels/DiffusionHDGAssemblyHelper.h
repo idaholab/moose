@@ -26,13 +26,18 @@ class HDGData;
 class MooseObject;
 class MaterialPropertyInterface;
 
+/**
+ * Implements all the methods for assembling a hybridized local discontinuous Galerkin (LDG-H),
+ * which is a type of HDG method, discretization of the diffusion equation. These routines may be
+ * called by both HDG kernels and integrated boundary conditions
+ */
 class DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGAssemblyHelper(const MooseObject * moose_obj,
-                             MaterialPropertyInterface * mpi,
+  DiffusionHDGAssemblyHelper(const MooseObject * const moose_obj,
+                             MaterialPropertyInterface * const mpi,
                              SystemBase & nl_sys,
                              SystemBase & aux_sys,
                              const THREAD_ID tid);
@@ -44,43 +49,83 @@ protected:
   template <typename DiffusionHDG>
   static void resizeData(DiffusionHDG & obj);
 
+  /**
+   * Implements a residual for the weak form:
+   * (q, v) + (u, div(v))
+   * where q is the vector field representing the gradient, v are its associated test functions, and
+   * u is the scalar field
+   */
   template <typename DiffusionHDG>
   static void vectorVolumeResidual(DiffusionHDG & obj,
                                    const unsigned int i_offset,
                                    const MooseArray<Gradient> & vector_sol,
                                    const MooseArray<Number> & scalar_sol);
 
+  /**
+   * Implements a Jacobian for the weak form:
+   * (q, v) + (u, div(v))
+   * where q is the vector field representing the gradient, v are its associated test functions, and
+   * u is the scalar field
+   */
   template <typename DiffusionHDG>
   static void vectorVolumeJacobian(DiffusionHDG & obj,
                                    const unsigned int i_offset,
                                    const unsigned int vector_j_offset,
                                    const unsigned int scalar_j_offset);
 
+  /**
+   * Implements a residual for the weak form:
+   * (Dq, grad(w)) - (f, w)
+   * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
+   * a forcing function
+   */
   template <typename DiffusionHDG>
   static void scalarVolumeResidual(DiffusionHDG & obj,
                                    const unsigned int i_offset,
                                    const MooseArray<Gradient> & vector_field,
                                    const Function & source);
 
+  /**
+   * Implements a Jacobian for the weak form:
+   * (Dq, grad(w)) - (f, w)
+   * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
+   * a forcing function
+   */
   template <typename DiffusionHDG>
   static void scalarVolumeJacobian(DiffusionHDG & obj,
                                    const unsigned int i_offset,
                                    const unsigned int vector_field_j_offset);
 
   //
-  // Methods which are leveraged both on internal sides in the kernel and by natural conditions
+  // Methods which can be leveraged both on internal sides in the kernel and by boundary conditions
   //
 
+  /**
+   * Implements a residual for the weak form:
+   * -<\hat{u}, n*v>
+   * where \hat{u} is the trace of the scalar field, n is the normal vector, and v are the test
+   * functions associated with the gradient field
+   */
   template <typename DiffusionHDG>
   static void vectorFaceResidual(DiffusionHDG & obj,
                                  const unsigned int i_offset,
                                  const MooseArray<Number> & lm_sol);
 
+  /**
+   * Implements a Jacobian for the weak form:
+   * -<\hat{u}, n*v>
+   * where \hat{u} is the trace of the scalar field, n is the normal vector, and v are the test
+   * functions associated with the gradient field
+   */
   template <typename DiffusionHDG>
   static void vectorFaceJacobian(DiffusionHDG & obj,
                                  const unsigned int i_offset,
                                  const unsigned int lm_j_offset);
 
+  /**
+   * Implements a residual for the weak form:
+   * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
+   */
   template <typename DiffusionHDG>
   static void scalarFaceResidual(DiffusionHDG & obj,
                                  const unsigned int i_offset,
@@ -88,6 +133,10 @@ protected:
                                  const MooseArray<Number> & scalar_sol,
                                  const MooseArray<Number> & lm_sol);
 
+  /**
+   * Implements a Jacobian for the weak form:
+   * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
+   */
   template <typename DiffusionHDG>
   static void scalarFaceJacobian(DiffusionHDG & obj,
                                  const unsigned int i_offset,
@@ -95,6 +144,10 @@ protected:
                                  const unsigned int scalar_j_offset,
                                  const unsigned int lm_j_offset);
 
+  /**
+   * Implements a residual for the weak form:
+   * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
+   */
   template <typename DiffusionHDG>
   static void lmFaceResidual(DiffusionHDG & obj,
                              const unsigned int i_offset,
@@ -102,6 +155,10 @@ protected:
                              const MooseArray<Number> & scalar_sol,
                              const MooseArray<Number> & lm_sol);
 
+  /**
+   * Implements a Jacobian for the weak form:
+   * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
+   */
   template <typename DiffusionHDG>
   static void lmFaceJacobian(DiffusionHDG & obj,
                              const unsigned int i_offset,
@@ -109,11 +166,17 @@ protected:
                              const unsigned int scalar_j_offset,
                              const unsigned int lm_j_offset);
 
+  /**
+   * Weakly imposes a Dirichlet condition for the scalar field in the vector (gradient) equation
+   */
   template <typename DiffusionHDG>
   static void vectorDirichletResidual(DiffusionHDG & obj,
                                       const unsigned int i_offset,
                                       const Function & dirichlet_function);
 
+  /**
+   * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
+   */
   template <typename DiffusionHDG>
   static void scalarDirichletResidual(DiffusionHDG & obj,
                                       const unsigned int i_offset,
@@ -121,6 +184,10 @@ protected:
                                       const MooseArray<Number> & scalar_sol,
                                       const Function & dirichlet_function);
 
+  /**
+   * Computes the Jacobian for a Dirichlet condition for the scalar field in the scalar field
+   * equation
+   */
   template <typename DiffusionHDG>
   static void scalarDirichletJacobian(DiffusionHDG & obj,
                                       const unsigned int i_offset,
