@@ -21,7 +21,3 @@ Documents:
 Requirements:
     python:
         directories: !include ${MOOSE_DIR}/python/doc/sqa_directories.yml
-        log_missing: WARNING
-        log_missing_requirement: WARNING
-        log_top_level_detail: WARNING
-        log_testable: WARNING
