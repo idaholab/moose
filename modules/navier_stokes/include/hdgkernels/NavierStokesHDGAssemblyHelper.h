@@ -477,10 +477,9 @@ NavierStokesHDGAssemblyHelper::scalarFaceResidual(NSHDG & obj,
 
     for (const auto i : make_range(obj._scalar_n_dofs))
     {
-      if (obj._neigh)
-        // pressure
-        obj._PrimalVec(i_offset + i) +=
-            obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (qp_p * obj._normals[qp]);
+      // pressure
+      obj._PrimalVec(i_offset + i) +=
+          obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (qp_p * obj._normals[qp]);
 
       // lm from convection term
       obj._PrimalVec(i_offset + i) +=
@@ -507,15 +506,14 @@ NavierStokesHDGAssemblyHelper::scalarFaceJacobian(NSHDG & obj,
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
     {
-      if (obj._neigh)
-        for (const auto j : make_range(obj._p_n_dofs))
-        {
-          Gradient p_phi;
-          p_phi(vel_component) = obj._scalar_phi_face[j][qp];
-          // pressure
-          obj._PrimalLM(i_offset + i, p_j_offset + j) +=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (p_phi * obj._normals[qp]);
-        }
+      for (const auto j : make_range(obj._p_n_dofs))
+      {
+        Gradient p_phi;
+        p_phi(vel_component) = obj._scalar_phi_face[j][qp];
+        // pressure
+        obj._PrimalLM(i_offset + i, p_j_offset + j) +=
+            obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * (p_phi * obj._normals[qp]);
+      }
 
       for (const auto j : make_range(obj._lm_n_dofs))
       {
