@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess, os
+import subprocess, os, sys
 from versioner import Versioner
 
 class PreMake:
@@ -17,21 +17,21 @@ class PreMake:
         self.versioner_meta = Versioner().version_meta()
 
     @staticmethod
-    def printColored(msg, color):
+    def printColored(msg, color, **kwargs):
         """
         Prints a colored message
         """
         color_vals = {'red': 31, 'green': 32, 'yellow': 33}
         if color not in color_vals:
             raise Exception('Unknown prefix color {}'.format(color))
-        print(f'\033[{color_vals[color]}m{msg}\033[0m')
+        print(f'\033[{color_vals[color]}m{msg}\033[0m', **kwargs)
 
     @staticmethod
     def warn(msg):
         """
         Prints a warning in yellow
         """
-        PreMake.printColored(f'WARNING: {msg}', 'yellow')
+        PreMake.printColored(f'WARNING: {msg}', 'yellow', file=sys.stderr)
 
     @staticmethod
     def condaList():
