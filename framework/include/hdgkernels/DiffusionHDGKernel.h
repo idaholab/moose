@@ -10,7 +10,7 @@
 #pragma once
 
 #include "HDGKernel.h"
-#include "DiffusionHDGInterface.h"
+#include "DiffusionHDGAssemblyHelper.h"
 
 #include <vector>
 
@@ -19,7 +19,7 @@ class Function;
 /**
  * Implements the diffusion equation for a hybridized discretization
  */
-class DiffusionHDGKernel : public HDGKernel, public DiffusionHDGInterface
+class DiffusionHDGKernel : public HDGKernel, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -36,5 +36,5 @@ private:
   /// optional source
   const Function & _source;
 
-  friend class DiffusionHDGInterface;
+  friend class DiffusionHDGAssemblyHelper;
 };

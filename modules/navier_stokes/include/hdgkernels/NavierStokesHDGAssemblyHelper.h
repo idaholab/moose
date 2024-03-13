@@ -9,19 +9,19 @@
 
 #pragma once
 
-#include "DiffusionHDGInterface.h"
+#include "DiffusionHDGAssemblyHelper.h"
 
-class NavierStokesHDGInterface : public DiffusionHDGInterface
+class NavierStokesHDGAssemblyHelper : public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  NavierStokesHDGInterface(const MooseObject * moose_obj,
-                           MaterialPropertyInterface * mpi,
-                           SystemBase & nl_sys,
-                           SystemBase & aux_sys,
-                           const MooseMesh & mesh,
-                           const THREAD_ID tid);
+  NavierStokesHDGAssemblyHelper(const MooseObject * moose_obj,
+                                MaterialPropertyInterface * mpi,
+                                SystemBase & nl_sys,
+                                SystemBase & aux_sys,
+                                const MooseMesh & mesh,
+                                const THREAD_ID tid);
 
 protected:
   /**
@@ -223,7 +223,7 @@ protected:
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::resizeData(NSHDG & obj)
+NavierStokesHDGAssemblyHelper::resizeData(NSHDG & obj)
 {
   obj._vector_n_dofs = obj._qu_dof_indices.size();
   obj._scalar_n_dofs = obj._u_dof_indices.size();
@@ -248,13 +248,13 @@ NavierStokesHDGInterface::resizeData(NSHDG & obj)
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::scalarVolumeResidual(NSHDG & obj,
-                                               const unsigned int i_offset,
-                                               const MooseArray<Gradient> & vel_gradient,
-                                               const unsigned int vel_component,
-                                               const Function & body_force)
+NavierStokesHDGAssemblyHelper::scalarVolumeResidual(NSHDG & obj,
+                                                    const unsigned int i_offset,
+                                                    const MooseArray<Gradient> & vel_gradient,
+                                                    const unsigned int vel_component,
+                                                    const Function & body_force)
 {
-  DiffusionHDGInterface::scalarVolumeResidual(obj, i_offset, vel_gradient, body_force);
+  DiffusionHDGAssemblyHelper::scalarVolumeResidual(obj, i_offset, vel_gradient, body_force);
 
   for (const auto qp : make_range(obj._qrule->n_points()))
   {
@@ -275,15 +275,15 @@ NavierStokesHDGInterface::scalarVolumeResidual(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::scalarVolumeJacobian(NSHDG & obj,
-                                               const unsigned int i_offset,
-                                               const unsigned int vel_gradient_j_offset,
-                                               const unsigned int p_j_offset,
-                                               const unsigned int vel_component,
-                                               const unsigned int u_j_offset,
-                                               const unsigned int v_j_offset)
+NavierStokesHDGAssemblyHelper::scalarVolumeJacobian(NSHDG & obj,
+                                                    const unsigned int i_offset,
+                                                    const unsigned int vel_gradient_j_offset,
+                                                    const unsigned int p_j_offset,
+                                                    const unsigned int vel_component,
+                                                    const unsigned int u_j_offset,
+                                                    const unsigned int v_j_offset)
 {
-  DiffusionHDGInterface::scalarVolumeJacobian(obj, i_offset, vel_gradient_j_offset);
+  DiffusionHDGAssemblyHelper::scalarVolumeJacobian(obj, i_offset, vel_gradient_j_offset);
 
   for (const auto qp : make_range(obj._qrule->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
@@ -320,10 +320,11 @@ NavierStokesHDGInterface::scalarVolumeJacobian(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::pressureVolumeResidual(NSHDG & obj,
-                                                 const unsigned int i_offset,
-                                                 const unsigned int global_lm_i_offset,
-                                                 const Function & pressure_mms_forcing_function)
+NavierStokesHDGAssemblyHelper::pressureVolumeResidual(
+    NSHDG & obj,
+    const unsigned int i_offset,
+    const unsigned int global_lm_i_offset,
+    const Function & pressure_mms_forcing_function)
 {
   for (const auto qp : make_range(obj._qrule->n_points()))
   {
@@ -355,12 +356,12 @@ NavierStokesHDGInterface::pressureVolumeResidual(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::pressureVolumeJacobian(NSHDG & obj,
-                                                 const unsigned int i_offset,
-                                                 const unsigned int u_j_offset,
-                                                 const unsigned int v_j_offset,
-                                                 const unsigned int p_j_offset,
-                                                 const unsigned int global_lm_offset)
+NavierStokesHDGAssemblyHelper::pressureVolumeJacobian(NSHDG & obj,
+                                                      const unsigned int i_offset,
+                                                      const unsigned int u_j_offset,
+                                                      const unsigned int v_j_offset,
+                                                      const unsigned int p_j_offset,
+                                                      const unsigned int global_lm_offset)
 {
   for (const auto qp : make_range(obj._qrule->n_points()))
   {
@@ -393,23 +394,23 @@ NavierStokesHDGInterface::pressureVolumeJacobian(NSHDG & obj,
 }
 
 inline RealVectorValue
-NavierStokesHDGInterface::velCrossVelResidual(const MooseArray<Number> & u_sol,
-                                              const MooseArray<Number> & v_sol,
-                                              const unsigned int qp,
-                                              const unsigned int vel_component)
+NavierStokesHDGAssemblyHelper::velCrossVelResidual(const MooseArray<Number> & u_sol,
+                                                   const MooseArray<Number> & v_sol,
+                                                   const unsigned int qp,
+                                                   const unsigned int vel_component)
 {
   const RealVectorValue U(u_sol[qp], v_sol[qp]);
   return U * U(vel_component);
 }
 
 inline RealVectorValue
-NavierStokesHDGInterface::velCrossVelJacobian(const MooseArray<Number> & u_sol,
-                                              const MooseArray<Number> & v_sol,
-                                              const unsigned int qp,
-                                              const unsigned int vel_component,
-                                              const unsigned int vel_j_component,
-                                              const MooseArray<std::vector<Real>> & phi,
-                                              const unsigned int j)
+NavierStokesHDGAssemblyHelper::velCrossVelJacobian(const MooseArray<Number> & u_sol,
+                                                   const MooseArray<Number> & v_sol,
+                                                   const unsigned int qp,
+                                                   const unsigned int vel_component,
+                                                   const unsigned int vel_j_component,
+                                                   const MooseArray<std::vector<Real>> & phi,
+                                                   const unsigned int j)
 {
   const RealVectorValue U(u_sol[qp], v_sol[qp]);
   RealVectorValue vector_phi;
@@ -422,7 +423,7 @@ NavierStokesHDGInterface::velCrossVelJacobian(const MooseArray<Number> & u_sol,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::pressureFaceResidual(NSHDG & obj, const unsigned int i_offset)
+NavierStokesHDGAssemblyHelper::pressureFaceResidual(NSHDG & obj, const unsigned int i_offset)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
@@ -435,10 +436,10 @@ NavierStokesHDGInterface::pressureFaceResidual(NSHDG & obj, const unsigned int i
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::pressureFaceJacobian(NSHDG & obj,
-                                               const unsigned int i_offset,
-                                               const unsigned int lm_u_j_offset,
-                                               const unsigned int lm_v_j_offset)
+NavierStokesHDGAssemblyHelper::pressureFaceJacobian(NSHDG & obj,
+                                                    const unsigned int i_offset,
+                                                    const unsigned int lm_u_j_offset,
+                                                    const unsigned int lm_v_j_offset)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._p_n_dofs))
@@ -459,14 +460,14 @@ NavierStokesHDGInterface::pressureFaceJacobian(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::scalarFaceResidual(NSHDG & obj,
-                                             const unsigned int i_offset,
-                                             const MooseArray<Gradient> & vector_sol,
-                                             const MooseArray<Number> & scalar_sol,
-                                             const MooseArray<Number> & lm_sol,
-                                             const unsigned int vel_component)
+NavierStokesHDGAssemblyHelper::scalarFaceResidual(NSHDG & obj,
+                                                  const unsigned int i_offset,
+                                                  const MooseArray<Gradient> & vector_sol,
+                                                  const MooseArray<Number> & scalar_sol,
+                                                  const MooseArray<Number> & lm_sol,
+                                                  const unsigned int vel_component)
 {
-  DiffusionHDGInterface::scalarFaceResidual(obj, i_offset, vector_sol, scalar_sol, lm_sol);
+  DiffusionHDGAssemblyHelper::scalarFaceResidual(obj, i_offset, vector_sol, scalar_sol, lm_sol);
 
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
@@ -490,17 +491,17 @@ NavierStokesHDGInterface::scalarFaceResidual(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::scalarFaceJacobian(NSHDG & obj,
-                                             const unsigned int i_offset,
-                                             const unsigned int vector_j_offset,
-                                             const unsigned int scalar_j_offset,
-                                             const unsigned int lm_j_offset,
-                                             const unsigned int p_j_offset,
-                                             const unsigned int vel_component,
-                                             const unsigned int lm_u_j_offset,
-                                             const unsigned int lm_v_j_offset)
+NavierStokesHDGAssemblyHelper::scalarFaceJacobian(NSHDG & obj,
+                                                  const unsigned int i_offset,
+                                                  const unsigned int vector_j_offset,
+                                                  const unsigned int scalar_j_offset,
+                                                  const unsigned int lm_j_offset,
+                                                  const unsigned int p_j_offset,
+                                                  const unsigned int vel_component,
+                                                  const unsigned int lm_u_j_offset,
+                                                  const unsigned int lm_v_j_offset)
 {
-  DiffusionHDGInterface::scalarFaceJacobian(
+  DiffusionHDGAssemblyHelper::scalarFaceJacobian(
       obj, i_offset, vector_j_offset, scalar_j_offset, lm_j_offset);
 
   for (const auto qp : make_range(obj._qrule_face->n_points()))
@@ -542,14 +543,14 @@ NavierStokesHDGInterface::scalarFaceJacobian(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::lmFaceResidual(NSHDG & obj,
-                                         const unsigned int i_offset,
-                                         const MooseArray<Gradient> & vector_sol,
-                                         const MooseArray<Number> & scalar_sol,
-                                         const MooseArray<Number> & lm_sol,
-                                         const unsigned int vel_component)
+NavierStokesHDGAssemblyHelper::lmFaceResidual(NSHDG & obj,
+                                              const unsigned int i_offset,
+                                              const MooseArray<Gradient> & vector_sol,
+                                              const MooseArray<Number> & scalar_sol,
+                                              const MooseArray<Number> & lm_sol,
+                                              const unsigned int vel_component)
 {
-  DiffusionHDGInterface::lmFaceResidual(obj, i_offset, vector_sol, scalar_sol, lm_sol);
+  DiffusionHDGAssemblyHelper::lmFaceResidual(obj, i_offset, vector_sol, scalar_sol, lm_sol);
 
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
@@ -575,17 +576,17 @@ NavierStokesHDGInterface::lmFaceResidual(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::lmFaceJacobian(NSHDG & obj,
-                                         const unsigned int i_offset,
-                                         const unsigned int vector_j_offset,
-                                         const unsigned int scalar_j_offset,
-                                         const unsigned int lm_j_offset,
-                                         const unsigned int p_j_offset,
-                                         const unsigned int vel_component,
-                                         const unsigned int lm_u_j_offset,
-                                         const unsigned int lm_v_j_offset)
+NavierStokesHDGAssemblyHelper::lmFaceJacobian(NSHDG & obj,
+                                              const unsigned int i_offset,
+                                              const unsigned int vector_j_offset,
+                                              const unsigned int scalar_j_offset,
+                                              const unsigned int lm_j_offset,
+                                              const unsigned int p_j_offset,
+                                              const unsigned int vel_component,
+                                              const unsigned int lm_u_j_offset,
+                                              const unsigned int lm_v_j_offset)
 {
-  DiffusionHDGInterface::lmFaceJacobian(
+  DiffusionHDGAssemblyHelper::lmFaceJacobian(
       obj, i_offset, vector_j_offset, scalar_j_offset, lm_j_offset);
 
   for (const auto qp : make_range(obj._qrule_face->n_points()))
@@ -622,7 +623,7 @@ NavierStokesHDGInterface::lmFaceJacobian(NSHDG & obj,
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::pressureDirichletResidual(
+NavierStokesHDGAssemblyHelper::pressureDirichletResidual(
     NSHDG & obj, const unsigned int i_offset, const std::array<const Function *, 3> & dirichlet_vel)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
@@ -639,7 +640,7 @@ NavierStokesHDGInterface::pressureDirichletResidual(
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::scalarDirichletResidual(
+NavierStokesHDGAssemblyHelper::scalarDirichletResidual(
     NSHDG & obj,
     const unsigned int i_offset,
     const MooseArray<Gradient> & vector_sol,
@@ -647,7 +648,7 @@ NavierStokesHDGInterface::scalarDirichletResidual(
     const unsigned int vel_component,
     const std::array<const Function *, 3> & dirichlet_vel)
 {
-  DiffusionHDGInterface::scalarDirichletResidual(
+  DiffusionHDGAssemblyHelper::scalarDirichletResidual(
       obj, i_offset, vector_sol, scalar_sol, *dirichlet_vel[vel_component]);
 
   for (const auto qp : make_range(obj._qrule_face->n_points()))
@@ -676,14 +677,15 @@ NavierStokesHDGInterface::scalarDirichletResidual(
 
 template <typename NSHDG>
 void
-NavierStokesHDGInterface::scalarDirichletJacobian(NSHDG & obj,
-                                                  const unsigned int i_offset,
-                                                  const unsigned int vector_j_offset,
-                                                  const unsigned int scalar_j_offset,
-                                                  const unsigned int p_j_offset,
-                                                  const unsigned int vel_component)
+NavierStokesHDGAssemblyHelper::scalarDirichletJacobian(NSHDG & obj,
+                                                       const unsigned int i_offset,
+                                                       const unsigned int vector_j_offset,
+                                                       const unsigned int scalar_j_offset,
+                                                       const unsigned int p_j_offset,
+                                                       const unsigned int vel_component)
 {
-  DiffusionHDGInterface::scalarDirichletJacobian(obj, i_offset, vector_j_offset, scalar_j_offset);
+  DiffusionHDGAssemblyHelper::scalarDirichletJacobian(
+      obj, i_offset, vector_j_offset, scalar_j_offset);
 
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))

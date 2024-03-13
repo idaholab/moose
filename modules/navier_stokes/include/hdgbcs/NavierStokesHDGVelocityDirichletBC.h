@@ -10,7 +10,7 @@
 #pragma once
 
 #include "HDGIntegratedBC.h"
-#include "NavierStokesHDGInterface.h"
+#include "NavierStokesHDGAssemblyHelper.h"
 
 #include <vector>
 
@@ -25,7 +25,8 @@ class Function;
  * Weakly imposes Dirichlet boundary conditions for the velocity for a hybridized discretization of
  * the Navier-Stokes equations
  */
-class NavierStokesHDGVelocityDirichletBC : public HDGIntegratedBC, public NavierStokesHDGInterface
+class NavierStokesHDGVelocityDirichletBC : public HDGIntegratedBC,
+                                           public NavierStokesHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -41,6 +42,6 @@ private:
   /// Dirichlet velocity
   std::array<const Function *, 3> _dirichlet_vel;
 
-  friend class NavierStokesHDGInterface;
-  friend class DiffusionHDGInterface;
+  friend class NavierStokesHDGAssemblyHelper;
+  friend class DiffusionHDGAssemblyHelper;
 };

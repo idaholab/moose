@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesHDGInterface.h"
+#include "NavierStokesHDGAssemblyHelper.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
@@ -24,9 +24,9 @@
 using namespace libMesh;
 
 InputParameters
-NavierStokesHDGInterface::validParams()
+NavierStokesHDGAssemblyHelper::validParams()
 {
-  auto params = DiffusionHDGInterface::validParams();
+  auto params = DiffusionHDGAssemblyHelper::validParams();
   params.addRequiredParam<NonlinearVariableName>(NS::pressure, "The pressure variable.");
   params.setDocString("u", "The x-component of velocity");
   params.addRequiredParam<AuxVariableName>("v", "The y-component of velocity");
@@ -45,13 +45,13 @@ NavierStokesHDGInterface::validParams()
   return params;
 }
 
-NavierStokesHDGInterface::NavierStokesHDGInterface(const MooseObject * const moose_obj,
-                                                   MaterialPropertyInterface * const mpi,
-                                                   SystemBase & nl_sys,
-                                                   SystemBase & aux_sys,
-                                                   const MooseMesh & mesh,
-                                                   const THREAD_ID tid)
-  : DiffusionHDGInterface(moose_obj, mpi, nl_sys, aux_sys, tid),
+NavierStokesHDGAssemblyHelper::NavierStokesHDGAssemblyHelper(const MooseObject * const moose_obj,
+                                                             MaterialPropertyInterface * const mpi,
+                                                             SystemBase & nl_sys,
+                                                             SystemBase & aux_sys,
+                                                             const MooseMesh & mesh,
+                                                             const THREAD_ID tid)
+  : DiffusionHDGAssemblyHelper(moose_obj, mpi, nl_sys, aux_sys, tid),
     // vars
     _v_var(aux_sys.getFieldVariable<Real>(tid, moose_obj->getParam<AuxVariableName>("v"))),
     _w_var(mesh.dimension() > 2

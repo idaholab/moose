@@ -10,7 +10,7 @@
 #pragma once
 
 #include "HDGIntegratedBC.h"
-#include "DiffusionHDGInterface.h"
+#include "DiffusionHDGAssemblyHelper.h"
 
 #include <vector>
 
@@ -19,7 +19,7 @@ class Function;
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
-class DiffusionHDGDirichletBC : public HDGIntegratedBC, public DiffusionHDGInterface
+class DiffusionHDGDirichletBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -35,5 +35,5 @@ private:
   /// Dirichlet function
   const Function & _dirichlet_val;
 
-  friend class DiffusionHDGInterface;
+  friend class DiffusionHDGAssemblyHelper;
 };

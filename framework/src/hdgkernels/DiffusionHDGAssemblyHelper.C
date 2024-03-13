@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DiffusionHDGInterface.h"
+#include "DiffusionHDGAssemblyHelper.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
@@ -19,7 +19,7 @@
 using namespace libMesh;
 
 InputParameters
-DiffusionHDGInterface::validParams()
+DiffusionHDGAssemblyHelper::validParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredParam<AuxVariableName>("u", "The diffusing specie concentration");
@@ -31,11 +31,11 @@ DiffusionHDGInterface::validParams()
   return params;
 }
 
-DiffusionHDGInterface::DiffusionHDGInterface(const MooseObject * const moose_obj,
-                                             MaterialPropertyInterface * const mpi,
-                                             SystemBase & nl_sys,
-                                             SystemBase & aux_sys,
-                                             const THREAD_ID tid)
+DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(const MooseObject * const moose_obj,
+                                                       MaterialPropertyInterface * const mpi,
+                                                       SystemBase & nl_sys,
+                                                       SystemBase & aux_sys,
+                                                       const THREAD_ID tid)
   : // vars
     _u_var(aux_sys.getFieldVariable<Real>(tid, moose_obj->getParam<AuxVariableName>("u"))),
     _grad_u_var(aux_sys.getFieldVariable<RealVectorValue>(

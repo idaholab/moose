@@ -26,16 +26,16 @@ class HDGData;
 class MooseObject;
 class MaterialPropertyInterface;
 
-class DiffusionHDGInterface
+class DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGInterface(const MooseObject * moose_obj,
-                        MaterialPropertyInterface * mpi,
-                        SystemBase & nl_sys,
-                        SystemBase & aux_sys,
-                        const THREAD_ID tid);
+  DiffusionHDGAssemblyHelper(const MooseObject * moose_obj,
+                             MaterialPropertyInterface * mpi,
+                             SystemBase & nl_sys,
+                             SystemBase & aux_sys,
+                             const THREAD_ID tid);
 
 protected:
   /**
@@ -169,7 +169,7 @@ protected:
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::resizeData(DiffusionHDG & obj)
+DiffusionHDGAssemblyHelper::resizeData(DiffusionHDG & obj)
 {
   obj._vector_n_dofs = obj._qu_dof_indices.size();
   obj._scalar_n_dofs = obj._u_dof_indices.size();
@@ -192,10 +192,10 @@ DiffusionHDGInterface::resizeData(DiffusionHDG & obj)
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::vectorVolumeResidual(DiffusionHDG & obj,
-                                            const unsigned int i_offset,
-                                            const MooseArray<Gradient> & vector_sol,
-                                            const MooseArray<Number> & scalar_sol)
+DiffusionHDGAssemblyHelper::vectorVolumeResidual(DiffusionHDG & obj,
+                                                 const unsigned int i_offset,
+                                                 const MooseArray<Gradient> & vector_sol,
+                                                 const MooseArray<Number> & scalar_sol)
 {
   for (const auto qp : make_range(obj._qrule->n_points()))
     for (const auto i : make_range(obj._vector_n_dofs))
@@ -210,10 +210,10 @@ DiffusionHDGInterface::vectorVolumeResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::vectorVolumeJacobian(DiffusionHDG & obj,
-                                            const unsigned int i_offset,
-                                            const unsigned int vector_j_offset,
-                                            const unsigned int scalar_j_offset)
+DiffusionHDGAssemblyHelper::vectorVolumeJacobian(DiffusionHDG & obj,
+                                                 const unsigned int i_offset,
+                                                 const unsigned int vector_j_offset,
+                                                 const unsigned int scalar_j_offset)
 {
   for (const auto qp : make_range(obj._qrule->n_points()))
     for (const auto i : make_range(obj._vector_n_dofs))
@@ -232,10 +232,10 @@ DiffusionHDGInterface::vectorVolumeJacobian(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::scalarVolumeResidual(DiffusionHDG & obj,
-                                            const unsigned int i_offset,
-                                            const MooseArray<Gradient> & vector_field,
-                                            const Function & source)
+DiffusionHDGAssemblyHelper::scalarVolumeResidual(DiffusionHDG & obj,
+                                                 const unsigned int i_offset,
+                                                 const MooseArray<Gradient> & vector_field,
+                                                 const Function & source)
 {
   for (const auto qp : make_range(obj._qrule->n_points()))
   {
@@ -255,9 +255,9 @@ DiffusionHDGInterface::scalarVolumeResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::scalarVolumeJacobian(DiffusionHDG & obj,
-                                            const unsigned int i_offset,
-                                            const unsigned int vector_field_j_offset)
+DiffusionHDGAssemblyHelper::scalarVolumeJacobian(DiffusionHDG & obj,
+                                                 const unsigned int i_offset,
+                                                 const unsigned int vector_field_j_offset)
 {
   for (const auto qp : make_range(obj._qrule->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
@@ -269,9 +269,9 @@ DiffusionHDGInterface::scalarVolumeJacobian(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::vectorFaceResidual(DiffusionHDG & obj,
-                                          const unsigned int i_offset,
-                                          const MooseArray<Number> & lm_sol)
+DiffusionHDGAssemblyHelper::vectorFaceResidual(DiffusionHDG & obj,
+                                               const unsigned int i_offset,
+                                               const MooseArray<Number> & lm_sol)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     // Vector equation dependence on LM dofs
@@ -282,9 +282,9 @@ DiffusionHDGInterface::vectorFaceResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::vectorFaceJacobian(DiffusionHDG & obj,
-                                          const unsigned int i_offset,
-                                          const unsigned int lm_j_offset)
+DiffusionHDGAssemblyHelper::vectorFaceJacobian(DiffusionHDG & obj,
+                                               const unsigned int i_offset,
+                                               const unsigned int lm_j_offset)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     // Vector equation dependence on LM dofs
@@ -297,11 +297,11 @@ DiffusionHDGInterface::vectorFaceJacobian(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::scalarFaceResidual(DiffusionHDG & obj,
-                                          const unsigned int i_offset,
-                                          const MooseArray<Gradient> & vector_sol,
-                                          const MooseArray<Number> & scalar_sol,
-                                          const MooseArray<Number> & lm_sol)
+DiffusionHDGAssemblyHelper::scalarFaceResidual(DiffusionHDG & obj,
+                                               const unsigned int i_offset,
+                                               const MooseArray<Gradient> & vector_sol,
+                                               const MooseArray<Number> & scalar_sol,
+                                               const MooseArray<Number> & lm_sol)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
@@ -324,11 +324,11 @@ DiffusionHDGInterface::scalarFaceResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::scalarFaceJacobian(DiffusionHDG & obj,
-                                          const unsigned int i_offset,
-                                          const unsigned int vector_j_offset,
-                                          const unsigned int scalar_j_offset,
-                                          const unsigned int lm_j_offset)
+DiffusionHDGAssemblyHelper::scalarFaceJacobian(DiffusionHDG & obj,
+                                               const unsigned int i_offset,
+                                               const unsigned int vector_j_offset,
+                                               const unsigned int scalar_j_offset,
+                                               const unsigned int lm_j_offset)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
@@ -354,11 +354,11 @@ DiffusionHDGInterface::scalarFaceJacobian(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::lmFaceResidual(DiffusionHDG & obj,
-                                      const unsigned int i_offset,
-                                      const MooseArray<Gradient> & vector_sol,
-                                      const MooseArray<Number> & scalar_sol,
-                                      const MooseArray<Number> & lm_sol)
+DiffusionHDGAssemblyHelper::lmFaceResidual(DiffusionHDG & obj,
+                                           const unsigned int i_offset,
+                                           const MooseArray<Gradient> & vector_sol,
+                                           const MooseArray<Number> & scalar_sol,
+                                           const MooseArray<Number> & lm_sol)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._lm_n_dofs))
@@ -379,11 +379,11 @@ DiffusionHDGInterface::lmFaceResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::lmFaceJacobian(DiffusionHDG & obj,
-                                      const unsigned int i_offset,
-                                      const unsigned int vector_j_offset,
-                                      const unsigned int scalar_j_offset,
-                                      const unsigned int lm_j_offset)
+DiffusionHDGAssemblyHelper::lmFaceJacobian(DiffusionHDG & obj,
+                                           const unsigned int i_offset,
+                                           const unsigned int vector_j_offset,
+                                           const unsigned int scalar_j_offset,
+                                           const unsigned int lm_j_offset)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._lm_n_dofs))
@@ -408,9 +408,9 @@ DiffusionHDGInterface::lmFaceJacobian(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::vectorDirichletResidual(DiffusionHDG & obj,
-                                               const unsigned int i_offset,
-                                               const Function & dirichlet_function)
+DiffusionHDGAssemblyHelper::vectorDirichletResidual(DiffusionHDG & obj,
+                                                    const unsigned int i_offset,
+                                                    const Function & dirichlet_function)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
@@ -425,11 +425,11 @@ DiffusionHDGInterface::vectorDirichletResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::scalarDirichletResidual(DiffusionHDG & obj,
-                                               const unsigned int i_offset,
-                                               const MooseArray<Gradient> & vector_sol,
-                                               const MooseArray<Number> & scalar_sol,
-                                               const Function & dirichlet_function)
+DiffusionHDGAssemblyHelper::scalarDirichletResidual(DiffusionHDG & obj,
+                                                    const unsigned int i_offset,
+                                                    const MooseArray<Gradient> & vector_sol,
+                                                    const MooseArray<Number> & scalar_sol,
+                                                    const Function & dirichlet_function)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
@@ -455,10 +455,10 @@ DiffusionHDGInterface::scalarDirichletResidual(DiffusionHDG & obj,
 
 template <typename DiffusionHDG>
 void
-DiffusionHDGInterface::scalarDirichletJacobian(DiffusionHDG & obj,
-                                               const unsigned int i_offset,
-                                               const unsigned int vector_j_offset,
-                                               const unsigned int scalar_j_offset)
+DiffusionHDGAssemblyHelper::scalarDirichletJacobian(DiffusionHDG & obj,
+                                                    const unsigned int i_offset,
+                                                    const unsigned int vector_j_offset,
+                                                    const unsigned int scalar_j_offset)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
