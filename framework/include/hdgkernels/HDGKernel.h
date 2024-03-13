@@ -10,7 +10,7 @@
 #pragma once
 
 #include "KernelBase.h"
-#include "HDGInterface.h"
+#include "HDGData.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 
@@ -21,7 +21,7 @@ class HDGIntegratedBC;
 /**
  * A kernel for hybridized finite element formulations
  */
-class HDGKernel : public KernelBase, public HDGInterface
+class HDGKernel : public KernelBase, public HDGData
 {
 public:
   static InputParameters validParams();

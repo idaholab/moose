@@ -20,7 +20,7 @@ typedef Eigen::MatrixXd EigenMatrix;
 typedef Eigen::VectorXd EigenVector;
 #endif
 
-class HDGInterface
+class HDGData
 {
 protected:
   /// Matrix data structures for on-diagonal coupling
