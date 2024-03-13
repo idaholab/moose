@@ -11,11 +11,12 @@ the not-too-distant future.
 For documentation specific to finite element or finite volume implementations,
 please refer to the below pages:
 
-- [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
-- [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
 - [Incompressible Finite Volume](insfv.md)
 - [Weakly Compressible Finite Volume](wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
+- [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
+- [Hybridized Discontinous Galerkin (HDG) Finite Element](NavierStokesHDGKernel.md)
+- [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
 - [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
 - [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
 - [Porous media Compressible Finite Volume HLLC](PCNSFVHLLC.md)
