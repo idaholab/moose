@@ -102,7 +102,7 @@ protected:
   /// whether to check subdomain ids of the element in the (element, side, boundary id) tupule when adding sides
   const bool _check_subdomains;
 
-  /// whether to check the subdomain ids of the neighbor (on the other 'side' of the side) when adding sides
+  /// whether to check the subdomain ids of the neighbor element (on the other 'side' of the side) when adding sides
   const bool _check_neighbor_subdomains;
 
   /// A list of included boundary ids that the side has to be part of
