@@ -98,7 +98,6 @@
     variable = temperature
   []
 []
-#---------------------------------------------------
 
 [Outputs]
   console = false

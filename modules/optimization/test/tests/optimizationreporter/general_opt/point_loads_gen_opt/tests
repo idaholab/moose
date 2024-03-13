@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#26476 #21885 #24101 #25689'
+  design = 'GeneralOptimization.md OptimizationData.md ReporterPointSource.md'
+  [gen_opt_point_loads]
+    requirement = "The system shall be able to invert for point loads using the general optimization reporter with"
+    [no_measurement_transfer]
+      type = CSVDiff
+      input = main_auto_adjoint.i
+      csvdiff = 'main_out_OptimizationReporter_0001.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      abs_zero = 1e-4 # Set above the gradient tolerance which is 1e-5.
+      rel_err = 1e-4
+      # steady solve
+      recover = false
+      detail = 'the measurement data defined on the forward_and_adjoint app; '
+    []
+    [measurement_transfer]
+      type = CSVDiff
+      absent_out = 'type: ilu'
+      input = main_auto_adjoint_transfer_data.i
+      cli_args = '-ksp_view'
+      csvdiff = 'main_out_OptimizationReporter_0001.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      abs_zero = 1e-4
+      rel_err = 1e-4
+      # steady solve
+      recover = false
+      detail = "the measurement data defined on the main app and transferred to the"
+      "forward_and_adjoint app while maintaining the correct preconditioning on the adjoint system;"
+    []
+    [separate_multiapps]
+      type = CSVDiff
+      input = main_separate_multiapps.i
+      csvdiff = 'main_out_OptimizationReporter_0001.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      abs_zero = 1e-4
+      rel_err = 1e-4
+      # steady solve
+      recover = false
+      detail = 'the measurment data defined on the separate subapps;'
+    []
+    [separate_multiapps_with_reg]
+      type = CSVDiff
+      input = "main_separate_multiapps.i regularization_for_main.i"
+      cli_args = 'Outputs/file_base=main_reg_out  measurement_points="0.5 0.28 0 0.5 1.1 0" measurement_values="293 320"'
+      csvdiff = 'main_reg_out_OptimizationReporter_0001.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      abs_zero = 1e-4
+      rel_err = 1e-4
+      # steady solve
+      recover = false
+      detail = 'the measurment data defined on the separate subapps and using regularization;'
+    []
+  []
+[]

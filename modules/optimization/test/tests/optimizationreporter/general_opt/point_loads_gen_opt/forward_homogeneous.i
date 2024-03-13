@@ -1,6 +1,3 @@
-# DO NOT CHANGE THIS TEST
-# this test is documented as an example in forceInv_pointLoads.md
-# if this test is changed, the figures will need to be updated.
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -41,25 +38,25 @@
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 300
+    value = 0
   []
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
-    value = 300
+    value = 0
   []
   [bottom]
     type = DirichletBC
     variable = temperature
     boundary = bottom
-    value = 300
+    value = 0
   []
   [top]
     type = DirichletBC
     variable = temperature
     boundary = top
-    value = 300
+    value = 0
   []
 []
 
@@ -90,24 +87,18 @@
              -1000 120 500'
     execute_on = LINEAR
   []
-  [vertical]
-    type = LineValueSampler
-    variable = 'temperature'
-    start_point = '0.5 0 0'
-    end_point = '0.5 1.4 0'
-    num_points = 21
-    sort_by = y
-  []
 []
 
 [Reporters]
   [measure_data]
     type = OptimizationData
     variable = temperature
+    measurement_points = ${measurement_points}
+    measurement_values = ${measurement_values}
   []
 []
 
 [Outputs]
   console = false
-  file_base = 'forward'
+  file_base = 'forward_homo'
 []
