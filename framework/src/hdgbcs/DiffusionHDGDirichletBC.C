@@ -38,6 +38,9 @@ DiffusionHDGDirichletBC::onBoundary()
 {
   resizeData(*this);
 
+  // For notation, please read "A superconvergent LDG-hybridizable Galerkin method for second-order
+  // elliptic problems" by Cockburn
+
   // qu, u
   vectorDirichletResidual(*this, 0, _dirichlet_val);
   scalarDirichletResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _dirichlet_val);

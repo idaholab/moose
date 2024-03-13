@@ -30,7 +30,9 @@ class MaterialPropertyInterface;
 /**
  * Implements all the methods for assembling a hybridized local discontinuous Galerkin (LDG-H),
  * which is a type of HDG method, discretization of the diffusion equation. These routines may be
- * called by both HDG kernels and integrated boundary conditions
+ * called by both HDG kernels and integrated boundary conditions. The implementation here is based
+ * (but not exactly based) on "A superconvergent LDG-hybridizable Galerkin method for second-order
+ * elliptic problems" by Cockburn
  */
 class DiffusionHDGAssemblyHelper
 {

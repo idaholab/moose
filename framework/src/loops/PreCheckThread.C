@@ -34,7 +34,7 @@ PreCheckThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
-  // Update variable Dependencies
+  // Update variable dependencies
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _hybridized_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
 

@@ -22,15 +22,15 @@ broken. For instance Raviart-Thomas finite elements may be used to solve a mixed
 formulation description of a Poisson problem. The Raviart-Thomas elements ensure
 continuity of the normal component of the vector field across element faces. We
 break that continuity in the finite element space used in the hybridized method
-and instead introduce degrees of freedom, that live only on the mesh skeleton,
-that are responsible for ensuring the continuity that was lost by breaking the
-finite element space. In libMesh/MOOSE implementation terms, when hybridizing
-the Raviart-Thomas description of the Poisson problem, we change from using a
-`RAVIART_THOMAS` basis to an `L2_RAVIART_THOMAS` basis and introduce a
-`SIDE_HIERARCHIC` variable whose degrees of freedom live on the mesh
-skeleton. We will refer to the variables that exist "before" the hybridization
-as primal variables and the variable(s) that live on the mesh skeleton as
-Lagrange multipliers or dual variable(s).
+and instead introduce degrees of freedom, that live only on the mesh skeleton
+(the faces of the mesh), that are responsible for ensuring the continuity that
+was lost by breaking the finite element space. In libMesh/MOOSE implementation
+terms, when hybridizing the Raviart-Thomas description of the Poisson problem,
+we change from using a `RAVIART_THOMAS` basis to an `L2_RAVIART_THOMAS` basis
+and introduce a `SIDE_HIERARCHIC` variable whose degrees of freedom live on the
+mesh skeleton. We will refer to the variables that exist "before" the
+hybridization as primal variables and the variable(s) that live on the mesh
+skeleton as Lagrange multipliers (LMs) or dual variable(s).
 
 ## Implementation in MOOSE
 

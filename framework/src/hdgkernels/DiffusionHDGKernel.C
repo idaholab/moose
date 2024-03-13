@@ -31,6 +31,9 @@ DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & parameters)
 {
 }
 
+// For notation, please read "A superconvergent LDG-hybridizable Galerkin method for second-order
+// elliptic problems" by Cockburn
+
 void
 DiffusionHDGKernel::onElement()
 {
