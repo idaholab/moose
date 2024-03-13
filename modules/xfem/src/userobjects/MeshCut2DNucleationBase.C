@@ -13,6 +13,9 @@
 
 #include "MooseMesh.h"
 
+#include "libmesh/parallel_algebra.h"
+#include "libmesh/parallel.h"
+
 InputParameters
 MeshCut2DNucleationBase::validParams()
 {
