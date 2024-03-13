@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [TerminalTextEdit]
     type = PythonUnitTest
     input = test_TerminalTextEdit.py
     display_required = true
+    requirement = "The system shall include a graphical interface that lets the user visualize, save, and clear console (terminal) output."
   []
 []

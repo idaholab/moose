@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [ParamsByGroup]
     type = PythonUnitTest
     input = test_ParamsByGroup.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can read parameter groups and group parameters by parameter group."
   []
 []
