@@ -29,9 +29,9 @@
 
 [Kernels]
   [./matrix_dt]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = u
-    Coefficient = 0.2  # matrix porosity
+    coeff = 0.2  # matrix porosity
     block = 1
   [../]
   [./matrix_diff]
@@ -41,9 +41,9 @@
     tensor_coeff = '0.002 0 0   0 0 0   0 0 0'  # matrix porosity * matrix diffusivity
   [../]
   [./fracture_dt]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = u
-    Coefficient = 0.1  # fracture half-aperture * fracture porosity
+    coeff = 0.1  # fracture half-aperture * fracture porosity
     block = 2
   [../]
   [./fracture_advect]

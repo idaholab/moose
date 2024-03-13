@@ -54,8 +54,8 @@ cp = 1.0
     block = 1
   []
   [time_deriv]
-    type = CoefTimeDerivative
-    Coefficient = ${cp}
+    type = TimeDerivative
+    coeff = ${cp}
     variable = T
   []
 []
