@@ -184,7 +184,7 @@ class Test(unittest.TestCase):
             pre_make._checkCondaPackage(package)
         self.assertEqual(e.exception.package, package)
         self.assertEqual(e.exception.version, 'foo')
-        self.assertEqual(e.exception.required_version, version)
+        self.assertEqual(e.exception.required_version, current_version)
         self.assertEqual(e.exception.build, build)
         self.assertEqual(e.exception.required_build, build)
 
@@ -198,7 +198,7 @@ class Test(unittest.TestCase):
             pre_make._checkCondaPackage(package)
         self.assertEqual(e.exception.package, package)
         self.assertEqual(e.exception.version, version)
-        self.assertEqual(e.exception.required_version, version)
+        self.assertEqual(e.exception.required_version, current_version)
         self.assertEqual(e.exception.build, different_build_string)
         self.assertEqual(e.exception.required_build, build)
 
