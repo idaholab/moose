@@ -157,7 +157,7 @@
   []
 
   [data_specific]
-    requirement = 'The system shall support in the output of rays in a mesh format the output of specific'
+    requirement = 'The system shall support, in the output of rays in a mesh format, the output of specific'
     design = 'RayTracingMeshOutput.md'
     [data]
       type = Exodiff
@@ -225,7 +225,7 @@
                   Outputs/rays/output_data_nodal=true'
       expect_err = "Not supported when study segments_on_cache_traces = false"
 
-      detail = 'when nodal data is requested to be output but segment-wise information is not cached,'
+      detail = 'nodal data is requested to be output but segment-wise information is not cached,'
     []
     [data_all_and_specific]
       type = RunException
@@ -235,7 +235,7 @@
                   Outputs/rays/output_data_names=unused'
       expect_err = "Cannot be used in addition to 'output_data_names'"
 
-      detail = 'when all data and specific data are both requested,'
+      detail = 'all data and specific data are both requested,'
     []
     [aux_data_all_and_specific]
       type = RunException
@@ -245,7 +245,7 @@
                   Outputs/rays/output_aux_data_names=unused'
       expect_err = "Cannot be used in addition to 'output_aux_data_names'"
 
-      detail = 'when all aux data and specific aux data are both requested'
+      detail = 'all aux data and specific aux data are both requested'
     []
     [missing_data]
       type = RunException
