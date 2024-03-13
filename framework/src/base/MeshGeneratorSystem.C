@@ -158,7 +158,6 @@ MeshGeneratorSystem::createAddedMeshGenerators()
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
 
   // If we're using data-driven generation, find that requirement now
-  std::optional<std::string> data_driven_generator_name;
   mooseAssert(!_data_driven_generator_name, "Should not be set");
   if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
       moose_mesh->isParamValid(data_driven_generator_param))
