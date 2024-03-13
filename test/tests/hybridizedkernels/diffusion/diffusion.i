@@ -41,12 +41,12 @@
   [left]
     type = DiffusionHDGDirichletBC
     boundary = 'left'
-    function = '0'
+    functor = '0'
   []
   [right]
     type = DiffusionHDGDirichletBC
     boundary = 'right'
-    function = '1'
+    functor = '1'
   []
   [zero_flux]
     type = DiffusionHDGZeroFluxBC

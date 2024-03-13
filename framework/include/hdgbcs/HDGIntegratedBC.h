@@ -11,11 +11,12 @@
 
 #include "IntegratedBCBase.h"
 #include "HDGData.h"
+#include "NonADFunctorInterface.h"
 
 /**
  * An integrated boundary condition for hybridized finite element formulations
  */
-class HDGIntegratedBC : public IntegratedBCBase, public HDGData
+class HDGIntegratedBC : public IntegratedBCBase, public HDGData, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();

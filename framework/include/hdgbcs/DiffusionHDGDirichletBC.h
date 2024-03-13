@@ -33,7 +33,7 @@ protected:
 
 private:
   /// Dirichlet function
-  const Function & _dirichlet_val;
+  const Moose::Functor<Real> & _dirichlet_val;
 
   friend class DiffusionHDGAssemblyHelper;
 };

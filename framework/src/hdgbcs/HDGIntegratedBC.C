@@ -22,6 +22,7 @@ HDGIntegratedBC::validParams()
 
 HDGIntegratedBC::HDGIntegratedBC(const InputParameters & parameters)
   : IntegratedBCBase(parameters),
+    NonADFunctorInterface(this),
     _normals(_assembly.normals()),
     _aux_sys(_fe_problem.getAuxiliarySystem()),
     _JxW_face(_JxW),
