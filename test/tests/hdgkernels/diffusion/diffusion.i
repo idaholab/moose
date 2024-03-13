@@ -38,6 +38,7 @@
 []
 
 [HDGBCs]
+  inactive = 'right_flux'
   [left]
     type = DiffusionHDGDirichletBC
     boundary = 'left'
@@ -47,6 +48,11 @@
     type = DiffusionHDGDirichletBC
     boundary = 'right'
     functor = '1'
+  []
+  [right_flux]
+    type = DiffusionHDGPrescribedGradientBC
+    boundary = 'right'
+    normal_gradient = 1
   []
   [zero_flux]
     type = DiffusionHDGPrescribedGradientBC

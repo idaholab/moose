@@ -373,21 +373,20 @@ DiffusionHDGAssemblyHelper::scalarFaceResidual(DiffusionHDG & obj,
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
-      if (obj._neigh)
-      {
-        // vector
-        obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._diff[qp] *
-                                        obj._scalar_phi_face[i][qp] *
-                                        (vector_sol[qp] * obj._normals[qp]);
+    {
+      // vector
+      obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._diff[qp] *
+                                      obj._scalar_phi_face[i][qp] *
+                                      (vector_sol[qp] * obj._normals[qp]);
 
-        // scalar from stabilization term
-        obj._PrimalVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
-                                        scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
+      // scalar from stabilization term
+      obj._PrimalVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
+                                      scalar_sol[qp] * obj._normals[qp] * obj._normals[qp];
 
-        // lm from stabilization term
-        obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
-                                        lm_sol[qp] * obj._normals[qp] * obj._normals[qp];
-      }
+      // lm from stabilization term
+      obj._PrimalVec(i_offset + i) -= obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau *
+                                      lm_sol[qp] * obj._normals[qp] * obj._normals[qp];
+    }
 }
 
 template <typename DiffusionHDG>
@@ -400,24 +399,23 @@ DiffusionHDGAssemblyHelper::scalarFaceJacobian(DiffusionHDG & obj,
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
     for (const auto i : make_range(obj._scalar_n_dofs))
-      if (obj._neigh)
-      {
-        for (const auto j : make_range(obj._vector_n_dofs))
-          obj._PrimalMat(i_offset + i, vector_j_offset + j) -=
-              obj._JxW_face[qp] * obj._diff[qp] * obj._scalar_phi_face[i][qp] *
-              (obj._vector_phi_face[j][qp] * obj._normals[qp]);
+    {
+      for (const auto j : make_range(obj._vector_n_dofs))
+        obj._PrimalMat(i_offset + i, vector_j_offset + j) -=
+            obj._JxW_face[qp] * obj._diff[qp] * obj._scalar_phi_face[i][qp] *
+            (obj._vector_phi_face[j][qp] * obj._normals[qp]);
 
-        for (const auto j : make_range(obj._scalar_n_dofs))
-          obj._PrimalMat(i_offset + i, scalar_j_offset + j) +=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._scalar_phi_face[j][qp] *
-              obj._normals[qp] * obj._normals[qp];
+      for (const auto j : make_range(obj._scalar_n_dofs))
+        obj._PrimalMat(i_offset + i, scalar_j_offset + j) +=
+            obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._scalar_phi_face[j][qp] *
+            obj._normals[qp] * obj._normals[qp];
 
-        for (const auto j : make_range(obj._lm_n_dofs))
-          // from stabilization term
-          obj._PrimalLM(i_offset + i, lm_j_offset + j) -=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._lm_phi_face[j][qp] *
-              obj._normals[qp] * obj._normals[qp];
-      }
+      for (const auto j : make_range(obj._lm_n_dofs))
+        // from stabilization term
+        obj._PrimalLM(i_offset + i, lm_j_offset + j) -=
+            obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * _tau * obj._lm_phi_face[j][qp] *
+            obj._normals[qp] * obj._normals[qp];
+    }
 }
 
 template <typename DiffusionHDG>
