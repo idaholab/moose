@@ -17,6 +17,8 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/nemesis_io.h"
 
+const std::string MeshGenerator::data_only_param = "_data_only";
+
 InputParameters
 MeshGenerator::validParams()
 {
@@ -45,6 +47,7 @@ MeshGenerator::validParams()
   params.addPrivateParam<bool>("_has_generate_data", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
   params.addPrivateParam<const MeshGenerator *>("_subgenerator_child", nullptr);
+  params.addPrivateParam<bool>(data_only_param, false);
 
   return params;
 }
@@ -55,9 +58,18 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
     _mesh(getParam<MooseMesh *>("_moose_mesh") ? getParam<MooseMesh *>("_moose_mesh")
                                                : _app.actionWarehouse().mesh().get()),
     _save_with_name(getParam<std::string>("save_with_name")),
-    _subgenerator_child(getParam<const MeshGenerator *>("_subgenerator_child"))
+    _subgenerator_child(getParam<const MeshGenerator *>("_subgenerator_child")),
+    _data_only(getParam<bool>(data_only_param))
 {
-  if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
+  const auto & system = _app.getMeshGeneratorSystem();
+  if (isDataOnly())
+  {
+    if (!hasGenerateData())
+      system.dataDrivenError(*this, "does not support data-driven generation");
+    if (hasSaveMesh())
+      system.dataDrivenError(*this, "has 'save_with_name' set");
+  }
+  if (_save_with_name == system.mainMeshGeneratorName())
     paramError(
         "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
 }
@@ -241,18 +253,15 @@ MeshGenerator::buildDistributedMesh(unsigned int dim)
 }
 
 std::unique_ptr<MeshBase>
-MeshGenerator::generateInternal(const bool data_only)
+MeshGenerator::generateInternal()
 {
   libmesh_parallel_only(comm());
   mooseAssert(comm().verify(type() + name()), "Inconsistent execution ordering");
 
-  if (data_only)
-    mooseAssert(hasGenerateData(), "Does not support data-only generation");
-
   if (hasGenerateData())
     generateData();
 
-  if (data_only)
+  if (isDataOnly())
     return nullptr;
 
   auto mesh = generate();
@@ -328,6 +337,9 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
   // In case the user forgot it
   params.set<MooseApp *>("_moose_app") = &_app;
   params.set<const MeshGenerator *>("_subgenerator_child") = this;
+
+  // Set this to be data-only if this generator is data only
+  params.set<bool>(data_only_param) = isDataOnly();
 
   _app.addMeshGenerator(type, name, params);
   _sub_mesh_generators.insert(&std::as_const(_app).getMeshGenerator(name));

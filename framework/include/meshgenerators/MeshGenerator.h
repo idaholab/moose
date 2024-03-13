@@ -58,6 +58,9 @@ public:
    */
   static bool hasGenerateData(const InputParameters & params);
 
+  /// The name of the private parameter for setting data only
+  static const std::string data_only_param;
+
   MeshGenerator(const InputParameters & parameters);
 
   /**
@@ -69,7 +72,7 @@ public:
    * Internal generation method - this is what is actually called
    * within MooseApp to execute the MeshGenerator.
    */
-  [[nodiscard]] std::unique_ptr<MeshBase> generateInternal(const bool data_only);
+  [[nodiscard]] std::unique_ptr<MeshBase> generateInternal();
 
   /**
    * @returns The names of the MeshGenerators that were requested in the getMesh methods
@@ -185,6 +188,11 @@ public:
    * @return If this generator was created as a subgenerator, the generator that created it
    */
   const MeshGenerator * getSubgeneratorChild() const { return _subgenerator_child; }
+
+  /**
+   * @return Whether or not this generator is to be generated in data-only mode
+   */
+  bool isDataOnly() const { return _data_only; }
 
 protected:
   /**
@@ -445,6 +453,9 @@ private:
 
   /// Whether or not this mesh generator is a subgenerator
   const MeshGenerator * _subgenerator_child;
+
+  /// Whether or not this mesh generator will run in data only mode
+  const bool _data_only;
 };
 
 template <typename T, typename... Args>

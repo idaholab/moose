@@ -155,18 +155,57 @@ MeshGeneratorSystem::createAddedMeshGenerators()
                MooseUtils::join(e.getCyclicDependencies(), " <- "));
   }
 
+  const auto & moose_mesh = _app.actionWarehouse().getMesh();
+
+  // If we're using data-driven generation, find that requirement now
+  std::optional<std::string> data_driven_generator_name;
+  mooseAssert(!_data_driven_generator_name, "Should not be set");
+  if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
+      moose_mesh->isParamValid(data_driven_generator_param))
+  {
+    if (!hasDataDrivenAllowed())
+      moose_mesh->paramError(
+          data_driven_generator_param,
+          "This application does not support data-driven mesh generation.\n\nThis generation is an "
+          "advanced feature and must be enabled on the application via the '",
+          allow_data_driven_param,
+          "' parameter.");
+
+    mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
+                "Assumption for mesh type is now invalid");
+
+    _data_driven_generator_name = moose_mesh->getParam<std::string>(data_driven_generator_param);
+    if (!_mesh_generator_params.count(*_data_driven_generator_name))
+      moose_mesh->paramError(data_driven_generator_param,
+                             "The data driven generator '",
+                             *_data_driven_generator_name,
+                             "' does not exist");
+  }
+
   // Construct all of the mesh generators that we know exist
   for (const auto & generator_names : ordered_generators)
     for (const auto & generator_name : generator_names)
-      if (_mesh_generator_params.count(generator_name))
+      if (auto it = _mesh_generator_params.find(generator_name); it != _mesh_generator_params.end())
+      {
+        auto & params = it->second.second;
+
+        // Determine now if we need to run this in data only mode
+        const bool data_only = _data_driven_generator_name &&
+                               getDataDrivenGeneratorName() != generator_name &&
+                               resolver.dependsOn(getDataDrivenGeneratorName(), generator_name);
+        params.set<bool>(MeshGenerator::data_only_param) = data_only;
+
         createMeshGenerator(generator_name);
+
+        mooseAssert(data_only == getMeshGenerator(generator_name).isDataOnly(),
+                    "Inconsistent data only");
+      }
 
   mooseAssert(_mesh_generator_params.empty(), "Should be empty");
   mooseAssert(_final_generator_name.empty(), "Should be unset at this point");
 
   // Set the final generator if we have one set by the user
   // and if so make sure it also exists
-  const auto & moose_mesh = _app.actionWarehouse().getMesh();
   if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
       moose_mesh->isParamValid("final_generator"))
   {
@@ -329,73 +368,6 @@ MeshGeneratorSystem::executeMeshGenerators()
   // Order the generators
   createMeshGeneratorOrder();
 
-  // Manage the data driven capability, which needs to be done this late
-  // because folks could add generators via append_mesh_generator
-  const auto & moose_mesh = _app.actionWarehouse().getMesh();
-  std::set<const MeshGenerator *> data_only_generators;
-  if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
-      moose_mesh->isParamValid(data_driven_generator_param))
-  {
-    if (!hasDataDrivenAllowed())
-      moose_mesh->paramError(
-          data_driven_generator_param,
-          "This application does not support data-driven mesh generation.\n\nThis generation is an "
-          "advanced feature and must be enabled on the application via the '",
-          allow_data_driven_param,
-          "' parameter.");
-
-    mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
-                "Assumption for mesh type is now invalid");
-
-    const auto & data_driven_generator_name =
-        moose_mesh->parameters().get<std::string>(data_driven_generator_param);
-    if (!hasMeshGenerator(data_driven_generator_name))
-      moose_mesh->paramError(data_driven_generator_param,
-                             "The data driven generator '",
-                             data_driven_generator_name,
-                             "' does not exist");
-
-    // Make sure all parents support data driven generation, and keep track of them
-    for (const auto & name_generator_pair : _mesh_generators)
-    {
-      const auto & generator = *name_generator_pair.second;
-      if (generator.isChildMeshGenerator(data_driven_generator_name, false))
-      {
-        // Do not run any subgenerators created by the data driven generator in data only
-        const MeshGenerator * subgenerator_child = generator.getSubgeneratorChild();
-        bool skip_subgenerator_of_data_driven_generator = false;
-        while (subgenerator_child)
-        {
-          if (subgenerator_child->name() == data_driven_generator_name)
-          {
-            skip_subgenerator_of_data_driven_generator = true;
-            break;
-          }
-          subgenerator_child = subgenerator_child->getSubgeneratorChild();
-        }
-        if (skip_subgenerator_of_data_driven_generator)
-          continue;
-
-        if (!generator.hasGenerateData())
-          moose_mesh->paramError(data_driven_generator_param,
-                                 "The generator '",
-                                 data_driven_generator_name,
-                                 "' cannot be used in data-driven mode because the parent ",
-                                 generator.typeAndName(),
-                                 " does not support data-driven generation");
-        if (generator.hasSaveMesh())
-          moose_mesh->paramError(data_driven_generator_param,
-                                 "The generator '",
-                                 data_driven_generator_name,
-                                 "' cannot be used in data-driven mode because the parent ",
-                                 generator.typeAndName(),
-                                 " has 'save_with_name' set");
-
-        data_only_generators.insert(&generator);
-      }
-    }
-  }
-
   // Save all meshes marked to to_save_in_meshes and save in error checking
   std::map<std::string, std::unique_ptr<MeshBase> *> to_save_in_meshes;
   for (const auto & generator_set : _ordered_mesh_generators)
@@ -419,11 +391,10 @@ MeshGeneratorSystem::executeMeshGenerators()
     {
       const auto & name = generator->name();
 
-      const bool data_only = data_only_generators.count(generator);
-      auto current_mesh = generator->generateInternal(data_only);
+      auto current_mesh = generator->generateInternal();
 
       // Only generating data for this generator
-      if (data_only)
+      if (generator->isDataOnly())
       {
         mooseAssert(!current_mesh, "Should not have a mesh");
         continue;
@@ -659,4 +630,25 @@ bool
 MeshGeneratorSystem::hasDataDrivenAllowed() const
 {
   return _app.parameters().get<bool>(allow_data_driven_param);
+}
+
+const std::string &
+MeshGeneratorSystem::getDataDrivenGeneratorName() const
+{
+  mooseAssert(_data_driven_generator_name, "Not set");
+  return *_data_driven_generator_name;
+}
+
+void
+MeshGeneratorSystem::dataDrivenError(const MeshGenerator & generator,
+                                     const std::string & message) const
+{
+  const auto & moose_mesh = _app.actionWarehouse().getMesh();
+  moose_mesh->paramError(data_driven_generator_param,
+                         "The generator '",
+                         getDataDrivenGeneratorName(),
+                         "' cannot be used in data-driven mode because the parent ",
+                         generator.typeAndName(),
+                         " ",
+                         message);
 }
