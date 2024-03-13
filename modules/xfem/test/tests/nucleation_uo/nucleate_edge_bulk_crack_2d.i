@@ -96,7 +96,7 @@
   poissons_ratio = 0.3
   youngs_modulus = 207000
   block = 0
-  incremental = true
+  incremental = false
   used_by_xfem_to_grow_crack = true
 []
 
@@ -150,10 +150,9 @@
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
-    strain = FINITE
-    planar_formulation = plane_strain
+    strain = SMALL
+    planar_formulation = PLANE_STRAIN
     add_variables = true
-    generate_output = 'stress_xx stress_yy vonmises_stress max_principal_stress'
   []
 []
 
@@ -214,16 +213,16 @@
     poissons_ratio = 0.3
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      8'
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'gmres lu superlu_dist'
 
   line_search = 'none'
 
@@ -231,6 +230,9 @@
     type = SimplePredictor
     scale = 1.0
   [../]
+
+  reuse_preconditioner=true
+  reuse_preconditioner_max_linear_its = 25
 
 # controls for linear iterations
   l_max_its = 100
