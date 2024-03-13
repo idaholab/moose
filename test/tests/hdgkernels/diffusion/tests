@@ -17,4 +17,11 @@
     installation_type = in_tree
     valgrind = 'none'
   []
+  [prescribed_nonzero_flux]
+    requirement = 'The system shall be able to apply a non-zero normal gradient boundary condition for the primal scalar field.'
+    input = 'diffusion.i'
+    csvdiff = 'prescribed_gradient.csv'
+    type = CSVDiff
+    cli_args = "HDGBCs/inactive='right' Outputs/file_base=prescribed_gradient"
+  []
 []
