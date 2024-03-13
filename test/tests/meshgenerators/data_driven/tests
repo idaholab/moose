@@ -1,6 +1,6 @@
 [Tests]
   design = 'MeshGenerator.md'
-  issues = '#26295'
+  issues = '#26295 #27075'
 
   [test]
     type = 'Exodiff'
