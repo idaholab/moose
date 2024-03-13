@@ -5,7 +5,7 @@
     exodiff = 'transient_vector_diffusion_out.e'
     requirement = 'The system shall be able to reproduce the simple_transient_diffusion test with VectorTimeDerivative (hand-coded Jacobian).'
     issues = '#13913'
-    design = 'VectorTimeDerivative.md'
+    design = 'TimeDerivative.md'
   [../]
   [./jac_transient_vector_diffusion]
     type = 'PetscJacobianTester'
@@ -16,6 +16,6 @@
     difference_tol = 1e-6
     requirement = 'The Jacobian from VectorTimeDerivative shall be perfect'
     issues = '#13913'
-    design = 'VectorTimeDerivative.md'
+    design = 'TimeDerivative.md'
   [../]
 []
