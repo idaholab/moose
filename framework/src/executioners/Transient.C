@@ -226,22 +226,6 @@ Transient::init()
 
   mooseAssert(getTimeStepper(), "No time stepper was set");
 
-  /**
-   * If this is a restart run, the user may want to override the start time, which we already set in
-   * the constructor. "_time" however will have been "restored" from the restart file. We need to
-   * honor the original request of the developer now that the restore has been completed. This must
-   * occur before we init the time stepper (since that prints out the start time). The multiapp case
-   * is also bit complicated. If we didn't set a start time, the app won't have it yet, so we just
-   * restart the old time from the current time.
-   */
-  if (_app.isRestarting())
-  {
-    if (_app.hasStartTime())
-      _time = _time_old = _app.getStartTime();
-    else
-      _time_old = _time;
-  }
-
   _time_stepper->init();
 
   if (_app.isRecovering()) // Recover case

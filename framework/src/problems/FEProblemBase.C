@@ -786,6 +786,11 @@ FEProblemBase::initialSetup()
     // Only load all of the vectors if we're recovering
     _req.set().setLoadAllVectors(_app.isRecovering());
 
+    // This forces stateful material property loading to be an exact one-to-one match
+    if (_app.isRecovering())
+      for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
+        props->setRecovering();
+
     TIME_SECTION("restore", 3, "Restoring from backup");
 
     // We could have a cached backup when this app is a sub-app and has been given a Backup
@@ -794,9 +799,18 @@ FEProblemBase::initialSetup()
     else
       _app.restoreFromInitialBackup(_app.isRestarting());
 
-    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-        _neighbor_material_props.hasStatefulProperties())
-      _has_initialized_stateful = true;
+    /**
+     * If this is a restart run, the user may want to override the start time, which we already set
+     * in the constructor. "_time" however will have been "restored" from the restart file. We need
+     * to honor the original request of the developer now that the restore has been completed.
+     */
+    if (_app.isRestarting())
+    {
+      if (_app.hasStartTime())
+        _time = _time_old = _app.getStartTime();
+      else
+        _time_old = _time;
+    }
   }
   else
   {
@@ -938,7 +952,6 @@ FEProblemBase::initialSetup()
       }
     }
 
-    if (!_has_initialized_stateful)
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
@@ -948,6 +961,16 @@ FEProblemBase::initialSetup()
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
     }
+  }
+
+  // setRestartInPlace() is set because the property maps have now been setup and we can
+  // dataLoad() them directly in place
+  // setRecovering() is set because from now on we require a one-to-one mapping of
+  // stateful properties because we shouldn't be declaring any more
+  for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
+  {
+    props->setRestartInPlace();
+    props->setRecovering();
   }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
@@ -7553,8 +7576,6 @@ void
 FEProblemBase::checkDependMaterialsHelper(
     const std::map<SubdomainID, std::vector<std::shared_ptr<MaterialBase>>> & materials_map)
 {
-  auto & prop_names = _material_props.statefulPropNames();
-
   for (const auto & it : materials_map)
   {
     /// These two sets are used to make sure that all dependent props on a block are actually supplied
@@ -7567,10 +7588,8 @@ FEProblemBase::checkDependMaterialsHelper(
 
       auto & alldeps = mat1->getMatPropDependencies(); // includes requested stateful props
       for (auto & dep : alldeps)
-      {
-        if (prop_names.count(dep) > 0)
-          block_depend_props.insert(prop_names.at(dep));
-      }
+        if (const auto name = _material_props.queryStatefulPropName(dep))
+          block_depend_props.insert(*name);
 
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)

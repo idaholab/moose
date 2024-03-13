@@ -86,8 +86,12 @@ public:
 
   /**
    * Initialize stateful properties (if material has some)
+   *
+   * This is _only_ called if this material has properties that are
+   * requested as stateful
    */
   virtual void initStatefulProperties(unsigned int n_points);
+
   virtual bool isInterfaceMaterial() { return false; };
 
   /**
@@ -249,6 +253,15 @@ public:
    */
   void setActiveProperties(const std::unordered_set<unsigned int> & needed_props);
 
+  /**
+   * @return Whether or not this material should forcefully call
+   * initStatefulProperties() even if it doesn't produce properties
+   * that needs state.
+   *
+   * Please don't set this to true :(
+   */
+  bool forceStatefulInit() const { return _force_stateful_init; }
+
 protected:
   /**
    * Users must override this method.
@@ -274,6 +287,9 @@ protected:
    * and an older property named "_diffusivity_old".  You only need to initialize diffusivity.
    * MOOSE will use
    * copy that initial value to the old and older values as necessary.
+   *
+   * This is _only_ called if this material has properties that are
+   * requested as stateful
    */
   virtual void initQpStatefulProperties();
 
@@ -359,6 +375,9 @@ protected:
 
 private:
   const MaterialPropertyName _declare_suffix;
+
+  /// Whether or not to force stateful init; see forceStatefulInit()
+  const bool _force_stateful_init;
 };
 
 template <typename T>

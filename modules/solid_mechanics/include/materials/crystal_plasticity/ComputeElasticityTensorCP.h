@@ -34,7 +34,6 @@ protected:
    * Defines the constant rotation matrix from the user specified
    * Bunge Euler Angles or user-supplied rotation matrix.
    */
-  virtual void initQpStatefulProperties() override;
   virtual void computeQpElasticityTensor() override;
 
   virtual void assignEulerAngles();
