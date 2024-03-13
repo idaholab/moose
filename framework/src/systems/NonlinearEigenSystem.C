@@ -185,30 +185,9 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 void
 NonlinearEigenSystem::solve()
 {
-  // Clear the iteration counters
-  _current_l_its.clear();
-  _current_nl_its = 0;
-  // Initialize the solution vector using a predictor and known values from nodal bcs
-  setInitialSolution();
-
-  // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
-  // to determine variable scaling factors
-  if (_automatic_scaling)
-  {
-    if (_compute_scaling_once)
-    {
-      if (!_computed_scaling)
-      {
-        computeScaling();
-        _computed_scaling = true;
-      }
-    }
-    else
-      computeScaling();
-  }
-  // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
-  // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
-  assembleScalingVector();
+  const bool presolve_succeeded = preSolve();
+  if (!presolve_succeeded)
+    return;
 
 // In DEBUG mode, Libmesh will check the residual automatically. This may cause
 // an error because B does not need to assembly by default.
@@ -313,7 +292,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
 }
 
 void
-NonlinearEigenSystem::stopSolve()
+NonlinearEigenSystem::stopSolve(const ExecFlagType &)
 {
   mooseError("did not implement yet \n");
 }

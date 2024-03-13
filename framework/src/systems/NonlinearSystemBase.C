@@ -2821,6 +2821,12 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
            i++) // Add any Jacobian contributions still hanging around
         _fe_problem.addCachedJacobian(i);
 
+      // Check whether any exceptions were thrown and propagate this information for parallel
+      // consistency before
+      // 1) we do parallel communication when closing tagged matrices
+      // 2) early returning before reaching our PARALLEL_CATCH below
+      _fe_problem.checkExceptionAndStopSolve();
+
       closeTaggedMatrices(tags);
 
       return;
@@ -3833,11 +3839,16 @@ NonlinearSystemBase::setupScalingData()
                     libmesh_map_find(number_to_var_map, i)->name()) !=
           _ignore_variables_for_autoscaling.end())
         _variable_autoscaled[i] = false;
+
+  _auto_scaling_initd = true;
 }
 
-void
+bool
 NonlinearSystemBase::computeScaling()
 {
+  if (_compute_scaling_once && _computed_scaling)
+    return true;
+
   _console << "\nPerforming automatic scaling calculation\n" << std::endl;
 
   TIME_SECTION("computeScaling", 3, "Computing Automatic Scaling");
@@ -3894,6 +3905,10 @@ NonlinearSystemBase::computeScaling()
     _fe_problem.computingNonlinearResid(false);
     _fe_problem.computingScalingResidual(false);
   }
+
+  // Did something bad happen during residual/Jacobian scaling computation?
+  if (_fe_problem.getFailNextNonlinearConvergenceCheck())
+    return false;
 
   auto examine_dof_indices = [this,
                               jac_scaling,
@@ -3985,7 +4000,8 @@ NonlinearSystemBase::computeScaling()
     displaced_problem->systemBaseNonlinear(number()).applyScalingFactors(
         flattened_inverse_scaling_factors);
 
-  _auto_scaling_initd = true;
+  _computed_scaling = true;
+  return true;
 }
 
 void
@@ -4033,4 +4049,30 @@ NonlinearSystemBase::assembleScalingVector()
   if (auto * displaced_problem = _fe_problem.getDisplacedProblem().get())
     // copy into the corresponding displaced system vector because they should be the exact same
     displaced_problem->systemBaseNonlinear(number()).getVector("scaling_factors") = scaling_vector;
+}
+
+bool
+NonlinearSystemBase::preSolve()
+{
+  // Clear the iteration counters
+  _current_l_its.clear();
+  _current_nl_its = 0;
+
+  // Initialize the solution vector using a predictor and known values from nodal bcs
+  setInitialSolution();
+
+  // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
+  // to determine variable scaling factors
+  if (_automatic_scaling)
+  {
+    const bool scaling_succeeded = computeScaling();
+    if (!scaling_succeeded)
+      return false;
+  }
+
+  // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
+  // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
+  assembleScalingVector();
+
+  return true;
 }

@@ -153,31 +153,9 @@ NonlinearSystem::solve()
                << _initial_residual_before_preset_bcs << std::endl;
   }
 
-  // Clear the iteration counters
-  _current_l_its.clear();
-  _current_nl_its = 0;
-
-  // Initialize the solution vector using a predictor and known values from nodal bcs
-  setInitialSolution();
-
-  // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
-  // to determine variable scaling factors
-  if (_automatic_scaling)
-  {
-    if (_compute_scaling_once)
-    {
-      if (!_computed_scaling)
-      {
-        computeScaling();
-        _computed_scaling = true;
-      }
-    }
-    else
-      computeScaling();
-  }
-  // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
-  // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
-  assembleScalingVector();
+  const bool presolve_succeeded = preSolve();
+  if (!presolve_succeeded)
+    return;
 
   if (_use_finite_differenced_preconditioner)
   {
@@ -234,29 +212,27 @@ NonlinearSystem::solve()
 }
 
 void
-NonlinearSystem::stopSolve()
+NonlinearSystem::stopSolve(const ExecFlagType & exec_flag)
 {
   PetscNonlinearSolver<Real> & solver =
       static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
-  SNESSetFunctionDomainError(solver.snes());
 
-  // Insert a NaN into the residual vector.  As of PETSc-3.6, this
-  // should make PETSc return DIVERGED_NANORINF the next time it does
-  // a reduction.  We'll write to the first local dof on every
-  // processor that has any dofs.
-  _nl_implicit_sys.rhs->close();
+  if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
+  {
+    SNESSetFunctionDomainError(solver.snes());
 
-  if (_nl_implicit_sys.rhs->local_size())
-    _nl_implicit_sys.rhs->set(_nl_implicit_sys.rhs->first_local_index(),
-                              std::numeric_limits<Real>::quiet_NaN());
-  _nl_implicit_sys.rhs->close();
-
-  // Clean up by getting other vectors into a valid state for a
-  // (possible) subsequent solve.  There may be more than just
-  // these...
-  if (_Re_time)
-    _Re_time->close();
-  _Re_non_time->close();
+    // Clean up by getting vectors into a valid state for a
+    // (possible) subsequent solve.  There may be more than just
+    // these...
+    _nl_implicit_sys.rhs->close();
+    if (_Re_time)
+      _Re_time->close();
+    _Re_non_time->close();
+  }
+  else if (exec_flag == EXEC_NONLINEAR)
+    SNESSetJacobianDomainError(solver.snes());
+  else
+    mooseError("Unsupported execute flag: ", Moose::stringify(exec_flag));
 }
 
 void
@@ -359,7 +335,7 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 bool
 NonlinearSystem::converged()
 {
-  if (_fe_problem.hasException())
+  if (_fe_problem.hasException() || _fe_problem.getFailNextNonlinearConvergenceCheck())
     return false;
   if (!_fe_problem.allowInvalidSolution() && _solution_is_invalid)
   {
