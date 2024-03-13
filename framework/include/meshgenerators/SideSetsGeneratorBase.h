@@ -48,7 +48,8 @@ protected:
    * This method implements a recursive flood routine to paint a sideset of
    * mesh to neighboring faces given a starting element and normal.
    */
-  void flood(const Elem * elem, Point normal, boundary_id_type side_id, MeshBase & mesh);
+  void
+  flood(const Elem * elem, const Point & normal, const boundary_id_type & side_id, MeshBase & mesh);
 
   /**
    * Determines whether two normal vectors are within normal_tol of each other.
@@ -57,7 +58,7 @@ protected:
    * @param tol The comparison tolerance.
    * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= tol.
    */
-  static bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real tol);
+  static bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real & tol);
 
   /**
    * Determines whether the given element's subdomain id is in the given subdomain_id_list.

@@ -185,8 +185,8 @@ SideSetsGeneratorBase::finalize()
 
 void
 SideSetsGeneratorBase::flood(const Elem * elem,
-                             Point normal,
-                             boundary_id_type side_id,
+                             const Point & normal,
+                             const boundary_id_type & side_id,
                              MeshBase & mesh)
 {
   if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
@@ -225,7 +225,7 @@ SideSetsGeneratorBase::flood(const Elem * elem,
 bool
 SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1,
                                         const Point & normal_2,
-                                        const Real tol)
+                                        const Real & tol)
 {
   return (1.0 - normal_1 * normal_2) <= tol;
 }
@@ -265,7 +265,7 @@ SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * elem,
   if (_check_boundaries && !elementSideInIncludedBoundaries(elem, side, mesh))
     return false;
 
-  // Skip if element does no have neighbor in specified subdomains
+  // Skip if element does not have neighbor in specified subdomains
   if (_check_neighbor_subdomains)
   {
     const Elem * neighbor = elem->neighbor_ptr(side);

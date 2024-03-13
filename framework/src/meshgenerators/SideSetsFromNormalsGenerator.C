@@ -37,12 +37,12 @@ SideSetsFromNormalsGenerator::validParams()
       "Adds a new named sideset to the mesh for all faces matching the specified normal.");
   params.addRequiredParam<std::vector<Point>>(
       "normals", "A list of normals for which to start painting sidesets");
-  params.addParam<Real>("normal_tol", 1e-5, "Tolerance for comparing the face nornmal");
   params.addDeprecatedParam<Real>("tolerance",
                                   "Tolerance for comparing the face normal",
                                   "Deprecated, use 'normal_tol' instead");
   params.deprecateParam("tolerance", "normal_tol", "4/01/2025");
 
+  // We are using 'normals' instead
   params.suppressParameter<Point>("normal");
 
   // It doesn't make sense to allow internal sides for this side set generator.
@@ -96,14 +96,14 @@ SideSetsFromNormalsGenerator::generate()
       if (elem->neighbor_ptr(side))
         continue;
 
-      const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
+      const Point & face_normal = _fe_face->get_normals()[0];
 
       for (const auto i : make_range(boundary_ids.size()))
       {
         _normal = _normals[i];
-        if (normalsWithinTol(_normal, normals[0], _normal_tol))
-          flood(elem, _normals[i], boundary_ids[i], *mesh);
+        if (normalsWithinTol(_normal, face_normal, _normal_tol))
+          flood(elem, _normal, boundary_ids[i], *mesh);
       }
     }
 
