@@ -46,9 +46,7 @@ HDGKernel::HDGKernel(const InputParameters & parameters)
     _coord_face(_assembly.coordTransformation()),
     _normals(_assembly.normals()),
     _neigh(nullptr),
-#ifndef NDEBUG
     _current_side(_assembly.side()),
-#endif
     _computing_global_data(true),
     _hibc_warehouse(
         *getCheckedPointerParam<MooseObjectWarehouse<HDGIntegratedBC> *>("hibc_warehouse"))

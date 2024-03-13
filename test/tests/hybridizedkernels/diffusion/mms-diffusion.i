@@ -42,7 +42,7 @@
   [all]
     type = DiffusionHDGDirichletBC
     boundary = 'left right top bottom'
-    function = 'exact'
+    functor = 'exact'
   []
 []
 

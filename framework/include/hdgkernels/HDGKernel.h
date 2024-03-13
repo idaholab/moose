@@ -109,10 +109,8 @@ private:
    */
   void addBCData(const HDGIntegratedBC & hibc);
 
-#ifndef NDEBUG
   /// The current side index
   const unsigned int & _current_side;
-#endif
 
   /// Whether we are assembling the Lagrange multiplier residual and Jacobian
   bool _computing_global_data;

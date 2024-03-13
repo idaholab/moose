@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "MooseArray.h"
+#include "MooseFunctor.h"
 #include "Function.h"
 #include "libmesh/vector_value.h"
 #include <vector>
@@ -172,7 +173,7 @@ protected:
   template <typename DiffusionHDG>
   static void vectorDirichletResidual(DiffusionHDG & obj,
                                       const unsigned int i_offset,
-                                      const Function & dirichlet_function);
+                                      const Moose::Functor<Real> & dirichlet_value);
 
   /**
    * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
@@ -182,7 +183,7 @@ protected:
                                       const unsigned int i_offset,
                                       const MooseArray<Gradient> & vector_sol,
                                       const MooseArray<Number> & scalar_sol,
-                                      const Function & dirichlet_function);
+                                      const Moose::Functor<Real> & dirichlet_value);
 
   /**
    * Computes the Jacobian for a Dirichlet condition for the scalar field in the scalar field
@@ -477,11 +478,14 @@ template <typename DiffusionHDG>
 void
 DiffusionHDGAssemblyHelper::vectorDirichletResidual(DiffusionHDG & obj,
                                                     const unsigned int i_offset,
-                                                    const Function & dirichlet_function)
+                                                    const Moose::Functor<Real> & dirichlet_value)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
-    const auto scalar_value = dirichlet_function.value(obj._t, obj._q_point_face[qp]);
+    const auto scalar_value = dirichlet_value(
+        Moose::ElemSideQpArg{
+            obj._current_elem, obj._current_side, qp, obj._qrule_face, obj._q_point_face[qp]},
+        obj.determineState());
 
     // External boundary -> Dirichlet faces -> Vector equation RHS
     for (const auto i : make_range(obj._vector_n_dofs))
@@ -496,11 +500,14 @@ DiffusionHDGAssemblyHelper::scalarDirichletResidual(DiffusionHDG & obj,
                                                     const unsigned int i_offset,
                                                     const MooseArray<Gradient> & vector_sol,
                                                     const MooseArray<Number> & scalar_sol,
-                                                    const Function & dirichlet_function)
+                                                    const Moose::Functor<Real> & dirichlet_value)
 {
   for (const auto qp : make_range(obj._qrule_face->n_points()))
   {
-    const auto scalar_value = dirichlet_function.value(obj._t, obj._q_point_face[qp]);
+    const auto scalar_value = dirichlet_value(
+        Moose::ElemSideQpArg{
+            obj._current_elem, obj._current_side, qp, obj._qrule_face, obj._q_point_face[qp]},
+        obj.determineState());
 
     for (const auto i : make_range(obj._scalar_n_dofs))
     {
