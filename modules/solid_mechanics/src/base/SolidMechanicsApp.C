@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "OptimizationApp.h"
 
 InputParameters
 SolidMechanicsApp::validParams()
@@ -187,6 +188,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 void
 SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  OptimizationApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"SolidMechanicsApp"});
   Registry::registerActionsTo(af, {"SolidMechanicsApp"});
   associateSyntaxInner(s, af);
@@ -197,6 +199,7 @@ void
 SolidMechanicsApp::registerApps()
 {
   registerApp(SolidMechanicsApp);
+  OptimizationApp::registerApps();
 }
 
 void

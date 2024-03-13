@@ -87,6 +87,7 @@ endif
 # tensor_mechanics was renamed to solid_mechanics
 ifeq ($(TENSOR_MECHANICS),yes)
   SOLID_MECHANICS      := yes
+  OPTIMIZATION         := yes
   $(warning The tensor mechanics module was renamed to the solid mechanics module. Please update your Makefile and replace TENSOR_MECHANICS with SOLID_MECHANICS)
 endif
 
