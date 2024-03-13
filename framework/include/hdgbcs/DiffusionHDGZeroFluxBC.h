@@ -10,7 +10,7 @@
 #pragma once
 
 #include "HDGIntegratedBC.h"
-#include "DiffusionHDGInterface.h"
+#include "DiffusionHDGAssemblyHelper.h"
 
 #include <vector>
 
@@ -22,7 +22,7 @@ class Function;
  * Implements a zero-flux boundary condition for use with a hybridized discretization of the
  * diffusion equation
  */
-class DiffusionHDGZeroFluxBC : public HDGIntegratedBC, public DiffusionHDGInterface
+class DiffusionHDGZeroFluxBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -34,5 +34,5 @@ public:
 protected:
   virtual void onBoundary() override;
 
-  friend class DiffusionHDGInterface;
+  friend class DiffusionHDGAssemblyHelper;
 };

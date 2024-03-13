@@ -19,7 +19,7 @@ InputParameters
 NavierStokesHDGVelocityDirichletBC::validParams()
 {
   auto params = HDGIntegratedBC::validParams();
-  params += NavierStokesHDGInterface::validParams();
+  params += NavierStokesHDGAssemblyHelper::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for the velocity for a "
                              "hybridized discretization of the Navier-Stokes equations");
   params.addParam<FunctionName>(
@@ -34,7 +34,8 @@ NavierStokesHDGVelocityDirichletBC::validParams()
 
 NavierStokesHDGVelocityDirichletBC::NavierStokesHDGVelocityDirichletBC(
     const InputParameters & parameters)
-  : HDGIntegratedBC(parameters), NavierStokesHDGInterface(this, this, _sys, _aux_sys, _mesh, _tid)
+  : HDGIntegratedBC(parameters),
+    NavierStokesHDGAssemblyHelper(this, this, _sys, _aux_sys, _mesh, _tid)
 {
   _dirichlet_vel[0] = &getFunction("dirichlet_u");
   _dirichlet_vel[1] = &getFunction("dirichlet_v");

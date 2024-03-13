@@ -19,14 +19,14 @@ InputParameters
 DiffusionHDGZeroFluxBC::validParams()
 {
   auto params = HDGIntegratedBC::validParams();
-  params += DiffusionHDGInterface::validParams();
+  params += DiffusionHDGAssemblyHelper::validParams();
   params.addClassDescription("Implements a zero flux boundary condition for use with a hybridized "
                              "discretization of the diffusion equation");
   return params;
 }
 
 DiffusionHDGZeroFluxBC::DiffusionHDGZeroFluxBC(const InputParameters & parameters)
-  : HDGIntegratedBC(parameters), DiffusionHDGInterface(this, this, _sys, _aux_sys, _tid)
+  : HDGIntegratedBC(parameters), DiffusionHDGAssemblyHelper(this, this, _sys, _aux_sys, _tid)
 {
 }
 

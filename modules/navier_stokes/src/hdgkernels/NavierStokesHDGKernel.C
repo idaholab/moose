@@ -18,7 +18,7 @@ InputParameters
 NavierStokesHDGKernel::validParams()
 {
   auto params = HDGKernel::validParams();
-  params += NavierStokesHDGInterface::validParams();
+  params += NavierStokesHDGAssemblyHelper::validParams();
   params.addParam<FunctionName>(
       "body_force_x", 0, "Body force for the momentum equation in the x-direction");
   params.addParam<FunctionName>(
@@ -37,7 +37,7 @@ NavierStokesHDGKernel::validParams()
 
 NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters),
-    NavierStokesHDGInterface(this, this, _sys, _aux_sys, _mesh, _tid),
+    NavierStokesHDGAssemblyHelper(this, this, _sys, _aux_sys, _mesh, _tid),
     // body forces
     _body_force_x(getFunction("body_force_x")),
     _body_force_y(getFunction("body_force_y")),

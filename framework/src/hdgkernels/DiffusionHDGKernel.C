@@ -18,7 +18,7 @@ InputParameters
 DiffusionHDGKernel::validParams()
 {
   auto params = HDGKernel::validParams();
-  params += DiffusionHDGInterface::validParams();
+  params += DiffusionHDGAssemblyHelper::validParams();
   params.addParam<FunctionName>("source", 0, "Source for the diffusing species");
   params.addClassDescription("Implements the diffusion equation for a hybridized discretization");
   return params;
@@ -26,7 +26,7 @@ DiffusionHDGKernel::validParams()
 
 DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters),
-    DiffusionHDGInterface(this, this, _sys, _aux_sys, _tid),
+    DiffusionHDGAssemblyHelper(this, this, _sys, _aux_sys, _tid),
     _source(getFunction("source"))
 {
 }

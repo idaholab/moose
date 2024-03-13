@@ -19,14 +19,15 @@ InputParameters
 NavierStokesHDGOutflowBC::validParams()
 {
   auto params = HDGIntegratedBC::validParams();
-  params += NavierStokesHDGInterface::validParams();
+  params += NavierStokesHDGAssemblyHelper::validParams();
   params.addClassDescription("Implements an outflow boundary condition for use with a hybridized "
                              "discretization of the Navier-Stokes equations");
   return params;
 }
 
 NavierStokesHDGOutflowBC::NavierStokesHDGOutflowBC(const InputParameters & parameters)
-  : HDGIntegratedBC(parameters), NavierStokesHDGInterface(this, this, _sys, _aux_sys, _mesh, _tid)
+  : HDGIntegratedBC(parameters),
+    NavierStokesHDGAssemblyHelper(this, this, _sys, _aux_sys, _mesh, _tid)
 {
 }
 

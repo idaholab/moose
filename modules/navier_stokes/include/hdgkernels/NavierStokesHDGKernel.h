@@ -10,7 +10,7 @@
 #pragma once
 
 #include "HDGKernel.h"
-#include "NavierStokesHDGInterface.h"
+#include "NavierStokesHDGAssemblyHelper.h"
 
 #include <vector>
 
@@ -19,7 +19,7 @@ class Function;
 /**
  * Implements the steady incompressible Navier-Stokes equations for a hybridized discretization
  */
-class NavierStokesHDGKernel : public HDGKernel, public NavierStokesHDGInterface
+class NavierStokesHDGKernel : public HDGKernel, public NavierStokesHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -39,6 +39,6 @@ protected:
   std::vector<const Function *> _body_forces;
   const Function & _pressure_mms_forcing_function;
 
-  friend class NavierStokesHDGInterface;
-  friend class DiffusionHDGInterface;
+  friend class NavierStokesHDGAssemblyHelper;
+  friend class DiffusionHDGAssemblyHelper;
 };

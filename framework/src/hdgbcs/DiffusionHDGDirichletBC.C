@@ -19,7 +19,7 @@ InputParameters
 DiffusionHDGDirichletBC::validParams()
 {
   auto params = HDGIntegratedBC::validParams();
-  params += DiffusionHDGInterface::validParams();
+  params += DiffusionHDGAssemblyHelper::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
                              "hybridized discretization of diffusion equation");
   params.addParam<FunctionName>("function", 0, "The Dirichlet value for the diffusing specie");
@@ -28,7 +28,7 @@ DiffusionHDGDirichletBC::validParams()
 
 DiffusionHDGDirichletBC::DiffusionHDGDirichletBC(const InputParameters & parameters)
   : HDGIntegratedBC(parameters),
-    DiffusionHDGInterface(this, this, _sys, _aux_sys, _tid),
+    DiffusionHDGAssemblyHelper(this, this, _sys, _aux_sys, _tid),
     _dirichlet_val(getFunction("function"))
 {
 }
