@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess, os, sys
+import subprocess, os, sys, traceback
 from versioner import Versioner
 
 class PreMake:
@@ -117,6 +117,10 @@ class PreMake:
             self._check()
         except self.CondaVersionMismatch as e:
             self.warn(str(e))
+        except Exception as e:
+            warning = 'PreMake check failed; this may be ignored but may suggest an environment issue'
+            warning += f'\n\n{traceback.format_exc()}'
+            self.warn(warning)
 
     def _checkCondaPackage(self, package_name, versioner_name=None):
         """
