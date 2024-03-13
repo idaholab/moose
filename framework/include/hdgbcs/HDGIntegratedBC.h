@@ -10,12 +10,12 @@
 #pragma once
 
 #include "IntegratedBCBase.h"
-#include "HDGInterface.h"
+#include "HDGData.h"
 
 /**
  * An integrated boundary condition for hybridized finite element formulations
  */
-class HDGIntegratedBC : public IntegratedBCBase, public HDGInterface
+class HDGIntegratedBC : public IntegratedBCBase, public HDGData
 {
 public:
   static InputParameters validParams();

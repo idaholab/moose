@@ -16,7 +16,6 @@
 #include "MooseObject.h"
 #include "MaterialPropertyInterface.h"
 #include "NS.h"
-#include "HDGInterface.h"
 
 #include "libmesh/point.h"
 #include "libmesh/quadrature.h"
