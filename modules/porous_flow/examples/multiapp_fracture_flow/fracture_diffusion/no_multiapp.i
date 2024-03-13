@@ -64,8 +64,8 @@
 
 [Kernels]
   [dot_frac_T]
-    type = CoefTimeDerivative
-    Coefficient = 1E-2
+    type = TimeDerivative
+    coeff = 1E-2
     variable = frac_T
     block = fracture
   []

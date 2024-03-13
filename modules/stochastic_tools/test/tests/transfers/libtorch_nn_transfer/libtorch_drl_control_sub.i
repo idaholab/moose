@@ -16,9 +16,9 @@
 
 [Kernels]
   [time]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = temp
-    Coefficient = '${fparse 1.00630182*1.225}'
+    coeff = '${fparse 1.00630182*1.225}'
   []
   [heat_conduc]
     type = MatDiffusion

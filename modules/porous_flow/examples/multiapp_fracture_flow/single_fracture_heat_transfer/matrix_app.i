@@ -20,9 +20,9 @@
 
 [Kernels]
   [dot]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = matrix_T
-    Coefficient = 1E5
+    coeff = 1E5
   []
   [matrix_diffusion]
     type = AnisotropicDiffusion

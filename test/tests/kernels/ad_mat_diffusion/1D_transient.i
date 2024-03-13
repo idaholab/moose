@@ -32,9 +32,9 @@
     diffusivity = 0.95
   [../]
   [./dt]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = T
-    Coefficient = 0.82064
+    coeff = 0.82064
   [../]
 []
 

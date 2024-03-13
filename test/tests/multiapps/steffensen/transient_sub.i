@@ -17,9 +17,9 @@
 
 [Kernels]
   [time]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = v
-    Coefficient = 0.1
+    coeff = 0.1
   []
   [diff_v]
     type = Diffusion
