@@ -16,17 +16,21 @@
  * Implements a zero-flux boundary condition for use with a hybridized discretization of the
  * diffusion equation
  */
-class DiffusionHDGZeroFluxBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
+class DiffusionHDGPrescribedGradientBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGZeroFluxBC(const InputParameters & parameters);
+  DiffusionHDGPrescribedGradientBC(const InputParameters & parameters);
 
   virtual const MooseVariableBase & variable() const override { return _u_face_var; }
 
 protected:
   virtual void onBoundary() override;
+
+  /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
+  /// condition
+  const Moose::Functor<Real> & _normal_gradient;
 
   friend class DiffusionHDGAssemblyHelper;
 };

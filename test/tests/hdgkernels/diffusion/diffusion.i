@@ -49,7 +49,7 @@
     functor = '1'
   []
   [zero_flux]
-    type = DiffusionHDGZeroFluxBC
+    type = DiffusionHDGPrescribedGradientBC
     boundary = 'top bottom'
   []
 []
