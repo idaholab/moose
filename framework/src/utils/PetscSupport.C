@@ -507,9 +507,14 @@ petscSetDefaults(FEProblemBase & problem)
         dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
     SNES snes = petsc_solver->snes();
     KSP ksp;
-    SNESGetKSP(snes, &ksp);
+    auto ierr = SNESGetKSP(snes, &ksp);
+    CHKERRABORT(nl.comm().get(), ierr);
 
-    SNESSetMaxLinearSolveFailures(snes, 1000000);
+    ierr = SNESSetMaxLinearSolveFailures(snes, 1000000);
+    CHKERRABORT(nl.comm().get(), ierr);
+
+    ierr = SNESSetCheckJacobianDomainError(snes, PETSC_TRUE);
+    CHKERRABORT(nl.comm().get(), ierr);
 
     // In 3.0.0, the context pointer must actually be used, and the
     // final argument to KSPSetConvergenceTest() is a pointer to a
@@ -517,8 +522,7 @@ petscSetDefaults(FEProblemBase & problem)
     // we use the default context provided by PETSc in addition to
     // a few other tests.
     {
-      auto ierr =
-          SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR);
+      ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR);
       CHKERRABORT(nl.comm().get(), ierr);
     }
 

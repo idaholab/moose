@@ -464,10 +464,12 @@ public:
   ///@}
 
   /**
-   * Set an exception.  Usually this should not be directly called - but should be called through
-   * the mooseException() macro.
+   * Set an exception, which is stored at this point by toggling a member variable in
+   * this class, and which must be followed up with by a call to
+   * checkExceptionAndStopSolve().
    *
-   * @param message The error message about the exception.
+   * @param message The error message describing the exception, which will get printed
+   *                when checkExceptionAndStopSolve() is called
    */
   virtual void setException(const std::string & message);
 
@@ -477,14 +479,20 @@ public:
   virtual bool hasException() { return _has_exception; }
 
   /**
-   * Check to see if an exception has occurred on any processor and stop the solve.
+   * Check to see if an exception has occurred on any processor and, if possible,
+   * force the solve to fail, which will result in the time step being cut.
    *
-   * Note: Collective on MPI!  Must be called simultaneously by all processors!
+   * Notes:
+   *  * The exception have be registered by calling setException() prior to calling this.
+   *  * This is collective on MPI, and must be called simultaneously by all processors!
+   *  * If called when the solve can be interruped, it will do so and also throw a
+   *    MooseException, which must be handled.
+   *  * If called at a stage in the execution when the solve cannot be interupted (i.e.,
+   *    there is no solve active), it will generate an error and terminate the application.
+   *  * DO NOT CALL THIS IN A THREADED REGION! This is meant to be called just after a
+   *    threaded section.
    *
-   * Also: This will throw a MooseException!
-   *
-   * Note: DO NOT CALL THIS IN A THREADED REGION!  This is meant to be called just after a threaded
-   * section.
+   * @param print_message whether to print a message with exception information
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
@@ -1861,31 +1869,31 @@ public:
 #endif
 
   /// Set boolean flag to true to store solution time derivative
-  virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; };
+  virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; }
 
   /// Set boolean flag to true to store solution second time derivative
   virtual void setUDotDotRequested(const bool u_dotdot_requested)
   {
     _u_dotdot_requested = u_dotdot_requested;
-  };
+  }
 
   /// Set boolean flag to true to store old solution time derivative
   virtual void setUDotOldRequested(const bool u_dot_old_requested)
   {
     _u_dot_old_requested = u_dot_old_requested;
-  };
+  }
 
   /// Set boolean flag to true to store old solution second time derivative
   virtual void setUDotDotOldRequested(const bool u_dotdot_old_requested)
   {
     _u_dotdot_old_requested = u_dotdot_old_requested;
-  };
+  }
 
   /// Get boolean flag to check whether solution time derivative needs to be stored
-  virtual bool uDotRequested() { return _u_dot_requested; };
+  virtual bool uDotRequested() { return _u_dot_requested; }
 
   /// Get boolean flag to check whether solution second time derivative needs to be stored
-  virtual bool uDotDotRequested() { return _u_dotdot_requested; };
+  virtual bool uDotDotRequested() { return _u_dotdot_requested; }
 
   /// Get boolean flag to check whether old solution time derivative needs to be stored
   virtual bool uDotOldRequested()
@@ -1896,7 +1904,7 @@ public:
                  "true using setUDotRequested.");
 
     return _u_dot_old_requested;
-  };
+  }
 
   /// Get boolean flag to check whether old solution second time derivative needs to be stored
   virtual bool uDotDotOldRequested()
@@ -1906,7 +1914,7 @@ public:
                  "second time derivation of solution should also be stored. Please set "
                  "`u_dotdot_requested` to true using setUDotDotRequested.");
     return _u_dotdot_old_requested;
-  };
+  }
 
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;
@@ -2036,7 +2044,7 @@ public:
   }
 
   /// method returning the number of forced nonlinear iterations
-  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; };
+  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; }
 
   /// method setting the absolute divergence tolerance
   void setNonlinearAbsoluteDivergenceTolerance(const Real nl_abs_div_tol)
@@ -2094,7 +2102,7 @@ public:
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
    */
-  void setExecutionPrinting(const ExecFlagEnum & print_exec) { _print_execution_on = print_exec; };
+  void setExecutionPrinting(const ExecFlagEnum & print_exec) { _print_execution_on = print_exec; }
 
   /**
    * Check whether the problem should output execution orders at this time
@@ -2131,6 +2139,11 @@ public:
    * Clear the current residual vector tag data structure
    */
   void clearCurrentResidualVectorTags();
+
+  /**
+   * Clear the current Jacobian vector tag data structure ... if someone creates it
+   */
+  void clearCurrentJacobianVectorTags() {}
 
   using SubProblem::doingPRefinement;
   virtual void doingPRefinement(bool doing_p_refinement,
@@ -2489,6 +2502,12 @@ protected:
 
 private:
   /**
+   * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
+   * caller of this method must determine how to handle the thrown exception
+   */
+  void handleException(const std::string & calling_method);
+
+  /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
    * and displaced parameters, given some initial set
    */
@@ -2538,6 +2557,11 @@ private:
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
+
+  /**
+   * Reset state of this object in preparation for the next evaluation.
+   */
+  virtual void resetState();
 
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
@@ -2605,6 +2629,10 @@ private:
 
   /// Whether we are performing some calculations with finite volume discretizations
   bool _have_fv = false;
+
+  /// If we catch an exception during residual/Jacobian evaluaton for which we don't have specific
+  /// handling, immediately error instead of allowing the time step to be cut
+  const bool _regard_general_exceptions_as_errors;
 };
 
 using FVProblemBase = FEProblemBase;

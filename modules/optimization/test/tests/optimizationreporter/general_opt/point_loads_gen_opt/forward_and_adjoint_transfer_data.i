@@ -1,6 +1,3 @@
-# DO NOT CHANGE THIS TEST
-# this test is documented as an example in forceInv_pointLoads.md
-# if this test is changed, the figures will need to be updated.
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -12,8 +9,16 @@
   []
 []
 
+[Problem]
+  nl_sys_names = 'nl0 adjoint'
+  kernel_coverage_check = false
+[]
+
 [Variables]
   [temperature]
+  []
+  [temperature_adjoint]
+    nl_sys = adjoint
   []
 []
 
@@ -33,6 +38,14 @@
     y_coord_name = 'point_source/y'
     z_coord_name = 'point_source/z'
     value_name = 'point_source/value'
+  []
+  [misfit]
+    type = ReporterPointSource
+    variable = temperature_adjoint
+    x_coord_name = measure_data/measurement_xcoord
+    y_coord_name = measure_data/measurement_ycoord
+    z_coord_name = measure_data/measurement_zcoord
+    value_name = measure_data/misfit_values
   []
 []
 
@@ -72,31 +85,24 @@
 []
 
 [Executioner]
-  type = Steady
-  solve_type = NEWTON
-  nl_abs_tol = 1e-6
-  nl_rel_tol = 1e-8
+  type = SteadyAndAdjoint
+  forward_system = nl0
+  adjoint_system = adjoint
+  nl_rel_tol = 1e-12
+  l_tol = 1e-12
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 []
 
 [VectorPostprocessors]
-  [point_source]
-    type = ConstantVectorPostprocessor
-    vector_names = 'x y z value'
-    value = '0.2 0.7 0.4;
-             0.2 0.56 1;
-             0 0 0;
-             -1000 120 500'
-    execute_on = LINEAR
-  []
-  [vertical]
-    type = LineValueSampler
-    variable = 'temperature'
-    start_point = '0.5 0 0'
-    end_point = '0.5 1.4 0'
-    num_points = 21
-    sort_by = y
+  [gradient]
+    type = PointValueSampler
+    points = '0.2 0.2 0
+              0.7 0.56 0
+              0.4 1 0'
+    variable = temperature_adjoint
+    sort_by = id
+    execute_on = ADJOINT_TIMESTEP_END
   []
 []
 
@@ -104,10 +110,18 @@
   [measure_data]
     type = OptimizationData
     variable = temperature
+    objective_name = misfit_norm
+  []
+  [point_source]
+    type = ConstantReporter
+    real_vector_names = 'x y z value'
+    real_vector_values = '0.2 0.7 0.4;
+                          0.2 0.56 1;
+                          0 0 0;
+                          -1000 120 500'
   []
 []
 
 [Outputs]
   console = false
-  file_base = 'forward'
 []

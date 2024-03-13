@@ -24,6 +24,7 @@
     add_variables = true
     generate_output = 'stress_zz elastic_strain_zz creep_strain_zz'
     use_automatic_differentiation = true
+    scaling = 1.06364e-11
   []
 []
 
@@ -94,7 +95,6 @@
 
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu     '
-  automatic_scaling = true
 
   line_search = 'none'
 

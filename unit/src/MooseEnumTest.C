@@ -234,12 +234,14 @@ TEST(MultiMooseEnum, testExecuteOn)
 
   // Checks that names are added and removed
   EXPECT_EQ(exec_enum.getRawNames(),
-            "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN MULTIAPP_FIXED_POINT_END "
+            "NONE INITIAL LINEAR NONLINEAR POSTCHECK TIMESTEP_END TIMESTEP_BEGIN "
+            "MULTIAPP_FIXED_POINT_END "
             "MULTIAPP_FIXED_POINT_BEGIN FINAL CUSTOM");
   std::vector<std::string> opts = {"NONE",
                                    "INITIAL",
                                    "LINEAR",
                                    "NONLINEAR",
+                                   "POSTCHECK",
                                    "TIMESTEP_END",
                                    "TIMESTEP_BEGIN",
                                    "MULTIAPP_FIXED_POINT_END",
@@ -298,7 +300,7 @@ TEST(MultiMooseEnum, testExecuteOn)
   std::string doc = exec_enum.getDocString();
   EXPECT_EQ(doc,
             "The list of flag(s) indicating when this object should be executed, the "
-            "available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, "
+            "available options include NONE, INITIAL, LINEAR, NONLINEAR, POSTCHECK, TIMESTEP_END, "
             "TIMESTEP_BEGIN, MULTIAPP_FIXED_POINT_END, MULTIAPP_FIXED_POINT_BEGIN, FINAL, FAILED, "
             "CUSTOM.");
 

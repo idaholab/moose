@@ -1,6 +1,3 @@
-# DO NOT CHANGE THIS TEST
-# this test is documented as an example in forceInv_pointLoads.md
-# if this test is changed, the figures will need to be updated.
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -104,6 +101,9 @@
   [measure_data]
     type = OptimizationData
     variable = temperature
+    objective_name = misfit_norm
+    measurement_points = ${measurement_points}
+    measurement_values = ${measurement_values}
   []
 []
 
