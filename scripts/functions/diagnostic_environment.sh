@@ -11,8 +11,8 @@
 function compiler_test()
 {
     print_sep
-    printf "Compiler(s) (CC CXX FC F77 F90 F95):\n\n"
-    local compiler_array=(CC CXX FC F77 F90 F95)
+    printf "Compiler(s) (CC CXX FC F77 F90):\n\n"
+    local compiler_array=(CC CXX FC F77 F90)
     local error_cnt=0
     for compiler in ${compiler_array[@]}; do
         if ! [[ "x${!compiler}" == "x" ]]; then
@@ -87,25 +87,44 @@ files may still be relying on calling: \`/usr/bin/env ${which_python}\` (Python 
 function _python_modules()
 {
     print_sep
-    printf "Python Modules (TestHarness, runnability)\n\n"
-    check_modules=(packaging yaml pyaml jinja2)
+    printf "Python Modules (TestHarness, run-ability)\n\n"
+    fail_modules=(packaging)
+    warn_modules=(yaml pyaml jinja2)
     local error_cnt=0
-    for check_module in "${check_modules[@]}"; do
-        /usr/bin/env python3 -c "import ${check_module}" 2>/dev/null
+    local warn_cnt=0
+    for fail_module in "${fail_modules}"; do
+        /usr/bin/env python3 -c "import ${fail_module}" 2>/dev/null
         if [[ $? -ge 1 ]]; then
-            print_red "FAIL: "
-            printf "python module: \`${check_module}\` not available\n"
+            print_red "FAIL:    "
+            printf "python module: \`${fail_module}\` not available\n"
             let error_cnt+=1
         fi
     done
+    for warn_module in "${warn_modules[@]}"; do
+        /usr/bin/env python3 -c "import ${warn_module}" 2>/dev/null
+        if [[ $? -ge 1 ]]; then
+            print_orange "WARNING: "
+            printf "python module: \`${warn_module}\` not available\n"
+            let warn_cnt+=1
+        fi
+    done
+    if [[ $error_cnt -ge 1 ]] || [[ $warn_cnt -ge 1 ]]; then printf "\n" ;fi
     if [[ $error_cnt -ge 1 ]]; then
-        printf "\nSome Python modules are not available. Numerous miscellaneous issues may
-persist without these packages present. Either install these packages, or
-perhaps you have yet to \`conda activate moose\`.\n"
-        return 1
-    else
-        print_green "OK\n"
+        printf "Failing Python packages will prevent you from building MOOSE.\n"
     fi
+    if [[ $warn_cnt -ge 1 ]]; then
+        printf "Warning Python packages may cause miscellaneous runtime issues.\n"
+    fi
+    if [[ $error_cnt -ge 1 ]] || [[ $warn_cnt -ge 1 ]]; then
+        printf "\nEither install the above packages, or perhaps you have yet to activate your
+moose environment: \`conda activate moose\`.\n"
+    fi
+    if [[ $error_cnt -ge 1 ]]; then
+        return 1
+    elif [[ $warn_cnt -ge 1 ]]; then
+        return 0
+    fi
+    print_green "OK\n"
     return 0
 }
 
@@ -114,6 +133,7 @@ function conda_test()
     # First run our python_modules test. We need yaml in order to run conda_test.
     _python_modules
     modules_test=$?
+    if [[ -z "${CONDA_PREFIX}" ]]; then printf "\n"; return 0; fi
     print_sep
     printf "CONDA MOOSE Packages\n\n"
     if [[ $modules_test -ge 1 ]]; then
@@ -165,7 +185,7 @@ There are two ways to fix this:
 User is required to manually build PETSc, libMesh, and/or WASP\n\n"
         fi
     else
-        print_orange "\nWARNING: "
+        print_orange "WARNING: "
         printf "Not using Conda MOOSE packages, or \`conda activate moose\` not
 performed\n\n"
     fi
