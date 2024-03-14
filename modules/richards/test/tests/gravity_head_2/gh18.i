@@ -287,10 +287,10 @@
 [Outputs]
   file_base = gh18
   execute_on = 'timestep_end final'
-  interval = 100000
+  time_step_interval = 100000
   exodus = true
   [./console]
     type = Console
-    interval = 1
+    time_step_interval = 1
   [../]
 []

@@ -519,7 +519,13 @@ public:
    *  Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
-  bool halfTransient() const { return _half_transient; }
+  bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
+  bool halfTransient() const
+  {
+    mooseDeprecated("MooseApp::halfTransient is deprecated, use "
+                    "MooseApp::testCheckpointHalfTransient instead.");
+    return testCheckpointHalfTransient();
+  }
 
   /**
    * Store a map of outputter names and file numbers
@@ -1239,7 +1245,7 @@ protected:
   std::string _restart_recover_base;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
-  bool _half_transient;
+  bool _test_checkpoint_half_transient;
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;

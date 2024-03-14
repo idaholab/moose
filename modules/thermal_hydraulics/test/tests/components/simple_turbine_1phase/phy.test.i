@@ -103,5 +103,5 @@
   exodus = true
   show = 'p T vel'
   velocity_as_vector = false
-  interval = 5
+  time_step_interval = 5
 []

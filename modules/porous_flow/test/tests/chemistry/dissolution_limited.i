@@ -190,7 +190,7 @@
   []
 []
 [Outputs]
-  interval = 10
+  time_step_interval = 10
   csv = true
   perf_graph = true
 []

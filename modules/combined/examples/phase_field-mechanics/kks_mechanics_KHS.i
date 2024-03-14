@@ -601,7 +601,7 @@
 [Outputs]
   [./exodus]
     type = Exodus
-    interval = 20
+    time_step_interval = 20
   [../]
   checkpoint = true
   [./csv]

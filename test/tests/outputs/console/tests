@@ -146,7 +146,7 @@
     # Test the transient console output with a perf log interval
     type = RunApp
     input = 'console_transient.i'
-    cli_args = 'Outputs/pgraph/type=PerfGraphOutput Outputs/pgraph/additional_execute_on=timestep_end Outputs/pgraph/interval=6'
+    cli_args = 'Outputs/pgraph/type=PerfGraphOutput Outputs/pgraph/additional_execute_on=timestep_end Outputs/pgraph/time_step_interval=6'
     expect_out = 'Time Step 6.*?Graph.*?Time Step 7'
 
     requirement = 'The system shall support outputting the Performance Log at user specified intervals.'

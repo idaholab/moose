@@ -254,6 +254,6 @@
 
 [Outputs]
   file_base = bl21
-  interval = 10000
+  time_step_interval = 10000
   exodus = true
 []

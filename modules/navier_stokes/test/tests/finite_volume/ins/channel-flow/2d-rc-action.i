@@ -56,7 +56,6 @@ rho = 1.1
 [Outputs]
   exodus = true
   csv = true
-
   [restart]
     type = Checkpoint
     additional_execute_on = 'FINAL'

@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'check_element_addition.i'
     exodiff = 'check_element_addition_out.e-s002'
-    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    cli_args = "Executioner/end_time=0.5 Outputs/time_step_interval=5"
     requirement = 'The subdomain 1 should be expanded while subdomain 2 should be contracted via '
                   'ActivateElementsUserObject. The addition of elements is controlled by a function '
                   'path.'
@@ -14,7 +14,7 @@
     type = 'Exodiff'
     input = 'check_element_addition_by_variable.i'
     exodiff = 'check_element_addition_by_variable_out.e-s002'
-    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    cli_args = "Executioner/end_time=0.5 Outputs/time_step_interval=5"
     requirement = 'The subdomain 1 should be expanded via ActivateElementsUserObject. The addition '
                   'of elements is controlled by a coupled variable strain_zz.'
     valgrind = HEAVY
@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'check_stateful_properties.i'
     exodiff = 'check_stateful_properties_out.e-s002'
-    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    cli_args = "Executioner/end_time=0.5 Outputs/time_step_interval=5"
     requirement = 'The newly activated elements should have the stateful material properties for '
                   'heat conduction as specified in the input.'
   []
@@ -31,7 +31,7 @@
     type = 'Exodiff'
     input = 'check_initial_condition.i'
     exodiff = 'check_initial_condition_out.e-s002'
-    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    cli_args = "Executioner/end_time=0.5 Outputs/time_step_interval=5"
     requirement = 'The newly activated elements should have the IC of variables as specified in the '
                   'input.'
   []
@@ -39,7 +39,7 @@
     type = 'Exodiff'
     input = 'check_element_addition_2D.i'
     exodiff = 'check_element_addition_2D_out.e-s002'
-    cli_args = "Outputs/interval=10"
+    cli_args = "Outputs/time_step_interval=10"
     requirement = 'Several rows of elements should be added to subdomain 1. The number of rows is '
                   'related to the activate_distance parameter.'
   []

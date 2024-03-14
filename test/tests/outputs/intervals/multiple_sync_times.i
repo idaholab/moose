@@ -50,12 +50,12 @@
   execute_on = 'timestep_end'
   [./exodus_3]
     type = Exodus
-    interval = 3
+    time_step_interval = 3
     file_base = multiple_sync_times_out_3
   [../]
   [./exodus_5]
     type = Exodus
-    interval = 5
+    time_step_interval = 5
     file_base = multiple_sync_times_out_5
   [../]
   [./exodus_sync_0]

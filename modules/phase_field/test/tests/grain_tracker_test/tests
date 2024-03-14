@@ -127,7 +127,7 @@
   [test_recovery_serial_part1]
     type = 'RunApp'
     input = 'grain_tracker_remapping_test.i'
-    cli_args = 'Outputs/file_base=gt_recover_serial_out Outputs/checkpoint=true --half-transient'
+    cli_args = 'Outputs/file_base=gt_recover_serial_out Outputs/checkpoint=true --test-checkpoint-half-transient'
 
     method = '!DBG'
     valgrind = 'NONE'
@@ -158,7 +158,7 @@
   [test_recovery_parallel_part1]
     type = 'RunApp'
     input = 'grain_tracker_remapping_test.i'
-    cli_args = 'Outputs/file_base=gt_recover_parallel_out Outputs/checkpoint=true --half-transient'
+    cli_args = 'Outputs/file_base=gt_recover_parallel_out Outputs/checkpoint=true --test-checkpoint-half-transient'
 
     min_parallel = 8 # Test distributed merge work with grain tracker
 

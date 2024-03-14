@@ -132,6 +132,6 @@
   exodus = true
   [./console]
     type = Console
-    interval = 2
+    time_step_interval = 2
   [../]
 []

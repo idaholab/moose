@@ -37,7 +37,6 @@
 
 [Outputs]
   csv = true
-  checkpoint = true
   [ckp]
     type = Checkpoint
     num_files = 3

@@ -40,10 +40,30 @@ Output::validParams()
       "use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
   // Output intervals and timing
-  params.addParam<unsigned int>(
-      "interval", 1, "The interval at which time steps are output to the solution file");
+  params.addRangeCheckedParam<unsigned int>(
+      "time_step_interval",
+      1,
+      "time_step_interval > 0",
+      "The interval (number of time steps) at which output occurs. "
+      "Unless explicitly set, the default value of this parameter is set "
+      "to infinity if the wall_time_interval is explicitly set.");
+  params.addDeprecatedParam<unsigned int>(
+      "interval",
+      "The interval (number of time steps) at which output occurs",
+      "Deprecated, use time_step_interval");
+  params.deprecateParam("interval", "time_step_interval", "02/01/2025");
   params.addParam<Real>(
-      "minimum_time_interval", 0.0, "The minimum simulation time between output steps");
+      "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
+  params.addDeprecatedParam<Real>("minimum_time_interval",
+                                  "The minimum simulation time between output steps",
+                                  "Deprecated, use min_simulation_time_interval");
+  params.deprecateParam("minimum_time_interval", "min_simulation_time_interval", "02/01/2025");
+  params.addParam<Real>("simulation_time_interval",
+                        std::numeric_limits<Real>::max(),
+                        "The target simulation time interval (in seconds) at which to output");
+  params.addParam<Real>("wall_time_interval",
+                        std::numeric_limits<Real>::max(),
+                        "The target wall time interval (in seconds) at which to output");
   params.addParam<std::vector<Real>>(
       "sync_times", {}, "Times at which the output and solution is forced to occur");
   params.addParam<TimesName>(
@@ -73,10 +93,11 @@ Output::validParams()
   params.addParamNamesToGroup("execute_on additional_execute_on", "Execution scheduling");
 
   // 'Timing' group
-  params.addParamNamesToGroup(
-      "time_tolerance interval sync_times sync_times_object sync_only start_time end_time "
-      "start_step end_step minimum_time_interval",
-      "Timing and frequency of output");
+  params.addParamNamesToGroup("time_tolerance time_step_interval sync_times sync_times_object "
+                              "sync_only start_time end_time "
+                              "start_step end_step min_simulation_time_interval "
+                              "simulation_time_interval wall_time_interval",
+                              "Timing and frequency of output");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
@@ -119,8 +140,17 @@ Output::Output(const InputParameters & parameters)
     _dt(_problem_ptr->dt()),
     _dt_old(_problem_ptr->dtOld()),
     _num(0),
-    _interval(getParam<unsigned int>("interval")),
-    _minimum_time_interval(getParam<Real>("minimum_time_interval")),
+    _time_step_interval_set_by_addparam(parameters.isParamSetByAddParam("time_step_interval")),
+    // If wall_time_interval is user-specified and time_step_interval is not,
+    // override default value of time_step_interval so output does not occur
+    // after every time step.
+    _time_step_interval(
+        (parameters.isParamSetByUser("wall_time_interval") && _time_step_interval_set_by_addparam)
+            ? std::numeric_limits<unsigned int>::max()
+            : getParam<unsigned int>("time_step_interval")),
+    _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
+    _simulation_time_interval(getParam<Real>("simulation_time_interval")),
+    _wall_time_interval(getParam<Real>("wall_time_interval")),
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _sync_times_object(isParamValid("sync_times_object")
@@ -140,8 +170,9 @@ Output::Output(const InputParameters & parameters)
     _allow_output(true),
     _is_advanced(false),
     _advanced_execute_on(_execute_on, parameters),
-    _last_output_time(
-        declareRestartableData<Real>("last_output_time", std::numeric_limits<Real>::lowest()))
+    _last_output_simulation_time(declareRestartableData<Real>("last_output_simulation_time",
+                                                              std::numeric_limits<Real>::lowest())),
+    _last_output_wall_time(std::chrono::steady_clock::now())
 {
   if (_use_displaced)
   {
@@ -215,19 +246,27 @@ Output::outputStep(const ExecFlagType & type)
   if (type == EXEC_INITIAL && _app.isRecovering())
     return;
 
-  // Return if the current output is not on the desired interval
-  if (type != EXEC_FINAL && !onInterval())
+  // Return if the current output is not on the desired interval and there is
+  // no signal to process
+  const bool on_interval_or_exec_final = (onInterval() || (type == EXEC_FINAL));
+  // Sync across processes and only output one time per signal received.
+  comm().max(Moose::interrupt_signal_number);
+  const bool signal_received = Moose::interrupt_signal_number;
+  if (!(on_interval_or_exec_final || signal_received))
     return;
-
-  // store current simulation time
-  _last_output_time = _time;
 
   // set current type
   _current_execute_flag = type;
 
-  // Call the output method
+  // Check whether we should output, then do it.
   if (shouldOutput())
   {
+    // store current simulation time
+    _last_output_simulation_time = _time;
+
+    // store current wall time of output
+    _last_output_wall_time = std::chrono::steady_clock::now();
+
     TIME_SECTION("outputStep", 2, "Outputting Step");
     output();
   }
@@ -252,7 +291,7 @@ Output::onInterval()
   // Return true if the current step on the current output interval and within the output time range
   // and within the output step range
   if (_time >= _start_time && _time <= _end_time && _t_step >= _start_step &&
-      _t_step <= _end_step && (_t_step % _interval) == 0)
+      _t_step <= _end_step && (_t_step % _time_step_interval) == 0)
     output = true;
 
   // Return false if 'sync_only' is set to true
@@ -272,12 +311,40 @@ Output::onInterval()
   if (_sync_times.find(_time) != _sync_times.end())
     output = true;
 
-  // check if enough time has passed between outputs
-  if (_time > _last_output_time && _last_output_time + _minimum_time_interval > _time + _t_tol)
-    return false;
+  // check if enough simulation time has passed between outputs
+  if (_time > _last_output_simulation_time &&
+      _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
+    output = false;
+
+  // check if enough wall time has passed between outputs
+  const auto now = std::chrono::steady_clock::now();
+  // count below returns an interger type, so lets express on a millisecond
+  // scale and convert to seconds for finer resolution
+  _wall_time_since_last_output =
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_output_wall_time).count() /
+      1000.0;
+  // Take the maximum wall time since last output accross all processors
+  _communicator.max(_wall_time_since_last_output);
+  if (_wall_time_since_last_output >= _wall_time_interval)
+    output = true;
 
   // Return the output status
   return output;
+}
+
+void
+Output::setWallTimeIntervalFromCommandLineParam()
+{
+  if (_app.isParamValid("output_wall_time_interval"))
+  {
+    _wall_time_interval = _app.getParam<Real>("output_wall_time_interval");
+
+    // If default value of _wall_time_interval was just overriden and user did not
+    // explicitly specify _time_step_interval, override default value of
+    // _time_step_interval so output does not occur after every time step
+    if (_time_step_interval_set_by_addparam)
+      _time_step_interval = std::numeric_limits<unsigned int>::max();
+  }
 }
 
 Real

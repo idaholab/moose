@@ -525,7 +525,7 @@
 
 [Outputs]
   file_base = cosserat_wp_only
-  interval = 1
+  time_step_interval = 1
   print_linear_residuals = false
   csv = true
   exodus = true

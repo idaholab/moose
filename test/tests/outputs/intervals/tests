@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
-    cli_args = 'Outputs/out/interval=5'
+    cli_args = 'Outputs/out/time_step_interval=5'
 
     requirement = "The system shall support specifying an output interval for an output input file "
                   "block."
@@ -14,7 +14,7 @@
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
-    cli_args = 'Outputs/interval=5'
+    cli_args = 'Outputs/time_step_interval=5'
     prereq = 'time_step'
 
     requirement = "The system shall support specifying an output interval for all outputs."

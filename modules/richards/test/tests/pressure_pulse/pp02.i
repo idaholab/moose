@@ -125,6 +125,6 @@
 [Outputs]
   file_base = pp02
   execute_on = 'initial timestep_end final'
-  interval = 10000
+  time_step_interval = 10000
   exodus = true
 []

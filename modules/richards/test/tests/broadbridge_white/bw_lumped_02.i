@@ -156,7 +156,7 @@
 
 [Outputs]
   file_base = bw_lumped_02
-  interval = 10000
+  time_step_interval = 10000
   execute_on = 'timestep_end final'
   exodus = true
 []

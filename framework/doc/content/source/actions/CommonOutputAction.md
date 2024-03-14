@@ -7,7 +7,7 @@
 An action, that acts when the `[Outputs]` block exists. It adds short-cut syntax options, such as the
 [!param](/Outputs/exodus) parameter, as well as common parameters that are applied to all output
 objects. For example, the following enables two output objects and sets the output
-[!param](/Outputs/interval) to every 10 timesteps for both objects.
+[!param](/Outputs/time_step_interval) to every 10 timesteps for both objects.
 
 ```text
 [Outputs]
