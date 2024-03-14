@@ -1,4 +1,4 @@
-# This tests the ability of the ComputeVolumetricEigenstrain material
+# This tests the ability of the ADComputeVolumetricEigenstrain material
 # to compute an eigenstrain tensor that results in a solution that exactly
 # recovers the specified volumetric expansion.
 # This model applies volumetric strain that ramps from 0 to 2 to a unit cube
@@ -10,6 +10,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
 []
 
 [Variables]
@@ -37,12 +40,13 @@
     strain = FINITE
     eigenstrain_names = eigenstrain
     decomposition_method = EigenSolution #Necessary for exact solution
+    use_automatic_differentiation = true
   []
 []
 
 [AuxKernels]
   [volumetric_strain]
-    type = RankTwoScalarAux
+    type = ADRankTwoScalarAux
     scalar_type = VolumetricStrain
     rank_two_tensor = total_strain
     variable = volumetric_strain
@@ -51,19 +55,19 @@
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   []
   [bottom]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   []
   [back]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
@@ -72,21 +76,20 @@
 
 [Materials]
   [elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   []
   [finite_strain_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   []
   [volumetric_eigenstrain]
-    type = ComputeVolumetricEigenstrain
+    type = ADComputeVolumetricEigenstrain
     volumetric_materials = volumetric_change
     eigenstrain_name = eigenstrain
-    args = ''
   []
   [volumetric_change]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = volumetric_change
     prop_values = t
   []
