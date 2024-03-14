@@ -17,7 +17,7 @@ ArrayCoupledTimeDerivative::validParams()
   InputParameters params = ArrayKernel::validParams();
   params.addClassDescription(
       "Time derivative Array Kernel that acts on a coupled variable. Weak form: "
-      "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$. The coupled variable and"
+      "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$. The coupled variable and "
       "the variable must have the same dimensionality");
   params.addRequiredCoupledVar("v", "Coupled variable");
   return params;
