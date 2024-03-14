@@ -39,7 +39,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 {
   // In case of half transient, transient's end time needs to be reset to
   // be able to imprint TimeSequenceStepperBase's end time
-  if (_app.halfTransient())
+  if (_app.testCheckpointHalfTransient())
     _executioner.endTime() = _executioner.endTime() * 2.0 - _executioner.getStartTime();
 
   // only set up _time_sequence if the app is _not_ recovering
@@ -111,7 +111,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
     }
   }
 
-  if (_app.halfTransient())
+  if (_app.testCheckpointHalfTransient())
   {
     unsigned int half = (_time_sequence.size() - 1) / 2;
     _executioner.endTime() = _time_sequence[half];

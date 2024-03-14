@@ -10,25 +10,22 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxVariables]
-  [./volumetric_strain]
+  [volumetric_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -36,94 +33,86 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     eigenstrain_names = eigenstrain
     decomposition_method = EigenSolution #Necessary for exact solution
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./volumetric_strain]
+  [volumetric_strain]
     type = RankTwoScalarAux
     scalar_type = VolumetricStrain
     rank_two_tensor = total_strain
     variable = volumetric_strain
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./finite_strain_stress]
+  []
+  [finite_strain_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./volumetric_eigenstrain]
+  []
+  [volumetric_eigenstrain]
     type = ComputeVolumetricEigenstrain
     volumetric_materials = volumetric_change
     eigenstrain_name = eigenstrain
     args = ''
-  [../]
-  [./volumetric_change]
+  []
+  [volumetric_change]
     type = GenericFunctionMaterial
     prop_names = volumetric_change
     prop_values = t
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./vol]
+  [vol]
     type = VolumePostprocessor
     use_displaced_mesh = true
     execute_on = 'initial timestep_end'
-  [../]
-  [./volumetric_strain]
+  []
+  [volumetric_strain]
     type = ElementalVariableValue
     variable = volumetric_strain
     elementid = 0
-  [../]
-  [./disp_right]
+  []
+  [disp_right]
     type = NodalExtremeValue
     variable = disp_x
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-  solve_type = PJFNK
-  l_max_its = 100
-  l_tol = 1e-4
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-12
-
-  start_time = 0.0
-  end_time = 2.0
-  dt = 1.0
+  end_time = 2
 []
 
 [Outputs]

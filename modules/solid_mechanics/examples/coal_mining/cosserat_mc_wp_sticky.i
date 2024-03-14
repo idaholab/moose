@@ -619,7 +619,7 @@
 
 [Outputs]
   file_base = cosserat_mc_wp_sticky
-  interval = 1
+  time_step_interval = 1
   print_linear_residuals = false
   exodus = true
   csv = true

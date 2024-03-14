@@ -235,7 +235,7 @@ rate_CH3COO_diffuse = 13.3333E-9 # 4E-6 mol.m^-3.yr^-1 = 4E-9 mol.litre^-1.yr^-1
   exodus = true
   [csv]
     type = CSV
-    interval = 10
+    time_step_interval = 10
     execute_on = 'INITIAL TIMESTEP_END FINAL'
   []
 []

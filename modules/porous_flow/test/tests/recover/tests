@@ -12,7 +12,7 @@
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0002.csv'
-    cli_args = '--half-transient Outputs/checkpoint=true'
+    cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'theis_full'
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
@@ -43,7 +43,7 @@
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0002.csv'
-    cli_args = '--half-transient Outputs/checkpoint=true'
+    cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'pffltvd_full'
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"

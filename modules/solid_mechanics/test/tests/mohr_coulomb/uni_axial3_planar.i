@@ -255,6 +255,6 @@
   [../]
   [./csv]
     type = CSV
-    interval = 1
+    time_step_interval = 1
   [../]
 []

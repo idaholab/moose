@@ -23,7 +23,7 @@ AddMetaDataGenerator::validParams()
 
   params.addClassDescription(
       "This mesh generator assigns extraneous mesh metadata to the input mesh");
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addParam<MeshGeneratorName>("input", "The mesh we want to modify");
 
   params.addParam<std::vector<std::string>>(
       "real_scalar_metadata_names", {}, "Names of the real scalar mesh metadata.");
@@ -85,12 +85,15 @@ AddMetaDataGenerator::validParams()
   params.addParam<std::vector<std::vector<Point>>>(
       "point_vector_metadata_values", {}, "Values of the Point vector mesh metadata.");
 
+  // This generator only adds data in its constructor, so it's safe to do this
+  MeshGenerator::setHasGenerateData(params);
+
   return params;
 }
 
 AddMetaDataGenerator::AddMetaDataGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-    _input(getMesh("input")),
+    _input(isParamValid("input") ? &getMesh("input") : nullptr),
     _real_scalar_metadata_names(getParam<std::vector<std::string>>("real_scalar_metadata_names")),
     _real_scalar_metadata_values(getParam<std::vector<Real>>("real_scalar_metadata_values")),
     _uint_scalar_metadata_names(getParam<std::vector<std::string>>("uint_scalar_metadata_names")),
@@ -206,9 +209,18 @@ AddMetaDataGenerator::AddMetaDataGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 AddMetaDataGenerator::generate()
 {
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
+  if (!isParamValid("input"))
+    paramError("input", "Input was not specified");
 
+  mooseAssert(_input, "Should be set");
+  std::unique_ptr<MeshBase> mesh = std::move(*_input);
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+AddMetaDataGenerator::generateData()
+{
+  // We don't need to do anything here because all data is generated in the constructor
 }
 
 template <class T>

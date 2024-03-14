@@ -66,26 +66,21 @@ RepeatableRayStudy::RepeatableRayStudy(const InputParameters & parameters)
   : RepeatableRayStudyBase(parameters),
     _names(getParam<std::vector<std::string>>("names")),
     _start_points(getParam<std::vector<Point>>("start_points")),
-    _end_points(parameters.isParamSetByUser("end_points")
-                    ? &getParam<std::vector<Point>>("end_points")
-                    : nullptr),
-    _directions(parameters.isParamSetByUser("directions")
-                    ? &getParam<std::vector<Point>>("directions")
-                    : nullptr),
-    _max_distances(parameters.isParamSetByUser("max_distances")
-                       ? &getParam<std::vector<Real>>("max_distances")
-                       : nullptr),
-    _ray_data_indices(parameters.isParamSetByUser("ray_data_names")
+    _end_points(isParamValid("end_points") ? &getParam<std::vector<Point>>("end_points") : nullptr),
+    _directions(isParamValid("directions") ? &getParam<std::vector<Point>>("directions") : nullptr),
+    _max_distances(isParamValid("max_distances") ? &getParam<std::vector<Real>>("max_distances")
+                                                 : nullptr),
+    _ray_data_indices(isParamValid("ray_data_names")
                           ? registerRayData(getParam<std::vector<std::string>>("ray_data_names"))
                           : std::vector<RayDataIndex>()),
-    _initial_ray_data(parameters.isParamSetByUser("initial_ray_data")
+    _initial_ray_data(isParamValid("initial_ray_data")
                           ? &getParam<std::vector<std::vector<Real>>>("initial_ray_data")
                           : nullptr),
     _ray_aux_data_indices(
-        parameters.isParamSetByUser("ray_aux_data_names")
+        isParamValid("ray_aux_data_names")
             ? registerRayAuxData(getParam<std::vector<std::string>>("ray_aux_data_names"))
             : std::vector<RayDataIndex>()),
-    _initial_ray_aux_data(parameters.isParamSetByUser("initial_ray_aux_data")
+    _initial_ray_aux_data(isParamValid("initial_ray_aux_data")
                               ? &getParam<std::vector<std::vector<Real>>>("initial_ray_aux_data")
                               : nullptr)
 {
@@ -111,53 +106,47 @@ RepeatableRayStudy::RepeatableRayStudy(const InputParameters & parameters)
   if (_end_points && _names.size() != _end_points->size())
     paramError("end_points", "Not the same size as names");
 
-  if (_initial_ray_data)
+  // Check ray data and aux data
+  const auto check_data = [this](const bool aux)
   {
-    if (_ray_data_indices.size())
-    {
-      if (_initial_ray_data->size() != _names.size())
-        paramError("initial_ray_data",
-                   "Data for ",
-                   _initial_ray_data->size(),
-                   " ray(s) was provided, but ",
-                   _names.size(),
-                   " ray(s) were defined");
-      for (std::size_t i = 0; i < _initial_ray_data->size(); ++i)
-        if ((*_initial_ray_data)[i].size() != _ray_data_indices.size())
-          paramError("initial_ray_data",
-                     "Data for index ",
-                     i,
-                     " (ray '",
-                     _names[i],
-                     "') is not the size of 'ray_data_names'");
-    }
-    else
-      paramError("initial_ray_data", "Can only be used if 'ray_data_names' is set");
-  }
+    const auto initial_data = aux ? _initial_ray_aux_data : _initial_ray_data;
+    const std::string param_prefix = aux ? "aux_" : "";
 
-  if (_initial_ray_aux_data)
-  {
-    if (_ray_aux_data_indices.size())
+    if (initial_data)
     {
-      if (_initial_ray_aux_data->size() != _names.size())
-        paramError("initial_ray_aux_data",
-                   "Aux data for ",
-                   _initial_ray_aux_data->size(),
-                   " ray(s) was provided, but ",
-                   _names.size(),
-                   " ray(s) were defined");
-      for (std::size_t i = 0; i < _initial_ray_aux_data->size(); ++i)
-        if ((*_initial_ray_aux_data)[i].size() != _ray_aux_data_indices.size())
-          paramError("initial_ray_aux_data",
-                     "Data for index ",
-                     i,
-                     " (ray '",
-                     _names[i],
-                     "') is not the size of 'ray_aux_data_names'");
+      const auto & indices = aux ? _ray_aux_data_indices : _ray_data_indices;
+      const std::string initial_data_param = "initial_ray_" + param_prefix + "data";
+      const std::string names_param = "ray_" + param_prefix + "data_names";
+
+      if (indices.size())
+      {
+        const std::string error_prefix = aux ? "Aux data " : "Data ";
+        if (initial_data->size() != _names.size())
+          paramError(initial_data_param,
+                     error_prefix,
+                     "for ",
+                     initial_data->size(),
+                     " ray(s) was provided, but ",
+                     _names.size(),
+                     " ray(s) were defined");
+        for (const auto i : index_range(*initial_data))
+          if ((*initial_data)[i].size() != indices.size())
+            paramError(initial_data_param,
+                       error_prefix,
+                       "for index ",
+                       i,
+                       " (ray '",
+                       _names[i],
+                       "') is not the size of '",
+                       names_param,
+                       "'");
+      }
+      else
+        paramError(initial_data_param, "Can only be used if '" + names_param + "' is set");
     }
-    else
-      paramError("initial_ray_aux_data", "Can only be used if 'ray_aux_data_names' is set");
-  }
+  };
+  check_data(false);
+  check_data(true);
 }
 
 void
@@ -174,10 +163,27 @@ RepeatableRayStudy::defineRays()
       ray->setStartingDirection((*_directions)[i]);
 
     // Set the data if the user requested so
-    if (_initial_ray_data)
-      ray->data() = (*_initial_ray_data)[i];
-    if (_initial_ray_aux_data)
-      ray->auxData() = (*_initial_ray_aux_data)[i];
+    const auto set_data = [this, &ray, &i](const bool aux)
+    {
+      const auto indices = aux ? _ray_aux_data_indices : _ray_data_indices;
+      const auto data = aux ? _initial_ray_aux_data : _initial_ray_data;
+      if (data)
+      {
+        mooseAssert(data->size() == _names.size(), "Size mismatch");
+        mooseAssert((*data)[i].size() == indices.size(), "Size mismatch");
+        for (const auto index_i : indices)
+        {
+          const auto data_index = indices[index_i];
+          const auto value = (*data)[i][index_i];
+          if (aux)
+            ray->auxData(data_index) = value;
+          else
+            ray->data(data_index) = value;
+        }
+      }
+    };
+    set_data(false);
+    set_data(true);
 
     // User set max-distances
     if (_max_distances)

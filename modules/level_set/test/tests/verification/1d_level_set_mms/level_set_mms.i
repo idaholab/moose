@@ -97,7 +97,7 @@
 []
 
 [Outputs]
-  interval = 10
+  time_step_interval = 10
   execute_on = 'timestep_end'
   csv = true
 []

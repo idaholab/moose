@@ -125,6 +125,6 @@
 []
 [Outputs]
   file_base = mollified_langmuir_desorption
-  interval = 10
+  time_step_interval = 10
   csv = 10
 [] # Outputs

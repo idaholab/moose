@@ -143,6 +143,6 @@
 [Outputs]
   file_base = bl01_lumped_fu
   execute_on = 'initial timestep_end final'
-  interval = 10000
+  time_step_interval = 10000
   exodus = true
 []

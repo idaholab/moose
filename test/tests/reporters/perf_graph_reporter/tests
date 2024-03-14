@@ -21,7 +21,7 @@
   [recover_initial]
     type = 'RunApp'
     input = 'perf_graph_reporter_recover.i'
-    cli_args = '--half-transient Outputs/checkpoint=true'
+    cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     recover = false
 
     requirement = 'The system shall include the ability to serialize report performance information with the recover system'

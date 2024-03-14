@@ -21,4 +21,7 @@ public:
 protected:
   virtual void generateData() override;
   virtual std::unique_ptr<MeshBase> generate() override;
+
+  std::unique_ptr<MeshBase> * _subgenerator_no_data_only_mesh;
+  std::unique_ptr<MeshBase> * _subgenerator_no_data_only_submesh = nullptr;
 };

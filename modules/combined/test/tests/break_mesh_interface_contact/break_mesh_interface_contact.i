@@ -187,7 +187,7 @@
 
 [Outputs]
   print_linear_residuals = false
-  interval = 1
+  time_step_interval = 1
   csv = false
   perf_graph = false
   exodus = true

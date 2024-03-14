@@ -154,7 +154,7 @@
 
 [Outputs]
   file_base = rd01
-  interval = 100000
+  time_step_interval = 100000
   execute_on = 'initial final'
   exodus = true
 []

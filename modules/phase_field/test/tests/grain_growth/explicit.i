@@ -97,6 +97,6 @@
 
 [Outputs]
   execute_on = 'initial timestep_end final'
-  interval = 20
+  time_step_interval = 20
   exodus = true
 []

@@ -113,7 +113,7 @@
   [./Exodus]
     type = Exodus
     file_base = 1d_aefv_square_wave_none_out
-    interval = 2
+    time_step_interval = 2
   [../]
   perf_graph = true
 []

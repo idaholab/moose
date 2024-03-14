@@ -230,13 +230,21 @@ MooseApp::validParams()
                                           "Continue the calculation.  If file_base is omitted then "
                                           "the most recent recovery file will be utilized");
 
-  params.addCommandLineParam<bool>("half_transient",
-                                   "--half-transient",
+  params.addCommandLineParam<bool>("test_checkpoint_half_transient",
+                                   "--test-checkpoint-half-transient",
                                    false,
                                    "When true the simulation will only run half of "
                                    "its specified transient (ie half the "
-                                   "timesteps).  This is useful for testing "
-                                   "recovery and restart");
+                                   "timesteps) with checkpoints enabled. "
+                                   "This is useful for testing recovery and restart "
+                                   "and should only be used in the test harness.");
+
+  params.addCommandLineParam<Real>("output_wall_time_interval",
+                                   "--output-wall-time-interval [interval]",
+                                   "The target wall time interval (in seconds) at "
+                                   "which to write to output. "
+                                   "USE FOR TEST SUITE PROBLEMS ONLY, FOR ALL OTHER USES "
+                                   "SEE THE wall_time_interval IN DERIVED Output OBJECTS.");
 
   // No default on these two options, they must not both be valid
   params.addCommandLineParam<bool>(
@@ -390,7 +398,7 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _half_transient(false),
+    _test_checkpoint_half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _multiapp_level(
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
@@ -691,7 +699,14 @@ MooseApp::setupOptions()
 
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
-  _half_transient = getParam<bool>("half_transient");
+  _test_checkpoint_half_transient = getParam<bool>("test_checkpoint_half_transient");
+
+  if (isParamValid("output_wall_time_interval"))
+  {
+    const auto output_wall_time_interval = getParam<Real>("output_wall_time_interval");
+    if (output_wall_time_interval <= 0)
+      mooseError("--output-wall-time-interval must be greater than zero.");
+  }
 
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
@@ -1709,8 +1724,6 @@ MooseApp::getCheckpointDirectories() const
 
   // Add the directories added with Outputs/checkpoint=true input syntax
   checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
-  // Add the directories added with the autosave checkpoint input syntax
-  checkpoint_dirs.push_back("autosave_cp");
 
   // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
@@ -1723,7 +1736,14 @@ MooseApp::getCheckpointDirectories() const
 
     const InputParameters & params = moose_object_action->getObjectParams();
     if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
-      checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
+    {
+      // Unless file_base was explicitly set by user, we cannot rely on it, as it will be changed
+      // later
+      const std::string cp_dir =
+          _file_base_set_by_user ? params.get<std::string>("file_base")
+                                 : (getOutputFileBase(true) + "_" + moose_object_action->name());
+      checkpoint_dirs.push_back(cp_dir + "_cp");
+    }
   }
   return checkpoint_dirs;
 }

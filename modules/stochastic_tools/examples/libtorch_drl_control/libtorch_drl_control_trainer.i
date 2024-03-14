@@ -85,5 +85,5 @@
 [Outputs]
   file_base = output/train_out
   csv = true
-  interval = 10
+  time_step_interval = 10
 []
