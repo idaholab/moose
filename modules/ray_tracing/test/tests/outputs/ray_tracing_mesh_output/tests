@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16028 #16320 #25501'
+  issues = '#16028 #16320 #25501 #26979'
 
   [elem_type]
     requirement = 'The system shall support the mesh output of traced rays on meshes of element types '
@@ -156,6 +156,37 @@
     []
   []
 
+  [data_specific]
+    requirement = 'The system shall support, in the output of rays in a mesh format, the output of specific'
+    design = 'RayTracingMeshOutput.md'
+    [data]
+      type = Exodiff
+      input = 'ray_mesh_output_data.i'
+      exodiff = 'ray_mesh_output_data_specific.e ray_mesh_output_data_specific_nodal.e'
+      cli_args = "UserObjects/study/ray_data_names='foo'
+                  UserObjects/study/initial_ray_data='5; 6; 7; 8'
+                  Outputs/rays/output_data=false
+                  Outputs/rays/output_data_names='foo'
+                  Outputs/rays/file_base=ray_mesh_output_data_specific
+                  Outputs/rays_nodal/output_data=false
+                  Outputs/rays_nodal/output_data_names='foo'
+                  Outputs/rays_nodal/file_base=ray_mesh_output_data_specific_nodal"
+      detail = 'ray data'
+    []
+    [aux_data]
+      type = Exodiff
+      input = 'ray_mesh_output_data.i'
+      exodiff = 'ray_mesh_output_aux_data_specific.e'
+      cli_args = "UserObjects/study/ray_aux_data_names='test_aux foo'
+                  UserObjects/study/initial_ray_aux_data='1 5; 2 6; 3 7; 4 8'
+                  Outputs/active=rays
+                  Outputs/rays/output_aux_data=false
+                  Outputs/rays/output_aux_data_names='foo'
+                  Outputs/rays/file_base=ray_mesh_output_aux_data_specific"
+      detail = 'ray aux data'
+    []
+  []
+
   [errors]
     requirement = 'The system shall report an error when ouputting rays in a mesh format when'
     design = 'RayTracingMeshOutput.md'
@@ -176,25 +207,65 @@
 
       detail = 'aux data is requested to be output but it is not cached,'
     []
-    [data_nodal_and_non_nodal]
+    [data_nodal_no_data]
       type = RunException
       input = 'ray_mesh_output_errors.i'
       cli_args = 'UserObjects/study/data_on_cache_traces=true
-                  Outputs/rays/output_data=true
                   Outputs/rays/output_data_nodal=true'
-      expect_err = "Either choose output_data = true or output_data_nodal = true, not both."
+      expect_err = "Cannot be used unless there is data to output"
 
-      detail = 'both nodal and non-nodal data is requested to be output,'
+      detail = 'nodal data is requested but data is not requested,'
     []
     [nodal_no_segments]
       type = RunException
       input = 'ray_mesh_output_errors.i'
       cli_args = 'UserObjects/study/data_on_cache_traces=true
                   UserObjects/study/segments_on_cache_traces=false
+                  Outputs/rays/output_data=true
                   Outputs/rays/output_data_nodal=true'
       expect_err = "Not supported when study segments_on_cache_traces = false"
 
-      detail = 'and when nodal data is requested to be output but segment-wise information is not cached.'
+      detail = 'nodal data is requested to be output but segment-wise information is not cached,'
+    []
+    [data_all_and_specific]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  Outputs/rays/output_data=true
+                  Outputs/rays/output_data_names=unused'
+      expect_err = "Cannot be used in addition to 'output_data_names'"
+
+      detail = 'all data and specific data are both requested,'
+    []
+    [aux_data_all_and_specific]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/aux_data_on_cache_traces=true
+                  Outputs/rays/output_aux_data=true
+                  Outputs/rays/output_aux_data_names=unused'
+      expect_err = "Cannot be used in addition to 'output_aux_data_names'"
+
+      detail = 'all aux data and specific aux data are both requested'
+    []
+    [missing_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  UserObjects/study/always_cache_traces=true
+                  Outputs/rays/output_data_names=no_exist'
+      expect_err = "The ray data 'no_exist' is not registered"
+
+      detail = 'requesting to output data and the data does not exist'
+    []
+    [missing_aux_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/aux_data_on_cache_traces=true
+                  UserObjects/study/always_cache_traces=true
+                  Outputs/rays/output_aux_data_names=no_exist'
+      expect_err = "The ray aux data 'no_exist' is not registered"
+
+      detail = 'requesting to output aux data and the aux data does not exist'
     []
   []
 
