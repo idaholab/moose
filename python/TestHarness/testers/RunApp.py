@@ -208,7 +208,7 @@ class RunApp(Tester):
             command = command + ' --n-threads=' + str(nthreads)
 
         if self.force_mpi or options.parallel or ncpus > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + command
+            command = f'{self.mpi_command} -n {ncpus} {command}'
 
         return command
 
