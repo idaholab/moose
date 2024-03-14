@@ -772,7 +772,8 @@ protected:
       const unsigned int num_extra_layers) const;
 
   /**
-   * Modifies the input multi boundary layer parameters for node generation, especially for the quadratic elements
+   * Modifies the input multi boundary layer parameters for node generation, especially for the
+   * quadratic elements
    * @param original_multi_bdry_layer_params original multi boundary layer parameters
    * @param order order of the elements
    * @return modified multi boundary layer parameters
@@ -782,7 +783,8 @@ protected:
                                       const unsigned int order) const;
 
   /**
-   * Modifies the input single boundary layer parameters for node generation, especially for the quadratic elements
+   * Modifies the input single boundary layer parameters for node generation, especially for the
+   * quadratic elements
    * @param original_single_bdry_layer_params original single boundary layer parameters
    * @param order order of the elements
    * @return modified single boundary layer parameters
