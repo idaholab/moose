@@ -1,4 +1,12 @@
 #!/bin/bash
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
 
 function enter_moose()
 {
@@ -33,6 +41,7 @@ download properly.\n\n"
 function build_library()
 {
     if [ "${FULL_BUILD}" == 0 ]; then return; fi
+    print_sep
     local error_cnt=${error_cnt:-0}
     if [ ${error_cnt} -le 0 ]; then printf "Build Step: $1\n"; fi
     enter_moose
@@ -88,6 +97,7 @@ function build_moose()
 
 function build_application()
 {
+    print_sep
     clone_moose
     # Do the dumb necessary things we do in 'moose-mpich' package
     # TODO: remove this when 'moose-mpi' becomes available
@@ -97,7 +107,6 @@ function build_application()
 
     local LIBS=(petsc libmesh wasp)
     for lib in ${LIBS[@]}; do
-        print_sep
         build_library ${lib}
     done
     print_sep

@@ -1,4 +1,12 @@
 #!/bin/bash
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
 
 function check_failure()
 {
@@ -40,6 +48,7 @@ function test_parallel()
 
 function test_application()
 {
+    print_sep
     if [ "${FULL_BUILD}" == 0 ]; then
         printf "Running aggregated tests\n\n"
         enter_moose
