@@ -24,7 +24,7 @@
 #include "libmesh/periodic_boundaries.h"
 
 // External includes
-#include "bitmask_operators.h"
+#include "boost/bitmask_operators.h"
 
 // Forward Declarations
 class MooseMesh;
