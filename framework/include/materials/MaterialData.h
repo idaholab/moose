@@ -289,7 +289,7 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
     // if we are not declaring the property we initialize only what we need (the requested state)
     if (!entry.hasValue(prop_id) && (declare || state_i == state))
     {
-      if (state == 0)
+      if (state_i == 0)
         entry.setPointer(
             prop_id, std::move(std::make_unique<GenericMaterialProperty<T, is_ad>>(prop_id)), {});
       else
