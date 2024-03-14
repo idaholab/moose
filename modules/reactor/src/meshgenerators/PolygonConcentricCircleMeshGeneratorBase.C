@@ -535,7 +535,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     if ((_order == 1 && (*input[i]->elements_begin())->default_order() != FIRST) ||
         (_order == 2 && (*input[i]->elements_begin())->default_order() == FIRST))
       paramError("tri_element_type",
-                 "the order of the input mesh to be adapted to does not match the order of the "
+                 "The order of the input mesh to be adapted to does not match the order of the "
                  "mesh to be generated.");
   }
 

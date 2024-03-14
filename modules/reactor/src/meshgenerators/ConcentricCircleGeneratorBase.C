@@ -72,15 +72,11 @@ ConcentricCircleGeneratorBase::validParams()
                                "Optional customized external boundary name.");
 
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7", "TRI3");
-  params.addParam<MooseEnum>("tri_element_type",
-                             tri_elem_type,
-                             "Type of the triangular elements to be generated. Options: " +
-                                 tri_elem_type.getRawNames());
+  params.addParam<MooseEnum>(
+      "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
   MooseEnum quad_elem_type("QUAD4 QUAD8 QUAD9", "QUAD4");
-  params.addParam<MooseEnum>("quad_element_type",
-                             quad_elem_type,
-                             "Type of the quadrilateral elements to be generated. Options: " +
-                                 quad_elem_type.getRawNames());
+  params.addParam<MooseEnum>(
+      "quad_element_type", quad_elem_type, "Type of the quadrilateral elements to be generated.");
 
   params.addParam<std::vector<std::string>>(
       "inward_interface_boundary_names",

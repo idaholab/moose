@@ -269,7 +269,7 @@ PolygonMeshGeneratorBase::buildSlice(
   mod_background_outer_boundary_layer_params.bias =
       std::pow(mod_background_outer_boundary_layer_params.bias, 1.0 / order);
 
-  // The distance parameters of the rings and duct need to be modified too as they main be involved
+  // The distance parameters of the rings and duct need to be modified too as they may be involved
   // in the boundary layer cases.
   std::vector<Real> mod_ducts_center_dist(ducts_center_dist);
   std::vector<Real> mod_ring_radii(ring_radii);
@@ -508,7 +508,7 @@ PolygonMeshGeneratorBase::buildSlice(
 
   // From now on, we work on the elements, which need the none "mod_" parameters
   // Assign elements, boundaries, and subdomains;
-  // Add Tri3/Tri7 or Quad4/Quad9 mesh into innermost (central) region
+  // Add Tri3/Tri6/Tri7 or Quad4/Quad8/Quad9 mesh into innermost (central) region
   if (quad_center_elements)
     cenQuadElemDef(*mesh,
                    div_num,
