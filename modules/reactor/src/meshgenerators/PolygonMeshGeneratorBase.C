@@ -230,44 +230,19 @@ PolygonMeshGeneratorBase::buildSlice(
   // background_radial_bias is similar to ring_radial_biases
   const Real mod_background_radial_bias = std::pow(background_radial_bias, 1.0 / order);
   // Perform similar modifications for boundary layer parameters
-  multiBdryLayerParams mod_ring_inner_boundary_layer_params(ring_inner_boundary_layer_params);
-  std::for_each(mod_ring_inner_boundary_layer_params.intervals.begin(),
-                mod_ring_inner_boundary_layer_params.intervals.end(),
-                [&order](unsigned int & n) { n *= order; });
-  std::for_each(mod_ring_inner_boundary_layer_params.biases.begin(),
-                mod_ring_inner_boundary_layer_params.biases.end(),
-                [&order](Real & n) { n = std::pow(n, 1.0 / order); });
-  multiBdryLayerParams mod_ring_outer_boundary_layer_params(ring_outer_boundary_layer_params);
-  std::for_each(mod_ring_outer_boundary_layer_params.intervals.begin(),
-                mod_ring_outer_boundary_layer_params.intervals.end(),
-                [&order](unsigned int & n) { n *= order; });
-  std::for_each(mod_ring_outer_boundary_layer_params.biases.begin(),
-                mod_ring_outer_boundary_layer_params.biases.end(),
-                [&order](Real & n) { n = std::pow(n, 1.0 / order); });
-  multiBdryLayerParams mod_duct_inner_boundary_layer_params(duct_inner_boundary_layer_params);
-  std::for_each(mod_duct_inner_boundary_layer_params.intervals.begin(),
-                mod_duct_inner_boundary_layer_params.intervals.end(),
-                [&order](unsigned int & n) { n *= order; });
-  std::for_each(mod_duct_inner_boundary_layer_params.biases.begin(),
-                mod_duct_inner_boundary_layer_params.biases.end(),
-                [&order](Real & n) { n = std::pow(n, 1.0 / order); });
-  multiBdryLayerParams mod_duct_outer_boundary_layer_params(duct_outer_boundary_layer_params);
-  std::for_each(mod_duct_outer_boundary_layer_params.intervals.begin(),
-                mod_duct_outer_boundary_layer_params.intervals.end(),
-                [&order](unsigned int & n) { n *= order; });
-  std::for_each(mod_duct_outer_boundary_layer_params.biases.begin(),
-                mod_duct_outer_boundary_layer_params.biases.end(),
-                [&order](Real & n) { n = std::pow(n, 1.0 / order); });
-  singleBdryLayerParams mod_background_inner_boundary_layer_params(
-      background_inner_boundary_layer_params);
-  mod_background_inner_boundary_layer_params.intervals *= order;
-  mod_background_inner_boundary_layer_params.bias =
-      std::pow(mod_background_inner_boundary_layer_params.bias, 1.0 / order);
-  singleBdryLayerParams mod_background_outer_boundary_layer_params(
-      background_outer_boundary_layer_params);
-  mod_background_outer_boundary_layer_params.intervals *= order;
-  mod_background_outer_boundary_layer_params.bias =
-      std::pow(mod_background_outer_boundary_layer_params.bias, 1.0 / order);
+  const auto mod_ring_inner_boundary_layer_params =
+      modifiedMultiBdryLayerParamsCreator(ring_inner_boundary_layer_params, order);
+  const auto mod_ring_outer_boundary_layer_params =
+      modifiedMultiBdryLayerParamsCreator(ring_outer_boundary_layer_params, order);
+  const auto mod_duct_inner_boundary_layer_params =
+      modifiedMultiBdryLayerParamsCreator(duct_inner_boundary_layer_params, order);
+  const auto mod_duct_outer_boundary_layer_params =
+      modifiedMultiBdryLayerParamsCreator(duct_outer_boundary_layer_params, order);
+
+  const auto mod_background_inner_boundary_layer_params =
+      modifiedSingleBdryLayerParamsCreator(background_inner_boundary_layer_params, order);
+  const auto mod_background_outer_boundary_layer_params =
+      modifiedSingleBdryLayerParamsCreator(background_outer_boundary_layer_params, order);
 
   // The distance parameters of the rings and duct need to be modified too as they may be involved
   // in the boundary layer cases.
@@ -1738,4 +1713,28 @@ PolygonMeshGeneratorBase::getInterfaceBoundaryIDs(
         interface_boundary_ids.insert(id);
     }
   return interface_boundary_ids;
+}
+
+PolygonMeshGeneratorBase::multiBdryLayerParams
+PolygonMeshGeneratorBase::modifiedMultiBdryLayerParamsCreator(
+    const multiBdryLayerParams & original_multi_bdry_layer_params, const unsigned int order) const
+{
+  multiBdryLayerParams mod_multi_bdry_layer_params(original_multi_bdry_layer_params);
+  std::for_each(mod_multi_bdry_layer_params.intervals.begin(),
+                mod_multi_bdry_layer_params.intervals.end(),
+                [&order](unsigned int & n) { n *= order; });
+  std::for_each(mod_multi_bdry_layer_params.biases.begin(),
+                mod_multi_bdry_layer_params.biases.end(),
+                [&order](Real & n) { n = std::pow(n, 1.0 / order); });
+  return mod_multi_bdry_layer_params;
+}
+
+PolygonMeshGeneratorBase::singleBdryLayerParams
+PolygonMeshGeneratorBase::modifiedSingleBdryLayerParamsCreator(
+    const singleBdryLayerParams & original_single_bdry_layer_params, const unsigned int order) const
+{
+  singleBdryLayerParams mod_single_bdry_layer_params(original_single_bdry_layer_params);
+  mod_single_bdry_layer_params.intervals *= order;
+  mod_single_bdry_layer_params.bias = std::pow(mod_single_bdry_layer_params.bias, 1.0 / order);
+  return mod_single_bdry_layer_params;
 }

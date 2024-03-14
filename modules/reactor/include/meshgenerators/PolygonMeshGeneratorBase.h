@@ -770,4 +770,24 @@ protected:
       const bool use_interface_boundary_id_shift,
       const bool create_interface_boundary_id,
       const unsigned int num_extra_layers) const;
+
+  /**
+   * Modifies the input multi boundary layer parameters for node generation, especially for the quadratic elements
+   * @param original_multi_bdry_layer_params original multi boundary layer parameters
+   * @param order order of the elements
+   * @return modified multi boundary layer parameters
+   */
+  multiBdryLayerParams
+  modifiedMultiBdryLayerParamsCreator(const multiBdryLayerParams & original_multi_bdry_layer_params,
+                                      const unsigned int order) const;
+
+  /**
+   * Modifies the input single boundary layer parameters for node generation, especially for the quadratic elements
+   * @param original_single_bdry_layer_params original single boundary layer parameters
+   * @param order order of the elements
+   * @return modified single boundary layer parameters
+   */
+  singleBdryLayerParams modifiedSingleBdryLayerParamsCreator(
+      const singleBdryLayerParams & original_single_bdry_layer_params,
+      const unsigned int order) const;
 };
