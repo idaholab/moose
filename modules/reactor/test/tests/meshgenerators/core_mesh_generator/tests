@@ -26,7 +26,8 @@
                 Outputs/json_out/execute_system_information_on=none
                 Outputs/json_out/file_base=core_square_datadriven_out'
     jsondiff = 'core_square_datadriven_out.json'
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen'
+    # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries'
     recover = false
   []
   [square_metadata_bypass_meshgen]
@@ -138,7 +139,8 @@
                 Outputs/json_out/execute_system_information_on=none
                 Outputs/json_out/file_base=core_hex_datadriven_out'
     jsondiff = 'core_hex_datadriven_out.json'
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen'
+    # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries'
     recover = false
   []
   [hex_metadata_bypass_meshgen]
@@ -231,7 +233,8 @@
                 Outputs/json_out/execute_system_information_on=none
                 Outputs/json_out/file_base=core_hex_2d_datadriven_out'
     jsondiff = 'core_hex_2d_datadriven_out.json'
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen'
+    # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries'
     recover = false
   []
   [hex_metadata_2d_bypass_meshgen]
