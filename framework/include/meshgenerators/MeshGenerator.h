@@ -185,11 +185,6 @@ public:
   bool hasGenerateData() const { return hasGenerateData(_pars); }
 
   /**
-   * @return If this generator was created as a subgenerator, the generator that created it
-   */
-  const MeshGenerator * getSubgeneratorChild() const { return _subgenerator_child; }
-
-  /**
    * @return Whether or not this generator is to be generated in data-only mode
    */
   bool isDataOnly() const { return _data_only; }
@@ -450,9 +445,6 @@ private:
 
   /// A user-defined name to save the mesh
   const std::string & _save_with_name;
-
-  /// Whether or not this mesh generator is a subgenerator
-  const MeshGenerator * _subgenerator_child;
 
   /// Whether or not this mesh generator will run in data only mode
   const bool _data_only;

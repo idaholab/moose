@@ -46,7 +46,6 @@ MeshGenerator::validParams()
 
   params.addPrivateParam<bool>("_has_generate_data", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
-  params.addPrivateParam<const MeshGenerator *>("_subgenerator_child", nullptr);
   params.addPrivateParam<bool>(data_only_param, false);
 
   return params;
@@ -58,7 +57,6 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
     _mesh(getParam<MooseMesh *>("_moose_mesh") ? getParam<MooseMesh *>("_moose_mesh")
                                                : _app.actionWarehouse().mesh().get()),
     _save_with_name(getParam<std::string>("save_with_name")),
-    _subgenerator_child(getParam<const MeshGenerator *>("_subgenerator_child")),
     _data_only(getParam<bool>(data_only_param))
 {
   const auto & system = _app.getMeshGeneratorSystem();
@@ -336,7 +334,6 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
 
   // In case the user forgot it
   params.set<MooseApp *>("_moose_app") = &_app;
-  params.set<const MeshGenerator *>("_subgenerator_child") = this;
 
   // Set this to be data-only if this generator is data only
   params.set<bool>(data_only_param) = isDataOnly();
