@@ -219,7 +219,7 @@ private:
   static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);
 
   /**
-   * Helper for casting \p requestor to a MaterialBase in addPropertyHepler() (templated)
+   * Helper for casting \p requestor to a MaterialBase in addPropertyHelper() (templated)
    */
   const MaterialBase & castRequestorToDeclarer(const MooseObject & requestor) const;
 
@@ -231,7 +231,7 @@ private:
   bool _resize_only_if_smaller;
 
   /// maximum state id requested for a property
-  std::vector<unsigned int> _max_state_requested;
+  unsigned int getMaxStateRequested(const unsigned int prop_id) const;
 };
 
 inline const MaterialProperties &
@@ -280,14 +280,8 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
       prop_name, typeid(T), state, declare ? &castRequestorToDeclarer(requestor) : nullptr);
   const auto size = prop_id + 1;
 
-  // get the maximum state id requested for this property so far
-  if (_max_state_requested.size() < size)
-    _max_state_requested.resize(size, 0);
-  const auto max_state = std::max(_max_state_requested[prop_id], state);
-  _max_state_requested[prop_id] = state;
-
   // Initialize the states that we need
-  for (const auto state_i : make_range(max_state + 1))
+  for (const auto state_i : make_range(getMaxStateRequested(prop_id) + 1))
   {
     auto & entry = props(state_i);
     if (entry.size() < size)
