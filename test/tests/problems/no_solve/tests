@@ -8,4 +8,24 @@
     issues = '#1978'
     design = 'Problem/index.md'
   [../]
+  [eigen_problem_solve_fail]
+    type = 'RunApp'
+    requirement = 'The system shall inform the user when the nonlinear-eigen system solve failed.'
+    expect_out = 'Aborting as solve did not converge'
+    input = 'ne_fail.i'
+    design = 'Problem/index.md'
+    issues = '#27084'
+  []    
+  [eigen_problem_skip_solve]
+    type = 'RunApp'
+    prereq = eigen_problem_solve_fail
+    requirement = 'The system shall have the ability to disable the nonlinear-eigen system solve in a simulation.'
+    # regex meant to make sure no messaged about solve failing is printed last
+    # \S+ is to consume the ansi color characters
+    expect_out = 'Solve Skipped!\S+\s+(?!Aborting)'
+    input = 'ne_fail.i'
+    cli_args = Problem/solve=false
+    design = 'Problem/index.md'
+    issues = '#27084'
+  []
 []
