@@ -1112,7 +1112,7 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     _intersection_distance = RayTracingCommon::invalid_distance;
 
     // Stationary ray
-    if (ray->intersections() == 0 && ray->maxDistance() == 0)
+    if (ray->stationary())
     {
       mooseAssert(ray->invalidDirection(), "Should have an invalid direction");
       _exits_elem = true;
@@ -1285,9 +1285,12 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     debugRay("  _intersection_distance = ", _intersection_distance);
 
     // Increment intersections
-    debugRay("Incrementing ray intersections by 1 to ", ray->intersections() + 1);
-    ray->addIntersection();
-    _results[INTERSECTIONS]++;
+    if (_intersection_distance > 0)
+    {
+      debugRay("Incrementing ray intersections by 1 to ", ray->intersections() + 1);
+      ray->addIntersection();
+      _results[INTERSECTIONS]++;
+    }
 
     // Increment distance
     ray->addDistance(_intersection_distance);
@@ -1642,6 +1645,8 @@ TraceRay::onCompleteTrace(const std::shared_ptr<Ray> & ray)
       if (_study.auxDataOnCacheTraces())
         _current_cached_trace->lastPoint()._aux_data = ray->auxData();
     }
+
+    mooseAssert(ray->stationary() == _current_cached_trace->stationary(), "Stationary mismatch");
   }
 }
 
