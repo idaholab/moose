@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator.md'
-  issues = '#22828'
+  issues = '#22828 #26986'
   [back_only]
     type = 'Exodiff'
     input = 'square_2d.i'
@@ -19,7 +19,6 @@
                 Mesh/gen/quad_element_type=QUAD9
                 --mesh-only "square_2d_back_only_quadratic.e"'
     requirement = 'The system shall generate a square mesh with one side adapted to another mesh that has quadratic elements.'
-    issues = '#26986'
     recover = false
     mesh_mode = 'REPLICATED'
   []

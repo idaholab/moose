@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/AdvancedConcentricCircleGenerator.md'
-  issues = '#24938'
+  issues = '#24938 #26986'
   [test]
     requirement = "The system shall generate "
     [general]
@@ -20,7 +20,6 @@
                   Mesh/accg/quad_element_type=QUAD9
                   --mesh-only accg_quadratic.e"
       exodiff = accg_quadratic.e
-      issues = '#26986'
       recover = false
       detail = "a volume preserved concentric circles mesh with quadratic elements."
     []
@@ -35,7 +34,6 @@
                   Mesh/accg/tri_element_type=TRI7
                   --mesh-only accg_one_layer_quadratic.e"
       exodiff = accg_one_layer_quadratic.e
-      issues = '#26986'
       recover = false
       detail = "a one-element-layer volume preserved concentric circles mesh with quadratic TRI7 elements."
     []
@@ -66,7 +64,6 @@
                   Mesh/accg/quad_element_type=QUAD9
                   --mesh-only accg_custom_azi_quadratic_in.e"
       exodiff = accg_custom_azi_quadratic_in.e
-      issues = '#26986'
       recover = false
       detail = "a volume preserved concentric circles mesh with custom nodal azimuthal angles and with quadratic elements."
     []
@@ -190,7 +187,6 @@
                   --mesh-only err.e"
       expect_err = 'the element types of triangular and quadrilateral elements must be compatible'
       detail = 'if the elements of the circular mesh to be generated have incompatible types.'
-      issues = '#26986'
     []
   []
 []
