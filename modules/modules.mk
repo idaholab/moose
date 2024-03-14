@@ -55,10 +55,6 @@ ifeq ($(THERMAL_HYDRAULICS),yes)
         MISC                        := yes
 endif
 
-ifeq ($(SOLID_MECHANICS),yes)
-        OPTIMIZATION                := yes
-endif
-
 ifeq ($(FSI),yes)
         NAVIER_STOKES               := yes
         SOLID_MECHANICS             := yes
@@ -87,7 +83,6 @@ endif
 # tensor_mechanics was renamed to solid_mechanics
 ifeq ($(TENSOR_MECHANICS),yes)
   SOLID_MECHANICS      := yes
-  OPTIMIZATION         := yes
   $(warning The tensor mechanics module was renamed to the solid mechanics module. Please update your Makefile and replace TENSOR_MECHANICS with SOLID_MECHANICS)
 endif
 
@@ -227,14 +222,6 @@ endif
 # The modules that follow are purposefully ordered such that all of their
 # dependencies are defined first
 
-# Depended on by solid_mechanics
-ifeq ($(OPTIMIZATION),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/optimization
-  APPLICATION_NAME   := optimization
-  SUFFIX             := opt
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
 # Depended on by navier_stokes, fsi (through navier_stokes)
 ifeq ($(HEAT_TRANSFER),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_transfer
@@ -256,7 +243,6 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
-  DEPEND_MODULES     := optimization
   SUFFIX             := sm
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -293,6 +279,13 @@ ifeq ($(MISC),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/misc
   APPLICATION_NAME   := misc
   SUFFIX             := misc
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(OPTIMIZATION),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/optimization
+  APPLICATION_NAME   := optimization
+  SUFFIX             := opt
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

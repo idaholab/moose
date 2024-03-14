@@ -9,15 +9,16 @@
 
 #include "BatchPropertyDerivative.h"
 
-registerMooseObject("SolidMechanicsApp", BatchPropertyDerivativeRankTwoTensorReal);
+registerMooseObject("MooseApp", BatchPropertyDerivativeRankTwoTensorReal);
 
 template <typename OutputType, typename InputType>
 InputParameters
 BatchPropertyDerivative<OutputType, InputType>::validParams()
 {
   auto params = BatchPropertyDerivativeBase<OutputType, InputType>::validParams();
-  params.addClassDescription("Gather material property for NEML2 material model, and receive the "
-                             "property derivatives from the NEML2 material model.");
+  params.addClassDescription("This user object gathers material property and receives the "
+                             "corresponding property derivatives. This object is useful in the "
+                             "optimization module for material property inversion problems.");
   params.template addRequiredParam<MaterialPropertyName>("material_property",
                                                          "Name of the scalar material property.");
   params.setDocString("execution_order_group",

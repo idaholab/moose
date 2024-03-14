@@ -165,7 +165,7 @@
 
 [VectorPostprocessors]
   [grad_youngs_modulus]
-    type = AdjointStrainStressGradNEML2InnerProduct
+    type = AdjointStrainBatchStressGradInnerProduct
     stress_derivative = 'forward_E_batch_material'
     adjoint_strain_name = 'adjoint_mechanical_strain'
     variable = dummy

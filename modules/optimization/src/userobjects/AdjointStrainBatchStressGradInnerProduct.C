@@ -7,21 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AdjointStrainStressGradNEML2InnerProduct.h"
+#include "AdjointStrainBatchStressGradInnerProduct.h"
 
-#include "NEML2Utils.h"
-
-registerMooseObject("SolidMechanicsApp", AdjointStrainStressGradNEML2InnerProduct);
+registerMooseObject("OptimizationApp", AdjointStrainBatchStressGradInnerProduct);
 
 InputParameters
-AdjointStrainStressGradNEML2InnerProduct::validParams()
+AdjointStrainBatchStressGradInnerProduct::validParams()
 {
   InputParameters params = ElementOptimizationFunctionInnerProduct::validParams();
   params.addClassDescription(
       "This component is designed to compute the gradient of the objective function concerning "
       "specific properties. It achieves this by computing the inner product of the property "
-      "derivative obtained from a NEML2 material model and the strain resulting from the forward "
-      "simulation");
+      "derivative obtained as a batch material and the strain resulting from the forward "
+      "simulation.");
   params.addRequiredParam<UserObjectName>("stress_derivative",
                                           "The user object that stores the stress derivative");
   params.addRequiredParam<MaterialPropertyName>(
@@ -29,7 +27,7 @@ AdjointStrainStressGradNEML2InnerProduct::validParams()
   return params;
 }
 
-AdjointStrainStressGradNEML2InnerProduct::AdjointStrainStressGradNEML2InnerProduct(
+AdjointStrainBatchStressGradInnerProduct::AdjointStrainBatchStressGradInnerProduct(
     const InputParameters & parameters)
   : ElementOptimizationFunctionInnerProduct(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
@@ -38,14 +36,13 @@ AdjointStrainStressGradNEML2InnerProduct::AdjointStrainStressGradNEML2InnerProdu
     _derivative_uo(getUserObject<BatchPropertyDerivativeRankTwoTensorReal>("stress_derivative")),
     _derivative(_derivative_uo.getOutputData())
 {
-  NEML2Utils::libraryNotEnabledError(parameters);
 }
 
 Real
-AdjointStrainStressGradNEML2InnerProduct::computeQpInnerProduct()
+AdjointStrainBatchStressGradInnerProduct::computeQpInnerProduct()
 {
   if (!_derivative_uo.outputReady())
-    mooseError("The NEML2 material update has not been performed yet");
+    mooseError("The batch material update has not been performed yet");
 
   const auto index = _derivative_uo.getIndex(_current_elem->id());
   Real ans = -_adjoint_strain[_qp].doubleContraction(_derivative[index + _qp]);
