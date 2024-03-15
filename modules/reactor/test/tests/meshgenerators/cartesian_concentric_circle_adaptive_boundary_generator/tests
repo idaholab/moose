@@ -1,12 +1,24 @@
 [Tests]
   design = 'meshgenerators/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator.md'
-  issues = '#22828'
+  issues = '#22828 #26986'
   [back_only]
     type = 'Exodiff'
     input = 'square_2d.i'
     exodiff = 'square_2d_back_only.e'
     cli_args = '--mesh-only "square_2d_back_only.e"'
     requirement = 'The system shall generate a square mesh that adapts one boundary of a mesh loaded from an exodus file.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [back_only_quadratic]
+    type = 'Exodiff'
+    input = 'square_2d.i'
+    exodiff = 'square_2d_back_only_quadratic.e'
+    cli_args = 'Mesh/fmg/file="square_2_in.e" 
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD9
+                --mesh-only "square_2d_back_only_quadratic.e"'
+    requirement = 'The system shall generate a square mesh with one side adapted to another mesh that has quadratic elements.'
     recover = false
     mesh_mode = 'REPLICATED'
   []

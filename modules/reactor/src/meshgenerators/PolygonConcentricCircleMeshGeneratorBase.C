@@ -248,6 +248,31 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>());
   declareMeshProperty<Real>("max_radius_meta", 0.0);
 
+  const unsigned short tri_order = _tri_elem_type == TRI_ELEM_TYPE::TRI3 ? 1 : 2;
+  const unsigned short quad_order = _quad_elem_type == QUAD_ELEM_TYPE::QUAD4 ? 1 : 2;
+  // 1. If the central elements are quad, then no triangular elements are generated;
+  // 2. If the generated mesh has only one radial layer of triangular elements, then no
+  // quad elements are generated; (For PCCMG, that layer must be background)
+  // 3. Otherwise, both types of elements are generated.
+  _order = quad_order;
+  if (_quad_center_elements)
+  {
+    if (tri_order != quad_order)
+      _tri_elem_type = quad_order == 1 ? TRI_ELEM_TYPE::TRI3 : TRI_ELEM_TYPE::TRI6;
+  }
+  else if (_ring_radii.empty() && _background_intervals == 1 &&
+           _background_inner_boundary_layer_params.intervals == 0 &&
+           _background_outer_boundary_layer_params.intervals == 0 && _duct_sizes.empty())
+  {
+    _order = tri_order;
+    if (tri_order != quad_order)
+      _quad_elem_type = tri_order == 1 ? QUAD_ELEM_TYPE::QUAD4 : QUAD_ELEM_TYPE::QUAD9;
+  }
+  else if (tri_order != quad_order)
+    paramError("tri_element_type",
+               "the element types of triangular and quadrilateral elements must be compatible if "
+               "both types of elements are generated.");
+
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
   if (!_sides_to_adapt.empty() && _num_sides != HEXAGON_NUM_SIDES && _num_sides != SQUARE_NUM_SIDES)
@@ -352,9 +377,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_inner_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _ring_inner_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "ring_inner_boundary_layer_intervals",
-            "Ring inner boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("ring_inner_boundary_layer_intervals",
+                   "Ring inner boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
     for (unsigned int i = 0; i < _ring_outer_boundary_layer_params.fractions.size(); i++)
     {
       if (MooseUtils::absoluteFuzzyEqual(_ring_outer_boundary_layer_params.fractions[i], 0.0) &&
@@ -364,9 +389,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_outer_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _ring_outer_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "ring_outer_boundary_layer_intervals",
-            "Ring outer boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("ring_outer_boundary_layer_intervals",
+                   "Ring outer boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
       if (_ring_inner_boundary_layer_params.fractions[i] +
               _ring_outer_boundary_layer_params.fractions[i] >=
           1.0)
@@ -437,9 +462,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_inner_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _duct_inner_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "duct_inner_boundary_layer_intervals",
-            "Duct inner boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("duct_inner_boundary_layer_intervals",
+                   "Duct inner boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
     for (unsigned int i = 0; i < _duct_outer_boundary_layer_params.fractions.size(); i++)
     {
       if (MooseUtils::absoluteFuzzyEqual(_duct_outer_boundary_layer_params.fractions[i], 0.0) &&
@@ -449,9 +474,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_outer_boundary_layer_params.fractions[i],
                                                     0.0) &&
                _duct_outer_boundary_layer_params.intervals[i] == 0)
-        paramError(
-            "duct_outer_boundary_layer_intervals",
-            "Duct outer boundary layer must have non-zero interval if its thickness is not zero.");
+        paramError("duct_outer_boundary_layer_intervals",
+                   "Duct outer boundary layer must have non-zero interval if its thickness is "
+                   "not zero.");
       if (_duct_inner_boundary_layer_params.fractions[i] +
               _duct_outer_boundary_layer_params.fractions[i] >=
           1.0)
@@ -507,6 +532,11 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     input[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_input_ptrs[i]));
     if (!input[i])
       mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
+    if ((_order == 1 && (*input[i]->elements_begin())->default_order() != FIRST) ||
+        (_order == 2 && (*input[i]->elements_begin())->default_order() == FIRST))
+      paramError("tri_element_type",
+                 "The order of the input mesh to be adapted to does not match the order of the "
+                 "mesh to be generated.");
   }
 
   unsigned int mesh_input_counter = 0;
@@ -548,11 +578,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     else
     {
       _azimuthal_angles_array.push_back(std::vector<Real>());
-      for (unsigned int i = 0; i < _num_sectors_per_side[mesh_index]; i++)
+      for (unsigned int i = 0; i < _num_sectors_per_side[mesh_index] * _order; i++)
       {
         azimuthal_list.push_back(
-            std::atan(std::tan(M_PI / _num_sides) *
-                      (2.0 * (Real)i / (Real)_num_sectors_per_side[mesh_index] - 1.0)) *
+            std::atan(
+                std::tan(M_PI / _num_sides) *
+                (2.0 * (Real)i / (Real)_num_sectors_per_side[mesh_index] / (Real)_order - 1.0)) *
                 180.0 / M_PI +
             (Real)mesh_index * (360.0 / (Real)_num_sides) - (180.0 - 180.0 / (Real)_num_sides));
       }
@@ -602,7 +633,9 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _create_inward_interface_boundaries,
                                 _create_outward_interface_boundaries,
                                 _interface_boundary_id_shift,
-                                _generate_side_specific_boundaries);
+                                _generate_side_specific_boundaries,
+                                _tri_elem_type,
+                                _quad_elem_type);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
@@ -632,7 +665,9 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _create_inward_interface_boundaries,
                                      _create_outward_interface_boundaries,
                                      _interface_boundary_id_shift,
-                                     _generate_side_specific_boundaries);
+                                     _generate_side_specific_boundaries,
+                                     _tri_elem_type,
+                                     _quad_elem_type);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);

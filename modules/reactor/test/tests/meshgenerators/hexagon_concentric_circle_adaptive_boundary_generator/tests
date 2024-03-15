@@ -1,12 +1,24 @@
 [Tests]
   design = 'meshgenerators/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md'
-  issues = '#18628'
+  issues = '#18628 #26986'
   [back_only]
     type = 'Exodiff'
     input = 'hex_2d.i'
     exodiff = 'hex_2d_back_only.e'
     cli_args = '--mesh-only "hex_2d_back_only.e"'
     requirement = 'The system shall generate a hexagon mesh that adapts one boundary of the mesh saved in the exodus file.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [back_only_quadratic]
+    type = 'Exodiff'
+    input = 'hex_2d.i'
+    exodiff = 'hex_2d_back_only_quadratic.e'
+    cli_args = 'Mesh/fmg/file="hex_2_in.e" 
+                Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD9
+                --mesh-only "hex_2d_back_only_quadratic.e"'
+    requirement = 'The system shall generate a hexagon mesh with one side adapted to another mesh that has quadratic elements.'
     recover = false
     mesh_mode = 'REPLICATED'
   []
@@ -34,5 +46,15 @@
                 --mesh-only "hex_2d_err.e"'
     expect_err = 'this parameter is deprecated; it cannot be provided along with the new parameter'
     requirement = "The system shall throw an error if the deprecated input parameter is provided along with the new parameter."
+  []
+  [err_incompatible_quadratic]
+    type = 'RunException'
+    input = 'hex_2d.i'
+    cli_args = 'Mesh/gen/tri_element_type=TRI7
+                Mesh/gen/quad_element_type=QUAD9
+                --mesh-only "hex_2d_err.e"'
+    expect_err = 'The order of the input mesh to be adapted to does not match'
+    requirement = "The system shall throw an error if the input mesh to adapt a polygon mesh side to has a different order than the order of the hexagonal mesh to be generated."
+    mesh_mode = 'REPLICATED'
   []
 []
