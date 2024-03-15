@@ -137,3 +137,16 @@ TEST(CapabilitiesTest, multipleTest)
         EXPECT_EQ(std::get<bool>(capabilities.check(test[i] + ' ' + test[j] + ' ' + test[k])),
                   i % 2 + j % 2 + k % 2 == 0);
 }
+
+#define BOOST_PARSER_DISABLE_HANA_TUPLE
+#include <boost/parser/parser.hpp>
+
+#include <iostream>
+#include <string>
+
+namespace bp = boost::parser;
+
+TEST(CapabilitiesTest, spiritParser)
+{
+  
+}
