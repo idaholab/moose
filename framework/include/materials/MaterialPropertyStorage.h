@@ -20,7 +20,6 @@
 
 // Forward declarations
 class MaterialBase;
-class MaterialData;
 class QpMap;
 
 // libMesh forward declarations

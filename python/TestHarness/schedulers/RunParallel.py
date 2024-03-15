@@ -55,6 +55,7 @@ class RunParallel(Scheduler):
 
             # Was this job already considered finished? (Timeout, Crash, etc)
             if job.isFinished():
+                tester.cleanup()
                 return
 
             # Allow derived proccessResults to process the output and set a failing status (if it failed)
@@ -82,6 +83,9 @@ class RunParallel(Scheduler):
         except Exception as e:
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
             tester.setStatus(StatusSystem().error, 'TESTER EXCEPTION')
+
+        # Clean up now that we're done
+        tester.cleanup()
 
         if job.getOutputFile():
             job.addMetaData(DIRTY_FILES=[job.getOutputFile()])

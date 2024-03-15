@@ -12,7 +12,8 @@ import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
-from tempfile import SpooledTemporaryFile
+from tempfile import SpooledTemporaryFile, TemporaryDirectory
+from pathlib import Path
 import subprocess
 from signal import SIGTERM
 
@@ -116,6 +117,10 @@ class Tester(MooseObject):
         params.addParam("classification", 'functional', "A means for defining a requirement classification for SQA process.")
         return params
 
+    def __del__(self):
+        # Do any cleaning that we can (removes the temp dir for now if it exists)
+        self.cleanup()
+
     # This is what will be checked for when we look for valid testers
     IS_TESTER = True
 
@@ -157,6 +162,31 @@ class Tester(MooseObject):
 
         self.__failed_statuses = self.test_status.getFailingStatuses()
         self.__skipped_statuses = [self.skip, self.silent]
+
+        # A temp directory for this Tester, if requested
+        self.tmp_dir = None
+
+    def getTempDirectory(self):
+        """
+        Gets a shared temp directory that will be cleaned up for this Tester
+        """
+        if self.tmp_dir is None:
+            self.tmp_dir = TemporaryDirectory(prefix='tester_')
+        return self.tmp_dir
+
+    def cleanup(self):
+        """
+        Entry point for doing any cleaning if necessary.
+
+        Currently just cleans up the temp directory
+        """
+        if self.tmp_dir is not None:
+            # Don't let this fail
+            try:
+                self.tmp_dir.cleanup()
+            except:
+                pass
+            self.tmp_dir = None
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -309,6 +339,26 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
+    def hasOpenMPI(self):
+        """ return whether we have openmpi for execution
+
+        The hacky way to do this is look for "ompi_info" (which only comes
+        with openmpi), and then if it does exist make sure that "mpiexec" is
+        in the same directory.
+
+        We could probably move this somewhere so that it's not called multiple
+        times, but I don't think that's a concern because the PATH should be
+        very hot in cache and it's nice to keep this method local to where
+        it's actually used.
+        """
+        which_ompi_info = shutil.which('ompi_info')
+        if which_ompi_info is None: # no ompi_info
+            return False
+        which_mpiexec = shutil.which('mpiexec')
+        if which_mpiexec is None: # no mpiexec
+            return False
+        return Path(which_mpiexec).parent.absolute() == Path(which_ompi_info).parent.absolute()
+
     def spawnSubprocessFromOptions(self, timer, options):
         """
         Spawns a subprocess based on given options, sets output and error files,
@@ -337,16 +387,26 @@ class Tester(MooseObject):
             f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
             e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
 
-            # On Windows, there is an issue with path translation when the command is passed in
-            # as a list.
-            # shell is set to False to avoid getting wrong PID to parent sh
-            # process on some systems instead of to child MOOSE app process
+            popen_args = [cmd]
+            popen_kwargs = {'stdout': f,
+                            'stderr': e,
+                            'close_fds': False,
+                            'shell': use_shell,
+                            'cwd': cwd}
+            # On Windows, there is an issue with path translation when the command
+            # is passed in as a list.
             if platform.system() == "Windows":
-                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=use_shell, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+                popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
             else:
-                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=use_shell, preexec_fn=os.setsid, cwd=cwd)
+                popen_kwargs['preexec_fn'] = os.setsid
+
+            # Set this for OpenMPI so that we don't clobber state
+            if self.hasOpenMPI():
+                popen_env = os.environ.copy()
+                popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
+                popen_kwargs['env'] = popen_env
+
+            process = subprocess.Popen(*popen_args, **popen_kwargs)
         except:
             print("Error in launching a new task", cmd)
             raise
@@ -407,6 +467,9 @@ class Tester(MooseObject):
                     os.killpg(pgid, SIGTERM)
             except OSError: # Process already terminated
                 pass
+
+        # Try to clean up anything else that we can
+        self.cleanup()
 
     def run(self, timer, options):
         """
