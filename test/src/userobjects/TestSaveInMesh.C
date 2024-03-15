@@ -28,7 +28,7 @@ TestSaveInMesh::validParams()
   params.addParam<std::string>(
       "mesh_unique",
       std::string(),
-      "Test whether or not throw out an error when the saved mesh mesh has already been retreived");
+      "Test whether or not throw out an error when the saved mesh mesh has already been retrieved");
   return params;
 }
 

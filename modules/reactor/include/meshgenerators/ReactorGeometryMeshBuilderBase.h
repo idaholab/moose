@@ -53,6 +53,9 @@ static const std::string duct_region_ids = "duct_region_ids";
 static const std::string duct_block_names = "duct_block_names";
 static const std::string peripheral_ring_region_id = "peripheral_ring_region_id";
 
+// Name of a boolean metadata that indicates whether or not we skipped mesh generation in favor of
+// only generating the mesh metadata
+static const std::string bypass_meshgen = "bypass_meshgen";
 }
 
 /**
@@ -66,6 +69,8 @@ public:
   static void addDepletionIDParams(InputParameters & parameters);
 
   ReactorGeometryMeshBuilderBase(const InputParameters & parameters);
+
+  void generateData() override{};
 
 protected:
   /**
