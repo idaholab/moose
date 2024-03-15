@@ -178,7 +178,8 @@ generators. When this is set, all parents of the generator described in the para
 generate only by calling `generateData()`, and not `generate()`. Thus, they will simply
 generate metadata and not an actual mesh. The generator that is set in
 [!param](/Mesh/MeshGeneratorMesh/data_driven_generator) will call `generate()`, and all
-other dependents will as well.
+other dependents will as well. All sub-generators of a generator that is ran in
+data-only mode will also be ran in data-only mode.
 
 Note that all generators that have this method enabled will always call `generateData()`
 during generation, and will only call `generate()` afterwards if they are not the parent

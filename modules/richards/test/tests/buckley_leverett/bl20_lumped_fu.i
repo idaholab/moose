@@ -230,11 +230,11 @@
 [Outputs]
   file_base = bl20_lumped_fu
   execute_on = 'initial timestep_end final'
-  interval = 100000
+  time_step_interval = 100000
   exodus = true
   hide = pgas
   [./console_out]
     type = Console
-    interval = 1
+    time_step_interval = 1
   [../]
 []

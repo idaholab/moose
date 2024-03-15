@@ -11,7 +11,7 @@
     cli_args = "Executioner/num_steps=1
                 Trainers/nn_trainer/update_frequency=1
                 Trainers/nn_trainer/num_epochs=100
-                Outputs/interval=1
+                Outputs/time_step_interval=1
                 Outputs/file_base='train_out'"
   []
 []

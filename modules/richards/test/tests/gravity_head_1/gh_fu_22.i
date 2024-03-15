@@ -129,6 +129,6 @@
 [Outputs]
   file_base = gh_fu_22
   execute_on = 'timestep_end final'
-  interval = 10000
+  time_step_interval = 10000
   exodus = true
 []

@@ -239,6 +239,6 @@
 [Outputs]
   file_base = bh27
   execute_on = 'initial timestep_end final'
-  interval = 1000000
+  time_step_interval = 1000000
   exodus = true
 []

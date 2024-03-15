@@ -121,6 +121,6 @@
 
 [Outputs]
   file_base = step_out
-  interval = 1
+  time_step_interval = 1
   exodus = true
 []

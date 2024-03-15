@@ -130,6 +130,6 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = ignore_bad
-  interval = 2
+  time_step_interval = 2
   exodus = true
 []

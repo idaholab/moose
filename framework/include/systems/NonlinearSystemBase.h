@@ -83,7 +83,7 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve() = 0;
+  virtual void stopSolve(const ExecFlagType & exec_flag) = 0;
 
   virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 
@@ -309,8 +309,9 @@ public:
 
   /**
    * Method used to obtain scaling factors for variables
+   * @returns whether this method ran without exceptions
    */
-  void computeScaling();
+  bool computeScaling();
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
@@ -780,6 +781,17 @@ protected:
                       const BoundaryID secondary_boundary,
                       const PenetrationInfo & info,
                       const bool displaced);
+
+  /**
+   * Perform some steps to get ready for the solver. These include
+   * - zeroing iteration counters
+   * - setting initial solutions
+   * - possibly performing automatic scaling
+   * - forming a scaling vector which, at least at some point, was required when AD objects were
+   *   used with non-unity scaling factors for nonlinear variables
+   * @returns Whether any exceptions were raised while running this method
+   */
+  bool preSolve();
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

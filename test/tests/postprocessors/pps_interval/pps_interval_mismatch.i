@@ -128,10 +128,10 @@
 []
 
 [Outputs]
-  interval = 4
+  time_step_interval = 4
   exodus = true
   [./console]
     type = Console
-    interval = 3
+    time_step_interval = 3
   [../]
 []

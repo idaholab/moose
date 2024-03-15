@@ -262,11 +262,11 @@
   [console]
     type = Console
     execute_on = 'nonlinear linear'
-    interval = 30
+    time_step_interval = 30
   []
   [csv]
     type = CSV
     execute_on = 'timestep_end'
-    interval = 3
+    time_step_interval = 3
   []
 []

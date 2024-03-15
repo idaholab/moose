@@ -29,7 +29,7 @@
 #include "libmesh/int_range.h"
 
 // BOOST include
-#include "bitmask_operators.h"
+#include "boost/bitmask_operators.h"
 
 #include "libmesh/ignore_warnings.h"
 #include "Eigen/Core"

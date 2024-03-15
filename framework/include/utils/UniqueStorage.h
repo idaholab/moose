@@ -83,7 +83,7 @@ public:
    * Note that the underlying data may not necessarily be initialized,
    * in which case this will throw an assertion or dereference a nullptr.
    *
-   * You can check whether or not the underlying data is intialized
+   * You can check whether or not the underlying data is initialized
    * with hasValue(i).
    */
   ///@{

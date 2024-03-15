@@ -1,0 +1,22 @@
+[Tests]
+  design = 'source/utils/Logger.md'
+  issues = '#19747 #27064'
+
+  [warnings]
+    type = RunApp
+    input = 'test.i'
+    cli_args = "Components/componentA/log_errors=false Components/componentB/log_errors=false"
+    expect_out = "componentA: warning 1.*componentA: warning 2.*componentB: warning 1.*componentB: warning 2"
+    allow_test_objects = true
+    allow_warnings = true # Testing that warnings are emitted
+    requirement = 'The system shall be able to output warnings in a batch.'
+  []
+  [errors]
+    type = RunException
+    input = 'test.i'
+    expect_err = "componentB: warning 2.*componentA: error 1.*componentA: error 2.*componentB: error 1.*componentB: error 2"
+    allow_test_objects = true
+    allow_warnings = true # Testing that warnings are emitted
+    requirement = 'The system shall be able to output errors in a batch.'
+  []
+[]

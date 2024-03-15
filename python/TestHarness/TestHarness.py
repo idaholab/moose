@@ -560,9 +560,7 @@ class TestHarness:
                 # Part 1:
                 part1_params = part1.parameters()
                 part1_params['test_name'] += '_part1'
-                part1_params['cli_args'].append('--half-transient')
-                if self.options.recoversuffix == 'cpr':
-                    part1_params['cli_args'].append('Outputs/checkpoint=true')
+                part1_params['cli_args'].append('--test-checkpoint-half-transient')
                 if self.options.recoversuffix == 'cpa':
                     part1_params['cli_args'].append('Outputs/out/type=Checkpoint')
                     part1_params['cli_args'].append('Outputs/out/binary=false')

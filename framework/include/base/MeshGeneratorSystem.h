@@ -160,6 +160,14 @@ public:
    */
   bool hasDataDrivenAllowed() const;
 
+  /**
+   * Reports an error with the context of the data driven parameter, coming from the generator
+   * \p generator with message \p message.
+   *
+   * Should be used to throw errors from within a MeshGenerator with more context.
+   */
+  void dataDrivenError(const MeshGenerator & generator, const std::string & message) const;
+
 private:
   /**
    * Gets the MeshGeneratorNames that are referenced in an object's parameters.
@@ -197,6 +205,11 @@ private:
     return const_cast<MeshGenerator &>(std::as_const(*this).getMeshGenerator(name));
   }
 
+  /**
+   * @return The data driven generator name (can only be called when set)
+   */
+  const std::string & getDataDrivenGeneratorName() const;
+
   /// The MooseApp that owns this system
   MooseApp & _app;
 
@@ -218,6 +231,9 @@ private:
 
   /// Holds the map of save in mesh -> name
   std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
+
+  /// The name of the data driven generator, if any
+  std::optional<std::string> _data_driven_generator_name;
 
   /// Whether any of the mesh generators are a \p BreakMeshByBlockGenerator
   bool _has_bmbb;

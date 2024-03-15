@@ -28,7 +28,7 @@ public:
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override { return NULL; }
   virtual void solve() override {}
-  virtual void stopSolve() override {}
+  virtual void stopSolve(const ExecFlagType &) override {}
   virtual bool converged() override { return true; }
   virtual NumericVector<Number> & RHS() override { return *_dummy; }
   virtual SNES getSNES() override { return nullptr; }

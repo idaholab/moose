@@ -252,7 +252,7 @@
 [Outputs]
   perf_graph = true
   print_linear_residuals = false
-  interval = 1
+  time_step_interval = 1
   execute_on = 'initial timestep_end'
   [console]
     type = Console

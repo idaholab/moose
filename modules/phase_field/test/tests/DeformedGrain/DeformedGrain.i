@@ -114,7 +114,7 @@
 
 [Outputs]
   exodus = true
-  interval = 1
+  time_step_interval = 1
   show = bnds
   perf_graph = true
 []

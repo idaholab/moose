@@ -138,7 +138,7 @@
     [creep_ramp_sub_true_exception]
       type = 'RunApp'
       input = creep_ramp_sub_true.i
-      expect_out = 'The number of substeps computed exceeds the maximum_number_substeps'
+      expect_out = "The number of substeps computed exceeds 'maximum_number_substeps'"
       cli_args = 'Materials/rom_stress_prediction/substep_strain_tolerance=5.0e-6'
       allow_test_objects = true
       allow_warnings = true

@@ -60,7 +60,7 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = out_tio
-  interval = 3
+  time_step_interval = 3
   [./exodus]
     type = Exodus
     execute_on = 'final timestep_end'

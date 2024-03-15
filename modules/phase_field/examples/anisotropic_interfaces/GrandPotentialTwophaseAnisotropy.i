@@ -308,6 +308,6 @@
 []
 
 [Outputs]
-  interval = 10
+  time_step_interval = 10
   exodus = true
 []

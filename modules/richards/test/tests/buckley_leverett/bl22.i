@@ -231,7 +231,7 @@
   print_nonlinear_converged_reason = false
   [./exodus]
     type = Exodus
-    interval = 100000
+    time_step_interval = 100000
     hide = pgas
     execute_on = 'initial final timestep_end'
   [../]

@@ -49,9 +49,6 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
   HeatConductionModel::_fe_type =
       second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
-
-  if (Moose::_warnings_are_errors)
-    _log.setWarningsAsErrors();
 }
 
 Simulation::~Simulation()
@@ -826,27 +823,8 @@ Simulation::integrityCheck() const
   for (auto && comp : _components)
     comp->executeCheck();
 
-  if (_log.getNumberOfErrors() > 0)
-  {
-    if (processor_id() == 0)
-    {
-      Moose::err << COLOR_RED
-                 << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
-                 << std::endl
-                 << std::endl;
-      _log.print();
-      Moose::err << std::endl;
-    }
-
-    MPI_Finalize();
-    exit(1);
-  }
-
-  if ((_log.getNumberOfWarnings() > 0) && (processor_id() == 0))
-  {
-    _log.print();
-    Moose::err << std::endl;
-  }
+  _log.emitLoggedWarnings();
+  _log.emitLoggedErrors();
 }
 
 void
@@ -864,16 +842,7 @@ Simulation::controlDataIntegrityCheck()
                "' was requested, but was not declared by any active control object.");
   }
 
-  if (_log.getNumberOfErrors() > 0)
-  {
-    Moose::err << COLOR_RED
-               << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
-               << std::endl
-               << std::endl;
-    _log.print();
-    Moose::err << std::endl;
-    MOOSE_ABORT;
-  }
+  _log.emitLoggedErrors();
 
   auto & ctrl_wh = _fe_problem.getControlWarehouse()[EXEC_TIMESTEP_BEGIN];
 

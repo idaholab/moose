@@ -61,7 +61,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     installation_type = in_tree
     input = 'bio_death.i'
     csvdiff = 'bio_death_out.csv'
-    cli_args = 'Executioner/dt=2 Outputs/interval=1'
+    cli_args = 'Executioner/dt=2 Outputs/time_step_interval=1'
     requirement = "The geochemistry module shall be able to solve mortality of microbes using a constant-rate model"
     issues = '#21559'
     design = 'biogeochemistry.md bio_death.md'

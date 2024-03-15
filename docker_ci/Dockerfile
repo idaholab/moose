@@ -136,7 +136,7 @@ if [ ! -d $LIBMESH_DIR/include/libmesh ]; then exit 1; fi
 #-----------------------------------------------------------------------------#
 # Install wasp to system path
 #-----------------------------------------------------------------------------#
-ARG WASP_REV=f16be318812fa6b26cbf376694cf2c2beec4038d
+ARG WASP_REV=7452f1b4263a9ebe59f336502bfdaef21e5931f3
 ENV WASP_DIR=/usr/local/wasp
 
 COPY scripts/update_and_rebuild_wasp.sh ${MOOSE_DIR}/scripts/update_and_rebuild_wasp.sh

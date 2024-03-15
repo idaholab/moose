@@ -106,7 +106,7 @@
   # Define output file(s)
 
   file_base = heat_out
-  interval = 1
+  time_step_interval = 1
   execute_on = timestep_end
   exodus = true
   [./console]

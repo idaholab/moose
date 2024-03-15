@@ -88,7 +88,7 @@ OversampleOutput::outputStep(const ExecFlagType & type)
     return;
 
   // store current simulation time
-  _last_output_time = _time;
+  _last_output_simulation_time = _time;
 
   // set current type
   _current_execute_flag = type;

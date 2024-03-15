@@ -172,7 +172,7 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
   // specific system tags that we need for this instance
   _nl_eigen->disassociateDefaultMatrixTags();
 
-  // Clear FE tags and first add the specific tag assoicated with the Jacobian
+  // Clear FE tags and first add the specific tag associated with the Jacobian
   _fe_matrix_tags.clear();
   _fe_matrix_tags.insert(tag);
 
@@ -256,7 +256,7 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
   // specific system tags that we need for this instance
   _nl_eigen->disassociateDefaultMatrixTags();
 
-  // Clear FE tags and first add the specific tags assoicated with the Jacobian
+  // Clear FE tags and first add the specific tags associated with the Jacobian
   _fe_matrix_tags.clear();
   _fe_matrix_tags.insert(tagA);
   _fe_matrix_tags.insert(tagB);
@@ -625,7 +625,10 @@ EigenProblem::init()
 bool
 EigenProblem::nlConverged(unsigned int)
 {
-  return _nl_eigen->converged();
+  if (_solve)
+    return _nl_eigen->converged();
+  else
+    return true;
 }
 
 bool

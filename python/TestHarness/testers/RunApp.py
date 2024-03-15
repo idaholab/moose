@@ -26,7 +26,6 @@ class RunApp(Tester):
         params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
         params.addParam('executable_pattern', "A test that only runs if the executable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
-        params.addParam('delete_output_folders', True, "Delete output folders before running")
         params.addParam('custom_evaluation_script', False, "A .py file containing a custom function for evaluating a test's success. For syntax, please check https://mooseframework.inl.gov/python/TestHarness.html")
 
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
@@ -208,7 +207,7 @@ class RunApp(Tester):
             command = command + ' --n-threads=' + str(nthreads)
 
         if self.force_mpi or options.parallel or ncpus > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + command
+            command = f'{self.mpi_command} -n {ncpus} {command}'
 
         return command
 

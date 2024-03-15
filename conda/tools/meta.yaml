@@ -6,7 +6,7 @@
 #   framework/doc/packages_config.yml
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.12.20" %}
+{% set version = "2024.03.07" %}
 
 package:
   name: moose-tools
@@ -27,7 +27,7 @@ requirements:
     - setuptools
   host:
     # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a # [osx]
+    - openssl <3.1.5 # [osx]
   run:
     - beautifulsoup4
     - {{ clang_format }}
@@ -46,6 +46,7 @@ requirements:
     - packaging
     - pandas
     - psycopg2
+    - pyarrow
     - pybtex
     - pycobertura
     - pyflakes
@@ -79,6 +80,7 @@ test:
     - numpy
     - pandas
     - psycopg2
+    - pyarrow
     - pybtex
     - pycobertura
     - pyflakes

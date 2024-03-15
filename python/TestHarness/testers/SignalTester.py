@@ -8,9 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunApp import RunApp
-import os, signal,time, platform, subprocess, copy
-from TestHarness import util
-from tempfile import SpooledTemporaryFile
+import os, signal,time
 
 
 # Classes that derive from this class are expected to write
@@ -21,39 +19,50 @@ class SignalTester(RunApp):
     def validParams():
         params = RunApp.validParams()
         params.addParam('signal', "SIGUSR1", "The signal to send to the app. Defaults to SIGUSR1")
-        params.addParam('sleep_time', 1, "The amount of time the tester should wait before sending a signal.")
         return params
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-    def send_signal(self,pid):
+        valid_signals = {}
+        for sig in signal.valid_signals():
+            try:
+                valid_signals[sig.name] = sig
+            # Skip int signals that don't have names.
+            except AttributeError:
+                continue
+        try:
+            self.signal = valid_signals[self.specs["signal"]]
+        except KeyError as e:
+            print(f"Error with parameter 'signal': {self.specs['signal']} is not "
+                  f"a supported signal type. Currently supported signal types are:\n{', '.join(list(valid_signals.keys()))}")
+            raise e
+
+    def send_signal(self):
         """Function used to send a signal to the program automatically for testing purposes."""
 
-        #Create a while loop that checks if the stdout buffer has any data in it, and then sends the signal once
-        #it knows that the moose_test binary is actually doing something.
+        # Create a while loop that checks if the stdout buffer has any data in it, and then sends the signal once
+        # it knows that the moose_test binary is actually doing something.
 
-        #process.poll() will return None if the process is running in the OS.
-        #This acts as a safety precaution against an infinite loop -- this will always close.
-        while(self.process.poll() == None):
+        # process.poll() returns the process's exit code if it has completed, and None if it is still running.
+        # This acts as a safety precaution against an infinite loop -- this will always close.
+        while self.process.poll() is None:
 
-            #first, make a true duplicate of the stdout file so we don't mess with the seek on the actual file
-            out_dupe = copy.copy(self.outfile)
-            #go to the beginning of the file and see if its actually started running the binary
-            out_dupe.seek(0)
-            output = out_dupe.read()
-
-            #if the output is blank, the moose_test binary hasn't actually started doing anything yet.
-            #if so, sleep briefly and check again.
-            if not output:
+            # tell() gives the current position in the file. If it is greater than zero, the binary
+            # has started running and writing output.
+            # if the output is blank, the moose_test binary hasn't actually started doing anything yet.
+            # if so, sleep briefly and check again.
+            if not self.outfile.tell():
                 time.sleep(0.05)
-                continue
 
-            #if the output isn't blank, then we actually sleep for the time specified in sleep_time
-            #then we finally send the SIGUSR1 and exit the loop
-            time.sleep(self.specs['sleep_time'])
-            os.kill(pid,signal.SIGUSR1)
-            break
+            # if the output isn't blank, then we finally send the signal and exit the loop
+            else:
+                try:
+                    os.kill(self.process.pid, self.signal)
+                    break
+                except ProcessLookupError as e:
+                    print("Unable to send signal to process. Has it already terminated?")
+                    raise e
 
     def runCommand(self, timer, options):
         """
@@ -67,5 +76,5 @@ class SignalTester(RunApp):
         if exit_code: # Something went wrong
             return
 
-        self.send_signal(self.process.pid)
+        self.send_signal()
         super().finishAndCleanupSubprocess(timer)

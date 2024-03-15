@@ -175,6 +175,6 @@
 
 [Outputs]
   file_base = bl01_adapt
-  interval = 10000
+  time_step_interval = 10000
   exodus = true
 []

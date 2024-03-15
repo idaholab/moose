@@ -32,12 +32,17 @@ RayTracingMeshOutput::validParams()
   params.addRequiredParam<UserObjectName>("study", "The RayTracingStudy to get the segments from");
 
   params.addParam<bool>("output_data", false, "Whether or not to also output the Ray's data");
-  params.addParam<bool>(
-      "output_aux_data", false, "Whether or not to also output the Ray's aux data");
+  params.addParam<std::vector<std::string>>("output_data_names",
+                                            "The names of specific data to output");
   params.addParam<bool>("output_data_nodal",
                         false,
                         "Whether or not to output the Ray's data in a nodal sense, in which the "
                         "data is interpolated linearly across segments");
+
+  params.addParam<bool>(
+      "output_aux_data", false, "Whether or not to also output the Ray's aux data");
+  params.addParam<std::vector<std::string>>("output_aux_data_names",
+                                            "The names of specific aux data to output");
 
   MultiMooseEnum props("ray_id intersections pid processor_crossings trajectory_changes",
                        "ray_id intersections");
@@ -51,34 +56,43 @@ RayTracingMeshOutput::RayTracingMeshOutput(const InputParameters & params)
     UserObjectInterface(this),
     _study(getUserObject<RayTracingStudy>("study")),
     _output_data(getParam<bool>("output_data")),
-    _output_aux_data(getParam<bool>("output_aux_data")),
+    _output_data_names(isParamValid("output_data_names")
+                           ? &getParam<std::vector<std::string>>("output_data_names")
+                           : nullptr),
     _output_data_nodal(getParam<bool>("output_data_nodal")),
+    _output_aux_data(getParam<bool>("output_aux_data")),
+    _output_aux_data_names(isParamValid("output_aux_data_names")
+                               ? &getParam<std::vector<std::string>>("output_aux_data_names")
+                               : nullptr),
     _ray_id_var(invalid_uint),
     _intersections_var(invalid_uint),
     _pid_var(invalid_uint),
     _processor_crossings_var(invalid_uint),
-    _trajectory_changes_var(invalid_uint),
-    _data_start_var(invalid_uint),
-    _aux_data_start_var(invalid_uint)
+    _trajectory_changes_var(invalid_uint)
 {
-  if (_output_data && !_study.dataOnCacheTraces())
+  if ((_output_data || _output_data_names) && !_study.dataOnCacheTraces())
     mooseError("In order to output Ray data in output '",
                name(),
                "', the RayTracingStudy '",
                _study.name(),
                "' must set data_on_cache_traces = true");
-  if (_output_aux_data && !_study.auxDataOnCacheTraces())
+  if ((_output_aux_data || _output_aux_data_names) && !_study.auxDataOnCacheTraces())
     mooseError("In order to output Ray aux data in output '",
                name(),
                "', the RayTracingStudy '",
                _study.name(),
                "' must set aux_data_on_cache_traces = true");
-  if (_output_data_nodal && _output_data)
+  if (_output_data_nodal && !_output_data && !_output_data_names)
     paramError("output_data_nodal",
-               "Cannot be used when output_data = true.\nEither choose output_data = true or "
-               "output_data_nodal = true, not both.");
+               "Cannot be used unless there is data to output; in addition set either "
+               "'output_data' or 'output_data_names");
   if (_output_data_nodal && !_study.segmentsOnCacheTraces())
     paramError("output_data_nodal", "Not supported when study segments_on_cache_traces = false");
+  if (_output_data && _output_data_names)
+    paramError("output_data", "Cannot be used in addition to 'output_data_names'; choose one");
+  if (_output_aux_data && _output_aux_data_names)
+    paramError("output_aux_data",
+               "Cannot be used in addition to 'output_aux_data_names'; choose one");
 }
 
 std::string
@@ -441,6 +455,8 @@ RayTracingMeshOutput::setupEquationSystem()
 
   _es = std::make_unique<EquationSystems>(*_segment_mesh);
   _sys = &_es->add_system<libMesh::ExplicitSystem>("sys");
+  _data_vars.clear();
+  _aux_data_vars.clear();
 
   // Add variables for the basic properties if enabled
   for (auto & prop : _pars.get<MultiMooseEnum>("output_properties"))
@@ -465,27 +481,46 @@ RayTracingMeshOutput::setupEquationSystem()
         mooseError("Invalid property");
     }
 
-  // Add variables for the primary Ray data
-  if ((_output_data || _output_data_nodal) && _study.hasRayData())
+  const auto get_data_vars = [this](const bool aux)
   {
-    const auto & names = _study.rayDataNames();
-    for (const auto & name : names)
-      if (_output_data_nodal)
-        _sys->add_variable(name, FIRST, LAGRANGE);
+    // The data index -> variable result
+    std::vector<std::pair<RayDataIndex, unsigned int>> vars;
+
+    const auto from_names =
+        aux ? (_output_aux_data ? &_study.rayAuxDataNames() : _output_aux_data_names)
+            : (_output_data ? &_study.rayDataNames() : _output_data_names);
+
+    // Nothing to output
+    if (!from_names)
+      return vars;
+
+    const auto output_data_nodal = aux ? false : _output_data_nodal;
+
+    for (const auto & name : *from_names)
+    {
+      const auto data_index =
+          aux ? _study.getRayAuxDataIndex(name, true) : _study.getRayDataIndex(name, true);
+      if (data_index == Ray::INVALID_RAY_DATA_INDEX)
+      {
+        const std::string names_param = aux ? "output_aux_data_names" : "output_data_names";
+        const std::string data_prefix = aux ? "aux " : "";
+        paramError(names_param, "The ray ", data_prefix, "data '", name, "' is not registered");
+      }
+
+      const std::string var_prefix = aux ? "aux_" : "";
+      if (output_data_nodal)
+        _sys->add_variable(var_prefix + name, FIRST, LAGRANGE);
       else
-        _sys->add_variable(name, CONSTANT, MONOMIAL);
-    _data_start_var = _sys->variable_number(names[0]);
-  }
+        _sys->add_variable(var_prefix + name, CONSTANT, MONOMIAL);
+      const auto var_num = _sys->variable_number(var_prefix + name);
+      vars.emplace_back(data_index, var_num);
+    }
 
-  // Add variables for the aux Ray data
-  if (_output_aux_data && _study.hasRayAuxData())
-  {
-    const auto & names = _study.rayAuxDataNames();
-    for (const auto & name : names)
-      _sys->add_variable("aux_" + name, CONSTANT, MONOMIAL);
+    return vars;
+  };
 
-    _aux_data_start_var = _sys->variable_number("aux_" + names[0]);
-  }
+  _data_vars = get_data_vars(false);
+  _aux_data_vars = get_data_vars(true);
 
   // All done
   _es->init();
@@ -510,12 +545,12 @@ RayTracingMeshOutput::fillFields()
     startingIDs(trace_data, node_id, elem_id);
 
     // With linear output data, set the first node's data
-    if (_output_data_nodal && _study.hasRayData())
+    if (_output_data_nodal && _data_vars.size())
     {
       const Node * node = _segment_mesh->node_ptr(node_id++);
-      for (unsigned int i = 0; i < _study.rayDataSize(); ++i)
-        solution->set(node->dof_number(sys_num, _data_start_var + i, 0),
-                      trace_data._point_data[0]._data[i]);
+      for (const auto & [data_index, var_num] : _data_vars)
+        solution->set(node->dof_number(sys_num, var_num, 0),
+                      trace_data._point_data[0]._data[data_index]);
     }
 
     // Set data for each segment
@@ -543,23 +578,22 @@ RayTracingMeshOutput::fillFields()
                       trace_data._trajectory_changes);
 
       // Fill the primary Ray data fields
-      if ((_output_data || _output_data_nodal) && _study.hasRayData())
+      if (_data_vars.size())
       {
         mooseAssert(point_data._data.size() == _study.rayDataSize(), "Size mismatch");
-        for (unsigned int i = 0; i < _study.rayDataSize(); ++i)
+        for (const auto & [i, var_num] : _data_vars)
           if (_output_data_nodal)
-            solution->set(node->dof_number(sys_num, _data_start_var + i, 0), point_data._data[i]);
+            solution->set(node->dof_number(sys_num, var_num, 0), point_data._data[i]);
           else
-            solution->set(elem->dof_number(sys_num, _data_start_var + i, 0), point_data._data[i]);
+            solution->set(elem->dof_number(sys_num, var_num, 0), point_data._data[i]);
       }
 
       // Fill the aux Ray data fields
-      if (_output_aux_data && _study.hasRayAuxData())
+      if (_aux_data_vars.size())
       {
         mooseAssert(point_data._aux_data.size() == _study.rayAuxDataSize(), "Size mismatch");
-        for (unsigned int i = 0; i < _study.rayAuxDataSize(); ++i)
-          solution->set(elem->dof_number(sys_num, _aux_data_start_var + i, 0),
-                        point_data._aux_data[i]);
+        for (const auto & [i, var_num] : _aux_data_vars)
+          solution->set(elem->dof_number(sys_num, var_num, 0), point_data._aux_data[i]);
       }
     }
   }

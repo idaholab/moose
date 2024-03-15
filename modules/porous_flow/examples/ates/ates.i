@@ -688,7 +688,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
   sync_times = ${synctimes}
   [ex]
     type = Exodus
-    interval = 20
+    time_step_interval = 20
   []
   [csv]
     type = CSV

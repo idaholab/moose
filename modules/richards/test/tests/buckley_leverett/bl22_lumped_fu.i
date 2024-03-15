@@ -229,7 +229,7 @@
   file_base = bl22_lumped_fu
   [./exodus]
     type = Exodus
-    interval = 100000
+    time_step_interval = 100000
     hide = 'pgas bounds_dummy'
     execute_on = 'initial final timestep_end'
   [../]

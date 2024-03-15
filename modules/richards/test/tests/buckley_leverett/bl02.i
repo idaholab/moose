@@ -147,6 +147,6 @@
 
 [Outputs]
   file_base = bl02
-  interval = 1000000
+  time_step_interval = 1000000
   exodus = true
 []

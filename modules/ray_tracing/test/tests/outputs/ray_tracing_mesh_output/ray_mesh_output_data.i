@@ -57,7 +57,6 @@
 []
 
 [Outputs]
-  exodus = true
   [rays]
     type = RayTracingExodus
     study = study
@@ -68,6 +67,7 @@
   [rays_nodal]
     type = RayTracingExodus
     study = study
+    output_data = true
     output_data_nodal = true
     execute_on = final
   []

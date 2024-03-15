@@ -164,6 +164,8 @@ class ApptainerGenerator:
                                  help='An alternate tag to push to')
         push_parser.add_argument('--to-tag-prefix', type=str,
                                  help='A prefix to add to the pushed tag')
+        push_parser.add_argument('--to-project-suffix', type=str,
+                                 help='A suffix to add to the project to push to')
 
         uri_parser = action_parser.add_parser('uri', parents=[parent],
                                               help='Get the URI to a container')
@@ -259,10 +261,12 @@ class ApptainerGenerator:
         ext = 'sif' if image else 'def'
         return os.path.join(self.dir, f'{name}_{tag}.{ext}')
 
-    def oras_uri(self, project: str, name: str, tag: str):
+    def oras_uri(self, project: str, name: str, tag: str, project_suffix = None):
         """
         Gets the ORAS URI for the given image
         """
+        if project_suffix is not None:
+            project = f'{project}-{project_suffix}'
         return f'oras://{self.args.oras_url}/{project}/{name}:{tag}'
 
     def apptainer_pull(self, project: str, name: str, tag: str, args=None):
@@ -751,7 +755,7 @@ class ApptainerGenerator:
         if not os.path.exists(container_path):
             self.error(f'Container {container_path} does not exist')
 
-        uri = self.oras_uri(self.project, self.name, to_tag)
+        uri = self.oras_uri(self.project, self.name, to_tag, project_suffix=self.args.to_project_suffix)
         if self.oras_exists(uri):
             if self.args.overwrite:
                 self.warn(f'Overwriting {uri}')

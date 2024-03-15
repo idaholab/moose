@@ -286,7 +286,7 @@
 [Outputs]
   file_base = gh16
   execute_on = 'timestep_end final'
-  interval = 100000
+  time_step_interval = 100000
   exodus = true
   csv = true
 []

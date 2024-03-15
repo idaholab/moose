@@ -22,10 +22,11 @@ public:
   AddMetaDataGenerator(const InputParameters & parameters);
 
   virtual std::unique_ptr<MeshBase> generate() override;
+  virtual void generateData() override;
 
 protected:
-  /// The input mesh to add the mesh metadata to
-  std::unique_ptr<MeshBase> & _input;
+  /// The input mesh to add the mesh metadata to (when not doing data-only)
+  std::unique_ptr<MeshBase> * _input;
   /// List of mesh metadata names for the Real type scalars
   const std::vector<std::string> _real_scalar_metadata_names;
   /// List of mesh metadata values for the Real type scalars

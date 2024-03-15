@@ -111,6 +111,6 @@
 []
 
 [Outputs]
-  interval = 3
+  time_step_interval = 3
   execute_on = 'initial timestep_end final'
 []

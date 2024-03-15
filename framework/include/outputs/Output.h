@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <chrono>
+
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
@@ -165,6 +167,14 @@ protected:
    */
   virtual bool onInterval();
 
+  /**
+   * Function to set the wall time interval based on value of command line parameter (used for
+   * testing only).
+   * @param cli_param_name The name of the command line parameter to set the wall time interval to
+   *
+   */
+  void setWallTimeIntervalFromCommandLineParam();
+
   /// Pointer the the FEProblemBase object for output object (use this)
   FEProblemBase * _problem_ptr;
 
@@ -212,11 +222,20 @@ protected:
   /// The number of outputs written
   unsigned int _num;
 
+  /// Whether time step interval is set by AddParam
+  const bool _time_step_interval_set_by_addparam;
+
   /// The output time step interval
-  const unsigned int _interval;
+  unsigned int _time_step_interval;
 
   /// Minimum simulation time between outputs
-  const Real _minimum_time_interval;
+  const Real _min_simulation_time_interval;
+
+  /// Target simulation time between outputs
+  const Real _simulation_time_interval;
+
+  /// Target wall time between outputs in seconds
+  Real _wall_time_interval;
 
   /// Sync times for this outputter
   std::set<Real> _sync_times;
@@ -255,7 +274,13 @@ protected:
   OutputOnWarehouse _advanced_execute_on;
 
   /// last simulation time an output has occured
-  Real & _last_output_time;
+  Real & _last_output_simulation_time;
+
+  /// last wall time an output has occured
+  std::chrono::time_point<std::chrono::steady_clock> _last_output_wall_time;
+
+  /// time in seconds since last output
+  Real _wall_time_since_last_output;
 
   friend class OutputWarehouse;
 };

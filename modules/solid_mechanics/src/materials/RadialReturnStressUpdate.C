@@ -336,8 +336,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
   }
 
   if (total_number_substeps > _maximum_number_substeps)
-    mooseException("The number of substeps computed exceeds the maximum_number_substeps. The "
-                   "system time step will be cut.");
+    mooseException("The number of substeps computed exceeds 'maximum_number_substeps'.");
 
   // cut the original timestep
   _dt = _dt_original / total_number_substeps;

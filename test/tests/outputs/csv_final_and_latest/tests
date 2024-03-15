@@ -6,7 +6,7 @@
     input = final.i
     csvdiff = final_out_line_sample_FINAL.csv
     requirement = "The CSV output object shall create a symlink to the final output with "
-                  "with a '_FINAL' suffix for VectorPostprocessor data when there are execute flags "
+                  "a '_FINAL' suffix for VectorPostprocessor data when there are execute flags "
                   "in addition to FINAL."
   []
   [final_only]
@@ -16,7 +16,7 @@
     check_not_exists = 'final_out_line_sample_0009.csv'
     check_files = 'final_out_line_sample_0011.csv final_out_line_sample_FINAL.csv'
     requirement = "The CSV output object shall create a symlink to the final output with "
-                  "with a '_FINAL' suffix for VectorPostprocessor data when the execute flag is "
+                  "a '_FINAL' suffix for VectorPostprocessor data when the execute flag is "
                   "set to FINAL."
     prereq = final
   []
@@ -35,7 +35,7 @@
     input = latest.i
     csvdiff = latest_out_line_sample_LATEST.csv
     requirement = "The CSV output object shall create a symlink to the most recent output with "
-                  "with a '_LATEST' suffix for VectorPostprocessor data."
+                  "a '_LATEST' suffix for VectorPostprocessor data."
   []
   [no_latest]
     type = CheckFiles

@@ -5,6 +5,10 @@
   ny = 2
 []
 
+[Problem]
+  regard_general_exceptions_as_errors = true
+[]
+
 [Variables]
   [./u]
     order = FIRST

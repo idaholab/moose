@@ -398,7 +398,7 @@
   execute_on = 'timestep_end'
   file_base = mandel
   [csv]
-    interval = 3
+    time_step_interval = 3
     type = CSV
   []
 []

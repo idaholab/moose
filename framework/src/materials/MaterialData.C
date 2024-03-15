@@ -104,3 +104,9 @@ MaterialData::castRequestorToDeclarer(const MooseObject & requestor) const
   mooseAssert(declarer, "Not a MaterialBase");
   return *declarer;
 }
+
+unsigned int
+MaterialData::getMaxStateRequested(const unsigned int prop_id) const
+{
+  return _storage.getPropRecord(prop_id).state;
+}

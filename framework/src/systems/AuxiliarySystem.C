@@ -739,13 +739,17 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
                 _fe_problem, mortar_nodal_warehouse, bnd_id, index);
             Threads::parallel_reduce(bnd_nodes, mnabt);
           }
-          catch (MooseException & e)
-          {
-            _fe_problem.setException(e.what());
-          }
           catch (libMesh::LogicError & e)
           {
-            _fe_problem.setException("We caught a libMesh::LogicError:" + std::string(e.what()));
+            _fe_problem.setException("The following libMesh::LogicError was raised during mortar "
+                                     "nodal Auxiliary variable computation:\n" +
+                                     std::string(e.what()));
+          }
+          catch (MooseException & e)
+          {
+            _fe_problem.setException("The following MooseException was raised during mortar nodal "
+                                     "Auxiliary variable computation:\n" +
+                                     std::string(e.what()));
           }
           catch (MetaPhysicL::LogicError & e)
           {
@@ -844,7 +848,9 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
       }
       catch (MooseException & e)
       {
-        _fe_problem.setException(e.what());
+        _fe_problem.setException("The following MooseException was raised during elemental "
+                                 "Auxiliary variable computation:\n" +
+                                 std::string(e.what()));
       }
     }
     PARALLEL_CATCH;
@@ -870,7 +876,9 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
       }
       catch (MooseException & e)
       {
-        _fe_problem.setException(e.what());
+        _fe_problem.setException("The following MooseException was raised during boundary "
+                                 "elemental Auxiliary variable computation:\n" +
+                                 std::string(e.what()));
       }
     }
     PARALLEL_CATCH;

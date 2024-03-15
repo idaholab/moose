@@ -566,7 +566,7 @@
 
 [Outputs]
   file_base = cosserat_elastic
-  interval = 1
+  time_step_interval = 1
   print_linear_residuals = false
   exodus = true
   csv = true

@@ -129,10 +129,10 @@
 [Outputs]
   file_base = gh23
   execute_on = 'timestep_end final'
-  interval = 10000
+  time_step_interval = 10000
   exodus = true
   [./console]
-    interval = 1
+    time_step_interval = 1
     type = Console
   [../]
 []

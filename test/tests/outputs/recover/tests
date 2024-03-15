@@ -8,7 +8,6 @@
                   'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/header '
                   'test_recover_dir_cp/0005-restart-0.rd/data '
                   'test_recover_dir_cp/0005-restart-0.rd/header'
-    delete_output_folders = false
     cli_args = 'Executioner/num_steps=5'
 
     requirement = 'Correctly set up initial recover files for the part2 test.'
@@ -22,7 +21,6 @@
     cli_args = '--recover test_recover_dir_cp/0005'
     prereq = 'part1'
     delete_output_before_running = false
-    delete_output_folders = false
     recover = false
 
     requirement = 'A simulation executed using the "--recover" flag successfully runs a simulation using the specified recover file argument.'
@@ -51,7 +49,6 @@
     cli_args = '--recover test_recover_dir_cp/LATEST'
     prereq = 'part1_latest'
     delete_output_before_running = false
-    delete_output_folders = false
     recover = false
 
     requirement = 'A simulation executed using the "--recover" flag with a file argument using the placeholder "LATEST" successfully runs a simulation using most recent checkpoint/recover file from the specified directory.'
