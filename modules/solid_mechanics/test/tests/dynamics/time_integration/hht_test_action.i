@@ -33,6 +33,7 @@
   ymax = 1.0
   zmin = 0.0
   zmax = 0.1
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

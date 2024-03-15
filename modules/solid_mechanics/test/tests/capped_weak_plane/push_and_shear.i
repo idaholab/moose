@@ -52,6 +52,7 @@
     top_right = '1 1500 -95'
     input = generated_mesh
   []
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

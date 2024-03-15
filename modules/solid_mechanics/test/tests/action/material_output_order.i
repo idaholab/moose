@@ -22,6 +22,7 @@
     top_sideset = 'top'
     num_layers = 5
   []
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

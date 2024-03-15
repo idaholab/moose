@@ -4,6 +4,7 @@
 
 [Mesh]
   file = square_xz_plane.e
+  use_displaced_mesh = false
 []
 
 [Variables]

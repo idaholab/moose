@@ -8,7 +8,8 @@
     abs_zero = 1e-6
     requirement = "Action produces identical results for small deformations/without stabilization in "
                   "axisymmetric RZ coordinates"
-    cli_args = "Outputs/file_base=small_unstabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
+    cli_args = "Mesh/use_displaced_mesh=false "
+               "Outputs/file_base=small_unstabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
                "Materials/compute_stress/large_kinematics=false"
   []

@@ -18,6 +18,7 @@
     new_boundary = 100
     input = generated_mesh
   []
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

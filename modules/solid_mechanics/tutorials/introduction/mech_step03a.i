@@ -39,6 +39,7 @@
     new_boundary = pin
     coord = '0 0 0'
   []
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

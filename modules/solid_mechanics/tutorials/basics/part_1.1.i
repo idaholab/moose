@@ -8,6 +8,7 @@
 
 [Mesh]
   file = necking_quad4.e
+  use_displaced_mesh = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]

@@ -10,6 +10,7 @@
     ny = 4
     nz = 4
   [../]
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

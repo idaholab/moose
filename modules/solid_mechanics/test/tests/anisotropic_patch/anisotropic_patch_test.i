@@ -28,6 +28,7 @@
 
 [Mesh]#Comment
   file = anisotropic_patch_test.e
+  use_displaced_mesh = false
 [] # Mesh
 
 [Functions]

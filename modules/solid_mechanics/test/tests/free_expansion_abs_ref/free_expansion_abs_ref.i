@@ -28,6 +28,7 @@
     new_boundary = 'lower_right'
     coord = '1 0'
   []
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

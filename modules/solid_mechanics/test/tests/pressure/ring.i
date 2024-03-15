@@ -10,7 +10,7 @@
   [MeshGenerator]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 1 #10
+    nx = 1
     ny = 1
     xmin = 1.0
     xmax = 1.1
@@ -27,6 +27,7 @@
     transform = rotate
     vector_value = '-20 0 0'
   []
+  use_displaced_mesh = false
 []
 
 [Problem]
@@ -70,13 +71,6 @@
       function = pressure
     []
   []
-  # [pull_x]
-  #   type = DirichletBC
-  #   variable = disp_x
-  #   boundary = left
-  #   value = 1e-5
-  #   preset = false
-  # []
 []
 
 [Materials]
@@ -85,9 +79,6 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
   []
-#  [strain]
-#    type = ComputeSmallStrain
-#  []
   [stress]
     type = ComputeLinearElasticStress
   []

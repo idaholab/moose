@@ -18,6 +18,7 @@
 
 [Mesh]
   file = 'blocks.e'
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

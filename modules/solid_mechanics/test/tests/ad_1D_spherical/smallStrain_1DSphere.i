@@ -22,6 +22,7 @@
   xmin = 0
   xmax = 4
   nx = 4
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

@@ -11,6 +11,7 @@
     xmax = 2
     ymax = 1
   []
+  use_displaced_mesh = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]

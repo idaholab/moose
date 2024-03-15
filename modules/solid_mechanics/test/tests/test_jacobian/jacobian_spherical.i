@@ -10,6 +10,7 @@
     xmin = 1
     xmax = 2
   []
+  use_displaced_mesh = false
 []
 
 [Problem]

@@ -14,6 +14,7 @@
     exodiff = 'two_block_out.e'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/block1/block=1'
     requirement = 'The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks requesting different strain formulations.'
+    allow_warnings = true
   [../]
 
   [./error_unrestricted]
@@ -21,7 +22,8 @@
     input = 'two_block.i'
     expect_err = 'No SolidMechanics/QuasiStatic action can be block unrestricted if more than one SolidMechanics/QuasiStatic action is specified.'
     prereq = 'two_block'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file does not specify block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
+    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file does not specify block restrictions for the QuasiStatic Physics in input files with more than one instance of the QuasiStatic block.'
+    allow_warnings = true
   [../]
 
   [./error_overlapping]
@@ -30,7 +32,8 @@
     cli_args = 'Physics/SolidMechanics/QuasiStatic/block1/block=2'
     expect_err = 'The block restrictions in the SolidMechanics/QuasiStatic actions must be non-overlapping.'
     prereq = 'error_unrestricted'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file specifies overlapping block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
+    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file specifies overlapping block restrictions for the Quasistatic Physics in input files with more than one instance of the QusaiStatic block.'
+    allow_warnings = true
   [../]
 
   [./two_coord]
@@ -58,6 +61,7 @@
     difference_tol = 1e4
     cli_args = 'Physics/SolidMechanics/QuasiStatic/block1/block=1'
     requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect'
+    allow_warnings = true
   [../]
   [./two_block_no_action-jac]
     type = 'PetscJacobianTester'

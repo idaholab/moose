@@ -31,6 +31,7 @@
   ymax = 1
   ymin = 0
   #second_order = true
+  use_displaced_mesh = false
 []
 
 [Functions]

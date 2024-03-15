@@ -32,6 +32,7 @@
     fixed_normal = true
     new_boundary = 'y0 y1 x0 x1 z0 z1'
   []
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

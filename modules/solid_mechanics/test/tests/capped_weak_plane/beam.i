@@ -11,6 +11,7 @@
   ymax = 10
   zmin = -50
   zmax = 0
+  use_displaced_mesh = false
 []
 
 [GlobalParams]
@@ -31,7 +32,6 @@
   [../]
   [./gravity_y]
     type = Gravity
-    use_displaced_mesh = false
     variable = disp_y
     value = -10
   [../]

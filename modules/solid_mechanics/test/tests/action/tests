@@ -31,6 +31,7 @@
     requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain "
                   "calculator material and stress divergence kernel pairs for different mesh "
                   "subblocks requesting different strain formulations."
+    allow_warnings = true
   []
 
   [two_block_lagrangian]
@@ -42,6 +43,7 @@
     requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain "
                   "calculator material and stress divergence kernel pairs for different mesh "
                   "subblocks requesting different strain formulations with the new kernel system."
+    allow_warnings = true
   []
 
   [two_block.error_unrestricted]

@@ -18,7 +18,7 @@
     new_boundary = pin
     input = gen
   []
-  displacements = 'disp_x disp_y'
+  use_displaced_mesh = false
 []
 
 [AuxVariables]
@@ -152,7 +152,6 @@
   [V]
     type = ElementIntegralMaterialProperty
     mat_prop = 1
-    use_displaced_mesh = true
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

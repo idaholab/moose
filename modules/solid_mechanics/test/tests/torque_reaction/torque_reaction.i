@@ -22,6 +22,7 @@
   dim = 2
   nx = 10
   ny = 1
+  use_displaced_mesh = false
 []
 
 [Problem]

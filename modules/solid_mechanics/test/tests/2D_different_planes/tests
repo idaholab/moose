@@ -23,7 +23,8 @@
   [./plane_strain_xy_finite]
     type = Exodiff
     input = 'planestrain_xy.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/plane_strain/strain=FINITE
+    cli_args = 'Mesh/use_displaced_mesh=true
+                Physics/SolidMechanics/QuasiStatic/plane_strain/strain=FINITE
                 Materials/elastic_stress/type=ComputeFiniteStrainElasticStress
                 Outputs/file_base=planestrain_xy_finite_out'
     exodiff = 'planestrain_xy_finite_out.e'
@@ -56,7 +57,8 @@
   [./plane_strain_xz_finite]
     type = Exodiff
     input = 'planestrain_xz.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/plane_strain/strain=FINITE
+    cli_args = 'Mesh/use_displaced_mesh=true
+                Physics/SolidMechanics/QuasiStatic/plane_strain/strain=FINITE
                 Materials/elastic_stress/type=ComputeFiniteStrainElasticStress
                 Outputs/file_base=planestrain_xz_finite_out'
     exodiff = 'planestrain_xz_finite_out.e'
@@ -89,7 +91,8 @@
   [./plane_strain_yz_finite]
     type = Exodiff
     input = 'planestrain_yz.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/plane_strain/strain=FINITE
+    cli_args = 'Mesh/use_displaced_mesh=true
+                Physics/SolidMechanics/QuasiStatic/plane_strain/strain=FINITE
                 Materials/elastic_stress/type=ComputeFiniteStrainElasticStress
                 Outputs/file_base=planestrain_yz_finite_out'
     exodiff = 'planestrain_yz_finite_out.e'
@@ -122,9 +125,10 @@
   [./gps_xy_finite]
     type = Exodiff
     input = 'gps_xy.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
+    cli_args = 'Mesh/use_displaced_mesh=true
+                Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
                 Materials/elastic_stress/type=ComputeFiniteStrainElasticStress
-		            Postprocessors/react_z/use_displaced_mesh=true
+                Postprocessors/react_z/use_displaced_mesh=true
                 Outputs/file_base=gps_xy_finite_out'
     exodiff = 'gps_xy_finite_out.e'
     abs_zero = 1e-7
@@ -156,7 +160,8 @@
   [./gps_xz_finite]
     type = Exodiff
     input = 'gps_xz.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
+    cli_args = 'Mesh/use_displaced_mesh=true
+                Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
                 Materials/elastic_stress/type=ComputeFiniteStrainElasticStress
                 Postprocessors/react_y/use_displaced_mesh=true
                 Outputs/file_base=gps_xz_finite_out'
@@ -190,7 +195,8 @@
   [./gps_yz_finite]
     type = Exodiff
     input = 'gps_yz.i'
-    cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
+    cli_args = 'Mesh/use_displaced_mesh=true
+                Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
                 Materials/elastic_stress/type=ComputeFiniteStrainElasticStress
                 Postprocessors/react_x/use_displaced_mesh=true
                 Outputs/file_base=gps_yz_finite_out'
