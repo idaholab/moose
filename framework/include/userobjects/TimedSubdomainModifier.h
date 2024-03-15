@@ -27,7 +27,6 @@ protected:
   virtual SubdomainID onComputeSubdomainID(double t_from_exclusive, double t_to_inclusive) override;
 
 private:
-
   void buildFromParameters();
   void buildFromFile();
 
@@ -36,5 +35,4 @@ private:
   /// storage for the block ids.
   std::vector<SubdomainID> _blocks_from;
   std::vector<SubdomainID> _blocks_to;
-
 };

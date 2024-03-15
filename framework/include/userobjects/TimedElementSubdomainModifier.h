@@ -29,29 +29,30 @@ protected:
   virtual std::vector<double> onGetTimes();
   virtual SubdomainID onComputeSubdomainID(double t_from_exclusive, double t_to_inclusive);
 
-    /// storage for the times including their original index.
-    struct timeIndexPair {
-      double time;
-      std::size_t index;
-  
-      bool operator<(const timeIndexPair& a) const
+  /// storage for the times including their original index.
+  struct timeIndexPair
+  {
+    double time;
+    std::size_t index;
+
+    bool operator<(const timeIndexPair & a) const
+    {
+      if (time == a.time)
       {
-        if (time == a.time) {
-          return index < a.index;
-        } else {
-          return time < a.time;
-        };
+        return index < a.index;
       }
+      else
+      {
+        return time < a.time;
+      };
+    }
+  };
 
-    };
-
-    std::vector<timeIndexPair> _timesAndIndices;
+  std::vector<timeIndexPair> _timesAndIndices;
 
 private:
-
-    // some state variables
-    int _current_step;
-    double _current_t;
-    double _last_t;
-
+  // some state variables
+  int _current_step;
+  double _current_t;
+  double _last_t;
 };

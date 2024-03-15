@@ -51,7 +51,7 @@ public:
   const std::size_t INVALID_SIZE = std::numeric_limits<std::size_t>::max();
 
   DelimitedFileReaderOfString(const std::string & filename,
-                      const libMesh::Parallel::Communicator * comm = nullptr);
+                              const libMesh::Parallel::Communicator * comm = nullptr);
 
   /**
    * Perform the actual data reading.
@@ -161,7 +161,8 @@ private:
    * @param row The vector to populate.
    * @param num The current line number.
    */
-  void processLine(const std::string & line, std::vector<std::string> & row, const unsigned int & num);
+  void
+  processLine(const std::string & line, std::vector<std::string> & row, const unsigned int & num);
 
   /**
    * Check the content of the line and if it should be skipped.

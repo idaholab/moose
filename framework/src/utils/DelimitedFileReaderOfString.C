@@ -27,8 +27,8 @@ using namespace std;
 namespace MooseUtils
 {
 
-DelimitedFileReaderOfString::DelimitedFileReaderOfString(const std::string & filename,
-                                         const libMesh::Parallel::Communicator * comm)
+DelimitedFileReaderOfString::DelimitedFileReaderOfString(
+    const std::string & filename, const libMesh::Parallel::Communicator * comm)
   : _filename(filename),
     _header_flag(HeaderFlag::OFF),
     _ignore_empty_lines(true),
@@ -172,7 +172,8 @@ DelimitedFileReaderOfString::getData(std::size_t index) const
 }
 
 void
-DelimitedFileReaderOfString::readColumnData(std::ifstream & stream_data, std::vector<std::string> & output)
+DelimitedFileReaderOfString::readColumnData(std::ifstream & stream_data,
+                                            std::vector<std::string> & output)
 {
   // Local storage for the data being read
   std::string line;
@@ -242,7 +243,8 @@ DelimitedFileReaderOfString::readColumnData(std::ifstream & stream_data, std::ve
 }
 
 void
-DelimitedFileReaderOfString::readRowData(std::ifstream & stream_data, std::vector<std::string> & output)
+DelimitedFileReaderOfString::readRowData(std::ifstream & stream_data,
+                                         std::vector<std::string> & output)
 {
   // Local storage for the data being read
   std::string line;
@@ -314,8 +316,8 @@ DelimitedFileReaderOfString::preprocessLine(std::string & line, const unsigned i
 
 void
 DelimitedFileReaderOfString::processLine(const std::string & line,
-                                 std::vector<std::string> & row,
-                                 const unsigned int & num)
+                                         std::vector<std::string> & row,
+                                         const unsigned int & num)
 {
   // Separate the row and error if it fails
   bool status = MooseUtils::tokenizeAndConvert<std::string>(line, row, delimiter(line));

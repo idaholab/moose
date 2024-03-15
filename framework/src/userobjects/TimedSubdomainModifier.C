@@ -17,262 +17,294 @@ registerMooseObject("MooseApp", TimedSubdomainModifier);
 InputParameters
 TimedSubdomainModifier::validParams()
 {
-    InputParameters params = TimedElementSubdomainModifier::validParams();
+  InputParameters params = TimedElementSubdomainModifier::validParams();
 
-    // parameters for direct input (additionally to 'times')
-    params.addParam<std::vector<std::string>>("blocks_from",
-        "Names or ids of the 'old' block.");
-    params.addParam<std::vector<std::string>>("blocks_to",
-        "Names or ids of the 'new' block.");
-    params.addParamNamesToGroup("times blocks_from blocks_to", "Direct data input.");
+  // parameters for direct input (additionally to 'times')
+  params.addParam<std::vector<std::string>>("blocks_from", "Names or ids of the 'old' block.");
+  params.addParam<std::vector<std::string>>("blocks_to", "Names or ids of the 'new' block.");
+  params.addParamNamesToGroup("times blocks_from blocks_to", "Direct data input.");
 
-    // parameters for file-based data supply
-    params.addParam<FileName>("data_file", 
-        "File holding CSV data");
-    params.addParam<bool>("header",
-        "Indicates whether the file contains a header with the column names");
-    params.addParam<std::string>("delimiter", ",", 
-        "Delimiter used to parse the file");
-    params.addParam<size_t>("time_column_index", 0, 
-        "Zero-based index of the time column. Default is '0'.");
-    params.addParam<size_t>("blocks_from_column_index", 1, 
-        "Zero-based index of the blocks_from column. Default is '1'.");
-    params.addParam<size_t>("blocks_to_column_index", 2, 
-        "Zero-based index of the blocks_to column. Default is '2'.");
-    params.addParam<std::string>("time_column_text", 
-        "Header text of the time column.");
-    params.addParam<std::string>("blocks_from_column_text", 
-        "Header text of the blocks_from column.");
-    params.addParam<std::string>("blocks_to_column_text", 
-        "Header text of the blocks_to column.");
-    params.addParamNamesToGroup("data_file header delimiter time_column_index blocks_from_column_index blocks_to_column_index time_column_text blocks_from_column_text blocks_to_column_text", "Data input from file.");
+  // parameters for file-based data supply
+  params.addParam<FileName>("data_file", "File holding CSV data");
+  params.addParam<bool>("header",
+                        "Indicates whether the file contains a header with the column names");
+  params.addParam<std::string>("delimiter", ",", "Delimiter used to parse the file");
+  params.addParam<size_t>(
+      "time_column_index", 0, "Zero-based index of the time column. Default is '0'.");
+  params.addParam<size_t>(
+      "blocks_from_column_index", 1, "Zero-based index of the blocks_from column. Default is '1'.");
+  params.addParam<size_t>(
+      "blocks_to_column_index", 2, "Zero-based index of the blocks_to column. Default is '2'.");
+  params.addParam<std::string>("time_column_text", "Header text of the time column.");
+  params.addParam<std::string>("blocks_from_column_text", "Header text of the blocks_from column.");
+  params.addParam<std::string>("blocks_to_column_text", "Header text of the blocks_to column.");
+  params.addParamNamesToGroup(
+      "data_file header delimiter time_column_index blocks_from_column_index "
+      "blocks_to_column_index time_column_text blocks_from_column_text blocks_to_column_text",
+      "Data input from file.");
 
-    params.addClassDescription(
-        "Moves all elements of a block to another at the given times.");
+  params.addClassDescription("Moves all elements of a block to another at the given times.");
 
-    return params;
+  return params;
 }
 
-TimedSubdomainModifier::TimedSubdomainModifier(
-    const InputParameters & parameters) 
-    : TimedElementSubdomainModifier(parameters)
+TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameters)
+  : TimedElementSubdomainModifier(parameters)
 {
-    // determine function arguments
+  // determine function arguments
 
-    int bFromData_File = isParamValid("data_file") + 
-                         isParamValid("header") + 
-                         isParamValid("delimiter") + 
-                         isParamValid("time_column_index") + 
-                         isParamValid("blocks_from_column_index") + 
-                         isParamValid("blocks_to_column_index") + 
-                         isParamValid("time_column_text") + 
-                         isParamValid("blocks_from_column_text") + 
-                         isParamValid("blocks_to_column_text");
+  int bFromData_File =
+      isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") +
+      isParamValid("time_column_index") + isParamValid("blocks_from_column_index") +
+      isParamValid("blocks_to_column_index") + isParamValid("time_column_text") +
+      isParamValid("blocks_from_column_text") + isParamValid("blocks_to_column_text");
 
-    int bFromData_File_NeedsHeader = 
-                         isParamValid("time_column_text") + 
-                         isParamValid("blocks_from_column_text") + 
-                         isParamValid("blocks_to_column_text");
+  int bFromData_File_NeedsHeader = isParamValid("time_column_text") +
+                                   isParamValid("blocks_from_column_text") +
+                                   isParamValid("blocks_to_column_text");
 
-    int bFromParameters = isParamValid("times") + 
-                          isParamValid("blocks_from") + 
-                          isParamValid("blocks_to");
+  int bFromParameters =
+      isParamValid("times") + isParamValid("blocks_from") + isParamValid("blocks_to");
 
-     // Check parameter set for inconsistencies
-    int nFrom = ((bFromData_File > 0) + (bFromParameters > 0));
-     if (nFrom != 1) {
-        mooseError("Data on times and blocks must be provided either via a CSV file ('data_file' and corresponding blocks), or via direct parameter input ('times', 'blocks_from', and 'blocks_to').");
+  // Check parameter set for inconsistencies
+  int nFrom = ((bFromData_File > 0) + (bFromParameters > 0));
+  if (nFrom != 1)
+  {
+    mooseError("Data on times and blocks must be provided either via a CSV file ('data_file' and "
+               "corresponding blocks), or via direct parameter input ('times', 'blocks_from', and "
+               "'blocks_to').");
+  };
+
+  if (bFromParameters > 0)
+  {
+    if (bFromParameters != 3)
+    {
+      mooseError("All parameters 'times', and 'blocks_from', and 'blocks_to' must be specified.");
+    };
+    buildFromParameters();
+  }
+  else if (bFromData_File > 0)
+  {
+    if ((isParamSetByUser("time_column_index") + isParamSetByUser("time_column_text")) > 1)
+    {
+      mooseError(
+          "The parameters 'time_column_index', and 'time_column_text' are mutual exclusive.");
+    };
+    if ((isParamSetByUser("blocks_from_column_index") +
+         isParamSetByUser("blocks_from_column_text")) > 1)
+    {
+      mooseError("The parameters 'blocks_from_column_index', and 'blocks_from_column_text' are "
+                 "mutual exclusive.");
+    };
+    if ((isParamSetByUser("blocks_to_column_index") + isParamSetByUser("blocks_to_column_text")) >
+        1)
+    {
+      mooseError("The parameters 'blocks_to_column_index', and 'blocks_to_column_text' are mutual "
+                 "exclusive.");
+    };
+    if ((bFromData_File_NeedsHeader > 0) && (isParamSetByUser("header") == 0))
+    {
+      mooseError("Header flag must be active if columns are to be found via header.");
     };
 
-    if (bFromParameters > 0) {
-        if (bFromParameters != 3) {
-            mooseError("All parameters 'times', and 'blocks_from', and 'blocks_to' must be specified.");
-        };
-        buildFromParameters();
-    } else if (bFromData_File > 0) {
-        if ((isParamSetByUser("time_column_index") + isParamSetByUser("time_column_text")) > 1) {
-            mooseError("The parameters 'time_column_index', and 'time_column_text' are mutual exclusive.");
-        };
-        if ((isParamSetByUser("blocks_from_column_index") + isParamSetByUser("blocks_from_column_text")) > 1) {
-            mooseError("The parameters 'blocks_from_column_index', and 'blocks_from_column_text' are mutual exclusive.");
-        };
-        if ((isParamSetByUser("blocks_to_column_index") + isParamSetByUser("blocks_to_column_text")) > 1) {
-            mooseError("The parameters 'blocks_to_column_index', and 'blocks_to_column_text' are mutual exclusive.");
-        };
-        if ((bFromData_File_NeedsHeader > 0) && (isParamSetByUser("header") == 0)) {
-            mooseError("Header flag must be active if columns are to be found via header.");
-        };
-        
-        buildFromFile();
-    } else {
-        mooseError("Unknown data source. Are you missing a parameter? Did you misspell one?");
-    };
+    buildFromFile();
+  }
+  else
+  {
+    mooseError("Unknown data source. Are you missing a parameter? Did you misspell one?");
+  };
 
-    // Debugging: print what we understood
-    // std::stringstream ss;
-    // size_t n = _times.size();
-    // ss << "TimedSubdomainModifier (" << n << " items)\n";
-    // ss << std::left << std::setw(10) << "Index" << std::left << std::setw(10) << "Time" << std::left << std::setw(10) << "BlockFom" << std::left << std::setw(10) << "BlockTo \n";
-    // for (size_t i = 0; i < n; ++i)
-    // {
-    //   ss << std::left << std::setw(10) << i << std::left << std::setw(10) << _times[i] << std::left << std::setw(10) << _blocks_from[i] << std::left << std::setw(10) << _blocks_to[i] << " \n";
-    // };
-    // mooseInfo(ss.str());
-
+  // Debugging: print what we understood
+  // std::stringstream ss;
+  // size_t n = _times.size();
+  // ss << "TimedSubdomainModifier (" << n << " items)\n";
+  // ss << std::left << std::setw(10) << "Index" << std::left << std::setw(10) << "Time" <<
+  // std::left << std::setw(10) << "BlockFom" << std::left << std::setw(10) << "BlockTo \n"; for
+  // (size_t i = 0; i < n; ++i)
+  // {
+  //   ss << std::left << std::setw(10) << i << std::left << std::setw(10) << _times[i] << std::left
+  //   << std::setw(10) << _blocks_from[i] << std::left << std::setw(10) << _blocks_to[i] << " \n";
+  // };
+  // mooseInfo(ss.str());
 }
 
 void
 TimedSubdomainModifier::buildFromParameters()
 {
 
-    _times = this->template getParam<std::vector<Real>>("times");
-    size_t n = _times.size();
+  _times = this->template getParam<std::vector<Real>>("times");
+  size_t n = _times.size();
 
-    std::vector<std::string> _raw_from = getParam<std::vector<std::string>>("blocks_from");
-    std::vector<std::string> _raw_to = getParam<std::vector<std::string>>("blocks_to");
+  std::vector<std::string> _raw_from = getParam<std::vector<std::string>>("blocks_from");
+  std::vector<std::string> _raw_to = getParam<std::vector<std::string>>("blocks_to");
 
-    if (_raw_from.size() != n) mooseError("Parameter 'blocks_from' must contain the same number of items as parameter 'times'.");
-    if (_raw_to.size() != n) mooseError("Parameter 'blocks_to' must contain the same number of items as parameter 'times'.");
+  if (_raw_from.size() != n)
+    mooseError(
+        "Parameter 'blocks_from' must contain the same number of items as parameter 'times'.");
+  if (_raw_to.size() != n)
+    mooseError("Parameter 'blocks_to' must contain the same number of items as parameter 'times'.");
 
-    _blocks_from.resize(n);
-    _blocks_to.resize(n);
+  _blocks_from.resize(n);
+  _blocks_to.resize(n);
 
-    const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
-    for (size_t i = 0; i < n; ++i)
-    {
-        _blocks_from[i] = _mesh->getSubdomainID(_raw_from[i]);
-        _blocks_to[i] = _mesh->getSubdomainID(_raw_to[i]);
-    };
-
+  const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
+  for (size_t i = 0; i < n; ++i)
+  {
+    _blocks_from[i] = _mesh->getSubdomainID(_raw_from[i]);
+    _blocks_to[i] = _mesh->getSubdomainID(_raw_to[i]);
+  };
 }
 
 void
 TimedSubdomainModifier::buildFromFile()
 {
-    const auto _file_name = getParam<FileName>("data_file");
+  const auto _file_name = getParam<FileName>("data_file");
 
-    /// Flag indicating if the file contains a header.
-    MooseUtils::DelimitedFileReaderOfString::HeaderFlag _header_flag = MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
-    if (isParamValid("header")) {
-        _header_flag = getParam<bool>("header") ? MooseUtils::DelimitedFileReaderOfString::HeaderFlag::ON : MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
-    };
-    
-    std::string _delimiter = ",";
-    if (isParamValid("delimiter")) {
-        _delimiter = getParam<std::string>("delimiter");
-    };
-    
-    MooseUtils::DelimitedFileReaderOfString file(_file_name);
+  /// Flag indicating if the file contains a header.
+  MooseUtils::DelimitedFileReaderOfString::HeaderFlag _header_flag =
+      MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
+  if (isParamValid("header"))
+  {
+    _header_flag = getParam<bool>("header")
+                       ? MooseUtils::DelimitedFileReaderOfString::HeaderFlag::ON
+                       : MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
+  };
 
-    file.setHeaderFlag(_header_flag);
-    file.setDelimiter(_delimiter);
-    file.read();
-    
-    size_t _time_column = 0;
-    if (isParamValid("time_column_text")) {
-        const auto s = getParam<std::string>("time_column_text");
-        const std::vector<std::string> _names = file.getNames();
-        const auto it = find(_names.begin(), _names.end(), s);
-        if (it == _names.end())
-            mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
-        _time_column = std::distance(_names.begin(), it);
-    } else if (isParamValid("time_column_index")) {
-        _time_column = getParam<size_t>("time_column_index");
-    };
-    
-    size_t _blocks_from_column = 1;
-    if (isParamValid("blocks_from_column_text")) {
-        const auto s = getParam<std::string>("blocks_from_column_text");
-        const std::vector<std::string> _names = file.getNames();
-        const auto it = find(_names.begin(), _names.end(), s);
-        if (it == _names.end())
-            mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
-        _blocks_from_column = std::distance(_names.begin(), it);
-    } else if (isParamValid("blocks_from_column_index")) {
-        _blocks_from_column = getParam<size_t>("blocks_from_column_index");
-    };
+  std::string _delimiter = ",";
+  if (isParamValid("delimiter"))
+  {
+    _delimiter = getParam<std::string>("delimiter");
+  };
 
-    size_t _blocks_to_column = 2;
-    if (isParamValid("blocks_to_column_text")) {
-        const auto s = getParam<std::string>("blocks_to_column_text");
-        const std::vector<std::string> _names = file.getNames();
-        const auto it = find(_names.begin(), _names.end(), s);
-        if (it == _names.end())
-            mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
-        _blocks_to_column = std::distance(_names.begin(), it);
-    } else if (isParamValid("blocks_to_column_index")) {
-        _blocks_to_column = getParam<size_t>("blocks_to_column_index");
-    };
+  MooseUtils::DelimitedFileReaderOfString file(_file_name);
 
-    size_t max_needed_column_index = std::max({_time_column, _blocks_from_column, _blocks_to_column});
+  file.setHeaderFlag(_header_flag);
+  file.setDelimiter(_delimiter);
+  file.read();
 
-    std::vector<std::vector<std::string>> data = file.getData();
+  size_t _time_column = 0;
+  if (isParamValid("time_column_text"))
+  {
+    const auto s = getParam<std::string>("time_column_text");
+    const std::vector<std::string> _names = file.getNames();
+    const auto it = find(_names.begin(), _names.end(), s);
+    if (it == _names.end())
+      mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
+    _time_column = std::distance(_names.begin(), it);
+  }
+  else if (isParamValid("time_column_index"))
+  {
+    _time_column = getParam<size_t>("time_column_index");
+  };
 
-    if (data.size() < max_needed_column_index)
-        mooseError("data must contain at least " + std::to_string(max_needed_column_index) + " columns in file ", _file_name);
+  size_t _blocks_from_column = 1;
+  if (isParamValid("blocks_from_column_text"))
+  {
+    const auto s = getParam<std::string>("blocks_from_column_text");
+    const std::vector<std::string> _names = file.getNames();
+    const auto it = find(_names.begin(), _names.end(), s);
+    if (it == _names.end())
+      mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
+    _blocks_from_column = std::distance(_names.begin(), it);
+  }
+  else if (isParamValid("blocks_from_column_index"))
+  {
+    _blocks_from_column = getParam<size_t>("blocks_from_column_index");
+  };
 
-    std::vector<std::string> strTimes = data[_time_column];
-    std::vector<std::string> strBlockFrom = data[_blocks_from_column];
-    std::vector<std::string> strBlockTo = data[_blocks_to_column];
+  size_t _blocks_to_column = 2;
+  if (isParamValid("blocks_to_column_text"))
+  {
+    const auto s = getParam<std::string>("blocks_to_column_text");
+    const std::vector<std::string> _names = file.getNames();
+    const auto it = find(_names.begin(), _names.end(), s);
+    if (it == _names.end())
+      mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
+    _blocks_to_column = std::distance(_names.begin(), it);
+  }
+  else if (isParamValid("blocks_to_column_index"))
+  {
+    _blocks_to_column = getParam<size_t>("blocks_to_column_index");
+  };
 
-    size_t n_rows = strTimes.size();
+  size_t max_needed_column_index = std::max({_time_column, _blocks_from_column, _blocks_to_column});
 
-    // some sanity checks
-    if (n_rows == 0)
-        mooseError("empty sequence in file ", _file_name);
-    if (n_rows != strBlockFrom.size())
-        mooseError("inconsistent data in ", _file_name);
-    if (n_rows != strBlockTo.size())
-        mooseError("inconsistent data in ", _file_name);
+  std::vector<std::vector<std::string>> data = file.getData();
 
-    // resize variables to fit the data
-    _times.resize(n_rows);
-    _blocks_from.resize(n_rows);
-    _blocks_to.resize(n_rows);
+  if (data.size() < max_needed_column_index)
+    mooseError("data must contain at least " + std::to_string(max_needed_column_index) +
+                   " columns in file ",
+               _file_name);
 
-    // parse the data given by the user
-    const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
-    std::transform(strTimes.begin(), strTimes.end(), _times.begin(), [](std::string x) { return std::stod(x); });
-    std::transform(strBlockFrom.begin(), strBlockFrom.end(), _blocks_from.begin(), [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
-    std::transform(strBlockTo.begin(), strBlockTo.end(), _blocks_to.begin(), [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
+  std::vector<std::string> strTimes = data[_time_column];
+  std::vector<std::string> strBlockFrom = data[_blocks_from_column];
+  std::vector<std::string> strBlockTo = data[_blocks_to_column];
 
+  size_t n_rows = strTimes.size();
+
+  // some sanity checks
+  if (n_rows == 0)
+    mooseError("empty sequence in file ", _file_name);
+  if (n_rows != strBlockFrom.size())
+    mooseError("inconsistent data in ", _file_name);
+  if (n_rows != strBlockTo.size())
+    mooseError("inconsistent data in ", _file_name);
+
+  // resize variables to fit the data
+  _times.resize(n_rows);
+  _blocks_from.resize(n_rows);
+  _blocks_to.resize(n_rows);
+
+  // parse the data given by the user
+  const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
+  std::transform(
+      strTimes.begin(), strTimes.end(), _times.begin(), [](std::string x) { return std::stod(x); });
+  std::transform(strBlockFrom.begin(),
+                 strBlockFrom.end(),
+                 _blocks_from.begin(),
+                 [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
+  std::transform(strBlockTo.begin(),
+                 strBlockTo.end(),
+                 _blocks_to.begin(),
+                 [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
 }
 
 void
-TimedSubdomainModifier::initialize() {
-    TimedElementSubdomainModifier::initialize();
+TimedSubdomainModifier::initialize()
+{
+  TimedElementSubdomainModifier::initialize();
 }
 
 std::vector<double>
 TimedSubdomainModifier::onGetTimes()
 {
-    // just return our local array of times
-    return _times;
+  // just return our local array of times
+  return _times;
 }
 
 SubdomainID
 TimedSubdomainModifier::onComputeSubdomainID(double t_from_exclusive, double t_to_inclusive)
 {
   // get the subdomain-id of the current element
-    SubdomainID _subdomain_id = _current_elem->subdomain_id();
+  SubdomainID _subdomain_id = _current_elem->subdomain_id();
 
   // iterate all block changes issued by the user and apply if appropriate
-    size_t n_rows = _timesAndIndices.size();
-    for (size_t i = 0; i < n_rows; ++i)
+  size_t n_rows = _timesAndIndices.size();
+  for (size_t i = 0; i < n_rows; ++i)
+  {
+    // time of the data point
+    double t = _timesAndIndices[i].time;
+
+    // original data point index
+    size_t j = _timesAndIndices[i].index;
+
+    // do we have to apply?
+    if (t > t_from_exclusive && t <= t_to_inclusive && _subdomain_id == _blocks_from[j])
     {
-        // time of the data point 
-        double t = _timesAndIndices[i].time;
-        
-        // original data point index
-        size_t j = _timesAndIndices[i].index;
+      // we have to change the subdomain-id using the original index (stored in 'j')
+      _subdomain_id = _blocks_to[j];
+    }
+  };
 
-        // do we have to apply?
-        if (t > t_from_exclusive && t <= t_to_inclusive && _subdomain_id == _blocks_from[j])
-        {
-            // we have to change the subdomain-id using the original index (stored in 'j')
-            _subdomain_id = _blocks_to[j];
-        }
-    };
-
-    return _subdomain_id;
+  return _subdomain_id;
 }
