@@ -48,18 +48,11 @@
     periphery_num_layers = 1
     desired_area = 5.0
   []
-  [elem_gen]
-    type = ElementGenerator
+  [test_rgmb]
+    type = TestReactorGeometryMeshBuilderMeshGenerator
     input = cmg
-    nodal_positions = '0 0 0
-                       1 0 0
-                       1 1 0
-                       0 1 0'
-
-    element_connectivity = '0 1 2 3'
-    elem_type = "QUAD4"
   []
-  data_driven_generator = elem_gen
+  data_driven_generator = test_rgmb
 []
 
 [Problem]

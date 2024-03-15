@@ -37,8 +37,6 @@ ElementGenerator::validParams()
 
   params.addClassDescription("Generates individual elements given a list of nodal positions.");
 
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 
