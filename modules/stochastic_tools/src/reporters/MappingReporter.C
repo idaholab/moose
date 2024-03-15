@@ -37,6 +37,7 @@ MappingReporter::validParams()
       "Sampler be able to identify how the samples are distributed among "
       "the processes. Only needed if parallel storage is defined. It is important to have the "
       "same sampler here as the one used to prepare the snapshots in the parallel storage.");
+  params.addParam<bool>("build_all_mappings_only", false, "Build all the mappings only.");
   return params;
 }
 
@@ -48,8 +49,12 @@ MappingReporter::MappingReporter(const InputParameters & parameters)
                           : nullptr),
     _sampler(isParamValid("sampler") ? &getSampler("sampler") : nullptr),
     _mapping_name(getParam<UserObjectName>("mapping")),
-    _variable_names(getParam<std::vector<VariableName>>("variables"))
+    _variable_names(getParam<std::vector<VariableName>>("variables")),
+    _build_all_mappings_only(getParam<bool>("build_all_mappings_only"))
 {
+  if (_build_all_mappings_only)
+    return;
+
   if (_parallel_storage)
   {
     if (_sampler)
@@ -89,6 +94,12 @@ MappingReporter::initialSetup()
 void
 MappingReporter::execute()
 {
+  if (_build_all_mappings_only)
+  {
+    _mapping->buildAllMappings();
+    return;
+  }
+
   // We have two execution modes. If the parallel storage is supplied we loop over the snapshots in
   // the parallel storage, and project them to obtain their coefficients.
   if (_parallel_storage)

@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#'
+  design = ''
+
+  [p]
+    type = JSONDiff
+    requirement = 'The system should be able to print serialized snapshots in a distributed fashion in a json format.'
+    input = parallel_storage_main.i
+    jsondiff = 'parallel_storage_main_out.json'
+
+  []
+[]

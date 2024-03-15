@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralReporter.h"
+#include "TaggingInterface.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "NonlinearSystemBase.h"
@@ -59,4 +60,7 @@ protected:
 
   /// The nonlinear system's number whose solution shall be collected
   const unsigned int _nonlinear_system_number;
+  /// Tolerance for comparing two snapshots. If comparison is below tolerance
+  /// snapshot is not saved.
+  const Real _save_tolerance;
 };

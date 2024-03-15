@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseError.h"
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
 #include "RestartableModelInterface.h"
@@ -33,6 +34,14 @@ public:
    * @param vname The name of the variable
    */
   virtual void buildMapping(const VariableName & vname) = 0;
+
+  /**
+   * Abstract function for building all the mappings of all the variables
+   */
+  virtual void buildAllMappings()
+  {
+    mooseError("buildAllMappings has not been implemented for this Mapping");
+  };
 
   /**
    * Map a full-order solution vector (in DenseVector format) for a given variable into a
