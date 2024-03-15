@@ -4,9 +4,8 @@ L = 5
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 1
   nx = 50
-  ny = 50
   xmax = ${L}
 []
 
@@ -28,7 +27,7 @@ L = 5
   [source_u]
     type = BodyForce
     variable = u
-    value = 5.0
+    value = 1.0
   []
 []
 

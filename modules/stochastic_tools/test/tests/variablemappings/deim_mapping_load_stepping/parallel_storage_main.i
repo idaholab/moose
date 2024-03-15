@@ -101,6 +101,7 @@
   [jacobian_storage]
     type = JacobianContainer
     jac_indices_reporter_name = indices
+    tag_name = dummy
     execute_on = 'NONE'
     outputs = none
   []
@@ -118,3 +119,7 @@
     execute_system_information_on = none
   []
 []
+[Problem]
+  extra_tag_matrices = 'dummy'
+[]
+
