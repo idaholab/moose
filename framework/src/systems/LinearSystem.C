@@ -104,7 +104,6 @@ void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
-
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -162,17 +161,8 @@ LinearSystem::computeGradients()
   // We must assemble here since we may have added face contributions to cells owned by neighboring
   // processes, and we must perform all our face summations before performing division by the cell
   // volumes in our volume thread
-  for (const auto tid : make_range(libMesh::n_threads()))
-    for (auto * const base_var : getVariables(tid))
-    {
-      auto * const linear_fv_var = dynamic_cast<MooseLinearVariableFV<Real> *>(base_var);
-      mooseAssert(linear_fv_var,
-                  "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                  "the linear system?");
-      auto & gradient = linear_fv_var->gradientContainer();
-      for (auto & grad_component : gradient)
-        grad_component->close();
-    }
+  for (auto & grad_component : _raw_grad_container)
+    grad_component->close();
 
   PARALLEL_TRY
   {

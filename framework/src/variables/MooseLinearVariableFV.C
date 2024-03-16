@@ -47,6 +47,7 @@ template <typename OutputType>
 MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _needs_cell_gradients(false),
+    _grad_container(this->_sys.gradientContainer()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
     // auxiliary systems
@@ -114,7 +115,7 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
     _cell_gradient.zero();
     for (const auto i : make_range(this->_mesh.dimension()))
       _cell_gradient(i) =
-          (*_grad_cache[i])(elem_info.dofIndices()[this->_sys.number()][this->number()]);
+          (*_grad_container[i])(elem_info.dofIndices()[this->_sys.number()][this->number()]);
   }
 
   return _cell_gradient;
@@ -145,17 +146,6 @@ void
 MooseLinearVariableFV<OutputType>::initialSetup()
 {
   MooseVariableField<OutputType>::initialSetup();
-
-  if (_needs_cell_gradients)
-  {
-    _grad_cache.clear();
-    for (const auto i : make_range(this->_mesh.dimension()))
-    {
-      libmesh_ignore(i);
-      _grad_cache.push_back(this->_sys.currentSolution()->zero_clone());
-    }
-  }
-
   cacheBoundaryBCMap();
 }
 

@@ -392,6 +392,10 @@ protected:
 
   /// A dummy ADReal variable
   mutable ADReal _ad_real_dummy = 0;
+
+  /// Boolean to check if this variable needs a raw cell-gradient storage vector from the
+  /// system.
+  bool _needs_cell_gradients;
 };
 
 #define usingMooseVariableFieldMembers                                                             \

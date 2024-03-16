@@ -43,9 +43,9 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
     mooseAssert(_current_var,
                 "This should be a linear FV variable, did we somehow add a nonlinear variable to "
                 "the linear system?");
-    if (_current_var->needsCellGradients())
+    auto & grad_container = _fe_problem.getLinearSystem(_linear_system_number).gradientContainer();
+    if (_current_var->needsGradientVectorStorage())
     {
-      auto & grad_container = _current_var->gradientContainer();
       _new_gradient.clear();
       for (auto & vec : grad_container)
         _new_gradient.push_back(vec->zero_clone());

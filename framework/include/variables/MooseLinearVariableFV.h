@@ -91,12 +91,7 @@ public:
   /**
    * Check if cell gradient computations were requested for this variable.
    */
-  bool needsCellGradients() const { return _needs_cell_gradients; }
-
-  /**
-   * Reference to the gradient container.
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() { return _grad_cache; }
+  virtual bool needsGradientVectorStorage() const override { return _needs_cell_gradients; }
 
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                           const Elem * elem,
@@ -166,11 +161,11 @@ protected:
   /// Boolean to check if this variable needs gradient computations.
   bool _needs_cell_gradients;
 
-  /// A cache for storing gradients on elements
-  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_cache;
-
   /// Temporary storage for the cell gradient to avoid unnecessary allocations.
   mutable RealVectorValue _cell_gradient;
+
+  /// Pointer to the cell gradients which are stored on the linear system
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & _grad_container;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel

@@ -925,6 +925,15 @@ public:
    */
   Moose::VarKindType varKind() const { return _var_kind; }
 
+  /**
+   * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
+   * Mainly used for finite volume systems.
+   */
+  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer()
+  {
+    return _raw_grad_container;
+  }
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
@@ -1015,6 +1024,11 @@ protected:
   /// Serialized version of the solution vector, or nullptr if a
   /// serialized solution is not needed
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
+
+  /// A cache for storing gradients at dof locations. We store it on the system
+  /// because we create copies of variables on each thread and that would
+  /// lead to increased data duplication when using threading-based parallelism.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
 
 private:
   /**

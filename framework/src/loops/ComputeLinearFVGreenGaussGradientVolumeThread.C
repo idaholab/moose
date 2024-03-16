@@ -43,11 +43,11 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
     mooseAssert(_current_var,
                 "This should be a linear FV variable, did we somehow add a nonlinear variable to "
                 "the linear system?");
-    if (_current_var->needsCellGradients())
+    auto & grad_container = _fe_problem.getLinearSystem(_linear_system_number).gradientContainer();
+    if (_current_var->needsGradientVectorStorage())
     {
       const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
       const auto state = Moose::currentState();
-      auto & grad_container = _current_var->gradientContainer();
       // Iterate over all the elements in the range
       for (const auto & elem_info : range)
         if (_current_var->hasBlocks(elem_info->subdomain_id()))
