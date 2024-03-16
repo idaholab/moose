@@ -785,20 +785,6 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
     const std::string & option = option_and_desc.first;
     const std::string & dscrpt = option_and_desc.second;
 
-    // choose format of insertion text based on if client supports snippets
-    int text_format;
-    std::string insert_text;
-    if (client_snippet_support)
-    {
-      text_format = wasp::lsp::m_text_format_snippet;
-      insert_text = "${1:" + option + "}";
-    }
-    else
-    {
-      text_format = wasp::lsp::m_text_format_plaintext;
-      insert_text = option;
-    }
-
     // add option name, insertion range, and description to completion list
     completionItems.push_back(wasp::DataObject());
     wasp::DataObject * item = completionItems.back().to_object();
@@ -809,13 +795,13 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                                              replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             insert_text,
+                                             option,
                                              complete_kind,
                                              "",
                                              dscrpt,
                                              false,
                                              false,
-                                             text_format);
+                                             wasp::lsp::m_text_format_plaintext);
   }
 
   return pass;
