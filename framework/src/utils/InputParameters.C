@@ -692,6 +692,8 @@ InputParameters::finalizeParams(const std::string & parsing_syntax,
     set_if_filename(MeshFileName);
 #undef set_if_filename
   }
+
+  _finalized = true;
 }
 
 bool
