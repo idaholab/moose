@@ -234,6 +234,15 @@ public:
   const std::string & getLastInputFileName() const;
 
   /**
+   * @return The file base for reading in files.
+   *
+   * In the case that we have input files, this is the parent path
+   * of the last input file. If we have no input files, this is the current
+   * working directory.
+   */
+  std::filesystem::path getInputFileBase() const;
+
+  /**
    * Override the selection of the output file base name.
    * Note: This method is supposed to be called by MultiApp only.
    */

@@ -1004,13 +1004,6 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
                                       dynamic_cast<InputParameters::Parameter<ptype> *>(par),      \
                                       in_global,                                                   \
                                       global_params_block)
-#define setfpath(ptype)                                                                            \
-  else if (par->type() == demangle(typeid(ptype).name()))                                          \
-      setFilePathParam<ptype>(full_name,                                                           \
-                              short_name,                                                          \
-                              dynamic_cast<InputParameters::Parameter<ptype> *>(par),              \
-                              in_global,                                                           \
-                              global_params_block)
 #define setvector(ptype, base)                                                                     \
   else if (par->type() == demangle(typeid(std::vector<ptype>).name()))                             \
       setVectorParameter<ptype, base>(                                                             \
@@ -1025,14 +1018,6 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
           full_name,                                                                               \
           short_name,                                                                              \
           dynamic_cast<InputParameters::Parameter<std::map<key_type, mapped_type>> *>(par),        \
-          in_global,                                                                               \
-          global_params_block)
-#define setvectorfpath(ptype)                                                                      \
-  else if (par->type() == demangle(typeid(std::vector<ptype>).name()))                             \
-      setVectorFilePathParam<ptype>(                                                               \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<InputParameters::Parameter<std::vector<ptype>> *>(par),                     \
           in_global,                                                                               \
           global_params_block)
 #define setvectorvector(ptype)                                                                     \
@@ -1077,10 +1062,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(string, string);
         setscalar(SubdomainName, string);
         setscalar(BoundaryName, string);
-        setfpath(FileName);
-        setfpath(MeshFileName);
+        setscalar(FileName, string);
+        setscalar(MeshFileName, string);
+        setscalar(FileNameNoExtension, string);
         setscalar(RelativeFileName, string);
-        setfpath(FileNameNoExtension);
+        setscalar(DataFileName, string);
         setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
@@ -1147,10 +1133,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(MooseEnum, MooseEnum);
 
         setvector(string, string);
-        setvectorfpath(FileName);
-        setvectorfpath(FileNameNoExtension);
+        setvector(FileName, string);
+        setvector(FileNameNoExtension, string);
         setvector(RelativeFileName, string);
-        setvectorfpath(MeshFileName);
+        setvector(DataFileName, string);
+        setvector(MeshFileName, string);
         setvector(SubdomainName, string);
         setvector(BoundaryName, string);
         setvector(NonlinearVariableName, string);
@@ -1207,6 +1194,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(string);
         setvectorvector(FileName);
         setvectorvector(FileNameNoExtension);
+        setvectorvector(DataFileName);
         setvectorvector(MeshFileName);
         setvectorvector(SubdomainName);
         setvectorvector(BoundaryName);
@@ -1246,6 +1234,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvectorvector(string);
         setvectorvectorvector(FileName);
         setvectorvectorvector(FileNameNoExtension);
+        setvectorvectorvector(DataFileName);
         setvectorvectorvector(MeshFileName);
         setvectorvectorvector(SubdomainName);
         setvectorvectorvector(BoundaryName);
@@ -1415,30 +1404,6 @@ Builder::setScalarParameter(const std::string & full_name,
   }
 }
 
-template <typename T>
-void
-Builder::setFilePathParam(const std::string & full_name,
-                          const std::string & short_name,
-                          InputParameters::Parameter<T> * param,
-                          bool in_global,
-                          GlobalParamsAction * global_block)
-{
-  std::string prefix;
-  std::string postfix = root()->param<std::string>(full_name);
-  auto input_filename = getPrimaryFileName(false);
-  size_t pos = input_filename.find_last_of('/');
-  if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
-    prefix = input_filename.substr(0, pos + 1);
-
-  param->set() = prefix + postfix;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<T>(short_name) = param->get();
-  }
-}
-
 template <typename T, typename UP_T, typename Base>
 void
 Builder::setScalarValueTypeParameter(const std::string & full_name,
@@ -1589,43 +1554,6 @@ Builder::setMapParameter(const std::string & full_name,
     auto & global_map = global_block->setParam<std::map<KeyType, MappedType>>(short_name);
     for (const auto & pair : the_map)
       global_map.insert(pair);
-  }
-}
-
-template <typename T>
-void
-Builder::setVectorFilePathParam(const std::string & full_name,
-                                const std::string & short_name,
-                                InputParameters::Parameter<std::vector<T>> * param,
-                                bool in_global,
-                                GlobalParamsAction * global_block)
-{
-  std::vector<T> vec;
-  std::vector<std::string> rawvec;
-  auto input_filename = getPrimaryFileName(false);
-  if (root()->find(full_name))
-  {
-    auto tmp = root()->param<std::vector<std::string>>(full_name);
-    for (auto val : tmp)
-    {
-      std::string prefix;
-      std::string postfix = val;
-      size_t pos = input_filename.find_last_of('/');
-      if (pos != std::string::npos && postfix[0] != '/')
-        prefix = input_filename.substr(0, pos + 1);
-      rawvec.push_back(postfix);
-      vec.push_back(prefix + postfix);
-    }
-  }
-
-  param->set() = vec;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<T>(short_name).resize(param->get().size());
-    for (unsigned int i = 0; i < vec.size(); ++i)
-      global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
   }
 }
 

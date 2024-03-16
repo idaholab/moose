@@ -24,6 +24,7 @@
 #include "parse.h"
 
 #include <cmath>
+#include <filesystem>
 
 InputParameters
 emptyInputParameters()
@@ -37,7 +38,9 @@ InputParameters::InputParameters()
     _collapse_nesting(false),
     _moose_object_syntax_visibility(true),
     _show_deprecated_message(true),
-    _allow_copy(true)
+    _allow_copy(true),
+    _hit_node(nullptr),
+    _finalized(false)
 {
 }
 
@@ -72,6 +75,7 @@ InputParameters::clear()
   _old_to_new_name_and_dep.clear();
   _new_to_old_names.clear();
   _hit_node = nullptr;
+  _finalized = false;
 }
 
 void
@@ -171,6 +175,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
+  _finalized = rhs._finalized;
 
   return *this;
 }
@@ -613,6 +618,80 @@ InputParameters::checkParams(const std::string & parsing_syntax)
 
   if (!oss.str().empty())
     mooseError(oss.str());
+}
+
+void
+InputParameters::finalizeParams(const std::string & parsing_syntax,
+                                const std::filesystem::path & default_file_base)
+{
+  mooseAssert(!isFinalized(), "Already finalized");
+
+  checkParams(parsing_syntax);
+
+  // Helper for setting the absolute paths for each set file name parameter
+  const auto set_absolute_path =
+      [this, &default_file_base](const std::string & param_name, auto & value)
+  {
+    // We don't need to set a path if nothing is there
+    if (value.empty())
+      return;
+
+    std::filesystem::path value_path = std::string(value);
+    if (!value_path.is_absolute())
+    {
+      // Try to find a hit node to use to get context
+      const hit::Node * hit_node = nullptr;
+      // Hit node from the parameter itself
+      if (const auto param_hit_node = getHitNode(param_name))
+        hit_node = param_hit_node;
+      // Hit node from the object
+      else if (const auto object_hit_node = getHitNode())
+        hit_node = object_hit_node;
+
+      // Find the input path to make the value relative to
+      std::filesystem::path param_path;
+      // We have a hit node so we have context as to where to get files from
+      if (hit_node)
+      {
+        // Command line options/parameters; current working directory
+        if (hit_node->filename() == "CLI_ARGS")
+          param_path = std::filesystem::current_path();
+        // Input file parameters; use the path of the input file
+        else
+          param_path =
+              std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
+      }
+      // No hit node, so fall back to the default
+      else
+        param_path = std::filesystem::absolute(default_file_base);
+
+      // Absolute path of the file relative to whatever it should be relative to
+      value_path = std::filesystem::absolute(param_path / value_path);
+    }
+
+    // Set the value to the absolute path
+    value = value_path.c_str();
+  };
+
+  // Set the absolute path for each file name typed parameter
+  for (const auto & [param_name, param_value] : *this)
+  {
+#define set_if_filename(type)                                                                      \
+  else if (auto type_value = dynamic_cast<Parameters::Parameter<type> *>(param_value.get()))       \
+      set_absolute_path(param_name, type_value->set());                                            \
+  else if (auto type_values = dynamic_cast<Parameters::Parameter<std::vector<type>> *>(            \
+               param_value.get())) for (auto & value : type_values->set())                         \
+      set_absolute_path(param_name, value)
+
+    if (false)
+      ;
+    // Note that we explicitly skip DataFileName here because we do not want absolute
+    // file paths for data files, as they're searched in the data directories
+    set_if_filename(FileName);
+    set_if_filename(FileNameNoExtension);
+    set_if_filename(MeshFileName);
+#undef set_if_filename
+  }
 }
 
 bool

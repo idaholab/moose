@@ -151,7 +151,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<std::string>("stress_unit", "Pa", "unit of stress");
 
   // use std::string here to avoid automatic absolute path expansion
-  params.addParam<FileName>("model", "LaRomance model JSON datafile");
+  params.addParam<DataFileName>("model", "LaRomance model JSON datafile");
   params.addParam<FileName>("export_model", "Write LaRomance model to JSON datafile");
 
   params.addParamNamesToGroup(
@@ -1396,7 +1396,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::checkJSONKey(const std::string & key)
   if (!this->isParamValid("model"))
     this->paramError("model", "Specify a JSON data filename.");
 
-  const auto model_file_name = this->_pars.rawParamVal("model");
+  const auto model_file_name = this->template getParam<DataFileName>("model");
   if (_json.empty())
     this->paramError("model", "The specified JSON data file '", model_file_name, "' is empty.");
   if (!_json.contains(key))

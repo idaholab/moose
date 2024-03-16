@@ -12,6 +12,8 @@
 #include "MooseObject.h"
 #include "Action.h"
 
+#include <filesystem>
+
 template <class T>
 DataFileInterface<T>::DataFileInterface(const T & parent) : _parent(parent)
 {
@@ -21,17 +23,11 @@ template <class T>
 std::string
 DataFileInterface<T>::getDataFileName(const std::string & param) const
 {
-  /// - relative to the input file directory
-  {
-    const auto & absolute_path = _parent.template getParam<DataFileParameterType>(param);
-    if (MooseUtils::checkFileReadable(absolute_path, false, false, false))
-    {
-      _parent.paramInfo(param, "Data file '", absolute_path, "' found relative to the input file.");
-      return absolute_path;
-    }
-  }
+  const auto & relative_path = _parent.template getParam<DataFileParameterType>(param);
+  if (std::filesystem::path(std::string(relative_path)).is_absolute())
+    _parent.paramError(param,
+                       "This file path cannot be absolute because it represents a data file");
 
-  const auto & relative_path = _parent.parameters().rawParamVal(param);
   return getDataFileNameByName(relative_path, &param);
 }
 

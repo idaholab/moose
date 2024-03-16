@@ -25,6 +25,7 @@ MooseBaseParameterInterface::MooseBaseParameterInterface(const MooseBase & base,
     _action_factory(base.getMooseApp().getActionFactory()),
     _moose_base(base)
 {
+  mooseAssert(_pars.isFinalized(), "Params are not finalized");
 }
 
 void

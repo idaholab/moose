@@ -118,7 +118,7 @@ Factory::create(const std::string & obj_name,
   params.set<std::string>("_type") = obj_name;
 
   // Check to make sure that all required parameters are supplied
-  params.checkParams(name);
+  params.finalizeParams(name, _app.getInputFileBase());
 
   // register type name as constructed
   _constructed_types.insert(obj_name);

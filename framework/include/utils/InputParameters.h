@@ -32,6 +32,7 @@ class FunctionParserBase
 #include <unordered_map>
 #include <mutex>
 #include <optional>
+#include <filesystem>
 
 // Forward declarations
 class Action;
@@ -670,6 +671,16 @@ public:
   void checkParams(const std::string & parsing_syntax);
 
   /**
+   * Finalizes the parameters, which must be done before constructing any objects
+   * with these parameters (to be called in the corresponding factories).
+   *
+   * This calls checkParams() and sets up the absolute paths for all file name
+   * typed parameters.
+   */
+  void finalizeParams(const std::string & parsing_syntax,
+                      const std::filesystem::path & default_file_base);
+
+  /**
    * Methods returning iterators to the coupled variables names stored in this
    * InputParameters object
    */
@@ -1051,6 +1062,11 @@ public:
    */
   void setHitNode(const hit::Node & node, const SetHitNodeKey) { _hit_node = &node; }
 
+  /**
+   * @return Whether or not finalizeParams() has been called
+   */
+  bool isFinalized() const { return _finalized; }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1116,8 +1132,6 @@ private:
     std::string _deprecation_message;
     /// Original location of parameter node; used for error messages
     const hit::Node * _hit_node;
-    /// raw token text for a parameter - usually only set for filepath type params.
-    std::string _raw_val;
     /// True if the parameters is controllable
     bool _controllable = false;
     /// Controllable execute flag restriction
@@ -1233,7 +1247,10 @@ private:
   std::multimap<std::string, std::string> _new_to_old_names;
 
   /// The hit node representing the syntax that created these parameters, if any
-  const hit::Node * _hit_node = nullptr;
+  const hit::Node * _hit_node;
+
+  /// Whether or not we've called finalizeParams() on these parameters yet
+  bool _finalized;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();

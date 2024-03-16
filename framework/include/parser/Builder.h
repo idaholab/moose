@@ -156,27 +156,6 @@ protected:
                        GlobalParamsAction * global_block);
 
   /**
-   * Sets an input parameter representing a file path using input file data.  The file path is
-   * modified to be relative to the directory this application's input file is in.
-   */
-  template <typename T>
-  void setFilePathParam(const std::string & full_name,
-                        const std::string & short_name,
-                        InputParameters::Parameter<T> * param,
-                        bool in_global,
-                        GlobalParamsAction * global_block);
-
-  /**
-   * Sets an input parameter representing a vector of file paths using input file data.  The file
-   * paths are modified to be relative to the directory this application's input file is in.
-   */
-  template <typename T>
-  void setVectorFilePathParam(const std::string & full_name,
-                              const std::string & short_name,
-                              InputParameters::Parameter<std::vector<T>> * param,
-                              bool in_global,
-                              GlobalParamsAction * global_block);
-  /**
    * Template method for setting any double indexed type parameter read from the input file or
    * command line.
    */

@@ -51,8 +51,8 @@ ActionFactory::create(const std::string & action,
   InputParameters & action_params = _app.getInputParameterWarehouse().addInputParameters(
       unique_action_name, incoming_parser_params);
 
-  // Check to make sure that all required parameters are supplied
-  action_params.checkParams(action_name);
+  // Check and finalize the parameters
+  action_params.finalizeParams(action_name, _app.getInputFileBase());
 
   iters = _name_to_build_info.equal_range(action);
   BuildInfo * build_info = &(iters.first->second);
