@@ -61,7 +61,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   app_params.set<bool>("check_input") = true;
   app_params.set<bool>("error_unused") = true;
   app_params.set<bool>("error") = true;
-  app_params.set<bool>("error_deprecated") = true;
   app_params.set<std::string>("color") = "off";
   app_params.set<bool>("disable_perf_graph_live") = true;
   app_params.set<std::shared_ptr<Parser>>("_parser") =
