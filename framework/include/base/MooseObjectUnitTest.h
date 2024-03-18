@@ -12,7 +12,6 @@
 #include "gtest/gtest.h"
 
 #include "MooseMesh.h"
-#include "GeneratedMesh.h"
 #include "FEProblem.h"
 #include "AppFactory.h"
 #include "MooseMain.h"
@@ -83,11 +82,13 @@ protected:
   void buildObjects()
   {
     InputParameters mesh_params = _factory.getValidParams("GeneratedMesh");
-    mesh_params.set<std::string>("_object_name") = "name1";
-    mesh_params.set<std::string>("_type") = "GeneratedMesh";
     mesh_params.set<MooseEnum>("dim") = "3";
-    _mesh = std::make_unique<GeneratedMesh>(mesh_params);
+    mesh_params.set<unsigned int>("nx") = 2;
+    mesh_params.set<unsigned int>("ny") = 2;
+    mesh_params.set<unsigned int>("nz") = 2;
+    _mesh = _factory.create<MooseMesh>("GeneratedMesh", "name1", mesh_params);
     _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    _mesh->buildMesh();
 
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
@@ -97,8 +98,22 @@ protected:
     _fe_problem->createQRules(QGAUSS, FIRST, FIRST, FIRST);
   }
 
-  std::unique_ptr<MooseMesh> _mesh;
+  template <typename T>
+  T & addObject(const std::string & type, const std::string & name, InputParameters & params);
+
+  std::shared_ptr<MooseMesh> _mesh;
   std::shared_ptr<MooseApp> _app;
   Factory & _factory;
   std::shared_ptr<FEProblem> _fe_problem;
 };
+
+template <typename T>
+T &
+MooseObjectUnitTest::addObject(const std::string & type,
+                               const std::string & name,
+                               InputParameters & params)
+{
+  auto objects = _fe_problem->addObject<T>(type, name, params);
+  mooseAssert(objects.size() == 1, "Doesn't work with threading");
+  return *objects[0];
+}

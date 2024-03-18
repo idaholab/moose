@@ -275,8 +275,8 @@ OversampleOutput::cloneMesh()
     mesh_params.set<MeshFileName>("file") = getParam<MeshFileName>("file");
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
-    mesh_params.set<std::string>("_object_name") = "output_problem_mesh";
-    mesh_params.finalizeParams("Mesh");
+    _cloned_mesh_ptr =
+        _app.getFactory().create<MooseMesh>("FileMesh", "output_problem_mesh", mesh_params);
     _cloned_mesh_ptr = std::make_unique<FileMesh>(mesh_params);
     _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _cloned_mesh_ptr->init();

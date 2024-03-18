@@ -621,8 +621,8 @@ InputParameters::checkParams(const std::string & parsing_syntax)
 }
 
 void
-InputParameters::finalizeParams(const std::string & parsing_syntax,
-                                const std::filesystem::path & default_file_base)
+InputParameters::finalize(const std::string & parsing_syntax,
+                          const std::filesystem::path & default_file_base)
 {
   mooseAssert(!isFinalized(), "Already finalized");
 

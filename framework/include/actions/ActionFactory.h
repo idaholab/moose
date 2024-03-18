@@ -100,6 +100,13 @@ public:
    */
   bool isRegisteredTask(const std::string & task) const { return _tasks.count(task); }
 
+  /**
+   * @return Whether or not this is currently creating an object
+   *
+   * Can be used to ensure that all Actions are created using the ActionFactory
+   */
+  bool currentlyConstructing() const { return _currently_constructing; }
+
 private:
   template <class T>
   static std::shared_ptr<Action> buildAction(const InputParameters & parameters)
@@ -119,4 +126,8 @@ private:
 
   /// The registered tasks
   std::set<std::string> _tasks;
+
+  /// Whether or not the factory is currently constructing an object; used to make sure
+  /// that all objects are created by the factory
+  bool _currently_constructing;
 };

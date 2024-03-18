@@ -14,7 +14,7 @@
 // Just for testing...
 #include "Diffusion.h"
 
-Factory::Factory(MooseApp & app) : _app(app) {}
+Factory::Factory(MooseApp & app) : _app(app), _currently_constructing(false) {}
 
 Factory::~Factory() {}
 
@@ -118,7 +118,7 @@ Factory::create(const std::string & obj_name,
   params.set<std::string>("_type") = obj_name;
 
   // Check to make sure that all required parameters are supplied
-  params.finalizeParams(name, _app.getInputFileBase());
+  params.finalize(name, _app.getInputFileBase());
 
   // register type name as constructed
   _constructed_types.insert(obj_name);
@@ -128,7 +128,9 @@ Factory::create(const std::string & obj_name,
     _app.actionWarehouse().problemBase()->setInputParametersFEProblem(params);
 
   // call the function pointer to build the object
+  _currently_constructing = true;
   auto obj = it->second->build(params);
+  _currently_constructing = false;
 
   auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
   if (fep)

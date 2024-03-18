@@ -133,6 +133,13 @@ public:
 
   MooseApp & app() { return _app; }
 
+  /**
+   * @return Whether or not this is currently creating an object
+   *
+   * Can be used to ensure that all MooseObjects are created using the Factory
+   */
+  bool currentlyConstructing() const { return _currently_constructing; }
+
 private:
   /**
    * Parse time string (mm/dd/yyyy HH:MM)
@@ -183,4 +190,8 @@ private:
   /// again - which is okay/allowed, while still allowing us to detect/reject cases of duplicate
   /// object name registration where the label/appname is not identical.
   std::set<std::pair<std::string, std::string>> _objects_by_label;
+
+  /// Whether or not the factory is currently constructing an object; used to make sure
+  /// that all objects are created by the factory
+  bool _currently_constructing;
 };

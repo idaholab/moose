@@ -13,7 +13,7 @@
 #include "InputParameterWarehouse.h"
 #include "MooseObjectAction.h"
 
-ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
+ActionFactory::ActionFactory(MooseApp & app) : _app(app), _currently_constructing(false) {}
 
 ActionFactory::~ActionFactory() {}
 
@@ -52,7 +52,7 @@ ActionFactory::create(const std::string & action,
       unique_action_name, incoming_parser_params);
 
   // Check and finalize the parameters
-  action_params.finalizeParams(action_name, _app.getInputFileBase());
+  action_params.finalize(action_name, _app.getInputFileBase());
 
   iters = _name_to_build_info.equal_range(action);
   BuildInfo * build_info = &(iters.first->second);
@@ -68,10 +68,14 @@ ActionFactory::create(const std::string & action,
     if (const auto hit_node = _app.getCurrentActionHitNode())
       action_params.setHitNode(*hit_node, {});
 
-  // Add the name to the parameters and create the object
+  // Add the name to the parameters
   action_params.set<std::string>("_action_name") = action_name;
   action_params.set<std::string>("_unique_action_name") = unique_action_name;
+
+  // Create the object
+  _currently_constructing = true;
   std::shared_ptr<Action> action_obj = build_info->_obj_pointer->buildAction(action_params);
+  _currently_constructing = false;
 
   if (action_params.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);

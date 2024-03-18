@@ -677,9 +677,8 @@ public:
    * This calls checkParams() and sets up the absolute paths for all file name
    * typed parameters.
    */
-  void
-  finalizeParams(const std::string & parsing_syntax,
-                 const std::filesystem::path & default_file_base = std::filesystem::current_path());
+  void finalize(const std::string & parsing_syntax,
+                const std::filesystem::path & default_file_base = std::filesystem::current_path());
 
   /**
    * Methods returning iterators to the coupled variables names stored in this
@@ -1064,7 +1063,7 @@ public:
   void setHitNode(const hit::Node & node, const SetHitNodeKey) { _hit_node = &node; }
 
   /**
-   * @return Whether or not finalizeParams() has been called
+   * @return Whether or not finalize() has been called
    */
   bool isFinalized() const { return _finalized; }
 
@@ -1250,7 +1249,7 @@ private:
   /// The hit node representing the syntax that created these parameters, if any
   const hit::Node * _hit_node;
 
-  /// Whether or not we've called finalizeParams() on these parameters yet
+  /// Whether or not we've called finalize() on these parameters yet
   bool _finalized;
 
   // These are the only objects allowed to _create_ InputParameters

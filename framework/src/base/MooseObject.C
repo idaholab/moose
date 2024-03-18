@@ -11,6 +11,7 @@
 #include "MooseObject.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
+#include "Factory.h"
 
 class FEProblem;
 class FEProblemBase;
@@ -55,4 +56,6 @@ MooseObject::MooseObject(const InputParameters & parameters)
     DataFileInterface<MooseObject>(*this),
     _enabled(getParam<bool>("enable"))
 {
+  mooseAssert(_app.getFactory().currentlyConstructing(),
+              "Object was not created using the Factory");
 }

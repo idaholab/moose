@@ -18,6 +18,7 @@
 #include "DisplacedProblem.h"
 #include "RelationshipManager.h"
 #include "InputParameterWarehouse.h"
+#include "ActionFactory.h"
 
 InputParameters
 Action::validParams()
@@ -74,6 +75,8 @@ Action::Action(const InputParameters & parameters)
     _problem(_awh.problemBase()),
     _act_timer(registerTimedSection("act", 4))
 {
+  mooseAssert(_app.getActionFactory().currentlyConstructing(),
+              "Object was not created using the ActionFactory");
 }
 
 void
