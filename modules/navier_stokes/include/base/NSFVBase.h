@@ -2024,8 +2024,9 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
   }
   else
   {
-    const std::string kernel_type = "INSFVMomentumFriction";
+    const std::string kernel_type = "PINSFVMomentumFriction";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    params.template set<MooseFunctorName>(NS::density) = _density_name;
     params.template set<UserObjectName>("rhie_chow_user_object") =
         prefix() + "ins_rhie_chow_interpolator";
 
@@ -2051,15 +2052,20 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
         {
           const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
           if (upper_name == "DARCY")
-            params.template set<MooseFunctorName>("linear_coef_name") =
-                _friction_coeffs[block_i][type_i];
+          {
+            params.template set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+            params.template set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
+          }
           else if (upper_name == "FORCHHEIMER")
-            params.template set<MooseFunctorName>("quadratic_coef_name") =
+          {
+            params.template set<MooseFunctorName>("Forchheimer_name") =
                 _friction_coeffs[block_i][type_i];
+            params.template set<MooseFunctorName>(NS::speed) = NS::speed;
+          }
         }
 
         getProblem().addFVKernel(kernel_type,
-                                 prefix() + "ins_momentum_friction_" + block_name + "_" +
+                                 prefix() + "momentum_friction_" + block_name + "_" +
                                      NS::directions[d],
                                  params);
       }
