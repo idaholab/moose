@@ -296,7 +296,8 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::setMaterialVectorSize()
 }
 
 void
-CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance(DenseVector<Real> & lattice_resistance)
+CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance(
+    DenseVector<Real> & lattice_resistance)
 {
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
