@@ -16,7 +16,7 @@ The [GaussianProcessHandler.md] is a class which incorporates the necessary data
 functions to create, train, and use Gaussian Processes. One of the most important members
 of this handler class is the covariance function:
 
-!listing GaussianProcessHandler.h line=CovarianceFunctionBase *
+!listing stochastic_tools/include/utils/GaussianProcessHandler.h line=CovarianceFunctionBase *
 
 The covariance function can be initialized in the handler by following the examples
 given in [source description](GaussianProcessHandler.md). Objects like
@@ -31,7 +31,7 @@ using the helper functions. Good examples are the [GaussianProcessTrainer.md] an
 [GaussianProcess.md] which utilize the helper functions to link an input
 covariance function to the [GaussianProcessHandler.md]:
 
-!listing GaussianProcessTrainer.C start=_gp_handler.initialize( end=}
+!listing stochastic_tools/src/trainers/GaussianProcessTrainer.C start=_gp_handler.initialize( end=}
 
 #### In a Surrogate
 

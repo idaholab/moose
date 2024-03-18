@@ -30,25 +30,6 @@ public:
                                            const RealEigenMatrix & B,
                                            const RealEigenMatrix & K) const;
 
-  // /// Used for outputting Hyper-parameter settings
-  // virtual void
-  // buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-  //                    std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
-
-  // /// Used for outputting additional Hyper-parameter settings in derived
-  // virtual void buildAdditionalHyperParamMap(
-  //     std::unordered_map<std::string, Real> & /*map*/,
-  //     std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) const {};
-
-  // /// Used for outputting Hyper-parameter settings for use in surrogate
-  // virtual void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
-  //                                std::unordered_map<std::string, std::vector<Real>> & vec_map);
-
-  // /// Used for outputting Hyper-parameter settings for use in surrogate for derived
-  // virtual void
-  // loadAdditionalHyperParamMap(std::unordered_map<std::string, Real> & /*map*/,
-  //                             std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/){};
-
   /// Compute the gradient of the B matrix
   virtual void computeBGrad(RealEigenMatrix & BGrad,
                             const std::vector<Real> & latent,
@@ -57,23 +38,8 @@ public:
   /// Setup the number of latent params
   virtual unsigned int setupNumLatent(const unsigned int & num_outputs) const;
 
-  // virtual bool isTunable(std::string name) const;
-
-  // virtual void getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const;
-
 protected:
   void kron(const RealEigenMatrix & mat_A,
             const RealEigenMatrix & mat_B,
             RealEigenMatrix & mat_req) const;
-  // /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  // std::vector<Real> _length_factor;
-
-  // /// signal variance (\sigma_f^2)
-  // Real _sigma_f_squared;
-
-  // /// noise variance (\sigma_n^2)
-  // Real _sigma_n_squared;
-
-  // /// list of tunable hyper-parameters
-  // std::unordered_set<std::string> _tunable_hp;
 };

@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#25438'
+  design = 'MultiOutputGaussianProcessTrainer.md MultiOutputGaussianProcess.md'
+  [mogp_tuning]
+    requirement = 'The system shall be be able to tune hyperparameters of a Multi-Output Gaussian process surrogate with '
+    [squared_exponential_ICM]
+      type = 'JSONDiff'
+      input = mogp.i
+      allow_test_objects = true
+      jsondiff = 'mogp_out.json'
+      detail = 'a squared exponential input kernel and ICM output kernel; '
+    []
+  []
+  [mogp_errors]
+    requirement = 'The system shall throw an error when '
+    [optimization_adam_batch_size]
+      type = RunException
+      input = mogp.i
+      cli_args = "Trainers/mogp/batch_size='100'"
+      detail = 'the batch size is greater than the training data set size for Adam optimization. '
+      expect_err = "Batch size cannot be greater than the training data set size."
+    []
+  []
+[]
