@@ -25,8 +25,13 @@ requirements:
     - pyqt
     - matplotlib
     - vtk
-  # Python min/max constraints
+    # Cuda pinnings follow # [linux]
+    - openh264 2.4.1       # [linux]
+    - libvpx 1.14.0        # [linux]
+    - libopenvino 2024.0.0 # [linux]
+
   run_constrained:
+    # Python max constraints
     - python <{{3.12}}
 
 test:

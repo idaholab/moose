@@ -25,6 +25,7 @@ build:
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
 
 requirements:
   build:
@@ -47,9 +48,13 @@ requirements:
     - {{ moose_clangcc }}                     # [osx]
     - {{ moose_clangxx }}                     # [osx]
     - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
-    # Cuda pinning runtime requirement
+    # Cuda pinning runtime requirement        # [linux]
     - kernel-headers_linux-64 3.10.0          # [linux]
     - libxt-devel-cos7-x86_64 1.1.5           # [linux]
+    - libexpat 2.5.0                          # [linux]
+    - expat 2.5.0                             # [linux]
+    - mkl 2022.2.1                            # [linux]
+    # End Cuda pinning                        # [linux]
     - automake 1.16.5
     - bison 3.4
     - zfp 0.5.5
