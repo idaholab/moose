@@ -96,13 +96,23 @@ finite elements for velocity and pressure.'
     cli_args = "n=8 -fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_steady_high_Re"
     petsc_version = '>=3.20.0'
   []
-  [steady_lid_driven_fsp_stokes]
-    type = 'Exodiff'
-    input = 'steady_vector_fsp_stokes.i'
-    exodiff = 'steady_vector_fsp_stokes_exo.e'
-    issues = '#24548'
-    requirement = 'The system shall be able to efficiently precondition Taylor-Hood finite elements using a Schur complement field split with the preconditioner for the Schur complement formed from the pressure mass matrix.'
-    petsc_version = '>=3.20.0'
+  [steady_lid_driven_fsp_pressure_mass_matrix]
+    requirement = 'The system shall be able to efficiently precondition Taylor-Hood finite elements using a Schur complement field split with the preconditioner for the Schur complement formed from the pressure mass matrix for a'
+    issues = '#24548 #27126'
+    [stokes]
+      type = 'Exodiff'
+      input = 'steady_vector_fsp_stokes.i'
+      exodiff = 'steady_vector_fsp_stokes_exo.e'
+      petsc_version = '>=3.20.0'
+      detail = 'a Stokes problem and a'
+    []
+    [high_Re]
+      type = 'Exodiff'
+      input = 'steady_vector_fsp_al.i'
+      exodiff = 'steady_vector_fsp_al_exo.e'
+      petsc_version = '>=3.20.0'
+      detail = 'a high Reynolds number (100) Navier-Stokes problem with a grad-div stabilization.'
+    []
   []
   [ad_lid_driven]
     type = 'Exodiff'
