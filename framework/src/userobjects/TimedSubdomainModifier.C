@@ -55,10 +55,11 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
   // determine function arguments
 
   int bFromData_File =
-      isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") + isParamValid("comment") +
-      isParamValid("time_column_index") + isParamValid("blocks_from_column_index") +
-      isParamValid("blocks_to_column_index") + isParamValid("time_column_text") +
-      isParamValid("blocks_from_column_text") + isParamValid("blocks_to_column_text");
+      isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") +
+      isParamValid("comment") + isParamValid("time_column_index") +
+      isParamValid("blocks_from_column_index") + isParamValid("blocks_to_column_index") +
+      isParamValid("time_column_text") + isParamValid("blocks_from_column_text") +
+      isParamValid("blocks_to_column_text");
 
   int bFromData_File_NeedsHeader = isParamValid("time_column_text") +
                                    isParamValid("blocks_from_column_text") +
