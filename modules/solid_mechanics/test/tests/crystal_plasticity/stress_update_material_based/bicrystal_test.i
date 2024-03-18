@@ -291,5 +291,5 @@
 
 [Outputs]
   csv = true
-  checkpoint = true
+  perf_graph = true
 []

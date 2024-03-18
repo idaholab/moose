@@ -130,7 +130,7 @@ CrystalPlasticityTwinningKalidindiUpdate::setMaterialVectorSize()
 {
   CrystalPlasticityStressUpdateBase::setMaterialVectorSize();
 
-  // Resize non-statefull material properties
+  // Resize non-stateful material properties
   _twin_volume_fraction_increment[_qp].resize(_number_slip_systems);
 }
 
