@@ -8,10 +8,25 @@
       type = 'CSVDiff'
       input = 'update_method_hcp_aprismatic_capyramidal.i'
       csvdiff = 'update_method_hcp_aprismatic_capyramidal_out.csv'
+      cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
       allow_warnings = true
       detail =  'compute the slip system strength and resolved applied shear '
                 'stress for the prismatic<a> and pyramidal<c+a> slip systems when '
                 'loaded along the c-axis;'
+    []
+    [update_method_hcp_aprismatic_capyramidal_restart]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      csvdiff = 'update_method_hcp_aprismatic_capyramidal_restart_out.csv'
+      cli_args = 'Problem/restart_file_base=update_method_hcp_aprismatic_capyramidal_out_cp/LATEST '
+               'Outputs/file_base=update_method_hcp_aprismatic_capyramidal_restart_out '
+               'Executioner/end_time=6'
+      issues = '#26458'
+      allow_warnings = true
+      detail =  'compute the slip system strength and resolved applied shear '
+                'stress for the prismatic<a> and pyramidal<c+a> slip systems in '
+                'an HCP lattice system upon simulation restart.'
+      prereq = 'constitutive_model/update_method_hcp_aprismatic_capyramidal'
     []
     [update_method_hcp_aprismatic_active]
       type = 'CSVDiff'
@@ -34,9 +49,24 @@
       type = 'CSVDiff'
       input = 'update_method_hcp_basal_active.i'
       csvdiff = 'update_method_hcp_basal_active_out.csv'
+      cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
       allow_warnings = true
       detail = 'evolve the forest dislocation densities on basal <a> slip '
                'planes when the crystal is loaded in an appropriate orientation.'
+    []
+    [update_method_hcp_basal_active_restart]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_basal_active.i'
+      csvdiff = 'update_method_hcp_basal_active_restart_out.csv'
+      allow_warnings = true
+      cli_args = 'Problem/restart_file_base=update_method_hcp_basal_active_out_cp/LATEST '
+                 'Outputs/file_base=update_method_hcp_basal_active_restart_out '
+                 'Executioner/end_time=2.75 '
+                 'Executioner/dt=0.125'
+      issues = '#26458'
+      detail = 'continue to evolve the forest dislocation densities on basal <a> slip '
+               'planes upon restart.'
+      prereq = 'constitutive_model/update_method_hcp_basal_active'
     []
     [update_method_hcp_no_substructure]
       type = 'CSVDiff'

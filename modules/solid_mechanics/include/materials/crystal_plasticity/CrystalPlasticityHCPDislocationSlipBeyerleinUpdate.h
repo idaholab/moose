@@ -27,6 +27,7 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
+  virtual void setMaterialVectorSize() override;
 
   virtual void setInitialConstitutiveVariableValues() override;
 
@@ -98,7 +99,7 @@ protected:
    * twins are considered, this method should be overwritten to account for the
    * influence of the twin dislocations.
    */
-  virtual void calculateGrainSizeResistance();
+  virtual void calculateGrainSizeResistance(DenseVector<Real> & lattice_resistance);
 
   /**
    * Determines if the state variables, e.g. defect densities, have converged
@@ -143,10 +144,6 @@ protected:
   ///@{ Initial slip resistance vectors, with values arranaged as
   /// per each slip system mode
   const std::vector<Real> _lattice_friction;
-
-  /// per each individual system system number
-  DenseVector<Real> _initial_lattice_friction;
-  ///@}
 
   ///@{Power-law slip rate calculation coefficients, from Wang et al IJP 49(2013)36-52
   const Real _reference_strain_rate;
