@@ -44,7 +44,7 @@ ElementPointNeighborLayers::ElementPointNeighborLayers(const ElementPointNeighbo
 std::unique_ptr<GhostingFunctor>
 ElementPointNeighborLayers::clone() const
 {
-  return std::make_unique<ElementPointNeighborLayers>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 std::string

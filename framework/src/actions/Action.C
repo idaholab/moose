@@ -75,8 +75,8 @@ Action::Action(const InputParameters & parameters)
     _problem(_awh.problemBase()),
     _act_timer(registerTimedSection("act", 4))
 {
-  mooseAssert(_app.getActionFactory().currentlyConstructing(),
-              "Object was not created using the ActionFactory");
+  if (!_app.getActionFactory().currentlyConstructing())
+    mooseError("This object was not constructed using the ActionFactory, which is not supported.");
 }
 
 void

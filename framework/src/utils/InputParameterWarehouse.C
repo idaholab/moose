@@ -19,7 +19,8 @@ InputParameterWarehouse::InputParameterWarehouse()
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name,
                                             const InputParameters & parameters,
-                                            THREAD_ID tid /* =0 */)
+                                            THREAD_ID tid,
+                                            const AddRemoveParamsKey)
 {
   // Error if the name contains "::"
   if (name.find("::") != std::string::npos)
@@ -105,7 +106,9 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
 }
 
 void
-InputParameterWarehouse::removeInputParameters(const MooseObject & moose_object, THREAD_ID tid)
+InputParameterWarehouse::removeInputParameters(const MooseObject & moose_object,
+                                               THREAD_ID tid,
+                                               const AddRemoveParamsKey)
 {
   auto moose_object_name_string = moose_object.parameters().get<std::string>("_unique_name");
   MooseObjectName moose_object_name(moose_object_name_string);

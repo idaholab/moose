@@ -38,7 +38,7 @@ AugmentSparsityBetweenElements::AugmentSparsityBetweenElements(
 std::unique_ptr<GhostingFunctor>
 AugmentSparsityBetweenElements::clone() const
 {
-  return std::make_unique<AugmentSparsityBetweenElements>(*this);
+  return _app.getFactory().clone(*this);
 }
 
 void

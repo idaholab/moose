@@ -111,3 +111,9 @@ ProxyRelationshipManager::operator>=(const RelationshipManager & /*rhs*/) const
   // There isn't a need to determine these because only the correct ones will be added
   return false;
 }
+
+std::unique_ptr<GhostingFunctor>
+ProxyRelationshipManager::clone() const
+{
+  return _app.getFactory().copyConstruct(*this);
+}

@@ -49,7 +49,7 @@ ActionFactory::create(const std::string & action,
       action + incoming_parser_params.get<std::string>("task") + full_action_name;
   // Create the actual parameters object that the object will reference
   InputParameters & action_params = _app.getInputParameterWarehouse().addInputParameters(
-      unique_action_name, incoming_parser_params);
+      unique_action_name, incoming_parser_params, 0, {});
 
   // Check and finalize the parameters
   action_params.finalize(action_name, _app.getInputFileBase());

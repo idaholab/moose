@@ -13,10 +13,8 @@
 
 #include "MooseBase.h"
 #include "InputParameters.h"
-#include "Registry.h"
 #include "MooseUtils.h"
 #include "MooseObjectParameterName.h"
-#include "MooseBase.h"
 
 #include <string>
 

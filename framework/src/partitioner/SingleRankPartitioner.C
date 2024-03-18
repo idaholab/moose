@@ -9,6 +9,8 @@
 
 #include "SingleRankPartitioner.h"
 
+#include "MooseApp.h"
+
 #include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", SingleRankPartitioner);
@@ -35,7 +37,7 @@ SingleRankPartitioner::SingleRankPartitioner(const InputParameters & params)
 std::unique_ptr<Partitioner>
 SingleRankPartitioner::clone() const
 {
-  return std::make_unique<SingleRankPartitioner>(_pars);
+  return _app.getFactory().clone(*this);
 }
 
 void

@@ -76,3 +76,9 @@ GhostLowerDElems::operator>=(const RelationshipManager & other) const
 {
   return dynamic_cast<const GhostLowerDElems *>(&other);
 }
+
+std::unique_ptr<GhostingFunctor>
+GhostLowerDElems::clone() const
+{
+  return _app.getFactory().copyConstruct(*this);
+}

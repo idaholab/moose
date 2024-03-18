@@ -95,7 +95,7 @@ private:
   bool _oversample_mesh_changed;
 
   std::unique_ptr<EquationSystems> _oversample_es;
-  std::shared_ptr<MooseMesh> _cloned_mesh_ptr;
+  std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
 
   /// Oversample solution vector
   /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the

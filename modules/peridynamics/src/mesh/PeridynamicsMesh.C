@@ -104,7 +104,7 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
 std::unique_ptr<MooseMesh>
 PeridynamicsMesh::safeClone() const
 {
-  return std::make_unique<PeridynamicsMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

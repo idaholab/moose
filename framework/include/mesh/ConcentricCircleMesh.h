@@ -25,10 +25,7 @@ public:
   ConcentricCircleMesh(const ConcentricCircleMesh & /* other_mesh */) = default;
 
   ConcentricCircleMesh & operator=(const ConcentricCircleMesh & other_mesh) = delete;
-  virtual std::unique_ptr<MooseMesh> safeClone() const override
-  {
-    return std::make_unique<ConcentricCircleMesh>(*this);
-  }
+  virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;
 
