@@ -112,7 +112,7 @@ Factory::create(const std::string & obj_name,
                 bool print_deprecated /* =true */)
 {
   std::shared_ptr<MooseObject> object =
-      std::move(createUnique(obj_name, name, parameters, tid, print_deprecated));
+      createUnique(obj_name, name, parameters, tid, print_deprecated);
 
   if (auto fep = std::dynamic_pointer_cast<FEProblemBase>(object))
     _app.actionWarehouse().problemBase() = fep;
