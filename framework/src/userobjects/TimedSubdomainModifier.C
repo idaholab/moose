@@ -29,6 +29,7 @@ TimedSubdomainModifier::validParams()
   params.addParam<bool>("header",
                         "Indicates whether the file contains a header with the column names");
   params.addParam<std::string>("delimiter", ",", "Delimiter used to parse the file");
+  params.addParam<std::string>("comment", "#", "Comment character used to parse the file");
   params.addParam<size_t>(
       "time_column_index", 0, "Zero-based index of the time column. Default is '0'.");
   params.addParam<size_t>(
@@ -39,7 +40,7 @@ TimedSubdomainModifier::validParams()
   params.addParam<std::string>("blocks_from_column_text", "Header text of the blocks_from column.");
   params.addParam<std::string>("blocks_to_column_text", "Header text of the blocks_to column.");
   params.addParamNamesToGroup(
-      "data_file header delimiter time_column_index blocks_from_column_index "
+      "data_file header delimiter comment time_column_index blocks_from_column_index "
       "blocks_to_column_index time_column_text blocks_from_column_text blocks_to_column_text",
       "Data input from file.");
 
@@ -54,7 +55,7 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
   // determine function arguments
 
   int bFromData_File =
-      isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") +
+      isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") + isParamValid("comment") +
       isParamValid("time_column_index") + isParamValid("blocks_from_column_index") +
       isParamValid("blocks_to_column_index") + isParamValid("time_column_text") +
       isParamValid("blocks_from_column_text") + isParamValid("blocks_to_column_text");
@@ -176,10 +177,17 @@ TimedSubdomainModifier::buildFromFile()
     _delimiter = getParam<std::string>("delimiter");
   };
 
+  std::string _comment = ",";
+  if (isParamValid("comment"))
+  {
+    _comment = getParam<std::string>("comment");
+  };
+
   MooseUtils::DelimitedFileReaderOfString file(_file_name);
 
   file.setHeaderFlag(_header_flag);
   file.setDelimiter(_delimiter);
+  file.setComment(_comment);
   file.read();
 
   size_t _time_column = 0;
