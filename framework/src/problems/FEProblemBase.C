@@ -3805,7 +3805,7 @@ FEProblemBase::addReporter(const std::string & type,
   addUserObject(type, name, parameters);
 }
 
-void
+std::vector<std::shared_ptr<UserObject>>
 FEProblemBase::addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters)
@@ -3875,6 +3875,8 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
       if (_displaced_problem)
         _displaced_problem->addFunctor(name, *functor, tid);
     }
+
+  return uos;
 }
 
 const UserObject &

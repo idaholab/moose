@@ -677,8 +677,9 @@ public:
    * This calls checkParams() and sets up the absolute paths for all file name
    * typed parameters.
    */
-  void finalizeParams(const std::string & parsing_syntax,
-                      const std::filesystem::path & default_file_base);
+  void
+  finalizeParams(const std::string & parsing_syntax,
+                 const std::filesystem::path & default_file_base = std::filesystem::current_path());
 
   /**
    * Methods returning iterators to the coupled variables names stored in this

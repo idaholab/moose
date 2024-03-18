@@ -79,9 +79,6 @@ protected:
   // The axis around which the radius is determined
   const unsigned int _axis;
 
-  // The list of InputParameter objects. This is a list because these cannot be copied (or moved).
-  std::list<InputParameters> _sub_params;
-
   using BaseType::_communicator;
   using BaseType::_current_elem;
   using BaseType::isParamValid;
@@ -131,15 +128,28 @@ NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParamete
 
   _user_objects.reserve(_points.size());
 
-  // Build each of the UserObject objects:
+  // Build each of the UserObject objects that we will manage manually
+  // If you're looking at this in the future and want to replace this behavior,
+  // _please_ don't do it. MOOSE should manage these objects.
   for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
-    auto sub_params = emptyInputParameters();
-    sub_params += parameters;
-    sub_params.set<std::string>("_object_name") = name() + "_sub" + std::to_string(i);
+    // Take the parameters from this object and apply the relevant ones
+    // to the UOs at each point
+    const auto uo_type = MooseUtils::prettyCppType<UserObjectType>();
+    auto sub_params = this->_app.getFactory().getValidParams(uo_type);
+    sub_params.applyParameters(parameters);
 
-    _sub_params.push_back(sub_params);
-    _user_objects.emplace_back(std::make_shared<UserObjectType>(_sub_params.back()));
+    // We're managing these on our own... unfortunately
+    sub_params.template set<ExecFlagEnum>("execute_on") = {};
+    // Before these UOs were owned by MOOSE, they didn't output their values
+    // when they were postprocessors. Retain this behavior
+    if (sub_params.template have_parameter<std::vector<OutputName>>("outputs"))
+      sub_params.template set<std::vector<OutputName>>("outputs") = {"none"};
+
+    const auto sub_name = name() + "_sub" + std::to_string(i);
+    auto uos = this->_fe_problem.addUserObject(uo_type, sub_name, sub_params);
+    mooseAssert(uos.size() == 1, "Not setup to work with threading");
+    _user_objects.emplace_back(std::dynamic_pointer_cast<UserObjectType>(uos[0]));
   }
 }
 
