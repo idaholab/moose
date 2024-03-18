@@ -51,11 +51,10 @@ requirements:
     # Cuda pinning runtime requirement        # [linux]
     - kernel-headers_linux-64 3.10.0          # [linux]
     - libxt-devel-cos7-x86_64 1.1.5           # [linux]
-    - libexpat 2.5.0                          # [linux]
-    - expat 2.5.0                             # [linux]
     - mkl 2022.2.1                            # [linux]
     # End Cuda pinning                        # [linux]
     - automake 1.16.5
+    - libexpat 2.5.0
     - bison 3.4
     - zfp 0.5.5
     - gfortran
