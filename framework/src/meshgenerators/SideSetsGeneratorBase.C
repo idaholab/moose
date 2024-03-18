@@ -232,7 +232,7 @@ SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1,
 
 bool
 SideSetsGeneratorBase::elementSubdomainIdInList(
-    const Elem * elem, const std::vector<subdomain_id_type> & subdomain_id_list) const
+    const Elem * const elem, const std::vector<subdomain_id_type> & subdomain_id_list) const
 {
   subdomain_id_type curr_subdomain = elem->subdomain_id();
   return std::find(subdomain_id_list.begin(), subdomain_id_list.end(), curr_subdomain) !=
@@ -240,8 +240,8 @@ SideSetsGeneratorBase::elementSubdomainIdInList(
 }
 
 bool
-SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * elem,
-                                                       const uint & side,
+SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * const elem,
+                                                       const unsigned int side,
                                                        const MeshBase & mesh) const
 {
   for (const auto bid : _restricted_boundary_ids)
@@ -251,8 +251,8 @@ SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * elem,
 }
 
 bool
-SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * elem,
-                                                     const uint & side,
+SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
+                                                     const unsigned int & side,
                                                      const MeshBase & mesh,
                                                      const Point & desired_normal,
                                                      const Point & face_normal)

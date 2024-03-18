@@ -22,16 +22,12 @@ SideSetsBetweenSubdomainsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "primary_block",
-      "The primary set of blocks for which to draw a sideset between",
-      "Deprecated, use 'included_subdomains'");
-  params.deprecateParam("primary_block", "included_subdomains", "4/01/25");
-  params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "paired_block",
-      "The paired set of blocks for which to draw a sideset between",
-      "Deprecated, use 'included_neighbors'");
-  params.deprecateParam("paired_block", "included_neighbors", "4/01/25");
+  params.renameParam("included_subdomains",
+                     "primary_block",
+                     "The primary set of blocks for which to draw a sideset between");
+  params.renameParam("included_neighbors",
+                     "paired_block",
+                     "The paired set of blocks for which to draw a sideset between");
   params.addClassDescription("MeshGenerator that creates a sideset composed of the nodes located "
                              "between two or more subdomains.");
 

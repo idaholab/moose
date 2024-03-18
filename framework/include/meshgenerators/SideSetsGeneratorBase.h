@@ -63,23 +63,23 @@ protected:
   /**
    * Determines whether the given element's subdomain id is in the given subdomain_id_list.
    */
-  bool elementSubdomainIdInList(const Elem * elem,
+  bool elementSubdomainIdInList(const Elem * const elem,
                                 const std::vector<subdomain_id_type> & subdomain_id_list) const;
 
   /**
-   * Determines whether the boundary id of the given side of an element is in the
+   * Determines whether the given side of an element belongs to any boundaries in the
    * included_boundaries parameter.
    */
-  bool elementSideInIncludedBoundaries(const Elem * elem,
-                                       const uint & side,
+  bool elementSideInIncludedBoundaries(const Elem * const elem,
+                                       const unsigned int side,
                                        const MeshBase & mesh) const;
 
   /**
    * Determines whether the given element's side satisfies the following parameters:
    * include_only_external_sides, included_boundaries, included_neighbor_subdomains and normal
    */
-  bool elemSideSatisfiesRequirements(const Elem * elem,
-                                     const uint & side,
+  bool elemSideSatisfiesRequirements(const Elem * const elem,
+                                     const unsigned int & side,
                                      const MeshBase & mesh,
                                      const Point & normal,
                                      const Point & face_normal);
@@ -99,16 +99,16 @@ protected:
   /// whether to check boundary ids when adding sides or not
   const bool _check_boundaries;
 
-  /// whether to check subdomain ids of the element in the (element, side, boundary id) tupule when adding sides
+  /// whether to check subdomain ids of the element in the (element, side, boundary id) tuple when adding sides
   const bool _check_subdomains;
 
   /// whether to check the subdomain ids of the neighbor element (on the other 'side' of the side) when adding sides
   const bool _check_neighbor_subdomains;
 
-  /// A list of included boundary ids that the side has to be part of
+  /// A list of included boundary ids that the side has to be part of, extracted from the included_boundaries parameter
   std::vector<boundary_id_type> _restricted_boundary_ids;
 
-  /// A list of included subdomain ids that the side has to be part of
+  /// A list of included subdomain ids that the side has to be part of, extracted from the included_subdomains parameter
   std::vector<subdomain_id_type> _included_subdomain_ids;
 
   /// A list of included neighbor subdomain ids

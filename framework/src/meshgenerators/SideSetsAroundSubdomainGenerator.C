@@ -25,11 +25,7 @@ SideSetsAroundSubdomainGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "block",
-      "The blocks around which to create sidesets",
-      "Deprecated, use 'included_subdomains' instead");
-  params.deprecateParam("block", "included_subdomains", "4/01/25");
+  params.renameParam("included_subdomains", "block", "The blocks around which to create sidesets");
 
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
