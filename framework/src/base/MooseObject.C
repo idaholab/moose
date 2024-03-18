@@ -56,6 +56,6 @@ MooseObject::MooseObject(const InputParameters & parameters)
     DataFileInterface<MooseObject>(*this),
     _enabled(getParam<bool>("enable"))
 {
-  if (!_app.getFactory().currentlyConstructing())
+  if (_app.getFactory().currentlyConstructing() != &parameters)
     mooseError("This object was not constructed using the Factory, which is not supported.");
 }

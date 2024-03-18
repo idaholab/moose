@@ -159,11 +159,12 @@ public:
   MooseApp & app() { return _app; }
 
   /**
-   * @return Whether or not this is currently creating an object
+   * @return The InputParameters for the object that is currently being constructed,
+   * if any.
    *
    * Can be used to ensure that all MooseObjects are created using the Factory
    */
-  bool currentlyConstructing() const { return _currently_constructing; }
+  const InputParameters * currentlyConstructing() const;
 
 private:
   /**
@@ -233,9 +234,10 @@ private:
   /// object name registration where the label/appname is not identical.
   std::set<std::pair<std::string, std::string>> _objects_by_label;
 
-  /// Whether or not the factory is currently constructing an object; used to make sure
-  /// that all objects are created by the factory
-  bool _currently_constructing;
+  /// The object's parameters that are currently being constructed (if any).
+  /// This is a vector because we create within create, thus the last entry is the
+  /// one that is being constructed at the moment
+  std::vector<const InputParameters *> _currently_constructing;
 
   /// Counter for keeping track of the number of times an object with a given name has
   /// been cloned so that we can continue to create objects with unique names
@@ -293,9 +295,9 @@ Factory::clone(const T & object)
   const auto & params = initialize(type, name, cloned_params, 0);
 
   // Construct the object
-  _currently_constructing = true;
+  _currently_constructing.push_back(&params);
   auto cloned_object = std::make_unique<T>(params);
-  _currently_constructing = false;
+  _currently_constructing.pop_back();
 
   // Do some sanity checking
   finalize(type, *cloned_object);
@@ -314,9 +316,9 @@ Factory::copyConstruct(const T & object)
   if (!base || (*base != "MooseMesh" && *base != "RelationshipManager"))
     mooseError("Copy construction of ", type, " objects is not supported.");
 
-  _currently_constructing = true;
+  _currently_constructing.push_back(&object.parameters());
   auto cloned_object = std::make_unique<T>(object);
-  _currently_constructing = false;
+  _currently_constructing.pop_back();
 
   finalize(type, *cloned_object);
 

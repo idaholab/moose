@@ -101,11 +101,12 @@ public:
   bool isRegisteredTask(const std::string & task) const { return _tasks.count(task); }
 
   /**
-   * @return Whether or not this is currently creating an object
+   * @return The InputParameters for the object that is currently being constructed,
+   * if any.
    *
    * Can be used to ensure that all Actions are created using the ActionFactory
    */
-  bool currentlyConstructing() const { return _currently_constructing; }
+  const InputParameters * currentlyConstructing() const;
 
 private:
   template <class T>
@@ -127,7 +128,8 @@ private:
   /// The registered tasks
   std::set<std::string> _tasks;
 
-  /// Whether or not the factory is currently constructing an object; used to make sure
-  /// that all objects are created by the factory
-  bool _currently_constructing;
+  /// The object's parameters that are currently being constructed (if any).
+  /// This is a vector because we create within create, thus the last entry is the
+  /// one that is being constructed at the moment
+  std::vector<const InputParameters *> _currently_constructing;
 };

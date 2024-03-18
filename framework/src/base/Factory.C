@@ -14,7 +14,7 @@
 // Just for testing...
 #include "Diffusion.h"
 
-Factory::Factory(MooseApp & app) : _app(app), _currently_constructing(false) {}
+Factory::Factory(MooseApp & app) : _app(app) {}
 
 Factory::~Factory() {}
 
@@ -92,12 +92,14 @@ Factory::createUnique(const std::string & obj_name,
   if (print_deprecated)
     mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
 
-  auto & params = initialize(obj_name, name, parameters, tid);
+  // Build the parameters that are stored in the InputParameterWarehouse for this
+  // object, set a few other things and do a little error checking
+  auto & warehouse_params = initialize(obj_name, name, parameters, tid);
 
   // call the function pointer to build the object
-  _currently_constructing = true;
-  auto obj = _name_to_object.at(obj_name)->build(params);
-  _currently_constructing = false;
+  _currently_constructing.push_back(&warehouse_params);
+  auto obj = _name_to_object.at(obj_name)->build(warehouse_params);
+  _currently_constructing.pop_back();
 
   finalize(obj_name, *obj);
 
@@ -245,6 +247,12 @@ Factory::getConstructedObjects() const
   for (const auto & name : _constructed_types)
     list.push_back(name);
   return list;
+}
+
+const InputParameters *
+Factory::currentlyConstructing() const
+{
+  return _currently_constructing.size() ? _currently_constructing.back() : nullptr;
 }
 
 FileLineInfo

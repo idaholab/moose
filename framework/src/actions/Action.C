@@ -75,7 +75,7 @@ Action::Action(const InputParameters & parameters)
     _problem(_awh.problemBase()),
     _act_timer(registerTimedSection("act", 4))
 {
-  if (!_app.getActionFactory().currentlyConstructing())
+  if (_app.getActionFactory().currentlyConstructing() != &parameters)
     mooseError("This object was not constructed using the ActionFactory, which is not supported.");
 }
 

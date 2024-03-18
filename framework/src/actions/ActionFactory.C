@@ -13,7 +13,7 @@
 #include "InputParameterWarehouse.h"
 #include "MooseObjectAction.h"
 
-ActionFactory::ActionFactory(MooseApp & app) : _app(app), _currently_constructing(false) {}
+ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 
 ActionFactory::~ActionFactory() {}
 
@@ -73,9 +73,9 @@ ActionFactory::create(const std::string & action,
   action_params.set<std::string>("_unique_action_name") = unique_action_name;
 
   // Create the object
-  _currently_constructing = true;
+  _currently_constructing.push_back(&action_params);
   std::shared_ptr<Action> action_obj = build_info->_obj_pointer->buildAction(action_params);
-  _currently_constructing = false;
+  _currently_constructing.pop_back();
 
   if (action_params.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
@@ -161,6 +161,13 @@ ActionFactory::getTasksByAction(const std::string & action) const
 
   return tasks;
 }
+
+const InputParameters *
+ActionFactory::currentlyConstructing() const
+{
+  return _currently_constructing.size() ? _currently_constructing.back() : nullptr;
+}
+
 FileLineInfo
 ActionFactory::getLineInfo(const std::string & name, const std::string & task) const
 {
