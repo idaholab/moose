@@ -62,8 +62,8 @@ MultiOutputGaussianProcessHandler::linkCovarianceFunction(
 
 void
 MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                                              const RealEigenMatrix & training_data,
-                                              const GPOptimizerOptions & opts)
+                                                         const RealEigenMatrix & training_data,
+                                                         const GPOptimizerOptions & opts)
 {
   const bool batch_decision = opts.batch_size > 0 && opts.batch_size <= training_params.rows();
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
@@ -94,8 +94,7 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
   _output_covariance->computeFullCovarianceMatrix(_kappa, _B, _K);
   // Compute the Cholesky decomposition and inverse action of the covariance matrix
   RealEigenMatrix vectorize_out;
-  vectorize_out =
-      training_data.reshaped(training_params.rows() * training_data.cols(), 1);
+  vectorize_out = training_data.reshaped(training_params.rows() * training_data.cols(), 1);
   setupStoredMatrices(vectorize_out);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -110,8 +109,8 @@ MultiOutputGaussianProcessHandler::setupStoredMatrices(const RealEigenMatrix & i
 
 void
 MultiOutputGaussianProcessHandler::generateTuningMap(const std::vector<std::string> params_to_tune,
-                                          std::vector<Real> min_vector,
-                                          std::vector<Real> max_vector)
+                                                     std::vector<Real> min_vector,
+                                                     std::vector<Real> max_vector)
 {
   _num_tunable_inp = 0;
 
@@ -159,11 +158,11 @@ MultiOutputGaussianProcessHandler::standardizeData(RealEigenMatrix & data)
 
 void
 MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                                            const RealEigenMatrix & training_data,
-                                            unsigned int iter,
-                                            const unsigned int & batch_size,
-                                            const Real & learning_rate,
-                                            const bool & show_optimization_details)
+                                                       const RealEigenMatrix & training_data,
+                                                       unsigned int iter,
+                                                       const unsigned int & batch_size,
+                                                       const Real & learning_rate,
+                                                       const bool & show_optimization_details)
 {
   libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable_inp);
   _batch_size = batch_size;
@@ -217,7 +216,8 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
       m_hat = m0[ii] / (1 - std::pow(b1, (ss + 1)));
       v_hat = v0[ii] / (1 - std::pow(b2, (ss + 1)));
       if (ii < _num_tunable_inp)
-        new_val = theta(ii) - 1.0 * (learning_rate * m_hat / (std::sqrt(v_hat) + eps) + lambda * theta(ii));
+        new_val = theta(ii) -
+                  1.0 * (learning_rate * m_hat / (std::sqrt(v_hat) + eps) + lambda * theta(ii));
       else
         new_val = _latent[ii - _num_tunable_inp] -
                   1.0 * (learning_rate * m_hat / (std::sqrt(v_hat) + eps) +
@@ -252,15 +252,15 @@ MultiOutputGaussianProcessHandler::getLoss(RealEigenMatrix & inputs, RealEigenMa
   setupStoredMatrices(outputs);
   Real log_likelihood = 0;
   log_likelihood += -(outputs.transpose() * _kappa_results_solve)(0, 0);
-  log_likelihood += -std::log(std::pow(_K.determinant(), _B.rows()) * std::pow(_B.determinant(), _K.rows()));
+  log_likelihood +=
+      -std::log(std::pow(_K.determinant(), _B.rows()) * std::pow(_B.determinant(), _K.rows()));
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   return log_likelihood;
 }
 
 std::vector<Real>
-MultiOutputGaussianProcessHandler::getGradient(
-    RealEigenMatrix & inputs)
+MultiOutputGaussianProcessHandler::getGradient(RealEigenMatrix & inputs)
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix B_grad(_B.rows(), _B.rows());

@@ -18,7 +18,8 @@ InputParameters
 MultiOutputGaussianProcess::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
-  params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
+  params.addClassDescription(
+      "Computes and evaluates Multi-Output Gaussian Process surrogate model.");
   return params;
 }
 
@@ -89,7 +90,7 @@ MultiOutputGaussianProcess::evaluate(const std::vector<Real> & x, std::vector<Re
   y.assign(mogp_mean.rows() * 4, 0.0);
   for (unsigned int i = 0; i < mogp_mean.rows(); ++i)
     y[i] = mogp_mean(i, 0);
-  for (unsigned int i = mogp_mean.rows(); i < 2*mogp_mean.rows(); ++i)
+  for (unsigned int i = mogp_mean.rows(); i < 2 * mogp_mean.rows(); ++i)
     y[i] = std::sqrt(covar_test(i - mogp_mean.rows(), i - mogp_mean.rows()));
 
   // Broadcast unnormalized mean and std to SurrogateModel

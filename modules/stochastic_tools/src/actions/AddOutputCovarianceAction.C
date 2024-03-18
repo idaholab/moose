@@ -23,7 +23,8 @@ AddOutputCovarianceAction::validParams()
   return params;
 }
 
-AddOutputCovarianceAction::AddOutputCovarianceAction(const InputParameters & params) : MooseObjectAction(params)
+AddOutputCovarianceAction::AddOutputCovarianceAction(const InputParameters & params)
+  : MooseObjectAction(params)
 {
 }
 

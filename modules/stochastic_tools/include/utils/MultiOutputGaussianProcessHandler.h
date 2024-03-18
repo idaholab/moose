@@ -89,8 +89,8 @@ public:
    * @param covariance_function Pointer to the covariance function that
    *                            needs to be used for the Gaussian Process.
    */
-  void linkCovarianceFunction(
-      OutputCovarianceBase * output_covariance, CovarianceFunctionBase * covariance_function);
+  void linkCovarianceFunction(OutputCovarianceBase * output_covariance,
+                              CovarianceFunctionBase * covariance_function);
 
   /**
    * Sets up the tuning map which is used if the user requires parameter tuning.
@@ -156,8 +156,7 @@ public:
   const RealEigenMatrix & getKappa() const { return _kappa; }
   const std::vector<Real> & getLatent() const { return _latent; }
   const RealEigenMatrix & getKappaResultsSolve() const { return _kappa_results_solve; }
-  const Eigen::LDLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp;
-  }
+  const Eigen::LDLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
   const RealEigenMatrix & getBatchInputs() const { return _batch_inputs; }
   const RealEigenMatrix & getBatchOutputs() const { return _batch_outputs; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }

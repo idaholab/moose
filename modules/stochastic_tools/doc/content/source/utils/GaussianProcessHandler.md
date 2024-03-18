@@ -13,12 +13,12 @@ and their corresponding decomposition and inverse action.
 The object which requires access to Gaussian Process-related functionalities shall
 have it as a member variable, which is important to enable restarting capabilities:
 
-!listing GaussianProcessTrainer.h line=StochasticTools::GaussianProcessHandler & _gp_handler;
+!listing stochastic_tools/include/trainers/GaussianProcessTrainer.h line=StochasticTools::GaussianProcessHandler & _gp_handler;
 
 An important step is the initialization of the covariance function, which can
 either be done using the `initialize` function as in [GaussianProcessTrainer.md]:
 
-!listing GaussianProcessTrainer.C start=_gp_handler.initialize(
+!listing stochastic_tools/src/trainers/GaussianProcessTrainer.C start=_gp_handler.initialize(
                                   end=}
 
 Or by linking it directly as in [GaussianProcess.md]:
@@ -31,7 +31,7 @@ Once the covariance function has been added to the handler, one can use it to
 create a covariance matrix by either using `setupCovarianceMatrix` as in
 [GaussianProcessTrainer.md]:
 
-!listing GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix(
+!listing stochastic_tools/src/trainers/GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix(
                                   end=}
 
 Or by simply calling the covariance matrix builder as in [GaussianProcess.md]:
@@ -45,13 +45,13 @@ have hyper parameters that need to be optimized to be able to get accurate
 predictions from the corresponding Gaussian Processes. We can optimize these
 parameters during the generation of the Covariance matrix:
 
-!listing GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix( end=}
+!listing stochastic_tools/src/trainers/GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix( end=}
 
 Or by simply calling the optimizer with TAO (deterministic algorithms):
 
-!listing GaussianProcessHandler.C start=tuneHyperParamsTAO end=)) include-end=True
+!listing stochastic_tools/src/utils/GaussianProcessHandler.C start=tuneHyperParamsTAO end=)) include-end=True
 
 or with Adam (stochastic algorithm):
 
-!listing GaussianProcessHandler.C start=tuneHyperParamsAdam(training_params end=);
+!listing stochastic_tools/src/utils/GaussianProcessHandler.C start=tuneHyperParamsAdam(training_params end=);
 

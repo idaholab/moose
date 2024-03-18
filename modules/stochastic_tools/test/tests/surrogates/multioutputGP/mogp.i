@@ -17,13 +17,13 @@
 [Samplers]
   [sample]
     type = LatinHypercube
-    num_rows = 200
+    num_rows = 20 # 200
     distributions = 'k_dist bc_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
   [test]
     type = LatinHypercube
-    num_rows = 100
+    num_rows = 10 # 100
     distributions = 'k_dist bc_dist'
   []
 []
@@ -93,7 +93,7 @@
     sampler = sample
     tune_parameters = 'signal_variance length_factor'
     iterations = 10000
-    batch_size = 40
+    batch_size = 20
     learning_rate = 5e-4
     show_optimization_details = true
   []
@@ -141,8 +141,8 @@
     execute_on = timestep_end
     vectorpostprocessors_as_reporters = true
   []
-  [out1]
-    type = CSV
-    execute_on = timestep_end
-  []
+  # [out1]
+  #   type = CSV
+  #   execute_on = timestep_end
+  # []
 []

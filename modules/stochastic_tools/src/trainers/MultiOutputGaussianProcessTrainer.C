@@ -25,15 +25,14 @@ InputParameters
 MultiOutputGaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params.addClassDescription(
-      "Provides data preperation and training for a Gaussian Process surrogate model.");
+  params.addClassDescription("Provides data preperation and training for a Multi-Output Gaussian "
+                             "Process surrogate model.");
   params.addRequiredParam<UserObjectName>("output_covariance", "Name of output covariance.");
   params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
   params.addParam<unsigned int>("iterations", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
-  params.addParam<bool>(
-      "show_optimization_details", false, "Switch to show Adam solver results");
+  params.addParam<bool>("show_optimization_details", false, "Switch to show Adam solver results");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   return params;

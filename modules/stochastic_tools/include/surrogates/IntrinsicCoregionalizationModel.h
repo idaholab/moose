@@ -18,7 +18,8 @@ public:
   IntrinsicCoregionalizationModel(const InputParameters & parameters);
 
   /// Generates the B Covariance Matrix for capturing output covariances
-  void computeBCovarianceMatrix(RealEigenMatrix & B, const std::vector<Real> & latent) const override;
+  void computeBCovarianceMatrix(RealEigenMatrix & B,
+                                const std::vector<Real> & latent) const override;
 
   /// Generates the full Covariance Matrix given two points in the parameter space
   // void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
