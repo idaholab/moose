@@ -11,7 +11,6 @@
 #include "OversampleOutput.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
-#include "FileMesh.h"
 #include "MooseApp.h"
 
 #include "libmesh/distributed_mesh.h"
@@ -270,14 +269,11 @@ OversampleOutput::cloneMesh()
   // Create the new mesh from a file
   if (isParamValid("file"))
   {
-    InputParameters mesh_params = emptyInputParameters();
-    mesh_params += _mesh_ptr->parameters();
-    mesh_params.applySpecificParameters(parameters(), {"file"});
+    InputParameters mesh_params = _app.getFactory().getValidParams("FileMesh");
+    mesh_params.applyParameters(parameters(), {}, true);
     mesh_params.set<bool>("nemesis") = false;
-    mesh_params.set<bool>("skip_partitioning") = false;
     _cloned_mesh_ptr =
         _app.getFactory().createUnique<MooseMesh>("FileMesh", "output_problem_mesh", mesh_params);
-    _cloned_mesh_ptr = std::make_unique<FileMesh>(mesh_params);
     _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _cloned_mesh_ptr->init();
     _cloned_mesh_ptr->prepare(/*mesh_to_clone=*/nullptr);
