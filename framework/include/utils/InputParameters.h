@@ -212,10 +212,10 @@ public:
 
   ///@{
   /**
-   * These methods add an option parameter and a documentation string to the InputParameters object.
-   * The first version of this function takes a default value which is used if the parameter is not
-   * found in the input file. The second method will leave the parameter uninitialized but can be
-   * checked with "isParamValid" before use.
+   * These methods add an optional parameter and a documentation string to the InputParameters
+   * object. The first version of this function takes a default value which is used if the parameter
+   * is not found in the input file. The second method will leave the parameter uninitialized but
+   * can be checked with "isParamValid" before use.
    */
   template <typename T, typename S>
   void addParam(const std::string & name, const S & value, const std::string & doc_string);
@@ -506,6 +506,19 @@ public:
    * existing parameter, such as a parameter that is supplied from an interface class.
    */
   void setDocString(const std::string & name, const std::string & doc);
+
+  /**
+   * Returns the documentation unit string for the specified parameter name
+   */
+  std::string getDocUnit(const std::string & name) const;
+
+  /**
+   * Set the unit string of a parameter.
+   *
+   * This method is only used within MooseDocs and the input syntax dump in order to provide a
+   * developer-expected unit for software quality assurance purposes.
+   */
+  void setDocUnit(const std::string & name, const std::string & doc_unit);
 
   /**
    * Returns a boolean indicating whether the specified parameter is required or not
@@ -1130,6 +1143,8 @@ private:
   struct Metadata
   {
     std::string _doc_string;
+    /// The developer-designated unit of the parameter for use in documentation
+    std::string _doc_unit;
     /// The custom type that will be printed in the YAML dump for a parameter if supplied
     std::string _custom_type;
     /// The data pertaining to a command line parameter (empty if not a command line param)
@@ -1872,20 +1887,21 @@ template <>
 void InputParameters::addPrivateParam<MultiMooseEnum>(const std::string & /*name*/);
 
 template <>
-void InputParameters::addDeprecatedParam<MooseEnum>(const std::string & name,
-                                                    const std::string & doc_string,
-                                                    const std::string & deprecation_message);
+void InputParameters::addDeprecatedParam<MooseEnum>(const std::string & /*name*/,
+                                                    const std::string & /*doc_string*/,
+                                                    const std::string & /*deprecation_message*/);
 
 template <>
-void InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string & name,
-                                                         const std::string & doc_string,
-                                                         const std::string & deprecation_message);
+void
+InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string & /*name*/,
+                                                    const std::string & /*doc_string*/,
+                                                    const std::string & /*deprecation_message*/);
 
 template <>
 void InputParameters::addDeprecatedParam<std::vector<MooseEnum>>(
-    const std::string & name,
-    const std::string & doc_string,
-    const std::string & deprecation_message);
+    const std::string & /*name*/,
+    const std::string & /*doc_string*/,
+    const std::string & /*deprecation_message*/);
 
 // Forward declare specializations for setParamHelper
 template <>
