@@ -23,7 +23,7 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
 {
   /// - relative to the input file directory
   {
-    const auto & absolute_path = _parent.template getParam<FileName>(param);
+    const auto & absolute_path = _parent.template getParam<DataFileParameterType>(param);
     if (MooseUtils::checkFileReadable(absolute_path, false, false, false))
     {
       _parent.paramInfo(param, "Data file '", absolute_path, "' found relative to the input file.");

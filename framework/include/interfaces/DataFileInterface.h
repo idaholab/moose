@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseTypes.h"
+
 #include <string>
 
 /**
@@ -18,6 +20,11 @@ template <class T>
 class DataFileInterface
 {
 public:
+  /**
+   * The parameter type this interface expects for a data file name.
+   */
+  using DataFileParameterType = FileName;
+
   /**
    * Constructing the object
    * @param parent Parent object (either MooseObject or Action) for params and  output
