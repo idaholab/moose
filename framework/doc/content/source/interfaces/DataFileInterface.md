@@ -13,9 +13,10 @@ getDataFileNameByName | Finds a data file given a relative path
 Files located in `moose/framework/data`, the `moose/modules/*/data`, or
 `<your_app>/data` directories can be retrieved using the `getDataFileName(const
 std::string & param)` function, where `param` is an input parameter of type
-`FileName`
+`DataFileName`
 
-`getDataFileName` will search (in this order)
+If the provided path is absolute, no searching will take place and the absolute
+path will be used. Otherwise, `getDataFileName` will search (in this order)
 
 - relative to the input file
 - relative to the running binary in the shared directory (assuming the application is installed)
