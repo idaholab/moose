@@ -8,8 +8,16 @@
 []
 
 [Components]
-  [warn]
-    type = LogWarningComponent
+  [componentA]
+    type = LoggerTestComponent
+    log_warnings = true
+    log_errors = true
+  []
+
+  [componentB]
+    type = LoggerTestComponent
+    log_warnings = true
+    log_errors = true
   []
 
   [hs]

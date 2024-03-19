@@ -49,6 +49,8 @@ InputParameters
 CombinedTestApp::validParams()
 {
   InputParameters params = CombinedApp::validParams();
+  // Below parameter is set to enable data driven mesh generation in test suite
+  params.set<bool>(MeshGeneratorSystem::allow_data_driven_param) = true;
   return params;
 }
 

@@ -70,6 +70,14 @@ ConcentricCircleGeneratorBase::validParams()
                                                 "Optional customized external boundary id.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
+
+  MooseEnum tri_elem_type("TRI3 TRI6 TRI7", "TRI3");
+  params.addParam<MooseEnum>(
+      "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
+  MooseEnum quad_elem_type("QUAD4 QUAD8 QUAD9", "QUAD4");
+  params.addParam<MooseEnum>(
+      "quad_element_type", quad_elem_type, "Type of the quadrilateral elements to be generated.");
+
   params.addParam<std::vector<std::string>>(
       "inward_interface_boundary_names",
       "Optional customized boundary names for the internal inward interfaces between block.");
@@ -152,7 +160,9 @@ ConcentricCircleGeneratorBase::ConcentricCircleGeneratorBase(const InputParamete
     _outward_interface_boundary_names(
         isParamValid("outward_interface_boundary_names")
             ? getParam<std::vector<std::string>>("outward_interface_boundary_names")
-            : std::vector<std::string>())
+            : std::vector<std::string>()),
+    _tri_elem_type(getParam<MooseEnum>("tri_element_type").template getEnum<TRI_ELEM_TYPE>()),
+    _quad_elem_type(getParam<MooseEnum>("quad_element_type").template getEnum<QUAD_ELEM_TYPE>())
 {
   // Customized interface boundary id/name related error messages
   if (!_create_inward_interface_boundaries && _inward_interface_boundary_names.size() > 0)

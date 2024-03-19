@@ -21,6 +21,8 @@ ReactorGeometryMeshBuilderBase::validParams()
   params.addClassDescription("A base class that contains common members and methods for Reactor "
                              "Geometry Mesh Builder mesh generators.");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 
