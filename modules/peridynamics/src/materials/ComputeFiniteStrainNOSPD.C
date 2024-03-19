@@ -131,9 +131,15 @@ ComputeFiniteStrainNOSPD::computeQpStrainRotationIncrements(RankTwoTensor & tota
       const Real p = trFhatinv_1 * trFhatinv_1 / 4.0;
 
       // cos theta_a
-      const Real C1 =
-          std::sqrt(p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
-                    2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q));
+      const Real C1_squared = p +
+                              3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
+                              2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q);
+      if (C1_squared <= 0.0)
+        mooseException(
+            "Cannot take square root of a number less than or equal to zero in the calculation of "
+            "C1 for the Rashid approximation for the rotation tensor.");
+
+      const Real C1 = std::sqrt(C1_squared);
 
       Real C2;
       if (q > 0.01)
@@ -148,9 +154,16 @@ ComputeFiniteStrainNOSPD::computeQpStrainRotationIncrements(RankTwoTensor & tota
                  (1104.0 - 992.0 * p + 376.0 * Utility::pow<2>(p) - 72.0 * Utility::pow<3>(p) +
                   5.0 * Utility::pow<4>(p)) /
                  (512.0 * Utility::pow<4>(p));
-      const Real C3 =
-          0.5 * std::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
-                          Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
+
+      const Real C3_test =
+          (p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) / Utility::pow<3>(p + q);
+
+      if (C3_test <= 0.0)
+        mooseException(
+            "Cannot take square root of a number less than or equal to zero in the calculation of "
+            "C3_test for the Rashid approximation for the rotation tensor.");
+
+      const Real C3 = 0.5 * std::sqrt(C3_test); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
       // 93, so we transpose it before storing
@@ -172,27 +185,10 @@ ComputeFiniteStrainNOSPD::computeQpStrainRotationIncrements(RankTwoTensor & tota
     }
     case DecompMethod::EigenSolution:
     {
-      std::vector<Real> e_value(3);
-      RankTwoTensor e_vector;
-
-      RankTwoTensor Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
-      Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
-
-      const Real lambda1 = std::sqrt(e_value[0]);
-      const Real lambda2 = std::sqrt(e_value[1]);
-      const Real lambda3 = std::sqrt(e_value[2]);
-
-      const auto N1 = RankTwoTensor::selfOuterProduct(e_vector.column(0));
-      const auto N2 = RankTwoTensor::selfOuterProduct(e_vector.column(1));
-      const auto N3 = RankTwoTensor::selfOuterProduct(e_vector.column(2));
-
-      RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
-      RankTwoTensor invUhat(Uhat.inverse());
-
-      rotation_increment = _Fhat[_qp] * invUhat;
-
-      total_strain_increment =
-          N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
+      FactorizedRankTwoTensor Chat = RankTwoTensor::transposeTimes(_Fhat[_qp]);
+      FactorizedRankTwoTensor Uhat = MathUtils::sqrt(Chat);
+      rotation_increment = _Fhat[_qp] * Uhat.inverse().get();
+      total_strain_increment = MathUtils::log(Uhat).get();
       break;
     }
 

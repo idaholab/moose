@@ -29,6 +29,7 @@ protected:
   virtual Real computeQpOutOfPlaneDeformationGradient();
   virtual Real computeQpOutOfPlaneDeformationGradientOld();
   ///@}
+
 private:
   ///@{ Scalar out-of-plane strain for generalized plane strain
   const bool _scalar_out_of_plane_strain_coupled;

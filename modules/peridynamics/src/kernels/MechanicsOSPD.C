@@ -70,7 +70,7 @@ MechanicsOSPD::computeNonlocalResidual()
         vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
         origin_vec_nb =
-            *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+            _pdmesh.getNodeCoord(neighbors[nb]) - _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
         for (unsigned int i = 0; i < _dim; ++i)
           current_vec_nb(i) = origin_vec_nb(i) +
@@ -165,7 +165,7 @@ MechanicsOSPD::computeNonlocalJacobian()
         vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
         origin_vec_nb =
-            *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+            _pdmesh.getNodeCoord(neighbors[nb]) - _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
         for (unsigned int k = 0; k < _dim; ++k)
           current_vec_nb(k) = origin_vec_nb(k) +
@@ -273,7 +273,7 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
         vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
         origin_vec_nb =
-            *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+            _pdmesh.getNodeCoord(neighbors[nb]) - _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
         for (unsigned int i = 0; i < _dim; ++i)
           current_vec_nb(i) = origin_vec_nb(i) +
