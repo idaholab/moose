@@ -710,6 +710,9 @@ public:
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 protected:
   usingMooseVariableFieldMembers;
 

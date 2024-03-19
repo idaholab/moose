@@ -60,6 +60,9 @@ public:
     return ret;
   }
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 private:
   ValueType evaluate(const ElemArg & elem_arg, const StateArg & state) const override;
   ValueType evaluate(const FaceArg & face, const StateArg & state) const override;

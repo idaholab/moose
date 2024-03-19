@@ -46,6 +46,9 @@ public:
     return _non_ad_functor.hasFaceSide(fi, fi_elem_side);
   }
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 protected:
   ///@{
   /**
