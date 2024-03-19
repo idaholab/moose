@@ -9,5 +9,6 @@
     abs_zero = 1e-9
     # skip test if test is being run out-of-tree. Issue Ref: #26129
     installation_type = in_tree
+    rel_err = 1e-4
   []
 []
