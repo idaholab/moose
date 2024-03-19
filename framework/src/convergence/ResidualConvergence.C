@@ -39,10 +39,9 @@ ResidualConvergence::validParams()
 
 ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   : Convergence(parameters),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _perf_nonlinear(
-        registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence")),
-    _initialized(false)
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+    //_perf_nonlinear(
+        //registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence"))
 {
   EquationSystems & es = _fe_problem.es();
 
@@ -156,7 +155,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
   MooseAlgebraicConvergence reason = MooseAlgebraicConvergence::ITERATING;
 
   // Needed by problems/residual_reference
-  _fe_problem.nonlinearConvergenceSetup();
+  nonlinearConvergenceSetup();
 
   // To check if the nonlinear iterations should abort
   bool terminate = _fe_problem.getFailNextNonlinearConvergenceCheck();
@@ -267,7 +266,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
     Real the_residual = system._compute_initial_residual_before_preset_bcs
                             ? system._initial_residual_before_preset_bcs
                             : system._initial_residual_after_preset_bcs;
-    if (_fe_problem.checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
+    if (checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
       reason = MooseAlgebraicConvergence::CONVERGED;
     else if (snorm < _stol * xnorm)
     {

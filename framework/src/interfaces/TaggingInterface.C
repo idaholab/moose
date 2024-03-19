@@ -11,7 +11,7 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "Assembly.h"
-#include "ReferenceResidualProblem.h"
+#include "ReferenceResidualConvergence.h"
 
 #include "libmesh/dense_vector.h"
 
@@ -127,9 +127,10 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
 
   const auto * const fe_problem =
       moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
-  if (const auto * const ref_problem = dynamic_cast<const ReferenceResidualProblem *>(fe_problem))
+  const auto & conv = fe_problem->getConvergence(fe_problem->getActiveConvergenceName());
+  if (const auto * const ref_conv = dynamic_cast<const ReferenceResidualConvergence *>(&conv))
   {
-    const auto reference_tag = ref_problem->referenceVectorTagID({});
+    const auto reference_tag = ref_conv->referenceVectorTagID({});
     auto create_tags_split =
         [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)
     {

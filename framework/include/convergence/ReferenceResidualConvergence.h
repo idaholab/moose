@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Convergence.h"
+#include "ResidualConvergence.h"
 #include "FEProblem.h"
 #include "PerfGraphInterface.h"
 
@@ -19,45 +19,17 @@
 
 #include "libmesh/enum_norm_type.h"
 
-class ReferenceResidualConvergence : public Convergence
+class ReferenceResidualConvergence : public ResidualConvergence
 {
 public:
   static InputParameters validParams();
+  static InputParameters validCommonReferenceResidualProblemParams();
 
   ReferenceResidualConvergence(const InputParameters & parameters);
 
-  void setupReferenceResidual();
-
   void updateReferenceResidual();
 
-  void nonlinearConvergenceSetup();
-
-  bool checkRelativeConvergence(const PetscInt it,
-                                const Real fnorm,
-                                const Real the_residual,
-                                const Real rtol,
-                                const Real abstol,
-                                std::ostringstream & oss);
-
-  Convergence::MooseAlgebraicConvergence
-  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
-
-  /**
-   * Check the convergence by comparing the norm of each variable separately against
-   * its reference variable's norm. Only consider the solution converged if all
-   * variables are converged individually using either a relative or absolute
-   * criterion.
-   * @param fnorm Function norm (norm of full residual vector)
-   * @param abstol Absolute convergence tolerance
-   * @param rtol Relative convergence tolerance
-   * @param initial_residual_before_preset_bcs Initial norm of full residual vector
-   *                                           before applying preset bcs
-   * @return true if all variables are converged
-   */
-  bool checkConvergenceIndividVars(const Real fnorm,
-                                   const Real abstol,
-                                   const Real rtol,
-                                   const Real initial_residual_before_preset_bcs);
+  virtual void initialSetup() override;
 
   /**
    * Add a set of variables that need to be grouped together. For use in
@@ -86,43 +58,36 @@ public:
   TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_vector_tag_id; }
 
 protected:
-  FEProblemBase & _fe_problem;
+  
+  virtual void nonlinearConvergenceSetup() override;
 
-  PerfID _perf_nonlinear;
+  virtual bool checkRelativeConvergence(const PetscInt it,
+                                const Real fnorm,
+                                const Real the_residual,
+                                const Real rtol,
+                                const Real abstol,
+                                std::ostringstream & oss) override;
 
-  // Variables for the convergence criteria
-  Real _atol; // absolute convergence tolerance
-  Real _rtol; // relative convergence tolerance
-  Real _stol; // convergence (step) tolerance in terms of the norm of the change in the
-              // solution between steps
+  //Convergence::MooseAlgebraicConvergence
+  //checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
-  Real _div_threshold = std::numeric_limits<Real>::max();
-  /// the absolute non linear divergence tolerance
-  Real _nl_abs_div_tol = -1;
-  Real _divtol; // relative divergence tolerance
+  /**
+   * Check the convergence by comparing the norm of each variable separately against
+   * its reference variable's norm. Only consider the solution converged if all
+   * variables are converged individually using either a relative or absolute
+   * criterion.
+   * @param fnorm Function norm (norm of full residual vector)
+   * @param abstol Absolute convergence tolerance
+   * @param rtol Relative convergence tolerance
+   * @param initial_residual_before_preset_bcs Initial norm of full residual vector
+   *                                           before applying preset bcs
+   * @return true if all variables are converged
+   */
+  bool checkConvergenceIndividVars(const Real fnorm,
+                                   const Real abstol,
+                                   const Real rtol,
+                                   const Real initial_residual_before_preset_bcs);
 
-  Real _nl_rel_tol;
-  Real _nl_abs_tol;
-  Real _nl_rel_step_tol;
-  Real _nl_abs_step_tol;
-
-  int _nl_forced_its = 0; // the number of forced nonlinear iterations
-  PetscInt _nfuncs = 0;
-
-  unsigned int _nl_max_its;
-  unsigned int _nl_max_funcs;
-
-  PetscInt _maxit; // maximum number of iterations
-  PetscInt _maxf;  // maximum number of function evaluations
-
-  // Linear solver convergence criteria
-  Real _l_tol;
-  Real _l_abs_tol;
-  unsigned int _l_max_its;
-
-  /// maximum number of ping-pong iterations
-  unsigned int _n_nl_pingpong = 0;
-  unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
 
   ///@{
   /// List of solution variable names whose reference residuals will be stored,

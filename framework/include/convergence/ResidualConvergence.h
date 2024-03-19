@@ -23,8 +23,18 @@ public:
 
   ResidualConvergence(const InputParameters & parameters);
 
-  // static InputParameters commonParams();
+  Convergence::MooseAlgebraicConvergence
+  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
+protected:
+   /**
+   * Check the relative convergence of the nonlinear solution
+   * @param fnorm          Norm of the residual vector
+   * @param the_residual   The residual to check
+   * @param rtol           Relative tolerance
+   * @param abstol         Absolute tolerance
+   * @return               Bool signifying convergence
+   */
   virtual bool checkRelativeConvergence(const PetscInt it,
                                         const Real fnorm,
                                         const Real the_residual,
@@ -32,15 +42,9 @@ public:
                                         const Real abstol,
                                         std::ostringstream & oss);
 
-  Convergence::MooseAlgebraicConvergence
-  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
-
-protected:
   FEProblemBase & _fe_problem;
 
-  PerfID _perf_nonlinear;
-
-  bool _initialized;
+  //PerfID _perf_nonlinear;
 
   // Variables for the convergence criteria
   Real _atol; // absolute convergence tolerance

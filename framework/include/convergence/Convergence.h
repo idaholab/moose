@@ -29,6 +29,15 @@ public:
 
   static InputParameters commonParams();
 
+  virtual void initialSetup(){};
+
   virtual MooseAlgebraicConvergence
   checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
+
+protected:
+  PerfID _perf_nonlinear;
+  /**
+   * Performs setup necessary for each call to checkAlgebraicConvergence
+   */
+  virtual void nonlinearConvergenceSetup(){};
 };

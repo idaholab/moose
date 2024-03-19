@@ -709,6 +709,9 @@ FEProblemBase::initialSetup()
 {
   TIME_SECTION("initialSetup", 2, "Performing Initial Setup");
 
+  if (!_nonlinear_convergence_name.empty())
+    getConvergence(_nonlinear_convergence_name).initialSetup();
+
   SubProblem::initialSetup();
 
   if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
@@ -927,13 +930,16 @@ FEProblemBase::initialSetup()
     computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
 
     {
-      TIME_SECTION("ICiniitalSetup", 5, "Setting Up Initial Conditions");
+      TIME_SECTION("ICinitalSetup", 5, "Setting Up Initial Conditions");
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
         _ics.initialSetup(tid);
 
       _scalar_ics.initialSetup();
     }
+
+    //if (!_nonlinear_convergence_name.empty())
+    //   getConvergence(_nonlinear_convergence_name).initialSetup();
 
     projectSolution();
   }
@@ -2293,14 +2299,9 @@ void
 FEProblemBase::addDefaultConvergence()
 {
   // parallel_object_only();
-  std::string class_name = "ResidualConvergence";
+  const std::string class_name = "ResidualConvergence";
   InputParameters params = _factory.getValidParams(class_name);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    std::shared_ptr<Convergence> func =
-        _factory.create<Convergence>(class_name, _nonlinear_convergence_name, params, tid);
-    _convergences.addObject(func, tid);
-  }
+  addConvergence(class_name,_nonlinear_convergence_name, params);
 }
 
 bool
@@ -2361,7 +2362,7 @@ FEProblemBase::hasConvergence(const std::string & name, const THREAD_ID tid)
 }
 
 Convergence &
-FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid)
+FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid) const
 {
   // This thread lock is necessary since this method will create functions
   // for all threads if one is missing.
@@ -7821,24 +7822,6 @@ FEProblemBase::getVariableNames()
   names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
 
   return names;
-}
-
-bool
-FEProblemBase::checkRelativeConvergence(const PetscInt /*it*/,
-                                        const Real fnorm,
-                                        const Real the_residual,
-                                        const Real rtol,
-                                        const Real /*abstol*/,
-                                        std::ostringstream & oss)
-{
-  if (_fail_next_nonlinear_convergence_check)
-    return false;
-  if (fnorm <= the_residual * rtol)
-  {
-    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol << ")\n";
-    return true;
-  }
-  return false;
 }
 
 SolverParams &

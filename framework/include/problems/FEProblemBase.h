@@ -210,24 +210,6 @@ public:
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
 
-  /// Perform steps required before checking nonlinear convergence
-  virtual void nonlinearConvergenceSetup() {}
-
-  /**
-   * Check the relative convergence of the nonlinear solution
-   * @param fnorm          Norm of the residual vector
-   * @param the_residual   The residual to check
-   * @param rtol           Relative tolerance
-   * @param abstol         Absolute tolerance
-   * @return               Bool signifying convergence
-   */
-  virtual bool checkRelativeConvergence(const PetscInt it,
-                                        const Real fnorm,
-                                        const Real the_residual,
-                                        const Real rtol,
-                                        const Real abstol,
-                                        std::ostringstream & oss);
-
   virtual bool hasVariable(const std::string & var_name) const override;
   using SubProblem::getVariable;
   virtual const MooseVariableFieldBase &
@@ -587,12 +569,9 @@ public:
 
   virtual void
   addConvergence(const std::string & type, const std::string & name, InputParameters & parameters);
-  virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0);
+  virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0) const;
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0);
   virtual void addDefaultConvergence();
-  virtual void updateReferenceResidual(){};
-  // virtual Convergence & getDefaultConvergence(const THREAD_ID tid = 0);
-  // virtual Convergence & getActiveConvergence(const THREAD_ID tid = 0);
   /**
    * add a MOOSE line search
    */
@@ -2040,7 +2019,7 @@ public:
     _set_nonlinear_convergence_name = true;
   }
 
-  const ConvergenceName getActiveConvergenceName() { return _nonlinear_convergence_name; }
+  ConvergenceName getActiveConvergenceName() const { return _nonlinear_convergence_name; }
   /**
    * Setter for whether we're computing the scaling jacobian
    */
