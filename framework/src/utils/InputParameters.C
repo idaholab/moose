@@ -678,10 +678,9 @@ InputParameters::getParamFileBase(const std::string & param_name) const
   // Context from the parameters
   if (!hit_node)
     hit_node = getHitNode();
-  // No luck :(
+  // No hit node, so use the cwd (no input files)
   if (!hit_node)
-    mooseError(errorPrefix(param_name),
-               " Parameter does not have a hit node to determine a file path context.");
+    return std::filesystem::current_path();
 
   // Find any context that isn't command line arguments
   while (hit_node && hit_node->filename() == "CLI_ARGS")
