@@ -36,20 +36,26 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  for (const auto & variable :
-       _fe_problem.getLinearSystem(_linear_system_number).getVariables(_tid))
+  auto & linear_system = _fe_problem.getLinearSystem(_linear_system_number);
+
+  // This will be the vector we work on since the old gradient might still be needed
+  // to compute extrapolated boundary conditions for example.
+  auto & grad_container = linear_system.newGradientContainer();
+
+  for (const auto & variable : linear_system.getVariables(_tid))
   {
     _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
     mooseAssert(_current_var,
                 "This should be a linear FV variable, did we somehow add a nonlinear variable to "
                 "the linear system?");
-    auto & grad_container = _fe_problem.getLinearSystem(_linear_system_number).gradientContainer();
     if (_current_var->needsGradientVectorStorage())
     {
       const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
       const auto state = Moose::currentState();
+
       // Iterate over all the elements in the range
       for (const auto & elem_info : range)
+      {
         if (_current_var->hasBlocks(elem_info->subdomain_id()))
         {
           const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
@@ -58,8 +64,10 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
           const auto volume = elem_info->volume() * elem_info->coordFactor();
 
           for (const auto dim_index : index_range(grad_container))
-            grad_container[dim_index]->set(dof_id_elem,
-                                           (*grad_container[dim_index])(dof_id_elem) / volume);
+          {
+            const auto normalized_value = (*grad_container[dim_index])(dof_id_elem) / volume;
+            grad_container[dim_index]->set(dof_id_elem, normalized_value);
+          }
 
           if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
           {
@@ -68,6 +76,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
             grad_container[rz_radial_coord]->add(dof_id_elem, radial_contrib);
           }
         }
+      }
     }
   }
 }

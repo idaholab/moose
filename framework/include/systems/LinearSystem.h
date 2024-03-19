@@ -101,6 +101,14 @@ public:
    */
   void computeGradients();
 
+  /**
+   * Return a reference to the new (temporary) gradient container vectors
+   */
+  std::vector<std::unique_ptr<NumericVector<Number>>> & newGradientContainer()
+  {
+    return _new_gradient;
+  }
+
 protected:
   /**
    * Compute the right hand side and system matrix for given tags
@@ -151,6 +159,12 @@ protected:
 
   /// Base class reference to the linear implicit system in libmesh
   LinearImplicitSystem & _linear_implicit_system;
+
+  /// Vectors to store the new gradients during the computation. This is needed
+  /// because the old gradients might still be needed to determine boundary values
+  /// (for extrapolated boundary conditions). Once the computation is done, we
+  /// move the nev vectors to the original containers.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
 
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)

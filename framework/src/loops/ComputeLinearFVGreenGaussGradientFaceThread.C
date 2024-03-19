@@ -17,7 +17,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _dim(_fe_problem.mesh().dimension()),
     _linear_system_number(linear_system_num),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
-        _fe_problem.getLinearSystem(_linear_system_number).system()))
+        _fe_problem.getLinearSystem(_linear_system_number).system())),
+    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newGradientContainer())
 {
 }
 
@@ -26,7 +27,10 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
     _linear_system_number(x._linear_system_number),
-    _linear_system(x._linear_system)
+    _linear_system(x._linear_system),
+    // This will be the vector we work on since the old gradient might still be needed
+    // to compute extrapolated boundary conditions for example.
+    _new_gradient(x._new_gradient)
 {
 }
 
@@ -43,13 +47,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
     mooseAssert(_current_var,
                 "This should be a linear FV variable, did we somehow add a nonlinear variable to "
                 "the linear system?");
-    auto & grad_container = _fe_problem.getLinearSystem(_linear_system_number).gradientContainer();
     if (_current_var->needsGradientVectorStorage())
-    {
-      _new_gradient.clear();
-      for (auto & vec : grad_container)
-        _new_gradient.push_back(vec->zero_clone());
-
       // Iterate over all the elements in the range
       for (const auto & face_info : range)
       {
@@ -62,10 +60,6 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
                  current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
           onBoundaryFace(*face_info);
       }
-
-      for (const auto i : index_range(grad_container))
-        grad_container[i] = std::move(_new_gradient[i]);
-    }
   }
 }
 

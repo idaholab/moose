@@ -140,37 +140,41 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 void
 LinearSystem::computeGradients()
 {
+  _new_gradient.clear();
+  for (auto & vec : _raw_grad_container)
+    _new_gradient.push_back(vec->zero_clone());
+
   TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
-
-  using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-  ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
-                                _fe_problem.mesh().ownedElemInfoEnd());
-
-  using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-  FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
-                                _fe_problem.mesh().ownedFaceInfoEnd());
 
   PARALLEL_TRY
   {
+    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
+                                  _fe_problem.mesh().ownedFaceInfoEnd());
+
     ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
         _fe_problem, _fe_problem.linearSysNum(name()));
     Threads::parallel_reduce(face_info_range, gradient_face_thread);
   }
   PARALLEL_CATCH;
 
-  // We must assemble here since we may have added face contributions to cells owned by neighboring
-  // processes, and we must perform all our face summations before performing division by the cell
-  // volumes in our volume thread
-  for (auto & grad_component : _raw_grad_container)
-    grad_component->close();
+  for (auto & vec : _new_gradient)
+    vec->close();
 
   PARALLEL_TRY
   {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
     ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
         _fe_problem, _fe_problem.linearSysNum(name()));
     Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
   }
   PARALLEL_CATCH;
+
+  for (const auto i : index_range(_raw_grad_container))
+    _raw_grad_container[i] = std::move(_new_gradient[i]);
 }
 
 void

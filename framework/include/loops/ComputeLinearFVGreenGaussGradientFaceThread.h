@@ -93,5 +93,5 @@ protected:
 
   /// Cache for the new gradient which is being built. It is needed because in certain scenarios the
   /// old gradient is used for computing the new gradient.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _new_gradient;
 };
