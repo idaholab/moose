@@ -3,6 +3,7 @@ height = 2.2
 density = 1.2
 gravity = 10
 head = ${fparse height * density * gravity}
+Darcy_coef = ${fparse 2 / 1e-3}
 
 [Mesh]
   [mesh]
@@ -74,7 +75,7 @@ head = ${fparse height * density * gravity}
     mass_advection_interpolation = 'upwind'
     friction_blocks = '1'
     friction_types = 'Darcy'
-    friction_coeffs = '2'
+    friction_coeffs = 'Darcy_coefficient'
   []
 []
 
@@ -91,6 +92,11 @@ head = ${fparse height * density * gravity}
     type = ADGenericFunctorMaterial
     prop_names = 'rho'
     prop_values = '${density}'
+  []
+  [Darcy_coefficient]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient'
+    prop_values = '${Darcy_coef} ${Darcy_coef} ${Darcy_coef}'
   []
 []
 
