@@ -1062,22 +1062,6 @@ MooseApp::getLastInputFileName() const
   return _parser->getLastInputFileName();
 }
 
-std::filesystem::path
-MooseApp::getInputFileBase() const
-{
-  mooseAssert(_parser, "Parser is not set");
-
-  // If we have input files, the default historically has been the file path
-  // associated with the last input file
-  if (const auto input_filenames = _parser->getInputFileNames(); input_filenames.size())
-  {
-    const auto & last_input = input_filenames.back();
-    mooseAssert(last_input.size(), "Empty input");
-    return std::filesystem::absolute(last_input).parent_path();
-  }
-  return std::filesystem::current_path();
-}
-
 std::string
 MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 {
