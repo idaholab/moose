@@ -2,6 +2,7 @@ mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
+Darcy_coef = ${fparse 0.1 / mu}
 
 pressure_tag = "pressure_grad"
 
@@ -81,11 +82,14 @@ pressure_tag = "pressure_grad"
     extra_vector_tags = ${pressure_tag}
   []
   [u_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
     momentum_component = 'y'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    rho = ${rho}
+    speed = speed
+    mu = ${mu}
   []
   [v_advection]
     type = INSFVMomentumAdvection
@@ -109,11 +113,14 @@ pressure_tag = "pressure_grad"
     extra_vector_tags = ${pressure_tag}
   []
   [v_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
     momentum_component = 'y'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    rho = ${rho}
+    speed = speed
+    mu = ${mu}
   []
   [p_diffusion]
     type = FVAnisotropicDiffusion
@@ -186,10 +193,35 @@ pressure_tag = "pressure_grad"
 []
 
 [FunctorMaterials]
-  [darcy]
-    type = ADGenericFunctorMaterial
-    prop_names = 'Darcy_coefficient Forchheimer_coefficient'
-    prop_values = '0.1 0.1'
+  [friction_coefficient_quad_x]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_x'
+    property_name = 'friction_coefficient_quad_x'
+    expression = '2.0 * 0.1 * abs(vel_x) / ${rho} / speed'
+  []
+  [friction_coefficient_quad_y]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_y'
+    property_name = 'friction_coefficient_quad_y'
+    expression = '2.0 * 0.1 * abs(vel_y) / ${rho} / speed'
+  []
+  [friction_coefficient_quad]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Forchheimer_coefficient'
+    prop_values = 'friction_coefficient_quad_x friction_coefficient_quad_y 0.0'
+  []
+  [friction_coefficient_linear]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient'
+    prop_values = '${Darcy_coef} ${Darcy_coef} ${Darcy_coef}'
+  []
+  [speed_material]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = vel_x
+    superficial_vel_y = vel_y
+    porosity = 1
+    vel_x = vel_x_mat
+    vel_y = vel_y_mat
   []
 []
 
