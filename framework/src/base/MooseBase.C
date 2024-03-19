@@ -35,12 +35,12 @@ MooseBase::callMooseError(std::string msg, const bool with_prefix) const
   _app.getOutputWarehouse().mooseConsole();
   const std::string prefix = _app.isUltimateMaster() ? "" : _app.name();
   if (with_prefix)
-    msg = objectErrorPrefix("error") + msg;
+    msg = errorPrefix("error") + msg;
   moose::internal::mooseErrorRaw(msg, prefix);
 }
 
 std::string
-MooseBase::objectErrorPrefix(const std::string & error_type) const
+MooseBase::errorPrefix(const std::string & error_type) const
 {
   std::stringstream oss;
   if (const auto node = _params.getHitNode())

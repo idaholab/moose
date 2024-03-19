@@ -51,7 +51,7 @@ public:
   void mooseWarning(Args &&... args) const
   {
     moose::internal::mooseWarningStream(
-        _console, _moose_base.objectErrorPrefix("warning"), std::forward<Args>(args)...);
+        _console, _moose_base.errorPrefix("warning"), std::forward<Args>(args)...);
   }
 
   /**

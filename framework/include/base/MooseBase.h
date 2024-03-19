@@ -67,7 +67,7 @@ public:
    * file location associated with this object (if any) and the
    * name and type of the object.
    */
-  std::string objectErrorPrefix(const std::string & error_type) const;
+  std::string errorPrefix(const std::string & error_type) const;
 
   /**
    * Calls moose error with the message \p msg.

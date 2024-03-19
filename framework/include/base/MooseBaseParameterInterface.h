@@ -178,7 +178,7 @@ private:
 
     // With no input location information, append object info (name + type)
     const std::string object_prefix =
-        _pars.inputLocation(param).empty() ? _moose_base.objectErrorPrefix("parameter error") : "";
+        _pars.inputLocation(param).empty() ? _moose_base.errorPrefix("parameter error") : "";
 
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
