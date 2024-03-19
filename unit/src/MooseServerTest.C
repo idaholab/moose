@@ -542,7 +542,8 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
   wasp::DataObject diagnostics_notification;
 
   EXPECT_TRUE(
-      moose_server->handleDidOpenNotification(didopen_notification, diagnostics_notification));
+      moose_server->handleDidOpenNotification(didopen_notification, diagnostics_notification))
+      << moose_server->getErrors();
 
   EXPECT_TRUE(moose_server->getErrors().empty());
 

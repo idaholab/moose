@@ -57,7 +57,8 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
   // copy parent application parameters and modify to set up input check
-  InputParameters app_params = _moose_app.parameters();
+  InputParameters app_params = AppFactory::instance().getValidParams(_moose_app.type());
+  app_params.applyParameters(_moose_app.parameters());
   app_params.set<bool>("check_input") = true;
   app_params.set<bool>("error_unused") = true;
   app_params.set<bool>("error") = true;
@@ -65,8 +66,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   app_params.set<bool>("disable_perf_graph_live") = true;
   app_params.set<std::shared_ptr<Parser>>("_parser") =
       std::make_shared<Parser>(parse_file_path, document_text);
-
-  app_params.remove("language_server");
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _moose_app.commandLine();
 
   // turn output off so input check application does not affect messages
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);

@@ -93,9 +93,11 @@ protected:
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = _factory.createUnique<FEProblem>("FEProblem", "problem", problem_params);
+    _fe_problem = _factory.create<FEProblem>("FEProblem", "problem", problem_params);
 
     _fe_problem->createQRules(QGAUSS, FIRST, FIRST, FIRST);
+
+    _app->actionWarehouse().problemBase() = _fe_problem;
   }
 
   template <typename T>
@@ -104,7 +106,7 @@ protected:
   std::unique_ptr<MooseMesh> _mesh;
   std::shared_ptr<MooseApp> _app;
   Factory & _factory;
-  std::unique_ptr<FEProblem> _fe_problem;
+  std::shared_ptr<FEProblem> _fe_problem;
 };
 
 template <typename T>
