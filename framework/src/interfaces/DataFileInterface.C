@@ -25,6 +25,9 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
 {
   // The path from the parameters, which has not been modified because it is a DataFileName
   const auto & value = _parent.template getParam<DataFileParameterType>(param);
+  if (value.empty())
+    _parent.paramInfo(param, "Data file name is empty");
+
   const std::filesystem::path value_path = std::filesystem::path(std::string(value));
 
   // If the file is absolute, we should reference that directly and don't need to add
@@ -33,17 +36,12 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
     return value;
 
   // Look relative to the input file
-  // This is the path on the filesystem that can be associated with this parameter, if any
-  const auto base_ptr = _parent.parameters().getParamFileBase(param);
-  if (base_ptr)
+  const auto base = _parent.parameters().getParamFileBase(param);
+  const std::string relative_to_context = std::filesystem::absolute(base / value_path).c_str();
+  if (MooseUtils::checkFileReadable(relative_to_context, false, false, false))
   {
-    const std::string relative_to_context =
-        std::filesystem::absolute(*base_ptr / value_path).c_str();
-    if (MooseUtils::checkFileReadable(relative_to_context, false, false, false))
-    {
-      _parent.paramInfo(param, "Data file '", value, "' found relative to the input file.");
-      return relative_to_context;
-    }
+    _parent.paramInfo(param, "Data file '", value, "' found relative to the input file.");
+    return relative_to_context;
   }
 
   // Isn't absolute and couldn't find relative to the input file, so search the data

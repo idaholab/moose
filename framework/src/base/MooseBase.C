@@ -44,7 +44,8 @@ MooseBase::objectErrorPrefix(const std::string & error_type) const
 {
   std::stringstream oss;
   if (const auto node = _params.getHitNode())
-    oss << node->fileLocation() << ":\n";
+    if (!node->isRoot())
+      oss << node->fileLocation() << ":\n";
   oss << "The following " << error_type << " occurred in the ";
   if (const auto base_ptr = _params.getBase())
     oss << *base_ptr;

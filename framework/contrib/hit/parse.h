@@ -76,7 +76,7 @@ enum class NodeType
   Comment, /// Represents comments that are not directly part of the actual hit document.
   Field,   /// Represents field-value pairs (i.e. paramname=val).
   Blank,   /// Represents a blank line
-  Other, /// Represents any other type of node
+  Other,   /// Represents any other type of node
 };
 
 /// Traversal order for walkers. Determines if the walker on a node is executed before or
@@ -225,9 +225,14 @@ public:
   /// children returns a list of this node's children of the given type t.
   std::vector<Node *> children(NodeType t = NodeType::All);
   /// parent returns a pointer to this node's parent node or nullptr if this node has no parent.
-  Node * parent();
+  ///@{
+  Node * parent() { return _parent; }
+  const Node * parent() const { return _parent; }
+  ///@}
   /// root returns the root node for the gepot tree this node resides in.
   Node * root();
+  /// Whether or not this is the root
+  bool isRoot() const { return parent() == nullptr; }
   /// clone returns a complete (deep) copy of this node.  The caller will be responsible for
   /// managing the memory/deallocation of the returned clone node.
   virtual Node * clone(bool absolute_path = false) = 0;
@@ -288,7 +293,6 @@ protected:
   wasp::HITNodeView _hnv;
 
 private:
-
   template <typename T>
   T paramInner(Node *)
   {

@@ -621,16 +621,14 @@ InputParameters::checkParams(const std::string & parsing_syntax)
 }
 
 void
-InputParameters::finalize(const std::string & parsing_syntax,
-                          const std::filesystem::path & default_file_base)
+InputParameters::finalize(const std::string & parsing_syntax)
 {
   mooseAssert(!isFinalized(), "Already finalized");
 
   checkParams(parsing_syntax);
 
   // Helper for setting the absolute paths for each set file name parameter
-  const auto set_absolute_path =
-      [this, &default_file_base](const std::string & param_name, auto & value)
+  const auto set_absolute_path = [this](const std::string & param_name, auto & value)
   {
     // We don't need to set a path if nothing is there
     if (value.empty())
@@ -642,13 +640,8 @@ InputParameters::finalize(const std::string & parsing_syntax,
       return;
 
     // The base by which to make things relative to
-    auto file_base_ptr = getParamFileBase(param_name);
-    // Not set, which means we don't have context so use the default
-    if (!file_base_ptr)
-      file_base_ptr = default_file_base;
-
-    value_path = std::filesystem::absolute(*file_base_ptr / value_path);
-    value = value_path.c_str();
+    const auto file_base = getParamFileBase(param_name);
+    value = std::filesystem::absolute(file_base / value_path).c_str();
   };
 
   // Set the absolute path for each file name typed parameter
@@ -674,29 +667,33 @@ InputParameters::finalize(const std::string & parsing_syntax,
   _finalized = true;
 }
 
-std::optional<std::filesystem::path>
+std::filesystem::path
 InputParameters::getParamFileBase(const std::string & param_name) const
 {
-  // Try to find a hit node to use to get context
-  const hit::Node * hit_node = nullptr;
-  // Hit node from the parameter itself
-  if (const auto param_hit_node = getHitNode(param_name))
-    hit_node = param_hit_node;
-  // Hit node from the object
-  else if (const auto object_hit_node = getHitNode())
-    hit_node = object_hit_node;
-  // We don't have a hit node, so we can't provide any context!
-  else
-    return {};
+  mooseAssert(!have_parameter<std::string>("_app_name"),
+              "Not currently setup to work with app FileName parameters");
 
-  // Command line options/parameters; current working directory
-  // TODO: This could be dangerous as people could change the current path.
-  // We should store the path once at init and always use it. It also probably
-  // won't work with MultiApp/name/cli_args=...
-  if (hit_node->filename() == "CLI_ARGS")
-    return std::filesystem::current_path();
+  // Context from the individual parameter
+  const hit::Node * hit_node = getHitNode(param_name);
+  // Context from the parameters
+  if (!hit_node)
+    hit_node = getHitNode();
+  // No luck :(
+  if (!hit_node)
+    mooseError(errorPrefix(param_name),
+               " Parameter does not have a hit node to determine a file path context.");
 
-  // Input file parameters; use the path of the input file
+  // Find any context that isn't command line arguments
+  while (hit_node && hit_node->filename() == "CLI_ARGS")
+    hit_node = hit_node->parent();
+
+  // Failed to find a node up the tree that isn't a command line argument
+  if (!hit_node)
+    mooseError(
+        errorPrefix(param_name),
+        " Parameter was set via a command-line argument and does not have sufficient context for "
+        "determining a file path.");
+
   return std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
 }
 
@@ -924,6 +921,10 @@ InputParameters::applyParameters(const InputParameters & common,
                                  const std::vector<std::string> & exclude,
                                  const bool allow_private)
 {
+  // If we're applying all of the things, also associate the top level hit node
+  if (exclude.empty() && !getHitNode() && common.getHitNode())
+    setHitNode(*common.getHitNode(), {});
+
   // Loop through the common parameters
   for (const auto & it : common)
   {

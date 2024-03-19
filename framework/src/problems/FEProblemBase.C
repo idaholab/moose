@@ -5428,6 +5428,7 @@ FEProblemBase::addAnyRedistributers()
       redistribute_params.set<Moose::RelationshipManagerType>("rm_type") =
           Moose::RelationshipManagerType::GEOMETRIC;
       redistribute_params.set<bool>("use_displaced_mesh") = use_displaced_mesh;
+      redistribute_params.setHitNode(*parameters().getHitNode(), {});
 
       std::shared_ptr<RedistributeProperties> redistributer =
           _factory.create<RedistributeProperties>(

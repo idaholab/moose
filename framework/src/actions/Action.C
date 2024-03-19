@@ -167,7 +167,12 @@ Action::associateWithParameter(const InputParameters & from_params,
                                const std::string & param_name,
                                InputParameters & params) const
 {
-  if (!params.getHitNode())
+  const auto to_hit_node = params.getHitNode();
+  if (!to_hit_node || to_hit_node->isRoot())
+  {
     if (const auto hit_node = from_params.getHitNode(param_name))
       params.setHitNode(*hit_node, {});
+    else if (const auto hit_node = from_params.getHitNode())
+      params.setHitNode(*hit_node, {});
+  }
 }

@@ -330,15 +330,9 @@ Node::children(NodeType t)
 }
 
 Node *
-Node::parent()
-{
-  return _parent;
-}
-
-Node *
 Node::root()
 {
-  if (_parent == nullptr)
+  if (isRoot())
     return this;
   return _parent->root();
 }

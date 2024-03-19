@@ -1358,11 +1358,11 @@ MooseApp::addExecutorParams(const std::string & type,
   _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
 }
 
-Moose::Builder &
+Parser &
 MooseApp::parser()
 {
-  mooseDeprecated("MooseApp::parser() is deprecated, use MooseApp::builder() instead.");
-  return _builder;
+  mooseAssert(_parser, "Not set");
+  return *_parser;
 }
 
 void

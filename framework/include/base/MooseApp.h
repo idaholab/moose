@@ -347,10 +347,9 @@ public:
                          const InputParameters & params);
 
   /**
-   * Deprecated helper function to link the new added Builder back to Parser. This function will be
-   *removed after new Parser and builder are merged
+   * @return The Parser
    **/
-  Moose::Builder & parser();
+  Parser & parser();
 
 private:
   /**

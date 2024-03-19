@@ -136,7 +136,7 @@ AppFactory::createShared(const std::string & app_type,
   parameters.set<std::string>("_type") = app_type;
 
   // Check to make sure that all required parameters are supplied
-  parameters.finalize("", std::filesystem::current_path());
+  parameters.finalize("");
 
   auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
 

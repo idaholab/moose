@@ -38,6 +38,7 @@ class FunctionParserBase
 class Action;
 class ActionFactory;
 class Factory;
+class FEProblemBase;
 class InputParameters;
 class MooseEnum;
 class MooseObject;
@@ -95,6 +96,8 @@ public:
     friend class ActionFactory;
     friend class Moose::Builder;
     friend class Factory;
+    friend class FEProblemBase;
+    friend class InputParameters;
     SetHitNodeKey() {}
     SetHitNodeKey(const SetHitNodeKey &) {}
   };
@@ -674,28 +677,24 @@ public:
   /**
    * Finalizes the parameters, which must be done before constructing any objects
    * with these parameters (to be called in the corresponding factories).
-   *
-   * This calls checkParams() and sets up the absolute paths for all file name
    * typed parameters.
+   *
+   * This calls checkParams() and sets up the absolute paths for all file name.
    */
-  void finalize(const std::string & parsing_syntax,
-                const std::filesystem::path & default_file_base = std::filesystem::current_path());
+  void finalize(const std::string & parsing_syntax);
 
   /**
    * @return A file base to associate with the parameter with name \p param_name.
    *
-   * This may be an empty value depending on if context exists.
-   *
    * We have the following cases:
    * - The parameter itself has a hit node set (context for that parameter)
    * - The InputParameters object has a hit node set (context for all parameters)
-   * - Neither of the above; no context is available
+   * - Neither of the above and we die
    *
-   * In the event that the context is from command line arguments, the current
-   * working directory is used. This might not work for MultiApps that do not
-   * exist in the same directory as the main app.
+   * In the event that a the parameter is set via command line, this will
+   * attempt to look at the parameter's parents to find a suitable context.
    */
-  std::optional<std::filesystem::path> getParamFileBase(const std::string & param_name) const;
+  std::filesystem::path getParamFileBase(const std::string & param_name) const;
 
   /**
    * Methods returning iterators to the coupled variables names stored in this

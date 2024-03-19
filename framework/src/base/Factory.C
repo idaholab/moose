@@ -301,7 +301,7 @@ Factory::initialize(const std::string & type,
   // already because someone had a better option than just the action)
   // If it isn't set, it typically means that this object was created by a
   // non-MooseObjectAction Action
-  if (!params.getHitNode())
+  if (!params.getHitNode() || params.getHitNode()->isRoot())
     if (const auto hit_node = _app.getCurrentActionHitNode())
       params.setHitNode(*hit_node, {});
 
@@ -309,7 +309,7 @@ Factory::initialize(const std::string & type,
   params.set<std::string>("_type") = type;
 
   // Check to make sure that all required parameters are supplied
-  params.finalize(name, _app.getInputFileBase());
+  params.finalize(name);
 
   // register type name as constructed
   _constructed_types.insert(type);
