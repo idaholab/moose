@@ -1269,8 +1269,8 @@ TEST_F(MooseServerTest, CompletionValueActiveBlocks)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: u text: ${1:u} desc: subblock name pos: [9.12]-[9.19] kind:  7 format: snippet
-label: v text: ${1:v} desc: subblock name pos: [9.12]-[9.19] kind:  7 format: snippet
+label: u text: u desc: subblock name pos: [9.12]-[9.19] kind:  7 format: regular
+label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7 format: regular
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1329,8 +1329,8 @@ TEST_F(MooseServerTest, CompletionValueBooleanParam)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: false text: ${1:false} desc:  pos: [33.10]-[33.15] kind:  8 format: snippet
-label: true  text: ${1:true}  desc:  pos: [33.10]-[33.15] kind:  8 format: snippet
+label: false text: false desc:  pos: [33.10]-[33.15] kind:  8 format: regular
+label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8 format: regular
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1389,10 +1389,10 @@ TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: ERROR   text: ${1:ERROR}   desc: Throw a MOOSE err... pos: [39.18]-[39.22] kind: 20 format: snippet
-label: INFO    text: ${1:INFO}    desc: Output an informa... pos: [39.18]-[39.22] kind: 20 format: snippet
-label: NONE    text: ${1:NONE}    desc: No message will b... pos: [39.18]-[39.22] kind: 20 format: snippet
-label: WARNING text: ${1:WARNING} desc: Output a warning ... pos: [39.18]-[39.22] kind: 20 format: snippet
+label: ERROR   text: ERROR   desc: Throw a MOOSE err... pos: [39.18]-[39.22] kind: 20 format: regular
+label: INFO    text: INFO    desc: Output an informa... pos: [39.18]-[39.22] kind: 20 format: regular
+label: NONE    text: NONE    desc: No message will b... pos: [39.18]-[39.22] kind: 20 format: regular
+label: WARNING text: WARNING desc: Output a warning ... pos: [39.18]-[39.22] kind: 20 format: regular
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1451,11 +1451,11 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: Eigenvalue         text: ${1:Eigenvalue}         desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: snippet
-label: InversePowerMethod text: ${1:InversePowerMethod} desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: snippet
-label: NonlinearEigen     text: ${1:NonlinearEigen}     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: snippet
-label: Steady             text: ${1:Steady}             desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: snippet
-label: Transient          text: ${1:Transient}          desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: snippet
+label: Eigenvalue         text: Eigenvalue         desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: regular
+label: InversePowerMethod text: InversePowerMethod desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: regular
+label: NonlinearEigen     text: NonlinearEigen     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Steady             text: Steady             desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Transient          text: Transient          desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: regular
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1514,10 +1514,10 @@ TEST_F(MooseServerTest, CompletionValueInputLookups)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: disp_x text: ${1:disp_x} desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: snippet
-label: disp_y text: ${1:disp_y} desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: snippet
-label: u      text: ${1:u}      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: snippet
-label: v      text: ${1:v}      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: snippet
+label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: regular
+label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: regular
+label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: regular
+label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: regular
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1756,8 +1756,8 @@ label: InitialCondition   text: InitialCondition]\n  $0\n[]   desc: application 
   request_char = 15;
   expect_count = 2;
   expect_items = R"INPUT(
-label: u text: ${1:u} desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: snippet
-label: v text: ${1:v} desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: snippet
+label: u text: u desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: regular
+label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: regular
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1779,11 +1779,11 @@ label: TimeSteppers   text: TimeSteppers]\n  $0\n[]   desc: application named...
   request_char = 23;
   expect_count = 5;
   expect_items = R"INPUT(
-label: 1                 text: ${1:1}                 desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
-label: 2                 text: ${1:2}                 desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
-label: 3                 text: ${1:3}                 desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
-label: DEFAULT           text: ${1:DEFAULT}           desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
-label: PROBLEM_DIMENSION text: ${1:PROBLEM_DIMENSION} desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
+label: 1                 text: 1                 desc:  pos: [27.23]-[27.23] kind: 20 format: regular
+label: 2                 text: 2                 desc:  pos: [27.23]-[27.23] kind: 20 format: regular
+label: 3                 text: 3                 desc:  pos: [27.23]-[27.23] kind: 20 format: regular
+label: DEFAULT           text: DEFAULT           desc:  pos: [27.23]-[27.23] kind: 20 format: regular
+label: PROBLEM_DIMENSION text: PROBLEM_DIMENSION desc:  pos: [27.23]-[27.23] kind: 20 format: regular
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
