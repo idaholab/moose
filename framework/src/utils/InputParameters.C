@@ -637,39 +637,17 @@ InputParameters::finalize(const std::string & parsing_syntax,
       return;
 
     std::filesystem::path value_path = std::string(value);
-    if (!value_path.is_absolute())
-    {
-      // Try to find a hit node to use to get context
-      const hit::Node * hit_node = nullptr;
-      // Hit node from the parameter itself
-      if (const auto param_hit_node = getHitNode(param_name))
-        hit_node = param_hit_node;
-      // Hit node from the object
-      else if (const auto object_hit_node = getHitNode())
-        hit_node = object_hit_node;
+    // Is already absolute, nothing to do
+    if (value_path.is_absolute())
+      return;
 
-      // Find the input path to make the value relative to
-      std::filesystem::path param_path;
-      // We have a hit node so we have context as to where to get files from
-      if (hit_node)
-      {
-        // Command line options/parameters; current working directory
-        if (hit_node->filename() == "CLI_ARGS")
-          param_path = std::filesystem::current_path();
-        // Input file parameters; use the path of the input file
-        else
-          param_path =
-              std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
-      }
-      // No hit node, so fall back to the default
-      else
-        param_path = std::filesystem::absolute(default_file_base);
+    // The base by which to make things relative to
+    auto file_base_ptr = getParamFileBase(param_name);
+    // Not set, which means we don't have context so use the default
+    if (!file_base_ptr)
+      file_base_ptr = default_file_base;
 
-      // Absolute path of the file relative to whatever it should be relative to
-      value_path = std::filesystem::absolute(param_path / value_path);
-    }
-
-    // Set the value to the absolute path
+    value_path = std::filesystem::absolute(*file_base_ptr / value_path);
     value = value_path.c_str();
   };
 
@@ -694,6 +672,32 @@ InputParameters::finalize(const std::string & parsing_syntax,
   }
 
   _finalized = true;
+}
+
+std::optional<std::filesystem::path>
+InputParameters::getParamFileBase(const std::string & param_name) const
+{
+  // Try to find a hit node to use to get context
+  const hit::Node * hit_node = nullptr;
+  // Hit node from the parameter itself
+  if (const auto param_hit_node = getHitNode(param_name))
+    hit_node = param_hit_node;
+  // Hit node from the object
+  else if (const auto object_hit_node = getHitNode())
+    hit_node = object_hit_node;
+  // We don't have a hit node, so we can't provide any context!
+  else
+    return {};
+
+  // Command line options/parameters; current working directory
+  // TODO: This could be dangerous as people could change the current path.
+  // We should store the path once at init and always use it. It also probably
+  // won't work with MultiApp/name/cli_args=...
+  if (hit_node->filename() == "CLI_ARGS")
+    return std::filesystem::current_path();
+
+  // Input file parameters; use the path of the input file
+  return std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
 }
 
 bool

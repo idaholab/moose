@@ -681,6 +681,22 @@ public:
                 const std::filesystem::path & default_file_base = std::filesystem::current_path());
 
   /**
+   * @return A file base to associate with the parameter with name \p param_name.
+   *
+   * This may be an empty value depending on if context exists.
+   *
+   * We have the following cases:
+   * - The parameter itself has a hit node set (context for that parameter)
+   * - The InputParameters object has a hit node set (context for all parameters)
+   * - Neither of the above; no context is available
+   *
+   * In the event that the context is from command line arguments, the current
+   * working directory is used. This might not work for MultiApps that do not
+   * exist in the same directory as the main app.
+   */
+  std::optional<std::filesystem::path> getParamFileBase(const std::string & param_name) const;
+
+  /**
    * Methods returning iterators to the coupled variables names stored in this
    * InputParameters object
    */

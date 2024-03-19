@@ -23,12 +23,31 @@ template <class T>
 std::string
 DataFileInterface<T>::getDataFileName(const std::string & param) const
 {
-  const auto & relative_path = _parent.template getParam<DataFileParameterType>(param);
-  if (std::filesystem::path(std::string(relative_path)).is_absolute())
-    _parent.paramError(param,
-                       "This file path cannot be absolute because it represents a data file");
+  // The path from the parameters, which has not been modified because it is a DataFileName
+  const auto & value = _parent.template getParam<DataFileParameterType>(param);
+  const std::filesystem::path value_path = std::filesystem::path(std::string(value));
 
-  return getDataFileNameByName(relative_path, &param);
+  // If the file is absolute, we should reference that directly and don't need to add
+  // any info beacuse this is not ambiguous
+  if (value_path.is_absolute() && MooseUtils::checkFileReadable(value, false, false, false))
+    return value;
+
+  // Look relative to the input file
+  // This is the path on the filesystem that can be associated with this parameter, if any
+  const auto base_ptr = _parent.parameters().getParamFileBase(param);
+  if (base_ptr)
+  {
+    const std::string relative_to_context =
+        std::filesystem::absolute(*base_ptr / value_path).c_str();
+    if (MooseUtils::checkFileReadable(relative_to_context, false, false, false))
+    {
+      _parent.paramInfo(param, "Data file '", value, "' found relative to the input file.");
+      return relative_to_context;
+    }
+  }
+
+  // Isn't absolute and couldn't find relative to the input file, so search the data
+  return getDataFileNameByName(value, &param);
 }
 
 template <class T>
