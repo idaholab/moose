@@ -125,7 +125,6 @@
       cli_args = 'Problem/restart_file_base=combined_twinning_slip_111tension_out_cp/LATEST '
                  'Outputs/file_base=combined_twinning_slip_111tension_restart_out '
                  'Executioner/dtmin=0.001'
-      issues = '#26458'
       detail = 'continue to calculate plastic shear due to both dislocation slip and twinning '
                'when loaded under tension in a 111 orientation in a simulation restart.'
       prereq = 'combined_twinning_slip_models/combined_twinning_slip_111tension'
