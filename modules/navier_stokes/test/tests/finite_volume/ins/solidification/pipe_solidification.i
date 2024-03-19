@@ -200,11 +200,14 @@ Ny = 5
     pressure = pressure
   []
   [u_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
     momentum_component = 'x'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    Darcy_name = 'Darcy_coefficient_vector'
+    Forchheimer_name = 'Forchheimer_coefficient_vector'
+    rho =${rho_liquid}
+    mu = ${mu}
+    speed = speed
   []
 
   [v_time]
@@ -234,11 +237,14 @@ Ny = 5
     pressure = pressure
   []
   [v_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
     momentum_component = 'y'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    Darcy_name = 'Darcy_coefficient_vector'
+    Forchheimer_name = 'Forchheimer_coefficient_vector'
+    rho =${rho_liquid}
+    mu = ${mu}
+    speed = speed
   []
 
   [T_time]
@@ -355,6 +361,42 @@ Ny = 5
     liquid_fraction = 'fl'
     mu = '${mu}'
     rho_l = '${rho_liquid}'
+  []
+  [Darcy_coefficient_new]
+    type = ADParsedFunctorMaterial
+    functor_names = 'Darcy_coefficient'
+    property_name = 'Darcy_coefficient_new'
+    expression = 'Darcy_coefficient / ${mu}'
+  []
+  [Forchheimer_coefficient_new_x]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_x Forchheimer_coefficient'
+    property_name = 'Forchheimer_coefficient_new_x'
+    expression = '2.0 * Forchheimer_coefficient * abs(vel_x) / ${rho_liquid} / speed'
+  []
+  [Forchheimer_coefficient_new_y]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_y Forchheimer_coefficient'
+    property_name = 'Forchheimer_coefficient_new_y'
+    expression = '2.0 * Forchheimer_coefficient * abs(vel_y) / ${rho_liquid} / speed'
+  []
+  [Darcy_coefficient_vector]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient_vector'
+    prop_values = 'Darcy_coefficient_new Darcy_coefficient_new 0.0'
+  []
+  [Forchheimer_coefficient_vector]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Forchheimer_coefficient_vector'
+    prop_values = 'Forchheimer_coefficient_new_x Forchheimer_coefficient_new_y 0.0'
+  []
+  [speed_material]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = vel_x
+    superficial_vel_y = vel_y
+    porosity = 1
+    vel_x = vel_x_mat
+    vel_y = vel_y_mat
   []
 []
 
