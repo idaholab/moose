@@ -41,6 +41,7 @@ class Factory;
 class InputParameters;
 class MooseEnum;
 class MooseObject;
+class MooseBase;
 class MultiMooseEnum;
 class Problem;
 namespace hit
@@ -866,7 +867,7 @@ public:
   static const T & getParamHelper(const std::string & name,
                                   const InputParameters & pars,
                                   const T * the_type,
-                                  const MooseObject * moose_object = nullptr);
+                                  const MooseBase * moose_base = nullptr);
   ///@}
 
   using Parameters::get;
@@ -1112,7 +1113,7 @@ private:
                                 const std::string & docstring,
                                 const std::string & removal_date);
 
-  static void callMooseErrorHelper(const MooseObject & object, const std::string & error);
+  static void callMooseErrorHelper(const MooseBase & moose_base, const std::string & error);
 
   struct Metadata
   {
@@ -1890,12 +1891,13 @@ void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & 
                                                             MooseFunctorName & l_value,
                                                             const int & r_value);
 
+// TODO: pass MooseBase here instead and use it in objects
 template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name_in,
                                 const InputParameters & pars,
                                 const T *,
-                                const MooseObject * moose_object /* = nullptr */)
+                                const MooseBase * moose_base /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
 
@@ -1903,8 +1905,8 @@ InputParameters::getParamHelper(const std::string & name_in,
   {
     std::stringstream err;
     err << "The parameter \"" << name << "\" is being retrieved before being set.";
-    if (moose_object)
-      callMooseErrorHelper(*moose_object, err.str());
+    if (moose_base)
+      callMooseErrorHelper(*moose_base, err.str());
     else
       mooseError(err.str());
   }
@@ -1920,14 +1922,14 @@ const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name,
                                            const InputParameters & pars,
                                            const MooseEnum *,
-                                           const MooseObject * moose_object /* = nullptr */);
+                                           const MooseBase * moose_base /* = nullptr */);
 
 template <>
 const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
                                                 const InputParameters & pars,
                                                 const MultiMooseEnum *,
-                                                const MooseObject * moose_object /* = nullptr */);
+                                                const MooseBase * moose_base /* = nullptr */);
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>

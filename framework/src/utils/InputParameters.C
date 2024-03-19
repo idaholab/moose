@@ -1314,7 +1314,7 @@ const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
                                            const InputParameters & pars,
                                            const MooseEnum *,
-                                           const MooseObject * /* = nullptr */)
+                                           const MooseBase * /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MooseEnum>(name);
@@ -1325,7 +1325,7 @@ const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
                                                 const InputParameters & pars,
                                                 const MultiMooseEnum *,
-                                                const MooseObject * /* = nullptr */)
+                                                const MooseBase * /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MultiMooseEnum>(name);
@@ -1607,7 +1607,7 @@ InputParameters::paramAliases(const std::string & param_name) const
 }
 
 void
-InputParameters::callMooseErrorHelper(const MooseObject & object, const std::string & error)
+InputParameters::callMooseErrorHelper(const MooseBase & moose_base, const std::string & error)
 {
-  object.mooseError(error);
+  moose_base.callMooseError(error, true);
 }
