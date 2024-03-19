@@ -45,7 +45,5 @@ AdjointStrainBatchStressGradInnerProduct::computeQpInnerProduct()
     mooseError("The batch material update has not been performed yet");
 
   const auto index = _derivative_uo.getIndex(_current_elem->id());
-  Real ans = -_adjoint_strain[_qp].doubleContraction(_derivative[index + _qp]);
-
-  return ans;
+  return -_adjoint_strain[_qp].doubleContraction(_derivative[index + _qp]);
 }
