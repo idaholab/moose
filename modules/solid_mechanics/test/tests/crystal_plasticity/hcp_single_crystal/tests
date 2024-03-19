@@ -14,20 +14,6 @@
                 'stress for the prismatic<a> and pyramidal<c+a> slip systems when '
                 'loaded along the c-axis;'
     []
-    [update_method_hcp_aprismatic_capyramidal_restart]
-      type = 'CSVDiff'
-      input = 'update_method_hcp_aprismatic_capyramidal.i'
-      csvdiff = 'update_method_hcp_aprismatic_capyramidal_restart_out.csv'
-      cli_args = 'Problem/restart_file_base=update_method_hcp_aprismatic_capyramidal_out_cp/LATEST '
-               'Outputs/file_base=update_method_hcp_aprismatic_capyramidal_restart_out '
-               'Executioner/end_time=6'
-      issues = '#26458'
-      allow_warnings = true
-      detail =  'compute the slip system strength and resolved applied shear '
-                'stress for the prismatic<a> and pyramidal<c+a> slip systems in '
-                'an HCP lattice system upon simulation restart.'
-      prereq = 'constitutive_model/update_method_hcp_aprismatic_capyramidal'
-    []
     [update_method_hcp_aprismatic_active]
       type = 'CSVDiff'
       input = 'update_method_hcp_aprismatic_active.i'
@@ -53,20 +39,6 @@
       allow_warnings = true
       detail = 'evolve the forest dislocation densities on basal <a> slip '
                'planes when the crystal is loaded in an appropriate orientation.'
-    []
-    [update_method_hcp_basal_active_restart]
-      type = 'CSVDiff'
-      input = 'update_method_hcp_basal_active.i'
-      csvdiff = 'update_method_hcp_basal_active_restart_out.csv'
-      allow_warnings = true
-      cli_args = 'Problem/restart_file_base=update_method_hcp_basal_active_out_cp/LATEST '
-                 'Outputs/file_base=update_method_hcp_basal_active_restart_out '
-                 'Executioner/end_time=2.75 '
-                 'Executioner/dt=0.125'
-      issues = '#26458'
-      detail = 'continue to evolve the forest dislocation densities on basal <a> slip '
-               'planes upon restart.'
-      prereq = 'constitutive_model/update_method_hcp_basal_active'
     []
     [update_method_hcp_no_substructure]
       type = 'CSVDiff'
@@ -171,6 +143,35 @@
                    'equals the value supplied for slip_system_modes'
       detail =  'ensure the user specifies a size of lattice friction values per '
                 'mode that is equal to the specified number of modes;'
+    []
+  []
+  [restart_capabilities]
+    issues = '#26458'
+    design = '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /ComputeMultipleCrystalPlasticityStress.md'
+    requirement = 'Upon simulation restart, the HCP crystal plasticity capability shall:'
+    [update_method_hcp_basal_active_restart]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_basal_active.i'
+      csvdiff = 'update_method_hcp_basal_active_restart_out.csv'
+      allow_warnings = true
+      cli_args = 'Problem/restart_file_base=update_method_hcp_basal_active_out_cp/LATEST '
+                 'Outputs/file_base=update_method_hcp_basal_active_restart_out '
+                 'Executioner/end_time=2.75 '
+                 'Executioner/dt=0.125'
+      detail = 'continue to evolve the forest dislocation densities on basal <a> slip planes.'
+      prereq = 'constitutive_model/update_method_hcp_basal_active'
+    []
+    [update_method_hcp_aprismatic_capyramidal_restart]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      csvdiff = 'update_method_hcp_aprismatic_capyramidal_restart_out.csv'
+      cli_args = 'Problem/restart_file_base=update_method_hcp_aprismatic_capyramidal_out_cp/LATEST '
+               'Outputs/file_base=update_method_hcp_aprismatic_capyramidal_restart_out '
+               'Executioner/end_time=6'
+      allow_warnings = true
+      detail =  'continue to compute the slip system strength and resolved applied shear '
+                'stress for the prismatic<a> and pyramidal<c+a> slip systems.'
+      prereq = 'constitutive_model/update_method_hcp_aprismatic_capyramidal'
     []
   []
   [base_class_hcp]

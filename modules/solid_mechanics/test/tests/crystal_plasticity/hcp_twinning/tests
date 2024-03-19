@@ -20,17 +20,19 @@
       detail = 'compute a plastic velocity gradient that accounts for deformation '
                'contributions from both slip and twinning in an HCP crystal.'
     []
-    [demonstration_combined_hcp_slip_twins_restart]
-      type = CSVDiff
-      input = 'demonstration_combined_hcp_slip_twins.i'
-      csvdiff = 'demonstration_combined_hcp_slip_twins_restart_out.csv'
-      cli_args = 'Problem/restart_file_base=demonstration_combined_hcp_slip_twins_out_cp/LATEST '
-                 'Outputs/file_base=demonstration_combined_hcp_slip_twins_restart_out '
-                 'Executioner/end_time=2.5 '
-                 'Executioner/dt=0.125'
-      detail = 'compute the plastic velocity gradient from both slip and twinning in an '
-                'HCP crystal upon simulation restart.'
-      prereq = 'coupling_demonstration/demonstration_combined_hcp_slip_twins'
-    []
+  []
+  [demonstration_combined_hcp_slip_twins_restart]
+    type = CSVDiff
+    input = 'demonstration_combined_hcp_slip_twins.i'
+    csvdiff = 'demonstration_combined_hcp_slip_twins_restart_out.csv'
+    cli_args = 'Problem/restart_file_base=demonstration_combined_hcp_slip_twins_out_cp/LATEST '
+               'Outputs/file_base=demonstration_combined_hcp_slip_twins_restart_out '
+               'Executioner/end_time=2.5 '
+               'Executioner/dt=0.125'
+    requirement = 'The crystal plasticity system shall compute the plastic velocity gradient  '
+                  'from both slip and twinning in anHCP crystal upon simulation restart.'
+    issues = '#26458'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /CrystalPlasticityTwinningKalidindiUpdate.md'
+    prereq = 'coupling_demonstration/demonstration_combined_hcp_slip_twins'
   []
 []
