@@ -27,7 +27,7 @@
 #include "MeshGeneratorSystem.h"
 #include "RestartableDataReader.h"
 #include "Backup.h"
-
+#include "MooseBase.h"
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
@@ -72,7 +72,8 @@ class Node;
  */
 class MooseApp : public ConsoleStreamInterface,
                  public PerfGraphInterface,
-                 public libMesh::ParallelObject
+                 public libMesh::ParallelObject,
+                 public MooseBase
 {
 public:
   /**
@@ -101,15 +102,6 @@ public:
   TheWarehouse & theWarehouse() { return *_the_warehouse; }
 
   /**
-   * Get the name of the object. In the case of MooseApp, the name of the object is *NOT* the name
-   * of the application. It's the name of the created application which is usually "main". If you
-   * have subapps, then each individual subapp will have a unique name which typically comes from
-   * the input file (e.g. sub0, sub1, etc...).
-   * @return The name of the object
-   */
-  const std::string & name() const { return _name; }
-
-  /**
    * Get printable name of the application.
    */
   virtual std::string getPrintableName() const { return "Application"; }
@@ -128,13 +120,6 @@ public:
    * @return The parameters of the object
    */
   InputParameters & parameters() { return _pars; }
-
-  /**
-   * Get the type of this object as a string. This is a string version of the class name (e.g.
-   * MooseTestApp).
-   * @return The the type of the object
-   */
-  const std::string & type() const;
 
   /**
    * The RankMap is a useful object for determining how the processes
@@ -1496,7 +1481,7 @@ template <typename T>
 const T &
 MooseApp::getParam(const std::string & name) const
 {
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), this);
 }
 
 template <typename T>
@@ -1506,13 +1491,13 @@ MooseApp::getRenamedParam(const std::string & old_name, const std::string & new_
   // this enables having a default on the new parameter but bypassing it with the old one
   // Most important: accept new parameter
   if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
   // Second most: accept old parameter
   else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0));
+    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0), this);
   // Third most: accept default for new parameter
   else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
   // Refuse: no default, no value passed
   else if (!isParamValid(old_name) && !isParamValid(new_name))
     mooseError(_pars.blockFullpath() + ": parameter '" + new_name +

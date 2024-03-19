@@ -360,9 +360,11 @@ MooseApp::MooseApp(InputParameters parameters)
     PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
-    _name(parameters.get<std::string>("_app_name")),
+    MooseBase(parameters.get<std::string>("_type"),
+              parameters.get<std::string>("_app_name"),
+              *this,
+              _pars),
     _pars(parameters),
-    _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
     _output_position_set(false),
@@ -1044,14 +1046,6 @@ MooseApp::setupOptions()
   }
 
   Moose::out << std::flush;
-}
-
-const std::string &
-MooseApp::type() const
-{
-  if (_parser && _parser->getAppType().size())
-    mooseAssert(_parser->getAppType() == _type, "Should be equivalent");
-  return _type;
 }
 
 const std::vector<std::string> &
