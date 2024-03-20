@@ -24,7 +24,7 @@ public:
 
 protected:
   /**
-   * Requests a vector of all points in time from the inheriting class 
+   * Requests a vector of all points in time from the inheriting class
    * (these do not have to be sorted).
    * @returns Unsorted vector of points in time.
    */
