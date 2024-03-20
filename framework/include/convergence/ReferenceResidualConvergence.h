@@ -58,18 +58,17 @@ public:
   TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_vector_tag_id; }
 
 protected:
-  
   virtual void nonlinearConvergenceSetup() override;
 
   virtual bool checkRelativeConvergence(const PetscInt it,
-                                const Real fnorm,
-                                const Real the_residual,
-                                const Real rtol,
-                                const Real abstol,
-                                std::ostringstream & oss) override;
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real abstol,
+                                        std::ostringstream & oss) override;
 
-  //Convergence::MooseAlgebraicConvergence
-  //checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
+  // Convergence::MooseAlgebraicConvergence
+  // checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
   /**
    * Check the convergence by comparing the norm of each variable separately against
@@ -87,7 +86,6 @@ protected:
                                    const Real abstol,
                                    const Real rtol,
                                    const Real initial_residual_before_preset_bcs);
-
 
   ///@{
   /// List of solution variable names whose reference residuals will be stored,

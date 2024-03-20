@@ -39,14 +39,13 @@ ReferenceResidualConvergence::validParams()
 {
   InputParameters params = ResidualConvergence::validParams();
   params += validCommonReferenceResidualProblemParams();
-  //params += FEProblemSolve::commonParams();
-  //params += ReferenceResidualProblem::commonParams();
+  // params += FEProblemSolve::commonParams();
+  // params += ReferenceResidualProblem::commonParams();
 
   params.addClassDescription("Check ReferenceResidualConvergence of the set up problem.");
 
   return params;
 }
-
 
 InputParameters
 ReferenceResidualConvergence::validCommonReferenceResidualProblemParams()
@@ -111,7 +110,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
   : ResidualConvergence(parameters),
     //_fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     //_perf_nonlinear(
-        //registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence")),
+    // registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence")),
     _use_group_variables(false),
     _zero_ref_type(parameters.get<MooseEnum>("zero_reference_residual_treatment")
                        .getEnum<ZeroReferenceType>()),
@@ -129,7 +128,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
                       "Please simply delete this parameter from your input file.");
     _soln_var_names = parameters.get<std::vector<NonlinearVariableName>>("solution_variables");
   }
-  
+
   if (parameters.isParamValid("reference_residual_variables") &&
       parameters.isParamValid("reference_vector"))
     mooseError(
@@ -144,7 +143,8 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
         "and will be removed on January 1, 2020. Please use the tagging system instead; "
         "specifically, please assign a TagName to the `reference_vector` parameter");
 
-    _ref_resid_var_names = parameters.get<std::vector<AuxVariableName>>("reference_residual_variables");
+    _ref_resid_var_names =
+        parameters.get<std::vector<AuxVariableName>>("reference_residual_variables");
 
     if (_soln_var_names.size() != _ref_resid_var_names.size())
       mooseError("In ReferenceResidualProblem, size of solution_variables (",
@@ -205,7 +205,6 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
 
   if (_local_norm && !parameters.isParamValid("reference_vector"))
     paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
-
 }
 
 void
@@ -225,7 +224,7 @@ ReferenceResidualConvergence::initialSetup()
     if (_reference_vector)
       for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
         _soln_var_names.push_back(s.variable_name(var_num));
-      
+
     // If they didn't provide reference_vector, that implies that they
     // want to skip the individual variable comparison, so leave it alone.
   }
@@ -419,7 +418,6 @@ ReferenceResidualConvergence::initialSetup()
   }
   //_fe_problem.initialSetup();
   _initialized = true;
-   
 }
 
 void
@@ -489,8 +487,8 @@ ReferenceResidualConvergence::updateReferenceResidual()
 void
 ReferenceResidualConvergence::nonlinearConvergenceSetup()
 {
-  //if (!_initialized)
-    //initialSetup();
+  // if (!_initialized)
+  // initialSetup();
 
   updateReferenceResidual();
 

@@ -938,8 +938,8 @@ FEProblemBase::initialSetup()
       _scalar_ics.initialSetup();
     }
 
-    //if (!_nonlinear_convergence_name.empty())
-    //   getConvergence(_nonlinear_convergence_name).initialSetup();
+    // if (!_nonlinear_convergence_name.empty())
+    //    getConvergence(_nonlinear_convergence_name).initialSetup();
 
     projectSolution();
   }
@@ -2301,7 +2301,7 @@ FEProblemBase::addDefaultConvergence()
   // parallel_object_only();
   const std::string class_name = "ResidualConvergence";
   InputParameters params = _factory.getValidParams(class_name);
-  addConvergence(class_name,_nonlinear_convergence_name, params);
+  addConvergence(class_name, _nonlinear_convergence_name, params);
 }
 
 bool

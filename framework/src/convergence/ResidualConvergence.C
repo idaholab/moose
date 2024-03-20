@@ -40,8 +40,8 @@ ResidualConvergence::validParams()
 ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   : Convergence(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
-    //_perf_nonlinear(
-        //registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence"))
+//_perf_nonlinear(
+// registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence"))
 {
   EquationSystems & es = _fe_problem.es();
 

@@ -27,7 +27,7 @@ public:
   checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
 protected:
-   /**
+  /**
    * Check the relative convergence of the nonlinear solution
    * @param fnorm          Norm of the residual vector
    * @param the_residual   The residual to check
@@ -44,7 +44,7 @@ protected:
 
   FEProblemBase & _fe_problem;
 
-  //PerfID _perf_nonlinear;
+  // PerfID _perf_nonlinear;
 
   // Variables for the convergence criteria
   Real _atol; // absolute convergence tolerance
