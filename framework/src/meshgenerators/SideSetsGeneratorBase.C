@@ -227,7 +227,7 @@ SideSetsGeneratorBase::flood(const Elem * elem,
 bool
 SideSetsGeneratorBase::normalsWithinTol(const Point & normal_1,
                                         const Point & normal_2,
-                                        const Real & tol)
+                                        const Real & tol) const
 {
   return (1.0 - normal_1 * normal_2) <= tol;
 }

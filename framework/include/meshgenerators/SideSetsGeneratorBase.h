@@ -58,7 +58,7 @@ protected:
    * @param tol The comparison tolerance.
    * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= tol.
    */
-  static bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real & tol);
+  bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real & tol) const;
 
   /**
    * Determines whether the given element's subdomain id is in the given subdomain_id_list.
