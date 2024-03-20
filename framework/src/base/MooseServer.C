@@ -22,6 +22,7 @@
 #include "FileLineInfo.h"
 #include "pcrecpp.h"
 #include "hit.h"
+#include "wasphit/HITInterpreter.h"
 #include "waspcore/utils.h"
 #include <algorithm>
 #include <vector>
@@ -1095,12 +1096,17 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
                                                int tab_size,
                                                bool /* insert_spaces */)
 {
+  // input check expanded any brace expressions in cached tree so reprocess
+  std::stringstream input_errors, input_stream(document_text);
+  wasp::DefaultHITInterpreter interpreter(input_errors);
+  interpreter.parse(input_stream);
+
   // return without adding any formatting text edits if parser root is null
-  if (!rootIsValid())
+  if (interpreter.root().is_null())
     return true;
 
   // get input root node line and column range to represent entire document
-  wasp::HITNodeView view_root = getRoot().getNodeView();
+  wasp::HITNodeView view_root = interpreter.root();
   int document_start_line = view_root.line() - 1;
   int document_start_char = view_root.column() - 1;
   int document_last_line = view_root.last_line() - 1;
