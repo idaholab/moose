@@ -79,7 +79,7 @@ protected:
    * include_only_external_sides, included_boundaries, included_neighbor_subdomains and normal
    */
   bool elemSideSatisfiesRequirements(const Elem * const elem,
-                                     const unsigned int & side,
+                                     const unsigned int side,
                                      const MeshBase & mesh,
                                      const Point & normal,
                                      const Point & face_normal);
@@ -111,17 +111,17 @@ protected:
   /// A list of included subdomain ids that the side has to be part of, extracted from the included_subdomains parameter
   std::vector<subdomain_id_type> _included_subdomain_ids;
 
-  /// A list of included neighbor subdomain ids
+  /// A list of included neighbor subdomain ids that the sides' neighbor element must be a part of
   std::vector<subdomain_id_type> _included_neighbor_subdomain_ids;
 
   /// Whether to only include external side when considering sides to add to the sideset
   const bool _include_only_external_sides;
 
-  /// if specified, then faces are only added if their normal is close to this
-  Point _normal;
-
   /// true if only faces close to "normal" will be added
   bool _using_normal;
+
+  /// if specified, then faces are only added if their normal is close to this
+  Point _normal;
 
   /**
    * if normal is specified, then faces are only added

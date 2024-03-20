@@ -97,13 +97,13 @@ SideSetsFromNormalsGenerator::generate()
         continue;
 
       _fe_face->reinit(elem, side);
+      // We'll just use the normal of the first qp
       const Point & face_normal = _fe_face->get_normals()[0];
 
       for (const auto i : make_range(boundary_ids.size()))
       {
-        _normal = _normals[i];
-        if (normalsWithinTol(_normal, face_normal, _normal_tol))
-          flood(elem, _normal, boundary_ids[i], *mesh);
+        if (normalsWithinTol(_normals[i], face_normal, _normal_tol))
+          flood(elem, _normals[i], boundary_ids[i], *mesh);
       }
     }
 

@@ -38,6 +38,7 @@ ParsedGenerateSideset::validParams()
       {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
+  // This sideset generator can only handle a single new sideset name, not a vector of names
   params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
   params.addClassDescription("A MeshGenerator that adds element sides to a sideset if the "
@@ -106,6 +107,7 @@ ParsedGenerateSideset::generate()
     for (const auto side : make_range(elem->n_sides()))
     {
       _fe_face->reinit(elem, side);
+      // We'll just use the normal of the first qp
       const Point & face_normal = _fe_face->get_normals()[0];
 
       if (!elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))

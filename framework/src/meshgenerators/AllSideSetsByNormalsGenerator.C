@@ -30,9 +30,11 @@ AllSideSetsByNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
+  // This is the expected behavior of this sideset generator
   params.setParameters("include_only_external_sides", true);
   params.suppressParameter<bool>("include_only_external_sides");
 
+  // The normals are found from the actual orientation of sidesets, not user-specified
   params.suppressParameter<bool>("fixed_normal");
   params.suppressParameter<Point>("normal");
   params.suppressParameter<Real>("normal_tol");

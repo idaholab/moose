@@ -31,5 +31,5 @@ public:
   /**
    * Determine whether the given side of an element resides on an external or internal boundary
    */
-  static bool elemSideOnBoundary(const Elem * elem, const uint & side);
+  static bool elemSideOnBoundary(const Elem * const elem, const unsigned int side);
 };

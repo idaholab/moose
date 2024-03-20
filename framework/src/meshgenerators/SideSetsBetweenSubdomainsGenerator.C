@@ -85,6 +85,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
       else if (neighbor != NULL)
       {
         _fe_face->reinit(elem, side);
+        // We'll just use the normal of the first qp
         const Point & face_normal = _fe_face->get_normals()[0];
         // Add the boundaries, if appropriate
         if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
@@ -140,6 +141,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
         if (neighbor != NULL)
         {
           _fe_face->reinit(elem, side);
+          // We'll just use the normal of the first qp
           const Point & face_normal = _fe_face->get_normals()[0];
           // Add the boundaries, if appropriate
           if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))

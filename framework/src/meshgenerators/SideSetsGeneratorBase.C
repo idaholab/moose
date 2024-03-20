@@ -89,8 +89,9 @@ SideSetsGeneratorBase::SideSetsGeneratorBase(const InputParameters & parameters)
     _included_subdomain_ids(std::vector<subdomain_id_type>()),
     _included_neighbor_subdomain_ids(std::vector<subdomain_id_type>()),
     _include_only_external_sides(getParam<bool>("include_only_external_sides")),
-    _normal(getParam<Point>("normal")),
     _using_normal(isParamSetByUser("normal")),
+    _normal(_using_normal ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
+                          : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol"))
 {
   if (isParamValid("new_boundary"))
@@ -202,6 +203,7 @@ SideSetsGeneratorBase::flood(const Elem * elem,
   {
 
     _fe_face->reinit(elem, side);
+    // We'll just use the normal of the first qp
     const Point face_normal = _fe_face->get_normals()[0];
 
     if (!elemSideSatisfiesRequirements(elem, side, mesh, normal, face_normal))
@@ -252,7 +254,7 @@ SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * const elem,
 
 bool
 SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
-                                                     const unsigned int & side,
+                                                     const unsigned int side,
                                                      const MeshBase & mesh,
                                                      const Point & desired_normal,
                                                      const Point & face_normal)
@@ -268,14 +270,13 @@ SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
   // Skip if element does not have neighbor in specified subdomains
   if (_check_neighbor_subdomains)
   {
-    const Elem * neighbor = elem->neighbor_ptr(side);
+    const Elem * const neighbor = elem->neighbor_ptr(side);
     // if the neighbor does not exist, then skip this face; we only add sidesets
     // between existing elems if _check_neighbor_subdomains is true
     if (!(neighbor && elementSubdomainIdInList(neighbor, _included_neighbor_subdomain_ids)))
       return false;
   }
 
-  // We'll just use the normal of the first qp
   if (_using_normal && !normalsWithinTol(desired_normal, face_normal, _normal_tol))
     return false;
 

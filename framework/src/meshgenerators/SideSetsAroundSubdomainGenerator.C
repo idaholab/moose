@@ -40,12 +40,6 @@ SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
     const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters)
 {
-  if (_using_normal)
-  {
-    // normalize
-    mooseAssert(_normal.norm() >= 1E-5, "Normal is zero");
-    _normal /= _normal.norm();
-  }
 }
 
 std::unique_ptr<MeshBase>
@@ -92,6 +86,7 @@ SideSetsAroundSubdomainGenerator::generate()
       else if (elemSideOnBoundary(elem, side))
       {
         _fe_face->reinit(elem, side);
+        // We'll just use the normal of the first qp
         const Point & face_normal = _fe_face->get_normals()[0];
         // Add the boundaries, if appropriate
         if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
@@ -143,6 +138,7 @@ SideSetsAroundSubdomainGenerator::generate()
         const unsigned int side = q.second;
 
         _fe_face->reinit(elem, side);
+        // We'll just use the normal of the first qp
         const Point & face_normal = _fe_face->get_normals()[0];
         if (elemSideOnBoundary(elem, side) &&
             elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
@@ -187,8 +183,9 @@ SideSetsAroundSubdomainGenerator::generate()
 }
 
 bool
-SideSetsAroundSubdomainGenerator::elemSideOnBoundary(const Elem * elem, const uint & side)
+SideSetsAroundSubdomainGenerator::elemSideOnBoundary(const Elem * const elem,
+                                                     const unsigned int side)
 {
   const Elem * neighbor = elem->neighbor_ptr(side);
-  return neighbor == nullptr or elem->subdomain_id() != neighbor->subdomain_id();
+  return (neighbor == nullptr) or (elem->subdomain_id() != neighbor->subdomain_id());
 }
