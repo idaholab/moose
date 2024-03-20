@@ -186,6 +186,6 @@ bool
 SideSetsAroundSubdomainGenerator::elemSideOnBoundary(const Elem * const elem,
                                                      const unsigned int side) const
 {
-  const Elem * neighbor = elem->neighbor_ptr(side);
-  return (neighbor == nullptr) or (elem->subdomain_id() != neighbor->subdomain_id());
+  const auto neighbor = elem->neighbor_ptr(side);
+  return (neighbor == nullptr) || (elem->subdomain_id() != neighbor->subdomain_id());
 }

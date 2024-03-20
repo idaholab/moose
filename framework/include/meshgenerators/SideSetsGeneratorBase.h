@@ -128,7 +128,7 @@ protected:
    * if face_normal.normal_hat <= 1 - normal_tol
    * where normal_hat = _normal/|_normal|
    */
-  Real _normal_tol;
+  const Real _normal_tol;
 
   std::unique_ptr<FEBase> _fe_face;
   std::unique_ptr<QGauss> _qface;

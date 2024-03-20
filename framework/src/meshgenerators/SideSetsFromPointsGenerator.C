@@ -76,7 +76,7 @@ SideSetsFromPointsGenerator::generate()
 
   std::unique_ptr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *mesh);
 
-  for (const auto i : make_range(boundary_ids.size()))
+  for (const auto i : index_range(boundary_ids))
   {
     std::set<const Elem *> candidate_elements;
     (*pl)(_points[i], candidate_elements);
@@ -133,7 +133,7 @@ SideSetsFromPointsGenerator::generate()
 
   finalize();
 
-  for (const auto i : make_range(boundary_ids.size()))
+  for (const auto i : index_range(boundary_ids))
     mesh->get_boundary_info().sideset_name(boundary_ids[i]) = _boundary_names[i];
 
   mesh->set_isnt_prepared();

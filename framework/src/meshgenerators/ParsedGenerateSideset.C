@@ -39,6 +39,7 @@ ParsedGenerateSideset::validParams()
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   // This sideset generator can only handle a single new sideset name, not a vector of names
+  // This sideset generator can only handle a single new sideset name
   params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
   params.addClassDescription("A MeshGenerator that adds element sides to a sideset if the "
