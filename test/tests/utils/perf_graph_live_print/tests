@@ -31,6 +31,17 @@
     design = 'utils/PerfGraphLivePrint.md'
     requirement = 'The system shall be able to display the automatic print-out of a timed section even when an external print happened before the threshold for the automatic print-out was met.'
   []
+  [stats_interrupted_by_regular_print]
+    # this test does not address the warnings 'direct to Moose::out' issue #23750
+    type = RunApp
+    input = perf_graph_live_print.i
+    cli_args = 'Problem/print_at_end_of_section=true'
+    expect_out = "Timed section is about to finish\nFinished"
+
+    issues = '#23746'
+    design = 'utils/PerfGraphLivePrint.md'
+    requirement = 'The system shall be able to display the automatic print-out of a timed section even when an external print happened right at the end of the timed section, before the statistics for the sections were printed.'
+  []
 
   [multiapps]
     type = RunApp

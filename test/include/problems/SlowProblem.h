@@ -30,5 +30,6 @@ protected:
 
   const std::vector<Real> _seconds_to_sleep;
   const bool _nested_print;
+  const bool _nested_print_end;
   const bool _nested_section;
 };

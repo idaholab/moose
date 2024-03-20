@@ -25,6 +25,9 @@ SlowProblem::validParams()
   // Parameters to print perf graph live print interactions
   params.addParam<bool>(
       "print_during_section", false, "Whether to nest a console print inside the timed section");
+  params.addParam<bool>("print_at_end_of_section",
+                        false,
+                        "Whether to nest a console print right at the end of the timed section");
   params.addParam<bool>(
       "nest_inside_section", false, "Whether to nest another section inside the timed section");
 
@@ -35,6 +38,7 @@ SlowProblem::SlowProblem(const InputParameters & params)
   : FEProblem(params),
     _seconds_to_sleep(getParam<std::vector<Real>>("seconds_to_sleep")),
     _nested_print(getParam<bool>("print_during_section")),
+    _nested_print_end(getParam<bool>("print_at_end_of_section")),
     _nested_section(getParam<bool>("nest_inside_section"))
 {
   if (_seconds_to_sleep.empty())
@@ -52,11 +56,17 @@ SlowProblem::solve(unsigned int nl_sys_num)
       TIME_SECTION("slow", 1, "Testing Slowness");
       std::this_thread::sleep_for(std::chrono::duration<Real>(delay));
     }
-    else if (_nested_print)
+    else if (_nested_print_end)
     {
       TIME_SECTION("slow", 1, "Testing Slowness");
       _console << "Timed section just started, printing something though" << std::endl;
       std::this_thread::sleep_for(std::chrono::duration<Real>(delay));
+    }
+    else if (_nested_print)
+    {
+      TIME_SECTION("slow", 1, "Testing Slowness");
+      std::this_thread::sleep_for(std::chrono::duration<Real>(delay));
+      _console << "Timed section is about to finish" << std::endl;
     }
     else if (_nested_section)
     {
@@ -74,6 +84,7 @@ SlowProblem::otherTimedSection() const
 {
   Real delay = getDelay();
   TIME_SECTION("slowish", 2, "Testing Nested Slowness");
+  _console << "Interrupt" << std::endl;
   std::this_thread::sleep_for(std::chrono::duration<Real>(delay));
 }
 
