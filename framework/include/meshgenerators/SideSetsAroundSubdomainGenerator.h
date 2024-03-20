@@ -28,24 +28,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-protected:
-  std::unique_ptr<MeshBase> & _input;
-
-  /// names of the sidesets to which the faces will be added
-  std::vector<BoundaryName> _boundary_names;
-
-  /// true if only faces close to "normal" will be added
-  bool _using_normal;
-
-  /// Only apply the sideset to external boundaries
-  const bool _external_only;
   /**
-   * if normal is specified, then faces are only added
-   * if face_normal.normal_hat <= 1 - normal_tol
-   * where normal_hat = _normal/|_normal|
+   * Determine whether the given side of an element resides on an external or internal boundary
    */
-  Real _normal_tol;
-
-  /// if specified, then faces are only added if their normal is close to this
-  Point _normal;
+  bool elemSideOnBoundary(const Elem * const elem, const unsigned int side) const;
 };

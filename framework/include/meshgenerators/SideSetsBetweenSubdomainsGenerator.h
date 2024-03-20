@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "SideSetsGeneratorBase.h"
 
 /**
  * MeshGenerator that creates a sideset composed of the nodes located between
  * two or more subdomains.
  */
-class SideSetsBetweenSubdomainsGenerator : public MeshGenerator
+class SideSetsBetweenSubdomainsGenerator : public SideSetsGeneratorBase
 {
 public:
   static InputParameters validParams();
@@ -23,7 +23,4 @@ public:
   SideSetsBetweenSubdomainsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
-
-protected:
-  std::unique_ptr<MeshBase> & _input;
 };
