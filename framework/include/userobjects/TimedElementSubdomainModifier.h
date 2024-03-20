@@ -50,8 +50,12 @@ protected:
   std::vector<timeIndexPair> _times_and_indices;
 
 private:
-  /// Reference to the current time step
+  /// Local variable for the current step (to be able to determine incrementation)
   int _current_step;
+  
+  /// Local variable for the end of the timespan to apply changes of the subdomain
   real _current_t;
+
+  /// Local variable for the start of the timespan to apply changes of the subdomain
   real _last_t;
 };
