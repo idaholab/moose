@@ -825,7 +825,8 @@ InputParameters::getGroupName(const std::string & param_name_in) const
 
 void
 InputParameters::applyParameters(const InputParameters & common,
-                                 const std::vector<std::string> exclude)
+                                 const std::vector<std::string> & exclude,
+                                 const bool allow_private)
 {
   // Loop through the common parameters
   for (const auto & it : common)
@@ -836,7 +837,7 @@ InputParameters::applyParameters(const InputParameters & common,
     if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
       continue;
 
-    applyParameter(common, common_name);
+    applyParameter(common, common_name, allow_private);
   }
 
   // Loop through the coupled variables

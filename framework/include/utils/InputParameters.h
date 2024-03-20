@@ -717,7 +717,7 @@ public:
    *   (1) A local parameter must exist with the same name as common parameter
    *   (2) Common parameter must valid
    *   (3) Local parameter must be invalid OR not have been set from its default
-   *   (4) Both cannot be private
+   *   (4) Both cannot be private (unless \p allow_private = true)
    *
    * Output objects have a set of common parameters that are passed
    * down to each of the output objects created. This method is used for
@@ -726,7 +726,8 @@ public:
    * @see CommonOutputAction AddOutputAction
    */
   void applyParameters(const InputParameters & common,
-                       std::vector<std::string> exclude = std::vector<std::string>());
+                       const std::vector<std::string> & exclude = {},
+                       const bool allow_private = false);
 
   /**
    * Method for applying common parameters
