@@ -24,6 +24,15 @@ SideIntegralPostprocessor::SideIntegralPostprocessor(const InputParameters & par
 }
 
 void
+SideIntegralPostprocessor::initialSetup()
+{
+  SidePostprocessor::initialSetup();
+
+  if (!_qp_integration && _mesh.allFaceInfo().size() == 0)
+    errorNoFaceInfo();
+}
+
+void
 SideIntegralPostprocessor::initialize()
 {
   _integral_value = 0;
