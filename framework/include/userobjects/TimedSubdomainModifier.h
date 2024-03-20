@@ -23,14 +23,14 @@ public:
   virtual void initialize();
 
 protected:
-  virtual std::vector<double> onGetTimes() override;
-  virtual SubdomainID onComputeSubdomainID(double t_from_exclusive, double t_to_inclusive) override;
+  virtual std::vector<real> onGetTimes() override;
+  virtual SubdomainID onComputeSubdomainID(real t_from_exclusive, real t_to_inclusive) override;
 
 private:
   void buildFromParameters();
   void buildFromFile();
 
-  std::vector<double> _times;
+  std::vector<real> _times;
 
   /// storage for the block ids.
   std::vector<SubdomainID> _blocks_from;

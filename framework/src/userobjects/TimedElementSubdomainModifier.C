@@ -38,7 +38,7 @@ TimedElementSubdomainModifier::initialize()
   _current_step = _t_step - 1;
 
   // ask for all times (must NOT be sorted)
-  std::vector<double> _times = onGetTimes();
+  std::vector<real> _times = onGetTimes();
   size_t n = _times.size();
 
   // copy data to local storage
@@ -53,18 +53,16 @@ TimedElementSubdomainModifier::initialize()
   std::sort(_timesAndIndices.begin(), _timesAndIndices.end());
 }
 
-std::vector<double>
+std::vector<real>
 TimedElementSubdomainModifier::onGetTimes()
 {
-  std::vector<double> _times;
+  std::vector<real> _times;
   return _times;
 }
 
 SubdomainID
-TimedElementSubdomainModifier::onComputeSubdomainID(double t_from_exclusive, double t_to_inclusive)
+TimedElementSubdomainModifier::onComputeSubdomainID(real /* t_from_exclusive */, real /* t_to_inclusive */)
 {
-  (void)t_from_exclusive;
-  (void)t_to_inclusive;
   SubdomainID _subdomain_id = _current_elem->subdomain_id();
   return _subdomain_id;
 }

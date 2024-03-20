@@ -92,20 +92,14 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
           "The parameters 'time_column_index', and 'time_column_text' are mutual exclusive.");
     if ((isParamSetByUser("blocks_from_column_index") +
          isParamSetByUser("blocks_from_column_text")) > 1)
-    {
       mooseError("The parameters 'blocks_from_column_index', and 'blocks_from_column_text' are "
                  "mutual exclusive.");
-    };
     if ((isParamSetByUser("blocks_to_column_index") + isParamSetByUser("blocks_to_column_text")) >
         1)
-    {
       mooseError("The parameters 'blocks_to_column_index', and 'blocks_to_column_text' are mutual "
                  "exclusive.");
-    };
     if ((bFromData_File_NeedsHeader > 0) && (isParamSetByUser("header") == 0))
-    {
       mooseError("Header flag must be active if columns are to be found via header.");
-    };
 
     buildFromFile();
   }
@@ -270,7 +264,7 @@ TimedSubdomainModifier::initialize()
   TimedElementSubdomainModifier::initialize();
 }
 
-std::vector<double>
+std::vector<real>
 TimedSubdomainModifier::onGetTimes()
 {
   // just return our local array of times
@@ -278,7 +272,7 @@ TimedSubdomainModifier::onGetTimes()
 }
 
 SubdomainID
-TimedSubdomainModifier::onComputeSubdomainID(double t_from_exclusive, double t_to_inclusive)
+TimedSubdomainModifier::onComputeSubdomainID(real t_from_exclusive, real t_to_inclusive)
 {
   // get the subdomain-id of the current element
   SubdomainID _subdomain_id = _current_elem->subdomain_id();
@@ -288,7 +282,7 @@ TimedSubdomainModifier::onComputeSubdomainID(double t_from_exclusive, double t_t
   for (size_t i = 0; i < n_rows; ++i)
   {
     // time of the data point
-    double t = _timesAndIndices[i].time;
+    real t = _timesAndIndices[i].time;
 
     // original data point index
     size_t j = _timesAndIndices[i].index;
