@@ -5,6 +5,10 @@ mpi:
 moose_mpi:
   - moose-mpi 2024.03.15
 
+build_variant:                                              # [linux]
+  - cuda                                                    # [linux]
+  - nocuda                                                  # [linux]
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/MacOSX10.15.sdk                                    # [not arm64 and osx]

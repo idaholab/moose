@@ -18,6 +18,7 @@ export FCFLAGS="$FFLAGS"
 export HYDRA_LAUNCHER=fork
 
 if [[ $(uname) == Darwin ]]; then
+    BUILD_VARIANT=""
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
         CFLAGS="${CFLAGS} -mcpu=apple-a12"
         CXXFLAGS="${CXXFLAGS} -mcpu=apple-a12"
@@ -30,6 +31,7 @@ if [[ $(uname) == Darwin ]]; then
         FCFLAGS="${FCFLAGS} -I$PREFIX/include"
     fi
 else
+    BUILD_VARIANT=${build_variant}
     CFLAGS="${CFLAGS} -march=nocona -mtune=haswell"
     CXXFLAGS="${CXXFLAGS} -march=nocona -mtune=haswell"
     FFLAGS="${FFLAGS} -I$PREFIX/include"
@@ -48,6 +50,12 @@ elif [[ $mpi == "mpich" ]]; then
   export LIBS="-lmpifort -lgfortran"
 fi
 
+# Handle switches created by Conda variants
+ADDITIONAL_ARGS=""
+if [[ "${BUILD_VARIANT}" == 'cuda' ]]; then
+  ADDITIONAL_ARGS+=" --with-cuda=1 --with-cudac=${PREFIX}/bin/nvcc --with-cuda-dir=${PREFIX}/targets/x86_64-linux --CUDAFLAGS=-I${PREFIX}/targets/x86_64-linux/include"
+fi
+
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
     --COPTFLAGS=-O3 \
@@ -64,6 +72,7 @@ configure_petsc \
     FFLAGS="$FFLAGS" \
     FCFLAGS="$FCFLAGS" \
     LDFLAGS="$LDFLAGS" \
+    ${ADDITIONAL_ARGS} \
     --prefix=$PREFIX || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked

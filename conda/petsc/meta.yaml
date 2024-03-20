@@ -22,7 +22,10 @@ source:
 
 build:
   number: {{ build }}
-  string: {{ mpi }}_{{ build }}
+  string: {{ mpi }}_{{ build_variant }}_{{ build }}      # [linux]
+  string: {{ mpi }}_{{ build }}                          # [osx]
+  features:                                              # [build_variant == "cuda" and linux]
+    - cuda                                               # [build_variant == "cuda" and linux]
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
@@ -37,19 +40,26 @@ requirements:
     - {{ mpi }}
     - {{ moose_mpi }}
     - pkg-config
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
   host:
     - {{ mpi }}
     - {{ moose_mpi }}
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
   run:
     - {{ mpi }}
     - {{ moose_mpi }}
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
 
 test:
   requires:
     - pkg-config
     - {{ mpi }}
     - {{ moose_mpi }}
-
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
   files:
     - tests/ex1.c
     - tests/ex1f.F90
