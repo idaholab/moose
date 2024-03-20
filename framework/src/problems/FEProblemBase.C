@@ -746,12 +746,12 @@ FEProblemBase::initialSetup()
       TIME_SECTION("computingMaxDofs", 3, "Computing Max Dofs Per Element");
 
       MaxVarNDofsPerElem mvndpe(*this, nl);
-      Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+      Threads::parallel_reduce(getAlgebraicElementRange(), mvndpe);
       max_var_n_dofs_per_elem = mvndpe.max();
       _communicator.max(max_var_n_dofs_per_elem);
 
       MaxVarNDofsPerNode mvndpn(*this, nl);
-      Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+      Threads::parallel_reduce(getAlgebraicNodeRange(), mvndpn);
       max_var_n_dofs_per_node = mvndpn.max();
       _communicator.max(max_var_n_dofs_per_node);
       global_max_var_n_dofs_per_elem =
@@ -963,7 +963,7 @@ FEProblemBase::initialSetup()
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
-      initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+      initElementStatefulProps(getAlgebraicElementRange(), true);
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
@@ -1107,7 +1107,7 @@ FEProblemBase::initialSetup()
     TIME_SECTION("BoundaryRestrictedNodeIntegrityCheck", 5);
 
     // check that variables are defined along boundaries of boundary restricted nodal objects
-    ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
+    const ConstBndNodeRange & bnd_nodes = getAlgebraicBndNodeRange();
     BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
     Threads::parallel_reduce(bnd_nodes, bnict);
 
@@ -1204,7 +1204,7 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 
-    initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+    initElementStatefulProps(getAlgebraicElementRange(), true);
   }
 
   // Control Logic
@@ -3187,7 +3187,7 @@ FEProblemBase::projectSolution()
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  const ConstElemRange & elem_range = getAlgebraicElementRange();
   ComputeInitialConditionThread cic(*this);
   Threads::parallel_reduce(elem_range, cic);
 
@@ -3206,7 +3206,7 @@ FEProblemBase::projectSolution()
   _aux->solution().close();
 
   // now run boundary-restricted initial conditions
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  const ConstBndNodeRange & bnd_nodes = getAlgebraicBndNodeRange();
   ComputeBoundaryInitialConditionThread cbic(*this);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
@@ -4025,12 +4025,12 @@ FEProblemBase::computeIndicators()
 
     // compute Indicators
     ComputeIndicatorThread cit(*this);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
+    Threads::parallel_reduce(getAlgebraicElementRange(), cit);
     _aux->solution().close();
     _aux->update();
 
     ComputeIndicatorThread finalize_cit(*this, true);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
+    Threads::parallel_reduce(getAlgebraicElementRange(), finalize_cit);
     _aux->solution().close();
     _aux->update();
 
@@ -4064,7 +4064,7 @@ FEProblemBase::computeMarkers()
     }
 
     ComputeMarkerThread cmt(*this);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
+    Threads::parallel_reduce(getAlgebraicElementRange(), cmt);
 
     _aux->solution().close();
     _aux->update();
@@ -4406,7 +4406,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
         // because some nodal user objects (NodalNormal related) depend on elemental user objects
         // :-(
         ComputeUserObjectsThread cppt(*this, query);
-        Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+        Threads::parallel_reduce(getAlgebraicElementRange(), cppt);
 
         // There is one instance in rattlesnake where an elemental user object's finalize depends
         // on a side user object having been finalized first :-(
@@ -4437,7 +4437,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
       {
         ComputeNodalUserObjectsThread cnppt(*this, query);
-        Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
+        Threads::parallel_reduce(getAlgebraicNodeRange(), cnppt);
         joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
       }
 
@@ -5456,7 +5456,7 @@ FEProblemBase::updateMaxQps()
   // Find the maximum number of quadrature points
   {
     MaxQpsThread mqt(*this);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
+    Threads::parallel_reduce(getAlgebraicElementRange(), mqt);
     _max_qps = mqt.max();
 
     // If we have more shape functions or more quadrature points on
@@ -8421,4 +8421,63 @@ FEProblemBase::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
   SubProblem::setCurrentBoundaryID(bid, tid);
   if (_displaced_problem)
     _displaced_problem->setCurrentBoundaryID(bid, tid);
+}
+
+const ConstElemRange &
+FEProblemBase::getAlgebraicElementRange()
+{
+  if (!_algebraic_elem_range)
+    return *_mesh.getActiveLocalElementRange();
+
+  return *_algebraic_elem_range;
+}
+const ConstNodeRange &
+FEProblemBase::getAlgebraicNodeRange()
+{
+  if (!_algebraic_node_range)
+    return *_mesh.getLocalNodeRange();
+
+  return *_algebraic_node_range;
+}
+const ConstBndNodeRange &
+FEProblemBase::getAlgebraicBndNodeRange()
+{
+  if (!_algebraic_bnd_node_range)
+    return *_mesh.getBoundaryNodeRange();
+
+  return *_algebraic_bnd_node_range;
+}
+
+void
+FEProblemBase::setAlgebraicElementRange(ConstElemRange * range)
+{
+  if (!range)
+  {
+    _algebraic_elem_range = nullptr;
+    return;
+  }
+
+  _algebraic_elem_range = std::make_unique<ConstElemRange>(*range);
+}
+void
+FEProblemBase::setAlgebraicNodeRange(ConstNodeRange * range)
+{
+  if (!range)
+  {
+    _algebraic_node_range = nullptr;
+    return;
+  }
+
+  _algebraic_node_range = std::make_unique<ConstNodeRange>(*range);
+}
+void
+FEProblemBase::setAlgebraicBndNodeRange(ConstBndNodeRange * range)
+{
+  if (!range)
+  {
+    _algebraic_bnd_node_range = nullptr;
+    return;
+  }
+
+  _algebraic_bnd_node_range = std::make_unique<ConstBndNodeRange>(*range);
 }
