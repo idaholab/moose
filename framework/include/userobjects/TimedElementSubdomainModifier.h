@@ -20,8 +20,6 @@ public:
   TimedElementSubdomainModifier(const InputParameters & parameters);
 
   virtual void initialize();
-  // virtual void execute() {}
-  // virtual void finalize() {}
 
 protected:
   virtual SubdomainID computeSubdomainID() override;
@@ -32,7 +30,7 @@ protected:
   /// storage for the times including their original index.
   struct timeIndexPair
   {
-    double time;
+    Real time;
     std::size_t index;
 
     bool operator<(const timeIndexPair & a) const
@@ -48,10 +46,11 @@ protected:
     }
   };
 
-  std::vector<timeIndexPair> _timesAndIndices;
+  /// Times and subdomain changes to make
+  std::vector<timeIndexPair> _times_and_indices;
 
 private:
-  // some state variables
+  /// Reference to the current time step
   int _current_step;
   double _current_t;
   double _last_t;

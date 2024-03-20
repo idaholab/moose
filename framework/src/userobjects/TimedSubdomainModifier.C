@@ -88,10 +88,8 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
   else if (bFromData_File > 0)
   {
     if ((isParamSetByUser("time_column_index") + isParamSetByUser("time_column_text")) > 1)
-    {
       mooseError(
           "The parameters 'time_column_index', and 'time_column_text' are mutual exclusive.");
-    };
     if ((isParamSetByUser("blocks_from_column_index") +
          isParamSetByUser("blocks_from_column_text")) > 1)
     {
@@ -116,18 +114,6 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
     mooseError("Unknown data source. Are you missing a parameter? Did you misspell one?");
   };
 
-  // Debugging: print what we understood
-  // std::stringstream ss;
-  // size_t n = _times.size();
-  // ss << "TimedSubdomainModifier (" << n << " items)\n";
-  // ss << std::left << std::setw(10) << "Index" << std::left << std::setw(10) << "Time" <<
-  // std::left << std::setw(10) << "BlockFom" << std::left << std::setw(10) << "BlockTo \n"; for
-  // (size_t i = 0; i < n; ++i)
-  // {
-  //   ss << std::left << std::setw(10) << i << std::left << std::setw(10) << _times[i] << std::left
-  //   << std::setw(10) << _blocks_from[i] << std::left << std::setw(10) << _blocks_to[i] << " \n";
-  // };
-  // mooseInfo(ss.str());
 }
 
 void
