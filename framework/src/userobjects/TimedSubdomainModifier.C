@@ -107,7 +107,6 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
   {
     mooseError("Unknown data source. Are you missing a parameter? Did you misspell one?");
   };
-
 }
 
 void

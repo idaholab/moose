@@ -61,7 +61,8 @@ TimedElementSubdomainModifier::onGetTimes()
 }
 
 SubdomainID
-TimedElementSubdomainModifier::onComputeSubdomainID(real /* t_from_exclusive */, real /* t_to_inclusive */)
+TimedElementSubdomainModifier::onComputeSubdomainID(real /* t_from_exclusive */,
+                                                    real /* t_to_inclusive */)
 {
   SubdomainID _subdomain_id = _current_elem->subdomain_id();
   return _subdomain_id;

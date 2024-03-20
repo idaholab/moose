@@ -24,7 +24,8 @@ public:
 
 protected:
   /**
-   * Requests a vector of all points in time from the inheriting class (these do not have to be sorted).
+   * Requests a vector of all points in time from the inheriting class 
+   * (these do not have to be sorted).
    * @returns Unsorted vector of points in time.
    */
   virtual std::vector<real> onGetTimes() override;
