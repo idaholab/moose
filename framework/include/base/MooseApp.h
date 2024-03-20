@@ -520,12 +520,6 @@ public:
    * recovery)
    */
   bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
-  bool halfTransient() const
-  {
-    mooseDeprecated("MooseApp::halfTransient is deprecated, use "
-                    "MooseApp::testCheckpointHalfTransient instead.");
-    return testCheckpointHalfTransient();
-  }
 
   /**
    * Store a map of outputter names and file numbers
