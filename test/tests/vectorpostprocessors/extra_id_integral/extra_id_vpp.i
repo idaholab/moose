@@ -26,6 +26,19 @@
   []
 []
 
+[Materials]
+  [mat1]
+    type = GenericConstantMaterial
+    prop_names = 'mat1'
+    prop_values = 1
+  []
+  [mat2]
+    type = GenericConstantMaterial
+    prop_names = 'mat2'
+    prop_values = 2
+  []
+[]
+
 [VectorPostprocessors]
   [integral]
     type = ExtraIDIntegralVectorPostprocessor
