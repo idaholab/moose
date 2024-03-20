@@ -964,6 +964,9 @@ DerivativeStringClass(FileName);
 /// This type is for expected filenames where the extension is unwanted, it can be used to trigger open file dialogs in the GUI
 DerivativeStringClass(FileNameNoExtension);
 
+/// This type is for expected filenames that should be relative (don't set the absolute path under the hood)
+DerivativeStringClass(RelativeFileName);
+
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
 

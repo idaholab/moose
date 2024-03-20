@@ -1086,6 +1086,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(BoundaryName, string);
         setfpath(FileName);
         setfpath(MeshFileName);
+        setscalar(RelativeFileName, string);
         setfpath(FileNameNoExtension);
         setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
@@ -1155,6 +1156,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(string, string);
         setvectorfpath(FileName);
         setvectorfpath(FileNameNoExtension);
+        setvector(RelativeFileName, string);
         setvectorfpath(MeshFileName);
         setvector(SubdomainName, string);
         setvector(BoundaryName, string);

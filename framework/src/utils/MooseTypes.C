@@ -45,6 +45,7 @@ const TagName PREVIOUS_NL_SOLUTION_TAG = "U_PREVIOUS_NL_NEWTON";
   static_assert(true, "")
 DerivativeStringToJSON(FileName);
 DerivativeStringToJSON(FileNameNoExtension);
+DerivativeStringToJSON(RelativeFileName);
 DerivativeStringToJSON(MeshFileName);
 DerivativeStringToJSON(OutFileBase);
 DerivativeStringToJSON(NonlinearVariableName);
