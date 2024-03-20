@@ -113,16 +113,16 @@ class Parser
 {
 public:
   /**
-   * Constructor given a list of input files, given in \p input_filenames
-   */
-  Parser(const std::vector<std::string> & input_filenames);
-  /**
-   * Constructor for a single input file, given in \p input_filename
+   * Constructor given a list of input files, given in \p input_filenames.
    *
-   * Optionally, \p input_text can be provided if you wish to parse contents
-   * from this text instead of reading \p input_filename. This is currently used
-   * within the language server for parsing contents of a file that have not
-   * necessary been saved to disk yet.
+   * Optionally, the file contents can be provided via text in \p input_text.
+   */
+  Parser(const std::vector<std::string> & input_filenames,
+         const std::optional<std::vector<std::string>> & input_text = {});
+  /**
+   * Constructor, given a file in \p input_filename.
+   *
+   * Optionally, the file contents can be provided via text in \p input_text.
    */
   Parser(const std::string & input_filename, const std::optional<std::string> & input_text = {});
 
@@ -177,8 +177,8 @@ private:
   /// The input file names
   const std::vector<std::string> _input_filenames;
 
-  /// The optional input text (to augment reading a single input with the MooseServer)
-  const std::optional<std::string> _input_text;
+  /// The optional input text contents (to support not reading by file)
+  const std::optional<std::vector<std::string>> _input_text;
 
   /// The application types extracted from [Application] block
   std::string _app_type;

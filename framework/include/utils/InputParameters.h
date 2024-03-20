@@ -34,6 +34,8 @@ class FunctionParserBase
 #include <optional>
 #include <filesystem>
 
+#include <gtest/gtest.h>
+
 // Forward declarations
 class Action;
 class ActionFactory;
@@ -98,6 +100,7 @@ public:
     friend class Factory;
     friend class FEProblemBase;
     friend class InputParameters;
+    FRIEND_TEST(InputParametersTest, fileNames);
     SetHitNodeKey() {}
     SetHitNodeKey(const SetHitNodeKey &) {}
   };
@@ -109,6 +112,7 @@ public:
   class SetParamHitNodeKey
   {
     friend class Moose::Builder;
+    FRIEND_TEST(InputParametersTest, fileNames);
     SetParamHitNodeKey() {}
     SetParamHitNodeKey(const SetParamHitNodeKey &) {}
   };
