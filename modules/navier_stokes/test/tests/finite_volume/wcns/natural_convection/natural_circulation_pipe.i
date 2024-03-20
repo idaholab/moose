@@ -141,7 +141,8 @@ gamma = 1.4
     prop_names = 'porosity loss_coeff'
     prop_values = '1       1.3'
   []
-
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
+  # backwards compatible with the INSFVMomentumFriction formulation
   [Darcy_coeff]
     type = ADParsedFunctorMaterial
     property_name = 'Darcy_coeff'

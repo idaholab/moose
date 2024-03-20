@@ -163,7 +163,7 @@ coef_linear = ${fparse 25 / mu}
 []
 
 [FunctorMaterials]
-  # Have material properties compatible with the PINSFVMomentumFriction formulation and
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
   # backwards compatible with the INSFVMomentumFriction formulation
   inactive = friction_coefficient_exp
   [friction_coefficient_linear]

@@ -362,6 +362,8 @@ Ny = 5
     mu = '${mu}'
     rho_l = '${rho_liquid}'
   []
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
+  # backwards compatible with the INSFVMomentumFriction formulation
   [Darcy_coefficient_new]
     type = ADParsedFunctorMaterial
     functor_names = 'Darcy_coefficient'

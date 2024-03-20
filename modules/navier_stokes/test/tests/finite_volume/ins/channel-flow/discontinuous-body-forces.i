@@ -173,6 +173,8 @@ coef = ${fparse 25 / mu}
 []
 
 [FunctorMaterials]
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
+  # backwards compatible with the INSFVMomentumFriction formulation
   [friction_coefficient]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'friction_coefficient'
