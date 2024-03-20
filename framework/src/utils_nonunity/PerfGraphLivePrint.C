@@ -156,7 +156,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   if (!section_info_start._print_dots ||
       (_last_printed_increment && _last_printed_increment != &section_increment_start) ||
       (section_increment_start._beginning_num_printed !=
-       _console_num_printed)) // This means someone _else_ printed
+       _console_num_printed) ||                      // This means someone _else_ printed
+      _console_num_printed != _console.numPrinted()) // This means someone _else_ printed
   {
     // If we had printed some dots - we need to finish the line
     if (_last_printed_increment &&
