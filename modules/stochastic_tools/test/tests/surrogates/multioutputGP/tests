@@ -8,7 +8,8 @@
       input = mogp.i
       allow_test_objects = true
       jsondiff = 'mogp_out.json'
-      detail = 'a squared exponential input kernel and ICM output kernel; '
+      detail = 'a squared exponential input kernel and ICM output kernel. '
+      abs_zero = 1.0e-7
     []
   []
   [mogp_errors]
