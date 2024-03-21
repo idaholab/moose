@@ -40,7 +40,7 @@
         input = s4
         bottom_left = '0 0 0'
         top_right = '3 3 3'
-        boundaries_old = 's1 s2 s3 s4'
+        included_boundaries = 's1 s2 s3 s4'
         boundary_new = 's_combined'
     []
     [flip]

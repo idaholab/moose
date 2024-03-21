@@ -62,7 +62,7 @@ pressure_tag = "pressure_grad"
     input = solid_fluid_interface_2
     bottom_left = '0 0 0'
     top_right = '0.1 0.0127 0'
-    boundaries_old = left
+    included_boundaries = left
     boundary_new = wall_left
   []
 
@@ -71,7 +71,7 @@ pressure_tag = "pressure_grad"
     input = wall_left_boundary_1
     bottom_left = '0 2.9857 0'
     top_right = '0.1 2.9984 0'
-    boundaries_old = left
+    included_boundaries = left
     boundary_new = wall_left
   []
 
@@ -80,7 +80,7 @@ pressure_tag = "pressure_grad"
     input = wall_left_boundary_2
     bottom_left = '0 0.0127 0'
     top_right = '0.1 2.9857 0'
-    boundaries_old = left
+    included_boundaries = left
     boundary_new = fluid_left
   []
 
