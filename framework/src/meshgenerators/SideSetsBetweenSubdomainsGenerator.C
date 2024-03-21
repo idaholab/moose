@@ -20,67 +20,40 @@ registerMooseObject("MooseApp", SideSetsBetweenSubdomainsGenerator);
 InputParameters
 SideSetsBetweenSubdomainsGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<std::vector<SubdomainName>>(
-      "primary_block", "The primary set of blocks for which to draw a sideset between");
-  params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "master_block",
-      "The primary set of blocks for which to draw a sideset between",
-      "The 'master_block' param is deprecated and will be removed on January 1, 2021. Please use "
-      "the 'primary_block' parameter instead.");
-  params.addRequiredParam<std::vector<SubdomainName>>(
-      "paired_block", "The paired set of blocks for which to draw a sideset between");
-  params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
-                                                     "The name of the boundary to create");
+  params.renameParam("included_subdomains",
+                     "primary_block",
+                     "The primary set of blocks for which to draw a sideset between");
+  params.renameParam("included_neighbors",
+                     "paired_block",
+                     "The paired set of blocks for which to draw a sideset between");
   params.addClassDescription("MeshGenerator that creates a sideset composed of the nodes located "
                              "between two or more subdomains.");
+
+  // TODO: Implement each of these in the generate() routine using utilities in SidesetGeneratorBase
+  params.suppressParameter<bool>("fixed_normal");
+  params.suppressParameter<bool>("include_only_external_sides");
 
   return params;
 }
 
 SideSetsBetweenSubdomainsGenerator::SideSetsBetweenSubdomainsGenerator(
     const InputParameters & parameters)
-  : MeshGenerator(parameters), _input(getMesh("input"))
+  : SideSetsGeneratorBase(parameters)
 {
 }
 
 std::unique_ptr<MeshBase>
 SideSetsBetweenSubdomainsGenerator::generate()
 {
-  auto primary_block = isParamValid("primary_block")
-                           ? getParam<std::vector<SubdomainName>>("primary_block")
-                           : getParam<std::vector<SubdomainName>>("master_block");
-
-  auto paired_block = getParam<std::vector<SubdomainName>>("paired_block");
-
-  // Check that the block ids/names exist in the mesh
-  for (const auto & b : primary_block)
-    if (!MooseMeshUtils::hasSubdomainName(*_input, b))
-      paramError("primary_block", "The block '", b, "' was not found within the mesh");
-
-  for (const auto & b : paired_block)
-    if (!MooseMeshUtils::hasSubdomainName(*_input, b))
-      paramError("paired_block", "The block '", b, "' was not found within the mesh");
-
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // Make sure that the mesh is prepared
-  if (!mesh->is_prepared())
-    mesh->find_neighbors();
+  // construct the FE object so we can compute normals of faces
+  setup(*mesh);
 
-  std::vector<subdomain_id_type> vec_primary_ids =
-      MooseMeshUtils::getSubdomainIDs(*mesh, primary_block);
-  std::set<subdomain_id_type> primary_ids(vec_primary_ids.begin(), vec_primary_ids.end());
-
-  std::vector<subdomain_id_type> vec_paired_ids =
-      MooseMeshUtils::getSubdomainIDs(*mesh, paired_block);
-  std::set<subdomain_id_type> paired_ids(vec_paired_ids.begin(), vec_paired_ids.end());
-
-  std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
   std::vector<boundary_id_type> boundary_ids =
-      MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
+      MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -94,13 +67,11 @@ SideSetsBetweenSubdomainsGenerator::generate()
 
   for (const auto & elem : mesh->active_element_ptr_range())
   {
-    subdomain_id_type curr_subdomain = elem->subdomain_id();
-
     // We only need to loop over elements in the primary subdomain
-    if (primary_ids.count(curr_subdomain) == 0)
+    if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
       continue;
 
-    for (unsigned int side = 0; side < elem->n_sides(); side++)
+    for (const auto & side : make_range(elem->n_sides()))
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
 
@@ -111,11 +82,21 @@ SideSetsBetweenSubdomainsGenerator::generate()
       {
         queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
       }
-      else if (neighbor != NULL && paired_ids.count(neighbor->subdomain_id()) > 0)
-
-        // Add the boundaries
-        for (const auto & boundary_id : boundary_ids)
-          boundary_info.add_side(elem, side, boundary_id);
+      else if (neighbor != NULL)
+      {
+        _fe_face->reinit(elem, side);
+        // We'll just use the normal of the first qp
+        const Point & face_normal = _fe_face->get_normals()[0];
+        // Add the boundaries, if appropriate
+        if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+        {
+          // Add the boundaries
+          if (_replace)
+            boundary_info.remove_side(elem, side);
+          for (const auto & boundary_id : boundary_ids)
+            boundary_info.add_side(elem, side, boundary_id);
+        }
+      }
     }
   }
 
@@ -127,7 +108,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
     std::vector<Parallel::Request> side_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
 
     // Make all requests
-    for (processor_id_type p = 0; p != my_n_proc; ++p)
+    for (const auto & p : make_range(my_n_proc))
     {
       if (p == my_proc_id)
         continue;
@@ -140,7 +121,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
     // Reply to all requests
     std::vector<vec_type> responses(my_n_proc - 1);
 
-    for (processor_id_type p = 1; p != my_n_proc; ++p)
+    for (const auto & p : make_range(uint(1), my_n_proc))
     {
       vec_type query;
 
@@ -157,9 +138,14 @@ SideSetsBetweenSubdomainsGenerator::generate()
         const unsigned int side = q.second;
         const Elem * neighbor = elem->neighbor_ptr(side);
 
-        if (neighbor != NULL && paired_ids.count(neighbor->subdomain_id()) > 0)
+        if (neighbor != NULL)
         {
-          responses[p - 1].push_back(std::make_pair(elem->id(), side));
+          _fe_face->reinit(elem, side);
+          // We'll just use the normal of the first qp
+          const Point & face_normal = _fe_face->get_normals()[0];
+          // Add the boundaries, if appropriate
+          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+            responses[p - 1].push_back(std::make_pair(elem->id(), side));
         }
       }
 
@@ -181,6 +167,8 @@ SideSetsBetweenSubdomainsGenerator::generate()
         const Elem * elem = mesh->elem_ptr(r.first);
         const unsigned int side = r.second;
 
+        if (_replace)
+          boundary_info.remove_side(elem, side);
         for (const auto & boundary_id : boundary_ids)
           boundary_info.add_side(elem, side, boundary_id);
       }
@@ -190,8 +178,8 @@ SideSetsBetweenSubdomainsGenerator::generate()
     Parallel::wait(reply_requests);
   }
 
-  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-    boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
+  for (const auto & i : make_range(boundary_ids.size()))
+    boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
