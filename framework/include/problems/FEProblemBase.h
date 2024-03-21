@@ -468,16 +468,16 @@ public:
    * These are the element and nodes that contribute to the jacobian and
    * residual for this local processor.
    *
-   * getAlgebraicElementRange() returns the element range that contributes to the
+   * getCurrentAlgebraicElementRange() returns the element range that contributes to the
    * system
-   * getAlgebraicNodeRange() returns the node range that contributes to the
+   * getCurrentAlgebraicNodeRange() returns the node range that contributes to the
    * system
-   * getAlgebraicBndNodeRange returns the boundary node ranges that contributes
+   * getCurrentAlgebraicBndNodeRange returns the boundary node ranges that contributes
    * to the system
    */
-  const ConstElemRange & getAlgebraicElementRange();
-  const ConstNodeRange & getAlgebraicNodeRange();
-  const ConstBndNodeRange & getAlgebraicBndNodeRange();
+  const ConstElemRange & getCurrentAlgebraicElementRange();
+  const ConstNodeRange & getCurrentAlgebraicNodeRange();
+  const ConstBndNodeRange & getCurrentAlgebraicBndNodeRange();
   ///@}
 
   ///@{
@@ -486,21 +486,21 @@ public:
    * and boundary nodes that contribute to the jacobian and residual for this local
    * processor.
    *
-   * setAlgebraicElementRange() sets the element range that contributes to the
+   * setCurrentAlgebraicElementRange() sets the element range that contributes to the
    * system. A nullptr will reset the range to use the mesh's range.
    *
-   * setAlgebraicNodeRange() sets the node range that contributes to the
+   * setCurrentAlgebraicNodeRange() sets the node range that contributes to the
    * system. A nullptr will reset the range to use the mesh's range.
    *
-   * setAlgebraicBndNodeRange() sets the boundary node range that contributes
+   * setCurrentAlgebraicBndNodeRange() sets the boundary node range that contributes
    * to the system. A nullptr will reset the range to use the mesh's range.
    *
    * @param range A pointer to the const range object representing the algebraic
    *              elements, nodes, or boundary nodes.
    */
-  void setAlgebraicElementRange(ConstElemRange * range);
-  void setAlgebraicNodeRange(ConstNodeRange * range);
-  void setAlgebraicBndNodeRange(ConstBndNodeRange * range);
+  void setCurrentAlgebraicElementRange(ConstElemRange * range);
+  void setCurrentAlgebraicNodeRange(ConstNodeRange * range);
+  void setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range);
   ///@}
 
   /**
@@ -2536,9 +2536,9 @@ protected:
   std::unique_ptr<ConstElemRange> _nl_evaluable_local_elem_range;
   std::unique_ptr<ConstElemRange> _aux_evaluable_local_elem_range;
 
-  std::unique_ptr<ConstElemRange> _algebraic_elem_range;
-  std::unique_ptr<ConstNodeRange> _algebraic_node_range;
-  std::unique_ptr<ConstBndNodeRange> _algebraic_bnd_node_range;
+  std::unique_ptr<ConstElemRange> _current_algebraic_elem_range;
+  std::unique_ptr<ConstNodeRange> _current_algebraic_node_range;
+  std::unique_ptr<ConstBndNodeRange> _current_algebraic_bnd_node_range;
 
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property

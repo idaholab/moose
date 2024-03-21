@@ -898,7 +898,7 @@ NonlinearSystemBase::setInitialSolution()
   {
     TIME_SECTION("initialBCs", 2, "Applying BCs To Initial Condition");
 
-    const ConstBndNodeRange & bnd_nodes = _fe_problem.getAlgebraicBndNodeRange();
+    const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
     for (const auto & bnode : bnd_nodes)
     {
       BoundaryID boundary_id = bnode->_bnd_id;
@@ -1696,7 +1696,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     TIME_SECTION("Kernels", 3 /*, "Computing Kernels"*/);
 
-    const ConstElemRange & elem_range = _fe_problem.getAlgebraicElementRange();
+    const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
 
     ComputeResidualThread cr(_fe_problem, tags);
     Threads::parallel_reduce(elem_range, cr);
@@ -1785,7 +1785,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
       ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels, tags);
 
-      const ConstNodeRange & range = _fe_problem.getAlgebraicNodeRange();
+      const ConstNodeRange & range = _fe_problem.getCurrentAlgebraicNodeRange();
 
       if (range.begin() != range.end())
       {
@@ -1817,7 +1817,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
       ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels, tags);
 
-      const ConstBndNodeRange & bnd_node_range = _fe_problem.getAlgebraicBndNodeRange();
+      const ConstBndNodeRange & bnd_node_range = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
       Threads::parallel_reduce(bnd_node_range, cnk);
 
@@ -1932,7 +1932,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
   {
     TIME_SECTION("Kernels", 3 /*, "Computing Kernels"*/);
 
-    const ConstElemRange & elem_range = _fe_problem.getAlgebraicElementRange();
+    const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
 
     ComputeResidualAndJacobianThread crj(_fe_problem, vector_tags, matrix_tags);
     Threads::parallel_reduce(elem_range, crj);
@@ -2002,7 +2002,7 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
-    const ConstBndNodeRange & bnd_nodes = _fe_problem.getAlgebraicBndNodeRange();
+    const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
     if (!bnd_nodes.empty())
     {
@@ -2050,7 +2050,7 @@ NonlinearSystemBase::computeNodalBCsResidualAndJacobian()
 {
   PARALLEL_TRY
   {
-    const ConstBndNodeRange & bnd_nodes = _fe_problem.getAlgebraicBndNodeRange();
+    const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
     if (!bnd_nodes.empty())
     {
@@ -2773,7 +2773,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     if (_nodal_kernels.hasActiveBlockObjects())
     {
       ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
-      const ConstNodeRange & range = _fe_problem.getAlgebraicNodeRange();
+      const ConstNodeRange & range = _fe_problem.getCurrentAlgebraicNodeRange();
       Threads::parallel_reduce(range, cnkjt);
 
       unsigned int n_threads = libMesh::n_threads();
@@ -2805,7 +2805,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     mortarConstraints(Moose::ComputeType::Jacobian, {}, tags);
 
     // Get our element range for looping over
-    const ConstElemRange & elem_range = _fe_problem.getAlgebraicElementRange();
+    const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
 
     if (_fe_problem.computingScalingJacobian())
     {
@@ -2848,7 +2848,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
-          const ConstBndNodeRange & bnd_range = _fe_problem.getAlgebraicBndNodeRange();
+          const ConstBndNodeRange & bnd_range = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
           unsigned int n_threads = libMesh::n_threads();
@@ -2873,7 +2873,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
-          const ConstBndNodeRange & bnd_range = _fe_problem.getAlgebraicBndNodeRange();
+          const ConstBndNodeRange & bnd_range = _fe_problem.getCurrentAlgebraicBndNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
           unsigned int n_threads = libMesh::n_threads();
@@ -2992,7 +2992,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0, this->number());
 
       // Compute Jacobians for NodalBCBases
-      const ConstBndNodeRange & bnd_nodes = _fe_problem.getAlgebraicBndNodeRange();
+      const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
       for (const auto & bnode : bnd_nodes)
       {
         BoundaryID boundary_id = bnode->_bnd_id;
@@ -3135,7 +3135,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
 
   PARALLEL_TRY
   {
-    const ConstElemRange & elem_range = _fe_problem.getAlgebraicElementRange();
+    const ConstElemRange & elem_range = _fe_problem.getCurrentAlgebraicElementRange();
     ComputeJacobianBlocksThread cjb(_fe_problem, blocks, tags);
     Threads::parallel_reduce(elem_range, cjb);
   }
@@ -3156,7 +3156,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
     std::vector<numeric_index_type> zero_rows;
     PARALLEL_TRY
     {
-      const ConstBndNodeRange & bnd_nodes = _fe_problem.getAlgebraicBndNodeRange();
+      const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
       for (const auto & bnode : bnd_nodes)
       {
         BoundaryID boundary_id = bnode->_bnd_id;
@@ -3235,7 +3235,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
         has_active_dampers = true;
         *_increment_vec = update;
         ComputeElemDampingThread cid(_fe_problem, *this);
-        Threads::parallel_reduce(_fe_problem.getAlgebraicElementRange(), cid);
+        Threads::parallel_reduce(_fe_problem.getCurrentAlgebraicElementRange(), cid);
         damping = std::min(cid.damping(), damping);
       }
       PARALLEL_CATCH;
@@ -3250,7 +3250,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
         has_active_dampers = true;
         *_increment_vec = update;
         ComputeNodalDampingThread cndt(_fe_problem, *this);
-        Threads::parallel_reduce(_fe_problem.getAlgebraicNodeRange(), cndt);
+        Threads::parallel_reduce(_fe_problem.getCurrentAlgebraicNodeRange(), cndt);
         damping = std::min(cndt.damping(), damping);
       }
       PARALLEL_CATCH;
