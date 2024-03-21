@@ -47,7 +47,7 @@ reac_coeff=3
 
 [LinearFVBCs]
   [dir]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = "left"
     functor = 0

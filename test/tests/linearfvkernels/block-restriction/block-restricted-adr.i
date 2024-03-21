@@ -71,13 +71,13 @@
 [LinearFVBCs]
   inactive = "outflow"
   [dir]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = "sides outlet"
     functor = analytic_solution
   []
   [outflow]
-    type = LinearFVOutflowBC
+    type = LinearFVAdvectionDiffusionOutflowBC
     variable = u
     boundary = "right"
     use_two_term_expansion = true

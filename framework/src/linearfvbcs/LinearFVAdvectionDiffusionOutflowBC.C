@@ -7,16 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVOutflowBC.h"
+#include "LinearFVAdvectionDiffusionOutflowBC.h"
 
-registerMooseObject("MooseApp", LinearFVOutflowBC);
+registerMooseObject("MooseApp", LinearFVAdvectionDiffusionOutflowBC);
 
 InputParameters
-LinearFVOutflowBC::validParams()
+LinearFVAdvectionDiffusionOutflowBC::validParams()
 {
-  InputParameters params = LinearFVBoundaryCondition::validParams();
+  InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addClassDescription("Adds a boundary condition which represents a surface with outflowing "
-                             "material with a constant velocity.");
+                             "material with a constant velocity. This kernel is only compatible "
+                             "with advection-diffusion problems.");
   params.addParam<bool>(
       "use_two_term_expansion",
       false,
@@ -24,8 +25,9 @@ LinearFVOutflowBC::validParams()
   return params;
 }
 
-LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
-  : LinearFVBoundaryCondition(parameters),
+LinearFVAdvectionDiffusionOutflowBC::LinearFVAdvectionDiffusionOutflowBC(
+    const InputParameters & parameters)
+  : LinearFVAdvectionDiffusionBC(parameters),
     _two_term_expansion(getParam<bool>("use_two_term_expansion"))
 {
   if (_two_term_expansion)
@@ -33,7 +35,7 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryValue() const
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValue() const
 {
   // We allow internal boundaries too so we need to check which side we are on
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -51,7 +53,7 @@ LinearFVOutflowBC::computeBoundaryValue() const
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryNormalGradient() const
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryNormalGradient() const
 {
   // By default we assume that the face value is the same as the cell center value so we
   // have a zero gradient.
@@ -69,13 +71,13 @@ LinearFVOutflowBC::computeBoundaryNormalGradient() const
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryValueMatrixContribution() const
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueMatrixContribution() const
 {
   return 1.0;
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueRHSContribution() const
 {
   // If we approximate the face value with the cell value, we
   // don't need to add anything to the right hand side
@@ -95,13 +97,13 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryGradientMatrixContribution() const
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientMatrixContribution() const
 {
   return 0.0;
 }
 
 Real
-LinearFVOutflowBC::computeBoundaryGradientRHSContribution() const
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientRHSContribution() const
 {
   return computeBoundaryNormalGradient();
 }

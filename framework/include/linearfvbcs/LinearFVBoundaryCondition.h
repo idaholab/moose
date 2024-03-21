@@ -67,8 +67,6 @@ public:
 
   virtual bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
-  virtual bool needsExtrapolation() const { return false; }
-
   /**
    * Get a reference to the subproblem
    * @return Reference to SubProblem
@@ -87,35 +85,6 @@ public:
    * Computes the normal gradient (often used in diffusion terms) on the boundary.
    */
   virtual Real computeBoundaryNormalGradient() const = 0;
-
-  /**
-   * Computes the boundary value's contribution to the linear system matrix.
-   */
-  virtual Real computeBoundaryValueMatrixContribution() const = 0;
-
-  /**
-   * Computes the boundary value's contribution to the linear system right hand side.
-   */
-  virtual Real computeBoundaryValueRHSContribution() const = 0;
-
-  /**
-   * Computes the boundary gradient's contribution to the linear system matrix. Mostly used for
-   * diffusion.
-   */
-  virtual Real computeBoundaryGradientMatrixContribution() const = 0;
-
-  /**
-   * Computes the boundary gradient's contribution to the linear system right hand side.
-   * Mostly used for diffusion.
-   */
-  virtual Real computeBoundaryGradientRHSContribution() const = 0;
-
-  /**
-   * Check if the contributions to the right hand side and matrix already include the material
-   * property multipler. For dirichlet boundary conditions this is false, but for flux boundary
-   * conditions this can be true (like Neumann BC for diffusion problems).
-   */
-  virtual bool includesMaterialPropertyMultiplier() const { return false; }
 
   /// Set current face info
   void setCurrentFaceInfo(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type);

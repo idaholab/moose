@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVAdvection.md LinearFVOutflowBC.md'
+  design = 'LinearFVAdvection.md LinearFVAdvectionDiffusionOutflowBC.md'
   issues = '#25722'
   [mms-1d-upwind]
     type = PythonUnitTest

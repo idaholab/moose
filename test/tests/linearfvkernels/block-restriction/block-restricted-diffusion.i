@@ -59,7 +59,7 @@
 
 [LinearFVBCs]
   [dir]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = "sides outlet"
     functor = analytic_solution

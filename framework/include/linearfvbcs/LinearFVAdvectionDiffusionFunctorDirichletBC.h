@@ -9,26 +9,22 @@
 
 #pragma once
 
-#include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Class implementing an outflow boundary condition for linear finite
- * volume variables
+ * Class implementing a Dirichlet boundary condition for linear finite
+ * volume variables. This is only applicable for advection-diffusion problems.
  */
-class LinearFVOutflowBC : public LinearFVBoundaryCondition
+class LinearFVAdvectionDiffusionFunctorDirichletBC : public LinearFVAdvectionDiffusionBC
 {
 public:
-  static InputParameters validParams();
-
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVOutflowBC(const InputParameters & parameters);
+  LinearFVAdvectionDiffusionFunctorDirichletBC(const InputParameters & parameters);
 
-  /// Whether the face value on this boundary is determined using a linear
-  /// extrapolation from the adjacent cell center.
-  virtual bool needsExtrapolation() const override { return _two_term_expansion; }
+  static InputParameters validParams();
 
   virtual Real computeBoundaryValue() const override;
 
@@ -43,6 +39,6 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  /// Switch for enabling linear extrapolation for the boundary face value
-  const bool _two_term_expansion;
+  /// The functor for this BC (can be variable, function, etc)
+  const Moose::Functor<Real> & _functor;
 };

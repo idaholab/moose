@@ -128,6 +128,11 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
+  const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> & getBoundaryConditionMap()
+  {
+    return _boundary_id_to_bc;
+  }
+
   virtual void prepareIC() override {}
 
   virtual bool isNodal() const override final { return false; }
@@ -156,6 +161,11 @@ protected:
   /// Throw an error when somebody wants to use this variable with automatic differentiation
   [[noreturn]] void adError() const;
 
+  /**
+   * Setup the boundary to Dirichlet BC map
+   */
+  void cacheBoundaryBCMap();
+
   usingMooseVariableBaseMembers;
 
   /// Boolean to check if this variable needs gradient computations.
@@ -176,6 +186,10 @@ protected:
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
   /// loops
   std::unique_ptr<MooseVariableDataLinearFV<OutputType>> _neighbor_data;
+
+  /// Map for easily accessing the boundary conditions based on the boundary IDs.
+  /// We assume that each boundary has one boundary condition only.
+  std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
   friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
 
@@ -200,15 +214,6 @@ private:
   virtual GradientType evaluateGradient(const FaceArg & face,
                                         const StateArg &) const override final;
   virtual DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
-
-  /**
-   * Setup the boundary to Dirichlet BC map
-   */
-  void cacheBoundaryBCMap();
-
-  /// Map for easily accessing the boundary conditions based on the boundary IDs.
-  /// We assume that each boundary has one boundary condition only.
-  std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
   /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
   /// because the solution might not exist at the time that this variable is constructed, so we

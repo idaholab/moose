@@ -90,14 +90,14 @@ The following functions represent this common functionality:
   meaning that a $\frac{u_b}{|d_Cf|}$ term will be added with additional multipliers
   applied at the kernel level.
 
-## LinearFVBCs source code: LinearFVFunctorDirichletBC
+## LinearFVBCs source code: LinearFVAdvectionDiffusionFunctorDirichletBC
 
-`LinearFVFunctorDirichletBC` object assigns a value on a boundary. This value is computed using a moose
+`LinearFVAdvectionDiffusionFunctorDirichletBC` object assigns a value on a boundary. This value is computed using a moose
 functor. For more information on the functor system in moose, see [Functors/index.md].
 
-!listing framework/src/linearfvbcs/LinearFVFunctorDirichletBC.C
+!listing framework/src/linearfvbcs/LinearFVAdvectionDiffusionFunctorDirichletBC.C
          start=#include
          end=""
-         caption=Example source code for `LinearFVFunctorDirichletBC`.
+         caption=Example source code for `LinearFVAdvectionDiffusionFunctorDirichletBC`.
 
 !syntax list /LinearFVBCs objects=True actions=False subsystems=False

@@ -10,7 +10,7 @@
 #include "LinearFVDiffusion.h"
 #include "Assembly.h"
 #include "SubProblem.h"
-#include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 registerMooseObject("MooseApp", LinearFVDiffusion);
 
@@ -37,6 +37,15 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
 {
   if (_use_nonorthogonal_correction)
     _var.computeCellGradients();
+}
+
+void
+LinearFVDiffusion::initialSetup()
+{
+  for (const auto bc : _var.getBoundaryConditionMap())
+    if (!dynamic_cast<const LinearFVAdvectionDiffusionBC *>(bc.second))
+      mooseError(
+          bc.second->type(), " is not a compatible boundary condition with ", this->type(), "!");
 }
 
 Real
@@ -124,10 +133,13 @@ LinearFVDiffusion::computeFluxRHSContribution()
 Real
 LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  auto grad_contrib = bc.computeBoundaryGradientMatrixContribution() * _current_face_area;
+  const auto * diff_bc = dynamic_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(diff_bc, "This should be a valid BC!");
+
+  auto grad_contrib = diff_bc->computeBoundaryGradientMatrixContribution() * _current_face_area;
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
-  if (!bc.includesMaterialPropertyMultiplier())
+  if (!diff_bc->includesMaterialPropertyMultiplier())
   {
     const auto face_arg = singleSidedFaceArg(_current_face_info);
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
@@ -139,12 +151,15 @@ LinearFVDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
 Real
 LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
+  const auto * diff_bc = dynamic_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(diff_bc, "This should be a valid BC!");
+
   const auto face_arg = singleSidedFaceArg(_current_face_info);
-  auto grad_contrib = bc.computeBoundaryGradientRHSContribution() * _current_face_area;
+  auto grad_contrib = diff_bc->computeBoundaryGradientRHSContribution() * _current_face_area;
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
-  if (!bc.includesMaterialPropertyMultiplier())
+  if (!diff_bc->includesMaterialPropertyMultiplier())
     grad_contrib *= _diffusion_coeff(face_arg, determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do

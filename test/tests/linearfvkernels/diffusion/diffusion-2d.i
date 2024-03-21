@@ -36,7 +36,7 @@
 
 [LinearFVBCs]
   [dir]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = "left right top bottom"
     functor = analytic_solution

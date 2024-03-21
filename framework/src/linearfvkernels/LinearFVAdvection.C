@@ -10,7 +10,7 @@
 #include "LinearFVAdvection.h"
 #include "Assembly.h"
 #include "SubProblem.h"
-#include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 registerMooseObject("MooseApp", LinearFVAdvection);
 
@@ -30,6 +30,15 @@ LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
 
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+}
+
+void
+LinearFVAdvection::initialSetup()
+{
+  for (const auto bc : _var.getBoundaryConditionMap())
+    if (!dynamic_cast<const LinearFVAdvectionDiffusionBC *>(bc.second))
+      mooseError(
+          bc.second->type(), " is not a compatible boundary condition with ", this->type(), "!");
 }
 
 Real
@@ -63,7 +72,10 @@ LinearFVAdvection::computeNeighborRightHandSideContribution()
 Real
 LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto boundary_value_matrix_contrib = bc.computeBoundaryValueMatrixContribution();
+  const auto * adv_bc = dynamic_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(adv_bc, "This should be a valid BC!");
+
+  const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
 
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
@@ -75,10 +87,13 @@ LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
 Real
 LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
+  const auto * adv_bc = dynamic_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(adv_bc, "This should be a valid BC!");
+
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
-  const auto boundary_value_rhs_contrib = bc.computeBoundaryValueRHSContribution();
+  const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
   return -boundary_value_rhs_contrib * factor * (_velocity * _current_face_info->normal()) *
          _current_face_area;
 }

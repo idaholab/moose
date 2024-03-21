@@ -26,13 +26,13 @@
 
 [LinearFVBCs]
   [left]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = left
     functor = 0
   []
   [right]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = right
     functor = 1

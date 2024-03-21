@@ -54,7 +54,7 @@
 
 [LinearFVBCs]
   [left_bc]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = 'left right'
     functor = 0

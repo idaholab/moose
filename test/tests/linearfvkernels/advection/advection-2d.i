@@ -36,13 +36,13 @@
 
 [LinearFVBCs]
   [inflow]
-    type = LinearFVFunctorDirichletBC
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = "left top bottom"
     functor = analytic_solution
   []
   [outflow]
-    type = LinearFVOutflowBC
+    type = LinearFVAdvectionDiffusionOutflowBC
     variable = u
     boundary = "right"
     use_two_term_expansion = false
