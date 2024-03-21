@@ -41,7 +41,7 @@ public:
   }
 
 private:
-  // /// Data from the current predictor row
+  /// Data from the current predictor row
   const std::vector<Real> & _predictor_row;
 
   /// Gaussian process handler responsible for managing training related tasks
@@ -53,24 +53,24 @@ private:
   /// Data (y) used for training.
   std::vector<std::vector<Real>> _data_buffer;
 
-  // /// Paramaters (x) used for training, along with statistics
+  /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
 
-  // /// Data (y) used for training
+  /// Data (y) used for training
   RealEigenMatrix _training_data;
 
   /// Struct holding parameters necessary for parameter tuning
   const StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions _optimization_opts;
 
-  // /// Data from the current sampler row
+  /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
 
-  // /// Predictor values from reporters
+  /// Predictor values from reporters
   std::vector<const Real *> _pvals;
 
-  // /// Columns from sampler for predictors
+  /// Columns from sampler for predictors
   std::vector<unsigned int> _pcols;
 
-  // /// Total number of parameters/dimensions
+  /// Total number of parameters/dimensions
   unsigned int _n_params;
 };

@@ -11,6 +11,7 @@
     type = Normal
     mean = 1000.0
     standard_deviation = 100.0
+
   []
 []
 
@@ -20,11 +21,13 @@
     num_rows = 20 # 200
     distributions = 'k_dist bc_dist'
     execute_on = PRE_MULTIAPP_SETUP
+    seed = 100
   []
   [test]
     type = LatinHypercube
     num_rows = 10 # 100
     distributions = 'k_dist bc_dist'
+    seed = 101
   []
 []
 
@@ -71,14 +74,6 @@
     parallel_type = ROOT
     execute_on = timestep_end
     sampler = test
-  []
-  [eval_train]
-    type = EvaluateSurrogate
-    model = mogp_surrogate
-    response_type = vector_real
-    parallel_type = ROOT
-    execute_on = timestep_end
-    sampler = sample
   []
 []
 
@@ -140,6 +135,7 @@
     type = JSON
     execute_on = timestep_end
     vectorpostprocessors_as_reporters = true
+    execute_system_information_on = NONE
   []
   # [out1]
   #   type = CSV

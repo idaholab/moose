@@ -29,7 +29,6 @@ class MultiOutputGaussianProcessHandler
 {
 public:
   MultiOutputGaussianProcessHandler() {}
-  // MultiOutputGaussianProcessHandler();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
