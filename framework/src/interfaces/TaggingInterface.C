@@ -128,7 +128,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
 
   const auto * const fe_problem =
       moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
-  
+
   if (fe_problem->isConvergenceSet())
   {
     const auto & conv = fe_problem->getConvergence(fe_problem->getActiveConvergenceName());
@@ -146,12 +146,12 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
       };
       create_tags_split(_vector_tags, _non_ref_vector_tags, _ref_vector_tags);
       create_tags_split(_abs_vector_tags, _non_ref_abs_vector_tags, _ref_abs_vector_tags);
-      }
+    }
     else
-      {
-       _non_ref_vector_tags = _vector_tags;
-       _non_ref_abs_vector_tags = _abs_vector_tags;
-       }
+    {
+      _non_ref_vector_tags = _vector_tags;
+      _non_ref_abs_vector_tags = _abs_vector_tags;
+    }
   }
 }
 

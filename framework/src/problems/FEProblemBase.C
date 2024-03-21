@@ -2356,7 +2356,7 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
   return *ret;
 }
 
-bool 
+bool
 FEProblemBase::isConvergenceSet() const
 {
   return _set_nonlinear_convergence_name;
