@@ -34,6 +34,11 @@ public:
   void serializeSolution();
 
   /**
+   * Quit the current solve as soon as possible.
+   */
+  virtual void stopSolve(const ExecFlagType & exec_flag) = 0;
+
+  /**
    * Set the solution to a given vector.
    * @param soln The vector which should be treated as the solution.
    */

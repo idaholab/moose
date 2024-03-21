@@ -79,11 +79,6 @@ public:
 
   virtual void solve() override = 0;
 
-  /**
-   * Quit the current solve as soon as possible.
-   */
-  virtual void stopSolve(const ExecFlagType & exec_flag) = 0;
-
   virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 
   virtual SNES getSNES() = 0;

@@ -53,6 +53,11 @@ public:
   virtual void jacobianSetup() override {}
 
   /**
+   * Quit the current solve as soon as possible.
+   */
+  virtual void stopSolve(const ExecFlagType & exec_flag) override;
+
+  /**
    * Compute the right hand side and the system matrix of the system for given tags.
    * @param vector_tags The IDs of the vector tags whose right hand side contribution should be
    * included

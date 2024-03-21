@@ -5989,7 +5989,11 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // Stop the solve -- this entails setting
       // SNESSetFunctionDomainError() or directly inserting NaNs in the
       // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
-      _current_nl_sys->stopSolve(_current_execute_on_flag);
+      if (_current_nl_sys)
+        _current_nl_sys->stopSolve(_current_execute_on_flag);
+
+      if (_current_linear_sys)
+        _current_nl_sys->stopSolve(_current_execute_on_flag);
 
       // and close Aux system (we MUST do this here; see #11525)
       _aux->solution().close();

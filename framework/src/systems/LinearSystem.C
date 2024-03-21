@@ -291,3 +291,15 @@ LinearSystem::solve()
       _app.solutionInvalidity().print(_console);
   }
 }
+
+void
+LinearSystem::stopSolve(const ExecFlagType & /*exec_flag*/)
+{
+  // We close the containers in case the solve restarts from a failed iteration
+  _linear_implicit_system.matrix->close();
+  _linear_implicit_system.rhs->close();
+  if (_rhs_time)
+    _rhs_time->close();
+  if (_rhs_non_time)
+    _rhs_non_time->close();
+}
