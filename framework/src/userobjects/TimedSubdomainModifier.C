@@ -20,7 +20,8 @@ TimedSubdomainModifier::validParams()
   InputParameters params = TimedElementSubdomainModifier::validParams();
 
   // parameters for direct input (additionally to 'times')
-  params.addParam<std::vector<std::string>>("blocks_from", "Names or ids of the 'old' block(s), to be renamed.");
+  params.addParam<std::vector<std::string>>("blocks_from", 
+                                            "Names or ids of the 'old' block(s), to be renamed.");
   params.addParam<std::vector<std::string>>("blocks_to", "Names or ids of the 'new' block.");
   params.addParamNamesToGroup("times blocks_from blocks_to", "Direct subdomain changes data input");
 
@@ -62,8 +63,8 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
       isParamValid("blocks_to_column_text");
 
   const auto from_data_File_needs_header = isParamValid("time_column_text") +
-                                   isParamValid("blocks_from_column_text") +
-                                   isParamValid("blocks_to_column_text");
+                                           isParamValid("blocks_from_column_text") +
+                                           isParamValid("blocks_to_column_text");
 
   const auto from_parameters =
       isParamValid("times") + isParamValid("blocks_from") + isParamValid("blocks_to");
@@ -142,8 +143,7 @@ TimedSubdomainModifier::buildFromFile()
   const auto _file_name = getParam<FileName>("data_file");
 
   /// Flag indicating if the file contains a header.
-  MooseUtils::DelimitedFileReaderOfString::HeaderFlag _header_flag =
-      MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
+  auto _header_flag = MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
   if (isParamValid("header"))
   {
     _header_flag = getParam<bool>("header")
@@ -174,7 +174,7 @@ TimedSubdomainModifier::buildFromFile()
   if (isParamValid("time_column_text"))
   {
     const auto s = getParam<std::string>("time_column_text");
-    const std::vector<std::string> _names = file.getNames();
+    const auto _names = file.getNames();
     const auto it = find(_names.begin(), _names.end(), s);
     if (it == _names.end())
       mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
@@ -189,7 +189,7 @@ TimedSubdomainModifier::buildFromFile()
   if (isParamValid("blocks_from_column_text"))
   {
     const auto s = getParam<std::string>("blocks_from_column_text");
-    const std::vector<std::string> _names = file.getNames();
+    const auto _names = file.getNames();
     const auto it = find(_names.begin(), _names.end(), s);
     if (it == _names.end())
       mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
@@ -204,7 +204,7 @@ TimedSubdomainModifier::buildFromFile()
   if (isParamValid("blocks_to_column_text"))
   {
     const auto s = getParam<std::string>("blocks_to_column_text");
-    const std::vector<std::string> _names = file.getNames();
+    const auto _names = file.getNames();
     const auto it = find(_names.begin(), _names.end(), s);
     if (it == _names.end())
       mooseError("Could not find '", s, "' in header of file ", _file_name, ".");
@@ -215,20 +215,20 @@ TimedSubdomainModifier::buildFromFile()
     _blocks_to_column = getParam<size_t>("blocks_to_column_index");
   };
 
-  size_t max_needed_column_index = std::max({_time_column, _blocks_from_column, _blocks_to_column});
+  const auto max_needed_column_index = std::max({_time_column, _blocks_from_column, _blocks_to_column});
 
-  std::vector<std::vector<std::string>> data = file.getData();
+  const auto data = file.getData();
 
   if (data.size() < max_needed_column_index)
     mooseError("data must contain at least " + std::to_string(max_needed_column_index) +
                    " columns in file ",
                _file_name);
 
-  std::vector<std::string> strTimes = data[_time_column];
-  std::vector<std::string> strBlockFrom = data[_blocks_from_column];
-  std::vector<std::string> strBlockTo = data[_blocks_to_column];
+  const auto strTimes = data[_time_column];
+  const auto strBlockFrom = data[_blocks_from_column];
+  const auto strBlockTo = data[_blocks_to_column];
 
-  size_t n_rows = strTimes.size();
+  const auto n_rows = strTimes.size();
 
   // some sanity checks
   if (n_rows == 0)
@@ -263,7 +263,7 @@ TimedSubdomainModifier::initialize()
   TimedElementSubdomainModifier::initialize();
 }
 
-std::vector<real>
+std::vector<Real>
 TimedSubdomainModifier::onGetTimes()
 {
   // just return our local array of times
@@ -274,25 +274,25 @@ SubdomainID
 TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const Real t_to_inclusive)
 {
   // get the subdomain-id of the current element
-  SubdomainID _subdomain_id = _current_elem->subdomain_id();
+  SubdomainID resulting_subdomain_id = _current_elem->subdomain_id();
 
   // iterate all block changes issued by the user and apply if appropriate
-  size_t n_rows = _timesAndIndices.size();
+  const auto n_rows = _times_and_indices.size();
   for (size_t i = 0; i < n_rows; ++i)
   {
     // time of the data point
-    const auto t = _timesAndIndices[i].time;
+    const auto t = _times_and_indices[i].time;
 
     // original data point index
-    const auto j = _timesAndIndices[i].index;
+    const auto j = _times_and_indices[i].index;
 
     // do we have to apply?
-    if (t > t_from_exclusive && t <= t_to_inclusive && _subdomain_id == _blocks_from[j])
+    if (t > t_from_exclusive && t <= t_to_inclusive && resulting_subdomain_id == _blocks_from[j])
     {
       // we have to change the subdomain-id using the original index (stored in 'j')
-      _subdomain_id = _blocks_to[j];
+      resulting_subdomain_id = _blocks_to[j];
     }
   };
 
-  return _subdomain_id;
+  return resulting_subdomain_id;
 }

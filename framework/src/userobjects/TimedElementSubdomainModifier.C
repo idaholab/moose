@@ -38,33 +38,33 @@ TimedElementSubdomainModifier::initialize()
   _current_step = _t_step - 1;
 
   // ask for all times (must NOT be sorted)
-  std::vector<real> _times = onGetTimes();
-  size_t n = _times.size();
+  const auto _times = onGetTimes();
+  const auto n = _times.size();
 
   // copy data to local storage
-  _timesAndIndices.resize(n);
+  _times_and_indices.resize(n);
   for (size_t i = 0; i < n; ++i)
   {
-    _timesAndIndices[i].time = _times[i];
-    _timesAndIndices[i].index = i;
+    _times_and_indices[i].time = _times[i];
+    _times_and_indices[i].index = i;
   };
 
   // sort the times
-  std::sort(_timesAndIndices.begin(), _timesAndIndices.end());
+  std::sort(_times_and_indices.begin(), _times_and_indices.end());
 }
 
-std::vector<real>
+std::vector<Real>
 TimedElementSubdomainModifier::onGetTimes()
 {
-  std::vector<real> _times;
+  std::vector<Real> _times;
   return _times;
 }
 
 SubdomainID
-TimedElementSubdomainModifier::onComputeSubdomainID(real /* t_from_exclusive */,
-                                                    real /* t_to_inclusive */)
+TimedElementSubdomainModifier::onComputeSubdomainID(Real /* t_from_exclusive */,
+                                                    Real /* t_to_inclusive */)
 {
-  SubdomainID _subdomain_id = _current_elem->subdomain_id();
+  const auto _subdomain_id = _current_elem->subdomain_id();
   return _subdomain_id;
 }
 
@@ -80,7 +80,7 @@ TimedElementSubdomainModifier::computeSubdomainID()
   }
 
   // get the new subdomain-id of the current element; provide the timespan to be considered
-  SubdomainID _subdomain_id = onComputeSubdomainID(_last_t, _current_t);
+  const auto _subdomain_id = onComputeSubdomainID(_last_t, _current_t);
 
   return _subdomain_id;
 }

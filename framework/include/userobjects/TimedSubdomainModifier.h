@@ -28,19 +28,19 @@ protected:
    * (these do not have to be sorted).
    * @returns Unsorted vector of points in time.
    */
-  virtual std::vector<real> onGetTimes() override;
+  virtual std::vector<Real> onGetTimes() override;
 
   /**
    * Determines the new subdomain-id for the current element.
    * @returns New subdomain id to move the element to.
    */
-  virtual SubdomainID onComputeSubdomainID(real t_from_exclusive, real t_to_inclusive) override;
+  virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive) override;
 
 private:
   void buildFromParameters();
   void buildFromFile();
 
-  std::vector<real> _times;
+  std::vector<Real> _times;
 
   /// storage for the block ids.
   std::vector<SubdomainID> _blocks_from;

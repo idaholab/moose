@@ -24,13 +24,13 @@ public:
 protected:
   virtual SubdomainID computeSubdomainID() override;
 
-  virtual std::vector<real> onGetTimes();
-  virtual SubdomainID onComputeSubdomainID(real t_from_exclusive, real t_to_inclusive);
+  virtual std::vector<Real> onGetTimes();
+  virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive);
 
   /// storage for the times including their original index.
   struct timeIndexPair
   {
-    real time;
+    Real time;
     std::size_t index;
 
     bool operator<(const timeIndexPair & a) const
@@ -57,5 +57,5 @@ private:
   Real _current_t;
 
   /// Local variable for the start of the timespan to apply changes of the subdomain
-  real _last_t;
+  Real _last_t;
 };
