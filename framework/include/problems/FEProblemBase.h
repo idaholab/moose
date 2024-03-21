@@ -572,6 +572,7 @@ public:
   virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0) const;
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0);
   virtual void addDefaultConvergence();
+  virtual bool isConvergenceSet() const;
   /**
    * add a MOOSE line search
    */
