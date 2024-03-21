@@ -1850,8 +1850,10 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
   int doc_version = 5;
   std::string doc_text_change = R"INPUT(
 
+num_dim = 2
+
 [Mesh]
-type=GeneratedMesh   dim   =  1
+type=GeneratedMesh   dim   =  ${num_dim}
     []
 
 [Functions]
@@ -1966,11 +1968,13 @@ expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 
   // expected textedits with zero-based lines and columns
 
   std::string textedits_expect = R"INPUT(
-textedit_position: [2.0]-[56.11]
+textedit_position: [2.0]-[58.11]
 textedit_new_text:
+num_dim = 2
+
 [Mesh]
     type = GeneratedMesh
-    dim = 1
+    dim = ${num_dim}
 []
 
 [Functions]
