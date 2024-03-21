@@ -20,9 +20,9 @@ TimedSubdomainModifier::validParams()
   InputParameters params = TimedElementSubdomainModifier::validParams();
 
   // parameters for direct input (additionally to 'times')
-  params.addParam<std::vector<std::string>>("blocks_from", "Names or ids of the 'old' block.");
+  params.addParam<std::vector<std::string>>("blocks_from", "Names or ids of the 'old' block(s), to be renamed.");
   params.addParam<std::vector<std::string>>("blocks_to", "Names or ids of the 'new' block.");
-  params.addParamNamesToGroup("times blocks_from blocks_to", "Direct data input.");
+  params.addParamNamesToGroup("times blocks_from blocks_to", "Direct subdomain changes data input");
 
   // parameters for file-based data supply
   params.addParam<FileName>("data_file", "File holding CSV data");
@@ -42,9 +42,9 @@ TimedSubdomainModifier::validParams()
   params.addParamNamesToGroup(
       "data_file header delimiter comment time_column_index blocks_from_column_index "
       "blocks_to_column_index time_column_text blocks_from_column_text blocks_to_column_text",
-      "Data input from file.");
+      "Subdomain change data input from CSV file");
 
-  params.addClassDescription("Moves all elements of a block to another at the given times.");
+  params.addClassDescription("Renames entire blocks at user-specified times.");
 
   return params;
 }
@@ -54,38 +54,38 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
 {
   // determine function arguments
 
-  int bFromData_File =
+  const auto from_data_file =
       isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") +
       isParamValid("comment") + isParamValid("time_column_index") +
       isParamValid("blocks_from_column_index") + isParamValid("blocks_to_column_index") +
       isParamValid("time_column_text") + isParamValid("blocks_from_column_text") +
       isParamValid("blocks_to_column_text");
 
-  int bFromData_File_NeedsHeader = isParamValid("time_column_text") +
+  const auto from_data_File_needs_header = isParamValid("time_column_text") +
                                    isParamValid("blocks_from_column_text") +
                                    isParamValid("blocks_to_column_text");
 
-  int bFromParameters =
+  const auto from_parameters =
       isParamValid("times") + isParamValid("blocks_from") + isParamValid("blocks_to");
 
   // Check parameter set for inconsistencies
-  int nFrom = ((bFromData_File > 0) + (bFromParameters > 0));
-  if (nFrom != 1)
+  const auto from_source_count = ((from_data_file > 0) + (from_parameters > 0));
+  if (from_source_count != 1)
   {
     mooseError("Data on times and blocks must be provided either via a CSV file ('data_file' and "
                "corresponding blocks), or via direct parameter input ('times', 'blocks_from', and "
                "'blocks_to').");
   };
 
-  if (bFromParameters > 0)
+  if (from_parameters > 0)
   {
-    if (bFromParameters != 3)
+    if (from_parameters != 3)
     {
       mooseError("All parameters 'times', and 'blocks_from', and 'blocks_to' must be specified.");
     };
     buildFromParameters();
   }
-  else if (bFromData_File > 0)
+  else if (from_data_file > 0)
   {
     if ((isParamSetByUser("time_column_index") + isParamSetByUser("time_column_text")) > 1)
       mooseError(
@@ -98,7 +98,7 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
         1)
       mooseError("The parameters 'blocks_to_column_index', and 'blocks_to_column_text' are mutual "
                  "exclusive.");
-    if ((bFromData_File_NeedsHeader > 0) && (isParamSetByUser("header") == 0))
+    if ((from_data_File_needs_header > 0) && (isParamSetByUser("header") == 0))
       mooseError("Header flag must be active if columns are to be found via header.");
 
     buildFromFile();
@@ -116,23 +116,23 @@ TimedSubdomainModifier::buildFromParameters()
   _times = this->template getParam<std::vector<Real>>("times");
   size_t n = _times.size();
 
-  std::vector<std::string> _raw_from = getParam<std::vector<std::string>>("blocks_from");
-  std::vector<std::string> _raw_to = getParam<std::vector<std::string>>("blocks_to");
+  const auto raw_from = getParam<std::vector<SubdomainName>>("blocks_from");
+  const auto raw_to = getParam<std::vector<SubdomainName>>("blocks_to");
 
-  if (_raw_from.size() != n)
+  if (raw_from.size() != n)
     mooseError(
         "Parameter 'blocks_from' must contain the same number of items as parameter 'times'.");
-  if (_raw_to.size() != n)
+  if (raw_to.size() != n)
     mooseError("Parameter 'blocks_to' must contain the same number of items as parameter 'times'.");
 
   _blocks_from.resize(n);
   _blocks_to.resize(n);
 
   const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
-  for (size_t i = 0; i < n; ++i)
+  for (const auto i : index_range(raw_from))
   {
-    _blocks_from[i] = _mesh->getSubdomainID(_raw_from[i]);
-    _blocks_to[i] = _mesh->getSubdomainID(_raw_to[i]);
+    _blocks_from[i] = _mesh->getSubdomainID(raw_from[i]);
+    _blocks_to[i] = _mesh->getSubdomainID(raw_to[i]);
   };
 }
 
@@ -271,7 +271,7 @@ TimedSubdomainModifier::onGetTimes()
 }
 
 SubdomainID
-TimedSubdomainModifier::onComputeSubdomainID(real t_from_exclusive, real t_to_inclusive)
+TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const Real t_to_inclusive)
 {
   // get the subdomain-id of the current element
   SubdomainID _subdomain_id = _current_elem->subdomain_id();
@@ -281,10 +281,10 @@ TimedSubdomainModifier::onComputeSubdomainID(real t_from_exclusive, real t_to_in
   for (size_t i = 0; i < n_rows; ++i)
   {
     // time of the data point
-    real t = _timesAndIndices[i].time;
+    const auto t = _timesAndIndices[i].time;
 
     // original data point index
-    size_t j = _timesAndIndices[i].index;
+    const auto j = _timesAndIndices[i].index;
 
     // do we have to apply?
     if (t > t_from_exclusive && t <= t_to_inclusive && _subdomain_id == _blocks_from[j])

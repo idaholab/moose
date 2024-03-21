@@ -54,7 +54,7 @@ private:
   int _current_step;
 
   /// Local variable for the end of the timespan to apply changes of the subdomain
-  real _current_t;
+  Real _current_t;
 
   /// Local variable for the start of the timespan to apply changes of the subdomain
   real _last_t;
