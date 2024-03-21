@@ -20,7 +20,7 @@ TimedSubdomainModifier::validParams()
   InputParameters params = TimedElementSubdomainModifier::validParams();
 
   // parameters for direct input (additionally to 'times')
-  params.addParam<std::vector<std::string>>("blocks_from", 
+  params.addParam<std::vector<std::string>>("blocks_from",
                                             "Names or ids of the 'old' block(s), to be renamed.");
   params.addParam<std::vector<std::string>>("blocks_to", "Names or ids of the 'new' block.");
   params.addParamNamesToGroup("times blocks_from blocks_to", "Direct subdomain changes data input");
@@ -215,7 +215,8 @@ TimedSubdomainModifier::buildFromFile()
     _blocks_to_column = getParam<size_t>("blocks_to_column_index");
   };
 
-  const auto max_needed_column_index = std::max({_time_column, _blocks_from_column, _blocks_to_column});
+  const auto max_needed_column_index =
+      std::max({_time_column, _blocks_from_column, _blocks_to_column});
 
   const auto data = file.getData();
 
