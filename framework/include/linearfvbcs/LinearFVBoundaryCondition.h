@@ -37,7 +37,7 @@ class SubProblem;
 class SystemBase;
 
 /**
- * Base class for creating new types of boundary conditions for linear FV systems.
+ * Base class for boundary conditions for linear FV systems.
  */
 class LinearFVBoundaryCondition : public MooseObject,
                                   public BoundaryRestrictableRequired,

@@ -6,7 +6,7 @@ In MOOSE, a `LinearSystem` denotes a linear algebraic equation system that
 arises from the spatial discretization of a linearized partial differential equation.
 Unlike [NonlinearSystem.md], where Newton's method is used, with a `LinearSystem` the user can
 customize how the system is linearized using objects that contribute to the system.
-The simples case is a Picard-style approach where coupling an nonlinear terms are
+The simplest case is a Picard-style approach where coupling an nonlinear terms are
 linearized by evaluating with known solution states. For better clarity an example is provided below.
 
 !alert note

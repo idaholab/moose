@@ -89,5 +89,5 @@ protected:
 
   /// The set of cached elemental kernels which will be executed on a given element.
   /// This member variable is changed on a per-block basis.
-  std::set<LinearFVElementalKernel *> _fv_kernels;
+  std::vector<LinearFVElementalKernel *> _fv_kernels;
 };

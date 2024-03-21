@@ -45,7 +45,4 @@ public:
 protected:
   /// Switch for enabling linear extrapolation for the boundary face value
   const bool _two_term_expansion;
-
-  /// The constant advecting velocity on the boundary face
-  const RealVectorValue _velocity;
 };

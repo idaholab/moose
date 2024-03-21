@@ -97,7 +97,7 @@ ComputeLinearFVElementalThread::fetchSystemContributionObjects()
     base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
   _old_subdomain = _subdomain;
 
-  _fv_kernels = std::set<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
+  _fv_kernels = std::vector<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
 }
 
 void

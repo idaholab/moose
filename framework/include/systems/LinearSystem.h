@@ -145,7 +145,7 @@ protected:
   /// Used for the right hand side vector from PETSc
   TagID _rhs_tag;
 
-  /// Tag for non-time contribution Jacobian
+  /// Tag for non-time contribution to the system matrix
   TagID _system_matrix_non_time_tag;
 
   /// Tag for every contribution to system matrix

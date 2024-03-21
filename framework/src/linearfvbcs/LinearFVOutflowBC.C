@@ -21,14 +21,12 @@ LinearFVOutflowBC::validParams()
       "use_two_term_expansion",
       false,
       "If an approximate linear expansion should be used to compute the face value.");
-  params.addRequiredParam<RealVectorValue>("velocity", "The velocity at the outflow surface.");
   return params;
 }
 
 LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
   : LinearFVBoundaryCondition(parameters),
-    _two_term_expansion(getParam<bool>("use_two_term_expansion")),
-    _velocity(getParam<RealVectorValue>("velocity"))
+    _two_term_expansion(getParam<bool>("use_two_term_expansion"))
 {
   if (_two_term_expansion)
     _var.computeCellGradients();

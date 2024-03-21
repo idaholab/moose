@@ -43,7 +43,6 @@
     type = LinearFVOutflowBC
     variable = u
     boundary = "right"
-    velocity = "0.5 0 0"
     use_two_term_expansion = false
   []
 []
