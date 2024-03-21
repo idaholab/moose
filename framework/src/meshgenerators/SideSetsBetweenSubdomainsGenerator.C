@@ -25,9 +25,11 @@ SideSetsBetweenSubdomainsGenerator::validParams()
   params.renameParam("included_subdomains",
                      "primary_block",
                      "The primary set of blocks for which to draw a sideset between");
+  params.makeParamRequired<std::vector<SubdomainName>>("primary_block");
   params.renameParam("included_neighbors",
                      "paired_block",
                      "The paired set of blocks for which to draw a sideset between");
+  params.makeParamRequired<std::vector<SubdomainName>>("paired_block");
   params.addClassDescription("MeshGenerator that creates a sideset composed of the nodes located "
                              "between two or more subdomains.");
 
