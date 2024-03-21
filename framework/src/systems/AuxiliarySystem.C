@@ -927,6 +927,38 @@ AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType
   }
 }
 
+void
+AuxiliarySystem::variableWiseRelativeSolutionDifferenceNorm(
+    std::vector<Number> & rel_diff_norms) const
+{
+  rel_diff_norms.resize(nVariables(), 0);
+  // Get dof map from system
+  const auto & dof_map = _sys.get_dof_map();
+
+  for (const auto & n : make_range(nVariables()))
+  {
+    // Get local indices from dof map for each variable
+    std::vector<dof_id_type> local_indices_n;
+    dof_map.local_variable_indices(local_indices_n, _mesh, n);
+    Number diff_norm_n = 0;
+    Number norm_n = 0;
+    // Get values from system, update norm
+    for (const auto & local_index : local_indices_n)
+    {
+      const Number & value = solution()(local_index);
+      const Number & value_old = solutionOld()(local_index);
+      diff_norm_n += pow(value - value_old, 2);
+      norm_n += pow(value, 2);
+    }
+    // Aggregate norm over proceccors
+    _communicator.sum(diff_norm_n);
+    _communicator.sum(norm_n);
+    diff_norm_n = sqrt(diff_norm_n);
+    norm_n = sqrt(norm_n);
+    rel_diff_norms[n] = diff_norm_n / norm_n;
+  }
+}
+
 template void
 AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(const MooseObjectWarehouse<AuxKernel> &);
 template void AuxiliarySystem::computeElementalVarsHelper<VectorAuxKernel>(
