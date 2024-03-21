@@ -3938,7 +3938,7 @@ NonlinearSystemBase::computeScaling()
   };
 
   // Compute our scaling factors for the spatial field variables
-  for (const auto & elem : _fe_problem.getAlgebraicElementRange())
+  for (const auto & elem : _fe_problem.getCurrentAlgebraicElementRange())
     for (const auto i : make_range(system().n_vars()))
       if (_variable_autoscaled[i] && system().variable_type(i).family != SCALAR)
       {

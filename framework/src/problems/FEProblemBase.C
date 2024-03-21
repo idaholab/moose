@@ -746,12 +746,12 @@ FEProblemBase::initialSetup()
       TIME_SECTION("computingMaxDofs", 3, "Computing Max Dofs Per Element");
 
       MaxVarNDofsPerElem mvndpe(*this, nl);
-      Threads::parallel_reduce(getAlgebraicElementRange(), mvndpe);
+      Threads::parallel_reduce(getCurrentAlgebraicElementRange(), mvndpe);
       max_var_n_dofs_per_elem = mvndpe.max();
       _communicator.max(max_var_n_dofs_per_elem);
 
       MaxVarNDofsPerNode mvndpn(*this, nl);
-      Threads::parallel_reduce(getAlgebraicNodeRange(), mvndpn);
+      Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), mvndpn);
       max_var_n_dofs_per_node = mvndpn.max();
       _communicator.max(max_var_n_dofs_per_node);
       global_max_var_n_dofs_per_elem =
@@ -4406,7 +4406,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
         // because some nodal user objects (NodalNormal related) depend on elemental user objects
         // :-(
         ComputeUserObjectsThread cppt(*this, query);
-        Threads::parallel_reduce(getAlgebraicElementRange(), cppt);
+        Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cppt);
 
         // There is one instance in rattlesnake where an elemental user object's finalize depends
         // on a side user object having been finalized first :-(
@@ -4437,7 +4437,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
       {
         ComputeNodalUserObjectsThread cnppt(*this, query);
-        Threads::parallel_reduce(getAlgebraicNodeRange(), cnppt);
+        Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), cnppt);
         joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
       }
 
@@ -8426,10 +8426,10 @@ FEProblemBase::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
 const ConstElemRange &
 FEProblemBase::getCurrentAlgebraicElementRange()
 {
-  if (!__current_algebraic_elem_range)
+  if (!_current_algebraic_elem_range)
     return *_mesh.getActiveLocalElementRange();
 
-  return *__current_algebraic_elem_range;
+  return *_current_algebraic_elem_range;
 }
 const ConstNodeRange &
 FEProblemBase::getCurrentAlgebraicNodeRange()
@@ -8453,11 +8453,11 @@ FEProblemBase::setCurrentAlgebraicElementRange(ConstElemRange * range)
 {
   if (!range)
   {
-    __current_algebraic_elem_range = nullptr;
+    _current_algebraic_elem_range = nullptr;
     return;
   }
 
-  __current_algebraic_elem_range = std::make_unique<ConstElemRange>(*range);
+  _current_algebraic_elem_range = std::make_unique<ConstElemRange>(*range);
 }
 void
 FEProblemBase::setCurrentAlgebraicNodeRange(ConstNodeRange * range)
