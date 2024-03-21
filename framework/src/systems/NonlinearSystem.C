@@ -187,6 +187,9 @@ NonlinearSystem::solve()
     _n_linear_iters = solver.get_total_linear_iterations();
   }
 
+  if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
+    _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
+
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
