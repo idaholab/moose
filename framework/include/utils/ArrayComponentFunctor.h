@@ -37,8 +37,8 @@ public:
                                   const Moose::StateArg & state) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _array.hasBlocks(sub_id); }
 
-  bool supportsFaceArg() const override final { return true; }
-  bool supportsElemSideQpArg() const override final { return true; }
+  bool supportsFaceArg() const override final { return _array.supportsFaceArg(); }
+  bool supportsElemSideQpArg() const override final { return _array.supportsElemSideQpArg(); }
 
 private:
   /// The parent array functor
