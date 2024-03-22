@@ -58,16 +58,28 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
     checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
                                                                "flux_inlet_directions");
 
-  // Placeholder before work with components
-  if (_blocks.empty())
-    _blocks.push_back("ANY_BLOCK_ID");
-
   // Check that flow physics are consistent
   if (isParamValid("coupled_flow_physics"))
     _flow_equations_physics =
         getCoupledPhysics<WCNSFVFlowPhysics>(getParam<PhysicsName>("coupled_flow_physics"));
   else
     _flow_equations_physics = nullptr;
+
+  // Annoying edge case. We cannot use ANY_BLOCK_ID since errors got added downstream,
+  // we cannot leave it empty as that sets all objects to not live on any block
+  if (isParamSetByUser("block") && _blocks.empty())
+    paramError("block",
+               "Empty block restriction is not supported. Comment out the Physics if you are "
+               "trying to disable it.");
+  // Placeholder before work with components
+  if (_blocks.empty())
+    _blocks.push_back("ANY_BLOCK_ID");
+}
+
+void
+WCNSFVPhysicsBase::initializePhysicsAdditional()
+{
+  getProblem().needFV();
 }
 
 void
@@ -111,9 +123,6 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
 
   if (num_rc_uo)
     return;
-
-  if (_verbose)
-    _console << prefix() << " creating Rhie Chow user-object: " << rhieChowUOName() << std::endl;
 
   const std::string u_names[3] = {"u", "v", "w"};
   const auto object_type =

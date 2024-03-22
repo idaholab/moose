@@ -209,6 +209,7 @@ private:
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
+  virtual void initializePhysicsAdditional() {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type

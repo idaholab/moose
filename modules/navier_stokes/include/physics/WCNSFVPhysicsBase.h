@@ -31,6 +31,8 @@ public:
 
   WCNSFVPhysicsBase(const InputParameters & parameters);
 
+  void initializePhysicsAdditional() override;
+
   /// Add user objects: for now mainly the Rhie Chow user object
   virtual void addUserObjects() override;
   /// Add postprocessors, could be moved up to the base class

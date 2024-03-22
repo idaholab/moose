@@ -22,7 +22,7 @@ PhysicsBase::validParams()
   params.addClassDescription("Creates all the objects necessary to solve a particular physics");
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", {}, "Blocks that this Physics is active on. Components can add additional blocks");
+      "block", {}, "Blocks (subdomains) that this Physics is active on.");
 
   MooseEnum transient_options("true false same_as_problem", "same_as_problem");
   params.addParam<MooseEnum>(
@@ -189,8 +189,15 @@ PhysicsBase::initializePhysics()
   else
     _dim = _mesh->dimension();
 
+  // Forward physics verbosity to problem to output the setup
+  if (_verbose)
+    getProblem().setVerboseProblem(_verbose);
+
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
+
+  // If the derived physics need additional initialization very early on
+  initializePhysicsAdditional();
 }
 
 void
@@ -291,6 +298,8 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
   // functions
   if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
+  if (blocks.empty())
+    _console << "Empty block restriction assigned, did you mean to do this?" << std::endl;
 }
 
 void
