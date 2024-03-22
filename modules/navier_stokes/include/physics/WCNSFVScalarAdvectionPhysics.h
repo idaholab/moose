@@ -27,6 +27,9 @@ public:
     return _passive_scalar_names;
   }
 
+  /// Whether the physics is actually creating the scalar advection equations
+  bool hasScalarEquations() const { return _has_scalar_equation; }
+
 protected:
 private:
   void addNonlinearVariables() override;
@@ -55,9 +58,13 @@ private:
 
   /// Names of the passive scalar variables
   std::vector<NonlinearVariableName> _passive_scalar_names;
+  /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
+  const bool _has_scalar_equation;
 
-  /// Functors for the passive scalar sources. Inner indexing is scalar variable index
-  std::vector<std::vector<MooseFunctorName>> _passive_scalar_sources;
+  /// Functors for the passive scalar sources. Indexing is scalar variable index
+  std::vector<MooseFunctorName> _passive_scalar_sources;
+  /// Functors for the passive scalar (coupled) sources. Inner indexing is scalar variable index
+  std::vector<std::vector<MooseFunctorName>> _passive_scalar_coupled_sources;
   /// Coefficients multiplying for the passive scalar sources. Inner indexing is scalar variable index
   std::vector<std::vector<Real>> _passive_scalar_sources_coef;
 

@@ -26,13 +26,24 @@ WCNSFVScalarAdvectionPhysics::validParams()
 
   params += NSFVAction::commonScalarFieldAdvectionParams();
 
+  // TODO Remove the parameter once NavierStokesFV syntax has been removed
+  params.addParam<bool>(
+      "add_scalar_equation",
+      "Whether to add the scalar advection equation. This parameter is not necessary if "
+      "using the Physics syntax");
+
+  // These parameters are not shared because the NSFVPhysics use functors
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "passive_scalar_inlet_functors",
+      "passive_scalar_inlet_function",
       std::vector<std::vector<MooseFunctorName>>(),
       "Functors for inlet boundaries in the passive scalar equations.");
 
-  // Functors can meet that need
-  params.suppressParameter<std::vector<MooseFunctorName>>("passive_scalar_source");
+  // New functor boundary conditions
+  params.deprecateParam(
+      "passive_scalar_inlet_function", "passive_scalar_inlet_functors", "01/01/2025");
+
+  // No need for the duplication
+  params.addParam<std::vector<MooseFunctorName>>("passive_scalar_source", "Passive scalar sources");
 
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(),
@@ -52,7 +63,10 @@ WCNSFVScalarAdvectionPhysics::validParams()
 WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
-    _passive_scalar_sources(
+    _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
+                                                             : usingWCNSFVPhysics()),
+    _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
+    _passive_scalar_coupled_sources(
         getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
     _passive_scalar_sources_coef(
         getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
@@ -65,32 +79,44 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
 
-  // Dont let users pass empty vectors
-  checkVectorParamNotEmpty<NonlinearVariableName>("passive_scalar_names");
-  checkVectorParamNotEmpty<MooseFunctorName>("passive_scalar_diffusivity");
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_scalar_equation)
+    return;
 
   // These parameters must be passed for every passive scalar at a time
-  checkVectorParamsSameLength<NonlinearVariableName, MooseFunctorName>(
-      "passive_scalar_names", "passive_scalar_diffusivity");
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, MooseFunctorName>(
+      "passive_scalar_names", "passive_scalar_diffusivity", true);
   checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
-      "passive_scalar_names", "passive_scalar_coupled_source");
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, Real>("passive_scalar_names",
-                                                                "passive_scalar_scaling");
-  checkVectorParamsSameLength<NonlinearVariableName, std::vector<MooseFunctorName>>(
-      "passive_scalar_names", "passive_scalar_inlet_functors");
-  // checkTwoDVectorParamsSameLength<std::vector<std::string>,
-  // std::string>("passive_scalar_inlet_functors",
-  //                                                                "passive_scalar_inlet_types");
+      "passive_scalar_names", "passive_scalar_coupled_source", true);
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, MooseFunctorName>(
+      "passive_scalar_names", "passive_scalar_source", true);
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, Real>(
+      "passive_scalar_names", "passive_scalar_scaling", true);
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, FunctionName>(
+      "passive_scalar_names", "initial_scalar_variables", true);
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
+      "passive_scalar_names", "passive_scalar_inlet_functors", true);
+  checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
+      "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
   checkTwoDVectorParamInnerSameLengthAsOneDVector<MooseFunctorName, BoundaryName>(
       "passive_scalar_inlet_functors", "inlet_boundaries");
 
-  checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
-                                                          "passive_scalar_coupled_source_coeff");
+  if (_passive_scalar_sources_coef.size())
+    checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
+                                                            "passive_scalar_coupled_source_coeff");
+
+  if (_porous_medium_treatment)
+    paramError("porous_medium_treatment",
+               "Porous media scalar advection is currently unimplemented");
 }
 
 void
 WCNSFVScalarAdvectionPhysics::addNonlinearVariables()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_scalar_equation)
+    return;
+
   auto params = getFactory().getValidParams("INSFVScalarFieldVariable");
   assignBlocks(params, _blocks);
   params.set<MooseEnum>("face_interp_method") =
@@ -101,7 +127,7 @@ WCNSFVScalarAdvectionPhysics::addNonlinearVariables()
   for (const auto name_i : index_range(_passive_scalar_names))
   {
     // Dont add if the user already defined the variable
-    if (nonLinearVariableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
+    if (nonlinearVariableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
     {
       checkBlockRestrictionIdentical(
           _passive_scalar_names[name_i],
@@ -120,12 +146,16 @@ WCNSFVScalarAdvectionPhysics::addNonlinearVariables()
 void
 WCNSFVScalarAdvectionPhysics::addFVKernels()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_scalar_equation)
+    return;
+
   if (isTransient())
     addScalarTimeKernels();
 
   addScalarAdvectionKernels();
   addScalarDiffusionKernels();
-  if (isParamValid("passive_scalar_coupled_source"))
+  if (_passive_scalar_sources.size() || _passive_scalar_coupled_sources.size())
     addScalarSourceKernels();
 }
 
@@ -165,14 +195,17 @@ WCNSFVScalarAdvectionPhysics::addScalarAdvectionKernels()
 void
 WCNSFVScalarAdvectionPhysics::addScalarDiffusionKernels()
 {
+  const auto passive_scalar_diffusivities =
+      getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity");
+  if (passive_scalar_diffusivities.empty())
+    return;
   const std::string kernel_type = "FVDiffusion";
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
   for (const auto name_i : index_range(_passive_scalar_names))
   {
     params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-    params.set<MooseFunctorName>("coeff") =
-        getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity")[name_i];
+    params.set<MooseFunctorName>("coeff") = passive_scalar_diffusivities[name_i];
     getProblem().addFVKernel(
         kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
   }
@@ -187,24 +220,38 @@ WCNSFVScalarAdvectionPhysics::addScalarSourceKernels()
 
   for (const auto scalar_i : index_range(_passive_scalar_names))
   {
-    for (const auto i : index_range(_passive_scalar_sources[scalar_i]))
+    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[scalar_i];
+    if (_passive_scalar_sources.size())
     {
-
-      params.set<NonlinearVariableName>("variable") = _passive_scalar_names[scalar_i];
-      params.set<MooseFunctorName>("v") = _passive_scalar_sources[scalar_i][i];
-      params.set<Real>("coef") = _passive_scalar_sources_coef[scalar_i][i];
-
-      getProblem().addFVKernel(kernel_type,
-                               prefix() + "ins_" + _passive_scalar_names[scalar_i] +
-                                   "_coupled_source_" + std::to_string(i),
-                               params);
+      // Added for backward compatibility with former Modules/NavierStokesFV syntax
+      params.set<MooseFunctorName>("v") = _passive_scalar_sources[scalar_i];
+      getProblem().addFVKernel(
+          kernel_type, prefix() + "ins_" + _passive_scalar_names[scalar_i] + "_source", params);
     }
+
+    // Sufficient for all intents and purposes
+    if (_passive_scalar_coupled_sources.size())
+      for (const auto i : index_range(_passive_scalar_coupled_sources[scalar_i]))
+      {
+        params.set<MooseFunctorName>("v") = _passive_scalar_coupled_sources[scalar_i][i];
+        if (_passive_scalar_sources_coef.size())
+          params.set<Real>("coef") = _passive_scalar_sources_coef[scalar_i][i];
+
+        getProblem().addFVKernel(kernel_type,
+                                 prefix() + "ins_" + _passive_scalar_names[scalar_i] +
+                                     "_coupled_source_" + std::to_string(i),
+                                 params);
+      }
   }
 }
 
 void
 WCNSFVScalarAdvectionPhysics::addFVBCs()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_scalar_equation)
+    return;
+
   addScalarInletBC();
   // There is typically no wall flux of passive scalars, similarly we rarely know
   // their concentrations at the outlet at the beginning of the simulation
@@ -275,6 +322,14 @@ WCNSFVScalarAdvectionPhysics::addScalarInletBC()
 void
 WCNSFVScalarAdvectionPhysics::addInitialConditions()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_scalar_equation)
+    return;
+  if (!_define_variables && parameters().isParamSetByUser("initial_scalar_variables"))
+    paramError("initial_scalar_variables",
+               "Scalar variables are defined externally of NavierStokesFV, so should their inital "
+               "conditions");
+
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
 
