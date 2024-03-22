@@ -55,6 +55,7 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
 {
   // determine function arguments
 
+  // helper variables for parameter consistency checks
   const auto from_data_file =
       isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") +
       isParamValid("comment") + isParamValid("time_column_index") +
