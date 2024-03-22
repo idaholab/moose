@@ -26,6 +26,9 @@ public:
   const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
   const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
 
+  /// Whether the physics is actually creating the heat equation
+  bool hasEnergyEquation() const { return _has_energy_equation; }
+
 protected:
 private:
   void addNonlinearVariables() override;
@@ -54,13 +57,12 @@ private:
   void addINSEnergyInletBC();
   void addINSEnergyWallBC();
 
-  /// Add material to define an enthalpy functor material property for incompressible simulations
-  void addEnthalpyMaterial();
-
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
   bool processThermalConductivity();
 
+  /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
+  const bool _has_energy_equation;
   /// Name of the specific heat material property
   MooseFunctorName _specific_heat_name;
   /// Vector of subdomain groups where we want to have different thermal conduction

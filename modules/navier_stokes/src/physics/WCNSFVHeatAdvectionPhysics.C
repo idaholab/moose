@@ -26,15 +26,24 @@ WCNSFVHeatAdvectionPhysics::validParams()
 
   params += NSFVAction::commonFluidEnergyEquationParams();
 
-  /// These parameters are not shared because the NSFVPhysics use functors
+  // TODO Remove the parameter once NavierStokesFV syntax has been removed
+  params.addParam<bool>("add_energy_equation",
+                        "Whether to add the energy equation. This parameter is not necessary if "
+                        "using the Physics syntax");
+
+  // These parameters are not shared because the NSFVPhysics use functors
   params.addParam<std::vector<MooseFunctorName>>(
-      "energy_inlet_functors",
+      "energy_inlet_function",
       std::vector<MooseFunctorName>(),
       "Functors for Dirichlet/Neumann inlet boundaries in the energy equation.");
   params.addParam<std::vector<MooseFunctorName>>(
-      "energy_wall_functors",
+      "energy_wall_function",
       std::vector<MooseFunctorName>(),
       "Functors for Dirichlet/Neumann wall boundaries in the energy equation.");
+
+  // New functor boundary conditions
+  params.deprecateParam("energy_inlet_function", "energy_inlet_functors", "01/01/2025");
+  params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");
 
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_advection_interpolation");
@@ -49,6 +58,8 @@ WCNSFVHeatAdvectionPhysics::validParams()
 
 WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
+    _has_energy_equation(isParamValid("add_energy_equation") ? getParam<bool>("add_energy_equation")
+                                                             : usingWCNSFVPhysics()),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_blocks(
         parameters.isParamValid("thermal_conductivity_blocks")
@@ -64,20 +75,19 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
     _energy_wall_types(getParam<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_functors(getParam<std::vector<MooseFunctorName>>("energy_wall_functors"))
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+
   saveNonlinearVariableName(_fluid_temperature_name);
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
 
   // Parameter checks
-  checkSecondParamSetOnlyIfFirstOneSet("ambient_convection_blocks", "ambient_convection_alpha");
-  checkSecondParamSetOnlyIfFirstOneSet("ambient_convection_blocks", "ambient_temperature");
-  checkVectorParamsSameLengthIfSet<std::vector<SubdomainName>, MooseFunctorName>(
-      "ambient_convection_blocks", "ambient_convection_alpha");
-  checkVectorParamsSameLengthIfSet<std::vector<SubdomainName>, MooseFunctorName>(
-      "ambient_convection_blocks", "ambient_temperature");
+  checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
+                                                                       "ambient_temperature");
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
 
-  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
   if (_boundary_condition_information_complete)
   {
     checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
@@ -95,26 +105,39 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
 void
 WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+
   // Dont add if the user already defined the variable
-  if (nonLinearVariableExists(_fluid_temperature_name, /*error_if_aux=*/true))
+  if (nonlinearVariableExists(_fluid_temperature_name, /*error_if_aux=*/true))
   {
     checkBlockRestrictionIdentical(_fluid_temperature_name,
                                    getProblem().getVariable(0, _fluid_temperature_name).blocks());
-    return;
   }
-
-  auto params = getFactory().getValidParams("INSFVEnergyVariable");
-  assignBlocks(params, _blocks);
-  params.set<std::vector<Real>>("scaling") = {getParam<Real>("energy_scaling")};
-  params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
-  params.set<bool>("two_term_boundary_expansion") = getParam<bool>("energy_two_term_bc_expansion");
-
-  getProblem().addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
+  else if (_define_variables)
+  {
+    auto params = getFactory().getValidParams("INSFVEnergyVariable");
+    assignBlocks(params, _blocks);
+    params.set<std::vector<Real>>("scaling") = {getParam<Real>("energy_scaling")};
+    params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
+    params.set<bool>("two_term_boundary_expansion") =
+        getParam<bool>("energy_two_term_bc_expansion");
+    getProblem().addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
+  }
+  else
+    paramError("fluid_temperature_variable",
+               "Variable (" + _fluid_temperature_name +
+                   ") supplied to the NavierStokesFV action does not exist!");
 }
 
 void
 WCNSFVHeatAdvectionPhysics::addFVKernels()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+
   if (isTransient())
   {
     if (_compressibility == "incompressible")
@@ -154,7 +177,10 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyTimeKernels()
   {
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
     if (getProblem().hasFunctor(NS::time_deriv(_density_name), /*thread_id=*/0))
+    {
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+      params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
+    }
     params.set<bool>("is_solid") = false;
   }
 
@@ -177,11 +203,12 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyTimeKernels()
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
   params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
+  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
 
   if (_porous_medium_treatment)
   {
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
     params.set<bool>("is_solid") = false;
   }
@@ -207,8 +234,6 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");
-
-  std::cout << "Using " << rhieChowUOName() << std::endl;
 
   getProblem().addFVKernel(kernel_type, kernel_name, params);
 }
@@ -332,6 +357,10 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
 void
 WCNSFVHeatAdvectionPhysics::addFVBCs()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+
   addINSEnergyInletBC();
   addINSEnergyWallBC();
 }
@@ -383,6 +412,10 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
       params.set<PostprocessorName>("temperature_pp") = _energy_inlet_functors[bc_ind];
       params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+      params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+
+      for (const auto d : make_range(dimension()))
+        params.set<MooseFunctorName>(NS::velocity_vector[d]) = _velocity_names[d];
 
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
@@ -421,19 +454,6 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyWallBC()
           bc_type, _fluid_temperature_name + "_" + _wall_boundaries[bc_ind], params);
     }
   }
-}
-
-void
-WCNSFVHeatAdvectionPhysics::addEnthalpyMaterial()
-{
-  InputParameters params = getFactory().getValidParams("INSFVEnthalpyMaterial");
-  assignBlocks(params, _blocks);
-
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
-
-  getProblem().addMaterial("INSFVEnthalpyMaterial", prefix() + "ins_enthalpy_material", params);
 }
 
 bool
@@ -483,6 +503,12 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
 void
 WCNSFVHeatAdvectionPhysics::addInitialConditions()
 {
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+  if (!_define_variables && parameters().isParamSetByUser("initial_temperature"))
+    paramError("initial_temperature",
+               "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
 
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
@@ -499,14 +525,19 @@ WCNSFVHeatAdvectionPhysics::addInitialConditions()
 void
 WCNSFVHeatAdvectionPhysics::addMaterials()
 {
-  InputParameters params = getFactory().getValidParams("INSFVEnthalpyMaterial");
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+
+  InputParameters params = getFactory().getValidParams("INSFVEnthalpyFunctorMaterial");
   assignBlocks(params, _blocks);
 
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
 
-  getProblem().addMaterial("INSFVEnthalpyMaterial", prefix() + "ins_enthalpy_material", params);
+  getProblem().addMaterial(
+      "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);
 }
 
 unsigned short
