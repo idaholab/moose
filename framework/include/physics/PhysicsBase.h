@@ -133,14 +133,14 @@ protected:
   template <typename T, typename S>
   void checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
                                                        const std::string & param2) const;
-  bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
   /// Check that the user did not pass an empty vector
   template <typename T>
   void checkVectorParamNotEmpty(const std::string & param1) const;
   /// Check that two vector parameters are the same length if both are set
   template <typename T, typename S>
   void checkVectorParamsSameLengthIfSet(const std::string & param1,
-                                        const std::string & param2) const;
+                                        const std::string & param2,
+                                        const bool ignore_empty_param2 = false) const;
 
   template <typename T, typename S, typename U>
   void checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
@@ -425,7 +425,8 @@ PhysicsBase::checkVectorParamNotEmpty(const std::string & param) const
 template <typename T, typename S>
 void
 PhysicsBase::checkVectorParamsSameLengthIfSet(const std::string & param1,
-                                              const std::string & param2) const
+                                              const std::string & param2,
+                                              const bool ignore_empty_param2) const
 {
   assertParamDefined<std::vector<T>>(param1);
   assertParamDefined<std::vector<S>>(param2);
@@ -434,6 +435,8 @@ PhysicsBase::checkVectorParamsSameLengthIfSet(const std::string & param1,
   {
     const auto size_1 = getParam<std::vector<T>>(param1).size();
     const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (ignore_empty_param2 && (size_2 == 0))
+      return;
     if (size_1 != size_2)
       paramError(param1,
                  "Parameter '" + param1 + "' (size " + std::to_string(size_1) + ") and '" + param2 +
