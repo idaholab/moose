@@ -22,6 +22,10 @@ WCNSFVPhysicsBase::validParams()
 
   params.addParam<PhysicsName>("coupled_flow_physics",
                                "WCNSFVFlowPhysics generating the velocities");
+  params.addParam<bool>(
+      "define_variables",
+      true,
+      "Whether to define variables if the variables with the specified names do not exist");
 
   // We pull in parameters from various flow objects. This helps make sure the parameters are
   // spelled the same way and match the evolution of other objects.
@@ -43,14 +47,20 @@ WCNSFVPhysicsBase::validParams()
 
 WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   : NavierStokesFlowPhysicsBase(parameters),
+    _define_variables(getParam<bool>("define_variables")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions"))
 {
   // Parameter checking
   checkSecondParamSetOnlyIfFirstOneSet("flux_inlet_pps", "flux_inlet_directions");
-  checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
-                                                             "flux_inlet_directions");
+  if (_flux_inlet_directions.size())
+    checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
+                                                               "flux_inlet_directions");
+
+  // Placeholder before work with components
+  if (_blocks.empty())
+    _blocks.push_back("ANY_BLOCK_ID");
 
   // Check that flow physics are consistent
   if (isParamValid("coupled_flow_physics"))
@@ -72,7 +82,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   mooseAssert(dimension(), "0-dimension not supported");
 
   // This means we are solving for velocity. We dont need external RC coefficients
-  bool has_flow_equations = nonLinearVariableExists(_velocity_names[0], false);
+  bool has_flow_equations = nonlinearVariableExists(_velocity_names[0], false);
 
   // First make sure that we only add this object once
   // Potential cases:
@@ -103,7 +113,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
     return;
 
   if (_verbose)
-    _console << prefix() << " creating Rhie Chow user-object" << std::endl;
+    _console << prefix() << " creating Rhie Chow user-object: " << rhieChowUOName() << std::endl;
 
   const std::string u_names[3] = {"u", "v", "w"};
   const auto object_type =
@@ -162,7 +172,9 @@ WCNSFVPhysicsBase::addPostprocessors()
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
       params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
 
-      getProblem().addPostprocessor(pp_type, "area_pp_" + _inlet_boundaries[bc_ind], params);
+      const auto name_pp = "area_pp_" + _inlet_boundaries[bc_ind];
+      if (!getProblem().hasUserObject(name_pp))
+        getProblem().addPostprocessor(pp_type, name_pp, params);
     }
 }
 
@@ -171,12 +183,11 @@ WCNSFVPhysicsBase::rhieChowUOName() const
 {
   // This could still fail if we have 2 advecting physics
   if (_flow_equations_physics)
-    return _flow_equations_physics->prefix() + (_porous_medium_treatment
-                                                    ? +"pins_rhie_chow_interpolator"
-                                                    : "ins_rhie_chow_interpolator");
+    return (_porous_medium_treatment ? +"pins_rhie_chow_interpolator"
+                                     : "ins_rhie_chow_interpolator");
   else
-    return prefix() + (_porous_medium_treatment ? +"pins_rhie_chow_interpolator"
-                                                : "ins_rhie_chow_interpolator");
+    return (_porous_medium_treatment ? +"pins_rhie_chow_interpolator"
+                                     : "ins_rhie_chow_interpolator");
 }
 
 unsigned short

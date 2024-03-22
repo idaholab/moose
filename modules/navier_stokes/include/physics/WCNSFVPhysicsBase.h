@@ -16,6 +16,7 @@ class WCNSFVFlowPhysics;
 #define registerWCNSFVPhysicsBaseTasks(app_name, derived_name)                                     \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_user_object");                                  \
+  registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
   registerMooseAction(app_name, derived_name, "add_geometric_rm");
 
 /**
@@ -47,6 +48,12 @@ protected:
 
   /// Checks that the parameters shared between two flow physics are the same
   void checkCommonParametersConsistent(const InputParameters & parameters) const override;
+
+  /// Detects if we are using the new Physics syntax or the old NavierStokesFV action
+  bool usingWCNSFVPhysics() const { return !_awh.hasActions("nsfv_action_deprecation_task"); }
+
+  /// Whether to define variables if they do not exist
+  bool _define_variables;
 
   /// The velocity / momentum face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
