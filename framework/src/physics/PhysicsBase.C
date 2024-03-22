@@ -300,6 +300,12 @@ PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
   // If identical, we can return fast
   if (_blocks == blocks)
     return;
+  // If one is block restricted to anywhere and the other is not block restricted, return
+  if ((std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end() &&
+       blocks.empty()) ||
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end() && _blocks.empty()))
+    return;
+
   // Copy, sort and unique is the only way to check that they are actually the same
   auto copy_blocks = _blocks;
   auto copy_blocks_other = blocks;
