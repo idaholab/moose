@@ -38,11 +38,11 @@ NavierStokesFlowPhysicsBase::validParams()
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "dynamic_viscosity");
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "density");
 
-  params.addParam<bool>(
-      "boundary_conditions_all_set",
-      true,
-      "Whether all boundary conditions have been set using the parameters or "
-      "whether additional information may be passed by other objects (THM junctions)");
+  // This lets components define additional boundaries later
+  params.addParam<bool>("boundary_conditions_all_set",
+                        true,
+                        "Whether all boundary conditions have been set using the parameters or "
+                        "whether additional information may be passed by other objects");
 
   return params;
 }
@@ -95,6 +95,8 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
   }
   checkVectorParamsNoOverlap<BoundaryName>(
       {"inlet_boundaries", "outlet_boundaries", "wall_boundaries"});
+
+  // Porous media parameters
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity_smoothing_layers");
 }
