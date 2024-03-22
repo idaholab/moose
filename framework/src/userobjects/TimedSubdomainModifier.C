@@ -20,9 +20,9 @@ TimedSubdomainModifier::validParams()
   InputParameters params = TimedElementSubdomainModifier::validParams();
 
   // parameters for direct input (additionally to 'times')
-  params.addParam<std::vector<std::string>>("blocks_from",
-                                            "Names or ids of the 'old' block(s), to be renamed.");
-  params.addParam<std::vector<std::string>>("blocks_to", "Names or ids of the 'new' block.");
+  params.addParam<std::vector<SubdomainName>>("blocks_from",
+                                              "Names or ids of the 'old' block(s), to be renamed.");
+  params.addParam<std::vector<SubdomainName>>("blocks_to", "Names or ids of the 'new' block.");
   params.addParamNamesToGroup("times blocks_from blocks_to", "Direct subdomain changes data input");
 
   // parameters for file-based data supply
