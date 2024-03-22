@@ -536,13 +536,15 @@ NSFVBase<BaseType>::commonMomentumEquationParams()
 
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "friction_blocks",
+      {},
       "The blocks where the friction factors are applied to emulate flow resistances.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
-      "friction_types", "The types of friction forces for every block in 'friction_blocks'.");
+      "friction_types", {}, "The types of friction forces for every block in 'friction_blocks'.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "friction_coeffs",
+      {},
       "The friction coefficients for every item in 'friction_types'. Note that if "
       "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
       "multiplier but they are not multiplied with density yet!");
@@ -605,6 +607,7 @@ NSFVBase<BaseType>::commonFluidEnergyEquationParams()
 
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "thermal_conductivity_blocks",
+      {},
       "The blocks where the user wants define different thermal conductivities.");
 
   params.addParam<std::vector<MooseFunctorName>>(
@@ -618,11 +621,6 @@ NSFVBase<BaseType>::commonFluidEnergyEquationParams()
   params.addParam<MultiMooseEnum>("energy_inlet_types",
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
-
-  params.addParam<std::vector<FunctionName>>(
-      "energy_inlet_function",
-      std::vector<FunctionName>(),
-      "Functions for fixed-value boundaries in the energy equation.");
 
   MultiMooseEnum en_wall_types("fixed-temperature heatflux");
   params.addParam<MultiMooseEnum>(
