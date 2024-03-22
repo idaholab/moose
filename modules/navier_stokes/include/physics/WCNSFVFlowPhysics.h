@@ -23,6 +23,9 @@ public:
 
   WCNSFVFlowPhysics(const InputParameters & parameters);
 
+  /// Whether the physics is actually creating the flow equations
+  bool hasFlowEquations() const { return _has_flow_equations; }
+
 protected:
 private:
   void addNonlinearVariables() override;
@@ -34,6 +37,8 @@ private:
 
   /// Function adding kernels for the incompressible continuity equation
   void addINSMassKernels();
+  /// Function adding the pressure constraint
+  void addINSPressurePinKernel();
 
   /**
    * Functions adding kernels for the incompressible momentum equation
@@ -67,6 +72,8 @@ private:
   /// Whether a turbulence Physics has been coupled in, to know which viscosity to pick on symmetry boundary conditions
   bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
 
+  /// Boolean to keep track of whether the flow equations should be created
+  const bool _has_flow_equations;
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;
 
