@@ -58,7 +58,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Create the Action syntax
   registerSyntax("CNSAction", "Modules/CompressibleNavierStokes");
   registerSyntax("INSAction", "Modules/IncompressibleNavierStokes");
-  registerSyntax("NSFVAction", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVFlowPhysics", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVHeatAdvectionPhysics", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVScalarAdvectionPhysics", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVTurbulencePhysics", "Modules/NavierStokesFV");
+  registerTask("nsfv_action_deprecation_task", /*is_required=*/false);
+  registerSyntax("NSFVActionDeprecation", "Modules/NavierStokesFV");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
