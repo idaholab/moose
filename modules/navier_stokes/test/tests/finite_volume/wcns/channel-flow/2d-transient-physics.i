@@ -26,7 +26,7 @@ inlet_v = 0.001
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlowPhysics]
+    [WCNSFVFlow]
       [flow]
         compressibility = 'weakly-compressible'
 

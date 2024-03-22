@@ -49,7 +49,7 @@ inlet_v = 0.001
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlowPhysics]
+    [WCNSFVFlow]
       [flow1]
         compressibility = 'weakly-compressible'
         block = 0
@@ -78,7 +78,7 @@ inlet_v = 0.001
       []
     []
 
-    [WCNSFVFlowPhysics]
+    [WCNSFVFlow]
       [flow2]
         compressibility = 'weakly-compressible'
         block = 1
