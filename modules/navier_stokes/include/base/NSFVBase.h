@@ -696,10 +696,6 @@ NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
       std::vector<MooseFunctorName>(),
       "Functor names for the diffusivities used for the passive scalar fields.");
 
-  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
-                                     std::vector<Real>(),
-                                     "Schmidt numbers used for the passive scalar fields.");
-
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_source",
       std::vector<MooseFunctorName>(),
@@ -724,8 +720,8 @@ NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
       "Types for the inlet boundaries for the passive scalar equation.");
 
   params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
-                              "passive_scalar_schmidt_number passive_scalar_source "
-                              "passive_scalar_coupled_source passive_scalar_coupled_source_coeff",
+                              "passive_scalar_source passive_scalar_coupled_source "
+                              "passive_scalar_coupled_source_coeff",
                               "Passive scalar control");
   return params;
 }
@@ -762,6 +758,9 @@ NSFVBase<BaseType>::commonTurbulenceParams()
                                     1,
                                     "turbulent_prandtl > 0",
                                     "Turbulent Prandtl number for energy turbulent diffusion");
+  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
+                                     std::vector<Real>(),
+                                     "Schmidt numbers used for the passive scalar fields.");
 
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
                               "von_karman_const_0 mixing_length_delta turbulent_prandtl",

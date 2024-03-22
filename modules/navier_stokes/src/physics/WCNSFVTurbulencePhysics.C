@@ -28,19 +28,28 @@ WCNSFVTurbulencePhysics::validParams()
 
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
-      "turbulence_model",
+      "turbulence_handling",
       turbulence_type,
       "The way turbulent diffusivities are determined in the turbulent regime.");
   params += NSFVAction::commonTurbulenceParams();
+  params.transferParam<bool>(NSFVAction::validParams(), "mixing_length_two_term_bc_expansion");
+
+  // TODO Added to facilitate transition, remove default once NavierStokesFV action is removed
+  params.addParam<AuxVariableName>(
+      "mixing_length_name", "mixing_length", "Name of the mixing length auxiliary variable");
 
   // Add the coupled physics
+  // TODO Remove the defaults once NavierStokesFV action is removed
   params.addParam<PhysicsName>("coupled_flow_physics",
+                               "NavierStokesFV",
                                "WCNSFVFlowPhysics generating the Navier Stokes flow equations");
   params.addParam<PhysicsName>(
       "heat_advection_physics",
+      "NavierStokesFV",
       "WCNSFVHeatAdvectionPhysics generating the heat advection equations");
   params.addParam<PhysicsName>(
       "scalar_advection_physics",
+      "NavierStokesFV",
       "WCNSFVScalarAdvectionPhysics generating the scalar advection equations");
 
   return params;
@@ -48,26 +57,52 @@ WCNSFVTurbulencePhysics::validParams()
 
 WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
-    _turbulence_model(getParam<MooseEnum>("turbulence_model")),
-    _mixing_length_name(prefix() + "mixing_length"),
+    _turbulence_model(getParam<MooseEnum>("turbulence_handling")),
+    _mixing_length_name(getParam<AuxVariableName>("mixing_length_name")),
     _mixing_length_walls(getParam<std::vector<BoundaryName>>("mixing_length_walls"))
 {
+  if (_verbose && _turbulence_model != "none")
+    _console << "Creating a " << std::string(_turbulence_model) << " turbulence model."
+             << std::endl;
+
+  if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations())
+    _has_flow_equations = true;
+  else
+    _has_flow_equations = false;
+
   if (isParamValid("heat_advection_physics"))
   {
     _fluid_energy_physics = getCoupledPhysics<WCNSFVHeatAdvectionPhysics>(
-        getParam<PhysicsName>("heat_advection_physics"));
-    checkCommonParametersConsistent(_fluid_energy_physics->parameters());
+        getParam<PhysicsName>("heat_advection_physics"), true);
+    if (_fluid_energy_physics)
+      checkCommonParametersConsistent(_fluid_energy_physics->parameters());
+    if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation())
+      _has_energy_equation = true;
+    else
+      _has_energy_equation = false;
   }
   else
+  {
+    _has_energy_equation = false;
     _fluid_energy_physics = nullptr;
+  }
+
   if (isParamValid("scalar_advection_physics"))
   {
     _scalar_advection_physics = getCoupledPhysics<WCNSFVScalarAdvectionPhysics>(
-        getParam<PhysicsName>("scalar_advection_physics"));
-    checkCommonParametersConsistent(_scalar_advection_physics->parameters());
+        getParam<PhysicsName>("scalar_advection_physics"), true);
+    if (_scalar_advection_physics)
+      checkCommonParametersConsistent(_scalar_advection_physics->parameters());
+    if (_scalar_advection_physics && _scalar_advection_physics->hasScalarEquations())
+      _has_scalar_equations = true;
+    else
+      _has_scalar_equations = false;
   }
   else
+  {
+    _has_scalar_equations = false;
     _scalar_advection_physics = nullptr;
+  }
 
   // Parameter checks
   if (_turbulence_model != "mixing-length")
@@ -98,10 +133,6 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
     if (isParamValid("mixing_length_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("mixing_length_two_term_bc_expansion");
-
-    if (_verbose)
-      _console << "Creating auxiliary variable " << _mixing_length_name << " on blocks "
-               << Moose::stringify(_blocks) << std::endl;
     getProblem().addAuxVariable("MooseVariableFVReal", _mixing_length_name, params);
   }
 }
@@ -109,11 +140,11 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
 void
 WCNSFVTurbulencePhysics::addFVKernels()
 {
-  if (_flow_equations_physics)
+  if (_has_flow_equations)
     addFlowTurbulenceKernels();
-  if (_fluid_energy_physics)
+  if (_has_energy_equation)
     addFluidEnergyTurbulenceKernels();
-  if (_scalar_advection_physics)
+  if (_has_scalar_equations)
     addScalarAdvectionTurbulenceKernels();
 }
 
@@ -134,10 +165,10 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
       kernel_name = prefix() + "pins_momentum_mixing_length_reynolds_stress_";
 
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-    for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
+    for (const auto dim_i : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
-    for (unsigned int d = 0; d < dimension(); ++d)
+    for (const auto d : make_range(dimension()))
     {
       params.set<NonlinearVariableName>("variable") = _velocity_names[d];
       params.set<MooseEnum>("momentum_component") = NS::directions[d];
@@ -157,13 +188,12 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::specific_enthalpy) =
-        _fluid_energy_physics->getSpecificEnthalpyName();
+    params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
     params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
     params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
-    for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
+    for (const auto dim_i : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
     if (_porous_medium_treatment)
@@ -186,12 +216,16 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
 
-    for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
+    for (const auto dim_i : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
     const auto & passive_scalar_names = _scalar_advection_physics->getAdvectedScalarNames();
     const auto & passive_scalar_schmidt_number =
         getParam<std::vector<Real>>("passive_scalar_schmidt_number");
+    if (passive_scalar_schmidt_number.size() != passive_scalar_names.size())
+      paramError("passive_scalar_schmidt_number",
+                 "The number of Schmidt numbers defined is not equal to the number of passive "
+                 "scalar fields!");
 
     for (const auto & name_i : index_range(passive_scalar_names))
     {
@@ -238,17 +272,28 @@ WCNSFVTurbulencePhysics::addMaterials()
   if (_turbulence_model == "mixing-length")
   {
     const std::string u_names[3] = {"u", "v", "w"};
-    InputParameters params = getFactory().getValidParams("MixingLengthTurbulentViscosityMaterial");
+    InputParameters params =
+        getFactory().getValidParams("MixingLengthTurbulentViscosityFunctorMaterial");
     assignBlocks(params, _blocks);
 
-    for (unsigned int d = 0; d < dimension(); ++d)
+    for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
 
-    getProblem().addMaterial(
-        "MixingLengthTurbulentViscosityMaterial", prefix() + "mixing_length_material", params);
+    getProblem().addMaterial("MixingLengthTurbulentViscosityFunctorMaterial",
+                             prefix() + "mixing_length_material",
+                             params);
   }
+}
+
+unsigned short
+WCNSFVTurbulencePhysics::getNumberAlgebraicGhostingLayersNeeded() const
+{
+  unsigned short ghost_layers = WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded();
+  if (_turbulence_model == "mixing-length")
+    ghost_layers = std::max(ghost_layers, (unsigned short)3);
+  return ghost_layers;
 }
