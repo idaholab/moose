@@ -23,7 +23,7 @@ public:
   WCNSFVHeatAdvectionPhysics(const InputParameters & parameters);
 
   /// Get the name of the specific heat material property
-  const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
+  const MooseFunctorName getSpecificHeatName() const { return _specific_heat_name; }
   const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
 
   /// Whether the physics is actually creating the heat equation

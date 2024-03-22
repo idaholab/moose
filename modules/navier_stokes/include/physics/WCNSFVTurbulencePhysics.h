@@ -26,6 +26,8 @@ public:
   WCNSFVTurbulencePhysics(const InputParameters & parameters);
 
 protected:
+  unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+
 private:
   void addNonlinearVariables() override;
   void addAuxiliaryVariables() override;
@@ -42,6 +44,10 @@ private:
 
   /// Turbulence model to create the equation(s) for
   const MooseEnum _turbulence_model;
+
+  bool _has_flow_equations;
+  bool _has_energy_equation;
+  bool _has_scalar_equations;
 
   /// The heat advection physics to add turbulent mixing for
   const WCNSFVHeatAdvectionPhysics * _fluid_energy_physics;
