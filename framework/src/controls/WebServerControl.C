@@ -29,7 +29,6 @@ WebServerControl::WebServerControl(const InputParameters & parameters)
   : Control(parameters),
     _currently_waiting(false),
     _port(getParam<unsigned int>("port")),
-    _server(),
     _server_thread(startServer())
 {
 }
@@ -89,7 +88,10 @@ WebServerControl::startServer()
       return result{};
     };
 
-    // Create the endpoint for checking whether or not the control is waiting
+    // GET /waiting, returns code 200 on success and JSON:
+    //  'waiting' (bool): Whether or not the control is waiting
+    //  'execute_on_flag' (string): Only exists if waiting=true, the execute
+    //                              flag that is being waited on
     _server.when("/waiting")
         ->requested(
             [this](const HttpRequest & /*req*/)
@@ -107,7 +109,10 @@ WebServerControl::startServer()
               return HttpResponse{200, res_json};
             });
 
-    // Get any Postprocessor value
+    // POST /get/postprocessor, with data:
+    //   'name' (string): The name of the Postprocessor
+    // Returns code 200 on success and JSON:
+    //   'value' (double): The postprocessor value
     _server.when("/get/postprocessor")
         ->posted(
             [this, &error, &get_name, &require_waiting, &require_parameters](
@@ -136,7 +141,11 @@ WebServerControl::startServer()
               return HttpResponse{200, res_json};
             });
 
-    // Create the endpoint for setting a controllable value
+    // POST /set/controllable, with data:
+    //   'name' (string): The path to the controllable data
+    //   'value' (double, array(double), or array(string)): The data to set
+    // Returns code 201 on success and JSON:
+    //   'error' (string): The error (only set if an error occurred)
     _server.when("/set/controllable")
         ->posted(
             [this, &error, &get_name, &require_waiting, &require_parameters](
@@ -214,7 +223,7 @@ WebServerControl::startServer()
               return HttpResponse{201};
             });
 
-    // Create the endpoint for telling the control to continue
+    // GET /continue, Returns code 200
     _server.when("/continue")
         ->requested(
             [this, &error](const HttpRequest &)
@@ -222,7 +231,7 @@ WebServerControl::startServer()
               if (this->_currently_waiting.load())
               {
                 this->_currently_waiting.store(false);
-                return HttpResponse{201};
+                return HttpResponse{200};
               }
 
               // Not currently waiting

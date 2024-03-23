@@ -1,13 +1,13 @@
 [Tests]
-  method = "opt"
   issues = '#23359'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
 
-  [./single]
-    type = 'CSVDiff'
-    input = 'web_server_control.i'
-    csvdiff = 'web_server_control_out.csv'
-    command = "../../../moose_test-opt -i web_server_control.i & python controller.py"
-    requirement = "The Control system shall allow external control through a REST API."
-  [../]
+  [control_real]
+    type = Exodiff
+    input = change_real.i
+    exodiff = change_real_out.e
+    command_proxy = change_real.py
+    requirement = "The system shall support controlling a real-valued parameter via a REST API"
+    recover = false
+  []
 []
