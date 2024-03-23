@@ -7,13 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseBaseErrorInterface.h"
-#include "MooseBase.h"
-#include "MooseApp.h"
+#pragma once
 
-#include "parse.h"
+#include "MooseObjectUnitTest.h"
 
-MooseBaseErrorInterface::MooseBaseErrorInterface(const MooseBase & base)
-  : ConsoleStreamInterface(base.getMooseApp()), _moose_base(base)
+class PositionsTest : public MooseObjectUnitTest
 {
-}
+public:
+  PositionsTest() : MooseObjectUnitTest("MooseUnitApp") {}
+};

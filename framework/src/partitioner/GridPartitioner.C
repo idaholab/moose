@@ -48,7 +48,7 @@ GridPartitioner::~GridPartitioner() {}
 std::unique_ptr<Partitioner>
 GridPartitioner::clone() const
 {
-  return std::make_unique<GridPartitioner>(_pars);
+  return _app.getFactory().clone(*this);
 }
 
 void

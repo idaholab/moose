@@ -360,9 +360,11 @@ MooseApp::MooseApp(InputParameters parameters)
     PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
-    _name(parameters.get<std::string>("_app_name")),
+    MooseBase(parameters.get<std::string>("_type"),
+              parameters.get<std::string>("_app_name"),
+              *this,
+              _pars),
     _pars(parameters),
-    _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
     _output_position_set(false),
@@ -1046,14 +1048,6 @@ MooseApp::setupOptions()
   Moose::out << std::flush;
 }
 
-const std::string &
-MooseApp::type() const
-{
-  if (_parser && _parser->getAppType().size())
-    mooseAssert(_parser->getAppType() == _type, "Should be equivalent");
-  return _type;
-}
-
 const std::vector<std::string> &
 MooseApp::getInputFileNames() const
 {
@@ -1348,11 +1342,11 @@ MooseApp::addExecutorParams(const std::string & type,
   _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
 }
 
-Moose::Builder &
+Parser &
 MooseApp::parser()
 {
-  mooseDeprecated("MooseApp::parser() is deprecated, use MooseApp::builder() instead.");
-  return _builder;
+  mooseAssert(_parser, "Not set");
+  return *_parser;
 }
 
 void
@@ -2413,6 +2407,14 @@ MooseApp::restartFolderBase(const std::filesystem::path & folder_base) const
   auto folder = folder_base;
   folder += "-restart-" + std::to_string(processor_id());
   return RestartableDataIO::restartableDataFolder(folder);
+}
+
+const hit::Node *
+MooseApp::getCurrentActionHitNode() const
+{
+  if (const auto action = _action_warehouse.getCurrentAction())
+    return action->parameters().getHitNode();
+  return nullptr;
 }
 
 bool

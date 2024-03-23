@@ -9,6 +9,8 @@
 
 #include "GeneratedMesh.h"
 
+#include "MooseApp.h"
+
 #include "libmesh/mesh_generation.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/periodic_boundaries.h"
@@ -150,7 +152,7 @@ GeneratedMesh::getMaxInDimension(unsigned int component) const
 std::unique_ptr<MooseMesh>
 GeneratedMesh::safeClone() const
 {
-  return std::make_unique<GeneratedMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

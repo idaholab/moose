@@ -943,9 +943,8 @@ public:
   ReporterData & getReporterData(ReporterData::WriteKey /*key*/) { return _reporter_data; }
 
   // UserObjects /////
-  virtual void addUserObject(const std::string & user_object_name,
-                             const std::string & name,
-                             InputParameters & parameters);
+  virtual std::vector<std::shared_ptr<UserObject>> addUserObject(
+      const std::string & user_object_name, const std::string & name, InputParameters & parameters);
 
   // TODO: delete this function after apps have been updated to not call it
   const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const

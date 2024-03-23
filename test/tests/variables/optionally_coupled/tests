@@ -77,7 +77,7 @@
       type = 'RunException'
       input = 'optionally_coupled.i'
       cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u'
-      expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
+      expect_err = 'component 2 is out of range for this variable \(max 1\)'
 
       detail = "accessed by name or"
     []
@@ -87,7 +87,7 @@
       input = 'optionally_coupled.i'
       cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u '
                  'Kernels/wrong_index/access_value=false'
-      expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
+      expect_err = 'component 2 is out of range for this variable \(max 1\)'
 
       detail = "accessed by index."
     []

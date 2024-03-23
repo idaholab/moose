@@ -8,38 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
+
+#include "JSONReaderTest.h"
 #include "JSONFileReader.h"
-#include "AppFactory.h"
-#include "Executioner.h"
-#include "MooseMain.h"
 
-TEST(JSONFileReader, errors)
+TEST_F(JSONReaderTest, errors)
 {
-  // Create a minimal app that can create objects
-  const char * argv[2] = {"foo", "\0"};
-  std::shared_ptr<MooseApp> app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
-  const auto & factory = &app->getFactory();
-  app->parameters().set<bool>("minimal") = true;
-  app->run();
-  Executioner * exec = app->getExecutioner();
-  FEProblemBase * fe_problem = &exec->feProblem();
-
   // JSONFileReader is uninitialized at construction, any other JSONFileReader with such
   // behavior would do
-  InputParameters params = factory->getValidParams("JSONFileReader");
-  params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
-  params.set<SubProblem *>("_subproblem") = fe_problem;
-  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
-  params.set<std::string>("_object_name") = "test";
+  InputParameters params = _factory.getValidParams("JSONFileReader");
   params.set<std::string>("_type") = "JSONFileReader";
   params.set<FileName>("filename") = "data/json/function_values.json";
-  JSONFileReader JSONFileReader(params);
+  auto & reader = addObject<JSONFileReader>("JSONFileReader", "test", params);
 
   // Scalar getters
   try
   {
     Real a;
-    JSONFileReader.getScalar("not_a_key", a);
+    reader.getScalar("not_a_key", a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -52,7 +38,7 @@ TEST(JSONFileReader, errors)
   try
   {
     Real a;
-    JSONFileReader.getScalar(std::vector<std::string>(), a);
+    reader.getScalar(std::vector<std::string>(), a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -66,7 +52,7 @@ TEST(JSONFileReader, errors)
   try
   {
     std::vector<Real> a;
-    JSONFileReader.getVector("not_a_key", a);
+    reader.getVector("not_a_key", a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -78,7 +64,7 @@ TEST(JSONFileReader, errors)
   try
   {
     std::vector<Real> a;
-    JSONFileReader.getVector(std::vector<std::string>(), a);
+    reader.getVector(std::vector<std::string>(), a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -89,38 +75,24 @@ TEST(JSONFileReader, errors)
   }
 }
 
-TEST(JSONFileReader, getters)
+TEST_F(JSONReaderTest, getters)
 {
-  // Create a minimal app that can create objects
-  const char * argv[2] = {"foo", "\0"};
-  const auto & app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
-  const auto & factory = &app->getFactory();
-  app->parameters().set<bool>("minimal") = true;
-  app->run();
-  Executioner * exec = app->getExecutioner();
-  FEProblemBase * fe_problem = &exec->feProblem();
-
-  InputParameters params = factory->getValidParams("JSONFileReader");
-  params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
-  params.set<SubProblem *>("_subproblem") = fe_problem;
-  params.set<std::string>("_object_name") = "test";
-  params.set<std::string>("_type") = "JSONFileReader";
+  InputParameters params = _factory.getValidParams("JSONFileReader");
   params.set<FileName>("filename") = "data/json/function_values.json";
-  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
-  JSONFileReader JSONFileReader(params);
+  auto & reader = addObject<JSONFileReader>("JSONFileReader", "test", params);
 
   // Test scalar getters
   Real from_json;
-  JSONFileReader.getScalar("direct_key", from_json);
+  reader.getScalar("direct_key", from_json);
   EXPECT_EQ(from_json, 3);
-  JSONFileReader.getScalar(std::vector<std::string>({"the_data", "random_other_key"}), from_json);
+  reader.getScalar(std::vector<std::string>({"the_data", "random_other_key"}), from_json);
   EXPECT_EQ(from_json, 2);
 
   // Test vector getters
   std::vector<Real> from_json_vec;
-  JSONFileReader.getVector("direct_vector_key", from_json_vec);
+  reader.getVector("direct_vector_key", from_json_vec);
   EXPECT_EQ(from_json_vec[2], 2);
-  JSONFileReader.getVector(std::vector<std::string>({"the_data", "some_key", "some_other_key"}),
-                           from_json_vec);
+  reader.getVector(std::vector<std::string>({"the_data", "some_key", "some_other_key"}),
+                   from_json_vec);
   EXPECT_EQ(from_json_vec[2], 7);
 }

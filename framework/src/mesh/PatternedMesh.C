@@ -10,6 +10,7 @@
 #include "PatternedMesh.h"
 #include "Parser.h"
 #include "InputParameters.h"
+#include "MooseApp.h"
 
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
@@ -79,7 +80,7 @@ PatternedMesh::PatternedMesh(const PatternedMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 PatternedMesh::safeClone() const
 {
-  return std::make_unique<PatternedMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

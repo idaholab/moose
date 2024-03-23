@@ -32,14 +32,29 @@ class FunctionParserBase
 #include <unordered_map>
 #include <mutex>
 #include <optional>
+#include <filesystem>
+
+#include <gtest/gtest.h>
 
 // Forward declarations
 class Action;
+class ActionFactory;
+class Factory;
+class FEProblemBase;
 class InputParameters;
 class MooseEnum;
 class MooseObject;
+class MooseBase;
 class MultiMooseEnum;
 class Problem;
+namespace hit
+{
+class Node;
+}
+namespace Moose
+{
+class Builder;
+}
 
 /**
  * The main MOOSE class responsible for handling user-defined
@@ -71,6 +86,35 @@ public:
     std::vector<std::string> syntax;
     /// The type of argument
     ArgumentType argument_type;
+  };
+
+  /**
+   * Class that is used as a parameter to setHitNode() that allows only
+   * relevant classes to set the hit node
+   */
+  class SetHitNodeKey
+  {
+    friend class Action;
+    friend class ActionFactory;
+    friend class Moose::Builder;
+    friend class Factory;
+    friend class FEProblemBase;
+    friend class InputParameters;
+    FRIEND_TEST(InputParametersTest, fileNames);
+    SetHitNodeKey() {}
+    SetHitNodeKey(const SetHitNodeKey &) {}
+  };
+
+  /**
+   * Class that is used as a parameter to setHitNode(param) that allows only
+   * relevant classes to set the hit node
+   */
+  class SetParamHitNodeKey
+  {
+    friend class Moose::Builder;
+    FRIEND_TEST(InputParametersTest, fileNames);
+    SetParamHitNodeKey() {}
+    SetParamHitNodeKey(const SetParamHitNodeKey &) {}
   };
 
   /**
@@ -529,6 +573,11 @@ public:
   void registerBase(const std::string & value);
 
   /**
+   * @return The base system of the object these parameters are for, if any
+   */
+  std::optional<std::string> getBase() const;
+
+  /**
    * This method is used to define the MOOSE system name that is used by the TheWarehouse object
    * for storing objects to be retrieved for execution. The base class of every object class
    * that will be called for execution (e.g., UserObject objects) should call this method.
@@ -628,6 +677,28 @@ public:
    *   they were created, or were read from an input file or some other valid source
    */
   void checkParams(const std::string & parsing_syntax);
+
+  /**
+   * Finalizes the parameters, which must be done before constructing any objects
+   * with these parameters (to be called in the corresponding factories).
+   * typed parameters.
+   *
+   * This calls checkParams() and sets up the absolute paths for all file name.
+   */
+  void finalize(const std::string & parsing_syntax);
+
+  /**
+   * @return A file base to associate with the parameter with name \p param_name.
+   *
+   * We have the following cases:
+   * - The parameter itself has a hit node set (context for that parameter)
+   * - The InputParameters object has a hit node set (context for all parameters)
+   * - Neither of the above and we die
+   *
+   * In the event that a the parameter is set via command line, this will
+   * attempt to look at the parameter's parents to find a suitable context.
+   */
+  std::filesystem::path getParamFileBase(const std::string & param_name) const;
 
   /**
    * Methods returning iterators to the coupled variables names stored in this
@@ -799,7 +870,7 @@ public:
   static const T & getParamHelper(const std::string & name,
                                   const InputParameters & pars,
                                   const T * the_type,
-                                  const MooseObject * moose_object = nullptr);
+                                  const MooseBase * moose_base = nullptr);
   ///@}
 
   using Parameters::get;
@@ -842,60 +913,49 @@ public:
    */
   std::set<std::string> reservedValues(const std::string & name) const;
 
-  ///@{
   /**
-   * Get/set a string representing the location (i.e. filename,linenum) in the input text for the
+   * @return A string representing the location (i.e. filename,linenum) in the input text for the
    * block containing parameters for this object.
    */
-  std::string & blockLocation() { return _block_location; }
-  const std::string & blockLocation() const { return _block_location; }
-  ///@}
+  std::string blockLocation() const;
 
-  ///@{
   /**
-   * Get/set a string representing the full HIT parameter path from the input file (e.g.
+   * @return A string representing the full HIT parameter path from the input file (e.g.
    * "Mesh/foo") for the block containing parameters for this object.
    */
-  std::string & blockFullpath() { return _block_fullpath; }
-  const std::string & blockFullpath() const { return _block_fullpath; }
-  ///@}
+  std::string blockFullpath() const;
 
-  ///@{
   /**
-   * Get/set a string representing the location in the input text the parameter originated from
-   * (i.e. filename,linenum) for the given param.
+   * @return The hit node associated with setting the parameter \p param, if any
    */
-  const std::string & inputLocation(const std::string & param) const
-  {
-    return at(param)._input_location;
-  }
-  std::string & inputLocation(const std::string & param) { return at(param)._input_location; }
-  ///@}
-
-  ///@{
+  const hit::Node * getHitNode(const std::string & param) const;
   /**
-   * Get/set a string representing the full HIT parameter path from the input file (e.g.
+   * Sets the hit node associated with the parameter \p param to \p node
+   *
+   * Is protected to be called by only the Builder via the SetParamHitNodeKey.
+   */
+  void setHitNode(const std::string & param, const hit::Node & node, const SetParamHitNodeKey);
+
+  /**
+   * @return A string representing the location in the input text the parameter originated from
+   * (i.e. filename,linenum) for the given param
+   */
+  std::string inputLocation(const std::string & param) const;
+
+  /**
+   * @return A string representing the full HIT parameter path from the input file (e.g.
    * "Mesh/foo/bar" for param "bar") for the given param.
    */
-  const std::string & paramFullpath(const std::string & param) const
-  {
-    return at(param)._param_fullpath;
-  }
-  std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; }
-  ///@}
+  std::string paramFullpath(const std::string & param) const;
 
   /// generate error message prefix with parameter name and location (if available)
   std::string errorPrefix(const std::string & param) const;
 
   /**
-   * Get/set a string representing the raw, unmodified token text for the given param.  This is
-   * usually only set/useable for file-path type parameters.
+   * @return A string representing the raw, unmodified token text for the given param.
+   * This is only set if this parameter is parsed from hit
    */
-  std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; }
-  const std::string & rawParamVal(const std::string & param) const
-  {
-    return _params.at(param)._raw_val;
-  }
+  std::string rawParamVal(const std::string & param) const;
 
   /**
    * Informs this object that values for this parameter set from the input file or from the command
@@ -1008,6 +1068,25 @@ public:
    */
   std::vector<std::string> paramAliases(const std::string & param_name) const;
 
+  /**
+   * @return The hit node that represents the syntax responsible for creating
+   * these parameters, if any
+   */
+  const hit::Node * getHitNode() const { return _hit_node; }
+  /**
+   * Sets the hit node that represents the syntax responsible for creating
+   * these parameters
+   *
+   * Is protected to be called by only the ActionFactory, Builder, and Factory
+   * via the SetHitNodeKey.
+   */
+  void setHitNode(const hit::Node & node, const SetHitNodeKey) { _hit_node = &node; }
+
+  /**
+   * @return Whether or not finalize() has been called
+   */
+  bool isFinalized() const { return _finalized; }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1037,7 +1116,7 @@ private:
                                 const std::string & docstring,
                                 const std::string & removal_date);
 
-  static void callMooseErrorHelper(const MooseObject & object, const std::string & error);
+  static void callMooseErrorHelper(const MooseBase & moose_base, const std::string & error);
 
   struct Metadata
   {
@@ -1071,12 +1150,8 @@ private:
     std::set<std::string> _reserved_values;
     /// If non-empty, this parameter is deprecated.
     std::string _deprecation_message;
-    /// original location of parameter (i.e. filename,linenum) - used for nice error messages.
-    std::string _input_location;
-    /// full HIT path of the parameter from the input file - used for nice error messages.
-    std::string _param_fullpath;
-    /// raw token text for a parameter - usually only set for filepath type params.
-    std::string _raw_val;
+    /// Original location of parameter node; used for error messages
+    const hit::Node * _hit_node;
     /// True if the parameters is controllable
     bool _controllable = false;
     /// Controllable execute flag restriction
@@ -1190,6 +1265,12 @@ private:
   /// A map from derived-class/blessed parameter names to associated base-class/deprecated parameter
   /// names
   std::multimap<std::string, std::string> _new_to_old_names;
+
+  /// The hit node representing the syntax that created these parameters, if any
+  const hit::Node * _hit_node;
+
+  /// Whether or not we've called finalize() on these parameters yet
+  bool _finalized;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
@@ -1813,12 +1894,13 @@ void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & 
                                                             MooseFunctorName & l_value,
                                                             const int & r_value);
 
+// TODO: pass MooseBase here instead and use it in objects
 template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name_in,
                                 const InputParameters & pars,
                                 const T *,
-                                const MooseObject * moose_object /* = nullptr */)
+                                const MooseBase * moose_base /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
 
@@ -1826,8 +1908,8 @@ InputParameters::getParamHelper(const std::string & name_in,
   {
     std::stringstream err;
     err << "The parameter \"" << name << "\" is being retrieved before being set.";
-    if (moose_object)
-      callMooseErrorHelper(*moose_object, err.str());
+    if (moose_base)
+      callMooseErrorHelper(*moose_base, err.str());
     else
       mooseError(err.str());
   }
@@ -1843,14 +1925,14 @@ const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name,
                                            const InputParameters & pars,
                                            const MooseEnum *,
-                                           const MooseObject * moose_object /* = nullptr */);
+                                           const MooseBase * moose_base /* = nullptr */);
 
 template <>
 const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
                                                 const InputParameters & pars,
                                                 const MultiMooseEnum *,
-                                                const MooseObject * moose_object /* = nullptr */);
+                                                const MooseBase * moose_base /* = nullptr */);
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>

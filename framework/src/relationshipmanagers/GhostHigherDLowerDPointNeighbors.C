@@ -94,3 +94,9 @@ GhostHigherDLowerDPointNeighbors::operator>=(const RelationshipManager & other) 
   return dynamic_cast<const GhostHigherDLowerDPointNeighbors *>(&other) ||
          dynamic_cast<const GhostLowerDElems *>(&other);
 }
+
+std::unique_ptr<GhostingFunctor>
+GhostHigherDLowerDPointNeighbors::clone() const
+{
+  return _app.getFactory().copyConstruct(*this);
+}

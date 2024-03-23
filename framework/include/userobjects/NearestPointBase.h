@@ -69,18 +69,15 @@ protected:
    * @param p The point.
    * @return The UserObject closest to p.
    */
-  std::shared_ptr<UserObjectType> nearestUserObject(const Point & p) const;
+  UserObjectType & nearestUserObject(const Point & p) const;
 
   std::vector<Point> _points;
-  std::vector<std::shared_ptr<UserObjectType>> _user_objects;
+  std::vector<std::unique_ptr<UserObjectType>> _user_objects;
 
   // To specify whether the distance is defined based on point or radius
   const unsigned int _dist_norm;
   // The axis around which the radius is determined
   const unsigned int _axis;
-
-  // The list of InputParameter objects. This is a list because these cannot be copied (or moved).
-  std::list<InputParameters> _sub_params;
 
   using BaseType::_communicator;
   using BaseType::_current_elem;
@@ -129,17 +126,21 @@ NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParamete
 
   fillPoints();
 
-  _user_objects.reserve(_points.size());
+  _user_objects.resize(_points.size());
 
-  // Build each of the UserObject objects:
+  // Build each of the UserObject objects that we will manage manually
+  // If you're looking at this in the future and want to replace this behavior,
+  // _please_ don't do it. MOOSE should manage these objects.
   for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
-    auto sub_params = emptyInputParameters();
-    sub_params += parameters;
-    sub_params.set<std::string>("_object_name") = name() + "_sub" + std::to_string(i);
+    const auto uo_type = MooseUtils::prettyCppType<UserObjectType>();
+    auto sub_params = this->_app.getFactory().getValidParams(uo_type);
+    sub_params.applyParameters(parameters, {}, true);
 
-    _sub_params.push_back(sub_params);
-    _user_objects.emplace_back(std::make_shared<UserObjectType>(_sub_params.back()));
+    const auto sub_name = name() + "_sub" + std::to_string(i);
+    auto uo = this->_app.getFactory().template createUnique<UserObjectType>(
+        uo_type, sub_name, sub_params, this->_tid);
+    _user_objects[i] = std::move(uo);
   }
 }
 
@@ -184,7 +185,7 @@ template <typename UserObjectType, typename BaseType>
 void
 NearestPointBase<UserObjectType, BaseType>::execute()
 {
-  nearestUserObject(_current_elem->vertex_average())->execute();
+  nearestUserObject(_current_elem->vertex_average()).execute();
 }
 
 template <typename UserObjectType, typename BaseType>
@@ -209,11 +210,11 @@ template <typename UserObjectType, typename BaseType>
 Real
 NearestPointBase<UserObjectType, BaseType>::spatialValue(const Point & p) const
 {
-  return nearestUserObject(p)->spatialValue(p);
+  return nearestUserObject(p).spatialValue(p);
 }
 
 template <typename UserObjectType, typename BaseType>
-std::shared_ptr<UserObjectType>
+UserObjectType &
 NearestPointBase<UserObjectType, BaseType>::nearestUserObject(const Point & p) const
 {
   unsigned int closest = 0;
@@ -252,7 +253,7 @@ NearestPointBase<UserObjectType, BaseType>::nearestUserObject(const Point & p) c
     }
   }
 
-  return _user_objects[closest];
+  return *_user_objects[closest];
 }
 
 template <typename UserObjectType, typename BaseType>
@@ -263,8 +264,7 @@ NearestPointBase<UserObjectType, BaseType>::spatialPoints() const
 
   for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
-    std::shared_ptr<LayeredBase> layered_base =
-        std::dynamic_pointer_cast<LayeredBase>(_user_objects[i]);
+    auto layered_base = dynamic_cast<LayeredBase *>(_user_objects[i].get());
     if (layered_base)
     {
       const auto & layers = layered_base->getLayerCenters();

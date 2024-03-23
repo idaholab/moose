@@ -398,3 +398,9 @@ AugmentSparsityOnInterface::operator>=(const RelationshipManager & other) const
   }
   return false;
 }
+
+std::unique_ptr<GhostingFunctor>
+AugmentSparsityOnInterface::clone() const
+{
+  return _app.getFactory().copyConstruct(*this);
+}

@@ -258,6 +258,7 @@ AutomaticMortarGeneration::initOutput()
       std::to_string(_primary_secondary_boundary_id_pairs.front().first) +
       std::to_string(_primary_secondary_boundary_id_pairs.front().second) + "_" +
       (_on_displaced ? "displaced" : "undisplaced");
+  _output_params->finalize("MortarNodalGeometryOutput");
   _app.getOutputWarehouse().addOutput(std::make_shared<MortarNodalGeometryOutput>(*_output_params));
 }
 

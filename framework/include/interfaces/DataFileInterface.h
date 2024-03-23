@@ -23,7 +23,7 @@ public:
   /**
    * The parameter type this interface expects for a data file name.
    */
-  using DataFileParameterType = FileName;
+  using DataFileParameterType = DataFileName;
 
   /**
    * Constructing the object

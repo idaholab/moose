@@ -46,6 +46,7 @@ const TagName PREVIOUS_NL_SOLUTION_TAG = "U_PREVIOUS_NL_NEWTON";
 DerivativeStringToJSON(FileName);
 DerivativeStringToJSON(FileNameNoExtension);
 DerivativeStringToJSON(RelativeFileName);
+DerivativeStringToJSON(DataFileName);
 DerivativeStringToJSON(MeshFileName);
 DerivativeStringToJSON(OutFileBase);
 DerivativeStringToJSON(NonlinearVariableName);

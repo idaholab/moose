@@ -10,6 +10,7 @@
 #include "ConcentricCircleMesh.h"
 #include "libmesh/face_quad4.h"
 #include "MooseMesh.h"
+#include "MooseApp.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/boundary_info.h"
@@ -93,6 +94,12 @@ ConcentricCircleMesh::ConcentricCircleMesh(const InputParameters & parameters)
     for (unsigned i = 0; i < _radii.size(); ++i)
       if (_pitch / 2 < _radii[i])
         mooseError("The pitch / 2 must be larger than any radii.");
+}
+
+std::unique_ptr<MooseMesh>
+ConcentricCircleMesh::safeClone() const
+{
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

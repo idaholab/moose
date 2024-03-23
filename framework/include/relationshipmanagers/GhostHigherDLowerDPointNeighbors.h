@@ -25,10 +25,7 @@ public:
                   processor_id_type p,
                   map_type & coupled_elements) override;
 
-  std::unique_ptr<GhostingFunctor> clone() const override
-  {
-    return std::make_unique<GhostHigherDLowerDPointNeighbors>(*this);
-  }
+  std::unique_ptr<GhostingFunctor> clone() const override;
 
   std::string getInfo() const override;
 

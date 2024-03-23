@@ -9,6 +9,8 @@
 
 #include "AnnularMesh.h"
 
+#include "MooseApp.h"
+
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
 
@@ -153,7 +155,7 @@ AnnularMesh::getMaxInDimension(unsigned int component) const
 std::unique_ptr<MooseMesh>
 AnnularMesh::safeClone() const
 {
-  return std::make_unique<AnnularMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void
