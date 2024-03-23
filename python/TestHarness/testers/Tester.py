@@ -339,6 +339,10 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
+    def getEnvironment(self, options):
+        """ return the additional environment to run the tester with """
+        return {}
+
     def hasOpenMPI(self):
         """ return whether we have openmpi for execution
 
@@ -392,7 +396,8 @@ class Tester(MooseObject):
                             'stderr': e,
                             'close_fds': False,
                             'shell': use_shell,
-                            'cwd': cwd}
+                            'cwd': cwd,
+                            'env': os.environ.copy()}
             # On Windows, there is an issue with path translation when the command
             # is passed in as a list.
             if platform.system() == "Windows":
@@ -401,10 +406,12 @@ class Tester(MooseObject):
                 popen_kwargs['preexec_fn'] = os.setsid
 
             # Set this for OpenMPI so that we don't clobber state
+            # Maybe move this to getEnvironment()
             if self.hasOpenMPI():
-                popen_env = os.environ.copy()
-                popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
-                popen_kwargs['env'] = popen_env
+                popen_kwargs['env']['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
+
+            # Append and additional environment variables requested by the Tester
+            popen_kwargs['env'].update(self.getEnvironment(options))
 
             process = subprocess.Popen(*popen_args, **popen_kwargs)
         except:

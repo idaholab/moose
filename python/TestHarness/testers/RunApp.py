@@ -30,7 +30,8 @@ class RunApp(Tester):
 
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
         # it'll be used in lieu of building up the command automatically
-        params.addParam('command',            "The command line to execute for this test.")
+        params.addParam('command',       "The command line to execute for this test")
+        params.addParam('command_proxy', "A proxy command to run that will execute the underlying test via wrapper; the intended command is set in the env variable RUNAPP_COMMAND")
 
         # Parallel/Thread testing
         params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
@@ -60,9 +61,18 @@ class RunApp(Tester):
             self.mpi_command = 'mpiexec'
             self.force_mpi = False
 
+        # The cached command; used so that after getCommand() is called with the 'command'
+        # parameter, we can cache the command that we intended to run and then can set it
+        # in RUNAPP_COMMAND in getEnvironment()
+        self._command_proxy_command = None
+
         # Make sure that either input or command is supplied
-        if not (params.isValid('input') or params.isValid('command') or params['no_additional_cli_args']):
-            raise Exception('One of "input", "command", or "no_additional_cli_args" must be supplied for a RunApp test')
+        if not (params.isValid('input') or params.isValid('command') or params.isValid("command_proxy") or params['no_additional_cli_args']):
+            raise Exception('One of "input", "command", "command_proxy", or "no_additional_cli_args" must be supplied for a RunApp test')
+
+        # Not compatible with each other due to the return break in runCommand()
+        if params.isValid('command_proxy') and params['no_additional_cli_args']:
+            raise Exception('The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -209,7 +219,25 @@ class RunApp(Tester):
         if self.force_mpi or options.parallel or ncpus > 1:
             command = f'{self.mpi_command} -n {ncpus} {command}'
 
+        # Arbitrary proxy command, but keep track of the command so that someone could use it later
+        if specs.isValid('command_proxy'):
+            self._command_proxy_command = command
+            return os.path.join(specs['test_dir'], specs['command_proxy']) + ' ' + ' '.join(specs['cli_args'])
+
         return command
+
+    def getEnvironment(self, options):
+        env = {}
+
+        specs = self.specs
+        if specs.isValid('command_proxy'):
+            if self._command_proxy_command is None:
+                raise Exception('Missing cached command for RUNAPP_COMMAND variable with "command_proxy" param set')
+            env['RUNAPP_COMMAND'] = self._command_proxy_command
+        elif self._command_proxy_command is not None:
+            raise Exception('RunApp._command_proxy_command is set and it should not be')
+
+        return env
 
     def testFileOutput(self, moose_dir, options, output):
         """ Set a failure status for expressions found in output """
