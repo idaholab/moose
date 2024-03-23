@@ -178,10 +178,15 @@ WebServerControl::startServer()
               // Will be modifying _real_data or _vec_real_data
               std::lock_guard<std::mutex> lock(this->_data_mutex);
 
+              // This could be generalized more in the future, but this is good for now
               // Real parameter value
               if (value.isNumber())
               {
                 _real_data[name] = value.toDouble();
+              }
+              else if (value.isString())
+              {
+                _string_data[name] = value.toString();
               }
               // Array, currently std::vector<Real/std::string>
               else if (value.isArray())
@@ -264,6 +269,7 @@ WebServerControl::execute()
 
   // Broadcast all of the data that we have received
   comm().broadcast(_real_data);
+  comm().broadcast(_string_data);
   comm().broadcast(_vec_real_data);
   comm().broadcast(_vec_string_data);
 
@@ -289,11 +295,13 @@ WebServerControl::execute()
 
   // Set all of the data that we have
   set_values(_real_data);
+  set_values(_string_data);
   set_values(_vec_real_data);
   set_values(_vec_string_data);
 
   // Done with these
   _real_data.clear();
+  _string_data.clear();
   _vec_real_data.clear();
   _vec_string_data.clear();
 }

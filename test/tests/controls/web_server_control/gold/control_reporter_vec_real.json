@@ -1,0 +1,48 @@
+{
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "vec_real_value": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "vec_real_value": [
+                    999.0,
+                    0.0,
+                    100.0
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "vec_real_value": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "vec_real_value": [
+                    6.0,
+                    100.0
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

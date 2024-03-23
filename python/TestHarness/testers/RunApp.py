@@ -222,7 +222,7 @@ class RunApp(Tester):
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
         if specs.isValid('command_proxy'):
             self._command_proxy_command = command
-            return os.path.join(specs['test_dir'], specs['command_proxy']) + ' ' + ' '.join(specs['cli_args'])
+            return os.path.join(specs['test_dir'], specs['command_proxy'])
 
         return command
 

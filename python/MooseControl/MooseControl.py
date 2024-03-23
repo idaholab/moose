@@ -89,7 +89,7 @@ class MooseControl:
         if r.headers.get('content-type') == 'application/json':
             r_json = r.json()
             if 'error' in r.json():
-                self.exception(f'HTTP error: "{r.json()["error"]}"')
+                self.Exception(f'HTTP error: "{r_json["error"]}"')
         r.raise_for_status()
 
         return r.status_code, r_json
@@ -201,6 +201,13 @@ class MooseControl:
             except requests.exceptions.ConnectionError:
                 return
 
+    def _setControllable(self, path: str, value):
+        """Internal helper for setting a controllable value"""
+        data = {'name': path, 'value': value}
+        status, _ = self._post('set/controllable', data)
+        if status != 201:
+            raise Exception(f'Unexpected status {status} from setting controllable value')
+
     def setControllableReal(self, path: str, value: float):
         """Sets a controllable Real-valued parameter
 
@@ -209,10 +216,43 @@ class MooseControl:
             value (float): The value to set
         """
         self.log(f'Setting controllable Real value {path}={value}')
-        data = {'name': path, 'value': value}
-        status, _ = self._post('set/controllable', data)
-        if status != 201:
-            raise Exception(f'Unexpected status {status} from setting controllable value')
+        self._setControllable(path, float(value))
+
+    def setControllableVectorReal(self, path: str, value: list[float]):
+        """Sets a controllable vector-of-Real parameter
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (list[float]): The value to set
+        """
+        value_list = []
+        for entry in value:
+            value_list.append(float(entry))
+        self.log(f'Setting controllable vector Real value {path}={value_list}')
+        self._setControllable(path, value_list)
+
+    def setControllableString(self, path: str, value: str):
+        """Sets a controllable string parameter
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (str): The value to set
+        """
+        self.log(f'Setting controllable string value {path}={value}')
+        self._setControllable(path, str(value))
+
+    def setControllableVectorString(self, path: str, value: list[float]):
+        """Sets a controllable vector-of-string parameter
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (list[str]): The value to set
+        """
+        value_list = []
+        for entry in value:
+            value_list.append(str(entry))
+        self.log(f'Setting controllable vector string value {path}={value_list}')
+        self._setControllable(path, value_list)
 
     def getPostprocessor(self, name: str) -> float:
         """Gets a postprocessor value
