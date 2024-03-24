@@ -201,9 +201,9 @@ class MooseControl:
             except requests.exceptions.ConnectionError:
                 return
 
-    def _setControllable(self, path: str, value):
+    def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
-        data = {'name': path, 'value': value}
+        data = {'name': path, 'value': value, 'type': type}
         status, _ = self._post('set/controllable', data)
         if status != 201:
             raise Exception(f'Unexpected status {status} from setting controllable value')
@@ -216,7 +216,7 @@ class MooseControl:
             value (float): The value to set
         """
         self.log(f'Setting controllable Real value {path}={value}')
-        self._setControllable(path, float(value))
+        self._setControllable(path, 'Real', float(value))
 
     def setControllableVectorReal(self, path: str, value: list[float]):
         """Sets a controllable vector-of-Real parameter
@@ -229,7 +229,7 @@ class MooseControl:
         for entry in value:
             value_list.append(float(entry))
         self.log(f'Setting controllable vector Real value {path}={value_list}')
-        self._setControllable(path, value_list)
+        self._setControllable(path, 'std::vector<Real>', value_list)
 
     def setControllableString(self, path: str, value: str):
         """Sets a controllable string parameter
@@ -239,7 +239,7 @@ class MooseControl:
             value (str): The value to set
         """
         self.log(f'Setting controllable string value {path}={value}')
-        self._setControllable(path, str(value))
+        self._setControllable(path, 'std::string', str(value))
 
     def setControllableVectorString(self, path: str, value: list[float]):
         """Sets a controllable vector-of-string parameter
@@ -252,7 +252,7 @@ class MooseControl:
         for entry in value:
             value_list.append(str(entry))
         self.log(f'Setting controllable vector string value {path}={value_list}')
-        self._setControllable(path, value_list)
+        self._setControllable(path, 'std::vector<std::string>', value_list)
 
     def getPostprocessor(self, name: str) -> float:
         """Gets a postprocessor value
