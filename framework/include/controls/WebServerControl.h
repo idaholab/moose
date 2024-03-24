@@ -11,6 +11,8 @@
 
 #include "Control.h"
 
+#include "WebServerControlTypeRegistry.h"
+
 #include "http.h"
 
 #include <atomic>
@@ -32,7 +34,118 @@ public:
 
   virtual void execute() override;
 
-protected:
+  /**
+   * @return A string representation of \p json_type
+   */
+  static std::string stringifyJSONType(const miniJson::JsonType & json_type);
+
+  /**
+   * @return A c++ representation of the scalar value of \p json_value with
+   * the given expected json type
+   */
+  template <typename T, miniJson::JsonType json_type>
+  static T getScalarJSONValue(const miniJson::Json & json_value);
+
+  using ValueBase = WebServerControlTypeRegistry::ValueBase;
+
+  /**
+   * Base class for a controllable value with a given type and name
+   */
+  template <typename T>
+  class TypedValueBase : public ValueBase
+  {
+  public:
+    TypedValueBase(const std::string & name, const std::string & type) : ValueBase(name, type) {}
+    TypedValueBase(const std::string & name, const std::string & type, const T & value)
+      : ValueBase(name, type), _value(value)
+    {
+    }
+
+    /**
+     * @return The underlying value
+     */
+    const T & value() const { return _value; }
+
+    virtual void setControllableValue(WebServerControl & control) override final
+    {
+      control.comm().broadcast(_value);
+      control.setControllableValueByName<T>(name(), value());
+    }
+
+  private:
+    /// The underlying value
+    T _value;
+  };
+
+  /**
+   * Class that stores a scalar controllable value to be set
+   */
+  template <typename T, miniJson::JsonType json_type>
+  class ScalarValue : public TypedValueBase<T>
+  {
+  public:
+    ScalarValue(const std::string & name, const std::string & type) : TypedValueBase<T>(name, type)
+    {
+    }
+    ScalarValue(const std::string & name,
+                const std::string & type,
+                const miniJson::Json & json_value)
+      : TypedValueBase<T>(name, type, getScalarJSONValue<T, json_type>(json_value))
+    {
+    }
+  };
+
+  /**
+   * Class that stores a vector controllable value to be set
+   */
+  template <typename T, miniJson::JsonType json_type>
+  class VectorValue : public TypedValueBase<std::vector<T>>
+  {
+  public:
+    VectorValue(const std::string & name, const std::string & type)
+      : TypedValueBase<std::vector<T>>(name, type)
+    {
+    }
+    VectorValue(const std::string & name,
+                const std::string & type,
+                const miniJson::Json & json_value)
+      : TypedValueBase<std::vector<T>>(name, type, getVectorJSONValue(json_value))
+    {
+    }
+
+    static std::vector<T> getVectorJSONValue(const miniJson::Json & json_value)
+    {
+      if (json_value.getType() != miniJson::JsonType::kArray)
+        throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
+                                   stringifyJSONType(from_json_type) + " is not an array");
+
+      const auto & array_value = json_value.toArray();
+      std::vector<T> value(array_value.size());
+      for (const auto i : index_range(array_value))
+        value[i] = getScalarJSONValue<T, json_type>(array_value[i]);
+      return value;
+    }
+  };
+
+  /**
+   * Registers a scalar parameter type to be controlled
+   */
+  template <typename T, miniJson::JsonType json_type>
+  static char registerScalarType(const std::string type_name)
+  {
+    return WebServerControlTypeRegistry().add<ScalarValue<T, json_type>>(type_name);
+  }
+  /**
+   * Registers a vector parameter type to be controlled
+   */
+  template <typename T, miniJson::JsonType json_type>
+  static char registerVectorType(const std::string type_name)
+  {
+    return WebServerControlTypeRegistry().add<VectorValue<T, json_type>>("std::vector<" +
+                                                                         type_name + ">");
+  }
+
+private:
   /**
    * Internal method for starting the server
    */
@@ -53,14 +166,27 @@ protected:
   /// The server thread
   const std::unique_ptr<std::thread> _server_thread;
 
-  /// The Real data that we accumulate from the server
-  std::map<std::string, Real> _real_data;
-  /// The Real data that we accumulate from the server
-  std::map<std::string, std::string> _string_data;
-  /// The std::vector<Real> data that we accumulate from the server
-  std::map<std::string, std::vector<Real>> _vec_real_data;
-  /// The std::vector<std::string> data that we accumulate from the server
-  std::map<std::string, std::vector<std::string>> _vec_string_data;
-  /// Mutex to prevent threaded writes to _real_data and _vec_real_data
-  std::mutex _data_mutex;
+  /// The values received to control; filled on rank 0 from the server and then broadcast
+  std::vector<std::unique_ptr<ValueBase>> _controlled_values;
+  /// Mutex to prevent threaded writes to _controlled_values
+  std::mutex _controlled_values_mutex;
 };
+
+template <typename T, miniJson::JsonType json_type>
+T
+WebServerControl::getScalarJSONValue(const miniJson::Json & json_value)
+{
+  const auto from_json_type = json_value.getType();
+  if (from_json_type != json_type)
+    throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
+                               stringifyJSONType(from_json_type) + " is not of the expected type " +
+                               stringifyJSONType(json_type));
+  if constexpr (json_type == miniJson::JsonType::kBool)
+    return json_value.toBool();
+  else if constexpr (json_type == miniJson::JsonType::kNumber)
+    return json_value.toDouble();
+  else if constexpr (json_type == miniJson::JsonType::kString)
+    return json_value.toString();
+  ::mooseError("WebServerControl::getScalarJSONValue(): Not configured for parsing type ",
+               stringifyJSONType(from_json_type));
+}

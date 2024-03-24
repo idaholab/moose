@@ -13,6 +13,32 @@
 
 registerMooseObject("MooseApp", WebServerControl);
 
+#define registerWebServerControlCombine1(X, Y) X##Y
+#define registerWebServerControlCombine(X, Y) registerWebServerControlCombine1(X, Y)
+#define registerWebServerControlScalar(T, json_type)                                               \
+  static char registerWebServerControlCombine(wsc_scalar, __COUNTER__) =                           \
+      WebServerControl::registerScalarType<T, json_type>(#T)
+#define registerWebServerControlVector(T, json_type)                                               \
+  static char registerWebServerControlCombine(wsc_vector, __COUNTER__) =                           \
+      WebServerControl::registerVectorType<T, json_type>(#T)
+#define registerWebServerControlScalarBool(T)                                                      \
+  registerWebServerControlScalar(T, miniJson::JsonType::kBool)
+#define registerWebServerControlScalarNumber(T)                                                    \
+  registerWebServerControlScalar(T, miniJson::JsonType::kNumber)
+#define registerWebServerControlScalarString(T)                                                    \
+  registerWebServerControlScalar(T, miniJson::JsonType::kString)
+#define registerWebServerControlVectorNumber(T)                                                    \
+  registerWebServerControlVector(T, miniJson::JsonType::kNumber)
+#define registerWebServerControlVectorString(T)                                                    \
+  registerWebServerControlVector(T, miniJson::JsonType::kString)
+
+// Registration of the types that we can accept in the web server for controlling parameters
+registerWebServerControlScalarBool(bool);
+registerWebServerControlScalarNumber(Real);
+registerWebServerControlScalarString(std::string);
+registerWebServerControlVectorNumber(Real);
+registerWebServerControlVectorString(std::string);
+
 InputParameters
 WebServerControl::validParams()
 {
@@ -57,19 +83,24 @@ WebServerControl::startServer()
       return HttpResponse{400, response};
     };
 
-    const auto get_name = [&error](const auto & msg, const std::string & description)
+    // Helper for getting a string from a json value with error checking
+    const auto get_string =
+        [&error](const auto & msg, const std::string & name, const std::string & description)
     {
       using result = std::variant<std::string, HttpResponse>;
-      const auto name_it = msg.find("name");
-      if (name_it == msg.end())
-        return result(error("The entry 'name' is missing which should contain the name of the " +
-                            description));
-      const auto & name_json = name_it->second;
-      if (!name_json.isString())
-        return result(error("The entry 'name' which should contain the name of the " + description +
-                            " must be a string"));
-      return result(name_json.toString());
+      const auto it = msg.find(name);
+      if (it == msg.end())
+        return result(
+            error("The entry '" + name + "' is missing which should contain the " + description));
+      const auto & value = it->second;
+      if (!value.isString())
+        return result(error("The entry '" + name + "' which should contain the " + description));
+      return result(value.toString());
     };
+
+    // Helper for getting a string name from a json value with error checking
+    const auto get_name = [&error, &get_string](const auto & msg, const std::string & description)
+    { return get_string(msg, "name", "name of the " + description); };
 
     const auto require_waiting = [&error](auto & control)
     {
@@ -143,87 +174,62 @@ WebServerControl::startServer()
 
     // POST /set/controllable, with data:
     //   'name' (string): The path to the controllable data
-    //   'value' (double, array(double), or array(string)): The data to set
+    //   'value': The data to set
+    //   'type' (string): The C++ type of the controllable data to set
     // Returns code 201 on success and JSON:
     //   'error' (string): The error (only set if an error occurred)
     _server.when("/set/controllable")
         ->posted(
-            [this, &error, &get_name, &require_waiting, &require_parameters](
+            [this, &error, &get_string, &get_name, &require_waiting, &require_parameters](
                 const HttpRequest & req)
             {
               const auto & msg = req.json().toObject();
+
+              // Should only have a name, type, and value
+              if (const auto response = require_parameters(msg, {"name", "type", "value"}))
+                return *response;
+              // Should be waiting for data
+              if (const auto response = require_waiting(*this))
+                return *response;
+
+              // Get the parameter type
+              const auto type_result = get_string(msg, "type", "type of the parameter");
+              if (const auto response = std::get_if<HttpResponse>(&type_result))
+                return *response;
+              const auto & type = std::get<std::string>(type_result);
+              if (!WebServerControlTypeRegistry::isRegistered(type))
+                return error("The type '" + type +
+                             "' is not registered for setting a controllable parameter");
 
               // Get the parameter name
               const auto name_result = get_name(msg, "name of the parameter to control");
               if (const auto response = std::get_if<HttpResponse>(&name_result))
                 return *response;
               const auto & name = std::get<std::string>(name_result);
+              // Parameter should exist
+              if (!this->hasControllableParameterByName(name))
+                return error("The controllable parameter '" + name + "' was not found");
+
               // Get the parameter value
               const auto value_it = msg.find("value");
               if (value_it == msg.end())
                 return error(
                     "The entry 'value' is missing which should contain the value of the parameter");
-              const auto & value = value_it->second;
+              const auto & json_value = value_it->second;
 
-              // Should only have a name and a value
-              if (const auto response = require_parameters(msg, {"name", "value"}))
-                return *response;
-              // Should be waiting for data
-              if (const auto response = require_waiting(*this))
-                return *response;
-              // Parameter should exist
-              if (!this->hasControllableParameterByName(name))
-                return error("The controllable parameter '" + name + "' was not found");
-
-              // Will be modifying _real_data or _vec_real_data
-              std::lock_guard<std::mutex> lock(this->_data_mutex);
-
-              // This could be generalized more in the future, but this is good for now
-              // Real parameter value
-              if (value.isNumber())
+              // Build the value (also does the parsing)
               {
-                _real_data[name] = value.toDouble();
-              }
-              else if (value.isString())
-              {
-                _string_data[name] = value.toString();
-              }
-              // Array, currently std::vector<Real/std::string>
-              else if (value.isArray())
-              {
-                const auto & array_value = value.toArray();
-
-                if (array_value.size() == 0)
-                  return error("Cannot send empty vector data as we cannot distinguish the type");
-
-                if (array_value[0].isString())
+                std::lock_guard<std::mutex> lock(this->_controlled_values_mutex);
+                try
                 {
-                  std::vector<std::string> string_values(array_value.size());
-                  for (const auto i : index_range(array_value))
-                  {
-                    if (!array_value[i].isString())
-                      return error("The " + std::to_string(i) + "-th value is not a string.");
-                    string_values[i] = array_value[i].toString();
-                  }
-                  _vec_string_data[name] = std::move(string_values);
+                  _controlled_values.emplace_back(
+                      WebServerControlTypeRegistry::build(type, name, json_value));
                 }
-                else if (array_value[0].isNumber())
+                catch (ValueBase::Exception & e)
                 {
-                  std::vector<Real> real_values(array_value.size());
-                  for (const auto i : index_range(array_value))
-                  {
-                    if (!array_value[i].isNumber())
-                      return error("The " + std::to_string(i) + "-th value is not a number.");
-                    real_values[i] = array_value[i].toDouble();
-                  }
-
-                  _vec_real_data[name] = std::move(real_values);
+                  return error("While parsing 'value': " + std::string(e.what()));
                 }
-                else
-                  return error("The vector data type is not a supported type (float or string)");
               }
-              else
-                return error("The data type is not a supported type");
 
               return HttpResponse{201};
             });
@@ -253,6 +259,12 @@ WebServerControl::startServer()
 void
 WebServerControl::execute()
 {
+  // Needed to broadcast all of the types and names of data that we have received on rank 0
+  // so that we can construct the same objects on the other ranks to receive the data and
+  // set the same values
+  std::vector<std::pair<std::string, std::string>> name_and_types;
+
+  // Wait for the server on rank 0 to be done
   if (processor_id() == 0)
   {
     TIME_SECTION("execute()", 3, "WebServerControl waiting for input")
@@ -262,46 +274,55 @@ WebServerControl::execute()
     // While waiting, yield so the server has time to run
     while (_currently_waiting.load())
       std::this_thread::yield();
+
+    for (const auto & value_ptr : _controlled_values)
+      name_and_types.emplace_back(value_ptr->name(), value_ptr->type());
   }
 
   // All processes need to wait
   _communicator.barrier();
 
-  // Broadcast all of the data that we have received
-  comm().broadcast(_real_data);
-  comm().broadcast(_string_data);
-  comm().broadcast(_vec_real_data);
-  comm().broadcast(_vec_string_data);
+  // Construct the values on other processors to be received into so that
+  // they're parallel consistent
+  comm().broadcast(name_and_types);
+  if (processor_id() != 0)
+    for (const auto & [name, type] : name_and_types)
+      _controlled_values.emplace_back(WebServerControlTypeRegistry::build(type, name));
 
-  // Helper for setting values from the data maps
-  const auto set_values = [this](const auto & value_map)
+  // Set all of the values
+  for (auto & value_ptr : _controlled_values)
   {
-    for (const auto & [name, value] : value_map)
+    try
     {
-      try
-      {
-        setControllableValueByName(name, value);
-      }
-      catch (...)
-      {
-        mooseError("Error setting '",
-                   MooseUtils::prettyCppType(&value),
-                   "' typed value for parameter '",
-                   name,
-                   "'; it is likely that the parameter has a different type");
-      }
+      value_ptr->setControllableValue(*this);
     }
-  };
+    catch (...)
+    {
+      mooseError("Error setting '",
+                 value_ptr->type(),
+                 "' typed value for parameter '",
+                 value_ptr->name(),
+                 "'; it is likely that the parameter has a different type");
+    }
+  }
 
-  // Set all of the data that we have
-  set_values(_real_data);
-  set_values(_string_data);
-  set_values(_vec_real_data);
-  set_values(_vec_string_data);
+  _controlled_values.clear();
+}
 
-  // Done with these
-  _real_data.clear();
-  _string_data.clear();
-  _vec_real_data.clear();
-  _vec_string_data.clear();
+std::string
+WebServerControl::stringifyJSONType(const miniJson::JsonType & json_type)
+{
+  if (json_type == miniJson::JsonType::kNull)
+    return "empty";
+  if (json_type == miniJson::JsonType::kBool)
+    return "bool";
+  if (json_type == miniJson::JsonType::kNumber)
+    return "number";
+  if (json_type == miniJson::JsonType::kString)
+    return "string";
+  if (json_type == miniJson::JsonType::kArray)
+    return "array";
+  if (json_type == miniJson::JsonType::kObject)
+    return "object";
+  ::mooseError("WebServerControl::stringifyJSONType(): Unused JSON value type");
 }
