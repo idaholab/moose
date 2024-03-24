@@ -99,7 +99,7 @@ WebServerControl::startServer()
     };
 
     // Helper for getting a string name from a json value with error checking
-    const auto get_name = [&error, &get_string](const auto & msg, const std::string & description)
+    const auto get_name = [&get_string](const auto & msg, const std::string & description)
     { return get_string(msg, "name", "name of the " + description); };
 
     const auto require_waiting = [&error](auto & control)
