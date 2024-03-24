@@ -38,9 +38,12 @@ this version of the documentation is available at the following links:
 
 The documentation for the SQA releases can be found using the following links:
 
-- [2021-09-15](https://mooseframework.org/releases/moose/2021-09-15)
-- [2021-05-18](https://mooseframework.org/releases/moose/2021-05-18)
-- [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
+- [2024-03-08](https://mooseframework.inl.gov/releases/moose/2024-03-08/)
+- [2022-06-13](https://mooseframework.inl.gov/releases/moose/2022-06-13)
+- [2022-06-10](https://mooseframework.inl.gvo/releases/moose/2022-06-10)
+- [2021-09-15](https://mooseframework.inl.gov/releases/moose/2021-09-15)
+- [2021-05-18](https://mooseframework.inl.gov/releases/moose/2021-05-18)
+- [v1.0.0](https://mooseframework.inl.gov/releases/moose/v1.0.0)
 
 ## Github Backups
 

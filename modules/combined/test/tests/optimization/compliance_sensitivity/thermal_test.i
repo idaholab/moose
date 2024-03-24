@@ -54,7 +54,7 @@ TC1 = 1.0
     bottom_left = '-0.01 17.999  0'
     top_right = '5 22.001  0'
     boundary_new = n1
-    boundaries_old = left
+    included_boundaries = left
   []
   [dirichlet_bc]
     type = SideSetsFromNodeSetsGenerator

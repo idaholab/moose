@@ -20,26 +20,38 @@ applications ensure that life-cycle activities are planned and performed in a tr
 manner.  It includes the requirements for [!ac](CMP), [!ac](VVP), and [!ac](SQP). PLN-4005 can be
 accessed from the [!ac](INL) network as follows.
 
-1. From the +Nucleus+ Home page select +A-Z+
-1. From the alphabetical list select +EDMS+
+1. From the +Nucleus+ Home page select +A-Z+.
+1. From the alphabetical list select +EDMS+.
 1. Enter +PLN-4005+ in the "Document Id" field and select +Submit+.
-1. Select the +Doc Viewer down arrow+ and then select the +Record File pdf+.
+1. To download, select the +Doc Viewer down arrow+ and then select the +Record File pdf+.
 
 ## [!ac](EA) Record id=enterprise_architecture_entry
 
-The [!ac](EA) record can be accessed from the [!ac](INL) network as follows.
+The [!ac](EA) record can be accessed from the [!ac](INL) network by U.S. citizen employees as follows.
 
-1. From the Nucleus Home page select +A-Z+
-1. From the alphabetical list select +CTM---Capabilities & Technology Management+
-1. Click +All+ to enable a search of all entries
-1. Enter the name of the application in the search box in the upper right corner of the screen
-1. When the search is complete, click on the name of the application
+1. From the Nucleus Home page select +A-Z+.
+1. From the alphabetical list select +Enterprise Architecture (EA) Repository+.
+1. Click +All+ to enable a search of all entries.
+1. In the search area directly above +All+, select +Name+ in the dropdown menu beside the search box.
+1. Enter the name of the application in the search box and press Enter/Return on the keyboard.
+1. When the search is complete, click on the name of the application.
+
+!alert! note title=Access for foreign national employees
+Foreign national [!ac](INL) employees do not have direct access to the [!ac](EA) repository in the
+same way as U.S. citizen employees. In order to access this system, please perform the following steps.
+
+1. From the Nucleus Home page select +A-Z+.
+1. From the alphabetical list select +ServiceNow+.
+1. Click the +Filter/Funnel+ icon near the top left corner of the page, if the left panel is not expanded.
+1. In the left panel, select +Application Portfolio+ and then +All Business Applications+
+1. Repeat the search steps in the instructions for U.S. citizens above.
+!alert-end!
 
 ## [!ac](SSD) id=safety_software_determination
 
 The [!ac](SSD) can be accessed from the [!ac](INL) network as follows.
 
-1. Under +Related Links+ on the [!ac](EA) application page, (refer to [#enterprise_architecture_entry]),
+1. Under the +Related Links+ section on the [!ac](EA) application page, (refer to [#enterprise_architecture_entry]),
    select the +Application Documents+ tab
 1. The +Safety Software Determination+ link will either be listed directly or shown under +Other+
 
@@ -47,7 +59,7 @@ The [!ac](SSD) can be accessed from the [!ac](INL) network as follows.
 
 The [!ac](QLD) can be accessed from the [!ac](INL) network as follows.
 
-1.  Under +Related Links+ on the [!ac](EA) application page, (refer to [#enterprise_architecture_entry]),
+1.  Under the +Related Links+ section on the [!ac](EA) application page, (refer to [#enterprise_architecture_entry]),
    select the +Application Documents+ tab
 1. The +Quality Level Determination+ link will either be listed directly or shown under +Other+
 
@@ -67,7 +79,7 @@ The [!ac](SQP) is included in the [!ac](SQAP), see [#software_quality_assurance_
 
 ## [!ac](AMP) id=asset_maintenance_plan
 
-In accordance with [!ac](INL) [!ac](LWP) "Managing Information Technology Assets" (LWP-13620), an
-[!ac](IT) asset maintenance plan, or equivalent, must be created by the end user to specify how the
-software application will be managed after it is deployed for use, see the [!ac](INL) template,
+In accordance with [!ac](INL) [!ac](LWP) "Managing Information Technology Assets" (LWP-13620 rev. 18),
+an [!ac](IT) asset maintenance plan, or equivalent, must be created by the end user to specify how
+the software application will be managed after it is deployed for use, see the [!ac](INL) template,
 "IT Asset Maintenance Plan Template" (TEM-215) for further information.
