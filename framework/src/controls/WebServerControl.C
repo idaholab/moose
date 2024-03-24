@@ -219,16 +219,17 @@ WebServerControl::startServer()
 
               // Build the value (also does the parsing)
               {
+                std::unique_ptr<ValueBase> value;
                 std::lock_guard<std::mutex> lock(this->_controlled_values_mutex);
                 try
                 {
-                  _controlled_values.emplace_back(
-                      WebServerControlTypeRegistry::build(type, name, json_value));
+                  value = WebServerControlTypeRegistry::build(type, name, json_value);
                 }
                 catch (ValueBase::Exception & e)
                 {
                   return error("While parsing 'value': " + std::string(e.what()));
                 }
+                _controlled_values.emplace_back(std::move(value));
               }
 
               return HttpResponse{201};

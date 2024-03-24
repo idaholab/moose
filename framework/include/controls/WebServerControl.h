@@ -115,7 +115,8 @@ public:
 
     static std::vector<T> getVectorJSONValue(const miniJson::Json & json_value)
     {
-      if (json_value.getType() != miniJson::JsonType::kArray)
+      const auto from_json_type = json_value.getType();
+      if (from_json_type != miniJson::JsonType::kArray)
         throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
                                    stringifyJSONType(from_json_type) + " is not an array");
 
