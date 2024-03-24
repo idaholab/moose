@@ -45,4 +45,13 @@
       detail = 'a vector of strings'
     []
   []
+
+  [get_postprocessor]
+    type = CSVDiff
+    input = get_postprocessor.i
+    csvdiff = get_postprocessor_out.csv
+    command_proxy = get_postprocessor.py
+    recover = false
+    requirement = 'The system shall support retreiving a postprocessor value via a REST API'
+  []
 []
