@@ -11,21 +11,21 @@
 
 #include "ADDGKernel.h"
 
-class ADHDGDiffusionSide : public ADDGKernel
+class ADHDGAdvectionSide : public ADDGKernel
 {
 public:
   static InputParameters validParams();
 
-  ADHDGDiffusionSide(const InputParameters & parameters);
+  ADHDGAdvectionSide(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
-  const Real _alpha;
-  const ADMaterialProperty<Real> & _diff;
-  const ADMaterialProperty<Real> & _diff_neighbor;
+  /// The velocity on the element
+  const ADMaterialProperty<RealVectorValue> & _velocity;
+  /// The velocity on the neighbor
+  const ADMaterialProperty<RealVectorValue> & _velocity_neighbor;
+
   const ADVariableValue & _interior_value;
   const ADVariableValue & _interior_neighbor_value;
-  const ADVariableGradient & _interior_gradient;
-  const ADVariableGradient & _interior_neighbor_gradient;
 };
