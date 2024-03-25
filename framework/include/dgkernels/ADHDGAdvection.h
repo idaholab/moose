@@ -26,5 +26,7 @@ protected:
   /// The velocity on the neighbor
   const ADMaterialProperty<RealVectorValue> & _velocity_neighbor;
 
-  const ADVariableValue & _side_u;
+  const Real _coeff;
+
+  const ADVariableValue * const _side_u;
 };
