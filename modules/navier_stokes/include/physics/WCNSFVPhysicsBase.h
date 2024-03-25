@@ -52,7 +52,10 @@ protected:
   void checkCommonParametersConsistent(const InputParameters & parameters) const override;
 
   /// Detects if we are using the new Physics syntax or the old NavierStokesFV action
-  bool usingWCNSFVPhysics() const { return !_awh.hasActions("nsfv_action_deprecation_task"); }
+  bool usingWCNSFVPhysics() const
+  {
+    return !(parameters().get<std::string>("registered_identifier") == "Modules/NavierStokesFV");
+  }
 
   /// Whether to define variables if they do not exist
   bool _define_variables;
