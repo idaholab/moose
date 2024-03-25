@@ -37,6 +37,27 @@ PeripheralTriangleMeshGenerator::validParams()
       "desired_area_func",
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
+
+  params.addParam<bool>("use_auto_area_func", false, "Use the automatic area function.");
+  params.addParam<Real>(
+      "auto_area_func_default_size",
+      0,
+      "Background size for automatic area function, or 0 to use non background size");
+  params.addParam<Real>("auto_area_func_default_size_dist",
+                        -1.0,
+                        "Effective distance of background size for automatic area "
+                        "function, or negative to use non background size");
+  params.addParam<unsigned int>("auto_area_function_num_points",
+                                10,
+                                "Maximum number of nearest points used for the inverse distance "
+                                "interpolation algorithm for automatic area function calculation.");
+  params.addRangeCheckedParam<Real>(
+      "auto_area_function_power",
+      1.0,
+      "auto_area_function_power>0",
+      "Polynomial power of the inverse distance interpolation algorithm for automatic area "
+      "function calculation.");
+
   params.addParam<SubdomainName>("peripheral_ring_block_name",
                                  "The block name assigned to the created peripheral layer.");
   params.addParam<std::string>("external_boundary_name",
@@ -44,6 +65,10 @@ PeripheralTriangleMeshGenerator::validParams()
   params.addClassDescription("This PeripheralTriangleMeshGenerator object is designed to generate "
                              "a triangulated mesh between a generated outer circle boundary "
                              "and a provided inner mesh.");
+  params.addParamNamesToGroup("desired_area desired_area_func use_auto_area_func "
+                              "auto_area_func_default_size auto_area_func_default_size_dist "
+                              "auto_area_function_num_points auto_area_function_power",
+                              "Area Limit Delaunay");
   return params;
 }
 
@@ -98,6 +123,13 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<unsigned int>("add_nodes_per_boundary_segment") = 0;
     params.set<Real>("desired_area") = _desired_area;
     params.set<std::string>("desired_area_func") = _desired_area_func;
+    params.set<bool>("use_auto_area_func") = getParam<bool>("use_auto_area_func");
+    params.set<Real>("auto_area_func_default_size") = getParam<Real>("auto_area_func_default_size");
+    params.set<Real>("auto_area_func_default_size_dist") =
+        getParam<Real>("auto_area_func_default_size_dist");
+    params.set<unsigned int>("auto_area_function_num_points") =
+        getParam<unsigned int>("auto_area_function_num_points");
+    params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
     params.set<bool>("refine_boundary") = false;
     params.set<std::vector<bool>>("refine_holes") = std::vector<bool>{false};
     params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>{true};

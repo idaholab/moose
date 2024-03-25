@@ -84,6 +84,27 @@ FlexiblePatternGenerator::validParams()
       "desired_area_func",
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
+
+  params.addParam<bool>("use_auto_area_func", false, "Use the automatic area function.");
+  params.addParam<Real>(
+      "auto_area_func_default_size",
+      0,
+      "Background size for automatic area function, or 0 to use non background size");
+  params.addParam<Real>("auto_area_func_default_size_dist",
+                        -1.0,
+                        "Effective distance of background size for automatic area "
+                        "function, or negative to use non background size");
+  params.addParam<unsigned int>("auto_area_function_num_points",
+                                10,
+                                "Maximum number of nearest points used for the inverse distance "
+                                "interpolation algorithm for automatic area function calculation.");
+  params.addRangeCheckedParam<Real>(
+      "auto_area_function_power",
+      1.0,
+      "auto_area_function_power>0",
+      "Polynomial power of the inverse distance interpolation algorithm for automatic area "
+      "function calculation.");
+
   params.addParam<bool>("verify_holes", true, "Whether the holes are verified.");
   params.addRangeCheckedParam<subdomain_id_type>(
       "background_subdomain_id",
@@ -115,7 +136,9 @@ FlexiblePatternGenerator::validParams()
   params.addParamNamesToGroup("extra_positions extra_positions_mg_indices",
                               "Extra Positions (Free-Style Patterns)");
   params.addParamNamesToGroup("desired_area desired_area_func verify_holes background_subdomain_id "
-                              "background_subdomain_name",
+                              "background_subdomain_name use_auto_area_func "
+                              "auto_area_func_default_size auto_area_func_default_size_dist "
+                              "auto_area_function_num_points auto_area_function_power",
                               "Background Area Delaunay");
   params.addParamNamesToGroup("boundary_type boundary_mesh boundary_sectors boundary_size "
                               "delete_default_external_boundary_from_inputs external_boundary_id",
@@ -481,6 +504,13 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
       std::vector<bool>(patterned_pin_mg_series.size(), false);
   params.set<Real>("desired_area") = getParam<Real>("desired_area");
   params.set<std::string>("desired_area_func") = getParam<std::string>("desired_area_func");
+  params.set<bool>("use_auto_area_func") = getParam<bool>("use_auto_area_func");
+  params.set<Real>("auto_area_func_default_size") = getParam<Real>("auto_area_func_default_size");
+  params.set<Real>("auto_area_func_default_size_dist") =
+      getParam<Real>("auto_area_func_default_size_dist");
+  params.set<unsigned int>("auto_area_function_num_points") =
+      getParam<unsigned int>("auto_area_function_num_points");
+  params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
   params.set<BoundaryName>("output_boundary") = std::to_string(OUTER_SIDESET_ID);
   addMeshSubgenerator("XYDelaunayGenerator", name() + "_pattern", params);
 

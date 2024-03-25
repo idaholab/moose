@@ -98,7 +98,15 @@
       cli_args = '--mesh-only'
       exodiff = 'xydelaunay_area_func_in.e'
       recover = false
-      detail = "with optional non-uniform refinement."
+      detail = "with optional non-uniform refinement based on a custom function."
+    []
+    [auto_area_func]
+      type = 'Exodiff'
+      input = 'xydelaunay_auto_area_func.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_auto_area_func_in.e'
+      recover = false
+      detail = "with optional non-uniform refinement based on an automatically generated function."
     []
   []
   [errors]
@@ -111,6 +119,14 @@
                   Mesh/triang/holes="hole_1_name hole_2_name_2"'
       expect_err = "The hole meshes contain subdomain name maps with conflicts."
       detail = "if the input hole meshes contain subdomain name maps with conflicts"
+    []
+    [err_redundant_area_limits]
+      type = RunException
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/triang/use_auto_area_func="true"'
+      expect_err = "Only one of the three methods"
+      detail = "if more than one element area limit methods are enabled"
     []
   []
 []
