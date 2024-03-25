@@ -116,6 +116,14 @@ class MooseControl:
             if key not in data:
                 raise MooseControl.Exception(f'Missing expected key "{key}"')
 
+    def isListening(self) -> bool:
+        """Returns whether or not the webserver is listening"""
+        try:
+            r = requests.get(self._url)
+        except requests.exceptions.ConnectionError:
+            return False
+        return r.status_code == 404
+
     def initialWait(self):
         """Waits for the MOOSE webserver to start listening
 
@@ -127,14 +135,35 @@ class MooseControl:
 
         while True:
             time.sleep(self._poll_time)
-            try:
-                requests.get(self._url)
-            except requests.exceptions.ConnectionError:
-                continue
-            break
+            if self.isListening():
+                break
 
         self._did_initial_wait = True
         self.log(f'Webserver is listening at "{self._url}"')
+
+    def finalWait(self):
+        """Waits for the MOOSE webserver to stop listening
+
+        Use this when you think MOOSE should be done. This will
+        throw in the event that the webserver is waiting for
+        input when you think it should be done"""
+        while True:
+            time.sleep(self._poll_time)
+
+            # If the server is no longer responding, we're good
+            if not self.isListening():
+                return
+
+            # Make sure that the control isn't waiting for input
+            # while we think we should be done, because this will
+            # hang forever
+            waiting_flag = None
+            try:
+                waiting_flag = self.getWaitingFlag()
+            except: # could be shutting down; can fil
+                pass
+            if waiting_flag is not None:
+                raise self.Exception(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
 
     def wait(self, flag=None):
         """Waits for the MOOSE webserver and returns once the WebServerControl

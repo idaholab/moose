@@ -37,6 +37,9 @@ def base_controller(control_name, run_control):
             process.kill()
         raise
 
+    # Wait for the webserver to stop listening
+    control.finalWait()
+
     if process:
         # Wait for MOOSE to finish up
         process.wait()
