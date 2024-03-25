@@ -33,8 +33,9 @@ enum CheckState
 {
   CERTAIN_FAIL = 0,
   POSSIBLE_FAIL = 1,
-  POSSIBLE_PASS = 2,
-  CERTAIN_PASS = 3
+  UNKNOWN = 2,
+  POSSIBLE_PASS = 3,
+  CERTAIN_PASS = 4
 };
 
 /// A capability can have a bool, int, or string value
@@ -43,6 +44,6 @@ typedef std::tuple<CheckState, std::string, std::string> Result;
 typedef std::map<std::string, std::pair<Type, std::string>> Registry;
 
 /// Check a requirement against a capabilities registry
-Result check(const std::string & requirement, const Registry & capabilities);
+Result check(const std::string & requirements, const Registry & capabilities);
 
 } // namespace CapabilityUtils
