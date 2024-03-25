@@ -74,14 +74,17 @@
   []
 
   [parallel_consistent]
-    type = Exodiff
-    input = control_bc.i
-    exodiff = control_bc_out.e
-    command_proxy = control_bc.py
+    type = JSONDiff
+    input = control_reporter.i
+    jsondiff = 'parallel_consistent.json parallel_consistent.json.1'
+    cli_args = 'Outputs/json/file_base=parallel_consistent
+                Reporters/test/bool_value=true'
+    command_proxy = 'control_reporter.py bool_value'
     recover = false
     requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
     prereq = get_postprocessor
-    min_parallel = 4
+    min_parallel = 2
+    max_parallel = 2
   []
 
   [errors]

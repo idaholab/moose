@@ -50,8 +50,8 @@ protected:
   void declare(const std::string & param_name)
   {
     if (isParamValid(param_name))
-      _values.emplace_back(std::make_unique<TestValue<T>>(declareValueByName<T>(param_name),
-                                                          getParam<T>(param_name)));
+      _values.emplace_back(std::make_unique<TestValue<T>>(
+          declareValueByName<T>(param_name, REPORTER_MODE_DISTRIBUTED), getParam<T>(param_name)));
   }
 
   std::vector<std::unique_ptr<TestValueBase>> _values;
