@@ -61,6 +61,17 @@
     prereq = control/vec_string
   []
 
+  [parallel_consistent]
+    type = Exodiff
+    input = control_bc.i
+    exodiff = control_bc_out.e
+    command_proxy = control_bc.py
+    recover = false
+    requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
+    prereq = get_postprocessor
+    min_parallel = 4
+  []
+
   [errors]
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
     [set_controllable_no_exist]
@@ -69,7 +80,7 @@
       command_proxy = 'errors.py set_controllable_no_exist'
       expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
-      prereq = get_postprocessor
+      prereq = parallel_consistent
     []
     [postprocessor_no_exist]
       type = RunException

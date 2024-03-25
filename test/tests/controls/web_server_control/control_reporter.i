@@ -1,3 +1,9 @@
+# This should be called via control_reporter.py to test
+# controlling a parameter in Reporters/test, which is then
+# output via JSON to verify that it was changed. It supports
+# multiple times depending on which parameters are passed to
+# Reporters/test
+
 [Mesh/gmg]
   type = GeneratedMeshGenerator
   dim = 1

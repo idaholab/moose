@@ -1,3 +1,6 @@
+# This should be ran by get_postprocessor.py to test
+# getting a changing postprocessor value by the server
+
 [Mesh/gmg]
   type = GeneratedMeshGenerator
   dim = 1
