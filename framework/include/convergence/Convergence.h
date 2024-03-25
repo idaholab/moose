@@ -31,6 +31,8 @@ public:
 
   virtual void initialSetup(){};
 
+  virtual void timestepSetup(){};
+
   virtual MooseAlgebraicConvergence
   checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
 

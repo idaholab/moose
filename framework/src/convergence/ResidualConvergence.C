@@ -128,6 +128,19 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   }
 }
 
+void 
+ResidualConvergence::initialSetup()
+{
+  // This is a virtual function that is not implemented in the ResidualConvergence class.
+  // It is implemented in the ResidualConvergence.C file.
+}
+
+//void
+//ResidualConvergence::timestepSetup()
+//{
+  //_fe_problem.timestepSetup();
+//}
+
 bool
 ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
                                               const Real fnorm,
@@ -158,11 +171,10 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
   nonlinearConvergenceSetup();
 
   // To check if the nonlinear iterations should abort
-  bool terminate = _fe_problem.getFailNextNonlinearConvergenceCheck();
-  if (terminate)
+  if (_fe_problem.getFailNextNonlinearConvergenceCheck())
   {
     _fe_problem.resetFailNextNonlinearConvergenceCheck();
-    reason = MooseAlgebraicConvergence::DIVERGED;
+    return MooseAlgebraicConvergence::DIVERGED;
   }
 
   // To check PETSc error codes.

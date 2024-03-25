@@ -26,6 +26,10 @@ public:
   Convergence::MooseAlgebraicConvergence
   checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
+  void initialSetup() override;
+
+  //void timestepSetup() override;
+
 protected:
   /**
    * Check the relative convergence of the nonlinear solution
