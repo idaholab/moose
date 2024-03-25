@@ -9,7 +9,7 @@ if __name__ == '__main__':
     test = sys.argv[1]
 
     def run_control(control):
-        control.wait('INITIAL')
+        control.wait()
 
         if test == 'set_controllable_no_exist':
             control.setControllableReal('no_exist', 0)
@@ -19,7 +19,7 @@ if __name__ == '__main__':
             control._setControllable('unused', 'BadType', 'unused')
         elif test == 'set_controllable_bad_convert':
             control._setControllable('Outputs/json/enable', 'bool', 'foo')
-
-        control.setContinue()
+        elif test == 'set_controllable_vector_non_array':
+            control._setControllable('Reporters/test/vec_real_value', 'std::vector<Real>', 1234)
 
     base_controller('web_server', run_control)
