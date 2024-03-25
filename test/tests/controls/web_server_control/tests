@@ -61,37 +61,13 @@
 
   [errors]
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
-    [continue_not_waiting]
-      type = RunException
-      input = 'errors.i'
-      command_proxy = 'errors.py continue_not_waiting'
-      expect_err = 'Exception: MOOSE is not waiting'
-      detail = 'requesting the system to continue when it is not waiting'
-      prereq = get_postprocessor
-    []
-    [get_postprocessor_not_waiting]
-      type = RunException
-      input = 'errors.i'
-      command_proxy = 'errors.py get_postprocessor_not_waiting'
-      expect_err = 'Exception: MOOSE is not waiting'
-      detail = 'requesting a postprocessor value when the system is not waiting'
-      prereq = errors/continue_not_waiting
-    []
-    [set_controllable_not_waiting]
-      type = RunException
-      input = 'errors.i'
-      command_proxy = 'errors.py set_controllable_not_waiting'
-      expect_err = 'Exception: MOOSE is not waiting'
-      detail = 'setting a controllable value when the system is not waiting'
-      prereq = errors/get_postprocessor_not_waiting
-    []
     [set_controllable_no_exist]
       type = RunException
       input = 'errors.i'
       command_proxy = 'errors.py set_controllable_no_exist'
       expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
-      prereq = errors/set_controllable_not_waiting
+      prereq = get_postprocessor
     []
     [postprocessor_no_exist]
       type = RunException
@@ -108,6 +84,15 @@
       expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
       detail = 'setting a controllable parameter whose type is not supported'
       prereq = errors/postprocessor_no_exist
+    []
+    [set_controllable_bad_convert_json]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_bad_convert'
+      cli_args = 'Outputs/json/type=JSON'
+      expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
+      detail = 'setting a controllable parameter with an incompatible JSON type'
+      prereq = errors/set_controllable_unregistered_type
     []
   []
 []

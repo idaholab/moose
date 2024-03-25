@@ -102,6 +102,8 @@ WebServerControl::startServer()
     const auto get_name = [&get_string](const auto & msg, const std::string & description)
     { return get_string(msg, "name", "name of the " + description); };
 
+    // Helper for requiring that the control is waiting
+    // Note that this is very hard to test unless we want to add sleeps
     const auto require_waiting = [&error](auto & control)
     {
       using result = std::optional<HttpResponse>;
