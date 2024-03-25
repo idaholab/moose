@@ -62,7 +62,7 @@ class MooseControl:
             int: The HTTP status code
             dict or None: The returned JSON data, if any, otherwise None
         """
-        self.log(f'Getting "{path}"')
+        self.log(f'GET "{path}"')
 
         if not self._did_initial_wait:
             raise Exception('Attempting to GET without calling initialWait()')
@@ -88,7 +88,7 @@ class MooseControl:
             int: The HTTP status code
             dict or None: The returned JSON data, if any, otherwise None
         """
-        self.log(f'Sending {data} to "{path}"')
+        self.log(f'POST {data} to "{path}"')
 
         if not self._did_initial_wait:
             raise Exception('Attempting to GET without calling initialWait()')
@@ -99,8 +99,9 @@ class MooseControl:
         r_json = None
         if r.headers.get('content-type') == 'application/json':
             r_json = r.json()
-            if 'error' in r.json():
-                self.Exception(f'HTTP error: "{r_json["error"]}"')
+            error = r_json.get('error')
+            if error is not None:
+                raise MooseControl.Exception(f'WebServerControl error: {error}')
         r.raise_for_status()
 
         return r.status_code, r_json
@@ -195,7 +196,7 @@ class MooseControl:
     def _requireWaiting(self):
         """Internal helper that throws if the server is not waiting"""
         if not self.isWaiting():
-            raise Exception('MOOSE is not waiting')
+            raise self.Exception('MOOSE is not waiting')
 
     def setContinue(self):
         """Tells the WebServerControl to continue"""
