@@ -16,7 +16,14 @@ ADHDGAdvectionSide::validParams()
 {
   InputParameters params = ADDGKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("velocity", "Velocity vector");
+  params.addParam<Real>(
+      "coeff", 1, "A constant coefficient. This could be something like a density");
   params.addRequiredCoupledVar("interior_variable", "interior variable to find jumps in");
+  params.addParam<bool>("self_advection",
+                        true,
+                        "Whether this kernel should advect itself, e.g. it's "
+                        "variable/interior_variable pair. If false, we will advect "
+                        "unity (possibly multiplied by the 'coeff' parameter");
   return params;
 }
 
@@ -24,15 +31,28 @@ ADHDGAdvectionSide::ADHDGAdvectionSide(const InputParameters & parameters)
   : ADDGKernel(parameters),
     _velocity(getADMaterialProperty<RealVectorValue>("velocity")),
     _velocity_neighbor(getNeighborADMaterialProperty<RealVectorValue>("velocity")),
-    _interior_value(adCoupledValue("interior_variable")),
-    _interior_neighbor_value(adCoupledNeighborValue("interior_variable"))
+    _coeff(getParam<Real>("coeff")),
+    _interior_value(isParamValid("interior_variable") ? &adCoupledValue("interior_variable")
+                                                      : nullptr),
+    _interior_neighbor_value(
+        isParamValid("interior_variable") ? &adCoupledNeighborValue("interior_variable") : nullptr)
 {
+  if (_interior_value && !getParam<bool>("self_advection"))
+    paramError("interior_variable",
+               "If not advecting the variable/interior_variable pair as indicated by "
+               "'self_advection=false', then 'interior_variable' should not supplied");
+  else if (!_interior_value && getParam<bool>("self_advection"))
+    paramError(
+        "interior_variable",
+        "When advecting a variable/interior_variable pair as indicated by 'self_advection=true' "
+        "(the default), then 'interior_variable' should be supplied");
 }
 
 ADReal
 ADHDGAdvectionSide::computeQpResidual(Moose::DGResidualType type)
 {
-  ADReal r = 0.0;
+  ADReal element_r = 0;
+  ADReal neighbor_r = 0;
 
   switch (type)
   {
@@ -40,29 +60,42 @@ ADHDGAdvectionSide::computeQpResidual(Moose::DGResidualType type)
     {
       {
         const auto vdotn = _velocity[_qp] * _normals[_qp];
-        if (MetaPhysicL::raw_value(vdotn) >= 0)
-          // outflow
-          r -= _test[_i][_qp] * vdotn * _interior_value[_qp];
+        if (_interior_value)
+        {
+          if (MetaPhysicL::raw_value(vdotn) >= 0)
+            // outflow
+            element_r = (*_interior_value)[_qp];
+          else
+            // inflow
+            element_r = _u[_qp];
+        }
         else
-          // inflow
-          r -= _test[_i][_qp] * vdotn * _u[_qp];
+          element_r = 1;
+
+        element_r *= -_coeff * _test[_i][_qp] * vdotn;
       }
       {
         const auto vdotn = _velocity_neighbor[_qp] * -_normals[_qp];
-        if (MetaPhysicL::raw_value(vdotn) >= 0)
-          // outflow
-          r -= _test[_i][_qp] * vdotn * _interior_neighbor_value[_qp];
+        if (_interior_neighbor_value)
+        {
+          if (MetaPhysicL::raw_value(vdotn) >= 0)
+            // outflow
+            neighbor_r = (*_interior_neighbor_value)[_qp];
+          else
+            // inflow
+            neighbor_r = _u[_qp];
+        }
         else
-          // inflow
-          r -= _test[_i][_qp] * vdotn * _u[_qp];
+          neighbor_r = 1;
+
+        neighbor_r *= -_coeff * _test[_i][_qp] * vdotn;
       }
       break;
     }
 
     case Moose::Neighbor:
-      r = 0;
       break;
   }
 
-  return r;
+  return element_r + neighbor_r;
 }
