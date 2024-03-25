@@ -1,6 +1,6 @@
 [Tests]
   [simple_diffusion]
-    requirement = 'The system shall be able to solve a two dimensional diffusion problem  using a hybridizable interior penalty discontinuous Galerkin discretization.'
+    requirement = 'The system shall be able to solve a two dimensional diffusion problem using a hybridizable interior penalty discontinuous Galerkin discretization.'
     type = Exodiff
     input = simple_ip_hdg_diffusion.i
     exodiff = simple_ip_hdg_diffusion_out.e
@@ -67,5 +67,11 @@
       valgrind = 'none'
       detail = 'tensor-product elements with a L2 hierarchic basis for the interior variable.'
     []
+  []
+  [simple_advection]
+    requirement = 'The system shall be able to solve a one dimensional advection problem using a hybridizable interior penalty (no gradient variable) discontinuous Galerkin discretization.'
+    type = Exodiff
+    input = simple_ip_hdg_advection.i
+    exodiff = simple_ip_hdg_advection_out.e
   []
 []
