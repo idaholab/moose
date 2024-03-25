@@ -1,0 +1,17 @@
+[Tests]
+  design = 'Convergence.md'
+  issues = '#25931'
+  [nonlinear]
+    type = 'Exodiff'
+    input = 'diffusion_convergence.i'
+    exodiff = 'diffusion_convergence_out.e'
+    requirement = 'The system shall query the convergence status of the nonlinear solvers.'
+  []
+  [reference_residual]
+    type = 'Exodiff'
+    input = 'reference_residual.i'
+    exodiff = 'reference_residual_out.e'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to reference quantities of those variables.'
+  []
+[]

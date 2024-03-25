@@ -4,9 +4,9 @@ The methods implemented in this postprocessor compute timesteps adaptively using
 As a reminder, the time marching approach to computing steady states reframes a problem in discrete form $M\frac{\partial \mathbf u}{\Delta t}=F(\mathbf u)$, where $M$ is the mass matrix and $F()$ an operator gathering the right-hand side discrete terms.
 Using implicit Euler, the problem reads
 
-\begin{equation}
+$$
 M\frac{\mathbf u_{n+1}-\mathbf u_n}{\Delta t}=F(\mathbf u_{n+1})
-\end{equation}
+$$
 
 To be consistent with the literature the current implementation has been tested only on implicit Euler.
 

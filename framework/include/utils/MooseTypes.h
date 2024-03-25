@@ -1064,6 +1064,9 @@ DerivativeStringClass(ParsedFunctionExpression);
 /// System name support of multiple nonlinear systems on the same mesh
 DerivativeStringClass(NonlinearSystemName);
 
+/// Name of a Convergence object
+DerivativeStringClass(ConvergenceName);
+
 /// Command line argument, specialized to handle quotes in vector arguments
 DerivativeStringClass(CLIArgString);
 
