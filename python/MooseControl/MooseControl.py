@@ -66,6 +66,8 @@ class MooseControl:
 
         if not self._did_initial_wait:
             raise Exception('Attempting to GET without calling initialWait()')
+        if not self.isListening():
+            raise Exception('The webserver is not listening')
 
         r = requests.get(f'{self._url}/{path}')
         self.log(f'Status from "{path}": {r.status_code}')
@@ -92,6 +94,8 @@ class MooseControl:
 
         if not self._did_initial_wait:
             raise Exception('Attempting to GET without calling initialWait()')
+        if not self.isListening():
+            raise Exception('The webserver is not listening')
         self._requireWaiting()
 
         r = requests.post(f'{self._url}/{path}', json=data)
