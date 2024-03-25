@@ -1380,13 +1380,25 @@ MooseApp::setupOptions()
     {
       _perf_graph.disableLivePrint();
 
-      auto [fulfilled, reason, doc] = Moose::Capabilities::getCapabilityRegistry().check(
-          getParam<std::string>("required_capabilities"));
-      if (!fulfilled)
+      const auto required_capabilities = getParam<std::string>("required_capabilities");
+      auto [status, reason, doc] =
+          Moose::Capabilities::getCapabilityRegistry().check(required_capabilities);
+      if (status < CapabilityUtils::UNKNOWN)
       {
-        Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"
-                   << reason << "\n"
-                   << doc << "\nCAPABILITIES_MISMATCH_END" << std::endl;
+        mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
+        _ready_to_exit = true;
+        // we use code 77 as "skip" in the Testharness
+        _exit_code = 77;
+        return;
+      }
+      if (status == CapabilityUtils::UNKNOWN)
+      {
+        mooseInfo("Required capabilities '",
+                  required_capabilities,
+                  "' are not specific enough. A comparison test is performed on an undefined "
+                  "capability. Disambiguate this requirement by adding an existence/non-existence "
+                  "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
+                  "or '!unknown | unknown<1.2.3'");
         _ready_to_exit = true;
         // we use code 77 as "skip" in the Testharness
         _exit_code = 77;
