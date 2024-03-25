@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
 class TestMonomialTri(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 5, "--error", "--error-unused",
+        df1 = mms.run_spatial('mms-advection-diffusion.i', 5, "--error", "--error-unused",
                               "Mesh/elem_type=TRI6",
                               y_pp=['L2u'])
 
@@ -17,7 +17,7 @@ class TestMonomialTri(unittest.TestCase):
 
 class TestMonomialQuad(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 6, "--error", "--error-unused",
+        df1 = mms.run_spatial('mms-advection-diffusion.i', 6, "--error", "--error-unused",
                               "Mesh/elem_type=QUAD9",
                               y_pp=['L2u'])
 
@@ -30,7 +30,7 @@ class TestMonomialQuad(unittest.TestCase):
 
 class TestLagrangeTri(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 5, "--error", "--error-unused",
+        df1 = mms.run_spatial('mms-advection-diffusion.i', 5, "--error", "--error-unused",
                               "Mesh/elem_type=TRI6",
                               "Variables/u/family=L2_LAGRANGE",
                               y_pp=['L2u'])
@@ -44,7 +44,7 @@ class TestLagrangeTri(unittest.TestCase):
 
 class TestLagrangeQuad(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 6, "--error", "--error-unused",
+        df1 = mms.run_spatial('mms-advection-diffusion.i', 6, "--error", "--error-unused",
                               "Mesh/elem_type=QUAD9",
                               "Variables/u/family=L2_LAGRANGE",
                               y_pp=['L2u'])
@@ -58,7 +58,7 @@ class TestLagrangeQuad(unittest.TestCase):
 
 class TestHierarchicTri(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 5, "--error", "--error-unused",
+        df1 = mms.run_spatial('mms-advection-diffusion.i', 5, "--error", "--error-unused",
                               "Mesh/elem_type=TRI6",
                               "Variables/u/family=L2_HIERARCHIC",
                               y_pp=['L2u'])
@@ -72,7 +72,7 @@ class TestHierarchicTri(unittest.TestCase):
 
 class TestHierarchicQuad(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 6, "--error", "--error-unused",
+        df1 = mms.run_spatial('mms-advection-diffusion.i', 6, "--error", "--error-unused",
                               "Mesh/elem_type=QUAD9",
                               "Variables/u/family=L2_HIERARCHIC",
                               y_pp=['L2u'])
