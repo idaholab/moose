@@ -77,6 +77,14 @@ Standardizer::computeSet(const RealEigenMatrix & input)
 }
 
 void
+Standardizer::computeCovariance(const RealEigenMatrix & input)
+{
+  _mean_colwise = input;
+  RealEigenMatrix centered = input.rowwise() - _mean_colwise.colwise().mean();
+  _cov = (centered.adjoint() * centered) / double(input.rows() - 1);
+}
+
+void
 Standardizer::getStandardized(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
@@ -91,6 +99,30 @@ Standardizer::getDestandardized(RealEigenMatrix & input) const
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
   input =
       (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
+}
+
+void
+Standardizer::getStandardizedCovariance(RealEigenMatrix & input) const
+{
+  Eigen::LDLT<RealEigenMatrix> _cov_inv;
+  _cov_inv = _cov.ldlt();
+  RealEigenMatrix centered = input.rowwise() - _mean_colwise.colwise().mean();
+  for (unsigned int i = 0; i < centered.rows(); ++i)
+    input.row(i) = _cov_inv.solve(centered.row(i).transpose());
+}
+
+void
+Standardizer::getDestandardizedCovariance(RealEigenMatrix & input) const
+{
+  RealEigenMatrix covariated = input.transpose() * _cov;
+  input = covariated + _mean_colwise.colwise().mean();
+  input = input.transpose();
+}
+
+void
+Standardizer::getDescaledCovariance(RealEigenVector & input) const
+{
+  input = _cov * input;
 }
 
 void
