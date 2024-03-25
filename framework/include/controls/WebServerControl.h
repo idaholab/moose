@@ -45,7 +45,7 @@ public:
   template <typename T, miniJson::JsonType json_type>
   static T getScalarJSONValue(const miniJson::Json & json_value);
 
-  using ValueBase = WebServerControlTypeRegistry::ValueBase;
+  using ValueBase = Moose::WebServerControlTypeRegistry::ValueBase;
 
   /**
    * Base class for a controllable value with a given type and name
@@ -133,7 +133,7 @@ public:
   template <typename T, miniJson::JsonType json_type>
   static char registerScalarType(const std::string type_name)
   {
-    return WebServerControlTypeRegistry().add<ScalarValue<T, json_type>>(type_name);
+    return Moose::WebServerControlTypeRegistry().add<ScalarValue<T, json_type>>(type_name);
   }
   /**
    * Registers a vector parameter type to be controlled
@@ -141,8 +141,8 @@ public:
   template <typename T, miniJson::JsonType json_type>
   static char registerVectorType(const std::string type_name)
   {
-    return WebServerControlTypeRegistry().add<VectorValue<T, json_type>>("std::vector<" +
-                                                                         type_name + ">");
+    return Moose::WebServerControlTypeRegistry().add<VectorValue<T, json_type>>("std::vector<" +
+                                                                                type_name + ">");
   }
 
 private:

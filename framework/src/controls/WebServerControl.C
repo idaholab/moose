@@ -199,7 +199,7 @@ WebServerControl::startServer()
             if (const auto response = std::get_if<HttpResponse>(&type_result))
               return *response;
             const auto & type = std::get<std::string>(type_result);
-            if (!WebServerControlTypeRegistry::isRegistered(type))
+            if (!Moose::WebServerControlTypeRegistry::isRegistered(type))
               return error("The type '" + type +
                            "' is not registered for setting a controllable parameter");
 
@@ -225,7 +225,7 @@ WebServerControl::startServer()
               std::lock_guard<std::mutex> lock(this->_controlled_values_mutex);
               try
               {
-                value = WebServerControlTypeRegistry::build(type, name, json_value);
+                value = Moose::WebServerControlTypeRegistry::build(type, name, json_value);
               }
               catch (ValueBase::Exception & e)
               {
@@ -286,7 +286,7 @@ WebServerControl::execute()
   comm().broadcast(name_and_types);
   if (processor_id() != 0)
     for (const auto & [name, type] : name_and_types)
-      _controlled_values.emplace_back(WebServerControlTypeRegistry::build(type, name));
+      _controlled_values.emplace_back(Moose::WebServerControlTypeRegistry::build(type, name));
 
   // Set all of the values
   for (auto & value_ptr : _controlled_values)
