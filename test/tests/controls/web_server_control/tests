@@ -6,7 +6,17 @@
   # if we'll get unique ports if we call them all at once
 
   [control]
-    requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of'
+    requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of a'
+    [bool]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_bool.json'
+      cli_args = 'Outputs/json/file_base=control_reporter_bool
+                  Reporters/test/bool_value=true'
+      command_proxy = 'control_reporter.py bool_value'
+      recover = false
+      detail = 'boolean'
+    []
     [real]
       type = JSONDiff
       input = control_reporter.i
@@ -15,7 +25,8 @@
                   Reporters/test/real_value=1234'
       command_proxy = 'control_reporter.py real_value'
       recover = false
-      detail = 'a double precision number'
+      detail = 'double precision number'
+      prereq = control/bool
     []
     [string]
       type = JSONDiff
@@ -25,7 +36,7 @@
                   Reporters/test/string_value=abcd'
       command_proxy = 'control_reporter.py string_value'
       recover = false
-      detail = 'a string'
+      detail = 'string'
       prereq = control/real
     []
     [vec_real]
@@ -36,7 +47,7 @@
                   Reporters/test/vec_real_value="999 0 100"'
       command_proxy = 'control_reporter.py vec_real_value'
       recover = false
-      detail = 'a vector of double precision numbers'
+      detail = 'vector of double precision numbers'
       prereq = control/string
     []
     [vec_string]
@@ -47,7 +58,7 @@
                   Reporters/test/vec_string_value="m o o s e"'
       command_proxy = 'control_reporter.py vec_string_value'
       recover = false
-      detail = 'a vector of strings'
+      detail = 'vector of strings'
       prereq = control/vec_real
     []
   []
