@@ -22,8 +22,9 @@ a=2
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    diffusivity = ${diff}
   []
   [adv]
     type = ADConservativeAdvection
@@ -105,7 +106,7 @@ a=2
   []
   [forcing]
     type = ParsedFunction
-    expression = '-2*a*sin(x)*sin(y) + a*cos(x)*cos(y) + 2*diff*sin(x)*cos(y) + sin(x)*cos(y)'
+    expression = '-2*a*sin(x)*sin(y) + a*cos(x)*cos(y) + 2*diff*sin(x)*cos(y)'
     symbol_names = 'a diff'
     symbol_values = '${a} ${diff}'
   []
