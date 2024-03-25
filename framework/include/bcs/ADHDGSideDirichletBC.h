@@ -11,17 +11,7 @@
 
 #include "ADIntegratedBC.h"
 
-/**
- * Implements a simple BC for DG
- *
- * BC derived from diffusion problem that can handle:
- * \f$ { \nabla u \cdot n_e} [v] + \epsilon { \nabla v \cdot n_e } [u] + (\frac{\sigma}{|e|} \cdot
- * [u][v]) \f$
- *
- * \f$ [a] = [ a_1 - a_2 ] \f$
- * \f$ {a} = 0.5 * (a_1 + a_2) \f$
- */
-class HDGDiffusionSideBC : public ADIntegratedBC
+class ADHDGSideDirichletBC : public ADIntegratedBC
 {
 public:
   /**
@@ -30,13 +20,11 @@ public:
    */
   static InputParameters validParams();
 
-  HDGDiffusionSideBC(const InputParameters & parameters);
+  ADHDGSideDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-  const Real _alpha;
-  const ADMaterialProperty<Real> & _diff;
   const Function & _func;
 };
