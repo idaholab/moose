@@ -159,7 +159,7 @@ WebServerControl::startServer()
                 return *response;
               const auto & name = std::get<std::string>(name_result);
 
-              // Should only have a name and a value
+              // Should only have a name
               if (const auto response = require_parameters(msg, {"name"}))
                 return *response;
               // Should be waiting for data

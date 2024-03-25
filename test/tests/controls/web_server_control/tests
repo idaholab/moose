@@ -2,6 +2,8 @@
   issues = '#23359'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
 
+  # Not really sure if all of these prereqs are required as I can't guarantee
+  # if we'll get unique ports if we call them all at once
   [control]
     requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of'
     [real]
@@ -93,6 +95,16 @@
       expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
       detail = 'setting a controllable parameter with an incompatible JSON type'
       prereq = errors/set_controllable_unregistered_type
+    []
+    [set_controllable_vector_non_array]
+      type = RunException
+      input = 'control_reporter.i'
+      command_proxy = 'errors.py set_controllable_vector_non_array'
+      cli_args = 'Reporters/test/type=WebServerControlTestReporter
+                  Reporters/test/vec_real_value=0'
+      expect_err = 'The value \'1234\' of type number is not an array'
+      detail = 'setting a controllable parameter with an incompatible JSON type'
+      prereq = errors/set_controllable_bad_convert_json
     []
   []
 []

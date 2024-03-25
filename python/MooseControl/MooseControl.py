@@ -224,6 +224,18 @@ class MooseControl:
         if status != 201:
             raise Exception(f'Unexpected status {status} from setting controllable value')
 
+    @staticmethod
+    def _requireNumeric(value):
+        """Helper for requring that the given value is numeric"""
+        if not isinstance(value, (int, float)):
+            raise Exception(f'Value "{value}" is not numeric')
+
+    @staticmethod
+    def _requireType(value, value_type):
+        """Helper for requring that the given value is a certain type"""
+        if not isinstance(value, value_type):
+            raise MooseControl.Exception(f'value is not a {value_type}; is a {type(value)}')
+
     def setControllableReal(self, path: str, value: float):
         """Sets a controllable Real-valued parameter
 
@@ -232,6 +244,7 @@ class MooseControl:
             value (float): The value to set
         """
         self.log(f'Setting controllable Real value {path}={value}')
+        self._requireNumeric(value)
         self._setControllable(path, 'Real', float(value))
 
     def setControllableVectorReal(self, path: str, value: list[float]):
@@ -241,9 +254,11 @@ class MooseControl:
             path (str): The path of the controllable value
             value (list[float]): The value to set
         """
+        self._requireType(value, list)
         value_list = []
         for entry in value:
-            value_list.append(float(entry))
+            self._requireNumeric(entry)
+            value_list.append(entry)
         self.log(f'Setting controllable vector Real value {path}={value_list}')
         self._setControllable(path, 'std::vector<Real>', value_list)
 
@@ -264,11 +279,11 @@ class MooseControl:
             path (str): The path of the controllable value
             value (list[str]): The value to set
         """
-        value_list = []
-        for entry in value:
-            value_list.append(str(entry))
-        self.log(f'Setting controllable vector string value {path}={value_list}')
-        self._setControllable(path, 'std::vector<std::string>', value_list)
+        self.log(f'Setting controllable vector string value {path}={value}')
+        self._requireType(value, list)
+        for i in range(len(value)):
+            value[i] = str(value[i])
+        self._setControllable(path, 'std::vector<std::string>', value)
 
     def getPostprocessor(self, name: str) -> float:
         """Gets a postprocessor value
