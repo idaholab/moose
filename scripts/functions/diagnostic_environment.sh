@@ -30,7 +30,7 @@ function compiler_test()
     done
     if [[ $error_cnt -ge 1 ]]; then
         print_red "\nFAIL: "
-        printf "One or more compiler variables not set\n"
+        printf "One or more compiler environment variables not set\n"
         return 1
     else
         print_green "OK\n"
@@ -43,7 +43,7 @@ function env_test()
     print_sep
     printf "Influential Environment Variables\n\n"
     reg_exp='^LD\|^DYLD\|^PATH\|^CFLAGS\|^CPP\|^CC\|^CXX\|^FFLAGS\|^FC\|^F90\|^F95\|^F77\|^CONDA'
-    reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES'
+    reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES\|^PBS\|^SLURM'
     reg_not='CONDA_BACKUP'
     env | sort | grep "${reg_exp}" | grep -v "${reg_not}"
 }
@@ -156,7 +156,7 @@ function conda_test()
                                       grep 'install:' | \
                                       awk 'BEGIN { FS = "=" }; {print $2" "$3}'`)
                 if [[ ${package} != 'dev' ]]; then
-                    reminder='moose-dev\t\t  Not present. Careful attention needed\n\t\t\t  when keep everything in sync.'
+                    reminder='moose-dev\t\t  is not present. All the packages must\n\t\t\t  kept in sync manually.'
                 fi
                 break
             fi
@@ -178,7 +178,7 @@ There are two ways to fix this:
 2.  Or adjust your repository to be in sync with moose-${package} Conda package.\n\n"
             return 1
         elif [[ -n "${my_version}" ]]; then
-            print_green "\nOK:"
+            print_green "\nOK"
             printf " Conda packages and MOOSE repo/submodule versions match\n\n"
         else
             printf "\nConda MOOSE packages not applicative.
@@ -200,5 +200,5 @@ function print_environment()
     compiler_test || let ERR_CNT+=1
     python_test || let ERR_CNT+=1
     conda_test || let ERR_CNT+=1
-    exit $ERR_CNT
+    exit_on_failure $ERR_CNT
 }

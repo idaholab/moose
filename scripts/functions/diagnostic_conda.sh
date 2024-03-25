@@ -31,7 +31,9 @@ function create_env()
     ${INSTANCE_EXE} create -p $CTMP_DIR/_env -q -y ${MOOSE_PACKAGES} git git-lfs 1>/dev/null \
     || print_failure_and_exit 'installing Conda environment'
     source activate $CTMP_DIR/_env || print_failure_and_exit 'activating environment'
-    printf "The following MOOSE packages were installed:\n\n"
+    if [ ${FULL_BUILD} == 0 ]; then
+        printf "The following MOOSE packages were installed:\n\n"
+    fi
     ${INSTANCE_EXE} list | grep moose
 }
 
@@ -52,7 +54,7 @@ function install_conda()
         fi
         local DOWNLOAD_URL="${URL}-${ARCHFILE}"
         curl --insecure -L ${DOWNLOAD_URL} --output \
-        ${CTMP_DIR}/install_conda.sh &>/dev/null || exit 1
+        ${CTMP_DIR}/install_conda.sh &>/dev/null || exit_on_failure 1
         bash ${CTMP_DIR}/install_conda.sh \
         -b -p ${CTMP_DIR}/${INSTANCE_EXE} &>/dev/null || print_failure_and_exit 'installing conda'
         export PATH=${CTMP_DIR}/${INSTANCE_EXE}/bin:$PATH
