@@ -6,7 +6,7 @@
     exodiff = simple_ip_hdg_diffusion_out.e
   []
   [mms]
-    requirement = 'The system shall show at least second order convergence in the L2 norm of the scalar field with a first order basis using a hybridizable interior penalty discontinuous Galerkin discretization on'
+    requirement = 'The system shall show at least second order convergence in the L2 norm for advection-diffusion with a first order basis using a hybridizable interior penalty discontinuous Galerkin discretization on'
     [monomial_tri]
       type = PythonUnitTest
       input = test.py
