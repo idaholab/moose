@@ -147,11 +147,13 @@ class MooseControl:
         Use this when you think MOOSE should be done. This will
         throw in the event that the webserver is waiting for
         input when you think it should be done"""
+        self.log(f'Waiting for webserver to finish')
         while True:
             time.sleep(self._poll_time)
 
             # If the server is no longer responding, we're good
             if not self.isListening():
+                self.log(f'Webserver has finished')
                 return
 
             # Make sure that the control isn't waiting for input
