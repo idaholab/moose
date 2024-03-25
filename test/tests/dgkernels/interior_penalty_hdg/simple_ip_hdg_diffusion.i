@@ -48,11 +48,10 @@
     alpha = 6
   []
   [left_side]
-    type = HDGDiffusionSideBC
+    type = ADHDGSideDirichletBC
     variable = side_u
     exact_soln = 0
     boundary = 'left'
-    alpha = 6
   []
   [right_interior]
     type = HDGDiffusionBC
@@ -62,11 +61,10 @@
     alpha = 6
   []
   [right_side]
-    type = HDGDiffusionSideBC
+    type = ADHDGSideDirichletBC
     variable = side_u
     exact_soln = 1
     boundary = 'right'
-    alpha = 6
   []
   [zero_flux]
     type = HDGDiffusionFluxBC

@@ -53,11 +53,10 @@
     alpha = 6
   []
   [dirichlet_side]
-    type = HDGDiffusionSideBC
+    type = ADHDGSideDirichletBC
     variable = side_u
     exact_soln = exact
     boundary = 'left right top bottom'
-    alpha = 6
   []
 []
 

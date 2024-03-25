@@ -75,14 +75,6 @@ a=2
     alpha = 6
     diff = ${diff}
   []
-  [dirichlet_side_diff]
-    type = HDGDiffusionSideBC
-    variable = side_u
-    exact_soln = exact
-    boundary = 'left right top bottom'
-    alpha = 6
-    diff = ${diff}
-  []
   [dg_interior_adv]
     type = ADHDGAdvectionDirichletBC
     variable = u
@@ -90,12 +82,10 @@ a=2
     velocity = vel
     boundary = 'left right top bottom'
   []
-  [dg_side_adv]
-    type = ADHDGAdvectionSideDirichletBC
+  [dirichlet_side]
+    type = ADHDGSideDirichletBC
     variable = side_u
-    interior_variable = u
     exact_soln = exact
-    velocity = vel
     boundary = 'left right top bottom'
   []
 []
