@@ -70,7 +70,12 @@
   solve_type = NEWTON
 []
 
+[Postprocessors]
+  [symmetric]
+    type = IsMatrixSymmetric
+  []
+[]
+
 [Outputs]
   exodus = true
-  dofmap = true
 []
