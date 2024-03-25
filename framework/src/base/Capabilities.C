@@ -23,8 +23,10 @@ Capabilities::getCapabilityRegistry()
 {
   // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
   // bug in clang's static object destruction when using dynamic library loading.
-  static Capabilities capability_registry;
-  return capability_registry;
+  static Capabilities * capability_registry = nullptr;
+  if (!capability_registry)
+    capability_registry = new Capabilities();
+  return *capability_registry;
 }
 
 void
