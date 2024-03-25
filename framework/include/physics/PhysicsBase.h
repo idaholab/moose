@@ -18,7 +18,7 @@
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
   registerMooseAction(app_name, derived_name, "init_physics");                                     \
-  registerMooseAction(app_name, derived_name, "copy_nodal_vars")
+  registerMooseAction(app_name, derived_name, "copy_nodal_vars_physics");
 
 /**
  * Base class to help creates an entire physics
