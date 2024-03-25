@@ -1,0 +1,37 @@
+{
+    "number_of_parts": 2,
+    "part": 1,
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "bool_value": {
+                    "type": "bool"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "bool_value": true
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "bool_value": false
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "bool_value": true
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
