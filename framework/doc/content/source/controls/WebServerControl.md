@@ -1,85 +1,112 @@
 # WebServerControl
 
-The `WebServerControl` object is designed to allow an external process to control a MOOSE solve.
-It works by starting up a webserver on the chosen `port` and exposing a REST API.
-As with all REST APIs the input and output are both JSON.  Just use whatever REST API you like best
-from your language (for Python `requests` is excellent).
+The `WebServerControl` object is designed to allow an external process to control a MOOSE solve. It works by starting up a webserver on the chosen [!param](/Controls/WebServerControl/port) and exposing a REST API. As with all REST APIs the input and output are both JSON.
+
+It can then be managed via the [MooseControl/index.md] python utility.
 
 ## API
 
-The `WebServerControl` presents four REST endpoints in order to control the solve:
+The `WebServerControl` presents REST endpoints to help control the solve.
+
+For the endpoints that follow, if the HTTP status code received is a non-successful code, there may be a response of type `application/json` of the form:
+
+```language=json
+{
+  "error": "<ERROR>"
+}
+```
+
+where `<ERROR>` is a useful error message pertaining to the error that was encountered. The response is not guaranteed to contain `application/json` data, but it will when more context is available.
+
+The REST endpoints are as follows:
 
 ### `waiting`
 
-`get` this endpoint to find out if MOOSE is currently waiting within the WebServerControl.  i.e. that the `Control` is waiting for external input.
+Used to determine of MOOSE is currently waiting within the `WebServerControl`, i.e., that `Control` is waiting for external input. The rest of the endpoints that follow require that the control is currently waiting for input.
 
-This endpoint returns a JSON message of the following format:
-
-```language=json
-{
-  waiting: True/False
-}
-```
-
-`True` means that MOOSE is waiting (i.e. you should take action).  `False` means that it is not.
-
-### `set_controllable`
-
-`post` to this endpoint to set the value of the parameter that is being controlled.
-This endpoint expects a JSON message of the following format:
+Interact with this endpoint by a `GET` request to `/waiting` without any data. If the control is currently waiting, the response will be of type `application/json` of the form:
 
 ```language=json
 {
-  value: [double]
+  "waiting": True
+  "execute_on_flag": "<EXEC_ON_FLAG>"
 }
 ```
 
-Obviously this only allows you to set floating point values for now.  More will be added later
-
-### `get_pp`
-
-`post` to this endpoint to get the value of any `Postprocessor` in the system
-This endpoint expects to receive a JSON message of the following format:
+where `<EXEC_ON_FLAG>` is the current execution flag. If the control is not currently waiting, the response will be a response of type `application/json` of the form:
 
 ```language=json
 {
-  pp: [postprocessorname]
+  "waiting": False
 }
 ```
 
-And returns a JSON message like this that contains the value of the postprocessor:
+This endpoint can be accessed via the [MooseControl/index.md] python utility via the following methods:
+
+- `wait()`: Waits for the control to be waiting
+- `getWaitingFlag()`: Gets the current flag that the control is waiting on, if any
+- `isWaiting()`: Whether or not the control is currently waiting
+
+### `get/postprocessor`
+
+Used to obtain the value of a postprocessor. The control must be waiting in order to access this endpoint.
+
+Interact with this endpoint by a `POST` request to `/get/postprocessor` with the following `application/json` data:
 
 ```language=json
 {
-  value: [double]
+  "name": "<NAME>"
 }
 ```
+
+where `<NAME>` is the name of the postprocessor whose value you wish to receive. The response will be of the form:
+
+```language=json
+{
+  "value": <VALUE>
+}
+```
+
+### `set/controllable`
+
+Used to change a controllable parameter in the simulation. The control must be waiting in order to access this endpoint.
+
+The following parameter types are currently supported by the endpoint:
+
+- `bool`
+- `Real`
+- `std::string`
+- `std::vector<Real>`
+- `std::vector<std::string>`
+
+These types can be extended by the `registerWebServerControl[Scalar/Vector][BoolNumberString]` registration methods in the source for the `WebServerControl`.
+
+Interact with this endpoint by a `POST` request to `/set/controllable` with the following `application/json` data:
+
+```language=json
+{
+  "name": "<NAME>",
+  "type" "<TYPE>",
+  "value": <VALUE>
+}
+```
+
+where `<NAME>` is the string path to the controllable parameter, `<TYPE>` is the string version of the C++ parameter type, and `<VALUE>` is the value to set the parameter to. The type of `<VALUE>` depends on the controllable parameter type.
+
+On success, the response will be empty with a status code of 201.
+
+This endpoint can be accessed via the [MooseControl/index.md] python utility via the following methods:
+
+- `setControllableReal()`: Sets a controllable `Real` parmeter
+- `setControllableVectorReal()`: Sets a controllable `std::vector<Real>` parameter
+- `setControllableString()`: Sets a controllable `std::string` parameter
+- `setControllableVectorString()`: Sets a controllable `std::vector<std::string>` parameter
 
 ### `continue`
 
-`post` to this to tell MOOSE to continue execution.
+Tells a waiting control to continue with the execution. The control must be waiting in order to access this endpoint.
 
-## Example
-
-Consider a simulation that solves the diffusion equation, where the Laplacian term has a
-coefficient, but the coefficient is defined as a constant input parameter ("coef"). For some
-reason, it is desired to control this coefficient from an external python script.
-
-The `WebServerControl` object is designed for this purpose as shown below.
-
-!listing test/tests/controls/web_server_control/web_server_control.i block=Controls caption=Control block demonstrating the use of the `WebServerControl` object.
-
-Notice that the "parameter" input parameter is expecting a parameter name which can be defined
-in various forms.
-
-For a discussion on the naming of objects and parameters see
-[Object and Parameter Names](syntax/Controls/index.md#object-and-parameter-names) section.
-
-## External Control Example
-
-As an example of how you can control MOOSE using this object, see the `controller.py` from the test for this object as shown below:
-
-!listing test/tests/controls/web_server_control/controller.py caption=Demonstrates the control of the `WebServerControl` object.
+Interact with this endpoint by a `GET` request to `/continue`. On success, the response will be empty with a status code of 200.
 
 !syntax parameters /Controls/WebServerControl
 
