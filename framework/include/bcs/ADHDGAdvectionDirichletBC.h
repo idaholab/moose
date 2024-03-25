@@ -24,7 +24,10 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// The velocity
-  const ADMaterialProperty<RealVectorValue> & _velocity;
+  const ADMaterialProperty<RealVectorValue> * const _velocity;
+  const Function * const _velocity_func;
 
-  const Function & _func;
+  const Real _coeff;
+
+  const Function * const _func;
 };
