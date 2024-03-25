@@ -20,7 +20,7 @@ class MooseControl:
     This object is tested primarily by
     test/tests/controls/web_server_control in the framework."""
 
-    def __init__(self, port: int, moose_process = None):
+    def __init__(self, port: int, moose_process: subprocess.Popen = None):
         """Constructor
 
         Parameters:
@@ -41,7 +41,7 @@ class MooseControl:
         # The process that is running moose, if any
         self._moose_process = moose_process
 
-    def log(self, msg):
+    def log(self, msg: str):
         """Helper for printing to a log
 
         Allows us to easily implement a better log in the future
@@ -111,7 +111,7 @@ class MooseControl:
         return r.status_code, r_json
 
     @staticmethod
-    def _checkResponse(expected_keys, data):
+    def _checkResponse(expected_keys: list, data: list):
         """Internal helper for checking the keys in data"""
         for key in data.keys():
             if key not in expected_keys:
@@ -171,7 +171,7 @@ class MooseControl:
             if waiting_flag is not None:
                 raise self.Exception(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
 
-    def wait(self, flag=None):
+    def wait(self, flag: str = None):
         """Waits for the MOOSE webserver and returns once the WebServerControl
         is waiting for input
 
@@ -265,6 +265,8 @@ class MooseControl:
     def setControllableReal(self, path: str, value: float):
         """Sets a controllable Real-valued parameter
 
+        The provided value must be numeric
+
         Parameters:
             path (str): The path of the controllable value
             value (float): The value to set
@@ -276,9 +278,11 @@ class MooseControl:
     def setControllableVectorReal(self, path: str, value: list[float]):
         """Sets a controllable vector-of-Real parameter
 
+        The provided value must be a list of numeric values
+
         Parameters:
             path (str): The path of the controllable value
-            value (list[float]): The value to set
+            value (list): The value to set
         """
         self._requireType(value, list)
         value_list = []
@@ -301,9 +305,11 @@ class MooseControl:
     def setControllableVectorString(self, path: str, value: list[float]):
         """Sets a controllable vector-of-string parameter
 
+        The provided value must be a list
+
         Parameters:
             path (str): The path of the controllable value
-            value (list[str]): The value to set
+            value (list): The value to set
         """
         self.log(f'Setting controllable vector string value {path}={value}')
         self._requireType(value, list)
