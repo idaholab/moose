@@ -59,7 +59,7 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
 {
   checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
                                         "initial_from_file_timestep");
-  prepareCopyNodalVariables();
+  prepareCopyVariablesFromMesh();
   addRequiredPhysicsTask("init_physics");
 }
 
@@ -129,12 +129,16 @@ PhysicsBase::act()
   else if (_current_task == "add_executor")
     addExecutors();
 
+  // Exodus restart capabilities
+  if (_current_task == "copy_nodal_vars")
+    copyVariablesFromMesh(nonlinearVariableNames());
+
   // Lets a derived Physics class implement additional tasks
   actOnAdditionalTasks();
 }
 
 void
-PhysicsBase::prepareCopyNodalVariables() const
+PhysicsBase::prepareCopyVariablesFromMesh() const
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
     _app.setExodusFileRestart(true);

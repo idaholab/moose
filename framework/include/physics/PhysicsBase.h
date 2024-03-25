@@ -17,7 +17,8 @@
 #include "MultiMooseEnum.h"
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
-  registerMooseAction(app_name, derived_name, "init_physics")
+  registerMooseAction(app_name, derived_name, "init_physics");                                     \
+  registerMooseAction(app_name, derived_name, "copy_nodal_vars")
 
 /**
  * Base class to help creates an entire physics
@@ -84,12 +85,8 @@ protected:
     return *_problem;
   }
 
-  /// Get the mesh for this physics
-  /// This could be set by a component
-  /// NOTE: hopefully we will not need this
-  // virtual const MooseMesh & getMesh() const override { return *_mesh; }
   /// Tell the app if we want to use Exodus restart
-  void prepareCopyNodalVariables() const;
+  void prepareCopyVariablesFromMesh() const;
   /// Copy variables from the mesh file
   void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy);
 

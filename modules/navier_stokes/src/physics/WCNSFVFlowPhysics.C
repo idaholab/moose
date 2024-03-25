@@ -86,13 +86,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
     _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs"))
 {
-  if (_has_flow_equations)
-  {
-    for (const auto d : index_range(_velocity_names))
-      saveNonlinearVariableName(_velocity_names[d]);
-    saveNonlinearVariableName(_pressure_name);
-  }
-
   // Create maps for boundary-restricted parameters
   _momentum_inlet_functors = createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
       _inlet_boundaries,
@@ -174,6 +167,10 @@ WCNSFVFlowPhysics::addNonlinearVariables()
 {
   if (!_has_flow_equations)
     return;
+
+  for (const auto d : make_range(dimension()))
+    saveNonlinearVariableName(_velocity_names[d]);
+  saveNonlinearVariableName(_pressure_name);
 
   // Check number of variables variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
