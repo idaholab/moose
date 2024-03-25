@@ -24,7 +24,7 @@
       max_parallel = 1
       min_threads = 2
       max_threads = 2
-      capabilities = '!openmp !tbb'
+      capabilities = '!openmp & !tbb'
 
       detail = "'pthreads' or"
     []
