@@ -70,6 +70,10 @@ WebServerControl::~WebServerControl()
 void
 WebServerControl::startServer()
 {
+  mooseAssert(processor_id() == 0, "Should only be started on rank 0");
+  mooseAssert(!_server, "Server is already started");
+  mooseAssert(!_server_thread, "Server thread is already listening");
+
   // Helper for returning an error response
   const auto error = [](const std::string & error)
   {
