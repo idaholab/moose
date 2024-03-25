@@ -4,6 +4,7 @@
 
   # Not really sure if all of these prereqs are required as I can't guarantee
   # if we'll get unique ports if we call them all at once
+
   [control]
     requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of'
     [real]
@@ -114,7 +115,7 @@
       cli_args = 'Reporters/test/type=WebServerControlTestReporter
                   Reporters/test/vec_real_value=0'
       expect_err = 'The value \'1234\' of type number is not an array'
-      detail = 'setting a controllable parameter with an incompatible JSON type'
+      detail = 'setting a controllable parameter with a type that does not match'
       prereq = errors/set_controllable_bad_convert_json
     []
   []
