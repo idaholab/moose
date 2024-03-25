@@ -32,7 +32,7 @@
     input = 'diffusion_hmg.i'
     exodiff = 'diffusion_strumpack_3d_out.e'
     min_parallel = 2
-    capabilities = 'petsc>=3.12.0 strumpack'
+    capabilities = 'petsc>=3.12.0 & strumpack'
     # strumpack is not valgrind clean, see #23502 and https://github.com/pghysels/STRUMPACK/issues/103
     valgrind = none
     issues = '#16501'
