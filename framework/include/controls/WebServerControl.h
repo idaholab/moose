@@ -29,7 +29,6 @@ public:
   static InputParameters validParams();
 
   WebServerControl(const InputParameters & parameters);
-
   ~WebServerControl();
 
   virtual void execute() override;
@@ -150,7 +149,7 @@ private:
   /**
    * Internal method for starting the server
    */
-  std::unique_ptr<std::thread> startServer();
+  void startServer();
 
   /**
    * @return Whether or not the server is currently waiting
@@ -162,10 +161,10 @@ private:
 
   /// The port to run on
   const unsigned int _port;
-  /// The server instance
-  HttpServer _server;
+  /// The server
+  std::unique_ptr<HttpServer> _server;
   /// The server thread
-  const std::unique_ptr<std::thread> _server_thread;
+  std::unique_ptr<std::thread> _server_thread;
 
   /// The values received to control; filled on rank 0 from the server and then broadcast
   std::vector<std::unique_ptr<ValueBase>> _controlled_values;

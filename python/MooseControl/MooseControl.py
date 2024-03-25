@@ -208,15 +208,6 @@ class MooseControl:
         if r_json is not None:
             raise Exception(f'Unexpected data {r_json} from continue')
 
-    def waitDone(self):
-        """Waits for the WebServerControl to be done (no longer responding)"""
-        self.log(f'Waiting for completion')
-        while True:
-            try:
-                requests.get(f'{self._url}')
-            except requests.exceptions.ConnectionError:
-                return
-
     def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
         data = {'name': path, 'value': value, 'type': type}
@@ -319,7 +310,7 @@ class MooseControl:
     def spawnMoose(cmd: str, cwd) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""
         popen_kwargs = {'stdout': subprocess.PIPE,
-                        'stderr': subprocess.PIPE,
+                        'stderr': subprocess.STDOUT,
                         'cwd': cwd,
                         'close_fds': False,
                         'shell': True,
