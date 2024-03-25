@@ -58,8 +58,10 @@ WCNSFVHeatAdvectionPhysics::validParams()
 
 WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
-    _has_energy_equation(isParamValid("add_energy_equation") ? getParam<bool>("add_energy_equation")
-                                                             : usingWCNSFVPhysics()),
+    _has_energy_equation(
+        isParamValid("add_energy_equation")
+            ? getParam<bool>("add_energy_equation")
+            : (usingWCNSFVPhysics() ? true : isParamSetByUser("energy_inlet_function"))),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_blocks(
         parameters.isParamValid("thermal_conductivity_blocks")
