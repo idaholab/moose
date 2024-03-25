@@ -220,9 +220,9 @@ addActionTypes(Syntax & syntax)
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
   registerTask("copy_nodal_aux_vars", true);
+  registerTask("copy_nodal_vars_physics", false);
   registerTask("setup_postprocessor_data", false);
   registerTask("setup_time_steppers", true);
-  registerTask("init_physics", false);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
@@ -341,7 +341,7 @@ addActionTypes(Syntax & syntax)
                            "(add_mesh_division)"  // NearestPositionsDivision uses a Positions
                            "(add_multi_app)"
                            "(add_transfer)"
-                           "(copy_nodal_vars, copy_nodal_aux_vars)"
+                           "(copy_nodal_vars, copy_nodal_aux_vars, copy_nodal_vars_physics)"
                            "(add_material)"
                            "(add_master_action_material)"
                            "(add_functor_material)"
