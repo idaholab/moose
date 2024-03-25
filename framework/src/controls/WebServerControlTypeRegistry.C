@@ -16,7 +16,7 @@ WebServerControlTypeRegistry::getRegistry()
 {
   static WebServerControlTypeRegistry * registry_singleton = nullptr;
   if (!registry_singleton)
-    registry_singleton = new WebServerControlTypeRegistry();
+    registry_singleton = new WebServerControlTypeRegistry;
   return *registry_singleton;
 }
 }
