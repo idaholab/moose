@@ -52,30 +52,24 @@ WebServerControl::validParams()
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
-  : Control(parameters),
-    _currently_waiting(false),
-    _port(getParam<unsigned int>("port")),
-    _server_thread(startServer())
+  : Control(parameters), _currently_waiting(false), _port(getParam<unsigned int>("port"))
 {
+  if (processor_id() == 0)
+    startServer();
 }
 
 WebServerControl::~WebServerControl()
 {
-  if (processor_id() == 0)
+  if (_server)
   {
-    // Kill the server
-    _server.shutdown();
+    _server->shutdown();
     _server_thread->join();
   }
 }
 
-std::unique_ptr<std::thread>
+void
 WebServerControl::startServer()
 {
-  // Only start on rank 0
-  if (processor_id() != 0)
-    return nullptr;
-
   // Helper for returning an error response
   const auto error = [](const std::string & error)
   {
@@ -122,11 +116,13 @@ WebServerControl::startServer()
     return result{};
   };
 
+  _server = std::make_unique<HttpServer>();
+
   // GET /waiting, returns code 200 on success and JSON:
   //  'waiting' (bool): Whether or not the control is waiting
   //  'execute_on_flag' (string): Only exists if waiting=true, the execute
   //                              flag that is being waited on
-  _server.when("/waiting")
+  _server->when("/waiting")
       ->requested(
           [this](const HttpRequest & /*req*/)
           {
@@ -147,7 +143,7 @@ WebServerControl::startServer()
   //   'name' (string): The name of the Postprocessor
   // Returns code 200 on success and JSON:
   //   'value' (double): The postprocessor value
-  _server.when("/get/postprocessor")
+  _server->when("/get/postprocessor")
       ->posted(
           [this, &error, &get_name, &require_waiting, &require_parameters](const HttpRequest & req)
           {
@@ -180,7 +176,7 @@ WebServerControl::startServer()
   //   'type' (string): The C++ type of the controllable data to set
   // Returns code 201 on success and JSON:
   //   'error' (string): The error (only set if an error occurred)
-  _server.when("/set/controllable")
+  _server->when("/set/controllable")
       ->posted(
           [this, &error, &get_string, &get_name, &require_waiting, &require_parameters](
               const HttpRequest & req)
@@ -238,7 +234,7 @@ WebServerControl::startServer()
           });
 
   // GET /continue, Returns code 200
-  _server.when("/continue")
+  _server->when("/continue")
       ->requested(
           [this, &error](const HttpRequest &)
           {
@@ -252,7 +248,7 @@ WebServerControl::startServer()
             return error("The control is not currently waiting");
           });
 
-  return std::make_unique<std::thread>([this] { this->_server.startListening(this->_port); });
+  _server_thread = std::make_unique<std::thread>([this] { _server->startListening(this->_port); });
 }
 
 void

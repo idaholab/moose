@@ -4,10 +4,24 @@
 #include <iterator>
 #include <vector>
 #include <sstream>
+#include <sys/poll.h>
 
 /*static*/ TCPClientStream
 TCPClientStream::acceptFrom(short listener)
 {
+  // poll to see if we have a connection available
+  // this lets us exit this occasionally so that we can shutdown if requested
+  struct pollfd fd;
+  fd.fd = listener;
+  fd.events = POLLIN;
+  const auto num_fds = poll(&fd, 1, 100);
+  if (num_fds < 1)
+  {
+    if (num_fds != 0)
+      perror("poll failed");
+    return {-1};
+  }
+
   struct sockaddr_in client;
   const size_t clientLen = sizeof(client);
 
@@ -233,6 +247,12 @@ HttpServer::HttpServer()
   mDefault400Message = HttpResponse{400, "text/plain", "400 bad request"}.buildMessage();
 }
 
+HttpServer::~HttpServer()
+{
+  // shutdown the server in the event that it is running
+  shutdown();
+}
+
 void
 HttpServer::startListening(uint16_t port)
 {
@@ -267,8 +287,12 @@ HttpServer::startListening(uint16_t port)
   mSocket = 0;
 #endif
 
-  printf("Waiting for incoming connections...\n");
-  while (mSocket != -1)
+  // we're going to be listening
+  is_listening.store(true);
+  // reset the state for shutdown requests
+  should_shutdown.store(false);
+
+  while (mSocket != -1 && !should_shutdown.load())
   {
 #ifdef TINYHTTP_FUZZING
     auto stream = std::make_shared<StdinClientStream>();
@@ -335,8 +359,6 @@ HttpServer::startListening(uint16_t port)
           {
             std:: cerr << "Exception in HTTP client handler (" << e.what() << ")\n";
           }
-
-          stream->close();
         });
 
 #ifdef TINYHTTP_FUZZING
@@ -347,12 +369,22 @@ HttpServer::startListening(uint16_t port)
 #endif
   }
 
-  puts("Listen loop shut down");
+  if (mSocket != -1)
+  {
+    close(mSocket);
+    mSocket = -1;
+  }
+
+  is_listening.store(false);
 }
 
 void
 HttpServer::shutdown()
 {
-  close(mSocket);
-  mSocket = -1;
+  // let the server know to shutdown next time it polls
+  should_shutdown.store(true);
+  // and wait for it to finish
+  while (is_listening.load())
+  {
+  }
 }

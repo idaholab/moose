@@ -489,7 +489,10 @@ class HttpServer
   std::vector<std::pair<std::regex, std::shared_ptr<HandlerBuilder>>> mReHandlers;
   MessageBuilder mDefault404Message, mDefault400Message;
   short mSocket = -1;
-
+  /// whether or not we have received a request to shutdown the server
+  std::atomic<bool> should_shutdown = false;
+  /// whether or not the server is currently listening
+  std::atomic<bool> is_listening = false;
   std::shared_ptr<HttpResponse> processRequest(std::string key, const HttpRequest & req)
   {
 
@@ -522,6 +525,7 @@ class HttpServer
 
 public:
   HttpServer();
+  ~HttpServer();
 
 #ifdef TINYHTTP_WS
   std::shared_ptr<WebsockHandlerBuilder> websocket(std::string path)
