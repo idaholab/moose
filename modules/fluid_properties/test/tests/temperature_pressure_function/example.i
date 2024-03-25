@@ -2,6 +2,7 @@
 
 cv = 4000
 T_initial = 400
+p_initial = 1e5
 
 [Mesh]
   type = GeneratedMesh
@@ -23,26 +24,20 @@ T_initial = 400
 
 [Functions]
   # This demonstrates how to define fluid properties that are functions
-  # of an integral quantity (through a postprocessor) of the (p,T) variable. See example.i in this
-  # same folder for defining fluid properties that are functions of the
-  # LOCAL value of the (p,T) variables
+  # of the LOCAL value of the (p,T) variables
+  # x for temperature
+  # y for pressure
   [k]
     type = ParsedFunction
-    symbol_names = 'T p'
-    symbol_values = 'temperature pressure'
-    expression = '14 + 1e-2 * T + 1e-5 * p'
+    expression = '14 + 1e-2 * x + 1e-5 * y'
   []
   [rho]
     type = ParsedFunction
-    symbol_names = 'T p'
-    symbol_values = 'temperature pressure'
-    expression = '1.5e3 + 0.13 * T - 1.5e-4 * p'
+    expression = '1.5e3 + 0.13 * x - 1.5e-4 * y'
   []
   [mu]
     type = ParsedFunction
-    symbol_names = 'T p'
-    symbol_values = 'temperature pressure'
-    expression = '1e-3 + 2e-6 * T - 3e-9 * p'
+    expression = '1e-3 + 2e-6 * x - 3e-9 * y'
   []
 []
 
@@ -71,36 +66,27 @@ T_initial = 400
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 2
+  type = Steady
 []
 
 [Postprocessors]
-  # Postprocessors to get from the functions used as fluid properties
-  [temperature]
-    type = ElementAverageValue
-    variable = temperature
-    outputs = none
-  []
-  [pressure]
-    type = ElementAverageValue
-    variable = pressure
-    outputs = none
-  []
   [k_exact]
     type = FunctionValuePostprocessor
     function = k
     outputs = none
+    point = '${T_initial} ${p_initial} 0'
   []
   [rho_exact]
     type = FunctionValuePostprocessor
     function = rho
     outputs = none
+    point = '${T_initial} ${p_initial} 0'
   []
   [mu_exact]
     type = FunctionValuePostprocessor
     function = mu
     outputs = none
+    point = '${T_initial} ${p_initial} 0'
   []
   [e_exact]
     type = Receiver
@@ -161,7 +147,7 @@ T_initial = 400
     value1 = mu_exact
     value2 = mu_avg
   []
-  [rho_avg_diff]
+  [rho_diff]
     type = DifferencePostprocessor
     value1 = rho_exact
     value2 = rho_avg
