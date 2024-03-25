@@ -72,6 +72,9 @@ ifeq ($(shell uname -s),Darwin)
 	lib_suffix := dylib
 endif
 
+# Making a .la object instead.  This is what you make out of .lo objects...
+moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
+
 #
 # wasp
 #
@@ -160,10 +163,11 @@ hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 
 capabilities_LIB          := $(CAPABILITIES_DIR)/capabilities.$(PYMOD_EXTENSION)
 capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS)
+capabilities_LDFLAGS      := -Wl,-rpath,$(HIT_DIR) -L$(HIT_DIR) -lhit-$(METHOD) -Wl,-rpath,$(FRAMEWORK_DIR) -L$(FRAMEWORK_DIR) -lmoose-$(METHOD) $(DYNAMIC_LOOKUP)
 
-capabilities $(capabilities_LIB) : $(capabilities_srcfiles)
+capabilities $(capabilities_LIB) : $(capabilities_srcfiles) $(moose_LIB)| prebuild
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $^ -I $(MOOSE_DIR)/framework/include/utils $(capabilities_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(capabilities_LIB))'
+	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB))'
 
 #
 # gtest
@@ -249,9 +253,6 @@ moose_INC_DIRS += $(HIT_DIR)/include
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
-
-# Making a .la object instead.  This is what you make out of .lo objects...
-moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
@@ -415,7 +416,7 @@ prebuild::
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
-moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(capabilities_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
@@ -437,7 +438,7 @@ $(hit_LIB): $(hit_objects)
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(capabilities_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
@@ -447,6 +448,7 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
+$(capabilities_LIB) : | moose_header_symlinks
 
 else
 
@@ -571,7 +573,7 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(capabilities_LIB)
+app_LIB  := $(moose_LIBS) $(gtest_LIB) $(pyhit_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 
