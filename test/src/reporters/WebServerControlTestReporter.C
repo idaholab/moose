@@ -15,17 +15,19 @@ InputParameters
 WebServerControlTestReporter::validParams()
 {
   auto params = GeneralReporter::validParams();
+  params.addParam<bool>("bool_value", "Test bool value");
   params.addParam<Real>("real_value", "Test Real value");
   params.addParam<std::vector<Real>>("vec_real_value", "Test vector Real value");
   params.addParam<std::string>("string_value", "Test string value");
   params.addParam<std::vector<std::string>>("vec_string_value", "Test vector string value");
-  params.declareControllable("real_value vec_real_value string_value vec_string_value");
+  params.declareControllable("bool_value real_value vec_real_value string_value vec_string_value");
   return params;
 }
 
 WebServerControlTestReporter::WebServerControlTestReporter(const InputParameters & parameters)
   : GeneralReporter(parameters)
 {
+  declare<bool>("bool_value");
   declare<Real>("real_value");
   declare<std::vector<Real>>("vec_real_value");
   declare<std::string>("string_value");

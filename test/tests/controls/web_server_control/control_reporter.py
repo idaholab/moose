@@ -15,7 +15,10 @@ if __name__ == '__main__':
     path = f'Reporters/test/{value}'
     # Determine what to set the values to and what function to call
     # on MooseControl to change the value
-    if value == 'real_value':
+    if value == 'bool_value':
+      values = [False, True]
+      set_name = 'setControllableBool'
+    elif value == 'real_value':
       values = [1.5, 3.2]
       set_name = 'setControllableReal'
     elif value == 'vec_real_value':

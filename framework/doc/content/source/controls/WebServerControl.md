@@ -97,7 +97,8 @@ On success, the response will be empty with a status code of 201.
 
 This endpoint can be accessed via the [MooseControl/index.md] python utility via the following methods:
 
-- `setControllableReal()`: Sets a controllable `Real` parmeter
+- `setControllableBool()`: Sets a controllable `bool` parameter
+- `setControllableReal()`: Sets a controllable `Real` parameter
 - `setControllableVectorReal()`: Sets a controllable `std::vector<Real>` parameter
 - `setControllableString()`: Sets a controllable `std::string` parameter
 - `setControllableVectorString()`: Sets a controllable `std::vector<std::string>` parameter

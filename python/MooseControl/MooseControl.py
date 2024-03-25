@@ -262,6 +262,19 @@ class MooseControl:
         if not isinstance(value, value_type):
             raise MooseControl.Exception(f'value is not a {value_type}; is a {type(value)}')
 
+    def setControllableBool(self, path: str, value: bool):
+        """Sets a controllable bool-valued parameter
+
+        The provided value must be a bool
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (float): The value to set
+        """
+        self.log(f'Setting controllable bool value {path}={value}')
+        self._requireType(value, bool)
+        self._setControllable(path, 'bool', value)
+
     def setControllableReal(self, path: str, value: float):
         """Sets a controllable Real-valued parameter
 
