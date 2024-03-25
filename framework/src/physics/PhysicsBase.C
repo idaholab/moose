@@ -206,6 +206,7 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
     SystemBase & system = getProblem().getNonlinearSystemBase(_sys_number);
+    _console << "Adding restart for " << variables_to_copy.size() << " variables " << std::endl;
 
     for (const auto & var_name : variables_to_copy)
       system.addVariableToCopy(
@@ -309,10 +310,11 @@ PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
   // If identical, we can return fast
   if (_blocks == blocks)
     return;
-  // If one is block restricted to anywhere and the other is not block restricted, return
+  // If one is block restricted to anywhere and the other is block restricted to anywhere manually
   if ((std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end() &&
-       blocks.empty()) ||
-      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end() && _blocks.empty()))
+       allMeshBlocks(blocks)) ||
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end() &&
+       allMeshBlocks(_blocks)))
     return;
 
   // Copy, sort and unique is the only way to check that they are actually the same
@@ -336,10 +338,20 @@ PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
              name(),
              "' and object '",
              object_name,
-             "' have different block restrictions.\n Physics: ",
+             "' have different block restrictions.\nPhysics: ",
              Moose::stringify(_blocks),
              "\nObject: ",
              Moose::stringify(blocks),
              "\nDifference: ",
              Moose::stringify(diff));
+}
+
+bool
+PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
+{
+  for (const auto mesh_block : _mesh->meshSubdomains())
+    if (std::find(blocks.begin(), blocks.end(), _mesh->getSubdomainName(mesh_block)) ==
+        blocks.end())
+      return false;
+  return true;
 }

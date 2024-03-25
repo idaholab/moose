@@ -47,7 +47,7 @@ public:
 
   /// Get a Physics from the ActionWarehouse with the requested type and name
   template <typename T>
-  const T * getCoupledPhysics(const PhysicsName & phys_name) const;
+  const T * getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail = false) const;
 
   /// Utilities to merge two Physics of the same type together
   /// Check that parameters are compatible for a merge with another Physics
@@ -133,6 +133,10 @@ protected:
   template <typename T, typename S>
   void checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
                                                        const std::string & param2) const;
+  template <typename T>
+  void checkTwoDVectorParamMultiMooseEnumSameLength(const std::string & param1,
+                                                    const std::string & param2,
+                                                    const bool error_for_param2) const;
   /// Check that the user did not pass an empty vector
   template <typename T>
   void checkVectorParamNotEmpty(const std::string & param1) const;
@@ -140,7 +144,7 @@ protected:
   template <typename T, typename S>
   void checkVectorParamsSameLengthIfSet(const std::string & param1,
                                         const std::string & param2,
-                                        const bool ignore_empty_param2 = false) const;
+                                        const bool ignore_empty_default_param2 = false) const;
 
   template <typename T, typename S, typename U>
   void checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
@@ -190,9 +194,8 @@ protected:
 
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
-  /// Checks if the variables created outside of the physics are restricted to the same blocks
-  // void checkVariableBlockRestrictionConsistency(const std::string & var_name);
-  // USE CHECKVARIABLE FROM BLOCKRESITRCATBLE
+  /// Check if a vector contains all the mesh blocks
+  bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
 
   /// Routine to help create maps
   template <typename T, typename C>
@@ -261,7 +264,7 @@ private:
 
 template <typename T>
 const T *
-PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
+PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail) const
 {
   const auto all_T_physics = _awh.getActions<T>();
   for (const auto * const physics : all_T_physics)
@@ -269,11 +272,14 @@ PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
     if (physics->name() == phys_name)
       return physics;
   }
-  mooseError("Requested Physics '",
-             phys_name,
-             "' does not exist or is not of type '",
-             MooseUtils::prettyCppType<T>(),
-             "'");
+  if (!allow_fail)
+    mooseError("Requested Physics '",
+               phys_name,
+               "' does not exist or is not of type '",
+               MooseUtils::prettyCppType<T>(),
+               "'");
+  else
+    return nullptr;
 }
 
 template <typename T>
@@ -377,6 +383,34 @@ PhysicsBase::checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string &
   }
 }
 
+template <typename T>
+void
+PhysicsBase::checkTwoDVectorParamMultiMooseEnumSameLength(const std::string & param1,
+                                                          const std::string & param2,
+                                                          const bool error_for_param2) const
+{
+  assertParamDefined<std::vector<std::vector<T>>>(param1);
+  assertParamDefined<MultiMooseEnum>(param2);
+  const auto vec1 = getParam<std::vector<std::vector<T>>>(param1);
+  const auto enum2 = getParam<MultiMooseEnum>(param2);
+  const auto size_1 = vec1.empty() ? 0 : vec1.size() * vec1[0].size();
+  const auto size_2 = enum2.size();
+  if (size_1 != size_2)
+  {
+    if (error_for_param2)
+      paramError(param2,
+                 "Vector enumeration parameter (size " + std::to_string(size_2) +
+                     ") is not the same size as the vector of vector parameter '" + param1 +
+                     "' (size " + std::to_string(size_1) + ")");
+    else
+      paramError(param1,
+                 "Vector of vector parameter '" + param1 + "' (total size " +
+                     std::to_string(size_1) +
+                     ") is not the same size as vector-enumeration parameter '" + param2 +
+                     "' (size " + std::to_string(size_2) + ")");
+  }
+}
+
 template <typename T, typename S, typename U>
 void
 PhysicsBase::checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
@@ -427,7 +461,7 @@ template <typename T, typename S>
 void
 PhysicsBase::checkVectorParamsSameLengthIfSet(const std::string & param1,
                                               const std::string & param2,
-                                              const bool ignore_empty_param2) const
+                                              const bool ignore_empty_default_param2) const
 {
   assertParamDefined<std::vector<T>>(param1);
   assertParamDefined<std::vector<S>>(param2);
@@ -436,7 +470,7 @@ PhysicsBase::checkVectorParamsSameLengthIfSet(const std::string & param1,
   {
     const auto size_1 = getParam<std::vector<T>>(param1).size();
     const auto size_2 = getParam<std::vector<S>>(param2).size();
-    if (ignore_empty_param2 && (size_2 == 0))
+    if (ignore_empty_default_param2 && (size_2 == 0) && !isParamSetByUser(param2))
       return;
     if (size_1 != size_2)
       paramError(param1,
@@ -548,14 +582,15 @@ PhysicsBase::createMapFromVectors(std::vector<T> keys, std::vector<C> values) co
   // No values have been specified.
   if (!values.size())
   {
-    // If we cant return a map of default C, dont try it
-    if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
-      return map;
-
-    C def;
-    for (const auto & k : keys)
-      map[k] = def;
     return map;
+    // If we cant return a map of default C, dont try it
+    // if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
+    //   return map;
+
+    // C def;
+    // for (const auto & k : keys)
+    //   map[k] = def;
+    // return map;
   }
   std::transform(keys.begin(),
                  keys.end(),
