@@ -9,20 +9,22 @@
 
 #pragma once
 
-#include "ADDGKernel.h"
+#include "ADIntegratedBC.h"
 
-class ADHDGDiffusion : public ADDGKernel
+class Function;
+
+class ADHDGAdvectionDirichletBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  ADHDGDiffusion(const InputParameters & parameters);
+  ADHDGAdvectionDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
+  virtual ADReal computeQpResidual() override;
 
-  const Real _alpha;
-  const ADMaterialProperty<Real> & _diff;
-  const ADMaterialProperty<Real> & _diff_neighbor;
-  const ADVariableValue & _side_u;
+  /// The velocity
+  const ADMaterialProperty<RealVectorValue> & _velocity;
+
+  const Function & _func;
 };
