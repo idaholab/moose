@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolverSystem.h"
+#include "SolutionInvalidity.h"
+#include "FEProblemBase.h"
 
 SolverSystem::SolverSystem(SubProblem & subproblem,
                            FEProblemBase & fe_problem,
@@ -16,7 +18,8 @@ SolverSystem::SolverSystem(SubProblem & subproblem,
   : SystemBase(subproblem, fe_problem, name, var_kind),
     _current_solution(nullptr),
     _pc_side(Moose::PCS_DEFAULT),
-    _ksp_norm(Moose::KSPN_UNPRECONDITIONED)
+    _ksp_norm(Moose::KSPN_UNPRECONDITIONED),
+    _solution_is_invalid(false)
 {
 }
 
@@ -99,4 +102,25 @@ SolverSystem::setMooseKSPNormType(MooseEnum kspnorm)
     _ksp_norm = Moose::KSPN_DEFAULT;
   else
     mooseError("Unknown ksp norm type specified.");
+}
+
+void
+SolverSystem::checkInvalidSolution()
+{
+  // determine whether solution invalid occurs in the converged solution
+  _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
+
+  // output the solution invalid summary
+  if (_solution_is_invalid)
+  {
+    // sync all solution invalid counts to rank 0 process
+    _app.solutionInvalidity().sync();
+
+    if (_fe_problem.allowInvalidSolution())
+      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
+                   "Use Problem/allow_invalid_solution=false to activate ");
+    else
+      // output the occurrence of solution invalid in a summary table
+      _app.solutionInvalidity().print(_console);
+  }
 }

@@ -127,7 +127,11 @@ public:
   /**
    * Clear the dof indices in the cache.
    */
-  void clearDofIndices() { _dof_indices.clear(); }
+  void clearDofIndices()
+  {
+    _dof_indices.clear();
+    _prev_elem = nullptr;
+  }
 
 protected:
   /**

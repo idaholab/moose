@@ -77,8 +77,7 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
     _rhs_non_time_tag(-1),
     _rhs_non_time(NULL),
     _n_linear_iters(0),
-    _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name)),
-    _solution_is_invalid(false)
+    _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name))
 {
   getRightHandSideNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -275,21 +274,7 @@ LinearSystem::solve()
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
 
   // determine whether solution invalid occurs in the converged solution
-  _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
-
-  // output the solution invalid summary
-  if (_solution_is_invalid)
-  {
-    // sync all solution invalid counts to rank 0 process
-    _app.solutionInvalidity().sync();
-
-    if (_fe_problem.allowInvalidSolution())
-      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
-                   "Use Problem/allow_invalid_solution=false to activate ");
-    else
-      // output the occurrence of solution invalid in a summary table
-      _app.solutionInvalidity().print(_console);
-  }
+  checkInvalidSolution();
 }
 
 void

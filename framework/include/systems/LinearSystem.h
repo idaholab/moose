@@ -174,7 +174,4 @@ protected:
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
-
-  /// Boolean to see if solution is invalid
-  bool _solution_is_invalid;
 };

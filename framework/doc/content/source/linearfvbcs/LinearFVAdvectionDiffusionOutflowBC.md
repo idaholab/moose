@@ -10,8 +10,7 @@ integral of the advective flux over a boundary face ($S_b$) of a boundary elemen
 \int\limits_{S_b} \vec{v} \cdot \vec{n} u dS  \approx \vec{v}_f \cdot \vec{n} u_f |S_b|~,
 
 where $\vec{v}_f$, $\vec{n}$ and $|S_b|$ are the outlet face velocity, outward pointing surface vector
-and the surface area, respectively. The velocity in this case can be defined using
-the [!param](/LinearFVBCs/LinearFVAdvectionDiffusionOutflowBC/velocity) parameter.
+and the surface area,
 
 The value of $u_f$ can be computed two different ways depending on the setting of the
 [!param](/LinearFVBCs/LinearFVAdvectionDiffusionOutflowBC/use_two_term_expansion) parameter. When the two-term

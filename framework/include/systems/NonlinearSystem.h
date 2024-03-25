@@ -101,6 +101,4 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
-
-  bool _solution_is_invalid;
 };
