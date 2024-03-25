@@ -23,6 +23,7 @@
       command_proxy = 'control_reporter.py string_value'
       recover = false
       detail = 'a string'
+      prereq = control/real
     []
     [vec_real]
       type = JSONDiff
@@ -33,6 +34,7 @@
       command_proxy = 'control_reporter.py vec_real_value'
       recover = false
       detail = 'a vector of double precision numbers'
+      prereq = control/string
     []
     [vec_string]
       type = JSONDiff
@@ -43,6 +45,7 @@
       command_proxy = 'control_reporter.py vec_string_value'
       recover = false
       detail = 'a vector of strings'
+      prereq = control/vec_real
     []
   []
 
@@ -53,5 +56,58 @@
     command_proxy = get_postprocessor.py
     recover = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
+    prereq = control/vec_string
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when interacting with the REST API when'
+    [continue_not_waiting]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py continue_not_waiting'
+      expect_err = 'Exception: MOOSE is not waiting'
+      detail = 'requesting the system to continue when it is not waiting'
+      prereq = get_postprocessor
+    []
+    [get_postprocessor_not_waiting]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py get_postprocessor_not_waiting'
+      expect_err = 'Exception: MOOSE is not waiting'
+      detail = 'requesting a postprocessor value when the system is not waiting'
+      prereq = errors/continue_not_waiting
+    []
+    [set_controllable_not_waiting]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_not_waiting'
+      expect_err = 'Exception: MOOSE is not waiting'
+      detail = 'setting a controllable value when the system is not waiting'
+      prereq = errors/get_postprocessor_not_waiting
+    []
+    [set_controllable_no_exist]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_no_exist'
+      expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
+      detail = 'setting a controllable parameter that does not exist'
+      prereq = errors/set_controllable_not_waiting
+    []
+    [postprocessor_no_exist]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py postprocessor_no_exist'
+      expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
+      detail = 'getting a postprocessor that does not exist'
+      prereq = errors/set_controllable_no_exist
+    []
+    [set_controllable_unregistered_type]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_unregistered_type'
+      expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
+      detail = 'setting a controllable parameter whose type is not supported'
+      prereq = errors/postprocessor_no_exist
+    []
   []
 []
