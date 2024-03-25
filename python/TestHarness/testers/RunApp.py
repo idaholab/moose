@@ -354,11 +354,8 @@ class RunApp(Tester):
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
             if self.exit_code == 77:
-                output = output.split('CAPABILITIES_MISMATCH_BEGIN\n')[1]
-                output = output.split('CAPABILITIES_MISMATCH_END\n')[0]
-                output = output.split(' |')[0]
                 self.setStatus(self.skip, "ABORT")
-                self.addCaveats(output)
+                self.addCaveats(' '.join(specs['capabilities']))
                 return ''
             elif options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
                 reason = 'ERRMSG'

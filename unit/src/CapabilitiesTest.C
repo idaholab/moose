@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Capabilities.h"
+#include "MooseException.h"
 #include "libmesh/int_range.h"
 
 #include "gtest/gtest.h"
@@ -15,21 +16,23 @@
 TEST(CapabilitiesTest, boolTest)
 {
   Moose::Capabilities capabilities;
+  std::vector<std::pair<std::string, CapabilityUtils::CheckState>> tests = {
+      {"unittest_bool", CapabilityUtils::CERTAIN_PASS},
+      {"!unittest_bool", CapabilityUtils::CERTAIN_FAIL},
+      {"!unittest_bool2", CapabilityUtils::CERTAIN_PASS},
+      {"unittest_bool2", CapabilityUtils::CERTAIN_FAIL},
+      {"unittest_doesnotexist", CapabilityUtils::POSSIBLE_FAIL},
+      {"!unittest_doesnotexist", CapabilityUtils::POSSIBLE_PASS},
+  };
   capabilities.add("unittest_bool", true, "Boolean test capability");
   capabilities.Capabilities::add("unittest_bool2", false, "Boolean test capability 2");
 
-  EXPECT_TRUE(std::get<bool>(capabilities.check("unittest_bool")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("!unittest_bool")));
-  EXPECT_TRUE(std::get<bool>(capabilities.check("!unittest_bool2")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_bool2")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_bool2>10")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_bool2<=10")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_bool2<=1.0.0")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_bool2=>1.0.0")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_doesnotexist")));
-  EXPECT_TRUE(std::get<bool>(capabilities.check("!unittest_doesnotexist")));
-  EXPECT_THROW(capabilities.check("unittest_bool="), std::invalid_argument);
-  EXPECT_THROW(capabilities.check("unittest_bool=="), std::invalid_argument);
+  for (const auto & [requirement, state] : tests)
+    EXPECT_EQ(std::get<0>(capabilities.check(requirement)), state);
+
+  EXPECT_THROW(capabilities.check("unittest_bool2=>1.0.0"), std::runtime_error);
+  EXPECT_THROW(capabilities.check("unittest_bool="), std::runtime_error);
+  EXPECT_THROW(capabilities.check("unittest_bool=="), std::runtime_error);
 }
 
 TEST(CapabilitiesTest, intTest)
@@ -43,15 +46,17 @@ TEST(CapabilitiesTest, intTest)
 
   for (const auto & c : is_true)
   {
-    EXPECT_TRUE(std::get<bool>(capabilities.check("unittest_int" + c)));
-    EXPECT_FALSE(std::get<bool>(capabilities.check("!unittest_int" + c)));
+    EXPECT_EQ(std::get<0>(capabilities.check("unittest_int" + c)), CapabilityUtils::CERTAIN_PASS);
+    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_int" + c + ")")),
+              CapabilityUtils::CERTAIN_FAIL);
   }
   for (const auto & c : is_false)
   {
-    EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_int" + c)));
-    EXPECT_TRUE(std::get<bool>(capabilities.check("!unittest_int" + c)));
+    EXPECT_EQ(std::get<0>(capabilities.check("unittest_int" + c)), CapabilityUtils::CERTAIN_FAIL);
+    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_int" + c + ")")),
+              CapabilityUtils::CERTAIN_PASS);
   }
-  EXPECT_THROW(capabilities.check("unittest_int<"), std::invalid_argument);
+  EXPECT_THROW(capabilities.check("unittest_int<"), std::runtime_error);
 }
 
 TEST(CapabilitiesTest, stringTest)
@@ -59,13 +64,15 @@ TEST(CapabilitiesTest, stringTest)
   Moose::Capabilities capabilities;
   capabilities.add("unittest_string", "CLanG", "String test capability");
 
-  EXPECT_TRUE(std::get<bool>(capabilities.check("unittest_string")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("!unittest_string")));
+  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string")), CapabilityUtils::CERTAIN_PASS);
+  EXPECT_EQ(std::get<0>(capabilities.check("!unittest_string")), CapabilityUtils::CERTAIN_FAIL);
 
-  EXPECT_TRUE(std::get<bool>(capabilities.check("unittest_string=clang")));
-  EXPECT_TRUE(std::get<bool>(capabilities.check("unittest_string=CLANG")));
-  EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_string=gcc")));
-  EXPECT_THROW(capabilities.check("unittest_string>"), std::invalid_argument);
+  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=clang")),
+            CapabilityUtils::CERTAIN_PASS);
+  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=CLANG")),
+            CapabilityUtils::CERTAIN_PASS);
+  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=gcc")), CapabilityUtils::CERTAIN_FAIL);
+  EXPECT_THROW(capabilities.check("unittest_string>"), std::runtime_error);
 }
 
 TEST(CapabilitiesTest, versionTest)
@@ -94,59 +101,50 @@ TEST(CapabilitiesTest, versionTest)
 
   for (const auto & c : is_true)
   {
-    EXPECT_TRUE(std::get<bool>(capabilities.check("unittest_version" + c)));
-    EXPECT_FALSE(std::get<bool>(capabilities.check("!unittest_version" + c)));
+    EXPECT_EQ(std::get<0>(capabilities.check("unittest_version" + c)),
+              CapabilityUtils::CERTAIN_PASS);
+    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_version" + c + ")")),
+              CapabilityUtils::CERTAIN_FAIL);
   }
   for (const auto & c : is_false)
   {
-    EXPECT_FALSE(std::get<bool>(capabilities.check("unittest_version" + c)));
-    EXPECT_TRUE(std::get<bool>(capabilities.check("!unittest_version" + c)));
+    EXPECT_EQ(std::get<0>(capabilities.check("unittest_version" + c)),
+              CapabilityUtils::CERTAIN_FAIL);
+    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_version" + c + ")")),
+              CapabilityUtils::CERTAIN_PASS);
   }
-  EXPECT_THROW(capabilities.check("!unittest_version<"), std::invalid_argument);
+  EXPECT_THROW(capabilities.check("!unittest_version<"), std::runtime_error);
 }
 
 TEST(CapabilitiesTest, multipleTest)
 {
   using libMesh::index_range;
   Moose::Capabilities capabilities;
-  capabilities.add("unittest2_bool", true, "Multiple capability test bool");
-  capabilities.add("unittest2_int", 78, "Multiple capability test int");
-  capabilities.add("unittest2_string", "CLanG", "Multiple capability test string");
-  capabilities.add("unittest2_version", "3.2.1", "Multiple capability test version number");
+  capabilities.add("unittest_bool", true, "Multiple capability test bool");
+  capabilities.add("unittest_int", 78, "Multiple capability test int");
+  capabilities.add("unittest_string", "CLanG", "Multiple capability test string");
+  capabilities.add("unittest_version", "3.2.1", "Multiple capability test version number");
 
-  EXPECT_TRUE(std::get<bool>(
-      capabilities.check("!unittest_doesnotexist unittest2_version<4.2.2 "
-                         "unittest2_int<100 unittest2_int>50 unittest2_string!=Popel")));
+  std::vector<std::pair<std::string, CapabilityUtils::CheckState>> tests = {
+      {"!unittest_doesnotexist & unittest_version<4.2.2 &"
+       "unittest_int<100 & unittest_int>50 & unittest_string!=Popel ",
+       CapabilityUtils::POSSIBLE_PASS},
+      {"!unittest_doesnotexist & unittest_version<4.2.2 &"
+       "unittest_int<100 & unittest2_int>50 & unittest_string!=Popel ",
+       CapabilityUtils::UNKNOWN},
+      {"unittest_doesnotexist & unittest_doesnotexist>2.0.1", CapabilityUtils::POSSIBLE_FAIL},
+      {"!unittest_doesnotexist | unittest_doesnotexist<=2.0.1", CapabilityUtils::POSSIBLE_PASS},
+      {"unittest_bool & unittest_int!=78", CapabilityUtils::CERTAIN_FAIL},
+      {"unittest_bool | unittest_int!=78", CapabilityUtils::CERTAIN_PASS},
+      {" !unittest_bool | (unittest_string=gcc | unittest_version<1.0)",
+       CapabilityUtils::CERTAIN_FAIL},
+      {"(unittest_bool & unittest_int=78) & (unittest_string=clang & unittest_version>2.0)",
+       CapabilityUtils::CERTAIN_PASS}};
+
+  for (const auto & [requirement, state] : tests)
+    EXPECT_EQ(std::get<0>(capabilities.check(requirement)), state);
+
   EXPECT_THROW(capabilities.check("unittest2_bool unittest2_int< unittest2_string==Popel"),
-               std::invalid_argument);
-
-  // test mix of true and false requirements (even indices are true, odd are false)
-  const std::vector<std::string> test = {"unittest2_bool",
-                                         "!unittest2_bool",
-                                         "!unittest_doesnotexist",
-                                         "unittest_doesnotexist",
-                                         "unittest2_int<100",
-                                         "unittest2_int>100",
-                                         "unittest2_string=clang",
-                                         "unittest2_string=gcc",
-                                         "unittest2_version<4.2.2",
-                                         "unittest2_version>4.2.2"};
-  for (const auto i : index_range(test))
-    for (const auto j : index_range(test))
-      for (const auto k : index_range(test))
-        EXPECT_EQ(std::get<bool>(capabilities.check(test[i] + ' ' + test[j] + ' ' + test[k])),
-                  i % 2 + j % 2 + k % 2 == 0);
-}
-
-#define BOOST_PARSER_DISABLE_HANA_TUPLE
-#include <boost/parser/parser.hpp>
-
-#include <iostream>
-#include <string>
-
-namespace bp = boost::parser;
-
-TEST(CapabilitiesTest, spiritParser)
-{
-  
+               std::runtime_error);
+  EXPECT_THROW(capabilities.check("(unittest2_bool"), std::runtime_error);
 }

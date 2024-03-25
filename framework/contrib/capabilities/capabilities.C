@@ -119,7 +119,8 @@ PyInit_capabilities(void)
   auto module = PyModule_Create(&capabilitiesmodule);
   PyModule_AddIntConstant(module, "CERTAIN_FAIL", 0);
   PyModule_AddIntConstant(module, "POSSIBLE_FAIL", 1);
-  PyModule_AddIntConstant(module, "POSSIBLE_PASS", 2);
-  PyModule_AddIntConstant(module, "CERTAIN_PASS", 3);
+  PyModule_AddIntConstant(module, "UNKNOWN", 2);
+  PyModule_AddIntConstant(module, "POSSIBLE_PASS", 3);
+  PyModule_AddIntConstant(module, "CERTAIN_PASS", 4);
   return module;
 }

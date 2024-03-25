@@ -6,7 +6,7 @@
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\nchaco not supported.*\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'Required capabilities \'chaco\' not fulfilled\.'
     requirement = 'The system shall not start a simulation if a requested capability is registered as false.'
   []
   [negative_not_supported_registered]
@@ -18,26 +18,26 @@
     requirement = 'The system shall start a simulation if a capability requested to not be present is registered as false.'
   []
   [false_compare_registered]
-    type = RunApp
+    type = RunException
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco>10'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\nchaco not supported.*\nCAPABILITIES_MISMATCH_END'
+    expect_err = 'Cannot compare capability chaco to a number\.'
     requirement = 'The system shall not start a simulation if a requested capability is not registered.'
   []
   [negative_false_compare_registered]
-    type = RunApp
+    type = RunException
     input = input.i
     chaco = false
-    cli_args = '--required-capabilities !chaco>10'
-    expect_out = 'Solve Converged!'
+    cli_args = '--required-capabilities !(chaco>10)'
+    expect_err = 'Cannot compare capability chaco to a number\.'
     requirement = 'The system shall start a simulation if a capability in a negate comparison is not registered.'
   []
   [not_supported_not_registered]
     type = RunApp
     input = input.i
     cli_args = '--required-capabilities doesnotexist'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\ndoesnotexist not supported.*\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'Required capabilities \'doesnotexist\' not fulfilled\.'
     requirement = 'The system shall not start a simulation if a requested capability is not supported.'
   []
   [negative_not_supported_not_registered]
@@ -51,7 +51,7 @@
     type = RunApp
     input = input.i
     cli_args = '--required-capabilities !petsc'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc supported.*\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'Required capabilities \'!petsc\' not fulfilled\.'
     requirement = 'The system shall not start a simulation if an excluded capability is supported.'
   []
   [supported]
@@ -65,21 +65,21 @@
     type = RunApp
     input = input.i
     cli_args = "--required-capabilities petsc<1.0.3"
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc<1.0.3 version not matched.*\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'Required capabilities \'petsc<1.0.3\' not fulfilled\.'
     requirement = 'The system shall not start a simulation if a requested capability has the wrong version.'
   []
   [negative_version_mismatch]
     type = RunApp
     input = input.i
-    cli_args = "--required-capabilities !petsc<1.0.3"
+    cli_args = "--required-capabilities !(petsc<1.0.3)"
     expect_out = 'Solve Converged!'
     requirement = 'The system shall start a simulation if a requested capability does not have the wrong version.'
   []
   [negative_nonexisting_comparison]
     type = RunApp
     input = input.i
-    cli_args = "--required-capabilities !doesnotexist<1.0.3"
-    expect_out = 'Solve Converged!'
+    cli_args = "--required-capabilities !(doesnotexist<1.0.3)"
+    expect_out = 'Required capabilities \'!\(doesnotexist<1.0.3\)\' are not specific enough\.'
     requirement = 'The system shall start a simulation if a negated test involves a capability that is not registered.'
   []
 []
