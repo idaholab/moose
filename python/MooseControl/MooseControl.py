@@ -62,13 +62,11 @@ class MooseControl:
             int: The HTTP status code
             dict or None: The returned JSON data, if any, otherwise None
         """
-        self.log(f'GET "{path}"')
-
         if not self._did_initial_wait:
-            raise Exception('Attempting to GET without calling initialWait()')
-        if not self.isListening():
-            raise Exception('The webserver is not listening')
+            raise Exception('Attempting GET without calling initialWait()')
+        self._requireListening()
 
+        self.log(f'GET "{path}"')
         r = requests.get(f'{self._url}/{path}')
         self.log(f'Status from "{path}": {r.status_code}')
         r.raise_for_status()
@@ -90,14 +88,12 @@ class MooseControl:
             int: The HTTP status code
             dict or None: The returned JSON data, if any, otherwise None
         """
-        self.log(f'POST {data} to "{path}"')
-
         if not self._did_initial_wait:
-            raise Exception('Attempting to GET without calling initialWait()')
-        if not self.isListening():
-            raise Exception('The webserver is not listening')
+            raise Exception('Attempting POST without calling initialWait()')
+        self._requireListening()
         self._requireWaiting()
 
+        self.log(f'POST {data} to "{path}"')
         r = requests.post(f'{self._url}/{path}', json=data)
 
         r_json = None
@@ -127,6 +123,11 @@ class MooseControl:
         except requests.exceptions.ConnectionError:
             return False
         return r.status_code == 404
+
+    def _requireListening(self):
+        """Internal helper that throws if the server is not listening"""
+        if not self.isListening():
+            raise self.Exception('MOOSE is not listening')
 
     def initialWait(self):
         """Waits for the MOOSE webserver to start listening
