@@ -6,7 +6,7 @@
 [Controls/web_server]
   type = WebServerControl
   port = 8000 # will get overridden by the script to find an available port
-  execute_on = 'INITIAL FINAL'
+  execute_on = 'INITIAL'
 []
 
 [Problem]

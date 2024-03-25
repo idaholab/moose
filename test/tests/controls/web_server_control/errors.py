@@ -17,14 +17,9 @@ if __name__ == '__main__':
             control.getPostprocessor('no_exist')
         elif test == 'set_controllable_unregistered_type':
             control._setControllable('unused', 'BadType', 'unused')
+        elif test == 'set_controllable_bad_convert':
+            control._setControllable('Outputs/json/enable', 'bool', 'foo')
 
         control.setContinue()
-
-        if test == 'continue_not_waiting':
-            control.setContinue()
-        elif test == 'get_postprocessor_not_waiting':
-            control.getPostprocessor('unused')
-        elif test == 'set_controllable_not_waiting':
-            control.setControllableReal('unused', 0)
 
     base_controller('web_server', run_control)

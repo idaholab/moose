@@ -179,9 +179,10 @@ WebServerControl::getScalarJSONValue(const miniJson::Json & json_value)
 {
   const auto from_json_type = json_value.getType();
   if (from_json_type != json_type)
-    throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
-                               stringifyJSONType(from_json_type) + " is not of the expected type " +
-                               stringifyJSONType(json_type));
+    throw ValueBase::Exception("The value " + json_value.serialize() + " of JSON type " +
+                               stringifyJSONType(from_json_type) +
+                               " is not of the expected JSON type " + stringifyJSONType(json_type));
+
   if constexpr (json_type == miniJson::JsonType::kBool)
     return json_value.toBool();
   else if constexpr (json_type == miniJson::JsonType::kNumber)
