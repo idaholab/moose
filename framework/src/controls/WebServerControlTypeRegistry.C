@@ -9,6 +9,8 @@
 
 #include "WebServerControlTypeRegistry.h"
 
+namespace Moose
+{
 WebServerControlTypeRegistry &
 WebServerControlTypeRegistry::getRegistry()
 {
@@ -16,4 +18,5 @@ WebServerControlTypeRegistry::getRegistry()
   if (!registry_singleton)
     registry_singleton = new WebServerControlTypeRegistry();
   return *registry_singleton;
+}
 }

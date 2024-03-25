@@ -19,6 +19,8 @@
 
 class WebServerControl;
 
+namespace Moose
+{
 /**
  * A static registry used to register and build values of different types for the WebServerControl
  *
@@ -183,3 +185,4 @@ private:
   /// The registration data
   std::map<std::string, std::unique_ptr<TypeBase>> _types;
 };
+}
