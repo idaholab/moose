@@ -82,6 +82,12 @@
   []
 []
 
+[Postprocessors]
+  [symmetric]
+    type = IsMatrixSymmetric
+  []
+[]
+
 [Executioner]
   type = Steady
   nl_rel_tol = 1e-10
@@ -92,5 +98,4 @@
 
 [Outputs]
   exodus = true
-  dofmap = true
 []
