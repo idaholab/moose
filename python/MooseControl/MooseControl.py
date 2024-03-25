@@ -20,7 +20,15 @@ class MooseControl:
     This object is tested primarily by
     test/tests/controls/web_server_control in the framework."""
 
-    def __init__(self, port: int):
+    def __init__(self, port: int, moose_process = None):
+        """Constructor
+
+        Parameters:
+            port (int): The port that the WebServerControl is running on
+            moose_process (subprocess.Popen or None): The moose process that we're
+                attached to (if any); if this is set and the process has ended
+                while in wait(), this will throw
+        """
         # The URL we interact with
         self._url = f'http://localhost:{port}'
 
@@ -29,6 +37,9 @@ class MooseControl:
 
         # Whether or not we called initialWait()
         self._did_initial_wait = False
+
+        # The process that is running moose, if any
+        self._moose_process = moose_process
 
     def log(self, msg):
         """Helper for printing to a log
@@ -141,6 +152,10 @@ class MooseControl:
         while True:
             # Wait every so often
             time.sleep(self._poll_time)
+
+            # If the process is provided, die if it is no longer running
+            if self._moose_process and self._moose_process.poll() is not None:
+                raise self.Exception(f'Attached MOOSE process has terminated')
 
             # Wait for it to be available
             current_flag = self.getWaitingFlag()

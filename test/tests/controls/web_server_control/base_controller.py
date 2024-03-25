@@ -20,7 +20,7 @@ def base_controller(control_name, run_control):
     process = MooseControl.spawnMoose(command, cwd)
 
     # Build the MooseControl for the test to use
-    control = MooseControl(port)
+    control = MooseControl(port, process)
     control.initialWait()
 
     # Run the user test, killing the process on any exceptions
