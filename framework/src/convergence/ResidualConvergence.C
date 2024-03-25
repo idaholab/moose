@@ -128,17 +128,17 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   }
 }
 
-void 
+void
 ResidualConvergence::initialSetup()
 {
   // This is a virtual function that is not implemented in the ResidualConvergence class.
   // It is implemented in the ResidualConvergence.C file.
 }
 
-//void
-//ResidualConvergence::timestepSetup()
+// void
+// ResidualConvergence::timestepSetup()
 //{
-  //_fe_problem.timestepSetup();
+//_fe_problem.timestepSetup();
 //}
 
 bool
