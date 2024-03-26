@@ -11,6 +11,7 @@
 #include <iostream>
 #include <typeinfo>
 
+#include "libmesh/id_types.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_object.h"
 
@@ -20,6 +21,7 @@
 #include "JsonIO.h"
 #include "JsonSyntaxTree.h"
 #include "MooseObject.h"
+#include <type_traits>
 
 class ReporterData;
 
@@ -138,6 +140,18 @@ public:
                                 const ReporterName & r_name,
                                 dof_id_type index,
                                 unsigned int time_index = 0) const = 0;
+  /**
+   * Helper for enabling generic transfer of a vector Reporter of values to a
+   * single value
+   * @param r_data The ReporterData on the app that this data is being transferred to
+   * @param r_name The name of the Report being transfered to
+   *
+   * @see ReporterTransferInterface
+   */
+  virtual void transferFromVector(ReporterData & r_data,
+                                  const ReporterName & r_name,
+                                  dof_id_type index,
+                                  unsigned int time_index = 0) const = 0;
 
   /**
    * Helper for declaring new reporter values based on this context
@@ -173,6 +187,18 @@ public:
    * @param local_size Number of elements to resize vector to
    */
   virtual void resize(dof_id_type local_size) = 0;
+
+  /**
+   * Helper for clearing vector data
+   *
+   */
+  virtual void clear() = 0;
+
+  /**
+   * Helper for summing reporter value.
+   *
+   */
+  virtual void vectorSum() = 0;
 
 protected:
   /**
@@ -258,6 +284,17 @@ public:
                                 const ReporterName & r_name,
                                 dof_id_type index,
                                 unsigned int time_index = 0) const override;
+
+  /**
+   * Perform type specific transfer from a vector
+   *
+   * NOTE: This is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
+   *       know of a better solution, if you have one please implement it.
+   */
+  virtual void transferFromVector(ReporterData & r_data,
+                                  const ReporterName & r_name,
+                                  dof_id_type index,
+                                  unsigned int time_index = 0) const override;
 
 protected:
   void broadcast()
@@ -421,16 +458,97 @@ public:
                                   const MooseObject & producer) const override;
 
   virtual void resize(dof_id_type local_size) final;
+  virtual void clear() final;
+  virtual void vectorSum() final;
 
   virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 };
 
-template <typename T>
-void ReporterGeneralContext<T>::resize(dof_id_type)
+//  Needed for compile-time checking if T is a vector.
+template <typename>
+struct is_std_vector : std::false_type
 {
-  mooseError("Cannot resize non vector-type reporter values.");
-}
+};
 
+template <typename T, typename A>
+struct is_std_vector<std::vector<T, A>> : std::true_type
+{
+};
+
+template <typename T>
+void
+ReporterGeneralContext<T>::resize(dof_id_type size)
+{
+  if constexpr (is_std_vector<T>::value)
+    this->_state.value().resize(size);
+  else
+  {
+    libmesh_ignore(size);
+    mooseError("Cannot resize non vector-type reporter values.");
+  }
+}
+template <typename T>
+void
+ReporterGeneralContext<T>::clear()
+{
+  if constexpr (is_std_vector<T>::value)
+    this->_state.value().clear();
+  else
+    mooseError("Cannot clear non vector-type reporter values.");
+}
+template <typename T>
+void
+ReporterGeneralContext<T>::vectorSum()
+{
+  // Case 1: T is a numeric type that we can sum (excluding bool)
+  if constexpr (std::is_arithmetic<T>::value && !std::is_same<T, bool>::value)
+  {
+    // Perform summation of the scalar value across all processors
+    this->comm().sum(this->_state.value());
+    return;
+  }
+  // Case 2: T is a vector type
+  else if constexpr (is_std_vector<T>::value)
+  {
+    using VectorValueType = typename T::value_type;
+
+    // Check if the vector elements are of a numeric type
+    if constexpr (std::is_arithmetic<VectorValueType>::value &&
+                  !std::is_same<VectorValueType, bool>::value)
+    {
+      // Perform summation of the vector elements across all processors
+      this->comm().sum(this->_state.value());
+      return;
+    }
+    // Check if the vector elements are also vectors
+    else if constexpr (is_std_vector<VectorValueType>::value)
+    {
+      using InnerValueType = typename VectorValueType::value_type;
+
+      // Check if the inner vector elements are of a numeric type
+      if constexpr (std::is_arithmetic<InnerValueType>::value &&
+                    !std::is_same<InnerValueType, bool>::value)
+      {
+        // Iterate over each inner vector in the outer vector
+        for (auto & innerVector : this->_state.value())
+        {
+          // Get the maximum size of the inner vector across all processors
+          dof_id_type maxInnerSize = innerVector.size();
+          this->comm().max(maxInnerSize);
+
+          // Resize the inner vector to the maximum size
+          innerVector.resize(maxInnerSize);
+
+          // Perform summation of the inner vector elements across all processors
+          this->comm().sum(innerVector);
+        }
+        return;
+      }
+    }
+  }
+
+  mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
+}
 /**
  * A context that broadcasts the Reporter value from the root processor
  */
@@ -629,6 +747,36 @@ public:
    * on @param local_size
    */
   virtual void resize(dof_id_type local_size) override { this->_state.value().resize(local_size); }
+
+  /**
+   * Since we know that the _state value is a vector type, we can clear it.
+   */
+  virtual void clear() override { this->_state.value().clear(); }
+
+  virtual void vectorSum() override
+  {
+    // Case 1: T is type that we can sum
+    if constexpr (std::is_arithmetic<T>::value &&
+                  !std::is_same<T, bool>::value) // We can't sum bools.
+    {
+      this->comm().sum(this->_state.value());
+      return;
+    }
+    // Case 2: T is a vector
+    else if constexpr (is_std_vector<T>::value)
+    {
+      using ValueType = typename T::value_type;
+      // Check if the ValueType is a vector
+      if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
+        for (auto & val_vec : this->_state.value())
+        { //_state.value()-> vector<vector<R>
+          this->comm().sum(val_vec);
+          return;
+        }
+    }
+    else
+      mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
+  }
 
   virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 };

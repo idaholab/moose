@@ -38,4 +38,8 @@ ConstantReporter::ConstantReporter(const InputParameters & parameters) : General
   declareConstantVectorReporterValues<Real>("real");
   declareConstantVectorReporterValues<std::string>("string");
   declareConstantVectorReporterValues<dof_id_type>("dof_id_type");
+  declareConstantVectorVectorReporterValues<int>("integer");
+  declareConstantVectorVectorReporterValues<Real>("real");
+  declareConstantVectorVectorReporterValues<std::string>("string");
+  declareConstantVectorVectorReporterValues<dof_id_type>("dof_id_type");
 }
