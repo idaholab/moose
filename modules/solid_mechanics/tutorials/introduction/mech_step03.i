@@ -32,6 +32,7 @@
     bottom_left = '1 0 0'
     top_right = '2 1 0'
   []
+  use_displaced_mesh = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]

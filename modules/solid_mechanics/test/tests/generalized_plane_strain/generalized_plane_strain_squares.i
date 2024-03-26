@@ -1,6 +1,5 @@
 [Mesh]
   file = 2squares.e
-  displacements = 'disp_x disp_y'
 []
 
 [Variables]

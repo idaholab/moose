@@ -20,6 +20,7 @@
     fixed_normal = true
     new_boundary = 'left right bottom top'
   []
+  use_displaced_mesh = false
 []
 
 [Physics]

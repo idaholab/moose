@@ -6,6 +6,7 @@
   ny = 10
   xmax = 50
   ymax = 50
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

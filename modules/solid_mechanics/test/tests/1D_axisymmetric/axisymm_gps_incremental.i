@@ -11,6 +11,7 @@
 
 [Mesh]
   file = line.e
+  use_displaced_mesh = false
 []
 
 [Variables]

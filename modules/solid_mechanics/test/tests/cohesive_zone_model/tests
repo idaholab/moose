@@ -43,7 +43,8 @@
       type = Exodiff
       input = 'czm_patch_test_base.i'
       exodiff = czm_small_strain_incremental_out.e
-      cli_args = "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
+      cli_args = "Mesh/use_displaced_mesh=false "
+                 "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
                  "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2  "
                  " Physics/SolidMechanics/CohesiveZone/czm_ik/strain=SMALL "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
@@ -325,7 +326,8 @@
       type = CSVDiff
       input = 'czm_patch_test_base.i'
       csvdiff = 'czm_jacobian_3DC_out.csv'
-      cli_args = "Materials/czm_mat/type=SalehaniIrani3DCTraction "
+      cli_args = "Mesh/use_displaced_mesh=false "
+                 "Materials/czm_mat/type=SalehaniIrani3DCTraction "
                  "Materials/czm_mat/normal_gap_at_maximum_normal_traction=0.05 "
                  "Materials/czm_mat/tangential_gap_at_maximum_shear_traction=0.01 "
                  "Materials/czm_mat/maximum_normal_traction=100 "

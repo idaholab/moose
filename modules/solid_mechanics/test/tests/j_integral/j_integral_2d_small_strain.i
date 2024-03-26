@@ -15,6 +15,7 @@
 
 [Mesh]
   file = crack2d.e
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

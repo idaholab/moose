@@ -372,6 +372,16 @@ QuasiStaticSolidMechanicsPhysics::act()
   // Add variables
   else if (_current_task == "add_variable")
   {
+    if (_strain == Strain::Small && _problem->getDisplacedProblem() != nullptr)
+    {
+      mooseWarning(
+          "SolidMechanics Action: A small strain formulation is requested (strain = SMALL) but a "
+          "displaced mesh exists. Some kernels and boundary conditions (i.e., Gravity, Pressure) "
+          "are applied by default on the displaced mesh if it exists, which is inconsistent with "
+          "small-strain assumptions. Unless the displaced mesh is needed (such as for contact), it "
+          "is recommended to disable it by setting 'use_dispalced_mesh=false' in the Mesh block.");
+    }
+
     if (getParam<bool>("add_variables"))
     {
       auto params = _factory.getValidParams("MooseVariable");

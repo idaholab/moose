@@ -14,6 +14,7 @@
     ny = 15
     elem_type = QUAD4
   []
+  use_displaced_mesh = false
 []
 
 [Variables]
