@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "Moose.h"
 #include "OptimizeSolve.h"
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
@@ -31,6 +32,7 @@ OptimizeSolve::validParams()
                OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD};
   params.addParam<ExecFlagEnum>(
       "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
+  params.addParam<bool>("time_step_as_iteration", false, "Use the time as the current iteration.");
   return params;
 }
 
@@ -39,6 +41,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _my_comm(MPI_COMM_SELF),
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
+    _time_step_as_iteration(getParam<bool>("time_step_as_iteration")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
     _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
@@ -61,6 +64,11 @@ OptimizeSolve::solve()
   // Initialize solution and matrix
   _obj_function->setInitialCondition(*_parameters.get());
   _ndof = _parameters->size();
+
+  // time step defaults 1, we want to start at 0 for first iteration to be
+  // consistent with TAO iterations.
+  if (_time_step_as_iteration)
+    _problem.timeStep() = 0;
   bool solveInfo = (taoSolve() == 0);
   return solveInfo;
 }
@@ -295,6 +303,8 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
       steady->setIterationNumberOutput((unsigned int)its);
   }
 
+  if (_time_step_as_iteration)
+    _problem.timeStep() = its;
   // print verbose per iteration output
   if (_verbose)
     _console << "TAO SOLVER: iteration=" << its << "\tf=" << f << "\tgnorm=" << gnorm
@@ -387,13 +397,17 @@ OptimizeSolve::objectiveFunction()
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
 
-  _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_FORWARD);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_FORWARD))
+  {
+    // We do this so we can output for failed solves.
+    _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
     mooseError("Forward solve multiapp failed!");
+  }
   if (_solve_on.contains(OptimizationAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 
+  _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
   _obj_iterate++;
   return _obj_function->computeObjective();
 }
