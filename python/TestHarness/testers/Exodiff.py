@@ -16,7 +16,7 @@ def findExodiff(moose_dir):
     exodiff_bin = os.path.join(moose_dir, 'share', 'moose', 'bin', 'exodiff')
 
     if not os.path.exists(exodiff_bin):
-        # use tradional build location
+        # use traditional build location
         exodiff_bin = os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff')
     return exodiff_bin
 

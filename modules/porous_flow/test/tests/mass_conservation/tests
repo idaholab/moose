@@ -52,7 +52,6 @@
     type = 'CSVDiff'
     input = 'mass06.i'
     csvdiff = 'mass06.csv'
-    compiler = '!INTEL'
     threading = '!pthreads'
     requirement = 'The system shall correctly compute the component and phase fluid masses in a multi-phase, multi-component fluid, at all saturations, and above a saturation threshold.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'

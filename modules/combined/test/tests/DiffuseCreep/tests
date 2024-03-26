@@ -13,14 +13,12 @@
     type = 'Exodiff'
     input = 'stress.i'
     exodiff = 'stress_out.e'
-    compiler = 'GCC CLANG'
     custom_cmp = 'stress.cmp'
   [../]
   [./stress_flux_n_gb_relax]
     type = 'Exodiff'
     input = 'stress_flux_n_gb_relax.i'
     exodiff = 'stress_flux_n_gb_relax_out.e'
-    compiler = 'GCC CLANG'
     custom_cmp = 'stress.cmp'
   [../]
   [./stress_based_chem_pot]

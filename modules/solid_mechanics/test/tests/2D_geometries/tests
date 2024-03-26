@@ -5,7 +5,6 @@
     input = 'planestrain.i'
     exodiff = 'planestrain_out.e'
     abs_zero = 1e-6
-    compiler = 'CLANG GCC'
     design = 'source/materials/ComputePlaneSmallStrain.md'
     requirement = 'The ComputePlaneSmallStrain class shall compute the elastic stress and strain for a planar square geometry under tension using a total small plane strain formulation.'
   [../]
@@ -14,7 +13,6 @@
     input = 'planestrain.i'
     exodiff = 'planestrain_out.e'
     abs_zero = 5e-6
-    compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'plane_strain'
     design = 'source/materials/ComputePlaneSmallStrain.md VolumetricLocking.md'
@@ -25,7 +23,6 @@
     input = 'finite_planestrain.i'
     exodiff = 'finite_planestrain_out.e'
     abs_zero = 1e-9
-    compiler = 'CLANG GCC'
     design = 'source/materials/ComputePlaneFiniteStrain.md'
     requirement = 'The ComputePlaneFiniteStrain class shall compute the elastic stress and strain for a planar square geometry under tension using a finite incremental plane strain formulation.'
   [../]
@@ -34,7 +31,6 @@
     input = 'finite_planestrain.i'
     exodiff = 'finite_planestrain_out.e'
     abs_zero = 1e-9
-    compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'finite_planestrain'
     design = 'source/materials/ComputePlaneFiniteStrain.md VolumetricLocking.md'
@@ -85,7 +81,6 @@
     exodiff = '2D-RZ_finiteStrain_resid_out.e'
     use_old_floor = true
     abs_zero = 1e-8
-    compiler = 'GCC CLANG'
     design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md'
     requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
   [../]
@@ -95,7 +90,6 @@
     exodiff = '2D-RZ_finiteStrain_resid_bbar_out.e'
     use_old_floor = true
     abs_zero = 1e-8
-    compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=2D-RZ_finiteStrain_resid_bbar_out'
     prereq = 'axisym_resid'
     design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'

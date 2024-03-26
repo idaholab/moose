@@ -69,7 +69,7 @@
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     min_parallel = 4
     abs_zero = 1e-6
     max_time = 800
@@ -82,7 +82,7 @@
     input = 'frictionless_penalty_contact_line_search.i'
     exodiff = 'frictionless_penalty_contact_line_search_out.e'
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     min_parallel = 4
     abs_zero = 1e-6
     max_time = 800
