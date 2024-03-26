@@ -141,6 +141,9 @@ public:
 
   virtual bool isNodalDefined() const override final { return false; }
 
+  virtual bool supportsFaceArg() const override final { return true; }
+  virtual bool supportsElemSideQpArg() const override final { return false; }
+
   virtual const Elem * const & currentElem() const override;
 
   virtual bool computingSecond() const override final { return false; }
