@@ -772,6 +772,11 @@ class RenderParameterToken(components.RenderComponent):
         html.Tag(p, 'span', string='C++ Type:')
         html.String(p, content=cpp_type, escape=True)
 
+        doc_unit = param['doc_unit']
+        p = html.Tag(body, 'p', class_='moose-parameter-description-doc-unit')
+        html.Tag(p, 'span', string='Unit:')
+        html.String(p, content=doc_unit)
+
         if param['options']:
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')
             html.Tag(p, 'span', string='Options:')
