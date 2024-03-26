@@ -20,6 +20,12 @@ where `<ERROR>` is a useful error message pertaining to the error that was encou
 
 The REST endpoints are as follows:
 
+### `check`
+
+Used to determine if the MOOSE webserver is currently listening. This doesn't necessarily mean that it is waiting for input.
+
+Interact with this endpoint by a `GET` request to `/check`. On success, the status code will be 200.
+
 ### `waiting`
 
 Used to determine of MOOSE is currently waiting within the `WebServerControl`, i.e., that `Control` is waiting for external input. The rest of the endpoints that follow require that the control is currently waiting for input.
