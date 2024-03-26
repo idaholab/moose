@@ -45,9 +45,9 @@ ADHDGAdvection::ADHDGAdvection(const InputParameters & parameters)
 }
 
 ADReal
-ADHDGAdvection::computeQpResidual(Moose::DGResidualType type)
+ADHDGAdvection::computeQpResidual(const Moose::DGResidualType type)
 {
-  ADReal r = 0.0;
+  ADReal r = 0;
 
   switch (type)
   {
