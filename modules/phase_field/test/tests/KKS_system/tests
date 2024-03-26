@@ -89,12 +89,38 @@
     []
   []
 
-  [kks_example_nested]
+  [kks_example_two_phase_nested]
     type = 'Exodiff'
     input = 'kks_example_nested.i'
     exodiff = 'kks_example_nested.e'
-    issues = '#19981'
+    issues = '#26263'
     design = 'KKSPhaseConcentrationMaterial.md KKSPhaseConcentrationDerivatives.md NestedKKSACBulkC.md NestedKKSACBulkF.md NestedKKSSplitCHCRes.md'
-    requirement = 'The nested solve of Kim-Kim-Suzuki shall yield the correct results with non-linear phase free energies'
+    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
+  []
+  [kks_example_two_phase_nested_damped]
+    type = 'Exodiff'
+    input = 'kks_example_nested_damped.i'
+    exodiff = 'kks_example_nested_damped.e'
+    issues = '#26263'
+    design = 'KKSPhaseConcentrationMaterial.md KKSPhaseConcentrationDerivatives.md NestedKKSACBulkC.md NestedKKSACBulkF.md NestedKKSSplitCHCRes.md'
+    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
+  []
+
+  [kks_example_multiphase_nested]
+    type = 'Exodiff'
+    input = 'kks_example_multiphase_nested.i'
+    exodiff = 'kks_example_multiphase_nested.e'
+    issues = '#26263'
+    design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestedKKSMultiACBulkC.md NestedKKSMultiACBulkF.md NestedKKSMultiSplitCHCRes.md'
+    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
+  []
+
+  [kks_example_multiphase_nested_damped]
+    type = 'Exodiff'
+    input = 'kks_example_multiphase_nested_damped.i'
+    exodiff = 'kks_example_multiphase_nested_damped.e'
+    issues = '#26263'
+    design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestedKKSMultiACBulkC.md NestedKKSMultiACBulkF.md NestedKKSMultiSplitCHCRes.md'
+    requirement = 'The damped nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with log-based phase free energies'
   []
 []

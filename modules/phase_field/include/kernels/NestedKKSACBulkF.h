@@ -29,48 +29,48 @@ protected:
 
   const JvarMap & _c_map;
 
-  /// Number of global concentrations
+  // Number of global concentrations
   const unsigned int _num_c;
 
-  /// Global concentrations
+  // Global concentrations
   const std::vector<VariableName> _c_names;
 
-  /// Phase concentrations
+  // Phase concentrations
   const std::vector<MaterialPropertyName> _ci_names;
 
-  /// Free energy of phase a
+  // Free energy of phase a
   const MaterialPropertyName _Fa_name;
 
-  /// Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
+  // Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
   std::vector<const MaterialProperty<Real> *> _dFadca;
 
-  /// Free energy of phase b
+  // Free energy of phase b
   const MaterialPropertyName _Fb_name;
 
-  /// Derivative of the free energy function \f$ \frac d{dc_b} F_b \f$
+  // Derivative of the free energy function \f$ \frac d{dc_b} F_b \f$
   std::vector<const MaterialProperty<Real> *> _dFbdcb;
 
-  /// Derivative of barrier function g
+  // Derivative of barrier function g
   const MaterialProperty<Real> & _prop_dg;
 
-  /// Second derivative of barrier function g
+  // Second derivative of barrier function g
   const MaterialProperty<Real> & _prop_d2g;
 
-  /// Double well height parameter
+  // Double well height parameter
   const Real _w;
 
-  /// Free energy properties
+  // Free energy properties
   std::vector<const MaterialProperty<Real> *> _prop_Fi;
 
-  /// Derivative of phase concentration wrt eta \f$ \frac d{d{eta}} c_i \f$
+  // Derivative of phase concentration wrt eta \f$ \frac d{d{eta}} c_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dcideta;
 
-  /// Derivative of phase concentration wrt global concentration \f$ \frac d{b} c_i \f$
+  // Derivative of phase concentration wrt global concentration \f$ \frac d{b} c_i \f$
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _dcidb;
 
-  /// Partial derivative of the free energy function Fa wrt coupled variables \f$ \frac d{dq} F_a \f$
+  // Partial derivative of the free energy function Fa wrt coupled variables \f$ \frac d{dq} F_a \f$
   std::vector<const MaterialProperty<Real> *> _dFadarg;
 
-  /// Partial derivative of the free energy function Fb wrt coupled variables \f$ \frac d{dq} F_b \f$
+  // Partial derivative of the free energy function Fb wrt coupled variables \f$ \frac d{dq} F_b \f$
   std::vector<const MaterialProperty<Real> *> _dFbdarg;
 };
