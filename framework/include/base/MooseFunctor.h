@@ -271,6 +271,16 @@ public:
    */
   Moose::FaceArg checkFace(const Moose::FaceArg & face) const;
 
+  /**
+   * Whether this functor supports evaluation with FaceArg
+   */
+  virtual bool supportsFaceArg() const = 0;
+
+  /**
+   * Whether this functor supports evaluation with ElemSideQpArg
+   */
+  virtual bool supportsElemSideQpArg() const = 0;
+
 protected:
   /** @name Functor evaluation routines
    * These methods are all for evaluating functors with different kinds of spatial arguments. Each
@@ -1118,6 +1128,9 @@ public:
     return _wrapped->hasFaceSide(fi, fi_elem_side);
   }
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 protected:
   ///@{
   /**
@@ -1262,6 +1275,9 @@ public:
 
   bool hasBlocks(SubdomainID /* id */) const override { return true; }
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 private:
   ValueType evaluate(const ElemArg &, const StateArg &) const override { return _value; }
   ValueType evaluate(const FaceArg &, const StateArg &) const override { return _value; }
@@ -1315,6 +1331,9 @@ public:
 
   // For backwards compatiblity of unit testing
   bool hasFaceSide(const FaceInfo & fi, bool) const override;
+
+  bool supportsFaceArg() const override final { return false; }
+  bool supportsElemSideQpArg() const override final { return false; }
 
 private:
   ValueType evaluate(const ElemArg &, const StateArg &) const override

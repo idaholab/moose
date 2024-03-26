@@ -258,16 +258,14 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
           hit::errormsg(n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
 
     params = _action_factory.getValidParams(it->second._action);
-
     params.set<ActionWarehouse *>("awh") = &_action_wh;
+    params.setHitNode(*n, {});
 
     extractParams(curr_identifier, params);
 
     // Add the parsed syntax to the parameters object for consumption by the Action
     params.set<std::string>("task") = it->second._task;
     params.set<std::string>("registered_identifier") = registered_identifier;
-    params.blockLocation() = n->filename() + ":" + std::to_string(n->line());
-    params.blockFullpath() = n->fullpath();
 
     if (!(params.have_parameter<bool>("isObjectAction") && params.get<bool>("isObjectAction")))
       params.set<std::vector<std::string>>("control_tags")
@@ -283,11 +281,10 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
           std::dynamic_pointer_cast<MooseObjectAction>(action_obj);
       if (object_action)
       {
-        object_action->getObjectParams().blockLocation() = params.blockLocation();
-        object_action->getObjectParams().blockFullpath() = params.blockFullpath();
-        extractParams(curr_identifier, object_action->getObjectParams());
-        object_action->getObjectParams()
-            .set<std::vector<std::string>>("control_tags")
+        auto & object_params = object_action->getObjectParams();
+        object_params.setHitNode(*n, {});
+        extractParams(curr_identifier, object_params);
+        object_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
     }
@@ -953,8 +950,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
       auto node = root()->find(full_name);
       if (node && node->type() == hit::NodeType::Field)
       {
-        p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
-        p.paramFullpath(param_name) = full_name;
+        p.setHitNode(param_name, *node, {});
         p.set_attributes(param_name, false);
         // Check if we have already printed the deprecated param message.
         // If we haven't, add it to the tracker, and print it.
@@ -972,8 +968,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         node = root()->find(full_name);
         if (node)
         {
-          p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
-          p.paramFullpath(param_name) = full_name;
+          p.setHitNode(param_name, *node, {});
           p.set_attributes(param_name, false);
           _extracted_vars.insert(
               full_name); // Keep track of all variables extracted from the input file
@@ -1009,14 +1004,6 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
                                       dynamic_cast<InputParameters::Parameter<ptype> *>(par),      \
                                       in_global,                                                   \
                                       global_params_block)
-#define setfpath(ptype)                                                                            \
-  else if (par->type() == demangle(typeid(ptype).name()))                                          \
-      setFilePathParam<ptype>(full_name,                                                           \
-                              short_name,                                                          \
-                              dynamic_cast<InputParameters::Parameter<ptype> *>(par),              \
-                              p,                                                                   \
-                              in_global,                                                           \
-                              global_params_block)
 #define setvector(ptype, base)                                                                     \
   else if (par->type() == demangle(typeid(std::vector<ptype>).name()))                             \
       setVectorParameter<ptype, base>(                                                             \
@@ -1031,15 +1018,6 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
           full_name,                                                                               \
           short_name,                                                                              \
           dynamic_cast<InputParameters::Parameter<std::map<key_type, mapped_type>> *>(par),        \
-          in_global,                                                                               \
-          global_params_block)
-#define setvectorfpath(ptype)                                                                      \
-  else if (par->type() == demangle(typeid(std::vector<ptype>).name()))                             \
-      setVectorFilePathParam<ptype>(                                                               \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<InputParameters::Parameter<std::vector<ptype>> *>(par),                     \
-          p,                                                                                       \
           in_global,                                                                               \
           global_params_block)
 #define setvectorvector(ptype)                                                                     \
@@ -1084,10 +1062,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(string, string);
         setscalar(SubdomainName, string);
         setscalar(BoundaryName, string);
-        setfpath(FileName);
-        setfpath(MeshFileName);
+        setscalar(FileName, string);
+        setscalar(MeshFileName, string);
+        setscalar(FileNameNoExtension, string);
         setscalar(RelativeFileName, string);
-        setfpath(FileNameNoExtension);
+        setscalar(DataFileName, string);
         setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
@@ -1154,10 +1133,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(MooseEnum, MooseEnum);
 
         setvector(string, string);
-        setvectorfpath(FileName);
-        setvectorfpath(FileNameNoExtension);
+        setvector(FileName, string);
+        setvector(FileNameNoExtension, string);
         setvector(RelativeFileName, string);
-        setvectorfpath(MeshFileName);
+        setvector(DataFileName, string);
+        setvector(MeshFileName, string);
         setvector(SubdomainName, string);
         setvector(BoundaryName, string);
         setvector(NonlinearVariableName, string);
@@ -1214,6 +1194,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(string);
         setvectorvector(FileName);
         setvectorvector(FileNameNoExtension);
+        setvectorvector(DataFileName);
         setvectorvector(MeshFileName);
         setvectorvector(SubdomainName);
         setvectorvector(BoundaryName);
@@ -1253,6 +1234,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvectorvector(string);
         setvectorvectorvector(FileName);
         setvectorvectorvector(FileNameNoExtension);
+        setvectorvectorvector(DataFileName);
         setvectorvectorvector(MeshFileName);
         setvectorvectorvector(SubdomainName);
         setvectorvectorvector(BoundaryName);
@@ -1422,32 +1404,6 @@ Builder::setScalarParameter(const std::string & full_name,
   }
 }
 
-template <typename T>
-void
-Builder::setFilePathParam(const std::string & full_name,
-                          const std::string & short_name,
-                          InputParameters::Parameter<T> * param,
-                          InputParameters & params,
-                          bool in_global,
-                          GlobalParamsAction * global_block)
-{
-  std::string prefix;
-  std::string postfix = root()->param<std::string>(full_name);
-  auto input_filename = getPrimaryFileName(false);
-  size_t pos = input_filename.find_last_of('/');
-  if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
-    prefix = input_filename.substr(0, pos + 1);
-
-  params.rawParamVal(short_name) = postfix;
-  param->set() = prefix + postfix;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<T>(short_name) = param->get();
-  }
-}
-
 template <typename T, typename UP_T, typename Base>
 void
 Builder::setScalarValueTypeParameter(const std::string & full_name,
@@ -1598,45 +1554,6 @@ Builder::setMapParameter(const std::string & full_name,
     auto & global_map = global_block->setParam<std::map<KeyType, MappedType>>(short_name);
     for (const auto & pair : the_map)
       global_map.insert(pair);
-  }
-}
-
-template <typename T>
-void
-Builder::setVectorFilePathParam(const std::string & full_name,
-                                const std::string & short_name,
-                                InputParameters::Parameter<std::vector<T>> * param,
-                                InputParameters & params,
-                                bool in_global,
-                                GlobalParamsAction * global_block)
-{
-  std::vector<T> vec;
-  std::vector<std::string> rawvec;
-  auto input_filename = getPrimaryFileName(false);
-  if (root()->find(full_name))
-  {
-    auto tmp = root()->param<std::vector<std::string>>(full_name);
-    params.rawParamVal(short_name) = root()->param<std::string>(full_name);
-    for (auto val : tmp)
-    {
-      std::string prefix;
-      std::string postfix = val;
-      size_t pos = input_filename.find_last_of('/');
-      if (pos != std::string::npos && postfix[0] != '/')
-        prefix = input_filename.substr(0, pos + 1);
-      rawvec.push_back(postfix);
-      vec.push_back(prefix + postfix);
-    }
-  }
-
-  param->set() = vec;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<T>(short_name).resize(param->get().size());
-    for (unsigned int i = 0; i < vec.size(); ++i)
-      global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
   }
 }
 

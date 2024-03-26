@@ -9,7 +9,9 @@
 
 #include "LibmeshPartitioner.h"
 
+#include "MooseApp.h"
 #include "MooseMeshUtils.h"
+
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/centroid_partitioner.h"
 #include "libmesh/parmetis_partitioner.h"
@@ -129,7 +131,7 @@ LibmeshPartitioner::clone() const
       return std::make_unique<MortonSFCPartitioner>();
 
     case 4: // subdomain_partitioner
-      return std::make_unique<LibmeshPartitioner>(parameters());
+      return _app.getFactory().clone(*this);
   }
   // this cannot happen but I need to trick the compiler into
   // believing me

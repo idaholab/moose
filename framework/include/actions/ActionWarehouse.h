@@ -249,6 +249,13 @@ public:
   const std::string & getMooseAppName();
   const std::string & getCurrentTaskName() const { return _current_task; }
 
+  /**
+   * @return The current action that is running, if any
+   */
+  const Action * getCurrentAction() const { return _current_action; }
+  /**
+   * @return The name of the current action that is running
+   */
   std::string getCurrentActionName() const;
 
   /**
@@ -304,6 +311,8 @@ protected:
   // When executing the actions in the warehouse, this string will always contain
   // the current task name
   std::string _current_task;
+  // The current action that is running
+  Action * _current_action;
 
   //
   // data created by actions
@@ -321,8 +330,6 @@ protected:
 private:
   /// Last task to run before (optional) early termination - blank means no early termination.
   std::string _final_task;
-
-  ActionIterator _act_iter;
 
   const std::list<Action *> _empty_action_list;
 };

@@ -150,6 +150,9 @@ public:
 
   bool hasBlocks(SubdomainID) const override { return true; }
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 private:
   using typename Moose::FunctorBase<Real>::ValueType;
   using typename Moose::FunctorBase<Real>::GradientType;

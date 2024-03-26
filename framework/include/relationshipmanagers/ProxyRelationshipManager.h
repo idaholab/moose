@@ -45,10 +45,7 @@ public:
    * A clone() is needed because GhostingFunctor can not be shared between
    * different meshes. The operations in  GhostingFunctor are mesh dependent.
    */
-  virtual std::unique_ptr<GhostingFunctor> clone() const override
-  {
-    return std::make_unique<ProxyRelationshipManager>(*this);
-  }
+  virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override{};

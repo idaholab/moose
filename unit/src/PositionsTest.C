@@ -8,33 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
-#include "MultiAppPositions.h"
-#include "InputPositions.h"
-#include "AppFactory.h"
-#include "Executioner.h"
-#include "MooseMain.h"
 
-TEST(Positions, getUninitialized)
+#include "PositionsTest.h"
+#include "Positions.h"
+
+TEST_F(PositionsTest, getUninitialized)
 {
-  // Create a minimal app that can create objects
-  const char * argv[2] = {"foo", "\0"};
-  const auto & app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
-  const auto & factory = &app->getFactory();
-  app->parameters().set<bool>("minimal") = true;
-  app->run();
-  Executioner * exec = app->getExecutioner();
-  FEProblemBase * fe_problem = &exec->feProblem();
-
   // MultiAppPositions is uninitialized at construction, any other Positions with such
   // behavior would do
-  InputParameters params = factory->getValidParams("MultiAppPositions");
-  params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
-  params.set<SubProblem *>("_subproblem") = fe_problem;
-  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
+  InputParameters params = _factory.getValidParams("MultiAppPositions");
   params.set<std::vector<MultiAppName>>("multiapps") = {"m1"};
-  params.set<std::string>("_object_name") = "test";
-  params.set<std::string>("_type") = "MultiAppPositions";
-  MultiAppPositions positions(params);
+  auto & positions = addObject<Positions>("MultiAppPositions", "test", params);
 
   try
   {
@@ -81,26 +65,12 @@ TEST(Positions, getUninitialized)
   }
 }
 
-TEST(Positions, getters)
+TEST_F(PositionsTest, getters)
 {
-  // Create a minimal app that can create objects
-  const char * argv[2] = {"foo", "\0"};
-  const auto & app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
-  const auto & factory = &app->getFactory();
-  app->parameters().set<bool>("minimal") = true;
-  app->run();
-  Executioner * exec = app->getExecutioner();
-  FEProblemBase * fe_problem = &exec->feProblem();
-
-  InputParameters params = factory->getValidParams("InputPositions");
-  params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
-  params.set<SubProblem *>("_subproblem") = fe_problem;
-  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
+  InputParameters params = _factory.getValidParams("InputPositions");
   params.set<std::vector<Point>>("positions") = {Point(1, 0, 0), Point(0, 0, 1)};
-  params.set<std::string>("_object_name") = "test";
-  params.set<std::string>("_type") = "InputPositions";
   params.set<bool>("auto_sort") = true;
-  InputPositions positions(params);
+  auto & positions = addObject<Positions>("InputPositions", "test", params);
 
   // Test getters
   EXPECT_EQ(positions.getPositions(false)[0], Point(1, 0, 0));

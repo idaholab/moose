@@ -71,6 +71,12 @@ SideAdvectiveFluxIntegralTempl<is_ad>::SideAdvectiveFluxIntegralTempl(
 
   // Check whether a finite element or finite volume variable is provide
   _qp_integration = !_adv_quant;
+
+  checkFunctorSupportsSideIntegration<Real>("vel_x", _qp_integration);
+  if (_vel_y)
+    checkFunctorSupportsSideIntegration<Real>("vel_y", _qp_integration);
+  if (_vel_z)
+    checkFunctorSupportsSideIntegration<Real>("vel_z", _qp_integration);
 }
 
 template <bool is_ad>

@@ -9,6 +9,7 @@
 
 #include "BlockWeightedPartitioner.h"
 #include "MooseMeshUtils.h"
+#include "MooseApp.h"
 
 #include "libmesh/elem.h"
 
@@ -48,7 +49,7 @@ BlockWeightedPartitioner::BlockWeightedPartitioner(const InputParameters & param
 std::unique_ptr<Partitioner>
 BlockWeightedPartitioner::clone() const
 {
-  return std::make_unique<BlockWeightedPartitioner>(_pars);
+  return _app.getFactory().clone(*this);
 }
 
 void

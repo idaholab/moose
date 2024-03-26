@@ -955,17 +955,21 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
 
 // Instantiate new Types
 
-/// This type is for expected (i.e. input) file names or paths that your simulation needs.  If
-/// relative paths are assigned to this type, they are treated/modified to be relative to the
-/// location of the simulation's main input file's directory.  It can be used to trigger open file
-/// dialogs in the GUI.
+/// This type is for expected (i.e. input) file names or paths that your simulation needs.
+/// If relative types are assigned to this type, they are replaced with an absolute path
+/// that is relative to the context of the parameter (usually the input file).
 DerivativeStringClass(FileName);
 
-/// This type is for expected filenames where the extension is unwanted, it can be used to trigger open file dialogs in the GUI
+/// Similar to FileName but without an extension
 DerivativeStringClass(FileNameNoExtension);
 
-/// This type is for expected filenames that should be relative (don't set the absolute path under the hood)
+/// This type is for expected filenames that should be relative and will not have their
+/// values set to absolute paths like FileName
 DerivativeStringClass(RelativeFileName);
+
+/// This type is for files used in the DataFileInterface, which enables searching of files
+/// within the registered data directory
+DerivativeStringClass(DataFileName);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);

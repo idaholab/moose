@@ -39,7 +39,7 @@ RedistributeProperties::operator()(const MeshBase::const_element_iterator &,
 std::unique_ptr<GhostingFunctor>
 RedistributeProperties::clone() const
 {
-  return std::make_unique<RedistributeProperties>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 std::string

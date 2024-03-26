@@ -151,16 +151,19 @@ UnitsConversionEvaler::eval(hit::Field * n,
   return ss.str();
 }
 
-Parser::Parser(const std::vector<std::string> & input_filenames)
-  : _root(nullptr), _input_filenames(input_filenames), _input_text(), _app_type(std::string())
+Parser::Parser(const std::vector<std::string> & input_filenames,
+               const std::optional<std::vector<std::string>> & input_text)
+  : _root(nullptr),
+    _input_filenames(input_filenames),
+    _input_text(input_text),
+    _app_type(std::string())
 {
 }
 
 Parser::Parser(const std::string & input_filename, const std::optional<std::string> & input_text)
-  : _root(nullptr),
-    _input_filenames({input_filename}),
-    _input_text(input_text),
-    _app_type(std::string())
+  : Parser(std::vector<std::string>{input_filename},
+           input_text ? std::optional<std::vector<std::string>>({*input_text})
+                      : std::optional<std::vector<std::string>>())
 {
 }
 
@@ -290,9 +293,8 @@ Parser::parse()
 {
   _root.reset();
 
-  if (_input_text)
-    mooseAssert(getInputFileNames().size() == 1,
-                "Should have only one filename with text provided");
+  if (_input_text && _input_text->size() != getInputFileNames().size())
+    mooseError("Input text is not the same size as the input filenames");
 
   if (getInputFileNames().size() > 1)
     mooseInfo("Merging inputs ", Moose::stringify(getInputFileNames()));
@@ -309,16 +311,17 @@ Parser::parse()
       std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
   const auto use_real_paths = use_rel_paths_str == "0" || use_rel_paths_str == "false";
 
-  for (const auto & input_filename : getInputFileNames())
+  for (const auto i : index_range(getInputFileNames()))
   {
+    const auto & input_filename = getInputFileNames()[i];
     const auto corrected_filename =
         use_real_paths ? MooseUtils::realpath(input_filename) : input_filename;
 
     // Parse the input text string if provided, otherwise read file from disk
     std::string input;
     std::string errmsg;
-    if (_input_text.has_value())
-      input = _input_text.value();
+    if (_input_text)
+      input = (*_input_text)[i];
     else
     {
       MooseUtils::checkFileReadable(corrected_filename, true);

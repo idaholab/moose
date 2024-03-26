@@ -15,7 +15,7 @@ InputParameters
 DataFileNameTest::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addRequiredParam<FileName>("data_file", "Data file to look up");
+  params.addRequiredParam<DataFileName>("data_file", "Data file to look up");
   return params;
 }
 

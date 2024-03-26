@@ -18,6 +18,7 @@
 #include "DisplacedProblem.h"
 #include "RelationshipManager.h"
 #include "InputParameterWarehouse.h"
+#include "ActionFactory.h"
 
 InputParameters
 Action::validParams()
@@ -40,12 +41,12 @@ Action::validParams()
 }
 
 Action::Action(const InputParameters & parameters)
-  : MooseBase(
-        parameters.get<std::string>("action_type"),
-        parameters.get<std::string>("_action_name"),
-        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
-    MooseBaseParameterInterface(parameters, this),
-    MooseBaseErrorInterface(this),
+  : MooseBase(parameters.get<std::string>("action_type"),
+              parameters.get<std::string>("_action_name"),
+              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor"),
+              parameters),
+    MooseBaseParameterInterface(*this, parameters),
+    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
     MeshMetaDataInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     PerfGraphInterface(
@@ -74,6 +75,8 @@ Action::Action(const InputParameters & parameters)
     _problem(_awh.problemBase()),
     _act_timer(registerTimedSection("act", 4))
 {
+  if (_app.getActionFactory().currentlyConstructing() != &parameters)
+    mooseError("This object was not constructed using the ActionFactory, which is not supported.");
 }
 
 void
@@ -151,4 +154,25 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
   }
 
   return added;
+}
+
+void
+Action::associateWithParameter(const std::string & param_name, InputParameters & params) const
+{
+  associateWithParameter(parameters(), param_name, params);
+}
+
+void
+Action::associateWithParameter(const InputParameters & from_params,
+                               const std::string & param_name,
+                               InputParameters & params) const
+{
+  const auto to_hit_node = params.getHitNode();
+  if (!to_hit_node || to_hit_node->isRoot())
+  {
+    if (const auto hit_node = from_params.getHitNode(param_name))
+      params.setHitNode(*hit_node, {});
+    else if (const auto hit_node = from_params.getHitNode())
+      params.setHitNode(*hit_node, {});
+  }
 }

@@ -60,6 +60,9 @@ ReadExecutorParamsAction::setupAutoPreconditioning()
     InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
     params.set<std::string>("type") = "SMP";
 
+    // Associate errors with "solve_type"
+    associateWithParameter(_moose_object_pars, "solve_type", params);
+
     // Create the Action that will build the Preconditioner object
     std::shared_ptr<Action> ptr =
         _action_factory.create("SetupPreconditionerAction", "_moose_auto", params);

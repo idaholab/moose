@@ -1,0 +1,3 @@
+[object]
+  file = ../foo
+[]

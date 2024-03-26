@@ -24,6 +24,7 @@ public:
 
   SideIntegralPostprocessor(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
@@ -37,6 +38,14 @@ protected:
     mooseError("Integral over faces have not been implemented for this postprocessor");
   };
   virtual Real computeIntegral();
+
+  /**
+   * Error method to call when face info is needed but not available
+   */
+  virtual void errorNoFaceInfo() const
+  {
+    mooseError("Face info integration was specified, but the mesh contains no face info objects.");
+  }
 
   /// The local quadrature point index when computing an integral over quadrature points
   unsigned int _qp;

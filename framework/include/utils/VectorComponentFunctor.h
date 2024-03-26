@@ -39,6 +39,9 @@ public:
                                   const Moose::StateArg & state) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _vector.hasBlocks(sub_id); }
 
+  bool supportsFaceArg() const override final { return _vector.supportsFaceArg(); }
+  bool supportsElemSideQpArg() const override final { return _vector.supportsElemSideQpArg(); }
+
 private:
   /// The parent vector functor
   const VectorFunctor & _vector;

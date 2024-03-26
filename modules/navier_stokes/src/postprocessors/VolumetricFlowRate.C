@@ -67,6 +67,12 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
                  "advected material properties.");
 
   _qp_integration = !getFieldVar("vel_x", 0)->isFV();
+
+  if (_advected_mat_prop_supplied)
+    checkFunctorSupportsSideIntegration<ADReal>("advected_mat_prop", _qp_integration);
+  if (_adv_quant)
+    checkFunctorSupportsSideIntegration<ADReal>("advected_quantity", _qp_integration);
+
   if (!_qp_integration)
   {
     if (!_rc_uo)

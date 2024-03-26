@@ -14,22 +14,13 @@
 #include "MooseError.h"
 #include "MooseBase.h"
 
-/// Needed to break include cycle between MooseApp.h and Action.h
-class MooseApp;
-[[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
-
 /**
  * Interface that provides APIs to output errors/warnings/info messages
  */
 class MooseBaseErrorInterface : public ConsoleStreamInterface
 {
 public:
-  MooseBaseErrorInterface(const MooseBase * const base)
-    : ConsoleStreamInterface(base->getMooseApp()), _app(base->getMooseApp()), _moose_base(base)
-  {
-  }
-
-  virtual ~MooseBaseErrorInterface() = default;
+  MooseBaseErrorInterface(const MooseBase & base);
 
   /**
    * Emits an error prefixed with object name and type.
@@ -38,9 +29,8 @@ public:
   [[noreturn]] void mooseError(Args &&... args) const
   {
     std::ostringstream oss;
-    moose::internal::mooseStreamAll(oss, errorPrefix("error"), std::forward<Args>(args)...);
-    std::string msg = oss.str();
-    callMooseErrorRaw(msg, &_app);
+    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+    _moose_base.callMooseError(oss.str(), /* with_prefix = */ true);
   }
 
   /**
@@ -51,8 +41,7 @@ public:
   {
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-    std::string msg = oss.str();
-    callMooseErrorRaw(msg, &_app);
+    _moose_base.callMooseError(oss.str(), /* with_prefix = */ false);
   }
 
   /**
@@ -62,7 +51,7 @@ public:
   void mooseWarning(Args &&... args) const
   {
     moose::internal::mooseWarningStream(
-        _console, errorPrefix("warning"), std::forward<Args>(args)...);
+        _console, _moose_base.errorPrefix("warning"), std::forward<Args>(args)...);
   }
 
   /**
@@ -86,17 +75,7 @@ public:
     moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...);
   }
 
-  /**
-   * A descriptive prefix for errors for this object:
-   *
-   * The following <error_type> occurred in the object "<name>", of type "<type>".
-   */
-  std::string errorPrefix(const std::string & error_type) const;
-
 private:
-  /// The MOOSE application this is associated with
-  MooseApp & _app;
-
   /// The MooseBase class deriving from this interface
-  const MooseBase * const _moose_base;
+  const MooseBase & _moose_base;
 };
