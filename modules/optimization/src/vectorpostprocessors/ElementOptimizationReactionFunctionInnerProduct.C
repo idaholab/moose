@@ -16,8 +16,9 @@ ElementOptimizationReactionFunctionInnerProduct::validParams()
 {
   InputParameters params = ElementOptimizationFunctionInnerProduct::validParams();
   params.addClassDescription(
-      "Compute the gradient for material inversion by taking the inner product of the "
-      "forward and adjoint variables with material gradient");
+      "Compute the gradient for reaction material inversion by taking the inner product of the "
+      "forward and adjoint variables multiplied by the derivative of the optimization function "
+      "with respect to the controllable parameters.");
 
   params.addRequiredCoupledVar("forward_variable", "Variable from the forward solution");
   return params;

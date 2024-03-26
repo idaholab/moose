@@ -4,6 +4,6 @@
   [analytic]
     type = RunApp
     input = element_reaction_inner_product.i
-    requirement = 'The system shall be able to compute the inner product between two variables weighted by the derivative of a function with respect to a the vector it depends on.'
+    requirement = 'The system shall be able to compute the inner product between two variables weighted by the derivative of a function with respect to the vector it depends on.'
   []
 []

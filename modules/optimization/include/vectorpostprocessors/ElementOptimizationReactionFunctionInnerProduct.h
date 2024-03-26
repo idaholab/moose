@@ -10,7 +10,11 @@
 #pragma once
 
 #include "ElementOptimizationFunctionInnerProduct.h"
-
+/**
+ * Compute the gradient for reaction material inversion by taking the inner product of the forward
+ * and adjoint variables multiplied by the derivative of the optimization function with respect to
+ * the controllable parameters.
+ */
 class ElementOptimizationReactionFunctionInnerProduct
   : public ElementOptimizationFunctionInnerProduct
 {

@@ -1,6 +1,6 @@
 # Material Inversion Example: Nonlinear Diffusion Reaction
 
-The following illustrates the capability of the MOOSE-Opt by applying the module to a nonlinear, material-inversion optimization problem:
+The following illustrates the capability of the MOOSE Optimization module by applying the module to a nonlinear, material-inversion optimization problem:
 
 !equation
 \begin{split}
@@ -27,7 +27,7 @@ The reaction rate is parameterized using the mesh shown in the top right plot of
   caption=Physics sub-application
   id=lst:forward
 
-The top right figure in [!ref](fig:forward_exact) shows the rate found from the optimization process. [!ref](fig:solution_compare) shows how close the solution from the optimized reaction rate is from the synthetic measurement data.  The diffusion only initial guess is shown by the square data points.
+The top right figure in [!ref](fig:forward_exact) shows the rate found from the optimization process. [!ref](fig:solution_compare) shows how close the solution from the optimized reaction rate is from the synthetic measurement data.  The diffusion-only initial guess is shown by the square data points.
 
 !media diffusion_reaction/solution_mesh.png
   caption=Left: Exact reaction rate, simulation mesh, and measurement locations. Right: Optimized rection rate and parameter mesh.
