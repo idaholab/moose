@@ -72,6 +72,11 @@ public:
   virtual void executeOnInternalSide() {}
 
   /**
+   * execute method that is called during ComputeUserObjects::onExternalSide
+   */
+  virtual void executeOnExternalSide() {}
+
+  /**
    * execute method that is called during ComputeUserObjects::onInterface
    */
   virtual void executeOnInterface() {}
