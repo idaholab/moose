@@ -339,10 +339,6 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
-    def getEnvironment(self, options):
-        """ return the additional environment to run the tester with """
-        return {}
-
     def hasOpenMPI(self):
         """ return whether we have openmpi for execution
 
@@ -406,12 +402,8 @@ class Tester(MooseObject):
                 popen_kwargs['preexec_fn'] = os.setsid
 
             # Set this for OpenMPI so that we don't clobber state
-            # Maybe move this to getEnvironment()
             if self.hasOpenMPI():
                 popen_kwargs['env']['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
-
-            # Append and additional environment variables requested by the Tester
-            popen_kwargs['env'].update(self.getEnvironment(options))
 
             process = subprocess.Popen(*popen_args, **popen_kwargs)
         except:
