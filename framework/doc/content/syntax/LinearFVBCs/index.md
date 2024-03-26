@@ -17,7 +17,8 @@ FVM boundary conditions are added to simulation input files in the `LinearFVBCs`
          block=LinearFVBCs
          caption=Example of the LinearFVBCs block in a MOOSE input file.
 
-In this example input, an advection equation with Dirichlet boundary condition on the left and outflow boundary conditions on the right is solved. To understand the differences between
+In this example input, an advection equation with Dirichlet boundary condition on the left
+and outflow boundary conditions on the right is solved. To understand the differences between
 these two boundary conditions, let's start with the advection equation:
 
 \begin{equation}
@@ -53,12 +54,16 @@ the right hand side of the system only, whereas the outflow boundary condition c
 ## Functions to override:
 
 Different linear finite volume kernels might use the quantities provided by these boundary
-conditions differently, but there are some common functionalities which are used more
-frequently between diffusion and advection kernels.
-The following functions represent this common functionality:
+conditions differently, but these APIs should be implemented for boundary conditions of linear systems:
 
 - `computeBoundaryValue` computes the boundary value of the field.
-- `computBoundaryNormalGradient` computes the normal gradient of the variable on this boundary.
+- `computeBoundaryNormalGradient` computes the normal gradient of the variable on this boundary.
+
+For derived classes of linear system boundary conditions, we recommend following the same design pattern as the
+`LinearAdvectionDiffusionBC` parent class.
+For all boundary conditions (Neumann and Dirichlet) for an advection-diffusion problem,
+we implemented the following four APIs:
+
 - `computeBoundaryValueMatrixContribution` computes the matrix contribution that would come from
   the boundary value of the field, extensively used within advection kernels.
   For example, on an outflow boundary in an advection problem,
@@ -66,7 +71,8 @@ The following functions represent this common functionality:
   as an approximation for the boundary value: $u_b = u_C$. In this case, we can treat the outflow term
   implicitly by adding a $\vec{v} \cdot \vec{n} |S_b|$ term to the matrix which comes from
   $\vec{v} \cdot \vec{n} u_C |S_b|$ outward flux term. This function will return
-  $1$ (as it is just the cell value) and the $\vec{v} \cdot \vec{n} |S_b|$ multipliers are added in the advection kernel.
+  $1$ (as it is just the cell value) and the $\vec{v} \cdot \vec{n} |S_b|$ multipliers are added
+  in the advection kernel.
 - `computeBoundaryValueRHSContribution` computes the right hand side contributions for terms that
   need the boundary value of the field, extensively used within advection kernels.
   Using the same example as above, by employing an extrapolation to the boundary face to determine the

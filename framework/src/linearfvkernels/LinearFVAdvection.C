@@ -72,7 +72,7 @@ LinearFVAdvection::computeNeighborRightHandSideContribution()
 Real
 LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * adv_bc = dynamic_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
@@ -87,7 +87,7 @@ LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
 Real
 LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * adv_bc = dynamic_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   // We support internal boundaries too so we have to make sure the normal points always outward

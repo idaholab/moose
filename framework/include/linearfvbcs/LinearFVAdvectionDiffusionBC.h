@@ -14,7 +14,8 @@
 
 /**
  * Base class for boundary conditions that are valid for advection diffusion problems.
- * It will be
+ * LinearFVAdvection/Diffusion kernels rely on the implementation of the RHS and matrix
+ * contribution routines.
  */
 class LinearFVAdvectionDiffusionBC : public LinearFVBoundaryCondition
 {

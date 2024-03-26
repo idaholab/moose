@@ -168,6 +168,9 @@ private:
   /// used to keep track of when dof indices are out of date
   mutable const Elem * _prev_elem = nullptr;
 
+  /**
+   * Fetch and return the dof indices of this variable on the current element.
+   */
   const std::vector<dof_id_type> & initDofIndices();
 
   /// Whether this variable is being calculated on a displaced system
