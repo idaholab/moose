@@ -2,9 +2,8 @@
   [cyl2d_iga]
     type = FileMeshGenerator
     file = PressurizedCyl_Patch6_4Elem.e
+    discontinuous_spline_extraction = true
   []
-  allow_renumbering = false   # VTK diffs via XMLDiff are
-  parallel_type = replicated  # really fragile
 []
 
 [Variables]
@@ -20,9 +19,10 @@
     variable = u
     block = 0  # Avoid direct calculations on spline nodes
   []
-  [diff]
-    type = Diffusion
+  [rxn]
+    type = Reaction
     variable = u
+    rate = -0.1
     block = 0  # Avoid direct calculations on spline nodes
   []
   [null]
@@ -36,7 +36,7 @@
   [u]
     type = FunctionIC
     variable = u
-    function = 'sin(x)'
+    function = '1.0'
   []
 []
 
@@ -48,5 +48,5 @@
 []
 
 [Outputs]
-  vtk = true
+  exodus = true
 []

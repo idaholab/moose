@@ -1,10 +1,9 @@
 [Mesh]
   [cyl2d_iga]
     type = FileMeshGenerator
-    file = PressurizedCyl_Patch6_4Elem.e
+    file = test_quadratic.e
+    discontinuous_spline_extraction = true
   []
-  allow_renumbering = false   # VTK diffs via XMLDiff are
-  parallel_type = replicated  # really fragile
 []
 
 [Variables]
@@ -14,17 +13,25 @@
   []
 []
 
-[Kernels]
-  [time]
-    type = TimeDerivative
+[ICs]
+  [u]
+    type = FunctionIC
     variable = u
-    block = 0  # Avoid direct calculations on spline nodes
+    function = 'x'
   []
+[]
+
+[Kernels]
   [diff]
     type = Diffusion
     variable = u
     block = 0  # Avoid direct calculations on spline nodes
   []
+  [./time]
+    type = TimeDerivative
+    variable = u
+    block = 0
+  [../]
   [null]
     type = NullKernel
     variable = u
@@ -32,21 +39,13 @@
   []
 []
 
-[ICs]
-  [u]
-    type = FunctionIC
-    variable = u
-    function = 'sin(x)'
-  []
-[]
-
 [Executioner]
   type = Transient
-  num_steps = 2
+  num_steps = 1
   solve_type = NEWTON
-  dtmin = 1
+  dt = 1
 []
 
 [Outputs]
-  vtk = true
+  exodus = true
 []

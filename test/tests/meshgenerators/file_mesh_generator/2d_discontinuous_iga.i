@@ -2,9 +2,8 @@
   [cyl2d_iga]
     type = FileMeshGenerator
     file = PressurizedCyl_Patch6_4Elem.e
+    discontinuous_spline_extraction = true
   []
-  allow_renumbering = false   # VTK diffs via XMLDiff are
-  parallel_type = replicated  # really fragile
 []
 
 [Variables]
@@ -48,5 +47,5 @@
 []
 
 [Outputs]
-  vtk = true
+  exodus = true
 []

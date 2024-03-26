@@ -2,6 +2,7 @@
 <VTKFile type="PUnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
   <PUnstructuredGrid GhostLevel="1">
     <PPointData RationalWeights="RationalWeights">
+      <PDataArray type="Int32" Name="libmesh_node_id"/>
       <PDataArray type="Float64" Name="RationalWeights"/>
       <PDataArray type="Float64" Name="u"/>
     </PPointData>
