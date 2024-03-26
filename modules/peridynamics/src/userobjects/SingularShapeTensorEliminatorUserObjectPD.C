@@ -119,7 +119,8 @@ SingularShapeTensorEliminatorUserObjectPD::checkShapeTensorSingularity(const Ele
       if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
       {
         vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
-        origin_vec_nb = *_pdmesh.nodePtr(neighbors[nb]) - *elem->node_ptr(nd);
+        origin_vec_nb =
+            _pdmesh.getNodeCoord(neighbors[nb]) - _pdmesh.getNodeCoord(elem->node_id(nd));
         weight_nb = horizon_nd / origin_vec_nb.norm();
 
         for (unsigned int k = 0; k < _dim; ++k)

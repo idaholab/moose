@@ -179,7 +179,8 @@ NodalRankTwoPD::computeRankTwoTensors()
     {
       Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
       vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
-      origin_vec = *neighbor_nb - *_pdmesh.nodePtr(_current_node->id());
+      origin_vec =
+          _pdmesh.getNodeCoord(neighbor_nb->id()) - _pdmesh.getNodeCoord(_current_node->id());
 
       for (unsigned int k = 0; k < _dim; ++k)
         current_vec(k) = origin_vec(k) + _disp_var[k]->getNodalValue(*neighbor_nb) -
