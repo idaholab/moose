@@ -1938,6 +1938,10 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
+      if (_fe_problem.ignoreZerosInJacobian())
+        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                      MAT_IGNORE_ZERO_ENTRIES,
+                                      PETSC_TRUE));
     }
   }
 
@@ -2778,6 +2782,10 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
+      if (_fe_problem.ignoreZerosInJacobian())
+        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                      MAT_IGNORE_ZERO_ENTRIES,
+                                      PETSC_TRUE));
     }
   }
 
