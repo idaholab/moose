@@ -47,12 +47,15 @@ const auto f_not_identifier = [](auto & ctx)
   else
     _val(ctx) = CapState::MAYBE_TRUE;
 };
-const auto f_compare = [](auto & ctx) { _val(ctx) = CapState::FALSE; };
+
+const auto f_compare = [](auto & ctx)
+{
+  const auto & [left, op, right] = _attr(ctx);
+  _val(ctx) = CapState::FALSE;
+};
 
 bp::symbols<int> const comparison = {
     {"<=", 0}, {">=", 1}, {"<", 2}, {">", 3}, {"!=", 4}, {"==", 5}, {"=", 5}};
-bp::symbols<int> const conjunction = {
-    {"&&", 0}, {"&", 0}, {"||", 1}, {"|", 1}};
 
 // capability value
 bp::rule<struct generic_tag, std::string> generic = "generic capability value";
@@ -69,15 +72,73 @@ BOOST_PARSER_DEFINE_RULES(generic, version, value);
 // bool_statement
 bp::rule<struct bool_statement_tag, CapState> bool_statement = "bool statement";
 auto const bool_statement_def =
-    ('!' >> name)[f_not_identifier] | name[f_identifier] | (name >> comparison)[f_compare];
-// ('!' >> name)[f_not_identifier] | name[f_identifier] | (name >> comparison >> value)[f_compare];
+    ('!' >> name)[f_not_identifier] | name[f_identifier] | (name >> comparison >> value)[f_compare];
 BOOST_PARSER_DEFINE_RULES(bool_statement);
 
+const auto f_and = [](auto & ctx)
+{
+  const auto & [left, right] = _attr(ctx);
+  const auto states = {
+      CapState::FALSE, CapState::MAYBE_FALSE, CapState::MAYBE_TRUE, CapState::TRUE};
+
+  for (const auto state : states)
+    if (left == state || right == state)
+    {
+      _val(ctx) = state;
+      return;
+    }
+};
+
+const auto f_or = [](auto & ctx)
+{
+  const auto & [left, right] = _attr(ctx);
+  const auto states = {
+      CapState::TRUE, CapState::MAYBE_TRUE, CapState::MAYBE_FALSE, CapState::FALSE};
+
+  for (const auto state : states)
+    if (left == state || right == state)
+    {
+      _val(ctx) = state;
+      return;
+    }
+};
+
+const auto f_negate = [](auto & ctx)
+{
+  // negate current capability state
+  switch (_attr(ctx))
+  {
+    case CapState::FALSE:
+      _val(ctx) = CapState::TRUE;
+      break;
+    case CapState::TRUE:
+      _val(ctx) = CapState::FALSE;
+      break;
+    case CapState::MAYBE_FALSE:
+      _val(ctx) = CapState::MAYBE_TRUE;
+      break;
+    case CapState::MAYBE_TRUE:
+      _val(ctx) = CapState::MAYBE_FALSE;
+      break;
+  }
+};
+
+const auto f_pass = [](auto & ctx)
+{
+  // pass through value
+  _val(ctx) = _attr(ctx);
+};
+
 // expression
+bp::rule<struct p_conjunction_tag, CapState> p_conjunction = "conjunction expression";
+bp::rule<struct p_negate_tag, CapState> p_negate = "boolean negation";
+bp::rule<struct p_pass_tag, CapState> p_pass = "boolean statement";
 bp::rule<struct expr_tag, CapState> expr = "boolean expression";
-auto const expr_def =
-    "!(" >> expr >> ")" | "(" >> expr >> ")" | bool_statement | expr >> conjunction >> expr;
-BOOST_PARSER_DEFINE_RULES(expr);
+auto const p_conjunction_def = (expr >> "&" >> expr)[f_and] | (expr >> "|" >> expr)[f_or];
+auto const p_negate_def = "!(" >> expr >> ")";
+auto const p_pass_def = ("(" >> expr >> ")") | bool_statement;
+auto const expr_def = p_negate[f_negate] | p_pass[f_pass] | p_conjunction; //[f_conjunction];
+BOOST_PARSER_DEFINE_RULES(p_conjunction, p_negate, p_pass, expr);
 }
 
 /*
@@ -94,7 +155,7 @@ main()
 {
   std::string input = "23.4.12";
 
-  auto const result = bp::parse(input, bool_statement, bp::ws);
+  auto const result = bp::parse(input, expr, bp::ws);
   // type_is<decltype(*result)>();
 
   // if (result)
