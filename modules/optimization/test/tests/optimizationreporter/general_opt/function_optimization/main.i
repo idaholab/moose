@@ -50,4 +50,9 @@
     type = JSON
     execute_system_information_on = none
   []
+  [json_forward]
+    type = JSON
+    execute_on = 'FORWARD'
+    execute_system_information_on = none
+  []
 []
