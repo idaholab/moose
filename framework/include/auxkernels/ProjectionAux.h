@@ -11,6 +11,11 @@
 
 #include "AuxKernel.h"
 
+namespace libMesh
+{
+class System;
+}
+
 /**
  * Projects from one variable to another
  */
@@ -31,7 +36,7 @@ protected:
   const MooseVariable & _source_variable;
 
   /// The system owning the source variable
-  const SystemBase & _source_sys;
+  const System & _source_sys;
 
 private:
   /// For a node, finds an element we can use to evaluate the (continuous) source variable

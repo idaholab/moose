@@ -45,6 +45,19 @@
                   ICs/active='linear_elem linear_nodal'"
       detail = "a linear variation to all variable families supported in 2d at various orders,"
     []
+    [2d_linear_displaced]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_linear.csv'
+      cli_args = "Outputs/file_base=2d_linear
+                  GlobalParams/use_displaced_mesh=true
+                  GlobalParams/displacements='disp_x disp_y'
+                  AuxVariables/disp_x/order=SECOND
+                  AuxVariables/disp_y/order=SECOND
+                  AuxVariables/base_elem/order=FIRST
+                  ICs/active='linear_elem linear_nodal'"
+      detail = "between variables supported in 2d at various orders on a displaced mesh,"
+    []
     [2d_quadratic]
       type = 'CSVDiff'
       input = '2d.i'
@@ -96,8 +109,8 @@
                   AuxVariables/base_elem/order=THIRD
                   AuxVariables/base_nodal/order=THIRD
                   ICs/active='cubic_elem cubic_nodal'"
-      detail = "a cubic variation to all variable families supported in 2d at various orders on "
-               "a triangle mesh,"
+      detail = "a cubic variation to all variable families supported in 2d at various orders on a "
+               "triangle mesh,"
     []
   []
 []

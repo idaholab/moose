@@ -132,7 +132,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         }
       }
 
-      // We have only set local values - prepare for use by gathering remote gata
+      // We have only set local values - prepare for use by gathering remote data
       idi->prepare_for_use();
 
       // Loop over the parent app nodes and set the value of the variable

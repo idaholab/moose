@@ -9,6 +9,7 @@
 
 #include "ProjectionAux.h"
 #include "SystemBase.h"
+#include "libmesh/system.h"
 
 registerMooseObjectRenamed("MooseApp", SelfAux, "01/30/2024 24:00", ProjectionAux);
 registerMooseObject("MooseApp", ProjectionAux);
@@ -43,7 +44,7 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _v(coupledValue("v")),
     _source_variable(*getVar("v", 0)),
-    _source_sys(_source_variable.sys())
+    _source_sys(_c_fe_problem.getSystem(coupledName("v")))
 {
   // Output some messages to user
   if (_source_variable.order() > _var.order())
@@ -59,7 +60,7 @@ ProjectionAux::computeValue()
   // AND nodal low order -> nodal higher order
   else if (isNodal() && _source_variable.getContinuity() != DISCONTINUOUS &&
            _source_variable.getContinuity() != SIDE_DISCONTINUOUS)
-    return _source_sys.system().point_value(
+    return _source_sys.point_value(
         _source_variable.number(), *_current_node, elemOnNodeVariableIsDefinedOn());
   // Handle discontinuous elemental variable projection into a nodal variable
   else
@@ -81,8 +82,7 @@ ProjectionAux::computeValue()
       {
         const auto elem_volume = elem->volume();
         sum_weighted_values +=
-            _source_sys.system().point_value(_source_variable.number(), *_current_node, elem) *
-            elem_volume;
+            _source_sys.point_value(_source_variable.number(), *_current_node, elem) * elem_volume;
         sum_volumes += elem_volume;
       }
     }
