@@ -10,6 +10,7 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 #include "MooseVariable.h"
+#include "Registry.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -90,6 +91,17 @@ mooseErrorRaw(std::string msg, const std::string prefix)
 void
 mooseStreamAll(std::ostringstream &)
 {
+}
+
+std::string
+formatMooseDocumentedError(const std::string & repo_name,
+                           const unsigned int issue_num,
+                           const std::string & msg)
+{
+  const auto & repo_url = Registry::getRepositoryURL(repo_name);
+  std::stringstream oss;
+  oss << msg << "\n\nThis error is documented at " << repo_url << "/issues/" << issue_num << ".";
+  return oss.str();
 }
 
 } // namespace internal

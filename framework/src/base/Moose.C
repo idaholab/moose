@@ -59,6 +59,7 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
   associateSyntaxInner(s, af);
   registerActions(s, af, {"MooseApp"});
   registerDataFilePath();
+  registerRepository("moose", "github.com/idaholab/moose");
 }
 
 void

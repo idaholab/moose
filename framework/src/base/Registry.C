@@ -102,3 +102,25 @@ Registry::addDataFilePath(const std::string & fullpath)
       std::find(dfp.begin(), dfp.end(), data_dir) == dfp.end())
     dfp.push_back(data_dir);
 }
+
+void
+Registry::addRepository(const std::string & repo_name, const std::string & repo_url)
+{
+  auto & repos = getRegistry()._repos;
+  const auto [it, inserted] = repos.emplace(repo_name, repo_url);
+  if (!inserted && it->second != repo_url)
+    mooseError("Registry::registerRepository(): The repository '",
+               repo_name,
+               "' is already registered with a different URL '",
+               it->second,
+               "'.");
+}
+
+const std::string &
+Registry::getRepositoryURL(const std::string & repo_name)
+{
+  const auto & repos = getRegistry()._repos;
+  if (const auto it = repos.find(repo_name); it != repos.end())
+    return it->second;
+  mooseError("Registry::getRepositoryURL(): The repository '", repo_name, "' is not registered.");
+}
