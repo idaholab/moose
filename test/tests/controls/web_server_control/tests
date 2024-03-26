@@ -92,6 +92,8 @@
     max_parallel = 2
   []
 
+  # We cannot run these tests with valgrind because they come from the python script, which will terminate
+  # the MOOSE process early and therefore we won't receieve and of the valgrind summary output
   [errors]
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
     [set_controllable_no_exist]
@@ -101,6 +103,7 @@
       expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
       prereq = parallel_consistent
+      valgrind = none
     []
     [postprocessor_no_exist]
       type = RunException
@@ -109,6 +112,7 @@
       expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
       detail = 'getting a postprocessor that does not exist'
       prereq = errors/set_controllable_no_exist
+      valgrind = none
     []
     [set_controllable_unregistered_type]
       type = RunException
@@ -117,6 +121,7 @@
       expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
       detail = 'setting a controllable parameter whose type is not supported'
       prereq = errors/postprocessor_no_exist
+      valgrind = none
     []
     [set_controllable_bad_convert_json]
       type = RunException
@@ -126,6 +131,7 @@
       expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
       detail = 'setting a controllable parameter with an incompatible JSON type'
       prereq = errors/set_controllable_unregistered_type
+      valgrind = none
     []
     [set_controllable_vector_non_array]
       type = RunException
@@ -136,6 +142,7 @@
       expect_err = 'The value \'1234\' of type number is not an array'
       detail = 'setting a controllable parameter with a type that does not match'
       prereq = errors/set_controllable_bad_convert_json
+      valgrind = none
     []
   []
 []
