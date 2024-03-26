@@ -113,9 +113,32 @@ public:
 
   void addGeometricCut(GeometricCutUserObject * geometric_cut);
 
-  void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal);
-  void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigned int marked_side);
-  void addStateMarkedFrag(unsigned int elem_id, RealVectorValue & normal);
+  /**
+   * Mark a new element for cutting based on the physical state of the model, cracks only propagate
+   * from existing intersections
+   * @param elem_id   The id of the element to be cut
+   * @param normal A vector of normal Vectors containing the direction normal to cut for each cut
+   */
+  void addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & normal);
+
+  /**
+   * Mark a new element for cutting based on the physical state of the model, cracks only propagate
+   * from existing intersections
+   * @param elem_id   The id of the element to be cut
+   * @param normal A vector of normal Vectors containing the direction normal to cut for each cut
+   * @param marked_side id of element side that is cut
+   */
+  void addStateMarkedElem(unsigned int elem_id,
+                          std::vector<RealVectorValue> & normal,
+                          unsigned int marked_side);
+
+  /**
+   * Mark a new fragment for cutting based on the physical state of the model, cracks only propagate
+   * from existing intersections
+   * @param elem_id   The id of the element to be cut
+   * @param normal A vector of normal Vectors containing the direction normal to cut for each cut
+   */
+  void addStateMarkedFrag(unsigned int elem_id, std::vector<RealVectorValue> & normal);
 
   void clearStateMarkedElems();
 
@@ -336,7 +359,7 @@ private:
 
   // std::map<const Elem*, Point> _crack_propagation_direction_map;
 
-  std::map<const Elem *, RealVectorValue> _state_marked_elems;
+  std::map<const Elem *, std::vector<RealVectorValue>> _state_marked_elems;
   std::set<const Elem *> _state_marked_frags;
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 

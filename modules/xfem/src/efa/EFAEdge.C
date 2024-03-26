@@ -408,3 +408,19 @@ EFAEdge::removeEmbeddedNode(EFANode * node)
     _intersection_x.erase(_intersection_x.begin() + index);
   }
 }
+
+bool
+EFAEdge::hasNode(EFANode * node)
+{
+  bool hasNode = false;
+
+  // check _edge_node1 for node
+  if (node == _edge_node1)
+    hasNode = true;
+
+  // check _edge_node2 for node
+  if (node == _edge_node2)
+    hasNode = true;
+
+  return hasNode;
+}
