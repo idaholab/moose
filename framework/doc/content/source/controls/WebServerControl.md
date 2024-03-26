@@ -2,7 +2,7 @@
 
 The `WebServerControl` object is designed to allow an external process to control a MOOSE solve. It works by starting up a webserver on the chosen [!param](/Controls/WebServerControl/port) and exposing a REST API. As with all REST APIs the input and output are both JSON.
 
-It can then be managed via the [MooseControl/index.md] python utility.
+It can then be managed via the [MooseControl](MooseControl/index.md optional=true) python utility.
 
 ## API
 
@@ -41,7 +41,7 @@ where `<EXEC_ON_FLAG>` is the current execution flag. If the control is not curr
 }
 ```
 
-This endpoint can be accessed via the [MooseControl/index.md] python utility via the following methods:
+This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via the following methods:
 
 - `wait()`: Waits for the control to be waiting
 - `getWaitingFlag()`: Gets the current flag that the control is waiting on, if any
@@ -95,7 +95,7 @@ where `<NAME>` is the string path to the controllable parameter, `<TYPE>` is the
 
 On success, the response will be empty with a status code of 201.
 
-This endpoint can be accessed via the [MooseControl/index.md] python utility via the following methods:
+This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via the following methods:
 
 - `setControllableBool()`: Sets a controllable `bool` parameter
 - `setControllableReal()`: Sets a controllable `Real` parameter
