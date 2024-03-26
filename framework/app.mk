@@ -300,6 +300,40 @@ endif
 # Instantiate a new suffix rule for the module loader
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
+ifneq ($(INSTALLABLE_DIRS),)
+    # We need to maintain relative paths to submodules or dependancy directories if we
+    # want to install tests from those directories. To do that, we need to know what
+    # the relative path is from the current dependency relative to its parent
+    relpath =
+    ifneq ($(APPLICATION_DIR),$(CURDIR))
+        relpath = $(shell python -c \
+          'import os; print(os.path.relpath("$(APPLICATION_DIR)", "$(CURDIR)") + os.sep)')
+    endif
+    curr_install_dirs := $(addprefix $(relpath),$(INSTALLABLE_DIRS))
+    # Since we support transforming the installable paths, those destination directories will
+    # need some treatment as well (e.g. test/tests->tests => submodule/test/tests->submodule/tests)
+    # To do this, we need to loop over all the directories (white-space separated items) in the list.
+    # For each of these, we'll look for '->' and if we find it, we'll split it on that token then
+    # insert the "relpath" variable we just got out of our Python one-liner as the destination
+    # directory prefix. If we don't find that character, we just return the unedited item.
+    # Note, Whitespace is important in those subst functions
+    curr_install_dirs := $(foreach dir,$(curr_install_dirs),$(if $(findstring ->,$(dir)),\
+      $(word 1,$(subst ->, ,$(dir)))->$(relpath)$(word 2,$(subst ->, ,$(dir))),$(dir)))
+
+    installable_dirs_all := $(installable_dirs_all) $(curr_install_dirs)
+
+    # Zero this out in case there are more applications included in this compile
+    INSTALLABLE_DIRS :=
+else ifeq ($(BUILD_EXEC),yes)
+    # Set a default to install the main application's tests if one isn't set in any of the included
+    # .mk files anywhere.
+    ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
+      installable_dirs_all += test/tests->tests
+    else
+      installable_dirs_all += tests
+    endif
+endif
+
 # If this is a matching module then build the exec, otherwise fall back and use the variable
 want_exec := $(BUILD_EXEC)
 ifneq (,$(MODULE_NAME))
@@ -310,16 +344,6 @@ ifneq (,$(MODULE_NAME))
   endif
 else
   ifeq ($(BUILD_EXEC),yes)
-
-    # Set a default to install the main application's tests if one isn't set in the Makefile
-    ifndef INSTALLABLE_DIRS
-      ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
-        INSTALLABLE_DIRS := test/tests->tests
-      else
-        INSTALLABLE_DIRS := tests
-      endif
-    endif
-
     all: $(app_EXEC)
   else
     all: $(app_LIB)
@@ -340,7 +364,7 @@ endif
 # Target-specific Variable Values (See GNU-make manual)
 $(app_HEADER): curr_dir              := $(APPLICATION_DIR)
 $(app_HEADER): curr_app              := $(APPLICATION_NAME)
-$(app_HEADER): curr_installable_dirs := $(INSTALLABLE_DIRS)
+$(app_HEADER): curr_installable_dirs := $(installable_dirs_all)
 $(app_HEADER): all_header_dir        := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
@@ -463,7 +487,7 @@ docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(share_install_dir)/$(notdir $(app_EXEC))
 # Strip the trailing slashes (if provided) and transform into a suitable Makefile targets
-copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
+copy_input_targets := $(foreach dir,$(installable_dirs_all),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
 
 ifeq ($(want_exec),yes)
   install_bin: $(bindst)
@@ -485,6 +509,7 @@ install_data_%:
 	@mkdir -p $($@_dst)
 	@cp -r $($@_src) $($@_dst)
 
+$(copy_input_targets): orig_make_dir = $(CURDIR)
 $(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
 	@$(eval source_dir := $(word 1, $(kv)))
@@ -492,16 +517,16 @@ $(copy_input_targets):
 	@echo "Installing inputs from directory \"$(source_dir)\" into $(dest_dir)"
 	@rm -rf $(share_install_dir)/$(dest_dir)
 	@mkdir -p $(share_install_dir)/$(dest_dir)
-	@$(eval abs_source_dir := $(realpath $(APPLICATION_DIR)/$(source_dir)))
+	@$(eval abs_source_dir := $(realpath $(orig_make_dir)/$(source_dir)))
 	@if [ "$(abs_source_dir)" != "" ]; \
 	then \
 		cp -R $(abs_source_dir)/ $(share_install_dir)/$(dest_dir); \
 	else \
-		(echo "ERROR: Source directory $(APPLICATION_DIR)/$(source_dir) does not exist!"; exit 1) \
+		(echo "ERROR: Source directory $(orig_make_dir)/$(source_dir) does not exist!"; exit 1) \
 	fi;
-	@if [ -e $(APPLICATION_DIR)/testroot ]; \
+	@if [ -e $(orig_make_dir)/testroot ]; \
 	then \
-		cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$(dest_dir)/; \
+		cp -f $(orig_make_dir)/testroot $(share_install_dir)/$(dest_dir)/; \
 	elif [ -e $(source_dir)/testroot ]; \
 	then \
 		cp -f $(source_dir)/testroot $(share_install_dir)/$(dest_dir)/; \
