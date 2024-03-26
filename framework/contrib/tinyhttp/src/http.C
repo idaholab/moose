@@ -274,12 +274,9 @@ HttpServer::startListening(uint16_t port)
     iRetval = bind(mSocket, reinterpret_cast<struct sockaddr *>(&remote), sizeof(remote));
 
     if (iRetval < 0)
-    {
-      perror("Failed to bind socket, retrying in 5 seconds...");
-      usleep(1000 * 5000);
-    }
-    else
-      break;
+      throw std::runtime_error("Failed to bind socket");
+
+    break;
   }
 
   listen(mSocket, 3);
