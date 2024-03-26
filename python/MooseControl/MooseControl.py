@@ -266,6 +266,14 @@ class MooseControl:
             if waiting_flag is not None:
                 raise self.Exception(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
 
+    def returnCode(self):
+        """Gets the return code of the moose process"""
+        if self._moose_process is None:
+            raise Exception('A MOOSE process was not spawned')
+        if self._moose_process.poll() is None:
+            raise Exception('The MOOSE process has not completed')
+        return self._moose_process.returncode
+
     def wait(self, flag: str = None):
         """Waits for the MOOSE webserver and returns once the WebServerControl
         is waiting for input

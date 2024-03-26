@@ -20,6 +20,9 @@ def base_controller(control_name, run_control):
     # Wait for the webserver to stop listening
     control.finalize()
 
+    # Exit with the process of the MOOSE application
+    sys.exit(control.returnCode())
+
 def expect_equal(gold, value):
     if gold != value:
         raise Exception(f'"{gold}" != "{value}"')
