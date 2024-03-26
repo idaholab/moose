@@ -23,9 +23,9 @@ air_effective_k = 0.5 # W/(m K)
 
 [Kernels]
   [time_derivative]
-    type = CoefTimeDerivative
+    type = TimeDerivative
     variable = T
-    Coefficient = '${fparse air_density*air_cp}'
+    coeff = '${fparse air_density*air_cp}'
   []
   [heat_conduction]
     type = MatDiffusion

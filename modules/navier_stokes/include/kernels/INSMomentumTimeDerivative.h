@@ -15,7 +15,7 @@
 
 /**
  * This class computes the time derivative for the incompressible
- * Navier-Stokes momentum equation.  Could instead use CoefTimeDerivative
+ * Navier-Stokes momentum equation.  Could instead use TimeDerivative
  * for this.
  */
 class INSMomentumTimeDerivative : public TimeDerivative

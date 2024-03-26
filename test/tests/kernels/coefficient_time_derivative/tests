@@ -1,6 +1,6 @@
 [Tests]
   issues = '#11047'
-  design = 'CoefTimeDerivative.md'
+  design = 'TimeDerivative.md'
 
   [./test]
     type = 'Exodiff'
