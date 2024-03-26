@@ -21,6 +21,7 @@
       type = CSVDiff
       input = "main.i regularization_for_main.i"
       csvdiff = main_out_reg_OptimizationReporter_0001.csv
+      cli_args= 'measurement_points="0.5 0.28 0 0.5 1.1 0" measurement_values="293 320"'
       max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
       abs_zero = 10
@@ -45,7 +46,7 @@
       type = CSVDiff
       input = "main.i regularization_for_main.i"
       cli_args = "Executioner/tao_solver=taolmvm Executioner/petsc_options_iname='-tao_gttol' "
-                 "Executioner/petsc_options_value='1e-5'"
+                 "Executioner/petsc_options_value='1e-5' measurement_points='0.5 0.28 0 0.5 1.1 0' measurement_values='293 320'"
       csvdiff = main_out_reg_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
@@ -69,7 +70,7 @@
     []
     [auto_adjoint_reg]
       type = CSVDiff
-      cli_args = "OptimizationReporter/initial_condition='1000 1000 1000'"
+      cli_args = "OptimizationReporter/initial_condition='1000 1000 1000' measurement_points='0.5 0.28 0 0.5 1.1 0' measurement_values='293 320'"
       input = 'main_auto_adjoint.i regularization_for_main.i'
       csvdiff = main_out_reg_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads

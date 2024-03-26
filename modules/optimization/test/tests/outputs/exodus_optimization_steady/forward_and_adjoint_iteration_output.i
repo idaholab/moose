@@ -109,15 +109,16 @@
 [Reporters]
   [measure_data]
     type = OptimizationData
+    objective_name = objective_value
     variable = temperature
+    outputs = none
   []
   [point_source]
     type = ConstantReporter
     real_vector_names = 'x y z value'
     real_vector_values = '0.2 0.7 0.4;
                           0.2 0.56 1;
-                        '
-                         '  0 0 0;
+                          0 0 0;
                           -1000 120 500'
   []
 []

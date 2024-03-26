@@ -117,6 +117,7 @@
   [measure_data]
     type = OptimizationData
     variable = temperature
+    objective_name = objective_value
   []
   [params]
     type = ConstantReporter

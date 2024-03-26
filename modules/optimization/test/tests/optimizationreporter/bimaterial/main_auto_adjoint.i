@@ -9,14 +9,21 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = diffusivity_values
   num_values = 2 # diffusivity in the bottom material and in the top material of model.i
   initial_condition = '3 4' # the expected result is about '1 10' so this initial condition is not too bad
   lower_bounds = '1'
   upper_bounds = '20'
-  measurement_file = 'synthetic_data.csv'
-  file_value = 'temperature'
+[]
+
+[Reporters]
+  [main]
+    type = OptimizationData
+    measurement_file = 'synthetic_data.csv'
+    file_value = 'temperature'
+  []
 []
 
 [Executioner]
@@ -43,11 +50,11 @@
   [toForward] #pass the coordinates where we knew the measurements to the forward model to do the extraction of the simulation data at the location of the measurements to compute the misfit
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/diffusivity_values'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -59,9 +66,9 @@
   [from_forward] #get the simulation values
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values
+    from_reporters = 'measure_data/objective_value
                       gradvec/inner_product'
-    to_reporters = 'OptimizationReporter/simulation_values
+    to_reporters = 'OptimizationReporter/objective_value
                     OptimizationReporter/grad_diffusivity_values'
   []
 []

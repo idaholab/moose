@@ -81,8 +81,8 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  reuse_preconditioner=true
-  reuse_preconditioner_max_linear_its=50
+  reuse_preconditioner = true
+  reuse_preconditioner_max_linear_its = 50
 []
 
 [Reporters]
@@ -96,6 +96,7 @@
     file_value = u
     variable = u
     execute_on = timestep_end
+    objective_name = objective_value
     outputs = none
   []
 []
@@ -128,6 +129,6 @@
 []
 
 [Outputs]
-  csv=true
+  csv = true
   console = false
 []

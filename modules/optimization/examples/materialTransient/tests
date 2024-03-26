@@ -6,7 +6,7 @@
     [forward]
       type = CSVDiff
       input = forward.i
-      cli_args = 'Outputs/execute_on=FINAL'
+      cli_args = 'Outputs/execute_on=FINAL Reporters/data/outputs=csv'
       csvdiff = forward_out_data_0011.csv
       recover = False
       method = '!dbg'

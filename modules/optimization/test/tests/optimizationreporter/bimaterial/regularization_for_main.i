@@ -1,13 +1,11 @@
 [OptimizationReporter]
-  type = OptimizationReporter
-  parameter_names = diffusivity_values
+  type = GeneralOptimization
+  objective_name = objective_value
   num_values = 2
   initial_condition = '35 35'
   tikhonov_coeff = 10
   lower_bounds = '1'
   upper_bounds = '50'
-  measurement_file = 'synthetic_data.csv'
-  file_value = 'temperature'
 []
 
 [Outputs]
