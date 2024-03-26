@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [group]
     type = ImageDiff
     command = result_group.py
     imagediff = result_group.png
     display_required = true
+    requirement = "The system shall be able to plot multiple fields in a single plot, limiting each field to certain blocks."
   []
 []

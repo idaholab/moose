@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [timer]
     type = RunApp
     command = timer.py
     expect_out = "count = 3"
     display_required = true
+    requirement = "The system shall be able to define observers that examine plots, notably through time, and output to console."
   []
 []

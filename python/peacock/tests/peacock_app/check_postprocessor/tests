@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [CheckPostprocessor]
     type = PythonUnitTest
     input = test_check_postprocessor.py
     display_required = true
+    requirement = "The system shall include a graphical interface which can read postprocessor data for each time step."
   []
 []

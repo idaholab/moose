@@ -1,10 +1,14 @@
 [Tests]
+  issues = '#12095'
+  design = 'python/index.md'
   [Parameter]
     type = PythonUnitTest
     input = test_Parameter.py
+    requirement = "The system shall be able to define parameters in Python, similar to individual MooseObject parameters in C++, with numerous similar capabilities, including a name, a type, allowed and default values, descriptions, required and private status."
   []
   [InputParameters]
     type = PythonUnitTest
     input = test_InputParameters.py
+    requirement = "The system shall be able to define groups of parameters to Python objects, similar to the parameters of a MooseObject in C++, with numerous similar capabilities, including parameter errors, the ability to retrieve parameters, to set defaults, and others."
   []
 []

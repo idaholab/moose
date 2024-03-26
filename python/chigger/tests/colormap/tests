@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [matplotlib]
     # Tests that matplotlib colormaps are loaded
     type = ImageDiff
     command = colormap.py
     imagediff = colormap.png
     display_required = true
+    requirement = "The system shall be able to draw a colormap from simulation results."
   []
 
   [number]
@@ -13,6 +16,7 @@
     command = colormap_number.py
     imagediff = colormap_number.png
     display_required = true
+    requirement = "The system shall be able to draw a colormap with a user-specified number of colors from simulation results."
   []
 
   [reverse_matplotlib]
@@ -20,6 +24,7 @@
     command = reverse.py
     imagediff = reverse.png
     display_required = true
+    requirement = "The system shall be able to draw a colormap with inverted colors from simulation results."
   []
 
   [reverse_xml]
@@ -27,6 +32,7 @@
     command = reverse_xml.py
     imagediff = reverse_xml.png
     display_required = true
+    requirement = "The system shall be able to draw a colormap with inverted colors and a 'shock' color scheme from simulation results."
   []
 
   [reverse_default]
@@ -34,5 +40,6 @@
     command = reverse_default.py
     imagediff = reverse_default.png
     display_required = true
+    requirement = "The system shall be able to draw a colormap with inverted colors and the default color scheme from simulation results."
   []
 []

@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [offscreen]
     type = ImageDiff
     command = offscreen.py
     imagediff = 'offscreen.png'
     display_required = true
+    requirement = 'The system shall be able to plot and render offscreen.'
   []
 []

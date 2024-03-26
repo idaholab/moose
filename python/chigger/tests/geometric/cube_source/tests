@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = cube_source.py
     imagediff = 'cube_source.png'
     display_required = true
+    requirement = 'The system shall be able to represent cube shapes, nested cubes and cubes with edges.'
   []
 []

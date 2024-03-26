@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [add_variable_and_block]
     type = PythonUnitTest
     input = test_AddVariableAndBlock.py
     display_required = true
+    requirement = "The system shall include a graphical interface in which a user can add variables without perturbing the GUI selection of blocks displayed and colormap range."
   []
 []

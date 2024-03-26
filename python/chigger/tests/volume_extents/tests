@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = extents.py
@@ -6,5 +8,6 @@
     allowed_darwin = 0.96
     allowed_linux = 0.96
     display_required = true
+    requirement = 'The system shall be able to plot the reference axes along with ticks along the axes to show the spatial extent of a volume plot.'
   []
 []

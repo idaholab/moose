@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [image]
     # Test displaying an image
     type = ImageDiff
     command = image_annotation.py
     imagediff = 'image_annotation.png'
+    requirement = 'The system shall be able to display an image without an annotation.'
 
     display_required = true
   []
@@ -13,6 +16,7 @@
     type = ImageDiff
     command = logo_annotation.py
     imagediff = 'logo_annotation.png'
+    requirement = 'The system shall be able to display an image with a logo annotation on it.'
 
     display_required = true
   []
@@ -22,6 +26,7 @@
     type = ImageDiff
     command = text_annotation.py
     imagediff = 'text_annotation.png'
+    requirement = 'The system shall be able to display an image with a text annotation on it.'
 
     display_required = true
   []
@@ -31,6 +36,7 @@
     type = ImageDiff
     command = time_annotation.py
     imagediff = 'time_annotation.png'
+    requirement = 'The system shall be able to display an image with the time annotated on it.'
 
     display_required = true
   []
@@ -40,6 +46,7 @@
     type = ImageDiff
     command = time_annotation_change.py
     imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
+    requirement = 'The system shall be able to display an image with the time elapsed annotated on it.'
 
     display_required = true
   []

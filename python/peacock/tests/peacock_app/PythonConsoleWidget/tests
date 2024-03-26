@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [PythonConsoleWidget]
     type = PythonUnitTest
     input = test_PythonConsoleWidget.py
     display_required = true
+    requirement = "The system shall include a graphical interface which can be controlled through a Python console widget."
   []
 []

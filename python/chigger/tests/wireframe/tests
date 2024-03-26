@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [wireframe]
     type = ImageDiff
     command = wireframe.py
@@ -6,6 +8,7 @@
     allowed_linux = 0.895
     allowed_darwin = 0.93
     display_required = true
+    requirement = 'The system shall be able to plot the wireframe of a mesh.'
   []
 
   [points]
@@ -15,5 +18,6 @@
     allowed_linux = 0.965
     allowed_darwin = 0.94
     display_required = true
+    requirement = 'The system shall be able to plot the nodes of a mesh.'
   []
 []

@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [run]
     type = RunApp
     command = options.py
     cli_args = '--type=run'
     display_required = true
+    requirement = "The system shall be able to add parameters to its plotting options objects."
   []
 
   [bad_type]
@@ -12,6 +15,7 @@
     cli_args = '--type=bad-type'
     expect_out = "param must be of type int but str provided."
     display_required = true
+    requirement = "The system shall report an error if a parameter with the wrong type is passed to its plotting options objects."
   []
 
   [bad_allow_type]
@@ -20,6 +24,7 @@
     cli_args = '--type=bad-allow-type'
     expect_out = "The type provided, int, does not match the type of the allowed values, list."
     display_required = true
+    requirement = "The system shall report an error if a parameter with a type that does not match allowed values is passed to its plotting options objects."
   []
 
   [value_not_allowed]
@@ -28,6 +33,7 @@
     cli_args = '--type=value-not-allowed'
     expect_out = "Attempting to set param to a value of 1 but only the following are allowed"
     display_required = true
+    requirement = "The system shall report an error if a parameter with a value that does not match allowed values is passed to its plotting options objects."
   []
 
   [bad-arg-count]
@@ -36,6 +42,7 @@
     cli_args = '--type=bad-arg-count'
     expect_err = "Wrong number of arguments, must supply 2 or 3 input arguments."
     display_required = true
+    requirement = "The system shall report an error if the wrong number of arguments are passed as parameters to its plotting options objects."
   []
 
   [dump]
@@ -45,6 +52,7 @@
     expect_out = "Some parameter"
     skip = 'Needs terminaltables'
     display_required = true
+    requirement = "The system shall be able to dump parameters of its plotting options objects to the console."
   []
 
   [duplicate]
@@ -53,5 +61,6 @@
     cli_args = '--type=duplicate'
     expect_out = "A parameter with the name param already exists."
     display_required = true
+    requirement = "The system shall error if duplicate parameters are created for its plotting options objects."
   []
 []

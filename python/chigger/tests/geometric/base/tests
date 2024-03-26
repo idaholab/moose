@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [orientation]
     type = ImageDiff
     command = orientation.py
     imagediff = 'orientation.png'
     display_required = true
+    requirement = 'The system shall be able to orient geometric shapes before displaying them.'
   []
 
   [scale]
@@ -11,6 +14,7 @@
     command = scale.py
     imagediff = 'scale.png'
     display_required = true
+    requirement = 'The system shall be able to scale geometric shapes before displaying them.'
   []
 
   [rotation]
@@ -18,5 +22,6 @@
     command = rotation.py
     imagediff = 'rotation.png'
     display_required = true
+    requirement = 'The system shall be able to rotate geometric shapes before displaying them.'
   []
 []

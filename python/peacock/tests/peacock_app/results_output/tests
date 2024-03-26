@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [CheckResultOutput]
     type = PythonUnitTest
     input = test_results_output.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface which can read input files and execute them, handling a variety of edge cases in the input syntax."
   []
 []

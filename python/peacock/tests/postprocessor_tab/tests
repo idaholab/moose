@@ -1,79 +1,94 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [FigurePlugin]
     type = PythonUnitTest
     input = test_FigurePlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can draw 2D plots, usually from CSV data."
   []
 
   [LineSettingsWidget]
     type = PythonUnitTest
     input = test_LineSettingsWidget.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can set line settings for 2D plots."
   []
 
   [LineGroupWidget_Postprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetPostprocessor.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can plot postprocessor data through time."
   []
 
   [LineGroupWidget_VectorPostprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetVectorPostprocessor.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can plot vector postprocessor data."
   []
 
   [PostprocessorSelectPlugin_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorSelectPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can plot live or multiple postprocessor data."
   []
 
   [PostprocessorSelectPlugin_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorSelectPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can plot live or multiple vector postprocessor data."
   []
 
   [AxesSettingsPlugin]
     type = PythonUnitTest
     input = test_AxesSettingsPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can set the legend and a title for 2D plots."
   []
 
   [AxisTabsPlugin]
     type = PythonUnitTest
     input = test_AxisTabsPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget that can set axes settings for 2D plots."
   []
 
   [MediaControlPlugin]
     type = PythonUnitTest
     input = test_MediaControlPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget to handle the control of the time step displayed."
   []
 
   [PostprocessorPluginManager]
     type = PythonUnitTest
     input = test_PostprocessorPluginManager.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can use multiple widgets together to create a plot of postprocessor data and set its parameters."
   []
 
   [PostprocessorViewer_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorViewer.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget dedicated to plotting postprocessor data."
   []
 
   [PostprocessorViewer_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorViewer.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget dedicated to plotting vector postprocessor data."
   []
 
   [Output]
     type = PythonUnitTest
     input = test_OutputPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget dedicated to outputting 2D plots to various image formats."
   []
 []

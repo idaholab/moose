@@ -1,14 +1,18 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [nemesis]
     type = ImageDiff
     command = nemesis.py
     imagediff = 'nemesis.png'
     display_required = true
+    requirement = 'The system shall be able to plot spatial data loaded from Nemesis distributed output.'
   []
   [explode]
     type = ImageDiff
     command = explode.py
     imagediff = 'explode.png'
     display_required = true
+    requirement = 'The system shall be able to plot spatial data with an expansion/explosion coefficient to separate the distributed mesh results.'
   []
 []

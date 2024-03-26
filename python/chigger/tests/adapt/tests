@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [adapt_steps]
     type = ImageDiff
     command = adapt.py
     imagediff = 'adapt_0.png adapt_4.png adapt_9.png'
     display_required = true
+    requirement = 'The system shall be able to load results of simulations with mesh h-adaptivity and output them to images.'
   []
 []

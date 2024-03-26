@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [clear]
     type = ImageDiff
     command = window_clear.py
     imagediff = 'window_clear.png'
     display_required = true
+    requirement = 'The system shall be able to clear the window to remove a plot, then append another plot.'
   []
 []

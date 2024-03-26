@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [LogWidget]
     type = PythonUnitTest
     input = test_LogWidget.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can handle console output and reproduce it in the GUI or export it to HTML."
   []
 []

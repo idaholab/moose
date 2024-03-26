@@ -12,8 +12,13 @@
 import os
 import time
 import chigger
+import mooseutils
 
-filename = os.path.join(os.getenv('MOOSE_DIR'), 'modules', 'phase_field', 'examples', 'grain_growth', 'grain_growth_2D_graintracker_out.e')
+if os.getenv('MOOSE_DIR') == None:
+    mooseutils.mooseError("MOOSE_DIR must be set in this script")
+
+# filename = os.path.join(os.getenv('MOOSE_DIR'), 'modules', 'phase_field', 'examples', 'grain_growth', 'grain_growth_2D_graintracker_out.e')
+filename = os.path.join(os.getenv('MOOSE_DIR'), 'modules', 'phase_field', 'test', 'tests', 'grain_growth', 'gold', 'test_out.e-s005')
 variables = ['bnds']
 blocks = ['0']
 N = 10

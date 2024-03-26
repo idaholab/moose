@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [tube]
     # Test creating 3D tube from 1D part
     type = ImageDiff
     command = tube.py
     imagediff = 'tube.png'
     display_required = true
+    requirement = "The system shall be able to plot 1D data represented on a 3D tube."
   []
 []

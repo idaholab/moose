@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [magnitude]
     type = ImageDiff
     command = vector_magnitude.py
     imagediff = 'vector_magnitude.png'
     allowed_linux = 0.975
     display_required = true
+    requirement = 'The system shall be able to plot the magnitude field of a vector field.'
   []
 
   [x_component]
@@ -13,6 +16,7 @@
     imagediff = 'vector_x.png'
     allowed_linux = 0.965
     display_required = true
+    requirement = 'The system shall be able to plot the X-component field of a vector field.'
   []
 
   [y_component]
@@ -21,5 +25,6 @@
     imagediff = 'vector_y.png'
     allowed_linux = 0.965
     display_required = true
+    requirement = 'The system shall be able to plot the Y-component field of a vector field.'
   []
 []

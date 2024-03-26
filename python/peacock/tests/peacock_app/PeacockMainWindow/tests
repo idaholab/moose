@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [PeacockMainWindow]
     type = PythonUnitTest
     input = test_PeacockMainWindow.py
     display_required = true
     separate = True
+    requirement = "The system shall include a graphical interface which contains a console window and can switch to an execution tab to run a simulation."
   []
 []

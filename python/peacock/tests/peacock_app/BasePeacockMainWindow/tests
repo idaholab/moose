@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [BasePeacockMainWindow]
     type = PythonUnitTest
     input = test_BasePeacockMainWindow.py
     display_required = true
     separate = True
+    requirement = "The system shall include a graphical interface with tabs for various functions, such as displaying and modifying the input or executing the simulation."
   []
 []

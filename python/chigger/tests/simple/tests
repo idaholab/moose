@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [simple]
     # Most basic example
     type = ImageDiff
     command = simple.py
     imagediff = 'simple.png'
     display_required = true
+    requirement = 'The system shall be able to plot a field variable from an Exodus file.'
   []
 
   [simple_camera]
@@ -13,5 +16,6 @@
     command = simple_camera.py
     imagediff = 'simple_camera.png'
     display_required = true
+    requirement = 'The system shall be able to plot a field variable from an Exodus file with a user-specified camera angle, position and focus point.'
   []
 []

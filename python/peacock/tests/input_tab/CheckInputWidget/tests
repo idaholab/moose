@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [CheckInputWidget]
     type = PythonUnitTest
     input = test_CheckInputWidget.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can perform syntax checks on user inputs."
   []
 []

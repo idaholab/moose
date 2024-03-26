@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = mesh_only.py
     imagediff = 'mesh_only.png'
     display_required = true
+    requirement = 'The system shall be able to plot only the geometry, with no field used for the coloring of the geometry.'
   []
 []
