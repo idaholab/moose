@@ -569,6 +569,7 @@ li{
 .moose-parameter-description span,
 .moose-parameter-description-default span,
 .moose-parameter-description-cpptype span,
+.moose-parameter-description-doc-unit span,
 .moose-parameter-description-options span,
 .moose-parameter-description-controllable span{
     padding-right:10px;
