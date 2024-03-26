@@ -123,8 +123,7 @@ WebServerControl::startServer()
   _server = std::make_unique<HttpServer>();
 
   // GET /check, returns code 200
-  _server->when("/check")->requested([this](const HttpRequest & /*req*/)
-                                     { return HttpResponse{200}; });
+  _server->when("/check")->requested([](const HttpRequest & /*req*/) { return HttpResponse{200}; });
 
   // GET /waiting, returns code 200 on success and JSON:
   //  'waiting' (bool): Whether or not the control is waiting
