@@ -26,6 +26,22 @@ CauchyStressFromNEML2UO::validParams()
       "from all quadrature points. The batched input vector is sent through "
       "a NEML2 material model to perform the constitutive update.");
   params.addCoupledVar("temperature", "The temperature");
+  params.addParam<std::vector<std::string>>(
+      "scalar_material_property_names",
+      {},
+      "Names of the material properties (gathered from MOOSE) whose values are used to set "
+      "parameter values in the NEML2 material model.");
+  params.addParam<std::vector<UserObjectName>>(
+      "scalar_material_property_values",
+      {},
+      "The list of userobjects for scalar-valued material properties. These userobjects should be "
+      "of type BatchPropertyDerivativeRankTwoTensorReal. The property values gathered by each of "
+      "the userobject will be used as parameter values in the NEML2 material model, and the "
+      "derivatives of the Cauchy stress w.r.t. each of the parameter will be set into the "
+      "corresponding userobject.");
+
+  params.addParam<MaterialPropertyName>(
+      "mechanical_strain", "mechanical_strain", "Name of the mechanical strain material property.");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -52,6 +68,38 @@ CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
         params, "mechanical_strain", "temperature")
 {
   validateModel();
+
+  // Initialize scalar-valued material property UOs
+  const auto prop_names = getParam<std::vector<std::string>>("scalar_material_property_names");
+  const auto prop_values = getParam<std::vector<UserObjectName>>("scalar_material_property_values");
+  if (prop_names.size() != prop_values.size())
+    mooseError("Each of scalar_material_property_names should correspond to a value in "
+               "scalar_material_property_values. ",
+               prop_names.size(),
+               " names are present, while ",
+               prop_values.size(),
+               " values are supplied.");
+  for (auto i : index_range(prop_names))
+    _props[prop_names[i]] = const_cast<BatchPropertyDerivativeRankTwoTensorReal *>(
+        &getUserObjectByName<BatchPropertyDerivativeRankTwoTensorReal>(prop_values[i]));
+}
+
+void
+CauchyStressFromNEML2UO::preCompute()
+{
+  // Set the parameter value using batch material from MOOSE
+  for (auto && [name, prop] : _props)
+  {
+    if (!model().named_parameters().has_key(name))
+      mooseError("Trying to set scalar-valued material property named ",
+                 name,
+                 ". But there is not such parameter in the NEML2 material model.");
+
+    auto input = NEML2Utils::homogenizeBatchedTuple(prop->getInputData());
+    auto pval = NEML2Utils::toNEML2Batched(std::get<0>(input));
+    pval.requires_grad_(true);
+    model().named_parameters()[name].set(pval);
+  }
 }
 
 void
@@ -67,6 +115,9 @@ CauchyStressFromNEML2UO::batchCompute()
       _in = neml2::LabeledVector::zeros(_input_data.size(), {&model().input_axis()});
       _out = neml2::LabeledVector::zeros(_input_data.size(), {&model().output_axis()});
     }
+
+    // Steps before stress update
+    preCompute();
 
     updateForces();
 
@@ -84,6 +135,9 @@ CauchyStressFromNEML2UO::batchCompute()
         std::get<1>(_output_data[i]) = RankFourTensor(NEML2Utils::toMOOSE<SymmetricRankFourTensor>(
             _dout_din(stress(), strain()).batch_index({i})));
       }
+
+      // Additional calculations after stress update
+      postCompute();
     }
   }
   catch (neml2::NEMLException & e)
@@ -98,6 +152,23 @@ CauchyStressFromNEML2UO::batchCompute()
                    e.what(),
                    "\nIt is possible that this error is related to NEML2.",
                    NEML2Utils::NEML2_help_message);
+  }
+}
+
+void
+CauchyStressFromNEML2UO::postCompute()
+{
+  for (auto && [name, prop] : _props)
+  {
+    // Extract the parameter derivative from NEML2
+    auto param = neml2::BatchTensor(model().named_parameters()[name]);
+    auto dstress_dparam = neml2::math::jacrev(_out(stress()), param);
+
+    // Fill the NEML2 parameter derivative into MOOSE UO
+    auto & dstress_dprop = prop->setOutputData();
+    for (const neml2::TorchSize i : index_range(dstress_dprop))
+      dstress_dprop[i] =
+          NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(dstress_dparam.batch_index({i}));
   }
 }
 
