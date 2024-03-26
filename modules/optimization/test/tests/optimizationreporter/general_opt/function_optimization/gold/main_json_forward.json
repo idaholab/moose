@@ -19,32 +19,17 @@
         {
             "OptimizationReporter": {
                 "grad_vals": [
-                    0.0,
-                    0.0
-                ],
-                "obj_value": 0.0,
-                "vals": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "time": 0.0,
-            "time_step": 1
-        },
-        {
-            "OptimizationReporter": {
-                "grad_vals": [
                     -34.0,
                     -38.0
                 ],
                 "obj_value": 74.0,
                 "vals": [
-                    34.0,
-                    38.0
+                    0.0,
+                    0.0
                 ]
             },
             "time": 0.0,
-            "time_step": 1
+            "time_step": 0
         },
         {
             "OptimizationReporter": {
@@ -54,12 +39,12 @@
                 ],
                 "obj_value": 20810.0,
                 "vals": [
-                    8.5,
-                    9.5
+                    34.0,
+                    38.0
                 ]
             },
             "time": 0.0,
-            "time_step": 1
+            "time_step": 0
         },
         {
             "OptimizationReporter": {
@@ -69,12 +54,12 @@
                 ],
                 "obj_value": 882.5,
                 "vals": [
-                    2.125,
-                    2.375
+                    8.5,
+                    9.5
                 ]
             },
             "time": 0.0,
-            "time_step": 1
+            "time_step": 0
         },
         {
             "OptimizationReporter": {
@@ -89,7 +74,7 @@
                 ]
             },
             "time": 0.0,
-            "time_step": 1
+            "time_step": 0
         },
         {
             "OptimizationReporter": {
@@ -99,12 +84,12 @@
                 ],
                 "obj_value": 2.65625,
                 "vals": [
-                    0.10564218425352578,
-                    3.8833841002158422
+                    2.125,
+                    2.375
                 ]
             },
             "time": 0.0,
-            "time_step": 1
+            "time_step": 0
         },
         {
             "OptimizationReporter": {
@@ -129,8 +114,8 @@
                 ],
                 "obj_value": 1.5807250608311465,
                 "vals": [
-                    1.0000000000000002,
-                    3.0000000000000004
+                    0.10564218425352578,
+                    3.8833841002158422
                 ]
             },
             "time": 0.0,
@@ -149,7 +134,37 @@
                 ]
             },
             "time": 0.0,
-            "time_step": 1
+            "time_step": 2
+        },
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    3.552713678800501e-15,
+                    3.552713678800501e-15
+                ],
+                "obj_value": 1.5777218104420236e-30,
+                "vals": [
+                    1.0000000000000002,
+                    3.0000000000000004
+                ]
+            },
+            "time": 0.0,
+            "time_step": 2
+        },
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    3.552713678800501e-15,
+                    3.552713678800501e-15
+                ],
+                "obj_value": 1.5777218104420236e-30,
+                "vals": [
+                    1.0000000000000002,
+                    3.0000000000000004
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
         }
     ]
 }
