@@ -1,8 +1,8 @@
 mu = 1
 rho = 1
 l = 1
-U = 1
-n = 2
+U = 100
+n = 8
 
 [Mesh]
   [gen]
@@ -19,23 +19,23 @@ n = 2
 []
 
 [Variables]
-  [u]
-    family = MONOMIAL
+  [vel_x]
+    family = L2_HIERARCHIC
     order = SECOND
   []
-  [v]
-    family = MONOMIAL
+  [vel_y]
+    family = L2_HIERARCHIC
     order = SECOND
   []
   [pressure]
-    family = MONOMIAL
+    family = L2_HIERARCHIC
     order = FIRST
   []
-  [u_bar]
+  [vel_bar_x]
     family = SIDE_HIERARCHIC
     order = SECOND
   []
-  [v_bar]
+  [vel_bar_y]
     family = SIDE_HIERARCHIC
     order = SECOND
   []
@@ -50,40 +50,40 @@ n = 2
 []
 
 [Kernels]
-  # [momentum_x_convection]
-  #   type = ADConservativeAdvection
-  #   variable = u
-  #   velocity = 'velocity'
-  #   advected_quantity = 'rhou'
-  # []
+  [momentum_x_convection]
+    type = ADConservativeAdvection
+    variable = vel_x
+    velocity = 'velocity'
+    advected_quantity = 'rhou'
+  []
   [momentum_x_diffusion]
     type = ADMatDiffusion
-    variable = u
+    variable = vel_x
     diffusivity = 'mu'
   []
   [momentum_x_pressure]
     type = PressureGradient
     integrate_p_by_parts = true
-    variable = u
+    variable = vel_x
     pressure = pressure
     component = 0
   []
 
-  # [momentum_y_convection]
-  #   type = ADConservativeAdvection
-  #   variable = v
-  #   velocity = 'velocity'
-  #   advected_quantity = 'rhov'
-  # []
+  [momentum_y_convection]
+    type = ADConservativeAdvection
+    variable = vel_y
+    velocity = 'velocity'
+    advected_quantity = 'rhov'
+  []
   [momentum_y_diffusion]
     type = ADMatDiffusion
-    variable = v
+    variable = vel_y
     diffusivity = 'mu'
   []
   [momentum_y_pressure]
     type = PressureGradient
     integrate_p_by_parts = true
-    variable = v
+    variable = vel_y
     pressure = pressure
     component = 1
   []
@@ -92,7 +92,7 @@ n = 2
     type = ADConservativeAdvection
     variable = pressure
     velocity = velocity
-    advected_quantity = -1
+    advected_quantity = ${fparse -rho}
   []
 
  [mean_zero_pressure]
@@ -112,72 +112,72 @@ n = 2
 []
 
 [DGKernels]
-  # [momentum_x_convection]
-  #   type = ADHDGAdvection
-  #   variable = u
-  #   velocity = 'velocity'
-  #   coeff = ${rho}
-  #   side_variable = u_bar
-  # []
-  # [momentum_x_convection_side]
-  #   type = ADHDGAdvectionSide
-  #   variable = u_bar
-  #   velocity = 'velocity'
-  #   coeff = ${rho}
-  #   interior_variable = u
-  # []
+  [momentum_x_convection]
+    type = ADHDGAdvection
+    variable = vel_x
+    velocity = 'velocity'
+    coeff = ${rho}
+    side_variable = vel_bar_x
+  []
+  [momentum_x_convection_side]
+    type = ADHDGAdvectionSide
+    variable = vel_bar_x
+    velocity = 'velocity'
+    coeff = ${rho}
+    interior_variable = vel_x
+  []
   [momentum_x_diffusion]
     type = ADHDGDiffusion
-    variable = u
+    variable = vel_x
     alpha = 6
     diff = 'mu'
-    side_variable = u_bar
+    side_variable = vel_bar_x
   []
   [momentum_x_diffusion_side]
     type = ADHDGDiffusionSide
-    variable = u_bar
+    variable = vel_bar_x
     alpha = 6
     diff = 'mu'
-    interior_variable = u
+    interior_variable = vel_x
   []
   [momentum_x_pressure]
     type = ADHDGPressure
-    variable = u
+    variable = vel_x
     pressure = pressure_bar
     component = 0
   []
 
-  # [momentum_y_convection]
-  #   type = ADHDGAdvection
-  #   variable = v
-  #   velocity = 'velocity'
-  #   coeff = ${rho}
-  #   side_variable = v_bar
-  # []
-  # [momentum_y_convection_side]
-  #   type = ADHDGAdvectionSide
-  #   variable = v_bar
-  #   velocity = 'velocity'
-  #   coeff = ${rho}
-  #   interior_variable = v
-  # []
+  [momentum_y_convection]
+    type = ADHDGAdvection
+    variable = vel_y
+    velocity = 'velocity'
+    coeff = ${rho}
+    side_variable = vel_bar_y
+  []
+  [momentum_y_convection_side]
+    type = ADHDGAdvectionSide
+    variable = vel_bar_y
+    velocity = 'velocity'
+    coeff = ${rho}
+    interior_variable = vel_y
+  []
   [momentum_y_diffusion]
     type = ADHDGDiffusion
-    variable = v
+    variable = vel_y
     alpha = 6
     diff = 'mu'
-    side_variable = v_bar
+    side_variable = vel_bar_y
   []
   [momentum_y_diffusion_side]
     type = ADHDGDiffusionSide
-    variable = v_bar
+    variable = vel_bar_y
     alpha = 6
     diff = 'mu'
-    interior_variable = v
+    interior_variable = vel_y
   []
   [momentum_y_pressure]
     type = ADHDGPressure
-    variable = v
+    variable = vel_y
     pressure = pressure_bar
     component = 1
   []
@@ -202,34 +202,34 @@ n = 2
   [momentum_x_diffusion_walls]
     type = HDGDiffusionBC
     boundary = 'left bottom right'
-    variable = u
+    variable = vel_x
     alpha = 6
     exact_soln = '0'
     diff = 'mu'
   []
   [momentum_x_diffusion_side_walls]
     type = ADHDGSideDirichletBC
-    variable = u_bar
+    variable = vel_bar_x
     exact_soln = 0
     boundary = 'left bottom right'
   []
   [momentum_x_diffusion_top]
     type = HDGDiffusionBC
     boundary = 'top'
-    variable = u
+    variable = vel_x
     alpha = 6
     exact_soln = '${U}'
     diff = 'mu'
   []
   [momentum_x_diffusion_side_top]
     type = ADHDGSideDirichletBC
-    variable = u_bar
+    variable = vel_bar_x
     exact_soln = ${U}
     boundary = 'top'
   []
   [momentum_x_pressure_all]
     type = ADHDGPressureBC
-    variable = u
+    variable = vel_x
     component = 0
     pressure = pressure_bar
     boundary = 'left bottom right top'
@@ -238,20 +238,20 @@ n = 2
   [momentum_y_diffusion_all]
     type = HDGDiffusionBC
     boundary = 'left bottom right top'
-    variable = v
+    variable = vel_y
     alpha = 6
     exact_soln = '0'
     diff = 'mu'
   []
   [momentum_y_side_all]
     type = ADHDGSideDirichletBC
-    variable = v_bar
+    variable = vel_bar_y
     exact_soln = 0
     boundary = 'left bottom right top'
   []
   [momentum_y_pressure_all]
     type = ADHDGPressureBC
-    variable = v
+    variable = vel_y
     component = 1
     pressure = pressure_bar
     boundary = 'left bottom right top'
@@ -310,55 +310,22 @@ n = 2
   [vel]
     type = ADVectorFromComponentVariablesMaterial
     vector_prop_name = 'velocity'
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
   []
   [rhou]
     type = ADParsedMaterial
     property_name = 'rhou'
-    coupled_variables = 'u'
+    coupled_variables = 'vel_x'
     material_property_names = 'rho'
-    expression = 'rho*u'
+    expression = 'rho*vel_x'
   []
   [rhov]
     type = ADParsedMaterial
     property_name = 'rhov'
-    coupled_variables = 'v'
+    coupled_variables = 'vel_y'
     material_property_names = 'rho'
-    expression = 'rho*v'
-  []
-[]
-
-[AuxVariables]
-  [vel_x]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [vel_y]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [p]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [vel_x]
-    type = ProjectionAux
-    variable = vel_x
-    v = u
-  []
-  [vel_y]
-    type = ProjectionAux
-    variable = vel_y
-    v = v
-  []
-  [p]
-    type = ProjectionAux
-    variable = p
-    v = pressure
+    expression = 'rho*vel_y'
   []
 []
 
@@ -371,7 +338,10 @@ n = 2
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    hide = 'lambda pressure_integral'
+  []
 []
 
 [Postprocessors]
