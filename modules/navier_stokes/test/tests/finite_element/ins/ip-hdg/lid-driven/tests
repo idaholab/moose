@@ -6,4 +6,16 @@
     exodiff = lid-driven_out.e
     installation_type = 'in_tree' # uses JIT
   []
+  [lid-mms]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLid
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce second order convergence for velocity variables and first order convergence for the pressure variable when using first and zeroth order polynomials respectively.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
 []
