@@ -1,0 +1,16 @@
+[Tests]
+  design = 'FlowChannel1PhaseWithAddedMass.md'
+  issues = '#26086'
+
+  [physics]
+    requirement = 'The system shall simulate a single-phase flow channel with added mass'
+
+    [pipe_with_added_mass_test]
+      type = 'CSVDiff'
+      input = 'pipe_with_added_mass.i'
+      csvdiff = 'pipe_added_mass.csv'
+      rel_err = 1e-10
+      detail = 'with a constant added mass flow rate.'
+    []
+  []
+[]
