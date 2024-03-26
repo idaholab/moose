@@ -18,4 +18,10 @@
     installation_type = in_tree
     valgrind = 'none'
   []
+  [stokes_symmetric]
+    type = CSVDiff
+    input = stokes-lid-driven.i
+    csvdiff = stokes-lid-driven_out.csv
+    requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization of Stokes flow shall be symmetric.'
+  []
 []
