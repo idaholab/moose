@@ -96,6 +96,14 @@ An example of how to pass the user object in an input file is given below:
 Note that the step capability is three-pronged: 1) It allows to pass the step number to the UMAT
 routine via the present object, 2) It allows to pass the step number to the [AbaqusUExternalDB](/AbaqusUExternalDB.md) plugin, and 3) It allows to directly drive controls via step number in [StepPeriod](/StepPeriod.md).
 
+## UMAT Orientation
+
+Anisotropic material models typically have a specified local coordinate system that may need to be
+oriented differently than the global system. The `orientation` parameter takes a vector of 3 Euler
+angles that defines the rotation between the local and global coordinate systems. More information
+on the use of Euler angles for rotating material models in MOOSE can be found on the
+[ComputeElasticityTensor](/ComputeElasticityTensor.md) page.
+
 ## Example input file
 
 !listing modules/solid_mechanics/test/tests/umat/elastic_hardening/linear_strain_hardening.i block=Materials/constant
