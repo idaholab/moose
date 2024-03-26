@@ -119,6 +119,8 @@ There are also some optional parameters that can be supplied to
   integration. *Exact* integration of SECOND order QUAD face elements (e.g.
   HEX27 meshes) requires FOURTH order integration.
 
+%% Add note to doc here about the boundary offset
+
 At present, either the `secondary_variable` or `primary_variable` parameter must be supplied.
 
 ## Coupling with Scalar Variables
