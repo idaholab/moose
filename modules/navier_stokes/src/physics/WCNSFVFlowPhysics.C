@@ -132,7 +132,7 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                             "bernoulli",
                             {"pressure_allow_expansion_on_bernoulli_faces"});
 
-  // Additional boundary condition checks. Most checks are in the NavierStokesFlowPhysicsBase
+  // Additional boundary condition checks. Most checks are in the NavierStokesPhysicsBase
   if (_boundary_condition_information_complete)
   {
     checkVectorParamLengthSameAsCombinedOthers<BoundaryName,

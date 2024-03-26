@@ -14,12 +14,12 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes equations
  */
-class NavierStokesFlowPhysicsBase : public PhysicsBase
+class NavierStokesPhysicsBase : public PhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  NavierStokesFlowPhysicsBase(const InputParameters & parameters);
+  NavierStokesPhysicsBase(const InputParameters & parameters);
 
   /// To interface with other Physics
   std::vector<std::string> getVelocityNames() const { return _velocity_names; }
