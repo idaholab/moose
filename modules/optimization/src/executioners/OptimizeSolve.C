@@ -378,6 +378,7 @@ OptimizeSolve::objectiveFunction()
 
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
 
+  _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_FORWARD);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_FORWARD))
     mooseError("Forward solve multiapp failed!");
