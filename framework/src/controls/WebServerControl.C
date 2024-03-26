@@ -252,7 +252,20 @@ WebServerControl::startServer()
             return error("The control is not currently waiting");
           });
 
-  _server_thread = std::make_unique<std::thread>([this] { _server->startListening(this->_port); });
+  _server_thread = std::make_unique<std::thread>(
+      [this]
+      {
+        try
+        {
+          _server->startListening(this->_port);
+        }
+        catch (...)
+        {
+          this->mooseError("Failed to start the webserver; it is likely that the port ",
+                           this->_port,
+                           " is not available");
+        }
+      });
 }
 
 void
