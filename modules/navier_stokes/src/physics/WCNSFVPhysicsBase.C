@@ -16,7 +16,7 @@
 InputParameters
 WCNSFVPhysicsBase::validParams()
 {
-  InputParameters params = NavierStokesFlowPhysicsBase::validParams();
+  InputParameters params = NavierStokesPhysicsBase::validParams();
   params.addClassDescription(
       "Base class to define the Navier Stokes incompressible and weakly-compressible equation");
 
@@ -46,7 +46,7 @@ WCNSFVPhysicsBase::validParams()
 }
 
 WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
-  : NavierStokesFlowPhysicsBase(parameters),
+  : NavierStokesPhysicsBase(parameters),
     _define_variables(getParam<bool>("define_variables")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
@@ -234,7 +234,7 @@ WCNSFVPhysicsBase::getAdditionalRMParams() const
 void
 WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other_params) const
 {
-  NavierStokesFlowPhysicsBase::checkCommonParametersConsistent(other_params);
+  NavierStokesPhysicsBase::checkCommonParametersConsistent(other_params);
 
   // Check all the parameters in WCNSFVPhysicsBase
   warnInconsistent<std::vector<PostprocessorName>>(other_params, "flux_inlet_pps");

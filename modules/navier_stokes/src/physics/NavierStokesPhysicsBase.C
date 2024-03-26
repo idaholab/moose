@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesFlowPhysicsBase.h"
+#include "NavierStokesPhysicsBase.h"
 #include "NSFVAction.h"
 
 InputParameters
-NavierStokesFlowPhysicsBase::validParams()
+NavierStokesPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription("Define the Navier Stokes equation");
@@ -47,7 +47,7 @@ NavierStokesFlowPhysicsBase::validParams()
   return params;
 }
 
-NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters & parameters)
+NavierStokesPhysicsBase::NavierStokesPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters),
     _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
@@ -102,7 +102,7 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
 }
 
 MooseFunctorName
-NavierStokesFlowPhysicsBase::getPorosityFunctorName(bool smoothed) const
+NavierStokesPhysicsBase::getPorosityFunctorName(bool smoothed) const
 {
   mooseAssert(!smoothed || !_porosity_smoothing_layers,
               "Smooth porosity cannot be used without the smoothing treatment turned on");
@@ -113,8 +113,7 @@ NavierStokesFlowPhysicsBase::getPorosityFunctorName(bool smoothed) const
 }
 
 void
-NavierStokesFlowPhysicsBase::checkCommonParametersConsistent(
-    const InputParameters & other_params) const
+NavierStokesPhysicsBase::checkCommonParametersConsistent(const InputParameters & other_params) const
 {
   // TODO C++20: make warnInconsistent a templated lambda
   warnInconsistent<MooseEnum>(other_params, "compressibility");
