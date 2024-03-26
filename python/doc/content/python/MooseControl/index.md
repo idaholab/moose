@@ -4,14 +4,15 @@ A helper class used to interact with a simulation running with a [WebServerContr
 
 ## Basic usage
 
-First, instantiate a control object with the port that the [WebServerControl.md] is running on and wait for MOOSE to be available:
+First, instantiate a control object with an input file that has a [WebServerControl.md] object named `control_name`:
 
 ```language=python
-# Setup the control to interact with the server on port 12345
-control = MooseControl(12345)
+# Setup the control; runs the application and interacts with it
+moose_command = 'mpiexec -n 2 /path/to/app-opt -i input.i'
+control = MooseControl(moose_command=moose_command, moose_control_name='control_name')
 
-# Waits for the MOOSE webserver to be listening
-control.initialWait()
+# Initialize the MOOSE process and wait for the webserver to start
+control.initialize()
 ```
 
 You should know which execution flags the webserver will be listening on, and how many times it will be listening. An example loop over an expected number of timesteps and action on `TIMESTEP_BEGIN` and `TIMESTEP_END` is as follows:
@@ -42,7 +43,7 @@ for t in range(num_steps):
     control.setContinue()
 
 # Wait for MOOSE to finish up
-control.finalWait()
+control.finalize()
 ```
 
 ## Class methods

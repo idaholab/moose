@@ -13,45 +13,87 @@ import os
 import socket
 import subprocess
 import time
+import logging
+from threading import Thread
+
+# Common logger for the MooseControl
+logger = logging.getLogger('MooseControl')
 
 class MooseControl:
     """Helper for interacting with the MOOSE WebServerControl.
 
+    Use this class as follows:
+        control = MooseControl(...)
+        control.initialize()
+        <interact with the process>
+        control.finalize()
+
     This object is tested primarily by
     test/tests/controls/web_server_control in the framework."""
 
-    def __init__(self, port: int, moose_process: subprocess.Popen = None):
+    def __init__(self, moose_command=None, moose_port=None, moose_control_name=None):
         """Constructor
 
+        You must specify either "moose_port" or "moose_command" and "moose_control_name".
+
+        If "moose_port" is specified: Connect to the webserver at this port and
+        do not spawn a moose process.
+
+        If "moose_command" is specified: Spawn a moose process and then connect to it
+        at an available port. "moose_control_name" must be specified so that the port
+        for the WebServerControl object can be set via this class, that is, via the
+        command line option Controls/<moose_control_name/port=<port>, where <port>
+        is the determined available port.
+
         Parameters:
-            port (int): The port that the WebServerControl is running on
-            moose_process (subprocess.Popen or None): The moose process that we're
-                attached to (if any); if this is set and the process has ended
-                while in wait(), this will throw
+            moose_command (str): The command to use to start the moose process
+            moose_port (int): The webserver port to connect to
+            moose_control_name (str): The name of the input control object
         """
-        # The URL we interact with
-        self._url = f'http://localhost:{port}'
+        # Setup a basic logger
+        logging.basicConfig(level=logging.INFO,
+                            handlers=[logging.StreamHandler()],
+                            format='%(levelname)s:%(name)s: %(message)s')
+
+        # Sanity checks on input
+        has_moose_command = moose_command is not None
+        has_moose_port = moose_port is not None
+        has_moose_control_name = moose_control_name is not None
+        if not has_moose_command and not has_moose_port:
+            raise ValueError('One of "moose_command" or "moose_port" must be provided')
+        if has_moose_command and has_moose_port:
+            raise ValueError('"moose_command" and "moose_port" cannot be provided together')
+        if has_moose_command and not has_moose_control_name:
+            raise ValueError('"moose_control_name" must be specified with "moose_command"')
+        if not has_moose_control_name and has_moose_port:
+            raise ValueError('"moose_control_name" is unused with "moose_port"')
+
+        # Store inputs
+        self._moose_command = moose_command
+        self._moose_port = moose_port
+        self._moose_control_name = moose_control_name
+
+        # Set defaults
+        self._url = None
+        self._moose_process = None
+        self._moose_reader = None
 
         # How often we want to poll MOOSE for its availability
         self._poll_time = 0.1
 
-        # Whether or not we called initialWait()
-        self._did_initial_wait = False
-
-        # The process that is running moose, if any
-        self._moose_process = moose_process
-
-    def log(self, msg: str):
-        """Helper for printing to a log
-
-        Allows us to easily implement a better log in the future
-        if we want to"""
-        print(f'[{self.__class__.__name__}]: {msg}')
+        # Whether or not we called initialize()
+        self._initialized = False
 
     class Exception(Exception):
         """Basic exception for an error within the MooseControl"""
         def __init__(self, message):
             super().__init__(message)
+
+    def _requireMooseProcess(self):
+        """Throws an exception if the moose process is not running
+        (only if one was spwaned)"""
+        if self._moose_process and self._moose_process.poll() is not None:
+            raise Exception('The MOOSE process has ended')
 
     def _get(self, path: str):
         """Calls GET on the webserver
@@ -62,19 +104,17 @@ class MooseControl:
             int: The HTTP status code
             dict or None: The returned JSON data, if any, otherwise None
         """
-        if not self._did_initial_wait:
-            raise Exception('Attempting GET without calling initialWait()')
+        if not self._initialized:
+            raise Exception('Attempting GET without calling initialize()')
+        self._requireMooseProcess()
         self._requireListening()
 
-        self.log(f'GET "{path}"')
         r = requests.get(f'{self._url}/{path}')
-        self.log(f'Status from "{path}": {r.status_code}')
         r.raise_for_status()
 
         r_json = None
         if r.headers.get('content-type') == 'application/json':
             r_json = r.json()
-            self.log(f'Result from "{path}": {r_json}')
 
         return int(r.status_code), r_json
 
@@ -88,12 +128,12 @@ class MooseControl:
             int: The HTTP status code
             dict or None: The returned JSON data, if any, otherwise None
         """
-        if not self._did_initial_wait:
-            raise Exception('Attempting POST without calling initialWait()')
+        if not self._initialized:
+            raise Exception('Attempting POST without calling initialize()')
+        self._requireMooseProcess()
         self._requireListening()
         self._requireWaiting()
 
-        self.log(f'POST {data} to "{path}"')
         r = requests.post(f'{self._url}/{path}', json=data)
 
         r_json = None
@@ -101,6 +141,7 @@ class MooseControl:
             r_json = r.json()
             error = r_json.get('error')
             if error is not None:
+                logger.error(error)
                 raise MooseControl.Exception(f'WebServerControl error: {error}')
         r.raise_for_status()
 
@@ -119,46 +160,99 @@ class MooseControl:
     def isListening(self) -> bool:
         """Returns whether or not the webserver is listening"""
         try:
-            r = requests.get(self._url)
+            r = requests.get(f'{self._url}/check')
         except requests.exceptions.ConnectionError:
             return False
-        return r.status_code == 404
+        return r.status_code == 200
 
     def _requireListening(self):
         """Internal helper that throws if the server is not listening"""
         if not self.isListening():
             raise self.Exception('MOOSE is not listening')
 
-    def initialWait(self):
-        """Waits for the MOOSE webserver to start listening
+    def initialize(self):
+        """Starts the MOOSE process (if enabled) and waits for
+        the MOOSE webserver to start listening
 
         Must be called before doing any other operations"""
-        self.log(f'Waiting for the webserver to start at "{self._url}"')
+        if self._initialized:
+            raise Exception('Already called initialize()')
 
-        if self._did_initial_wait:
-            raise Exception('Already called initialWait()')
+        # The port we've decided on
+        port = None
 
+        # MOOSE command is provided; start the process
+        if self._moose_command:
+            # Setup the port moose will run on
+            sock = socket.socket()
+            sock.bind(('', 0))
+            port = int(sock.getsockname()[1])
+            sock.close()
+            logger.info(f'Determined port {port} for communication')
+
+            # Build the command, including what port to run the WebServerControl on
+            moose_command = f"{self._moose_command} Controls/{self._moose_control_name}/port={port}"
+
+            # Spawn the moose process
+            logger.info(f'Spawning MOOSE with command "{moose_command}"')
+            self._moose_process = self.spawnMoose(moose_command)
+
+            # And setup the threaded reader that will pipe the moose process
+            # to the common logger
+            def read_process(pipe):
+                for line in iter(pipe.readline, ""):
+                    logging.getLogger('MooseControl.app').info(line.rstrip())
+            self._moose_reader = Thread(target=read_process,
+                                        args=[self._moose_process.stdout],
+                                        daemon=True)
+            self._moose_reader.start()
+
+            # This should be running now
+            self._requireMooseProcess()
+        # MOOSE command is not provided; just connect via the port
+        else:
+            logger.info(f'Using provided port {self._moose_port} for communication')
+            port = int(self._moose_port)
+
+        # Set the URL for communication
+        self._url = f'http://localhost:{port}'
+
+        # Wait for the webserver to listen
+        logger.info(f'Waiting for the webserver to start on "{self._url}"...')
         while True:
             time.sleep(self._poll_time)
+            self._requireMooseProcess()
             if self.isListening():
                 break
 
-        self._did_initial_wait = True
-        self.log(f'Webserver is listening at "{self._url}"')
+        self._initialized = True
+        logger.info(f'Webserver is listening on "{self._url}"')
 
-    def finalWait(self):
-        """Waits for the MOOSE webserver to stop listening
+    def finalize(self):
+        """Waits for the MOOSE webserver to stop listening and for
+        the MOOSE process to exit (if one was setup)
 
         Use this when you think MOOSE should be done. This will
         throw in the event that the webserver is waiting for
         input when you think it should be done"""
-        self.log(f'Waiting for webserver to finish')
+        if self._moose_process:
+            logger.info('Waiting for the webserver to stop and for the app process to exit...')
+        else:
+            logger.info('Waiting for the webserver to stop...')
+
+        webserver_stopped = False
         while True:
             time.sleep(self._poll_time)
 
             # If the server is no longer responding, we're good
             if not self.isListening():
-                self.log(f'Webserver has finished')
+                if not webserver_stopped:
+                    logger.info('Webserver has stopped listening')
+                    webserver_stopped = True
+                if self._moose_process:
+                    self._moose_process.wait()
+                    return_code = self._moose_process.returncode
+                    logger.info(f'App process has exited with code {return_code}')
                 return
 
             # Make sure that the control isn't waiting for input
@@ -181,9 +275,9 @@ class MooseControl:
         """
 
         if flag:
-            self.log(f'Waiting to be at execute on flag "{flag}"')
+            logger.info(f'Waiting for the webserver to be at execute on flag {flag}...')
         else:
-            self.log(f'Waiting to be available')
+            logger.info(f'Waiting for the webserver...')
 
         # Poll until we're available
         while True:
@@ -199,9 +293,9 @@ class MooseControl:
             if current_flag is None:
                 continue
 
-            self.log(f'Waiting at execute on flag "{current_flag}"')
+            logger.info(f'Webserver is waiting at execute on flag {current_flag}')
             if flag is not None and current_flag != flag:
-                raise self.Exception(f'Unexpected execute on flag "{current_flag}"')
+                raise self.Exception(f'Unexpected execute on flag {current_flag}')
             return
 
     def getWaitingFlag(self) -> str:
@@ -236,20 +330,23 @@ class MooseControl:
 
     def setContinue(self):
         """Tells the WebServerControl to continue"""
-        self.log(f'Telling to continue')
+        logger.info(f'Telling the webserver to continue...')
         self._requireWaiting()
         status, r_json = self._get('continue')
         if status != 200:
             raise Exception(f'Unexpected status {status} from continue')
         if r_json is not None:
             raise Exception(f'Unexpected data {r_json} from continue')
+        logger.info(f'Successfully told the webserver to continue')
 
     def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
+        logger.info(f'Setting controllable {type} value {path}={value}...')
         data = {'name': path, 'value': value, 'type': type}
         status, _ = self._post('set/controllable', data)
         if status != 201:
             raise Exception(f'Unexpected status {status} from setting controllable value')
+        logger.info(f'Successfully set controllable value {path}')
 
     @staticmethod
     def _requireNumeric(value):
@@ -272,7 +369,6 @@ class MooseControl:
             path (str): The path of the controllable value
             value (float): The value to set
         """
-        self.log(f'Setting controllable bool value {path}={value}')
         self._requireType(value, bool)
         self._setControllable(path, 'bool', value)
 
@@ -285,7 +381,6 @@ class MooseControl:
             path (str): The path of the controllable value
             value (float): The value to set
         """
-        self.log(f'Setting controllable Real value {path}={value}')
         self._requireNumeric(value)
         self._setControllable(path, 'Real', float(value))
 
@@ -303,7 +398,6 @@ class MooseControl:
         for entry in value:
             self._requireNumeric(entry)
             value_list.append(entry)
-        self.log(f'Setting controllable vector Real value {path}={value_list}')
         self._setControllable(path, 'std::vector<Real>', value_list)
 
     def setControllableString(self, path: str, value: str):
@@ -313,7 +407,6 @@ class MooseControl:
             path (str): The path of the controllable value
             value (str): The value to set
         """
-        self.log(f'Setting controllable string value {path}={value}')
         self._setControllable(path, 'std::string', str(value))
 
     def setControllableVectorString(self, path: str, value: list[float]):
@@ -325,7 +418,6 @@ class MooseControl:
             path (str): The path of the controllable value
             value (list): The value to set
         """
-        self.log(f'Setting controllable vector string value {path}={value}')
         self._requireType(value, list)
         for i in range(len(value)):
             value[i] = str(value[i])
@@ -339,7 +431,7 @@ class MooseControl:
         Returns:
             float: The value of the postprocessor
         """
-        self.log(f'Getting postprocessor value for "{name}"')
+        logger.info(f'Getting postprocessor value for "{name}"...')
         self._requireWaiting()
 
         data = {'name': name}
@@ -350,26 +442,20 @@ class MooseControl:
         self._checkResponse(['value'], r)
 
         value = float(r['value'])
-        self.log(f'Retrieved postprocessor value {name}={value}')
+        logger.info(f'Successfully retrieved postprocessor value {name}={value}')
 
         return value
 
     @staticmethod
-    def getAvailablePort() -> int:
-        """Gets an available port on the system to use for the web server"""
-        sock = socket.socket()
-        sock.bind(('', 0))
-        return int(sock.getsockname()[1])
-
-    @staticmethod
-    def spawnMoose(cmd: str, cwd) -> subprocess.Popen:
+    def spawnMoose(cmd: str) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""
         popen_kwargs = {'stdout': subprocess.PIPE,
                         'stderr': subprocess.STDOUT,
-                        'cwd': cwd,
                         'close_fds': False,
                         'shell': True,
-                        'text': True}
+                        'text': True,
+                        'universal_newlines': True,
+                        'bufsize': 1}
 
         # This controls the process being killed properly with the parent
         if platform.system() == "Windows":
