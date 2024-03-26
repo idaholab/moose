@@ -32,7 +32,6 @@ auto const cont_letter_def = start_letter_def | bp::digit;
 auto const name_def = start_letter >> *(cont_letter);
 BOOST_PARSER_DEFINE_RULES(start_letter, cont_letter, name);
 
-
 // check bool existence
 const auto f_identifier = [](auto & ctx)
 {
@@ -48,13 +47,7 @@ const auto f_not_identifier = [](auto & ctx)
   else
     _val(ctx) = CapState::MAYBE_TRUE;
 };
-const auto f_compare = [](auto & ctx)
-{
-  if (caps.find(_attr(ctx)) != caps.end())
-    _val(ctx) = CapState::FALSE;
-  else
-    _val(ctx) = CapState::MAYBE_TRUE;
-};
+const auto f_compare = [](auto & ctx) { _val(ctx) = CapState::FALSE; };
 
 bp::symbols<int> const comparison = {
     {"<=", 0}, {">=", 1}, {"<", 2}, {">", 3}, {"!=", 4}, {"==", 5}, {"=", 5}};
@@ -62,27 +55,36 @@ bp::symbols<int> const conjunction = {
     {"&&", 0}, {"&", 0}, {"||", 1}, {"|", 1}};
 
 // capability value
-bp::rule<struct value_tag, std::string> value = "capability value";
-auto const value_def = +(bp::lower | bp::upper | '_' | '-') | (bp::digit >> *('.' >> +bp::digit));
-BOOST_PARSER_DEFINE_RULES(value);
+bp::rule<struct generic_tag, std::string> generic = "generic capability value";
+bp::rule<struct version_tag, std::vector<unsigned int>> version = "version number";
+bp::rule<struct value_tag, std::variant<std::string, std::vector<unsigned int>>> value =
+    "capability value";
+auto const generic_def = +(bp::lower | bp::upper | bp::digit | '_' | '-');
+auto const version_def = bp::uint_ >> *('.' >> bp::uint_);
+auto const value_def = generic | version;
+// auto const value_def = +(bp::lower | bp::upper | '_' | '-') | (bp::digit >> *('.' >>
+// +bp::digit));
+BOOST_PARSER_DEFINE_RULES(generic, version, value);
 
 // bool_statement
 bp::rule<struct bool_statement_tag, CapState> bool_statement = "bool statement";
-auto const bool_statement_def = ('!' > name)[f_not_identifier] | name[f_identifier] | (name >> comparison >> value)[f_compare];
+auto const bool_statement_def =
+    ('!' >> name)[f_not_identifier] | name[f_identifier] | (name >> comparison)[f_compare];
+// ('!' >> name)[f_not_identifier] | name[f_identifier] | (name >> comparison >> value)[f_compare];
 BOOST_PARSER_DEFINE_RULES(bool_statement);
 
 // expression
 bp::rule<struct expr_tag, CapState> expr = "boolean expression";
-auto const expr_def = "!(" >> expr >> ")" | "(" >> expr >> ")" | bool_statement | expr >> conjunction >> expr;
+auto const expr_def =
+    "!(" >> expr >> ")" | "(" >> expr >> ")" | bool_statement | expr >> conjunction >> expr;
 BOOST_PARSER_DEFINE_RULES(expr);
-
 }
 
 /*
 <name> ::= [a-z] ([a-z] | [0-9])*
 <comp> ::= (">" | "<") ("=")? | "!=" | "="
 <conj> ::= "&" | "|"
-<value> ::= ([a-z] | [0-9] | "_" | "-")+ | [0-9] ("." [0-9]+)* 
+<value> ::= ([a-z] | [0-9] | "_" | "-")+ | [0-9] ("." [0-9]+)*
 <bool> ::= <name> | <name> <comp> <value>
 <expr> ::= "!(" <expr> ")" | "(" <expr> ")" | <bool> | <expr> <conj> <expr>
 
@@ -90,23 +92,24 @@ https://bnfplayground.pauliankline.com/?bnf=%3Cname%3E%20%3A%3A%3D%20%5Ba-z%5D%2
 int
 main()
 {
-  std::string input = "hal3lo";
+  std::string input = "23.4.12";
 
-  auto const result = bp::parse(input, expr, bp::ws);
+  auto const result = bp::parse(input, bool_statement, bp::ws);
+  // type_is<decltype(*result)>();
 
-  if (result)
-  {
-    std::cout << "Great! It looks like you entered:\n";
-    std::cout << static_cast<int>(*result) << "\n";
-    // for (double x : *result)
-    // {
-    //   std::cout << x << "\n";
-    // }
-  }
-  else
-  {
-    std::cout << "Good job!  Please proceed to the recovery annex for cake.\n";
-  }
+  // if (result)
+  // {
+  //   std::cout << "Great! It looks like you entered:\n";
+  //   // std::cout << *result << "\n";
+  //   for (auto & x : *result)
+  //   {
+  //     std::cout << x << "\n";
+  //   }
+  // }
+  // else
+  // {
+  //   std::cout << "Good job!  Please proceed to the recovery annex for cake.\n";
+  // }
 
   return 0;
 }
