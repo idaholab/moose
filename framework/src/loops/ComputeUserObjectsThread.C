@@ -172,7 +172,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   if (userobjs.size() == 0 && _domain_objs.size() == 0)
     return;
 
-  _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+  _fe_problem.reinitElemFace(elem, side, _tid);
 
   // Reinitialize lower-dimensional variables for use in boundary Materials
   if (lower_d_elem)

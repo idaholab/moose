@@ -1945,7 +1945,7 @@ FEProblemBase::reinitElem(const Elem * elem, const THREAD_ID tid)
 }
 
 void
-FEProblemBase::reinitElemPhys(const Elem * elem,
+FEProblemBase::reinitElemPhys(const Elem * const elem,
                               const std::vector<Point> & phys_points_in_elem,
                               const THREAD_ID tid)
 {
@@ -1966,20 +1966,30 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
 }
 
 void
-FEProblemBase::reinitElemFace(const Elem * elem,
-                              unsigned int side,
-                              BoundaryID bnd_id,
+FEProblemBase::reinitElemFace(const Elem * const elem,
+                              const unsigned int side,
+                              const BoundaryID,
                               const THREAD_ID tid)
+{
+  mooseDeprecated(
+      "reinitElemFace with a BoundaryID argument is deprecated because the boundary id was never "
+      "used. Please call reinitElemFace without the BoundaryID argument instead");
+
+  reinitElemFace(elem, side, tid);
+}
+
+void
+FEProblemBase::reinitElemFace(const Elem * const elem, const unsigned int side, const THREAD_ID tid)
 {
   for (const auto i : index_range(_nl))
   {
     _assembly[tid][i]->reinit(elem, side);
-    _nl[i]->reinitElemFace(elem, side, bnd_id, tid);
+    _nl[i]->reinitElemFace(elem, side, tid);
   }
-  _aux->reinitElemFace(elem, side, bnd_id, tid);
+  _aux->reinitElemFace(elem, side, tid);
 
   if (_displaced_problem && _reinit_displaced_face)
-    _displaced_problem->reinitElemFace(_displaced_mesh->elemPtr(elem->id()), side, bnd_id, tid);
+    _displaced_problem->reinitElemFace(_displaced_mesh->elemPtr(elem->id()), side, tid);
 }
 
 void
@@ -2087,14 +2097,13 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD
   }
   _aux->prepareNeighbor(tid);
 
-  BoundaryID bnd_id = 0; // some dummy number (it is not really used for anything, right now)
   for (auto & nl : _nl)
   {
-    nl->reinitElemFace(elem, side, bnd_id, tid);
-    nl->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+    nl->reinitElemFace(elem, side, tid);
+    nl->reinitNeighborFace(neighbor, neighbor_side, tid);
   }
-  _aux->reinitElemFace(elem, side, bnd_id, tid);
-  _aux->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _aux->reinitElemFace(elem, side, tid);
+  _aux->reinitNeighborFace(neighbor, neighbor_side, tid);
 
   if (_displaced_problem && _reinit_displaced_neighbor)
   {
@@ -2167,8 +2176,8 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
 
   // Compute the values of each variable at the points
   for (auto & nl : _nl)
-    nl->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
-  _aux->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
+    nl->reinitNeighborFace(neighbor, neighbor_side, tid);
+  _aux->reinitNeighborFace(neighbor, neighbor_side, tid);
 }
 
 void
@@ -2518,19 +2527,18 @@ FEProblemBase::determineNonlinearSystem(const std::string & var_name,
 }
 
 void
-FEProblemBase::addKernel(const std::string & kernel_name,
-                         const std::string & name,
-                         InputParameters & parameters)
+FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
+                                             const std::string & name,
+                                             InputParameters & parameters,
+                                             const unsigned int nl_sys_num,
+                                             const std::string & base_name,
+                                             bool & reinit_displaced)
 {
-  parallel_object_only();
-
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
-    _reinit_displaced_elem = true;
+    reinit_displaced = true;
   }
   else
   {
@@ -2548,8 +2556,35 @@ FEProblemBase::addKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("Kernel", name, kernel_name);
+  logAdd(base_name, name, ro_name);
+}
+
+void
+FEProblemBase::addKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  parallel_object_only();
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  setResidualObjectParamsAndLog(
+      kernel_name, name, parameters, nl_sys_num, "Kernel", _reinit_displaced_elem);
+
   _nl[nl_sys_num]->addKernel(kernel_name, name, parameters);
+}
+
+void
+FEProblemBase::addHDGKernel(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters)
+{
+  parallel_object_only();
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  setResidualObjectParamsAndLog(
+      kernel_name, name, parameters, nl_sys_num, "HDGKernel", _reinit_displaced_elem);
+
+  _nl[nl_sys_num]->addHDGKernel(kernel_name, name, parameters);
 }
 
 void
@@ -2629,30 +2664,23 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
-    _reinit_displaced_face = true;
-  }
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow Materials to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this Material.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
-  }
-
-  logAdd("BoundaryCondition", name, bc_name);
+  setResidualObjectParamsAndLog(
+      bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
   _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
+}
+
+void
+FEProblemBase::addHDGIntegratedBC(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  parallel_object_only();
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  setResidualObjectParamsAndLog(
+      bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
+
+  _nl[nl_sys_num]->addHDGIntegratedBC(bc_name, name, parameters);
 }
 
 void
@@ -2745,8 +2773,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     var_type = "MooseVariableConstMonomial";
   else if (type.family == SCALAR)
     var_type = "MooseVariableScalar";
-  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE ||
-           type.family == MONOMIAL_VEC || type.family == RAVIART_THOMAS)
+  else if (FEInterface::field_type(type) == TYPE_VECTOR)
     var_type = "VectorMooseVariable";
   else
     var_type = "MooseVariable";
@@ -8196,39 +8223,31 @@ FEProblemBase::automaticScaling(bool automatic_scaling)
 void
 FEProblemBase::reinitElemFaceRef(const Elem * elem,
                                  unsigned int side,
-                                 BoundaryID bnd_id,
                                  Real tolerance,
                                  const std::vector<Point> * const pts,
                                  const std::vector<Real> * const weights,
                                  const THREAD_ID tid)
 {
-  SubProblem::reinitElemFaceRef(elem, side, bnd_id, tolerance, pts, weights, tid);
+  SubProblem::reinitElemFaceRef(elem, side, tolerance, pts, weights, tid);
 
   if (_displaced_problem)
     _displaced_problem->reinitElemFaceRef(
-        _displaced_mesh->elemPtr(elem->id()), side, bnd_id, tolerance, pts, weights, tid);
+        _displaced_mesh->elemPtr(elem->id()), side, tolerance, pts, weights, tid);
 }
 
 void
 FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                      unsigned int neighbor_side,
-                                     BoundaryID bnd_id,
                                      Real tolerance,
                                      const std::vector<Point> * const pts,
                                      const std::vector<Real> * const weights,
                                      const THREAD_ID tid)
 {
-  SubProblem::reinitNeighborFaceRef(
-      neighbor_elem, neighbor_side, bnd_id, tolerance, pts, weights, tid);
+  SubProblem::reinitNeighborFaceRef(neighbor_elem, neighbor_side, tolerance, pts, weights, tid);
 
   if (_displaced_problem)
-    _displaced_problem->reinitNeighborFaceRef(_displaced_mesh->elemPtr(neighbor_elem->id()),
-                                              neighbor_side,
-                                              bnd_id,
-                                              tolerance,
-                                              pts,
-                                              weights,
-                                              tid);
+    _displaced_problem->reinitNeighborFaceRef(
+        _displaced_mesh->elemPtr(neighbor_elem->id()), neighbor_side, tolerance, pts, weights, tid);
 }
 
 void

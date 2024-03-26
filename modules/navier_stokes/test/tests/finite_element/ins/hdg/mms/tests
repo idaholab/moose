@@ -1,0 +1,52 @@
+[Tests]
+  issues = '#26405'
+  design = 'NavierStokesHDGKernel.md'
+  [lid_lagrange]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLidLagrange
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a hybridized discontinuous Galerkin scheme with broken Lagrange basis and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
+  [lid_hierarchic]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLidHierarchic
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a hybridized discontinuous Galerkin scheme with broken Hierarchic basis and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
+  [channel_lagrange]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestChannelLagrange
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a channel using a hybridized discontinuous Galerkin scheme with broken Lagrange basis and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
+  [channel_hierarchic]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestChannelHierarchic
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a channel using a hybridized discontinuous Galerkin scheme with broken Hierarchic basis and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
+[]

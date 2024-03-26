@@ -38,7 +38,7 @@ Main capabilities:
 Utilizes the following techniques:
 
 - Stabilized Continuous Finite Element Discretization (maintained, but not intensely developed) ([!cite](peterson2018overview))
-- Finite Volume Discretization (current development direction) ([!cite](lindsay2021improvement))
+- Finite Volume Discretization (current development direction) ([!cite](lindsay2023moose))
 
 !col-end!
 !row-end!
@@ -295,6 +295,3 @@ $^*$ Because the complexity of the LU preconditioner is $N^3$ in the worst case 
 !style-end!
 
 !---
-
-
-

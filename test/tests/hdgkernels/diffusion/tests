@@ -1,0 +1,40 @@
+[Tests]
+  design = 'DiffusionHDGKernel.md DiffusionHDGDirichletBC.md DiffusionHDGPrescribedGradientBC.md'
+  issues = '#26406'
+  [diffusion]
+    requirement = 'The system shall be to solve a simple diffusion problem using a hybridized discontinuous Galerkin discretization.'
+    input = 'diffusion.i'
+    csvdiff = 'diffusion_out.csv'
+    type = CSVDiff
+  []
+  [mms]
+    requirement = 'The system shall show second order convergence in the L2 norm of the scalar field with a first order basis using a hybridized discontinuous Galerkin discretization on'
+    [tri]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestLagrangeTri
+      method = "!dbg"
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree
+      valgrind = 'none'
+      detail = 'simplex elements and'
+    []
+    [quad]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestLagrangeQuad
+      method = "!dbg"
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree
+      valgrind = 'none'
+      detail = 'tensor-product elements.'
+    []
+  []
+  [prescribed_nonzero_flux]
+    requirement = 'The system shall be able to apply a non-zero normal gradient boundary condition for the primal scalar field.'
+    input = 'diffusion.i'
+    csvdiff = 'prescribed_gradient.csv'
+    type = CSVDiff
+    cli_args = "HDGBCs/inactive='right' Outputs/file_base=prescribed_gradient"
+  []
+[]
