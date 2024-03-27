@@ -1,4 +1,4 @@
-import os, pathlib, sys
+import os, shlex, sys
 from MooseControl import MooseControl
 
 # Helper for testing the WebServerControl via the RunApp command_proxy option
@@ -11,7 +11,8 @@ def base_controller(control_name, run_control):
         sys.exit('Missing expected command variable RUNAPP_COMMAND')
 
     # Build the MooseControl for the test to use
-    control = MooseControl(moose_command=RUNAPP_COMMAND, moose_control_name=control_name)
+    moose_command = shlex.split(RUNAPP_COMMAND)
+    control = MooseControl(moose_command=moose_command, moose_control_name=control_name)
     control.initialize()
 
     # Run the user test
