@@ -54,4 +54,23 @@ TEST(RegistryTest, repositoryURL)
   // register it
   Registry::addRepository(repo_name, repo_url);
   EXPECT_EQ(Registry::getRepositoryURL(repo_name), repo_url);
+
+  // re-register, different URL
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::addRepository(repo_name, "badurl");
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Registry::registerRepository(): The repository '" + repo_name +
+                        "' is already registered "
+                        "with a different URL '" +
+                        repo_url + "'.");
+          throw;
+        }
+      },
+      std::exception);
 }
