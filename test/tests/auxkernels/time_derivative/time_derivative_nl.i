@@ -77,6 +77,8 @@
   solve_type = 'NEWTON'
   dt = 0.1
   num_steps = 5
+  petsc_options_iname = -ksp_rtol
+  petsc_options_value = 1e-12
 []
 
 
