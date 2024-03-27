@@ -87,9 +87,13 @@ class MooseControl:
     def __del__(self):
         self.kill()
 
+    def isProcessRunning(self):
+        """Returns whether or not a moose process is running"""
+        return self._moose_process is not None and self._moose_process.poll() is None
+
     def kill(self):
         """Kills the underlying moose process if one is running"""
-        if self._moose_process:
+        if self.isProcessRunning():
             self._moose_process.kill()
             self._moose_process = None
 
@@ -99,9 +103,8 @@ class MooseControl:
             super().__init__(message)
 
     def _requireMooseProcess(self):
-        """Throws an exception if the moose process is not running
-        (only if one was spwaned)"""
-        if self._moose_process and self._moose_process.poll() is not None:
+        """Throws an exception if the moose process is not running (only if one was spwaned)"""
+        if self._moose_process and not self.isProcessRunning():
             raise Exception('The MOOSE process has ended')
 
     def _get(self, path: str):
