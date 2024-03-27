@@ -7,8 +7,8 @@
 #include <string>
 #include <chrono>
 
-#include "braceexpr.h"
-#include "parse.h"
+#include "hit/braceexpr.h"
+#include "hit/parse.h"
 
 class Flags;
 std::vector<std::string> parseOpts(int argc, char ** argv, Flags & flags);
