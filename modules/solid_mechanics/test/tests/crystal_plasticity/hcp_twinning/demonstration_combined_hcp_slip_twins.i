@@ -15,7 +15,6 @@
 
 [AuxVariables]
   [temperature]
-    initial_condition = 300
   []
   [pk2]
     order = CONSTANT
@@ -81,11 +80,17 @@
 
 [Physics/SolidMechanics/QuasiStatic/all]
   strain = FINITE
+  incremental = true
   add_variables = true
   generate_output = stress_zz
 []
 
 [AuxKernels]
+  [temperature]
+    type = ConstantAux
+    variable = temperature
+    value= 300
+  []
   [pk2]
     type = RankTwoAux
     variable = pk2

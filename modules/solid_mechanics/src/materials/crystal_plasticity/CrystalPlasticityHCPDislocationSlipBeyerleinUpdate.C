@@ -250,9 +250,6 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
 
   // Resize constitutive-model specific material properties
   _forest_dislocation_density[_qp].resize(_number_slip_systems);
-  _forest_dislocation_increment[_qp].resize(_number_slip_systems);
-  _forest_dislocations_removed_increment[_qp].resize(_number_slip_systems);
-  _initial_lattice_friction.resize(_number_slip_systems);
 
   // Set constitutive-model specific initial values from parameters
   const Real forest_density_per_system = _initial_forest_dislocation_density / _number_slip_systems;
@@ -264,31 +261,43 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
   }
 
   // Set initial resistance from lattice friction, which is type dependent
+  DenseVector<Real> lattice_resistance(_number_slip_systems, 0.0);
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
   for (const auto i : make_range(_number_slip_systems))
   {
     if ((i - counter_adjustment) < _number_slip_systems_per_mode[slip_mode])
-      _initial_lattice_friction(i) = _lattice_friction[slip_mode];
+      lattice_resistance(i) = _lattice_friction[slip_mode];
     else
     {
       counter_adjustment += _number_slip_systems_per_mode[slip_mode];
       ++slip_mode;
-      _initial_lattice_friction(i) = _lattice_friction[slip_mode];
+      lattice_resistance(i) = _lattice_friction[slip_mode];
     }
   }
 
-  calculateGrainSizeResistance();
+  calculateGrainSizeResistance(lattice_resistance);
 
   for (const auto i : make_range(_number_slip_systems))
-    _slip_resistance[_qp][i] = _initial_lattice_friction(i);
+    _slip_resistance[_qp][i] = lattice_resistance(i);
 
   _total_substructure_density[_qp] = _initial_substructure_density;
   _total_substructure_density_increment[_qp] = 0.0;
 }
 
 void
-CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance()
+CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::setMaterialVectorSize()
+{
+  CrystalPlasticityStressUpdateBase::setMaterialVectorSize();
+
+  // Resize non-stateful material properties
+  _forest_dislocation_increment[_qp].resize(_number_slip_systems);
+  _forest_dislocations_removed_increment[_qp].resize(_number_slip_systems);
+}
+
+void
+CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance(
+    DenseVector<Real> & lattice_resistance)
 {
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
@@ -305,7 +314,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance
       hallpetch_burgers_term = _hallpetch_like_coefficient[slip_mode] * _shear_modulus[slip_mode] *
                                std::sqrt(_burgers_vector[slip_mode]);
     }
-    _initial_lattice_friction(i) += hallpetch_burgers_term / std::sqrt(_grain_size);
+    lattice_resistance(i) += hallpetch_burgers_term / std::sqrt(_grain_size);
   }
 }
 
@@ -500,7 +509,7 @@ void
 CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSubstructureDensityEvolutionIncrement()
 {
   // calculate the generation coefficient, which depends on the slip mode
-  DenseVector<Real> generation_term(_number_slip_systems);
+  DenseVector<Real> generation_term(_number_slip_systems, 0.0);
 
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
@@ -528,8 +537,9 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSubstructureDensity
 void
 CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
 {
-  DenseVector<Real> forest_hardening(_number_slip_systems);
-  DenseVector<Real> substructure_hardening(_number_slip_systems);
+  DenseVector<Real> forest_hardening(_number_slip_systems, 0.0);
+  DenseVector<Real> substructure_hardening(_number_slip_systems, 0.0);
+  DenseVector<Real> lattice_resistance(_number_slip_systems, 0.0);
 
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
@@ -541,6 +551,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
     {
       burgers = _burgers_vector[slip_mode];
       shear_modulus = _shear_modulus[slip_mode];
+      lattice_resistance(i) = _lattice_friction[slip_mode];
     }
     else
     {
@@ -548,6 +559,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
       ++slip_mode;
       burgers = _burgers_vector[slip_mode];
       shear_modulus = _shear_modulus[slip_mode];
+      lattice_resistance(i) = _lattice_friction[slip_mode];
     }
 
     // forest dislocation hardening
@@ -568,10 +580,12 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
       substructure_hardening(i) = 0.0;
   }
 
+  calculateGrainSizeResistance(lattice_resistance);
+
   // have the constant initial value, while it's not a function of temperature, sum
   for (const auto i : make_range(_number_slip_systems))
     _slip_resistance[_qp][i] =
-        _initial_lattice_friction(i) + forest_hardening(i) + substructure_hardening(i);
+        lattice_resistance(i) + forest_hardening(i) + substructure_hardening(i);
 }
 
 bool

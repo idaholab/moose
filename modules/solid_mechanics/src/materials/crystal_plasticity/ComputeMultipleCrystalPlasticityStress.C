@@ -186,7 +186,10 @@ void
 ComputeMultipleCrystalPlasticityStress::computeQpStress()
 {
   for (unsigned int i = 0; i < _num_models; ++i)
+  {
     _models[i]->setQp(_qp);
+    _models[i]->setMaterialVectorSize();
+  }
 
   for (unsigned int i = 0; i < _num_eigenstrains; ++i)
     _eigenstrains[i]->setQp(_qp);
@@ -229,6 +232,8 @@ ComputeMultipleCrystalPlasticityStress::updateStress(RankTwoTensor & cauchy_stre
       _models[i]->setSubstepDt(_substep_dt);
 
     // calculate F^{eigen} only when we have eigenstrain
+    _inverse_eigenstrain_deformation_grad.zero();
+    _inverse_eigenstrain_deformation_grad.addIa(1.0);
     if (_num_eigenstrains)
       calculateEigenstrainDeformationGrad();
 

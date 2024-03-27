@@ -9,6 +9,7 @@
       input = 'only_twinning_fcc.i'
       csvdiff = 'only_twinning_fcc_out.csv'
       allow_warnings = true
+      cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
       detail = 'compute the plastic shear due to twinning as a function of the '
                'applied shear stress and resistance to twin propagation, the '
                'corresponding twin volume fraction per twin system, and the total '
@@ -74,6 +75,7 @@
       type = CSVDiff
       input = 'combined_twinning_slip_111tension.i'
       csvdiff = 'combined_twinning_slip_111tension_out.csv'
+      cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
       detail = 'compute plastic shear due to both slip and twin propagation when '
                'loaded under tension in a 111 orientation.'
     []
@@ -81,7 +83,7 @@
       type = CSVDiff
       input = 'combined_twinning_slip_111tension.i'
       csvdiff = 'combined_twinning_slip_111compression_out.csv'
-      cli_args = 'BCs/tdisp/function=-0.02*t Outputs/file_base=combined_twinning_slip_111compression_out'
+      cli_args = 'BCs/tdisp/function=-0.02*t Outputs/file_base=combined_twinning_slip_111compression_out '
       detail = 'compute a near-zero twin volume fraction when loaded under '
                'compression in a 111 orientation.'
     []
@@ -99,6 +101,33 @@
       csvdiff = 'combined_twinning_slip_100compression_out.csv'
       detail = 'compute both dislocation glide and twin propagation in a 100 '
                'oriented crystal loaded under compression.'
+    []
+  []
+  [restart_capabilities]
+    issues = '#26458'
+    design = '/CrystalPlasticityTwinningKalidindiUpdate.md /CrystalPlasticityKalidindiUpdate.md /ComputeMultipleCrystalPlasticityStress.md'
+    requirement = 'Upon simulation restart, the crystal plasticity capability shall:'
+    [only_twinning_fcc_restart]
+      type = 'CSVDiff'
+      input = 'only_twinning_fcc.i'
+      csvdiff = 'only_twinning_fcc_restart_out.csv'
+      allow_warnings = true
+      cli_args = 'Problem/restart_file_base=only_twinning_fcc_out_cp/LATEST '
+               'Outputs/file_base=only_twinning_fcc_restart_out'
+      detail = 'continue to compute the plastic shear due to twinning after '
+               'a simulation restart.'
+      prereq = 'constiutive_model/only_twinning_fcc'
+    []
+    [combined_twinning_slip_111tension_restart]
+      type = CSVDiff
+      input = 'combined_twinning_slip_111tension.i'
+      csvdiff = 'combined_twinning_slip_111tension_restart_out.csv'
+      cli_args = 'Problem/restart_file_base=combined_twinning_slip_111tension_out_cp/LATEST '
+                 'Outputs/file_base=combined_twinning_slip_111tension_restart_out '
+                 'Executioner/dtmin=0.001'
+      detail = 'continue to calculate plastic shear due to both dislocation slip and twinning '
+               'when loaded under tension in a 111 orientation in a simulation restart.'
+      prereq = 'combined_twinning_slip_models/combined_twinning_slip_111tension'
     []
   []
 []
