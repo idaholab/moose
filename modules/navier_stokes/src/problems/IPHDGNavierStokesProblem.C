@@ -27,14 +27,14 @@ IPHDGNavierStokesProblem::validParams()
   InputParameters params = FEProblem::validParams();
   params.addRequiredParam<TagName>("mass_matrix",
                                    "The matrix tag name corresponding to the mass matrix.");
-  params.addRequiredParam<std::vector<TagName>>(
+  params.addParam<std::vector<TagName>>(
       "jump_matrices",
+      {},
       "The matrices corresponding to different (superpositions) of finite element weak forms");
   params.addRequiredParam<NonlinearVariableName>("u", "The interior x-velocity variable");
   params.addRequiredParam<NonlinearVariableName>("v", "The interior y-velocity variable");
   params.addRequiredParam<NonlinearVariableName>(NS::pressure, "The pressure in the volume");
-  params.addRequiredParam<NonlinearVariableName>(NS::pressure + "_bar",
-                                                 "The pressure on the facets");
+  params.addParam<NonlinearVariableName>(NS::pressure + "_bar", "The pressure on the facets");
   params.addParam<bool>("print", true, "Whether to print the matrices");
   return params;
 }
@@ -54,6 +54,8 @@ IPHDGNavierStokesProblem::onTimestepEnd()
   if (!getParam<bool>("print"))
     return;
 
+  const bool has_pbar = isParamValid(NS::pressure + "_bar");
+
   auto & nl = getNonlinearSystemBase(0);
   auto & dof_map = nl.dofMap();
   auto & lm_mesh = mesh().getMesh();
@@ -61,17 +63,21 @@ IPHDGNavierStokesProblem::onTimestepEnd()
   const auto & u_var = nl.getVariable(0, getParam<NonlinearVariableName>("u"));
   const auto & v_var = nl.getVariable(0, getParam<NonlinearVariableName>("v"));
   const auto & p_var = nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure));
-  const auto & pb_var = nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure + "_bar"));
+  const MooseVariableFieldBase * pb_var;
+  if (has_pbar)
+    pb_var = &nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure + "_bar"));
 
   std::vector<dof_id_type> u_indices, v_indices, p_vol_indices, pb_indices, vel_indices, p_indices;
   dof_map.local_variable_indices(u_indices, lm_mesh, u_var.number());
   dof_map.local_variable_indices(v_indices, lm_mesh, v_var.number());
   dof_map.local_variable_indices(p_vol_indices, lm_mesh, p_var.number());
-  dof_map.local_variable_indices(pb_indices, lm_mesh, pb_var.number());
+  if (has_pbar)
+    dof_map.local_variable_indices(pb_indices, lm_mesh, pb_var->number());
   vel_indices = u_indices;
   vel_indices.insert(vel_indices.end(), v_indices.begin(), v_indices.end());
   p_indices = p_vol_indices;
-  p_indices.insert(p_indices.end(), pb_indices.begin(), pb_indices.end());
+  if (has_pbar)
+    p_indices.insert(p_indices.end(), pb_indices.begin(), pb_indices.end());
 
   PetscMatrix<Number> vel_p_mat(_communicator), p_vel_mat(_communicator), p_mass_mat(_communicator);
   const auto mass_matrix_tag_id = getMatrixTagID(_mass_matrix);
@@ -114,7 +120,8 @@ IPHDGNavierStokesProblem::onTimestepEnd()
     LIBMESH_CHKERR(ierr);
   };
 
-  do_vel_p(pb_indices, "vel-pb");
+  if (has_pbar)
+    do_vel_p(pb_indices, "vel-pb");
   do_vel_p(p_indices, "vel-all-p");
 
   for (const auto & jump_name : _jump_matrices)
