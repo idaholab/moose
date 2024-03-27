@@ -15,7 +15,7 @@
 
 #include "MooseError.h"
 
-#include "minijson.h"
+#include "minijson/minijson.h"
 
 class WebServerControl;
 

@@ -13,7 +13,7 @@
 
 #include "WebServerControlTypeRegistry.h"
 
-#include "http.h"
+#include "tinyhttp/http.h"
 
 #include <atomic>
 #include <memory>

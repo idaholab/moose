@@ -9,7 +9,7 @@
 
 #include "WebServerControl.h"
 
-#include "minijson.h"
+#include "minijson/minijson.h"
 
 registerMooseObject("MooseApp", WebServerControl);
 
