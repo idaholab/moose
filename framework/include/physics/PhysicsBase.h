@@ -14,9 +14,11 @@
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
 #include "Factory.h"
+#include "MultiMooseEnum.h"
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
-  registerMooseAction(app_name, derived_name, "init_physics")
+  registerMooseAction(app_name, derived_name, "init_physics");                                     \
+  registerMooseAction(app_name, derived_name, "copy_nodal_vars_physics");
 
 /**
  * Base class to help creates an entire physics
@@ -46,7 +48,22 @@ public:
 
   /// Get a Physics from the ActionWarehouse with the requested type and name
   template <typename T>
-  const T * getCoupledPhysics(const PhysicsName & phys_name) const;
+  const T * getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail = false) const;
+  /// Get all Physics from the ActionWarehouse with the requested type
+  template <typename T>
+  const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
+
+  /// Utilities to merge two Physics of the same type together
+  /// Check that parameters are compatible for a merge with another Physics
+  virtual bool checkParametersMergeable(const InputParameters & /*param*/, bool /*warn*/) const
+  {
+    mooseError("Not implemented");
+  }
+  /// Merge these parameters into existing parameters of this Physics
+  virtual void mergeParameters(const InputParameters & /*params*/)
+  {
+    mooseError("Not implemented");
+  }
 
 protected:
   /// Return whether the Physics is solved using a transient
@@ -56,7 +73,8 @@ protected:
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  Factory & getFactory() const { return _factory; }
+  virtual Factory & getFactory() { return _factory; }
+  virtual Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem()
@@ -71,7 +89,7 @@ protected:
   }
 
   /// Tell the app if we want to use Exodus restart
-  void prepareCopyNodalVariables() const;
+  void prepareCopyVariablesFromMesh() const;
   /// Copy variables from the mesh file
   void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy);
 
@@ -96,14 +114,63 @@ protected:
   /// Check that a parameter is set only if the first one is set to true
   void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
                                              const std::string & param2) const;
+  void checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
+                                            const std::string & param2) const;
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
+  /// Check that this vector parameter (param1) has the same length as the MultiMooseEnum (param2)
+  template <typename T>
+  void checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
+                                               const std::string & param2) const;
+  template <typename T, typename S>
+  void checkTwoDVectorParamsSameLength(const std::string & param1,
+                                       const std::string & param2) const;
   /// Check that there is no overlap between the items in each vector parameters
   /// Each vector parameter should also have unique items
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
+  template <typename T, typename S>
+  void checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
+                                                       const std::string & param2) const;
+  template <typename T>
+  void checkTwoDVectorParamMultiMooseEnumSameLength(const std::string & param1,
+                                                    const std::string & param2,
+                                                    const bool error_for_param2) const;
+  /// Check that the user did not pass an empty vector
+  template <typename T>
+  void checkVectorParamNotEmpty(const std::string & param1) const;
+  /// Check that two vector parameters are the same length if both are set
+  template <typename T, typename S>
+  void checkVectorParamsSameLengthIfSet(const std::string & param1,
+                                        const std::string & param2,
+                                        const bool ignore_empty_default_param2 = false) const;
 
+  template <typename T, typename S, typename U>
+  void checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
+                                                  const std::string & param2,
+                                                  const std::string & param3) const;
+
+  /// Check if the user commited errors during the definition of block-wise parameters
+  template <typename T>
+  void checkBlockwiseConsistency(const std::string & block_param_name,
+                                 const std::vector<std::string> & parameter_names) const;
+  /// Check if an external object has the same block restriction
+  bool checkBlockRestrictionIdentical(const std::string & object_name,
+                                      const std::vector<SubdomainName> & blocks,
+                                      const bool error_if_not_identical = true) const;
+  /// Check that all shared parameters are consistent: if set (default or user), set to the same value
+  void checkCommonParametersConsistent(const InputParameters & parameters) const;
+  template <typename T>
+  bool parameterConsistent(const InputParameters & other_param,
+                           const std::string & param_name,
+                           bool warn) const;
+  template <typename T>
+  void warnInconsistent(const InputParameters & parameters, const std::string & param_name) const;
+  /// Error messages for parameter checks
+  void errorDependentParameter(const std::string & param1,
+                               const std::string & value_not_set,
+                               const std::vector<std::string> & dependent_params) const;
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
@@ -126,6 +193,20 @@ protected:
   /// Keep track of the subdomains the Physics is defined on
   std::vector<SubdomainName> _blocks;
 
+  /// Return the blocks this physics is defined on
+  const std::vector<SubdomainName> & blocks() const { return _blocks; }
+  /// Utilities to process and forward parameters
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
+  /// Check if a vector contains all the mesh blocks
+  bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
+
+  /// Routine to help create maps
+  template <typename T, typename C>
+  std::map<T, C> createMapFromVectors(std::vector<T> keys, std::vector<C> values) const;
+  template <typename T>
+  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(std::vector<T> keys,
+                                                              MultiMooseEnum values) const;
+
 private:
   /// Gathers additional parameters for the relationship managers from the Physics
   /// then calls the parent Action::addRelationshipManagers with those parameters
@@ -134,6 +215,7 @@ private:
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
+  virtual void initializePhysicsAdditional() {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
@@ -185,7 +267,7 @@ private:
 
 template <typename T>
 const T *
-PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
+PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail) const
 {
   const auto all_T_physics = _awh.getActions<T>();
   for (const auto * const physics : all_T_physics)
@@ -193,11 +275,25 @@ PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
     if (physics->name() == phys_name)
       return physics;
   }
-  mooseError("Requested Physics '",
-             phys_name,
-             "' does not exist or is not of type '",
-             MooseUtils::prettyCppType<T>(),
-             "'");
+  if (!allow_fail)
+    mooseError("Requested Physics '",
+               phys_name,
+               "' does not exist or is not of type '",
+               MooseUtils::prettyCppType<T>(),
+               "'");
+  else
+    return nullptr;
+}
+
+template <typename T>
+const std::vector<T *>
+PhysicsBase::getCoupledPhysics(const bool allow_fail) const
+{
+  const auto all_T_physics = _awh.getActions<T>();
+  if (!allow_fail && all_T_physics.empty())
+    mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
+  else
+    return all_T_physics;
 }
 
 template <typename T>
@@ -235,6 +331,122 @@ PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
 
 template <typename T>
 void
+PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
+                                                     const std::string & param2) const
+{
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<MultiMooseEnum>(param2);
+
+  if (isParamValid(param1) && isParamValid(param2))
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<MultiMooseEnum>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
+                     param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
+  }
+  // handle empty vector defaults
+  else if (isParamValid(param1) || isParamValid(param2))
+    if (getParam<std::vector<T>>(param1).size() || getParam<MultiMooseEnum>(param2).size())
+      checkParamsBothSetOrNotSet(param1, param2);
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
+                                             const std::string & param2) const
+{
+  checkVectorParamsSameLength<std::vector<T>, std::vector<S>>(param1, param2);
+  if (isParamValid(param1) && isParamValid(param2))
+  {
+    const auto value1 = getParam<std::vector<std::vector<T>>>(param1);
+    const auto value2 = getParam<std::vector<std::vector<S>>>(param2);
+    for (const auto index : index_range(value1))
+      if (value1[index].size() != value2[index].size())
+        paramError(param1,
+                   "Vector at index " + std::to_string(index) + " of 2D vector parameter '" +
+                       param1 +
+                       "' is not the same size as its counterpart from 2D vector parameter '" +
+                       param2 + "'");
+  }
+  // handle empty vector defaults
+  else if (isParamValid(param1) || isParamValid(param2))
+    if (getParam<std::vector<T>>(param1).size() || getParam<std::vector<T>>(param2).size())
+      checkParamsBothSetOrNotSet(param1, param2);
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
+                                                             const std::string & param2) const
+{
+  assertParamDefined<std::vector<std::vector<T>>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+  for (const auto & sub_vec_i : index_range(getParam<std::vector<std::vector<T>>>(param1)))
+  {
+    const auto size_1 = getParam<std::vector<std::vector<T>>>(param1)[sub_vec_i].size();
+    const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Vector at index " + std::to_string(sub_vec_i) + " (size " +
+                     std::to_string(size_1) +
+                     ") "
+                     " of this parameter should be the same length as parameter '" +
+                     param2 + "' (size " + std::to_string(size_2) + ")");
+  }
+}
+
+template <typename T>
+void
+PhysicsBase::checkTwoDVectorParamMultiMooseEnumSameLength(const std::string & param1,
+                                                          const std::string & param2,
+                                                          const bool error_for_param2) const
+{
+  assertParamDefined<std::vector<std::vector<T>>>(param1);
+  assertParamDefined<MultiMooseEnum>(param2);
+  const auto vec1 = getParam<std::vector<std::vector<T>>>(param1);
+  const auto enum2 = getParam<MultiMooseEnum>(param2);
+  const auto size_1 = vec1.empty() ? 0 : vec1.size() * vec1[0].size();
+  const auto size_2 = enum2.size();
+  if (size_1 != size_2)
+  {
+    if (error_for_param2)
+      paramError(param2,
+                 "Vector enumeration parameter (size " + std::to_string(size_2) +
+                     ") is not the same size as the vector of vector parameter '" + param1 +
+                     "' (size " + std::to_string(size_1) + ")");
+    else
+      paramError(param1,
+                 "Vector of vector parameter '" + param1 + "' (total size " +
+                     std::to_string(size_1) +
+                     ") is not the same size as vector-enumeration parameter '" + param2 +
+                     "' (size " + std::to_string(size_2) + ")");
+  }
+}
+
+template <typename T, typename S, typename U>
+void
+PhysicsBase::checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
+                                                        const std::string & param2,
+                                                        const std::string & param3) const
+{
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+  assertParamDefined<std::vector<U>>(param3);
+  const auto size_1 = getParam<std::vector<T>>(param1).size();
+  const auto size_2 = getParam<std::vector<S>>(param2).size();
+  const auto size_3 = getParam<std::vector<U>>(param3).size();
+
+  if (size_1 != size_2 + size_3)
+    paramError(param1,
+               "Vector parameter '" + param1 + "' (size " + std::to_string(size_1) +
+                   ") should be the same size as parameter '" + param2 + "' and '" + param3 +
+                   " combined (total size " + std::to_string(size_2 + size_3) + ")");
+}
+
+template <typename T>
+void
 PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const
 {
   std::set<std::string> unique_params;
@@ -248,4 +460,178 @@ PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_v
                    "' is also present in one or more of the parameters '" +
                    Moose::stringify(param_vec) + "'. This is disallowed.");
   }
+}
+
+template <typename T>
+void
+PhysicsBase::checkVectorParamNotEmpty(const std::string & param) const
+{
+  assertParamDefined<std::vector<T>>(param);
+  if (!getParam<std::vector<T>>(param).size())
+    paramError(param, "Parameter '" + param + "' should not be set to an empty vector.");
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkVectorParamsSameLengthIfSet(const std::string & param1,
+                                              const std::string & param2,
+                                              const bool ignore_empty_default_param2) const
+{
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+
+  if (isParamValid(param1) && isParamValid(param2))
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (ignore_empty_default_param2 && (size_2 == 0) && !isParamSetByUser(param2))
+      return;
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Parameter '" + param1 + "' (size " + std::to_string(size_1) + ") and '" + param2 +
+                     "' (size " + std::to_string(size_2) + ") must be the same size if set.");
+  }
+}
+
+template <typename T>
+void
+PhysicsBase::checkBlockwiseConsistency(const std::string & block_param_name,
+                                       const std::vector<std::string> & parameter_names) const
+{
+  const std::vector<std::vector<SubdomainName>> & block_names =
+      getParam<std::vector<std::vector<SubdomainName>>>(block_param_name);
+
+  if (block_names.size())
+  {
+    // We only check block-restrictions if the action is not restricted to `ANY_BLOCK_ID`.
+    // If the users define blocks that are not on the mesh, they will receive errors from the
+    // objects created created by the action
+    if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") == _blocks.end())
+      for (const auto & block_group : block_names)
+        for (const auto & block : block_group)
+          if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+            paramError(block_param_name,
+                       "Block '" + block +
+                           "' is not present in the block restriction of the fluid flow action!");
+
+    for (const auto & param_name : parameter_names)
+    {
+      const std::vector<T> & param_vector = getParam<std::vector<T>>(param_name);
+      if (block_names.size() != param_vector.size())
+        paramError(param_name,
+                   "The number of entries in '" + param_name + "' (" +
+                       std::to_string(param_vector.size()) +
+                       ") is not the same as the number of blocks"
+                       " (" +
+                       std::to_string(block_names.size()) + ") in '" + block_param_name + "'!");
+    }
+  }
+  else
+  {
+    unsigned int previous_size = 0;
+    for (unsigned int param_i = 0; param_i < parameter_names.size(); ++param_i)
+    {
+      const std::vector<T> & param_vector = getParam<std::vector<T>>(parameter_names[param_i]);
+      if (param_i == 0)
+      {
+        if (param_vector.size() > 1)
+          paramError(parameter_names[param_i],
+                     "The user should only use one or zero entries in " + parameter_names[param_i] +
+                         " if " + block_param_name + " not defined!");
+        previous_size = param_vector.size();
+      }
+      else
+      {
+        if (previous_size != param_vector.size())
+          paramError(parameter_names[param_i],
+                     "The number of entries in '" + parameter_names[param_i] +
+                         "' is not the same as the number of entries in '" +
+                         parameter_names[param_i - 1] + "'!");
+      }
+    }
+  }
+}
+
+template <typename T>
+bool
+PhysicsBase::parameterConsistent(const InputParameters & other_param,
+                                 const std::string & param_name,
+                                 bool warn) const
+{
+  assertParamDefined<T>(param_name);
+  mooseAssert(other_param.have_parameter<T>(param_name),
+              "This should have been a parameter from the parameters being compared");
+  bool consistent = true;
+  if (parameters().isParamValid(param_name) && other_param.isParamValid(param_name))
+  {
+    if constexpr (std::is_same_v<MooseEnum, T>)
+    {
+      if (!getParam<T>(param_name).compareCurrent(other_param.get<T>(param_name)))
+        consistent = false;
+    }
+    else if (getParam<T>(param_name) != other_param.get<T>(param_name))
+      consistent = false;
+  }
+  if (warn && !consistent)
+    mooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" + name() +
+                 "\" of type \"" + type() + "\" and the parameter set for \"" +
+                 other_param.get<std::string>("_action_name") + "\" of type \"" +
+                 other_param.get<std::string>("action_type") + "\"");
+  return consistent;
+}
+
+template <typename T>
+void
+PhysicsBase::warnInconsistent(const InputParameters & other_param,
+                              const std::string & param_name) const
+{
+  parameterConsistent<T>(other_param, param_name, true);
+}
+
+template <typename T, typename C>
+std::map<T, C>
+PhysicsBase::createMapFromVectors(std::vector<T> keys, std::vector<C> values) const
+{
+  std::map<T, C> map;
+  // No values have been specified.
+  if (!values.size())
+  {
+    return map;
+    // If we cant return a map of default C, dont try it
+    // if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
+    //   return map;
+
+    // C def;
+    // for (const auto & k : keys)
+    //   map[k] = def;
+    // return map;
+  }
+  std::transform(keys.begin(),
+                 keys.end(),
+                 values.begin(),
+                 std::inserter(map, map.end()),
+                 [](T a, C b) { return std::make_pair(a, b); });
+  return map;
+}
+
+template <typename T>
+std::map<T, MooseEnum>
+PhysicsBase::createMapFromVectorAndMultiMooseEnum(std::vector<T> keys, MultiMooseEnum values) const
+{
+  std::map<T, MooseEnum> map;
+  // No values have been specified. We cant form a map of empty MooseEnum
+  if (!values.size())
+    return map;
+  std::transform(keys.begin(),
+                 keys.end(),
+                 values.begin(),
+                 std::inserter(map, map.end()),
+                 [values](T a, MooseEnumItem b)
+                 {
+                   // Create a MooseEnum from the available values in the MultiMooseEnum and an
+                   // actual current active item from that same MultiMooseEnum
+                   MooseEnum single_value(values.getRawNames(), b.name());
+                   return std::make_pair(a, single_value);
+                 });
+  return map;
 }

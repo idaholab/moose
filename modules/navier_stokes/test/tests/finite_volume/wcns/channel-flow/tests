@@ -22,6 +22,16 @@
     recover = false # see #19126
     valgrind = HEAVY
   []
+  [transient-physics]
+    type = 'Exodiff'
+    input = 2d-transient-physics.i
+    exodiff = 2d-transient-physics_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation using the WCNSFV Physics syntax.'
+    abs_zero = 1e-9
+    recover = false # see #19126
+    valgrind = HEAVY
+  []
   [turbulence]
     type = 'Exodiff'
     input = 2d-transient.i
@@ -34,21 +44,26 @@
     recover = false # see #19126
     valgrind = HEAVY
     min_ad_size = 53 # You can draw out the stencil. For Rhie-Chow we interpolate element 'a' coefficients
-    		     # to a face. Each element 'a' coefficient will be dependent on face computations of rho
-		     # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
-		     # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
-		     # That means we need one layer of neighbor cell gradients, which in turn means we need
-		     # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
-		     # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
-		     # is used in computation of the Rhie-Chow velocity required for the advection kernels)
-		     # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
-		     # debugging assertions (which I'm fixing)
+    # to a face. Each element 'a' coefficient will be dependent on face computations of rho
+    # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
+    # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
+    # That means we need one layer of neighbor cell gradients, which in turn means we need
+    # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
+    # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
+    # is used in computation of the Rhie-Chow velocity required for the advection kernels)
+    # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
+    # debugging assertions (which I'm fixing)
   []
   [turbulence-action]
     type = 'Exodiff'
     input = 2d-transient-action.i
     exodiff = 2d-turbulent-action.e
-    cli_args = "Modules/NavierStokesFV/turbulence_handling='mixing-length' Modules/NavierStokesFV/mixing_length_delta='0.5' Modules/NavierStokesFV/mixing_length_walls='top' Modules/NavierStokesFV/mixing_length_aux_execute_on='initial' Modules/NavierStokesFV/mixing_length_two_term_bc_expansion=true Outputs/file_base='2d-turbulent-action'"
+    cli_args = "Modules/NavierStokesFV/turbulence_handling='mixing-length' "
+               "Modules/NavierStokesFV/mixing_length_delta='0.5' "
+               "Modules/NavierStokesFV/mixing_length_walls='top' "
+               "Modules/NavierStokesFV/mixing_length_aux_execute_on='initial' "
+               "Modules/NavierStokesFV/mixing_length_two_term_bc_expansion=true "
+               "Outputs/file_base='2d-turbulent-action'"
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model using the NSFV action syntax.'
     mesh_mode = REPLICATED
@@ -56,15 +71,15 @@
     recover = false # see #19126
     valgrind = HEAVY
     min_ad_size = 53 # You can draw out the stencil. For Rhie-Chow we interpolate element 'a' coefficients
-    		     # to a face. Each element 'a' coefficient will be dependent on face computations of rho
-		     # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
-		     # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
-		     # That means we need one layer of neighbor cell gradients, which in turn means we need
-		     # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
-		     # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
-		     # is used in computation of the Rhie-Chow velocity required for the advection kernels)
-		     # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
-		     # debugging assertions (which I'm fixing)
+    # to a face. Each element 'a' coefficient will be dependent on face computations of rho
+    # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
+    # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
+    # That means we need one layer of neighbor cell gradients, which in turn means we need
+    # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
+    # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
+    # is used in computation of the Rhie-Chow velocity required for the advection kernels)
+    # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
+    # debugging assertions (which I'm fixing)
   []
   [transient-jac]
     type = 'PetscJacobianTester'
@@ -79,18 +94,19 @@
     input = 2d-transient.i
     run_sim = True
     difference_tol = 1e-7
-    cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1 FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
+    cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1 FVKernels/inactive='' "
+               "AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model and show a perfect Jacobian.'
     mesh_mode = REPLICATED
     min_ad_size = 53 # You can draw out the stencil. For Rhie-Chow we interpolate element 'a' coefficients
-    		     # to a face. Each element 'a' coefficient will be dependent on face computations of rho
-		     # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
-		     # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
-		     # That means we need one layer of neighbor cell gradients, which in turn means we need
-		     # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
-		     # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
-		     # is used in computation of the Rhie-Chow velocity required for the advection kernels)
-		     # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
-		     # debugging assertions (which I'm fixing)
+    # to a face. Each element 'a' coefficient will be dependent on face computations of rho
+    # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
+    # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
+    # That means we need one layer of neighbor cell gradients, which in turn means we need
+    # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
+    # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
+    # is used in computation of the Rhie-Chow velocity required for the advection kernels)
+    # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
+    # debugging assertions (which I'm fixing)
   []
 []

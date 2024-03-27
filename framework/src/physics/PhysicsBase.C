@@ -22,7 +22,7 @@ PhysicsBase::validParams()
   params.addClassDescription("Creates all the objects necessary to solve a particular physics");
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", {}, "Blocks that this Physics is active on. Components can add additional blocks");
+      "block", {}, "Blocks (subdomains) that this Physics is active on.");
 
   MooseEnum transient_options("true false same_as_problem", "same_as_problem");
   params.addParam<MooseEnum>(
@@ -31,6 +31,7 @@ PhysicsBase::validParams()
   MooseEnum pc_options("default none", "none");
   params.addParam<MooseEnum>(
       "preconditioning", pc_options, "Which preconditioning to use for this Physics");
+
   params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
 
   // Restart parameters
@@ -44,6 +45,7 @@ PhysicsBase::validParams()
       "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
                               "Restart from Exodus");
+
   return params;
 }
 
@@ -57,7 +59,7 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
 {
   checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
                                         "initial_from_file_timestep");
-  prepareCopyNodalVariables();
+  prepareCopyVariablesFromMesh();
   addRequiredPhysicsTask("init_physics");
 }
 
@@ -127,20 +129,28 @@ PhysicsBase::act()
   else if (_current_task == "add_executor")
     addExecutors();
 
+  // Exodus restart capabilities
+  if (_current_task == "copy_nodal_vars_physics")
+    copyVariablesFromMesh(nonlinearVariableNames());
+
   // Lets a derived Physics class implement additional tasks
   actOnAdditionalTasks();
 }
 
 void
-PhysicsBase::prepareCopyNodalVariables() const
+PhysicsBase::prepareCopyVariablesFromMesh() const
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
     _app.setExodusFileRestart(true);
+
+  checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
+                                        "initial_from_file_timestep");
 }
 
 bool
 PhysicsBase::isTransient() const
 {
+  mooseAssert(_problem, "We dont have a problem yet");
   if (_is_transient == "true")
     return true;
   else if (_is_transient == "false")
@@ -183,8 +193,15 @@ PhysicsBase::initializePhysics()
   else
     _dim = _mesh->dimension();
 
+  // Forward physics verbosity to problem to output the setup
+  if (_verbose)
+    getProblem().setVerboseProblem(_verbose);
+
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
+
+  // If the derived physics need additional initialization very early on
+  initializePhysicsAdditional();
 }
 
 void
@@ -193,6 +210,7 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
     SystemBase & system = getProblem().getNonlinearSystemBase(_sys_number);
+    _console << "Adding restart for " << variables_to_copy.size() << " variables " << std::endl;
 
     for (const auto & var_name : variables_to_copy)
       system.addVariableToCopy(
@@ -221,6 +239,16 @@ PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
     paramError(param2,
                "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
                    "' is set by the user");
+}
+
+void
+PhysicsBase::checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
+                                                  const std::string & param2) const
+{
+  if (!isParamSetByUser(param1) && isParamSetByUser(param2))
+    paramError(param2,
+               "Parameter '" + param2 + "' should not be set if parameter '" + param1 +
+                   "' is not specified.");
 }
 
 bool
@@ -252,4 +280,86 @@ PhysicsBase::checkRequiredTasks() const
                    "' but this task is not registered to the derived class. Registered tasks for "
                    "this Physics are: " +
                    Moose::stringify(registered_tasks));
+}
+
+void
+PhysicsBase::errorDependentParameter(const std::string & param1,
+                                     const std::string & value_not_set,
+                                     const std::vector<std::string> & dependent_params) const
+{
+  for (const auto & dependent_param : dependent_params)
+    if (isParamSetByUser(dependent_param))
+      paramError(dependent_param,
+                 "Parameter '" + dependent_param +
+                     "' should not be set by the user if parameter '" + param1 +
+                     "' has not been set to '" + value_not_set + "'");
+}
+
+void
+PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const
+{
+  // We only set the blocks if we don't have `ANY_BLOCK_ID` defined because the subproblem
+  // (through the mesh) errors out if we use this keyword during the addVariable/Kernel
+  // functions
+  if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
+    params.set<std::vector<SubdomainName>>("block") = blocks;
+  if (blocks.empty())
+    _console << "Empty block restriction assigned, did you mean to do this?" << std::endl;
+}
+
+bool
+PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
+                                            const std::vector<SubdomainName> & blocks,
+                                            bool error_if_not_identical) const
+{
+  // If identical, we can return fast
+  if (_blocks == blocks)
+    return true;
+  // If one is block restricted to anywhere and the other is block restricted to anywhere manually
+  if ((std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end() &&
+       allMeshBlocks(blocks)) ||
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end() &&
+       allMeshBlocks(_blocks)))
+    return true;
+
+  // Copy, sort and unique is the only way to check that they are actually the same
+  auto copy_blocks = _blocks;
+  auto copy_blocks_other = blocks;
+  std::sort(copy_blocks.begin(), copy_blocks.end());
+  copy_blocks.erase(unique(copy_blocks.begin(), copy_blocks.end()), copy_blocks.end());
+  std::sort(copy_blocks_other.begin(), copy_blocks_other.end());
+  copy_blocks_other.erase(unique(copy_blocks_other.begin(), copy_blocks_other.end()),
+                          copy_blocks_other.end());
+
+  if (copy_blocks == copy_blocks_other)
+    return true;
+  std::vector<SubdomainName> diff;
+  std::set_difference(copy_blocks.begin(),
+                      copy_blocks.end(),
+                      copy_blocks_other.begin(),
+                      copy_blocks_other.end(),
+                      std::inserter(diff, diff.begin()));
+  if (error_if_not_identical)
+    mooseError("Physics '",
+               name(),
+               "' and object '",
+               object_name,
+               "' have different block restrictions.\nPhysics: ",
+               Moose::stringify(_blocks),
+               "\nObject: ",
+               Moose::stringify(blocks),
+               "\nDifference: ",
+               Moose::stringify(diff));
+  else
+    return false;
+}
+
+bool
+PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
+{
+  for (const auto mesh_block : _mesh->meshSubdomains())
+    if (std::find(blocks.begin(), blocks.end(), _mesh->getSubdomainName(mesh_block)) ==
+        blocks.end())
+      return false;
+  return true;
 }

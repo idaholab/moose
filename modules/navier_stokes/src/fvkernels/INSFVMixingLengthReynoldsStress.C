@@ -54,7 +54,7 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
   if (_dim >= 3 && !_w)
-    mooseError("In threedimensions, the w velocity must be supplied using the 'w' parameter");
+    mooseError("In three dimensions, the w velocity must be supplied using the 'w' parameter");
 }
 
 ADReal

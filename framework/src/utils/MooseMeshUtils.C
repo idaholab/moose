@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "MooseMeshUtils.h"
+#include "MooseMesh.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
@@ -498,5 +499,86 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
       i--;
     }
   }
+}
+
+void
+stitchNodesets(MooseMesh & input_mesh,
+               const BoundaryName & side1,
+               const BoundaryName & side2,
+               bool allow_partial,
+               bool keep_old_nodeset)
+{
+  // Node to elem map will make it easy to find the nodes to fix
+  const auto node_to_elems = input_mesh.nodeToElemMap();
+
+  const auto side1_id = input_mesh.getBoundaryID(side1);
+  const auto side2_id = input_mesh.getBoundaryID(side2);
+
+  if (!input_mesh.nodeSetNodes().count(side1_id))
+    mooseError("Nodeset '", side1, "' was not found in the mesh");
+  if (!input_mesh.nodeSetNodes().count(side2_id))
+    mooseError("Nodeset '", side2, "' was not found in the mesh");
+  const auto & nodes_sideset_1 = input_mesh.nodeSetNodes().at(side1_id);
+  const auto & nodes_sideset_2 = input_mesh.nodeSetNodes().at(side2_id);
+
+  for (const auto node1_id : nodes_sideset_1)
+  {
+    bool match_found = false;
+    auto node1 = input_mesh.nodePtr(node1_id);
+
+    // Now find the node to stitch on side2
+    for (const auto node2_id : nodes_sideset_2)
+    {
+      const auto node2 = input_mesh.nodePtr(node2_id);
+
+      if (Point(*node2).absolute_fuzzy_equals(Point(*node1)))
+      {
+        match_found = true;
+        // replace node2 from all the elements containing it
+        for (const auto & elem_id : node_to_elems.at(node2_id))
+        {
+          Elem * elem = input_mesh.elemPtr(elem_id);
+          elem->set_node(elem->get_node_index(node2)) = node1;
+        }
+      }
+    }
+
+    if (!match_found && !allow_partial)
+      mooseError("Stitching was required to stitch all nodes, but the following node on boundary ",
+                 side1,
+                 " was not stitched: ",
+                 node1->get_info());
+  }
+
+  if (input_mesh.getMesh().allow_renumbering())
+    input_mesh.getMesh().renumber_nodes_and_elements();
+  else
+  {
+    input_mesh.getMesh().remove_orphaned_nodes();
+    input_mesh.getMesh().update_parallel_id_counts();
+  }
+
+  // Check that side 2 no longer exists
+  if (!allow_partial)
+  {
+    if (!input_mesh.getBoundaryIDs().count(side2_id))
+      return;
+    input_mesh.buildNodeList();
+    if (input_mesh.nodeSetNodes().count(side2_id))
+      mooseError("Stitching failed as there remains ",
+                 std::to_string(input_mesh.nodeSetNodes().at(side2_id).size()),
+                 " nodes on boundary ",
+                 side2);
+  }
+
+  // This isn't very precise. We really should be only working with the nodes that got merged.
+  // here we add all of side1 to side2!
+  // and in the other case we delete all of side2 even though side2 could extend beyond side1
+  if (keep_old_nodeset)
+    for (const auto & node : input_mesh.nodeSetNodes().at(side1_id))
+      input_mesh.getMesh().get_boundary_info().add_node(node, side2_id);
+  else
+    // remove reference to the old id
+    input_mesh.getMesh().get_boundary_info().remove_id(side2_id);
 }
 }
