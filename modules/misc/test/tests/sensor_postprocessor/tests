@@ -1,0 +1,16 @@
+[Tests]
+  design = 'GeneralSensorPostprocessor.md'
+
+  [general_sensor]
+    type = 'CSVdiff'
+    input = 'general_sensor.i'
+    csvdiff = 'general_sensor.e'
+    requirement = 'The system process a signal and send out a general sensor-mediated signal.'
+  []
+
+  [thermocouple_sensor]
+    type = 'CSVdiff'
+    input = 'thermocouple_sensor.i'
+    csvdiff = 'thermocouple_sensor.e'
+    requirement = 'The system process a signal and send out a thermocouple sensor-mediated signal.'
+  []
