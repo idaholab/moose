@@ -108,7 +108,8 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
   }
   else if (_read_type == PropertyReadFile::ReadTypeEnum::VORONOI)
     // No need to search for the element if we're just looking at nearest neighbors
-    return _read_prop_user_object->getVoronoiData(p, _column_number);
+    // Remove the Moose::dim offset to match the column requested for by the user
+    return _read_prop_user_object->getVoronoiData(p, _column_number - Moose::dim);
   else
     mooseError("This should not be reachable. Implementation error somewhere");
 }

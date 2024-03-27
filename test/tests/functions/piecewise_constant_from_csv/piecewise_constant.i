@@ -22,26 +22,26 @@
     type = PropertyReadFile
     prop_file_name = 'data_element.csv'
     read_type = 'element'
-    nprop = 3  # number of columns in CSV
+    nprop = 3 # number of columns in CSV
   []
   [reader_node]
     type = PropertyReadFile
     prop_file_name = 'data_node.csv'
     read_type = 'node'
-    nprop = 3  # number of columns in CSV
+    nprop = 3 # number of columns in CSV
   []
   [reader_nearest]
     type = PropertyReadFile
     prop_file_name = 'data_nearest.csv'
     read_type = 'voronoi'
-    nprop = 3
+    nprop = 4
     nvoronoi = 3
   []
   [reader_block]
     type = PropertyReadFile
     prop_file_name = 'data_nearest.csv'
     read_type = 'block'
-    nprop = 3
+    nprop = 4
     nblock = 3
   []
 []
@@ -63,13 +63,13 @@
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'reader_nearest'
     read_type = 'voronoi'
-    column_number = '2'
+    column_number = '3'
   []
   [block]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'reader_block'
     read_type = 'block'
-    column_number = '2'
+    column_number = '3'
   []
 []
 
