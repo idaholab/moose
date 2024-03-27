@@ -32,7 +32,10 @@ class MooseControl:
     This object is tested primarily by
     test/tests/controls/web_server_control in the framework."""
 
-    def __init__(self, moose_command=None, moose_port=None, moose_control_name=None):
+    def __init__(self,
+                 moose_command: list[str] = None,
+                 moose_port: int = None,
+                 moose_control_name: str = None):
         """Constructor
 
         You must specify either "moose_port" or "moose_command" and "moose_control_name".
@@ -47,7 +50,7 @@ class MooseControl:
         is the determined available port.
 
         Parameters:
-            moose_command (str): The command to use to start the moose process
+            moose_command (list[str]): The command to use to start the moose process
             moose_port (int): The webserver port to connect to
             moose_control_name (str): The name of the input control object
         """
@@ -68,6 +71,8 @@ class MooseControl:
             raise ValueError('"moose_control_name" must be specified with "moose_command"')
         if not has_moose_control_name and has_moose_port:
             raise ValueError('"moose_control_name" is unused with "moose_port"')
+        if has_moose_command and not isinstance(moose_command, list):
+            raise ValueError('"moose_command" is not a list')
 
         # Store inputs
         self._moose_command = moose_command
@@ -95,7 +100,10 @@ class MooseControl:
     def kill(self):
         """Kills the underlying moose process if one is running"""
         if self.isProcessRunning():
-            os.killpg(os.getpgid(self._moose_process.pid), signal.SIGTERM)
+            try:
+                self._moose_process.kill()
+            except:
+                pass
 
     class Exception(Exception):
         """Basic exception for an error within the MooseControl"""
@@ -203,7 +211,7 @@ class MooseControl:
             logger.info(f'Determined port {port} for communication')
 
             # Build the command, including what port to run the WebServerControl on
-            moose_command = f"{self._moose_command} Controls/{self._moose_control_name}/port={port}"
+            moose_command = self._moose_command + [f'Controls/{self._moose_control_name}/port={port}']
 
             # Spawn the moose process
             logger.info(f'Spawning MOOSE with command "{moose_command}"')
@@ -467,20 +475,12 @@ class MooseControl:
         return value
 
     @staticmethod
-    def spawnMoose(cmd: str) -> subprocess.Popen:
+    def spawnMoose(cmd: list[str]) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""
         popen_kwargs = {'stdout': subprocess.PIPE,
                         'stderr': subprocess.STDOUT,
-                        'close_fds': False,
-                        'shell': True,
                         'text': True,
                         'universal_newlines': True,
                         'bufsize': 1}
-
-        # This controls the process being killed properly with the parent
-        if platform.system() == "Windows":
-            popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
-        else:
-            popen_kwargs['preexec_fn'] = os.setsid
 
         return subprocess.Popen(cmd, **popen_kwargs)
