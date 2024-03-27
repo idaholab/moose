@@ -57,7 +57,7 @@ class MooseControl:
         # Setup a basic logger
         logging.basicConfig(level=logging.INFO,
                             handlers=[logging.StreamHandler()],
-                            format='%(levelname)s:%(name)s: %(message)s')
+                            format='%(name)s: %(message)s')
 
         # Sanity checks on input
         has_moose_command = moose_command is not None
@@ -105,7 +105,7 @@ class MooseControl:
             except:
                 pass
 
-    class Exception(Exception):
+    class ControlException(Exception):
         """Basic exception for an error within the MooseControl"""
         def __init__(self, message):
             super().__init__(message)
@@ -113,7 +113,7 @@ class MooseControl:
     def _requireMooseProcess(self):
         """Throws an exception if the moose process is not running (only if one was spwaned)"""
         if self._moose_process and not self.isProcessRunning():
-            raise Exception('The MOOSE process has ended')
+            raise ControlException('The MOOSE process has ended')
 
     def _get(self, path: str):
         """Calls GET on the webserver
@@ -125,7 +125,7 @@ class MooseControl:
             dict or None: The returned JSON data, if any, otherwise None
         """
         if not self._initialized:
-            raise Exception('Attempting GET without calling initialize()')
+            raise ControlException('Attempting GET without calling initialize()')
         self._requireMooseProcess()
         self._requireListening()
 
@@ -149,7 +149,7 @@ class MooseControl:
             dict or None: The returned JSON data, if any, otherwise None
         """
         if not self._initialized:
-            raise Exception('Attempting POST without calling initialize()')
+            raise ControlException('Attempting POST without calling initialize()')
         self._requireMooseProcess()
         self._requireListening()
         self._requireWaiting()
@@ -188,7 +188,7 @@ class MooseControl:
     def _requireListening(self):
         """Internal helper that throws if the server is not listening"""
         if not self.isListening():
-            raise self.Exception('MOOSE is not listening')
+            raise ControlException('MOOSE is not listening')
 
     def initialize(self):
         """Starts the MOOSE process (if enabled) and waits for
@@ -196,7 +196,7 @@ class MooseControl:
 
         Must be called before doing any other operations"""
         if self._initialized:
-            raise Exception('Already called initialize()')
+            raise ControlException('Already called initialize()')
 
         # The port we've decided on
         port = None
@@ -238,7 +238,7 @@ class MooseControl:
         self._url = f'http://localhost:{port}'
 
         # Wait for the webserver to listen
-        logger.info(f'Waiting for the webserver to start on "{self._url}"...')
+        logger.info(f'Waiting for the webserver to start on "{self._url}"')
         while True:
             time.sleep(self._poll_time)
             self._requireMooseProcess()
@@ -256,9 +256,9 @@ class MooseControl:
         throw in the event that the webserver is waiting for
         input when you think it should be done"""
         if self._moose_process:
-            logger.info('Waiting for the webserver to stop and for the app process to exit...')
+            logger.info('Waiting for the webserver to stop and for the app process to exit')
         else:
-            logger.info('Waiting for the webserver to stop...')
+            logger.info('Waiting for the webserver to stop')
 
         webserver_stopped = False
         while True:
@@ -284,28 +284,29 @@ class MooseControl:
             except: # could be shutting down; can fil
                 pass
             if waiting_flag is not None:
-                raise self.Exception(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
+                raise ControlException(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
 
     def returnCode(self):
         """Gets the return code of the moose process"""
         if self._moose_process is None:
-            raise Exception('A MOOSE process was not spawned')
+            raise ControlException('A MOOSE process was not spawned')
         if self._moose_process.poll() is None:
-            raise Exception('The MOOSE process has not completed')
+            raise ControlException('The MOOSE process has not completed')
         return self._moose_process.returncode
 
-    def wait(self, flag: str = None):
+    def wait(self, flag: str = None) -> str:
         """Waits for the MOOSE webserver and returns once the WebServerControl
         is waiting for input
 
         Parameters:
             flag (str or None): The expected execute on flag, if any, otherwise None
+        Returns:
+            str: The execute on flag
         """
-
         if flag:
-            logger.info(f'Waiting for the webserver to be at execute on flag {flag}...')
+            logger.info(f'Waiting for the webserver to be at execute on flag {flag}')
         else:
-            logger.info(f'Waiting for the webserver...')
+            logger.info(f'Waiting for the webserver')
 
         # Poll until we're available
         while True:
@@ -314,7 +315,7 @@ class MooseControl:
 
             # If the process is provided, die if it is no longer running
             if self._moose_process and self._moose_process.poll() is not None:
-                raise self.Exception(f'Attached MOOSE process has terminated')
+                raise ControlException(f'Attached MOOSE process has terminated')
 
             # Wait for it to be available
             current_flag = self.getWaitingFlag()
@@ -323,8 +324,8 @@ class MooseControl:
 
             logger.info(f'Webserver is waiting at execute on flag {current_flag}')
             if flag is not None and current_flag != flag:
-                raise self.Exception(f'Unexpected execute on flag {current_flag}')
-            return
+                raise ControlException(f'Unexpected execute on flag {current_flag}')
+            return current_flag
 
     def getWaitingFlag(self) -> str:
         """Gets the current EXECUTE_ON flag that WebServerControl is waiting on
@@ -334,7 +335,7 @@ class MooseControl:
         """
         status, r = self._get('waiting')
         if status != 200:
-            raise Exception(f'Unexpected status {status} from waiting')
+            raise ControlException(f'Unexpected status {status} from waiting')
 
         if not r['waiting']:
             self._checkResponse(['waiting'], r)
@@ -354,33 +355,34 @@ class MooseControl:
     def _requireWaiting(self):
         """Internal helper that throws if the server is not waiting"""
         if not self.isWaiting():
-            raise self.Exception('MOOSE is not waiting')
+            raise ControlException('MOOSE is not waiting')
 
     def setContinue(self):
         """Tells the WebServerControl to continue"""
-        logger.info(f'Telling the webserver to continue...')
+        logger.info(f'Telling the webserver to continue')
         self._requireWaiting()
         status, r_json = self._get('continue')
         if status != 200:
-            raise Exception(f'Unexpected status {status} from continue')
+            raise ControlException(f'Unexpected status {status} from continue')
         if r_json is not None:
-            raise Exception(f'Unexpected data {r_json} from continue')
-        logger.info(f'Successfully told the webserver to continue')
+            raise ControlException(f'Unexpected data {r_json} from continue')
+        logger.debug(f'Successfully told the webserver to continue')
 
     def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
-        logger.info(f'Setting controllable {type} value {path}={value}...')
+        logger.info(f'Setting controllable value {path}')
+        logger.debug(f'Setting controllable {type} value {path}={value}')
         data = {'name': path, 'value': value, 'type': type}
         status, _ = self._post('set/controllable', data)
         if status != 201:
-            raise Exception(f'Unexpected status {status} from setting controllable value')
-        logger.info(f'Successfully set controllable value {path}')
+            raise ControlException(f'Unexpected status {status} from setting controllable value')
+        logger.debug(f'Successfully set controllable value {path}')
 
     @staticmethod
     def _requireNumeric(value):
         """Helper for requring that the given value is numeric"""
         if not isinstance(value, (int, float)):
-            raise Exception(f'Value "{value}" is not numeric')
+            raise ControlException(f'Value "{value}" is not numeric')
 
     @staticmethod
     def _requireType(value, value_type):
@@ -459,18 +461,18 @@ class MooseControl:
         Returns:
             float: The value of the postprocessor
         """
-        logger.info(f'Getting postprocessor value for "{name}"...')
+        logger.debug(f'Getting postprocessor value for "{name}"')
         self._requireWaiting()
 
         data = {'name': name}
         status, r = self._post('get/postprocessor', data)
 
         if status != 200:
-            raise Exception(f'Unexpected status {status} from getting postprocessor value')
+            raise ControlException(f'Unexpected status {status} from getting postprocessor value')
         self._checkResponse(['value'], r)
 
         value = float(r['value'])
-        logger.info(f'Successfully retrieved postprocessor value {name}={value}')
+        logger.debug(f'Successfully retrieved postprocessor value {name}={value}')
 
         return value
 
