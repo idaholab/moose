@@ -19,10 +19,10 @@
   [v]
   []
   [u_adjoint]
-    nl_sys = adjoint
+    solver_sys = adjoint
   []
   [v_adjoint]
-    nl_sys = adjoint
+    solver_sys = adjoint
   []
 []
 

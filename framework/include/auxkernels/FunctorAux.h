@@ -31,6 +31,9 @@ protected:
   /// Factor to multiply the functor with
   const Moose::Functor<Real> & _factor;
 
-  /// Whether the variable is a finite element variable
-  const bool _is_fe;
+  /// Whether the variable is a standard finite element variable
+  const bool _is_standard_fe;
+
+  /// Whether the variable is a standard finite volume variable
+  const bool _is_standard_fv;
 };

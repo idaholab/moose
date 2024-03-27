@@ -13,12 +13,12 @@
 // libMesh includes
 #include "libmesh/elem_range.h"
 
-class NonlinearSystem;
+class SolverSystem;
 
 class MaxVarNDofsPerElem : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  MaxVarNDofsPerElem(FEProblemBase & feproblem, NonlinearSystemBase & sys);
+  MaxVarNDofsPerElem(FEProblemBase & feproblem, SolverSystem & sys);
 
   // Splitting Constructor
   MaxVarNDofsPerElem(MaxVarNDofsPerElem & x, Threads::split split);
@@ -33,7 +33,7 @@ public:
 
 protected:
   /// The nonlinear system
-  NonlinearSystemBase & _system;
+  SolverSystem & _system;
 
   /// Maximum number of dofs for any one variable on any one element
   size_t _max;

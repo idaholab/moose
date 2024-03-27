@@ -16,6 +16,7 @@
 #include "PointListAdaptor.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "SubProblem.h"
@@ -3522,8 +3523,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   for (const Elem * elem : as_range(begin, end))
     _elem_to_elem_info.emplace(elem->id(), elem);
 
-  _linear_finite_volume_dofs_cached = false;
-
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3698,13 +3697,21 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
   {
     const auto & nl_variables = _app.feProblem().getNonlinearSystemBase(i).getVariables(0);
     for (const auto & var : nl_variables)
-      if (var->fieldType() == 0)
+      if (var->fieldType() == Moose::VAR_FIELD_STANDARD)
+        moose_vars.push_back(var);
+  }
+
+  for (const auto i : make_range(_app.feProblem().numLinearSystems()))
+  {
+    const auto & variables = _app.feProblem().getLinearSystem(i).getVariables(0);
+    for (const auto & var : variables)
+      if (var->fieldType() == Moose::VAR_FIELD_STANDARD)
         moose_vars.push_back(var);
   }
 
   const auto & aux_variables = _app.feProblem().getAuxiliarySystem().getVariables(0);
   for (const auto & var : aux_variables)
-    if (var->fieldType() == 0)
+    if (var->fieldType() == Moose::VAR_FIELD_STANDARD)
       moose_vars.push_back(var);
 
   for (FaceInfo & face : _all_face_info)
@@ -3771,6 +3778,27 @@ MooseMesh::cacheFVElementalDoFs() const
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
+        dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
+        const auto & variables = sys.getVariables(0);
+        for (const auto & var : variables)
+        {
+          const auto & var_subdomains = var->blockIDs();
+
+          // We will only cache for FV variables and if they live on the current subdomain
+          if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
+          {
+            std::vector<dof_id_type> indices;
+            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
+            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            dof_vector[sys.number()][var->number()] = indices[0];
+          }
+        }
+      }
+
+    for (const auto i : make_range(_app.feProblem().numLinearSystems()))
+      if (_app.feProblem().getLinearSystem(i).nFVVariables())
+      {
+        auto & sys = _app.feProblem().getLinearSystem(i);
         dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
         const auto & variables = sys.getVariables(0);
         for (const auto & var : variables)

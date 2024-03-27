@@ -114,6 +114,8 @@ Extensions:
             fviks: syntax/FVInterfaceKernels/index.md
             fvics: syntax/FVICs/index.md
             fvkernels: syntax/FVKernels/index.md
+            linearfvkernels: syntax/LinearFVKernels/index.md
+            linearfvbcs: syntax/LinearFVBCs/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
             interfacekernels: syntax/InterfaceKernels/index.md

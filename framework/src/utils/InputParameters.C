@@ -810,6 +810,8 @@ InputParameters::getMooseType(const std::string & name_in) const
     var = get<VariableName>(name);
   else if (have_parameter<NonlinearVariableName>(name))
     var = get<NonlinearVariableName>(name);
+  else if (have_parameter<LinearVariableName>(name))
+    var = get<LinearVariableName>(name);
   else if (have_parameter<AuxVariableName>(name))
     var = get<AuxVariableName>(name);
   else if (have_parameter<PostprocessorName>(name))

@@ -109,25 +109,25 @@ pressure_tag = "pressure_grad"
   [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
     block = 'spacer_block porous_block'
-    nl_sys = u_system
+    solver_sys = u_system
   []
 
   [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
     block = 'spacer_block porous_block'
-    nl_sys = v_system
+    solver_sys = v_system
   []
 
   [pressure]
     type = INSFVPressureVariable
     block = 'spacer_block porous_block'
-    nl_sys = pressure_system
+    solver_sys = pressure_system
   []
 
   [T_fluid]
     type = INSFVEnergyVariable
     block = 'spacer_block porous_block'
-    nl_sys = t_system
+    solver_sys = t_system
   []
 []
 

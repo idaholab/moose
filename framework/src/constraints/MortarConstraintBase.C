@@ -101,7 +101,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     MooseVariableInterface<Real>(this,
                                  true,
                                  isParamValid("variable") ? "variable" : "secondary_variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarKindType::VAR_SOLVER,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _var(isParamValid("variable")

@@ -75,7 +75,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
     _sys(changeSystem(parameters, _var)),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid, _var.kind() == Moose::VAR_NONLINEAR ? _sys.number() : 0)),
+    _assembly(_subproblem.assembly(_tid, _var.kind() == Moose::VAR_SOLVER ? _sys.number() : 0)),
     _mesh(_subproblem.mesh())
 {
   _subproblem.haveADObjects(true);

@@ -14,6 +14,7 @@
 #include "MooseArray.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableFV.h"
+#include "MooseLinearVariableFV.h"
 #include "InputParameters.h"
 #include "HasMembers.h"
 
@@ -1337,6 +1338,9 @@ protected:
 
   /// Vector of standard finite volume coupled variables
   std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
+
+  /// Vector of standard linear finite volume coupled variables
+  std::vector<MooseLinearVariableFV<Real> *> _coupled_standard_linear_fv_moose_vars;
 
   /// map from new to deprecated variable names
   const std::unordered_map<std::string, std::string> & _new_to_deprecated_coupled_vars;

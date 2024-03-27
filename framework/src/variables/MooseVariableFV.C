@@ -100,20 +100,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
 }
 
 template <typename OutputType>
-Moose::VarFieldType
-MooseVariableFV<OutputType>::fieldType() const
-{
-  if (std::is_same<OutputType, Real>::value)
-    return Moose::VarFieldType::VAR_FIELD_STANDARD;
-  else if (std::is_same<OutputType, RealVectorValue>::value)
-    return Moose::VarFieldType::VAR_FIELD_VECTOR;
-  else if (std::is_same<OutputType, RealEigenVector>::value)
-    return Moose::VarFieldType::VAR_FIELD_ARRAY;
-  else
-    mooseError("Unknown variable field type");
-}
-
-template <typename OutputType>
 void
 MooseVariableFV<OutputType>::clearDofIndices()
 {
@@ -407,20 +393,6 @@ void
 MooseVariableFV<OutputType>::setLowerDofValues(const DenseVector<OutputData> &)
 {
   lowerDError();
-}
-
-template <typename OutputType>
-bool
-MooseVariableFV<OutputType>::isArray() const
-{
-  return std::is_same<OutputType, RealEigenVector>::value;
-}
-
-template <typename OutputType>
-bool
-MooseVariableFV<OutputType>::isVector() const
-{
-  return std::is_same<OutputType, RealVectorValue>::value;
 }
 
 template <typename OutputType>
@@ -838,7 +810,7 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & st
 
   const dof_id_type dof_index = this->_dof_indices[0];
 
-  if (_var_kind == Moose::VAR_NONLINEAR)
+  if (_var_kind == Moose::VAR_SOLVER)
   {
     ADReal dot = (*_solution)(dof_index);
     if (ADReal::do_derivatives && state.state == 0 &&

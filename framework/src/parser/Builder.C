@@ -1071,6 +1071,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
         setscalar(NonlinearVariableName, string);
+        setscalar(LinearVariableName, string);
         setscalar(AuxVariableName, string);
         setscalar(FunctionName, string);
         setscalar(MeshDivisionName, string);
@@ -1093,6 +1094,8 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(PostprocessorName, PostprocessorName);
         setscalar(ExecutorName, string);
         setscalar(NonlinearSystemName, string);
+        setscalar(LinearSystemName, string);
+        setscalar(SolverSystemName, string);
         setscalar(CLIArgString, string);
 
         // Moose Compound Scalars
@@ -1141,6 +1144,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(SubdomainName, string);
         setvector(BoundaryName, string);
         setvector(NonlinearVariableName, string);
+        setvector(LinearVariableName, string);
         setvector(AuxVariableName, string);
         setvector(FunctionName, string);
         setvector(MeshDivisionName, string);
@@ -1168,6 +1172,8 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ReporterValueName, string);
         setvector(ExecutorName, string);
         setvector(NonlinearSystemName, string);
+        setvector(LinearSystemName, string);
+        setvector(SolverSystemName, string);
 
         // map types
         setmap(string, Real);
@@ -1200,6 +1206,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(BoundaryName);
         setvectorvector(VariableName);
         setvectorvector(NonlinearVariableName);
+        setvectorvector(LinearVariableName);
         setvectorvector(AuxVariableName);
         setvectorvector(FunctionName);
         setvectorvector(UserObjectName);
@@ -1240,6 +1247,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvectorvector(BoundaryName);
         setvectorvectorvector(VariableName);
         setvectorvectorvector(NonlinearVariableName);
+        setvectorvectorvector(LinearVariableName);
         setvectorvectorvector(AuxVariableName);
         setvectorvectorvector(FunctionName);
         setvectorvectorvector(UserObjectName);

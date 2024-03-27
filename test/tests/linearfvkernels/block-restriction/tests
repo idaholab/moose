@@ -1,0 +1,29 @@
+[Tests]
+  design = 'LinearFVDiffusion.md'
+  issues = '#25722'
+  [mms-diffusion]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = BlockRestrictedDiffusion
+    requirement = 'The system shall display second-order convergence for diffusion problems with Dirichlet boundary conditions using a linear finite volume system on a block-restricted two-dimensional orthogonal mesh.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [mms-adr]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = BlockRestrictedADR
+    requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary condition using a linear finite volume system on a block-restricted two-dimensional orthogonal mesh.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diff-react-exact]
+    type = CSVDiff
+    input = block-restricted-diffusion-react.i
+    csvdiff = block-restricted-diffusion-react_csv.csv
+    requirement = 'The system should be able to exactly solve a problem with a constant source and diffusion and reaction kernels restricted to two different subdomains.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

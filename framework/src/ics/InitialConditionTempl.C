@@ -26,7 +26,7 @@ InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & paramete
                                         parameters.get<VariableName>("variable"))),
     _fe_var(dynamic_cast<MooseVariableFE<T> *>(&_var)),
     _assembly(
-        _fe_problem.assembly(_tid, _var.kind() == Moose::VAR_NONLINEAR ? _var.sys().number() : 0)),
+        _fe_problem.assembly(_tid, _var.kind() == Moose::VAR_SOLVER ? _var.sys().number() : 0)),
     _coord_sys(_assembly.coordSystem()),
     _current_elem(_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),

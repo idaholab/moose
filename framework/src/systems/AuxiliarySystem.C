@@ -33,15 +33,10 @@
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
-  : SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
+  : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
-    _fe_problem(subproblem),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _u_dot(NULL),
-    _u_dotdot(NULL),
-    _u_dot_old(NULL),
-    _u_dotdot_old(NULL),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
     _nodal_aux_storage(_app.getExecuteOnEnum()),
     _mortar_nodal_aux_storage(_app.getExecuteOnEnum()),
@@ -63,19 +58,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 }
 
 AuxiliarySystem::~AuxiliarySystem() = default;
-
-void
-AuxiliarySystem::addDotVectors()
-{
-  if (_fe_problem.uDotRequested())
-    _u_dot = &addVector("u_dot", true, GHOSTED);
-  if (_fe_problem.uDotDotRequested())
-    _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
-  if (_fe_problem.uDotOldRequested())
-    _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
-  if (_fe_problem.uDotDotOldRequested())
-    _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
-}
 
 void
 AuxiliarySystem::initialSetup()
@@ -379,18 +361,6 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
     var->reinitAuxNeighbor();
     var->computeElemValuesFace();
   }
-}
-
-NumericVector<Number> &
-AuxiliarySystem::serializedSolution()
-{
-  if (!_serialized_solution.get())
-  {
-    _serialized_solution = NumericVector<Number>::build(_fe_problem.comm());
-    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
-  }
-
-  return *_serialized_solution;
 }
 
 void

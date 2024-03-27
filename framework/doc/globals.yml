@@ -27,6 +27,8 @@ Outputs: /syntax/Outputs/index.md
 ScalarKernels: /ScalarKernels/index.md
 FVKernels: /FVKernels/index.md
 FVBCs: /FVBCs/index.md
+LinearFVKernels: /LinearFVKernels/index.md
+LinearFVBCs: /LinearFVBCs/index.md
 GitHub: https://github.com
 Gmsh: https://gmsh.info/
 SLEPc: https://slepc.upv.es/

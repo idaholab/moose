@@ -10,10 +10,10 @@
 
 [Variables]
   [u]
-    nl_sys = 'u'
+    solver_sys = 'u'
   []
   [v]
-    nl_sys = 'v'
+    solver_sys = 'v'
   []
 []
 

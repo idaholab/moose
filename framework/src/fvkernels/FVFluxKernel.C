@@ -50,7 +50,7 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
   : FVKernel(params),
     TwoMaterialPropertyInterface(this, blockIDs(), {}),
     NeighborMooseVariableInterface(
-        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, false, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
         this, false, false, /*is_fv=*/true),
     _var(*mooseVariableFV()),

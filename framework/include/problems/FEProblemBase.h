@@ -47,6 +47,8 @@ class AuxiliarySystem;
 class DisplacedProblem;
 class MooseMesh;
 class NonlinearSystemBase;
+class LinearSystem;
+class SolverSystem;
 class NonlinearSystem;
 class RandomInterface;
 class RandomData;
@@ -92,6 +94,7 @@ namespace libMesh
 {
 class CouplingMatrix;
 class NonlinearImplicitSystem;
+class LinearImplicitSystem;
 } // namespace libMesh
 
 /// Enumeration for nonlinear convergence reasons
@@ -361,8 +364,8 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) override;
-  const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const override;
+  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
+  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -435,12 +438,20 @@ public:
   virtual void subdomainSetup(SubdomainID subdomain, const THREAD_ID tid);
   virtual void neighborSubdomainSetup(SubdomainID subdomain, const THREAD_ID tid);
 
-  virtual void newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
+  virtual void newAssemblyArray(std::vector<std::shared_ptr<SolverSystem>> & solver_systems);
   virtual void initNullSpaceVectors(const InputParameters & parameters,
                                     std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
+
+  /**
+   * Build and solve a linear system
+   * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
+   * @param po The petsc options for the solve, if not supplied, the defaults are used
+   */
+  void solveLinearSystem(const unsigned int linear_sys_num,
+                         const Moose::PetscSupport::PetscOptions * po = nullptr);
 
   ///@{
   /**
@@ -665,6 +676,53 @@ public:
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
   /**
+   * Get non-constant reference to a linear system
+   * @param sys_num The number of the linear system
+   */
+  LinearSystem & getLinearSystem(unsigned int sys_num);
+
+  /**
+   * Get a constant reference to a linear system
+   * @param sys_num The number of the linear system
+   */
+  const LinearSystem & getLinearSystem(unsigned int sys_num) const;
+
+  /**
+   * Get non-constant reference to a solver system
+   * @param sys_num The number of the solver system
+   */
+  SolverSystem & getSolverSystem(unsigned int sys_num);
+
+  /**
+   * Get a constant reference to a solver system
+   * @param sys_num The number of the solver system
+   */
+  const SolverSystem & getSolverSystem(unsigned int sys_num) const;
+
+  /**
+   * Set the current linear system pointer
+   * @param sys_num The number of linear system
+   */
+  void setCurrentLinearSystem(unsigned int sys_num);
+
+  /// Get a non-constant reference to the current linear system
+  LinearSystem & currentLinearSystem();
+  /// Get a constant reference to the current linear system
+  const LinearSystem & currentLinearSystem() const;
+
+  /**
+   * Get a constant base class reference to a linear system
+   * @param sys_num The number of the linear system
+   */
+  virtual const SystemBase & systemBaseLinear(unsigned int sys_num) const override;
+
+  /**
+   * Get a non-constant base class reference to a linear system
+   * @param sys_num The number of the linear system
+   */
+  virtual SystemBase & systemBaseLinear(unsigned int sys_num) override;
+
+  /**
    * Canonical method for adding a non-linear variable
    * @param var_type the type of the variable, e.g. MooseVariableScalar
    * @param var_name the variable name, e.g. 'u'
@@ -734,13 +792,20 @@ public:
   virtual void addDGKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
-
+  // FV /////
   virtual void addFVKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
 
+  virtual void addLinearFVKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters);
   virtual void
   addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
+  virtual void addLinearFVBC(const std::string & fv_bc_name,
+                             const std::string & name,
+                             InputParameters & parameters);
+
   virtual void addFVInterfaceKernel(const std::string & fv_ik_name,
                                     const std::string & name,
                                     InputParameters & parameters);
@@ -1322,6 +1387,32 @@ public:
                                     libMesh::System & precond_system,
                                     unsigned int ivar,
                                     unsigned int jvar);
+
+  /**
+   * Assemble both the right hand side and the system matrix of a given linear
+   * system.
+   * @param sys The linear system which should be assembled
+   * @param system_matrix The sparse matrix which should hold the system matrix
+   * @param rhs The vector which should hold the right hand side
+   */
+  void computeLinearSystemSys(LinearImplicitSystem & sys,
+                              SparseMatrix<Number> & system_matrix,
+                              NumericVector<Number> & rhs);
+
+  /**
+   * Assemble the current linear system given a set of vector and matrix tags.
+   *
+   * @param soln The solution which should be used for the system assembly
+   * @param system_matrix The sparse matrix which should hold the system matrix
+   * @param rhs The vector which should hold the right hand side
+   * @param vector_tags The vector tags for the right hand side
+   * @param matrix_tags The matrix tags for the matrix
+   */
+  void computeLinearSystemTags(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & system_matrix,
+                               NumericVector<Number> & rhs,
+                               const std::set<TagID> & vector_tags,
+                               const std::set<TagID> & matrix_tags);
 
   virtual Real computeDamping(const NumericVector<Number> & soln,
                               const NumericVector<Number> & update);
@@ -2081,8 +2172,32 @@ public:
   MooseAppCoordTransform & coordTransform();
 
   virtual std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
+
+  virtual std::size_t numLinearSystems() const override { return _num_linear_sys; }
+
+  virtual std::size_t numSolverSystems() const override { return _num_nl_sys + _num_linear_sys; }
+
+  /// Check if the solver system is nonlinear
+  bool isSolverSystemNonlinear(const unsigned int sys_num) { return sys_num < _num_nl_sys; }
+
   virtual unsigned int currentNlSysNum() const override;
+
+  virtual unsigned int currentLinearSysNum() const override;
+
+  /**
+   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   */
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
+
+  /**
+   * @return the linear system number corresponding to the provided \p linear_sys_name
+   */
+  unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const override;
+
+  /**
+   * @return the solver system number corresponding to the provided \p solver_sys_name
+   */
+  unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const override;
 
   /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
@@ -2181,6 +2296,12 @@ protected:
 
   std::set<TagID> _fe_matrix_tags;
 
+  /// Temporary storage for filtered vector tags for linear systems
+  std::set<TagID> _linear_vector_tags;
+
+  /// Temporary storage for filtered matrix tags for linear systems
+  std::set<TagID> _linear_matrix_tags;
+
   /// Whether or not to actually solve the nonlinear system
   const bool & _solve;
 
@@ -2201,6 +2322,24 @@ protected:
   /// the absolute non linear divergence tolerance
   Real _nl_abs_div_tol = -1;
 
+  /// The linear system names
+  const std::vector<LinearSystemName> _linear_sys_names;
+
+  /// The number of linear systems
+  const std::size_t _num_linear_sys;
+
+  /// The vector of linear systems
+  std::vector<std::shared_ptr<LinearSystem>> _linear_systems;
+
+  /// Map from linear system name to number
+  std::map<LinearSystemName, unsigned int> _linear_sys_name_to_num;
+
+  /// The current linear system that we are solving
+  LinearSystem * _current_linear_sys;
+
+  /// Boolean to check if we have the default nonlinear system
+  const bool _using_default_nl;
+
   /// The nonlinear system names
   const std::vector<NonlinearSystemName> _nl_sys_names;
 
@@ -2213,11 +2352,17 @@ protected:
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
 
-  /// Map from nonlinear variable name to nonlinear system number
-  std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
-
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
+
+  /// Combined container to base pointer of every solver system
+  std::vector<std::shared_ptr<SolverSystem>> _solver_systems;
+
+  /// Map connecting variable names with their respective solver systems
+  std::map<SolverVariableName, unsigned int> _solver_var_to_sys_num;
+
+  /// Map connecting solver system names with their respective systems
+  std::map<SolverSystemName, unsigned int> _solver_sys_name_to_num;
 
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
@@ -2525,17 +2670,17 @@ private:
                                                        bool displaced);
 
   /**
-   * Determine what nonlinear system the provided variable name lies in
-   * @param var_name The name of the variable we are doing nonlinear system lookups for
+   * Determine what solver system the provided variable name lies in
+   * @param var_name The name of the variable we are doing solver system lookups for
    * @param error_if_not_found Whether to error if the variable name isn't found in any of the
-   * nonlinear systems
+   * solver systems
    * @return A pair in which the first member indicates whether the variable was found in the
-   * nonlinear systems and the second member indicates the nonlinear system number in which the
+   * solver systems and the second member indicates the solver system number in which the
    * variable was found (or an invalid unsigned integer if not found)
    */
-  std::pair<bool, unsigned int>
-  determineNonlinearSystem(const std::string & var_name,
-                           bool error_if_not_found = false) const override;
+  virtual std::pair<bool, unsigned int>
+  determineSolverSystem(const std::string & var_name,
+                        bool error_if_not_found = false) const override;
 
   /**
    * Checks if the variable of the initial condition is getting restarted and errors for specific
@@ -2725,6 +2870,22 @@ FEProblemBase::getNonlinearSystemBase(const unsigned int sys_num) const
   return *_nl[sys_num];
 }
 
+inline SolverSystem &
+FEProblemBase::getSolverSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
+}
+
+inline const SolverSystem &
+FEProblemBase::getSolverSystem(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
+}
+
 inline NonlinearSystemBase &
 FEProblemBase::currentNonlinearSystem()
 {
@@ -2739,22 +2900,52 @@ FEProblemBase::currentNonlinearSystem() const
   return *_current_nl_sys;
 }
 
+inline LinearSystem &
+FEProblemBase::getLinearSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  return *_linear_systems[sys_num];
+}
+
+inline const LinearSystem &
+FEProblemBase::getLinearSystem(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  return *_linear_systems[sys_num];
+}
+
+inline LinearSystem &
+FEProblemBase::currentLinearSystem()
+{
+  mooseAssert(_current_linear_sys, "The linear system is not currently set");
+  return *_current_linear_sys;
+}
+
+inline const LinearSystem &
+FEProblemBase::currentLinearSystem() const
+{
+  mooseAssert(_current_linear_sys, "The linear system is not currently set");
+  return *_current_linear_sys;
+}
+
 inline Assembly &
-FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
+FEProblemBase::assembly(const THREAD_ID tid, const unsigned int sys_num)
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid][nl_sys_num];
+  mooseAssert(sys_num < _assembly[tid].size(),
+              "System number larger than the assembly container size");
+  return *_assembly[tid][sys_num];
 }
 
 inline const Assembly &
-FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const
+FEProblemBase::assembly(const THREAD_ID tid, const unsigned int sys_num) const
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid][nl_sys_num];
+  mooseAssert(sys_num < _assembly[tid].size(),
+              "System number larger than the assembly container size");
+  return *_assembly[tid][sys_num];
 }
 
 inline const CouplingMatrix *
@@ -2769,6 +2960,14 @@ FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
   mooseAssert(nl_sys_num < _nl.size(),
               "System number greater than the number of nonlinear systems");
   _current_nl_sys = _nl[nl_sys_num].get();
+}
+
+inline void
+FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  _current_linear_sys = _linear_systems[sys_num].get();
 }
 
 inline void
