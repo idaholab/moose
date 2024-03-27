@@ -21,7 +21,10 @@ messages:
   once, even if called multiple times.
 
 !alert note title=Warnings in repeating sections
-For warnings in sections of the code that are often executed, it is recommended to leverage the [SolutionInvalidityInterface.md], which will only output the warning once but keep track of the occurence of the problem. It can also force the solver to reject a converged solution that still presents the warning/invalid condition.
+For warnings in sections of the code that are often executed, it is recommended to leverage
+the [SolutionInvalidInterface.md], which will only output the warning once but keep track of
+the occurence of the problem. It can also force the solver to reject a converged solution that
+still presents the warning/invalid condition.
 
 ## Documented Errors id=documented_errors
 
