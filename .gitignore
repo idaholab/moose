@@ -42,6 +42,7 @@
 *.blg
 *.spl
 *.idx
+*.mat
 traceout*.txt
 temp_print_trace.*
 *.xda
@@ -115,6 +116,7 @@ test.cache
 !**/gold/**/*.vtk
 !**/gold/**/*.vtu
 !**/gold/**/*.pvtu
+!**/gold/**/*.mat
 !**/gold/**/*.xml*
 !**/gold/**/*.json*
 
