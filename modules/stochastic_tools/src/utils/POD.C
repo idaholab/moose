@@ -149,7 +149,7 @@ POD::computePOD(const VariableName & vname,
 
   // We start extracting the basis functions and the singular values.
 
-// Find the local size needed for u
+  // Find the local size needed for u
   dof_id_type local_snapsize;
   LIBMESH_CHKERR(MatGetLocalSize(mat, NULL, numeric_petsc_cast(&local_snapsize)));
 
