@@ -56,30 +56,21 @@ POD::computePOD(const VariableName & vname,
   dof_id_type global_rows = 0;
   if (_parallel_storage->getStorage().size())
   {
-    local_rows = _parallel_storage->getStorage(vname).size();
+    for (const auto & row : _parallel_storage->getStorage(vname))
+    {
+      local_rows += row.second.size();
+      if (row.second.size())
+        snapshot_size = row.second[0].size();
+    }
     global_rows = local_rows;
-    if (_parallel_storage->getStorage(vname).size())
-      snapshot_size = _parallel_storage->getStorage(vname).begin()->second[0].size();
   }
 
   _communicator.sum(global_rows);
   _communicator.max(snapshot_size);
 
-  // The Lanczos method is preferred for symmetric semi positive definite matrices
-  // but it only works with sparse matrices at the moment (dense matrix leaks memory).
-  // So we create a sparse matrix with the distribution given in ParallelSolutionStorage.
-  // TODO: Figure out a way to use a dense matrix without leaking memory, that would
-  // avoid the overhead of using a sparse format for a dense matrix
-  PetscErrorCode ierr = MatCreateAIJ(_communicator.get(),
-                                     local_rows,
-                                     snapshot_size,
-                                     global_rows,
-                                     snapshot_size,
-                                     _communicator.rank() == 0 ? snapshot_size : 0,
-                                     NULL,
-                                     _communicator.rank() == 0 ? 0 : snapshot_size,
-                                     NULL,
-                                     &mat);
+  // Generally snapshot matrices are dense.
+  PetscErrorCode ierr = MatCreateDense(
+      _communicator.get(), local_rows, PETSC_DECIDE, global_rows, snapshot_size, NULL, &mat);
   LIBMESH_CHKERR(ierr);
 
   // Check where the local rows begin in the matrix, we use these to convert from local to
@@ -92,43 +83,60 @@ POD::computePOD(const VariableName & vname,
   if (local_rows)
     for (const auto & row : _parallel_storage->getStorage(vname))
     {
-      std::vector<PetscInt> rows(snapshot_size, (counter++) + local_beg);
+      // Adds each snap individually. For problems with multiple snaps per run.
+      for (const auto & snap : row.second)
+      {
+        std::vector<PetscInt> rows(snapshot_size, (counter++) + local_beg);
 
-      // Fill the column indices with 0,1,...,snapshot_size-1
-      std::vector<PetscInt> columns(snapshot_size);
-      std::iota(std::begin(columns), std::end(columns), 0);
+        // Fill the column indices with 0,1,...,snapshot_size-1
+        std::vector<PetscInt> columns(snapshot_size);
+        std::iota(std::begin(columns), std::end(columns), 0);
 
-      // Set the rows in the "sparse" matrix
-      MatSetValues(mat,
-                   1,
-                   rows.data(),
-                   snapshot_size,
-                   columns.data(),
-                   row.second[0].get_values().data(),
-                   INSERT_VALUES);
+        // Set the rows in the "sparse" matrix
+        LIBMESH_CHKERR(MatSetValues(mat,
+                                    1,
+                                    rows.data(),
+                                    snapshot_size,
+                                    columns.data(),
+                                    snap.get_values().data(),
+                                    INSERT_VALUES));
+      }
     }
 
   // Assemble the matrix
-  MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
+  LIBMESH_CHKERR(MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY));
+  LIBMESH_CHKERR(MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY));
 
+  LIBMESH_CHKERR(ierr);
   SVD svd;
-  SVDCreate(_communicator.get(), &svd);
+  LIBMESH_CHKERR(SVDCreate(_communicator.get(), &svd));
   // Now we set the operators for our SVD objects
-  SVDSetOperators(svd, mat, NULL);
+  LIBMESH_CHKERR(SVDSetOperators(svd, mat, NULL));
+
+  // Set the parallel operation mode to "DISTRIBUTED", default is "REDUNDANT"
+  DS ds;
+  LIBMESH_CHKERR(SVDGetDS(svd, &ds));
+  LIBMESH_CHKERR(DSSetParallel(ds, DS_PARALLEL_DISTRIBUTED));
 
   // We want the Lanczos method, might give the choice to the user
   // at some point
-  SVDSetType(svd, SVDTRLANCZOS);
+  LIBMESH_CHKERR(SVDSetType(svd, SVDTRLANCZOS));
+
+  // Default is the transpose is explicitly created. This method is less efficient
+  // computationally but better for storage
+  LIBMESH_CHKERR(SVDSetImplicitTranspose(svd, PETSC_TRUE));
+
   ierr = PetscOptionsInsertString(NULL, _extra_slepc_options.c_str());
   LIBMESH_CHKERR(ierr);
 
   // Set the subspace size for the Lanczos method, we take twice as many
   // basis vectors as the requested number of POD modes. This guarantees in most of the case the
   // convergence of the singular triplets.
-  SVDSetFromOptions(svd);
-  SVDSetDimensions(
-      svd, num_modes, std::min(2 * num_modes, global_rows), std::min(2 * num_modes, global_rows));
+  LIBMESH_CHKERR(SVDSetDimensions(
+      svd, num_modes, std::min(2 * num_modes, global_rows), std::min(2 * num_modes, global_rows)));
+
+  // Gives the user the ability to override any option set before the solve.
+  LIBMESH_CHKERR(SVDSetFromOptions(svd));
 
   // Compute the singular value triplets
   ierr = SVDSolve(svd);
@@ -139,11 +147,14 @@ POD::computePOD(const VariableName & vname,
   ierr = SVDGetConverged(svd, &nconv);
   LIBMESH_CHKERR(ierr);
 
-  // We start extracting the basis functions and the singular values. The left singular
-  // vectors are supposed to be all on the root processor
-  // PetscReal sigma;
+  // We start extracting the basis functions and the singular values.
+
+// Find the local size needed for u
+  dof_id_type local_snapsize;
+  LIBMESH_CHKERR(MatGetLocalSize(mat, NULL, numeric_petsc_cast(&local_snapsize)));
+
   PetscVector<Real> u(_communicator);
-  u.init(snapshot_size);
+  u.init(snapshot_size, local_snapsize, false, PARALLEL);
 
   PetscVector<Real> v(_communicator);
   v.init(global_rows, local_rows, false, PARALLEL);
@@ -167,7 +178,7 @@ POD::computePOD(const VariableName & vname,
   right_basis_functions.resize(num_requested_modes);
   for (PetscInt j = 0; j < cast_int<PetscInt>(num_requested_modes); ++j)
   {
-    SVDGetSingularTriplet(svd, j, NULL, v.vec(), u.vec());
+    LIBMESH_CHKERR(SVDGetSingularTriplet(svd, j, NULL, v.vec(), u.vec()));
     u.localize(left_basis_functions[j].get_values());
     v.localize(right_basis_functions[j].get_values());
   }
