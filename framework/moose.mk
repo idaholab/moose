@@ -138,7 +138,7 @@ pyhit_COMPILEFLAGS += $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
 #
