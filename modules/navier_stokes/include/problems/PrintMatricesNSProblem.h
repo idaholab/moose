@@ -19,12 +19,12 @@ class NonlinearSystem;
  * A problem that handles Schur complement preconditioning of the incompressible Navier-Stokes
  * equations
  */
-class IPHDGNavierStokesProblem : public FEProblem
+class PrintMatricesNSProblem : public FEProblem
 {
 public:
   static InputParameters validParams();
 
-  IPHDGNavierStokesProblem(const InputParameters & parameters);
+  PrintMatricesNSProblem(const InputParameters & parameters);
 
 protected:
   virtual void onTimestepEnd() override;

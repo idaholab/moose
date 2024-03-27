@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IPHDGNavierStokesProblem.h"
+#include "PrintMatricesNSProblem.h"
 #include "NonlinearSystemBase.h"
 #include "NS.h"
 #include "MooseMesh.h"
@@ -19,10 +19,10 @@
 #include "libmesh/nonlinear_implicit_system.h"
 #include <petscmat.h>
 
-registerMooseObject("NavierStokesApp", IPHDGNavierStokesProblem);
+registerMooseObject("NavierStokesApp", PrintMatricesNSProblem);
 
 InputParameters
-IPHDGNavierStokesProblem::validParams()
+PrintMatricesNSProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
   params.addRequiredParam<TagName>("mass_matrix",
@@ -39,7 +39,7 @@ IPHDGNavierStokesProblem::validParams()
   return params;
 }
 
-IPHDGNavierStokesProblem::IPHDGNavierStokesProblem(const InputParameters & parameters)
+PrintMatricesNSProblem::PrintMatricesNSProblem(const InputParameters & parameters)
   : FEProblem(parameters),
     _mass_matrix(getParam<TagName>("mass_matrix")),
     _jump_matrices(getParam<std::vector<TagName>>("jump_matrices"))
@@ -47,7 +47,7 @@ IPHDGNavierStokesProblem::IPHDGNavierStokesProblem(const InputParameters & param
 }
 
 void
-IPHDGNavierStokesProblem::onTimestepEnd()
+PrintMatricesNSProblem::onTimestepEnd()
 {
   FEProblem::onTimestepEnd();
 

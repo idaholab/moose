@@ -19,7 +19,7 @@ l = ${n}
 []
 
 [Problem]
-  type = IPHDGNavierStokesProblem
+  type = PrintMatricesNSProblem
   ignore_zeros_in_jacobian = true
   extra_tag_matrices = 'mass jump grad_div'
   mass_matrix = 'mass'
