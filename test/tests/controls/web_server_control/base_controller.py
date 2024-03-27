@@ -15,7 +15,11 @@ def base_controller(control_name, run_control):
     control.initialize()
 
     # Run the user test
-    run_control(control)
+    try:
+        run_control(control)
+    except:
+        control.kill()
+        raise
 
     # Wait for the webserver to stop listening
     control.finalize()

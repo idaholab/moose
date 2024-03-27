@@ -84,6 +84,15 @@ class MooseControl:
         # Whether or not we called initialize()
         self._initialized = False
 
+    def __del__(self):
+        self.kill()
+
+    def kill(self):
+        """Kills the underlying moose process if one is running"""
+        if self._moose_process:
+            self._moose_process.kill()
+            self._moose_process = None
+
     class Exception(Exception):
         """Basic exception for an error within the MooseControl"""
         def __init__(self, message):
