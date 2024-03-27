@@ -396,7 +396,7 @@ l = ${n}
 [Outputs]
   [out]
     type = CSV
-    show = 'symmetric'
+    show = 'symmetric equiv'
     execute_on = 'timestep_end'
   []
 []
@@ -410,5 +410,10 @@ l = ${n}
     type = ElementIntegralVariablePostprocessor
     variable = pressure
     execute_on = linear
+  []
+  [equiv]
+    type = AreMatricesTheSame
+    mat1 = 'vel-all-p.mat'
+    mat2 = 'gold/vel-all-p.mat'
   []
 []

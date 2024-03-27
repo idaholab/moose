@@ -116,6 +116,7 @@ PrintMatricesNSProblem::onTimestepEnd()
     _console << std::endl << "Printing the '" << matrix_name << "' matrix" << std::endl;
     PetscMatrix<Number> product(product_mat, _communicator);
     product.print();
+    product.print_matlab(matrix_name + std::string(".mat"));
     ierr = MatDestroy(&product_mat);
     LIBMESH_CHKERR(ierr);
   };
@@ -132,5 +133,6 @@ PrintMatricesNSProblem::onTimestepEnd()
     auto & system_size_jump_matrix = nl.getMatrix(jump_matrix_tag_id);
     system_size_jump_matrix.create_submatrix(jump_mat, vel_indices, vel_indices);
     jump_mat.print();
+    jump_mat.print_matlab(jump_name + std::string(".mat"));
   }
 }
