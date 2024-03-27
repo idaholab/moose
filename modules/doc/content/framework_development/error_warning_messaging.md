@@ -17,9 +17,12 @@ messages:
   are promoted to errors.
 - `mooseInfo(args)`: Emits an informational message formed by concatenating `args`.
   Example:
+- `mooseInfoRepeated(args)`: The same as `mooseInfo(args)` but only prints a message
+  once, even if called multiple times.
 
 !alert note title=Warnings in repeating sections
-For warnings in sections of the code that are often executed, it is better practice to leverage the SolutionInvalidityInterface, which will only output the warning once but keep track of the occurence of the problem. It can also force the solver to reject a converged solution that still presents the warning/invalid condition.
+For warnings in sections of the code that are often executed, it is recommended to leverage the [SolutionInvalidityInterface.md], which will only output the warning once but keep track of the occurence of the problem. It can also force the solver to reject a converged solution that still presents the warning/invalid condition.
+
 ## Documented Errors id=documented_errors
 
 The `mooseDocumentedError(repo_name, issue_num, args)` function is used for errors that are tied to
