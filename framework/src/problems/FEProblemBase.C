@@ -8101,6 +8101,11 @@ FEProblemBase::addOutput(const std::string & object_type,
   const InputParameters * common = output_warehouse.getCommonParameters();
   if (common)
     parameters.applyParameters(*common, exclude);
+  if (common && std::find(exclude.begin(), exclude.end(), "execute_on") != exclude.end() &&
+      common->isParamSetByUser("execute_on"))
+    mooseInfoRepeated(
+        "'execute_on' parameter specified in [Outputs] block is ignored for object '" +
+        object_name + "'.\nDefine this object in its own sub-block of [Outputs].");
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")
