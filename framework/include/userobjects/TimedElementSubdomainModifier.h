@@ -1,0 +1,61 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "ElementSubdomainModifier.h"
+#include "DelimitedFileReaderOfString.h"
+
+class TimedElementSubdomainModifier : public ElementSubdomainModifier
+{
+public:
+  static InputParameters validParams();
+
+  TimedElementSubdomainModifier(const InputParameters & parameters);
+
+  virtual void initialize();
+
+protected:
+  virtual SubdomainID computeSubdomainID() override;
+
+  virtual std::vector<Real> onGetTimes();
+  virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive);
+
+  /// storage for the times including their original index.
+  struct timeIndexPair
+  {
+    Real time;
+    std::size_t index;
+
+    bool operator<(const timeIndexPair & a) const
+    {
+      if (time == a.time)
+      {
+        return index < a.index;
+      }
+      else
+      {
+        return time < a.time;
+      };
+    }
+  };
+
+  /// Times and subdomain changes to make
+  std::vector<timeIndexPair> _times_and_indices;
+
+private:
+  /// Local variable for the current step (to be able to determine incrementation)
+  int _current_step;
+
+  /// Local variable for the end of the timespan to apply changes of the subdomain
+  Real _current_t;
+
+  /// Local variable for the start of the timespan to apply changes of the subdomain
+  Real _last_t;
+};
