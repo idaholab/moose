@@ -1,7 +1,7 @@
 #include "json.h"
 #include <cstdio>
-#include "jsonValue.h"
-#include "parse.h"
+#include "minijson/jsonValue.h"
+#include "minijson/parse.h"
 
 namespace miniJson
 {

@@ -1,5 +1,5 @@
-#include "jsonValue.h"
-#include "jsonException.h"
+#include "minijson/jsonValue.h"
+#include "minijson/jsonException.h"
 
 namespace miniJson
 {
