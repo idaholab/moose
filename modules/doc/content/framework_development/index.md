@@ -56,6 +56,8 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Utils](utils/index.md) - Basic utilities used throughout the framework
 
+[framework_development/error_warning_messaging.md] - How to emit error, warning, and informational messages
+
 [System Integrity Checking](sanity_checking.md) - Parsing and system integrity checks
 
 ## MOOSE Internal Systems

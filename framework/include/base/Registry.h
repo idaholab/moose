@@ -79,6 +79,8 @@
 
 #define registerDataFilePath() Registry::addDataFilePath(__FILE__)
 
+#define registerRepository(repo_name, repo_url) Registry::addRepository(repo_name, repo_url);
+
 class Factory;
 class ActionFactory;
 class MooseObject;
@@ -200,6 +202,9 @@ public:
   /// register search paths for built-in data files
   static void addDataFilePath(const std::string & path);
 
+  /// register a repository
+  static void addRepository(const std::string & repo_name, const std::string & repo_url);
+
   /// Returns a per-label keyed map of all MooseObjects in the registry.
   static const std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> & allObjects()
   {
@@ -227,6 +232,9 @@ public:
     return getRegistry()._data_file_paths;
   }
 
+  /// Returns the repository URL associated with \p repo_name
+  static const std::string & getRepositoryURL(const std::string & repo_name);
+
   /// returns the name() for a registered class
   template <typename T>
   static std::string getRegisteredName();
@@ -247,6 +255,8 @@ private:
   std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> _per_label_actions;
   std::set<std::string> _known_labels;
   std::vector<std::string> _data_file_paths;
+  /// Repository name -> repository URL; used for mooseDocumentedError
+  std::map<std::string, std::string> _repos;
   std::map<std::string, std::string> _type_to_classname;
 };
 

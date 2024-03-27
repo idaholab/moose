@@ -267,6 +267,21 @@ mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args 
  * @}
  */
 
+/**
+ * Formats a documented error. A documented error is an error that has
+ * an issue associated with it.
+ *
+ * The repository name \p repo_name links a named repository to a URL
+ * and should be registered at the application level with registerRepository().
+ * See Moose.C for an example of the "moose" repository registration.
+ *
+ * @param repo_name The repository name where the issue resides
+ * @param issue_num The number of the issue
+ * @param msg The specific error message
+ */
+std::string formatMooseDocumentedError(const std::string & repo_name,
+                                       const unsigned int issue_num,
+                                       const std::string & msg);
 } // namespace internal
 
 /**
@@ -286,6 +301,28 @@ mooseError(Args &&... args)
   std::ostringstream oss;
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
   moose::internal::mooseErrorRaw(oss.str());
+}
+
+/**
+ * Emit a documented error message with the given stringified, concatenated args
+ * and terminate the application.  Inside static functions, you will need to
+ * explicitly scope your mooseError call - i.e. do "::mooseError(arg1, ...);".
+ *
+ * Here, a documented error message is one with an associated issue. See
+ * formatMooseDocumentedError for more information.
+ *
+ * @param repo_name The repository name where the issue resides
+ * @param issue_num The number of the issue
+ * @param args The error message to stringify
+ **/
+template <typename... Args>
+[[noreturn]] void
+mooseDocumentedError(const std::string & repo_name, const unsigned int issue_num, Args &&... args)
+{
+  std::ostringstream oss;
+  moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+  moose::internal::mooseErrorRaw(
+      moose::internal::formatMooseDocumentedError(repo_name, issue_num, oss.str()));
 }
 
 /// Emit a warning message with the given stringified, concatenated args.

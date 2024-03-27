@@ -45,6 +45,30 @@ public:
   }
 
   /**
+   * Emits a documented error with object name and type.
+   *
+   * Documented errors are errors that have an issue associated with them.
+   *
+   * The repository name \p repo_name links a named repository to a URL
+   * and should be registered at the application level with registerRepository().
+   * See Moose.C for an example of the "moose" repository registration.
+   *
+   * @param repo_name The repository name where the issue resides
+   * @param issue_num The number of the issue
+   * @param args The error message to be combined
+   */
+  template <typename... Args>
+  [[noreturn]] void mooseDocumentedError(const std::string & repo_name,
+                                         const unsigned int issue_num,
+                                         Args &&... args) const
+  {
+    std::ostringstream oss;
+    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+    const auto msg = moose::internal::formatMooseDocumentedError(repo_name, issue_num, oss.str());
+    _moose_base.callMooseError(msg, /* with_prefix = */ true);
+  }
+
+  /**
    * Emits a warning prefixed with object name and type.
    */
   template <typename... Args>

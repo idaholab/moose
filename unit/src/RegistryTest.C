@@ -28,3 +28,49 @@ TEST(RegistryTest, getClassName)
   // This tests the lookup of an action class name
   EXPECT_EQ(Registry::getClassName<CheckOutputAction>(), "CheckOutputAction");
 }
+
+TEST(RegistryTest, repositoryURL)
+{
+  const std::string repo_name = "bar";
+  const std::string repo_url = "github.com/foo/bar";
+
+  // not registered
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::getRepositoryURL(repo_name);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Registry::getRepositoryURL(): The repository '" + repo_name +
+                        "' is not registered.");
+          throw;
+        }
+      },
+      std::exception);
+
+  // register it
+  Registry::addRepository(repo_name, repo_url);
+  EXPECT_EQ(Registry::getRepositoryURL(repo_name), repo_url);
+
+  // re-register, different URL
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::addRepository(repo_name, "badurl");
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Registry::registerRepository(): The repository '" + repo_name +
+                        "' is already registered "
+                        "with a different URL '" +
+                        repo_url + "'.");
+          throw;
+        }
+      },
+      std::exception);
+}
