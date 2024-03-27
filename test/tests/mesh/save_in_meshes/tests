@@ -53,11 +53,11 @@
       detail = 'the requested saved mesh does not exist, and when'
     []
 
-    [save_in_meshes_retreived_twice]
+    [save_in_meshes_retrieved_twice]
       type = 'RunException'
       input = 'save_in_meshes_with_D.i'
       cli_args ="UserObjects/test/mesh_unique='left_block'"
-      expect_err = "While getting the saved mesh generator 'left_block', said mesh has already been retreived"
+      expect_err = "While getting the saved mesh generator 'left_block', said mesh has already been retrieved"
 
       detail = 'the requested saved mesh has already been retrieved.'
     []

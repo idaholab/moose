@@ -30,14 +30,24 @@ AllSideSetsByNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  // This is the expected behavior of this sideset generator
+  // This is the expected behavior of this sideset generator
+  params.setParameters("include_only_external_sides", true);
+  params.suppressParameter<bool>("include_only_external_sides");
+
+  // The normals are found from the actual orientation of sidesets, not user-specified
+  // The normals are found from the actual orientation of sidesets, not user-specified
+  params.suppressParameter<bool>("fixed_normal");
+  params.suppressParameter<Point>("normal");
+  params.suppressParameter<Real>("normal_tol");
+  params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
+
   params.addClassDescription("Adds sidesets to the entire mesh based on unique normals.");
   return params;
 }
 
 AllSideSetsByNormalsGenerator::AllSideSetsByNormalsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _input(getMesh("input")),
     _boundary_to_normal_map(
         declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals"))
 {
@@ -59,11 +69,8 @@ AllSideSetsByNormalsGenerator::generate()
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
   for (const auto & elem : mesh->element_ptr_range())
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : make_range(elem->n_sides()))
     {
-      if (elem->neighbor_ptr(side))
-        continue;
-
       const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
 
@@ -71,7 +78,7 @@ AllSideSetsByNormalsGenerator::generate()
         // See if we've seen this normal before (linear search)
         const std::map<BoundaryID, RealVectorValue>::value_type * item = nullptr;
         for (const auto & id_pair : _boundary_to_normal_map)
-          if (std::abs(1.0 - id_pair.second * normals[0]) < 1e-5)
+          if (normalsWithinTol(id_pair.second, normals[0], 1e-5))
           {
             item = &id_pair;
             break;

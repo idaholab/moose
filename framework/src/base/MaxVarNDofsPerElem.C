@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MaxVarNDofsPerElem.h"
-#include "NonlinearSystem.h"
+#include "SolverSystem.h"
 #include "Problem.h"
 #include "Damper.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
-MaxVarNDofsPerElem::MaxVarNDofsPerElem(FEProblemBase & feproblem, NonlinearSystemBase & sys)
+MaxVarNDofsPerElem::MaxVarNDofsPerElem(FEProblemBase & feproblem, SolverSystem & sys)
   : ThreadedElementLoop<ConstElemRange>(feproblem),
     _system(sys),
     _max(0),

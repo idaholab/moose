@@ -20,8 +20,8 @@
     type = ParsedGenerateSideset
     combinatorial_geometry = '2 > 1'
     new_sideset_name = new_s
-    included_subdomain_ids = 1
-    included_neighbor_ids = 2
+    included_subdomains = 1
+    included_neighbors = 2
     input = extrude
   []
 []

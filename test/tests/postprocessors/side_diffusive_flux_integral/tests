@@ -43,4 +43,13 @@
     design = 'GenericVectorFunctorMaterial.md'
     issues = '#16809'
   []
+  [linear_fv_var]
+    type = 'Exodiff'
+    input = side_diffusive_flux_integral_linear_fv.i
+    exodiff = side_diffusive_flux_integral_linear_fv_out.e
+    requirement = 'The system shall be able to postprocess results from a linear finite volume solver and produce accurate aggregate fluxes and values and auxiliary fields.'
+    issues = '#25722'
+    design = 'LinearFVDiffusion.md'
+    max_threads = 1 # see libmesh issue #3808
+  []
 []

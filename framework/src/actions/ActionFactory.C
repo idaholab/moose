@@ -49,10 +49,22 @@ ActionFactory::create(const std::string & action,
       action + incoming_parser_params.get<std::string>("task") + full_action_name;
   // Create the actual parameters object that the object will reference
   InputParameters & action_params = _app.getInputParameterWarehouse().addInputParameters(
-      unique_action_name, incoming_parser_params);
+      unique_action_name, incoming_parser_params, 0, {});
 
-  // Check to make sure that all required parameters are supplied
-  action_params.checkParams(action_name);
+  if (!action_params.getHitNode())
+  {
+    // If we currently are in an action, that means that we're creating an
+    // action from within an action. Associate the action creating this one
+    // with the new action's parameters so that errors can be associated with it
+    if (const auto hit_node = _app.getCurrentActionHitNode())
+      action_params.setHitNode(*hit_node, {});
+    // Don't have one, so just use the root
+    else
+      action_params.setHitNode(*_app.parser().root(), {});
+  }
+
+  // Check and finalize the parameters
+  action_params.finalize(action_name);
 
   iters = _name_to_build_info.equal_range(action);
   BuildInfo * build_info = &(iters.first->second);
@@ -61,10 +73,14 @@ ActionFactory::create(const std::string & action,
         std::string("Unable to find buildable Action from supplied InputParameters Object for ") +
         action_name);
 
-  // Add the name to the parameters and create the object
+  // Add the name to the parameters
   action_params.set<std::string>("_action_name") = action_name;
   action_params.set<std::string>("_unique_action_name") = unique_action_name;
+
+  // Create the object
+  _currently_constructing.push_back(&action_params);
   std::shared_ptr<Action> action_obj = build_info->_obj_pointer->buildAction(action_params);
+  _currently_constructing.pop_back();
 
   if (action_params.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
@@ -150,6 +166,13 @@ ActionFactory::getTasksByAction(const std::string & action) const
 
   return tasks;
 }
+
+const InputParameters *
+ActionFactory::currentlyConstructing() const
+{
+  return _currently_constructing.size() ? _currently_constructing.back() : nullptr;
+}
+
 FileLineInfo
 ActionFactory::getLineInfo(const std::string & name, const std::string & task) const
 {

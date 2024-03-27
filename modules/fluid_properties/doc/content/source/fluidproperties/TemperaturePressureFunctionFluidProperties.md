@@ -41,7 +41,7 @@ In this example, temperature and pressure dependent density, dynamic viscosity a
 three `ParsedFunctions`. The functions are specified with the `x` and `y` coordinates, and are evaluated with respectively the temperature and
 pressure variables.
 
-!listing modules/fluid_properties/test/tests/temperature_pressure_function/exact.i block=Functions FluidProperties
+!listing modules/fluid_properties/test/tests/temperature_pressure_function/example.i block=Functions FluidProperties
 
 !syntax parameters /FluidProperties/TemperaturePressureFunctionFluidProperties
 

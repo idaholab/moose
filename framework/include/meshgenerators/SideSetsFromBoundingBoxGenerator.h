@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "SideSetsGeneratorBase.h"
 #include "MooseEnum.h"
 #include "libmesh/bounding_box.h"
 
 /**
  * MeshGenerator for defining sidesets inside or outside of a bounding box
  */
-class SideSetsFromBoundingBoxGenerator : public MeshGenerator
+class SideSetsFromBoundingBoxGenerator : public SideSetsGeneratorBase
 {
 public:
   static InputParameters validParams();
@@ -26,8 +26,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  std::unique_ptr<MeshBase> & _input;
-
   /// ID location (inside of outside of box)
   MooseEnum _location;
 

@@ -20,6 +20,8 @@ In order to adapt the external boundary to match input meshes (typically generat
 
 The [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/square_size) provided here must be consistent with the [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/square_size) values of all the [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/meshes_to_adapt_to) generators.
 
+The mesh generator can generate meshes with either linear or quadratic elements, which is controlled by the [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/tri_element_type) and [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/quad_element_type) parameters. The [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/meshes_to_adapt_to) must have the consistent element types for compatibility.
+
 One major application of this object is to generate meshes for control drums. In that case, [!param](/Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator/is_control_drum) can be set as true so that corresponding `MeshMetaData` can be generated for future use with control drum related objects.
 
 ## Example Syntax

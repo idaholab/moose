@@ -172,7 +172,7 @@ CommonOutputAction::act()
 // Create the actions for the short-cut methods
 #ifdef LIBMESH_HAVE_EXODUS_API
     if (getParam<bool>("exodus"))
-      create("Exodus");
+      create("Exodus", "exodus");
 #else
     if (getParam<bool>("exodus"))
       mooseWarning("Exodus output requested but not enabled through libMesh");
@@ -180,7 +180,7 @@ CommonOutputAction::act()
 
 #ifdef LIBMESH_HAVE_NEMESIS_API
     if (getParam<bool>("nemesis"))
-      create("Nemesis");
+      create("Nemesis", "nemesis");
 #else
     if (getParam<bool>("nemesis"))
       mooseWarning("Nemesis output requested but not enabled through libMesh");
@@ -188,59 +188,91 @@ CommonOutputAction::act()
 
     // Only create a Console if screen output was not created
     if (getParam<bool>("console") && !hasConsole())
-      create("Console");
+      create("Console", "console");
 
     if (getParam<bool>("csv"))
-      create("CSV");
+      create("CSV", "csv");
 
     if (getParam<bool>("xml"))
-      create("XMLOutput");
+      create("XMLOutput", "xml");
 
     if (getParam<bool>("json"))
-      create("JSON");
+      create("JSON", "json");
 
 #ifdef LIBMESH_HAVE_VTK
     if (getParam<bool>("vtk"))
-      create("VTK");
+      create("VTK", "vtk");
 #else
     if (getParam<bool>("vtk"))
       mooseWarning("VTK output requested but not enabled through libMesh");
 #endif
 
     if (getParam<bool>("xda"))
-      create("XDA");
+      create("XDA", "xda");
 
     if (getParam<bool>("xdr"))
-      create("XDR");
+      create("XDR", "xdr");
 
     if (getParam<bool>("checkpoint"))
-      create("Checkpoint");
+      create("Checkpoint", "checkpoint");
 
     if (getParam<bool>("gmv"))
-      create("GMV");
+      create("GMV", "gmv");
 
     if (getParam<bool>("tecplot"))
-      create("Tecplot");
+      create("Tecplot", "tecplot");
 
     if (getParam<bool>("gnuplot"))
-      create("Gnuplot");
+      create("Gnuplot", "gnuplot");
 
     if (getParam<bool>("solution_history"))
-      create("SolutionHistory");
+      create("SolutionHistory", "solution_history");
 
     if (getParam<bool>("progress"))
-      create("Progress");
+      create("Progress", "progress");
 
     if (getParam<bool>("dofmap"))
-      create("DOFMap");
+      create("DOFMap", "dofmap");
 
-    if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
-      create("ControlOutput");
+    {
+      std::optional<std::string> from_param_name;
+      const InputParameters * from_params = nullptr;
+      if (getParam<bool>("controls"))
+      {
+        from_param_name = "controls";
+        from_params = &parameters();
+      }
+      else if (_app.getParam<bool>("show_controls"))
+      {
+        from_param_name = "show_controls";
+        from_params = &_app.parameters();
+      }
+      if (from_param_name)
+        create("ControlOutput", *from_param_name, from_params);
+    }
 
-    if (!_app.getParam<bool>("no_timing") &&
-        (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log") ||
-         _app.getParam<bool>("timing")))
-      create("PerfGraphOutput");
+    if (!_app.getParam<bool>("no_timing"))
+    {
+      std::optional<std::string> from_param_name;
+      const InputParameters * from_params = nullptr;
+      if (getParam<bool>("perf_graph"))
+      {
+        from_param_name = "perf_graph";
+        from_params = &parameters();
+      }
+      else if (getParam<bool>("print_perf_log"))
+      {
+        from_param_name = "print_perf_log";
+        from_params = &parameters();
+      }
+      else if (_app.getParam<bool>("timing"))
+      {
+        from_param_name = "show_controls";
+        from_params = &_app.parameters();
+      }
+      if (from_param_name)
+        create("PerfGraphOutput", *from_param_name, from_params);
+    }
 
     if (!_app.getParam<bool>("no_timing") && getParam<bool>("perf_graph_live"))
       perfGraph().setLivePrintActive(true);
@@ -271,17 +303,30 @@ CommonOutputAction::act()
 }
 
 void
-CommonOutputAction::create(std::string object_type)
+CommonOutputAction::create(std::string object_type,
+                           const std::optional<std::string> & param_name,
+                           const InputParameters * const from_params /* = nullptr */)
 {
+  // Create our copy of the parameters
+  auto params = _action_params;
+
+  // Associate all action output object errors with param_name
+  // If from_params is specified, it means to associate it with parameters other than parameters()
+  if (param_name)
+  {
+    const InputParameters & associated_params = from_params ? *from_params : parameters();
+    associateWithParameter(associated_params, *param_name, params);
+  }
+
   // Set the 'type =' parameters for the desired object
-  _action_params.set<std::string>("type") = object_type;
+  params.set<std::string>("type") = object_type;
 
   // Create the complete object name (uses lower case of type)
   std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
 
   // Create the action
   std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create("AddOutputAction", object_type, _action_params));
+      _action_factory.create("AddOutputAction", object_type, params));
 
   // Set flag indicating that the object to be created was created with short-cut syntax
   action->getObjectParams().set<bool>("_built_by_moose") = true;

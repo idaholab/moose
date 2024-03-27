@@ -55,7 +55,7 @@ SetupResidualDebugAction::act()
     auto family = AddVariableAction::getNonlinearVariableFamilies();
 
     MooseVariableFEBase & var = _problem->getVariable(
-        0, var_name, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD);
+        0, var_name, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD);
     auto fe_type = var.feType();
     order = Utility::enum_to_string<Order>(fe_type.order);
     family = Utility::enum_to_string(fe_type.family);

@@ -11,6 +11,7 @@
 #include "MooseObject.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
+#include "Factory.h"
 
 class FEProblem;
 class FEProblemBase;
@@ -47,11 +48,15 @@ MooseObject::validParams()
 MooseObject::MooseObject(const InputParameters & parameters)
   : MooseBase(parameters.get<std::string>("_type"),
               parameters.get<std::string>("_object_name"),
-              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    MooseBaseParameterInterface(parameters, this),
-    MooseBaseErrorInterface(this),
+              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app"),
+              parameters),
+    MooseBaseParameterInterface(*this, parameters),
+    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     DataFileInterface<MooseObject>(*this),
     _enabled(getParam<bool>("enable"))
 {
+  if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)
+    mooseError(
+        "This registered object was not constructed using the Factory, which is not supported.");
 }

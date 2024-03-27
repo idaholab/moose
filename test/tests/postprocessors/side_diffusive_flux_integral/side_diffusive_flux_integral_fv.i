@@ -36,7 +36,7 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [mat_props]
     type = GenericFunctorMaterial
     prop_names = diffusivity

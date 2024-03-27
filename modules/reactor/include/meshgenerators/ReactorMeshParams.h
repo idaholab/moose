@@ -24,6 +24,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  void generateData() override{};
+
 protected:
   /// The number of dimension in the mesh
   const MooseEnum _dim;

@@ -62,6 +62,9 @@ public:
 
   virtual bool hasBlocks(SubdomainID /* id */) const override { return true; }
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 protected:
   /// Post-processor name
   const std::string & _pp_name;

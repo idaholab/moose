@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableFV.h"
+#include "MooseLinearVariableFV.h"
 #include "FVUtils.h"
 #include "SystemBase.h"
 
@@ -32,44 +33,5 @@ elemHasFaceInfo(const Elem & elem, const Elem * const neighbor)
   else
     return elem.id() < neighbor->id();
 }
-
-template <typename OutputType>
-std::tuple<const Elem *, const Elem *, bool>
-determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var)
-{
-  auto ft = fi.faceType(std::make_pair(var.number(), var.sys().number()));
-  mooseAssert(ft == FaceInfo::VarFaceNeighbors::BOTH
-                  ? var.hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
-                        var.hasBlocks(fi.neighborPtr()->subdomain_id())
-                  : true,
-              "Finite volume variable " << var.name()
-                                        << " does not exist on both sides of the face despite "
-                                           "what the FaceInfo is telling us.");
-  mooseAssert(ft == FaceInfo::VarFaceNeighbors::ELEM
-                  ? var.hasBlocks(fi.elem().subdomain_id()) &&
-                        (!fi.neighborPtr() || !var.hasBlocks(fi.neighborPtr()->subdomain_id()))
-                  : true,
-              "Finite volume variable " << var.name()
-                                        << " does not exist on or only on the elem side of the "
-                                           "face despite what the FaceInfo is telling us.");
-  mooseAssert(ft == FaceInfo::VarFaceNeighbors::NEIGHBOR
-                  ? fi.neighborPtr() && var.hasBlocks(fi.neighborPtr()->subdomain_id()) &&
-                        !var.hasBlocks(fi.elem().subdomain_id())
-                  : true,
-              "Finite volume variable " << var.name()
-                                        << " does not exist on or only on the neighbor side of the "
-                                           "face despite what the FaceInfo is telling us.");
-
-  const bool one_is_elem =
-      ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM;
-  const Elem * const elem_one = one_is_elem ? &fi.elem() : fi.neighborPtr();
-  mooseAssert(elem_one, "This elem should be non-null!");
-  const Elem * const elem_two = one_is_elem ? fi.neighborPtr() : &fi.elem();
-
-  return std::make_tuple(elem_one, elem_two, one_is_elem);
-}
-
-template std::tuple<const Elem *, const Elem *, bool>
-determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<Real> & var);
 }
 }

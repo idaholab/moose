@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#21885 #24101 #25689'
+  issues = '#21885 #24101 #25689 #26262'
   design = 'ReporterPointSource.md OptimizationReporter/index.md'
   [point_loads]
     requirement = "The system shall be able to invert for point loads using"
@@ -78,6 +78,18 @@
       # steady solve
       recover = false
       detail = 'gradient-based optimization with an automatically computed adjoint, with Tikhonov regularization, and initial conditions do not affect the converged regularized solution, or'
+    []
+    [finite_diff_view]
+      type = RunApp
+      input = main_auto_adjoint.i
+      expect_out = 'Hand-coded minus finite-difference gradient'
+      cli_args = " Executioner/petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_ls_type'"
+                 " Executioner/petsc_options_value='1 true true unit'"
+                 " Executioner/petsc_options='-tao_test_gradient_view'"
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      # steady solve
+      recover = false
+      detail = 'print finite difference gradient information to the screen when using the automatically formed adjoint.'
     []
   []
 []

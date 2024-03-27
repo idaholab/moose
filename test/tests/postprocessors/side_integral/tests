@@ -59,7 +59,7 @@
   []
 
   [functors]
-    issues = '#18086'
+    issues = '#18086 #25464'
     design = 'SideIntegralFunctorPostprocessor.md'
     requirement = 'The system shall '
     [mesh_side]
@@ -105,6 +105,12 @@
                   Postprocessors/int_s2_v2/functor_argument=qp Postprocessors/int_s2_v2/functor=v2_fe Postprocessors/int_s2_f1/functor_argument=qp Postprocessors/int_s2_m1/functor_argument=qp Postprocessors/int_s2_m2/functor_argument=qp"
 
       detail = 'support computing the integral of a functor using quadrature points instead of side faces'
+    []
+    [error_no_face_info]
+      type = RunException
+      input = 'side_integral_functor_fe.i'
+      expect_err = "The parameter 'functor_argument' was set to 'face', but the mesh contains no face info objects"
+      detail = 'report an error if face info integration is chosen to compute the integral of a functor when there is no face info in the mesh.'
     []
   []
 []

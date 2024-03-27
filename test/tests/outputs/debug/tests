@@ -200,6 +200,26 @@
       # in parallel, no guarantee block 2 is present on rank 0
       max_parallel = 1
     []
+    [linear_fv_elem_kernels]
+      type = RunApp
+      input = 'show_execution_linear_fv_elemental.i'
+      cli_args = '--color off'
+      expect_out = '\[DBG\] reaction_2 source_2'
+      detail = 'linear finite volume elemental kernels,'
+      # in parallel, no guarantee block 1 is present on rank 0
+      max_parallel = 1
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [linear_fv_flux_kernels]
+      type = RunApp
+      input = 'show_execution_linear_fv_flux.i'
+      cli_args = '--color off'
+      expect_out = '\[DBG\] (diffusion_1|diffusion_2) (diffusion_2|diffusion_1)'
+      detail = 'linear finite volume flux kernels,'
+      # in parallel, no guarantee block 1 is present on rank 0
+      max_parallel = 1
+      max_threads = 1 # see libmesh issue #3808
+    []
     # Nodal loops
     [nodal_kernel_bcs]
       type = RunApp

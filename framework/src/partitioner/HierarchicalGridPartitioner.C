@@ -65,7 +65,7 @@ HierarchicalGridPartitioner::~HierarchicalGridPartitioner() {}
 std::unique_ptr<Partitioner>
 HierarchicalGridPartitioner::clone() const
 {
-  return std::make_unique<HierarchicalGridPartitioner>(_pars);
+  return _app.getFactory().clone(*this);
 }
 
 void

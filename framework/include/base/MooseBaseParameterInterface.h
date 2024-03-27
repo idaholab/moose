@@ -9,13 +9,12 @@
 
 #pragma once
 
-// MOOSE includes
+#include "MooseBaseErrorInterface.h"
+
 #include "MooseBase.h"
 #include "InputParameters.h"
-#include "Registry.h"
 #include "MooseUtils.h"
 #include "MooseObjectParameterName.h"
-#include "MooseBaseErrorInterface.h"
 
 #include <string>
 
@@ -43,7 +42,7 @@ std::string paramErrorPrefix(const InputParameters & params, const std::string &
 class MooseBaseParameterInterface
 {
 public:
-  MooseBaseParameterInterface(const InputParameters & parameters, const MooseBase * base);
+  MooseBaseParameterInterface(const MooseBase & base, const InputParameters & parameters);
 
   virtual ~MooseBaseParameterInterface() = default;
 
@@ -53,7 +52,7 @@ public:
   MooseObjectParameterName uniqueParameterName(const std::string & parameter_name) const
   {
     return MooseObjectParameterName(
-        _pars.get<std::string>("_moose_base"), _moose_base->name(), parameter_name);
+        _pars.get<std::string>("_moose_base"), _moose_base.name(), parameter_name);
   }
 
   /**
@@ -146,11 +145,6 @@ public:
   void paramInfo(const std::string & param, Args... args) const;
 
   /**
-   * A descriptive prefix for errors for an object
-   */
-  std::string objectErrorPrefix(const std::string & error_type) const;
-
-  /**
    * Connect controllable parameter of this action with the controllable parameters of the
    * objects added by this action.
    * @param parameter Name of the controllable parameter of this action
@@ -175,7 +169,7 @@ protected:
 
 private:
   /// The MooseBase object that inherits this class
-  const MooseBase * const _moose_base;
+  const MooseBase & _moose_base;
 
   template <typename... Args>
   std::string paramErrorMsg(const std::string & param, Args... args) const
@@ -184,7 +178,7 @@ private:
 
     // With no input location information, append object info (name + type)
     const std::string object_prefix =
-        _pars.inputLocation(param).empty() ? objectErrorPrefix("parameter error") : "";
+        _pars.inputLocation(param).empty() ? _moose_base.errorPrefix("parameter error") : "";
 
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
@@ -209,7 +203,7 @@ template <typename T>
 const T &
 MooseBaseParameterInterface::getParam(const std::string & name) const
 {
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), &_moose_base);
 }
 
 template <typename T>
@@ -220,13 +214,13 @@ MooseBaseParameterInterface::getRenamedParam(const std::string & old_name,
   // this enables having a default on the new parameter but bypassing it with the old one
   // Most important: accept new parameter
   if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), &_moose_base);
   // Second most: accept old parameter
   else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0));
+    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0), &_moose_base);
   // Third most: accept default for new parameter
   else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), &_moose_base);
   // Refuse: no default, no value passed
   else if (!isParamValid(old_name) && !isParamValid(new_name))
     mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
@@ -243,8 +237,8 @@ template <typename... Args>
 MooseBaseParameterInterface::paramError(const std::string & param, Args... args) const
 {
   Moose::show_trace = false;
-  std::string msg = paramErrorMsg(param, std::forward<Args>(args)...);
-  callMooseErrorRaw(msg, &_moose_base->getMooseApp());
+  _moose_base.callMooseError(paramErrorMsg(param, std::forward<Args>(args)...),
+                             /* with_prefix = */ false);
   Moose::show_trace = true;
 }
 

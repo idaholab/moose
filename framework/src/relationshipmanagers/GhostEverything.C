@@ -61,3 +61,9 @@ GhostEverything::operator>=(const RelationshipManager & other) const
 {
   return dynamic_cast<const GhostEverything *>(&other);
 }
+
+std::unique_ptr<GhostingFunctor>
+GhostEverything::clone() const
+{
+  return _app.getFactory().copyConstruct(*this);
+}

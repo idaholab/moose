@@ -52,7 +52,7 @@
       type = RunException
       input = sideset_between_subdomains.i
       cli_args = "Mesh/central_boundary/primary_block='missing'"
-      expect_err = "The block 'missing' was not found within the mesh"
+      expect_err = "The block 'missing' was not found in the mesh"
       detail = 'only when the primary block exists in the mesh.'
     []
 
@@ -60,7 +60,7 @@
       type = RunException
       input = sideset_between_subdomains.i
       cli_args = "Mesh/central_boundary/paired_block='missing'"
-      expect_err = "The block 'missing' was not found within the mesh"
+      expect_err = "The block 'missing' was not found in the mesh"
       detail = 'only when the paired block exists in the mesh.'
     []
   []

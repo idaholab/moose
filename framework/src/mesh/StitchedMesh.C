@@ -11,6 +11,8 @@
 #include "Parser.h"
 #include "InputParameters.h"
 
+#include "MooseApp.h"
+
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
@@ -74,7 +76,7 @@ StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 StitchedMesh::safeClone() const
 {
-  return std::make_unique<StitchedMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

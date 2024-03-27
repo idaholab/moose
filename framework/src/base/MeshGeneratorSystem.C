@@ -614,7 +614,7 @@ MeshGeneratorSystem::getSavedMesh(const std::string & name)
   if (!mesh_unique_ptr)
     mooseError("While getting the saved mesh generator '",
                name,
-               "', said mesh has already been retreived");
+               "', said mesh has already been retrieved");
 
   return std::move(mesh_unique_ptr);
 }

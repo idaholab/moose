@@ -10,6 +10,7 @@
 #include "MeshGeneratorMesh.h"
 
 #include "MeshGeneratorSystem.h"
+#include "MooseApp.h"
 
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
@@ -37,7 +38,7 @@ MeshGeneratorMesh::MeshGeneratorMesh(const InputParameters & parameters) : Moose
 std::unique_ptr<MooseMesh>
 MeshGeneratorMesh::safeClone() const
 {
-  return std::make_unique<MeshGeneratorMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

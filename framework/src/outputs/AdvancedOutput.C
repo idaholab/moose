@@ -424,6 +424,7 @@ AdvancedOutput::initAvailableLists()
     {
       MooseVariableFEBase & var = _problem_ptr->getVariable(
           0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+
       const FEType type = var.feType();
       for (unsigned int i = 0; i < var.count(); ++i)
       {

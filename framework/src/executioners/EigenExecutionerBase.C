@@ -247,7 +247,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _problem.getAuxiliarySystem().copyOldSolutions();
     if (_problem.getDisplacedProblem() != NULL)
     {
-      _problem.getDisplacedProblem()->nlSys(_eigen_sys.number()).copyOldSolutions();
+      _problem.getDisplacedProblem()->solverSys(_eigen_sys.number()).copyOldSolutions();
       _problem.getDisplacedProblem()->auxSys().copyOldSolutions();
     }
 

@@ -76,29 +76,29 @@ pressure_tag = "pressure_grad"
   [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = u_system
+    solver_sys = u_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = v_system
+    solver_sys = v_system
     two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
-    nl_sys = pressure_system
+    solver_sys = pressure_system
     initial_condition = 0.2
     two_term_boundary_expansion = false
   []
   [TKE]
     type = INSFVEnergyVariable
-    nl_sys = TKE_system
+    solver_sys = TKE_system
     initial_condition = ${k_init}
   []
   [TKED]
     type = INSFVEnergyVariable
-    nl_sys = TKED_system
+    solver_sys = TKED_system
     initial_condition = ${eps_init}
   []
 []

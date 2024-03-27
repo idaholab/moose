@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#25722'
+  design = 'MooseLinearVariableFV.md'
+
+  [test]
+    type = Exodiff
+    input = nonlinear_main.i
+    exodiff = 'nonlinear_main_out.e'
+    requirement = "The system shall support the direct copy transfer of linear finite volume variables."
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

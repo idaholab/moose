@@ -626,7 +626,7 @@ enum AuxGroup
  */
 enum VarKindType
 {
-  VAR_NONLINEAR,
+  VAR_SOLVER,
   VAR_AUXILIARY,
   VAR_ANY
 };
@@ -955,14 +955,21 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
 
 // Instantiate new Types
 
-/// This type is for expected (i.e. input) file names or paths that your simulation needs.  If
-/// relative paths are assigned to this type, they are treated/modified to be relative to the
-/// location of the simulation's main input file's directory.  It can be used to trigger open file
-/// dialogs in the GUI.
+/// This type is for expected (i.e. input) file names or paths that your simulation needs.
+/// If relative types are assigned to this type, they are replaced with an absolute path
+/// that is relative to the context of the parameter (usually the input file).
 DerivativeStringClass(FileName);
 
-/// This type is for expected filenames where the extension is unwanted, it can be used to trigger open file dialogs in the GUI
+/// Similar to FileName but without an extension
 DerivativeStringClass(FileNameNoExtension);
+
+/// This type is for expected filenames that should be relative and will not have their
+/// values set to absolute paths like FileName
+DerivativeStringClass(RelativeFileName);
+
+/// This type is for files used in the DataFileInterface, which enables searching of files
+/// within the registered data directory
+DerivativeStringClass(DataFileName);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
@@ -973,10 +980,16 @@ DerivativeStringClass(OutFileBase);
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
 DerivativeStringClass(NonlinearVariableName);
 
+/// This type is used for objects that expect linear variable names (i.e. LinearFVKernels, LinearFVBCs)
+DerivativeStringClass(LinearVariableName);
+
+/// This type is used for objects that expect linear or nonlinear solver variable names
+DerivativeStringClass(SolverVariableName);
+
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
 DerivativeStringClass(AuxVariableName);
 
-/// This type is used for objects that expect either Nonlinear or Auxiliary Variables such as postprocessors
+/// This type is used for objects that expect either Solver or Auxiliary Variables such as postprocessors
 DerivativeStringClass(VariableName);
 
 /// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
@@ -1056,6 +1069,12 @@ DerivativeStringClass(ParsedFunctionExpression);
 
 /// System name support of multiple nonlinear systems on the same mesh
 DerivativeStringClass(NonlinearSystemName);
+
+/// System name support of multiple linear systems on the same mesh
+DerivativeStringClass(LinearSystemName);
+
+/// Name of a system which either be linear or nonlinear
+DerivativeStringClass(SolverSystemName);
 
 /// Command line argument, specialized to handle quotes in vector arguments
 DerivativeStringClass(CLIArgString);

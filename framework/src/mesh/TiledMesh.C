@@ -10,6 +10,7 @@
 #include "TiledMesh.h"
 #include "Parser.h"
 #include "InputParameters.h"
+#include "MooseApp.h"
 
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
@@ -79,7 +80,7 @@ TiledMesh::TiledMesh(const TiledMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 TiledMesh::safeClone() const
 {
-  return std::make_unique<TiledMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 std::string

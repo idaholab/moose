@@ -150,7 +150,7 @@
 
 [Variables]
   [u_adjoint]
-    nl_sys = adjoint
+    solver_sys = adjoint
     outputs = none
   []
 []

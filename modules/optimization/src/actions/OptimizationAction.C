@@ -47,6 +47,9 @@ OptimizationAction::act()
     InputParameters action_params = _action_factory.getValidParams("SetupMeshAction");
     action_params.set<std::string>("type") = "GeneratedMesh";
 
+    // Associate errors with "solve_type"
+    associateWithParameter("auto_create_mesh", action_params);
+
     // Create The Action
     auto action = std::static_pointer_cast<MooseObjectAction>(
         _action_factory.create("SetupMeshAction", "Mesh", action_params));
@@ -66,6 +69,9 @@ OptimizationAction::act()
   {
     // Build the Action parameters
     InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
+
+    // Associate errors with "solve_type"
+    associateWithParameter("auto_create_problem", action_params);
 
     // Create the action
     auto action = std::static_pointer_cast<MooseObjectAction>(

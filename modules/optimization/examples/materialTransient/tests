@@ -51,7 +51,7 @@
       type = Exodiff
       input = optimize_auto_adjoint.i
       cli_args = 'Outputs/file_base=optimize_grad_out
-                  forward:Variables/u/nl_sys=forward
+                  forward:Variables/u/solver_sys=forward
                   forward:Executioner/forward_system=forward
                   forward:Problem/nl_sys_names=\'forward adjoint\''
       exodiff = optimize_grad_out_forward0.e

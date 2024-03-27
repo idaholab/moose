@@ -33,29 +33,32 @@ SideSetsFromNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription(
       "Adds a new named sideset to the mesh for all faces matching the specified normal.");
-  params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
-                                                     "The names of the boundaries to create");
   params.addRequiredParam<std::vector<Point>>(
       "normals", "A list of normals for which to start painting sidesets");
-  params.addParam<Real>("tolerance", 1e-5, "Tolerance for comparing the face nornmal");
+  params.addDeprecatedParam<Real>("tolerance",
+                                  "Tolerance for comparing the face normal",
+                                  "Deprecated, use 'normal_tol' instead");
+  params.deprecateParam("tolerance", "normal_tol", "4/01/2025");
+
+  // We are using 'normals' instead
+  params.suppressParameter<Point>("normal");
+
+  // It doesn't make sense to allow internal sides for this side set generator.
+  params.setParameters("include_only_external_sides", true);
+  params.suppressParameter<bool>("include_only_external_sides");
 
   return params;
 }
 
 SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    _input(getMesh("input")),
     _normals(getParam<std::vector<Point>>("normals")),
     _boundary_to_normal_map(
-        declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals")),
-    _tolerance(getParam<Real>("tolerance"))
+        declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals"))
 {
   // Get the BoundaryIDs from the mesh
-  _boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
-
   if (_normals.size() != _boundary_names.size())
     mooseError("normal list and boundary list are not the same length");
 
@@ -66,6 +69,8 @@ SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters
       mooseError("Normal is zero");
     normal /= normal.norm();
   }
+
+  _using_normal = true;
 }
 
 std::unique_ptr<MeshBase>
@@ -86,17 +91,18 @@ SideSetsFromNormalsGenerator::generate()
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
   for (const auto & elem : mesh->element_ptr_range())
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : make_range(elem->n_sides()))
     {
       if (elem->neighbor_ptr(side))
         continue;
 
-      const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
+      // We'll just use the normal of the first qp
+      const Point & face_normal = _fe_face->get_normals()[0];
 
-      for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+      for (const auto i : make_range(boundary_ids.size()))
       {
-        if (std::abs(1.0 - _normals[i] * normals[0]) < _tolerance)
+        if (normalsWithinTol(_normals[i], face_normal, _normal_tol))
           flood(elem, _normals[i], boundary_ids[i], *mesh);
       }
     }
@@ -104,7 +110,7 @@ SideSetsFromNormalsGenerator::generate()
   finalize();
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+  for (const auto i : make_range(boundary_ids.size()))
   {
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
     _boundary_to_normal_map[boundary_ids[i]] = _normals[i];

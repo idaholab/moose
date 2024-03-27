@@ -38,6 +38,9 @@ public:
 
   bool hasBlocks(SubdomainID) const override { return true; }
 
+  bool supportsFaceArg() const override { return true; }
+  bool supportsElemSideQpArg() const override { return true; }
+
 private:
   ValueType evaluate(const ElemArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const FaceArg &, const StateArg &) const override final { return 0; }

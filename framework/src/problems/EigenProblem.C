@@ -81,11 +81,12 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     nl = std::make_shared<NonlinearEigenSystem>(*this, sys_name);
     _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
     _current_nl_sys = nl.get();
+    _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(nl);
   }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
-  newAssemblyArray(_nl);
+  newAssemblyArray(_solver_systems);
 
   FEProblemBase::initNullSpaceVectors(parameters, _nl);
 

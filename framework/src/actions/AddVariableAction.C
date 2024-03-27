@@ -175,6 +175,9 @@ AddVariableAction::createInitialConditionAction()
   InputParameters action_params = _action_factory.getValidParams("AddOutputAction");
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
+  // Associate all action and initial condition errors with "initial_condition"
+  associateWithParameter("initial_condition", action_params);
+
   bool is_vector = (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE ||
                     _fe_type.family == MONOMIAL_VEC || _fe_type.family == RAVIART_THOMAS);
 

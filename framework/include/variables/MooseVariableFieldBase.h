@@ -119,6 +119,12 @@ public:
   bool activeOnSubdomains(const std::set<SubdomainID> & subdomains) const;
 
   /**
+   * Check if this variable needs a raw vector of gradients at dof-values.
+   * This is mainly used for finite volume variables.
+   */
+  virtual bool needsGradientVectorStorage() const { return false; }
+
+  /**
    * Prepare the initial condition
    */
   virtual void prepareIC() = 0;

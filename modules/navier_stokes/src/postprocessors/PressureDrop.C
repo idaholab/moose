@@ -52,6 +52,11 @@ PressureDrop::PressureDrop(const InputParameters & parameters)
     paramError("pressure", "Pressure must be a variable");
   const auto * const pressure_var = &_subproblem.getVariable(_tid, pressure_name);
   _qp_integration = dynamic_cast<const MooseVariableFE<Real> *>(pressure_var);
+
+  checkFunctorSupportsSideIntegration<Real>("pressure", _qp_integration);
+  if (_weighting_functor)
+    checkFunctorSupportsSideIntegration<RealVectorValue>("weighting_functor", _qp_integration);
+
   if (!_qp_integration)
     Moose::FV::setInterpolationMethod(*this, _weight_interp_method, "weighting_interp_method");
 

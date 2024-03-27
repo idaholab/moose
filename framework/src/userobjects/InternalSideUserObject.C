@@ -99,9 +99,15 @@ InternalSideUserObject::getFaceInfos()
         element = neighbor;
         side = neighbor->which_neighbor_am_i(_current_elem);
       }
-      _face_infos.push_back(_mesh.faceInfo(element, side));
+      const auto fi = _mesh.faceInfo(element, side);
+      mooseAssert(fi, "Face info must not be null.");
+      _face_infos.push_back(fi);
     }
   }
   else
-    _face_infos.push_back(_mesh.faceInfo(_current_elem, _current_side));
+  {
+    const auto fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(fi, "Face info must not be null.");
+    _face_infos.push_back(fi);
+  }
 }

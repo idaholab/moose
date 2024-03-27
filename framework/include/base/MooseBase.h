@@ -11,6 +11,9 @@
 
 #include <string>
 
+class InputParameters;
+class MooseApp;
+
 #define usingMooseBaseMembers                                                                      \
   using MooseBase::getMooseApp;                                                                    \
   using MooseBase::type;                                                                           \
@@ -19,8 +22,6 @@
   using MooseBase::_type;                                                                          \
   using MooseBase::_app;                                                                           \
   using MooseBase::_name
-
-class MooseApp;
 
 /**
  * Base class for everything in MOOSE with a name and a type.
@@ -31,10 +32,10 @@ class MooseApp;
 class MooseBase
 {
 public:
-  MooseBase(const std::string & type, const std::string & name, MooseApp & app)
-    : _app(app), _type(type), _name(name)
-  {
-  }
+  MooseBase(const std::string & type,
+            const std::string & name,
+            MooseApp & app,
+            const InputParameters & params);
 
   virtual ~MooseBase() = default;
 
@@ -59,18 +60,36 @@ public:
    * Get the class's combined type and name; useful in error handling.
    * @return The type and name of this class in the form '<type()> "<name()>"'.
    */
-  std::string typeAndName() const
-  {
-    return type() + std::string(" \"") + name() + std::string("\"");
-  }
+  std::string typeAndName() const;
+
+  /**
+   * @returns A prefix to be used in errors that contains the input
+   * file location associated with this object (if any) and the
+   * name and type of the object.
+   */
+  std::string errorPrefix(const std::string & error_type) const;
+
+  /**
+   * Calls moose error with the message \p msg.
+   *
+   * Will prefix the message with the subapp name if one exists.
+   *
+   * If \p with_prefix, then add the prefix from errorPrefix()
+   * to the error.
+   */
+  [[noreturn]] void callMooseError(std::string msg, const bool with_prefix) const;
 
 protected:
   /// The MOOSE application this is associated with
   MooseApp & _app;
 
   /// The type of this class
-  const std::string & _type;
+  const std::string _type;
 
-  /// The name of this class, reference to value stored in InputParameters
-  const std::string & _name;
+  /// The name of this class
+  const std::string _name;
+
+private:
+  /// The object's parameteres
+  const InputParameters & _params;
 };

@@ -33,6 +33,7 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _show_action_dependencies(false),
     _show_actions(false),
     _show_parser(false),
+    _current_action(nullptr),
     _mesh(nullptr),
     _displaced_mesh(nullptr)
 {
@@ -366,9 +367,10 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
   // Set the current task name
   _current_task = task;
 
-  for (_act_iter = actionBlocksWithActionBegin(task); _act_iter != actionBlocksWithActionEnd(task);
-       ++_act_iter)
+  for (auto it = actionBlocksWithActionBegin(task); it != actionBlocksWithActionEnd(task); ++it)
   {
+    _current_action = *it;
+
     if (_show_actions)
     {
       MemoryUtils::Stats stats;
@@ -377,14 +379,16 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
           MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
       _console << "[DBG][ACT] "
                << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
-               << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*_act_iter)->type() << COLOR_DEFAULT
-               << ") "
-               << "NAME (" << COLOR_YELLOW << std::setw(16) << (*_act_iter)->name() << COLOR_DEFAULT
-               << ") Memory usage " << usage << "MB" << std::endl;
+               << "TYPE (" << COLOR_YELLOW << std::setw(32) << _current_action->type()
+               << COLOR_DEFAULT << ") "
+               << "NAME (" << COLOR_YELLOW << std::setw(16) << _current_action->name()
+               << COLOR_DEFAULT << ") Memory usage " << usage << "MB" << std::endl;
     }
 
-    (*_act_iter)->timedAct();
+    _current_action->timedAct();
   }
+
+  _current_action = nullptr;
 }
 
 void
@@ -445,7 +449,7 @@ ActionWarehouse::problem()
 std::string
 ActionWarehouse::getCurrentActionName() const
 {
-  return (*_act_iter)->parameters().blockFullpath();
+  return getCurrentAction()->parameters().getHitNode()->fullpath();
 }
 
 const std::string &

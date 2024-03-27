@@ -11,7 +11,7 @@
   [internal_sideset]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x<1.01 & x>0.99'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'center'
     input = 'mesh'
   []

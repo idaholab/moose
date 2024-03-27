@@ -22,6 +22,7 @@
 #include "FileLineInfo.h"
 #include "pcrecpp.h"
 #include "hit.h"
+#include "wasphit/HITInterpreter.h"
 #include "waspcore/utils.h"
 #include <algorithm>
 #include <vector>
@@ -57,17 +58,16 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
   // copy parent application parameters and modify to set up input check
-  InputParameters app_params = _moose_app.parameters();
+  InputParameters app_params = AppFactory::instance().getValidParams(_moose_app.type());
+  app_params.applyParameters(_moose_app.parameters());
   app_params.set<bool>("check_input") = true;
   app_params.set<bool>("error_unused") = true;
   app_params.set<bool>("error") = true;
-  app_params.set<bool>("error_deprecated") = true;
   app_params.set<std::string>("color") = "off";
   app_params.set<bool>("disable_perf_graph_live") = true;
   app_params.set<std::shared_ptr<Parser>>("_parser") =
       std::make_shared<Parser>(parse_file_path, document_text);
-
-  app_params.remove("language_server");
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _moose_app.commandLine();
 
   // turn output off so input check application does not affect messages
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
@@ -785,20 +785,6 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
     const std::string & option = option_and_desc.first;
     const std::string & dscrpt = option_and_desc.second;
 
-    // choose format of insertion text based on if client supports snippets
-    int text_format;
-    std::string insert_text;
-    if (client_snippet_support)
-    {
-      text_format = wasp::lsp::m_text_format_snippet;
-      insert_text = "${1:" + option + "}";
-    }
-    else
-    {
-      text_format = wasp::lsp::m_text_format_plaintext;
-      insert_text = option;
-    }
-
     // add option name, insertion range, and description to completion list
     completionItems.push_back(wasp::DataObject());
     wasp::DataObject * item = completionItems.back().to_object();
@@ -809,13 +795,13 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                                              replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             insert_text,
+                                             option,
                                              complete_kind,
                                              "",
                                              dscrpt,
                                              false,
                                              false,
-                                             text_format);
+                                             wasp::lsp::m_text_format_plaintext);
   }
 
   return pass;
@@ -1110,12 +1096,17 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
                                                int tab_size,
                                                bool /* insert_spaces */)
 {
+  // input check expanded any brace expressions in cached tree so reprocess
+  std::stringstream input_errors, input_stream(document_text);
+  wasp::DefaultHITInterpreter interpreter(input_errors);
+  interpreter.parse(input_stream);
+
   // return without adding any formatting text edits if parser root is null
-  if (!rootIsValid())
+  if (interpreter.root().is_null())
     return true;
 
   // get input root node line and column range to represent entire document
-  wasp::HITNodeView view_root = getRoot().getNodeView();
+  wasp::HITNodeView view_root = interpreter.root();
   int document_start_line = view_root.line() - 1;
   int document_start_char = view_root.column() - 1;
   int document_last_line = view_root.last_line() - 1;

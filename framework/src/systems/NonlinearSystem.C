@@ -96,8 +96,7 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
     _resid_and_jac_functor(_fe_problem),
-    _use_coloring_finite_difference(false),
-    _solution_is_invalid(false)
+    _use_coloring_finite_difference(false)
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -191,21 +190,7 @@ NonlinearSystem::solve()
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
   // determine whether solution invalid occurs in the converged solution
-  _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
-
-  // output the solution invalid summary
-  if (_solution_is_invalid)
-  {
-    // sync all solution invalid counts to rank 0 process
-    _app.solutionInvalidity().sync();
-
-    if (_fe_problem.allowInvalidSolution())
-      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
-                   "Use Problem/allow_invalid_solution=false to activate ");
-    else
-      // output the occurrence of solution invalid in a summary table
-      _app.solutionInvalidity().print(_console);
-  }
+  checkInvalidSolution();
 
   if (_use_coloring_finite_difference)
     MatFDColoringDestroy(&_fdcoloring);

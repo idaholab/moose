@@ -46,7 +46,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     // and it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
-        this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, true, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _secondary(_mesh.getBoundaryID(getParam<BoundaryName>("secondary"))),
     _primary(_mesh.getBoundaryID(getParam<BoundaryName>("primary"))),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),

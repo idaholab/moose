@@ -9,6 +9,8 @@
 
 #include "PartitionerWeightTest.h"
 
+#include "MooseApp.h"
+
 #include "libmesh/elem.h"
 
 registerMooseObject("MooseTestApp", PartitionerWeightTest);
@@ -31,7 +33,7 @@ PartitionerWeightTest::PartitionerWeightTest(const InputParameters & params)
 std::unique_ptr<Partitioner>
 PartitionerWeightTest::clone() const
 {
-  return std::make_unique<PartitionerWeightTest>(_pars);
+  return _app.getFactory().clone(*this);
 }
 
 dof_id_type

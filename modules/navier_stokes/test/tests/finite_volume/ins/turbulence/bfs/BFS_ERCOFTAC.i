@@ -91,29 +91,29 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
   [vel_x]
     type = INSFVVelocityVariable
     initial_condition = ${bulk_u}
-    nl_sys = u_system
+    solver_sys = u_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0
-    nl_sys = v_system
+    solver_sys = v_system
     two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
     initial_condition = 1e-8
-    nl_sys = pressure_system
+    solver_sys = pressure_system
     two_term_boundary_expansion = false
   []
   [TKE]
     type = INSFVEnergyVariable
-    nl_sys = TKE_system
+    solver_sys = TKE_system
     initial_condition = ${k_init}
   []
   [TKED]
     type = INSFVEnergyVariable
-    nl_sys = TKED_system
+    solver_sys = TKED_system
     initial_condition = ${eps_init}
   []
 []

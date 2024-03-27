@@ -100,6 +100,14 @@ public:
    */
   bool isRegisteredTask(const std::string & task) const { return _tasks.count(task); }
 
+  /**
+   * @return The InputParameters for the object that is currently being constructed,
+   * if any.
+   *
+   * Can be used to ensure that all Actions are created using the ActionFactory
+   */
+  const InputParameters * currentlyConstructing() const;
+
 private:
   template <class T>
   static std::shared_ptr<Action> buildAction(const InputParameters & parameters)
@@ -119,4 +127,9 @@ private:
 
   /// The registered tasks
   std::set<std::string> _tasks;
+
+  /// The object's parameters that are currently being constructed (if any).
+  /// This is a vector because we create within create, thus the last entry is the
+  /// one that is being constructed at the moment
+  std::vector<const InputParameters *> _currently_constructing;
 };

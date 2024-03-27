@@ -50,6 +50,9 @@ public:
    */
   ValueType evaluate(const FaceInfo * const fi) const;
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return false; }
+
 private:
   /// The mesh that this functor lives on
   const MooseMesh & _mesh;

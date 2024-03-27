@@ -28,38 +28,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// mesh to add the sidesets to
-  std::unique_ptr<MeshBase> & _input;
-
   /// function expression
   std::string _function;
-
-  /// name of the new sideset
-  BoundaryName _sideset_name;
-
-  /// whether to check boundary ids when adding sides or not
-  const bool _check_boundaries;
-
-  /// whether to check subdomain ids when adding sides or not
-  const bool _check_subdomains;
-
-  /// whether to check neighbor subdomain ids when adding sides or not
-  const bool _check_neighbor_subdomains;
-
-  /// whether to check normals when adding sides or not
-  const bool _check_normal;
-
-  /// A list of included subdomain ids that the side has to be part of
-  std::vector<subdomain_id_type> _included_ids;
-
-  /// A list of included neighbor subdomain ids
-  std::vector<subdomain_id_type> _included_neighbor_ids;
-
-  /// Whether to consider internal sides or not when building the sideset
-  const bool _include_only_external_sides;
-
-  /// A normal vector that (if provided) is compared against side's normals
-  Point _normal;
 
   /// function parser object describing the combinatorial geometry
   SymFunctionPtr _func_F;

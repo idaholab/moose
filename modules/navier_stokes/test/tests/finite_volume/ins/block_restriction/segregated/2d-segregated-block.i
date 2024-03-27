@@ -63,20 +63,20 @@ restricted_blocks = '1'
   [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 1.0
-    nl_sys = u_system
+    solver_sys = u_system
     two_term_boundary_expansion = false
     block = ${restricted_blocks}
   []
   [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = v_system
+    solver_sys = v_system
     two_term_boundary_expansion = false
     block = ${restricted_blocks}
   []
   [pressure]
     type = INSFVPressureVariable
-    nl_sys = pressure_system
+    solver_sys = pressure_system
     initial_condition = 0.2
     two_term_boundary_expansion = false
     block = ${restricted_blocks}
@@ -84,14 +84,14 @@ restricted_blocks = '1'
   [T_fluid]
     type = INSFVEnergyVariable
     initial_condition = 300
-    nl_sys = energy_system
+    solver_sys = energy_system
     two_term_boundary_expansion = false
     block = ${restricted_blocks}
   []
   [scalar]
     type = INSFVScalarFieldVariable
     block = ${restricted_blocks}
-    nl_sys = scalar_system
+    solver_sys = scalar_system
   []
 []
 

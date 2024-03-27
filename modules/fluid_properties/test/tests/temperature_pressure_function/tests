@@ -8,4 +8,12 @@
     abs_zero = 1e-9
     requirement = 'The system shall be able to compute functionalized fluid properties.'
   []
+  [example]
+    type = CSVDiff
+    input = 'example.i'
+    csvdiff = 'example_out.csv'
+    abs_zero = 1e-9
+    requirement = "The system shall be able to compute fluid properties defined through functions of "
+                  "pressure and temperature."
+  []
 []

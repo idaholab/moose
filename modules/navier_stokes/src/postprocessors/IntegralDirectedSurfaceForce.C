@@ -57,6 +57,12 @@ IntegralDirectedSurfaceForce::IntegralDirectedSurfaceForce(const InputParameters
 
   // This object will only work with finite volume variables
   _qp_integration = false;
+
+  checkFunctorSupportsSideIntegration<Real>("vel_x", _qp_integration);
+  if (_vel_components.size() >= 2)
+    checkFunctorSupportsSideIntegration<Real>("vel_y", _qp_integration);
+  if (_vel_components.size() == 3)
+    checkFunctorSupportsSideIntegration<Real>("vel_z", _qp_integration);
 }
 
 Real

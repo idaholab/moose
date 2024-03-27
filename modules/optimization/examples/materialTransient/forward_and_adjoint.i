@@ -117,7 +117,7 @@
 [Variables]
   [u_adjoint]
     initial_condition = 0
-    nl_sys = adjoint
+    solver_sys = adjoint
     outputs = none
   []
 []

@@ -33,7 +33,7 @@
     type = ParsedGenerateSideset
     combinatorial_geometry = 'abs(y - 6) < 1e-10'
     normal = '0 1 0'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'inner_top'
     input = 'inner_right'
   []
@@ -42,7 +42,7 @@
     type = ParsedGenerateSideset
     combinatorial_geometry = 'abs(y) < 1e-10'
     normal = '0 -1 0'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'inner_bottom'
     input = 'inner_top'
   []

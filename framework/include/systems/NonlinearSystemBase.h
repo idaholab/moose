@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "SystemBase.h"
+#include "SolverSystem.h"
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
 #include "MooseObjectTagWarehouse.h"
@@ -62,7 +62,7 @@ class DiagonalMatrix;
  *
  * It is a part of FEProblemBase ;-)
  */
-class NonlinearSystemBase : public SystemBase, public PerfGraphInterface
+class NonlinearSystemBase : public SolverSystem, public PerfGraphInterface
 {
 public:
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
@@ -78,12 +78,6 @@ public:
   virtual void turnOffJacobian();
 
   virtual void solve() override = 0;
-  virtual void restoreSolutions() override;
-
-  /**
-   * Quit the current solve as soon as possible.
-   */
-  virtual void stopSolve(const ExecFlagType & exec_flag) = 0;
 
   virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 
@@ -129,12 +123,6 @@ public:
                          const std::string & name,
                          InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
-
-  /**
-   * Add u_dot, u_dotdot, u_dot_old and u_dotdot_old
-   * vectors if requested by the time integrator
-   */
-  void addDotVectors();
 
   /**
    * Adds a kernel
@@ -361,8 +349,6 @@ public:
    */
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
-  virtual void setSolution(const NumericVector<Number> & soln);
-
   /**
    * Called from explicit time stepping to overwrite boundary positions (explicit dynamics). This
    * will close/assemble the passed-in \p soln after overwrite
@@ -390,15 +376,6 @@ public:
    */
   virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
 
-  NumericVector<Number> * solutionUDot() override { return _u_dot; }
-  NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
-  NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
-  NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
-  const NumericVector<Number> * solutionUDot() const override { return _u_dot; }
-  const NumericVector<Number> * solutionUDotDot() const override { return _u_dotdot; }
-  const NumericVector<Number> * solutionUDotOld() const override { return _u_dot_old; }
-  const NumericVector<Number> * solutionUDotDotOld() const override { return _u_dotdot_old; }
-
   /**
    *  Return a numeric vector that is associated with the time tag.
    */
@@ -413,14 +390,6 @@ public:
    * Return a residual vector that is associated with the residual tag.
    */
   NumericVector<Number> & residualVector(TagID tag);
-
-  const NumericVector<Number> * const & currentSolution() const override
-  {
-    return _current_solution;
-  }
-
-  virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution() override;
 
   virtual NumericVector<Number> & residualCopy() override;
   virtual NumericVector<Number> & residualGhosted() override;
@@ -552,14 +521,6 @@ public:
   void setPredictor(std::shared_ptr<Predictor> predictor);
   Predictor * getPredictor() { return _predictor.get(); }
 
-  void setPCSide(MooseEnum pcs);
-
-  Moose::PCSideType getPCSide() { return _pc_side; }
-
-  void setMooseKSPNormType(MooseEnum kspnorm);
-
-  Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
-
   /**
    * Indicated whether this system needs material properties on boundaries.
    * @return Boolean if IntegratedBCs are active
@@ -682,7 +643,6 @@ public:
     _off_diagonals_in_auto_scaling = off_diagonals_in_auto_scaling;
   }
 
-  FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_nl_rnorm;
@@ -771,8 +731,6 @@ protected:
    */
   virtual void postAddResidualObject(ResidualObject &) {}
 
-  NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
-
   /**
    * Reinitialize quantities such as variables, residuals, Jacobians, materials for node-face
    * constraints
@@ -793,27 +751,11 @@ protected:
    */
   bool preSolve();
 
-  /// solution vector from nonlinear solver
-  const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
   NumericVector<Number> * _residual_ghosted;
 
-  /// Serialized version of the solution vector, or nullptr if a
-  /// serialized solution is not needed
-  std::unique_ptr<NumericVector<Number>> _serialized_solution;
-
   /// Copy of the residual vector, or nullptr if a copy is not needed
   std::unique_ptr<NumericVector<Number>> _residual_copy;
-
-  /// solution vector for u^dot
-  NumericVector<Number> * _u_dot;
-  /// solution vector for u^dotdot
-  NumericVector<Number> * _u_dotdot;
-
-  /// old solution vector for u^dot
-  NumericVector<Number> * _u_dot_old;
-  /// old solution vector for u^dotdot
-  NumericVector<Number> * _u_dotdot_old;
 
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
@@ -888,10 +830,6 @@ protected:
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
   std::shared_ptr<MoosePreconditioner> _preconditioner;
-  /// Preconditioning side
-  Moose::PCSideType _pc_side;
-  /// KSP norm type
-  Moose::MooseKSPNormType _ksp_norm;
 
   /// Whether or not to use a finite differenced preconditioner
   bool _use_finite_differenced_preconditioner;

@@ -169,10 +169,6 @@ public:
 
   virtual void prepareIC() override;
 
-  Moose::VarFieldType fieldType() const override;
-  bool isArray() const override;
-  bool isVector() const override;
-
   virtual const Elem * const & currentElem() const override { return _element_data->currentElem(); }
 
   virtual void getDofIndices(const Elem * elem,
@@ -494,6 +490,9 @@ public:
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi,
                                        const Elem * elem,
                                        const Moose::StateArg & state) const;
+
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
 
 protected:
   /**

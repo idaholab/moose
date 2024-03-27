@@ -48,6 +48,7 @@ AddIterationCountPostprocessorsAction::act()
       {
         const std::string class_name = "AddPostprocessorAction";
         InputParameters action_params = _action_factory.getValidParams(class_name);
+        associateWithParameter("count_iterations", action_params);
         action_params.set<std::string>("type") = it_per_step_class_names[i];
         auto action = std::static_pointer_cast<MooseObjectAction>(
             _action_factory.create(class_name, it_per_step_names[i], action_params));
@@ -57,6 +58,7 @@ AddIterationCountPostprocessorsAction::act()
       {
         const std::string class_name = "AddPostprocessorAction";
         InputParameters action_params = _action_factory.getValidParams(class_name);
+        associateWithParameter("count_iterations", action_params);
         action_params.set<std::string>("type") = "CumulativeValuePostprocessor";
         auto action = std::static_pointer_cast<MooseObjectAction>(
             _action_factory.create(class_name, total_it_names[i], action_params));

@@ -62,7 +62,7 @@ pressure_tag = "pressure_grad"
     input = solid_fluid_interface_2
     bottom_left = '0 0 0'
     top_right = '0.1 0.0127 0'
-    boundaries_old = left
+    included_boundaries = left
     boundary_new = wall_left
   []
 
@@ -71,7 +71,7 @@ pressure_tag = "pressure_grad"
     input = wall_left_boundary_1
     bottom_left = '0 2.9857 0'
     top_right = '0.1 2.9984 0'
-    boundaries_old = left
+    included_boundaries = left
     boundary_new = wall_left
   []
 
@@ -80,7 +80,7 @@ pressure_tag = "pressure_grad"
     input = wall_left_boundary_2
     bottom_left = '0 0.0127 0'
     top_right = '0.1 2.9857 0'
-    boundaries_old = left
+    included_boundaries = left
     boundary_new = fluid_left
   []
 
@@ -109,25 +109,25 @@ pressure_tag = "pressure_grad"
   [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
     block = 'spacer_block porous_block'
-    nl_sys = u_system
+    solver_sys = u_system
   []
 
   [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
     block = 'spacer_block porous_block'
-    nl_sys = v_system
+    solver_sys = v_system
   []
 
   [pressure]
     type = INSFVPressureVariable
     block = 'spacer_block porous_block'
-    nl_sys = pressure_system
+    solver_sys = pressure_system
   []
 
   [T_fluid]
     type = INSFVEnergyVariable
     block = 'spacer_block porous_block'
-    nl_sys = t_system
+    solver_sys = t_system
   []
 []
 

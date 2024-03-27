@@ -34,6 +34,8 @@ MassFluxWeightedFlowRate::MassFluxWeightedFlowRate(const InputParameters & param
 {
   if (_qp_integration)
     mooseError("This object only works only with finite volume.");
+
+  checkFunctorSupportsSideIntegration<ADReal>("density", _qp_integration);
 }
 
 void

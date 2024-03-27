@@ -36,7 +36,7 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
     _t(_fe_problem.time()),
     _var(_sys.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _assembly(
-        _fe_problem.assembly(_tid, _var.kind() == Moose::VAR_NONLINEAR ? _var.sys().number() : 0))
+        _fe_problem.assembly(_tid, _var.kind() == Moose::VAR_SOLVER ? _var.sys().number() : 0))
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 

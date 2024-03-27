@@ -26,16 +26,19 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
   /// Return extra ID list
-  const std::vector<VectorPostprocessorValue *> & getUniqueExtraIds() const
-  {
-    return _var_extra_ids;
-  };
+  const std::vector<VectorPostprocessorValue *> & getUniqueExtraIds() const { return _extra_ids; };
   /// Return Integral values
-  const std::vector<VectorPostprocessorValue *> & getIntegrals() const { return _var_integrals; };
+  const std::vector<VectorPostprocessorValue *> & getIntegrals() const { return _integrals; };
 
 protected:
+  /// whether or not to compute volume average
+  const bool _average;
   /// Number of variables to be integrated
   const unsigned int _nvar;
+  /// Number of material properties to be integrated
+  const unsigned int _nprop;
+  /// Name of material properties
+  const std::vector<MaterialPropertyName> _prop_names;
   /// Extra IDs in use
   const std::vector<ExtraElementIDName> _extra_id;
   /// Number of extra IDs in use
@@ -43,11 +46,15 @@ protected:
   // Map of element ids to parsed vpp ids
   std::unordered_map<dof_id_type, dof_id_type> _unique_vpp_ids;
   /// Vectors holding extra IDs
-  std::vector<VectorPostprocessorValue *> _var_extra_ids;
+  std::vector<VectorPostprocessorValue *> _extra_ids;
   /// Coupled MOOSE variables to be integrated
   std::vector<const MooseVariable *> _vars;
   /// Quadrature point values of coupled MOOSE variables
   std::vector<const VariableValue *> _var_values;
-  /// Vectors holding variable integrals over extra IDs
-  std::vector<VectorPostprocessorValue *> _var_integrals;
+  /// Material properties to be integrated
+  std::vector<const MaterialProperty<Real> *> _props;
+  /// Vectors holding integrals over extra IDs
+  std::vector<VectorPostprocessorValue *> _integrals;
+  /// Vector holding the volume of extra IDs
+  std::vector<Real> _volumes;
 };

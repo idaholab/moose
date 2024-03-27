@@ -96,6 +96,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
             tmp_var->requireQpComputations();
             _coupled_standard_fv_moose_vars.push_back(tmp_var);
           }
+          else if (auto * tmp_var = dynamic_cast<MooseLinearVariableFV<Real> *>(moose_var))
+          {
+            _coupled_standard_linear_fv_moose_vars.push_back(tmp_var);
+          }
           else
             _obj->paramError(name, "provided c++ type for variable parameter is not supported");
         }
@@ -447,9 +451,9 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp) const
   }
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  if (var->kind() == Moose::VAR_NONLINEAR &&
+  if (var->kind() == Moose::VAR_SOLVER &&
       // are we not an object that feeds into the nonlinear system?
-      (!_c_sys || _c_sys->varKind() != Moose::VAR_NONLINEAR ||
+      (!_c_sys || _c_sys->varKind() != Moose::VAR_SOLVER ||
        // are we an object that impacts the nonlinear system and this variable is within our
        // nonlinear system?
        var->sys().number() == _c_sys->number()))

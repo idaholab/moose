@@ -14,12 +14,12 @@
 #include "MooseTypes.h"
 #include "ControllableItem.h"
 #include "ControllableParameter.h"
-#include "Factory.h"
-#include "ActionFactory.h"
 #include "ControlOutput.h"
 
 // Forward declarations
 class InputParameters;
+class Factory;
+class ActionFactory;
 
 /**
  * Storage container for all InputParamter objects.
@@ -42,6 +42,24 @@ public:
    * Destruction
    */
   virtual ~InputParameterWarehouse() = default;
+
+  /**
+   * Class that is used as a parameter to [add/remove]InputParameters()
+   * to restrict access.
+   */
+  class AddRemoveParamsKey
+  {
+    friend class Factory;
+    friend class ActionFactory;
+    FRIEND_TEST(InputParameterWarehouseTest, getControllableItems);
+    FRIEND_TEST(InputParameterWarehouseTest, getControllableParameter);
+    FRIEND_TEST(InputParameterWarehouseTest, getControllableParameterValues);
+    FRIEND_TEST(InputParameterWarehouseTest, emptyControllableParameterValues);
+    FRIEND_TEST(InputParameterWarehouseTest, addControllableParameterConnection);
+    FRIEND_TEST(InputParameterWarehouseTest, addControllableParameterAlias);
+    AddRemoveParamsKey() {}
+    AddRemoveParamsKey(const AddRemoveParamsKey &) {}
+  };
 
   ///@{
   /**
@@ -105,17 +123,6 @@ public:
   std::vector<MooseObjectParameterName>
   getControllableParameterNames(const MooseObjectParameterName & input) const;
 
-private:
-  /// Storage for the InputParameters objects
-  /// TODO: Remove multimap
-  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
-
-  /// Storage for controllable parameters via ControllableItem objects, a unique_ptr is
-  /// used to avoid creating multiple copies. All access to the objects are done via
-  /// pointers. The ControllableItem objects are not designed and will not be used directly in
-  /// user code. All user level access goes through the ControllableParameter object.
-  std::vector<std::vector<std::shared_ptr<ControllableItem>>> _controllable_items;
-
   /**
    * Method for adding a new InputParameters object
    * @param parameters The InputParameters object to copy and store in the warehouse
@@ -126,17 +133,30 @@ private:
    * are generic until Factory::create() is called and the actual MooseObject
    * is created.
    *
-   * This method is private, because only the factories that are creating objects should be
-   * able to call this method.
+   * This method is protected by the AddRemoveParamsKey, because only the factories
+   * that are creating objects should be able to call this method.
    */
   InputParameters & addInputParameters(const std::string & name,
                                        const InputParameters & parameters,
-                                       THREAD_ID tid = 0);
+                                       THREAD_ID tid,
+                                       const AddRemoveParamsKey);
 
   /**
    * Allows for the deletion and cleanup of an object while the simulation is running.
    */
-  void removeInputParameters(const MooseObject & moose_object, THREAD_ID tid = 0);
+  void
+  removeInputParameters(const MooseObject & moose_object, THREAD_ID tid, const AddRemoveParamsKey);
+
+private:
+  /// Storage for the InputParameters objects
+  /// TODO: Remove multimap
+  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
+
+  /// Storage for controllable parameters via ControllableItem objects, a unique_ptr is
+  /// used to avoid creating multiple copies. All access to the objects are done via
+  /// pointers. The ControllableItem objects are not designed and will not be used directly in
+  /// user code. All user level access goes through the ControllableParameter object.
+  std::vector<std::vector<std::shared_ptr<ControllableItem>>> _controllable_items;
 
   /**
    * Returns a ControllableParameter object that contains all matches to ControllableItem objects
@@ -173,15 +193,6 @@ private:
                                        THREAD_ID tid = 0) const;
   ///@}
 
-  ///@{
-  /// The factory is allowed to call addInputParameters and removeInputParameters.
-  friend std::shared_ptr<MooseObject> Factory::create(
-      const std::string &, const std::string &, const InputParameters &, THREAD_ID, bool);
-  friend std::shared_ptr<Action>
-  ActionFactory::create(const std::string &, const std::string &, InputParameters &);
-  friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
-  ///@}
-
   /// Only controls are allowed to call getControllableParameter. The
   /// Control::getControllableParameter is the only method that calls getControllableParameter.
   /// However, this method cannot be made a friend explicitly because the method would need to be
@@ -190,12 +201,12 @@ private:
   friend class Control;
 
   // Allow unit test to call methods
-  FRIEND_TEST(InputParameterWarehouse, getControllableItems);
-  FRIEND_TEST(InputParameterWarehouse, getControllableParameter);
-  FRIEND_TEST(InputParameterWarehouse, getControllableParameterValues);
-  FRIEND_TEST(InputParameterWarehouse, emptyControllableParameterValues);
-  FRIEND_TEST(InputParameterWarehouse, addControllableParameterConnection);
-  FRIEND_TEST(InputParameterWarehouse, addControllableParameterAlias);
+  FRIEND_TEST(InputParameterWarehouseTest, getControllableItems);
+  FRIEND_TEST(InputParameterWarehouseTest, getControllableParameter);
+  FRIEND_TEST(InputParameterWarehouseTest, getControllableParameterValues);
+  FRIEND_TEST(InputParameterWarehouseTest, emptyControllableParameterValues);
+  FRIEND_TEST(InputParameterWarehouseTest, addControllableParameterConnection);
+  FRIEND_TEST(InputParameterWarehouseTest, addControllableParameterAlias);
 };
 
 template <typename T>

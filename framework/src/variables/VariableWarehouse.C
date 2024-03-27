@@ -10,6 +10,7 @@
 #include "VariableWarehouse.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableFV.h"
+#include "MooseLinearVariableFV.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 
@@ -35,6 +36,11 @@ VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariab
     {
       _fv_vars_by_number[tmp_var->number()] = tmp_var;
       _fv_vars_by_name[var_name] = tmp_var;
+    }
+    else if (auto * tmp_var = dynamic_cast<MooseLinearVariableFVReal *>(raw_var))
+    {
+      _linear_fv_vars_by_number[tmp_var->number()] = tmp_var;
+      _linear_fv_vars_by_name[var_name] = tmp_var;
     }
     else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(raw_var))
     {
@@ -199,7 +205,10 @@ VariableWarehouse::getActualFieldVariable(const std::string & var_name)
   auto it = _regular_vars_by_name.find(var_name);
   if (it != _regular_vars_by_name.end())
     return it->second;
-  return _fv_vars_by_name.at(var_name);
+  auto it_fv = _fv_vars_by_name.find(var_name);
+  if (it_fv != _fv_vars_by_name.end())
+    return it_fv->second;
+  return _linear_fv_vars_by_name.at(var_name);
 }
 
 template <typename T>
@@ -209,7 +218,10 @@ VariableWarehouse::getActualFieldVariable(unsigned int var_number)
   auto it = _regular_vars_by_number.find(var_number);
   if (it != _regular_vars_by_number.end())
     return it->second;
-  return _fv_vars_by_number.at(var_number);
+  auto it_fv = _fv_vars_by_number.find(var_number);
+  if (it_fv != _fv_vars_by_number.end())
+    return it_fv->second;
+  return _linear_fv_vars_by_number.at(var_number);
 }
 
 template <>

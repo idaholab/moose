@@ -30,7 +30,7 @@ ADDGKernel::validParams()
 ADDGKernel::ADDGKernel(const InputParameters & parameters)
   : DGKernelBase(parameters),
     NeighborMooseVariableInterface(
-        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, false, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariable()),
     _phi(_assembly.phiFace(_var)),
     _grad_phi(_assembly.gradPhiFace(_var)),
@@ -84,7 +84,7 @@ ADDGKernel::ADDGKernel(const InputParameters & parameters)
   {
     MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
                                                          _diag_save_in_strings[i],
-                                                         Moose::VarKindType::VAR_NONLINEAR,
+                                                         Moose::VarKindType::VAR_SOLVER,
                                                          Moose::VarFieldType::VAR_FIELD_STANDARD);
 
     if (_sys.hasVariable(_diag_save_in_strings[i]))

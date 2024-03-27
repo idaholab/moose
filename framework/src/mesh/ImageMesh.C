@@ -58,7 +58,7 @@ ImageMesh::ImageMesh(const ImageMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 ImageMesh::safeClone() const
 {
-  return std::make_unique<ImageMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void

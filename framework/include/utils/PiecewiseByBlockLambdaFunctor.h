@@ -58,6 +58,9 @@ public:
 
   bool hasBlocks(SubdomainID id) const override;
 
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;
   using typename Moose::FunctorBase<T>::DotType;

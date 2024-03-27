@@ -147,9 +147,6 @@ public:
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
   FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
-  Moose::VarFieldType fieldType() const override;
-  bool isArray() const override;
-  bool isVector() const override;
   const Node * const & node() const { return _element_data->node(); }
   const dof_id_type & nodalDofIndex() const override { return _element_data->nodalDofIndex(); }
   virtual bool isNodalDefined() const override;
@@ -709,6 +706,9 @@ public:
   virtual void meshChanged() override;
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
+
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
 
 protected:
   usingMooseVariableFieldMembers;

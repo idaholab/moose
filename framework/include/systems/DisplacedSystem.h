@@ -28,6 +28,7 @@ public:
   DisplacedSystem & operator=(DisplacedSystem &&) = delete;
 
   DisplacedSystem(DisplacedProblem & problem,
+                  FEProblemBase & fe_problem,
                   SystemBase & undisplaced_system,
                   const std::string & name,
                   Moose::VarKindType var_kind);
@@ -152,6 +153,8 @@ public:
   virtual Number & duDotDotDu() override { return _undisplaced_system.duDotDotDu(); }
   virtual const Number & duDotDu() const override { return _undisplaced_system.duDotDu(); }
   virtual const Number & duDotDotDu() const override { return _undisplaced_system.duDotDotDu(); }
+
+  virtual void addDotVectors() override { _undisplaced_system.addDotVectors(); }
 
   /**
    * Return the residual copy from the NonlinearSystem

@@ -22,6 +22,10 @@ T_initial = 400
 []
 
 [Functions]
+  # This demonstrates how to define fluid properties that are functions
+  # of an integral quantity (through a postprocessor) of the (p,T) variable. See example.i in this
+  # same folder for defining fluid properties that are functions of the
+  # LOCAL value of the (p,T) variables
   [k]
     type = ParsedFunction
     symbol_names = 'T p'
@@ -100,12 +104,12 @@ T_initial = 400
   []
   [e_exact]
     type = Receiver
-    default = ${fparse cv * T_initial}
+    default = '${fparse cv * T_initial}'
     outputs = none
   []
   [cv_exact]
     type = Receiver
-    default = ${fparse cv}
+    default = '${fparse cv}'
     outputs = none
   []
 

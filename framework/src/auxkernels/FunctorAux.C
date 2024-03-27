@@ -29,9 +29,11 @@ FunctorAux::FunctorAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _functor(getFunctor<Real>("functor")),
     _factor(getFunctor<Real>("factor")),
-    _is_fe(dynamic_cast<MooseVariableFE<Real> *>(&_var))
+    _is_standard_fe(dynamic_cast<MooseVariableFE<Real> *>(&_var)),
+    _is_standard_fv(dynamic_cast<MooseVariableFV<Real> *>(&_var) ||
+                    dynamic_cast<MooseLinearVariableFV<Real> *>(&_var))
 {
-  if (!_is_fe && !dynamic_cast<MooseVariableFV<Real> *>(&_var))
+  if (!_is_standard_fe && !_is_standard_fv)
     paramError(
         "variable",
         "The variable must be a non-vector, non-array finite-volume/finite-element variable.");
@@ -46,7 +48,7 @@ FunctorAux::computeValue()
     const Moose::NodeArg node_arg = {_current_node, Moose::INVALID_BLOCK_ID};
     return _factor(node_arg, state) * _functor(node_arg, state);
   }
-  else if (_is_fe)
+  else if (_is_standard_fe)
   {
     const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
     return _factor(qp_arg, state) * _functor(qp_arg, state);

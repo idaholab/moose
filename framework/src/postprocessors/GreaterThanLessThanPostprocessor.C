@@ -43,7 +43,7 @@ GreaterThanLessThanPostprocessor::GreaterThanLessThanPostprocessor(
   : GeneralPostprocessor(parameters),
     _var(_fe_problem.getVariable(_tid,
                                  getParam<VariableName>("variable"),
-                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarKindType::VAR_SOLVER,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD)),
     _mesh(_fe_problem.mesh().getMesh()),
     _subdomain_restricted(isParamValid("subdomain")),

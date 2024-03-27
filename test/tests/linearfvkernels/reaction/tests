@@ -1,0 +1,11 @@
+[Tests]
+  design = 'LinearFVReaction.md'
+  issues = '#25722'
+  [reaction-1d]
+    type = Exodiff
+    input = 'reaction-1d.i'
+    exodiff = 'reaction-1d_exodus.e'
+    requirement = 'The system shall be able to solve reaction problems using a linear finite volume system on a one-dimensional domain.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

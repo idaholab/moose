@@ -50,6 +50,13 @@ enum class InterpMethod
   QUICK
 };
 
+enum class LinearFVComputationMode
+{
+  RHS,
+  Matrix,
+  FullSystem
+};
+
 /**
  * Returns an enum with all the currently supported interpolation methods and the current default
  * for FV: first-order upwind
@@ -104,7 +111,7 @@ std::pair<Real, Real>
 interpCoeffs(const InterpMethod m,
              const FaceInfo & fi,
              const bool one_is_elem,
-             const Vector advector = Vector())
+             const Vector & advector = Vector())
 {
   switch (m)
   {

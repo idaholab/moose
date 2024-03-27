@@ -334,7 +334,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
   [injection_area]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x<=${bh_r}*1.000001 & y >= ${screen_bottom} & y <= ${screen_top}'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'injection_area'
     input = 'bottom_cap'
   []

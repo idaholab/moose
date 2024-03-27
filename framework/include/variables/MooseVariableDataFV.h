@@ -55,6 +55,17 @@ initDofIndices(T & data, const Elem & elem)
 }
 }
 
+namespace
+{
+template <typename T, typename T2>
+void
+assignForAllQps(const T & value, T2 & array, const unsigned int nqp)
+{
+  for (const auto qp : make_range(nqp))
+    array[qp] = value;
+}
+}
+
 template <typename OutputType>
 class MooseVariableDataFV : public MooseVariableDataBase<OutputType>, public MeshChangedInterface
 {
@@ -473,7 +484,7 @@ MooseVariableDataFV<OutputType>::safeToComputeADUDot() const
   // the auxiliary system copy of the time integrator. Some derived time integrator classes do setup
   // in their solve() method, and that solve() method only happens for the nonlinear system copy of
   // the time integrator.
-  return _time_integrator && (_var.kind() == Moose::VAR_NONLINEAR);
+  return _time_integrator && (_var.kind() == Moose::VAR_SOLVER);
 }
 
 template <typename OutputType>

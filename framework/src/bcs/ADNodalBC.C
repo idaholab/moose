@@ -57,7 +57,7 @@ ADNodalBCTempl<T, Base>::ADNodalBCTempl(const InputParameters & parameters)
     MooseVariableInterface<T>(this,
                               true,
                               "variable",
-                              Moose::VarKindType::VAR_NONLINEAR,
+                              Moose::VarKindType::VAR_SOLVER,
                               std::is_same<T, Real>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
     ADFunctorInterface(this),

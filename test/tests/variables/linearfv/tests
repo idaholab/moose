@@ -1,0 +1,19 @@
+[Tests]
+  design = 'MooseLinearVariableFV.md'
+  issues = '#25722'
+  [basic_pps]
+    type = CSVDiff
+    input = 'diffusion-1d-pp.i'
+    csvdiff = "diffusion-1d-pp_csv.csv diffusion-1d-pp_vpp_csv_line-sample_0001.csv"
+    requirement = 'The system shall be able to evaluate linear finite volume variables with basic postprocessors.'
+    mesh_mode = REPLICATED # Node numbering needs to be disabled for ElementVariableValue
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [basic_aux]
+    type = Exodiff
+    input = 'diffusion-1d-aux.i'
+    exodiff = "diffusion-1d-aux_out.e"
+    requirement = 'The system shall be able to use linear finite volume variables with basic aux kernels.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

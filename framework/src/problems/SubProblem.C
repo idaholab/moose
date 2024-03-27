@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 #include "DisplacedSystem.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -271,6 +272,17 @@ SubProblem::selectVectorTagsFromSystem(const SystemBase & system,
   for (const auto & vector_tag : input_vector_tags)
     if (system.hasVector(vector_tag._id))
       selected_tags.insert(vector_tag._id);
+}
+
+void
+SubProblem::selectMatrixTagsFromSystem(const SystemBase & system,
+                                       const std::map<TagName, TagID> & input_matrix_tags,
+                                       std::set<TagID> & selected_tags)
+{
+  selected_tags.clear();
+  for (const auto & matrix_tag_pair : input_matrix_tags)
+    if (system.hasMatrix(matrix_tag_pair.second))
+      selected_tags.insert(matrix_tag_pair.second);
 }
 
 TagID
@@ -768,33 +780,33 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
-                              const std::vector<T> & nls,
+                              const std::vector<T> & systems,
                               const SystemBase & aux) const
 {
   // Eventual return value
   MooseVariableFEBase * var = nullptr;
 
-  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  const auto [var_in_sys, sys_num] = determineSolverSystem(var_name);
 
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)
   {
-    if (var_in_nl)
-      var = &(nls[nl_sys_num]->getVariable(tid, var_name));
+    if (var_in_sys)
+      var = &(systems[sys_num]->getVariable(tid, var_name));
     else if (aux.hasVariable(var_name))
       var = &(aux.getVariable(tid, var_name));
     else
       mooseError("Unknown variable " + var_name);
   }
-  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && var_in_nl &&
-           nls[nl_sys_num]->hasVariable(var_name))
-    var = &(nls[nl_sys_num]->getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_SOLVER && var_in_sys &&
+           systems[sys_num]->hasVariable(var_name))
+    var = &(systems[sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
     var = &(aux.getVariable(tid, var_name));
   else
   {
     std::string expected_var_type_string =
-        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR ? "nonlinear" : "auxiliary");
+        (expected_var_type == Moose::VarKindType::VAR_SOLVER ? "nonlinear" : "auxiliary");
     mooseError("No ",
                expected_var_type_string,
                " variable named ",
@@ -1326,7 +1338,7 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
-                              const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                              const std::vector<std::shared_ptr<SolverSystem>> & nls,
                               const SystemBase & aux) const;
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,

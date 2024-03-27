@@ -11,6 +11,9 @@
 
 #include "SolveObject.h"
 
+#include "SolverParams.h"
+#include "PetscSupport.h"
+
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
 
@@ -111,6 +114,15 @@ private:
   std::vector<double> _cnorm_vec;
   /// step length per iteration
   std::vector<double> _xdiff_vec;
+
+  ///@{
+  /// These are needed to reset the petsc options for the optimization solve
+  /// using Moose::PetscSupport::petscSetOptions
+  /// This only sets the finite difference options, the other optimizeSolve
+  /// options are set-up in TAO using TaoSetFromOptions()
+  Moose::PetscSupport::PetscOptions _petsc_options;
+  SolverParams _solver_params;
+  ///@}
 
   /// Here is where we call tao and solve
   PetscErrorCode taoSolve();

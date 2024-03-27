@@ -261,6 +261,6 @@ AddPeriodicBCAction::act()
         nl.dofMap().get_periodic_boundaries());
     if (displaced_problem)
       displaced_problem->mesh().getMesh().default_ghosting().set_periodic_boundaries(
-          displaced_problem->nlSys(/*nl_sys_num=*/0).dofMap().get_periodic_boundaries());
+          displaced_problem->solverSys(/*nl_sys_num=*/0).dofMap().get_periodic_boundaries());
   }
 }

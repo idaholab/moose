@@ -35,7 +35,7 @@ InterfaceKernelTempl<T>::InterfaceKernelTempl(const InputParameters & parameters
   : InterfaceKernelBase(parameters),
     NeighborMooseVariableInterface<T>(this,
                                       false,
-                                      Moose::VarKindType::VAR_NONLINEAR,
+                                      Moose::VarKindType::VAR_SOLVER,
                                       std::is_same<T, Real>::value
                                           ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                           : Moose::VarFieldType::VAR_FIELD_VECTOR),

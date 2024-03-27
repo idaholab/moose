@@ -78,11 +78,8 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
   // coupled variables must be nonlinear scalar fields
   for (const auto & variable_name : _variable_names)
   {
-    const auto * var =
-        &UserObject::_subproblem.getVariable(0,
-                                             variable_name,
-                                             Moose::VarKindType::VAR_NONLINEAR,
-                                             Moose::VarFieldType::VAR_FIELD_STANDARD);
+    const auto * var = &UserObject::_subproblem.getVariable(
+        0, variable_name, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD);
     _variables.push_back(var);
 
     // check block restriction

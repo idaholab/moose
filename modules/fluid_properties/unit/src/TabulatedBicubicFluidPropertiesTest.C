@@ -24,10 +24,8 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, unorderedData)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos =
-        std::string(err.what())
-            .find("The column data for temperature is not monotonically increasing in "
-                  "data/csv/unordered_fluid_props.csv");
+    std::size_t pos = std::string(err.what())
+                          .find("The column data for temperature is not monotonically increasing");
     ASSERT_TRUE(pos != std::string::npos);
   }
 }
@@ -60,8 +58,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, missingColumn)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("No temperature data read in "
-                                "data/csv/missing_col_fluid_props.csv. A "
+                          .find("data/csv/missing_col_fluid_props.csv. A "
                                 "column named temperature must be present");
     ASSERT_TRUE(pos != std::string::npos);
   }
@@ -78,7 +75,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, unknownColumn)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("unknown read in data/csv/unknown_fluid_props.csv is not one of "
+                          .find("data/csv/unknown_fluid_props.csv is not one of "
                                 "the properties that TabulatedFluidProperties understands");
     ASSERT_TRUE(pos != std::string::npos);
   }
@@ -95,7 +92,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, missingData)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("The number of rows in data/csv/missing_data_fluid_props.csv "
+                          .find("data/csv/missing_data_fluid_props.csv "
                                 "is not equal to the number of unique pressure values 3 multiplied "
                                 "by the number of unique temperature values 3");
     ASSERT_TRUE(pos != std::string::npos);

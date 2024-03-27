@@ -184,9 +184,13 @@ OptimizeSolve::taoSolve()
 #endif
   CHKERRQ(ierr);
 
-  // Set petsc options
+  // Set TAO petsc options
   ierr = TaoSetFromOptions(_tao);
   CHKERRQ(ierr);
+
+  // save nonTAO PETSC options to reset before every call to execute()
+  _petsc_options = _problem.getPetscOptions();
+  _solver_params = _problem.solverParams();
 
   // Set bounds for bounded optimization
   ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
@@ -376,6 +380,7 @@ OptimizeSolve::objectiveFunction()
   TIME_SECTION("objectiveFunction", 2, "Objective forward solve");
   _obj_function->updateParameters(*_parameters.get());
 
+  Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
 
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_FORWARD);
@@ -394,6 +399,7 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
   TIME_SECTION("gradientFunction", 2, "Gradient adjoint solve");
   _obj_function->updateParameters(*_parameters.get());
 
+  Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT))
@@ -418,6 +424,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
                "   execute_on = HOMOGENEOUS_FORWARD");
   _obj_function->updateParameters(s);
 
+  Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
@@ -427,6 +434,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
 
   _obj_function->setMisfitToSimulatedValues();
 
+  Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT))

@@ -30,7 +30,7 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     MooseVariableInterface<RealVectorValue>(this,
                                             false,
                                             "variable",
-                                            Moose::VarKindType::VAR_NONLINEAR,
+                                            Moose::VarKindType::VAR_SOLVER,
                                             Moose::VarFieldType::VAR_FIELD_VECTOR),
     _var(*mooseVariable()),
     _test(_var.phi()),

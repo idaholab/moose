@@ -61,28 +61,28 @@
     type = SideSetsAroundSubdomainGenerator
     input = block_rename
     new_boundary = rb_right
-    block = right_block
+    included_subdomains = right_block
     normal = '1 0 0'
   []
   [right_left_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = right_right_sideset
     new_boundary = rb_left
-    block = right_block
+    included_subdomains = right_block
     normal = '-1 0 0'
   []
   [right_top_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = right_left_sideset
     new_boundary = rb_top
-    block = right_block
+    included_subdomains = right_block
     normal = '0 1 0'
   []
   [right_bottom_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = right_top_sideset
     new_boundary = rb_bottom
-    block = right_block
+    included_subdomains = right_block
     normal = '0 -1 0'
   []
   [secondary]

@@ -57,7 +57,7 @@ ElementSideNeighborLayers::ElementSideNeighborLayers(const ElementSideNeighborLa
 std::unique_ptr<GhostingFunctor>
 ElementSideNeighborLayers::clone() const
 {
-  return std::make_unique<ElementSideNeighborLayers>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 std::string

@@ -605,7 +605,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       std::set<dof_id_type> cached_indices;
       std::set<dof_id_type> cached_unindices;
       auto & lm_mesh = dmm->_nl->system().get_mesh();
-      const auto & node_to_elem_map = dmm->_nl->_fe_problem.mesh().nodeToElemMap();
+      const auto & node_to_elem_map = dmm->_nl->feProblem().mesh().nodeToElemMap();
       for (const auto & vit : *(dmm->_var_ids))
       {
         unsigned int v = vit.second;
@@ -728,7 +728,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             bc_id_set.insert(contact_bid_pair.second); // secondary
           }
           // loop over boundary elements
-          ConstBndElemRange & range = *dmm->_nl->_fe_problem.mesh().getBoundaryElementRange();
+          ConstBndElemRange & range = *dmm->_nl->feProblem().mesh().getBoundaryElementRange();
           for (const auto & belem : range)
           {
             const Elem * elem_bdry = belem->_elem;
@@ -758,7 +758,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             if (displaced)
             {
               std::shared_ptr<DisplacedProblem> displaced_problem =
-                  dmm->_nl->_fe_problem.getDisplacedProblem();
+                  dmm->_nl->feProblem().getDisplacedProblem();
               if (!displaced_problem)
               {
                 std::ostringstream err;
@@ -769,7 +769,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
             }
             else
-              locator = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
+              locator = dmm->_nl->feProblem().geomSearchData()._penetration_locators[it.first];
 
             evindices.clear();
             // penetration locator
@@ -815,7 +815,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       std::vector<dof_id_type> local_vec_indices(cached_indices.size());
       std::copy(cached_indices.begin(), cached_indices.end(), local_vec_indices.begin());
       if (dmm->_contact_names->size() && !(dmm->_include_all_contact_nodes))
-        dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
+        dmm->_nl->feProblem().mesh().comm().allgather(local_vec_indices, false);
       // insert indices
       for (const auto & dof : local_vec_indices)
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
@@ -825,7 +825,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       local_vec_indices.resize(cached_unindices.size());
       std::copy(cached_unindices.begin(), cached_unindices.end(), local_vec_indices.begin());
       if (dmm->_uncontact_names->size() && !(dmm->_include_all_contact_nodes))
-        dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
+        dmm->_nl->feProblem().mesh().comm().allgather(local_vec_indices, false);
       // insert unindices
       for (const auto & dof : local_vec_indices)
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
@@ -1592,10 +1592,10 @@ DMSetUp_Moose_Pre(DM dm)
       try
       {
         if ((*dmm->_contact_displaced)[cpair])
-          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(
+          dmm->_nl->feProblem().getDisplacedProblem()->geomSearchData().getPenetrationLocator(
               cpair.first, cpair.second);
         else
-          dmm->_nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+          dmm->_nl->feProblem().geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
       catch (...)
       {
@@ -1620,10 +1620,10 @@ DMSetUp_Moose_Pre(DM dm)
       try
       {
         if ((*dmm->_uncontact_displaced)[cpair])
-          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(
+          dmm->_nl->feProblem().getDisplacedProblem()->geomSearchData().getPenetrationLocator(
               cpair.first, cpair.second);
         else
-          dmm->_nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+          dmm->_nl->feProblem().geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
       catch (...)
       {
@@ -2003,8 +2003,8 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 
   ierr = PetscFree(sides);
   CHKERRQ(ierr);
-  PetscInt maxcontacts = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators.size();
-  std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
+  PetscInt maxcontacts = dmm->_nl->feProblem().geomSearchData()._penetration_locators.size();
+  std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->feProblem().getDisplacedProblem();
   if (displaced_problem)
     maxcontacts = PetscMax(
         maxcontacts, (PetscInt)displaced_problem->geomSearchData()._penetration_locators.size());

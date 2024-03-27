@@ -9,6 +9,8 @@
 
 #include "RinglebMesh.h"
 
+#include "MooseApp.h"
+
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/mesh_modification.h"
@@ -64,7 +66,7 @@ RinglebMesh::RinglebMesh(const InputParameters & parameters)
 std::unique_ptr<MooseMesh>
 RinglebMesh::safeClone() const
 {
-  return std::make_unique<RinglebMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 std::vector<Real>
