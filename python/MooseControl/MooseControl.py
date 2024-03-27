@@ -10,6 +10,7 @@
 import platform
 import requests
 import os
+import signal
 import socket
 import subprocess
 import time
@@ -94,8 +95,7 @@ class MooseControl:
     def kill(self):
         """Kills the underlying moose process if one is running"""
         if self.isProcessRunning():
-            self._moose_process.kill()
-            self._moose_process = None
+            os.killpg(os.getpgid(self._moose_process.pid), signal.SIGTERM)
 
     class Exception(Exception):
         """Basic exception for an error within the MooseControl"""
