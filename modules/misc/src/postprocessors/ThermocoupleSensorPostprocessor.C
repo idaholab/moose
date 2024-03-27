@@ -16,6 +16,7 @@ ThermocoupleSensorPostprocessor::validParams()
 {
   InputParameters params = GeneralSensorPostprocessor::validParams();
   params.addParam<string>("thermocouple_type", "B", "The type of thermocouple (B, E, J or K)");
+  params.addParam<string>("method", "analytical", "The equation to be used.");
   params.addClassDescription("This is a ThermocoupleSensorPostprocessor for various classes of "
                              "thermocouples, described by the 'thermocouple_type' parameter");
   return params;
@@ -24,28 +25,20 @@ ThermocoupleSensorPostprocessor::validParams()
 ThermocoupleSensorPostprocessor::ThermocoupleSensorPostprocessor(const InputParameters & parameters)
   : GeneralSensorPostprocessor(parameters),
   _thermocouple_type(getParam<string>("thermocouple_type"))
+  _method(getParam<string>("method"))
 {
 }
 
 void ThermocoupleSensorPostprocessor::initialize() 
 { 
-  // conversion of T to emf
-  // Evaluating the emf
-  Real e;
-  
-  
-  
-  
-  
-  
-  time_values.push_back(_t);
+  _time_values.push_back(_t);
   _input_signal_values.push_back(_input_signal);
 
   // Check if the size is greater than 500
-  if (time_values.size() > 500 && _input_signal_values.size() > _vector_size) 
+  if (_time_values.size() > 500 && _input_signal_values.size() > _vector_size) 
   {
     // Remove the first 10 elements
-    time_values.erase(time_values.begin(), time_values.begin() + 10);
+    _time_values.erase(_time_values.begin(), _time_values.begin() + 10);
     _input_signal_values.erase(_input_signal_values.begin(), _input_signal_values.begin() + 10);
   }
 
@@ -61,27 +54,17 @@ void ThermocoupleSensorPostprocessor::initialize()
     // B type, temperature in degree celcius
     if (_input_signal >= 0 && _input_signal < 630.615)
     {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_B_0_to_630);
-    }
-    else if (_input_signal >= 630.615 && _input_signal <= 1820)
-    {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_B_630_to_1820);
+      drift_value = 1;
+      efficiency_value = 1;
+      signalToNoise_value = 1;
+      noise_value = 1;
+      uncertainty_value = 1;
+      delay_value = 1;
     }
     else
     {
       mooseWarning("Temperature is outside this thermocouple type's operation range.");
     }
-    
-    drift_value = 1;
-    efficiency_value = 1;
-    signalToNoise_value = 1;
-    noise_value = 1;
-    uncertainty_value = 1;
-    delay_value = 1;
-
-    // add noise, drift, delay etc to e
-
-    // convert e back to T
   }
 
   else if (_thermocouple_type == "E")
@@ -89,27 +72,26 @@ void ThermocoupleSensorPostprocessor::initialize()
     // E type, temperature in degree celcius
     if (_input_signal >= -270 && _input_signal < 0)
     {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_E_minus_270_to_0);
+      drift_value = 1;
+      efficiency_value = 1;
+      signalToNoise_value = 1;
+      noise_value = 1;
+      uncertainty_value = 1;
+      delay_value = 1;
     }
     else if (_input_signal >= 0 && _input_signal <= 1000)
     {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_E_0_to_1000);
+      drift_value = 1;
+      efficiency_value = 1;
+      signalToNoise_value = 1;
+      noise_value = 1;
+      uncertainty_value = 1;
+      delay_value = 1;
     }
     else
     {
       mooseWarning("Temperature is outside this thermocouple type's operation range.");
     }
-
-    drift_value = 1;
-    efficiency_value = 1;
-    signalToNoise_value = 1;
-    noise_value = 1;
-    uncertainty_value = 1;
-    delay_value = 1;
-
-    // add noise, drift, delay etc to e
-
-    // convert e back to T
   }
 
   else if (_thermocouple_type == "J")
@@ -117,26 +99,26 @@ void ThermocoupleSensorPostprocessor::initialize()
     // J type, temperature in degree celcius
     if (_input_signal >= -210 && _input_signal < 760)
     {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_J_minus_210_to_760);
+      drift_value = 1;
+      efficiency_value = 1;
+      signalToNoise_value = 1;
+      noise_value = 1;
+      uncertainty_value = 1;
+      delay_value = 1;
     }
     else if (_input_signal >= 760 && _input_signal <= 1200)
     {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_J_760_to_1200);
+      drift_value = 1;
+      efficiency_value = 1;
+      signalToNoise_value = 1;
+      noise_value = 1;
+      uncertainty_value = 1;
+      delay_value = 1;
     }
     else
     {
       mooseWarning("Temperature is outside this thermocouple type's operation range.");
     }
-    drift_value = 1;
-    efficiency_value = 1;
-    signalToNoise_value = 1;
-    noise_value = 1;
-    uncertainty_value = 1;
-    delay_value = 1;
-
-    // add noise, drift, delay etc to e
-
-    // convert e back to T
   }
 
   else if (_thermocouple_type == "K")
@@ -144,138 +126,140 @@ void ThermocoupleSensorPostprocessor::initialize()
     // K type, temperature in degree celcius
     if (_input_signal >= -210 && _input_signal < 0)
     {
-      e = evaluateEMF(_input_signal, coeff_C_thermo_type_K_minus_270_to_0);
+      drift_value = 200;
+      efficiency_value = 1;
+      signalToNoise_value = 5;
+      Real noise_std_dev = getNoiseStdDev();
+      noise_value = getNoise(noise_std_dev);
+      Real uncertainty_std_dev = getUncertaintyStdDev();
+      uncertainty_value = getUncertainty(uncertainty_std_dev);
+      delay_value = 0.3;
     }
     else if (_input_signal >= 0 && _input_signal <= 1372)
     {
-      e = evaluateEMFTypeK(_input_signal, coeff_C_thermo_type_K_0_to_1372, coeff_A_thermo_type_K_0_to_1372);
+      drift_value = 200;
+      efficiency_value = 1;
+      signalToNoise_value = 5;
+      Real noise_std_dev = getNoiseStdDev();
+      noise_value = getNoise(noise_std_dev);
+      Real uncertainty_std_dev = getUncertaintyStdDev();
+      uncertainty_value = getUncertainty(uncertainty_std_dev);
+      delay_value = 1;
     }
     else
     {
       mooseWarning("Temperature is outside this thermocouple type's operation range.");
     }
-
-    drift_value = 1;
-    efficiency_value = 1;
-    signalToNoise_value = 1;
-    noise_value = 1;
-    uncertainty_value = 1;
-    delay_value = 1;
-
-    // add noise, drift, delay etc to e
-
-    // convert e back to T
   }
 
   else
     mooseError("The thermocouple you want is invalid or not available.");
 
-  //-------------Misc-------------
-  Real _input_signal_initial;
+  Real _input_signal_delayed = getDelayedInputSignal(delay_value, _time_values, _input_signal_values);
 
-  if (_t == 0)
-    _input_signal_initial = _input_signal;
+ // integral
+  Real term_for_integration = _input_signal + signalToNoise_value * noise_value;
+  _integrand.push_back(term_for_integration);
+  _integration_value = getIntegral(_integrand, _time_values, delay_value);
 
-  Real _input_signal_delayed = getDelayedInputSignal(_input_signal_initial, delay_value);
-
-   //-------------Misc-------------
-  Real for_int_initial;
-
-  if (_t == 0)
-    for_int_initial = (_input_signal_delayed + signalToNoise_value * 1) ; // + signalToNoise_value * normal_value;
-
- //-------------INTEGRAL-------------
-  Real for_int = (_input_signal_delayed + signalToNoise_value * 1) ; // + signalToNoise_value * normal_value;
-  integrand.push_back(for_int);
-  Real integration_value = getIntegral(for_int_initial, integrand, time_values, delay_value);
-
-  //-------------OUTPUT-------------
+  // output
   Real proportional_value = _input_signal_delayed + signalToNoise_value * 1;
   //sensor_value = drift_value + efficiency_value * (_proportional_weight * proportional_value + _integral_weight * integration_value);
-  sensor_value = sensor_value_old + (_input_signal - sensor_value_old) * (1 - exp(-_t/delay_value));
-  sensor_value_old = sensor_value;
-  cout << "sensor_value_old: " << sensor_value_old << endl;
+  if (_t == _time_values[0])
+  {
+    _sensor_value = uncertainty_value + 0;
+  }
+  else
+  {
+    _sensor_value = _sensor_value_old + ((_input_signal /*+ signalToNoise_value * noise_value*/) - _sensor_value_old) * (1 - exp(-_t/delay_value)) + uncertainty_value;
+  }
+
+  _sensor_value_old = _sensor_value - uncertainty_value;
 }
 
 PostprocessorValue
 ThermocoupleSensorPostprocessor::getValue() const
 {
-  return sensor_value;
-  // switch (_thermocouple)
-  // {
-  //   // Switch cases based on thermocouple temperature ranges
-  //   case ThermocoupleType::B:
-  //   {
-  //     if (pp_value < 273.15 || pp_value > 2093.15)
-  //       mooseWarning("Temperature is outside this thermocouple type's operation range.");
-  //   }
-  //   case ThermocoupleType::E:
-  //   {
-  //     if (pp_value < -543.15 || pp_value > 1273.15)
-  //       mooseWarning("Temperature is outside this thermocouple type's operation range.");
-  //   }
-  //   case ThermocoupleType::J:
-  //   {
-  //     if (pp_value < -483.15 || pp_value > 1473.15)
-  //       mooseWarning("Temperature is outside this thermocouple type's operation range.");
-  //   }
-  //   case ThermocoupleType::K:
-  //   {
-  //     if (pp_value < -543.15 || pp_value > 1645.15)
-  //       mooseWarning("Temperature is outside this thermocouple type's operation range.");
-  //   }
-  //   default:
-  //     mooseError("Error, invalid thermocouple type.");
-  // }
-  // If the timestep value is less than or equal to the sensor delay, use the previous value of
-  // the postprocessor
-  // if (_t <= _delay)
-  //   return _pp_old;
-  // else
-  //  return pp_value;
+  return _sensor_value;
 }
 
-Real ThermocoupleSensorPostprocessor::evaluateEMF(Real t_90, const std::vector<Real>& coefficients) // formula different for K type thermocouple for above 0degreeC
+Real ThermocoupleSensorPostprocessor::getIntegral(std::vector<Real> integrand, std::vector<Real> time_values, Real delay_value)
 {
-    Real emf = 0.0;
-    Real t_power = 1.0;
+  Real integration_value;
+  std::vector<Real> exponential_term;
+  // computing vector of exponential term
+  for (size_t i = 0; i < time_values.size(); ++i) 
+      exponential_term.push_back(exp(-(_t - time_values[i])/delay_value)/delay_value); 
 
-    for (Real coefficient : coefficients) 
+  // calculate the total integrand vector including previous integrand and exponential terms
+  integrand = elementwiseMultiply(integrand, exponential_term);
+
+  // if there are more than two datapoints, do simpson's 3/8 rule for integration
+  // else do trapezoidal rule
+  if (time_values.size() > 2)
+  {
+    SplineInterpolation spline(time_values, integrand);
+    // number of intervals
+    Real n; 
+
+    // if number of datapoints is less than 30, use spline interpolation to get 30 intervals
+    if (time_values.size() < 30)
     {
-        emf += coefficient * t_power;
-        t_power *= t_90;
+      n = 30;
+    }   
+    else 
+    {
+      n = time_values.size();
+      // if interval is not a multiple of 3, make it
+      while (static_cast<int>(n) % 3 != 0)
+      {
+        n = n+1;
+      }
+    }
+  
+    Real h = (time_values.back() - time_values[0]) / n; // distance between time values
+    cout << "h is : " << h << endl;
+    // time vector for simpson integration
+    vector<Real> time_vec_simp;
+    // integrand vector for simpson integration
+    vector<Real> integrand_vec_simp;
+
+    for (Real i = 0; i < n+1; i++)
+    {
+      Real new_time = time_values[0] + i*h;
+      time_vec_simp.push_back(new_time);
+      Real new_integrand = spline.SplineInterpolation::sample(new_time);
+      integrand_vec_simp.push_back(new_integrand);
     }
 
-    return emf;
-}
+    // initialize integral with endpoints
+    integration_value = integrand_vec_simp[0] + integrand_vec_simp[n];
 
-Real ThermocoupleSensorPostprocessor::evaluateEMFTypeK(Real t90, const std::vector<Real>& coefficients, const std::vector<Real>& additionalCoefficients) 
-{
-    Real result = 0.0;
-
-    // Evaluate the polynomial part
-    for (size_t i = 0; i < coefficients.size(); ++i) 
+    // Sum for points not at endpoints
+    for (int i = 1; i < n; ++i) 
     {
-        result += coefficients[i] * std::pow(t90, static_cast<Real>(i));
+        if (i % 3 == 0) 
+        { // Every third point
+            integration_value += 2 * integrand_vec_simp[i];
+        } 
+        else 
+        {
+            integration_value += 3 * integrand_vec_simp[i];
+        }
     }
 
-    // Evaluate the exponential part
-    result += additionalCoefficients[0] * std::exp(additionalCoefficients[1] * std::pow(t90 - additionalCoefficients[2], 2.0));
+    // Multiply by 3h/8
+    integration_value *= (3 * h) / 8.0;
+  }
 
-    return result;
-}
+  else
+  {
+    // performing integration by trapezoidal rule, not accurate
+    //LinearInterpolation object with two vectors
+    LinearInterpolation integral(time_values, integrand);
+    //integrate the vectors
+    integration_value = integral.integrate(); 
+  }
 
-Real ThermocoupleSensorPostprocessor::evaluateT(Real E, const std::vector<Real>& coefficients) 
-{
-    Real t_90 = 0.0;
-    Real E_power = 1.0;
-
-    // Evaluate the polynomial expression
-    for (Real coefficient : coefficients) 
-    {
-        t_90 += coefficient * E_power;
-        E_power *= E;
-    }
-
-    return t_90;
+  return integration_value;
 }
