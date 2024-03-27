@@ -20,7 +20,10 @@ DotCouplingKernel::validParams()
 }
 
 DotCouplingKernel::DotCouplingKernel(const InputParameters & parameters)
-  : Kernel(parameters), _v_dot(coupledDot("v")), _dv_dot_dv(coupledDotDu("v"))
+  : Kernel(parameters),
+    _v_var_num(coupled("v")),
+    _v_dot(coupledDot("v")),
+    _dv_dot_dv(coupledDotDu("v"))
 {
 }
 
@@ -31,7 +34,10 @@ DotCouplingKernel::computeQpResidual()
 }
 
 Real
-DotCouplingKernel::computeQpJacobian()
+DotCouplingKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return -_dv_dot_dv[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  if (_v_var_num == jvar)
+    return -_dv_dot_dv[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+
+  return 0.0;
 }

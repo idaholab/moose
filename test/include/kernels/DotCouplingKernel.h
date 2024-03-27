@@ -23,9 +23,10 @@ public:
   virtual ~DotCouplingKernel(){};
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
+  unsigned int _v_var_num;
   const VariableValue & _v_dot;
   const VariableValue & _dv_dot_dv;
 };
