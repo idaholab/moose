@@ -64,7 +64,7 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
   : WCNSFVPhysicsBase(parameters),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
-                                                             : usingWCNSFVPhysics()),
+                                                             : !usingNavierStokesFVSyntax()),
     _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_sources(
         getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
@@ -76,8 +76,6 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
 {
   for (const auto & scalar_name : _passive_scalar_names)
     saveNonlinearVariableName(scalar_name);
-  if (_flow_equations_physics)
-    checkCommonParametersConsistent(_flow_equations_physics->parameters());
 
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -180,8 +178,9 @@ WCNSFVScalarAdvectionPhysics::addScalarAdvectionKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
-  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<MooseEnum>("velocity_interp_method") =
+      _flow_equations_physics->getVelocityInterpolationMethod();
+  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("passive_scalar_advection_interpolation");
 
@@ -352,7 +351,7 @@ WCNSFVScalarAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers =
-      std::max(necessary_layers, WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded());
+      std::max(necessary_layers, _flow_equations_physics->getNumberAlgebraicGhostingLayersNeeded());
   if (getParam<MooseEnum>("passive_scalar_face_interpolation") == "skewness-corrected")
     necessary_layers = std::max(necessary_layers, (unsigned short)3);
 

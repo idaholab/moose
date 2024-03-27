@@ -61,7 +61,7 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
     _has_energy_equation(
         isParamValid("add_energy_equation")
             ? getParam<bool>("add_energy_equation")
-            : (usingWCNSFVPhysics() ? true : isParamSetByUser("energy_inlet_function"))),
+            : (usingNavierStokesFVSyntax() ? isParamSetByUser("energy_inlet_function") : true)),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_blocks(
         parameters.isParamValid("thermal_conductivity_blocks")
@@ -82,8 +82,6 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
     return;
 
   saveNonlinearVariableName(_fluid_temperature_name);
-  if (_flow_equations_physics)
-    checkCommonParametersConsistent(_flow_equations_physics->parameters());
 
   // Parameter checks
   checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
@@ -232,8 +230,9 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
-  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<MooseEnum>("velocity_interp_method") =
+      _flow_equations_physics->getVelocityInterpolationMethod();
+  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");
 
@@ -401,15 +400,18 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
       const std::string bc_type = "WCNSFVEnergyFluxBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      if (_flux_inlet_directions.size())
-        params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
+      const auto flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
+      const auto flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
+
+      if (flux_inlet_directions.size())
+        params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
       if (_energy_inlet_types[bc_ind] == "flux-mass")
       {
-        params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
+        params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
         params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
       }
       else
-        params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
+        params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
 
       params.set<PostprocessorName>("temperature_pp") = _energy_inlet_functors[bc_ind];
       params.set<MooseFunctorName>(NS::density) = _density_name;
@@ -547,7 +549,7 @@ WCNSFVHeatAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers =
-      std::max(necessary_layers, WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded());
+      std::max(necessary_layers, _flow_equations_physics->getNumberAlgebraicGhostingLayersNeeded());
   if (getParam<MooseEnum>("energy_face_interpolation") == "skewness-corrected")
     necessary_layers = std::max(necessary_layers, (unsigned short)3);
 

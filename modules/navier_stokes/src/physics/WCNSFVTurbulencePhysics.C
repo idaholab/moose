@@ -40,9 +40,6 @@ WCNSFVTurbulencePhysics::validParams()
 
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
-  params.addParam<PhysicsName>("coupled_flow_physics",
-                               "NavierStokesFV",
-                               "WCNSFVFlowPhysics generating the Navier Stokes flow equations");
   params.addParam<PhysicsName>(
       "heat_advection_physics",
       "NavierStokesFV",
@@ -164,7 +161,7 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     if (_porous_medium_treatment)
       kernel_name = prefix() + "pins_momentum_mixing_length_reynolds_stress_";
 
-    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+    params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     for (const auto dim_i : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
@@ -292,7 +289,7 @@ WCNSFVTurbulencePhysics::addMaterials()
 unsigned short
 WCNSFVTurbulencePhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
-  unsigned short ghost_layers = WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded();
+  unsigned short ghost_layers = _flow_equations_physics->getNumberAlgebraicGhostingLayersNeeded();
   if (_turbulence_model == "mixing-length")
     ghost_layers = std::max(ghost_layers, (unsigned short)3);
   return ghost_layers;

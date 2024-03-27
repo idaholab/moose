@@ -15,8 +15,6 @@ class WCNSFVFlowPhysics;
 
 #define registerWCNSFVPhysicsBaseTasks(app_name, derived_name)                                     \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
-  registerMooseAction(app_name, derived_name, "add_user_object");                                  \
-  registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
   registerMooseAction(app_name, derived_name, "add_geometric_rm");
 
 /**
@@ -33,52 +31,28 @@ public:
 
   void initializePhysicsAdditional() override;
 
-  /// Add user objects: for now mainly the Rhie Chow user object
-  virtual void addUserObjects() override;
-  /// Add postprocessors, could be moved up to the base class
-  void addPostprocessors() override;
-
-  /// Convenience routine to be able to retrieve the actual variable names from their default names
-  VariableName getFlowVariableName(const std::string & default_name) const;
+  void findCoupledFlowPhysics();
 
 protected:
-  InputParameters getAdditionalRMParams() const override;
-  virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;
-
-  /// Return the name of the Rhie Chow user object
-  std::string rhieChowUOName() const;
-
-  /// Checks that the parameters shared between two flow physics are the same
-  void checkCommonParametersConsistent(const InputParameters & parameters) const override;
-
   /// Detects if we are using the new Physics syntax or the old NavierStokesFV action
-  bool usingWCNSFVPhysics() const
+  bool usingNavierStokesFVSyntax() const
   {
-    return !(parameters().get<std::string>("registered_identifier") == "Modules/NavierStokesFV");
+    return (parameters().get<std::string>("registered_identifier") == "Modules/NavierStokesFV");
   }
+
+  /// Parameters to change or add relationship managers
+  InputParameters getAdditionalRMParams() const override;
+
+  /// Return the number of ghosting layers needed
+  virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const = 0;
 
   /// Whether to define variables if they do not exist
   bool _define_variables;
 
-  /// The velocity / momentum face interpolation method for advecting other quantities
-  const MooseEnum _velocity_interpolation;
-
   /// A physics object defining the flow equations
   const WCNSFVFlowPhysics * _flow_equations_physics;
 
-  /// Postprocessors describing the momentum inlet for each boundary. Indexing based on the number of flux boundaries
-  std::vector<PostprocessorName> _flux_inlet_pps;
-  /// Direction of each flux inlet. Indexing based on the number of flux boundaries
-  std::vector<Point> _flux_inlet_directions;
-
 private:
-  /// Function which adds the RhieChow interpolator user objects for weakly and incompressible formulations
-  void addRhieChowUserObjects();
-
   /// Check whether another flow Physics object has been specified
   bool hasCoupledFlowPhysics() const { return !(!_flow_equations_physics); };
-
-  /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
-  /// for scalar or temperature advection by auxiliary variables
-  void checkRhieChowFunctorsDefined() const;
 };
