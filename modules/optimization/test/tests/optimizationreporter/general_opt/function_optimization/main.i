@@ -17,6 +17,7 @@
   petsc_options_iname = '-tao_gatol'
   petsc_options_value = '1e-8 '
   verbose = true
+  time_step_as_iteration = true
 []
 
 [MultiApps]
@@ -48,6 +49,11 @@
 [Outputs]
   [json]
     type = JSON
+    execute_system_information_on = none
+  []
+  [json_forward]
+    type = JSON
+    execute_on = 'FORWARD TIMESTEP_END'
     execute_system_information_on = none
   []
 []

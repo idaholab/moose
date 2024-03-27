@@ -90,6 +90,9 @@ private:
   /// control optimization executioner output
   bool _verbose;
 
+  /// Use time step as the iteration counter for purposes of outputting
+  bool _time_step_as_iteration;
+
   ///@{
   /// count individual solves for output
   int _obj_iterate = 0;

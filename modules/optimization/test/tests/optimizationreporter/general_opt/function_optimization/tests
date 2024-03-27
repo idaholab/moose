@@ -3,12 +3,12 @@
   [general_optimization]
     type = JSONDiff
     input = main.i
-    jsondiff = main_json.json
+    jsondiff = "main_json.json main_json_forward.json"
     recover = false
     abs_zero = 1.0e-6
     max_threads = 1
 
-    issues = '#24930'
-    requirement = "The system shall be able to minimize an objective function that is reporter transfer using TAO."
+    issues = '#24930 #27193'
+    requirement = "The system shall be able to minimize an objective function that is reporter transfer using TAO and output parameters used for each evaulation."
   []
 []
