@@ -11,6 +11,7 @@
 
 // Local includes
 #include "ViewFactorRayBC.h"
+#include "GeometryUtils.h"
 
 // libMesh includes
 #include "libmesh/parallel_algebra.h"
@@ -265,6 +266,7 @@ ViewFactorRayStudy::generateRays()
   reserveRayBuffer(num_local_rays);
 
   Point direction;
+  unsigned int num_rays_skipped = 0;
 
   // loop through all starting points and spawn rays from each for each point and angle
   for (const auto & start_elem : _start_elems)
@@ -312,6 +314,59 @@ ViewFactorRayStudy::generateRays()
                                 : std::cos(_2d_aq_angles[l]) * _2d_aq_weights[l];
         const auto start_weight = start_elem._weights[start_i] * awf;
 
+        // Skip the ray if it exists the domain through the non-planar side it is starting from.
+        // We do not expect there are any neighbor elements to track it on if it exits the
+        // non-planar side.
+        bool intersection_found = false;
+        if (_is_3d && start_elem._start_elem &&
+            !start_elem._start_elem->neighbor_ptr(start_elem._incoming_side) &&
+            sideIsNonPlanar(start_elem._start_elem, start_elem._incoming_side))
+        {
+          // Find edge on side that is 'in front' of the future ray
+          Point intersection_point(std::numeric_limits<Real>::max(), -1, -1);
+          const auto side_elem = start_elem._start_elem->side_ptr(start_elem._incoming_side);
+          Point proj_dir;
+          for (const auto edge_i : side_elem->side_index_range())
+          {
+            const auto edge_1 = side_elem->side_ptr(edge_i);
+            // Project direction onto (start_point, node 1, node 2)
+            const auto d1 = *edge_1->node_ptr(0) - start_elem._points[start_i];
+            const auto d2 = *edge_1->node_ptr(1) - start_elem._points[start_i];
+            const auto d1_unit = d1.unit();
+            const auto d2_unit = d2.unit();
+            // If the starting point is aligned with the edge, it wont cross it
+            if (MooseUtils::absoluteFuzzyEqual(std::abs(d1_unit * d2_unit), 1))
+              continue;
+            const auto normal = (d1_unit.cross(d2_unit)).unit();
+
+            // One of the nodes must be in front of the start point following the direction
+            if (d1 * direction < 0 && d2 * direction < 0)
+              continue;
+
+            proj_dir = (direction - (direction * normal) * normal).unit();
+
+            // Only the side of interest will have the projected direction in between d1 and d2
+            if ((proj_dir * d2_unit > d1_unit * d2_unit) &&
+                (proj_dir * d1_unit > d1_unit * d2_unit))
+            {
+              const auto dist = geom_utils::distanceFromLine(
+                  start_elem._points[start_i], *edge_1->node_ptr(0), *edge_1->node_ptr(1));
+              // Ortho-normalize the base on the plane
+              intersection_point = start_elem._points[start_i] + dist * proj_dir;
+              intersection_found = true;
+              break;
+            }
+          }
+
+          // Skip the ray if it goes out of the element
+          const auto grazing_dir = (intersection_point - start_elem._points[start_i]).unit();
+          if (intersection_found && inward_normal * direction < inward_normal * grazing_dir)
+          {
+            num_rays_skipped++;
+            continue;
+          }
+        }
+
         // Acquire a Ray and fill with the starting information
         std::shared_ptr<Ray> ray = acquireRay();
         ray->setStart(
@@ -324,6 +379,10 @@ ViewFactorRayStudy::generateRays()
         moveRayToBuffer(ray);
       }
   }
+  if (num_rays_skipped)
+    mooseInfo(num_rays_skipped,
+              " rays were skipped as they exited the mesh at their starting point through "
+              "non-planar sides.");
 }
 
 void

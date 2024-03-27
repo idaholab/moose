@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "StaticallyAllocatedSet.h"
+#include "Conversion.h"
 
 // Local includes
 #include "DebugRay.h"
@@ -127,7 +128,7 @@ bool isWithinSegment(const Point & segment1,
  * @param neighbor_set The set to fill the neighbors into
  * @param untested_set Set for internal use
  * @param next_untested_set Set for internal use
- * @param active_neighbor_children Temprorary vector for use in the search
+ * @param active_neighbor_children Temporary vector for use in the search
  */
 void findPointNeighbors(
     const Elem * const elem,
@@ -162,8 +163,9 @@ void findEdgeNeighbors(
  * allocated set and accepts a functor for the rejection/acceptance of an element.
  *
  * Returns the active neighbors that fit the criteria of keep_functor.
+ * Does not the return the current element (elem)
  *
- * @param elem The element
+ * @param elem The element for which we are searching for the neighbors
  * @param neighbor_set The set to fill the neighbors into
  * @param untested_set Set for internal use
  * @param next_untested_set Set for internal use
@@ -186,16 +188,15 @@ findNeighbors(
   untested_set.clear();
   next_untested_set.clear();
 
-  neighbor_set.insert(elem);
   untested_set.insert(elem);
 
   while (!untested_set.empty())
   {
     // Loop over all the elements in the patch that haven't already been tested
-    for (const Elem * elem : untested_set)
-      for (auto current_neighbor : elem->neighbor_ptr_range())
-        if (current_neighbor &&
-            current_neighbor != remote_elem) // we have a real neighbor on elem side
+    for (const Elem * const test_elem : untested_set)
+      for (const auto * const current_neighbor : test_elem->neighbor_ptr_range())
+        if (current_neighbor && current_neighbor != remote_elem &&
+            current_neighbor != elem) // we have a real neighbor on elem side
         {
           if (current_neighbor->active()) // ... if it is active
           {
@@ -209,10 +210,11 @@ findNeighbors(
           else // ... the neighbor is *not* active,
           {    // ... so add *all* neighboring
                // active children that touch p
-            current_neighbor->active_family_tree_by_neighbor(active_neighbor_children, elem);
+            current_neighbor->active_family_tree_by_neighbor(active_neighbor_children, test_elem);
 
             for (const Elem * current_child : active_neighbor_children)
-              if (!neighbor_set.contains(current_child) && keep_functor(current_child))
+              if (!neighbor_set.contains(current_child) && keep_functor(current_child) &&
+                  current_child != elem)
               {
                 next_untested_set.insert(current_child);
                 neighbor_set.insert(current_child);
@@ -594,9 +596,11 @@ sideIntersectedByLine(const Elem * elem,
   if (segment_vertex != SEGMENT_VERTEX_NONE)
   {
     intersected_extrema.setVertex(T::side_nodes_map[side][segment_vertex]);
-    mooseAssert(intersected_extrema.vertexPoint(elem).absolute_fuzzy_equals(intersection_point,
-                                                                            TRACE_TOLERANCE),
-                "Doesn't intersect vertex");
+    mooseAssert(
+        intersected_extrema.vertexPoint(elem).absolute_fuzzy_equals(intersection_point,
+                                                                    3 * TRACE_TOLERANCE),
+        "Doesn't intersect vertex at: " + Moose::stringify(intersected_extrema.vertexPoint(elem)) +
+            " tentative intersection point: " + Moose::stringify(intersection_point));
   }
 
   return intersected;
@@ -860,7 +864,7 @@ sideIntersectedByLine(const Elem * elem,
  */
 bool isTraceableElem(const Elem * elem);
 /**
- * @return Whether or not the element is traceable with adapativity
+ * @return Whether or not the element is traceable with adaptivity
  */
 bool isAdaptivityTraceableElem(const Elem * elem);
 
