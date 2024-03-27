@@ -16,15 +16,10 @@ messages:
   If the command-line flag `--error-deprecated` is supplied, then these warnings
   are promoted to errors.
 - `mooseInfo(args)`: Emits an informational message formed by concatenating `args`.
-- `mooseDoOnce(statement)`: Executes the statement `statement` only once. Useful
-  for warnings and informational messages that would otherwise occur frequently,
-  such as during residual evaluations or for multiple time steps during a transient.
   Example:
 
-  ```
-  mooseDoOnce(mooseWarning("This correlation is not recommended at this temperature"));
-  ```
-
+!alert note title=Warnings in repeating sections
+For warnings in sections of the code that are often executed, it is better practice to leverage the SolutionInvalidityInterface, which will only output the warning once but keep track of the occurence of the problem. It can also force the solver to reject a converged solution that still presents the warning/invalid condition.
 ## Documented Errors id=documented_errors
 
 The `mooseDocumentedError(repo_name, issue_num, args)` function is used for errors that are tied to
