@@ -182,6 +182,9 @@ ExplicitSSPRungeKutta::postResidual(NumericVector<Number> & residual)
   // The time residual is not included in the steady-state residual
   residual += _Re_non_time;
 
+  // Prevent misbehavior on calls to this method after the solve loop
+  _stage = std::min(_stage, _n_stages - 1);
+
   // Compute \sum_{k=0}^{s-1} a_{s,k} u^(k) - u^(s-1)
   _tmp_solution.zero();
   for (unsigned int k = 0; k <= _stage; k++)
