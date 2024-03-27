@@ -81,16 +81,20 @@ gamma = 1.4
 
 [FVKernels]
   [u_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = superficial_vel_x
-    linear_coef_name = linear_friction_coeff
+    Darcy_name = Darcy_coefficient
     momentum_component = 'x'
+    rho = rho
+    mu = mu
   []
   [v_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = superficial_vel_y
-    linear_coef_name = linear_friction_coeff
+    Darcy_name = Darcy_coefficient
     momentum_component = 'y'
+    rho = rho
+    mu = mu
   []
 []
 
@@ -115,7 +119,7 @@ gamma = 1.4
   [mu_rampdown_fn]
     type = PiecewiseLinear
     x = '0    0.5  1   5  10 100 1000 2000'
-    y = '1000 1000 100 10 1  1   1    0'
+    y = '1000 1000 100 10 1  1   1    1'
   []
 []
 
@@ -137,12 +141,19 @@ gamma = 1.4
     prop_names = 'porosity loss_coeff'
     prop_values = '1       1.3'
   []
-
-  [linear_friction_coeff]
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
+  # backwards compatible with the INSFVMomentumFriction formulation
+  [Darcy_coeff]
     type = ADParsedFunctorMaterial
-    property_name = 'linear_friction_coeff'
-    expression = 'loss_coeff * rho'
-    functor_names = 'loss_coeff rho'
+    property_name = 'Darcy_coeff'
+    expression = 'loss_coeff * rho / mu'
+    functor_names = 'loss_coeff rho mu'
+  []
+
+  [Darcy_coefficient]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient'
+    prop_values = 'Darcy_coeff Darcy_coeff 0.0'
   []
 []
 

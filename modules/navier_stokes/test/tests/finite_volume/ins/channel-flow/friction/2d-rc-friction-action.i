@@ -1,5 +1,6 @@
 mu = 1.1
 rho = 1.1
+coef_linear = ${fparse 25 / mu}
 
 [Mesh]
   [gen]
@@ -34,7 +35,7 @@ rho = 1.1
     pressure_function = '0'
 
     friction_types = 'darcy'
-    friction_coeffs = '25'
+    friction_coeffs = 'friction_coefficient_linear'
 
     mass_advection_interpolation = 'average'
     momentum_advection_interpolation = 'average'
@@ -42,6 +43,47 @@ rho = 1.1
 []
 
 [FunctorMaterials]
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
+  # backwards compatible with the INSFVMomentumFriction formulation
+  [friction_coefficient_linear]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient_linear'
+    prop_values = '${coef_linear} ${coef_linear} ${coef_linear}'
+  []
+  [friction_coefficient_quad_x]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_x'
+    property_name = 'friction_coefficient_quad_x'
+    expression = '2.0 * 25 * abs(vel_x) / ${rho} / speed'
+  []
+  [friction_coefficient_quad_y]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_y'
+    property_name = 'friction_coefficient_quad_y'
+    expression = '2.0 * 25 * abs(vel_y) / ${rho} / speed'
+  []
+  [friction_coefficient_quad]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient_quad'
+    prop_values = 'friction_coefficient_quad_x friction_coefficient_quad_y 0.0'
+  []
+  [friction_coefficient_exp_x]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_x coef_exp'
+    property_name = 'friction_coefficient_exp_x'
+    expression = '2.0 * coef_exp * abs(vel_x) / ${rho} / speed'
+  []
+  [friction_coefficient_exp_y]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_y coef_exp'
+    property_name = 'friction_coefficient_exp_y'
+    expression = '2.0 * coef_exp * abs(vel_y) / ${rho} / speed'
+  []
+  [friction_coefficient_exp]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient_exp'
+    prop_values = 'friction_coefficient_exp_x friction_coefficient_exp_y 0.0'
+  []
   [const]
     type = ADGenericFunctorMaterial
     prop_names = 'rho mu'
@@ -62,9 +104,9 @@ rho = 1.1
     rho = ${rho}
     mu = ${mu}
   []
-  [exponential_friction_coefficient]
-    type = ExponentialFrictionMaterial
-    friction_factor_name = 'friction_coefficient'
+  [coef_exp]
+    type = ExponentialFrictionFunctorMaterial
+    friction_factor_name = 'coef_exp'
     Re = Re
     c1 = 0.25
     c2 = 0.55

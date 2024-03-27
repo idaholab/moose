@@ -2,6 +2,7 @@ mu = 1.1
 rho = 1.1
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
+coef_linear = ${fparse 25 / mu}
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -74,16 +75,20 @@ velocity_interp_method = 'rc'
     pressure = pressure
   []
   [u_friction_linear]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
-    linear_coef_name = friction_coefficient
+    Darcy_name = friction_coefficient_linear
     momentum_component = 'x'
+    rho = ${rho}
+    mu = ${mu}
   []
   [u_friction_quad]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
-    quadratic_coef_name = friction_coefficient
+    Forchheimer_name = friction_coefficient_quad
     momentum_component = 'x'
+    rho = ${rho}
+    speed = speed
   []
 
   [v_advection]
@@ -107,16 +112,20 @@ velocity_interp_method = 'rc'
     pressure = pressure
   []
   [v_friction_linear]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
-    linear_coef_name = friction_coefficient
+    Darcy_name = friction_coefficient_linear
     momentum_component = 'y'
+    rho = ${rho}
+    mu = ${mu}
   []
   [v_friction_quad]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
-    quadratic_coef_name = friction_coefficient
+    Forchheimer_name = friction_coefficient_quad
     momentum_component = 'y'
+    rho = ${rho}
+    speed = speed
   []
 []
 
@@ -154,11 +163,47 @@ velocity_interp_method = 'rc'
 []
 
 [FunctorMaterials]
-  inactive = exponential_friction_coefficient
-  [friction_coefficient]
-    type = ADGenericFunctorMaterial
-    prop_names = 'friction_coefficient'
-    prop_values = '25'
+  # Have material friction factor properties compatible with the PINSFVMomentumFriction formulation and
+  # backwards compatible with the INSFVMomentumFriction formulation
+  inactive = friction_coefficient_exp
+  [friction_coefficient_linear]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient_linear'
+    prop_values = '${coef_linear} ${coef_linear} ${coef_linear}'
+  []
+  [friction_coefficient_quad_x]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_x'
+    property_name = 'friction_coefficient_quad_x'
+    expression = '2.0 * 25 * abs(vel_x) / ${rho} / speed'
+  []
+  [friction_coefficient_quad_y]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_y'
+    property_name = 'friction_coefficient_quad_y'
+    expression = '2.0 * 25 * abs(vel_y) / ${rho} / speed'
+  []
+  [friction_coefficient_quad]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient_quad'
+    prop_values = 'friction_coefficient_quad_x friction_coefficient_quad_y 0.0'
+  []
+  [friction_coefficient_exp_x]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_x coef_exp'
+    property_name = 'friction_coefficient_exp_x'
+    expression = '2.0 * coef_exp * abs(vel_x) / ${rho} / speed'
+  []
+  [friction_coefficient_exp_y]
+    type = ADParsedFunctorMaterial
+    functor_names = 'speed vel_y coef_exp'
+    property_name = 'friction_coefficient_exp_y'
+    expression = '2.0 * coef_exp * abs(vel_y) / ${rho} / speed'
+  []
+  [friction_coefficient_exp]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient_quad'
+    prop_values = 'friction_coefficient_exp_x friction_coefficient_exp_y 0.0'
   []
   [speed_material]
     type = PINSFVSpeedFunctorMaterial
@@ -175,9 +220,9 @@ velocity_interp_method = 'rc'
     rho = ${rho}
     mu = ${mu}
   []
-  [exponential_friction_coefficient]
-    type = ExponentialFrictionMaterial
-    friction_factor_name = 'friction_coefficient'
+  [coef_exp]
+    type = ExponentialFrictionFunctorMaterial
+    friction_factor_name = 'coef_exp'
     Re = Re
     c1 = 0.25
     c2 = 0.55

@@ -31,8 +31,7 @@ F = C_F \frac{\rho_l}{\sqrt{K}} \,,
 where the Ergun coefficient is $C_F = 0.55$ and $\rho_l$ is the density of the liquid phase.
 
 !alert note
-This material is compatible with [INSFVMomentumFriction.md] which multiplies the
-incoming Forchheimer coefficient by the velocity magnitude; it is *incompatible*
+This material is compatible with the previous version of the friction Kernel: INSFVMomentumFriction which multiplies the incoming Forchheimer coefficient by the velocity magnitude; it is *incompatible*
 with [PINSFVMomentumFriction.md] which assumes the incoming Forchheimer
 coefficient already includes multiplication by the velocity magnitude.
 
