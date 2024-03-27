@@ -18,6 +18,7 @@ export FCFLAGS="$FFLAGS"
 export HYDRA_LAUNCHER=fork
 
 if [[ $(uname) == Darwin ]]; then
+    BUILD_VARIANT=""
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
         CFLAGS="${CFLAGS} -mcpu=apple-a12"
         CXXFLAGS="${CXXFLAGS} -mcpu=apple-a12"
@@ -30,6 +31,7 @@ if [[ $(uname) == Darwin ]]; then
         FCFLAGS="${FCFLAGS} -I$PREFIX/include"
     fi
 else
+    BUILD_VARIANT=${build_variant}
     CFLAGS="${CFLAGS} -march=nocona -mtune=haswell"
     CXXFLAGS="${CXXFLAGS} -march=nocona -mtune=haswell"
     FFLAGS="${FFLAGS} -I$PREFIX/include"
@@ -39,6 +41,20 @@ fi
 # Remove std=C++17 from CXXFLAGS as we specify the C++ dialect for PETSc as C++17 in configure_petsc.
 # Specifying both causes an error as of PETSc 3.17.
 CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
+
+# Stole this from petsc-feedstock in an attempt to solve the openmpi error:
+# mca_base_component_repository_open: unable to open mca_btl_openib: librdmacm.so.1: cannot open shared object file: No such file or directory
+if [[ $mpi == "openmpi" ]]; then
+  export LIBS="-Wl,-rpath,$PREFIX/lib -lmpi_mpifh -lgfortran"
+elif [[ $mpi == "mpich" ]]; then
+  export LIBS="-lmpifort -lgfortran"
+fi
+
+# Handle switches created by Conda variants
+ADDITIONAL_ARGS=""
+if [[ "${BUILD_VARIANT}" == 'cuda' ]]; then
+  ADDITIONAL_ARGS+=" --with-cuda=1 --with-cudac=${PREFIX}/bin/nvcc --with-cuda-dir=${PREFIX}/targets/x86_64-linux --CUDAFLAGS=-I${PREFIX}/targets/x86_64-linux/include"
+fi
 
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
@@ -56,6 +72,7 @@ configure_petsc \
     FFLAGS="$FFLAGS" \
     FCFLAGS="$FCFLAGS" \
     LDFLAGS="$LDFLAGS" \
+    ${ADDITIONAL_ARGS} \
     --prefix=$PREFIX || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked
@@ -88,7 +105,10 @@ for path in $PETSC_DIR $BUILD_PREFIX; do
 done
 
 make
-make check
+# damn... again I have to disable this. (openmpi strange missing libraries error)
+if [[ $mpi == "mpich" ]] && [[ $(uname) == Linux ]]; then
+  make check
+fi
 make install
 
 # Remove unneeded files

@@ -2,18 +2,26 @@ mpi:
   - mpich
   - openmpi
 
-moose_petsc:
-  - moose-petsc 3.20.3 mpich_0
-  - moose-petsc 3.20.3 openmpi_0
-
-moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.2.6 mpich_0
-  - moose-libmesh-vtk 9.2.6 openmpi_0
+mpi_version:
+  - 4.1.2
+  - 4.1.6
 
 zip_keys:
   - mpi
-  - moose_petsc
-  - moose_libmesh_vtk
+  - mpi_version
+
+moose_libgfortran5:
+  - libgfortran5 13.2.0 ha4646dd_5                          # [linux]
+  - libgfortran5 13.2.0 h2873a65_3                          # [not arm64 and osx]
+  - libgfortran5 13.2.0 hf226fd6_3                          # [arm64]
+
+moose_clangcc:                                              # [osx]
+  - clang 15.0.7 hac416ee_4                                 # [not arm64 and osx]
+  - clang 15.0.7 haab561b_4                                 # [arm64]
+
+moose_clangxx:                                              # [osx]
+  - clangxx 15.0.7 default_h6b1ee41_4                       # [not arm64 and osx]
+  - clangxx 15.0.7 default_h5c94ee4_4                       # [arm64]
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

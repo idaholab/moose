@@ -31,7 +31,7 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
-TRACKING_LIBRARIES = ['mpich', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
+TRACKING_LIBRARIES = ['mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument
@@ -46,24 +46,9 @@ def undefined(arg, *args, **kwargs):
 JINJA_CONFIG = {'pin_compatible'        : undefined,
                 'pin_subpackage'        : undefined,
                 'compiler'              : undefined,
-                'base_mpich'            : undefined('mpich'),
-                'base_mpicc'            : undefined('mpicc'),
-                'base_mpicxx'           : undefined('mpicxx'),
-                'base_mpifort'          : undefined('mpifort'),
+                'mpi'                   : undefined('mpich|openmpi'),
                 'moose_libgfortran'     : undefined('libgfortran'),
                 'moose_libgfortran5'    : undefined('libgfortran5'),
-                'moose_hdf5'            : undefined('hdf5'),
-                'moose_ld64'            : undefined('ld64'),
-                'moose_libxt'           : undefined('ld64'),
-                'moose_libsm'           : undefined('ld64'),
-                'moose_libx11'          : undefined('libx11'),
-                'moose_libice'          : undefined('libice'),
-                'moose_libxext'         : undefined('libxext'),
-                'moose_mesa_libgl'      : undefined('mesa_libgl'),
-                'moose_xorg_x11'        : undefined('xorg_x11'),
-                'moose_libglu'          : undefined('libglu'),
-                'moose_mesalib'         : undefined('mesalib'),
-                'moose_mpich'           : undefined('moose-mpich'),
                 'moose_petsc'           : undefined('moose-petsc'),
                 'moose_libmesh_vtk'     : undefined('moose-libmesh-vtk'),
                 'moose_libmesh'         : undefined('moose-libmesh'),
@@ -113,6 +98,8 @@ class Versioner:
     @staticmethod
     def parse_args(argv, entities):
         """ parses arguments """
+        # deprecate mpich
+        argv = [x.replace('mpich', 'mpi') for x in argv]
         parser = argparse.ArgumentParser(description='Supplies a hash for a given library')
         parser.add_argument('library', nargs='?', metavar='library', choices=entities,
                             help=f'choose from: {", ".join(entities)}', default='moose-dev')
@@ -361,26 +348,21 @@ class Versioner:
         meta = yaml.safe_load(Versioner.parse_jinja(contents))
         name = meta['package']['name']
         version = meta['package']['version']
-        build = meta['build'].get('string', None)
-        return name, version, build, meta
+        build_string = meta['build'].get('string', None)
+        build_number = meta['build']['number']
+        return name, version, build_string, build_number, meta
 
     @staticmethod
     def conda_meta(package, influential, commit):
         """ produces the conda meta entry """
         # Read the conda-build jinja2 styled template
         contents = Versioner.git_file(influential, commit)
-        name, version, build, meta = Versioner.conda_meta_jinja(contents)
-
-        # Make sure the string is build_<NUMBER>
-        build_re = re.search(r'^build\_([0-9]+)$', build)
-        if not build_re:
-            print(f'fatal: {package} conda build string not understood')
-            sys.exit(1)
+        name, version, build_string, build_number, meta = Versioner.conda_meta_jinja(contents)
 
         return {'name': name,
                 'version': version,
-                'build': int(build_re.group(1)),
-                'install': f'{name}={version}={build}',
+                'build': int(build_number),
+                'install': f'{name}={version}={build_string}',
                 'meta': meta}
 
     @staticmethod
@@ -392,7 +374,7 @@ class Versioner:
         def_package = 'app' if is_app else package
 
         name_base = package
-        if package in ['mpich', 'petsc', 'libmesh', 'wasp']:
+        if package in ['mpi', 'petsc', 'libmesh', 'wasp']:
             name_base = f'moose-{name_base}'
         name_suffix = platform.machine()
         name = f'{name_base}-{name_suffix}'

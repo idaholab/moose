@@ -1,0 +1,87 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   petsc/*
+#   libmesh-vtk/*
+#   peacock/*
+#
+# As well as any directions pertaining to modifying those files.
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set version = "2024.03.15" %}
+
+# HDF5 Version
+{% set hdf5_version = "1.14.3" %}
+
+package:
+  name: moose-mpi
+  version: {{ version }}
+
+source:
+  - path: .
+
+build:
+  number: 0
+  string: {{ mpi }}
+  pin_depends: strict
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+
+requirements:
+  build:
+    - {{ mpi }} {{ mpi_version }}
+    - {{ mpi }}-mpicc
+    - {{ mpi }}-mpicxx
+    - {{ mpi }}-mpifort
+    - {{ moose_libgfortran5 }}
+    - {{ moose_clangcc }}                     # [osx]
+    - {{ moose_clangxx }}                     # [osx]
+    - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+    - gfortran
+
+  run:
+    - {{ mpi }} {{ mpi_version }}
+    - {{ mpi }}-mpicc
+    - {{ mpi }}-mpicxx
+    - {{ mpi }}-mpifort
+    - {{ moose_libgfortran5 }}
+    - {{ moose_clangcc }}                     # [osx]
+    - {{ moose_clangxx }}                     # [osx]
+    - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+    # Cuda pinning runtime requirement        # [linux]
+    - kernel-headers_linux-64 3.10.0          # [linux]
+    - libxt-devel-cos7-x86_64 1.1.5           # [linux]
+    - mkl 2022.2.1                            # [linux]
+    # End Cuda pinning                        # [linux]
+    - automake 1.16.5
+    - libexpat 2.5.0
+    - bison 3.4
+    - zfp 0.5.5
+    - gfortran
+    - autoconf
+    - libtool
+    - cmake
+    - make
+    - m4
+
+  run_constrained:
+    - python <{{3.12}}
+
+test:
+  commands:
+    - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpi.sh
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'A top-level package designed to control environment variables related to conda-forge provided MPICH'
+  description: |
+    MPICH is a high performance and widely portable implementation of the
+    Message Passing Interface (MPI) standard.
+  doc_url: http://www.mpich.org/documentation/guides
+  dev_url: https://wiki.mpich.org/mpich/index.php/Main_Page
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour

@@ -4,18 +4,29 @@
 # If adding a new control key, a change to versioner.py:influential_list will be required
 # (add that control key to 'not_libraries').
 packages:
+  mpi:
+    influential:
+      - apptainer/mpi.def
+      - conda/mpi/meta.yaml
+      - conda/mpi/conda_build_config.yaml
+      - conda/mpi/build.sh
+    apptainer:
+  # Deprecated. The following key (mpich) is only necessary for Civet recipes until the PR
+  # responsible for this change makes it all the way into master.
+  # TODO: remove mpich when able.
   mpich:
     influential:
-      - apptainer/mpich.def
-      - conda/mpich/meta.yaml
-      - conda/mpich/conda_build_config.yaml
-      - conda/mpich/build.sh
+      - apptainer/mpi.def
+      - conda/mpi/meta.yaml
+      - conda/mpi/conda_build_config.yaml
+      - conda/mpi/build.sh
     apptainer:
+  # END Deprecated mpich key
   petsc:
     dependencies:
-      - mpich
+      - mpi
     apptainer:
-      from: mpich
+      from: mpi
     influential:
       - petsc
       - apptainer/petsc.def

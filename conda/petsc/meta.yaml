@@ -10,9 +10,6 @@
 {% set build = 0 %}
 {% set version = "3.20.3" %}
 
-# permanent
-{% set strbuild = "build_" + build|string %}
-
 package:
   name: moose-petsc
   version: {{ version }}
@@ -25,29 +22,44 @@ source:
 
 build:
   number: {{ build }}
-  string: {{ strbuild }}
+  string: {{ mpi }}_{{ build_variant }}_{{ build }}      # [linux]
+  string: {{ mpi }}_{{ build }}                          # [osx]
+  features:                                              # [build_variant == "cuda" and linux]
+    - cuda                                               # [build_variant == "cuda" and linux]
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
   run_exports:
     - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
 
 requirements:
   build:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
     - pkg-config
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
   host:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
   run:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
 
 test:
   requires:
     - pkg-config
-    - {{ moose_mpich }}
-
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - cuda                                               # [build_variant == "cuda" and linux]
+    - pytorch-gpu                                        # [build_variant == "cuda" and linux]
   files:
     - tests/ex1.c
     - tests/ex1f.F90

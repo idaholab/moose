@@ -1,5 +1,13 @@
-moose_mpich:
-  - moose-mpich 4.0.2 build_15
+mpi:
+  - mpich
+  - openmpi
+
+moose_mpi:
+  - moose-mpi 2024.03.15
+
+build_variant:                                              # [linux]
+  - cuda                                                    # [linux]
+  - nocuda                                                  # [linux]
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

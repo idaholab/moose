@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.11.29" %}
+{% set version = "2024.03.15" %}
 
 package:
   name: moose-peacock
@@ -16,22 +16,23 @@ build:
   number: 0
 
 requirements:
-  host:
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a # [osx]
   run:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
     - pyaml
     - numpy
     - pandas
     - pyqt
     - matplotlib
     - vtk
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
-  # Python min/max constraints
+    # Cuda pinnings follow # [linux]
+    - openh264 2.4.1       # [linux]
+    - libvpx 1.14.0        # [linux]
+    - libopenvino 2024.0.0 # [linux]
+
   run_constrained:
-    - python <{{3.11}}
+    # Python max constraints
+    - python <{{3.12}}
 
 test:
   imports:
