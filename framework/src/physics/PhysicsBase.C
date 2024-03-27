@@ -307,19 +307,20 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
     _console << "Empty block restriction assigned, did you mean to do this?" << std::endl;
 }
 
-void
+bool
 PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
-                                            const std::vector<SubdomainName> & blocks) const
+                                            const std::vector<SubdomainName> & blocks,
+                                            bool error_if_not_identical) const
 {
   // If identical, we can return fast
   if (_blocks == blocks)
-    return;
+    return true;
   // If one is block restricted to anywhere and the other is block restricted to anywhere manually
   if ((std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end() &&
        allMeshBlocks(blocks)) ||
       (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end() &&
        allMeshBlocks(_blocks)))
-    return;
+    return true;
 
   // Copy, sort and unique is the only way to check that they are actually the same
   auto copy_blocks = _blocks;
@@ -331,23 +332,26 @@ PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
                           copy_blocks_other.end());
 
   if (copy_blocks == copy_blocks_other)
-    return;
+    return true;
   std::vector<SubdomainName> diff;
   std::set_difference(copy_blocks.begin(),
                       copy_blocks.end(),
                       copy_blocks_other.begin(),
                       copy_blocks_other.end(),
                       std::inserter(diff, diff.begin()));
-  mooseError("Physics '",
-             name(),
-             "' and object '",
-             object_name,
-             "' have different block restrictions.\nPhysics: ",
-             Moose::stringify(_blocks),
-             "\nObject: ",
-             Moose::stringify(blocks),
-             "\nDifference: ",
-             Moose::stringify(diff));
+  if (error_if_not_identical)
+    mooseError("Physics '",
+               name(),
+               "' and object '",
+               object_name,
+               "' have different block restrictions.\nPhysics: ",
+               Moose::stringify(_blocks),
+               "\nObject: ",
+               Moose::stringify(blocks),
+               "\nDifference: ",
+               Moose::stringify(diff));
+  else
+    return false;
 }
 
 bool

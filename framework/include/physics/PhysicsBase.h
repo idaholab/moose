@@ -49,6 +49,9 @@ public:
   /// Get a Physics from the ActionWarehouse with the requested type and name
   template <typename T>
   const T * getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail = false) const;
+  /// Get all Physics from the ActionWarehouse with the requested type
+  template <typename T>
+  const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
 
   /// Utilities to merge two Physics of the same type together
   /// Check that parameters are compatible for a merge with another Physics
@@ -153,8 +156,9 @@ protected:
   void checkBlockwiseConsistency(const std::string & block_param_name,
                                  const std::vector<std::string> & parameter_names) const;
   /// Check if an external object has the same block restriction
-  void checkBlockRestrictionIdentical(const std::string & object_name,
-                                      const std::vector<SubdomainName> & blocks) const;
+  bool checkBlockRestrictionIdentical(const std::string & object_name,
+                                      const std::vector<SubdomainName> & blocks,
+                                      const bool error_if_not_identical = true) const;
   /// Check that all shared parameters are consistent: if set (default or user), set to the same value
   void checkCommonParametersConsistent(const InputParameters & parameters) const;
   template <typename T>
@@ -189,6 +193,8 @@ protected:
   /// Keep track of the subdomains the Physics is defined on
   std::vector<SubdomainName> _blocks;
 
+  /// Return the blocks this physics is defined on
+  const std::vector<SubdomainName> & blocks() const { return _blocks; }
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
   /// Check if a vector contains all the mesh blocks
@@ -277,6 +283,17 @@ PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name, const bool allow_f
                "'");
   else
     return nullptr;
+}
+
+template <typename T>
+const std::vector<T *>
+PhysicsBase::getCoupledPhysics(const bool allow_fail) const
+{
+  const auto all_T_physics = _awh.getActions<T>();
+  if (!allow_fail && all_T_physics.empty())
+    mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
+  else
+    return all_T_physics;
 }
 
 template <typename T>
