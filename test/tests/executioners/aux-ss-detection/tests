@@ -1,10 +1,10 @@
 [Tests]
   design = 'Transient.md'
-  issues = '#19955'
+  issues = '#19955 #23840'
   [aux-ss]
     type = Exodiff
-    input = test_with_external_prob.i
-    exodiff = test_with_external_prob_out.e
+    input = simple_transient_diffusion.i
+    exodiff = simple_transient_diffusion_out.e
     requirement = 'The system shall be able to detect steady-states using the auxiliary system solution.'
   []
 []

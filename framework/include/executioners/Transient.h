@@ -300,6 +300,9 @@ protected:
   /// steady-state, this member should probably be be false.
   const bool _normalize_solution_diff_norm_by_dt;
 
+  /// Determines whether the problem has converged to steady state
+  bool convergedToSteadyState() const;
+
 private:
   /// Constrain the timestep dt_cur by looking at the timesteps for the MultiApps on execute_on
   void constrainDTFromMultiApp(Real & dt_cur,
