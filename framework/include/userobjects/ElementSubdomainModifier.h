@@ -21,10 +21,12 @@ public:
   ElementSubdomainModifier(const InputParameters & parameters);
 
   virtual void initialSetup() override;
+  virtual void timestepSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & /*uo*/) override;
   virtual void finalize() override;
+  virtual void meshChanged() override;
 
 protected:
   /// Compute the subdomain ID of the current element
@@ -62,16 +64,30 @@ protected:
     return _complement_moving_boundary_name;
   }
 
-  /// Range of the elements who changed their subdomain ID
-  ConstElemRange & movedElemsRange() const { return *_moved_elems_range; }
+  /// Range of activated elements
+  ConstElemRange & activatedElemsRange() const { return *_activated_elems_range; }
 
-  /// Range of the boundary nodes on moved elements
-  ConstBndNodeRange & movedBndNodesRange() const { return *_moved_bnd_nodes_range; }
+  /// Range of activated nodes
+  ConstNodeRange & activatedNodesRange() const { return *_activated_nodes_range; }
+
+  /// Range of activated boundary nodes
+  ConstBndNodeRange & activatedBndNodesRange() const { return *_activated_bnd_nodes_range; }
 
   /// Pointer to the displaced problem
   DisplacedProblem * _displaced_problem;
 
+  /// Nonlinear system
+  NonlinearSystemBase & _nl_sys;
+
+  /// Auxiliary system
+  AuxiliarySystem & _aux_sys;
+
 private:
+  /// Serialize the old solution
+  void serializeSolutionOld(dof_id_type ndof,
+                            SystemBase & sys,
+                            std::unique_ptr<NumericVector<Real>> & sol);
+
   /// Set the name of the moving boundary. Create the nodeset/sideset if not exist.
   void setMovingBoundaryName(MooseMesh & mesh);
 
@@ -97,14 +113,24 @@ private:
   /// Change the subdomain ID of all ancestor elements
   void setAncestorsSubdomainIDs(const SubdomainID & subdomain_id, const dof_id_type & elem_id);
 
-  /// Helper function to build the range of moved elements
-  void buildMovedElemsRange();
+  /// Helper function to build the range of activated elements
+  void buildActivatedElemsRange();
 
-  /// Helper function to build the range of boundary nodes on moved elements
-  void buildMovedBndNodesRange();
+  /// Helper function to build the range of activated nodes
+  void buildActivatedNodesRange();
 
-  /// Set old and older solutions to be the same as the current solution
-  void setOldAndOlderSolutionsForMovedNodes(SystemBase & sys);
+  /// Helper function to build the range of activated boundary nodes
+  void buildActivatedBndNodesRange();
+
+  /// Find nearest dofs for each variable
+  void findNearestDofs(SystemBase &, const VariableName &);
+
+  /// Set current solution to be the same as the nearest dof's old value
+  void
+  setNearestSolutionForActivatedDofs(SystemBase &, const VariableName &, NumericVector<Real> &);
+
+  /// Set activated dofs to constant
+  void setConstantForActivatedDofs(SystemBase & sys, const VariableName & var_name);
 
   /// Elements on the undisplaced mesh whose subdomain IDs have changed
   std::vector<const Elem *> _moved_elems;
@@ -112,17 +138,35 @@ private:
   /// Elements on the displaced mesh whose subdomain IDs have changed
   std::vector<const Elem *> _moved_displaced_elems;
 
-  /// Nodes on the moved elements
-  std::set<dof_id_type> _moved_nodes;
+  /// Newly activated elements
+  std::vector<const Elem *> _activated_elems;
 
-  /// Range of the moved elements
-  std::unique_ptr<ConstElemRange> _moved_elems_range;
+  /// Newly activated nodes
+  std::vector<const Node *> _activated_nodes;
 
-  /// Range of the boundary nodes on the moved elements
-  std::unique_ptr<ConstBndNodeRange> _moved_bnd_nodes_range;
+  /// Newly activated boundary nodes
+  std::vector<const BndNode *> _activated_bnd_nodes;
 
-  /// Whether to re-apply ICs on moved elements and moved nodes
-  const bool _apply_ic;
+  /// Range of activated elements
+  std::unique_ptr<ConstElemRange> _activated_elems_range;
+
+  /// Range of activated nodes
+  std::unique_ptr<ConstNodeRange> _activated_nodes_range;
+
+  /// Range of activated boundary nodes
+  std::unique_ptr<ConstBndNodeRange> _activated_bnd_nodes_range;
+
+  /// Do we need to initialize any variable?
+  const std::vector<VariableName> _init_vars;
+
+  /// The strategy used to apply "initial condition" for newly activated nodes
+  std::vector<MooseEnum> _init_strategy;
+
+  /// The constant to use for _init_strategy == "CONSTANT"
+  std::map<VariableName, Real> _init_constant;
+
+  /// The active subdomains on which the problem is being solved
+  const std::vector<SubdomainID> _active_subdomains;
 
   /// Whether a moving boundary name is provided
   const bool _moving_boundary_specified;
@@ -154,4 +198,20 @@ private:
 
   /// Subdomains between that the moving boundary is
   std::set<SubdomainID> _moving_boundary_subdomains;
+
+  /// Nearest dofs for each variable
+  std::map<unsigned int, std::map<dof_id_type, std::vector<dof_id_type>>> _elem_nearest_dofs;
+  std::map<unsigned int, std::map<dof_id_type, std::vector<dof_id_type>>> _node_nearest_dofs;
+
+  /// Number of dofs in nonlinear system
+  dof_id_type _nl_ndof;
+
+  /// The serialized nonlinear solution vector
+  std::unique_ptr<NumericVector<Real>> _nl_sol_old;
+
+  /// Number of dofs in aux system
+  dof_id_type _aux_ndof;
+
+  /// The serialized aux solution vector
+  std::unique_ptr<NumericVector<Real>> _aux_sol_old;
 };

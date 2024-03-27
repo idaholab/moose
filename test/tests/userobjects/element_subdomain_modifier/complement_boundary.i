@@ -64,6 +64,7 @@
   [w_complement_mvg_bnd]
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'temperature'
+    initialize_variables = 'temperature'
     block = '1'
     criterion_type = ABOVE
     threshold = 400
