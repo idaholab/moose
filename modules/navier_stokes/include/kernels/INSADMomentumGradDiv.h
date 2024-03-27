@@ -27,6 +27,7 @@ protected:
   /// The grad-div stabilization coefficient
   const Real _gamma;
 
+  /// Coordinate system of the mesh
   const Moose::CoordinateSystemType & _coord_sys;
 
   /// The radial coordinate index for RZ coordinate systems

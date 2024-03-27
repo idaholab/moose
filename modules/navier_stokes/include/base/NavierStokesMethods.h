@@ -160,6 +160,9 @@ divergence(const TensorValue<T> & gradient,
            const Moose::CoordinateSystemType & coord_sys,
            const unsigned int rz_radial_coord)
 {
+  mooseAssert((coord_sys == Moose::COORD_XYZ) || (coord_sys == Moose::COORD_RZ),
+              "This function only supports calculations of divergence in Cartesian and "
+              "axisymmetric coordinate systems");
   auto div = gradient.tr();
   if (coord_sys == Moose::COORD_RZ)
     // u_r / r

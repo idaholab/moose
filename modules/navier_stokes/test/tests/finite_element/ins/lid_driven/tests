@@ -111,7 +111,7 @@ finite elements for velocity and pressure.'
       input = 'steady_vector_fsp_al.i'
       exodiff = 'steady_vector_fsp_al_exo.e'
       petsc_version = '>=3.20.0'
-      detail = 'a high Reynolds number (100) Navier-Stokes problem with a grad-div stabilization.'
+      detail = 'a high Reynolds number (1000) Navier-Stokes problem with a grad-div stabilization.'
     []
   []
   [ad_lid_driven]

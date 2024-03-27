@@ -43,7 +43,7 @@ The field split options are shown in
 In this case we only wish to display the effectiveness of the pressure mass
 matrix as a preconditioner for the Schur complement, so we use LU solves for
 inverting the velocity block and $M_p$. Indeed for $\nu=10^{-3}$ (equivalent to
-$\textrm{Re}=1000$), the solution of the Schur complement system takes no more
+$\textrm{Re}=1000$), the solution of the Schur complement system to a relative tolerance of ($10^{-2}$) takes no more
 than 4 Krylov iterations when running on grids ranging from 8x8 to
 32x32. Scalable solves for the velocity block in the context of augmented
 Lagrange formulations are the subject of [!cite](benzi2023solving).
