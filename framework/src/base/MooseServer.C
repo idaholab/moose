@@ -21,7 +21,7 @@
 #include "JsonSyntaxTree.h"
 #include "FileLineInfo.h"
 #include "pcrecpp.h"
-#include "hit.h"
+#include "hit/hit.h"
 #include "wasphit/HITInterpreter.h"
 #include "waspcore/utils.h"
 #include <algorithm>

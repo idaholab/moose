@@ -21,7 +21,7 @@
 #include "libmesh/simple_range.h"
 
 #include "pcrecpp.h"
-#include "parse.h"
+#include "hit/parse.h"
 
 #include <cmath>
 #include <filesystem>

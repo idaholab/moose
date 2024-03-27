@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "parse.h"
+#include "hit/parse.h"
 
 namespace hit
 {
