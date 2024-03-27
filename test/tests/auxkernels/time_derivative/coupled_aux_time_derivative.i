@@ -56,7 +56,7 @@
   [./g_k]
     type = DotCouplingAux
     variable = g
-    v = f
+    v = u
   [../]
 []
 
@@ -74,6 +74,7 @@
   dt = 0.1
   num_steps = 2
 
+  solve_type = linear
   nl_abs_tol = 1.e-15
 []
 
