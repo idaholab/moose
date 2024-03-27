@@ -1,7 +1,7 @@
 // Disabling this for now because we don't need it
 #if 0
 
-#include "http.h"
+#include "tinyhttp/http.h"
 
 #ifndef TINYHTTP_WS
 #warning                                                                                           \
@@ -357,7 +357,7 @@ void WebsockClientHandler::sendRaw(uint8_t opcode, const void* data, size_t leng
 
     if (!data)
         length = 0;
-    
+
     const uint8_t* data_u8 = reinterpret_cast<const uint8_t*>(data);
     uint32_t key = static_cast<uint32_t>(rand());
 
@@ -399,7 +399,7 @@ void WebsockClientHandler::sendRaw(uint8_t opcode, const void* data, size_t leng
         } else {
             memcpy(packetBuffer + headerPosition, data_u8 + bufferPosition, lengthToSend);
         }
-        
+
         try {
             mClient->send(packetBuffer, lengthToSend + headerPosition);
         } catch (std::runtime_error& e) {

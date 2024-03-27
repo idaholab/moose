@@ -1,7 +1,7 @@
 #pragma once
 
-#include "minijson.h"
-#include "jsonException.h"
+#include "minijson/minijson.h"
+#include "minijson/jsonException.h"
 
 namespace miniJson
 {

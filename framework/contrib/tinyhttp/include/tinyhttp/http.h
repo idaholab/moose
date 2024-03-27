@@ -41,12 +41,12 @@
 #include <atomic>
 
 #ifdef TINYHTTP_JSON
-#include <minijson.h>
+#include "minijson/minijson.h"
 #include <cstring>
 #endif
 
 #ifdef TINYHTTP_TEMPLATES
-#include <HTMLTemplate.h>
+#include "tinyhttp/HTMLTemplate.h"
 #endif
 
 enum class HttpRequestMethod
