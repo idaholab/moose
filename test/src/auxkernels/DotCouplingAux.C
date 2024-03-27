@@ -30,5 +30,6 @@ DotCouplingAux::~DotCouplingAux() {}
 Real
 DotCouplingAux::computeValue()
 {
+  std::cout << "DotCouplingAux::computeValue() " << _v_dot[_qp] << std::endl;
   return _v_dot[_qp];
 }
