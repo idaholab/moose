@@ -23,11 +23,13 @@
     input = stokes-lid-driven.i
     csvdiff = stokes-lid-driven_out.csv
     requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization of Stokes flow shall be symmetric.'
+    installation_type = 'in_tree' # uses JIT
   []
   [matrix_testing]
     type = CSVDiff
     input = matrix-testing.i
     csvdiff = matrix-testing_out.csv
     requirement = 'The system shall be able to generate the product of B_{up} * M_p^{-1} * B_{pu}.'
+    installation_type = 'in_tree' # uses JIT
   []
 []

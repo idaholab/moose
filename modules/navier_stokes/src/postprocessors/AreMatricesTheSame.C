@@ -10,7 +10,7 @@
 #include "AreMatricesTheSame.h"
 
 #include "MooseUtils.h"
-#include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_matrix.h"
 
 registerMooseObject("NavierStokesApp", AreMatricesTheSame);
 
@@ -19,8 +19,8 @@ AreMatricesTheSame::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report whether two matrices are the same or not.");
-  params.addRequiredParam<std::string>("mat1", "The matlab like mat file containing matrix1");
-  params.addRequiredParam<std::string>("mat2", "The matlab like mat file containing matrix2");
+  params.addRequiredParam<std::string>("mat1", "The petsc binary mat file containing matrix1");
+  params.addRequiredParam<std::string>("mat2", "The petsc binary mat file containing matrix2");
   params.addParam<Real>("equivalence_tol", 1e-8, "The relative tolerance for comparing symmetry");
   return params;
 }
@@ -36,10 +36,28 @@ AreMatricesTheSame::AreMatricesTheSame(const InputParameters & parameters)
 void
 AreMatricesTheSame::initialize()
 {
-  _mat1 = SparseMatrix<Number>::build(_communicator);
-  _mat2 = SparseMatrix<Number>::build(_communicator);
-  _mat1->read_matlab(_mat1_name);
-  _mat2->read_matlab(_mat2_name);
+  auto load_matrix = [this](Mat mat, const std::string & mat_name)
+  {
+    PetscViewer matviewer;
+    auto ierr =
+        PetscViewerBinaryOpen(_communicator.get(), mat_name.c_str(), FILE_MODE_READ, &matviewer);
+    LIBMESH_CHKERR(ierr);
+    MatLoad(mat, matviewer);
+    LIBMESH_CHKERR(ierr);
+    ierr = PetscViewerDestroy(&matviewer);
+    LIBMESH_CHKERR(ierr);
+  };
+
+  auto ierr = MatCreate(_communicator.get(), &_petsc_mat1);
+  LIBMESH_CHKERR(ierr);
+  load_matrix(_petsc_mat1, _mat1_name);
+
+  ierr = MatCreate(_communicator.get(), &_petsc_mat2);
+  LIBMESH_CHKERR(ierr);
+  load_matrix(_petsc_mat2, _mat2_name);
+
+  _mat1 = std::make_unique<PetscMatrix<Number>>(_petsc_mat1, _communicator);
+  _mat2 = std::make_unique<PetscMatrix<Number>>(_petsc_mat2, _communicator);
 }
 
 void
@@ -67,6 +85,17 @@ void
 AreMatricesTheSame::finalize()
 {
   _communicator.min(_equiv);
+
+  if (_petsc_mat1)
+  {
+    auto ierr = MatDestroy(&_petsc_mat1);
+    LIBMESH_CHKERR(ierr);
+  }
+  if (_petsc_mat2)
+  {
+    auto ierr = MatDestroy(&_petsc_mat2);
+    LIBMESH_CHKERR(ierr);
+  }
 }
 
 Real

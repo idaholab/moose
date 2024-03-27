@@ -84,7 +84,20 @@ PrintMatricesNSProblem::onTimestepEnd()
   auto & system_size_mass_matrix = nl.getMatrix(mass_matrix_tag_id);
   auto & system_matrix = nl.nonlinearSolver()->system().get_system_matrix();
 
+  auto write_matrix = [this](Mat write_mat, const std::string & mat_name)
+  {
+    PetscViewer matviewer;
+    auto ierr =
+        PetscViewerBinaryOpen(_communicator.get(), mat_name.c_str(), FILE_MODE_WRITE, &matviewer);
+    LIBMESH_CHKERR(ierr);
+    MatView(write_mat, matviewer);
+    LIBMESH_CHKERR(ierr);
+    ierr = PetscViewerDestroy(&matviewer);
+    LIBMESH_CHKERR(ierr);
+  };
+
   auto do_vel_p = [this,
+                   write_matrix,
                    &vel_indices,
                    &system_size_mass_matrix,
                    &system_matrix,
@@ -116,7 +129,7 @@ PrintMatricesNSProblem::onTimestepEnd()
     _console << std::endl << "Printing the '" << matrix_name << "' matrix" << std::endl;
     PetscMatrix<Number> product(product_mat, _communicator);
     product.print();
-    product.print_matlab(matrix_name + std::string(".mat"));
+    write_matrix(product.mat(), matrix_name + std::string(".mat"));
     ierr = MatDestroy(&product_mat);
     LIBMESH_CHKERR(ierr);
   };
@@ -133,6 +146,6 @@ PrintMatricesNSProblem::onTimestepEnd()
     auto & system_size_jump_matrix = nl.getMatrix(jump_matrix_tag_id);
     system_size_jump_matrix.create_submatrix(jump_mat, vel_indices, vel_indices);
     jump_mat.print();
-    jump_mat.print_matlab(jump_name + std::string(".mat"));
+    write_matrix(jump_mat.mat(), jump_name + std::string(".mat"));
   }
 }
