@@ -150,7 +150,7 @@ POD::computePOD(const VariableName & vname,
   // We start extracting the basis functions and the singular values.
 
   // Find the local size needed for u
-  dof_id_type local_snapsize;
+  dof_id_type local_snapsize = 0;
   LIBMESH_CHKERR(MatGetLocalSize(mat, NULL, numeric_petsc_cast(&local_snapsize)));
 
   PetscVector<Real> u(_communicator);
