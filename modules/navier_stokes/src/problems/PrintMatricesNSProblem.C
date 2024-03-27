@@ -63,7 +63,7 @@ PrintMatricesNSProblem::onTimestepEnd()
   const auto & u_var = nl.getVariable(0, getParam<NonlinearVariableName>("u"));
   const auto & v_var = nl.getVariable(0, getParam<NonlinearVariableName>("v"));
   const auto & p_var = nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure));
-  const MooseVariableFieldBase * pb_var;
+  const MooseVariableFieldBase * pb_var = nullptr;
   if (has_pbar)
     pb_var = &nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure + "_bar"));
 
@@ -82,7 +82,9 @@ PrintMatricesNSProblem::onTimestepEnd()
   PetscMatrix<Number> vel_p_mat(_communicator), p_vel_mat(_communicator), p_mass_mat(_communicator);
   const auto mass_matrix_tag_id = getMatrixTagID(_mass_matrix);
   auto & system_size_mass_matrix = nl.getMatrix(mass_matrix_tag_id);
-  auto & system_matrix = nl.nonlinearSolver()->system().get_system_matrix();
+  auto * const system_matrix =
+      dynamic_cast<PetscMatrix<Number> *>(&nl.nonlinearSolver()->system().get_system_matrix());
+  mooseAssert(system_matrix, "Must be a PETSc matrix");
 
   auto write_matrix = [this](Mat write_mat, const std::string & mat_name)
   {
@@ -100,30 +102,72 @@ PrintMatricesNSProblem::onTimestepEnd()
                    write_matrix,
                    &vel_indices,
                    &system_size_mass_matrix,
-                   &system_matrix,
+                   system_matrix,
                    &vel_p_mat,
                    &p_vel_mat,
                    &p_mass_mat](const auto & pressure_indices, const auto & matrix_name)
   {
     system_size_mass_matrix.create_submatrix(p_mass_mat, pressure_indices, pressure_indices);
-    system_matrix.create_submatrix(vel_p_mat, vel_indices, pressure_indices);
-    system_matrix.create_submatrix(p_vel_mat, pressure_indices, vel_indices);
+    system_matrix->create_submatrix(vel_p_mat, vel_indices, pressure_indices);
+    system_matrix->create_submatrix(p_vel_mat, pressure_indices, vel_indices);
 
-    PetscVector<Number> p_mass_mat_diag(_communicator);
-    p_mass_mat_diag.init(p_mass_mat.m(), p_mass_mat.local_m(), false, PARALLEL);
-    p_mass_mat.get_diagonal(p_mass_mat_diag);
-    p_mass_mat_diag.reciprocal();
+    Mat B, X, Mb;
 
-    auto ierr = MatDiagonalSet(p_mass_mat.mat(), p_mass_mat_diag.vec(), INSERT_VALUES);
+    // Create B
+    auto ierr = MatCreateDense(_communicator.get(),
+                               p_mass_mat.local_m(),
+                               p_mass_mat.local_n(),
+                               p_mass_mat.m(),
+                               p_mass_mat.n(),
+                               nullptr,
+                               &B);
+    LIBMESH_CHKERR(ierr);
+    const PetscScalar one = 1.0;
+    for (const auto i : make_range(p_mass_mat.row_start(), p_mass_mat.row_stop()))
+    {
+      const auto petsc_i = cast_int<PetscInt>(i);
+      ierr = MatSetValues(B, 1, &petsc_i, 1, &petsc_i, &one, INSERT_VALUES);
+      LIBMESH_CHKERR(ierr);
+    }
+    ierr = MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
+    LIBMESH_CHKERR(ierr);
+    ierr = MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
+    LIBMESH_CHKERR(ierr);
+
+    // Create X
+    ierr = MatCreateDense(_communicator.get(),
+                          p_mass_mat.local_m(),
+                          p_mass_mat.local_n(),
+                          p_mass_mat.m(),
+                          p_mass_mat.n(),
+                          nullptr,
+                          &X);
+    LIBMESH_CHKERR(ierr);
+
+    // Factor A (Mb)
+    // MatType default_type;
+    // ierr = MatGetType(system_matrix->mat(), &default_type);
+    // LIBMESH_CHKERR(ierr);
+    // ierr = MatCreate(_communicator.get(), &Mb);
+    // LIBMESH_CHKERR(ierr);
+    // ierr =
+    //     MatSetSizes(Mb, p_mass_mat.local_m(), p_mass_mat.local_n(), p_mass_mat.m(),
+    //     p_mass_mat.n());
+    // LIBMESH_CHKERR(ierr);
+    // ierr = MatSetType(Mb, default_type);
+    // LIBMESH_CHKERR(ierr);
+    ierr = MatConvert(p_mass_mat.mat(), MATDENSE, MAT_INITIAL_MATRIX, &Mb);
+    LIBMESH_CHKERR(ierr);
+    ierr = MatLUFactor(Mb, nullptr, nullptr, nullptr);
+    LIBMESH_CHKERR(ierr);
+
+    // Solve for X
+    ierr = MatMatSolve(Mb, B, X);
     LIBMESH_CHKERR(ierr);
 
     Mat product_mat;
-    ierr = MatMatMatMult(vel_p_mat.mat(),
-                         p_mass_mat.mat(),
-                         p_vel_mat.mat(),
-                         MAT_INITIAL_MATRIX,
-                         PETSC_DEFAULT,
-                         &product_mat);
+    ierr = MatMatMatMult(
+        vel_p_mat.mat(), X, p_vel_mat.mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &product_mat);
     LIBMESH_CHKERR(ierr);
 
     _console << std::endl << "Printing the '" << matrix_name << "' matrix" << std::endl;
@@ -131,6 +175,10 @@ PrintMatricesNSProblem::onTimestepEnd()
     product.print();
     write_matrix(product.mat(), matrix_name + std::string(".mat"));
     ierr = MatDestroy(&product_mat);
+    LIBMESH_CHKERR(ierr);
+    ierr = MatDestroy(&B);
+    LIBMESH_CHKERR(ierr);
+    ierr = MatDestroy(&X);
     LIBMESH_CHKERR(ierr);
   };
 
