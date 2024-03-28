@@ -907,7 +907,10 @@ storeHelper(std::ostream & stream, UniqueStorage<T> & data, void * context)
   dataStore(stream, size, nullptr);
 
   for (const auto i : index_range(data))
+  {
+    mooseAssert(data.hasValue(i), "Data doesn't have a value");
     storeHelper(stream, data.pointerValue(i), context);
+  }
 }
 
 // Scalar Helper Function
@@ -989,6 +992,7 @@ loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context)
 {
   std::size_t size;
   dataLoad(stream, size, nullptr);
+  data.resize(size);
 
   for (const auto i : index_range(data))
     loadHelper(stream, data.pointerValue(i), context);
