@@ -392,8 +392,7 @@ class Tester(MooseObject):
                             'stderr': e,
                             'close_fds': False,
                             'shell': use_shell,
-                            'cwd': cwd,
-                            'env': os.environ.copy()}
+                            'cwd': cwd}
             # On Windows, there is an issue with path translation when the command
             # is passed in as a list.
             if platform.system() == "Windows":
@@ -403,7 +402,9 @@ class Tester(MooseObject):
 
             # Set this for OpenMPI so that we don't clobber state
             if self.hasOpenMPI():
-                popen_kwargs['env']['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
+                popen_env = os.environ.copy()
+                popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
+                popen_kwargs['env'] = popen_env
 
             process = subprocess.Popen(*popen_args, **popen_kwargs)
         except:
