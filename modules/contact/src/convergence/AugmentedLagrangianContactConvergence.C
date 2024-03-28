@@ -18,6 +18,7 @@
 #include "NearestNodeLocator.h"
 #include "NonlinearSystem.h"
 #include "PenetrationLocator.h"
+#include "FEProblemBase.h"
 
 #include "SystemBase.h"
 #include "Assembly.h"
@@ -28,28 +29,33 @@
 #include "AugmentedLagrangeInterface.h"
 
 #include "ResidualConvergence.h"
+#include "ReferenceResidualConvergence.h"
 
-registerMooseObject("ContactApp", AugmentedLagrangianContactConvergence);
+registerMooseObject("ContactApp", AugmentedLagrangianContactReferenceConvergence);
+registerMooseObject("ContactApp", AugmentedLagrangianContactFEProblemConvergence);
 
+template <class T>
 InputParameters
-AugmentedLagrangianContactConvergence::validParams()
+AugmentedLagrangianContactConvergence<T>::validParams()
 {
-  InputParameters params = ResidualConvergence::validParams();
+  InputParameters params = T::validParams();
   params += AugmentedLagrangianContactProblemInterface::validParams();
   params.addClassDescription("Manages convergence for augmented Lagrange contact");
   return params;
 }
 
-AugmentedLagrangianContactConvergence::AugmentedLagrangianContactConvergence(
+template <class T>
+AugmentedLagrangianContactConvergence<T>::AugmentedLagrangianContactConvergence(
     const InputParameters & params)
-  : ResidualConvergence(params),
+  : T(params),
     AugmentedLagrangianContactProblemInterface(params),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+    _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 
+template <class T>
 Convergence::MooseAlgebraicConvergence
-AugmentedLagrangianContactConvergence::checkAlgebraicConvergence(int it,
+AugmentedLagrangianContactConvergence<T>::checkAlgebraicConvergence(int it,
                                                                  Real xnorm,
                                                                  Real snorm,
                                                                  Real fnorm)
@@ -58,9 +64,9 @@ AugmentedLagrangianContactConvergence::checkAlgebraicConvergence(int it,
   // Real my_div_threshold = std::numeric_limits<Real>::max();
 
   Convergence::MooseAlgebraicConvergence reason =
-      ResidualConvergence::checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
+      T::checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
 
-  _console << "Augmented Lagrangian contact iteration " << _lagrangian_iteration_number;
+  Moose::out << "Augmented Lagrangian contact iteration " << _lagrangian_iteration_number;
 
   bool repeat_augmented_lagrange_step = false;
 
@@ -152,18 +158,22 @@ AugmentedLagrangianContactConvergence::checkAlgebraicConvergence(int it,
 
         // force it to keep iterating
         reason = Convergence::MooseAlgebraicConvergence::ITERATING;
-        _console << "Augmented Lagrangian Multiplier needs updating.";
+        Moose::out << "Augmented Lagrangian Multiplier needs updating.";
       }
       else
-        _console << "Augmented Lagrangian contact constraint enforcement is satisfied.";
+        Moose::out << "Augmented Lagrangian contact constraint enforcement is satisfied.";
     }
     else
     {
       // maxed out
-      _console << "Maximum Augmented Lagrangian contact iterations have been reached.";
+      Moose::out << "Maximum Augmented Lagrangian contact iterations have been reached.";
       reason = Convergence::MooseAlgebraicConvergence::DIVERGED;
     }
   }
 
   return reason;
 }
+
+template class AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>;
+template class AugmentedLagrangianContactConvergence<ResidualConvergence>;
+

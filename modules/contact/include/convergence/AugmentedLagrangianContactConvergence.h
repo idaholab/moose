@@ -14,13 +14,14 @@
 #include "NodeFaceConstraint.h"
 #include "MechanicalContactConstraint.h"
 #include "AugmentedLagrangianContactProblemInterface.h"
-#include "AugmentedLagrangianContactConvergence.h"
+#include "ReferenceResidualConvergence.h"
 #include "ResidualConvergence.h"
 
 /**
  * Class to check convergence for the augmented Lagrangian contact problem.
  */
-class AugmentedLagrangianContactConvergence : public ResidualConvergence,
+template <class T>
+class AugmentedLagrangianContactConvergence : public T,
                                               public AugmentedLagrangianContactProblemInterface
 {
 public:
@@ -34,3 +35,7 @@ public:
 protected:
   FEProblemBase & _fe_problem;
 };
+typedef AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>
+    AugmentedLagrangianContactReferenceConvergence;
+typedef AugmentedLagrangianContactConvergence<ResidualConvergence> AugmentedLagrangianContactFEProblemConvergence;
+
