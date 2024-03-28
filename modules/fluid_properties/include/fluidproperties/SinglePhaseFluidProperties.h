@@ -39,7 +39,14 @@
                                              DualReal & d##want##d1,                               \
                                              DualReal & d##want##d2) const                         \
   {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
+    fluidPropError("The fluid properties class '",                                                 \
+                   type(),                                                                         \
+                   "' has not implemented the derivatives for the automatic "                      \
+                   "differentiation-enabled method below. You can choose to neglect the "          \
+                   "derivatives by passing the 'allow_incorrect_jacobian' parameter. If your "     \
+                   "application requires this method, you "                                        \
+                   "must either implement it or use a different fluid properties class.\n\n",      \
+                   __PRETTY_FUNCTION__);                                                           \
     Real dummy, tmp1, tmp2;                                                                        \
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
     want##_from_##prop1##_##prop2(prop1.value(), prop2.value(), dummy, tmp1, tmp2);                \
@@ -54,13 +61,24 @@
 #define propfunc(want, prop1, prop2)                                                               \
   virtual Real want##_from_##prop1##_##prop2(Real, Real) const                                     \
   {                                                                                                \
-    mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");                            \
+    mooseError(                                                                                    \
+        "The fluid properties class '",                                                            \
+        type(),                                                                                    \
+        "' has not implemented the method below. If your application requires this method, you "   \
+        "must either implement it or use a different fluid properties class.\n\n",                 \
+        __PRETTY_FUNCTION__);                                                                      \
   }                                                                                                \
                                                                                                    \
   virtual void want##_from_##prop1##_##prop2(                                                      \
       Real prop1, Real prop2, Real & val, Real & d##want##d1, Real & d##want##d2) const            \
   {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
+    fluidPropError("The fluid properties class '",                                                 \
+                   type(),                                                                         \
+                   "' has not implemented the derivatives for the method below. You can choose "   \
+                   "to neglect the derivatives by passing the 'allow_incorrect_jacobian' "         \
+                   "parameter. If your application requires this method, you must either "         \
+                   "implement it or use a different fluid properties class.\n\n",                  \
+                   __PRETTY_FUNCTION__);                                                           \
     d##want##d1 = 0;                                                                               \
     d##want##d2 = 0;                                                                               \
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
