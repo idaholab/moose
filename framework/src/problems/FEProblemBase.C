@@ -46,6 +46,7 @@
 #include "MooseEigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
+#include "RestoringInterface.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ScalarInitialCondition.h"
 #include "FVInitialConditionTempl.h"
@@ -7689,6 +7690,22 @@ void
 FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 {
   _notify_when_mesh_changes.push_back(mci);
+}
+
+void
+FEProblemBase::restore()
+{
+  TIME_SECTION("restore", 3, "Handling Problem Restore");
+
+  // Let the RestoringInterface notify the registered objects to restore data
+  for (const auto & rsti : _notify_on_restore)
+    rsti->restoringProblem();
+}
+
+void
+FEProblemBase::notifyOnRestore(RestoringInterface * rsti)
+{
+  _notify_on_restore.push_back(rsti);
 }
 
 void

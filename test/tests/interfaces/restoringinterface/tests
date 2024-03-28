@@ -1,0 +1,10 @@
+[Tests]
+  design = 'RestoringInterface.md'
+  issues = '#26347'
+  [uo]
+    type = CSVDiff
+    input = 'uo.i'
+    csvdiff = 'uo_out.csv'
+    requirement = 'The system shall allow UserObjects to control what happens on restore.'
+  []
+[]
