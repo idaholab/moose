@@ -1,6 +1,18 @@
 Content:
     - framework/doc/content
     - modules/fluid_properties/doc/content
+    air:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content
+    carbon_dioxide:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content
+    helium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content
+    nitrogen:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content
+    potassium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content
+    sodium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -32,3 +44,9 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
+            air: !include modules/fluid_properties/contrib/air/doc/sqa_air.yml
+            carbon_dioxide: !include modules/fluid_properties/contrib/carbon_dioxide/doc/sqa_carbon_dioxide.yml
+            helium: !include modules/fluid_properties/contrib/helium/doc/sqa_helium.yml
+            nitrogen: !include modules/fluid_properties/contrib/nitrogen/doc/sqa_nitrogen.yml
+            potassium: !include modules/fluid_properties/contrib/potassium/doc/sqa_potassium.yml
+            sodium: !include modules/fluid_properties/contrib/sodium/doc/sqa_sodium.yml
