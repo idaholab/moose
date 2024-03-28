@@ -303,8 +303,14 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
       steady->setIterationNumberOutput((unsigned int)its);
   }
 
+  // Output the converged iteration outputs
+  _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
+
+  // Increment timestep. In steady problems timestep = time for outputting.
+  // See Output.C
   if (_time_step_as_iteration)
-    _problem.timeStep() = its;
+    _problem.timeStep() += 1;
+
   // print verbose per iteration output
   if (_verbose)
     _console << "TAO SOLVER: iteration=" << its << "\tf=" << f << "\tgnorm=" << gnorm
@@ -407,7 +413,6 @@ OptimizeSolve::objectiveFunction()
   if (_solve_on.contains(OptimizationAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 
-  _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
   _obj_iterate++;
   return _obj_function->computeObjective();
 }

@@ -53,7 +53,7 @@
   []
   [json_forward]
     type = JSON
-    execute_on = 'FORWARD TIMESTEP_END'
+    execute_on = 'FORWARD '
     execute_system_information_on = none
   []
 []
