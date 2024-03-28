@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FunctionAbuseAux.h"
+#include "FunctorCoordinatesFunctionAux.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", FunctionAbuseAux);
+registerMooseObject("MooseApp", FunctorCoordinatesFunctionAux);
 
 InputParameters
-FunctionAbuseAux::validParams()
+FunctorCoordinatesFunctionAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -33,7 +33,7 @@ FunctionAbuseAux::validParams()
   return params;
 }
 
-FunctionAbuseAux::FunctionAbuseAux(const InputParameters & parameters)
+FunctorCoordinatesFunctionAux::FunctorCoordinatesFunctionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _func(getFunction("function")),
     _x_functor(getFunctor<Real>("x_functor")),
@@ -50,7 +50,7 @@ FunctionAbuseAux::FunctionAbuseAux(const InputParameters & parameters)
 }
 
 Real
-FunctionAbuseAux::computeValue()
+FunctorCoordinatesFunctionAux::computeValue()
 {
   const auto state = determineState();
   if (isNodal())

@@ -17,7 +17,7 @@ class Function;
 /**
  * Function auxiliary value
  */
-class FunctionAbuseAux : public AuxKernel
+class FunctorCoordinatesFunctionAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
@@ -26,7 +26,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  FunctionAbuseAux(const InputParameters & parameters);
+  FunctorCoordinatesFunctionAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

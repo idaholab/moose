@@ -65,7 +65,7 @@
 
 [AuxKernels]
   [set_density]
-    type = FunctionAbuseAux
+    type = FunctorCoordinatesFunctionAux
     variable = density
     function = density_correlation
     t_functor = 'temperature'
@@ -78,11 +78,11 @@
     functor = 'y_function'
     variable = 'y_var'
     # this auxkernel must execute before the y_var functor is used
-    # in the FunctionAbuseAux if we want y to be up to date!
+    # in the FunctorCoordinatesFunctionAux if we want y to be up to date!
     execute_on = 'INITIAL'
   []
   [set_complex_dependency_fv]
-    type = FunctionAbuseAux
+    type = FunctorCoordinatesFunctionAux
     variable = multiple_dependency_test
     function = multi_dependency
     t_functor = 'time_function'
@@ -91,7 +91,7 @@
     z_functor = 'z_pp'
   []
   [set_complex_dependency_higher_order]
-    type = FunctionAbuseAux
+    type = FunctorCoordinatesFunctionAux
     variable = higher_order_test
     function = multi_dependency
     t_functor = 'time_function'
