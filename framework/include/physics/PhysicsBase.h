@@ -43,6 +43,14 @@ public:
   /// Add new blocks to the Physics
   void addBlocks(const std::vector<SubdomainName> & blocks);
 
+  /// Return the blocks this physics is defined on
+  const std::vector<SubdomainName> & blocks() const { return _blocks; }
+
+  /// Check if an external object has the same block restriction
+  bool checkBlockRestrictionIdentical(const std::string & object_name,
+                                      const std::vector<SubdomainName> & blocks,
+                                      const bool error_if_not_identical = true) const;
+
   /// Provide additional parameters for the relationship managers
   virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
 
@@ -155,10 +163,6 @@ protected:
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
                                  const std::vector<std::string> & parameter_names) const;
-  /// Check if an external object has the same block restriction
-  bool checkBlockRestrictionIdentical(const std::string & object_name,
-                                      const std::vector<SubdomainName> & blocks,
-                                      const bool error_if_not_identical = true) const;
   /// Check that all shared parameters are consistent: if set (default or user), set to the same value
   void checkCommonParametersConsistent(const InputParameters & parameters) const;
   template <typename T>
@@ -193,8 +197,6 @@ protected:
   /// Keep track of the subdomains the Physics is defined on
   std::vector<SubdomainName> _blocks;
 
-  /// Return the blocks this physics is defined on
-  const std::vector<SubdomainName> & blocks() const { return _blocks; }
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
   /// Check if a vector contains all the mesh blocks

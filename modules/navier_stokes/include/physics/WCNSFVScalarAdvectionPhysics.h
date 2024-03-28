@@ -9,12 +9,13 @@
 
 #pragma once
 
-#include "WCNSFVPhysicsBase.h"
+#include "NavierStokesPhysicsBase.h"
 
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar advection equations
  */
-class WCNSFVScalarAdvectionPhysics final : public WCNSFVPhysicsBase
+class WCNSFVScalarAdvectionPhysics final : public NavierStokesPhysicsBase,
+                                           public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
@@ -72,6 +73,4 @@ private:
   MultiMooseEnum _passive_scalar_inlet_types;
   /// Functors describing the inlet boundary values. See passive_scalar_inlet_types for what the functors actually represent
   std::vector<std::vector<MooseFunctorName>> _passive_scalar_inlet_functors;
-
-  const bool _porous_medium_treatment;
 };

@@ -11,7 +11,7 @@
 #include "WCNSFVTurbulencePhysics.h"
 #include "NSFVAction.h"
 
-registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
+registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_kernel");
@@ -23,7 +23,7 @@ registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_postprocessor");
 InputParameters
 WCNSFVFlowPhysics::validParams()
 {
-  InputParameters params = WCNSFVPhysicsBase::validParams();
+  InputParameters params = NavierStokesPhysicsBase::validParams();
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible mass and momentum equations");
 
@@ -112,7 +112,7 @@ WCNSFVFlowPhysics::validParams()
 }
 
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
-  : WCNSFVPhysicsBase(parameters),
+  : NavierStokesPhysicsBase(parameters),
     _has_flow_equations(getParam<bool>("add_flow_equations")),
     _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
@@ -241,6 +241,12 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                        " is already reserved for the automatically-computed interstitial velocity. "
                        "Please choose another name for your external velocity variable!");
     }
+}
+
+void
+WCNSFVFlowPhysics::initializePhysicsAdditional()
+{
+  getProblem().needFV();
 }
 
 void
@@ -1352,13 +1358,7 @@ WCNSFVFlowPhysics::addPostprocessors()
 std::string
 WCNSFVFlowPhysics::rhieChowUOName() const
 {
-  // This could still fail if we have 2 advecting physics
-  if (_flow_equations_physics)
-    return (_porous_medium_treatment ? +"pins_rhie_chow_interpolator"
-                                     : "ins_rhie_chow_interpolator");
-  else
-    return (_porous_medium_treatment ? +"pins_rhie_chow_interpolator"
-                                     : "ins_rhie_chow_interpolator");
+  return (_porous_medium_treatment ? +"pins_rhie_chow_interpolator" : "ins_rhie_chow_interpolator");
 }
 
 VariableName

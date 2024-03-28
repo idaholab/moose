@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "WCNSFVPhysicsBase.h"
+#include "NavierStokesPhysicsBase.h"
 
 class WCNSFVTurbulencePhysics;
 
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
  */
-class WCNSFVFlowPhysics final : public WCNSFVPhysicsBase
+class WCNSFVFlowPhysics final : public NavierStokesPhysicsBase
 {
 public:
   static InputParameters validParams();
@@ -42,7 +42,7 @@ public:
   /// Return the name of the dynamic viscosity functor
   const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
   /// Get the face interpolation method for velocity
-  const MooseEnum & getVelocityInterpolationMethod() const { return _velocity_interpolation; }
+  const MooseEnum & getVelocityFaceInterpolationMethod() const { return _velocity_interpolation; }
   /// Get the inlet boundaries
   const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
   /// Get the wall boundaries
@@ -57,6 +57,8 @@ public:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 protected:
+  void initializePhysicsAdditional() override;
+
 private:
   void addNonlinearVariables() override;
   void addInitialConditions() override;

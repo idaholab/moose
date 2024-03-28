@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "WCNSFVPhysicsBase.h"
+#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
 class WCNSFVHeatAdvectionPhysics;
 class WCNSFVScalarAdvectionPhysics;
@@ -18,7 +18,8 @@ class WCNSFVScalarAdvectionPhysics;
  * Creates all the objects needed to add a turbulence model to an incompressible /
  * weakly-compressible Navier Stokes finite volume flow simulation
  */
-class WCNSFVTurbulencePhysics final : public WCNSFVPhysicsBase
+class WCNSFVTurbulencePhysics final : public NavierStokesPhysicsBase,
+                                      public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();

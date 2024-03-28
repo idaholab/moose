@@ -11,9 +11,7 @@
 
 #include "PhysicsBase.h"
 
-class WCNSFVFlowPhysics;
-
-#define registerWCNSFVPhysicsBaseTasks(app_name, derived_name)                                     \
+#define registerNavierStokesPhysicsBaseTasks(app_name, derived_name)                               \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_geometric_rm");
 
@@ -22,16 +20,12 @@ class WCNSFVFlowPhysics;
  * Navier Stokes-based equations (WCNSFV)
  * Includes incompressible flow (INSFV).
  */
-class WCNSFVPhysicsBase : public PhysicsBase
+class NavierStokesPhysicsBase : public PhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVPhysicsBase(const InputParameters & parameters);
-
-  void initializePhysicsAdditional() override;
-
-  void findCoupledFlowPhysics();
+  NavierStokesPhysicsBase(const InputParameters & parameters);
 
 protected:
   /// Detects if we are using the new Physics syntax or the old NavierStokesFV action
@@ -48,11 +42,4 @@ protected:
 
   /// Whether to define variables if they do not exist
   bool _define_variables;
-
-  /// A physics object defining the flow equations
-  const WCNSFVFlowPhysics * _flow_equations_physics;
-
-private:
-  /// Check whether another flow Physics object has been specified
-  bool hasCoupledFlowPhysics() const { return !(!_flow_equations_physics); };
 };

@@ -8,6 +8,7 @@ cp = 1000
 mu = 1e2
 
 # Operating conditions
+inlet_temp = 300
 outlet_pressure = 1e5
 inlet_v = 0.001
 
@@ -30,6 +31,8 @@ inlet_v = 0.001
       [flow]
         compressibility = 'weakly-compressible'
 
+        velocity_variable = 'vel_x vel_y'
+
         density = 'rho'
         dynamic_viscosity = 'mu'
 
@@ -51,19 +54,47 @@ inlet_v = 0.001
         momentum_advection_interpolation = 'average'
       []
     []
+    [WCNSFVHeatAdvection]
+      [energy]
+        coupled_flow_physics = flow
+
+        thermal_conductivity = 'k'
+        specific_heat = 'cp'
+
+        initial_temperature = '${inlet_temp}'
+
+        energy_inlet_types = 'fixed-temperature'
+        energy_inlet_functors = '${inlet_temp}'
+        energy_wall_types = 'heatflux heatflux'
+        energy_wall_functors = '0 0'
+
+        external_heat_source = 'power_density'
+        energy_advection_interpolation = 'average'
+      []
+    []
+    [WCNSFVTurbulence]
+      [turbulence]
+        coupled_flow_physics = flow
+        heat_advection_physics = energy
+      []
+    []
+  []
+[]
+
+[AuxVariables]
+  [power_density]
+    type = MooseVariableFVReal
+    initial_condition = 1e4
+  []
+  [porosity]
+    type = MooseVariableFVReal
+    initial_condition = 1
   []
 []
 
 [FluidProperties]
   [fp]
     type = FlibeFluidProperties
-  []
-[]
-
-[AuxVariables]
-  [T_fluid]
-    type = MooseVariableFVReal
-    initial_condition = 300
   []
 []
 

@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WCNSFVPhysicsBase.h"
+#include "NavierStokesPhysicsBase.h"
 #include "NSFVAction.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "RelationshipManager.h"
 #include "WCNSFVFlowPhysics.h"
 
 InputParameters
-WCNSFVPhysicsBase::validParams()
+NavierStokesPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription(
@@ -34,10 +34,8 @@ WCNSFVPhysicsBase::validParams()
   return params;
 }
 
-WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
-  : PhysicsBase(parameters),
-    _define_variables(getParam<bool>("define_variables")),
-    _flow_equations_physics(nullptr)
+NavierStokesPhysicsBase::NavierStokesPhysicsBase(const InputParameters & parameters)
+  : PhysicsBase(parameters), _define_variables(getParam<bool>("define_variables"))
 {
   // Annoying edge case. We cannot use ANY_BLOCK_ID for kernels and variables since errors got added
   // downstream for using it, we cannot leave it empty as that sets all objects to not live on any
@@ -50,53 +48,13 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   // Placeholder before work with components
   if (_blocks.empty())
     _blocks.push_back("ANY_BLOCK_ID");
-
-  // Search for a physics defining the flow equations
-  findCoupledFlowPhysics();
-}
-
-void
-WCNSFVPhysicsBase::initializePhysicsAdditional()
-{
-  getProblem().needFV();
-}
-
-void
-WCNSFVPhysicsBase::findCoupledFlowPhysics()
-{
-  // User passed it, just use that
-  if (isParamValid("coupled_flow_physics"))
-    _flow_equations_physics =
-        getCoupledPhysics<WCNSFVFlowPhysics>(getParam<PhysicsName>("coupled_flow_physics"));
-  // Look for any physics of the right type, and check the block restriction
-  else
-  {
-    // We probably dont want this routine to be used for WCNSFVFlowPhysics
-    // Maybe WCNSFVPhysicsBase should WCNSFVCoupledAdvectionPhysicsBase
-    if (this->type() == "WCNSFVFlowPhysics")
-      return;
-    const auto all_flow_physics = getCoupledPhysics<const WCNSFVFlowPhysics>();
-    for (const auto physics : all_flow_physics)
-      if (checkBlockRestrictionIdentical(
-              physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
-      {
-        // We could check even further, and check that the block restrictions of WCNSFVFlowPhysics
-        // do not overlap.
-        if (_flow_equations_physics)
-          mooseError("Only one WCNSFV flow physics may be defined for a given block restriction");
-        _flow_equations_physics = physics;
-      }
-  }
 }
 
 InputParameters
-WCNSFVPhysicsBase::getAdditionalRMParams() const
+NavierStokesPhysicsBase::getAdditionalRMParams() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers = std::max(necessary_layers, getNumberAlgebraicGhostingLayersNeeded());
-  // if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
-  //   necessary_layers =
-  //       std::max(getParam<unsigned short>("porosity_smoothing_layers"), necessary_layers);
 
   // Just an object that has a ghost_layers parameter
   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";

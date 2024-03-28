@@ -9,13 +9,14 @@
 
 #pragma once
 
-#include "WCNSFVPhysicsBase.h"
+#include "NavierStokesPhysicsBase.h"
 #include "NS.h"
 
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation
  */
-class WCNSFVHeatAdvectionPhysics final : public WCNSFVPhysicsBase
+class WCNSFVHeatAdvectionPhysics final : public NavierStokesPhysicsBase,
+                                         public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
