@@ -4216,8 +4216,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
 
-  // AuxKernels
-  computeAuxiliaryKernels(exec_type);
+  // Systems (includes system time derivative and aux kernel calculations)
+  computeSystems(exec_type);
 
   // Post-aux UserObjects
   computeUserObjects(exec_type, Moose::POST_AUX);
@@ -4286,12 +4286,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
                  oss.str());
     }
   }
-}
-
-void
-FEProblemBase::computeAuxiliaryKernels(const ExecFlagType & type)
-{
-  _aux->compute(type);
 }
 
 // Finalize, threadJoin, and update PP values of Elemental/Nodal/Side/InternalSideUserObjects
@@ -6462,7 +6456,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       if (_displaced_problem)
       {
-        _aux->compute(EXEC_PRE_DISPLACE);
+        computeSystems(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
         if (_mortar_data.hasDisplacedObjects())
           updateMortarMesh();
@@ -6474,11 +6468,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         _functions.residualSetup(tid);
       }
 
-      // Where is the aux system done? Could the non-current nonlinear systems also be done there?
-      for (auto & nl : _nl)
-        nl->computeTimeDerivatives();
-
-      _aux->compute(EXEC_LINEAR);
+      computeSystems(EXEC_LINEAR);
 
       computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
@@ -6696,7 +6686,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
       if (_displaced_problem)
       {
-        _aux->compute(EXEC_PRE_DISPLACE);
+        computeSystems(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
         if (_mortar_data.hasDisplacedObjects())
           updateMortarMesh();
@@ -6708,11 +6698,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
         _functions.residualSetup(tid);
       }
 
-      // Where is the aux system done? Could the non-current nonlinear systems also be done there?
-      for (auto & nl : _nl)
-        nl->computeTimeDerivatives();
-
-      _aux->compute(EXEC_LINEAR);
+      computeSystems(EXEC_LINEAR);
 
       computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
@@ -6845,7 +6831,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
         if (_displaced_problem)
         {
-          _aux->compute(EXEC_PRE_DISPLACE);
+          computeSystems(EXEC_PRE_DISPLACE);
           _displaced_problem->updateMesh();
         }
 
@@ -6855,14 +6841,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           _functions.jacobianSetup(tid);
         }
 
-        // When computing the initial Jacobian for automatic variable scaling we need to make sure
-        // that the time derivatives have been calculated. So we'll call down to the nonlinear
-        // system here. Note that if we are not doing this initial Jacobian calculation we will
-        // just exit in that class to avoid redundant calculation (the residual function also
-        // computes time derivatives)
-        _current_nl_sys->computeTimeDerivatives(/*jacobian_calculation =*/true);
-
-        _aux->compute(EXEC_NONLINEAR);
+        computeSystems(EXEC_NONLINEAR);
 
         computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
 
@@ -6910,11 +6889,11 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
 
   if (_displaced_problem)
   {
-    _aux->compute(EXEC_PRE_DISPLACE);
+    computeSystems(EXEC_PRE_DISPLACE);
     _displaced_problem->updateMesh();
   }
 
-  _aux->compute(EXEC_NONLINEAR);
+  computeSystems(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
   _current_nl_sys->computeJacobianBlocks(blocks);
@@ -6958,7 +6937,7 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
         _all_materials.residualSetup(tid);
 
       _aux->residualSetup();
-      _aux->compute(EXEC_LINEAR);
+      computeSystems(EXEC_LINEAR);
       _lower.swap(lower);
       _upper.swap(upper);
     }
@@ -7043,7 +7022,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   try
   {
-    _aux->compute(EXEC_NONLINEAR);
+    computeSystems(EXEC_NONLINEAR);
   }
   catch (MooseException & e)
   {
@@ -8704,4 +8683,37 @@ FEProblemBase::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
   SubProblem::setCurrentBoundaryID(bid, tid);
   if (_displaced_problem)
     _displaced_problem->setCurrentBoundaryID(bid, tid);
+}
+
+void
+FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
+{
+  mooseAssert(nl_sys_num < _nl.size(),
+              "System number greater than the number of nonlinear systems");
+  _current_nl_sys = _nl[nl_sys_num].get();
+  _current_solver_sys = _current_nl_sys;
+}
+
+void
+FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  _current_linear_sys = _linear_systems[sys_num].get();
+  _current_solver_sys = _current_linear_sys;
+}
+
+void
+FEProblemBase::computeSystems(const ExecFlagType & type)
+{
+  if ((type == EXEC_LINEAR) || (type == EXEC_NONLINEAR))
+  {
+    mooseAssert(_current_solver_sys, "This should be non-null");
+    _current_solver_sys->compute(type);
+  }
+  else
+    for (auto & solver_sys : _solver_systems)
+      solver_sys->compute(type);
+
+  _aux->compute(type);
 }

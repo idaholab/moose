@@ -10,6 +10,7 @@
 #include "SolverSystem.h"
 #include "SolutionInvalidity.h"
 #include "FEProblemBase.h"
+#include "TimeIntegrator.h"
 
 SolverSystem::SolverSystem(SubProblem & subproblem,
                            FEProblemBase & fe_problem,
@@ -122,5 +123,33 @@ SolverSystem::checkInvalidSolution()
     else
       // output the occurrence of solution invalid in a summary table
       _app.solutionInvalidity().print(_console);
+  }
+}
+
+void
+SolverSystem::compute(const ExecFlagType type)
+{
+  // Let's try not to overcompute
+  bool compute_tds = false;
+  if (type == EXEC_LINEAR)
+    compute_tds = true;
+  else if (type == EXEC_NONLINEAR)
+  {
+    if (_fe_problem.computingScalingJacobian())
+      compute_tds = true;
+  }
+  else if ((type == EXEC_TIMESTEP_END) || (type == EXEC_FINAL))
+  {
+    if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
+      // We likely don't have a final residual evaluation upon which we compute the time derivatives
+      // so we need to do so now
+      compute_tds = true;
+  }
+
+  if (compute_tds && _fe_problem.dt() > 0. && _time_integrator)
+  {
+    // avoid division by dt which might be zero.
+    _time_integrator->preStep();
+    _time_integrator->computeTimeDerivatives();
   }
 }

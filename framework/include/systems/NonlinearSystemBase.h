@@ -332,11 +332,6 @@ public:
   Real computeDamping(const NumericVector<Number> & solution, const NumericVector<Number> & update);
 
   /**
-   * Computes the time derivative vector
-   */
-  void computeTimeDerivatives(bool jacobian_calculation = false);
-
-  /**
    * Called at the beginning of the time step
    */
   void onTimestepBegin();

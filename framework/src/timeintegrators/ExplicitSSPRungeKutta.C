@@ -142,7 +142,7 @@ bool
 ExplicitSSPRungeKutta::solveStage()
 {
   // Compute the mass matrix
-  _nl.computeTimeDerivatives();
+  computeTimeDerivatives();
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
   _fe_problem.computeJacobianTag(
       *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);

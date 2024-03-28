@@ -106,7 +106,7 @@ public:
    * Compute auxiliary variables
    * @param type Time flag of which variables should be computed
    */
-  virtual void compute(ExecFlagType type);
+  virtual void compute(ExecFlagType type) override;
 
   /**
    * Get a list of dependent UserObjects for this exec type

@@ -233,9 +233,9 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
   setCurrentNonlinearSystem(nl_sys_num);
 
   if (_displaced_problem)
-    _aux->compute(EXEC_PRE_DISPLACE);
+    computeSystems(EXEC_PRE_DISPLACE);
 
-  _aux->compute(EXEC_NONLINEAR);
+  computeSystems(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
 

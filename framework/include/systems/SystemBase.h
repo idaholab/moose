@@ -934,6 +934,12 @@ public:
     return _raw_grad_container;
   }
 
+  /**
+   * Compute time derivatives, auxiliary variables, etc.
+   * @param type Our current execution stage
+   */
+  virtual void compute(ExecFlagType type) = 0;
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
