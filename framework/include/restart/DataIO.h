@@ -18,6 +18,7 @@
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 #include "ColumnMajorMatrix.h"
+#include "UniqueStorage.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
@@ -107,6 +108,12 @@ template <typename P, typename Q>
 inline void storeHelper(std::ostream & stream, HashMap<P, Q> & data, void * context);
 
 /**
+ * UniqueStorage helper routine
+ */
+template <typename T>
+inline void storeHelper(std::ostream & stream, UniqueStorage<T> & data, void * context);
+
+/**
  * Scalar helper routine
  */
 template <typename P>
@@ -159,6 +166,12 @@ inline void loadHelper(std::istream & stream, std::optional<P> & data, void * co
  */
 template <typename P, typename Q>
 inline void loadHelper(std::istream & stream, HashMap<P, Q> & data, void * context);
+
+/**
+ * UniqueStorage helper routine
+ */
+template <typename T>
+inline void loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context);
 
 template <typename T>
 inline void dataStore(std::ostream & stream, T & v, void * /*context*/);
@@ -875,6 +888,20 @@ storeHelper(std::ostream & stream, HashMap<P, Q> & data, void * context)
   dataStore(stream, data, context);
 }
 
+/**
+ * UniqueStorage helper routine
+ */
+template <typename T>
+inline void
+storeHelper(std::ostream & stream, UniqueStorage<T> & data, void * context)
+{
+  std::size_t size = data.size();
+  dataStore(stream, size, nullptr);
+
+  for (const auto i : index_range(data))
+    storeHelper(stream, data.pointerValue(i), context);
+}
+
 // Scalar Helper Function
 template <typename P>
 inline void
@@ -945,6 +972,18 @@ inline void
 loadHelper(std::istream & stream, HashMap<P, Q> & data, void * context)
 {
   dataLoad(stream, data, context);
+}
+
+// UniqueStorage Helper Function
+template <typename T>
+inline void
+loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context)
+{
+  std::size_t size;
+  dataLoad(stream, size, nullptr);
+
+  for (const auto i : index_range(data))
+    loadHelper(stream, data.pointerValue(i), context);
 }
 
 void dataLoad(std::istream & stream, Point & p, void * context);
