@@ -74,11 +74,16 @@ AreMatricesTheSame::execute()
 
   for (const auto i : make_range(_mat1->row_start(), _mat1->row_stop()))
     for (const auto j : make_range(_mat1->col_start(), _mat1->col_stop()))
-      if (!MooseUtils::relativeFuzzyEqual((*_mat1)(i, j), (*_mat2)(i, j), _equiv_tol))
+    {
+      const auto val1 = (*_mat1)(i, j);
+      const auto val2 = (*_mat2)(i, j);
+      if (!MooseUtils::relativeFuzzyEqual(val1, val2, _equiv_tol) &&
+          !MooseUtils::absoluteFuzzyEqual(val1, val2, _equiv_tol))
       {
         _equiv = false;
         return;
       }
+    }
 }
 
 void
