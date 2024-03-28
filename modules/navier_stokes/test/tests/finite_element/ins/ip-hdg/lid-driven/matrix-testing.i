@@ -2,7 +2,7 @@ mu = 1
 rho = 1
 U = 1
 n = 10
-l = ${n}
+l = 1
 
 [Mesh]
   [gen]
