@@ -187,7 +187,8 @@ NonlinearSystem::solve()
     _n_linear_iters = solver.get_total_linear_iterations();
   }
 
-  if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
+  if (_fe_problem.solverParams()._type == Moose::ST_LINEAR && _time_integrator &&
+      !_time_integrator->isExplicit())
     _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
 
   // store info about the solve
