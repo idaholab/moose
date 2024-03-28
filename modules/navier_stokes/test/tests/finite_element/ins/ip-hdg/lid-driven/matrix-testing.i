@@ -1,7 +1,7 @@
 mu = 1
 rho = 1
 U = 1
-n = 1
+n = 2
 l = ${n}
 
 [Mesh]
@@ -28,6 +28,7 @@ l = ${n}
   v = vel_y
   pressure = pressure
   pressure_bar = pressure_bar
+  print = false
 []
 
 [Variables]
@@ -53,7 +54,7 @@ l = ${n}
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = CONSTANT
+    order = FIRST
   []
   [lambda]
     family = SCALAR
@@ -396,7 +397,7 @@ l = ${n}
 [Outputs]
   [out]
     type = CSV
-    show = 'symmetric equiv'
+    show = 'symmetric equiv equiv2 jump_and_upb_equiv'
     execute_on = 'timestep_end'
   []
 []
@@ -415,5 +416,15 @@ l = ${n}
     type = AreMatricesTheSame
     mat1 = 'vel-all-p.mat'
     mat2 = 'gold/vel-all-p.mat'
+  []
+  [equiv2]
+    type = AreMatricesTheSame
+    mat1 = 'vel-pb.mat'
+    mat2 = 'gold/vel-pb.mat'
+  []
+  [jump_and_upb_equiv]
+    type = AreMatricesTheSame
+    mat1 = 'vel-pb.mat'
+    mat2 = 'jump.mat'
   []
 []
