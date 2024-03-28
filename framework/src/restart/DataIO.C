@@ -684,7 +684,7 @@ dataLoad(std::istream & stream, std::unique_ptr<libMesh::NumericVector<Number>> 
   else
     mooseAssert(v->type() != GHOSTED, "Cannot be ghosted");
 
-  // Make sure that the sizes are consistent; this will happen if we we're calling this
+  // Make sure that the sizes are consistent; this will happen if we're calling this
   // on a vector that has already been loaded previously
   mooseAssert(v->size() == size, "Inconsistent size");
   mooseAssert(v->local_size() == local_size, "Inconsistent local size");
