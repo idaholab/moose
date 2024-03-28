@@ -83,7 +83,7 @@ TEST(DataIOTest, uniquePtrNumericVector)
 
   const std::vector<Real> data = {1.1, 1.5, 1e6};
   auto vec = NumericVector<Number>::build(comm);
-  vec->init(data.size(), data.size());
+  vec->init(data.size());
   for (const auto i : index_range(data))
     vec->set(i, data[i]);
 
