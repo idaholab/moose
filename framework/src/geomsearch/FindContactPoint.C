@@ -78,6 +78,7 @@ findContactPoint(PenetrationInfo & p_info,
     const std::vector<RealGradient> & elem_dxyz_dxi = fe_elem->get_dxyzdxi();
 
     fe_elem->reinit(primary_elem, &elem_points);
+    fe_side->reinit(side, &elem_points);
 
     p_info._normal = elem_dxyz_dxi[0];
     if (nearest_node->id() == primary_elem->node_id(0))
