@@ -14,6 +14,7 @@
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", INSADMaterial);
 
@@ -206,12 +207,8 @@ INSADMaterial::subdomainSetup()
 void
 INSADMaterial::computeQpProperties()
 {
-  _mass_strong_residual[_qp] = -_grad_velocity[_qp].tr();
-  if (_coord_sys == Moose::COORD_RZ)
-    // Subtract u_r / r
-    _mass_strong_residual[_qp] -=
-        _velocity[_qp](_rz_radial_coord) / (_use_displaced_mesh ? _ad_q_point[_qp](_rz_radial_coord)
-                                                                : _q_point[_qp](_rz_radial_coord));
+  _mass_strong_residual[_qp] = -NS::divergence(
+      _grad_velocity[_qp], _velocity[_qp], _ad_q_point[_qp], _coord_sys, _rz_radial_coord);
 
   _advective_strong_residual[_qp] = _rho[_qp] * _grad_velocity[_qp] * _velocity[_qp];
   if (_has_transient)
