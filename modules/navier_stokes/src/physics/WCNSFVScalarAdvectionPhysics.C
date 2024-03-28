@@ -72,7 +72,8 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
         getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
     _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
     _passive_scalar_inlet_functors(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors"))
+        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors")),
+    _porous_medium_treatment(true)
 {
   for (const auto & scalar_name : _passive_scalar_names)
     saveNonlinearVariableName(scalar_name);
@@ -260,10 +261,18 @@ WCNSFVScalarAdvectionPhysics::addFVBCs()
 void
 WCNSFVScalarAdvectionPhysics::addScalarInletBC()
 {
-  for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
+
+  for (const auto name_i : index_range(_passive_scalar_names))
   {
+    // Parameter checks
+    if (inlet_boundaries.size() != _passive_scalar_inlet_types[name_i].size())
+      paramError("passive_scalar_inlet_types", "");
+    if (inlet_boundaries.size() != _passive_scalar_inlet_functors[name_i].size())
+      paramError("passive_scalar_inlet_functors", "");
+
     unsigned int flux_bc_counter = 0;
-    unsigned int num_inlets = _inlet_boundaries.size();
+    unsigned int num_inlets = inlet_boundaries.size();
     for (unsigned int bc_ind = 0; bc_ind < num_inlets; ++bc_ind)
     {
       if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
@@ -272,10 +281,10 @@ WCNSFVScalarAdvectionPhysics::addScalarInletBC()
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
         params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
         getProblem().addFVBC(
-            bc_type, _passive_scalar_names[name_i] + "_" + _inlet_boundaries[bc_ind], params);
+            bc_type, _passive_scalar_names[name_i] + "_" + inlet_boundaries[bc_ind], params);
       }
       else if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass" ||
                _passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-velocity")
@@ -292,25 +301,28 @@ WCNSFVScalarAdvectionPhysics::addScalarInletBC()
         if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
-          params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + inlet_boundaries[bc_ind];
         }
         else
           params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
 
-        params.set<MooseFunctorName>(NS::density) = _density_name;
+        params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
         params.set<PostprocessorName>("scalar_value_pp") =
             _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
-        params.set<MooseFunctorName>(NS::velocity_x) = _velocity_names[0];
+        params.set<MooseFunctorName>(NS::velocity_x) =
+            _flow_equations_physics->getVelocityNames()[0];
         if (dimension() > 1)
-          params.set<MooseFunctorName>(NS::velocity_y) = _velocity_names[1];
+          params.set<MooseFunctorName>(NS::velocity_y) =
+              _flow_equations_physics->getVelocityNames()[1];
         if (dimension() > 2)
-          params.set<MooseFunctorName>(NS::velocity_z) = _velocity_names[2];
+          params.set<MooseFunctorName>(NS::velocity_z) =
+              _flow_equations_physics->getVelocityNames()[2];
 
         getProblem().addFVBC(bc_type,
                              prefix() + _passive_scalar_names[name_i] + "_" +
-                                 _inlet_boundaries[bc_ind],
+                                 inlet_boundaries[bc_ind],
                              params);
         flux_bc_counter += 1;
       }

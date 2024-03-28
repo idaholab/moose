@@ -26,9 +26,27 @@ public:
   /// Whether the physics is actually creating the flow equations
   bool hasFlowEquations() const { return _has_flow_equations; }
 
+  /// To interface with other Physics
+  std::vector<std::string> getVelocityNames() const { return _velocity_names; }
+  NonlinearVariableName getPressureName() const { return _pressure_name; }
+  NonlinearVariableName getFluidTemperatureName() const { return _fluid_temperature_name; }
+  MooseFunctorName getPorosityFunctorName(bool smoothed) const;
+
   // Getters to interact with other WCNSFVPhysics classes
+  /// Return the compressibility of the flow equations selected
+  const MooseEnum & compressibility() const { return _compressibility; }
+  /// Return whether a porous medium treatment is applied
+  bool porousMediumTreatment() const { return _porous_medium_treatment; }
+  /// Return the name of the density functor
+  const MooseFunctorName & densityName() const { return _density_name; }
+  /// Return the name of the dynamic viscosity functor
+  const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
   /// Get the face interpolation method for velocity
   const MooseEnum & getVelocityInterpolationMethod() const { return _velocity_interpolation; }
+  /// Get the inlet boundaries
+  const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
+  /// Get the wall boundaries
+  const std::vector<BoundaryName> & getWallBoundaries() const { return _wall_boundaries; }
   /// Get the inlet direction if using a flux inlet
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
   /// Get the inlet flux postprocessor if using a flux inlet
@@ -95,11 +113,49 @@ private:
   /// Boolean to keep track of whether the flow equations should be created
   const bool _has_flow_equations;
 
+  /// Compressibility type, can be compressible, incompressible or weakly-compressible
+  const MooseEnum _compressibility;
+
+  /// Switch to show if porous medium treatment is requested or not
+  const bool _porous_medium_treatment;
+  /// The name of the functor for the porosity field
+  const MooseFunctorName _porosity_name;
+  /// The name of the functor for the smoothed porosity field
+  const MooseFunctorName _flow_porosity_functor_name;
+  /// The number of smoothing layers if that treatment is used on porosity
+  const unsigned _porosity_smoothing_layers;
+
+  /// Velocity names
+  const std::vector<std::string> _velocity_names;
+  /// Pressure name
+  const NonlinearVariableName _pressure_name;
+  /// Fluid temperature name
+  const NonlinearVariableName _fluid_temperature_name;
+
+  /// Name of the density material property
+  const MooseFunctorName _density_name;
+  /// Name of the dynamic viscosity material property
+  const MooseFunctorName _dynamic_viscosity_name;
+
   /// The velocity / momentum face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;
+
+  /// Boundaries with a flow inlet specified on them
+  const std::vector<BoundaryName> _inlet_boundaries;
+  /// Boundaries with a flow outlet specified on them
+  const std::vector<BoundaryName> _outlet_boundaries;
+  /// Boundaries which define a wall (slip/noslip/etc.)
+  const std::vector<BoundaryName> _wall_boundaries;
+
+  /// Momentum inlet boundary types
+  std::map<BoundaryName, MooseEnum> _momentum_inlet_types;
+  /// Momentum outlet boundary types
+  std::map<BoundaryName, MooseEnum> _momentum_outlet_types;
+  /// Momentum wall boundary types
+  MultiMooseEnum _momentum_wall_types;
 
   /// Postprocessors describing the momentum inlet for each boundary. Indexing based on the number of flux boundaries
   std::vector<PostprocessorName> _flux_inlet_pps;

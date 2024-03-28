@@ -33,6 +33,28 @@ WCNSFVFlowPhysics::validParams()
                         "Whether to add the flow equations. This parameter is not necessary when "
                         "using the Physics syntax");
 
+  // We pull in parameters from various flow objects. This helps make sure the parameters are
+  // spelled the same way and match the evolution of other objects.
+  // If we remove these objects, or change their parameters, these parameters should be updated
+  // Downstream actions must either implement all these options, or redefine the parameter with
+  // a restricted MooseEnum, or place an error in the constructor for unsupported configurations
+  // We mostly pull the boundary parameters from NSFV Action
+
+  params += NSFVAction::commonNavierStokesFlowParams();
+
+  // Material properties
+  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "dynamic_viscosity");
+  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "density");
+
+  // Most downstream physics implementations are valid for porous media too
+  // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
+  params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
+  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
+  params.transferParam<unsigned short>(NSFVAction::validParams(), "porosity_smoothing_layers");
+
+  // Momentum boundary conditions are important for advection problems as well
+  params += NSFVAction::commonMomentumBoundaryTypesParams();
+
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
   params += NSFVAction::commonMomentumBoundaryFluxesParams();
@@ -92,7 +114,40 @@ WCNSFVFlowPhysics::validParams()
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
     _has_flow_equations(getParam<bool>("add_flow_equations")),
+    _compressibility(getParam<MooseEnum>("compressibility")),
+    _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
+    _porosity_name(getParam<MooseFunctorName>("porosity")),
+    _flow_porosity_functor_name(isParamValid("porosity_smoothing_layers") &&
+                                        getParam<unsigned short>("porosity_smoothing_layers")
+                                    ? NS::smoothed_porosity
+                                    : _porosity_name),
+    _porosity_smoothing_layers(isParamValid("porosity_smoothing_layers")
+                                   ? getParam<unsigned short>("porosity_smoothing_layers")
+                                   : 0),
+    _velocity_names(
+        isParamValid("velocity_variable")
+            ? getParam<std::vector<std::string>>("velocity_variable")
+            : (_porous_medium_treatment
+                   ? std::vector<std::string>(NS::superficial_velocity_vector,
+                                              NS::superficial_velocity_vector + 3)
+                   : std::vector<std::string>(NS::velocity_vector, NS::velocity_vector + 3))),
+    _pressure_name(isParamValid("pressure_variable")
+                       ? getParam<NonlinearVariableName>("pressure_variable")
+                       : NS::pressure),
+    _fluid_temperature_name(isParamValid("fluid_temperature_variable")
+                                ? getParam<NonlinearVariableName>("fluid_temperature_variable")
+                                : NS::T_fluid),
+    _density_name(getParam<MooseFunctorName>("density")),
+    _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
+    _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
+    _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
+    _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
+    _momentum_inlet_types(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+        _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"))),
+    _momentum_outlet_types(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+        _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"))),
+    _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions")),
     _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
@@ -151,14 +206,21 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                             "bernoulli",
                             {"pressure_allow_expansion_on_bernoulli_faces"});
 
-  // Additional boundary condition checks. Most checks are in the NavierStokesPhysicsBase
-  if (_boundary_condition_information_complete)
-  {
-    checkVectorParamLengthSameAsCombinedOthers<BoundaryName,
-                                               std::vector<MooseFunctorName>,
-                                               PostprocessorName>(
-        "inlet_boundaries", "momentum_inlet_functors", "flux_inlet_pps");
-  }
+  // Boundary parameters checking
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "momentum_inlet_types");
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("outlet_boundaries",
+                                                        "momentum_outlet_types");
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "momentum_wall_types");
+  checkVectorParamLengthSameAsCombinedOthers<BoundaryName,
+                                             std::vector<MooseFunctorName>,
+                                             PostprocessorName>(
+      "inlet_boundaries", "momentum_inlet_functors", "flux_inlet_pps");
+  checkVectorParamsNoOverlap<BoundaryName>(
+      {"inlet_boundaries", "outlet_boundaries", "wall_boundaries"});
+
+  // Porous media parameters
+  checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
+  checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity_smoothing_layers");
 
   // TODO make this more robust
   if (isParamValid("coupled_turbulence_physics"))
@@ -1311,7 +1373,18 @@ WCNSFVFlowPhysics::getFlowVariableName(const std::string & short_name) const
   else if (short_name == NS::velocity_z && dimension() > 2)
     return getVelocityNames()[2];
   else if (short_name == NS::temperature)
-    return getTemperatureName();
+    return getFluidTemperatureName();
   else
     mooseError("Short Variable name '", short_name, "' not recognized.");
+}
+
+MooseFunctorName
+WCNSFVFlowPhysics::getPorosityFunctorName(bool smoothed) const
+{
+  mooseAssert(!smoothed || !_porosity_smoothing_layers,
+              "Smooth porosity cannot be used without the smoothing treatment turned on");
+  if (smoothed)
+    return _flow_porosity_functor_name;
+  else
+    return _porosity_name;
 }

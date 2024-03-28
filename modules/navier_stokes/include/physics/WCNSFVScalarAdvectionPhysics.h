@@ -72,4 +72,6 @@ private:
   MultiMooseEnum _passive_scalar_inlet_types;
   /// Functors describing the inlet boundary values. See passive_scalar_inlet_types for what the functors actually represent
   std::vector<std::vector<MooseFunctorName>> _passive_scalar_inlet_functors;
+
+  const bool _porous_medium_treatment;
 };

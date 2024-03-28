@@ -63,6 +63,8 @@ private:
 
   /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
   const bool _has_energy_equation;
+  /// Fluid temperature name
+  NonlinearVariableName _fluid_temperature_name;
   /// Name of the specific heat material property
   MooseFunctorName _specific_heat_name;
   /// Vector of subdomain groups where we want to have different thermal conduction

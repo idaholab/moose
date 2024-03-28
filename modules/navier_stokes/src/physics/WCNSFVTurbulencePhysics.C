@@ -154,20 +154,22 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
 
     std::string kernel_name = prefix() + "ins_momentum_mixing_length_reynolds_stress_";
-    if (_porous_medium_treatment)
+    if (_flow_equations_physics->porousMediumTreatment())
       kernel_name = prefix() + "pins_momentum_mixing_length_reynolds_stress_";
 
     params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     for (const auto dim_i : make_range(dimension()))
-      params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
+      params.set<MooseFunctorName>(u_names[dim_i]) =
+          _flow_equations_physics->getVelocityNames()[dim_i];
 
     for (const auto d : make_range(dimension()))
     {
-      params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+      params.set<NonlinearVariableName>("variable") =
+          _flow_equations_physics->getVelocityNames()[d];
       params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
       getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
@@ -184,16 +186,18 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
     const std::string kernel_type = "WCNSFVMixingLengthEnergyDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
     params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
     params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
-    params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+    params.set<NonlinearVariableName>("variable") =
+        _flow_equations_physics->getFluidTemperatureName();
 
     for (const auto dim_i : make_range(dimension()))
-      params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
+      params.set<MooseFunctorName>(u_names[dim_i]) =
+          _flow_equations_physics->getVelocityNames()[dim_i];
 
-    if (_porous_medium_treatment)
+    if (_flow_equations_physics->porousMediumTreatment())
       getProblem().addFVKernel(
           kernel_type, prefix() + "pins_energy_mixing_length_diffusion", params);
     else
@@ -214,7 +218,8 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
 
     for (const auto dim_i : make_range(dimension()))
-      params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
+      params.set<MooseFunctorName>(u_names[dim_i]) =
+          _flow_equations_physics->getVelocityNames()[dim_i];
 
     const auto & passive_scalar_names = _scalar_advection_physics->getAdvectedScalarNames();
     const auto & passive_scalar_schmidt_number =
@@ -274,11 +279,11 @@ WCNSFVTurbulencePhysics::addMaterials()
     assignBlocks(params, _blocks);
 
     for (const auto d : make_range(dimension()))
-      params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+      params.set<MooseFunctorName>(u_names[d]) = _flow_equations_physics->getVelocityNames()[d];
 
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
 
     getProblem().addMaterial("MixingLengthTurbulentViscosityFunctorMaterial",
                              prefix() + "mixing_length_material",

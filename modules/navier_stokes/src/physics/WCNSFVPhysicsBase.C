@@ -16,7 +16,7 @@
 InputParameters
 WCNSFVPhysicsBase::validParams()
 {
-  InputParameters params = NavierStokesPhysicsBase::validParams();
+  InputParameters params = PhysicsBase::validParams();
   params.addClassDescription(
       "Base class to define the Navier Stokes incompressible and weakly-compressible equation");
 
@@ -35,7 +35,7 @@ WCNSFVPhysicsBase::validParams()
 }
 
 WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
-  : NavierStokesPhysicsBase(parameters),
+  : PhysicsBase(parameters),
     _define_variables(getParam<bool>("define_variables")),
     _flow_equations_physics(nullptr)
 {
@@ -94,9 +94,9 @@ WCNSFVPhysicsBase::getAdditionalRMParams() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers = std::max(necessary_layers, getNumberAlgebraicGhostingLayersNeeded());
-  if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
-    necessary_layers =
-        std::max(getParam<unsigned short>("porosity_smoothing_layers"), necessary_layers);
+  // if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
+  //   necessary_layers =
+  //       std::max(getParam<unsigned short>("porosity_smoothing_layers"), necessary_layers);
 
   // Just an object that has a ghost_layers parameter
   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
