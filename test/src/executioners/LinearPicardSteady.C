@@ -155,13 +155,12 @@ LinearPicardSteady::execute()
   _problem.updateActiveObjects();
 
   for (unsigned int i = 0; i < _number_of_iterations; i++)
-  {
-    for (const auto sys_number : _linear_sys_numbers)
+    for (const auto sys_index : index_range(_linear_sys_numbers))
     {
-      const auto & options = _petsc_options[i];
-      solveSystem(sys_number, &options);
+      const auto & options = _petsc_options[sys_index];
+      solveSystem(_linear_sys_numbers[sys_index], &options);
     }
-  }
+
   for (const auto sys_number : _linear_sys_numbers)
     _problem.getLinearSystem(sys_number).computeGradients();
 

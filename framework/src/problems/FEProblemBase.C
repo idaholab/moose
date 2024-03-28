@@ -6059,8 +6059,11 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   Moose::PetscSupport::petscSetOptions(
       options, solver_params); // Make sure the PETSc options are setup for this app
 #else
+  // Now this database will be the default
+  // Each app should have only one database
   if (!_app.isUltimateMaster())
     PetscOptionsPush(_petsc_option_data_base);
+  // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
     Moose::PetscSupport::petscSetOptions(options, solver_params);
