@@ -145,17 +145,6 @@ PrintMatricesNSProblem::onTimestepEnd()
     LIBMESH_CHKERR(ierr);
 
     // Factor A (Mb)
-    // MatType default_type;
-    // ierr = MatGetType(system_matrix->mat(), &default_type);
-    // LIBMESH_CHKERR(ierr);
-    // ierr = MatCreate(_communicator.get(), &Mb);
-    // LIBMESH_CHKERR(ierr);
-    // ierr =
-    //     MatSetSizes(Mb, p_mass_mat.local_m(), p_mass_mat.local_n(), p_mass_mat.m(),
-    //     p_mass_mat.n());
-    // LIBMESH_CHKERR(ierr);
-    // ierr = MatSetType(Mb, default_type);
-    // LIBMESH_CHKERR(ierr);
     ierr = MatConvert(p_mass_mat.mat(), MATDENSE, MAT_INITIAL_MATRIX, &Mb);
     LIBMESH_CHKERR(ierr);
     ierr = MatLUFactor(Mb, nullptr, nullptr, nullptr);
