@@ -924,6 +924,9 @@ storeHelper(std::ostream & stream, HashMap<P, Q> & data, void * context)
 
 /**
  * UniqueStorage helper routine
+ *
+ * The data within the UniqueStorage object cannot be null. The helper
+ * for unique_ptr<T> is called to store the data.
  */
 template <typename T>
 inline void
@@ -1011,7 +1014,13 @@ loadHelper(std::istream & stream, HashMap<P, Q> & data, void * context)
   dataLoad(stream, data, context);
 }
 
-// UniqueStorage Helper Function
+/**
+ * UniqueStorage Helper Function
+ *
+ * The unique_ptr<T> loader is called to load the data. That is,
+ * you will likely need a specialization of unique_ptr<T> that will
+ * appropriately construct and then fill the piece of data.
+ */
 template <typename T>
 inline void
 loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context)
