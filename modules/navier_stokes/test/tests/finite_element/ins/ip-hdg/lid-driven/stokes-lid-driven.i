@@ -18,10 +18,6 @@ n = 4
   []
 []
 
-[Problem]
-  ignore_zeros_in_jacobian = true
-[]
-
 [Variables]
   [vel_x]
     family = L2_HIERARCHIC
