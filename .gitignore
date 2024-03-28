@@ -118,6 +118,7 @@ test.cache
 !**/gold/**/*.vtu
 !**/gold/**/*.pvtu
 !**/gold/**/*.mat
+!**/gold/**/*.info
 !**/gold/**/*.xml*
 !**/gold/**/*.json*
 
