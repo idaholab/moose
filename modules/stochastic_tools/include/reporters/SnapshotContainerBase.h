@@ -31,7 +31,7 @@ public:
    *
    * The underlying storage is unique_ptrs, but the public API
    * (read-only access) exposes just references.
-  */
+   */
   class Snapshots : public UniqueStorage<NumericVector<Number>>
   {
   public:
