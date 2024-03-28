@@ -37,18 +37,41 @@ IsMatrixSymmetric::IsMatrixSymmetric(const InputParameters & parameters)
 void
 IsMatrixSymmetric::initialSetup()
 {
+  _mat_transpose = SparseMatrix<Number>::build(_communicator);
+}
+
+void
+IsMatrixSymmetric::execute()
+{
+  _equiv = true;
+
   auto * const nl_solver = _fe_problem.getNonlinearSystemBase(0).nonlinearSolver();
   mooseAssert(nl_solver, "This should be non-null");
-  _petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&nl_solver->system().get_system_matrix());
-  if (!_petsc_matrix)
-    mooseError("This postprocessor requires using PETSc as the solver backend");
+  auto & sys_mat = nl_solver->system().get_system_matrix();
+  sys_mat.get_transpose(*_mat_transpose);
+
+  for (const auto i : make_range(sys_mat.row_start(), sys_mat.row_stop()))
+    for (const auto j : make_range(sys_mat.col_start(), sys_mat.col_stop()))
+    {
+      const auto val1 = sys_mat(i, j);
+      const auto val2 = (*_mat_transpose)(i, j);
+      if (!MooseUtils::relativeFuzzyEqual(val1, val2, _symm_tol) &&
+          !MooseUtils::absoluteFuzzyEqual(val1, val2, _symm_tol))
+      {
+        _equiv = false;
+        return;
+      }
+    }
+}
+
+void
+IsMatrixSymmetric::finalize()
+{
+  _communicator.min(_equiv);
 }
 
 Real
 IsMatrixSymmetric::getValue() const
 {
-  PetscBool symmetric;
-  auto ierr = MatIsSymmetric(_petsc_matrix->mat(), _symm_tol, &symmetric);
-  LIBMESH_CHKERR(ierr);
-  return symmetric;
+  return _equiv;
 }

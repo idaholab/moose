@@ -26,11 +26,13 @@ public:
 
   virtual void initialSetup() override;
   virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void execute() override;
+  virtual void finalize() override;
 
   virtual Real getValue() const override;
 
 protected:
   const Real _symm_tol;
-  PetscMatrix<Number> * _petsc_matrix;
+  std::unique_ptr<SparseMatrix<Number>> _mat_transpose;
+  bool _equiv = true;
 };
