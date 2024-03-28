@@ -22,6 +22,7 @@
 
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
+#include "libmesh/numeric_vector.h"
 
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
@@ -39,8 +40,6 @@
 
 namespace libMesh
 {
-template <typename T>
-class NumericVector;
 template <typename T>
 class DenseMatrix;
 template <typename T>
@@ -406,6 +405,16 @@ void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
 template <>
+/**
+ * Stores an owned numeric vector.
+ *
+ * This should be used in lieu of the NumericVector<Number> & implementation
+ * when the vector may not necessarily be initialized yet on the loading of
+ * the data. It stores the partitioning (total and local number of entries).
+ *
+ * Requirements: the unique_ptr must exist (cannot be null), the vector
+ * cannot be ghosted, and the provided context must be the Communicator.
+ */
 void dataStore(std::ostream & stream,
                std::unique_ptr<libMesh::NumericVector<Number>> & v,
                void * context);
@@ -721,6 +730,23 @@ void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
 template <>
+/**
+ * Loads an owned numeric vector.
+ *
+ * This is used in lieu of the NumericVector<double> & implementation when
+ * the vector may not necessarily be initialized yet on the loading of the data.
+ *
+ * If \p is not null, it must have the same global and local sizes that it
+ * was stored with. In this case, the data is simply filled into the vector.
+ *
+ * If \p is null, it will be constructed with the type (currently just a
+ * PetscVector) stored and initialized with the global and local sizes stored.
+ * The data will then be filled after initialization.
+ *
+ * Requirements: the vector cannot be ghosted, the provided context must be
+ * the Communicator, and if \p v is initialized, it must have the same global
+ * and local sizes that the vector was stored with.
+ */
 void dataLoad(std::istream & stream,
               std::unique_ptr<libMesh::NumericVector<Number>> & v,
               void * context);
