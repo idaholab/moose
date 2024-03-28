@@ -51,8 +51,7 @@ PrintMatricesNSProblem::onTimestepEnd()
 {
   FEProblem::onTimestepEnd();
 
-  if (!getParam<bool>("print"))
-    return;
+  const bool print = getParam<bool>("print");
 
   const bool has_pbar = isParamValid(NS::pressure + "_bar");
 
@@ -100,6 +99,7 @@ PrintMatricesNSProblem::onTimestepEnd()
 
   auto do_vel_p = [this,
                    write_matrix,
+                   print,
                    &vel_indices,
                    &system_size_mass_matrix,
                    system_matrix,
@@ -159,9 +159,12 @@ PrintMatricesNSProblem::onTimestepEnd()
         vel_p_mat.mat(), X, p_vel_mat.mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &product_mat);
     LIBMESH_CHKERR(ierr);
 
-    _console << std::endl << "Printing the '" << matrix_name << "' matrix" << std::endl;
     PetscMatrix<Number> product(product_mat, _communicator);
-    product.print();
+    if (print)
+    {
+      _console << std::endl << "Printing the '" << matrix_name << "' matrix" << std::endl;
+      product.print();
+    }
     write_matrix(product.mat(), matrix_name + std::string(".mat"));
     ierr = MatDestroy(&product_mat);
     LIBMESH_CHKERR(ierr);
@@ -177,12 +180,15 @@ PrintMatricesNSProblem::onTimestepEnd()
 
   for (const auto & jump_name : _jump_matrices)
   {
-    _console << std::endl << "Printing the jump matrix '" << jump_name << "'" << std::endl;
     PetscMatrix<Number> jump_mat(_communicator);
     const auto jump_matrix_tag_id = getMatrixTagID(jump_name);
     auto & system_size_jump_matrix = nl.getMatrix(jump_matrix_tag_id);
     system_size_jump_matrix.create_submatrix(jump_mat, vel_indices, vel_indices);
-    jump_mat.print();
+    if (print)
+    {
+      _console << std::endl << "Printing the jump matrix '" << jump_name << "'" << std::endl;
+      jump_mat.print();
+    }
     write_matrix(jump_mat.mat(), jump_name + std::string(".mat"));
   }
 }

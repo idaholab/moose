@@ -1,7 +1,7 @@
 mu = 1
 rho = 1
 U = 1
-n = 2
+n = 10
 l = ${n}
 
 [Mesh]
