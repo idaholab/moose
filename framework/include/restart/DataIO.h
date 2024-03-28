@@ -405,6 +405,10 @@ template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
+template <>
+void dataStore(std::ostream & stream,
+               std::unique_ptr<libMesh::NumericVector<Number>> & v,
+               void * context);
 
 template <std::size_t N>
 inline void
@@ -716,6 +720,10 @@ template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
+template <>
+void dataLoad(std::istream & stream,
+              std::unique_ptr<libMesh::NumericVector<Number>> & v,
+              void * context);
 
 template <std::size_t N>
 inline void
