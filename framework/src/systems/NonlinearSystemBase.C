@@ -1866,6 +1866,10 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
                    PETSC_TRUE);
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+      if (_fe_problem.ignoreZerosInJacobian())
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_IGNORE_ZERO_ENTRIES,
+                     PETSC_TRUE);
     }
   }
 
@@ -2701,6 +2705,10 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
                    PETSC_TRUE);
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+      if (_fe_problem.ignoreZerosInJacobian())
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_IGNORE_ZERO_ENTRIES,
+                     PETSC_TRUE);
     }
   }
 
