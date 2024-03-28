@@ -3,8 +3,8 @@
 #include <memory>
 #include <algorithm>
 
-#include "lex.h"
-#include "braceexpr.h"
+#include "hit/lex.h"
+#include "hit/braceexpr.h"
 
 namespace hit
 {

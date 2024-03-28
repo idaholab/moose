@@ -1,0 +1,148 @@
+[Tests]
+  issues = '#23359'
+  design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
+
+  # Not really sure if all of these prereqs are required as I can't guarantee
+  # if we'll get unique ports if we call them all at once
+
+  [control]
+    requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of a'
+    [bool]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_bool.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_bool
+                  Reporters/test/bool_value=true'
+      command_proxy = 'control_reporter.py bool_value'
+      recover = false
+      detail = 'boolean'
+    []
+    [real]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_real.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_real
+                  Reporters/test/real_value=1234'
+      command_proxy = 'control_reporter.py real_value'
+      recover = false
+      detail = 'double precision number'
+      prereq = control/bool
+    []
+    [string]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_string.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_string
+                  Reporters/test/string_value=abcd'
+      command_proxy = 'control_reporter.py string_value'
+      recover = false
+      detail = 'string'
+      prereq = control/real
+    []
+    [vec_real]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_vec_real.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_vec_real
+                  Reporters/test/vec_real_value="999 0 100"'
+      command_proxy = 'control_reporter.py vec_real_value'
+      recover = false
+      detail = 'vector of double precision numbers'
+      prereq = control/string
+    []
+    [vec_string]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_vec_string.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_vec_string
+                  Reporters/test/vec_string_value="m o o s e"'
+      command_proxy = 'control_reporter.py vec_string_value'
+      recover = false
+      detail = 'vector of strings'
+      prereq = control/vec_real
+    []
+  []
+
+  [get_postprocessor]
+    type = CSVDiff
+    input = get_postprocessor.i
+    csvdiff = get_postprocessor_out.csv
+    command_proxy = get_postprocessor.py
+    recover = false
+    requirement = 'The system shall support retreiving a postprocessor value via a REST API'
+    prereq = control/vec_string
+  []
+
+  [parallel_consistent]
+    type = JSONDiff
+    input = control_reporter.i
+    jsondiff = 'parallel_consistent.json parallel_consistent.json.1'
+    cli_args = 'Outputs/json/file_base=parallel_consistent
+                Reporters/test/bool_value=true'
+    command_proxy = 'control_reporter.py bool_value'
+    recover = false
+    requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
+    prereq = get_postprocessor
+    min_parallel = 2
+    max_parallel = 2
+  []
+
+  # We cannot run these tests with valgrind because they come from the python script, which will terminate
+  # the MOOSE process early and therefore we won't receieve and of the valgrind summary output
+  [errors]
+    requirement = 'The system shall report a reasonable error when interacting with the REST API when'
+    [set_controllable_no_exist]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_no_exist'
+      expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
+      detail = 'setting a controllable parameter that does not exist'
+      prereq = parallel_consistent
+      valgrind = none
+    []
+    [postprocessor_no_exist]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py postprocessor_no_exist'
+      expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
+      detail = 'getting a postprocessor that does not exist'
+      prereq = errors/set_controllable_no_exist
+      valgrind = none
+    []
+    [set_controllable_unregistered_type]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_unregistered_type'
+      expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
+      detail = 'setting a controllable parameter whose type is not supported'
+      prereq = errors/postprocessor_no_exist
+      valgrind = none
+    []
+    [set_controllable_bad_convert_json]
+      type = RunException
+      input = 'errors.i'
+      command_proxy = 'errors.py set_controllable_bad_convert'
+      cli_args = 'Outputs/json/type=JSON'
+      expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
+      detail = 'setting a controllable parameter with an incompatible JSON type'
+      prereq = errors/set_controllable_unregistered_type
+      valgrind = none
+    []
+    [set_controllable_vector_non_array]
+      type = RunException
+      input = 'control_reporter.i'
+      command_proxy = 'errors.py set_controllable_vector_non_array'
+      cli_args = 'Reporters/test/type=WebServerControlTestReporter
+                  Reporters/test/vec_real_value=0'
+      expect_err = 'The value \'1234\' of type number is not an array'
+      detail = 'setting a controllable parameter with a type that does not match'
+      prereq = errors/set_controllable_bad_convert_json
+      valgrind = none
+    []
+  []
+[]

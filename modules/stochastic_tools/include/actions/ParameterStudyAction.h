@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Action.h"
-#include "hit.h"
+#include "hit/hit.h"
 
 // Forward declarations
 class ReporterName;

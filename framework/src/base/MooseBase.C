@@ -13,7 +13,7 @@
 #include "InputParameters.h"
 #include "MooseApp.h"
 
-#include "parse.h"
+#include "hit/parse.h"
 
 MooseBase::MooseBase(const std::string & type,
                      const std::string & name,

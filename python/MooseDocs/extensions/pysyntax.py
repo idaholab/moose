@@ -107,10 +107,19 @@ class PySyntaxCommandBase(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['name'] = (None, "The name python object/function to extract documentation.")
         settings['heading-level'] = (2, "The heading level to use for class documentation.")
+        settings['show-internal'] = (True, "Whether or not to show internal methods")
+        settings['show-private'] = (True, "Whether or not to show private methods")
+        settings['show-protected'] = (True, "Whether or not to show protected methods")
         return settings
 
-    def _addDocumentation(self, parent, page, doc, h_level, **kwargs):
+    def _addDocumentation(self, parent, page, doc, settings, h_level, **kwargs):
         for name, pyinfo in doc.items(**kwargs):
+            if pyinfo.internal and not settings['show-internal']:
+                continue
+            if pyinfo.private and not settings['show-private']:
+                continue
+            if pyinfo.protected and not settings['show-protected']:
+                continue
             h = core.Heading(parent, level=h_level, class_='moose-pysyntax-member-heading')
             fname = name + pyinfo.signature if pyinfo.signature is not None else name
             core.Monospace(core.Strong(h), string=fname)
@@ -120,11 +129,11 @@ class PySyntaxCommandBase(command.CommandComponent):
             else:
                 self.reader.tokenize(parent, pyinfo.documentation, page)
 
-    def _addFunctionDocumentation(self, parent, page, doc, h_level):
+    def _addFunctionDocumentation(self, parent, page, doc, settings, h_level):
         sec = PyFunction(parent)
-        self._addDocumentation(sec, page, doc, h_level)
+        self._addDocumentation(sec, page, doc, settings, h_level)
 
-    def _addClassDocumentation(self, parent, page, name, doc, h_level, **kwargs):
+    def _addClassDocumentation(self, parent, page, name, doc, settings, h_level, **kwargs):
         """Helper for listing class members"""
         sec = PyClass(parent)
 
@@ -137,7 +146,7 @@ class PySyntaxCommandBase(command.CommandComponent):
         else:
             self.reader.tokenize(sec, doc.documentation, page)
 
-        self._addDocumentation(sec, page, doc, h_level + 1, **kwargs)
+        self._addDocumentation(sec, page, doc, settings, h_level + 1, **kwargs)
 
 class PySyntaxClassCommand(PySyntaxCommandBase):
     SUBCOMMAND = 'class'
@@ -157,7 +166,7 @@ class PySyntaxClassCommand(PySyntaxCommandBase):
         if not doc.is_class:
             raise exceptions.MooseDocsException("'%s' is not a python class.", obj)
 
-        self._addClassDocumentation(parent, page, obj, doc, h_level, public=True, protected=True)
+        self._addClassDocumentation(parent, page, obj, doc, settings, h_level, public=True, protected=True)
         return parent
 
 class PySyntaxFunctionCommand(PySyntaxCommandBase):
@@ -179,7 +188,7 @@ class PySyntaxFunctionCommand(PySyntaxCommandBase):
         if not doc.is_function:
             raise exceptions.MooseDocsException("'%s' is not a python function.", obj)
 
-        self._addFunctionDocumentation(parent, page, doc, h_level)
+        self._addFunctionDocumentation(parent, page, doc, settings, h_level)
         return parent
 
 class RenderPyClass(components.RenderComponent):
