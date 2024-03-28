@@ -44,23 +44,14 @@ cp = 1
     []
     [WCNSFVHeatAdvection]
       [heat]
-        compressibility = 'incompressible'
         add_energy_equation = true
-
-        density = 'rho'
-        dynamic_viscosity = 'mu'
         thermal_conductivity = 'k'
         specific_heat = 'cp'
 
         initial_temperature = 0.0
 
-        inlet_boundaries = 'top'
-        momentum_inlet_types = 'fixed-velocity'
         energy_inlet_types = 'fixed-temperature'
         energy_inlet_function = '0'
-
-        wall_boundaries = 'left right bottom'
-        momentum_wall_types = 'noslip noslip noslip'
         energy_wall_types = 'heatflux heatflux fixed-temperature'
         energy_wall_function = '0 0 1'
 

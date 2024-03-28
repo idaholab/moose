@@ -52,28 +52,16 @@ h_fs = 0.01
     []
     [WCNSFVHeatAdvection]
       [heat]
-        compressibility = 'incompressible'
-
-        density = 'rho'
-        dynamic_viscosity = 'mu'
         thermal_conductivity = 'k'
         specific_heat = 'cp'
 
         fluid_temperature_variable = 'T_fluid'
         initial_temperature = '${T_inlet}'
-
-        inlet_boundaries = 'left'
-        momentum_inlet_types = 'fixed-velocity'
         energy_inlet_types = 'heatflux'
         energy_inlet_functors = '${fparse u_inlet * rho * cp * T_inlet}'
 
-        wall_boundaries = 'bottom top'
-        momentum_wall_types = 'symmetry noslip'
         energy_wall_types = 'heatflux heatflux'
         energy_wall_functors = '0 0'
-
-        outlet_boundaries = 'right'
-        momentum_outlet_types = 'fixed-pressure-zero-gradient'
 
         ambient_convection_alpha = 'h_cv'
         ambient_temperature = 'T_solid'

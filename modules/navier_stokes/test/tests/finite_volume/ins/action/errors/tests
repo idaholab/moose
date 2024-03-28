@@ -66,8 +66,8 @@
     requirement = 'The system shall throw an error if the number of energy inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_inlet_types=''"
     expect_err = "(Size \(0\) is not the same as the number of inlet boundaries in "
-                 "'inlet_boundaries' \(size 1\)|Parameters 'inlet_boundaries' and "
-                 "'energy_inlet_types' must be either both set or both not set)"
+                 "'inlet_boundaries' \(size 1\)|Energy inlet types \(size 0\) should be the same "
+                 "size as inlet_boundaries \(size 1\))"
   []
   [passive-scalar-inlet-error]
     type = 'RunException'
@@ -104,8 +104,8 @@
     requirement = 'The system shall throw an error if the number of energy wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_wall_types=''"
     expect_err = "(Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' "
-                 "\(size 2\)|Parameters 'wall_boundaries' and 'energy_wall_types' must be either "
-                 "both set or both not set.)"
+                 "\(size 2\)|Energy wall types \(size 0\) should be the same size as wall_boundaries "
+                 "\(size 2\))"
   []
   [energy-wall-function-action-error]
     type = 'RunException'
@@ -113,8 +113,8 @@
     requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
     cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
     expect_err = "(Size \(0\) is not the same as the number of Dirichlet/Neumann conditions in "
-                 "'energy_wall_types' \(size 2\)|Vector parameters 'wall_boundaries' \(size 2\) and "
-                 "'energy_wall_functors' \(size 0\) must be the same size)"
+                 "'energy_wall_types' \(size 2\)|Vector parameters 'energy_wall_functors' \(size 0\) "
+                 "and 'energy_wall_types' \(size 2\) must be the same size)"
   []
   [scalar-ic-error]
     type = 'RunException'

@@ -51,48 +51,21 @@ advected_interp_method = 'upwind'
     []
     [WCNSFVScalarAdvection]
       [scalars]
-        compressibility = 'incompressible'
         add_scalar_equation = true
-
         passive_scalar_names = 'scalar'
-
-        density = ${rho}
-        dynamic_viscosity = ${mu}
         passive_scalar_source = 0.1
-
-        inlet_boundaries = 'left'
-        momentum_inlet_types = 'fixed-velocity'
         passive_scalar_inlet_types = 'fixed-value'
         passive_scalar_inlet_function = '1'
-
-        wall_boundaries = 'top bottom'
-        momentum_wall_types = 'noslip symmetry'
-
-        outlet_boundaries = 'right'
-        momentum_outlet_types = 'fixed-pressure'
-
         passive_scalar_advection_interpolation = ${advected_interp_method}
       []
     []
     [WCNSFVTurbulence]
       [mixing-length]
-        compressibility = 'incompressible'
         turbulence_handling = 'mixing-length'
         coupled_flow_physics = flow
         scalar_advection_physics = scalars
 
-        density = ${rho}
-        dynamic_viscosity = ${mu}
         passive_scalar_schmidt_number = 1.0
-
-        inlet_boundaries = 'left'
-        momentum_inlet_types = 'fixed-velocity'
-
-        wall_boundaries = 'top bottom'
-        momentum_wall_types = 'noslip symmetry'
-
-        outlet_boundaries = 'right'
-        momentum_outlet_types = 'fixed-pressure'
 
         von_karman_const = ${von_karman_const}
         mixing_length_delta = 1e9

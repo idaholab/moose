@@ -86,10 +86,6 @@ inlet_v = 0.001
     type = MooseVariableFVReal
     initial_condition = 1e4
   []
-  [porosity]
-    type = MooseVariableFVReal
-    initial_condition = 1
-  []
 []
 
 [FluidProperties]

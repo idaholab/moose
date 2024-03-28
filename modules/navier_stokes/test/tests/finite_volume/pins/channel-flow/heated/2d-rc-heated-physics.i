@@ -62,28 +62,16 @@ h_cv = 1.0
     []
     [WCNSFVHeatAdvection]
       [heat]
-        porous_medium_treatment = true
-
-        density = ${rho}
-        dynamic_viscosity = ${mu}
         thermal_conductivity = ${k}
         specific_heat = ${cp}
-        porosity = 'porosity'
 
         initial_temperature = 0.0
 
-        inlet_boundaries = 'left'
-        momentum_inlet_types = 'fixed-velocity'
         energy_inlet_types = 'heatflux'
         energy_inlet_function = '${fparse u_inlet * rho * cp * T_inlet}'
 
-        wall_boundaries = 'top bottom'
-        momentum_wall_types = 'noslip symmetry'
         energy_wall_types = 'heatflux heatflux'
         energy_wall_function = '0 0'
-
-        outlet_boundaries = 'right'
-        momentum_outlet_types = 'fixed-pressure'
 
         ambient_convection_alpha = ${h_cv}
         ambient_temperature = 'T_solid'
