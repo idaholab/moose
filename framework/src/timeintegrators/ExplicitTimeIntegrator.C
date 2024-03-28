@@ -43,6 +43,8 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
     _solution_update(_nl.addVector("solution_update", true, PARALLEL)),
     _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL))
 {
+  _is_explicit = true;
+
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
   // This effectively changes the default solve_type to LINEAR instead of PJFNK,

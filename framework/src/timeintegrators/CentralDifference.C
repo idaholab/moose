@@ -34,7 +34,6 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
     _solution_older(_sys.solutionState(2)),
     _solution_old_old_old(_sys.solutionState(3))
 {
-  _is_explicit = true;
   if (_solve_type == LUMPED)
     _is_lumped = true;
 
