@@ -16,7 +16,7 @@
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
-#include "libmesh/numeric_vector.h"
+
 #include "libmesh/elem.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/enum_solver_package.h"
