@@ -10,6 +10,8 @@
 #pragma once
 
 #include "SnapshotContainerBase.h"
+#include "UniqueStorage.h"
+
 #include "libmesh/petsc_vector.h"
 
 /**

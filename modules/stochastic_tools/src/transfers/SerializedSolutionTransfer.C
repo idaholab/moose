@@ -161,20 +161,17 @@ SerializedSolutionTransfer::transferInParallel(FEProblemBase & app_problem,
     // Getting the corresponding DoF indices for the variable.
     system.setVariableGlobalDoFs(_variable_names[var_i]);
 
-    for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
-         ++solution_i)
+    for (const auto & snapshot : solution_container.getSnapshots())
     {
       DenseVector<Real> serialized_solution;
 
       // Localize the solution and add it to the local container on the rank
       // which is supposed to own it
-
-      solution_container.getSnapshot(solution_i)
-          ->localize(serialized_solution.get_values(),
-                     (local_app_index >= new_local_entries_begin &&
-                      local_app_index < new_local_entries_end)
-                         ? system.getVariableGlobalDoFs()
-                         : std::vector<dof_id_type>());
+      snapshot.localize(
+          serialized_solution.get_values(),
+          (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
+              ? system.getVariableGlobalDoFs()
+              : std::vector<dof_id_type>());
 
       if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
         _parallel_storage->addEntry(_variable_names[var_i], global_i, serialized_solution);
@@ -195,16 +192,14 @@ SerializedSolutionTransfer::transferToSubAppRoot(FEProblemBase & app_problem,
     // Getting the corresponding DoF indices for the variable.
     system.setVariableGlobalDoFs(_variable_names[var_i]);
 
-    for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
-         ++solution_i)
+    for (const auto & snapshot : solution_container.getSnapshots())
     {
       DenseVector<Real> serialized_solution;
 
       // In this case we always serialize on the root processor of the application.
-      solution_container.getSnapshot(solution_i)
-          ->localize(serialized_solution.get_values(),
-                     getFromMultiApp()->isRootProcessor() ? system.getVariableGlobalDoFs()
-                                                          : std::vector<dof_id_type>());
+      snapshot.localize(serialized_solution.get_values(),
+                        getFromMultiApp()->isRootProcessor() ? system.getVariableGlobalDoFs()
+                                                             : std::vector<dof_id_type>());
 
       if (getFromMultiApp()->isRootProcessor())
         _parallel_storage->addEntry(_variable_names[var_i], global_i, serialized_solution);
