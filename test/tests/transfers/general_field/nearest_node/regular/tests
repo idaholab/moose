@@ -13,6 +13,7 @@
     []
 
     [projection_needed_receiving]
+      skip = 'libMesh issue, #26605'
       type = 'Exodiff'
       input = 'main.i'
       exodiff = 'projection_receive.e projection_receive_sub0_out.e projection_receive_sub1_out.e projection_receive_sub2_out.e'
