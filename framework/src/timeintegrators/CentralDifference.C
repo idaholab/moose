@@ -33,7 +33,6 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
     _du_dotdot_du(_sys.duDotDotDu()),
     _solution_older(_sys.solutionState(2))
 {
-  _is_explicit = true;
   if (_solve_type == LUMPED)
     _is_lumped = true;
 

@@ -131,7 +131,7 @@ public:
   /**
    * Returns whether the explicit solvers are used
    */
-  virtual const bool & isExplicit() const { return _is_explicit; }
+  virtual bool isExplicit() const { return false; }
 
   /**
    * Returns whether mass matrix is lumped
@@ -192,9 +192,6 @@ protected:
   unsigned int _n_nonlinear_iterations;
   /// Total number of linear iterations over all stages of the time step
   unsigned int _n_linear_iterations;
-
-  /// Boolean flag that is set to true if explicit solvers are used
-  bool _is_explicit;
 
   /// Boolean flag that is set to true if lumped mass matrix is used
   bool _is_lumped;
