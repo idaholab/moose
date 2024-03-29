@@ -83,6 +83,10 @@ public:
 
   MooseVariableField(const InputParameters & parameters);
 
+  virtual Moose::VarFieldType fieldType() const override;
+  virtual bool isArray() const override;
+  virtual bool isVector() const override;
+
   static InputParameters validParams();
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) = 0;

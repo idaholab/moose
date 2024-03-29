@@ -31,7 +31,7 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     NeighborMooseVariableInterface<Real>(
-        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, false, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
     _interface_id(getParam<unsigned int>("interface_id")),

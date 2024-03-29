@@ -18,9 +18,11 @@
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 #include "ColumnMajorMatrix.h"
+#include "UniqueStorage.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
+#include "libmesh/numeric_vector.h"
 
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
@@ -38,8 +40,6 @@
 
 namespace libMesh
 {
-template <typename T>
-class NumericVector;
 template <typename T>
 class DenseMatrix;
 template <typename T>
@@ -107,6 +107,12 @@ template <typename P, typename Q>
 inline void storeHelper(std::ostream & stream, HashMap<P, Q> & data, void * context);
 
 /**
+ * UniqueStorage helper routine
+ */
+template <typename T>
+inline void storeHelper(std::ostream & stream, UniqueStorage<T> & data, void * context);
+
+/**
  * Scalar helper routine
  */
 template <typename P>
@@ -159,6 +165,12 @@ inline void loadHelper(std::istream & stream, std::optional<P> & data, void * co
  */
 template <typename P, typename Q>
 inline void loadHelper(std::istream & stream, HashMap<P, Q> & data, void * context);
+
+/**
+ * UniqueStorage helper routine
+ */
+template <typename T>
+inline void loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context);
 
 template <typename T>
 inline void dataStore(std::ostream & stream, T & v, void * /*context*/);
@@ -392,6 +404,20 @@ template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
+template <>
+/**
+ * Stores an owned numeric vector.
+ *
+ * This should be used in lieu of the NumericVector<Number> & implementation
+ * when the vector may not necessarily be initialized yet on the loading of
+ * the data. It stores the partitioning (total and local number of entries).
+ *
+ * Requirements: the unique_ptr must exist (cannot be null), the vector
+ * cannot be ghosted, and the provided context must be the Communicator.
+ */
+void dataStore(std::ostream & stream,
+               std::unique_ptr<libMesh::NumericVector<Number>> & v,
+               void * context);
 
 template <std::size_t N>
 inline void
@@ -703,6 +729,27 @@ template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
+template <>
+/**
+ * Loads an owned numeric vector.
+ *
+ * This is used in lieu of the NumericVector<double> & implementation when
+ * the vector may not necessarily be initialized yet on the loading of the data.
+ *
+ * If \p is not null, it must have the same global and local sizes that it
+ * was stored with. In this case, the data is simply filled into the vector.
+ *
+ * If \p is null, it will be constructed with the type (currently just a
+ * PetscVector) stored and initialized with the global and local sizes stored.
+ * The data will then be filled after initialization.
+ *
+ * Requirements: the vector cannot be ghosted, the provided context must be
+ * the Communicator, and if \p v is initialized, it must have the same global
+ * and local sizes that the vector was stored with.
+ */
+void dataLoad(std::istream & stream,
+              std::unique_ptr<libMesh::NumericVector<Number>> & v,
+              void * context);
 
 template <std::size_t N>
 inline void
@@ -875,6 +922,26 @@ storeHelper(std::ostream & stream, HashMap<P, Q> & data, void * context)
   dataStore(stream, data, context);
 }
 
+/**
+ * UniqueStorage helper routine
+ *
+ * The data within the UniqueStorage object cannot be null. The helper
+ * for unique_ptr<T> is called to store the data.
+ */
+template <typename T>
+inline void
+storeHelper(std::ostream & stream, UniqueStorage<T> & data, void * context)
+{
+  std::size_t size = data.size();
+  dataStore(stream, size, nullptr);
+
+  for (const auto i : index_range(data))
+  {
+    mooseAssert(data.hasValue(i), "Data doesn't have a value");
+    storeHelper(stream, data.pointerValue(i), context);
+  }
+}
+
 // Scalar Helper Function
 template <typename P>
 inline void
@@ -945,6 +1012,25 @@ inline void
 loadHelper(std::istream & stream, HashMap<P, Q> & data, void * context)
 {
   dataLoad(stream, data, context);
+}
+
+/**
+ * UniqueStorage Helper Function
+ *
+ * The unique_ptr<T> loader is called to load the data. That is,
+ * you will likely need a specialization of unique_ptr<T> that will
+ * appropriately construct and then fill the piece of data.
+ */
+template <typename T>
+inline void
+loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context)
+{
+  std::size_t size;
+  dataLoad(stream, size, nullptr);
+  data.resize(size);
+
+  for (const auto i : index_range(data))
+    loadHelper(stream, data.pointerValue(i), context);
 }
 
 void dataLoad(std::istream & stream, Point & p, void * context);

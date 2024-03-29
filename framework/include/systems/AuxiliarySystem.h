@@ -67,12 +67,6 @@ public:
   using SystemBase::addTimeIntegrator;
 
   /**
-   * Adds u_dot, u_dotdot, u_dot_old and u_dotdot_old
-   * vectors if requested by the time integrator
-   */
-  void addDotVectors();
-
-  /**
    * Adds an auxiliary kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
@@ -101,17 +95,7 @@ public:
     return _current_solution;
   }
 
-  NumericVector<Number> * solutionUDot() override { return _u_dot; }
-  NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
-  NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
-  NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
-  const NumericVector<Number> * solutionUDot() const override { return _u_dot; }
-  const NumericVector<Number> * solutionUDotDot() const override { return _u_dotdot; }
-  const NumericVector<Number> * solutionUDotOld() const override { return _u_dot_old; }
-  const NumericVector<Number> * solutionUDotDotOld() const override { return _u_dotdot_old; }
-
   virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution() override;
 
   // This is an empty function since the Aux system doesn't have a matrix!
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
@@ -178,24 +162,10 @@ protected:
   template <typename AuxKernelType>
   void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
-  FEProblemBase & _fe_problem;
-
   System & _sys;
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
-  /// Serialized version of the solution vector, or nullptr if a
-  /// serialized solution is not needed
-  std::unique_ptr<NumericVector<Number>> _serialized_solution;
-  /// solution vector for u^dot
-  NumericVector<Number> * _u_dot;
-  /// solution vector for u^dotdot
-  NumericVector<Number> * _u_dotdot;
-
-  /// Old solution vector for u^dot
-  NumericVector<Number> * _u_dot_old;
-  /// Old solution vector for u^dotdot
-  NumericVector<Number> * _u_dotdot_old;
 
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;

@@ -62,7 +62,7 @@
   [bad_bc_var_test]
     type = 'RunException'
     input = 'bad_bc_var_test.i'
-    expect_err = "Unknown variable 'foo'. It does not exist in the nonlinear system\(s\) or "
+    expect_err = "Unknown variable 'foo'. It does not exist in the solver system\(s\) or "
                  "auxiliary system"
 
     requirement = 'The system shall report an error when a non-existent nonlinear variable name is used by a MooseObject.'
@@ -635,9 +635,9 @@
   [same_name_variable_test]
     type = 'RunException'
     input = 'same_name_variable_test.i'
-    expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name"
+    expect_err = "Cannot have an auxiliary variable and a solver variable with the same name"
 
-    requirement = 'The system shall report an error when nonlinear and auxiliary variables are declared with the same name.'
+    requirement = 'The system shall report an error when solver and auxiliary variables are declared with the same name.'
     issues = '#1405'
   []
 
@@ -964,8 +964,8 @@
   [kernel_with_aux_var]
     type = 'RunException'
     input = 'kernel_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
 
     requirement = 'The system shall report an error when a Kernel attempts to use an auxiliary variable.'
     issues = '#11039'
@@ -974,8 +974,8 @@
   [bc_with_aux_var]
     type = 'RunException'
     input = 'bc_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
 
     requirement = 'The system shall report an error when a boundary condition object attempts to use an auxiliary variable.'
     issues = '#11039'
@@ -1002,8 +1002,8 @@
   [nodal_kernel_with_aux_var]
     type = 'RunException'
     input = 'nodal_kernel_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
 
     requirement = 'The system shall report an error when a nodal Kernel attempts to use an auxiliary variable.'
     issues = '#11039'
@@ -1012,8 +1012,8 @@
   [constraint_with_aux_var]
     type = 'RunException'
     input = 'constraint_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
     requirement = 'The system shall report an error when a constraint attempts to use an auxiliary variable.'
     issues = '#11039'
   []
@@ -1030,8 +1030,8 @@
   [dirac_kernel_with_aux_var]
     type = 'RunException'
     input = 'dirac_kernel_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
 
     requirement = 'The system shall report an error when a DiracKernel attempts to use an auxiliary variable.'
     issues = '#11039'
@@ -1040,18 +1040,18 @@
   [dg_kernel_with_aux_var]
     type = 'RunException'
     input = 'dg_kernel_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
 
-    requirement = 'The system shall report an error when a discontinuous Galerkin Kernel attempts to use a solution variable.'
+    requirement = 'The system shall report an error when a discontinuous Galerkin Kernel attempts to use an auxiliary variable.'
     issues = '#11039'
   []
 
   [interface_kernel_with_aux_var]
     type = 'RunException'
     input = 'interface_kernel_with_aux_var.i'
-    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when "
-                 "you meant to specify a nonlinear variable"
+    expect_err = "No solver variable named v found. Did you specify an auxiliary variable when "
+                 "you meant to specify a solver variable"
 
     requirement = 'The system shall report an error when an interface Kernel attempts to use an auxiliary variable.'
     issues = '#11039'

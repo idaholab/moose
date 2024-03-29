@@ -105,6 +105,16 @@ public:
    */
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const = 0;
 
+  /**
+   * @return the linear system number corresponding to the provided \p linear_sys_name
+   */
+  virtual unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const = 0;
+
+  /**
+   * @return the solver system number corresponding to the provided \p solver_sys_name
+   */
+  virtual unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const = 0;
+
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
@@ -307,14 +317,19 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(const THREAD_ID tid);
 
-  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) = 0;
-  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const = 0;
+  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) = 0;
+  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const = 0;
 
   /**
    * Return the nonlinear system object as a base class reference given the system number
    */
   virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const = 0;
   virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) = 0;
+  /**
+   * Return the linear system object as a base class reference given the system number
+   */
+  virtual const SystemBase & systemBaseLinear(const unsigned int sys_num) const = 0;
+  virtual SystemBase & systemBaseLinear(const unsigned int sys_num) = 0;
   /**
    * Return the auxiliary system object as a base class reference
    */
@@ -889,6 +904,21 @@ public:
   virtual unsigned int currentNlSysNum() const = 0;
 
   /**
+   * @return the number of linear systems in the problem
+   */
+  virtual std::size_t numLinearSystems() const = 0;
+
+  /**
+   * @return the number of solver systems in the problem
+   */
+  virtual std::size_t numSolverSystems() const = 0;
+
+  /**
+   * @return the current linear system number
+   */
+  virtual unsigned int currentLinearSysNum() const = 0;
+
+  /**
    * Register an unfulfilled functor request
    */
   template <typename T>
@@ -903,12 +933,22 @@ public:
 
   /**
    * Select the vector tags which belong to a specific system
-   * @param system Reference to the nonlinear system
+   * @param system Reference to the system
    * @param input_vector_tags A vector of vector tags
    * @param selected_tags A set which gets populated by the tag-ids that belong to the system
    */
   static void selectVectorTagsFromSystem(const SystemBase & system,
                                          const std::vector<VectorTag> & input_vector_tags,
+                                         std::set<TagID> & selected_tags);
+
+  /**
+   * Select the matrix tags which belong to a specific system
+   * @param system Reference to the system
+   * @param input_matrix_tags A map of matrix tags
+   * @param selected_tags A set which gets populated by the tag-ids that belong to the system
+   */
+  static void selectMatrixTagsFromSystem(const SystemBase & system,
+                                         const std::map<TagName, TagID> & input_matrix_tags,
                                          std::set<TagID> & selected_tags);
 
   /**
@@ -1045,13 +1085,13 @@ protected:
 
 private:
   /**
-   * @return whether a given variable name is in the nonlinear systems (reflected the first member
-   * of the returned paired which is a boolean) and if so, what nonlinear system number it is in
-   * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
-   * this will be an invalid unsigned integer)
+   * @return whether a given variable name is in the solver systems (reflected by the first
+   * member of the returned pair which is a boolean) and if so, what solver system number it is
+   * in (the second member of the returned pair; if the variable is not in the solver systems,
+   * then this will be an invalid unsigned integer)
    */
   virtual std::pair<bool, unsigned int>
-  determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
+  determineSolverSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
 
   enum class TrueFunctorIs
   {

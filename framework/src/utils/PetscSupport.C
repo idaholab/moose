@@ -14,6 +14,7 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
+#include "LinearSystem.h"
 #include "DisplacedProblem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
@@ -454,23 +455,23 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
 void
 petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
 {
-  for (const auto i : make_range(problem.numNonlinearSystems()))
+  for (const auto i : make_range(problem.numSolverSystems()))
   {
-    NonlinearSystemBase & nl = problem.getNonlinearSystemBase(i);
-    KSPSetNormType(ksp, getPetscKSPNormType(nl.getMooseKSPNormType()));
+    SolverSystem & sys = problem.getSolverSystem(i);
+    KSPSetNormType(ksp, getPetscKSPNormType(sys.getMooseKSPNormType()));
   }
 }
 
 void
 petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
 {
-  for (const auto i : make_range(problem.numNonlinearSystems()))
+  for (const auto i : make_range(problem.numSolverSystems()))
   {
-    NonlinearSystemBase & nl = problem.getNonlinearSystemBase(i);
+    SolverSystem & sys = problem.getSolverSystem(i);
 
     // PETSc 3.2.x+
-    if (nl.getPCSide() != Moose::PCS_DEFAULT)
-      KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
+    if (sys.getPCSide() != Moose::PCS_DEFAULT)
+      KSPSetPCSide(ksp, getPetscPCSide(sys.getPCSide()));
   }
 }
 
@@ -526,6 +527,16 @@ petscSetDefaults(FEProblemBase & problem)
       CHKERRABORT(nl.comm().get(), ierr);
     }
 
+    petscSetKSPDefaults(problem, ksp);
+  }
+
+  for (auto sys_index : make_range(problem.numLinearSystems()))
+  {
+    // dig out PETSc solver
+    LinearSystem & lin_sys = problem.getLinearSystem(sys_index);
+    PetscLinearSolver<Number> * petsc_solver = dynamic_cast<PetscLinearSolver<Number> *>(
+        lin_sys.linearImplicitSystem().get_linear_solver());
+    KSP ksp = petsc_solver->ksp();
     petscSetKSPDefaults(problem, ksp);
   }
 }

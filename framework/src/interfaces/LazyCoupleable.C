@@ -45,7 +45,7 @@ LazyCoupleable::init()
 
     auto & moose_var = _l_fe_problem->getVariable(
         0, var_pair.first, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
-    if (moose_var.kind() == Moose::VAR_NONLINEAR)
+    if (moose_var.kind() == Moose::VAR_SOLVER)
       *(var_pair.second) = moose_var.number();
     else
       *(var_pair.second) = std::numeric_limits<unsigned int>::max() - moose_var.number();

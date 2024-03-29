@@ -19,7 +19,7 @@
   []
   [u_adjoint]
     components = 2
-    nl_sys = adjoint
+    solver_sys = adjoint
   []
 []
 

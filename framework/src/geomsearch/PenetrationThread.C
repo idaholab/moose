@@ -130,7 +130,6 @@ PenetrationThread::operator()(const NodeIdRange & range)
         points[0] = contact_ref;
         const std::vector<Point> & secondary_pos = fe_side->get_xyz();
 
-        fe_side->reinit(info->_side, &points);
         Moose::findContactPoint(*info,
                                 fe_elem,
                                 fe_side,

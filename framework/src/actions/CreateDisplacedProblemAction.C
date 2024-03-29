@@ -144,7 +144,7 @@ CreateDisplacedProblemAction::act()
       for (const auto i : make_range(_problem->numNonlinearSystems()))
       {
         auto & undisplaced_nl = _problem->getNonlinearSystemBase(i);
-        auto & displaced_nl = displaced_problem_ptr->nlSys(i);
+        auto & displaced_nl = displaced_problem_ptr->solverSys(i);
         // Note the "to" system doesn't actually matter much - the GF will
         // get added to both systems on the receiving side
         addProxyAlgebraicRelationshipManagers(undisplaced_nl, displaced_nl);

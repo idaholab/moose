@@ -36,7 +36,7 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     // and it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
-        this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, true, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
 
     _secondary(_mesh.getSubdomainID(getParam<SubdomainName>("secondary"))),
     _primary(_mesh.getSubdomainID(getParam<SubdomainName>("primary"))),

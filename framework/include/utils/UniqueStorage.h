@@ -12,6 +12,14 @@
 #include <memory>
 #include <vector>
 #include <utility>
+#include <iostream>
+
+template <class T>
+class UniqueStorage;
+template <typename T>
+void storeHelper(std::ostream & stream, UniqueStorage<T> &, void *);
+template <typename T>
+void loadHelper(std::istream & stream, UniqueStorage<T> &, void *);
 
 /**
  * Storage container that stores a vector of unique pointers of T,
@@ -132,9 +140,6 @@ protected:
    *
    * This can be used to construct objects in the storage, i.e.,
    * setPointer(0, std::make_unique<T>(...));
-   *
-   * This is the only method that allows for the modification of
-   * ownership in the underlying vector. Protect it wisely.
    */
   void setPointer(const std::size_t i, std::unique_ptr<T> && ptr)
   {
@@ -153,25 +158,35 @@ protected:
 
   /**
    * Resizes the underlying vector.
-   *
-   * This is the only method that allows for modification of
-   * the underlying container. Protect it wisely.
    */
   void resize(const std::size_t size) { _values.resize(size); }
+
+  /**
+   * Clears the underlying vector.
+   */
+  void clear() { _values.clear(); }
 
 private:
   /**
    * Returns a read-only reference to the underlying unique pointer
    * at index \p i.
-   *
-   * We hope to only expose the underlying unique_ptr to this API,
-   * and not in derived classes. Hopefully it can stay that way.
    */
   const std::unique_ptr<T> & pointerValue(const std::size_t i) const
   {
     mooseAssert(size() > i, "Invalid size");
     return _values[i];
   }
+  /**
+   * Returns a reference to the underlying unique pointer
+   * at index \p i.
+   */
+  std::unique_ptr<T> & pointerValue(const std::size_t i)
+  {
+    return const_cast<std::unique_ptr<T> &>(std::as_const(*this).pointerValue(i));
+  }
+
+  friend void storeHelper<>(std::ostream & stream, UniqueStorage<T> &, void *);
+  friend void loadHelper<>(std::istream & stream, UniqueStorage<T> &, void *);
 
   /// The underlying data
   values_type _values;

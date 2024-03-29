@@ -25,6 +25,19 @@ class SnapshotContainerBase : public GeneralReporter
 public:
   static InputParameters validParams();
   SnapshotContainerBase(const InputParameters & parameters);
+
+  /**
+   * Storage for the snapshots.
+   *
+   * The underlying storage is unique_ptrs, but the public API
+   * (read-only access) exposes just references.
+   */
+  class Snapshots : public UniqueStorage<NumericVector<Number>>
+  {
+  public:
+    friend class SnapshotContainerBase;
+  };
+
   virtual void initialSetup() override;
   virtual void initialize() override {}
   virtual void execute() override;
@@ -34,16 +47,13 @@ public:
    * Return the whole snapshot container
    * @return const std::vector<std::unique_ptr<NumericVector<Number>>>&
    */
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & getContainer()
-  {
-    return _accumulated_data;
-  }
+  const Snapshots & getSnapshots() const { return _accumulated_data; }
 
   /**
    * Return one of the stored snapshot vectors
    * @param local_i The index of the locally stored numeric data container
    */
-  const std::unique_ptr<NumericVector<Number>> & getSnapshot(unsigned int local_i) const;
+  const NumericVector<Number> & getSnapshot(unsigned int local_i) const;
 
 protected:
   /**
@@ -55,8 +65,11 @@ protected:
   /// Dynamic container for snapshot vectors. We store pointers to make sure that the change in size
   /// comes with little overhead. This is a reference because we need it to be restartable for
   /// stochastic runs in batch mode.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _accumulated_data;
+  Snapshots & _accumulated_data;
 
   /// The nonlinear system's number whose solution shall be collected
   const unsigned int _nonlinear_system_number;
 };
+
+void dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context);
+void dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context);

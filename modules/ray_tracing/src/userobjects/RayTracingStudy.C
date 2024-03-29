@@ -527,6 +527,7 @@ RayTracingStudy::subdomainHMaxSetup()
         "tolerances used in computing ray intersections. This warning suggests that the\n"
         "approximate element size is not a good approximation. This is likely due to poor\n"
         "element aspect ratios.\n\n"
+        "This warning is only output for the first element affected.\n"
         "To disable this warning, set warn_subdomain_hmax = false.\n";
 
     for (const auto & elem : *_mesh.getActiveLocalElementRange())
@@ -537,13 +538,19 @@ RayTracingStudy::subdomainHMaxSetup()
 
       const auto hmax_rel = hmax / max_hmax;
       if (hmax_rel < 1.e-2 || hmax_rel > 1.e2)
-        mooseWarning(
-            warn_prefix, "Element hmax varies significantly from subdomain hmax.\n", warn_suffix);
+        mooseDoOnce(mooseWarning(warn_prefix,
+                                 "Element hmax varies significantly from subdomain hmax.\n",
+                                 warn_suffix,
+                                 "First element affected:\n",
+                                 Moose::stringify(*elem)););
 
       const auto h_rel = max_hmax / hmin;
       if (h_rel > 1.e2)
-        mooseWarning(
-            warn_prefix, "Element hmin varies significantly from subdomain hmax.\n", warn_suffix);
+        mooseDoOnce(mooseWarning(warn_prefix,
+                                 "Element hmin varies significantly from subdomain hmax.\n",
+                                 warn_suffix,
+                                 "First element affected:\n",
+                                 Moose::stringify(*elem)););
     }
   }
 }

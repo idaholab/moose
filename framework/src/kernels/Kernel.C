@@ -32,7 +32,7 @@ Kernel::Kernel(const InputParameters & parameters)
     MooseVariableInterface<Real>(this,
                                  false,
                                  "variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarKindType::VAR_SOLVER,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariable()),
     _test(_var.phi()),

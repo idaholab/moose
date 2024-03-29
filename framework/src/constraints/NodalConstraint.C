@@ -34,7 +34,7 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, true),
     NeighborMooseVariableInterface<Real>(
-        this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, true, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _var_secondary(_sys.getFieldVariable<Real>(
         _tid,

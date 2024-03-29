@@ -148,4 +148,25 @@ void getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                         const SubProblem & subproblem,
                         const std::set<SubdomainID> & block_ids,
                         std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map);
+
+/**
+ * Compute the divergence of a vector given its matrix of derivatives
+ */
+template <typename T, typename VectorType, typename PointType>
+T
+divergence(const TensorValue<T> & gradient,
+           const VectorType & value,
+           const PointType & point,
+           const Moose::CoordinateSystemType & coord_sys,
+           const unsigned int rz_radial_coord)
+{
+  mooseAssert((coord_sys == Moose::COORD_XYZ) || (coord_sys == Moose::COORD_RZ),
+              "This function only supports calculations of divergence in Cartesian and "
+              "axisymmetric coordinate systems");
+  auto div = gradient.tr();
+  if (coord_sys == Moose::COORD_RZ)
+    // u_r / r
+    div += value(rz_radial_coord) / point(rz_radial_coord);
+  return div;
+}
 }

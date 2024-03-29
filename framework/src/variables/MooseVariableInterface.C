@@ -14,6 +14,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableFV.h"
+#include "MooseLinearVariableFV.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -37,10 +38,13 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
                               expected_var_type,
                               expected_var_field_type);
   if (!(_variable = dynamic_cast<MooseVariableFE<T> *>(_var)))
-    _fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var);
+    if (!(_fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var)))
+      _linear_fv_variable = dynamic_cast<MooseLinearVariableFV<T> *>(_var);
+  if (!(_field_variable = dynamic_cast<MooseVariableField<T> *>(_var)))
+    mooseError("The variable supplied to the variable interface is not of field type");
 
   _mvi_assembly =
-      &problem.assembly(tid, _var->kind() == Moose::VAR_NONLINEAR ? _var->sys().number() : 0);
+      &problem.assembly(tid, (_var->kind() == Moose::VAR_SOLVER) ? _var->sys().number() : 0);
 }
 
 template <typename T>
@@ -57,6 +61,16 @@ MooseVariableInterface<T>::mooseVariableFV() const
                _moose_object.name(),
                ". Did you forget to set fv = true in the Variables block?");
   return _fv_variable;
+}
+
+template <typename T>
+MooseLinearVariableFV<T> *
+MooseVariableInterface<T>::mooseLinearVariableFV() const
+{
+  if (!_linear_fv_variable)
+    mooseError(
+        "The variable defined in ", _moose_object.name(), " is not a MooseLinearVariableFV!");
+  return _linear_fv_variable;
 }
 
 template <typename T>
@@ -316,6 +330,9 @@ MooseVariableInterface<T>::secondPhi()
   if (_nodal)
     mooseError("second derivatives are not defined at nodes");
 
+  if (_linear_fv_variable)
+    mooseError("second order shape function derivatives not available for linear FV variables");
+
   return _mvi_assembly->secondPhi(*_variable);
 }
 
@@ -326,6 +343,9 @@ MooseVariableInterface<T>::secondPhiFace()
   if (_nodal)
     mooseError("second derivatives are not defined at nodes");
 
+  if (_linear_fv_variable)
+    mooseError("second order shape function derivatives not available for linear FV variables");
+
   return _mvi_assembly->secondPhiFace(*_variable);
 }
 
@@ -333,15 +353,7 @@ template <typename T>
 MooseVariableField<T> &
 MooseVariableInterface<T>::mooseVariableField()
 {
-  if (_variable)
-    return *_variable;
-  else
-  {
-    if (!_fv_variable)
-      mooseError("Either _variable or _fv_variable must be non-null in MooseVariableInterface");
-
-    return *_fv_variable;
-  }
+  return *_field_variable;
 }
 
 template class MooseVariableInterface<Real>;
