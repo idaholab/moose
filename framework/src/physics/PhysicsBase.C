@@ -51,6 +51,7 @@ PhysicsBase::validParams()
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : Action(parameters),
+    InputParametersChecksUtils<PhysicsBase>(this),
     _sys_number(0),
     _verbose(getParam<bool>("verbose")),
     _preconditioning(getParam<MooseEnum>("preconditioning")),
@@ -218,39 +219,6 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
   }
 }
 
-void
-PhysicsBase::checkParamsBothSetOrNotSet(const std::string & param1,
-                                        const std::string & param2) const
-{
-  if ((isParamValid(param1) + isParamValid(param2)) % 2 != 0)
-    paramError(param1,
-               "Parameters '" + param1 + "' and '" + param2 +
-                   "' must be either both set or both not set.");
-}
-
-void
-PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
-                                                   const std::string & param2) const
-{
-  mooseAssert(parameters().have_parameter<bool>(param1),
-              "Cannot check if parameter " + param1 +
-                  " is true if it's not a bool parameter of this object");
-  if (!getParam<bool>(param1) && isParamSetByUser(param2))
-    paramError(param2,
-               "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
-                   "' is set by the user");
-}
-
-void
-PhysicsBase::checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
-                                                  const std::string & param2) const
-{
-  if (!isParamSetByUser(param1) && isParamSetByUser(param2))
-    paramError(param2,
-               "Parameter '" + param2 + "' should not be set if parameter '" + param1 +
-                   "' is not specified.");
-}
-
 bool
 PhysicsBase::nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const
 {
@@ -280,19 +248,6 @@ PhysicsBase::checkRequiredTasks() const
                    "' but this task is not registered to the derived class. Registered tasks for "
                    "this Physics are: " +
                    Moose::stringify(registered_tasks));
-}
-
-void
-PhysicsBase::errorDependentParameter(const std::string & param1,
-                                     const std::string & value_not_set,
-                                     const std::vector<std::string> & dependent_params) const
-{
-  for (const auto & dependent_param : dependent_params)
-    if (isParamSetByUser(dependent_param))
-      paramError(dependent_param,
-                 "Parameter '" + dependent_param +
-                     "' should not be set by the user if parameter '" + param1 +
-                     "' has not been set to '" + value_not_set + "'");
 }
 
 void
