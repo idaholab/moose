@@ -29,63 +29,99 @@ public:
 
 protected:
   /// Check in debug mode that this parameter has been added to the validParams
+  /// @param param parameter that should be defined
   template <typename T>
   void assertParamDefined(const std::string & param) const;
   /// Check that two parameters are either both set or both not set
+  /// @param param1 first parameter to check
+  /// @param param2 second parameter to check
   void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
   /// Check that a parameter is set only if the first one is set to true
+  /// @param param1 first parameter to check, check the second if true
+  /// @param param2 second parameter to check, that should be set if first one is true
   void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
                                              const std::string & param2) const;
+  /// Check that a parameter is set only if the first one is set
+  /// @param param1 first parameter to check, check the second if set
+  /// @param param2 second parameter to check, that should be set if first one is set
   void checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
                                             const std::string & param2) const;
   /// Check that the two vector parameters are of the same length
+  /// @param param1 first vector parameter to compare the size of
+  /// @param param2 second vector parameter to compare the size of
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
   /// Check that this vector parameter (with name defined in \p param1) has the same length as the MultiMooseEnum (with name defined in \p param2)
+  /// @param param1 vector parameter to compare the size of
+  /// @param param2 multiMooseEnum parameter to compare the size of
   template <typename T>
   void checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
                                                const std::string & param2) const;
+  /// Check that the two-D vectors have exactly the same length in both dimensions
+  /// @param param1 first two-D vector parameter to check the dimensions of
+  /// @param param2 second two-D vector parameter to check the dimensions of
   template <typename T, typename S>
   void checkTwoDVectorParamsSameLength(const std::string & param1,
                                        const std::string & param2) const;
   /// Check that there is no overlap between the items in each vector parameters
   /// Each vector parameter should also have unique items
+  /// @param param_vecs vector of parameters that should not overlap with each other
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
+  /// Check that each inner vector of a two-D vector parameter are the same size as another one-D vector parameter
+  /// @param param1 two-D vector parameter to check the dimensions of
+  /// @param param2 one-D vector parameter to set the desired size
   template <typename T, typename S>
   void checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
                                                        const std::string & param2) const;
+  /// Check that the size of a two-D vector parameter matches the size of a MultiMooseEnum parameter
+  /// @param param1 two-D vector parameter to check the unrolled size of
+  /// @param param2 MultiMooseEnum parameter to set the desired size
   template <typename T>
   void checkTwoDVectorParamMultiMooseEnumSameLength(const std::string & param1,
                                                     const std::string & param2,
                                                     const bool error_for_param2) const;
   /// Check that the user did not pass an empty vector
+  /// @param param1 vector parameter that should not be empty
   template <typename T>
   void checkVectorParamNotEmpty(const std::string & param1) const;
   /// Check that two vector parameters are the same length if both are set
+  /// @param param1 first vector parameter to check the size of
+  /// @param param2 second vector parameter to check the size of
   template <typename T, typename S>
   void checkVectorParamsSameLengthIfSet(const std::string & param1,
                                         const std::string & param2,
                                         const bool ignore_empty_default_param2 = false) const;
-
+  /// Check that a vector parameter is the same length as two others combined
+  /// @param param1 vector parameter that provides the target size
+  /// @param param2 vector parameter that provides one term in the combined size
+  /// @param param3 vector parameter that provides one term in the combined size
   template <typename T, typename S, typename U>
   void checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
                                                   const std::string & param2,
                                                   const std::string & param3) const;
 
   /// Check if the user commited errors during the definition of block-wise parameters
+  /// @param block_param_name the name of the parameter that provides the groups of blocks
+  /// @param parameter_names vector of the names of the parameters that are defined on a per-block basis
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
                                  const std::vector<std::string> & parameter_names) const;
-  /// Check that all shared parameters are consistent: if set (default or user), set to the same value
-  void checkCommonParametersConsistent(const InputParameters & parameters) const;
+  /// Return whether two parameters are consistent
+  /// @param other_param InputParameters object from another object to check the 'param_name' parameter in
+  /// @param param_name the name of the parameter to check for consistency
   template <typename T>
   bool parameterConsistent(const InputParameters & other_param,
-                           const std::string & param_name,
-                           bool warn) const;
+                           const std::string & param_name) const;
+  /// Emits a warning if two parameters are not equal to each other
+  /// @param other_param InputParameters object from another object to check the 'param_name' parameter in
+  /// @param param_name the name of the parameter to check for consistency
   template <typename T>
   void warnInconsistent(const InputParameters & parameters, const std::string & param_name) const;
-  /// Error messages for parameter checks
+  /// Error messages for parameters that should depend on another parameter
+  /// @param param1 the parameter has not been set to the desired value (for logging purposes)
+  /// @param value_not_set the desired value (for logging purposes)
+  /// @param dependent_params all the parameters that should not have been since 'param1' was not set to 'value_not_set'
   void errorDependentParameter(const std::string & param1,
                                const std::string & value_not_set,
                                const std::vector<std::string> & dependent_params) const;
@@ -362,8 +398,7 @@ template <typename C>
 template <typename T>
 bool
 InputParametersChecksUtils<C>::parameterConsistent(const InputParameters & other_param,
-                                                   const std::string & param_name,
-                                                   const bool warn) const
+                                                   const std::string & param_name) const
 {
   assertParamDefined<T>(param_name);
   mooseAssert(other_param.have_parameter<T>(param_name),
@@ -379,12 +414,6 @@ InputParametersChecksUtils<C>::parameterConsistent(const InputParameters & other
     else if (forwardGetParam<T>(param_name) != other_param.get<T>(param_name))
       consistent = false;
   }
-  if (warn && !consistent)
-    forwardMooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" +
-                        forwardName() + "\" of type \"" + forwardType() +
-                        "\" and the parameter set for \"" +
-                        other_param.get<std::string>("_action_name") + "\" of type \"" +
-                        other_param.get<std::string>("action_type") + "\"");
   return consistent;
 }
 
@@ -399,7 +428,7 @@ InputParametersChecksUtils<C>::checkBlockwiseConsistency(
 
   if (block_names.size())
   {
-    // We only check block-restrictions if the action is not restricted to `ANY_BLOCK_ID`.
+    // We only check block-restrictions if the customer class is not restricted to `ANY_BLOCK_ID`.
     // If the users define blocks that are not on the mesh, they will receive errors from the
     // objects created created by the customer class
     const auto & object_blocks = forwardBlocks();
@@ -459,7 +488,13 @@ void
 InputParametersChecksUtils<C>::warnInconsistent(const InputParameters & other_param,
                                                 const std::string & param_name) const
 {
-  parameterConsistent<T>(other_param, param_name, true);
+  const bool consistent = parameterConsistent<T>(other_param, param_name);
+  if (!consistent)
+    forwardMooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" +
+                        forwardName() + "\" of type \"" + forwardType() +
+                        "\" and the parameter set for \"" +
+                        other_param.get<std::string>("_action_name") + "\" of type \"" +
+                        other_param.get<std::string>("action_type") + "\"");
 }
 
 template <typename C>
