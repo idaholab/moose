@@ -53,11 +53,13 @@ function clone_moose()
 This may indicate the root cause of other issues. e.g MOOSE dependencies may fail to download
 properly in later steps.
 
-Possible solutions: You should contact your network support team and inform them of this issue.
-                    In the meantime, you can attempt to disable GIT SSL Verification (not
-                    recommended):
+Possible solutions:
 
-                    \texport GIT_SSL_NO_VERIFY=true
+\tYou should contact your network support team and inform them of this issue. In the
+\tmeantime you can attempt to disable GIT SSL Verification (not a long-term
+\trecommended solution):
+
+\t\texport GIT_SSL_NO_VERIFY=true
 
 Trying again with SSL protections turned off...\n\n"
         export GIT_SSL_NO_VERIFY=true
@@ -69,24 +71,23 @@ Trying again with SSL protections turned off...\n\n"
             run_command "tail -15 ${CTMP_DIR}/moose_clone_stdouterr.log"
         fi
         print_orange "\nWARNING: "
-        printf "Additional SSL issues remain after disabling SSL verification.
+        printf "Additional SSL issues remain after disabling SSL verification. This indicates
+a more serious networking issue which may indicate your inability to build MOOSE dependencies.
 
-This indicates a more serious networking issue which may indicate your inability to build MOOSE
-dependencies.
+Possible solutions:
 
-Possible solutions: You should contact your network support team and inform them of this issue.
-                    Disable any VPN software for the time being, if available.
-                    You can attempt to disable SSL Verification in several ways:
+\tYou should contact your network support team and inform them of this issue.
+\tDisable any VPN software for the time being, if available.
+\tYou can attempt to disable SSL Verification in several ways:
 
-                    \texport GIT_SSL_NO_VERIFY=true
-                    \tconda config --set ssl_verify false
+\t\texport GIT_SSL_NO_VERIFY=true
+\t\tconda config --set ssl_verify false
 
-                    Your network support team should inform you how to properly set the following
-                    variables:
+\tYour network support team should inform you how to properly set the following variables:
 
-                    \tREQUESTS_CA_BUNDLE
-                    \tSSL_CERT_FILE
-                    \tCURL_CA_BUNDLE
+\t\tREQUESTS_CA_BUNDLE
+\t\tSSL_CERT_FILE
+\t\tCURL_CA_BUNDLE
 \n"
         export ALREADY_TRIED_SSL=true
     elif [ ${exit_code} -ge 1 ]; then
@@ -143,7 +144,7 @@ function build_library()
 
     if [ "$exit_code" != '0' ] && [ ${error_cnt} -ge 1 ]; then
         print_failure_and_exit $(tail -20 ./${1}_stdouterr.log)
-    elif [ "$exit_code" != '0' ] && [ $(cat ./${1}_stdouterr.log | grep -c -i 'SSL certificate problem') -ge 1 ]; then
+    elif [ "$exit_code" != '0' ] && [ $(cat ./${1}_stdouterr.log | grep -c -i 'SSL certificate problem\|No such file or directory') -ge 1 ]; then
         let error_cnt+=1
         if [ "${VERBOSITY}" == '0' ]; then
             run_command "tail -15 ./${1}_stdouterr.log"
