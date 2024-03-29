@@ -11,6 +11,8 @@ package:
 source:
   git_url: https://github.com/sandialabs/seacas
   git_rev: {{ seacas_git_rev }}
+  patches:
+    - arm-kern-return.patch
 
 build:
   number: {{ build }}
