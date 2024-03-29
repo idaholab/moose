@@ -52,6 +52,11 @@ FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
   if (isParamSetByUser("no_backup_and_restore") && isParamSetByUser("no_restore"))
     paramError("no_backup_and_restore",
                "Cannot be used in addition to 'no_restore'; use just 'no_restore'.");
+  // You could end up with some dirty hidden behavior if you do this. We could remove this check,
+  // but I don't think that it's sane to do so.
+  if (_no_restore && (_app.isRecovering() || _app.isRestarting()))
+    paramError(getParam<bool>("no_backup_and_restore") ? "no_backup_and_restore" : "no_restore",
+               "The parent app is restarting or recovering, restoration cannot be disabled");
 }
 
 void
