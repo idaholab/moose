@@ -322,8 +322,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   Executioner * exec = app.getExecutioner();
 
   oss << "Execution Information:\n"
-      << std::setw(console_field_width) << "  Executioner: " << demangle(typeid(*exec).name())
-      << '\n';
+      << std::setw(console_field_width) << "  Executioner: " << exec->type() << '\n';
 
   std::string time_stepper = exec->getTimeStepperName();
   if (time_stepper != "")
