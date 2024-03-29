@@ -91,7 +91,7 @@ private:
   bool _verbose;
 
   /// Use time step as the iteration counter for purposes of outputting
-  bool _time_step_as_iteration;
+  bool _output_opt_iters;
 
   ///@{
   /// count individual solves for output

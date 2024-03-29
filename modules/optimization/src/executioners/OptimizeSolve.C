@@ -33,7 +33,10 @@ OptimizeSolve::validParams()
                OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD};
   params.addParam<ExecFlagEnum>(
       "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
-  params.addParam<bool>("time_step_as_iteration", false, "Use the time as the current iteration.");
+  params.addParam<bool>(
+      "output_optimization_iterations",
+      false,
+      "Use the time step as the current iteration for outputting optimization history.");
   return params;
 }
 
@@ -42,14 +45,14 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _my_comm(MPI_COMM_SELF),
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
-    _time_step_as_iteration(getParam<bool>("time_step_as_iteration")),
+    _output_opt_iters(getParam<bool>("output_optimization_iterations")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
     _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
 
-  if (_time_step_as_iteration && _problem.isTransient())
+  if (_output_opt_iters && _problem.isTransient())
     mooseDocumentedError(
         "moose", 27225, "Outputting for transient executioners has not been implemented.");
 }
@@ -72,7 +75,7 @@ OptimizeSolve::solve()
 
   // time step defaults 1, we want to start at 0 for first iteration to be
   // consistent with TAO iterations.
-  if (_time_step_as_iteration)
+  if (_output_opt_iters)
     _problem.timeStep() = 0;
   bool solveInfo = (taoSolve() == 0);
   return solveInfo;
@@ -313,7 +316,7 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
 
   // Increment timestep. In steady problems timestep = time for outputting.
   // See Output.C
-  if (_time_step_as_iteration)
+  if (_output_opt_iters)
     _problem.timeStep() += 1;
 
   // print verbose per iteration output
