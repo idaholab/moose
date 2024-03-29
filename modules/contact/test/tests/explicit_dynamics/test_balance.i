@@ -292,6 +292,10 @@
   interval = 50
   exodus = true
   csv = true
+  [check]
+    type = Checkpoint
+    wall_time_interval = 10000
+  []
 []
 
 [Postprocessors]

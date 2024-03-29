@@ -140,16 +140,10 @@ SolverSystem::compute(const ExecFlagType type)
   }
   else if ((type == EXEC_TIMESTEP_END) || (type == EXEC_FINAL))
   {
-    if (_fe_problem.solverParams()._type == Moose::ST_LINEAR && _time_integrator &&
-        !_time_integrator->isExplicit()) // for some reason the time derivatives get screwed up if
-                                         // we compute them at the end for explicit time
-                                         // integrators. Tests that fail without this check are the
-                                         // explicit dynamics balance tests in the contact module
-    {
+    if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
       // We likely don't have a final residual evaluation upon which we compute the time derivatives
       // so we need to do so now
       compute_tds = true;
-    }
   }
 
   if (compute_tds && _fe_problem.dt() > 0. && _time_integrator)

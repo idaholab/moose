@@ -31,8 +31,7 @@ CentralDifference::validParams()
 CentralDifference::CentralDifference(const InputParameters & parameters)
   : ActuallyExplicitEuler(parameters),
     _du_dotdot_du(_sys.duDotDotDu()),
-    _solution_older(_sys.solutionState(2)),
-    _solution_old_old_old(_sys.solutionState(3))
+    _solution_older(_sys.solutionState(2))
 {
   _is_explicit = true;
   if (_solve_type == LUMPED)
@@ -48,8 +47,7 @@ CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot,
                                             const dof_id_type & dof,
                                             DualReal & ad_u_dotdot) const
 {
-  computeTimeDerivativeHelper(
-      ad_u_dot, ad_u_dotdot, _solution_old(dof), _solution_older(dof), _solution_old_old_old(dof));
+  computeTimeDerivativeHelper(ad_u_dot, ad_u_dotdot, _solution_old(dof), _solution_older(dof));
 }
 
 void
@@ -79,9 +77,11 @@ CentralDifference::computeTimeDerivatives()
   auto & u_dot = *_sys.solutionUDot();
   auto & u_dotdot = *_sys.solutionUDotDot();
 
+  u_dot = *_solution;
+  u_dotdot = *_solution;
+
   // Computing derivatives
-  computeTimeDerivativeHelper(
-      u_dot, u_dotdot, _solution_old, _solution_older, _solution_old_old_old);
+  computeTimeDerivativeHelper(u_dot, u_dotdot, _solution_old, _solution_older);
 
   // make sure _u_dotdot and _u_dot are in good state
   u_dotdot.close();
