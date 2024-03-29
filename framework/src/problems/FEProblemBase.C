@@ -8706,14 +8706,12 @@ FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
 void
 FEProblemBase::computeSystems(const ExecFlagType & type)
 {
-  if ((type == EXEC_LINEAR) || (type == EXEC_NONLINEAR))
-  {
-    mooseAssert(_current_solver_sys, "This should be non-null");
-    _current_solver_sys->compute(type);
-  }
-  else
-    for (auto & solver_sys : _solver_systems)
-      solver_sys->compute(type);
+  // When performing an adjoint solve in the optimization module, the current solver system is the
+  // adjoint. However, the adjoint solve requires having accurate time derivative calculations for
+  // the forward system. The cleanest way to handle such uses is just to compute the time
+  // derivatives for all solver systems instead of trying to guess which ones we need and don't need
+  for (auto & solver_sys : _solver_systems)
+    solver_sys->compute(type);
 
   _aux->compute(type);
 }
