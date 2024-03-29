@@ -292,10 +292,7 @@
   interval = 50
   exodus = true
   csv = true
-  [check]
-    type = Checkpoint
-    wall_time_interval = 10000
-  []
+  checkpoint = true # for regression testing purposes
 []
 
 [Postprocessors]
