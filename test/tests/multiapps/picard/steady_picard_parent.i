@@ -74,7 +74,7 @@
   [sub]
     type = FullSolveMultiApp
     input_files = steady_picard_sub.i
-    no_backup_and_restore = true
+    no_restore = true
   []
 []
 
