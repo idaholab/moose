@@ -1086,7 +1086,10 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
 
   _fe_problem.reinitNeighborPhys(
       undisplaced_primary_elem, primary_side, {undisplaced_primary_physical_point}, 0);
-  _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+  // Stateful material properties are only initialized for neighbor material data for internal faces
+  // for discontinuous Galerkin methods or for conforming interfaces for interface kernels. We don't
+  // have either of those use cases here where we likely have disconnected meshes
+  _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0, /*swap_stateful=*/false);
 
   // Reinit points for constraint enforcement
   if (displaced)
