@@ -130,7 +130,7 @@ PhysicsBase::act()
     addExecutors();
 
   // Exodus restart capabilities
-  if (_current_task == "copy_nodal_vars_physics")
+  if (_current_task == "copy_vars_physics")
     copyVariablesFromMesh(nonlinearVariableNames());
 
   // Lets a derived Physics class implement additional tasks

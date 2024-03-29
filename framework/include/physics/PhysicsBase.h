@@ -18,10 +18,10 @@
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
   registerMooseAction(app_name, derived_name, "init_physics");                                     \
-  registerMooseAction(app_name, derived_name, "copy_nodal_vars_physics");
+  registerMooseAction(app_name, derived_name, "copy_vars_physics")
 
 /**
- * Base class to help creates an entire physics
+ * Base class to help creating an entire physics
  */
 class PhysicsBase : public Action
 {
@@ -127,7 +127,7 @@ protected:
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
-  /// Check that this vector parameter (param1) has the same length as the MultiMooseEnum (param2)
+  /// Check that this vector parameter (with name defined in \p param1) has the same length as the MultiMooseEnum (with name defined in \p param2)
   template <typename T>
   void checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
                                                const std::string & param2) const;
@@ -217,6 +217,7 @@ private:
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
+  /// Additional initialization work that should happen very early, as soon as the problem is created
   virtual void initializePhysicsAdditional() {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
@@ -558,7 +559,7 @@ template <typename T>
 bool
 PhysicsBase::parameterConsistent(const InputParameters & other_param,
                                  const std::string & param_name,
-                                 bool warn) const
+                                const bool warn) const
 {
   assertParamDefined<T>(param_name);
   mooseAssert(other_param.have_parameter<T>(param_name),
