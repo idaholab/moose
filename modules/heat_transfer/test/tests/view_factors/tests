@@ -63,4 +63,14 @@
     design = 'RayTracingViewFactor.md'
     requirement = 'The system shall compute view factors for unobstructed, planar surfaces in three-dimensional meshes using ray tracing.'
   []
+
+  [ray3D_nonplanar]
+    type = RunApp
+    input = 'view_factor_3d_non_planar_face.i'
+    expect_out = '732 rays were skipped as they exited the mesh at their starting point through non-planar sides.'
+    design = 'RayTracingViewFactor.md'
+    requirement = 'The system shall be able to skip rays that exit the mesh when starting from non-planar faces in three-dimensional problems.'
+    recover = false
+    mesh_mode = REPLICATED
+  []
 []
