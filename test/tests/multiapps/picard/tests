@@ -66,6 +66,7 @@
   [steady]
     type = 'Exodiff'
     input = 'steady_picard_parent.i'
+    cli_args = 'Executioner/fixed_point_rel_tol=1e-6'
     exodiff = 'steady_picard_parent_out.e steady_picard_parent_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
