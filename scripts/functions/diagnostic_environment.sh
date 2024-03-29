@@ -43,7 +43,8 @@ function env_test()
     print_sep
     printf "Influential Environment Variables\n\n"
     reg_exp='^LD\|^DYLD\|^PATH\|^CFLAGS\|^CPP\|^CC\|^CXX\|^FFLAGS\|^FC\|^F90\|^F95\|^F77\|^CONDA'
-    reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES\|^PBS\|^SLURM'
+    reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES\|^PBS\|^SLURM\|^http'
+    reg_exp+='\|^HTTPS\|^REQUESTS_CA_BUNDLE\|^SSL_CERT_FILE\|^CURL_CA_BUNDLE'
     reg_not='CONDA_BACKUP'
     env | sort | grep "${reg_exp}" | grep -v "${reg_not}"
 }
@@ -89,7 +90,7 @@ function _python_modules()
     print_sep
     printf "Python Modules (TestHarness, run-ability)\n\n"
     fail_modules=(packaging)
-    warn_modules=(yaml pyaml jinja2)
+    warn_modules=(yaml jinja2)
     local error_cnt=0
     local warn_cnt=0
     for fail_module in "${fail_modules}"; do

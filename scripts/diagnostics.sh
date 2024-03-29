@@ -17,8 +17,11 @@ function get_value()
 
 function print_failure_and_exit()
 {
-    print_environment
-    printf "\nThere was an error while $(print_red "$@")\033[0m.
+    if [[ -n "${CANCELED}" ]]; then exit 1; fi
+    print_red "ERROR: "
+    printf "Printing report.\n"
+    env_test
+    printf "\n\nThere was an error while $(print_red "$@")\033[0m.
 
 Please report the entirety of the output of diagnostics on
 this terminal to either YOUR existing post OR a new post on
@@ -29,7 +32,7 @@ https://github.com/idaholab/moose/discussions\n"
 function print_sep()
 {
     printf '\n'
-    printf '#%.0s' {1..75}
+    printf '#%.0s' {1..98}
     printf '\n'
 }
 
@@ -46,6 +49,15 @@ function print_orange()
 function print_green()
 {
     printf "\033[1;32m$@\033[0m"
+}
+
+function run_command()
+{
+    printf "\033[38;5;242m"
+    $@
+    exit_code=$?
+    printf "\033[0m"
+    return $exit_code
 }
 
 function create_tmp()
@@ -73,31 +85,41 @@ function print_help()
     args=("-h|--help"\
           "-f|--full-build"\
           "-r|--run-checks"\
+          "-c|--conda-channel"\
           "--continue-on-fail"\
-          "-c|--conda-channel")
+          "-v|--verbose")
 
     args_about=("Print this message and exit."\
-                "Build PETSc, libMesh, WASP, MOOSE, and then run entire TestHarness suite."\
+                "Build PETSc, libMesh, WASP, MOOSE, and then run entire test suite."\
                 "Build MOOSE and then run aggregated tests."\
+                "Prioritize MOOSE packages with this channel (default is public)."\
                 "Do not stop on failure. If this option works, you have intermittent network issues."\
-                "Prioritize MOOSE packages with this channel (default is public).")
+                "Print additional output from commands being executed.")
 
     printf "\nSyntax:\n\t./`basename $0`\n\nOptions:\n\n"
     print_args args args_about
     printf "\nInfluencial Environment Variables:\n
-\tMETHODS
-\tMETHOD
-\tMOOSE_JOBS
-\tREQUESTS_CA_BUNDLE
-\tSSL_CERT_FILE
-\tCURL_CA_BUNDLE\n
-Supplying no arguments prints useful environment information.\n"
+\tMETHODS             libMesh build type \"opt dbg devel oprof\" (default: opt)
+\tMETHOD              MOOSE build type (default: \"opt\")
+\tMOOSE_JOBS          Cores available during \`make -j \$MOOSE_JOBS\`
+
+Proxies/Certificate Authority environmet variables:
+(corporate work machines may require that these be set)
+
+\tREQUESTS_CA_BUNDLE=${REQUESTS_CA_BUNDLE:-'not set'}
+\tSSL_CERT_FILE=${SSL_CERT_FILE:-'not set'}
+\tCURL_CA_BUNDLE=${CURL_CA_BUNDLE:-'not set'}
+\thttp_proxy=${HTTP_PROXY:-${http_proxy:-'not set'}}
+\thttps_proxy=${HTTPS_PROXY:-${https_proxy:-'not set'}}
+
+Supplying no arguments prints useful environment information.\n\n"
 }
 
-# Obtain a temp directory
-export CTMP_DIR=$(create_tmp)
-# Delete temporary directory at any time this script exits
-trap 'rm -rf "$CTMP_DIR"' EXIT
+function ctl_c()
+{
+    printf "\033[0m\nYou canceled diagnostics\n"
+    export CANCELED=true
+}
 
 # Check Arguments. If PRISTINE is already set, break out of argument checking
 if [ -z "$PRISTINE_ENVIRONMENT" ]; then
@@ -110,10 +132,16 @@ if [ -z "$PRISTINE_ENVIRONMENT" ]; then
                 export FULL_BUILD=1; shift ;;
             -r|--run-checks)
                 export RUN_CHECKS=1; shift ;;
+            -c|--conda-channel)
+                if [[ $(echo $2 | grep -c '^http\|^file') -le 0 ]]; then
+                    print_red "\ninvalid -c|--conda-channel value\n"
+                    print_help; exit 1
+                fi
+                export CONDA_CHANNEL=$2; shift 2;;
             --continue-on-fail)
                 export NO_FAILURE=1; shift ;;
-            -c|--conda-channel)
-                export CONDA_CHANNEL=$2; shift 2;;
+            -v|--verbose)
+                export VERBOSITY=1; shift ;;
             *)
                 printf "Unknown argument: $1\n"; exit 1;;
         esac
@@ -125,6 +153,10 @@ if [ -z "$PRISTINE_ENVIRONMENT" ]; then
     fi
     # FULL_BUILD or RUN_CHECKS is set, but not PRISTINE_ENVIRONMENT
     if [ "${PRISTINE_ENVIRONMENT}" != 0 ] && [ "${NO_ENVIRONMENT}" == 1 ]; then
+        # Obtain a temp directory
+        export CTMP_DIR=$(create_tmp)
+        # Delete temporary directory at any time this script exits
+        trap 'printf "\033[0m\n\nDeleting temporary directory\n\n\t${CTMP_DIR}\n"; rm -rf "$CTMP_DIR";' EXIT
         printf "Beginning in a pristine environment\n"
         env -i bash --rcfile <(echo "CLEAN_ENV='True' \
                                 PRISTINE_ENVIRONMENT=1 \
@@ -134,6 +166,7 @@ if [ -z "$PRISTINE_ENVIRONMENT" ]; then
                                 FULL_BUILD=${FULL_BUILD:-0} \
                                 RUN_CHECKS=${RUN_CHECKS:-0} \
                                 NO_FAILURE=${NO_FAILURE:-0} \
+                                VERBOSITY=${VERBOSITY:-0} \
                                 CONDA_CHANNEL=${CONDA_CHANNEL:-'https://conda.software.inl.gov/public'} \
                                 REQUESTS_CA_BUNDLE=${REQUESTS_CA_BUNDLE:-''} \
                                 SSL_CERT_FILE=${SSL_CERT_FILE:-''} \
@@ -151,6 +184,7 @@ if [ -z "$PRISTINE_ENVIRONMENT" ]; then
         export MOOSE_JOBS=${MOOSE_JOBS:-6}
         export RUN_CHECKS=${RUN_CHECKS:-0}
         export NO_FAILURE=${NO_FAILURE:-0}
+        export VERBOSITY=${VERBOSITY:-0}
         export CONDA_CHANNEL=${CONDA_CHANNEL:-'https://conda.software.inl.gov/public'}
         export REQUESTS_CA_BUNDLE=${REQUESTS_CA_BUNDLE:-''}
         export SSL_CERT_FILE=${SSL_CERT_FILE:-''}
@@ -161,6 +195,7 @@ fi
 
 # Augment additional pristine environment variables
 if [ "${PRISTINE_ENVIRONMENT}" == "1" ]; then
+    trap 'ctl_c' INT
     # Make our environment more sane
     export PATH=/bin:/usr/bin:/sbin
     export TERM=xterm-256color
@@ -178,18 +213,19 @@ source ${SCRIPT_DIR}/functions/diagnostic_environment.sh
 # Do only the one thing if default behavior
 if [ "${NO_ENVIRONMENT}" == 0 ]; then print_environment; exit; fi
 # Do all the things
-printf "Note: The following steps are being performed in a temporary directory, and
-will be deleted when finished or upon encountering an error.
+printf "
+Note: The following steps are being performed in a temporary directory, and will be deleted when
+      finished or upon encountering an error.
 
-This tool should only be used to determine if there are external factors
-preventing you from building or running MOOSE.
+      The purpose of this tool is to determine if there are external factors preventing you from
+      building or running MOOSE.
 
-Errors encountered will usually mean network related or hardware related
-causes (VPN, Network Proxies, Corporate SSL Certificates, etc).
+      Errors encountered will usually mean network related or hardware related causes (VPN,
+      Network Proxies, Corporate SSL Certificates, etc).
 
-If no errors are encountered then likely the issue will be something in
-your environment as to the cause. If this is case, run `basename $0` again
-without any arguments, and carefully scrutinize the output.\n"
+      If no errors are encountered then likely the issue will be something in your environment as
+      to the cause. If this is case, run `basename $0` again without any arguments, and carefully
+      scrutinize the output.\n"
 print_sep
 source ${SCRIPT_DIR}/functions/diagnostic_conda.sh
 source ${SCRIPT_DIR}/functions/diagnostic_application.sh

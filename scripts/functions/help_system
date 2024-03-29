@@ -29,7 +29,7 @@ function print_args()
     ####
 
     ## The desired maximum about text length, before justification occurs
-    local max_length=132
+    local max_length=70
 
     ## The desired 'tab' length which separates the argument from argument description
     local tab="    "

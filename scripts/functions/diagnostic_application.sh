@@ -17,16 +17,22 @@ function enter_moose()
 function clone_moose()
 {
     # TODO: allow a --use-moose-dir argument
-    printf "Creating a clean clone of MOOSE repository\n"
+    printf "Cloning MOOSE repository\n\n"
     if [ -z "${retry_cnt}" ]; then
         export retry_cnt=0
     else
         let retry_cnt+=1
     fi
-    set -o pipefail
-    git clone --depth 1 https://github.com/idaholab/moose ${CTMP_DIR}/moose -b master 2>&1 | tee ${CTMP_DIR}/moose_clone_stdouterr.log
-    local exit_code=$?
-    set +o pipefail
+    local COMMAND="git clone --depth 1 https://github.com/idaholab/moose ${CTMP_DIR}/moose -b master"
+    if [ "${VERBOSITY}" == '1' ]; then
+        set -o pipefail
+        run_command "${COMMAND}" 2>&1 | tee ${CTMP_DIR}/moose_clone_stdouterr.log
+        local exit_code=$?
+        set +o pipefail
+    else
+        ${COMMAND} &> ${CTMP_DIR}/moose_clone_stdouterr.log
+        local exit_code=$?
+    fi
     if [ ${exit_code} -ge 1 ] && [ $(cat ${CTMP_DIR}/moose_clone_stdouterr.log | grep -c -i 'SSL') -ge 1 ]; then
         if [ -n "${retry_cnt}" ] && [ ${retry_cnt} -ge 2 ]; then
             print_red "\n${retry_cnt} attempt failure.\n"
@@ -38,73 +44,120 @@ function clone_moose()
             clone_moose
             return
         fi
+        if [ "${VERBOSITY}" == '0' ]; then
+            run_command "tail -15 ${CTMP_DIR}/moose_clone_stdouterr.log"
+        fi
         print_orange "\nWARNING: "
         printf "SSL issues detected.
 
-This may indicate the root cause of other issues. e.g PETSc contribs may
-fail to download properly in later steps, etc
+This may indicate the root cause of other issues. e.g MOOSE dependencies may fail to download
+properly in later steps.
 
-Trying again with protections turned off...\n"
-        print_orange "export GIT_SSL_NO_VERIFY=true\n\n"
+Possible solutions: You should contact your network support team and inform them of this issue.
+                    In the meantime, you can attempt to disable GIT SSL Verification (not
+                    recommended):
+
+                    \texport GIT_SSL_NO_VERIFY=true
+
+Trying again with SSL protections turned off...\n\n"
         export GIT_SSL_NO_VERIFY=true
         clone_moose
         unset GIT_SSL_NO_VERIFY
         return
     elif [ $(cat ${CTMP_DIR}/moose_clone_stdouterr.log | grep -c -i 'SSL') -ge 1 ]; then
+        if [ "${VERBOSITY}" == '0' ]; then
+            run_command "tail -15 ${CTMP_DIR}/moose_clone_stdouterr.log"
+        fi
         print_orange "\nWARNING: "
-        printf "Additional SSL issues detected even after turning GIT SSL
-verification off. This indicates a networking issue.
+        printf "Additional SSL issues remain after disabling SSL verification.
 
-We will continue, but it is very likely we will fail if we attempt to build
-PETSc (a full build: -f).\n\n"
+This indicates a more serious networking issue which may indicate your inability to build MOOSE
+dependencies.
+
+Possible solutions: You should contact your network support team and inform them of this issue.
+                    Disable any VPN software for the time being, if available.
+                    You can attempt to disable SSL Verification in several ways:
+
+                    \texport GIT_SSL_NO_VERIFY=true
+                    \tconda config --set ssl_verify false
+
+                    Your network support team should inform you how to properly set the following
+                    variables:
+
+                    \tREQUESTS_CA_BUNDLE
+                    \tSSL_CERT_FILE
+                    \tCURL_CA_BUNDLE
+\n"
         export ALREADY_TRIED_SSL=true
     elif [ ${exit_code} -ge 1 ]; then
         exit_on_failure 1
     fi
     # Print relevant repo data
-    git -C ${CTMP_DIR}/moose rev-parse HEAD || exit_on_failure 1
-    git -C ${CTMP_DIR}/moose branch || exit_on_failure 1
-    git -C ${CTMP_DIR}/moose status || exit_on_failure 1
+    #run_command "git -C ${CTMP_DIR}/moose log -1"
+    run_command "git -C ${CTMP_DIR}/moose branch"
+    run_command "git -C ${CTMP_DIR}/moose status"
 }
 
 function build_library()
 {
-    if [ "${FULL_BUILD}" == 0 ]; then return; fi
-    print_sep
+    if [ "${FULL_BUILD}" == '0' ]; then return; fi
     local error_cnt=${error_cnt:-0}
-    if [ ${error_cnt} -le 0 ]; then printf "Build Step: $1\n"; fi
+    if [ ${error_cnt} -le 0 ]; then print_sep; printf "Build Step: $1\n\n"; fi
     enter_moose
+    printf "Running scripts/update_and_rebuild_${1}.sh using ${MOOSE_JOBS:-6} jobs, METHODS: ${METHODS}\n"
     if [ "$1" == 'petsc' ]; then
-        # PETSc is special due to all the contribs.
+        # PETSc is special due to all the contribs. We need to download each, manualy
         mkdir -p $CTMP_DIR/downloads
         local petsc_urls=(`scripts/update_and_rebuild_petsc.sh --with-packages-download-dir=$CTMP_DIR/downloads 2>/dev/null | grep "\[" | cut -d, -f 2 | sed -e "s/\]//g"`)
         cd $CTMP_DIR/downloads
         printf "Downloading PETSc contribs...\n"
         for petsc_url in "${petsc_urls[@]}"; do
             clean_url=$(echo ${petsc_url} | sed -e "s/'//g")
-            curl --insecure -L -O $clean_url 2>/dev/null
+            if [ "${VERBOSITY}" == '1' ]; then
+                run_command "curl -L -O $clean_url"
+            else
+                curl -L -O $clean_url 2>/dev/null
+            fi
         done
         enter_moose
-        printf "Running scripts/update_and_rebuild_${1}.sh using ${MOOSE_JOBS:-6} jobs\n"
-        scripts/update_and_rebuild_${1}.sh --skip-submodule-update --with-packages-download-dir=$CTMP_DIR/downloads &> ./${1}_stdouterr.log
+        if [ "${VERBOSITY}" == '1' ]; then
+            set -o pipefail
+            run_command "scripts/update_and_rebuild_${1}.sh --skip-submodule-update --with-packages-download-dir=$CTMP_DIR/downloads" 2>&1 | tee ./${1}_stdouterr.log
+            exit_code=$?
+            set +o pipefail
+        else
+            scripts/update_and_rebuild_${1}.sh --skip-submodule-update --with-packages-download-dir=$CTMP_DIR/downloads &> ./${1}_stdouterr.log
+            exit_code=$?
+        fi
     else
-        printf "Running scripts/update_and_rebuild_${1}.sh using ${MOOSE_JOBS:-6} jobs, METHODS: ${METHODS}\n"
-        scripts/update_and_rebuild_${1}.sh &> ./${1}_stdouterr.log
+        if [ "${VERBOSITY}" == '1' ]; then
+            set -o pipefail
+            run_command "scripts/update_and_rebuild_${1}.sh" 2>&1 | tee ./${1}_stdouterr.log
+            exit_code=$?
+            set +o pipefail
+        else
+            scripts/update_and_rebuild_${1}.sh &> ./${1}_stdouterr.log
+            exit_code=$?
+        fi
     fi
 
-    exit_code=$?
     if [ "$exit_code" != '0' ] && [ ${error_cnt} -ge 1 ]; then
         print_failure_and_exit $(tail -20 ./${1}_stdouterr.log)
     elif [ "$exit_code" != '0' ] && [ $(cat ./${1}_stdouterr.log | grep -c -i 'SSL certificate problem') -ge 1 ]; then
         let error_cnt+=1
-        print_orange "SSL issues detected, attempting again with SSL protections off\n"
+        if [ "${VERBOSITY}" == '0' ]; then
+            run_command "tail -15 ./${1}_stdouterr.log"
+        fi
+        print_orange "\nWARNING: "
+        printf "SSL issues detected, attempting again with SSL protections off\n\n"
         export GIT_SSL_NO_VERIFY=true
         build_library $1
-        # unset so we see it error in each step
         unset GIT_SSL_NO_VERIFY
         return
     elif [ "$exit_code" != '0' ]; then
-        tail -20 ${1}_stdouterr.log
+        if [ "${VERBOSITY}" == '0' ]; then
+            run_command "tail -15 ${1}_stdouterr.log"
+        fi
         print_failure_and_exit "building $1"
     fi
     printf "Successfully built ${1} ...\n"
@@ -112,12 +165,22 @@ function build_library()
 
 function build_moose()
 {
-    printf "Build Step: MOOSE\n"
+    printf "Build Step: MOOSE. Using ${MOOSE_JOBS:-6} cores\n\n"
     enter_moose
     cd test
-    METHOD=${METHOD} make -j ${MOOSE_JOBS:-6} &> ./stdouterr.log
-    if [ "$?" != '0' ]; then
-        tail -20 ./stdouterr.log
+    if [ "${VERBOSITY}" == '1' ]; then
+        set -o pipefail
+        run_command "METHOD=${METHOD} make -j ${MOOSE_JOBS:-6}" 2>&1 | tee ./stdouterr.log
+        exit_code=$?
+        set +o pipefail
+    else
+        METHOD=${METHOD} make -j ${MOOSE_JOBS:-6} &> ./stdouterr.log
+        exit_code=$?
+    fi
+    if [ "$exit_code" != '0' ]; then
+        if [ "${VERBOSITY}" == '0' ]; then
+            tail -20 ./stdouterr.log
+        fi
         print_failure_and_exit "building MOOSE"
     fi
     printf "Successfully built MOOSE\n"
