@@ -4,8 +4,8 @@
     file = PressurizedCyl_Patch6_4Elem.e
     clear_spline_nodes = true
   []
-  allow_renumbering = false
-  parallel_type = replicated
+  allow_renumbering = false   # VTK diffs via XMLDiff are
+  parallel_type = replicated  # really fragile
 []
 
 [Variables]
