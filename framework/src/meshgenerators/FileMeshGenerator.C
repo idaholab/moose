@@ -45,6 +45,14 @@ FileMeshGenerator::validParams()
                         "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
                         "and constraints are removed from an IGA mesh, after which only "
                         "C^0 Rational-Bernstein-Bezier elements will remain.");
+  params.addParam<bool>("discontinuous_spline_extraction",
+                        false,
+                        "If discontinuous_spline_extraction=true, "
+                        "Rational-Bernstein-Bezier elements extracted from a spline mesh "
+                        "will be disconnected from neighboring elements, coupled only via "
+                        "their extraction operators.  This may be less efficient than the "
+                        "default C^0 extracted mesh, but may be necessary if the extracted "
+                        "mesh is non-conforming.");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
@@ -87,6 +95,9 @@ FileMeshGenerator::generate()
     {
       if (mesh->processor_id() == 0)
       {
+        if (getParam<bool>("discontinuous_spline_extraction"))
+          exreader->set_discontinuous_bex(true);
+
         exreader->read(_file_name);
 
         if (getParam<bool>("clear_spline_nodes"))
