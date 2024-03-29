@@ -17,7 +17,7 @@
   petsc_options_iname = '-tao_gatol'
   petsc_options_value = '1e-8 '
   verbose = true
-  time_step_as_iteration = true
+  output_optimization_iterations = true
 []
 
 [MultiApps]
