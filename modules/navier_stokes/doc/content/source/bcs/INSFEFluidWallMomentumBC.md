@@ -1,20 +1,23 @@
 # INSFEFluidWallMomentumBC
 
-!alert construction title=Undocumented Class
-The INSFEFluidWallMomentumBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/INSFEFluidWallMomentumBC
+
+This boundary condition can be used for porous media flow using the [!param](/BCs/INSFEFluidEnergyBC/porosity) parameter
+to define the porosity.
+This boundary condition must be specified for each component of the momentum.
 
 ## Overview
 
-!! Replace these lines with information regarding the INSFEFluidWallMomentumBC object.
+The momentum flux is computed as the sum of a viscous term, the wall shear stress, (only for near-unity porosity)
 
-## Example Input File Syntax
+!equation
+-(\mu + \mu_t) \nabla_u(comp) \vec{n}(comp)
 
-!! Describe and include an example of how to use the INSFEFluidWallMomentumBC object.
+where $\mu$ is the dynamic viscosity, $\mu_t$ is the turbulent viscosity, $\nabla_u$ is the gradient of
+velocity and $\vec{n}$ is the local boundary normal, for which only the $comp$ component is used.
+
+!alert note
+This boundary condition can only be used if the momentum equation pressure term is integrated by parts.
 
 !syntax parameters /BCs/INSFEFluidWallMomentumBC
 
