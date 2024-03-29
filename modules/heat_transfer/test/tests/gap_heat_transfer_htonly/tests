@@ -1,4 +1,13 @@
 [Tests]
+  parallel_scheduling = true
+  [1D]
+    type = Exodiff
+    input = 1D.i
+    exodiff = 1D_out.e
+    requirement = "The system shall compute thermal contact in 1D with axisymmetric coordinates."
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#27216'
+  []
   [3D]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_test.i'
