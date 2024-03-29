@@ -23,8 +23,8 @@ SnapshotContainerBase::validParams()
 
 SnapshotContainerBase::SnapshotContainerBase(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _accumulated_data(declareRestartableData<std::vector<std::unique_ptr<NumericVector<Number>>>>(
-        "accumulated_snapshots")),
+    _accumulated_data(
+        declareRestartableDataWithContext<Snapshots>("accumulated_snapshots", (void *)&comm())),
     _nonlinear_system_number(
         _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
 {
@@ -36,7 +36,7 @@ SnapshotContainerBase::initialSetup()
   _accumulated_data.clear();
 }
 
-const std::unique_ptr<NumericVector<Number>> &
+const NumericVector<Number> &
 SnapshotContainerBase::getSnapshot(unsigned int local_i) const
 {
   mooseAssert(local_i < _accumulated_data.size(),
@@ -50,5 +50,17 @@ void
 SnapshotContainerBase::execute()
 {
   // Store the cloned snapshot. Each derived class has to implement the cloneSnapshot() method.
-  _accumulated_data.push_back(collectSnapshot());
+  _accumulated_data.addPointer(collectSnapshot());
+}
+
+void
+dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context)
+{
+  storeHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
+}
+
+void
+dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context)
+{
+  loadHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
