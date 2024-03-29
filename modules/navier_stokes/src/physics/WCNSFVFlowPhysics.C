@@ -222,15 +222,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity_smoothing_layers");
 
-  // TODO make this more robust
-  if (isParamValid("coupled_turbulence_physics"))
-  {
-    _turbulence_physics = getCoupledPhysics<WCNSFVTurbulencePhysics>(
-        getParam<PhysicsName>("coupled_turbulence_physics"));
-  }
-  else
-    _turbulence_physics = nullptr;
-
   if (_define_variables && _porous_medium_treatment)
     for (const auto & name : NS::velocity_vector)
     {
@@ -247,6 +238,9 @@ void
 WCNSFVFlowPhysics::initializePhysicsAdditional()
 {
   getProblem().needFV();
+
+  // Turbulence physics cannot have been created before
+  _turbulence_physics = getCoupledTurbulencePhysics();
 }
 
 void
@@ -1387,4 +1381,26 @@ WCNSFVFlowPhysics::getPorosityFunctorName(bool smoothed) const
     return _flow_porosity_functor_name;
   else
     return _porosity_name;
+}
+
+const WCNSFVTurbulencePhysics *
+WCNSFVFlowPhysics::getCoupledTurbulencePhysics() const
+{
+  // User passed it, just use that
+  if (isParamValid("coupled_turbulence_physics"))
+    return getCoupledPhysics<WCNSFVTurbulencePhysics>(
+        getParam<PhysicsName>("coupled_flow_physics"));
+  // Look for any physics of the right type, and check the block restriction
+  else
+  {
+    const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysics>();
+    for (const auto physics : all_turbulence_physics)
+      if (checkBlockRestrictionIdentical(
+              physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
+      {
+        return physics;
+      }
+  }
+  // Did not find one
+  return nullptr;
 }

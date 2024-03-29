@@ -112,6 +112,9 @@ private:
   /// Whether a turbulence Physics has been coupled in, to know which viscosity to pick on symmetry boundary conditions
   bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
 
+  /// Find the turbulence physics
+  const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
+
   /// Boolean to keep track of whether the flow equations should be created
   const bool _has_flow_equations;
 
