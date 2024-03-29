@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Moose.h"
+#include "MooseError.h"
 #include "OptimizeSolve.h"
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
@@ -47,6 +48,9 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
+
+  if (_time_step_as_iteration && _problem.isTransient())
+    mooseError("Outputting for transient executioners has not been implemented.");
 }
 
 bool
