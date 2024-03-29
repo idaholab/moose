@@ -50,7 +50,8 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     mooseError("OptimizeSolve does not currently support threaded execution");
 
   if (_time_step_as_iteration && _problem.isTransient())
-    mooseError("Outputting for transient executioners has not been implemented.");
+    mooseDocumentedError(
+        "moose", 27225, "Outputting for transient executioners has not been implemented.");
 }
 
 bool
