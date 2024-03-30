@@ -5,6 +5,6 @@
     type = PythonUnitTest
     input = test_InputFileEditorPlugin.py
     display_required = true
-    requirement = "The system shall include a graphical interface that lets user modify input files inside widgets."
+    requirement = "The system shall include a graphical interface that lets users modify input files inside widgets."
   []
 []

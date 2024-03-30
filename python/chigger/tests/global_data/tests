@@ -22,7 +22,7 @@
     command = plot_global_data.py
     imagediff = 'plot_global_data.png'
     display_required = true
-    requirement = "The system shall be able to draw line plots from field data."
+    requirement = "The system shall be able to draw line plots from global data."
   []
 
   [plot_current_global_data]
@@ -31,6 +31,6 @@
     imagediff = 'plot_current_global_data_0.png plot_current_global_data_4.png plot_current_global_data_9.png'
     allowed_linux = 0.95
     display_required = true
-    requirement = "The system shall be able to draw line plots from field data at various time steos."
+    requirement = "The system shall be able to draw line plots from global data at various time steps."
   []
 []

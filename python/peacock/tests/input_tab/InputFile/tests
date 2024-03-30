@@ -5,6 +5,6 @@
     type = PythonUnitTest
     input = test_InputFile.py
     display_required = true
-    requirement = "The system shall include a graphical interface that can read user inputs and error if they are missing, present invalid duplicate syntax, or an unsupported file extension."
+    requirement = "The system shall include a graphical interface that can read user inputs and error if they are missing, present invalid duplicate syntax, or are an unsupported file extension."
   []
 []

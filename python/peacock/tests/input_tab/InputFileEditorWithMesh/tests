@@ -6,6 +6,6 @@
     input = test_InputFileEditorWithMesh.py
     separate = True
     display_required = true
-    requirement = "The system shall include a graphical interface that lets user modify input files with an existing mesh, pulling in block information from the mesh and highlighting blocks and boundaries in the mesh when specifying them as parameters."
+    requirement = "The system shall include a graphical interface that lets users modify input files with an existing mesh, pulling in block information from the mesh and highlighting blocks and boundaries in the mesh when specifying them as parameters."
   []
 []

@@ -11,6 +11,6 @@
     type = RunApp
     command = test_PeacockCollapsibleWidget.py
     display_required = true
-    requirement = 'The system shall have a graphical user interface which supports collapside widgets.'
+    requirement = 'The system shall have a graphical user interface which supports collapsible widgets.'
   []
 []

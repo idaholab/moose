@@ -5,6 +5,6 @@
     type = PythonUnitTest
     input = test_OutputNames.py
     display_required = true
-    requirement = "The system shall include a graphical interface that lets user specify new file names for the application output, and follows expected name conventions otherwise."
+    requirement = "The system shall include a graphical interface that lets users specify new file names for the application output and follows default name conventions when a new name is not specified."
   []
 []

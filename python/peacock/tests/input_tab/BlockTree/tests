@@ -5,6 +5,6 @@
     type = PythonUnitTest
     input = test_BlockTree.py
     display_required = true
-    requirement = "The system shall include a graphical interface that can store an input file as a tree of blocks and lets user modify individual blocks."
+    requirement = "The system shall include a graphical interface that can store an input file as a tree of blocks and lets users modify individual blocks."
   []
 []

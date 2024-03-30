@@ -4,11 +4,11 @@
   [Parameter]
     type = PythonUnitTest
     input = test_Parameter.py
-    requirement = "The system shall be able to define parameters in Python, similar to individual MooseObject parameters in C++, with numerous similar capabilities, including a name, a type, allowed and default values, descriptions, required and private status."
+    requirement = "The system shall be able to define parameters and associated metadata in Python that allows for type-checking, restrictions, defaults, verification, and documentation."
   []
   [InputParameters]
     type = PythonUnitTest
     input = test_InputParameters.py
-    requirement = "The system shall be able to define groups of parameters to Python objects, similar to the parameters of a MooseObject in C++, with numerous similar capabilities, including parameter errors, the ability to retrieve parameters, to set defaults, and others."
+    requirement = "The system shall have a warehouse and capability to manage groups of parameters in Python objects, including parameter errors and the ability to retrieve and set parameters, to set defaults, and to validate parameters."
   []
 []

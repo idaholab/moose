@@ -35,7 +35,7 @@
     type = PythonUnitTest
     input = test_WidgetUtils.py
     display_required = true
-    requirement = "The system shall include a graphical interface that can create widgets with notably buttons, labels and a progress bar."
+    requirement = "The system shall include a graphical interface that can create widgets with buttons, labels and a progress bar."
   []
   [loadstore]
     type = PythonUnitTest

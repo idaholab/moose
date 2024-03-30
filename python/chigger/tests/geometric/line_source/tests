@@ -22,6 +22,6 @@
     command = line_source_data_tube.py
     imagediff = 'line_source_data_tube.png'
     display_required = true
-    requirement = "The system shall be able to plot lines as a thicc tube with data represented with colors along the line."
+    requirement = "The system shall be able to plot lines as a thick tube with data represented with colors along the line."
   []
 []

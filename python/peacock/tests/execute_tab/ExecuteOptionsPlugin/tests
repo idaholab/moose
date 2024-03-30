@@ -5,6 +5,6 @@
     type = PythonUnitTest
     input = test_ExecuteOptionsPlugin.py
     display_required = true
-    requirement = "The system shall include a graphical interface that lets user specifies execution options such as the number of threads, parallel processes, working directory and input file name."
+    requirement = "The system shall include a graphical interface that lets users specify execution options such as the number of threads, parallel processes, working directory and input file name."
   []
 []

@@ -6,6 +6,6 @@
     command = color.py
     imagediff = color.png
     display_required = true
-    requirement = 'The system shall be able to specify a RGB color to display the mesh with.'
+    requirement = 'The system shall be able to specify an RGB color to display the mesh with.'
   []
 []

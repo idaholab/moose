@@ -6,7 +6,7 @@
     input = test_VTKWindowPlugin.py
     separate = True
     display_required = true
-    requirement = "The system shall include a graphical interface that can display both mesh and solution Exodus files and let the user, including series of files created with mesh adaptivity."
+    requirement = "The system shall include a graphical interface that can display both mesh and solution Exodus files and lets the user modify plotting settings, load files, including series of files created with mesh adaptivity and remove files."
   []
   [FilePlugin]
     type = PythonUnitTest
