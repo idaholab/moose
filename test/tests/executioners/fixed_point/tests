@@ -41,4 +41,33 @@
       detail = "materials."
     []
   []
+
+  [warnings]
+    issues = '#26285'
+    requirement = 'The system shall provide informative warnings when '
+
+    [rel_tol]
+      type = RunException
+      input = '2d_diffusion_fixed_point.i'
+      cli_args = '"Problem/solve=false" "Executioner/disable_fixed_point_residual_norm_check=true" "Executioner/fixed_point_rel_tol=1"'
+      expect_err = "fixed_point_rel_tol will be ignored because the fixed point residual check is disabled."
+      detail = 'fixed_point_rel_tol is set by the user and disable_fixed_point_residual_norm_check is set to true.'
+    []
+
+    [abs_tol]
+      type = RunException
+      input = '2d_diffusion_fixed_point.i'
+      cli_args = '"Problem/solve=false" "Executioner/disable_fixed_point_residual_norm_check=true" "Executioner/fixed_point_abs_tol=1"'
+      expect_err = "fixed_point_abs_tol will be ignored because the fixed point residual check is disabled."
+      detail = 'fixed_point_abs_tol is set by the user and disable_fixed_point_residual_norm_check is set to true.'
+    []
+
+    [force_norms]
+      type = RunException
+      input = '2d_diffusion_fixed_point.i'
+      cli_args = '"Problem/solve=false" "Executioner/disable_fixed_point_residual_norm_check=true" "Executioner/fixed_point_force_norms=true"'
+      expect_err = "fixed_point_force_norms will be ignored because the fixed point residual check is disabled."
+      detail = 'fixed_point_force_norms is set by the user and disable_fixed_point_residual_norm_check is set to true.'
+    []
+  []
 []
