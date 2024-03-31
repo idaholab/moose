@@ -30,7 +30,7 @@ parameter to get more information about which functors were created and requeste
 ## Developing with functors
 
 Functors are stored on the `SubProblem`, a derived class of [Problems](syntax/Problem/index.md) that is
-used for solving nonlinear systems. As such, classes do not need to have memory ownership of functors,
+used for solving nonlinear systems. As such, classes do not need to have memory ownership of functors;
 they may simply store a reference or a pointer.
 
 In the header of a class using a `Functor` `_functor` you will have:
@@ -39,16 +39,31 @@ In the header of a class using a `Functor` `_functor` you will have:
 const Moose::Functor<T> & _functor
 ```
 
-to store a reference to `_functor`. `T` is the return type of the functor. For a variable, it should be `ADReal`.
-For a vector variable, it would be `ADRealVectorValue`. If the object using the functor is not leveraging AD,
-it may be `Real` or `RealVectorValue`.
-
-!alert note
-With regards to [automatic differentiation](automatic_differentiation/index.md), `Functors` are automatically
-converted between `AD` and `non-AD` types when retrieved. When you retrieve a `Functor`, you must only think about whether
-you need `AD` in the consuming object. When you create a `Functor` (for example, a
+to store a reference to `_functor`, where `T` is the return type of the functor.
+For a variable, it should be `ADReal`, while for a vector variable, it should be `ADRealVectorValue`.
+If the object using the functor is not leveraging
+[automatic differentiation (AD)](automatic_differentiation/index.md), it may be `Real` or `RealVectorValue`.
+Note that functors are automatically converted between `AD` and `non-AD` types when retrieved, so
+when you retrieve a functor, you must only consider whether the object *using*
+the functor (i.e., the "consumer") needs `AD` types. When you create a functor (for example, a
 [functor material property](syntax/FunctorMaterials/index.md)) it's best practice to always use the `AD`
 return type so as to never discard some derivatives.
+
+The following table summarizes which functors are AD or non-AD (before possible conversion):
+
+| Functor | AD Type |
+| :- | :- |
+| Variables | AD |
+| Auxiliary variables | AD |
+| Functor material properties | AD or non-AD (user-defined) |
+| Functions | non-AD |
+| Post-processors | non-AD |
+
+Functor consumers that derive from `ADFunctorInterface` will report an error
+if you attempt to retrieve a functor with a non-AD type when that functor is
+an AD type. Functor consumers that instead derive from `NonADFunctorInterface`
+such as aux kernels and post-processors, may freely convert an AD functor to
+its corresponding non-AD type.
 
 In the constructor of the same class, you will have:
 

@@ -77,7 +77,7 @@
   [bad-functor-type-mixing]
     type = RunException
     input = wrong-type.i
-    expect_err = 'We are requesting a non-AD functor from an AD object, but the true functor is AD. This means we could be dropping important derivatives. We will not allow this'
+    expect_err = "The AD object 'diff_u' is requesting the functor 'prop' as a non-AD functor even though it is truly an AD functor, which is not allowed, since this may unintentionally drop derivatives"
     requirement = 'The system shall report an error if an automatic differentiation (AD) object requests a non-AD functor when the functor is AD. This prevents potential dropping of derivative information.'
     design = 'Materials/index.md'
   []
