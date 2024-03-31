@@ -39,7 +39,7 @@
                                              DualReal & d##want##d1,                               \
                                              DualReal & d##want##d2) const                         \
   {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
+    unimplementedDerivativeMethod(__PRETTY_FUNCTION__);                                            \
     Real dummy, tmp1, tmp2;                                                                        \
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
     want##_from_##prop1##_##prop2(prop1.value(), prop2.value(), dummy, tmp1, tmp2);                \
@@ -54,13 +54,18 @@
 #define propfunc(want, prop1, prop2)                                                               \
   virtual Real want##_from_##prop1##_##prop2(Real, Real) const                                     \
   {                                                                                                \
-    mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");                            \
+    mooseError(                                                                                    \
+        "The fluid properties class '",                                                            \
+        type(),                                                                                    \
+        "' has not implemented the method below. If your application requires this method, you "   \
+        "must either implement it or use a different fluid properties class.\n\n",                 \
+        __PRETTY_FUNCTION__);                                                                      \
   }                                                                                                \
                                                                                                    \
   virtual void want##_from_##prop1##_##prop2(                                                      \
       Real prop1, Real prop2, Real & val, Real & d##want##d1, Real & d##want##d2) const            \
   {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
+    unimplementedDerivativeMethod(__PRETTY_FUNCTION__);                                            \
     d##want##d1 = 0;                                                                               \
     d##want##d2 = 0;                                                                               \
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
@@ -425,7 +430,7 @@ protected:
   xyDerivatives(const T x, const T & y, T & z, T & dz_dx, T & dz_dy, const Functor & z_from_x_y);
 
   /**
-   * Given a type example, this method returns zero and unity reperesentations of that type (first
+   * Given a type example, this method returns zero and unity representations of that type (first
    * and second members of returned pair respectively)
    */
   template <typename T>
@@ -441,13 +446,23 @@ protected:
   const Real _p_initial_guess;
 
 private:
-  template <typename... Args>
-  void fluidPropError(Args... args) const
+  void unimplementedDerivativeMethod(const std::string & property_function_name) const
   {
+    const std::string message =
+        "The fluid properties class '" + type() +
+        "' has not implemented the method below, which computes derivatives of fluid properties "
+        "with regards to the flow variables. If your application requires this "
+        "method, you must either implement it or use a different fluid properties "
+        " class.\n\n" +
+        property_function_name;
+
     if (_allow_imperfect_jacobians)
-      mooseDoOnce(mooseWarning(std::forward<Args>(args)...));
+      mooseDoOnce(mooseWarning(message + "\nThe unimplemented derivatives for this fluid property "
+                                         "are currently neglected, set to 0."));
     else
-      mooseError(std::forward<Args>(args)...);
+      mooseError(message + "\n\nYou can avoid this error by neglecting the "
+                           "unimplemented derivatives of fluid properties by setting the "
+                           "'allow_imperfect_jacobians' parameter");
   }
 };
 
