@@ -204,4 +204,4 @@ transfer across a gap:
 
 ## Objects, Actions, and Syntax
 
-!syntax complete groups=HeatConductionApp level=3
+!syntax complete groups=HeatTransferApp level=3
