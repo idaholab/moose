@@ -935,7 +935,7 @@ AuxiliarySystem::variableWiseRelativeSolutionDifferenceNorm(
   // Get dof map from system
   const auto & dof_map = _sys.get_dof_map();
 
-  for (const auto & n : make_range(nVariables()))
+  for (const auto n : make_range(nVariables()))
   {
     // Get local indices from dof map for each variable
     std::vector<dof_id_type> local_indices_n;
@@ -943,12 +943,12 @@ AuxiliarySystem::variableWiseRelativeSolutionDifferenceNorm(
     Number diff_norm_n = 0;
     Number norm_n = 0;
     // Get values from system, update norm
-    for (const auto & local_index : local_indices_n)
+    for (const auto local_index : local_indices_n)
     {
       const Number & value = solution()(local_index);
       const Number & value_old = solutionOld()(local_index);
-      diff_norm_n += pow(value - value_old, 2);
-      norm_n += pow(value, 2);
+      diff_norm_n += Utility::pow<2, Number>(value - value_old);
+      norm_n += Utility::pow<2, Number>(value);
     }
     // Aggregate norm over proceccors
     _communicator.sum(diff_norm_n);
