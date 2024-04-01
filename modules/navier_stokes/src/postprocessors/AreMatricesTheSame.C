@@ -21,7 +21,8 @@ AreMatricesTheSame::validParams()
   params.addClassDescription("Report whether two matrices are the same or not.");
   params.addRequiredParam<std::string>("mat1", "The petsc binary mat file containing matrix1");
   params.addRequiredParam<std::string>("mat2", "The petsc binary mat file containing matrix2");
-  params.addParam<Real>("equivalence_tol", 1e-8, "The relative tolerance for comparing symmetry");
+  params.addParam<Real>(
+      "equivalence_tol", 1e-8, "The relative tolerance for comparing equivalence");
   return params;
 }
 
