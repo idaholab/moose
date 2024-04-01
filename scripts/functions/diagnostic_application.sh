@@ -171,11 +171,12 @@ function build_moose()
     cd test
     if [ "${VERBOSITY}" == '1' ]; then
         set -o pipefail
-        run_command "METHOD=${METHOD} make -j ${MOOSE_JOBS:-6}" 2>&1 | tee ./stdouterr.log
+        export METHOD=${METHOD:-opt}
+        run_command "make -j ${MOOSE_JOBS:-6}" 2>&1 | tee ./stdouterr.log
         exit_code=$?
         set +o pipefail
     else
-        METHOD=${METHOD} make -j ${MOOSE_JOBS:-6} &> ./stdouterr.log
+        METHOD=${METHOD:-opt} make -j ${MOOSE_JOBS:-6} &> ./stdouterr.log
         exit_code=$?
     fi
     if [ "$exit_code" != '0' ]; then
