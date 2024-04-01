@@ -95,8 +95,10 @@ alpha = 1
     ambient_temperature = '100'
 
     friction_blocks = '1; 2'
-    friction_types = 'darcy; darcy'
-    friction_coeffs = '1; 1'
+    friction_types = 'Darcy; Darcy'
+    friction_coeffs = 'friction_coefficient; friction_coefficient'
+
+    use_standard = false
   []
 []
 
@@ -109,6 +111,11 @@ alpha = 1
   [kappa]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'kappa'
+    prop_values = '1 1 1'
+  []
+  [friction_coefficient]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient'
     prop_values = '1 1 1'
   []
 []

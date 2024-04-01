@@ -52,7 +52,6 @@ velocity_interp_method = 'rc'
 []
 
 [FVKernels]
-  inactive = 'u_friction_quad v_friction_quad'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
@@ -60,7 +59,6 @@ velocity_interp_method = 'rc'
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
   []
-
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
@@ -90,15 +88,6 @@ velocity_interp_method = 'rc'
     use_standard = false
     rho = ${rho}
   []
-  [u_friction_quad]
-    type = PINSFVMomentumFriction
-    variable = u
-    Forchheimer_name = friction_coefficient
-    momentum_component = 'x'
-    block = '1'
-    use_standard = false
-  []
-
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
@@ -127,14 +116,6 @@ velocity_interp_method = 'rc'
     block = '1'
     use_standard = false
     rho = ${rho}
-  []
-  [v_friction_quad]
-    type = PINSFVMomentumFriction
-    variable = v
-    Forchheimer_name = friction_coefficient
-    momentum_component = 'y'
-    block = '1'
-    use_standard = false
   []
 []
 

@@ -423,6 +423,10 @@ protected:
   /// of the passive scalar fields
   const bool _passive_scalar_two_term_bc_expansion;
 
+  /// Flags for the friction calculation in PISFVMomentumFriction Kernel
+  const bool _use_standard;
+  const bool _use_superficial;
+
   /// The scaling factor for the mass equation variable (for incompressible simulations this is pressure scaling)
   const Real _mass_scaling;
   /// The scaling factor for the momentum variables
@@ -553,6 +557,11 @@ NSFVBase<BaseType>::commonMomentumEquationParams()
       "The friction coefficients for every item in 'friction_types'. Note that if "
       "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
       "multiplier but they are not multiplied with density yet!");
+
+  params.addParam<bool>(
+      "use_standard", true, "Flag to enable standard friction coefficient formulation");
+  params.addParam<bool>(
+      "use_superficial", true, "Flag to enable the use of superficial fluid values");
 
   params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs", "Friction control");
   return params;
@@ -1138,6 +1147,8 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
     _energy_two_term_bc_expansion(parameters.get<bool>("energy_two_term_bc_expansion")),
     _passive_scalar_two_term_bc_expansion(
         parameters.get<bool>("passive_scalar_two_term_bc_expansion")),
+    _use_standard(parameters.get<bool>("use_standard")),
+    _use_superficial(parameters.get<bool>("use_superficial")),
     _mass_scaling(parameters.get<Real>("mass_scaling")),
     _momentum_scaling(parameters.get<Real>("momentum_scaling")),
     _energy_scaling(parameters.get<Real>("energy_scaling")),
@@ -2015,6 +2026,8 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
     const std::string kernel_type = "PINSFVMomentumFriction";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.template set<MooseFunctorName>(NS::density) = _density_name;
+    params.template set<bool>("use_standard") = _use_standard;
+    params.template set<bool>("use_superficial") = _use_superficial;
     params.template set<UserObjectName>("rhie_chow_user_object") =
         prefix() + "pins_rhie_chow_interpolator";
 
@@ -2102,8 +2115,11 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
   }
   else
   {
-    const std::string kernel_type = "INSFVMomentumFriction";
+    const std::string kernel_type = "PINSFVMomentumFriction";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    params.template set<MooseFunctorName>(NS::density) = _density_name;
+    params.template set<bool>("use_standard") = _use_standard;
+    params.template set<bool>("use_superficial") = _use_superficial;
     params.template set<UserObjectName>("rhie_chow_user_object") =
         prefix() + "ins_rhie_chow_interpolator";
 
@@ -2129,10 +2145,9 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
         {
           const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
           if (upper_name == "DARCY")
-            params.template set<MooseFunctorName>("linear_coef_name") =
-                _friction_coeffs[block_i][type_i];
+            params.template set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
           else if (upper_name == "FORCHHEIMER")
-            params.template set<MooseFunctorName>("quadratic_coef_name") =
+            params.template set<MooseFunctorName>("Forchheimer_name") =
                 _friction_coeffs[block_i][type_i];
         }
 
