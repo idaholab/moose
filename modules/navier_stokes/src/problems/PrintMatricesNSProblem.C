@@ -117,7 +117,7 @@ PrintMatricesNSProblem::onTimestepEnd()
        &p_mass_mat,
        &vel_mass_mat](const auto & pressure_indices, const std::string & outer_matrix_name)
   {
-    auto compute_triple_product_matrix_and_eigenvalues =
+    auto compute_triple_product_matrix =
         [this, print, write_matrix](PetscMatrix<Number> & lhs,
                                     PetscMatrix<Number> & mass_matrix,
                                     PetscMatrix<Number> & rhs,
@@ -183,79 +183,6 @@ PrintMatricesNSProblem::onTimestepEnd()
       }
       write_matrix(triple_product.mat(), inner_matrix_name + std::string(".mat"));
 
-      //
-      // Now compute the eigenvalues of the triple product
-      //
-
-      _console << std::endl << "Conducting eigen-solve for " << inner_matrix_name << std::endl;
-
-      PetscScalar kr, ki;
-      PetscReal error, re, im;
-      PetscInt nconv, nev, i;
-      EPS eps;
-      ierr = EPSCreate(_communicator.get(), &eps);
-      LIBMESH_CHKERR(ierr);
-      ierr = EPSSetOperators(eps, triple_product_mat, nullptr);
-      LIBMESH_CHKERR(ierr);
-      ierr = EPSSetType(eps, EPSLAPACK);
-      LIBMESH_CHKERR(ierr);
-      ierr = EPSSolve(eps);
-      LIBMESH_CHKERR(ierr);
-      ierr = EPSGetDimensions(eps, &nev, nullptr, nullptr);
-      LIBMESH_CHKERR(ierr);
-      ierr = PetscPrintf(
-          _communicator.get(), " Number of requested eigenvalues: %" PetscInt_FMT "\n", nev);
-      LIBMESH_CHKERR(ierr);
-
-      ierr = EPSGetConverged(eps, &nconv);
-      LIBMESH_CHKERR(ierr);
-      ierr = PetscPrintf(
-          _communicator.get(), " Number of converged eigenpairs: %" PetscInt_FMT "\n\n", nconv);
-      LIBMESH_CHKERR(ierr);
-
-      if (nconv > 0)
-      {
-        /*
-           Display eigenvalues and relative errors
-        */
-        ierr = PetscPrintf(_communicator.get(),
-                           "           k          ||Ax-kx||/||kx||\n"
-                           "   ----------------- ------------------\n");
-        LIBMESH_CHKERR(ierr);
-
-        for (i = 0; i < nconv; i++)
-        {
-          /*
-            Get converged eigenpairs: i-th eigenvalue is stored in kr (real part) and
-            ki (imaginary part)
-          */
-          ierr = EPSGetEigenpair(eps, i, &kr, &ki, nullptr, nullptr);
-          LIBMESH_CHKERR(ierr);
-          /*
-             Compute the relative error associated to each eigenpair
-          */
-          ierr = EPSComputeError(eps, i, EPS_ERROR_RELATIVE, &error);
-          LIBMESH_CHKERR(ierr);
-
-#if defined(PETSC_USE_COMPLEX)
-          re = PetscRealPart(kr);
-          im = PetscImaginaryPart(kr);
-#else
-          re = kr;
-          im = ki;
-#endif
-          if (std::abs(im) > TOLERANCE * TOLERANCE)
-            ierr = PetscPrintf(
-                PETSC_COMM_WORLD, " %9f%+9fi %12g\n", (double)re, (double)im, (double)error);
-          else
-            ierr =
-                PetscPrintf(_communicator.get(), "   %12f       %12g\n", (double)re, (double)error);
-          LIBMESH_CHKERR(ierr);
-        }
-        ierr = PetscPrintf(_communicator.get(), "\n");
-        LIBMESH_CHKERR(ierr);
-      }
-
       ierr = MatDestroy(&triple_product_mat);
       LIBMESH_CHKERR(ierr);
       ierr = MatDestroy(&B);
@@ -263,8 +190,6 @@ PrintMatricesNSProblem::onTimestepEnd()
       ierr = MatDestroy(&M);
       LIBMESH_CHKERR(ierr);
       ierr = MatDestroy(&Minv);
-      LIBMESH_CHKERR(ierr);
-      ierr = EPSDestroy(&eps);
       LIBMESH_CHKERR(ierr);
     };
 
@@ -274,9 +199,9 @@ PrintMatricesNSProblem::onTimestepEnd()
     system_matrix->create_submatrix(vel_p_mat, vel_indices, pressure_indices);
     system_matrix->create_submatrix(p_vel_mat, pressure_indices, vel_indices);
 
-    compute_triple_product_matrix_and_eigenvalues(
+    compute_triple_product_matrix(
         vel_p_mat, p_mass_mat, p_vel_mat, outer_matrix_name + "-grad-div");
-    compute_triple_product_matrix_and_eigenvalues(
+    compute_triple_product_matrix(
         p_vel_mat, vel_mass_mat, vel_p_mat, outer_matrix_name + "-div-grad");
   };
 
