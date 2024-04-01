@@ -82,18 +82,21 @@ velocity_interp_method = 'rc'
     pressure = pressure
   []
   [u_friction_linear]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = u
-    linear_coef_name = friction_coefficient
+    Darcy_name = friction_coefficient
     momentum_component = 'x'
     block = '1'
+    use_standard = false
+    rho = ${rho}
   []
   [u_friction_quad]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = u
-    quadratic_coef_name = friction_coefficient
+    Forchheimer_name = friction_coefficient
     momentum_component = 'x'
     block = '1'
+    use_standard = false
   []
 
   [v_advection]
@@ -117,18 +120,21 @@ velocity_interp_method = 'rc'
     pressure = pressure
   []
   [v_friction_linear]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = v
-    linear_coef_name = friction_coefficient
+    Darcy_name = friction_coefficient
     momentum_component = 'y'
     block = '1'
+    use_standard = false
+    rho = ${rho}
   []
   [v_friction_quad]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = v
-    quadratic_coef_name = friction_coefficient
+    Forchheimer_name = friction_coefficient
     momentum_component = 'y'
     block = '1'
+    use_standard = false
   []
 []
 
@@ -167,9 +173,9 @@ velocity_interp_method = 'rc'
 
 [FunctorMaterials]
   [friction_coefficient]
-    type = ADGenericFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'friction_coefficient'
-    prop_values = '25'
+    prop_values = '25 25 25'
   []
 []
 
