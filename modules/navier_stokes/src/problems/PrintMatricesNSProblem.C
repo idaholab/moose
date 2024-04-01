@@ -36,7 +36,7 @@ PrintMatricesNSProblem::validParams()
       "The matrices corresponding to different (superpositions) of finite element weak forms");
   params.addRequiredParam<NonlinearVariableName>("u", "The interior x-velocity variable");
   params.addRequiredParam<NonlinearVariableName>("v", "The interior y-velocity variable");
-  params.addRequiredParam<NonlinearVariableName>(NS::pressure, "The pressure in the volume");
+  params.addParam<NonlinearVariableName>(NS::pressure, "The pressure in the volume");
   params.addParam<NonlinearVariableName>(NS::pressure + "_bar", "The pressure on the facets");
   params.addParam<bool>("print", true, "Whether to print the matrices");
   return params;
@@ -57,6 +57,7 @@ PrintMatricesNSProblem::onTimestepEnd()
 
   const bool print = getParam<bool>("print");
 
+  const bool has_p = isParamValid(NS::pressure);
   const bool has_pbar = isParamValid(NS::pressure + "_bar");
 
   auto & nl = getNonlinearSystemBase(0);
@@ -65,15 +66,18 @@ PrintMatricesNSProblem::onTimestepEnd()
 
   const auto & u_var = nl.getVariable(0, getParam<NonlinearVariableName>("u"));
   const auto & v_var = nl.getVariable(0, getParam<NonlinearVariableName>("v"));
-  const auto & p_var = nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure));
+  const MooseVariableFieldBase * p_var = nullptr;
   const MooseVariableFieldBase * pb_var = nullptr;
+  if (has_p)
+    p_var = &nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure));
   if (has_pbar)
     pb_var = &nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure + "_bar"));
 
   std::vector<dof_id_type> u_indices, v_indices, p_vol_indices, pb_indices, vel_indices, p_indices;
   dof_map.local_variable_indices(u_indices, lm_mesh, u_var.number());
   dof_map.local_variable_indices(v_indices, lm_mesh, v_var.number());
-  dof_map.local_variable_indices(p_vol_indices, lm_mesh, p_var.number());
+  if (has_p)
+    dof_map.local_variable_indices(p_vol_indices, lm_mesh, p_var->number());
   if (has_pbar)
     dof_map.local_variable_indices(pb_indices, lm_mesh, pb_var->number());
   vel_indices = u_indices;
@@ -205,9 +209,7 @@ PrintMatricesNSProblem::onTimestepEnd()
         p_vel_mat, vel_mass_mat, vel_p_mat, outer_matrix_name + "-div-grad");
   };
 
-  if (has_pbar)
-    do_vel_p(pb_indices, "vel-pb");
-  do_vel_p(p_indices, "vel-all-p");
+  do_vel_p(p_indices, "vel-p");
 
   for (const auto & jump_name : _jump_matrices)
   {
