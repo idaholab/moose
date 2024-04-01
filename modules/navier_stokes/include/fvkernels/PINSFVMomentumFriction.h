@@ -37,10 +37,24 @@ protected:
   /// Booleans to select the right models
   const bool _use_Darcy_friction_model;
   const bool _use_Forchheimer_friction_model;
+  const bool _use_superficial;
+  const bool _use_standard;
+
   /// Dynamic viscosity
   const Moose::Functor<ADReal> * const _mu;
   /// Density as a functor
   const Moose::Functor<ADReal> & _rho;
   /// Speed (norm of the interstitial velocity) as a functor
   const Moose::Functor<ADReal> * const _speed;
+
+  /// The dimension of the domain
+  const unsigned int _dim;
+  /// x-velocity
+  const Moose::Functor<ADReal> * _u_var;
+  /// y-velocity
+  const Moose::Functor<ADReal> * _v_var;
+  /// z-velocity
+  const Moose::Functor<ADReal> * _w_var;
+  /// Adding porosity functor
+  const Moose::Functor<ADReal> & _epsilon;
 };
