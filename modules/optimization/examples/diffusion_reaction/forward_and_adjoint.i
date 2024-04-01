@@ -112,12 +112,13 @@
 [Problem]
   nl_sys_names = 'nl0 adjoint'
   kernel_coverage_check = false
+  skip_nl_system_check = true
 []
 
 [Variables]
   [u_adjoint]
     initial_condition = 0
-    nl_sys = adjoint
+    solver_sys = adjoint
     outputs = none
   []
 []
