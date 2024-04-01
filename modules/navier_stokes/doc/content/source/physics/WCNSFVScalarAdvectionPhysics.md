@@ -1,9 +1,6 @@
 # WCNSFVScalarAdvectionPhysics
 
-!syntax description /Physics/WCNSFVScalarAdvection
-
-See the main [WCNSFVPhysics.md] page for an overview of the syntax and capabilities of the
-weakly-compressible Navier Stokes `Physics` syntax.
+!syntax description /Physics/NavierStokes/WCNSFVScalarAdvection/WCNSFVScalarAdvectionPhysics
 
 ## Coupling with other Physics
 
@@ -13,8 +10,8 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 
 !listing test/tests/finite_volume/ins/channel-flow/2d-scalar-transport-physics.i block=Physics
 
-!syntax parameters /Physics/WCNSFVScalarAdvection
+!syntax parameters /Physics/NavierStokes/WCNSFVScalarAdvection/WCNSFVScalarAdvectionPhysics
 
-!syntax inputs /Physics/WCNSFVScalarAdvection
+!syntax inputs /Physics/NavierStokes/WCNSFVScalarAdvection/WCNSFVScalarAdvectionPhysics
 
-!syntax children /Physics/WCNSFVScalarAdvection
+!syntax children /Physics/NavierStokes/WCNSFVScalarAdvection/WCNSFVScalarAdvectionPhysics

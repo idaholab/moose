@@ -1,9 +1,6 @@
 # WCNSFVFlowPhysics
 
-!syntax description /Physics/WCNSFVFlow
-
-See the main [WCNSFVPhysics.md] page for an overview of the syntax and capabilities of the
-weakly-compressible Navier Stokes `Physics` syntax.
+!syntax description /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
 
 ## Automatically defined variables
 
@@ -56,8 +53,8 @@ advected quantities (e.g. upwind, average) can be controlled through the
 
 Please see [the Bernoulli pressure variable documentation](BernoulliPressureVariable.md) for more information.
 
-!syntax parameters /Physics/WCNSFVFlow
+!syntax parameters /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
 
-!syntax inputs /Physics/WCNSFVFlow
+!syntax inputs /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
 
-!syntax children /Physics/WCNSFVFlow
+!syntax children /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics

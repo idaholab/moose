@@ -1,9 +1,6 @@
 # WCNSFVHeatAdvectionPhysics
 
-!syntax description /Physics/WCNSFVHeatAdvection
-
-See the main [WCNSFVPhysics.md] page for an overview of the syntax and capabilities of the
-weakly-compressible Navier Stokes `Physics` syntax.
+!syntax description /Physics/NavierStokes/WCNSFVHeatAdvection/WCNSFVHeatAdvectionPhysics
 
 ## Automatically defined variables
 
@@ -26,8 +23,8 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 
 !listing test/tests/finite_volume/ins/channel-flow/2d-rc-transient.i block=Physics
 
-!syntax parameters /Physics/WCNSFVHeatAdvection
+!syntax parameters /Physics/NavierStokes/WCNSFVHeatAdvection/WCNSFVHeatAdvectionPhysics
 
-!syntax inputs /Physics/WCNSFVHeatAdvection
+!syntax inputs /Physics/NavierStokes/WCNSFVHeatAdvection/WCNSFVHeatAdvectionPhysics
 
-!syntax children /Physics/WCNSFVHeatAdvection
+!syntax children /Physics/NavierStokes/WCNSFVHeatAdvection/WCNSFVHeatAdvectionPhysics
