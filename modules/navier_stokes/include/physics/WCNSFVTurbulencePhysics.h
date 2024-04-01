@@ -26,6 +26,9 @@ public:
 
   WCNSFVTurbulencePhysics(const InputParameters & parameters);
 
+  /// Whether a turbulence model is in use
+  bool hasTurbulenceModel() const { return _turbulence_model != "none"; }
+
 protected:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 

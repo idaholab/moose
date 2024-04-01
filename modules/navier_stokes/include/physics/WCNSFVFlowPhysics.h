@@ -10,8 +10,7 @@
 #pragma once
 
 #include "NavierStokesPhysicsBase.h"
-
-class WCNSFVTurbulencePhysics;
+#include "WCNSFVTurbulencePhysics.h"
 
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
@@ -110,7 +109,13 @@ private:
   VariableName getFlowVariableName(const std::string & default_name) const;
 
   /// Whether a turbulence Physics has been coupled in, to know which viscosity to pick on symmetry boundary conditions
-  bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
+  bool hasTurbulencePhysics() const
+  {
+    if (_turbulence_physics)
+      return _turbulence_physics->hasTurbulenceModel();
+    else
+      return false;
+  }
 
   /// Find the turbulence physics
   const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;

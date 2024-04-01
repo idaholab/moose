@@ -1393,7 +1393,7 @@ WCNSFVFlowPhysics::getCoupledTurbulencePhysics() const
   // Look for any physics of the right type, and check the block restriction
   else
   {
-    const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysics>();
+    const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysics>(true);
     for (const auto physics : all_turbulence_physics)
       if (checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
