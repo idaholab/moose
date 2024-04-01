@@ -20,13 +20,12 @@ l = 1
 
 [Problem]
   type = PrintMatricesNSProblem
-  extra_tag_matrices = 'mass jump grad_div'
+  extra_tag_matrices = 'mass jump'
   pressure_mass_matrix = 'mass'
   velocity_mass_matrix = 'mass'
-  jump_matrices = 'jump grad_div'
+  jump_matrices = 'jump'
   u = vel_x
   v = vel_y
-  pressure = pressure
   pressure_bar = pressure_bar
   print = false
 []
@@ -116,27 +115,6 @@ l = 1
     type = MassMatrix
     variable = pressure
     matrix_tags = 'mass'
-  []
-
-  [u_jump]
-    type = GradDiv
-    matrix_only = true
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    component = 0
-    vector_tags = ''
-    matrix_tags = 'grad_div'
-  []
-  [v_jump]
-    type = GradDiv
-    matrix_only = true
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    component = 1
-    vector_tags = ''
-    matrix_tags = 'grad_div'
   []
 []
 
@@ -424,17 +402,12 @@ l = 1
   []
   [equiv]
     type = AreMatricesTheSame
-    mat1 = 'vel-all-p-grad-div.mat'
-    mat2 = 'gold/vel-all-p.mat'
-  []
-  [equiv2]
-    type = AreMatricesTheSame
-    mat1 = 'vel-pb-grad-div.mat'
+    mat1 = 'vel-p-grad-div.mat'
     mat2 = 'gold/vel-pb.mat'
   []
   [jump_and_upb_equiv]
     type = AreMatricesTheSame
-    mat1 = 'vel-pb-grad-div.mat'
+    mat1 = 'vel-p-grad-div.mat'
     mat2 = 'jump.mat'
   []
   [vel-pb-grad-div-eig]
@@ -444,13 +417,5 @@ l = 1
   [vel-pb-div-grad-eig]
     type = NumZeroEigenvalues
     mat = vel-pb-div-grad.mat
-  []
-  [vel-all-p-grad-div-eig]
-    type = NumZeroEigenvalues
-    mat = vel-all-p-grad-div.mat
-  []
-  [vel-all-p-div-grad-eig]
-    type = NumZeroEigenvalues
-    mat = vel-all-p-div-grad.mat
   []
 []
