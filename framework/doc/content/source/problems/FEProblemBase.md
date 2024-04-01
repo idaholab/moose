@@ -54,7 +54,7 @@ of time on systems that have several active variables.
        caption=1D linear Lagrange shape functions
        style=width:25%;
 
-- Our discretized expansion of $$u$$ takes on the following form:
+- Our discretized expansion of $u$ takes on the following form:
   $u \approx u_h = \sum_{j=1}^N u_j \phi_j$
 - The $\phi_j$ here are called "basis functions"
 - These $\phi_j$ form the basis for the "trial function", $u_h$

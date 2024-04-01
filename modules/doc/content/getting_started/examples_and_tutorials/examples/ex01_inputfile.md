@@ -45,7 +45,7 @@ file itself:
 
 ### Variables
 
-In this simple problem, a single variable, 'diffused,' is defined, which represents $$u$$ from the
+In this simple problem, a single variable, 'diffused,' is defined, which represents $u$ from the
 continuous problem.  The 'diffused' variable is approximated with linear Lagrange shape functions.
 
 !listing examples/ex01_inputfile/ex01.i block=Variables
