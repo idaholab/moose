@@ -30,8 +30,10 @@ protected:
   virtual void onTimestepEnd() override;
 
 private:
-  /// The tag name of the mass matrix
-  const TagName & _mass_matrix;
+  /// The tag name of the pressure mass matrix
+  const TagName & _pressure_mass_matrix;
+  /// The tag name of the velocity mass matrix
+  const TagName & _velocity_mass_matrix;
   /// The tag name of the jump matrix
   const std::vector<TagName> & _jump_matrices;
 };

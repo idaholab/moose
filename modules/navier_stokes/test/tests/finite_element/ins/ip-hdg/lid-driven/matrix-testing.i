@@ -21,7 +21,8 @@ l = 1
 [Problem]
   type = PrintMatricesNSProblem
   extra_tag_matrices = 'mass jump grad_div'
-  mass_matrix = 'mass'
+  pressure_mass_matrix = 'mass'
+  velocity_mass_matrix = 'mass'
   jump_matrices = 'jump grad_div'
   u = vel_x
   v = vel_y
@@ -101,7 +102,17 @@ l = 1
     lambda = lambda
   []
 
-  [mass_matrix]
+  [mass_matrix_vel_x]
+    type = MassMatrix
+    variable = vel_x
+    matrix_tags = 'mass'
+  []
+  [mass_matrix_vel_y]
+    type = MassMatrix
+    variable = vel_y
+    matrix_tags = 'mass'
+  []
+  [mass_matrix_pressure]
     type = MassMatrix
     variable = pressure
     matrix_tags = 'mass'
@@ -413,17 +424,17 @@ l = 1
   []
   [equiv]
     type = AreMatricesTheSame
-    mat1 = 'vel-all-p.mat'
+    mat1 = 'vel-all-p-grad-div.mat'
     mat2 = 'gold/vel-all-p.mat'
   []
   [equiv2]
     type = AreMatricesTheSame
-    mat1 = 'vel-pb.mat'
+    mat1 = 'vel-pb-grad-div.mat'
     mat2 = 'gold/vel-pb.mat'
   []
   [jump_and_upb_equiv]
     type = AreMatricesTheSame
-    mat1 = 'vel-pb.mat'
+    mat1 = 'vel-pb-grad-div.mat'
     mat2 = 'jump.mat'
   []
 []
