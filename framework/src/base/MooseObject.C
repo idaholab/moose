@@ -60,3 +60,17 @@ MooseObject::MooseObject(const InputParameters & parameters)
     mooseError(
         "This registered object was not constructed using the Factory, which is not supported.");
 }
+
+std::shared_ptr<MooseObject>
+MooseObject::getSharedPtr()
+{
+  try
+  {
+    return shared_from_this();
+  }
+  catch (std::bad_weak_ptr &)
+  {
+    mooseError("MooseObject::getSharedPtr() must only be called for objects that are managed by a "
+               "shared pointer. Make sure this object is build using Factory::create(...).");
+  }
+}
