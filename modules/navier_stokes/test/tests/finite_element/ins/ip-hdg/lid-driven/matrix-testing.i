@@ -407,7 +407,7 @@ l = 1
 [Outputs]
   [out]
     type = CSV
-    show = 'symmetric equiv equiv2 jump_and_upb_equiv'
+    hide = 'pressure_integral lambda'
     execute_on = 'timestep_end'
   []
 []
@@ -436,5 +436,21 @@ l = 1
     type = AreMatricesTheSame
     mat1 = 'vel-pb-grad-div.mat'
     mat2 = 'jump.mat'
+  []
+  [vel-pb-grad-div-eig]
+    type = NumZeroEigenvalues
+    mat = vel-pb-grad-div.mat
+  []
+  [vel-pb-div-grad-eig]
+    type = NumZeroEigenvalues
+    mat = vel-pb-div-grad.mat
+  []
+  [vel-all-p-grad-div-eig]
+    type = NumZeroEigenvalues
+    mat = vel-all-p-grad-div.mat
+  []
+  [vel-all-p-div-grad-eig]
+    type = NumZeroEigenvalues
+    mat = vel-all-p-div-grad.mat
   []
 []
