@@ -16,18 +16,21 @@ InputParameters
 BatchPropertyDerivative<OutputType, InputType>::validParams()
 {
   auto params = BatchPropertyDerivativeBase<OutputType, InputType>::validParams();
-  params.addClassDescription("This user object gathers material property and receives the "
-                             "corresponding property derivatives. This object is useful in the "
-                             "optimization module for material property inversion problems.");
+  params.addClassDescription(
+      "This user object gathers a material property used as a parameter in a NEML2 material model, "
+      "and receives the corresponding derivatives of the model output with respect to the material "
+      "property. This object is useful in the `optimization` module for material inversion "
+      "problems.");
   params.template addRequiredParam<MaterialPropertyName>("material_property",
                                                          "Name of the material property.");
   params.setDocString("execution_order_group",
                       "BatchPropertyDerivative UserObject needs to be completely executed before "
                       "vectorPostprocessors.");
 
+  // This UO needs to execute before the CauchyStressFromNEML2UO
   params.template set<int>("execution_order_group") = -1;
 
-  // keep consistent with CauchyStressFromNEML2UO
+  // Keep consistent with CauchyStressFromNEML2UO
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
   execute_options = {EXEC_INITIAL, EXEC_LINEAR};
   params.template set<ExecFlagEnum>("execute_on") = execute_options;

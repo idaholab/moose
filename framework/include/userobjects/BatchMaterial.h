@@ -131,11 +131,10 @@ public:
   static InputParameters validParams() { return ElementUserObject::validParams(); }
 
   template <typename... Names>
-  BatchMaterial(const InputParameters & params, Names &&... names) : ElementUserObject(params)
+  BatchMaterial(const InputParameters & params, Names &&... names)
+    : ElementUserObject(params), _output_ready(false)
   {
     construct<0, Names...>(std::forward<Names>(names)...);
-    // not ready for output during initialization
-    _output_ready = false;
   }
 
   /// override this method to implement the computation on the batch data

@@ -16,8 +16,6 @@
 []
 
 [AuxVariables]
-  [dummy]
-  []
   [T]
   []
 []
