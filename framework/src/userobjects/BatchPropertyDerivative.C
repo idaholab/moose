@@ -20,7 +20,7 @@ BatchPropertyDerivative<OutputType, InputType>::validParams()
                              "corresponding property derivatives. This object is useful in the "
                              "optimization module for material property inversion problems.");
   params.template addRequiredParam<MaterialPropertyName>("material_property",
-                                                         "Name of the scalar material property.");
+                                                         "Name of the material property.");
   params.setDocString("execution_order_group",
                       "BatchPropertyDerivative UserObject needs to be completely executed before "
                       "vectorPostprocessors.");

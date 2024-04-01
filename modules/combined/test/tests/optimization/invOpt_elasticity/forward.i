@@ -32,7 +32,6 @@
         formulation = TOTAL
         incremental = true
         volumetric_locking_correction = false
-        # generate_output = 'cauchy_stress_xx'
       []
     []
   []

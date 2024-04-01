@@ -54,7 +54,6 @@
         formulation = TOTAL
         incremental = true
         volumetric_locking_correction = false
-        # generate_output = 'cauchy_stress_xx'
         displacements = 'ux uy'
         # add base name to distinguish between forward and adjoint
         # the total lagrangian formulation does not add base_name correctly without setting both, which should be improved
@@ -109,6 +108,7 @@
     prop_values = E
   []
 []
+
 [Functions]
   [E]
     type = NearestReporterCoordinatesFunction
@@ -117,6 +117,7 @@
     value_name = parametrization/youngs_modulus
   []
 []
+
 [Reporters]
   [measure_data]
     type = OptimizationData
@@ -181,6 +182,7 @@
   # we do not compute them together as this is overwritting DiracKernel's residual calculation, which should be improved
   residual_and_jacobian_together = false
 []
+
 [Outputs]
   file_base = 'adjoint'
   console = false
