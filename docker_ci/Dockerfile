@@ -99,7 +99,7 @@ WORKDIR ${MOOSE_DIR}
 #-----------------------------------------------------------------------------#
 # Install PETSc to system path
 #-----------------------------------------------------------------------------#
-ARG PETSC_REV=9a61b8cbbacd10b14c2a18c9bc314b0ecb8ec018
+ARG PETSC_REV=30694c2d5e23455d389e53fb2673c89f073de56b
 ARG PETSC_OPTIONS
 ENV PETSC_DIR=/usr/local
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
