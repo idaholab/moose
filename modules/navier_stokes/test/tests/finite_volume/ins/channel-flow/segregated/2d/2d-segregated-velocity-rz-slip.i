@@ -81,11 +81,15 @@ pressure_tag = "pressure_grad"
     extra_vector_tags = ${pressure_tag}
   []
   [u_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
-    momentum_component = 'y'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    u = vel_x
+    v = vel_y
+    momentum_component = 'x'
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    use_standard = false
+    rho = ${rho}
   []
   [v_advection]
     type = INSFVMomentumAdvection
@@ -109,11 +113,15 @@ pressure_tag = "pressure_grad"
     extra_vector_tags = ${pressure_tag}
   []
   [v_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
+    u = vel_x
+    v = vel_y
     momentum_component = 'y'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    use_standard = false
+    rho = ${rho}
   []
   [p_diffusion]
     type = FVAnisotropicDiffusion
@@ -187,9 +195,9 @@ pressure_tag = "pressure_grad"
 
 [FunctorMaterials]
   [darcy]
-    type = ADGenericFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'Darcy_coefficient Forchheimer_coefficient'
-    prop_values = '0.1 0.1'
+    prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
   []
 []
 

@@ -28,6 +28,9 @@ PINSFVMomentumFriction::validParams()
   params.addParam<bool>("use_standard", true, "Boolean to choose the type of formulation.");
   params.addParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
   params.addParam<MooseFunctorName>(NS::speed, "The norm of the superficial velocity.");
+  params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addParam<MooseFunctorName>(NS::porosity, 1.0, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   return params;

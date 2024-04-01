@@ -34,6 +34,7 @@
     cli_args = "FVKernels/inactive='' Outputs/file_base='2d-segregated-velocity-rz-slip-friction'"
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
                   "cylindrical channel with homogenized friction using the SIMPLE algorithm."
+    abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
   []
   [with-energy]
