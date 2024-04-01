@@ -1,2 +1,2 @@
-time,equiv,equiv2,jump_and_upb_equiv,symmetric
-1,1,1,1,1
+time,equiv,equiv2,jump_and_upb_equiv,symmetric,vel-all-p-div-grad-eig,vel-all-p-grad-div-eig,vel-pb-div-grad-eig,vel-pb-grad-div-eig
+1,1,1,1,1,1,261,0,360
