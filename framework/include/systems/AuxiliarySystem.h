@@ -146,6 +146,10 @@ public:
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & elemArrayAuxWarehouse() const;
 
+  /// Computes and stores ||current - old|| / ||current|| for each variable in the given vector
+  /// @param var_diffs a vector being filled with the L2 norm of the solution difference
+  void variableWiseRelativeSolutionDifferenceNorm(std::vector<Number> & var_diffs) const;
+
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
