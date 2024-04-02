@@ -152,6 +152,12 @@ rod_diameter = 0.00950
     type = Receiver
     default = ${P_out}
   []
+
+  [Mean_Temp_Out]
+    type = PlanarMean
+    variable = T
+    height = 1.2
+  []
 []
 
 [Outputs]
