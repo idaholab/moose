@@ -21,7 +21,7 @@
     input = 'vector_coupled_time_derivative_test.i'
     exodiff = 'vector_coupled_time_derivative_test_out.e'
     issues = '#13913'
-    design = 'VectorCoupledTimeDerivative.md'
+    design = 'CoupledTimeDerivative.md'
     requirement = 'A coupled time derivative kernel compatible with vector variables with hand-coded jacobians shall be provided'
   [../]
   [./jac_vectortestdirichlet]
@@ -33,6 +33,6 @@
     difference_tol = 1e-6
     requirement = 'The Jacobian from VectorCoupledTimeDerivative shall be perfect'
     issues = '#13913'
-    design = 'VectorCoupledTimeDerivative.md'
+    design = 'CoupledTimeDerivative.md'
   [../]
 []
