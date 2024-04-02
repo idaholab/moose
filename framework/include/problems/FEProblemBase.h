@@ -507,7 +507,7 @@ public:
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
   virtual Real finalNonlinearResidual(const unsigned int nl_sys_num) const override;
-  virtual bool computingInitialResidual(const unsigned int nl_sys_num) const override;
+  virtual bool computingPreSMOResidual(const unsigned int nl_sys_num) const override;
 
   /**
    * Return solver type as a human readable string

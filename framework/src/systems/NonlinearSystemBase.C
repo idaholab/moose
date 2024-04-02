@@ -137,7 +137,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _n_linear_iters(0),
     _n_residual_evaluations(0),
     _final_residual(0.),
-    _computing_initial_residual(false),
+    _computing_pre_smo_residual(false),
     _pre_smo_residual(0),
     _initial_residual(0),
     _use_pre_smo_residual(false),
@@ -3671,9 +3671,8 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
-bool
-NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                 THREAD_ID /*tid*/) const
+bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
+                                                      THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }

@@ -1154,9 +1154,9 @@ DisplacedProblem::nlConverged(const unsigned int nl_sys_num)
 }
 
 bool
-DisplacedProblem::computingInitialResidual(const unsigned int nl_sys_num) const
+DisplacedProblem::computingPreSMOResidual(const unsigned int nl_sys_num) const
 {
-  return _mproblem.computingInitialResidual(nl_sys_num);
+  return _mproblem.computingPreSMOResidual(nl_sys_num);
 }
 
 void

@@ -65,6 +65,7 @@
   start_time = 0.0
   num_steps = 5
   dt = .1
+  use_pre_SMO_residual = true
 []
 
 [Outputs]

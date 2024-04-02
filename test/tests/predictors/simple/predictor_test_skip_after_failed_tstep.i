@@ -86,13 +86,9 @@
     type = Residual
     residual_type = FINAL
   []
-  [initial_residual_before]
+  [initial_residual]
     type = Residual
-    residual_type = INITIAL_BEFORE_SMO
-  []
-  [initial_residual_after]
-    type = Residual
-    residual_type = INITIAL_AFTER_SMO
+    residual_type = INITIAL
   []
 []
 

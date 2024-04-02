@@ -6108,9 +6108,9 @@ FEProblemBase::finalNonlinearResidual(const unsigned int nl_sys_num) const
 }
 
 bool
-FEProblemBase::computingInitialResidual(const unsigned int nl_sys_num) const
+FEProblemBase::computingPreSMOResidual(const unsigned int nl_sys_num) const
 {
-  return _nl[nl_sys_num]->computingInitialResidual();
+  return _nl[nl_sys_num]->computingPreSMOResidual();
 }
 
 void

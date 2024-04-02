@@ -146,9 +146,9 @@ NonlinearSystem::solve()
   {
     TIME_SECTION("nlPreSMOResidual", 3, "Computing Pre-SMO Residual");
     // Calculate the pre-SMO residual for use in the convergence criterion.
-    _computing_initial_residual = true;
+    _computing_pre_smo_residual = true;
     _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
-    _computing_initial_residual = false;
+    _computing_pre_smo_residual = false;
     _nl_implicit_sys.rhs->close();
     _pre_smo_residual = _nl_implicit_sys.rhs->l2_norm();
     _console << "Pre-SMO residual: " << _pre_smo_residual << std::endl;

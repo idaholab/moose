@@ -633,7 +633,7 @@ public:
    * Returns true if the problem is in the process of computing it's initial residual.
    * @return Whether or not the problem is currently computing the initial residual.
    */
-  virtual bool computingInitialResidual(const unsigned int nl_sys_num) const = 0;
+  virtual bool computingPreSMOResidual(const unsigned int nl_sys_num) const = 0;
 
   /**
    * Return the list of elements that should have their DoFs ghosted to this processor.

@@ -86,10 +86,10 @@ public:
   virtual unsigned int getCurrentNonlinearIterationNumber() = 0;
 
   /**
-   * Returns true if this system is currently computing the initial residual for a solve.
-   * @return Whether or not we are currently computing the initial residual.
+   * Returns true if this system is currently computing the pre-SMO residual for a solve.
+   * @return Whether or not we are currently computing the pre-SMO residual.
    */
-  virtual bool computingInitialResidual() { return _computing_initial_residual; }
+  virtual bool computingPreSMOResidual() { return _computing_pre_smo_residual; }
 
   // Setup Functions ////
   virtual void initialSetup() override;
@@ -242,7 +242,7 @@ public:
    * If set to true, an _additional_ residual evaluation is performed before any
    * solution-modifying object is executed, and before the initial (0-th nonlinear iteration)
    * residual evaluation. Such residual is referred to as the pre-SMO residual. If the pre-SMO
-   * residual is evaluted, it is used in the subsequent relative convergence checks.
+   * residual is evaluated, it is used in the subsequent relative convergence checks.
    *
    * If set to false, no residual evaluation takes place before the initial residual evaluation, and
    * the initial residual is used in the subsequent relative convergence checks. This mode is
@@ -907,7 +907,7 @@ protected:
   /// If predictor is active, this is non-NULL
   std::shared_ptr<Predictor> _predictor;
 
-  bool _computing_initial_residual;
+  bool _computing_pre_smo_residual;
 
   /// The pre-SMO residual
   Real _pre_smo_residual;

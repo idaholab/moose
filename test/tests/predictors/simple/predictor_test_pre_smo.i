@@ -3,7 +3,8 @@
 # the predictor should come very close to exactly nailing the solution on steps
 # after the first step.
 
-#This test checks to see that the predictor is skipped in the last step.
+# The main thing to check here is that when the predictor is applied in the
+# second step, the initial residual is almost zero.
 
 [Mesh]
   type = GeneratedMesh
@@ -62,19 +63,24 @@
 
   start_time = 0.0
   dt = 0.5
-  end_time = 1.5
+  end_time = 1.0
 
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-    skip_times_old = '1.0'
   []
+
+  use_pre_SMO_residual = true
 []
 
 [Postprocessors]
   [final_residual]
     type = Residual
     residual_type = FINAL
+  []
+  [pre_smo_residual]
+    type = Residual
+    residual_type = PRE_SMO
   []
   [initial_residual]
     type = Residual
