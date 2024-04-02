@@ -38,7 +38,7 @@ kernel block below:
 
 !listing
 test/tests/kernels/coupled_time_derivative/ad_coupled_time_derivative_test.i
-block=Kernels label=false
+block=Kernels
 
 !syntax parameters /Kernels/ADCoupledTimeDerivative
 
