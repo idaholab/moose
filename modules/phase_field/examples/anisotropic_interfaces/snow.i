@@ -59,10 +59,10 @@
     variable = T
   [../]
   [./w_dot_T]
-    type = CoefCoupledTimeDerivative
+    type = CoupledTimeDerivative
     variable = T
     v = w
-    coef = -1.8
+    coeff = -1.8
   [../]
 []
 

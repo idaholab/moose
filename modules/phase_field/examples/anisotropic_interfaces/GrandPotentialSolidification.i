@@ -167,10 +167,10 @@
     variable = T
   [../]
   [./etaa0_dot_T]
-    type = CoefCoupledTimeDerivative
+    type = CoupledTimeDerivative
     variable = T
     v = etaa0
-    coef = -5.0
+    coeff = -5.0
   [../]
 []
 

@@ -41,4 +41,4 @@ ACInterfaceKobayashi2, and ACParsed in Kernels respectively.
   R2 = <dT/dt, _test> + <grad(T), grad_test> - <K*dw/dt, _test>
 
 These three terms of residual correspond to TimeDerivative, Diffusion, and
-CoefCoupledTimeDerivative in Kernels respectively.
+CoupledTimeDerivative in Kernels respectively.
