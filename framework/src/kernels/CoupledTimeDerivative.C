@@ -10,39 +10,62 @@
 #include "CoupledTimeDerivative.h"
 
 registerMooseObject("MooseApp", CoupledTimeDerivative);
+registerMooseObject("MooseApp", VectorCoupledTimeDerivative);
 
+template <typename K>
 InputParameters
-CoupledTimeDerivative::validParams()
+CoupledTimeDerivativeTempl<K>::validParams()
 {
-  InputParameters params = Kernel::validParams();
-  params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
-                             "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
+  InputParameters params = K::validParams();
+  if (std::is_same_v<K, Kernel>)
+    params.addClassDescription("Time derivative Kernel that acts on a coupled variable. "
+                               "Weak form: $(\\psi_i, k\\frac{\\partial v_h}{\\partial t})$.");
+  else if (std::is_same_v<K, VectorKernel>)
+    params.addClassDescription("Time derivative Kernel that acts on a coupled vector variable. "
+                               "Weak form: "
+                               "$(\\vec{\\psi}_i, k\\frac{\\partial \\vec{v_h}}{\\partial t})$.");
   params.addRequiredCoupledVar("v", "Coupled variable");
+  params.addParam<Real>("coeff", 1.0, "The constant coefficient");
   return params;
 }
 
-CoupledTimeDerivative::CoupledTimeDerivative(const InputParameters & parameters)
-  : Kernel(parameters), _v_dot(coupledDot("v")), _dv_dot(coupledDotDu("v")), _v_var(coupled("v"))
+template <>
+CoupledTimeDerivativeTempl<Kernel>::CoupledTimeDerivativeTempl(const InputParameters & parameters)
+  : Kernel(parameters),
+    _v_dot(coupledDot("v")),
+    _dv_dot(coupledDotDu("v")),
+    _v_var(coupled("v")),
+    _coeff(getParam<Real>("coeff"))
 {
 }
 
-Real
-CoupledTimeDerivative::computeQpResidual()
+template <>
+CoupledTimeDerivativeTempl<VectorKernel>::CoupledTimeDerivativeTempl(
+    const InputParameters & parameters)
+  : VectorKernel(parameters),
+    _v_dot(coupledVectorDot("v")),
+    _dv_dot(coupledVectorDotDu("v")),
+    _v_var(coupled("v")),
+    _coeff(getParam<Real>("coeff"))
 {
-  return _test[_i][_qp] * _v_dot[_qp];
 }
 
+template <typename K>
 Real
-CoupledTimeDerivative::computeQpJacobian()
+CoupledTimeDerivativeTempl<K>::computeQpResidual()
 {
-  return 0.0;
+  return _coeff * K::_test[K::_i][K::_qp] * _v_dot[K::_qp];
 }
 
+template <typename K>
 Real
-CoupledTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
+CoupledTimeDerivativeTempl<K>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-    return _test[_i][_qp] * _phi[_j][_qp] * _dv_dot[_qp];
+    return _coeff * K::_test[K::_i][K::_qp] * K::_phi[K::_j][K::_qp] * _dv_dot[K::_qp];
 
   return 0.0;
 }
+
+template class CoupledTimeDerivativeTempl<Kernel>;
+template class CoupledTimeDerivativeTempl<VectorKernel>;
