@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "SlepcEigenSolverConfiguration.h"
 
-#include "libmesh/eigen_system.h"
+#include "libmesh/condensed_eigen_system.h"
 
 // forward declarations
 class EigenProblem;
@@ -87,7 +87,7 @@ public:
    */
   virtual EPS getEPS();
 
-  EigenSystem & sys() { return _eigen_sys; }
+  CondensedEigenSystem & sys() { return _eigen_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -174,7 +174,7 @@ protected:
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  EigenSystem & _eigen_sys;
+  CondensedEigenSystem & _eigen_sys;
   EigenProblem & _eigen_problem;
   std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;

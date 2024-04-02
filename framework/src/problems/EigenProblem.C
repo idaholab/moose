@@ -194,10 +194,9 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-EigenProblem::computeMatricesTags(
-    const NumericVector<Number> & soln,
-    const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
-    const std::set<TagID> & tags)
+EigenProblem::computeMatricesTags(const NumericVector<Number> & soln,
+                                  const std::vector<SparseMatrix<Number> *> & jacobians,
+                                  const std::set<TagID> & tags)
 {
   TIME_SECTION("computeMatricesTags", 3);
 

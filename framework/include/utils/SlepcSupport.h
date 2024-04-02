@@ -80,13 +80,18 @@ void clearFreeNonlinearPowerIterations(const InputParameters & params);
 /**
  * Form matrix according to tag
  */
-void moosePetscSNESFormMatrixTag(SNES snes, Vec x, Mat mat, void * ctx, TagID tag);
+void moosePetscSNESFormMatrixTag(
+    SNES snes, Vec x, Mat mat, SparseMatrix<Number> & libmesh_mat, void * ctx, TagID tag);
 
 /**
  * Form multiple matrices for multiple tags
  */
-void moosePetscSNESFormMatricesTags(
-    SNES snes, Vec x, std::vector<Mat> & mats, void * ctx, const std::set<TagID> & tags);
+void moosePetscSNESFormMatricesTags(SNES snes,
+                                    Vec x,
+                                    std::vector<Mat> & mats,
+                                    std::vector<SparseMatrix<Number> *> & libmesh_mats,
+                                    void * ctx,
+                                    const std::set<TagID> & tags);
 
 /**
  * Form Jacobian matrix A. It is a SLEPc callback

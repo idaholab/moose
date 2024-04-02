@@ -41,7 +41,7 @@ void
 assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
-  EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
+  CondensedEigenSystem & eigen_system = es.get_system<CondensedEigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem(/*nl_sys_num=*/0);
 
   // If this is a nonlinear eigenvalue problem,
@@ -104,8 +104,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 }
 
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
-  : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<EigenSystem>(name), name),
-    _eigen_sys(eigen_problem.es().get_system<EigenSystem>(name)),
+  : NonlinearSystemBase(
+        eigen_problem, eigen_problem.es().add_system<CondensedEigenSystem>(name), name),
+    _eigen_sys(eigen_problem.es().get_system<CondensedEigenSystem>(name)),
     _eigen_problem(eigen_problem),
     _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
@@ -195,9 +196,21 @@ NonlinearEigenSystem::solve()
   if (!presolve_succeeded)
     return;
 
+  _eigen_sys.initialize_condensed_dofs();
+  std::unique_ptr<NumericVector<Number>> subvec;
+
   // We apply initial guess for only nonlinear solver
   if (_eigen_problem.isNonlinearEigenvalueSolver())
-    _eigen_sys.set_initial_space(solution());
+  {
+    if (dofMap().n_constrained_dofs())
+    {
+      subvec = NumericVector<Number>::build(_communicator);
+      solution().create_subvector(*subvec, _eigen_sys.local_non_condensed_dofs_vector);
+      _eigen_sys.set_initial_space(*subvec);
+    }
+    else
+      _eigen_sys.set_initial_space(solution());
+  }
 
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
