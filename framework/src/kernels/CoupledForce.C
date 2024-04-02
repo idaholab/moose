@@ -39,7 +39,7 @@ CoupledForceTempl<is_ad>::CoupledForceTempl(const InputParameters & parameters)
   if (_var.number() == _v_var)
     paramError("v",
                "Coupled variable 'v' needs to be different from 'variable' with CoupledForce / "
-               "ADCoupledForce, consider using the CoefReaction kernel or something similar");
+               "ADCoupledForce, consider using the Reaction kernel or something similar");
 }
 
 template <bool is_ad>

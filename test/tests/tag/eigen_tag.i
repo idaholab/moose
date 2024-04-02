@@ -35,7 +35,7 @@
     extra_matrix_tags = 'tag_diff'
   []
   [rhs]
-    type = CoefReaction
+    type = Reaction
     variable = u
     extra_vector_tags = 'eigen tag_rhs'
     extra_matrix_tags = 'tag_rhs'

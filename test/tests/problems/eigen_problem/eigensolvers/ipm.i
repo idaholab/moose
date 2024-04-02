@@ -60,9 +60,9 @@
   [../]
 
   [./rea]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = 2.0
+    rate = 2.0
     use_displaced_mesh = true
   [../]
 []

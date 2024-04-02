@@ -24,8 +24,8 @@
     variable = u
   []
   [reaction]
-    type = CoefReaction
-    coefficient = 0.01
+    type = Reaction
+    rate = 0.01
     variable = u
   []
   [rhs]

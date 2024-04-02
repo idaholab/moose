@@ -14,8 +14,7 @@ Forward automatic differentiation is used to compute all on and off-diagonal
 Jacobian contributions.
 
 !alert warning
-Note the negative sign, which does *not* appear in [Reaction](/Reaction.md) or
-[CoefReaction](/CoefReaction.md).
+Note the negative sign, which does *not* appear in [Reaction](/Reaction.md).
 
 ## Example Input File Syntax
 

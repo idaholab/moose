@@ -10,8 +10,7 @@ where $L$ (`mob_name`) is a reaction rate, $v$ is either a coupled variable (`v`
 or - if not explicitly specified - the nonlinear variable the kernel is operating on.
 
 !alert warning
-Note the negative sign, which does *not* appear in [Reaction](/Reaction.md) or
-[CoefReaction](/CoefReaction.md).
+Note the negative sign, which does *not* appear in [Reaction](/Reaction.md).
 
 !syntax parameters /Kernels/MatReaction
 

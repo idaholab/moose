@@ -62,8 +62,8 @@
     variable = potential
   []
   [coeff]
-    type = CoefReaction
-    coefficient = -1
+    type = Reaction
+    rate = -1
     variable = potential
     extra_vector_tags = 'eigen'
   []

@@ -266,14 +266,14 @@ ConservedAction::act()
           _problem->addKernel(kernel_type, kernel_name, params);
         }
 
-        // Add CoefReaction kernel
+        // Add Reaction kernel
         {
-          std::string kernel_type = "CoefReaction";
+          std::string kernel_type = "Reaction";
 
           std::string kernel_name = _chempot_name + "_" + kernel_type;
           InputParameters params = _factory.getValidParams(kernel_type);
           params.set<NonlinearVariableName>("variable") = _chempot_name;
-          params.set<Real>("coefficient") = -1.0;
+          params.set<Real>("rate") = -1.0;
           params.applyParameters(parameters());
 
           _problem->addKernel(kernel_type, kernel_name, params);

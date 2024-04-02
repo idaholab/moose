@@ -58,17 +58,17 @@
   [../]
 
   [./rea]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = 2.0
+    rate = 2.0
     use_displaced_mesh = true
   [../]
 
   [./rhs]
-    type = CoefReaction
+    type = Reaction
     variable = u
     use_displaced_mesh = true
-    coefficient = -1.0
+    rate = -1.0
     extra_vector_tags = 'eigen'
   [../]
 []

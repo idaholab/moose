@@ -37,9 +37,9 @@
   [../]
 
   [./rhs]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = -1.0
+    rate = -1.0
     extra_vector_tags = 'eigen'
   [../]
 []

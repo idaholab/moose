@@ -51,6 +51,6 @@ The kernels that are added depend on the solution approach:
 *Coupled variable*
 - [MatDiffusion](/MatDiffusion.md)
 - [CoupledMaterialDerivative](/CoupledMaterialDerivative.md)
-- [CoefReaction](/CoefReaction.md)
+- [Reaction](/Reaction.md)
 
 !syntax parameters /Modules/PhaseField/Conserved/ConservedAction

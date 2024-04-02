@@ -30,9 +30,9 @@
   [../]
 
   [./rea]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = 2.0
+    rate = 2.0
   [../]
 
   [./rhs]
@@ -42,9 +42,9 @@
   [../]
 
   [./rea1]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = 1.0
+    rate = 1.0
   [../]
 []
 

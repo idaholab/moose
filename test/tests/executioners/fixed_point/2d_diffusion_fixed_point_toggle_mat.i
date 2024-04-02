@@ -28,9 +28,9 @@
     mat_prop = 'diffusion'
   []
   [pseudo_time_compensation]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = 0.1
+    rate = 0.1
   []
 []
 

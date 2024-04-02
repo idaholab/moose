@@ -38,7 +38,7 @@ In this example the input parameter "coef" that corresponds to $\sigma$ is omitt
 
 !alert note
 The coupled variable [!param](/Kernels/CoupledForce/v) cannot be equal to the equation
-[!param](/Kernels/CoupledForce/variable) with this kernel. Use the [CoefReaction](/CoefReaction.md)
+[!param](/Kernels/CoupledForce/variable) with this kernel. Use the [Reaction](/Reaction.md)
 kernel for this purpose.
 
 !syntax parameters /Kernels/CoupledForce

@@ -92,11 +92,11 @@
     diag_save_in = u_diff_diag_save_in_1
   []
   [reaction0]
-    type = CoefReaction
+    type = Reaction
     variable = u_0
   []
   [reaction1]
-    type = CoefReaction
+    type = Reaction
     variable = u_1
   []
   [reaction01]

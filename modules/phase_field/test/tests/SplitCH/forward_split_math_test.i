@@ -50,9 +50,9 @@
     f_name = F
   [../]
   [./w3]
-    type = CoefReaction
+    type = Reaction
     variable = w
-    coefficient = -1.0
+    rate = -1.0
   [../]
 []
 

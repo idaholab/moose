@@ -22,16 +22,16 @@
     variable = u
   [../]
   [./pseudo_time]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = -0.1
+    rate = -0.1
     # comment out this will make fixed point iteration converged in one iteration
     vector_tags = 'previous'
   [../]
   [./pseudo_time_compensation]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = 0.1
+    rate = 0.1
   [../]
 []
 

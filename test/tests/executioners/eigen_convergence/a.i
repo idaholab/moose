@@ -24,14 +24,14 @@
     variable = u
   []
   [reaction]
-    type = CoefReaction
-    coefficient = 0.01
+    type = Reaction
+    rate = 0.01
     variable = u
   []
   [rhs]
-    type = CoefReaction
+    type = Reaction
     extra_vector_tags = 'eigen'
-    coefficient = -0.01
+    rate = -0.01
     variable = u
   []
 []
