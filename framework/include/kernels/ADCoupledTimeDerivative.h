@@ -25,4 +25,6 @@ protected:
   virtual ADReal precomputeQpResidual() override;
 
   const ADVariableValue & _v_dot;
+
+  Real _coeff;
 };
