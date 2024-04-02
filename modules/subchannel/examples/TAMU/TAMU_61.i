@@ -1,5 +1,5 @@
-# Vaghetto, R., Jones, P., Goth, N., Childs, M., Lee, S., Thien Nguyen, D. and Hassan, Y.A., 2018. 
-# Pressure measurements in a wire-wrapped 61-pin hexagonal fuel bundle. 
+# Vaghetto, R., Jones, P., Goth, N., Childs, M., Lee, S., Thien Nguyen, D. and Hassan, Y.A., 2018.
+# Pressure measurements in a wire-wrapped 61-pin hexagonal fuel bundle.
 # Journal of Fluids Engineering, 140(3), p.031104.
 T_in = 300
 flow_area = 0.00799219 #m2

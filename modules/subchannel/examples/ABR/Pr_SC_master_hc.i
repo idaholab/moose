@@ -160,7 +160,7 @@ inter_wrapper_blocks = 'inter_wrapper'
     diffusion_variable = T_wrapper
     component = normal
     boundary = 'prsb_interface_00 prsb_interface_01 prsb_interface_02 prsb_interface_03
-                prsb_interface_04 prsb_interface_05 prsb_interface_06' 
+                prsb_interface_04 prsb_interface_05 prsb_interface_06'
     execute_on = 'initial timestep_end'
   []
 
@@ -179,8 +179,8 @@ inter_wrapper_blocks = 'inter_wrapper'
   petsc_options_value = 'lu superlu_dist'
   fixed_point_max_its   = 5
   fixed_point_min_its = 2
-  fixed_point_rel_tol   = 1e-4 
-  fixed_point_abs_tol   = 1e-3 
+  fixed_point_rel_tol   = 1e-4
+  fixed_point_abs_tol   = 1e-3
 
   [Quadrature]
     order = THIRD
