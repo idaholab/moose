@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PeridynamicsApp.h"
-#include "SolidMechanicsApp.h" // tensor mechanics dependency
+#include "SolidMechanicsApp.h" // solid mechanics dependency
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -21,7 +21,7 @@ PeridynamicsApp::validParams()
   params.set<bool>("automatic_automatic_scaling") = false;
 
   params.set<bool>("use_legacy_material_output") = false;
-  params.set<bool>("use_legacy_initial_residual_evaluation_bahavior") = true;
+  params.set<bool>("use_legacy_initial_residual_evaluation_bahavior") = false;
 
   return params;
 }

@@ -207,6 +207,7 @@
 
   solve_type = PJFNK
   line_search = none
+  automatic_scaling = true
 
   l_tol = 1e-8
   nl_rel_tol = 1e-12
