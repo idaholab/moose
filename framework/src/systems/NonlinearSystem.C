@@ -19,10 +19,6 @@
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 #include "SolutionInvalidity.h"
-#include "DirichletBCBase.h"
-#include "ADDirichletBCBase.h"
-#include "Constraint.h"
-#include "Predictor.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
