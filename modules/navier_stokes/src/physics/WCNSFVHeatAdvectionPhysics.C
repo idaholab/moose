@@ -89,6 +89,11 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
 
   saveNonlinearVariableName(_fluid_temperature_name);
 
+  // set block restrictions if not set by user
+  // This should probably be done for all the coupled physics, tbd
+  if (!isParamSetByUser("block"))
+    _blocks = _flow_equations_physics->blocks();
+
   // Parameter checks
   checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
                                                                        "ambient_temperature");
@@ -519,7 +524,8 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
         {
           paramError("thermal_conductivity",
                      "We only allow functor of type ADReal or ADRealVectorValue for thermal "
-                     "conductivity!");
+                     "conductivity! Functor '" +
+                         _thermal_conductivity_name[i] + "' is not of the requested type.");
         }
       }
     }

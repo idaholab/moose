@@ -29,6 +29,8 @@ WCNSFVCoupledAdvectionPhysicsHelper::validParams()
 WCNSFVCoupledAdvectionPhysicsHelper::WCNSFVCoupledAdvectionPhysicsHelper(
     const InputParameters & parameters, const NavierStokesPhysicsBase * derived_physics)
   : _advection_physics(derived_physics),
+    // note: we could move all this initialization to an initalSetup routine to avoid
+    // creation ordering difficulties
     _flow_equations_physics(getCoupledFlowPhysics(parameters)),
     _compressibility(_flow_equations_physics->compressibility()),
     _porous_medium_treatment(_flow_equations_physics->porousMediumTreatment()),

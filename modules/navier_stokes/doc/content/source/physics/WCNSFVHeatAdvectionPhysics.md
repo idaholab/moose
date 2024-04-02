@@ -21,7 +21,7 @@ and the [WCNSFVFlowPhysics.md].
 The following input performs this coupling for incompressible flow in a 2D channel.
 No system parameters are passed, so the equations are solved in a fully coupled manner in the same [nonlinear system](systems/NonlinearSystem.md).
 
-!listing test/tests/finite_volume/ins/channel-flow/2d-rc-transient.i block=Physics
+!listing test/tests/finite_volume/ins/channel-flow/2d-rc-transient-physics.i block=Physics
 
 !syntax parameters /Physics/NavierStokes/WCNSFVHeatAdvection/WCNSFVHeatAdvectionPhysics
 

@@ -228,6 +228,8 @@
                "Modules/NavierStokesFV/scalar_advection_physics='NavierStokesFV'"
     expect_err = "The number of Schmidt numbers defined is not equal to the number of passive scalar "
                  "fields!"
+    # Wall distance mixing length aux currently does not support distributed meshes
+    mesh_mode = 'replicated'
   []
   [velocity-variable-error]
     type = 'RunException'
@@ -302,10 +304,15 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines a non-existing block for thermal conductivity'
-    cli_args = "Modules/NavierStokesFV/block='1 2' "
+    cli_args = "Mesh/add_subdomain_ids=3 "
+               "Modules/NavierStokesFV/block='1 2' "
                "Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' "
-               "Modules/NavierStokesFV/thermal_conductivity='kappa; kappa'"
-    expect_err = "Block '3' is not present in the block restriction of the fluid flow action!"
+               "Modules/NavierStokesFV/thermal_conductivity='kappa kappa' "
+               "FunctorMaterials/kappa/type=ADGenericFunctorMaterial "
+               "FunctorMaterials/kappa/prop_names='kappa dummy dummy2' "
+               "Postprocessors/temp/block='1 2'"
+    expect_err = "(Block '3' is not present in the block restriction of the fluid flow action!|"
+                 "Block '3' is not present in the block restriction of NavierStokesFV)"
   []
   [friction-block-error]
     type = 'RunException'
