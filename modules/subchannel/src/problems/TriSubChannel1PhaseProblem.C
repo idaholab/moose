@@ -227,7 +227,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   auto theta = std::acos(wire_lead_length /
                          std::sqrt(std::pow(wire_lead_length, 2) +
                                    std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
-  auto wd_t = (19.56 + 98.71 * (wire_diameter / rod_diameter) +
+  auto wd_t = (19.56 - 98.71 * (wire_diameter / rod_diameter) +
                303.47 * std::pow((wire_diameter / rod_diameter), 2.0)) *
               std::pow((wire_lead_length / rod_diameter), -0.541);
   auto wd_l = 1.4 * wd_t;
