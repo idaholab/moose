@@ -113,17 +113,20 @@ function build_library()
         mkdir -p $CTMP_DIR/downloads
         local petsc_urls=(`scripts/update_and_rebuild_petsc.sh --with-packages-download-dir=$CTMP_DIR/downloads 2>/dev/null | grep "\[" | cut -d, -f 2 | sed -e "s/\]//g"`)
         cd $CTMP_DIR/downloads
-        printf "Downloading PETSc contribs...\n\n"
+        printf "Downloading PETSc contribs...\n"
         for petsc_url in "${petsc_urls[@]}"; do
             clean_url=$(echo ${petsc_url} | sed -e "s/'//g")
             if [ "${VERBOSITY}" == '1' ]; then
+                printf "\n"
                 run_command "curl -L -O $clean_url"
             else
                 curl -L -O $clean_url 2>/dev/null
             fi
         done
         enter_moose
+        printf "Building PETSc...\n"
         if [ "${VERBOSITY}" == '1' ]; then
+            printf "\n"
             set -o pipefail
             run_command "scripts/update_and_rebuild_${1}.sh --skip-submodule-update --with-packages-download-dir=$CTMP_DIR/downloads" 2>&1 | tee ./${1}_stdouterr.log
             exit_code=$?
@@ -169,7 +172,7 @@ SSL issues). Attempting again with SSL protections off.\n\n"
         fi
         print_failure_and_exit "building $1"
     fi
-    printf "Successfully built ${1} ...\n"
+    printf "Successfully built ${1}\n"
 }
 
 function build_moose()

@@ -218,18 +218,18 @@ source ${SCRIPT_DIR}/functions/diagnostic_environment.sh
 if [ "${NO_ENVIRONMENT}" == 0 ]; then print_environment; exit; fi
 # Do all the things
 printf "
-Note: The following steps are being performed in a temporary directory, and will be deleted when
+Note: The following steps will be performed in a temporary directory, and will be deleted when
       finished or upon encountering an error.
 
-      The purpose of this tool is to determine if there are external factors preventing you from
+      The purpose of this tool is to determine if external factors are preventing you from
       building or running MOOSE.
 
-      Errors encountered will usually mean network related or hardware related causes (VPN,
-      Network Proxies, Corporate SSL Certificates, etc).
+      Errors encountered will usually mean network or hardware related causes (VPN, Network
+      Proxies, Corporate SSL Certificates, etc).
 
-      If no errors are encountered then likely the issue will be something in your environment as
-      to the cause. If this is case, run `basename $0` again without any arguments, and carefully
-      scrutinize the output.\n"
+      If diagnostics runs to completion without errors then likely the issue will be something in
+      your environment as to the cause. If this is case, run `basename $0` again without any
+      arguments, and carefully scrutinize the output.\n"
 print_sep
 source ${SCRIPT_DIR}/functions/diagnostic_conda.sh
 source ${SCRIPT_DIR}/functions/diagnostic_application.sh
