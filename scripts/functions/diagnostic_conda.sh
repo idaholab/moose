@@ -50,8 +50,6 @@ function install_conda()
 {
     if [ "${PRISTINE_ENVIRONMENT}" == 0 ]; then return; fi
     printf "Installing ${INSTANCE_SUP} @ v${CONDA_VERSION}...\n"
-    # Double protect that we will not interfere with existing Conda implementation
-    export HOME=${CTMP_DIR}
     if ! `type conda &>/dev/null`; then
         local URL=`conda_url`
         if [ `uname -p` == 'arm' ]; then

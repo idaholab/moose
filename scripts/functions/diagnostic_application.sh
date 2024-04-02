@@ -89,14 +89,16 @@ Possible solutions:
 \t\tSSL_CERT_FILE
 \t\tCURL_CA_BUNDLE
 \n"
-        export ALREADY_TRIED_SSL=true
     elif [ ${exit_code} -ge 1 ]; then
         exit_on_failure 1
     fi
-    # Print relevant repo data
-    #run_command "git -C ${CTMP_DIR}/moose log -1"
-    run_command "git -C ${CTMP_DIR}/moose branch"
-    run_command "git -C ${CTMP_DIR}/moose status"
+    if [ "${VERBOSITY}" == '1' ]; then
+        # Print relevant repo data
+        printf "MOOSE Repository information:\n"
+        run_command "git -C ${CTMP_DIR}/moose log -1"
+        run_command "git -C ${CTMP_DIR}/moose branch"
+        run_command "git -C ${CTMP_DIR}/moose status"
+    fi
 }
 
 function build_library()
@@ -111,7 +113,7 @@ function build_library()
         mkdir -p $CTMP_DIR/downloads
         local petsc_urls=(`scripts/update_and_rebuild_petsc.sh --with-packages-download-dir=$CTMP_DIR/downloads 2>/dev/null | grep "\[" | cut -d, -f 2 | sed -e "s/\]//g"`)
         cd $CTMP_DIR/downloads
-        printf "Downloading PETSc contribs...\n"
+        printf "Downloading PETSc contribs...\n\n"
         for petsc_url in "${petsc_urls[@]}"; do
             clean_url=$(echo ${petsc_url} | sed -e "s/'//g")
             if [ "${VERBOSITY}" == '1' ]; then
@@ -131,6 +133,7 @@ function build_library()
             exit_code=$?
         fi
     else
+        printf "\n"
         if [ "${VERBOSITY}" == '1' ]; then
             set -o pipefail
             run_command "scripts/update_and_rebuild_${1}.sh" 2>&1 | tee ./${1}_stdouterr.log
@@ -150,7 +153,12 @@ function build_library()
             run_command "tail -15 ./${1}_stdouterr.log"
         fi
         print_orange "\nWARNING: "
-        printf "SSL issues detected, attempting again with SSL protections off\n\n"
+        if [ $(cat ./${1}_stdouterr.log | grep -c -i 'SSL certificate problem') -ge 1 ]; then
+            printf "SSL issues detected, attempting again with SSL protections off\n\n"
+        elif [ $(cat ./${1}_stdouterr.log | grep -c -i 'No such file or directory') -ge 1 ]; then
+            printf "Previous cloning commands failed to download all required packages (most likely due to
+SSL issues). Attempting again with SSL protections off.\n\n"
+        fi
         export GIT_SSL_NO_VERIFY=true
         build_library $1
         unset GIT_SSL_NO_VERIFY

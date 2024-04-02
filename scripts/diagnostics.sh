@@ -117,8 +117,10 @@ Supplying no arguments prints useful environment information.\n\n"
 
 function ctl_c()
 {
-    printf "\033[0m\nYou canceled diagnostics\n"
+    printf "\033[0m\n\nYou canceled diagnostics. Running clean-up routines.
+Please do not ctl-c again, and allow the temp directory to be deleted.\n"
     export CANCELED=true
+    exit 1
 }
 
 # Check Arguments. If PRISTINE is already set, break out of argument checking
@@ -196,6 +198,8 @@ fi
 # Augment additional pristine environment variables
 if [ "${PRISTINE_ENVIRONMENT}" == "1" ]; then
     trap 'ctl_c' INT
+    # Further sandbox our environment
+    export HOME=${CTMP_DIR}
     # Make our environment more sane
     export PATH=/bin:/usr/bin:/sbin
     export TERM=xterm-256color
@@ -204,7 +208,7 @@ if [ "${PRISTINE_ENVIRONMENT}" == "1" ]; then
     # It's not enough to set these with --rcfile. They must be exported to be inherited by child processes
     export CTMP_DIR REQUESTS_CA_BUNDLE SSL_CERT_FILE CURL_CA_BUNDLE
     print_sep
-    printf "Temporary Directory:\n${CTMP_DIR}\n\n"
+    printf "Temporary Directory:\n${CTMP_DIR}\n"
 fi
 
 # Make print_environment available in any step
