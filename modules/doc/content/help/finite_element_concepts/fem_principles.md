@@ -5,8 +5,8 @@
   \begin{equation}
   f(x) = a + bx + cx^2 + \dots
   \end{equation}
-- Where $a$, $b$ and $c$ are scalar coefficients and $1$, $x$, $x^2$$ are "basis functions".
-- Find $a$, $b$, $c$, etc. such that $$f(x)$$ passes through the points you are given.
+- Where $a$, $b$ and $c$ are scalar coefficients and $1$, $x$, $x^2$ are "basis functions".
+- Find $a$, $b$, $c$, etc. such that $f(x)$ passes through the points you are given.
 - More generally you are looking for:
   \begin{equation}
   f(x) = \sum_{i=0}^d c_i x^i
@@ -28,7 +28,7 @@
   \begin{equation}
   y_i = a + bx_i + cx_i^2, i=1,2,3.
   \end{equation}
-- Leads to the following linear system for $$$a$$$, $$$b$$$, and $$$c$$$:
+- Leads to the following linear system for $a$, $b$, and $c$:
   \begin{equation}
   \begin{bmatrix}
   1 & 1 &  1 \\
@@ -76,7 +76,7 @@
 - The coefficients themselves don't mean anything, by themselves they are just numbers.
 - The solution is *not* the coefficients, but rather the *function* they create when they are multiplied by their respective basis functions and summed.
 - The function $f(x)$ does go through the points we were given, *but it is also defined everywhere in between*.
-- We can evaluate $f(x)$ at the point $$$x=2$$$, for example, by computing:
+- We can evaluate $f(x)$ at the point $x=2$, for example, by computing:
   $f(2) = \sum_{i=0}^2 c_i 2^i$ or more generically: $f(2) = \sum_{i=0}^2 c_i g_i(2),$
   where the $c_i$ correspond to the coefficients in the solution vector, and the $g_i$ are the respective functions.
 - Finally, note that the matrix consists of evaluating the functions at the points.
@@ -102,8 +102,8 @@
 
 1.  Write down strong form of PDE.
 2.  Rearrange terms so that zero is on the right of the equals sign.
-3.  Multiply the whole equation by a "test" function $$$\psi$$$.
-4.  Integrate the whole equation over the domain $$$\Omega$$$.
+3.  Multiply the whole equation by a "test" function $\psi$.
+4.  Integrate the whole equation over the domain $\Omega$.
 5.  Integrate by parts (use the divergence theorem) to get the desired derivative order on your functions and simultaneously generate boundary integrals.
 
 # Refresher: The divergence theorem
