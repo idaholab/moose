@@ -36,7 +36,7 @@ Checkpoint::validParams()
   // Controls whether the checkpoint will actually run. Should only ever be changed by the
   // auto-checkpoint created by AutoCheckpointAction, which does not write unless a signal
   // is received.
-  params.addPrivateParam<CheckpointType>("checkpoint_type", CheckpointType::NONE);
+  params.addPrivateParam<CheckpointType>("checkpoint_type", CheckpointType::USER_CREATED);
 
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
@@ -49,6 +49,11 @@ Checkpoint::validParams()
   // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
   params.addParam<Real>(
       "wall_time_interval", 600, "The target wall time interval (in seconds) at which to output");
+
+  // Parameter to turn off wall time checkpoints
+  params.addParam<bool>("disable_wall_time_checkpoints",
+                        false,
+                        "Whether to disable checkpoints based on elapsed wall time");
 
   // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END
@@ -104,6 +109,16 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   // 'The --output-wall-time-interval parameter is necessary for testing
   // and should only be used in the test suite.
   Output::setWallTimeIntervalFromCommandLineParam();
+  // We want to do this here and not in the constructor so it overrides --output-wall-time-interval
+  if (getParam<bool>("disable_wall_time_checkpoints"))
+  {
+    _wall_time_interval = std::numeric_limits<Real>::max();
+    mooseInfo("Wall time checkpoints are disabled.");
+  }
+  else
+    mooseInfo(
+        "Checkpoints will be written every " + std::to_string(_wall_time_interval) +
+        " seconds of wall time or at the end of the current timestep, whichever occurs later.");
 }
 
 std::string

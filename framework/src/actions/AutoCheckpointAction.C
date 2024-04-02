@@ -17,6 +17,11 @@ AutoCheckpointAction::validParams()
 {
   InputParameters params = Action::validParams();
 
+  params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
+  params.addParam<bool>("disable_wall_time_checkpoints",
+                        false,
+                        "Disables the output of checkpoints based on elapsed wall time.");
+
   return params;
 }
 
@@ -25,46 +30,43 @@ AutoCheckpointAction::AutoCheckpointAction(const InputParameters & params) : Act
 void
 AutoCheckpointAction::act()
 {
-  // if there's already a checkpoint object, we don't need to worry about creating a new
-  // checkpoint
+  // if there's already a checkpoint object, we don't need to worry about creating a new one
   const auto checkpoints = _app.getOutputWarehouse().getOutputs<Checkpoint>();
   const auto num_checkpoints = checkpoints.size();
 
-  if (num_checkpoints > 1)
-  {
-    // Get most recently added Checkpoint object and error
+  const bool shortcut_syntax = getParam<bool>("checkpoint");
+
+  if (num_checkpoints > 1 || (num_checkpoints == 1 and shortcut_syntax))
     mooseError("Multiple checkpoints are not allowed. Check the input to ensure there "
                "is only one Checkpoint defined in the 'Outputs' block, including the "
                "shortcut syntax 'Outputs/checkpoint=true'.");
+
+  if (num_checkpoints == 0)
+  {
+    // If there isn't an existing checkpoint, init a new one
+    auto cp_params = _factory.getValidParams("Checkpoint");
+
+    cp_params.set<bool>("_built_by_moose") = true;
+    cp_params.set<bool>("disable_wall_time_checkpoints") =
+        getParam<bool>("disable_wall_time_checkpoints");
+
+    // We need to keep track of what type of checkpoint we are creating. system created means the
+    // default value of 1 for time_step_interval is ignored.
+    if (!shortcut_syntax)
+      cp_params.set<CheckpointType>("checkpoint_type") = CheckpointType::SYSTEM_CREATED;
+
+    // We only want checkpoints in subapps if the user requests them
+    if (shortcut_syntax || _app.isUltimateMaster())
+      _problem->addOutput("Checkpoint", "checkpoint", cp_params);
   }
 
-  // We don't want to set up automatic checkpoints if we are not in the master app
-  else if (_app.isUltimateMaster())
+  // Check for special half transient test harness case
+  if (_app.testCheckpointHalfTransient())
   {
-    if (num_checkpoints == 0)
-    {
-      // If there isn't an existing checkpoint, init a new one
-      auto cp_params = _factory.getValidParams("Checkpoint");
-      cp_params.setParameters("checkpoint_type", CheckpointType::SYSTEM_CREATED);
-      cp_params.set<bool>("_built_by_moose") = true;
-      _problem->addOutput("Checkpoint", "checkpoint", cp_params);
-    }
-
-    else // num_checkpoints == 1
-    {
-      // Use the existing Checkpoint object, since we only need to/should make one object the
-      // autosave
-      checkpoints[0]->setAutosaveFlag(CheckpointType::USER_CREATED);
-    }
-
-    // Check for special half transient test harness case
-    if (_app.testCheckpointHalfTransient())
-    {
-      // For half transient, we want to simulate a user-created checkpoint so
-      // time_step_interval works correctly.
-      const auto checkpoint = _app.getOutputWarehouse().getOutputs<Checkpoint>()[0];
-      checkpoint->setAutosaveFlag(CheckpointType::USER_CREATED);
-      checkpoint->_time_step_interval = 1;
-    }
+    // For half transient, we want to simulate a user-created checkpoint so
+    // time_step_interval works correctly.
+    const auto checkpoint = _app.getOutputWarehouse().getOutputs<Checkpoint>()[0];
+    checkpoint->setAutosaveFlag(CheckpointType::USER_CREATED);
+    checkpoint->_time_step_interval = 1;
   }
 }

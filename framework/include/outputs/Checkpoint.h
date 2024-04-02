@@ -27,7 +27,6 @@
  */
 enum CheckpointType : unsigned short
 {
-  NONE,
   SYSTEM_CREATED,
   USER_CREATED
 };

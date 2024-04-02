@@ -65,7 +65,7 @@
   [default]
     requirement = "The system shall support outputting of checkpoint files, using a simplified input "
                   "format:"
-    issues = '#1927 #13562'
+    issues = '#1927 #13562 #27240'
     [recover_half_transient]
       type = CheckFiles
       input = checkpoint.i
@@ -101,7 +101,7 @@
       max_parallel = 1
       max_threads = 1
 
-      detail = "at every timestep while maintaining the most recent two files and"
+      detail = " at every timestep while maintaining the most recent two files and"
     []
     [recover]
       # Gold for this test was created using checkpoint.i without any recover options
@@ -115,7 +115,7 @@
       delete_output_before_running = false
       cli_args = '--recover'
       expect_out = 'checkpoint_out_cp/0005 for recovery'
-      detail = "be capable of restarting a simulation from the output data."
+      detail = " be capable of restarting a simulation from the output data."
     []
 
     [wall_time_interval]
@@ -123,7 +123,8 @@
       input = checkpoint.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --output-wall-time-interval 0.02'
-      detail = "at specified wall time intervals"
+      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
+      detail = " at specified wall time intervals and"
     []
     [wall_time_interval_recover]
       type = Exodiff
@@ -134,7 +135,24 @@
       delete_output_before_running = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --recover'
       expect_out = 'Using checkpoint_wall_time_interval_out_cp/\d+ for recovery'
-      detail = "be capable of restarting a simulation from the wall time checkpoint."
+      detail = " be capable of restarting a simulation from the wall time checkpoint."
+    []
+
+    [wall_time_interval_disabled]
+      type = RunApp
+      input = checkpoint.i
+      recover = false
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/disable_wall_time_checkpoints=true'
+      expect_out = "Wall time checkpoints are disabled."
+      detail = " with an option to disable wall time checkpoints and"
+    []
+    [wall_time_interval_disabled_recover]
+      type = RunException
+      input = checkpoint.i
+      prereq = 'default/wall_time_interval_disabled'
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --recover'
+      expect_err = "No checkpoint file found!"
+      detail = " not recover."
     []
 
     [output_wall_time_interval_error]
@@ -142,14 +160,14 @@
       input = 'checkpoint.i'
       cli_args = '--output-wall-time-interval -1'
       expect_err = 'output-wall-time-interval must be greater than zero.'
-      detail = ', catching invalid values of output-wall-time-interval.'
+      detail = ' catching invalid values of output-wall-time-interval.'
     []
   []
 
   [block]
     requirement = "The system shall support outputting of checkpoint files, using a complete input "
                   "block:"
-    issues = '#1927 #13562 #25755'
+    issues = '#1927 #13562 #25755 #27240'
     [recover_with_checkpoint_block_half_transient]
       # Tests that recover works when defining as a Output sub-block
       type = CheckFiles
@@ -207,6 +225,7 @@
       input = checkpoint_block.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --output-wall-time-interval 0.02'
+      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
       detail = "at specified wall time intervals"
     []
     [wall_time_interval_recover]
@@ -219,6 +238,23 @@
       cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --recover'
       expect_out = 'Using checkpoint_block_wall_time_interval_out_cp/\d+ for recovery'
       detail = "be capable of restarting a simulation from the wall time checkpoint."
+    []
+
+    [wall_time_interval_disabled]
+      type = RunApp
+      input = checkpoint_block.i
+      recover = false
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/out/disable_wall_time_checkpoints=true'
+      expect_out = "Wall time checkpoints are disabled."
+      detail = " with an option to disable wall time checkpoints and"
+    []
+    [wall_time_interval_disabled_recover]
+      type = RunException
+      input = checkpoint_block.i
+      prereq = 'block/wall_time_interval_disabled'
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --recover'
+      expect_err = "No checkpoint file found!"
+      detail = " not recover."
     []
 
     [execute_on_param_error]

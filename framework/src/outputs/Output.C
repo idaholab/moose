@@ -61,9 +61,11 @@ Output::validParams()
   params.addParam<Real>("simulation_time_interval",
                         std::numeric_limits<Real>::max(),
                         "The target simulation time interval (in seconds) at which to output");
-  params.addParam<Real>("wall_time_interval",
-                        std::numeric_limits<Real>::max(),
-                        "The target wall time interval (in seconds) at which to output");
+  params.addRangeCheckedParam<Real>(
+      "wall_time_interval",
+      std::numeric_limits<Real>::max(),
+      "wall_time_interval > 0",
+      "The target wall time interval (in seconds) at which to output");
   params.addParam<std::vector<Real>>(
       "sync_times", {}, "Times at which the output and solution is forced to occur");
   params.addParam<TimesName>(

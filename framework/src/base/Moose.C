@@ -522,6 +522,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddOutputAction", "Outputs/*");
   registerSyntax("CommonOutputAction", "Outputs");
+  registerSyntax("AutoCheckpointAction", "Outputs");
   syntax.registerSyntaxType("Outputs/*", "OutputName");
 
   // Note: Preconditioner Actions will be built by this setup action
