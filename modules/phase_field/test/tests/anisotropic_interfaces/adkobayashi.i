@@ -57,10 +57,10 @@
     variable = T
   []
   [w_dot_T]
-    type = ADCoefCoupledTimeDerivative
+    type = ADCoupledTimeDerivative
     variable = T
     v = w
-    coef = -1.8 #This is -K from kobayashi's paper
+    coeff = -1.8 #This is -K from kobayashi's paper
   []
 []
 
