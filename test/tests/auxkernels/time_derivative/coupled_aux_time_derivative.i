@@ -31,9 +31,10 @@
     variable = u
   [../]
   [./dck]
-    type = DotCouplingKernel
+    type = CoupledTimeDerivative
     variable = u
     v = f
+    coeff = -1
   [../]
 []
 

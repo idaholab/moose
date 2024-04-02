@@ -1,4 +1,4 @@
-# Test that coupling a time derivative of a variable (DotCouplingKernel) and using a Steady executioner
+# Test that coupling a time derivative of a variable and using a Steady executioner
 # errors out
 
 [Mesh]
@@ -22,9 +22,10 @@
   [../]
 
   [./conv_v]
-    type = DotCouplingKernel
+    type = CoupledTimeDerivative
     variable = v
     v = u
+    coeff = -1
   [../]
 []
 
