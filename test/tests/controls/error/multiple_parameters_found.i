@@ -12,14 +12,14 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.1
+    coeff = 0.1
   [../]
   [./diff2]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.2
+    coeff = 0.2
   [../]
   [./time]
     type = TimeDerivative
@@ -62,6 +62,6 @@
   [./func_control]
     type = TestControl
     test_type = 'real'
-    parameter = '*/*/coef'
+    parameter = '*/*/coeff'
   [../]
 []

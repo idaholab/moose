@@ -36,9 +36,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 1
+    coeff = 1
     extra_vector_tags = 'ref'
   [../]
 []

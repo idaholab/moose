@@ -165,9 +165,9 @@
     variable = porepressure
   [../]
   [./darcy_flow]
-    type = CoefDiffusion
+    type = Diffusion
     variable = porepressure
-    coef = 1E-12
+    coeff = 1E-12
   [../]
 []
 

@@ -26,7 +26,7 @@
  * Also note that coupled diffusion terms like ThermoDiffusion (and Nernst,
  * Ettingshausen, Dufour effects) can cause non-physical stability issues if a
  * regular diffusion term is not included. Thus, ThermoDiffusion should always
- * appear with a Fick's Law kernel such as CoefDiffusion.
+ * appear with a Fick's Law kernel such as Diffusion.
  *
  * The only restriction on the units of C, Qstar, and R is that they should be
  * consistent with each other and with C and T (could be mass ppm, mols/m^3, etc.).

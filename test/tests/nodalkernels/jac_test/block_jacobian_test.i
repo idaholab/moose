@@ -14,14 +14,14 @@
 
 [Kernels]
   [./diff_x]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u_x
-    coef = 0.1
+    coeff = 0.1
   [../]
   [./diff_y]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u_y
-    coef = 0.1
+    coeff = 0.1
   [../]
 []
 

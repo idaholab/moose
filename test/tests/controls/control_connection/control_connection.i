@@ -12,9 +12,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.1
+    coeff = 0.1
   [../]
 []
 
@@ -45,7 +45,7 @@
     type = TestControl
     execute_on = INITIAL
     test_type = 'connection'
-    parameter = 'Kernels/diff/coef'
+    parameter = 'Kernels/diff/coeff'
   [../]
 []
 

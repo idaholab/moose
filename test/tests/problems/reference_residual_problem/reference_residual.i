@@ -19,9 +19,9 @@ coef=1
 
 [Kernels]
   [u_diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = ${coef}
+    coeff = ${coef}
   []
   [u_rxn]
     type = PReaction

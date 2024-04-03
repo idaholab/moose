@@ -18,7 +18,7 @@ InputParameters
 ApplyCoupledVariablesTestAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
+  params.addCustomTypeParam("coeff", 0.0, "CoefficientType", "The coefficient of diffusion");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");
   return params;
@@ -36,11 +36,11 @@ ApplyCoupledVariablesTestAction::act()
 {
   // Set the 'type =' parameters for the desired object
   InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
-  action_params.set<std::string>("type") = "CoefDiffusion";
+  action_params.set<std::string>("type") = "Diffusion";
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   // Create the action
-  std::string long_name = "Kernels/_coef_diffusion";
+  std::string long_name = "Kernels/_diffusion";
   std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
       _action_factory.create("AddKernelAction", long_name, action_params));
 

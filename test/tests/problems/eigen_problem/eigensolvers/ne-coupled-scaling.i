@@ -35,9 +35,9 @@
   [../]
 
   [./diff_T]
-    type = CoefDiffusion
+    type = Diffusion
     variable = T
-    coef = 1e30
+    coeff = 1e30
   [../]
   [./src_T]
     type = CoupledForce

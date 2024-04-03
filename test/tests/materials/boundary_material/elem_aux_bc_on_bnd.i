@@ -36,9 +36,9 @@
 
 [Kernels]
   [./heat]
-    type = CoefDiffusion
+    type = Diffusion
     variable = temp
-    coef = 1
+    coeff = 1
   [../]
 []
 

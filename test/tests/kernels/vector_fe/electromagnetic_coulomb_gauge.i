@@ -30,9 +30,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = V
-    coef = 5
+    coeff = 5
   [../]
   [./V_frc]
     type = BodyForce

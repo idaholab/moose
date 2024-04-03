@@ -16,9 +16,9 @@
 
 [Kernels]
   [./diff_v]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.5
+    coeff = 0.5
   [../]
 
   [./conv_v]

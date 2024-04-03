@@ -33,9 +33,9 @@
     variable = u
   [../]
   [./diff_v]
-    type = CoefDiffusion
+    type = Diffusion
     variable = v
-    coef = 2
+    coeff = 2
   [../]
 []
 

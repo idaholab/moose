@@ -28,9 +28,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 1
+    coeff = 1
   [../]
   [./time]
     type = TimeDerivative

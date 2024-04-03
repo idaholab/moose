@@ -37,9 +37,9 @@ cp = 1.0
 
 [Kernels]
   [diffusion]
-    type = CoefDiffusion
+    type = Diffusion
     variable = T
-    coef = ${diff_coeff}
+    coeff = ${diff_coeff}
   []
   [source]
     type = BodyForce

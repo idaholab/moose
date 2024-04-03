@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "CoefDiffusion.h"
+#include "Diffusion.h"
 
 /**
  * A class for testing MooseObject::mooseConsole method
  */
-class ConsoleMessageKernel : public CoefDiffusion
+class ConsoleMessageKernel : public Diffusion
 {
 public:
   static InputParameters validParams();

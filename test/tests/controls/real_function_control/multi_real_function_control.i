@@ -24,18 +24,18 @@
 
 [Kernels]
   [./diff_u]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.1
+    coeff = 0.1
   [../]
   [./time_u]
     type = TimeDerivative
     variable = u
   [../]
   [./diff_v]
-    type = CoefDiffusion
+    type = Diffusion
     variable = v
-    coef = 0.2
+    coeff = 0.2
   [../]
   [./time_v]
     type = TimeDerivative
@@ -81,18 +81,18 @@
 [Postprocessors]
   [./u_coef]
     type = RealControlParameterReporter
-    parameter = 'Kernels/diff_u/coef'
+    parameter = 'Kernels/diff_u/coeff'
   [../]
   [./v_coef]
     type = RealControlParameterReporter
-    parameter = 'Kernels/diff_v/coef'
+    parameter = 'Kernels/diff_v/coeff'
   [../]
 []
 
 [Controls]
   [./func_control]
     type = RealFunctionControl
-    parameter = '*/*/coef'
+    parameter = '*/*/coeff'
     function = 'func_coef'
     execute_on = 'timestep_begin'
   [../]

@@ -54,7 +54,7 @@
     type = ADTimeDerivative
     variable = T
   [../]
-  [./CoefDiffusion]
+  [./Diffusion]
     type = ADDiffusion
     variable = T
   [../]

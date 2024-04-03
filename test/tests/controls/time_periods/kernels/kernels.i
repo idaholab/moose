@@ -12,14 +12,14 @@
 
 [Kernels]
   [./diff0]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.05
+    coeff = 0.05
   [../]
   [./diff1]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.5
+    coeff = 0.5
   [../]
   [./time]
     type = TimeDerivative

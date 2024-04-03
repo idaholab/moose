@@ -36,9 +36,9 @@
     variable = v
   [../]
   [./diff_v]
-    type = CoefDiffusion
+    type = Diffusion
     variable = v
-    coef = 0.5
+    coeff = 0.5
   [../]
   [./conv_v]
     type = CoupledConvection

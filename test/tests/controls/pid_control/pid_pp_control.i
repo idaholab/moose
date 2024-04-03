@@ -15,9 +15,9 @@
 [Kernels]
   inactive = 'exception'
   [diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 1
+    coeff = 1
   []
 
   [exception]

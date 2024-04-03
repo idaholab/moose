@@ -53,7 +53,7 @@
     type = TimeDerivative
     variable = T
   [../]
-  [./CoefDiffusion]
+  [./Diffusion]
     type = Diffusion
     variable = T
   [../]

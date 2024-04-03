@@ -217,9 +217,9 @@ heat_flux = ${fparse power / (perimeter * length)}
     variable = T
   []
   [heat_conduction]
-    type = CoefDiffusion
+    type = Diffusion
     variable = T
-    coef = ${fparse k / (rho * cp)}
+    coeff = ${fparse k / (rho * cp)}
   []
 []
 

@@ -14,12 +14,12 @@ registerMooseObject("MooseTestApp", ConsoleMessageKernel);
 InputParameters
 ConsoleMessageKernel::validParams()
 {
-  InputParameters params = CoefDiffusion::validParams();
+  InputParameters params = Diffusion::validParams();
   return params;
 }
 
 ConsoleMessageKernel::ConsoleMessageKernel(const InputParameters & parameters)
-  : CoefDiffusion(parameters)
+  : Diffusion(parameters)
 {
   _console << "ConsoleMessageKernel - Constructing object." << std::endl;
 }

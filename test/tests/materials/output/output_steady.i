@@ -19,10 +19,10 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
     block = 0
-    coef = 0.1
+    coeff = 0.1
   [../]
 []
 

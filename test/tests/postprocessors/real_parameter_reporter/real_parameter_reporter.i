@@ -12,9 +12,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.1
+    coeff = 0.1
   [../]
   [./time]
     type = TimeDerivative
@@ -53,7 +53,7 @@
 [Postprocessors]
   [./coef_value]
     type = RealControlParameterReporter
-    parameter = 'Kernels/diff/coef'
+    parameter = 'Kernels/diff/coeff'
     execute_on = 'initial timestep_begin'
   [../]
 []
