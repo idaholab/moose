@@ -48,6 +48,7 @@
 
 [Physics/SolidMechanics/QuasiStatic/all]
   strain = FINITE
+  incremental = true
   add_variables = true
   generate_output = stress_zz
 []
