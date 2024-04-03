@@ -17,6 +17,9 @@ AutoCheckpointAction::validParams()
 {
   InputParameters params = Action::validParams();
 
+  params.addClassDescription(
+      "Action to create shortcut syntax-specified checkpoints and automatic checkpoints.");
+
   params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
   params.addParam<bool>("disable_wall_time_checkpoints",
                         false,
