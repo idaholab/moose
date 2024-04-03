@@ -15,21 +15,26 @@ InputParameters
 Diffusion::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
-                             "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
+  params.addClassDescription("The diffusion term ($-\\nabla \\cdot k\\nabla u$), with the "
+                             "weak form of $(\\nabla \\phi_i, k\\nabla u_h)$.");
+  params.addParam<Real>("coeff", 1.0, "The constant coefficient");
+  params.declareControllable("coeff");
   return params;
 }
 
-Diffusion::Diffusion(const InputParameters & parameters) : Kernel(parameters) {}
+Diffusion::Diffusion(const InputParameters & parameters)
+  : Kernel(parameters), _coeff(getParam<Real>("coeff"))
+{
+}
 
 Real
 Diffusion::computeQpResidual()
 {
-  return _grad_u[_qp] * _grad_test[_i][_qp];
+  return _coeff * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
 Real
 Diffusion::computeQpJacobian()
 {
-  return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _coeff * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
