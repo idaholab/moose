@@ -11,6 +11,7 @@
 #include "NS.h"
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumFriction);
 

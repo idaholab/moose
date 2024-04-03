@@ -31,10 +31,9 @@ F = C_F \frac{\rho_l}{\sqrt{K}} \,,
 where the Ergun coefficient is $C_F = 0.55$ and $\rho_l$ is the density of the liquid phase.
 
 !alert note
-This material is compatible with [INSFVMomentumFriction.md] which multiplies the
-incoming Forchheimer coefficient by the velocity magnitude; it is *incompatible*
-with [PINSFVMomentumFriction.md] which assumes the incoming Forchheimer
-coefficient already includes multiplication by the velocity magnitude.
+This material is compatible with [PINSFVMomentumFriction.md] for the non standard (simplified) formulation
+which multiplies the incoming Forchheimer coefficient by the velocity magnitude times velocity component;
+it is *incompatible* with the standard formulation which also multiplies with density over two.
 
 !syntax parameters /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
 

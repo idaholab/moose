@@ -74,7 +74,7 @@ head = ${fparse height * density * gravity}
     mass_advection_interpolation = 'upwind'
     friction_blocks = '1'
     friction_types = 'Darcy'
-    friction_coeffs = 'friction_coefficient' 
+    friction_coeffs = 'friction_coefficient'
     use_standard = false
   []
 []
