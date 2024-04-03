@@ -11,7 +11,7 @@
 #include "MooseMain.h"
 #include "MeshGeneratorMesh.h"
 
-template <class T, bool shared>
+template <class T, int test>
 void
 getSharedTest()
 {
@@ -23,25 +23,34 @@ getSharedTest()
   std::string type = "MeshGeneratorMesh";
   InputParameters params = factory->getValidParams(type);
 
-  if constexpr (shared)
+  if constexpr (test == 1)
   {
     auto mesh = factory->create<T>(type, "mesh", params);
 
     // check usage
     EXPECT_EQ(mesh.use_count(), 1);
     {
-      auto mesh2 = mesh->getSharedPtr();
-      EXPECT_EQ(mesh.use_count(), 2);
+      const auto mesh2 = mesh->getSharedPtr();
+      const auto mesh3 = mesh2->getSharedPtr();
+      EXPECT_EQ(mesh.use_count(), 3);
     }
     EXPECT_EQ(mesh.use_count(), 1);
   }
-  else
+
+  if constexpr (test == 2)
   {
     auto mesh = factory->createUnique<T>(type, "mesh", params);
     EXPECT_THROW({ auto mesh2 = mesh->getSharedPtr(); }, std::exception);
   }
+
+  if constexpr (test == 3)
+  {
+    const auto mesh = factory->createUnique<T>(type, "mesh", params);
+    EXPECT_THROW({ const auto mesh2 = mesh->getSharedPtr(); }, std::exception);
+  }
 }
 
-TEST(MooseObjectTest, getSharedPtr_base) { getSharedTest<MooseObject, true>(); }
-TEST(MooseObjectTest, getSharedPtr_derived) { getSharedTest<MeshGeneratorMesh, true>(); }
-TEST(MooseObjectTest, getSharedPtr_error) { getSharedTest<MeshGeneratorMesh, false>(); }
+TEST(MooseObjectTest, getSharedPtr_base) { getSharedTest<MooseObject, 1>(); }
+TEST(MooseObjectTest, getSharedPtr_derived) { getSharedTest<MeshGeneratorMesh, 1>(); }
+TEST(MooseObjectTest, getSharedPtr_error) { getSharedTest<MeshGeneratorMesh, 2>(); }
+TEST(MooseObjectTest, getSharedPtr_const_error) { getSharedTest<MeshGeneratorMesh, 3>(); }
