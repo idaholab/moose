@@ -118,7 +118,11 @@ ActuallyExplicitEuler::postResidual(NumericVector<Number> & residual)
   residual += _Re_time;
   residual += _Re_non_time;
   residual.close();
+}
 
+void
+ActuallyExplicitEuler::postSolve()
+{
   // Reset time to the time at which to evaluate nodal BCs, which comes next
   _fe_problem.time() = _current_time;
 }
