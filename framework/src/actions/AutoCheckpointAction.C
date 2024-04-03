@@ -61,7 +61,7 @@ AutoCheckpointAction::act()
   }
 
   // Check for special half transient test harness case
-  if (_app.testCheckpointHalfTransient())
+  if (_app.testCheckpointHalfTransient() && _app.isUltimateMaster())
   {
     // For half transient, we want to simulate a user-created checkpoint so
     // time_step_interval works correctly.
