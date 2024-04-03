@@ -24,7 +24,6 @@
       exodiff = forward_and_adjoint_out.e
       prereq = 'diffusion_reaction/forward_exact diffusion_reaction/parameter_mesh'
       detail = 'performing a forward and adjoint simulation, and '
-      petsc_version = ">=3.15"
     []
     [optimize]
       type = Exodiff
@@ -35,7 +34,6 @@
       # steady solve
       recover = false
       detail = 'using TAO to perform optimization.'
-      petsc_version = ">=3.15"
     []
   []
 []
