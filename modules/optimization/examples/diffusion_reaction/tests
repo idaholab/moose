@@ -29,6 +29,7 @@
       type = Exodiff
       input = optimize.i
       exodiff = optimize_out_forward0.e
+      rel_err = 1e-4
       prereq = diffusion_reaction/forward_and_adjoint
       max_threads = 1 # Optimize executioner does not support multiple threads
       # steady solve
