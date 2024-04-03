@@ -162,6 +162,72 @@
       expect_err = 'output-wall-time-interval must be greater than zero.'
       detail = ' catching invalid values of output-wall-time-interval.'
     []
+
+    [wall_time_interval_tiny]
+      type = CheckFiles
+      input = checkpoint.i
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_tiny_out --output-wall-time-interval 1e-50'
+      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
+      recover = false
+
+      check_files = "checkpoint_wall_time_interval_tiny_out_cp/0010-restart-0.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-restart-0.rd/header "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpr/1/header.cpr "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpr/1/split-1-0.cpr "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpr/meta_data_mesh.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpr/meta_data_mesh.rd/header "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-restart-0.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-restart-0.rd/header "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpr/1/header.cpr "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpr/1/split-1-0.cpr "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpr/meta_data_mesh.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpr/meta_data_mesh.rd/header"
+
+      # The suffixes of these files change when running in parallel or with threads
+      max_parallel = 1
+      max_threads = 1
+
+      detail = " at specified wall time intervals smaller than the time required to output a checkpoint"
+    []
+
+    [wall_time_interval_multiapp]
+      type = CheckFiles
+      input = checkpoint_parent.i
+      cli_args = '--output-wall-time-interval 1e-50'
+      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
+      recover = false
+
+      check_files = "checkpoint_parent_out_cp/0010-restart-0.rd/data "
+                    "checkpoint_parent_out_cp/0010-restart-0.rd/header "
+                    "checkpoint_parent_out_cp/0010-mesh.cpr/1/header.cpr "
+                    "checkpoint_parent_out_cp/0010-mesh.cpr/1/split-1-0.cpr "
+                    "checkpoint_parent_out_cp/0010-mesh.cpr/meta_data_mesh.rd/data "
+                    "checkpoint_parent_out_cp/0010-mesh.cpr/meta_data_mesh.rd/header "
+                    "checkpoint_parent_out_cp/0011-restart-0.rd/data "
+                    "checkpoint_parent_out_cp/0011-restart-0.rd/header "
+                    "checkpoint_parent_out_cp/0011-mesh.cpr/1/header.cpr "
+                    "checkpoint_parent_out_cp/0011-mesh.cpr/1/split-1-0.cpr "
+                    "checkpoint_parent_out_cp/0011-mesh.cpr/meta_data_mesh.rd/data "
+                    "checkpoint_parent_out_cp/0011-mesh.cpr/meta_data_mesh.rd/header"
+      check_not_exists = "checkpoint_parent_out_sub_app0_cp/0010-restart-0.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0010-restart-0.rd/header "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpr/1/header.cpr "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpr/1/split-1-0.cpr "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpr/meta_data_mesh.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpr/meta_data_mesh.rd/header "
+                         "checkpoint_parent_out_sub_app0_cp/0011-restart-0.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0011-restart-0.rd/header "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpr/1/header.cpr "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpr/1/split-1-0.cpr "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpr/meta_data_mesh.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpr/meta_data_mesh.rd/header"
+
+      # The suffixes of these files change when running in parallel or with threads
+      max_parallel = 1
+      max_threads = 1
+
+      detail = " ensuring that wall time checkpoints are not written at the subapp level if not explicitly requested."
+    []
   []
 
   [block]
