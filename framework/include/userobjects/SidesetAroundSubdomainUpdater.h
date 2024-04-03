@@ -27,7 +27,7 @@ public:
 
   virtual void initialize() override;
 
-  virtual void executeOnExternalSide() override;
+  virtual void executeOnExternalSide(const Elem * /*elem*/, unsigned int /*side*/) override;
   virtual void executeOnInternalSide() override;
 
   virtual void finalize() override;

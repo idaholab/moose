@@ -72,20 +72,19 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
 }
 
 void
-SidesetAroundSubdomainUpdater::executeOnExternalSide()
+SidesetAroundSubdomainUpdater::executeOnExternalSide(const Elem * elem, unsigned int side)
 {
   // we should add the sideset only of the current element is in the "inner" set _and_ the user set
   // assign_surface_sides
-  if (_inner_ids.count(_current_elem->subdomain_id()))
+  if (_inner_ids.count(elem->subdomain_id()))
   {
-    if (_assign_outer_surface_sides &&
-        !_boundary_info.has_boundary_id(_current_elem, _current_side, _boundary_id))
-      _add[_pid].emplace_back(_current_elem->id(), _current_side);
+    if (_assign_outer_surface_sides && !_boundary_info.has_boundary_id(elem, side, _boundary_id))
+      _add[_pid].emplace_back(elem->id(), side);
   }
   else
   {
-    if (_boundary_info.has_boundary_id(_current_elem, _current_side, _boundary_id))
-      _remove[_pid].emplace_back(_current_elem->id(), _current_side);
+    if (_boundary_info.has_boundary_id(elem, side, _boundary_id))
+      _remove[_pid].emplace_back(elem->id(), side);
   }
 }
 
