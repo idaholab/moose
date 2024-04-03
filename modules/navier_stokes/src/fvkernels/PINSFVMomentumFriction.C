@@ -28,9 +28,9 @@ PINSFVMomentumFriction::validParams()
   params.addParam<bool>("use_standard", true, "Boolean to choose the type of formulation.");
   params.addParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
   params.addParam<MooseFunctorName>(NS::speed, "The norm of the superficial velocity.");
-  params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
-  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
-  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
+  params.addParam<MooseFunctorName>("u", "The superficial velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The superficial velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The superficial velocity in the z direction.");
   params.addParam<MooseFunctorName>(NS::porosity, 1.0, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   return params;
@@ -56,18 +56,6 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
 {
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
-
-  if (_use_Forchheimer_friction_model && !_speed)
-  {
-    if (_dim >= 1 && !_u_var)
-      paramError("u", "the u velocity must be supplied!'");
-
-    if (_dim >= 2 && !_v_var)
-      paramError("v", "the v velocity must be supplied!'");
-
-    if (_dim >= 3 && !_w_var)
-      paramError("w", "the w velocity must be supplied!'");
-  }
 
   if (_use_standard && _use_Darcy_friction_model && !_mu)
     mooseError("If using the standard Darcy friction model, then the '",

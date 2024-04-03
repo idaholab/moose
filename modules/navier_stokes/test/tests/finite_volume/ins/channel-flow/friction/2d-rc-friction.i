@@ -74,16 +74,21 @@ velocity_interp_method = 'rc'
     pressure = pressure
   []
   [u_friction_linear]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
-    linear_coef_name = friction_coefficient
+    Darcy_name = friction_coefficient
     momentum_component = 'x'
+    rho = ${rho}
+    use_standard = false
   []
   [u_friction_quad]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
-    quadratic_coef_name = friction_coefficient
+    speed = speed
+    Forchheimer_name = friction_coefficient
     momentum_component = 'x'
+    rho = ${rho}
+    use_standard = false
   []
 
   [v_advection]
@@ -107,16 +112,21 @@ velocity_interp_method = 'rc'
     pressure = pressure
   []
   [v_friction_linear]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
-    linear_coef_name = friction_coefficient
+    Darcy_name = friction_coefficient
     momentum_component = 'y'
+    rho = ${rho}
+    use_standard = false
   []
   [v_friction_quad]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
-    quadratic_coef_name = friction_coefficient
+    speed = speed
+    Forchheimer_name = friction_coefficient
     momentum_component = 'y'
+    rho = ${rho}
+    use_standard = false
   []
 []
 
@@ -156,9 +166,9 @@ velocity_interp_method = 'rc'
 [FunctorMaterials]
   inactive = exponential_friction_coefficient
   [friction_coefficient]
-    type = ADGenericFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'friction_coefficient'
-    prop_values = '25'
+    prop_values = '25 25 25'
   []
   [speed_material]
     type = PINSFVSpeedFunctorMaterial
@@ -175,12 +185,17 @@ velocity_interp_method = 'rc'
     rho = ${rho}
     mu = ${mu}
   []
-  [exponential_friction_coefficient]
+  [exponential_coeff]
     type = ExponentialFrictionMaterial
-    friction_factor_name = 'friction_coefficient'
+    friction_factor_name = 'exponential_coeff'
     Re = Re
     c1 = 0.25
     c2 = 0.55
+  []
+  [exponential_friction_coefficient]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient'
+    prop_values = 'exponential_coeff exponential_coeff exponential_coeff'
   []
 []
 

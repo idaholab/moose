@@ -2020,6 +2020,7 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
 {
   unsigned int num_friction_blocks = _friction_blocks.size();
   unsigned int num_used_blocks = num_friction_blocks ? num_friction_blocks : 1;
+  const std::string u_names[3] = {"u", "v", "w"};
 
   if (_porous_medium_treatment)
   {
@@ -2048,6 +2049,7 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
       for (unsigned int d = 0; d < _dim; ++d)
       {
         params.template set<NonlinearVariableName>("variable") = _velocity_name[d];
+        params.template set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
         params.template set<MooseEnum>("momentum_component") = NS::directions[d];
         for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
         {
@@ -2140,6 +2142,7 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
       for (unsigned int d = 0; d < _dim; ++d)
       {
         params.template set<NonlinearVariableName>("variable") = _velocity_name[d];
+        params.template set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
         params.template set<MooseEnum>("momentum_component") = NS::directions[d];
         for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
         {
@@ -2147,8 +2150,11 @@ NSFVBase<BaseType>::addINSMomentumFrictionKernels()
           if (upper_name == "DARCY")
             params.template set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
           else if (upper_name == "FORCHHEIMER")
+          {
             params.template set<MooseFunctorName>("Forchheimer_name") =
                 _friction_coeffs[block_i][type_i];
+            params.template set<MooseFunctorName>(NS::speed) = NS::speed;
+          }
         }
 
         getProblem().addFVKernel(kernel_type,
