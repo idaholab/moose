@@ -207,13 +207,15 @@
 
   solve_type = PJFNK
   line_search = none
-  automatic_scaling = true
 
   l_tol = 1e-8
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-15
+  nl_abs_tol = 1e-09
 
   start_time = 0.0
   end_time = 1.0
+
+  use_pre_SMO_residual = true
 []
 
 [Outputs]
