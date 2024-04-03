@@ -30,7 +30,7 @@ class TestDescription(AppSyntaxTestCase):
     def testAST(self):
         ast = self.tokenize(u"!syntax description /Kernels/Diffusion")
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'Paragraph', size=53)
+        self.assertToken(ast(0), 'Paragraph', size=55)
         self.assertToken(ast(0,0), 'Word', content=u'The')
         self.assertToken(ast(0)(2), 'Word', content=u'Laplacian')
 
@@ -95,7 +95,7 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), 'Optional Parameters')
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), 'ul', size=4)
+        self.assertHTMLTag(res(4), 'ul', size=5)
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
@@ -136,7 +136,7 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), 'Optional Parameters')
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), 'ul', size=4, class_='collapsible')
+        self.assertHTMLTag(res(4), 'ul', size=5, class_='collapsible')
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
@@ -155,7 +155,7 @@ class TestParameters(AppSyntaxTestCase):
         # This size should correspond to the total number of parameters for
         # Diffusion (Required + Optional + Advanced + Tagging) + 1
         # (corresponding to 'type')
-        self.assertSize(res, 18)
+        self.assertSize(res, 19)
         self.assertLatexCommand(res(0), 'chapter', size=4)
         self.assertLatexCommand(res(0,0), 'label', string=u'input-parameters')
         self.assertLatexString(res(0,1), content=u'Input')
