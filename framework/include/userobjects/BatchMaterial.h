@@ -131,7 +131,8 @@ public:
   static InputParameters validParams() { return ElementUserObject::validParams(); }
 
   template <typename... Names>
-  BatchMaterial(const InputParameters & params, Names &&... names) : ElementUserObject(params)
+  BatchMaterial(const InputParameters & params, Names &&... names)
+    : ElementUserObject(params), _output_ready(false)
   {
     construct<0, Names...>(std::forward<Names>(names)...);
   }
@@ -149,8 +150,11 @@ public:
   /// The serialized batch data is stored in a vector
   typedef std::vector<InputType> InputVector;
 
-  /// get a reference to the output data
+  /// Get a read-only reference to the output data
   const OutputVector & getOutputData() const { return _output_data; }
+
+  /// Get a writable reference to the output data
+  OutputVector & setOutputData() { return _output_data; }
 
   /// get a reference to the input data
   const InputVector & getInputData() const { return _input_data; }
