@@ -29,8 +29,9 @@ CauchyStressFromNEML2UO::validParams()
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
+  // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
-  execute_options = {EXEC_INITIAL, EXEC_LINEAR};
+  execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
   params.set<ExecFlagEnum>("execute_on") = execute_options;
 
   return params;
@@ -54,9 +55,30 @@ CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
   validateModel();
 }
 
+bool
+CauchyStressFromNEML2UO::shouldCompute()
+{
+  // NEML2 computes residual and Jacobian together at EXEC_LINEAR
+  // There is no work to be done at EXEC_NONLINEAR **UNLESS** we are computing the Jacobian for
+  // automatic scaling.
+  if (_fe_problem.computingScalingJacobian())
+    return true;
+
+  if (_fe_problem.currentlyComputingResidualAndJacobian())
+    return true;
+
+  if (_fe_problem.currentlyComputingJacobian())
+    return false;
+
+  return true;
+}
+
 void
 CauchyStressFromNEML2UO::batchCompute()
 {
+  if (!shouldCompute())
+    return;
+
   try
   {
     initModel(_input_data.size());

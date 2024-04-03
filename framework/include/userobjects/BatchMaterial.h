@@ -192,6 +192,10 @@ public:
 
   friend struct BatchMaterialUtils::GatherVariableOld;
 
+protected:
+  /// Whether we should perform a batch compute
+  virtual bool shouldCompute() { return true; }
+
 private:
   /// flag that indicates if _output_data has been fully computed
   bool _output_ready;
@@ -247,6 +251,9 @@ template <typename Tuple, typename Output, typename... Input>
 void
 BatchMaterial<Tuple, Output, Input...>::execute()
 {
+  if (!shouldCompute())
+    return;
+
   // update index map
   _index_map[_current_elem->id()] = _index;
 
@@ -264,6 +271,9 @@ template <typename Tuple, typename Output, typename... Input>
 void
 BatchMaterial<Tuple, Output, Input...>::threadJoin(const UserObject & uo)
 {
+  if (!shouldCompute())
+    return;
+
   // join maps (with index shift)
   const auto & bm = static_cast<const BatchMaterialType &>(uo);
   for (const auto & [id, index] : bm._index_map)
@@ -285,6 +295,9 @@ template <typename Tuple, typename Output, typename... Input>
 void
 BatchMaterial<Tuple, Output, Input...>::finalize()
 {
+  if (!shouldCompute())
+    return;
+
   // resize the input and output data blocks to contain just the gathered items
   // (should be a no-op mostly)
   _input_data.resize(_index);
