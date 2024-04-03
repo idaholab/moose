@@ -48,6 +48,7 @@ DerivativeStringToJSON(FileNameNoExtension);
 DerivativeStringToJSON(RelativeFileName);
 DerivativeStringToJSON(DataFileName);
 DerivativeStringToJSON(MeshFileName);
+DerivativeStringToJSON(MatrixFileName);
 DerivativeStringToJSON(OutFileBase);
 DerivativeStringToJSON(NonlinearVariableName);
 DerivativeStringToJSON(LinearVariableName);
