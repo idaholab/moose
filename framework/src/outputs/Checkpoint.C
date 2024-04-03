@@ -46,9 +46,9 @@ Checkpoint::validParams()
       "suffix",
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
-  // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
+  // For checkpoints, set the wall time output interval to defualt of 1 hour (3600 s)
   params.addParam<Real>(
-      "wall_time_interval", 600, "The target wall time interval (in seconds) at which to output");
+      "wall_time_interval", 3600, "The target wall time interval (in seconds) at which to output");
 
   // Parameter to turn off wall time checkpoints
   params.addParam<bool>("disable_wall_time_checkpoints",
