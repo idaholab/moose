@@ -27,7 +27,6 @@ public:
                                         DualReal & ad_u_dotdot) const override;
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
-  virtual void postSolve() override;
   virtual int order() override { return _order; }
 
 protected:

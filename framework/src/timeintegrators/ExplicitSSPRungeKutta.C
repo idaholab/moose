@@ -197,11 +197,7 @@ ExplicitSSPRungeKutta::postResidual(NumericVector<Number> & residual)
   residual -= _tmp_mass_solution_product;
 
   residual.close();
-}
 
-void
-ExplicitSSPRungeKutta::postSolve()
-{
   // Set time at which to evaluate nodal BCs
   _fe_problem.time() = _current_time;
 }
