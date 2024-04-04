@@ -102,6 +102,7 @@ Pointer to the current node that is being operated on (nodal only)
 ## VectorAuxKernel Objects
 
 Directly compute a vector AuxVariable values by:
+
 - inheriting from the `VectorAuxKernel` class
 - overriding `computeValue()`, with the difference being the return value of a `RealVectorValue` instead of Real.
 

@@ -194,9 +194,10 @@ returnType ClassName::methodName(type1 name1, type2 name2)
 
 ## Make
 
-A Makefile is a list of dependencies with rules to satisfy those dependencies
-All MOOSE-based applications are supplied with a complete Makefile
-To build a MOOSE-based application just type:
+A Makefile is a list of dependencies with rules to satisfy those dependencies. All MOOSE-based
+applications are supplied with a complete Makefile.
+
+To build a MOOSE-based application, just type:
 
 ```text
 make
