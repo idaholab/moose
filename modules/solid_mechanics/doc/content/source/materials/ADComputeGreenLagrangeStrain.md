@@ -4,9 +4,9 @@
 
 The Green-Lagrange strain $E$ is a non-linear total strain
 
-$$
-E=\frac12 \left(F^TF-1\right)
-$$
+\begin{equation}
+  E=\frac12 \left(F^TF-1\right)
+\end{equation}
 
 Where $F$ is the deformation gradient tensor. It can be combined with
 ADComputeLinearElasticStress to compute a second Piola-Kirchhoff stress (use the

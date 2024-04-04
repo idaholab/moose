@@ -7,28 +7,36 @@ helps ensure conservation of mass at a node. In a standard node-based Galerkin
 approximation, fluxes from spatial terms can be thought of as "entering"
 nodes. If there is no flux to a node, then the mass at that node should stay
 fixed. However, if the standard Galerkin method is applied to a time derivative
-term, $$(\psi_i, \frac{\partial u_h}{\partial t}$$ the corresponding coefficient
+term, $(\psi_i, \frac{\partial u_h}{\partial t}$ the corresponding coefficient
 matrix is tri-diagonal and the mass at a node is affected by fluxes to neighboring
 nodes. This can lead to violation of local mass conservation and generation of
 spurious oscillations with unphysical under- and over-shoot phenomena. Lumping
 fixes this problem by isolating a nodal solution from neighboring nodal
 solutions in the time derivative term. Mathematically, lumping looks like
-this. We start with our governing equation $$u_t = Au$$ where A is a
+this. We start with our governing equation $u_t = Au$ where A is a
 differential operator. We write our finite element solution as
 
-$$ u(t, x) = \sum u_j(t) \phi_j(x) $$
+\begin{equation}
+  u(t, x) = \sum u_j(t) \phi_j(x)
+\end{equation}
 
 Substituting into our governing equation, we have:
 
-$$ \sum u_j'\phi_j = Sum u_jA\phi_j $$
+\begin{equation}
+  \sum u_j'\phi_j = Sum u_jA\phi_j
+\end{equation}
 
 Now we apply our test functions $\psi_i$ and integrate over the volume:
 
-$$ \sum u_j' (\psi_i\phi_j) = \sum u_j (\psi_i, Au_j) $$
+\begin{equation}
+  \sum u_j' (\psi_i\phi_j) = \sum u_j (\psi_i, Au_j)
+\end{equation}
 
 After applying all of our test functions, we have the matrix system
 
-$$ \widetilde{M}\vec{u'} = \widetilde{K}\vec{u} $$
+\begin{equation}
+  \widetilde{M}\vec{u'} = \widetilde{K}\vec{u}
+\end{equation}
 
 where here $\vec{u}$ denotes the vector of coefficients $u_j$. $\widetilde{M}$
 is the mass matrix and $\widetilde{K}$ is the stiffness matrix. Note that
@@ -40,7 +48,9 @@ the matrix row elements (result 1) and placing the sums on the diagonals. The
 result is the identity matrix and $\widetilde{M}\vec{u'}$ becomes simply
 $\vec{u'}$:
 
-$$ \vec{u'} = \widetilde{K}\vec{u} $$
+\begin{equation}
+  \vec{u'} = \widetilde{K}\vec{u}
+\end{equation}
 
 As seen by the above equation, besides helping with local conservation of mass,
 mass lumping makes explicit time stepping feasible because it removes the need

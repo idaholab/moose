@@ -56,7 +56,7 @@ First, the mesh is defined by loading a file "mug.e".
 
 !listing examples/ex03_coupling/ex03.i block=Mesh
 
-Then, the two variables are defined: "diffused" and "convected", which refer to $$u$$ and $$v$$
+Then, the two variables are defined: "diffused" and "convected", which refer to $u$ and $v$
 from the problem statement, respectively. Both variables in this case are assigned to utilize
 linear Lagrange shape functions, but they could each use different shape functions and/or orders.
 

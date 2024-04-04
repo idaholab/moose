@@ -577,13 +577,13 @@ Transient::keepGoing()
       if (_steady_state_detection == true && _time > _steady_state_start_time)
       {
         // Check solution difference relative norm against steady-state tolerance
-        if (_solution_change_norm < _steady_state_tolerance)
+        if (convergedToSteadyState())
         {
           _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
           // Output last solve if not output previously by forcing it
           keep_going = false;
         }
-        else // Keep going
+        else // keep going
         {
           // Print steady-state relative error norm
           _console << "Steady-State Relative Differential Norm: " << _solution_change_norm
@@ -728,4 +728,42 @@ Transient::setTimeStepper(TimeStepper & ts)
 {
   mooseAssert(!_time_stepper, "Already set");
   _time_stepper = &ts;
+}
+
+bool
+Transient::convergedToSteadyState() const
+{
+  bool converged;
+
+  if (_check_aux)
+  {
+    // Get the relative change in the norm of each auxvariable
+    std::vector<Number> aux_soln_change_norms;
+    _aux.variableWiseRelativeSolutionDifferenceNorm(aux_soln_change_norms);
+
+    converged = true;
+    for (auto & norm_diff : aux_soln_change_norms)
+    {
+      // Normalize by timestep
+      norm_diff /= (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
+      if (norm_diff >= _steady_state_tolerance)
+      {
+        converged = false;
+        // No point in checking the rest of the auxvariables
+        break;
+      }
+    }
+
+    // This line is useful since _solution_change_norm will be printed
+    _solution_change_norm =
+        *std::max_element(aux_soln_change_norms.begin(), aux_soln_change_norms.end());
+  }
+
+  // If not using _check_aux, use relative change in norm from nonlinear system
+  else if (_solution_change_norm < _steady_state_tolerance)
+    converged = true;
+  else
+    converged = false;
+
+  return converged;
 }

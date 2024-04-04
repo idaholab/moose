@@ -157,7 +157,7 @@ strain required to return the stress state to the yield surface.
 \end{equation}
 where the change in the iterative effective inelastic strain is defined as the yield surface over the
 derivative of the yield surface with respect to the inelastic strain increment. In the case of
-isotropic linear hardening plasticity, with the hardening function $$ r = hp$$, the effective plastic
+isotropic linear hardening plasticity, with the hardening function $ r = hp$, the effective plastic
 strain increment has the form:
 \begin{equation}
  d \Delta p = \frac{\sigma^{trial}_{effective} - 3 G \Delta p - r - \sigma_{yield}}{3G + h}

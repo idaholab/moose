@@ -321,7 +321,7 @@ void
 SinglePhaseFluidProperties::gamma_from_v_e(
     Real v, Real e, Real & gamma, Real & dgamma_dv, Real & dgamma_de) const
 {
-  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
+  unimplementedDerivativeMethod(__PRETTY_FUNCTION__);
 
   dgamma_dv = 0.0;
   dgamma_de = 0.0;
@@ -338,7 +338,7 @@ void
 SinglePhaseFluidProperties::gamma_from_p_T(
     Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const
 {
-  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
+  unimplementedDerivativeMethod(__PRETTY_FUNCTION__);
 
   dgamma_dp = 0.0;
   dgamma_dT = 0.0;
@@ -359,7 +359,7 @@ SinglePhaseFluidProperties::henryCoefficients() const
 void
 SinglePhaseFluidProperties::vaporPressure(Real T, Real & p, Real & dp_dT) const
 {
-  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
+  unimplementedDerivativeMethod(__PRETTY_FUNCTION__);
 
   dp_dT = 0.0;
   p = vaporPressure(T);
@@ -388,7 +388,7 @@ Real SinglePhaseFluidProperties::vaporTemperature(Real) const
 void
 SinglePhaseFluidProperties::vaporTemperature(Real p, Real & T, Real & dT_dp) const
 {
-  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
+  unimplementedDerivativeMethod(__PRETTY_FUNCTION__);
 
   dT_dp = 0.0;
   T = vaporTemperature(p);

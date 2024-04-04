@@ -5,10 +5,25 @@
     csvdiff = 'thermal_eigenstrain_test_out.csv'
     allow_warnings = true
     issues = '#17734'
+    cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
     requirement = 'The system shall produce correct thermal deformation gradient values with '
                   'changing temperature'
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [thermal_eigenstrain_restart]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_restart_out.csv'
+    allow_warnings = true
+    cli_args = 'Problem/restart_file_base=thermal_eigenstrain_test_out_cp/LATEST '
+               'Outputs/file_base=thermal_eigenstrain_test_restart_out
+               Executioner/end_time=15'
+    issues = '#26458'
+    requirement = 'The system shall produce correct thermal deformation gradient values when '
+                  'the simulation is restarted'
+    design = '/ComputeMultipleCrystalPlasticityStress.md'
+    prereq = 'thermal_eigenstrain'
   []
   [multiple_eigenstrains]
     type = 'CSVDiff'
@@ -55,6 +70,7 @@
     input = 'volumetric_eigenstrain_increase.i'
     csvdiff = 'volumetric_eigenstrain_increase_out.csv'
     issues = '#25932'
+    cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
     requirement = 'The system shall produce a positive isotropic eigenstrain in response '
                   'to an increasing number density and shall demonstrate an applied shear '
                   'stress on the slip systems with a z-component in response to the BCs '
@@ -62,6 +78,19 @@
     design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md '
              '/CrystalPlasticityKalidindiUpdate.md'
+  []
+  [volumetric_eigenstrain_increase_restart]
+    type = 'CSVDiff'
+    input = 'volumetric_eigenstrain_increase.i'
+    csvdiff = 'volumetric_eigenstrain_increase_restart_out.csv'
+    cli_args = 'Problem/restart_file_base=volumetric_eigenstrain_increase_out_cp/LATEST '
+               'Outputs/file_base=volumetric_eigenstrain_increase_restart_out '
+               'Executioner/end_time=7.5'
+    issues = '#26458'
+    requirement = 'The system shall continue the isotropic eigenstrain response calculation '
+                  'upon simulation restart.'
+    design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
   []
   [hcp_volumetric_eigenstrain_decrease]
     type = 'CSVDiff'

@@ -9,18 +9,18 @@
 []
 
 [AuxVariables]
-  [./fp_zz]
+  [fp_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e_zz]
+  []
+  [e_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./gss]
+  []
+  [gss]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/all]
@@ -30,102 +30,102 @@
 []
 
 [AuxKernels]
-  [./fp_zz]
+  [fp_zz]
     type = RankTwoAux
     variable = fp_zz
     rank_two_tensor = plastic_deformation_gradient
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
-  [./e_zz]
+  []
+  [e_zz]
     type = RankTwoAux
     variable = e_zz
     rank_two_tensor = total_lagrangian_strain
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
-  [./gss]
+  []
+  [gss]
     type = MaterialStdVectorAux
     variable = gss
     property = slip_resistance
     index = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = DirichletBC
     variable = uz
     boundary = back
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = FunctionDirichletBC
     variable = uz
     boundary = front
     function = 0.01*t
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'trial_xtalpl'
     tan_mod_type = exact
     maximum_substep_iteration = 10
-  [../]
-  [./trial_xtalpl]
+  []
+  [trial_xtalpl]
     type = CrystalPlasticityKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = input_slip_sys.txt
     resistance_tol = 1.0e-2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./fp_zz]
+  []
+  [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
-  [../]
-  [./e_zz]
+  []
+  [e_zz]
     type = ElementAverageValue
     variable = e_zz
-  [../]
-  [./gss]
+  []
+  [gss]
     type = ElementAverageValue
     variable = gss
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

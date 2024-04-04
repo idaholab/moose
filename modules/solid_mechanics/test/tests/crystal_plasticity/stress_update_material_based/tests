@@ -4,9 +4,23 @@
     input = 'update_method_test.i'
     exodiff = 'update_method_test_out.e'
     issues = '#16064'
+    cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
     requirement = 'The system shall provide a StressUpdate material-based extensible crystal plasticity '
                   'system'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  []
+  [update_model_test_restart]
+    type = 'CSVDiff'
+    input = 'update_method_test.i'
+    csvdiff = 'update_method_test_restart_out.csv'
+    cli_args = 'Problem/restart_file_base=update_method_test_out_cp/LATEST '
+               'Outputs/file_base=update_method_test_restart_out '
+               'Outputs/exodus=false Outputs/csv=true'
+    issues = '#26458'
+    requirement = 'The system shall provide a StressUpdate material-based extensible crystal plasticity '
+                  'framework that shall continue the state-dependent calculation upon restart'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+    prereq = 'update_model_test'
   []
   [update_model_011orientation]
     type = 'CSVDiff'
@@ -128,11 +142,24 @@
     type = 'CSVDiff'
     input = 'bicrystal_test.i'
     csvdiff = 'bicrystal_test_out.csv'
+    cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
     requirement = 'The system shall allow multiple crystal plasticity models to '
                   'be used in a polycrystalline simulation through the use of '
                   'the base_name input parameter.'
     issues = '#21036'
     design = '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [bicrystal_test_restart]
+    type = 'CSVDiff'
+    input = 'bicrystal_test.i'
+    csvdiff = 'bicrystal_test_restart_out.csv'
+    requirement = 'The system shall allow multiple crystal plasticity models to '
+                  'be used in a polycrystalline simulation with the restart capability.'
+    cli_args = 'Problem/restart_file_base=bicrystal_test_out_cp/LATEST '
+               'Outputs/file_base=bicrystal_test_restart_out'
+    issues = '#26458'
+    design = '/ComputeMultipleCrystalPlasticityStress.md'
+    prereq = 'bicrystal_test'
   []
   [rotation_matrix_update_euler_angle_111_orientation]
     type = 'CSVDiff'

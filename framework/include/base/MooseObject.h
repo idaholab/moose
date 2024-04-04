@@ -34,7 +34,8 @@ class MooseObject : public MooseBase,
                     public MooseBaseParameterInterface,
                     public MooseBaseErrorInterface,
                     public libMesh::ParallelObject,
-                    public DataFileInterface<MooseObject>
+                    public DataFileInterface<MooseObject>,
+                    public std::enable_shared_from_this<MooseObject>
 {
 public:
   static InputParameters validParams();
@@ -47,6 +48,13 @@ public:
    * Return the enabled status of the object.
    */
   virtual bool enabled() const { return _enabled; }
+
+  /**
+   * Get another shared pointer to this object that has the same ownership group. Wrapper around
+   * shared_from_this().
+   */
+  std::shared_ptr<MooseObject> getSharedPtr();
+  std::shared_ptr<const MooseObject> getSharedPtr() const;
 
 protected:
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects

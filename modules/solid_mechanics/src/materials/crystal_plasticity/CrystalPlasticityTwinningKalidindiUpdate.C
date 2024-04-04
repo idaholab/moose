@@ -112,7 +112,6 @@ CrystalPlasticityTwinningKalidindiUpdate::initQpStatefulProperties()
 
   // Resize constitutive-model specific material properties
   _twin_volume_fraction[_qp].resize(_number_slip_systems);
-  _twin_volume_fraction_increment[_qp].resize(_number_slip_systems);
 
   // Set constitutive-model specific initial values from parameters
   _total_twin_volume_fraction[_qp] = _initial_total_twin_volume_fraction;
@@ -124,6 +123,15 @@ CrystalPlasticityTwinningKalidindiUpdate::initQpStatefulProperties()
     _slip_resistance[_qp][i] = _twin_initial_lattice_friction;
     _slip_increment[_qp][i] = 0.0;
   }
+}
+
+void
+CrystalPlasticityTwinningKalidindiUpdate::setMaterialVectorSize()
+{
+  CrystalPlasticityStressUpdateBase::setMaterialVectorSize();
+
+  // Resize non-stateful material properties
+  _twin_volume_fraction_increment[_qp].resize(_number_slip_systems);
 }
 
 void

@@ -42,7 +42,7 @@ below:
 
 !listing
 test/tests/kernels/coupled_time_derivative/coupled_time_derivative_test.i
-block=Kernels label=false
+block=Kernels
 
 !syntax parameters /Kernels/CoupledTimeDerivative
 

@@ -2,9 +2,9 @@
 
 Derive from this base class if your residual is of the form
 
-$$
-(\dots,\psi_i)
-$$
+\begin{equation}
+  (\dots,\psi_i)
+\end{equation}
 
 i.e. if the test function $\psi_i$ (`_test[_i][_qp]`) can be factored out.
 
