@@ -10,7 +10,6 @@
 #include "LinearWCNSFVMomentumFlux.h"
 #include "Assembly.h"
 #include "SubProblem.h"
-#include "LinearWCNSFVMomentumFluxDiffusionBC.h"
 
 registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
 
@@ -26,7 +25,8 @@ LinearWCNSFVMomentumFlux::validParams()
 }
 
 LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & params)
-  : LinearFVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
+  : LinearFVFluxKernel(params),
+    _vel_provider(getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object"))
 
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
@@ -62,13 +62,14 @@ LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 }
 
 Real
-LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
+LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(
+    const LinearFVBoundaryCondition & /*bc*/)
 {
   return 0.0;
 }
 
 Real
-LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
+LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & /*bc*/)
 {
   return 0.0;
 }
