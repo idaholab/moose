@@ -17,17 +17,11 @@
     block_id = 1
     input = gen
   []
-[]
-
-[Adaptivity]
-  initial_steps = 1
-  marker = uniform
-  [Markers]
-    [uniform]
-      type = UniformMarker
-      mark = refine
-      block = 1
-    []
+  [refine]
+    type = RefineBlockGenerator
+    input = left_block
+    refinement = '0 0'
+    block = '1 0'
   []
 []
 
