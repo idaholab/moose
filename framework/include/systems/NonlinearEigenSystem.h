@@ -23,6 +23,11 @@ class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
 
+namespace Moose
+{
+void assemble_matrix(EquationSystems & es, const std::string & system_name);
+}
+
 /**
  * Nonlinear eigenvalue system to be solved
  */
