@@ -7,7 +7,7 @@ helps ensure conservation of mass at a node. In a standard node-based Galerkin
 approximation, fluxes from spatial terms can be thought of as "entering"
 nodes. If there is no flux to a node, then the mass at that node should stay
 fixed. However, if the standard Galerkin method is applied to a time derivative
-term, $(\psi_i, \frac{\partial u_h}{\partial t}$ the corresponding coefficient
+term, $(\psi_i, \frac{\partial u_h}{\partial t})$ the corresponding coefficient
 matrix is tri-diagonal and the mass at a node is affected by fluxes to neighboring
 nodes. This can lead to violation of local mass conservation and generation of
 spurious oscillations with unphysical under- and over-shoot phenomena. Lumping
@@ -23,13 +23,13 @@ differential operator. We write our finite element solution as
 Substituting into our governing equation, we have:
 
 \begin{equation}
-  \sum u_j'\phi_j = Sum u_jA\phi_j
+  \sum u_j'\phi_j = \sum u_jA\phi_j
 \end{equation}
 
 Now we apply our test functions $\psi_i$ and integrate over the volume:
 
 \begin{equation}
-  \sum u_j' (\psi_i\phi_j) = \sum u_j (\psi_i, Au_j)
+  \sum u_j' (\psi_i,\phi_j) = \sum u_j (\psi_i, A\phi_j)
 \end{equation}
 
 After applying all of our test functions, we have the matrix system
