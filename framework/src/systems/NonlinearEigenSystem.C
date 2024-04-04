@@ -201,8 +201,7 @@ NonlinearEigenSystem::solve()
   {
     if (dofMap().n_constrained_dofs())
     {
-      subvec = NumericVector<Number>::build(_communicator);
-      solution().create_subvector(*subvec, _eigen_sys.local_non_condensed_dofs_vector);
+      subvec = solution().get_subvector(_eigen_sys.local_non_condensed_dofs_vector);
       _eigen_sys.set_initial_space(*subvec);
     }
     else
@@ -234,6 +233,9 @@ NonlinearEigenSystem::solve()
   // Update the solution vector to the active eigenvector
   if (n_converged_eigenvalues)
     getConvergedEigenpair(_eigen_problem.activeEigenvalueIndex());
+
+  if (_eigen_problem.isNonlinearEigenvalueSolver() && dofMap().n_constrained_dofs())
+    solution().restore_subvector(std::move(subvec), _eigen_sys.local_non_condensed_dofs_vector);
 }
 
 void
