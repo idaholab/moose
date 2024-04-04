@@ -94,8 +94,6 @@ make -j8
 This will generate the results file, out.e, as shown in Figure 1 and 2. This file may be viewed
 using Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
-<div style="width:100%">
-
 !media large_media/examples/ex03_out_diffused.png
        caption=Figure 1: example 3 Results, "diffused variable"
        style=width:40%;display:inline-flex;margin-left:7%;
@@ -103,8 +101,6 @@ using Peacock or an external application that supports the Exodus II format (e.g
 !media large_media/examples/ex03_out_convected.png
        caption=Figure 2: example 3 Results, "convected variable"
        style=width:40%;display:inline-flex;margin-left:7%;
-
-</div><br>
 
 # 1D exact solution
 
