@@ -8,25 +8,25 @@ list of publications that have cited MOOSE, please refer to the [publications.md
 For all publications that use MOOSE or a MOOSE-based application please cite the following.
 
 ```tex
-@article{lindsay2022moose,
-   title = {2.0 - {MOOSE}: Enabling massively parallel multiphysics simulation},
-   author = {Alexander D. Lindsay and Derek R. Gaston and Cody J. Permann and Jason M. Miller and
-             David Andr{\v{s}} and Andrew E. Slaughter and Fande Kong and Joshua Hansel and
-             Robert W. Carlsen and Casey Icenhour and Logan Harbour and Guillaume L. Giudicelli
-             and Roy H. Stogner and Peter German and Jacob Badger and Sudipta Biswas and
-             Leora Chapuis and Christopher Green and Jason Hales and Tianchen Hu and Wen Jiang
-             and Yeon Sang Jung and Christopher Matthews and Yinbin Miao and April Novak and
-             John W. Peterson and Zachary M. Prince and Andrea Rovinelli and Sebastian Schunert
-             and Daniel Schwen and Benjamin W. Spencer and Swetha Veeraraghavan and Antonio Recuero
-             and Dewen Yushu and Yaqi Wang and Andy Wilkins and Christopher Wong},
-    year = {2022},
+@article{giudicelli2024moose,
+   title = {3.0 - {MOOSE}: Enabling massively parallel multiphysics simulations},
+   author = {Guillaume Giudicelli and Alexander Lindsay and Logan Harbour and Casey Icenhour and
+             Mengnan Li and Joshua E. Hansel and Peter German and Patrick Behne and Oana Marin and
+             Roy H. Stogner and Jason M. Miller and Daniel Schwen and Yaqi Wang and Lynn Munday and
+             Sebastian Schunert and Benjamin W. Spencer and Dewen Yushu and Antonio Recuero and
+             Zachary M. Prince and Max Nezdyur and Tianchen Hu and Yinbin Miao and
+             Yeon Sang Jung and Christopher Matthews and April Novak and Brandon Langley and
+             Timothy Truster and Nuno Nobre and Brian Alger and David Andr{\v{s}} and
+             Fande Kong and Robert Carlsen and Andrew E. Slaughter and John W. Peterson and
+             Derek Gaston and Cody Permann},
+    year = {2024},
  journal = {{SoftwareX}},
-  volume = {20},
-   pages = {101202},
+  volume = {26},
+   pages = {101690},
     issn = {2352-7110},
-     doi = {https://doi.org/10.1016/j.softx.2022.101202},
-     url = {https://www.sciencedirect.com/science/article/pii/S2352711022001200},
-keywords = {Multiphysics, Object-oriented, Finite-element, Framework},
+     doi = {https://doi.org/10.1016/j.softx.2024.101690},
+     url = {https://www.sciencedirect.com/science/article/pii/S235271102400061X},
+keywords = {Framework, Finite-element, Finite-volume, Parallel, Multiphysics, Multiscale},
 }
 ```
 
