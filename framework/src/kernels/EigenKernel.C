@@ -185,6 +185,9 @@ EigenKernel::enabled() const
   bool flag = MooseObject::enabled();
   if (_eigen)
   {
+    if (!_eigen_sys)
+      mooseError("EigenKernel has eigen=true, but system is not a MooseEigenSystem.");
+
     if (_is_implicit)
       return flag && (!_eigen_sys->activeOnOld());
     else
