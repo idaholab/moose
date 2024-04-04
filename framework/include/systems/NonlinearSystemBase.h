@@ -89,7 +89,7 @@ public:
    * Returns true if this system is currently computing the pre-SMO residual for a solve.
    * @return Whether or not we are currently computing the pre-SMO residual.
    */
-  virtual bool computingPreSMOResidual() { return _computing_pre_smo_residual; }
+  bool computingPreSMOResidual() { return _computing_pre_smo_residual; }
 
   // Setup Functions ////
   virtual void initialSetup() override;
@@ -236,8 +236,8 @@ public:
   bool shouldEvaluatePreSMOResidual() const;
 
   /**
-   * Returns a writable reference to a boolean controlling whether to evaluate the pre-SMO residual
-   * and use it in the subsequent relative convergence checks.
+   * Set whether to evaluate the pre-SMO residual and use it in the subsequent relative convergence
+   * checks.
    *
    * If set to true, an _additional_ residual evaluation is performed before any
    * solution-modifying object is executed, and before the initial (0-th nonlinear iteration)
@@ -249,9 +249,9 @@ public:
    * recommended for performance-critical code as it avoids the additional pre-SMO residual
    * evaluation.
    */
-  bool & usePreSMOResidual() { return _use_pre_smo_residual; }
+  void setPreSMOResidual(bool use) { _use_pre_smo_residual = use; }
 
-  /// The const version of usePreSMOResidual
+  /// Whether we are using pre-SMO residual in relative convergence checks
   const bool & usePreSMOResidual() const { return _use_pre_smo_residual; }
 
   /// The reference residual used in relative convergence check.
@@ -909,9 +909,9 @@ protected:
 
   bool _computing_pre_smo_residual;
 
-  /// The pre-SMO residual
+  /// The pre-SMO residual, see setPreSMOResidual for a detailed explanation
   Real _pre_smo_residual;
-  /// The initial residual
+  /// The initial (i.e., 0th nonlinear iteration) residual, see setPreSMOResidual for a detailed explanation
   Real _initial_residual;
   /// Whether to use the pre-SMO initial residual in the relative convergence check
   bool _use_pre_smo_residual;

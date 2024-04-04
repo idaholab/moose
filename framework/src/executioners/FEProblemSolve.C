@@ -230,7 +230,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   _nl.setDecomposition(_splitting);
 
-  _nl.usePreSMOResidual() = getParam<bool>("use_pre_SMO_residual");
+  _nl.setPreSMOResidual(getParam<bool>("use_pre_SMO_residual"));
 
   if (getParam<bool>("residual_and_jacobian_together"))
     _nl.residualAndJacobianTogether();
