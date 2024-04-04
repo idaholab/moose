@@ -54,6 +54,7 @@ public:
    * shared_from_this().
    */
   std::shared_ptr<MooseObject> getSharedPtr();
+  std::shared_ptr<const MooseObject> getSharedPtr() const;
 
 protected:
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects
