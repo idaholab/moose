@@ -187,6 +187,7 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 
   _nl_eigen->associateMatrixToTag(jacobian, tag);
 
+  setCurrentNonlinearSystem(_nl_eigen->number());
   computeJacobianTags(_fe_matrix_tags);
 
   _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
@@ -218,6 +219,7 @@ EigenProblem::computeMatricesTags(
   for (auto tag : tags)
     _nl_eigen->associateMatrixToTag(*(jacobians[i++]), tag);
 
+  setCurrentNonlinearSystem(_nl_eigen->number());
   computeJacobianTags(tags);
 
   i = 0;
@@ -233,9 +235,9 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
   setCurrentNonlinearSystem(nl_sys_num);
 
   if (_displaced_problem)
-    _aux->compute(EXEC_PRE_DISPLACE);
+    computeSystems(EXEC_PRE_DISPLACE);
 
-  _aux->compute(EXEC_NONLINEAR);
+  computeSystems(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
 
@@ -273,6 +275,7 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
   _nl_eigen->associateMatrixToTag(jacobianA, tagA);
   _nl_eigen->associateMatrixToTag(jacobianB, tagB);
 
+  setCurrentNonlinearSystem(_nl_eigen->number());
   computeJacobianTags(_fe_matrix_tags);
 
   _nl_eigen->disassociateMatrixFromTag(jacobianA, tagA);
@@ -304,6 +307,7 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
 
   _nl_eigen->setSolution(soln);
 
+  setCurrentNonlinearSystem(_nl_eigen->number());
   computeResidualTags(_fe_vector_tags);
 
   _nl_eigen->disassociateVectorFromTag(residual, tag);

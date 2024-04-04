@@ -33,6 +33,7 @@ public:
   virtual void init() override;
   virtual void preSolve() override;
   virtual void meshChanged() override;
+  virtual bool isExplicit() const override { return true; }
 
 protected:
   enum SolveType

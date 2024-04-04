@@ -68,6 +68,8 @@ public:
 
   virtual const NumericVector<Number> * const & currentSolution() const override final;
 
+  virtual void compute(ExecFlagType type) override;
+
 protected:
   void checkInvalidSolution();
 

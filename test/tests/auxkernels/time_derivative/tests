@@ -15,7 +15,18 @@
     requirement = "AuxKernel objects shall be able to couple to the time derivative of a nonlinear variable."
   [../]
 
-  [./coupled_aux_time_derivative]
+  [coupled_aux_time_derivative]
+    type = Exodiff
+    input = time_derivative_nl.i
+    exodiff = time_derivative_nl_out.e
+    cli_args = 'Executioner/solve_type=linear'
+    issues = '#27233'
+    requirement = 'AuxKernel objects shall be able to couple to the time '
+                  'derivative of a nonlinear variable even if the problem is '
+                  'in fact linear and solved as such.'
+  []
+
+  [./coupled_aux_time_derivative_to_aux]
     type = 'RunException'
     input = 'coupled_aux_time_derivative.i'
     expect_err = 'g_k: Unable to couple time derivative of an auxiliary variable into the auxiliary system.'

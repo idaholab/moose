@@ -981,22 +981,6 @@ NonlinearSystemBase::residualVector(TagID tag)
 }
 
 void
-NonlinearSystemBase::computeTimeDerivatives(bool jacobian_calculation)
-{
-  // If we're doing any Jacobian calculation other than the initial Jacobian calculation for
-  // automatic variable scaling, then we can just return because the residual function evaluation
-  // has already done this work for us
-  if (jacobian_calculation && !_fe_problem.computingScalingJacobian())
-    return;
-
-  if (_time_integrator)
-  {
-    _time_integrator->preStep();
-    _time_integrator->computeTimeDerivatives();
-  }
-}
-
-void
 NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
 {
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
@@ -1102,7 +1086,10 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
 
   _fe_problem.reinitNeighborPhys(
       undisplaced_primary_elem, primary_side, {undisplaced_primary_physical_point}, 0);
-  _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0);
+  // Stateful material properties are only initialized for neighbor material data for internal faces
+  // for discontinuous Galerkin methods or for conforming interfaces for interface kernels. We don't
+  // have either of those use cases here where we likely have disconnected meshes
+  _fe_problem.reinitMaterialsNeighbor(primary_elem->subdomain_id(), 0, /*swap_stateful=*/false);
 
   // Reinit points for constraint enforcement
   if (displaced)

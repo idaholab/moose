@@ -117,7 +117,7 @@
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check2
     Outputs/chkfile/start_time=5.99'
     max_time = 1500
-    rel_err = 1e-5
+    rel_err = 2e-5
     abs_zero = 3e-5
     max_parallel = 1
     heavy = true

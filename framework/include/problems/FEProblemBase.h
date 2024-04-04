@@ -1841,11 +1841,6 @@ public:
                                        const std::string & name);
 
   /**
-   * Call compute methods on AuxKernels
-   */
-  virtual void computeAuxiliaryKernels(const ExecFlagType & type);
-
-  /**
    * Set a flag that indicated that user required values for the previous Newton iterate
    */
   void needsPreviousNewtonIteration(bool state);
@@ -2283,6 +2278,11 @@ protected:
   /// Create extra tagged solution vectors
   void createTagSolutions();
 
+  /**
+   * Do generic system computations
+   */
+  void computeSystems(const ExecFlagType & type);
+
   MooseMesh & _mesh;
 
 private:
@@ -2354,6 +2354,9 @@ protected:
 
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
+
+  /// The current solver system
+  SolverSystem * _current_solver_sys;
 
   /// Combined container to base pointer of every solver system
   std::vector<std::shared_ptr<SolverSystem>> _solver_systems;
@@ -2952,22 +2955,6 @@ inline const CouplingMatrix *
 FEProblemBase::couplingMatrix(const unsigned int i) const
 {
   return _cm[i].get();
-}
-
-inline void
-FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
-{
-  mooseAssert(nl_sys_num < _nl.size(),
-              "System number greater than the number of nonlinear systems");
-  _current_nl_sys = _nl[nl_sys_num].get();
-}
-
-inline void
-FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
-{
-  mooseAssert(sys_num < _linear_systems.size(),
-              "System number greater than the number of linear systems");
-  _current_linear_sys = _linear_systems[sys_num].get();
 }
 
 inline void
