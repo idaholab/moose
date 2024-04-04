@@ -4,7 +4,7 @@
 
 Implements the term
 \begin{equation}
-\nabla\cdot D(c,a,b,\dots) \nabla u,
+-\nabla\cdot D(c,a,b,\dots) \nabla u,
 \end{equation}
 where the diffusion coefficient $D$ (`diffusivity`) is provided by a `FunctionMaterial` function material (see `Phase Field Module` for more information), $u$ is the nonlinear variable the kernel is operating on.  
 
