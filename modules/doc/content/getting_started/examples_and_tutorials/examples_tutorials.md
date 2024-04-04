@@ -14,9 +14,13 @@ be found on [this page](training/index.md).
 Below is a recording of a MOOSE training webinar given in Summer 2020, as well as links to the training presentation and
 other targeted, advanced workshop presentations.
 
-!media https://www.youtube.com/embed/2tJwBsYaLaI
-       id=training-webinar
-       caption=MOOSE training workshop webinar given on June 9--10, 2020.
+!media https://www.youtube.com/embed/QPuK6OdF2hM
+       id=training-webinar-part-one
+       caption=Part 1 of the MOOSE training workshop webinar given on June 6--8, 2023.
+
+!media https://www.youtube.com/embed/JwbtDXRYPYo
+       id=training-webinar-part-two
+       caption=Part 2 of the MOOSE training workshop webinar given on June 6--8, 2023.
 
 - [MOOSE Training Workshop](workshop/index.md alternative=missing_config.md)
 - [MOOSE MultiApps Workshop](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)
