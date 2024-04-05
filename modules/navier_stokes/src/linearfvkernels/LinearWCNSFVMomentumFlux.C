@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearWCNSFVMomentumFlux.h"
+#include "MooseLinearVariableFV.h"
 #include "NSFVUtils.h"
 #include "NS.h"
 
@@ -19,6 +20,9 @@ LinearWCNSFVMomentumFlux::validParams()
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of the "
                              "stress and advection terms of the momentum equation.");
+  params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
+  params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
+  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
@@ -33,33 +37,65 @@ LinearWCNSFVMomentumFlux::validParams()
       true,
       "If the nonorthogonal correction should be used when computing the normal gradient.");
 
-  params += Moose::FV::interpolationParameters();
+  params += Moose::FV::advectedInterpolationParameter();
   return params;
 }
 
 LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & params)
   : LinearFVFluxKernel(params),
-    _vel_provider(getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object")),
+    _dim(_subproblem.mesh().dimension()),
+    _mass_flux_provider(
+        getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
-    _interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
     _face_mass_flux(0.0),
     _stress_matrix_contribution(0.0),
     _stress_rhs_contribution(0.0),
-    _index(getParam<MooseEnum>("momentum_component"))
+    _index(getParam<MooseEnum>("momentum_component")),
+    _u_var(dynamic_cast<const MooseLinearVariableFVReal *>(
+        &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("u")))),
+    _v_var(params.isParamValid("v")
+               ? dynamic_cast<const MooseLinearVariableFVReal *>(
+                     &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("v")))
+               : nullptr),
+    _w_var(params.isParamValid("w")
+               ? dynamic_cast<const MooseLinearVariableFVReal *>(
+                     &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
+               : nullptr)
 {
-  Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
+  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+
+  if (!_u_var)
+    paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
+
+  if (_dim >= 2 && !_v_var)
+    paramError("v",
+               "In two or more dimensions, the v velocity must be supplied and it must be a "
+               "MooseLinearVariableFVReal.");
+
+  if (_dim >= 3 && !_w_var)
+    paramError("w",
+               "In three-dimensions, the w velocity must be supplied and it must be a "
+               "MooseLinearVariableFVReal.");
 }
 
 void
 LinearWCNSFVMomentumFlux::initialSetup()
 {
+  // We need the cell gradients for two scenarios:
+  // (1) when we use nonorthogonal correction for the normal gradients
+  // (2) when we run with space-dependent viscosities where the deviatoric part of the
+  //     stress term can be non-negligible
+  if (_use_nonorthogonal_correction || !_mu.isConstant())
+    _var.computeCellGradients();
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeElemMatrixContribution()
 {
-  return (computeInternalAdvectionElemMatrixContribution() + computeStressMatrixContribution()) *
+  return (computeInternalAdvectionElemMatrixContribution() +
+          computeInternalStressMatrixContribution()) *
          _current_face_area;
 }
 
@@ -67,20 +103,20 @@ Real
 LinearWCNSFVMomentumFlux::computeNeighborMatrixContribution()
 {
   return (computeInternalAdvectionNeighborMatrixContribution() -
-          computeStressMatrixContribution()) *
+          computeInternalStressMatrixContribution()) *
          _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  return 0.0;
+  return computeInternalStressRHSContribution() * _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  return 0.0;
+  return -computeInternalStressRHSContribution() * _current_face_area;
 }
 
 Real
@@ -99,17 +135,17 @@ LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryC
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionElemMatrixContribution()
 {
-  return _interp_coeffs.first * _face_mass_flux;
+  return _advected_interp_coeffs.first * _face_mass_flux;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionNeighborMatrixContribution()
 {
-  return _interp_coeffs.second * _face_mass_flux;
+  return _advected_interp_coeffs.second * _face_mass_flux;
 }
 
 Real
-LinearWCNSFVMomentumFlux::computeStressMatrixContribution()
+LinearWCNSFVMomentumFlux::computeInternalStressMatrixContribution()
 {
   // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
@@ -130,14 +166,108 @@ LinearWCNSFVMomentumFlux::computeStressMatrixContribution()
   return _stress_matrix_contribution;
 }
 
+Real
+LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
+{
+  // We can have contributions to the right hand side in two occasions:
+  // (1) when we use nonorthogonal correction for the normal gradients
+  // (2) when we run with space-dependent viscosities where the deviatoric part of the
+  //     stress term can be non-negligible
+  if (!_cached_rhs_contribution)
+  {
+    // scenario (1), we need to add the nonorthogonal correction. In 1D, we don't have
+    // any correction so we just skip this part
+    if (_dim > 1 && _use_nonorthogonal_correction)
+    {
+      const auto face_arg = makeCDFace(*_current_face_info);
+      const auto state_arg = determineState();
+
+      // Get the gradients from the adjacent cells
+      const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo());
+      const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
+
+      // Interpolate the two gradients to the face
+      const auto interp_coeffs = interpCoeffs(
+          Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
+
+      const auto correction_vector =
+          _current_face_info->normal() -
+          1 / (_current_face_info->normal() * _current_face_info->eCN()) *
+              _current_face_info->eCN();
+
+      // Cache the matrix contribution
+      _stress_rhs_contribution =
+          _mu(face_arg, state_arg) *
+          (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
+          correction_vector;
+    }
+    // scenario (2), we will have to account for non-constant viscosity. In this case
+    // we have to use the transpose of the gradients to create the symmetric stress
+    // tensor.
+    else if (!_mu.isConstant())
+    {
+      // Interpolate the two gradients to the face
+      const auto interp_coeffs = interpCoeffs(
+          Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
+
+      const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
+      const auto u_grad_neighbor = _u_var->gradSln(*_current_face_info->neighborInfo());
+
+      Real trace_elem = 0;
+      Real trace_neighbor = 0;
+      RealVectorValue deviatoric_vector_elem;
+      RealVectorValue deviatoric_vector_neighbor;
+
+      deviatoric_vector_elem(0) = u_grad_elem(_index);
+      deviatoric_vector_neighbor(0) = u_grad_neighbor(_index);
+      trace_elem += u_grad_elem(0);
+      trace_neighbor += u_grad_neighbor(0);
+
+      const auto face_arg = makeCDFace(*_current_face_info);
+      const auto state_arg = determineState();
+
+      if (_dim > 1)
+      {
+        const auto v_grad_elem = _v_var->gradSln(*_current_face_info->elemInfo());
+        const auto v_grad_neighbor = _v_var->gradSln(*_current_face_info->neighborInfo());
+
+        deviatoric_vector_elem(1) = v_grad_elem(_index);
+        deviatoric_vector_neighbor(1) = v_grad_neighbor(_index);
+        trace_elem += v_grad_elem(1);
+        trace_neighbor += v_grad_neighbor(1);
+        if (_dim > 2)
+        {
+          const auto w_grad_elem = _w_var->gradSln(*_current_face_info->elemInfo());
+          const auto w_grad_neighbor = _w_var->gradSln(*_current_face_info->neighborInfo());
+
+          deviatoric_vector_elem(2) = w_grad_elem(_index);
+          deviatoric_vector_neighbor(2) = w_grad_neighbor(_index);
+          trace_elem += w_grad_elem(2);
+          trace_neighbor += w_grad_neighbor(2);
+        }
+      }
+      deviatoric_vector_elem(_index) = trace_elem;
+      deviatoric_vector_neighbor(_index) = trace_neighbor;
+
+      _stress_rhs_contribution += _mu(face_arg, state_arg) *
+                                  (interp_coeffs.first * deviatoric_vector_elem +
+                                   interp_coeffs.second * deviatoric_vector_neighbor) *
+                                  _current_face_info->normal();
+    }
+    _cached_rhs_contribution = true;
+  }
+
+  return _stress_rhs_contribution;
+}
+
 void
 LinearWCNSFVMomentumFlux::setCurrentFaceInfo(const FaceInfo * face_info)
 {
   LinearFVFluxKernel::setCurrentFaceInfo(face_info);
 
   // First, we fetch the velocity on the face
-  const auto & velocity =
-      _vel_provider.getVelocity(_velocity_interp_method, *face_info, determineState(), _tid, false);
+  const auto & velocity = _mass_flux_provider.getVelocity(
+      Moose::FV::InterpMethod::RhieChow, *face_info, determineState(), _tid, false);
 
   // Caching the mass flux on the face which will be reused in the advection term's matrix and right
   // hand side contributions
@@ -145,5 +275,10 @@ LinearWCNSFVMomentumFlux::setCurrentFaceInfo(const FaceInfo * face_info)
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
-  _interp_coeffs = interpCoeffs(_advected_interp_method, *_current_face_info, true, velocity);
+  _advected_interp_coeffs =
+      interpCoeffs(_advected_interp_method, *_current_face_info, true, velocity);
+
+  // We'll have to set this to zero to make sure that we don't accumulate values over multiple
+  // faces. The matrix contribution should be fine.
+  _cached_rhs_contribution = 0;
 }

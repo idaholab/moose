@@ -60,11 +60,17 @@ protected:
 
   /// Computes the matrix contribution of the stress term on the current face
   /// when the face is an internal face (doesn't have associated boundary conditions).
+  Real computeInternalStressMatrixContribution();
 
-  Real computeStressMatrixContribution();
+  /// Computes the right hand side contribution of the stress term on the current face
+  /// when the face is an internal face (doesn't have associated boundary conditions).
+  Real computeInternalStressRHSContribution();
+
+  /// The dimension of the mesh
+  const unsigned int _dim;
 
   /// The Rhie-Chow user object that provides us with the face velocity
-  const INSFVRhieChowInterpolatorSegregated & _vel_provider;
+  const INSFVRhieChowInterpolatorSegregated & _mass_flux_provider;
 
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
@@ -72,9 +78,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction in the stress term
   const bool _use_nonorthogonal_correction;
 
-  /// Container for the current velocity vector on the face to make sure we don't compute it
-  /// multiple times for different terms/
-  std::pair<Real, Real> _interp_coeffs;
+  /// Container for the current advected interpolation coefficients on the face to make sure
+  /// we don't compute it multiple times for different terms.
+  std::pair<Real, Real> _advected_interp_coeffs;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -89,10 +95,14 @@ protected:
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
 
-  /// The interpolation method to use for the velocity
-  Moose::FV::InterpMethod _velocity_interp_method;
-
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term
   const unsigned int _index;
+
+  /// Velocity in direction x
+  const MooseLinearVariableFVReal * const _u_var;
+  /// Velocity in direction y
+  const MooseLinearVariableFVReal * const _v_var;
+  /// Velocity in direction z
+  const MooseLinearVariableFVReal * const _w_var;
 };
