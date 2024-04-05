@@ -136,6 +136,12 @@ ExplicitSSPRungeKutta::solve()
     if (!converged)
       return;
   }
+
+  if (_stage == _n_stages)
+    // We made it to the end of the solve. We may call functions like computeTimeDerivatives later
+    // for postprocessing purposes in which case we need to ensure we're accessing our data
+    // correctly (e.g. not out-of-bounds)
+    --_stage;
 }
 
 bool
