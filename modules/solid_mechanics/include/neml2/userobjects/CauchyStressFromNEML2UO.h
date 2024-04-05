@@ -59,6 +59,9 @@ public:
   virtual void postCompute();
 
 protected:
+  /// Determine whether the material model should be called
+  virtual bool shouldCompute() override;
+
   /// Advance state and forces in time
   virtual void advanceStep();
 

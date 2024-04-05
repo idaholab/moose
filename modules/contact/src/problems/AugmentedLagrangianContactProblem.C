@@ -84,7 +84,6 @@ AugmentedLagrangianContactProblemTempl<T>::checkNonlinearConvergence(std::string
                                                                      const Real abstol,
                                                                      const PetscInt nfuncs,
                                                                      const PetscInt /*max_funcs*/,
-                                                                     const Real ref_resid,
                                                                      const Real /*div_threshold*/)
 {
   Real my_max_funcs = std::numeric_limits<int>::max();
@@ -101,7 +100,6 @@ AugmentedLagrangianContactProblemTempl<T>::checkNonlinearConvergence(std::string
                                                                         abstol,
                                                                         nfuncs,
                                                                         my_max_funcs,
-                                                                        ref_resid,
                                                                         my_div_threshold);
 
   _console << "Augmented Lagrangian contact iteration " << _lagrangian_iteration_number

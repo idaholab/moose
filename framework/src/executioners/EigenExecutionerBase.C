@@ -263,7 +263,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
     // save the initial residual
     if (iter == 0)
-      initial_res = _eigen_sys._initial_residual_before_preset_bcs;
+      initial_res = _eigen_sys.referenceResidual();
 
     // update eigenvalue
     k = k_old * _source_integral / _source_integral_old;

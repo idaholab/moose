@@ -86,10 +86,10 @@ public:
   virtual unsigned int getCurrentNonlinearIterationNumber() = 0;
 
   /**
-   * Returns true if this system is currently computing the initial residual for a solve.
-   * @return Whether or not we are currently computing the initial residual.
+   * Returns true if this system is currently computing the pre-SMO residual for a solve.
+   * @return Whether or not we are currently computing the pre-SMO residual.
    */
-  virtual bool computingInitialResidual() { return _computing_initial_residual; }
+  bool computingPreSMOResidual() { return _computing_pre_smo_residual; }
 
   // Setup Functions ////
   virtual void initialSetup() override;
@@ -226,6 +226,45 @@ public:
    * @param name The name of the split
    */
   std::shared_ptr<Split> getSplit(const std::string & name);
+
+  /**
+   * We offer the option to check convergence against the pre-SMO residual. This method handles the
+   * logic as to whether we should perform such residual evaluation.
+   *
+   * @return A boolean indicating whether we should evaluate the pre-SMO residual.
+   */
+  bool shouldEvaluatePreSMOResidual() const;
+
+  /**
+   * Set whether to evaluate the pre-SMO residual and use it in the subsequent relative convergence
+   * checks.
+   *
+   * If set to true, an _additional_ residual evaluation is performed before any
+   * solution-modifying object is executed, and before the initial (0-th nonlinear iteration)
+   * residual evaluation. Such residual is referred to as the pre-SMO residual. If the pre-SMO
+   * residual is evaluated, it is used in the subsequent relative convergence checks.
+   *
+   * If set to false, no residual evaluation takes place before the initial residual evaluation, and
+   * the initial residual is used in the subsequent relative convergence checks. This mode is
+   * recommended for performance-critical code as it avoids the additional pre-SMO residual
+   * evaluation.
+   */
+  void setPreSMOResidual(bool use) { _use_pre_smo_residual = use; }
+
+  /// Whether we are using pre-SMO residual in relative convergence checks
+  const bool & usePreSMOResidual() const { return _use_pre_smo_residual; }
+
+  /// The reference residual used in relative convergence check.
+  Real referenceResidual() const;
+
+  /// The pre-SMO residual
+  Real preSMOResidual() const;
+
+  /// The initial residual
+  Real initialResidual() const;
+
+  /// Record the initial residual (for later relative convergence check)
+  void setInitialResidual(Real r);
 
   void zeroVectorForResidual(const std::string & vector_name);
 
@@ -641,11 +680,8 @@ public:
   System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_nl_rnorm;
-  Real _initial_residual_before_preset_bcs;
-  Real _initial_residual_after_preset_bcs;
   std::vector<unsigned int> _current_l_its;
   unsigned int _current_nl_its;
-  bool _compute_initial_residual_before_preset_bcs;
 
   /**
    * Setup the PETSc DM object (when appropriate)
@@ -866,7 +902,14 @@ protected:
   /// If predictor is active, this is non-NULL
   std::shared_ptr<Predictor> _predictor;
 
-  bool _computing_initial_residual;
+  bool _computing_pre_smo_residual;
+
+  /// The pre-SMO residual, see setPreSMOResidual for a detailed explanation
+  Real _pre_smo_residual;
+  /// The initial (i.e., 0th nonlinear iteration) residual, see setPreSMOResidual for a detailed explanation
+  Real _initial_residual;
+  /// Whether to use the pre-SMO initial residual in the relative convergence check
+  bool _use_pre_smo_residual;
 
   bool _print_all_var_norms;
 

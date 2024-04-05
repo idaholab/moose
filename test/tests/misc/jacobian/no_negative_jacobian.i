@@ -8,33 +8,34 @@
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxKernels]
-  [./disp_x]
+  [disp_x]
     variable = disp_x
     type = FunctionAux
     function = '-x*t'
-  [../]
+    execute_on = 'LINEAR TIMESTEP_BEGIN'
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Executioner]

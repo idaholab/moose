@@ -38,10 +38,18 @@
   []
 
   [skip_after_failed_timestep]
-    requirement = "The system shall support the ability to skip a prediction after a failed time step"
+    requirement = "The system shall support the ability to skip a prediction after a failed time "
+                  "step"
     input = 'predictor_test_skip_after_failed_tstep.i'
     type = 'CSVDiff'
     csvdiff = 'predictor_test_skip_after_failed_tstep_out.csv'
+  []
+
+  [pre_smo]
+    requirement = "The system shall support the ability to output pre-SMO residual"
+    input = 'predictor_test_pre_smo.i'
+    type = 'CSVDiff'
+    csvdiff = 'predictor_test_pre_smo_out.csv'
   []
 
   [timestep_tolerance]
@@ -49,7 +57,7 @@
                   "determine if a prediction should be peformed."
     type = 'CSVDiff'
     input = 'predictor_skip_test.i'
-    csvdiff = 'predictor_skip_test_out.csv'  # use gold file from above
+    csvdiff = 'predictor_skip_test_out.csv' # use gold file from above
     cli_args = 'Executioner/Predictor/skip_times=0.9999999999 Executioner/timestep_tolerance=1e-9'
     prereq = 'skip/test_skip'
   []

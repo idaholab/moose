@@ -15,40 +15,40 @@
 []
 
 [Functions]
-  [./ramp1]
+  [ramp1]
     type = PiecewiseLinear
     x = '0      0.5     1'
     y = '0      1       4'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bot]
+  [bot]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0.0
-  [../]
-  [./ss2_x]
+  []
+  [ss2_x]
     type = FunctionDirichletBC
     variable = u
     boundary = top
     function = ramp1
-  [../]
+  []
 []
 
 [Problem]
@@ -68,32 +68,28 @@
   start_time = 0.0
   end_time = 1.0
 
-  [./TimeStepper]
+  [TimeStepper]
     type = ConstantDT
     dt = 0.1
     cutback_factor_at_failure = 0.5
-  [../]
+  []
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
     skip_after_failed_timestep = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./final_residual]
+  [final_residual]
     type = Residual
-    residual_type = final
-  [../]
-  [./initial_residual_before]
+    residual_type = FINAL
+  []
+  [initial_residual]
     type = Residual
-    residual_type = initial_before_preset
-  [../]
-  [./initial_residual_after]
-    type = Residual
-    residual_type = initial_after_preset
-  [../]
+    residual_type = INITIAL
+  []
 []
 
 [Outputs]

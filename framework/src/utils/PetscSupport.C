@@ -283,7 +283,6 @@ petscNonlinearConverged(SNES snes,
                         void * ctx)
 {
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
-  NonlinearSystemBase & system = problem.currentNonlinearSystem();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -360,7 +359,6 @@ petscNonlinearConverged(SNES snes,
                                         atol,
                                         nfuncs,
                                         maxf,
-                                        system._initial_residual_before_preset_bcs,
                                         std::numeric_limits<Real>::max());
 
   if (msg.length() > 0)

@@ -77,19 +77,14 @@ void
 SolutionInvalidity::solutionInvalidAccumulation()
 {
   for (auto & entry : _counts)
-  {
-    entry.total_counts += entry.counts;
     entry.timestep_counts += entry.counts;
-  }
 }
 
 void
 SolutionInvalidity::solutionInvalidAccumulationTimeStep()
 {
   for (auto & entry : _counts)
-  {
-    entry.timestep_counts += entry.counts;
-  }
+    entry.total_counts += entry.timestep_counts;
 }
 
 void
@@ -102,30 +97,26 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 void
 SolutionInvalidity::sync()
 {
-  std::map<processor_id_type,
-           std::vector<std::tuple<std::string, std::string, unsigned int, unsigned int>>>
+  std::map<processor_id_type, std::vector<std::tuple<std::string, std::string, unsigned int>>>
       data_to_send;
 
   if (processor_id() != 0)
-  {
     for (const auto id : index_range(_counts))
     {
-      const auto & entry = _counts[id];
+      auto & entry = _counts[id];
       if (entry.counts)
       {
         const auto & info = _solution_invalidity_registry.item(id);
-        data_to_send[0].emplace_back(
-            info.object_type, info.message, entry.counts, entry.timestep_counts);
-        _counts[id].total_counts = 0;
+        data_to_send[0].emplace_back(info.object_type, info.message, entry.counts);
+        entry.counts = 0;
       }
     }
-  }
 
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
     mooseAssert(pid != 0, "Should not be used except processor 0");
 
-    for (const auto & [object_type, message, counts, timestep_counts] : data)
+    for (const auto & [object_type, message, counts] : data)
     {
       InvalidSolutionID main_id = 0;
       const moose::internal::SolutionInvalidityName name(object_type, message);
@@ -138,8 +129,6 @@ SolutionInvalidity::sync()
         _counts.resize(main_id + 1);
 
       _counts[main_id].counts += counts;
-      _counts[main_id].timestep_counts += timestep_counts;
-      _counts[main_id].total_counts += timestep_counts;
     }
   };
 
