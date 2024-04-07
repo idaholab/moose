@@ -135,7 +135,7 @@ SolverSystem::compute(const ExecFlagType type)
     compute_tds = true;
   else if (type == EXEC_NONLINEAR)
   {
-    if (_fe_problem.computingScalingJacobian())
+    if (_fe_problem.computingScalingJacobian() || matrixFromColoring())
       compute_tds = true;
   }
   else if ((type == EXEC_TIMESTEP_END) || (type == EXEC_FINAL))
