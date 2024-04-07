@@ -531,16 +531,16 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
       return true;
     }
-  }
-  if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-    return true;
-  }
-  if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_rel_tol)
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-    return true;
+    if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
+    {
+      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
+      return true;
+    }
+    if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_rel_tol)
+    {
+      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
+      return true;
+    }
   }
   if (_fixed_point_it + 1 == _max_fixed_point_its)
   {
