@@ -533,6 +533,10 @@ EigenProblem::solve(const unsigned int nl_sys_num)
   {
     TIME_SECTION("solve", 1);
 
+    // Do this before attaching callbacks since we will call init on matrices which destroys
+    // whatever matrices were previously held
+    _nl_eigen->condenseOutConstraints();
+
     // Set necessary slepc callbacks
     // We delay this call as much as possible because libmesh
     // could rebuild matrices due to mesh changes or something else.

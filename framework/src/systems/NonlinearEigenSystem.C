@@ -139,6 +139,9 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   // the preconditioning matrix, and then _precond_tag will
   // point to part of "B" objects
   _precond_tag = eigen_problem.addMatrixTag("Eigen_precond");
+
+  // We do not rely on creating submatrices in the solve routine
+  _eigen_sys.dont_create_submatrices_in_solve();
 }
 
 void
@@ -184,6 +187,34 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
     object.useMatrixTag(_A_tag, {});
     // Noneigen Kernels
     object.useMatrixTag(_precond_tag, {});
+  }
+}
+
+void
+NonlinearEigenSystem::condenseOutConstraints()
+{
+  if (!dofMap().n_constrained_dofs())
+    return;
+
+  _eigen_sys.initialize_condensed_dofs();
+  const auto m = cast_int<numeric_index_type>(_eigen_sys.local_non_condensed_dofs_vector.size());
+  auto M = m;
+  _communicator.sum(M);
+  if (_eigen_sys.has_condensed_matrix_A())
+  {
+    _eigen_sys.get_condensed_matrix_A().init(M, M, m, m);
+    // A bit ludicrously MatCopy requires the matrix being copied to to be assembled
+    _eigen_sys.get_condensed_matrix_A().close();
+  }
+  if (_eigen_sys.has_condensed_matrix_B())
+  {
+    _eigen_sys.get_condensed_matrix_B().init(M, M, m, m);
+    _eigen_sys.get_condensed_matrix_B().close();
+  }
+  if (_eigen_sys.has_condensed_precond_matrix())
+  {
+    _eigen_sys.get_condensed_precond_matrix().init(M, M, m, m);
+    _eigen_sys.get_condensed_precond_matrix().close();
   }
 }
 
