@@ -124,7 +124,9 @@ LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBounda
 {
   const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
-  return computeStressBoundaryMatrixContribution(adv_diff_bc) * _current_face_area;
+  return (computeStressBoundaryMatrixContribution(adv_diff_bc) +
+          computeAdvectionBoundaryMatrixContribution(adv_diff_bc)) *
+         _current_face_area;
 }
 
 Real
@@ -132,7 +134,9 @@ LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryC
 {
   const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
-  return computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
+  return (computeStressBoundaryRHSContribution(adv_diff_bc) +
+          computeAdvectionBoundaryRHSContribution(adv_diff_bc)) *
+         _current_face_area;
 }
 
 Real
@@ -304,6 +308,29 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
   }
 
   return grad_contrib;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeAdvectionBoundaryMatrixContribution(
+    const LinearFVAdvectionDiffusionBC * bc)
+{
+  const auto boundary_value_matrix_contrib = bc->computeBoundaryValueMatrixContribution();
+
+  // We support internal boundaries too so we have to make sure the normal points always outward
+  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+
+  return boundary_value_matrix_contrib * factor * _face_mass_flux;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
+    const LinearFVAdvectionDiffusionBC * bc)
+{
+  // We support internal boundaries too so we have to make sure the normal points always outward
+  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
+
+  const auto boundary_value_rhs_contrib = bc->computeBoundaryValueRHSContribution();
+  return -boundary_value_rhs_contrib * factor * _face_mass_flux;
 }
 
 void
