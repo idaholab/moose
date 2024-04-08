@@ -189,15 +189,6 @@ NonlinearEigenSystem::solve()
   if (!presolve_succeeded)
     return;
 
-// In DEBUG mode, Libmesh will check the residual automatically. This may cause
-// an error because B does not need to assembly by default.
-// When PETSc is older than 3.13, we always need to do an extra assembly,
-// so we do not do "close" here
-#if DEBUG && !PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  if (sys().has_matrix_B())
-    sys().get_matrix_B().close();
-#endif
-
   // We apply initial guess for only nonlinear solver
   if (_eigen_problem.isNonlinearEigenvalueSolver())
     _eigen_sys.set_initial_space(solution());
