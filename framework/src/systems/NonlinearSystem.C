@@ -232,14 +232,14 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 
   if (fdp->finiteDifferenceType() == "coloring")
   {
-    setupColoringFiniteDifferencedPreconditioner();
     _use_coloring_finite_difference = true;
+    setupColoringFiniteDifferencedPreconditioner();
   }
 
   else if (fdp->finiteDifferenceType() == "standard")
   {
-    setupStandardFiniteDifferencedPreconditioner();
     _use_coloring_finite_difference = false;
+    setupStandardFiniteDifferencedPreconditioner();
   }
   else
     mooseError("Unknown finite difference type");

@@ -100,5 +100,7 @@ private:
    */
   void setupColoringFiniteDifferencedPreconditioner();
 
+  virtual bool matrixFromColoring() const override { return _use_coloring_finite_difference; }
+
   bool _use_coloring_finite_difference;
 };
