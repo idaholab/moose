@@ -39,9 +39,9 @@ SegregatedSolverBase::validParams()
   params.addParam<SolverSystemName>("solid_energy_system",
                                     "The solver system for the solid energy equation.");
   params.addParam<std::vector<SolverSystemName>>(
-      "passive_scalar_systems", "The solver system(s) for the passive scalar equation(s).");
+      "passive_scalar_systems", {}, "The solver system(s) for the passive scalar equation(s).");
   params.addParam<std::vector<SolverSystemName>>(
-      "turbulence_systems", "The solver system(s) for the turbulence equation(s).");
+      "turbulence_systems", {}, "The solver system(s) for the turbulence equation(s).");
 
   /*
    * Relaxation parameters for the different system
@@ -358,7 +358,9 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _has_passive_scalar_systems(isParamValid("passive_scalar_systems")),
     _has_turbulence_systems(isParamValid("turbulence_systems")),
-    _momentum_system_names(getParam<std::vector<NonlinearSystemName>>("momentum_systems")),
+    _momentum_system_names(getParam<std::vector<SolverSystemName>>("momentum_systems")),
+    _passive_scalar_system_names(getParam<std::vector<SolverSystemName>>("passive_scalar_systems")),
+    _turbulence_system_names(getParam<std::vector<SolverSystemName>>("turbulence_systems")),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
@@ -392,13 +394,11 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
   // set up the corresponding system numbers
   if (_has_passive_scalar_systems)
   {
-    const auto & passive_scalar_system_names =
-        getParam<std::vector<NonlinearSystemName>>("passive_scalar_systems");
-    if (passive_scalar_system_names.size() != _passive_scalar_equation_relaxation.size())
+    if (_passive_scalar_system_names.size() != _passive_scalar_equation_relaxation.size())
       paramError("passive_scalar_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
                  "passive scalar equations!");
-    if (passive_scalar_system_names.size() != _passive_scalar_absolute_tolerance.size())
+    if (_passive_scalar_system_names.size() != _passive_scalar_absolute_tolerance.size())
       paramError("passive_scalar_absolute_tolerance",
                  "The number of absolute tolerances does not match the number of "
                  "passive scalar equations!");
@@ -408,13 +408,11 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
   // set up the corresponding system numbers
   if (_has_turbulence_systems)
   {
-    const auto & turbulence_system_names =
-        getParam<std::vector<NonlinearSystemName>>("turbulence_systems");
-    if (turbulence_system_names.size() != _turbulence_equation_relaxation.size())
+    if (_turbulence_system_names.size() != _turbulence_equation_relaxation.size())
       paramError("turbulence_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
                  "turbulence scalar equations!");
-    if (turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
+    if (_turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
       paramError("turbulence_absolute_tolerance",
                  "The number of absolute tolerances does not match the number of "
                  "turbulence equations!");
@@ -794,7 +792,7 @@ SegregatedSolverBase::findDoFID(const VariableName & var_name, const Point & poi
 
 void
 SegregatedSolverBase::relaxSolutionUpdate(NumericVector<Number> & vec_new,
-                                          NumericVector<Number> & vec_old,
+                                          const NumericVector<Number> & vec_old,
                                           const Real relaxation_factor)
 {
   // The relaxation is just u = lambda * u* + (1-lambda) u_old

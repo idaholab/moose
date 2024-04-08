@@ -24,6 +24,17 @@ class InputParameters;
 class FEProblemBase;
 
 /**
+ * Solver configuration class used with the linear solvers in a SIMPLE solver.
+ */
+class SIMPLESolverConfiguration : public libMesh::SolverConfiguration
+{
+  /**
+   * Override this to make sure the PETSc options are not overwritten in the linear solver
+   */
+  virtual void configure_solver() override {}
+};
+
+/**
  * Base class for the executioners relying on segregated solution approaches.
  */
 class SegregatedSolverBase : public Executioner
@@ -33,9 +44,8 @@ public:
 
   SegregatedSolverBase(const InputParameters & parameters);
 
-  void init() override;
-  void execute() override;
-  bool lastSolveConverged() const override { return _last_solve_converged; }
+  virtual void init() override;
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
   /**
    * Compute a normalization factor which is applied to the linear residual to determine
@@ -108,7 +118,7 @@ protected:
    * @param min_limit = 0.0 The minimum limit for the solution
    * @param max_limit = 1e10 The maximum limit for the solution
    */
-  void limitSolutionUpdate(NonlinearSystemBase & system_in,
+  void limitSolutionUpdate(NumericVector<Number> & solution,
                            const Real min_limit = std::numeric_limits<Real>::epsilon(),
                            const Real max_limit = 1e10);
 
@@ -171,7 +181,13 @@ protected:
   const bool _has_turbulence_systems;
 
   /// The names of the momentum systems.
-  const std::vector<NonlinearSystemName> _momentum_system_names;
+  const std::vector<SolverSystemName> & _momentum_system_names;
+
+  /// The names of the passive scalar systems
+  const std::vector<SolverSystemName> & _passive_scalar_system_names;
+
+  /// The names of the turbulence scalar systems
+  const std::vector<SolverSystemName> & _turbulence_system_names;
 
   /// The user-defined relaxation parameter for the momentum equation
   const Real _momentum_equation_relaxation;
@@ -229,6 +245,9 @@ protected:
 
   /// Options which hold the petsc settings for the turbulence equation(s)
   Moose::PetscSupport::PetscOptions _turbulence_petsc_options;
+
+  /// Options for the linear solver of the momentum equation
+  SIMPLESolverConfiguration _momentum_linear_control;
 
   /// Absolute linear tolerance for the momentum equation(s). We need to store this, because
   /// it needs to be scaled with a representative flux.
