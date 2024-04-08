@@ -11,6 +11,7 @@
 
 #include "LinearFVFluxKernel.h"
 #include "INSFVRhieChowInterpolatorSegregated.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 /**
  * Kernel that implements the stress tensor and advection terms for the momentum
@@ -65,6 +66,15 @@ protected:
   /// Computes the right hand side contribution of the stress term on the current face
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalStressRHSContribution();
+
+  /// Computes the matrix contributions of the boundary conditions resulting from the stress tensor
+  /// @param bc The boundary condition whose contributions should be used
+  Real computeStressBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
+
+  /// Computes the right hand side contributions of the boundary conditions resulting
+  /// from the stress tensor
+  /// @param bc The boundary condition whose contributions should be used
+  Real computeStressBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// The dimension of the mesh
   const unsigned int _dim;

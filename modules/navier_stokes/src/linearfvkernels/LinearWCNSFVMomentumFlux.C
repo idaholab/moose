@@ -120,16 +120,19 @@ LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 }
 
 Real
-LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(
-    const LinearFVBoundaryCondition & /*bc*/)
+LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  return 0.0;
+  const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(adv_diff_bc, "This should be a valid BC!");
+  return computeStressBoundaryMatrixContribution(adv_diff_bc) * _current_face_area;
 }
 
 Real
-LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & /*bc*/)
+LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  return 0.0;
+  const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(adv_diff_bc, "This should be a valid BC!");
+  return computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
 }
 
 Real
@@ -258,6 +261,49 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
   }
 
   return _stress_rhs_contribution;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeStressBoundaryMatrixContribution(
+    const LinearFVAdvectionDiffusionBC * bc)
+{
+  auto grad_contrib = bc->computeBoundaryGradientMatrixContribution();
+  // If the boundary condition does not include the diffusivity contribution then
+  // add it here.
+  if (!bc->includesMaterialPropertyMultiplier())
+  {
+    const auto face_arg = singleSidedFaceArg(_current_face_info);
+    grad_contrib *= _mu(face_arg, determineState());
+  }
+
+  return grad_contrib;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
+    const LinearFVAdvectionDiffusionBC * bc)
+{
+  const auto face_arg = singleSidedFaceArg(_current_face_info);
+  auto grad_contrib = bc->computeBoundaryGradientRHSContribution();
+
+  // If the boundary condition does not include the diffusivity contribution then
+  // add it here.
+  if (!bc->includesMaterialPropertyMultiplier())
+    grad_contrib *= _mu(face_arg, determineState());
+
+  // We add the nonorthogonal corrector for the face here. Potential idea: we could do
+  // this in the boundary condition too. For now, however, we keep it like this.
+  if (_use_nonorthogonal_correction)
+  {
+    const auto correction_vector =
+        _current_face_info->normal() -
+        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
+
+    grad_contrib += _mu(face_arg, determineState()) *
+                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector;
+  }
+
+  return grad_contrib;
 }
 
 void
