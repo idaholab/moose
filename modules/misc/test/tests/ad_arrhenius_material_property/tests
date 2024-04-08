@@ -16,7 +16,7 @@
     petsc_version = '>=3.9'
     ratio_tol = 3e-7
     difference_tol = 1
-    issues = '#847'
+    issues = '#22384'
     design = 'jacobian_definition.md'
     requirement = 'The system shall provide perfect derivatives using ADArrheniusMaterialProperty.'
   []
