@@ -82,6 +82,9 @@ ParameterStudyAction::validParams()
       1,
       "Minimum number of processors to give to each sample. Useful for larger, distributed mesh "
       "solves where there are memory constraints.");
+  params.addParam<bool>("ignore_solve_not_converge",
+                        false,
+                        "True to continue main app even if a sub app's solve does not converge.");
 
   // Samplers ///////////////////////////
   // Parameters for Monte Carlo and LHS
@@ -415,6 +418,9 @@ ParameterStudyAction::act()
   else if (_current_task == "add_multi_app")
   {
     auto params = _factory.getValidParams("SamplerFullSolveMultiApp");
+
+    // Dealing with failed solves
+    params.set<bool>("ignore_solve_not_converge") = getParam<bool>("ignore_solve_not_converge");
 
     // Set input file
     params.set<std::vector<FileName>>("input_files") = {getParam<FileName>("input")};
