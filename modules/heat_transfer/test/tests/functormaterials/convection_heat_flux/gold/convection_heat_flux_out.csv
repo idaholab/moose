@@ -1,2 +1,2 @@
-time,q_fluid_pp,q_solid_pp
-0,-20000,20000
+time,q_pp
+0,20000

@@ -17,13 +17,10 @@ InputParameters
 ConvectionHeatFluxFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription("Computes a convection heat flux.");
+  params.addClassDescription("Computes a convection heat flux from a solid surface to a fluid.");
   params.addRequiredParam<MooseFunctorName>("htc", "Heat transfer coefficient functor");
   params.addRequiredParam<MooseFunctorName>("T_solid", "Solid temperature functor");
   params.addRequiredParam<MooseFunctorName>("T_fluid", "Fluid temperature functor");
-  params.addRequiredParam<bool>(
-      "to_solid",
-      "If true, compute the heat flux to the solid; else, compute the heat flux to the fluid");
   params.addRequiredParam<std::string>("heat_flux_name",
                                        "Name to give the heat flux functor material property");
   return params;
@@ -35,8 +32,7 @@ ConvectionHeatFluxFunctorMaterialTempl<is_ad>::ConvectionHeatFluxFunctorMaterial
   : FunctorMaterial(parameters),
     _htc(getFunctor<GenericReal<is_ad>>("htc")),
     _T_solid(getFunctor<GenericReal<is_ad>>("T_solid")),
-    _T_fluid(getFunctor<GenericReal<is_ad>>("T_fluid")),
-    _sign(getParam<bool>("to_solid") ? 1.0 : -1.0)
+    _T_fluid(getFunctor<GenericReal<is_ad>>("T_fluid"))
 {
   addFunctorProperty<GenericReal<is_ad>>(
       getParam<std::string>("heat_flux_name"),
@@ -45,7 +41,7 @@ ConvectionHeatFluxFunctorMaterialTempl<is_ad>::ConvectionHeatFluxFunctorMaterial
         const auto htc = _htc(r, t);
         const auto T_solid = _T_solid(r, t);
         const auto T_fluid = _T_fluid(r, t);
-        return _sign * htc * (T_fluid - T_solid);
+        return htc * (T_solid - T_fluid);
       });
 }
 

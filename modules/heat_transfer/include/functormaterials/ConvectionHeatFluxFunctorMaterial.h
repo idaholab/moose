@@ -12,7 +12,7 @@
 #include "FunctorMaterial.h"
 
 /**
- * Computes a convection heat flux.
+ * Computes a convection heat flux from a solid surface to a fluid.
  */
 template <bool is_ad>
 class ConvectionHeatFluxFunctorMaterialTempl : public FunctorMaterial
@@ -29,8 +29,6 @@ protected:
   const Moose::Functor<GenericReal<is_ad>> & _T_solid;
   /// Fluid temperature
   const Moose::Functor<GenericReal<is_ad>> & _T_fluid;
-  /// Sign for heat flux
-  const Real _sign;
 };
 
 typedef ConvectionHeatFluxFunctorMaterialTempl<false> ConvectionHeatFluxFunctorMaterial;

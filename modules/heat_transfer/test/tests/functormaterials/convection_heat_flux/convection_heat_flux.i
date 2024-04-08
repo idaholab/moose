@@ -1,9 +1,8 @@
-T_solid = 300
-T_fluid = 500
+T_solid = 500
+T_fluid = 300
 htc = 100
 
-# q_solid = htc * (T_fluid - T_solid) = 100 * (500 - 300) = 20000
-# q_fluid = -q_solid = -20000
+# q = htc * (T_solid - T_fluid) = 100 * (500 - 300) = 20000
 
 [Mesh]
   type = GeneratedMesh
@@ -12,18 +11,9 @@ htc = 100
 []
 
 [FunctorMaterials]
-  [q_solid_fmat]
+  [q_fmat]
     type = ADConvectionHeatFluxFunctorMaterial
-    heat_flux_name = q_solid
-    to_solid = true
-    T_solid = ${T_solid}
-    T_fluid = ${T_fluid}
-    htc = ${htc}
-  []
-  [q_fluid_fmat]
-    type = ConvectionHeatFluxFunctorMaterial
-    heat_flux_name = q_fluid
-    to_solid = false
+    heat_flux_name = q
     T_solid = ${T_solid}
     T_fluid = ${T_fluid}
     htc = ${htc}
@@ -31,14 +21,9 @@ htc = 100
 []
 
 [Postprocessors]
-  [q_solid_pp]
+  [q_pp]
     type = ADElementExtremeFunctorValue
-    functor = q_solid
-    execute_on = 'INITIAL'
-  []
-  [q_fluid_pp]
-    type = ElementExtremeFunctorValue
-    functor = q_fluid
+    functor = q
     execute_on = 'INITIAL'
   []
 []
