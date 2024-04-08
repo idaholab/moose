@@ -23,57 +23,57 @@
 []
 
 [Functions]
-  [./temperature]
+  [temperature]
     type = PiecewiseLinear
     x = '0 1'
     y = '1 2'
     scale_factor = 100
-  [../]
+  []
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     initial_condition = 100
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./block]
+  [block]
     strain = FINITE
     add_variables = true
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = Diffusion
     variable = temperature
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = ADDirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = ADDirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
-  [./temperatureInterior]
+  []
+  [temperatureInterior]
     type = ADFunctionDirichletBC
     boundary = 2
     function = temperature
     variable = temperature
-  [../]
-  [./CavityPressure]
-    [./pressure]
+  []
+  [CavityPressure]
+    [pressure]
       boundary = 'top bottom right'
       initial_pressure = 10e5
       R = 8.3143
@@ -83,19 +83,19 @@
       startup_time = 0.5
       output = ppress
       use_automatic_differentiation = true
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress1]
+  []
+  [stress1]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -110,20 +110,21 @@
   l_max_its = 20
   dt = 0.5
   end_time = 1.0
+  use_pre_SMO_residual = true
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 'top bottom right'
     execute_on = 'initial linear'
-  [../]
-  [./aveTempInterior]
+  []
+  [aveTempInterior]
     type = AxisymmetricCenterlineAverageValue
     boundary = left
     variable = temperature
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Outputs]

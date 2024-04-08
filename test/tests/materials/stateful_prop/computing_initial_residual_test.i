@@ -4,58 +4,58 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./prop1]
+  [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./prop1_output]
+  [prop1_output]
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
-  [../]
-  [./ie]
+  []
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1.0
-  [../]
+  []
 []
 
 [Materials]
-  [./stateful]
+  [stateful]
     type = ComputingInitialTest
     block = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,13 +65,14 @@
   start_time = 0.0
   num_steps = 5
   dt = .1
+  use_pre_SMO_residual = true
 []
 
 [Outputs]
   file_base = computing_initial_residual_test_out
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
     execute_elemental_on = none
-  [../]
+  []
 []

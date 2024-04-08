@@ -41,7 +41,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _dt_old(_fe_problem.dtOld()),
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0),
-    _is_explicit(false),
     _is_lumped(false),
     _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
     _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION))

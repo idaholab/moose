@@ -41,58 +41,58 @@
 []
 
 [Functions]
-  [./temperature]
+  [temperature]
     type = PiecewiseLinear
     x = '0 1'
     y = '1 2'
     scale_factor = 240.54443866068704
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_r]
-  [../]
-  [./disp_z]
-  [../]
-  [./temp]
+  [disp_r]
+  []
+  [disp_z]
+  []
+  [temp]
     initial_condition = 240.54443866068704
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
     use_automatic_differentiation = true
-  [../]
-  [./heat]
+  []
+  [heat]
     type = ADDiffusion
     variable = temp
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_r
     boundary = '1 2'
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_z
     boundary = '1 2'
     value = 0.0
-  [../]
-  [./temperatureInterior]
+  []
+  [temperatureInterior]
     type = ADFunctionDirichletBC
     preset = false
     boundary = 2
     function = temperature
     variable = temp
-  [../]
-  [./CavityPressure]
-    [./1]
+  []
+  [CavityPressure]
+    [1]
       boundary = 2
       initial_pressure = 100
       R = 8.314472
@@ -101,39 +101,39 @@
       startup_time = 0.5
       output = ppress
       use_automatic_differentiation = true
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elastic_tensor1]
+  [elastic_tensor1]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 1
-  [../]
-  [./strain1]
+  []
+  [strain1]
     type = ADComputeAxisymmetricRZFiniteStrain
     block = 1
-  [../]
-  [./stress1]
+  []
+  [stress1]
     type = ADComputeFiniteStrainElasticStress
     block = 1
-  [../]
-  [./elastic_tensor2]
+  []
+  [elastic_tensor2]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 2
-  [../]
-  [./strain2]
+  []
+  [strain2]
     type = ADComputeAxisymmetricRZFiniteStrain
     block = 2
-  [../]
-  [./stress2]
+  []
+  [stress2]
     type = ADComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -150,26 +150,27 @@
 
   dt = 0.5
   end_time = 1.0
+  use_pre_SMO_residual = true
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 2
     execute_on = 'initial linear'
-  [../]
-  [./aveTempInterior]
+  []
+  [aveTempInterior]
     type = SideAverageValue
     boundary = 2
     variable = temp
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
-  [./checkpoint]
+  [checkpoint]
     type = Checkpoint
     num_files = 1
-  [../]
+  []
 []

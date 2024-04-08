@@ -33,6 +33,6 @@ ComputingInitialTest::initQpStatefulProperties()
 void
 ComputingInitialTest::computeQpProperties()
 {
-  if (_subproblem.computingInitialResidual(0))
+  if (_subproblem.computingPreSMOResidual(0))
     _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1.0;
 }

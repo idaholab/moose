@@ -18,39 +18,39 @@
 []
 
 [Functions]
-  [./ramp1]
+  [ramp1]
     type = ParsedFunction
     expression = 't'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bot]
+  [bot]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0.0
-  [../]
-  [./ss2_x]
+  []
+  [ss2_x]
     type = FunctionDirichletBC
     variable = u
     boundary = top
     function = ramp1
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,25 +65,21 @@
   dt = 0.5
   end_time = 1.0
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./final_residual]
+  [final_residual]
     type = Residual
-    residual_type = final
-  [../]
-  [./initial_residual_before]
+    residual_type = FINAL
+  []
+  [initial_residual]
     type = Residual
-    residual_type = initial_before_preset
-  [../]
-  [./initial_residual_after]
-    type = Residual
-    residual_type = initial_after_preset
-  [../]
+    residual_type = INITIAL
+  []
 []
 
 [Outputs]

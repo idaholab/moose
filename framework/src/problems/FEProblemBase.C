@@ -4216,8 +4216,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
 
-  // AuxKernels
-  computeAuxiliaryKernels(exec_type);
+  // Systems (includes system time derivative and aux kernel calculations)
+  computeSystems(exec_type);
 
   // Post-aux UserObjects
   computeUserObjects(exec_type, Moose::POST_AUX);
@@ -4286,12 +4286,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
                  oss.str());
     }
   }
-}
-
-void
-FEProblemBase::computeAuxiliaryKernels(const ExecFlagType & type)
-{
-  _aux->compute(type);
 }
 
 // Finalize, threadJoin, and update PP values of Elemental/Nodal/Side/InternalSideUserObjects
@@ -6108,9 +6102,9 @@ FEProblemBase::finalNonlinearResidual(const unsigned int nl_sys_num) const
 }
 
 bool
-FEProblemBase::computingInitialResidual(const unsigned int nl_sys_num) const
+FEProblemBase::computingPreSMOResidual(const unsigned int nl_sys_num) const
 {
-  return _nl[nl_sys_num]->computingInitialResidual();
+  return _nl[nl_sys_num]->computingPreSMOResidual();
 }
 
 void
@@ -6462,7 +6456,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       if (_displaced_problem)
       {
-        _aux->compute(EXEC_PRE_DISPLACE);
+        computeSystems(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
         if (_mortar_data.hasDisplacedObjects())
           updateMortarMesh();
@@ -6474,11 +6468,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         _functions.residualSetup(tid);
       }
 
-      // Where is the aux system done? Could the non-current nonlinear systems also be done there?
-      for (auto & nl : _nl)
-        nl->computeTimeDerivatives();
-
-      _aux->compute(EXEC_LINEAR);
+      computeSystems(EXEC_LINEAR);
 
       computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
@@ -6696,7 +6686,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
       if (_displaced_problem)
       {
-        _aux->compute(EXEC_PRE_DISPLACE);
+        computeSystems(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
         if (_mortar_data.hasDisplacedObjects())
           updateMortarMesh();
@@ -6708,11 +6698,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
         _functions.residualSetup(tid);
       }
 
-      // Where is the aux system done? Could the non-current nonlinear systems also be done there?
-      for (auto & nl : _nl)
-        nl->computeTimeDerivatives();
-
-      _aux->compute(EXEC_LINEAR);
+      computeSystems(EXEC_LINEAR);
 
       computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
@@ -6845,7 +6831,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
         if (_displaced_problem)
         {
-          _aux->compute(EXEC_PRE_DISPLACE);
+          computeSystems(EXEC_PRE_DISPLACE);
           _displaced_problem->updateMesh();
         }
 
@@ -6855,14 +6841,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           _functions.jacobianSetup(tid);
         }
 
-        // When computing the initial Jacobian for automatic variable scaling we need to make sure
-        // that the time derivatives have been calculated. So we'll call down to the nonlinear
-        // system here. Note that if we are not doing this initial Jacobian calculation we will
-        // just exit in that class to avoid redundant calculation (the residual function also
-        // computes time derivatives)
-        _current_nl_sys->computeTimeDerivatives(/*jacobian_calculation =*/true);
-
-        _aux->compute(EXEC_NONLINEAR);
+        computeSystems(EXEC_NONLINEAR);
 
         computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
 
@@ -6910,11 +6889,11 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
 
   if (_displaced_problem)
   {
-    _aux->compute(EXEC_PRE_DISPLACE);
+    computeSystems(EXEC_PRE_DISPLACE);
     _displaced_problem->updateMesh();
   }
 
-  _aux->compute(EXEC_NONLINEAR);
+  computeSystems(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
   _current_nl_sys->computeJacobianBlocks(blocks);
@@ -6958,7 +6937,7 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
         _all_materials.residualSetup(tid);
 
       _aux->residualSetup();
-      _aux->compute(EXEC_LINEAR);
+      computeSystems(EXEC_LINEAR);
       _lower.swap(lower);
       _upper.swap(upper);
     }
@@ -7043,7 +7022,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   try
   {
-    _aux->compute(EXEC_NONLINEAR);
+    computeSystems(EXEC_NONLINEAR);
   }
   catch (MooseException & e)
   {
@@ -8047,7 +8026,6 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real abstol,
                                          const PetscInt nfuncs,
                                          const PetscInt max_funcs,
-                                         const Real initial_residual_before_preset_bcs,
                                          const Real div_threshold)
 {
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
@@ -8065,13 +8043,12 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
 
   Real fnorm_old;
-  // This is the first residual before any iterations have been done,
-  // but after preset BCs (if any) have been imposed on the solution
-  // vector.  We save it, and use it to detect convergence if
-  // compute_initial_residual_before_preset_bcs=false.
+  // This is the first residual before any iterations have been done, but after solution-modifying
+  // objects (if any) have been imposed on the solution vector.  We save it, and use it to detect
+  // convergence if system.usePreSMOResidual() == false.
   if (it == 0)
   {
-    system._initial_residual_after_preset_bcs = fnorm;
+    system.setInitialResidual(fnorm);
     fnorm_old = fnorm;
     _n_nl_pingpong = 0;
   }
@@ -8111,12 +8088,9 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 
   if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
-    // If compute_initial_residual_before_preset_bcs==false, then use the
-    // first residual computed by PETSc to determine convergence.
-    Real the_residual = system._compute_initial_residual_before_preset_bcs
-                            ? initial_residual_before_preset_bcs
-                            : system._initial_residual_after_preset_bcs;
-    if (checkRelativeConvergence(it, fnorm, the_residual, rtol, abstol, oss))
+    // Set the reference residual depending on what the user asks us to use.
+    const auto ref_residual = system.referenceResidual();
+    if (checkRelativeConvergence(it, fnorm, ref_residual, rtol, abstol, oss))
       reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     else if (snorm < stol * xnorm)
     {
@@ -8124,10 +8098,10 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
           << '\n';
       reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
-    else if (divtol > 0 && fnorm > the_residual * divtol)
+    else if (divtol > 0 && fnorm > ref_residual * divtol)
     {
-      oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
-          << divtol << " * initial residual " << the_residual << '\n';
+      oss << "Diverged due to residual " << fnorm << " > divergence tolerance " << divtol
+          << " * initial residual " << ref_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
     else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
@@ -8156,14 +8130,14 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 bool
 FEProblemBase::checkRelativeConvergence(const PetscInt /*it*/,
                                         const Real fnorm,
-                                        const Real the_residual,
+                                        const Real ref_residual,
                                         const Real rtol,
                                         const Real /*abstol*/,
                                         std::ostringstream & oss)
 {
   if (_fail_next_nonlinear_convergence_check)
     return false;
-  if (fnorm <= the_residual * rtol)
+  if (fnorm <= ref_residual * rtol)
   {
     oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol << ")\n";
     return true;
@@ -8704,4 +8678,35 @@ FEProblemBase::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
   SubProblem::setCurrentBoundaryID(bid, tid);
   if (_displaced_problem)
     _displaced_problem->setCurrentBoundaryID(bid, tid);
+}
+
+void
+FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
+{
+  mooseAssert(nl_sys_num < _nl.size(),
+              "System number greater than the number of nonlinear systems");
+  _current_nl_sys = _nl[nl_sys_num].get();
+  _current_solver_sys = _current_nl_sys;
+}
+
+void
+FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  _current_linear_sys = _linear_systems[sys_num].get();
+  _current_solver_sys = _current_linear_sys;
+}
+
+void
+FEProblemBase::computeSystems(const ExecFlagType & type)
+{
+  // When performing an adjoint solve in the optimization module, the current solver system is the
+  // adjoint. However, the adjoint solve requires having accurate time derivative calculations for
+  // the forward system. The cleanest way to handle such uses is just to compute the time
+  // derivatives for all solver systems instead of trying to guess which ones we need and don't need
+  for (auto & solver_sys : _solver_systems)
+    solver_sys->compute(type);
+
+  _aux->compute(type);
 }

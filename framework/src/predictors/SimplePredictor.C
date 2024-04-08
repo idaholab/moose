@@ -26,14 +26,10 @@ SimplePredictor::SimplePredictor(const InputParameters & parameters) : Predictor
 bool
 SimplePredictor::shouldApply()
 {
-  bool should_apply = true;
-  should_apply = Predictor::shouldApply();
+  bool should_apply = Predictor::shouldApply();
 
   if (_t_step < 2 || _dt_old <= 0)
     should_apply = false;
-
-  if (!should_apply)
-    _console << "  Skipping predictor this step" << std::endl;
 
   return should_apply;
 }

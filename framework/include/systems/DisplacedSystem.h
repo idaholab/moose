@@ -252,6 +252,8 @@ public:
   using SystemBase::addTimeIntegrator;
   void addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti) override;
 
+  virtual void compute(ExecFlagType) override {}
+
 protected:
   NumericVector<Number> & solutionInternal() const override
   {

@@ -75,7 +75,11 @@ OptimizeSolve::taoSolve()
   ierr = TaoCreate(_my_comm.get(), &_tao);
   CHKERRQ(ierr);
 
+#if PETSC_RELEASE_LESS_THAN(3, 21, 0)
   TaoSetMonitor(_tao, monitor, this, nullptr);
+#else
+  TaoMonitorSet(_tao, monitor, this, nullptr);
+#endif
 
   switch (_tao_solver_enum)
   {

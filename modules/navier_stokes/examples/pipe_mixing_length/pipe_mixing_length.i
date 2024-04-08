@@ -22,7 +22,7 @@ bulk_u = 1
 # the desired Reynolds number.
 mu = ${fparse rho * bulk_u * D / Re}
 
-# Here the DeltaP will be evaluted by using a postprocessor to find the pressure
+# Here the DeltaP will be evaluated by using a postprocessor to find the pressure
 # at a point that is 10 diameters away from the outlet. (The outlet pressure is
 # set to zero.)
 L = ${fparse 10 * D}

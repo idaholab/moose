@@ -36,34 +36,28 @@ protected:
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
-  const NumericVector<Number> & _solution_old_old_old;
 
   /**
    * Helper function that actually does the math for computing the time derivative
    */
-  template <typename T, typename T2, typename T3, typename T4, typename T5>
-  void computeTimeDerivativeHelper(T & u_dot,
-                                   T2 & u_dotdot,
-                                   const T3 & u_old,
-                                   const T4 & u_old_old,
-                                   const T5 & u_old_old_old) const;
+  template <typename T, typename T2, typename T3, typename T4>
+  void
+  computeTimeDerivativeHelper(T & u_dot, T2 & u_dotdot, const T3 & u_old, const T4 & u_older) const;
 };
 
-template <typename T, typename T2, typename T3, typename T4, typename T5>
+template <typename T, typename T2, typename T3, typename T4>
 void
 CentralDifference::computeTimeDerivativeHelper(T & u_dot,
                                                T2 & u_dotdot,
                                                const T3 & u_old,
-                                               const T4 & u_old_old,
-                                               const T5 & u_old_old_old) const
+                                               const T4 & u_older) const
 {
   // computing first derivative
   // using the Central Difference method
   // u_dot_old = (first_term - second_term) / 2 / dt
   //       first_term = u
   //      second_term = u_older
-  u_dot = u_old;
-  u_dot -= u_old_old_old; // 'older than older' solution
+  u_dot -= u_older; // 'older than older' solution
   u_dot *= 1.0 / (2.0 * _dt);
 
   // computing second derivative
@@ -72,9 +66,8 @@ CentralDifference::computeTimeDerivativeHelper(T & u_dot,
   //       first_term = u
   //      second_term = 2 * u_old
   //       third_term = u_older
-  u_dotdot = u_old;
-  u_dotdot -= u_old_old;
-  u_dotdot -= u_old_old;
-  u_dotdot += u_old_old_old;
+  u_dotdot -= u_old;
+  u_dotdot -= u_old;
+  u_dotdot += u_older;
   u_dotdot *= 1.0 / (_dt * _dt);
 }

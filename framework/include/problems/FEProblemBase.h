@@ -215,35 +215,31 @@ public:
 
   /**
    * Check for convergence of the nonlinear solution
-   * @param msg            Error message that gets sent back to the solver
-   * @param it             Iteration counter
-   * @param xnorm          Norm of the solution vector
-   * @param snorm          Norm of the change in the solution vector
-   * @param fnorm          Norm of the residual vector
-   * @param rtol           Relative residual convergence tolerance
-   * @param divtol         Relative residual divergence tolerance
-   * @param stol           Solution change convergence tolerance
-   * @param abstol         Absolute residual convergence tolerance
-   * @param nfuncs         Number of function evaluations
-   * @param max_funcs      Maximum Number of function evaluations
-   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of preset BCs
-   * values on solution vector
-   * @param div_threshold  Maximum value of residual before triggering divergence check
+   * @param msg Error message that gets sent back to the solver
+   * @param it Iteration counter
+   * @param xnorm Norm of the solution vector
+   * @param snorm Norm of the change in the solution vector
+   * @param fnorm Norm of the residual vector
+   * @param rtol Relative residual convergence tolerance
+   * @param divtol Relative residual divergence tolerance
+   * @param stol Solution change convergence tolerance
+   * @param abstol Absolute residual convergence tolerance
+   * @param nfuncs Number of function evaluations
+   * @param max_funcs Maximum Number of function evaluations
+   * @param div_threshold Maximum value of residual before triggering divergence check
    */
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real divtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const Real initial_residual_before_preset_bcs,
-                            const Real div_threshold);
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string & msg,
+                                                                    const PetscInt it,
+                                                                    const Real xnorm,
+                                                                    const Real snorm,
+                                                                    const Real fnorm,
+                                                                    const Real rtol,
+                                                                    const Real divtol,
+                                                                    const Real stol,
+                                                                    const Real abstol,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
+                                                                    const Real div_threshold);
 
   /// Perform steps required before checking nonlinear convergence
   virtual void nonlinearConvergenceSetup() {}
@@ -511,7 +507,7 @@ public:
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
   virtual Real finalNonlinearResidual(const unsigned int nl_sys_num) const override;
-  virtual bool computingInitialResidual(const unsigned int nl_sys_num) const override;
+  virtual bool computingPreSMOResidual(const unsigned int nl_sys_num) const override;
 
   /**
    * Return solver type as a human readable string
@@ -1841,11 +1837,6 @@ public:
                                        const std::string & name);
 
   /**
-   * Call compute methods on AuxKernels
-   */
-  virtual void computeAuxiliaryKernels(const ExecFlagType & type);
-
-  /**
    * Set a flag that indicated that user required values for the previous Newton iterate
    */
   void needsPreviousNewtonIteration(bool state);
@@ -2283,6 +2274,11 @@ protected:
   /// Create extra tagged solution vectors
   void createTagSolutions();
 
+  /**
+   * Do generic system computations
+   */
+  void computeSystems(const ExecFlagType & type);
+
   MooseMesh & _mesh;
 
 private:
@@ -2354,6 +2350,9 @@ protected:
 
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
+
+  /// The current solver system
+  SolverSystem * _current_solver_sys;
 
   /// Combined container to base pointer of every solver system
   std::vector<std::shared_ptr<SolverSystem>> _solver_systems;
@@ -2952,22 +2951,6 @@ inline const CouplingMatrix *
 FEProblemBase::couplingMatrix(const unsigned int i) const
 {
   return _cm[i].get();
-}
-
-inline void
-FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
-{
-  mooseAssert(nl_sys_num < _nl.size(),
-              "System number greater than the number of nonlinear systems");
-  _current_nl_sys = _nl[nl_sys_num].get();
-}
-
-inline void
-FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
-{
-  mooseAssert(sys_num < _linear_systems.size(),
-              "System number greater than the number of linear systems");
-  _current_linear_sys = _linear_systems[sys_num].get();
 }
 
 inline void

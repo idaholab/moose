@@ -13,7 +13,7 @@ by the PETSc solvers.
 You may find some additional documentation relevant to both `NonlinearSystem`
 and `NonlinearEigenSystem` in [NonlinearSystemBase.md].
 
-## Solving Non-linear Systems id=newtons_method
+## Solving Nonlinear Systems id=newtons_method
 
 Application of the finite element method converts PDE(s) into a system of
 nonlinear equations, $R_i(u_h)=0, \quad i=1,\ldots, N$
@@ -24,7 +24,7 @@ nonlinear equations, $R_i(u_h)=0, \quad i=1,\ldots, N$
 - Newton's Method in "Update Form" for finding roots of the scalar equation $f(x)=0, f(x): \mathbb{R} \rightarrow \mathbb{R}$ is given by:
 
 \begin{equation}
-\begin{split}   
+\begin{split}
  f'(x_n) \delta x_{n+1} &= -f(x_n) \\
   x_{n+1} &= x_n + \delta x_{n+1}
 \end{split}
@@ -34,7 +34,7 @@ nonlinear equations, $R_i(u_h)=0, \quad i=1,\ldots, N$
 - This leads to the following form of Newton's Method:
 
 \begin{equation}
-\begin{split} 
+\begin{split}
 \mathbf{J}(\vec{u}_n) \delta\vec{u}_{n+1} &= -\vec{R}(\vec{u}_n) \\
 \vec{u}_{n+1} &= \vec{u}_n + \delta\vec{u}_{n+1}
 \end{split}
@@ -46,13 +46,44 @@ nonlinear equations, $R_i(u_h)=0, \quad i=1,\ldots, N$
 - Note that:
 
 \begin{equation}
-\begin{split} 
+\begin{split}
 \dfrac{\partial u_h}{\partial u_j} &=
 \sum_k\dfrac{\partial }{\partial u_j}\left(u_k \phi_k\right) = \phi_j \\
 \dfrac{\partial \left(\nabla u_h\right)}{\partial u_j} &=
 \sum_k \dfrac{\partial }{\partial u_j}\left(u_k \nabla \phi_k\right) = \nabla \phi_j
 \end{split}
 \end{equation}
+
+## Convergence Criteria for the Nonlinear System
+
+The Newton's (or the modified Newton's) method iteratively updates the guess until
+a solution to the system of nonlinear equations is found. Therefore, after each solution update,
+we need to check if the current guess is "close enough" to being a solution.
+
+There are two primary convergence criteria, and the nonlinear system is said to be converged
+if _either_ of the two is satisfied:
+1. Absolute convergence: The norm of the residual evaluated at the current guess is below
+   a certain tolerance, i.e. $\lVert \vec{r} \rVert \leq \mathrm{atol}$ where $\mathrm{atol}$
+   is the absolute tolerance. This tolerance is specified via the `nl_abs_tol` parameter in the
+   [`Executioner`](Executioner.md) block.
+2. Relative convergence: The norm of the residual evaluated at the current guess is sufficiently
+   small compared to some "reference" value, i.e.
+   $\lVert \vec{r} \rVert \leq \mathrm{rtol} {\lVert \vec{r} \rVert}_0$ where $\mathrm{rtol}$ is
+   the relative tolerance, and ${\lVert \vec{r} \rVert}_0$ is the reference residual norm.
+   This tolerance is specified via the `nl_rel_tol` parameter in the
+   [`Executioner`](Executioner.md) block.
+
+MOOSE supports several definitions of the reference residual:
+- Initial residual: The residual evaluated at the 0-th nonlinear iteration. To select this definition,
+  set `use_pre_SMO_residual = false` in the [`Executioner`](Executioner.md) block.
+- Pre-SMO residual: The residual evaluated before any solution-modifying object is executed, and
+  before the 0-th nonlinear iteration. To select this definition, set `use_pre_SMO_residual = true`
+  in the [`Executioner`](Executioner.md) block.
+- Custom reference residual: To use a custom reference residual, use the
+  [`ReferenceResidualProblem`](ReferenceResidualProblem.md).
+
+The default is `use_pre_SMO_residual = false` which uses the initial residual as the reference
+residual in relative convergence checks.
 
 
 ## Jacobian Definition id=jacobian_definition
@@ -261,7 +292,7 @@ R_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\
 - Using the previously-defined rules for $\dfrac{\partial u_h}{\partial u_j}$ and $\dfrac{\partial \left(\nabla u_h\right)}{\partial u_j}$, the $(i,j)$ entry of the Jacobian is then:
 
 \begin{equation}
-\begin{split} 
+\begin{split}
 J_{ij}(u_h) &= \left(\nabla\psi_i, \dfrac{\partial k}{\partial u_j}\nabla u_h \right) + \left(\nabla\psi_i, k \nabla \phi_j \right) - \left \langle\psi_i, \dfrac{\partial k}{\partial u_j}\nabla u_h\cdot \hat{n} \right\rangle \\&- \left \langle\psi_i, k\nabla \phi_j\cdot \hat{n} \right\rangle + \left(\psi_i, \dfrac{\partial \vec{\beta}}{\partial u_j} \cdot\nabla u_h\right) + \left(\psi_i, \vec{\beta} \cdot \nabla \phi_j\right) - \left(\psi_i, \dfrac{\partial f}{\partial u_j}\right)
 \end{split}
 \end{equation}

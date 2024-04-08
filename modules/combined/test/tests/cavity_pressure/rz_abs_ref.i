@@ -149,6 +149,7 @@
 
   dt = 0.5
   end_time = 1.0
+  use_pre_SMO_residual = true
 []
 
 [Postprocessors]
