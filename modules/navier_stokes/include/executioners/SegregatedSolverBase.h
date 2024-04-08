@@ -24,32 +24,18 @@ class InputParameters;
 class FEProblemBase;
 
 /**
- * Solver configuration class used with the linear solvers in a SIMPLE solver.
+ * Base class for the executioners relying on segregated solution approaches.
  */
-class SIMPLESolverConfiguration : public libMesh::SolverConfiguration
-{
-  /**
-   * Override this to make sure the PETSc options are not overwritten in the linear solver
-   */
-  virtual void configure_solver() override {}
-};
-
-/**
- * Executioner set up to solve a thermal-hydraulics problem using the SIMPLE algorithm.
- * It utilizes segregated linearized systems which are solved using a fixed-point iteration.
- */
-class SIMPLE : public Executioner
+class SegregatedSolverBase : public Executioner
 {
 public:
   static InputParameters validParams();
 
-  SIMPLE(const InputParameters & parameters);
+  SegregatedSolverBase(const InputParameters & parameters);
 
   void init() override;
   void execute() override;
   bool lastSolveConverged() const override { return _last_solve_converged; }
-
-  const INSFVRhieChowInterpolatorSegregated & getRCUserObject() { return *_rc_uo; }
 
   /**
    * Compute a normalization factor which is applied to the linear residual to determine
@@ -102,41 +88,17 @@ protected:
                           const NumericVector<Number> & solution_in,
                           const NumericVector<Number> & diff_diagonal);
 
-  /// Solve a momentum predictor step with a fixed pressure field
-  /// @return A vector for the normalized residual norms of the momentum equations.
-  ///         The length of the vector equals the dimensionality of the domain.
-  std::vector<Real> solveMomentumPredictor();
-
-  /// Solve a pressure corrector step.
-  /// @return The normalized residual norm of the pressure equation.
-  Real solvePressureCorrector();
-
-  /// Solve an equation which contains an advection term that depends
-  /// on the solution of the segregated Navier-Stokes equations.
-  /// @param system_num The number of the system which is solved
-  /// @param system Reference to the system which is solved
-  /// @param relaxation_factor The relaxation factor for matrix relaxation
-  /// @param solver_config The solver configuration object for the linear solve
-  /// @param abs_tol The scaled absolute tolerance for the linear solve
-  /// @return The normalized residual norm of the equation.
-  Real solveAdvectedSystem(const unsigned int system_num,
-                           NonlinearSystemBase & system,
-                           const Real relaxation_factor,
-                           SolverConfiguration & solver_config,
-                           const Real abs_tol);
-
-  /// Solve the solid energy conservation equation.
-  /// @return The normalized residual norm of the solid equation.
-  Real solveSolidEnergySystem();
-
   /**
    * Relax the update on a solution field using the following approach:
    * $u = u_{old}+\lambda (u - u_{old})$
    *
-   * @param system_in The system whose solution shall be relaxed
+   * @param vector_new The new solution vector
+   * @param vec_old The old solution vector
    * @param relaxation_factor The lambda parameter in the expression above
    */
-  void relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor);
+  void relaxSolutionUpdate(NumericVector<Number> & vec_new,
+                           const NumericVector<Number> & vec_old,
+                           const Real relaxation_factor);
 
   /**
    * Limit a solution to its minimum and maximum bounds:
@@ -179,10 +141,22 @@ protected:
    */
   bool converged(const std::vector<Real> & residuals, const std::vector<Real> & abs_tolerances);
 
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
+                                    const bool should_be_defined);
+
+  /// Check for wrong execute on flags in the multiapps
+  bool hasMultiAppError(const ExecFlagEnum & flags);
+
+  /// Check for wrong execute on flags in the transfers
+  bool hasTransferError(const ExecFlagEnum & flags);
+
   FEProblemBase & _problem;
   Real _system_time;
   int & _time_step;
   Real & _time;
+
+  bool _last_solve_converged;
 
   /// Boolean for easy check if a fluid energy system shall be solved or not
   const bool _has_energy_system;
@@ -198,74 +172,6 @@ protected:
 
   /// The names of the momentum systems.
   const std::vector<NonlinearSystemName> _momentum_system_names;
-
-  /// The number(s) of the system(s) corresponding to the momentum equation(s)
-  std::vector<unsigned int> _momentum_system_numbers;
-
-  /// The number of the system corresponding to the pressure equation
-  const unsigned int _pressure_sys_number;
-
-  /// The number of the system corresponding to the energy equation
-  const unsigned int _energy_sys_number;
-
-  /// The number of the system corresponding to the solid energy equation
-  const unsigned int _solid_energy_sys_number;
-
-  /// The number(s) of the system(s) corresponding to the passive scalar equation(s)
-  std::vector<unsigned int> _passive_scalar_system_numbers;
-
-  /// The number(s) of the system(s) corresponding to the turbulence equation(s)
-  std::vector<unsigned int> _turbulence_system_numbers;
-
-  /// Pointer(s) to the system(s) corresponding to the momentum equation(s)
-  std::vector<NonlinearSystemBase *> _momentum_systems;
-
-  /// Reference to the nonlinear system corresponding to the pressure equation
-  NonlinearSystemBase & _pressure_system;
-
-  /// Pointer to the nonlinear system corresponding to the fluid energy equation
-  NonlinearSystemBase * _energy_system;
-
-  /// Pointer to the nonlinear system corresponding to the solid energy equation
-  NonlinearSystemBase * _solid_energy_system;
-
-  /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
-  std::vector<NonlinearSystemBase *> _passive_scalar_systems;
-
-  /// Pointer(s) to the system(s) corresponding to the turbulence equation(s)
-  std::vector<NonlinearSystemBase *> _turbulence_systems;
-
-  /// Pointer to the segregated RhieChow interpolation object
-  INSFVRhieChowInterpolatorSegregated * _rc_uo;
-
-private:
-  void checkDependentParameterError(const std::string & main_parameter,
-                                    const std::vector<std::string> & dependent_parameters,
-                                    const bool should_be_defined);
-
-  /// Check for wrong execute on flags in the multiapps
-  bool hasMultiAppError(const ExecFlagEnum & flags);
-
-  /// Check for wrong execute on flags in the transfers
-  bool hasTransferError(const ExecFlagEnum & flags);
-
-  /**
-   * Check if the system contains a time kernel or not. This is a steady-state executioner so we
-   * wanna make sure the user doesn't have kernels that add time-derivatives.
-   * @param system Reference to the system which holds the kernels. This is not const because
-   * the constainsTimeKernel() routine is not const.
-   */
-  void checkIntegrity(NonlinearSystemBase & system);
-
-  bool _last_solve_converged;
-
-  /// The name of the vector tag which corresponds to the pressure gradient terms in the
-  /// momentum equation
-  const TagName _pressure_tag_name;
-
-  /// The ID of the tag which corresponds to the pressure gradient terms in the
-  /// momentum equation
-  const TagID _pressure_tag_id;
 
   /// The user-defined relaxation parameter for the momentum equation
   const Real _momentum_equation_relaxation;
@@ -323,9 +229,6 @@ private:
 
   /// Options which hold the petsc settings for the turbulence equation(s)
   Moose::PetscSupport::PetscOptions _turbulence_petsc_options;
-
-  /// Options for the linear solver of the momentum equation
-  SIMPLESolverConfiguration _momentum_linear_control;
 
   /// Absolute linear tolerance for the momentum equation(s). We need to store this, because
   /// it needs to be scaled with a representative flux.
