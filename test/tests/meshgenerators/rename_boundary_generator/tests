@@ -109,7 +109,7 @@
       cli_args = 'Mesh/rename/old_boundary="0"
                   Mesh/rename/new_boundary="40000"
                   --mesh-only'
-      expect_err = "Boundary ID 40000 is not within the numeric limits of type BoundaryID."
+      expect_err = "40000 is not within the numeric limits of the expected ID type."
 
       detail = 'and when the provided old and new boundaries are not the same length.'
     []
