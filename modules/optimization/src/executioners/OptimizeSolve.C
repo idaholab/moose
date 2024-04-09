@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "Moose.h"
+#include "MooseError.h"
 #include "OptimizeSolve.h"
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
@@ -31,6 +33,10 @@ OptimizeSolve::validParams()
                OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD};
   params.addParam<ExecFlagEnum>(
       "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
+  params.addParam<bool>(
+      "output_optimization_iterations",
+      false,
+      "Use the time step as the current iteration for outputting optimization history.");
   return params;
 }
 
@@ -39,11 +45,16 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _my_comm(MPI_COMM_SELF),
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
+    _output_opt_iters(getParam<bool>("output_optimization_iterations")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
     _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
+
+  if (_output_opt_iters && _problem.isTransient())
+    mooseDocumentedError(
+        "moose", 27225, "Outputting for transient executioners has not been implemented.");
 }
 
 bool
@@ -61,6 +72,11 @@ OptimizeSolve::solve()
   // Initialize solution and matrix
   _obj_function->setInitialCondition(*_parameters.get());
   _ndof = _parameters->size();
+
+  // time step defaults 1, we want to start at 0 for first iteration to be
+  // consistent with TAO iterations.
+  if (_output_opt_iters)
+    _problem.timeStep() = 0;
   bool solveInfo = (taoSolve() == 0);
   return solveInfo;
 }
@@ -295,6 +311,14 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
       steady->setIterationNumberOutput((unsigned int)its);
   }
 
+  // Output the converged iteration outputs
+  _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
+
+  // Increment timestep. In steady problems timestep = time for outputting.
+  // See Output.C
+  if (_output_opt_iters)
+    _problem.timeStep() += 1;
+
   // print verbose per iteration output
   if (_verbose)
     _console << "TAO SOLVER: iteration=" << its << "\tf=" << f << "\tgnorm=" << gnorm
@@ -389,7 +413,11 @@ OptimizeSolve::objectiveFunction()
 
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_FORWARD);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_FORWARD))
+  {
+    // We do this so we can output for failed solves.
+    _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
     mooseError("Forward solve multiapp failed!");
+  }
   if (_solve_on.contains(OptimizationAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 

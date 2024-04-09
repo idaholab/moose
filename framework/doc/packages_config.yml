@@ -11,3 +11,6 @@ moose_tools: 2024.03.07
 apptainer_rockylinux: 8.8.20230518
 apptainer_mpich: 3.4.3
 apptainer_gcc: 12.2.1
+conda_version: 23.11.0-0
+conda_mpi: moose-mpich
+mpi: mpich

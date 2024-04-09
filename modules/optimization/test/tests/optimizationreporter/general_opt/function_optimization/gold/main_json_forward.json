@@ -1,0 +1,80 @@
+{
+    "reporters": {
+        "OptimizationReporter": {
+            "type": "GeneralOptimization",
+            "values": {
+                "grad_vals": {
+                    "type": "std::vector<double>"
+                },
+                "obj_value": {
+                    "type": "double"
+                },
+                "vals": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    -34.0,
+                    -38.0
+                ],
+                "obj_value": 74.0,
+                "vals": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    6.25,
+                    2.75
+                ],
+                "obj_value": 2.65625,
+                "vals": [
+                    2.125,
+                    2.375
+                ]
+            },
+            "time": 0.0,
+            "time_step": 1
+        },
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    -1.8765053557380043,
+                    1.6789784761866287
+                ],
+                "obj_value": 1.5807250608311465,
+                "vals": [
+                    0.10564218425352578,
+                    3.8833841002158422
+                ]
+            },
+            "time": 0.0,
+            "time_step": 2
+        },
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    3.552713678800501e-15,
+                    3.552713678800501e-15
+                ],
+                "obj_value": 1.5777218104420236e-30,
+                "vals": [
+                    1.0000000000000002,
+                    3.0000000000000004
+                ]
+            },
+            "time": 0.0,
+            "time_step": 3
+        }
+    ]
+}

@@ -17,7 +17,7 @@ GradField::validParams()
 {
   InputParameters params = VectorKernel::validParams();
   params.addClassDescription("The gradient operator optionally scaled by a constant scalar "
-                             "coefficient. Weak form: $(\\nabla \\cdot \\vec{\\psi_i}, k u)$.");
+                             "coefficient. Weak form: $(\\nabla \\cdot \\vec{\\psi_i}, k v)$.");
   params.addRequiredCoupledVar("coupled_scalar_variable", "The scalar field");
   params.addParam<Real>("coeff", 1.0, "The constant coefficient");
   return params;

@@ -18,10 +18,10 @@
 
 #include <memory>
 
-class Storage
+class WarehouseStorage
 {
 public:
-  virtual ~Storage() = default;
+  virtual ~WarehouseStorage() = default;
   virtual void add(std::size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) = 0;
   virtual std::vector<std::size_t> query(const std::vector<std::unique_ptr<Attribute>> & conds) = 0;
   virtual void set(std::size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) = 0;
@@ -53,7 +53,7 @@ AttribSorted::isEqual(const Attribute & other) const
   return isMatch(other);
 }
 
-class VecStore : public Storage
+class VecStore : public WarehouseStorage
 {
 public:
   virtual void add(std::size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) override
