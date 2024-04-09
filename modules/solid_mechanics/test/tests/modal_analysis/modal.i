@@ -122,8 +122,8 @@ index = 0
   n_eigen_pairs = 2
   n_basis_vectors = 5
   petsc_options = '-eps_monitor_all'
-  petsc_options_iname = ' -st_type -eps_target'
-  petsc_options_value = ' sinvert 0'
+  petsc_options_iname = '-st_type -eps_target'
+  petsc_options_value = 'sinvert 0'
   eigen_tol = 1e-8
 []
 
