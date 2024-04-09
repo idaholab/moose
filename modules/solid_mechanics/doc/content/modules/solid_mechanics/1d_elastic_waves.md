@@ -79,9 +79,11 @@ id=m_prob caption=Eigenvalues
 For this coarse mesh example, we were able to determine the first two
 $\omega$'s:552.8 Hz and 789 Hz. Which are close to the theoretical result of
 600 Hz and 800 Hz, and as the mesh is refined the results would converge on the
-true solutions.
+true solutions. The second mode is visualized in [mode2], and the outline of the
+undeformed state is shown in black.
 
-
+!media solid_mechanics/beam_mode_2.mp4 style=float:right;width:100%
+caption=Cantilever Beam: Mode 2 id=mode2
 
 
 ## Frequency Response Function
