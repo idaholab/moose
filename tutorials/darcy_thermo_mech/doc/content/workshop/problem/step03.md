@@ -69,7 +69,7 @@ it must be updated to consume the newly created material properties.
 ## Step 3: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_darcy_material
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step03_darcy_material
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step3.i

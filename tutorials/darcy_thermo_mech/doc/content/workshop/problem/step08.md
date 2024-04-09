@@ -20,7 +20,7 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 ## Step 8: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step08_postprocessors
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step08_postprocessors
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step8.i
