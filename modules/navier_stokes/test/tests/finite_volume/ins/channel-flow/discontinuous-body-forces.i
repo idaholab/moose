@@ -86,6 +86,7 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
     block = '1'
     use_standard = false
+    use_superficial = false
     rho = ${rho}
   []
   [v_advection]
@@ -115,6 +116,7 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
     block = '1'
     use_standard = false
+    use_superficial = false
     rho = ${rho}
   []
 []
