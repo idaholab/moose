@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#27295'
+  [modal]
+    type = Exodiff
+    input = 'modal.i'
+    exodiff = 'modal_out.e'
+    requirement = "The module shall be able to perform modal analysis with the Eigenvalue Executioner."
+  []
+[]
