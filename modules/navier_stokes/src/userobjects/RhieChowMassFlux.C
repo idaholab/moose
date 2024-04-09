@@ -207,10 +207,50 @@ RhieChowMassFlux::populateHbyA(
 }
 
 void
-RhieChowMassFlux::populateAinv(
-    const std::vector<std::unique_ptr<NumericVector<Number>>> & /*raw_Ainv*/,
-    const std::vector<unsigned int> & /*var_nums*/)
+RhieChowMassFlux::populateAinv(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv,
+                               const std::vector<unsigned int> & /*var_nums*/)
 {
+  using namespace Moose::FV;
+
+  for (auto & fi : _fe_problem.mesh().faceInfo())
+  {
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    {
+      // If we are on an internal face, we just interpolate the values to the faces.
+      // Otherwise, depending on the boundary type, we take the velocity value or
+      // extrapolated HbyA values.
+      if (_vel[0]->isInternalFace(*fi))
+      {
+        const auto & elem_info = *fi->elemInfo();
+        const auto & neighbor_info = *fi->neighborInfo();
+        const auto elem_dof =
+            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+        const auto neighbor_dof =
+            neighbor_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+
+        for (const auto dim_i : index_range(raw_Ainv))
+          interpolate(InterpMethod::Average,
+                      _Ainv[fi->id()](dim_i),
+                      (*raw_Ainv[dim_i])(elem_dof)*elem_info.volume() * elem_info.coordFactor(),
+                      (*raw_Ainv[dim_i])(neighbor_dof)*neighbor_info.volume() *
+                          neighbor_info.coordFactor(),
+                      *fi,
+                      true);
+      }
+      else
+      {
+        const ElemInfo & elem_info =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+        const auto elem_dof =
+            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+
+        for (const auto dim_i : index_range(raw_Ainv))
+          _Ainv[fi->id()](dim_i) =
+              (*raw_Ainv[dim_i])(elem_dof)*elem_info.volume() * elem_info.coordFactor();
+      }
+    }
+  }
 }
 
 void
