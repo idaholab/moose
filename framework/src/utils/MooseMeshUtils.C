@@ -186,8 +186,13 @@ getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
     id = mesh.get_boundary_info().get_id_by_name(boundary_name);
   else
   {
-    std::istringstream ss(boundary_name);
-    ss >> id;
+    const auto tmp_id = stoi(boundary_name);
+    if (tmp_id >= std::numeric_limits<BoundaryID>::min() &&
+        tmp_id <= std::numeric_limits<BoundaryID>::max())
+      id = tmp_id;
+    else
+      mooseError(
+          "Boundary ID ", boundary_name, " is not within the numeric limits of type BoundaryID.");
   }
 
   return id;
