@@ -19,6 +19,7 @@ MassFluxPenaltyBC::validParams()
   params.addRequiredCoupledVar("v", "The y-velocity");
   params.addRequiredParam<unsigned short>("component",
                                           "The velocity component this object is being applied to");
+  params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
   return params;
 }
 
@@ -27,7 +28,8 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _vel_x(adCoupledValue("u")),
     _vel_y(adCoupledValue("v")),
     _comp(getParam<unsigned short>("component")),
-    _matrix_only(getParam<bool>("matrix_only"))
+    _matrix_only(getParam<bool>("matrix_only")),
+    _gamma(getParam<Real>("gamma"))
 {
 }
 
@@ -43,5 +45,5 @@ MassFluxPenaltyBC::computeQpResidual()
 {
   const ADRealVectorValue soln_jump(_vel_x[_qp], _vel_y[_qp], 0);
 
-  return soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
+  return _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
 }
