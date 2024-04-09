@@ -27,7 +27,7 @@ ignored since we are interested in the free vibration response of the structure.
 Only Dirichlet boundary conditions are considered.
 
 To demonstrate modal analysis in MOOSE, we will visit the cantilever beam example that will be discussed in more detail in the next section on frequency response functions. The goal here is to calculate the first few natural frequencies and visualize the corresponding mode shapes of the cantilever beam.
-The strong form PDE for the modal analysis of the cantilever beam is:
+The strong form for the modal analysis of the cantilever beam is:
 \begin{equation}
 \nabla \cdot \boldsymbol{\sigma}(\mathbf{u}) = -\rho \omega^2 \mathbf{u}
 \end{equation}
@@ -40,17 +40,17 @@ to the "B" matrix.
 
 In the Kernels block, we define the kernels that contribute to the "A" and "B"
 matrices in the eigenvalue problem. The StressDivergenceTensor kernels represent the stress divergence terms and contribute to the "A"
-matrix. The ADCoefReaction kernels (reaction_x, reaction_y, reaction_z)
+matrix. The ADCoefReaction kernels
 represent the mass terms and contribute to the "B" matrix. The
 [!param](/Kernels/CoefReaction/coefficient) in [kernels/CoefReaction.md] is set
 to a negative value which corresponds to a positive density. The
-`extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels are
-part of the eigenvalue problem.
+`extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels
+contribute to "B" matrix.
 
 !listing test/tests/modal_analysis/modal.i block=Kernels id=m_kernel caption=
 Kernels for A and B
 
-The BCs block defines the boundary conditions for the problem. In this example, we have Dirichlet boundary conditions applied to the left boundary for all displacement components (disp_x, disp_y, disp_z). The [DirichletBC.md] is used for the "A" matrix, while the [EigenDirichletBC.md] is used for the "B" matrix.
+The BCs block defines the boundary conditions for the problem. In this example, we have Dirichlet boundary conditions applied to the left boundary for all displacement components. The [DirichletBC.md] is used for the "A" matrix, while the [EigenDirichletBC.md] is used for the "B" matrix.
 
 !listing test/tests/modal_analysis/modal.i block=BCs id=m_bc caption=BCs for
 matrix A and B.
@@ -61,24 +61,24 @@ solving a linear eigenvalue problem we can use a
 [!param](/Executioner/Eigenvalue/solve_type) that can get multiple eigenvalues
 at once, in this case that is `KRYLOVSCHUR`. The
 [!param](/Executioner/Eigenvalue/which_eigen_pairs) parameter determines which
-eigenvalues to compute and for modal analysis the smallest are usually of interest. The
+eigenvalues to compute and for modal analysis the smallest eigenvalues are usually of interest. The
 [!param](/Executioner/Eigenvalue/n_eigen_pairs) parameter sets the number of eigenvalue pairs to compute.
 
 !listing test/tests/modal_analysis/modal.i block=Executioner id=m_exec
 caption=Eigenvalue Executioner
 
 To output all the eigenvalues solved in the system we can use the
-[vectorpostprocessors/Eigenvalues.md]. While we have solved for the two smallest
+[vectorpostprocessors/Eigenvalues.md] vectorpostprocessor. While we have solved for the two smallest
 eigenvalues, currently MOOSE only has the ability to output a single one. To
-change which eigenvalue is adjust the index in
+change which eigenvector is outputted adjust the index in
 [!param](/Problem/EigenProblem/active_eigen_index).
 
 !listing test/tests/modal_analysis/modal.i block=VectorPostprocessors Problem
 id=m_prob caption=Eigenvalues
 
 For this coarse mesh example, we were able to determine the first two
-$\omega$'s:552.8 Hz and 789 Hz. Which are close to the theoretical result of
-600 Hz and 800 Hz, and as the mesh is refined the results would converge on the
+$\omega$'s: 552.8 Hz and 789 Hz. Which are close to the theoretical result of
+600 Hz and 800 Hz, and as the mesh is refined the results would converge on to the
 true solutions. The second mode is visualized in [mode2], and the outline of the
 undeformed state is shown in black.
 
