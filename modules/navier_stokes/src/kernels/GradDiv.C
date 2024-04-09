@@ -19,6 +19,7 @@ GradDiv::validParams()
   params.addRequiredCoupledVar("v", "The y-velocity");
   params.addRequiredParam<unsigned short>("component",
                                           "The velocity component this object is being applied to");
+  params.addParam<Real>("gamma", 1, "The penalty parameter");
   return params;
 }
 
@@ -27,7 +28,8 @@ GradDiv::GradDiv(const InputParameters & parameters)
     _grad_vel_x(adCoupledGradient("u")),
     _grad_vel_y(adCoupledGradient("v")),
     _comp(getParam<unsigned short>("component")),
-    _matrix_only(getParam<bool>("matrix_only"))
+    _matrix_only(getParam<bool>("matrix_only")),
+    _gamma(getParam<Real>("gamma"))
 {
 }
 
@@ -41,5 +43,5 @@ GradDiv::computeResidual()
 ADReal
 GradDiv::computeQpResidual()
 {
-  return (_grad_vel_x[_qp](0) + _grad_vel_y[_qp](1)) * _grad_test[_i][_qp](_comp);
+  return _gamma * (_grad_vel_x[_qp](0) + _grad_vel_y[_qp](1)) * _grad_test[_i][_qp](_comp);
 }
