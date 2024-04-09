@@ -13,7 +13,7 @@
 
 #define registerNavierStokesPhysicsBaseTasks(app_name, derived_name)                               \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
-  registerMooseAction(app_name, derived_name, "add_geometric_rm");
+  registerMooseAction(app_name, derived_name, "add_geometric_rm")
 
 /**
  * Base class to hold common parameters and utilities between all the weakly compressible

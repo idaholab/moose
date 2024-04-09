@@ -10,6 +10,7 @@
 #pragma once
 
 #include "NavierStokesPhysicsBase.h"
+#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "NS.h"
 
 /**

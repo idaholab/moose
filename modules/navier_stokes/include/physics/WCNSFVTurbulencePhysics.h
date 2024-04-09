@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "NavierStokesPhysicsBase.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
 class WCNSFVHeatAdvectionPhysics;

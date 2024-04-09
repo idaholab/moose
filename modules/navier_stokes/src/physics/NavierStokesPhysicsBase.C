@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NavierStokesPhysicsBase.h"
-#include "NSFVAction.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "RelationshipManager.h"
 #include "WCNSFVFlowPhysics.h"

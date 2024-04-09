@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVScalarAdvectionPhysics.h"
-#include "NSFVAction.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
+#include "WCNSFVFlowPhysics.h"
+#include "NSFVAction.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarAdvectionPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_variable");

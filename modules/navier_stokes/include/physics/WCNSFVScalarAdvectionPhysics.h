@@ -10,6 +10,7 @@
 #pragma once
 
 #include "NavierStokesPhysicsBase.h"
+#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar advection equations
