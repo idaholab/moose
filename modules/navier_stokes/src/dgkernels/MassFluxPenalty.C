@@ -24,6 +24,7 @@ MassFluxPenalty::validParams()
   params.addRequiredCoupledVar("v", "The y-velocity");
   params.addRequiredParam<unsigned short>("component",
                                           "The velocity component this object is being applied to");
+  params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
   return params;
 }
 
@@ -34,7 +35,8 @@ MassFluxPenalty::MassFluxPenalty(const InputParameters & parameters)
     _vel_y(adCoupledValue("v")),
     _vel_y_neighbor(adCoupledNeighborValue("v")),
     _comp(getParam<unsigned short>("component")),
-    _matrix_only(getParam<bool>("matrix_only"))
+    _matrix_only(getParam<bool>("matrix_only")),
+    _gamma(getParam<Real>("gamma"))
 {
 }
 
@@ -55,11 +57,11 @@ MassFluxPenalty::computeQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     case Moose::Element:
-      r = soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
+      r = _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
       break;
 
     case Moose::Neighbor:
-      r = -soln_jump * _normals[_qp] * _test_neighbor[_i][_qp] * _normals[_qp](_comp);
+      r = -_gamma * soln_jump * _normals[_qp] * _test_neighbor[_i][_qp] * _normals[_qp](_comp);
       break;
   }
 
