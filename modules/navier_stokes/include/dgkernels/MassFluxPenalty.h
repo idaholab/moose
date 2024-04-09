@@ -29,4 +29,5 @@ protected:
   const ADVariableValue & _vel_y_neighbor;
   const unsigned short _comp;
   const bool _matrix_only;
+  const Real _gamma;
 };
