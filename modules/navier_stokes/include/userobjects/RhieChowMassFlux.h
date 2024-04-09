@@ -80,6 +80,10 @@ protected:
   void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                     const std::vector<unsigned int> & var_nums);
 
+  /// Populate the face values of the 1/A field
+  void populateAinv(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv,
+                    const std::vector<unsigned int> & var_nums);
+
   /**
    * Check the block consistency between the passed in \p var and us
    */

@@ -207,8 +207,142 @@ RhieChowMassFlux::populateHbyA(
 }
 
 void
-RhieChowMassFlux::computeHbyA(bool /*verbose*/)
+RhieChowMassFlux::populateAinv(
+    const std::vector<std::unique_ptr<NumericVector<Number>>> & /*raw_Ainv*/,
+    const std::vector<unsigned int> & /*var_nums*/)
 {
+}
+
+void
+RhieChowMassFlux::computeHbyA(bool verbose)
+{
+  if (verbose)
+  {
+    _console << "************************************" << std::endl;
+    _console << "Computing HbyA" << std::endl;
+    _console << "************************************" << std::endl;
+  }
+  mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
+              "The momentum system shall be linked before calling this function!");
+
+  std::vector<unsigned int> var_nums;
+  for (const auto dim_i : index_range(_vel))
+    var_nums.push_back(_momentum_implicit_systems[1]->variable_number(_vel[dim_i]->name()));
+
+  auto & pressure_gradient = _pressure_system->gradientContainer();
+
+  _HbyA_raw.clear();
+  _Ainv_raw.clear();
+  for (auto system_i : index_range(_momentum_systems))
+  {
+    LinearImplicitSystem * momentum_system = _momentum_implicit_systems[system_i];
+
+    NumericVector<Number> & rhs = *(momentum_system->rhs);
+    NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+    NumericVector<Number> & solution = *(momentum_system->solution);
+    PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
+    mooseAssert(mmat,
+                "The matrices used in the segregated INSFVRhieChow objects need to be convertable "
+                "to PetscMatrix!");
+
+    if (verbose)
+    {
+      _console << "Matrix in rc object" << std::endl;
+      mmat->print();
+    }
+
+    _Ainv_raw.push_back(current_local_solution.zero_clone());
+    NumericVector<Number> & Ainv = *(_Ainv_raw.back());
+
+    mmat->get_diagonal(Ainv);
+
+    auto working_vector = momentum_system->current_local_solution->zero_clone();
+    PetscVector<Number> * working_vector_petsc =
+        dynamic_cast<PetscVector<Number> *>(working_vector.get());
+    mooseAssert(working_vector_petsc,
+                "The vectors used in the RhieChowMassFlux objects need to be convertable "
+                "to PetscVectors!");
+
+    *working_vector_petsc = 1.0;
+    Ainv.pointwise_divide(*working_vector_petsc, Ainv);
+
+    if (verbose)
+    {
+      _console << "Velocity solution in H(u)" << std::endl;
+      solution.print();
+    }
+
+    _HbyA_raw.push_back(current_local_solution.zero_clone());
+    NumericVector<Number> & HbyA = *(_HbyA_raw.back());
+    HbyA = 0;
+    HbyA.add(rhs);
+
+    // Now we set the diagonal of our system matrix to 0 so we can create H*u
+    // TODO: Add a function for this in libmesh
+    *working_vector_petsc = 0.0;
+    MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
+
+    if (verbose)
+    {
+      _console << "H" << std::endl;
+      mmat->print();
+    }
+
+    if (verbose)
+    {
+      _console << "total RHS" << std::endl;
+      rhs.print();
+      _console << "pressure RHS" << std::endl;
+      pressure_gradient[system_i]->print();
+    }
+
+    // We correct the right hand side to exclude the pressure contribution
+    HbyA.add(-1.0, *pressure_gradient[system_i]);
+
+    if (verbose)
+    {
+      _console << "H RHS" << std::endl;
+      HbyA.print();
+    }
+
+    // Create H(u)
+    mmat->vector_mult(*working_vector_petsc, solution);
+
+    if (verbose)
+    {
+      _console << " H(u)" << std::endl;
+      working_vector_petsc->print();
+    }
+
+    // Create H(u) - RHS
+    HbyA.add(*working_vector_petsc);
+
+    if (verbose)
+    {
+      _console << " H(u)-rhs-relaxation_source" << std::endl;
+      HbyA.print();
+    }
+
+    // Create 1/A*(H(u)-RHS)
+    HbyA.pointwise_mult(HbyA, Ainv);
+
+    if (verbose)
+    {
+      _console << " (H(u)-rhs)/A" << std::endl;
+      HbyA.print();
+    }
+  }
+
+  // We fill the 1/A functor
+  populateAinv(_Ainv_raw, var_nums);
+  populateHbyA(_HbyA_raw, var_nums);
+
+  if (verbose)
+  {
+    _console << "************************************" << std::endl;
+    _console << "DONE Computing HbyA " << std::endl;
+    _console << "************************************" << std::endl;
+  }
 }
 
 bool
