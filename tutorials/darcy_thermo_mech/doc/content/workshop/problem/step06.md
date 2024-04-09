@@ -117,7 +117,7 @@ The condition number of the Jacobian can be used to determine if variable scalin
 ```bash
 cd ~/projects/moose/tutorials/darcy_thermo_mech/step06_coupled_darcy_heat_conduction
 make -j 12
-../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor -ksp_view_pmat
+../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/gmg/nx=50 Mesh/gmg/ny=3 Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
 ```bash
@@ -145,7 +145,7 @@ row 4: (0, 4.01973e-12)  (1, 0.)  (2, 3.97056e-14)  (3, 0.)  (4, -6.43156e-11)  
 ```bash
 cd ~/projects/moose/tutorials/darcy_thermo_mech/step06_coupled_darcy_heat_conduction
 make -j 12
-../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 -pc_type svd -pc_svd_monitor -ksp_view_pmat
+../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/gmg/nx=50 Mesh/gmg/ny=3 Executioner/num_steps=1 -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
 ```bash
