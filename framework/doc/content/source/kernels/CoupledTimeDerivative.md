@@ -40,9 +40,7 @@ for phase field calculations. The syntax is simple, taking its type
 derivative operator acts upon. Example syntax can be found in the kernel block
 below:
 
-!listing
-test/tests/kernels/coupled_time_derivative/coupled_time_derivative_test.i
-block=Kernels
+!listing test/tests/kernels/coupled_time_derivative/coupled_time_derivative_test.i block=Kernels
 
 !syntax parameters /Kernels/CoupledTimeDerivative
 

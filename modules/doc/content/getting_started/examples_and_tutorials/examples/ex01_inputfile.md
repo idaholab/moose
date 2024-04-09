@@ -10,7 +10,7 @@ $-\nabla \cdot \nabla u = 0 \in \Omega$, $u = 1$ on the bottom, $u = 0$ on the t
 $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.
 
 The weak form ([see Finite Elements Principles](finite_element_concepts/fem_principles.md)) of
-this equation, in inner-product notation, is given by: $\nabla \phi_i, \nabla u_h = 0 \quad
+this equation, in inner-product notation, is given by: $(\nabla \phi_i, \nabla u_h) = 0 \quad
 \forall  \phi_i$, where $\phi_i$ are the test functions and $u_h$ is the finite element solution.
 
 ## Input File Syntax
@@ -37,7 +37,6 @@ file itself:
 []
 ```
 
-<br>
 
 !media large_media/examples/mug_mesh.png
        caption=mug.e mesh file
@@ -108,7 +107,6 @@ make -j8
 This will generate the results file, out.e, as shown in [example-1-results]. This file may be viewed using
 Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
-<br>
 
 !media large_media/examples/ex01_results.png
        id=example-1-results
