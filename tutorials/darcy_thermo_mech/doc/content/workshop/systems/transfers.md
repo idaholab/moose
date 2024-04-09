@@ -16,6 +16,7 @@ each sub-application should be able to solve on its own.
 ## Field Transfers
 
 Fields can be transferred between applications using a variety of interpolation algorithms.
+
 - The direction of the transfer is specified by giving the `from_multi_app` or `to_multi_app` parameter.
 - The source field is evaluated at the destination points (generally nodes or element centroids, depending on the receiving variable type).
 - The evaluations are then put into the receiving `AuxVariable` field specified by the `variable` parameter.
