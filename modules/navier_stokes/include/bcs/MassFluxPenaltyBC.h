@@ -27,4 +27,5 @@ protected:
   const ADVariableValue & _vel_y;
   const unsigned short _comp;
   const bool _matrix_only;
+  const Real _gamma;
 };
