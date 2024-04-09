@@ -132,6 +132,11 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _face_mass_flux;
 
+  /**
+   * Functor describing the density of the fluid
+   */
+  const Moose::Functor<Real> & _rho;
+
   /// Pointers to the nonlinear system(s) corresponding to the momentum equation(s)
   std::vector<LinearSystem *> _momentum_systems;
 

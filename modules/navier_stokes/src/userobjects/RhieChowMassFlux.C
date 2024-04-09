@@ -46,6 +46,8 @@ RhieChowMassFlux::validParams()
   params.addParam<VariableName>("v", "The y-component of velocity");
   params.addParam<VariableName>("w", "The z-component of velocity");
 
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
+
   // We disable the execution of this, should only provide functions
   // for the SIMPLE executioner
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -68,7 +70,8 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _vel(_dim, nullptr),
     _HbyA(_moose_mesh, blockIDs(), "HbyA"),
     _Ainv(_moose_mesh, blockIDs(), "Ainv"),
-    _face_mass_flux(_moose_mesh, blockIDs(), "face_values")
+    _face_mass_flux(_moose_mesh, blockIDs(), "face_values"),
+    _rho(getFunctor<Real>(NS::density))
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a MooseLinearVariableFVReal.");
@@ -132,6 +135,52 @@ RhieChowMassFlux::initialize()
 void
 RhieChowMassFlux::initFaceMassFlux()
 {
+  using namespace Moose::FV;
+
+  const auto time_arg = Moose::currentState();
+
+  for (auto & fi : _fe_problem.mesh().faceInfo())
+  {
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    {
+      RealVectorValue density_times_velocity;
+
+      // On internal face we do a regular interpolation with geometric weights
+      if (_vel[0]->isInternalFace(*fi))
+      {
+        const auto & elem_info = *fi->elemInfo();
+        const auto & neighbor_info = *fi->neighborInfo();
+
+        Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+        Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+
+        for (const auto dim_i : index_range(_vel))
+          interpolate(InterpMethod::Average,
+                      density_times_velocity(dim_i),
+                      _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
+                      _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
+                      *fi,
+                      true);
+      }
+      // On the boundary, we just take the boundary values
+      else
+      {
+        const Elem * const boundary_elem =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+
+        const Real face_rho = _rho(boundary_face, time_arg);
+        for (const auto dim_i : index_range(_vel))
+          density_times_velocity(dim_i) =
+              face_rho * raw_value((*_vel[dim_i])(boundary_face, time_arg));
+      }
+
+      _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
+    }
+  }
 }
 
 Real

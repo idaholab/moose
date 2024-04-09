@@ -175,6 +175,13 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
 
     return boundary_value;
   }
+  // If no boundary condition is defined but we are evaluating on a boundary, just return the
+  // element value
+  else if (face.face_side)
+  {
+    const auto & elem_info = this->_mesh.elemInfo(face.face_side->id());
+    return getElemValue(elem_info, state);
+  }
   else
     mooseError("We should never get here!");
 }
