@@ -11,6 +11,7 @@
 #include "MooseUtils.h"
 
 #include <cmath>
+#include <iomanip>
 
 InputParameters
 PolygonMeshGeneratorBase::validParams()
@@ -1737,4 +1738,30 @@ PolygonMeshGeneratorBase::modifiedSingleBdryLayerParamsCreator(
   mod_single_bdry_layer_params.intervals *= order;
   mod_single_bdry_layer_params.bias = std::pow(mod_single_bdry_layer_params.bias, 1.0 / order);
   return mod_single_bdry_layer_params;
+}
+
+std::string
+PolygonMeshGeneratorBase::pitchMetaDataErrorGenerator(
+    const std::vector<MeshGeneratorName> & input_names,
+    const std::vector<Real> & metadata_vals,
+    const std::string & metadata_name) const
+{
+  const unsigned int input_name_size =
+      std::max_element(input_names.begin(),
+                       input_names.end(),
+                       [](const auto & a, const auto & b) { return a.size() < b.size(); })
+          ->size();
+  std::stringstream detailed_error;
+  detailed_error << std::endl;
+  detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
+  detailed_error << std::fixed << std::left << std::setw(input_name_size + 4)
+                 << std::setprecision(6) << "input name" << "|" << std::fixed << std::right
+                 << std::setw(metadata_name.size() + 2) << metadata_name << std::endl;
+  detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
+  for (unsigned int i = 0; i < input_names.size(); i++)
+    detailed_error << std::fixed << std::left << std::setw(input_name_size + 4) << input_names[i]
+                   << "|" << std::fixed << std::right << std::setw(metadata_name.size() + 2)
+                   << metadata_vals[i] << std::endl;
+  detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
+  return detailed_error.str();
 }

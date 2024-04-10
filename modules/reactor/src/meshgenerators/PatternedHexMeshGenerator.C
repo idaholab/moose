@@ -416,10 +416,17 @@ PatternedHexMeshGenerator::generate()
     if (!MooseUtils::absoluteFuzzyEqual(
             *std::max_element(pattern_pitch_array.begin(), pattern_pitch_array.end()),
             *std::min_element(pattern_pitch_array.begin(), pattern_pitch_array.end())))
-      mooseError("In PatternedHexMeshGenerator ",
-                 _name,
-                 ": pattern_pitch metadata values of all input mesh generators must be identical "
-                 "when pattern_boundary is 'none' and generate_core_metadata is true.");
+      mooseError(
+          "In PatternedHexMeshGenerator ",
+          _name,
+          ": pattern_pitch metadata values of all input mesh generators must be identical "
+          "when pattern_boundary is 'none' and generate_core_metadata is true. Please check the "
+          "parameters of the mesh generators that produce the input meshes."
+          "Note that some of these mesh generators, such as "
+          "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator and FlexiblePatternGenerator,"
+          "may have different definitions of hexagon size in their input parameters. Please refer "
+          "to the documentation of these mesh generators.",
+          pitchMetaDataErrorGenerator(_input_names, pattern_pitch_array, "pattern_pitch_meta"));
     else
     {
       _pattern_pitch = pattern_pitch_array.front();
@@ -474,9 +481,12 @@ PatternedHexMeshGenerator::generate()
     max_radius_global = *max_element(max_radius_array.begin(), max_radius_array.end());
     if (!MooseUtils::absoluteFuzzyEqual(*std::max_element(pitch_array.begin(), pitch_array.end()),
                                         *std::min_element(pitch_array.begin(), pitch_array.end())))
-      mooseError("In PatternedHexMeshGenerator ",
-                 _name,
-                 ": pitch metadata values of all input mesh generators must be identical.");
+      mooseError(
+          "In PatternedHexMeshGenerator ",
+          _name,
+          ": pitch metadata values of all input mesh generators must be identical. Please check the "
+          "parameters of the mesh generators that produce the input meshes.",
+          pitchMetaDataErrorGenerator(_input_names, pitch_array, "pitch_meta"));
     setMeshProperty("input_pitch_meta", pitch_array.front());
     if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
         *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))
