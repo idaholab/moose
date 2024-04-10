@@ -146,7 +146,7 @@ FileMeshGenerator::generate()
   if (_matrix_file_name != "")
   {
     auto matrix = SparseMatrix<Number>::build(mesh->comm());
-    matrix->read(_matrix_file_name);
+    matrix->read_matlab(_matrix_file_name);
 
     // In the future we might deduce matrix orientation via matrix
     // size; for now we simply hardcode that the Flex IGA standard for
