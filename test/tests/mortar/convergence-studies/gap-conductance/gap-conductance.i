@@ -18,7 +18,7 @@
   [./left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
-    old_boundary_id = '0 1 2 3'
+    old_boundary = '0 1 2 3'
     new_boundary = 'lb_bottom lb_right lb_top lb_left'
   [../]
   [./left_block_id]
@@ -45,8 +45,8 @@
   [right_block_change_boundary_id]
     type = RenameBoundaryGenerator
     input = right_block_id
-    old_boundary_id = '0 1 2 3'
-    new_boundary_id = '100 101 102 103'
+    old_boundary = '0 1 2 3'
+    new_boundary = '100 101 102 103'
   []
   [./combined]
     type = MeshCollectionGenerator

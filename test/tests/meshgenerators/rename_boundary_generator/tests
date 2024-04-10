@@ -100,7 +100,7 @@
                   --mesh-only'
       expect_err = "Must be the same length as 'old_boundary'"
 
-      detail = 'and when the provided old and new boundaries are not the same length.'
+      detail = 'when the provided old and new boundaries are not the same length.'
     []
 
     [id_out_of_bounds]
@@ -111,7 +111,7 @@
                   --mesh-only'
       expect_err = "40000 is not within the numeric limits of the expected ID type."
 
-      detail = 'and when the provided old and new boundaries are not the same length.'
+      detail = 'when the user requests new boundary IDs outside the valid range of type BoundaryID.'
     []
   []
 []
