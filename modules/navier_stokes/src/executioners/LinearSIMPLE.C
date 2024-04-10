@@ -159,6 +159,52 @@ LinearSIMPLE::execute()
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
   _problem.updateActiveObjects();
 
+  if (_problem.shouldSolve())
+  {
+    // Initialize the quantities which matter in terms of the iteration
+    unsigned int iteration_counter = 0;
+
+    // Assign residuals to general residual vector
+    unsigned int no_systems = _momentum_systems.size() + 1;
+    std::vector<Real> ns_residuals(no_systems, 1.0);
+    std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
+    ns_abs_tols.push_back(_pressure_absolute_tolerance);
+
+    // Loop until converged or hit the maximum allowed iteration number
+    while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
+    {
+      // Residual index
+      size_t residual_index = 0;
+
+      iteration_counter++;
+
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver. In case of a segregated momentum
+      // solver, we assume that every velocity component uses the same preconditioner
+      Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
+
+      // Solve the momentum predictor step
+      auto momentum_residual = solveMomentumPredictor();
+      for (const auto system_i : index_range(momentum_residual))
+        ns_residuals[system_i] = momentum_residual[system_i];
+
+      // Compute the coupling fields between the momentum and pressure equations
+      _rc_uo->computeHbyA(_print_fields);
+
+      // Printing residuals
+      _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
+      for (auto system_i : index_range(_momentum_systems))
+        _console << " Momentum equation:"
+                 << (_momentum_systems.size() > 1
+                         ? std::string(" Component ") + std::to_string(system_i + 1) +
+                               std::string(" ")
+                         : std::string(" "))
+                 << COLOR_GREEN << ns_residuals[system_i] << COLOR_DEFAULT << std::endl;
+      _console << " Pressure equation: " << COLOR_GREEN << ns_residuals[momentum_residual.size()]
+               << COLOR_DEFAULT << std::endl;
+    }
+  }
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;
