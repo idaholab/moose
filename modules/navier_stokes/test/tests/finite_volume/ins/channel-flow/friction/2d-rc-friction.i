@@ -79,7 +79,7 @@ velocity_interp_method = 'rc'
     Darcy_name = friction_coefficient
     momentum_component = 'x'
     rho = ${rho}
-    use_standard = false
+    standard_friction_formulation = false
   []
   [u_friction_quad]
     type = PINSFVMomentumFriction
@@ -88,7 +88,7 @@ velocity_interp_method = 'rc'
     Forchheimer_name = friction_coefficient
     momentum_component = 'x'
     rho = ${rho}
-    use_standard = false
+    standard_friction_formulation = false
   []
 
   [v_advection]
@@ -117,7 +117,7 @@ velocity_interp_method = 'rc'
     Darcy_name = friction_coefficient
     momentum_component = 'y'
     rho = ${rho}
-    use_standard = false
+    standard_friction_formulation = false
   []
   [v_friction_quad]
     type = PINSFVMomentumFriction
@@ -126,7 +126,7 @@ velocity_interp_method = 'rc'
     Forchheimer_name = friction_coefficient
     momentum_component = 'y'
     rho = ${rho}
-    use_standard = false
+    standard_friction_formulation = false
   []
 []
 

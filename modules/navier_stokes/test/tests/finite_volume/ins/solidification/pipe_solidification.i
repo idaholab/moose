@@ -209,7 +209,7 @@ Ny = 5
     Forchheimer_name = 'Forchheimer_coeff'
     rho = ${rho_liquid}
     mu = ${mu}
-    use_standard = false
+    standard_friction_formulation = false
   []
 
   [v_time]
@@ -248,7 +248,7 @@ Ny = 5
     Forchheimer_name = 'Forchheimer_coeff'
     rho = ${rho_liquid}
     mu = ${mu}
-    use_standard = false
+    standard_friction_formulation = false
   []
 
   [T_time]

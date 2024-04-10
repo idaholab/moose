@@ -85,7 +85,7 @@ gamma = 1.4
     variable = superficial_vel_x
     Darcy_name = linear_friction_coeff
     momentum_component = 'x'
-    use_standard = false
+    standard_friction_formulation = false
     rho = rho
   []
   [v_friction]
@@ -93,7 +93,7 @@ gamma = 1.4
     variable = superficial_vel_y
     Darcy_name = linear_friction_coeff
     momentum_component = 'y'
-    use_standard = false
+    standard_friction_formulation = false
     rho = rho
   []
 []

@@ -88,7 +88,7 @@ pressure_tag = "pressure_grad"
     momentum_component = 'x'
     Darcy_name = 'Darcy_coefficient'
     Forchheimer_name = 'Forchheimer_coefficient'
-    use_standard = false
+    standard_friction_formulation = false
     rho = ${rho}
   []
   [v_advection]
@@ -120,7 +120,7 @@ pressure_tag = "pressure_grad"
     momentum_component = 'y'
     Darcy_name = 'Darcy_coefficient'
     Forchheimer_name = 'Forchheimer_coefficient'
-    use_standard = false
+    standard_friction_formulation = false
     rho = ${rho}
   []
   [p_diffusion]

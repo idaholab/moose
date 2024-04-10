@@ -2,7 +2,7 @@
 height = 2.2
 density = 1.2
 gravity = 10
-head = ${fparse height * density * gravity}
+head = '${fparse height * density * gravity}'
 
 [Mesh]
   [mesh]
@@ -75,7 +75,7 @@ head = ${fparse height * density * gravity}
     friction_blocks = '1'
     friction_types = 'Darcy'
     friction_coeffs = 'friction_coefficient'
-    use_standard = false
+    standard_friction_formulation = false
   []
 []
 

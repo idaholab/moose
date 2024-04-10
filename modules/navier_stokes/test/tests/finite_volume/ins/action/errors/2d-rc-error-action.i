@@ -98,7 +98,7 @@ alpha = 1
     friction_types = 'Darcy; Darcy'
     friction_coeffs = 'friction_coefficient; friction_coefficient'
 
-    use_standard = false
+    standard_friction_formulation = false
   []
 []
 

@@ -85,8 +85,7 @@ velocity_interp_method = 'rc'
     Darcy_name = friction_coefficient
     momentum_component = 'x'
     block = '1'
-    use_standard = false
-    use_superficial = false
+    standard_friction_formulation = false
     rho = ${rho}
   []
   [v_advection]
@@ -115,8 +114,7 @@ velocity_interp_method = 'rc'
     Darcy_name = friction_coefficient
     momentum_component = 'y'
     block = '1'
-    use_standard = false
-    use_superficial = false
+    standard_friction_formulation = false
     rho = ${rho}
   []
 []

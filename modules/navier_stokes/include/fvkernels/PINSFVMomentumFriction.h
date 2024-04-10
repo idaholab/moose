@@ -37,8 +37,8 @@ protected:
   /// Booleans to select the right models
   const bool _use_Darcy_friction_model;
   const bool _use_Forchheimer_friction_model;
-  const bool _use_superficial;
-  const bool _use_standard;
+  const bool _is_porous_medium;
+  const bool _standard_friction_formulation;
 
   /// Dynamic viscosity
   const Moose::Functor<ADReal> * const _mu;

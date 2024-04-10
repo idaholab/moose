@@ -25,13 +25,20 @@ PINSFVMomentumFriction::validParams()
   params.addParam<MooseFunctorName>("Darcy_name", "Name of the Darcy coefficients property.");
   params.addParam<MooseFunctorName>("Forchheimer_name",
                                     "Name of the Forchheimer coefficients property.");
-  params.addParam<bool>("use_superficial", true, "Boolean to choose the type of fluid properties.");
-  params.addParam<bool>("use_standard", true, "Boolean to choose the type of formulation.");
+  params.addParam<bool>("is_porous_medium", true, "Boolean to choose the type of medium.");
+  params.addParam<bool>(
+      "standard_friction_formulation", true, "Boolean to choose the type of friction formulation.");
   params.addParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
-  params.addParam<MooseFunctorName>(NS::speed, "The norm of the superficial velocity.");
-  params.addParam<MooseFunctorName>("u", "The superficial velocity in the x direction.");
-  params.addParam<MooseFunctorName>("v", "The superficial velocity in the y direction.");
-  params.addParam<MooseFunctorName>("w", "The superficial velocity in the z direction.");
+  params.addParam<MooseFunctorName>(NS::speed, "The magnitude of the interstitial velocity.");
+  params.addParam<MooseFunctorName>("u",
+                                    "The velocity in the x direction. Superficial in the case of "
+                                    "porous treatment, interstitial otherwise");
+  params.addParam<MooseFunctorName>("v",
+                                    "The velocity in the y direction. Superficial in the case of "
+                                    "porous treatment, interstitial otherwise");
+  params.addParam<MooseFunctorName>("w",
+                                    "The velocity in the z direction. Superficial in the case of "
+                                    "porous treatment, interstitial otherwise");
   params.addParam<MooseFunctorName>(NS::porosity, 1.0, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   return params;
@@ -44,8 +51,8 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
                                         : nullptr),
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
-    _use_superficial(getParam<bool>("use_superficial")),
-    _use_standard(getParam<bool>("use_standard")),
+    _is_porous_medium(getParam<bool>("is_porous_medium")),
+    _standard_friction_formulation(getParam<bool>("standard_friction_formulation")),
     _mu(isParamValid(NS::mu) ? &getFunctor<ADReal>(NS::mu) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _speed(isParamValid(NS::speed) ? &getFunctor<ADReal>(NS::speed) : nullptr),
@@ -58,10 +65,33 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
 
-  if (_use_standard && _use_Darcy_friction_model && !_mu)
+  if (_standard_friction_formulation && _use_Darcy_friction_model && !_mu)
     mooseError("If using the standard Darcy friction model, then the '",
                NS::mu,
                "' parameter must be provided");
+  if (_use_Forchheimer_friction_model && !_speed)
+  {
+    if (_dim >= 1)
+    {
+      if (!_u_var)
+        mooseError("The velocity variable 'u' should be defined if no speed functor material is "
+                   "defined for this kernel when using the Forchheimer fromulation.");
+    }
+    if (_dim >= 2)
+    {
+      if (!_v_var)
+        mooseError(
+            "The velocity variable 'v' should be defined if no speed functor material is "
+            "defined for this kernel and dimensions >= 2 when using the Forchheimer fromulation.");
+    }
+    if (_dim >= 3)
+    {
+      if (!_w_var)
+        mooseError(
+            "The velocity variable 'w' should be defined if no speed functor material is "
+            "defined for this kernel and dimensions >= 3 when using the Forchheimer fromulation.");
+    }
+  }
 }
 
 // We are going to follow the formulations in
@@ -71,8 +101,8 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
 //
 // \nabla p = \mu D v + \frac{\rho}{2} F |v| v
 //
-// where v denotes the either the superficial or intersticial velocity and similarly for density
-// rho. Both monolithic and segregated solves get multiplied by v in the gatherRCData and
+// where v denotes the superficial velocity.
+// Both monolithic and segregated solves get multiplied by v in the gatherRCData and
 // computeSegregatedContribution methods respectively, it is the job of the
 // computeFrictionWCoefficient method to compute, for the Darcy term:
 //
@@ -84,17 +114,17 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
 //
 // For the non standard formulation we define :
 // \nabla p = D v + F |v| v
-//
-// For the intersticial version we need to define: v = v/_epsilon and rho = rho *_epsilon
 
 ADReal
 PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
                                                     const Moose::StateArg & state)
 {
-  // Forward declaration of the coeffcient to be returned by the model
+  // Forward declaration of the coeffcients to be used and returned by the model
   ADReal coefficient = 0.0;
   ADReal speed = 0.0;
   ADReal rho = 0.0;
+  ADReal mu = 0.0;
+  /// Speed treatment
   if (_use_Forchheimer_friction_model && _speed)
     speed = (*_speed)(elem_arg, state);
   else if (_use_Forchheimer_friction_model && !_speed)
@@ -102,47 +132,41 @@ PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_
     ADRealVectorValue superficial_velocity;
     if (_dim >= 1)
     {
-      if (!_u_var)
-        mooseError("The velocity variable 'u' should be defined if no speed functor material is "
-                   "defined for this kernel when using the Forchheimer fromulation.");
-      superficial_velocity = ADRealVectorValue((*_u_var)(elem_arg, state));
-    }
-    if (_dim >= 2)
-    {
-      if (!_v_var)
-        mooseError(
-            "The velocity variable 'v' should be defined if no speed functor material is "
-            "defined for this kernel and dimensions >= 2 when using the Forchheimer fromulation.");
-      superficial_velocity =
-          ADRealVectorValue((*_u_var)(elem_arg, state), (*_v_var)(elem_arg, state));
-    }
-    if (_dim >= 3)
-    {
-      if (!_w_var)
-        mooseError(
-            "The velocity variable 'w' should be defined if no speed functor material is "
-            "defined for this kernel and dimensions >= 3 when using the Forchheimer fromulation.");
-      superficial_velocity = ADRealVectorValue(
-          (*_u_var)(elem_arg, state), (*_v_var)(elem_arg, state), (*_w_var)(elem_arg, state));
+      superficial_velocity(0) = (*_u_var)(elem_arg, state);
+      if (_dim >= 2)
+      {
+        superficial_velocity(1) = (*_v_var)(elem_arg, state);
+        if (_dim >= 3)
+          superficial_velocity(2) = (*_w_var)(elem_arg, state);
+      }
     }
     speed = NS::computeSpeed(superficial_velocity);
+    if (_is_porous_medium)
+    {
+      speed *= (1 / _epsilon(elem_arg, state));
+    }
+  }
+
+  /// Fluid properies
+  if (_use_Darcy_friction_model && _standard_friction_formulation)
+  {
+    mu = (*_mu)(elem_arg, state);
+  }
+
+  if (_use_Forchheimer_friction_model && _standard_friction_formulation)
+  {
+    rho = _rho(elem_arg, state);
   }
 
   ////////////////////////////////////////////////////////////////////
   ///// Switching across formulation cases
   ////////////////////////////////////////////////////////////////////
-  if (!_use_superficial)
-  {
-    rho = _epsilon(elem_arg, state) * _rho(elem_arg, state);
-    speed *= (1 / _epsilon(elem_arg, state));
-  }
-
-  if (_use_standard)
+  if (_standard_friction_formulation)
   {
     if (_use_Darcy_friction_model)
-      coefficient += (*_mu)(elem_arg, state) * (*_D)(elem_arg, state)(_index);
+      coefficient += mu * (*_D)(elem_arg, state)(_index);
     if (_use_Forchheimer_friction_model)
-      coefficient += _rho(elem_arg, state) / 2 * (*_F)(elem_arg, state)(_index)*speed;
+      coefficient += rho / 2 * (*_F)(elem_arg, state)(_index)*speed;
   }
   else
   {
@@ -160,11 +184,7 @@ PINSFVMomentumFriction::computeSegregatedContribution()
 {
   const auto & elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
-  auto u_functor = _u_functor(elem_arg, state);
-  if (!_use_superficial)
-    u_functor *= (1.0 / _epsilon(elem_arg, state));
-
-  return raw_value(computeFrictionWCoefficient(elem_arg, state)) * u_functor;
+  return raw_value(computeFrictionWCoefficient(elem_arg, state)) * _u_functor(elem_arg, state);
 }
 
 void
@@ -172,15 +192,9 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   const auto elem_arg = makeElemArg(&elem);
   const auto state = determineState();
-  auto u_functor = _u_functor(elem_arg, state);
-  if (!_use_superficial)
-    u_functor *= (1 / _epsilon(elem_arg, state));
-
   const auto coefficient =
       computeFrictionWCoefficient(elem_arg, state) * _assembly.elementVolume(&elem);
-
   _rc_uo.addToA(&elem, _index, coefficient);
-
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  addResidualAndJacobian(coefficient * u_functor, dof_number);
+  addResidualAndJacobian(coefficient * _u_functor(elem_arg, state), dof_number);
 }

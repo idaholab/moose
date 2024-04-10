@@ -189,7 +189,7 @@ Ny = 50
     Forchheimer_name = 'Forchheimer_coeff'
     rho = ${rho_liquid}
     mu = ${mu}
-    use_standard = false
+    standard_friction_formulation = false
   []
   [u_buoyancy]
     type = INSFVMomentumBoussinesq
@@ -244,7 +244,7 @@ Ny = 50
     Forchheimer_name = 'Forchheimer_coeff'
     rho = ${rho_liquid}
     mu = ${mu}
-    use_standard = false
+    standard_friction_formulation = false
   []
   [v_buoyancy]
     type = INSFVMomentumBoussinesq
@@ -289,7 +289,6 @@ Ny = 50
     T_solidus = ${T_solidus}
     rho = 'rho_mixture'
   []
-
 []
 
 [FVBCs]

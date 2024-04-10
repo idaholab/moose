@@ -38,7 +38,7 @@ rho = 1.1
 
     mass_advection_interpolation = 'average'
     momentum_advection_interpolation = 'average'
-    use_standard = false
+    standard_friction_formulation = false
   []
 []
 
