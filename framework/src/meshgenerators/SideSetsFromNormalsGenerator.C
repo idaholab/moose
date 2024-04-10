@@ -98,12 +98,16 @@ SideSetsFromNormalsGenerator::generate()
       if (elem->neighbor_ptr(side))
         continue;
 
+      // Request to compute normal vectors
+      const std::vector<Point> & face_normals = _fe_face->get_normals();
+
       _fe_face->reinit(elem, side);
-      // We'll just use the normal of the first qp
-      const Point & face_normal = _fe_face->get_normals()[0];
 
       for (const auto i : make_range(boundary_ids.size()))
       {
+        // We'll just use the normal of the first qp
+        const Point & face_normal = face_normals[0];
+
         if (normalsWithinTol(_normals[i], face_normal, _normal_tol))
           flood(elem, _normals[i], boundary_ids[i], *mesh);
       }
