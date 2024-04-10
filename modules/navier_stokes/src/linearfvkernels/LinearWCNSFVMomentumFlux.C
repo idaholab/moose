@@ -44,8 +44,7 @@ LinearWCNSFVMomentumFlux::validParams()
 LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & params)
   : LinearFVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _mass_flux_provider(
-        getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object")),
+    _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
@@ -194,8 +193,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
       const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
 
       // Interpolate the two gradients to the face
-      const auto interp_coeffs = interpCoeffs(
-          Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
+      const auto interp_coeffs =
+          interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
 
       const auto correction_vector =
           _current_face_info->normal() -
@@ -214,8 +213,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
     else if (!_mu.isConstant())
     {
       // Interpolate the two gradients to the face
-      const auto interp_coeffs = interpCoeffs(
-          Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
+      const auto interp_coeffs =
+          interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
 
       const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
       const auto u_grad_neighbor = _u_var->gradSln(*_current_face_info->neighborInfo());
@@ -338,18 +337,14 @@ LinearWCNSFVMomentumFlux::setCurrentFaceInfo(const FaceInfo * face_info)
 {
   LinearFVFluxKernel::setCurrentFaceInfo(face_info);
 
-  // First, we fetch the velocity on the face
-  const auto & velocity = _mass_flux_provider.getVelocity(
-      Moose::FV::InterpMethod::RhieChow, *face_info, determineState(), _tid, false);
-
   // Caching the mass flux on the face which will be reused in the advection term's matrix and right
   // hand side contributions
-  _face_mass_flux = raw_value(velocity * _current_face_info->normal());
+  _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
   _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, velocity);
+      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.

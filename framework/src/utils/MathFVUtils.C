@@ -119,5 +119,35 @@ setInterpolationMethod(const MooseObject & obj,
 
   return need_more_ghosting;
 }
+
+std::pair<Real, Real>
+interpCoeffs(const InterpMethod m,
+             const FaceInfo & fi,
+             const bool one_is_elem,
+             const Real face_flux)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+    case InterpMethod::SkewCorrectedAverage:
+    {
+      if (one_is_elem)
+        return std::make_pair(fi.gC(), 1. - fi.gC());
+      else
+        return std::make_pair(1. - fi.gC(), fi.gC());
+    }
+
+    case InterpMethod::Upwind:
+    {
+      if ((face_flux > 0) == one_is_elem)
+        return std::make_pair(1., 0.);
+      else
+        return std::make_pair(0., 1.);
+    }
+
+    default:
+      mooseError("Unrecognized interpolation method");
+  }
+}
 }
 }

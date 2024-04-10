@@ -17,7 +17,7 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
-#include "SIMPLE.h"
+#include "LinearSIMPLE.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -45,6 +45,8 @@ RhieChowMassFlux::validParams()
   params.addRequiredParam<VariableName>("u", "The x-component of velocity");
   params.addParam<VariableName>("v", "The y-component of velocity");
   params.addParam<VariableName>("w", "The z-component of velocity");
+  params.addRequiredParam<std::string>("p_diffusion_kernel",
+                                       "The diffusion kernel acting on the pressure.");
 
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
@@ -95,25 +97,28 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
   }
 
-  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()))
-    mooseError(this->name(), " should only be used with a segregated thermal-hydraulics solver!");
+  if (!dynamic_cast<LinearSIMPLE *>(getMooseApp().getExecutioner()))
+    mooseError(this->name(),
+               " should only be used with a linear segregated thermal-hydraulics solver!");
 
-  std::vector<LinearFVFluxKernel *> flux_kernel;
-  auto base_query = _fe_problem.theWarehouse()
-                        .query()
-                        .template condition<AttribThread>(_tid)
-                        .template condition<AttribSysNum>(_p->sys().number())
-                        .template condition<AttribSystem>("LinearFVFluxKernel")
-                        .template condition<AttribName>(getParam<std::string>("p_diffusion_kernel"))
-                        .queryInto(flux_kernel);
-  if (flux_kernel.size() != 1)
-    paramError(
-        "p_diffusion_kernel",
-        "The kernel with the given name could not be found or multiple instances were identified.");
-  _p_diffusion_kernel = dynamic_cast<LinearFVDiffusion *>(flux_kernel[0]);
-  if (!_p_diffusion_kernel)
-    paramError("p_diffusion_kernel",
-               "The provided diffusion kernel should of type LinearFVDiffusion!");
+  // std::vector<LinearFVFluxKernel *> flux_kernel;
+  // auto base_query = _fe_problem.theWarehouse()
+  //                       .query()
+  //                       .template condition<AttribThread>(_tid)
+  //                       .template condition<AttribSysNum>(_p->sys().number())
+  //                       .template condition<AttribSystem>("LinearFVFluxKernel")
+  //                       .template
+  //                       condition<AttribName>(getParam<std::string>("p_diffusion_kernel"))
+  //                       .queryInto(flux_kernel);
+  // if (flux_kernel.size() != 1)
+  //   paramError(
+  //       "p_diffusion_kernel",
+  //       "The kernel with the given name could not be found or multiple instances were
+  //       identified.");
+  // _p_diffusion_kernel = dynamic_cast<LinearFVDiffusion *>(flux_kernel[0]);
+  // if (!_p_diffusion_kernel)
+  //   paramError("p_diffusion_kernel",
+  //              "The provided diffusion kernel should of type LinearFVDiffusion!");
 }
 
 void
@@ -401,10 +406,6 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   }
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
-
-  std::vector<unsigned int> var_nums;
-  for (const auto dim_i : index_range(_vel))
-    var_nums.push_back(_momentum_implicit_systems[1]->variable_number(_vel[dim_i]->name()));
 
   auto & pressure_gradient = _pressure_system->gradientContainer();
 

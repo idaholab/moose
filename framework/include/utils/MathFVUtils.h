@@ -103,39 +103,13 @@ bool setInterpolationMethod(const MooseObject & obj,
  * @param m The interpolation method
  * @param fi The face information
  * @param one_is_elem Whether fi.elem() == F1
- * @param advector The advecting velocity. Not relevant for an Average interpolation
+ * @param face_flux The advecting face flux. Not relevant for an Average interpolation
  * @return a pair where the first Real is c_1 and the second Real is c_2
  */
-template <typename Vector = RealVectorValue>
-std::pair<Real, Real>
-interpCoeffs(const InterpMethod m,
-             const FaceInfo & fi,
-             const bool one_is_elem,
-             const Vector & advector = Vector())
-{
-  switch (m)
-  {
-    case InterpMethod::Average:
-    case InterpMethod::SkewCorrectedAverage:
-    {
-      if (one_is_elem)
-        return std::make_pair(fi.gC(), 1. - fi.gC());
-      else
-        return std::make_pair(1. - fi.gC(), fi.gC());
-    }
-
-    case InterpMethod::Upwind:
-    {
-      if ((advector * fi.normal() > 0) == one_is_elem)
-        return std::make_pair(1., 0.);
-      else
-        return std::make_pair(0., 1.);
-    }
-
-    default:
-      mooseError("Unrecognized interpolation method");
-  }
-}
+std::pair<Real, Real> interpCoeffs(const InterpMethod m,
+                                   const FaceInfo & fi,
+                                   const bool one_is_elem,
+                                   const Real face_flux = 0.0);
 
 /**
  * A simple linear interpolation of values between cell centers to a cell face. The \p one_is_elem
@@ -404,7 +378,7 @@ interpolate(InterpMethod m,
             const FaceInfo & fi,
             const bool one_is_elem)
 {
-  const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector);
+  const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector * fi.normal());
   result = coeffs.first * value1 + coeffs.second * value2;
 }
 

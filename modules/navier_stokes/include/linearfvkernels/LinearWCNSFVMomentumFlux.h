@@ -10,7 +10,7 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "INSFVRhieChowInterpolatorSegregated.h"
+#include "RhieChowMassFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
@@ -90,7 +90,7 @@ protected:
   const unsigned int _dim;
 
   /// The Rhie-Chow user object that provides us with the face velocity
-  const INSFVRhieChowInterpolatorSegregated & _mass_flux_provider;
+  const RhieChowMassFlux & _mass_flux_provider;
 
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;

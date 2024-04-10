@@ -24,6 +24,7 @@ advected_interp_method = 'average'
     v = v
     pressure = pressure
     rho = ${rho}
+    p_diffusion_kernel = "bazinga"
   []
 []
 
@@ -47,20 +48,24 @@ advected_interp_method = 'average'
 
 [LinearFVKernels]
   [u_advection_stress]
-    type = WCNSFVMomentumFlux
+    type = LinearWCNSFVMomentumFlux
     variable = u
     advected_interp_method = ${advected_interp_method}
-    rho = ${rho}
     mu = ${mu}
+    u = u
+    v = v
     momentum_component = 'x'
+    rhie_chow_user_object = 'rc'
   []
   [v_advection_stress]
-    type = WCNSFVMomentumFlux
+    type = LinearWCNSFVMomentumFlux
     variable = v
     advected_interp_method = ${advected_interp_method}
-    rho = ${rho}
     mu = ${mu}
+    u = u
+    v = v
     momentum_component = 'y'
+    rhie_chow_user_object = 'rc'
   []
 []
 

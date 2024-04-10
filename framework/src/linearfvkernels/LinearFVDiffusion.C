@@ -110,8 +110,8 @@ LinearFVDiffusion::computeFluxRHSContribution()
     const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
 
     // Interpolate the two gradients to the face
-    const auto interp_coeffs = interpCoeffs(
-        Moose::FV::InterpMethod::Average, *_current_face_info, true, RealVectorValue(0));
+    const auto interp_coeffs =
+        interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
 
     // Compute correction vector. Potential optimization: this only depends on the geometry
     // so we can cache it in FaceInfo at some point.
