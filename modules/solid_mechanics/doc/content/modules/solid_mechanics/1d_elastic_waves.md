@@ -1,7 +1,6 @@
 # Frequency Domain Analysis
 
-For frequency domain analysis for Solid Mechanics MOOSE has two main methods
-modal analysis and frequency response functions. The following example will go
+The MOOSE Solid Mechanics module performs frequency domain analysis using modal analysis and frequency response functions. The following example will go
 through both options.
 
 
@@ -36,6 +35,31 @@ The terms on the left side, which involve the stress divergence, will contribute
 to the "A" matrix, and the terms on the right side, which are the mass terms, will contribute
 to the "B" matrix.
 
+
+## Cantilever Beam Example
+
+The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Frequencies corresponding to the displacement peaks in the FRF indicate natural frequencies/modes.
+
+!media media/solid_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
+
+The analytic solution for the free vibration of a cantilever [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
+\begin{equation}
+  \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
+\end{equation}
+where $I$ is the moment of inertia, $A$ the cross sectional area, $L$ the beam length, and $k_n$ are the wave numbers.
+For a cantilever beam, the first three wave numbers, $k_n$, given for the Euler Bernoulli beam dimensions given as the dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m are\\
+$k_1=1.875$\\
+$k_2=4.694$\\
+$k_3=7.855$\\
+The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.
+
+For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.
+The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
+$\omega_{1a}=$509Hz\\
+$\omega_{1b}=$763Hz\\
+Both of these frequencies use the same value of $k_1$, but with the moment of inertia recomputed for bending about the different widths, where the lower frequency is the first bending mode about the thin direction ($h=a=$0.1m) and the next higher frequency is the first bending mode about the thicker direction ($h=b=$0.15m).
+
+
 ## Modal Analysis: Cantilever Beam Example
 
 In the Kernels block, we define the kernels that contribute to the "A" and "B"
@@ -45,12 +69,17 @@ represent the mass terms and contribute to the "B" matrix. The
 [!param](/Kernels/CoefReaction/coefficient) in [kernels/CoefReaction.md] is set
 to a negative value which corresponds to a positive density. The
 `extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels
-contribute to "B" matrix.
+contribute to "B" matrix. In other literature the A matrix would be the
+stiffness matrix (K) and B would be the Mass matrix(M).
 
 !listing test/tests/modal_analysis/modal.i block=Kernels id=m_kernel caption=
 Kernels for A and B
 
-The BCs block defines the boundary conditions for the problem. In this example, we have Dirichlet boundary conditions applied to the left boundary for all displacement components. The [DirichletBC.md] is used for the "A" matrix, while the [EigenDirichletBC.md] is used for the "B" matrix.
+The BCs block defines the boundary conditions for the problem. In this example,
+we have Dirichlet boundary conditions applied to the left boundary for all
+displacement components. The [DirichletBC.md] is used for the "A" matrix, while
+the [EigenDirichletBC.md] is used for the "B" matrix. Where ever a
+[DirichletBC.md] is used, an [EigenDirichletBC.md] should be set also.
 
 !listing test/tests/modal_analysis/modal.i block=BCs id=m_bc caption=BCs for
 matrix A and B.
@@ -77,14 +106,14 @@ change which eigenvector is outputted adjust the index in
 id=m_prob caption=Eigenvalues
 
 For this coarse mesh example, we were able to determine the first two
-$\omega$'s: 552.8 Hz and 789 Hz. Which are close to the theoretical result of
-600 Hz and 800 Hz, and as the mesh is refined the results would converge on to the
-true solutions. The second mode is visualized in [mode2], and the outline of the
-undeformed state is shown in black.
+$\omega$'s: 645.1 Hz and 855 Hz. Which are close to the theoretical result of
+509 Hz and 763 Hz, and as the mesh is refined the results would converge on to the
+true solutions. The results are similar to the frequency response function as
+long as the sweeps are granular enough. The second mode is visualized in
+[mode2], and the outline of the undeformed state is shown in black.
 
 !media solid_mechanics/beam_mode_2.mp4 style=float:right;width:100%
 caption=Cantilever Beam: Mode 2 id=mode2
-
 
 ## Frequency Response Function
 
@@ -129,32 +158,11 @@ with amplitude $A$ and frequency $f$, is transformed to
     \label{eq5}
 \end{equation}
 
-## Cantilever Beam Example
 
-The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Frequencies corresponding to the displacement peaks in the FRF indicate natural frequencies/modes.
-
-!media media/solid_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
-
-The analytic solution for the free vibration of a cantilever [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
-\begin{equation}
-  \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
-\end{equation}
-where $I$ is the moment of inertia, $A$ the cross sectional area, $L$ the beam length, and $k_n$ are the wave numbers.
-For a cantilever beam, the first three wave numbers, $k_n$, given for the Euler Bernoulli beam dimensions given as the dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m are\\
-$k_1=1.875$\\
-$k_2=4.694$\\
-$k_3=7.855$\\
-The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.
-
-For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.
-The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
-$\omega_{1a}=$509Hz\\
-$\omega_{1b}=$763Hz\\
-Both of these frequencies use the same value of $k_1$, but with the moment of inertia recomputed for bending about the different widths, where the lower frequency is the first bending mode about the thin direction ($h=a=$0.1m) and the next higher frequency is the first bending mode about the thicker direction ($h=b=$0.15m).
 The simulated natural frequencies given by peaks in the FRF for a coarse mesh are:\\
-$\omega_{1a}=$600Hz\\
-$\omega_{1b}=$800Hz\\
-where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
+$\omega_{1a}=$650Hz\\
+$\omega_{1b}=$850Hz\\
+where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
 The simulations will fail if they are run at the natural frequencies because the solution will become singular,
 i.e the displacements blow-up as shown by the asymptotes in [cantileverfrf].
 

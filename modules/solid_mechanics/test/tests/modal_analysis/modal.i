@@ -7,13 +7,13 @@ index = 0
     dim = 3
     xmin = 0
     xmax = 1.0
-    nx = 20
+    nx = 10
     ymin = 0
     ymax = 0.1
-    ny = 2
+    ny = 1
     zmin = 0
     zmax = 0.15
-    nz = 3
+    nz = 2
   []
 []
 [GlobalParams]
@@ -30,35 +30,35 @@ index = 0
 []
 
 [Kernels]
-  [reaction_x]
+  [mass_x]
     type = ADCoefReaction
     variable = disp_x
     extra_vector_tags = 'eigen'
     coefficient = -2.7e3
   []
-  [reaction_y]
+  [mass_y]
     type = ADCoefReaction
     variable = disp_y
     extra_vector_tags = 'eigen'
     coefficient = -2.7e3
   []
-  [reaction_z]
+  [mass_z]
     type = ADCoefReaction
     variable = disp_z
     extra_vector_tags = 'eigen'
     coefficient = -2.7e3
   []
-  [sdx]
+  [stiffness_x]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
   []
-  [sdy]
+  [stiffness_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
   []
-  [sdz]
+  [stiffness_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
