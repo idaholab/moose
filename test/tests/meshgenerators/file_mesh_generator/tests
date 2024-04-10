@@ -208,7 +208,7 @@
   [checkpoint_old_prefix]
     type = 'RunApp'
     input = 'checkpoint_old_prefix.i'
-    expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr'
+    expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpa'
     cli_args = 'Mesh/final_generator=checkpoint'
     requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix.'
     design = 'FileMeshGenerator.md'
