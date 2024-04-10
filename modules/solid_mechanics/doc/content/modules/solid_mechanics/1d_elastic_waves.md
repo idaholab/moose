@@ -98,9 +98,9 @@ caption=Eigenvalue Executioner
 
 To output all the eigenvalues solved in the system we can use the
 [vectorpostprocessors/Eigenvalues.md] vectorpostprocessor. While we have solved for the two smallest
-eigenvalues, currently MOOSE only has the ability to output a single one. To
+eigenvalues, currently MOOSE only has the ability to output a single eigenvector. To
 change which eigenvector is outputted adjust the index in
-[!param](/Problem/EigenProblem/active_eigen_index).
+[!param](/Problem/EigenProblem/active_eigen_index)and rerun the simulation.
 
 !listing test/tests/modal_analysis/modal.i block=VectorPostprocessors Problem
 id=m_prob caption=Eigenvalues
