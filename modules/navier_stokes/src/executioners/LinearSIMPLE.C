@@ -161,6 +161,11 @@ LinearSIMPLE::execute()
 
   if (_problem.shouldSolve())
   {
+    // Dummy solver parameter file which is needed for switching petsc options
+    SolverParams solver_params;
+    solver_params._type = Moose::SolveType::ST_LINEAR;
+    solver_params._line_search = Moose::LineSearchType::LS_NONE;
+
     // Initialize the quantities which matter in terms of the iteration
     unsigned int iteration_counter = 0;
 
