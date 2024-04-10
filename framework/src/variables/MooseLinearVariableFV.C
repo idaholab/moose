@@ -22,6 +22,7 @@
 #include "FVDirichletBCBase.h"
 #include "GreenGaussGradient.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -255,6 +256,18 @@ const Elem * const &
 MooseLinearVariableFV<OutputType>::currentElem() const
 {
   return this->_assembly.elem();
+}
+
+template <typename OutputType>
+bool
+MooseLinearVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi) const
+{
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto it = _boundary_id_to_bc.find(bnd_id); it != _boundary_id_to_bc.end())
+      if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(it->second))
+        return true;
+
+  return false;
 }
 
 // ****************************************************************************

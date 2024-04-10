@@ -162,3 +162,4 @@ template class FaceCenteredMapFunctor<ADRealVectorValue,
                                       std::unordered_map<dof_id_type, ADRealVectorValue>>;
 template class FaceCenteredMapFunctor<RealVectorValue,
                                       std::unordered_map<dof_id_type, RealVectorValue>>;
+template class FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>;

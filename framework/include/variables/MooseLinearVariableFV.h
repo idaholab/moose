@@ -83,6 +83,8 @@ public:
 
   virtual bool isFV() const override { return true; }
 
+  virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
+
   /**
    * Switch to request cell gradient computations.
    */

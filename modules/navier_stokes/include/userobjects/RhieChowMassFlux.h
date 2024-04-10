@@ -15,6 +15,7 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
+#include "LinearFVDiffusion.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -77,12 +78,10 @@ public:
 
 protected:
   /// Populate the face values of the H/A field
-  void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
-                    const std::vector<unsigned int> & var_nums);
+  void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya);
 
   /// Populate the face values of the 1/A field
-  void populateAinv(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv,
-                    const std::vector<unsigned int> & var_nums);
+  void populateAinv(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
 
   /**
    * Check the block consistency between the passed in \p var and us
@@ -105,13 +104,15 @@ protected:
   /// The thread 0 copy of the x-velocity variable
   std::vector<MooseLinearVariableFVReal *> _vel;
 
+  LinearFVDiffusion * _p_diffusion_kernel;
+
   /**
    * A map functor from faces to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
    * \mathrm{Source})_{ij}/A_{ij}$. So this contains the off-diagonal part of the system matrix
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
    * linearized momentum predictor step.
    */
-  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _HbyA_flux;
 
   /**
    * We hold on to the cell-based HbyA vectors so that we can easily reconstruct the
