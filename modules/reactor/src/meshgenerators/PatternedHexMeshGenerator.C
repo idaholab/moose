@@ -481,12 +481,12 @@ PatternedHexMeshGenerator::generate()
     max_radius_global = *max_element(max_radius_array.begin(), max_radius_array.end());
     if (!MooseUtils::absoluteFuzzyEqual(*std::max_element(pitch_array.begin(), pitch_array.end()),
                                         *std::min_element(pitch_array.begin(), pitch_array.end())))
-      mooseError(
-          "In PatternedHexMeshGenerator ",
-          _name,
-          ": pitch metadata values of all input mesh generators must be identical. Please check the "
-          "parameters of the mesh generators that produce the input meshes.",
-          pitchMetaDataErrorGenerator(_input_names, pitch_array, "pitch_meta"));
+      mooseError("In PatternedHexMeshGenerator ",
+                 _name,
+                 ": pitch metadata values of all input mesh generators must be identical. Please "
+                 "check the "
+                 "parameters of the mesh generators that produce the input meshes.",
+                 pitchMetaDataErrorGenerator(_input_names, pitch_array, "pitch_meta"));
     setMeshProperty("input_pitch_meta", pitch_array.front());
     if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
         *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))

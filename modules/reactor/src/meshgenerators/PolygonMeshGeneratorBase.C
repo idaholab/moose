@@ -1755,8 +1755,9 @@ PolygonMeshGeneratorBase::pitchMetaDataErrorGenerator(
   detailed_error << std::endl;
   detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
   detailed_error << std::fixed << std::left << std::setw(input_name_size + 4)
-                 << std::setprecision(6) << "input name" << "|" << std::fixed << std::right
-                 << std::setw(metadata_name.size() + 2) << metadata_name << std::endl;
+                 << std::setprecision(6) << "input name"
+                 << "|" << std::fixed << std::right << std::setw(metadata_name.size() + 2)
+                 << metadata_name << std::endl;
   detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
   for (unsigned int i = 0; i < input_names.size(); i++)
     detailed_error << std::fixed << std::left << std::setw(input_name_size + 4) << input_names[i]
