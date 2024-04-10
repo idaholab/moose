@@ -290,6 +290,12 @@ void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node
                          std::vector<dof_id_type> & ordered_node_list,
                          std::vector<dof_id_type> & ordered_elem_id_list);
 
+/**
+ * Converts a given name (BoundaryName or SubdomainName) into a corresponding ID (BoundaryID or
+ * SubdomainID) and performs bounds checking to ensure that overflow doesn't happen.
+ * @param name Name that is to be converted into an ID.
+ * @return ID type corresponding to the type of name.
+ */
 template <typename T, typename Q>
 Q
 getIDFromName(const T & name)
