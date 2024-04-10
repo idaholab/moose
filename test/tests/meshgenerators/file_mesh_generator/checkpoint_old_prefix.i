@@ -6,7 +6,7 @@
   []
   [checkpoint]
     type = FileMeshGenerator
-    file = checkpoint_old_prefix_out_cp/0001_mesh.cpr
+    file = checkpoint_old_prefix_out_cp/0001_mesh.cpa
   []
 []
 

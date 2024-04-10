@@ -196,7 +196,7 @@ MeshOnlyAction::act()
   {
     TIME_SECTION("act", 1, "Writing Checkpoint");
 
-    CheckpointIO io(mesh_ptr->getMesh(), true);
+    CheckpointIO io(mesh_ptr->getMesh(), false);
     io.write(mesh_file);
 
     // Write mesh metadata

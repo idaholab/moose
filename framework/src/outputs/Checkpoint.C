@@ -192,7 +192,7 @@ Checkpoint::output()
 
   // Create the libMesh Checkpoint_IO object
   MeshBase & mesh = _es_ptr->get_mesh();
-  CheckpointIO io(mesh, true);
+  CheckpointIO io(mesh, false);
 
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
