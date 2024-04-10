@@ -1,4 +1,4 @@
-# FunctionSideIntegral
+# FunctionSideAverage
 
 This post-processor computes the average $y(t)$ of some function $f(\mathbf{x}, t)$
 over a boundary $A$:
