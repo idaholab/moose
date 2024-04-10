@@ -197,6 +197,20 @@ RhieChowMassFlux::computeFaceMassFlux()
 void
 RhieChowMassFlux::computeCellVelocity()
 {
+  auto & pressure_gradient = _pressure_system->gradientContainer();
+
+  // We set the dof value in the solution vector the same logic applies:
+  // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
+  for (auto system_i : index_range(_momentum_implicit_systems))
+  {
+    auto working_vector = _Ainv_raw[system_i]->clone();
+    working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);
+    working_vector->add(*_HbyA_raw[system_i]);
+    (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
+    _momentum_implicit_systems[system_i]->update();
+    _momentum_systems[system_i]->setSolution(
+        *_momentum_implicit_systems[system_i]->current_local_solution);
+  }
 }
 
 void
