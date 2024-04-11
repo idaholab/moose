@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 15 %}
+{% set build = 16 %}
 {% set version = "4.0.2" %}
 
 # permanent
@@ -43,6 +43,8 @@ requirements:
     - {{ moose_libclang13 }}
     - {{ moose_clangcc }}       # [osx]
     - {{ moose_clangxx }}       # [osx]
+    - {{ moose_gcc }}           # [linux]
+    - gfortran
   host:
     # TODO: Try to remove when this version settles down among other conda-forge packages
     - openssl <3.2.0a           # [osx]
@@ -70,6 +72,9 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
+    - {{ moose_gcc }}           # [linux]
+    - gxx                       # [linux]
+    - gfortran
     - cmake
     - make
     - libtool
