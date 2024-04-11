@@ -170,6 +170,7 @@ Headers generally contain +declarations+
 
 - Statement of the types we will use
 - Gives names to types
+- The argument and return type signatures of functions
 
 Bodies generally contain +definitions+
 
