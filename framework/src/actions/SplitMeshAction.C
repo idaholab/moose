@@ -45,7 +45,7 @@ SplitMeshAction::act()
 
   // Decide whether to create ASCII or binary splits based on the split_file_arg. We use the
   // following rules to decide:
-  // 1.) No file extension -> binary
+  // 1.) No file extension -> ASCII
   // 2.) .cpr file extension -> binary
   // 3.) .cpa file extension -> ASCII
   // 4.) Any other file extension -> mooseError
@@ -59,7 +59,7 @@ SplitMeshAction::act()
 
   // If stripExtension() returns the original string, then there is no
   // file extension or the original string was empty.
-  bool checkpoint_binary_flag = true;
+  bool checkpoint_binary_flag = false;
 
   if (split_file_arg_ext != "")
   {
