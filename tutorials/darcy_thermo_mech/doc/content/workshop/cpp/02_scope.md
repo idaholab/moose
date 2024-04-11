@@ -301,19 +301,17 @@ delete b;
 
 The `const` keyword is used to mark a variable, parameter, method or other argument as constant
 
-Typically used with references and pointers to share objects but guarantee that they will not be
-modified
+Often used with references and pointers to share objects which should not be modified
 
 ```cpp
 {
   std::string name("myObject");
   print(name);
-  ...
 }
 void print(const std::string & name)
 {
-  // Attempting to modify name here will
-  // cause a compile time error
+  name = "MineNow"; // Compile-time error
+  const_cast<std::string &>(name) = "MineNow"; // Just bad code
   ...
 }
 ```

@@ -120,7 +120,14 @@ Be careful with your assumptions
 
 ```cpp
 unsigned int huge_value = 4294967295; // ok
-int i = static_cast<int>(huge_value); // won't work!
+int i = huge_value;                   // value silently changed!
+int j = static_cast<int>(huge_value); // won't help!
+```
+
+And consider safer MOOSE tools
+
+```
+int i = cast_int<int>(huge_value);    // assertion failure in non-optimized runs
 ```
 
 !---
