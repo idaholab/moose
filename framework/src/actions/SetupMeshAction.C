@@ -213,9 +213,9 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
     split_file_ext = split_file.substr(pos + 1, std::string::npos);
 
   // If split_file already has the .cpr or .cpa extension, we go with
-  // that, otherwise we strip off the extension and append ".cpr".
+  // that, otherwise we strip off the extension and append ".cpa".
   if (split_file != "" && split_file_ext != "cpr" && split_file_ext != "cpa")
-    split_file = MooseUtils::stripExtension(split_file) + ".cpr";
+    split_file = MooseUtils::stripExtension(split_file) + ".cpa";
 
   if (_type != "FileMesh")
   {
@@ -238,7 +238,7 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
       moose_object_params.set<MeshFileName>("file") = split_file;
     else
       moose_object_params.set<MeshFileName>("file") =
-          MooseUtils::stripExtension(moose_object_params.get<MeshFileName>("file")) + ".cpr";
+          MooseUtils::stripExtension(moose_object_params.get<MeshFileName>("file")) + ".cpa";
   }
 
   moose_object_params.set<bool>("_is_split") = true;

@@ -118,7 +118,7 @@ FileMeshGenerator::generate()
     if (_pars.isParamSetByUser("use_for_exodus_restart"))
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
-    // Supports old suffix (xxxx_mesh.cpr -> xxxx-mesh.cpr) and LATEST
+    // Supports old suffix (xxxx_mesh.cpa -> xxxx-mesh.cpa) and LATEST
     const auto file_name = deduceCheckpointPath(*this, _file_name);
     MooseUtils::checkFileReadable(file_name);
 
@@ -140,7 +140,7 @@ FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::s
   if (MooseUtils::pathExists(file_name))
     return file_name;
 
-  // xxxx_mesh.cpr -> xxxx-mesh.cpr
+  // xxxx_mesh.cpa -> xxxx-mesh.cpa
   const std::string old_ending = "_mesh.cpa";
   if (std::equal(old_ending.rbegin(), old_ending.rend(), file_name.rbegin()))
   {
