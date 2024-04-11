@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#11628'
+  issues = '#11628 #27240'
   design = '/PetscExternalPartitioner.md'
   # 'cmp' file is used for each test, so that we can easily adjust tolerance for each variable
   # At this point, we test against min, max, average, sum
@@ -145,7 +145,7 @@
     type = 'CheckFiles'
     input = 'petsc_partitioner.i'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Mesh/parallel_type=replicated --split-file petsc_partitioner_parmetis_presplit --split-mesh 4,8'
-    check_files = 'petsc_partitioner_parmetis_presplit.cpr/4/header.cpr petsc_partitioner_parmetis_presplit.cpr/4/split-4-0.cpr petsc_partitioner_parmetis_presplit.cpr/4/split-4-3.cpr petsc_partitioner_parmetis_presplit.cpr/8/header.cpr petsc_partitioner_parmetis_presplit.cpr/8/split-8-0.cpr petsc_partitioner_parmetis_presplit.cpr/8/split-8-7.cpr'
+    check_files = 'petsc_partitioner_parmetis_presplit.cpa/4/header.cpa petsc_partitioner_parmetis_presplit.cpa/4/split-4-0.cpa petsc_partitioner_parmetis_presplit.cpa/4/split-4-3.cpa petsc_partitioner_parmetis_presplit.cpa/8/header.cpa petsc_partitioner_parmetis_presplit.cpa/8/split-8-0.cpa petsc_partitioner_parmetis_presplit.cpa/8/split-8-7.cpa'
     recover = false
 
     parmetis = true
