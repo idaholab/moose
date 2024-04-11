@@ -137,9 +137,10 @@ int i = cast_int<int>(huge_value);    // assertion failure in non-optimized runs
 For, While, and Do-While Loops:
 
 ```cpp
-for (int i=0; i<10; ++i) { }
-while (boolean-expression)  { }
-do { } while (boolean-expression);
+for (int i=0; i<10; ++i) { foo(i); }
+for (auto val : my_container) { foo(val); }
+while (boolean-expression)  { bar(); }
+do { baz(); } while (boolean-expression);
 ```
 
 If-Then-Else Tests:
