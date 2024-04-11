@@ -1,0 +1,7 @@
+time,check_euler_angle_1,check_euler_angle_2,check_euler_angle_3
+0,0,0,0
+0.1,1,2,3
+0.2,2,4,6
+0.3,3,6,9
+0.4,4,8,12
+0.5,5,10,15

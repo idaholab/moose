@@ -21,6 +21,8 @@ ComputeElasticityTensorCP::validParams()
                                   "The ElementReadPropertyFile "
                                   "GeneralUserObject to read element "
                                   "specific property values from file");
+  params.addCoupledVar("euler_angle_variables",
+                       "Vector of coupled variables representing the Euler angles' components.");
   return params;
 }
 
@@ -31,7 +33,9 @@ ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & par
                                : nullptr),
     _Euler_angles_mat_prop(declareProperty<RealVectorValue>("Euler_angles")),
     _crysrot(declareProperty<RankTwoTensor>(_base_name + "crysrot")),
-    _R(_Euler_angles)
+    _R(_Euler_angles),
+    _n_euler_angle_vars(coupledComponents("euler_angle_variables")),
+    _euler_angle_vars(coupledValues("euler_angle_variables"))
 {
   // the base class guarantees constant in time, but in this derived class the
   // tensor will rotate over time once plastic deformation sets in
@@ -56,6 +60,15 @@ ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & par
        (parameters.isParamSetByUser("euler_angle_3"))))
     mooseError("Bunge Euler angle information and the rotation_matrix cannot both be specified. "
                "Provide only one type of orientation information in the input file.");
+
+  // Check if source of Euler angle values has a conflict
+  if (_read_prop_user_object && _n_euler_angle_vars)
+    paramError("euler_angle_variables",
+               "Euler angles cannot be supplied from both coupled variables and auxiliary input "
+               "file in the option `read_prop_user_object`.");
+
+  if (isCoupled("euler_angle_variables") && _n_euler_angle_vars != 3)
+    paramError("euler_angle_variables", "The Euler angles should have three components.");
 }
 
 void
@@ -66,6 +79,12 @@ ComputeElasticityTensorCP::assignEulerAngles()
     _Euler_angles_mat_prop[_qp](0) = _read_prop_user_object->getData(_current_elem, 0);
     _Euler_angles_mat_prop[_qp](1) = _read_prop_user_object->getData(_current_elem, 1);
     _Euler_angles_mat_prop[_qp](2) = _read_prop_user_object->getData(_current_elem, 2);
+  }
+  else if (_n_euler_angle_vars)
+  {
+    _Euler_angles_mat_prop[_qp](0) = (*_euler_angle_vars[0])[_qp];
+    _Euler_angles_mat_prop[_qp](1) = (*_euler_angle_vars[1])[_qp];
+    _Euler_angles_mat_prop[_qp](2) = (*_euler_angle_vars[2])[_qp];
   }
   else
     _Euler_angles_mat_prop[_qp] = _Euler_angles;
