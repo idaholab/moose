@@ -162,7 +162,7 @@
     max_parallel = 3
     prereq = 'use_split/from_input'
 
-    issues = '#18635'
+    issues = '#18635 #27240'
     design = 'Mesh/splitting.md FileMeshGenerator.md'
     requirement = 'The system should be able to load a pre-split mesh and perform additional mesh generation on it.'
   []
