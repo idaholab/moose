@@ -3,9 +3,9 @@ Fundamentals
 
 !---
 
-## Intrinsic Data Types
+## Data Types
 
-| Basic Type | Variant(s) |
+| Intrinsic Type | Variant(s) |
 | :- | :- |
 | bool | |
 | char | unsigned |
@@ -15,6 +15,10 @@ Fundamentals
 | void | |
 
 Note, `void` is the "anti-datatype", used in functions returning nothing
+
+Objects of these types can be combined into more complicated
+"structure" or "class" objects, or aggregated into arrays or various
+"container" classes.
 
 !---
 
