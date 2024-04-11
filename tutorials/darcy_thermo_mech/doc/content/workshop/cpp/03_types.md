@@ -8,7 +8,7 @@ Standard Template Library (STL)
 
 C++ is a "statically-typed" language
 
-This means that "type checking" is performed during compile-time as opposed to run-time
+This means that "type checking" is performed at compile time as opposed to at run time
 
 Python and MATLAB are examples of "dynamically-typed" languages
 
