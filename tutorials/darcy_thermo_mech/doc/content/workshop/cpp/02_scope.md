@@ -14,7 +14,10 @@ Variables have a limited lifetime
 
 - When a variable goes out of scope, its destructor is called
 
-Dynamically-allocated (via new) memory *is not* automatically freed at the end of scope
+Manually dynamically-allocated (via `new`) memory *is not*
+automatically freed at the end of scope, but smart-pointers and
+containers will free dynamically-allocated memory in their
+destructors.
 
 !---
 
@@ -251,33 +254,38 @@ Why do we need dynamic memory allocation?
 
 ## Dynamic Memory in C++
 
-"new" allocates memory
-
-"delete" frees memory
+"new" allocates memory, "delete" frees it
 
 Recall that variables typically have limited lifetimes (within the nearest enclosing scope)
 
 Dynamic memory allocations do not have limited lifetimes
 
-- No automatic memory cleanup!
-- Watch out for memory leaks
-- Should have a "delete" for every "new".
+- No deallocation when a pointer goes out of scope!
+- No automatic garbage collection when dynamic memory becomes unreachable!
+- Watch out for memory leaks - a missing "delete" is memory that
+  is lost until program exit
 
-During normal usage, dynamic memory allocation is unnecessary.
+Modern C++ provides classes that encapsulate allocation, with
+destructors that deallocate.
+
+Almost every "new"/"delete" should be a "smart pointer" or container class instead!
 
 !---
 
 ## Example: Dynamic Memory
 
 ```cpp
-int a;
-int *b;
-b = new int; // dynamic allocation, what is b's value?
-a = 4;
-*b = 5;
-int c = a + *b;
-std::cout << c;  // prints 9
-delete b;
+  {
+    int a = 4;
+    int *b = new int; // dynamic allocation; what is b's value?
+    auto c = std::make_unique<int>(6); // dynamic allocation
+    *b = 5;
+    int d = a + *b + *c;
+    std::cout << d;  // prints 15
+  }
+  // a, b, and c are no longer on the stack
+  // *c was deleted from the heap by std::unique_ptr
+  // *b is leaked memory - we forgot "delete b" and now it's too late!
 ```
 
 !---
@@ -286,13 +294,12 @@ delete b;
 
 ```cpp
 int a;
-int *b = new int;    // dynamic allocation
-int &r = *b;         // creating a reference to newly created variable
+auto b = std::make_unique<int>(); // dynamic allocation
+int &r = *b;     // creating a reference to newly allocated object
 a = 4;
 r = 5;
 int c = a + r;
 std::cout << c;  // prints 9
-delete b;
 ```
 
 !---
