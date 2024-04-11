@@ -53,7 +53,8 @@ Assignments are one of the most common operations in programming
 
 Two operands are required
 
-- An assignable location on the left hand side (memory location)
+- An assignable "lvalue" on the left hand side, referring to some
+  object
 - An expression on the right hand side
 
 !---
@@ -81,14 +82,14 @@ Declare a pointer
 int *p;
 ```
 
-Use the +address-of+ operator to initialize a pointer
+The +address-of+ operator on a variable gives a pointer to it, for initializing another pointer
 
 ```cpp
 int a;
 p = &a;
 ```
 
-Use the +dereference+ operator to get or set values pointed-to by the pointer
+The +dereference+ operator on a pointer gives a reference to what it points to, to get or set values
 
 ```cpp
 *p = 5;                  // set value of "a" through "p"
@@ -137,7 +138,7 @@ Now what happens when we do this?
 
 ## References to the Rescue
 
-A reference is an alternative name for an object (Stroustrup), think of it as an alias for the
+A reference is an alternative name for an object (Stroustrup), like an alias for the
 original variable
 
 ```cpp
@@ -151,28 +152,60 @@ std::cout << &r << "\n";  // prints address of a
 
 !---
 
-## References are Safe
+## References are Safer
 
-References cannot be modified
+References cannot be reseated, nor left un-initialized - even classes
+with references must initialize them in the constructor!
 
 ```cpp
 &r = &r + 1;   // won't compile
+int &r;        // won't compile
 ```
 
-References never start out un-initialized
+But references can still be incorrectly left "dangling"
 
 ```cpp
-int &r;     // won't compile
+std::vector<int> four_ints(4);
+int &r = four_ints[0];
+r = 5;  // Valid: four_ints is now {5,0,0,0}
+four_ints.clear();  // four_ints is now {}
+r = 6;  // Undefined behavior, nasal demons
 ```
 
-- Note, that class declarations may contain references
-- If so, initialization must occur in the constructor!
+!---
+
+## Rvalue References Can Be More Efficient
+
+An "lvalue" reference starts with `&`; an "rvalue" reference starts
+with `&&`.
+
+Mnemonic: lvalues can usually be assigned to, +L+eft of an = sign;
+rvalues can't, so they're found +R+ight of an = sign.
+
+Lvalue code like "copy assignment" is correct and sufficient
+
+```cpp
+Foo & Foo::operator= (const Foo & other) {
+  this->member1 = other.member1;  // Has to copy everything
+  this->member2 = other.member2;
+}
+```
+
+But rvalue code like "move assignment" may be written for optimization
+
+```cpp
+Foo & Foo::operator= (Foo && other) {
+  // std::move "makes an lvalue into an rvalue"
+  this->member1 = std::move(other.member1);  // Can cheaply "steal" memory
+  this->member2 = std::move(other.member2);
+}
+```
 
 !---
 
 ## Summary: Pointers and References
 
-A pointer is a variable that holds a memory address to another variable
+A pointer is a variable that holds a potentially-changeable memory address to another variable
 
 ```cpp
 int *iPtr;  // Declaration
@@ -180,11 +213,17 @@ iPtr = &c;
 int a = b + *iPtr;
 ```
 
-A reference is an alternative name for an object (Stroustrup), so it must reference an existing object
+An lvalue reference is an alternative name for an object, and must reference a fixed object
 
 ```cpp
 int &iRef = c;    // Must initialize
 int a = b + iRef;
+```
+
+An rvalue reference is an alternative name for a temporary object
+
+```cpp
+std::sqrt(a + b);  // "a+b" creates an object which will stop existing shortly
 ```
 
 !---
@@ -205,7 +244,7 @@ result = someFunction(a, b, my_shape);
 
 !---
 
-## Swap Example (Pass by Value)
+## "Swap" Example - Pass by Value
 
 ```cpp
 void swap(int a, int b)
@@ -223,7 +262,7 @@ std::cout << i << " " << j;   // prints 1 2
 
 !---
 
-## Swap Example (Pass by Reference)
+## Swap Example - Pass by (Lvalue) Reference
 
 ```cpp
 void swap(int &a, int &b)

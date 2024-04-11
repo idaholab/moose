@@ -136,12 +136,12 @@ auto & elem_it = mesh.active_local_elements_begin();
 auto & item_pair = map.find(some_item);
 
 // Cannot use reference here
-for (auto it = obj.begin(); it != obj.end(); ++it)
-  doSomething();
+for (auto it = container.begin(); it != container.end(); ++it)
+  doSomething(*it);
 
 // Use reference here
 for (auto & obj : container)
-  doSomething();
+  doSomething(obj);
 ```
 
 Do not use `auto` in any kind of function or method declaration
