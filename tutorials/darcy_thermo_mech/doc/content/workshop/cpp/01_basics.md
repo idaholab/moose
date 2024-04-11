@@ -197,6 +197,14 @@ class ClassName
 };
 ```
 
+(Pointers to) functions *themselves* are also objects, with ugly syntax
+
+```cpp
+  returnType (*f_ptr)(type1, type2) = &functionName;
+  returnType r = (*f_ptr)(a1, a2);
+  do_something_else_with(f_ptr);
+```
+
 !---
 
 ### Definition Examples

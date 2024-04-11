@@ -148,13 +148,24 @@ Do not use `auto` in any kind of function or method declaration
 
 !---
 
-## Lambdas
+## Lambda Functions
+
+Ugly syntax: "Captured" variables in brackets, then arguments
+in parentheses, then code in braces
+
+Still useful enough to be *encouraged* in many cases:
+
+- Defining a new function object in the only scope where it is used
+
+- Preferring standard generic algorithms (which take function object arguments)
+
+- Improving efficiency over using function pointers for function object arguments
 
 ```cpp
-// List captured variables (by value or reference) in the capture list explicitly where possible.
+// List captured variables in the capture list explicitly where possible.
 std::for_each(container.begin(), container.end(), [= local_var](Foo & foo) {
-  foo.item = local_var;
-  foo.item2 = local_var2;
+  foo.item = local_var.item;
+  foo.item2 = local_var.item2;
 });
 ```
 
