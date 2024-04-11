@@ -257,6 +257,7 @@ LinearSIMPLE::execute()
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
       // Solve the momentum predictor step
+      _pressure_system.computeGradients();
       auto momentum_residual = solveMomentumPredictor();
       for (const auto system_i : index_range(momentum_residual))
         ns_residuals[system_i] = momentum_residual[system_i];

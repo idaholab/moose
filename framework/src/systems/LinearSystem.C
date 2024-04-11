@@ -173,7 +173,10 @@ LinearSystem::computeGradients()
   PARALLEL_CATCH;
 
   for (const auto i : index_range(_raw_grad_container))
+  {
     _raw_grad_container[i] = std::move(_new_gradient[i]);
+    _raw_grad_container[i]->close();
+  }
 }
 
 void

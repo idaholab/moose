@@ -67,6 +67,18 @@ advected_interp_method = 'average'
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
   []
+  [u_pressure]
+    type = LinearFVMomentumPressure
+    variable = u
+    pressure = pressure
+    momentum_component = 'x'
+  []
+  [v_pressure]
+    type = LinearFVMomentumPressure
+    variable = v
+    pressure = pressure
+    momentum_component = 'y'
+  []
 []
 
 [LinearFVBCs]
