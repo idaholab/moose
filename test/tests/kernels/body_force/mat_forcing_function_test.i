@@ -11,20 +11,26 @@
 [Variables]
   [u]
   []
+  [alphapi]
+    initial_condition = ${fparse 16 * 3.14159265359}
+  []
 []
 
 [Materials]
   [forcing_material]
-    type = ParsedMaterial
+    type = DerivativeParsedMaterial
     property_name = forcing_material
     extra_symbols = x
-    expression = 'alpha*alpha*pi*pi*sin(alpha*pi*x)'
-    constant_names = 'alpha pi'
-    constant_expressions = '16 3.14159265359'
+    coupled_variables = alphapi
+    expression = 'alphapi*alphapi*sin(alphapi*x)'
   []
 []
 
 [Kernels]
+  [alphapi]
+    type = Diffusion
+    variable = alphapi
+  []
   [diff]
     type = Diffusion
     variable = u
@@ -53,10 +59,12 @@
 
 [Executioner]
   type = Steady
+  solve_type = NEWTON
   nl_rel_tol = 1e-12
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
+  hide = alphapi
 []
