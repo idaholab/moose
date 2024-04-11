@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#9698 #6353 #6795 #24868'
+  issues = '#9698 #6353 #6795 #24868 #27240'
   design = 'TimeSequenceStepper.md'
 
   [time_sequence]

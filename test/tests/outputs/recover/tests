@@ -11,7 +11,7 @@
     cli_args = 'Executioner/num_steps=5'
 
     requirement = 'Correctly set up initial recover files for the part2 test.'
-    issues = '#2661'
+    issues = '#2661 #27240'
   [../]
   [./part2]
     # Recover the solve from part1 with a specified file
@@ -39,7 +39,7 @@
     prereq = part2
 
     requirement = 'Correctly set up initial recover files for the part2_latest test.'
-    issues = '#10494 #12403'
+    issues = '#10494 #12403 #27240'
   [../]
   [./part2_latest]
     # Recover the solve from part1 with a specified file

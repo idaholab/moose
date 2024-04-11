@@ -191,7 +191,7 @@
     prereq = pre_checkpoint_load_test
     requirement = 'The system shall have the ability to load the mesh from checkpoint files.'
     design = 'meshgenerators/FileMeshGenerator.md'
-    issues = '#16192'
+    issues = '#16192 #27240'
   []
 
   [checkpoint_new_prefix]
@@ -201,7 +201,7 @@
     cli_args = 'Outputs/checkpoint=true Mesh/final_generator=gmg'
     requirement = 'The system shall support outputting checkpoints using a consistent directory naming scheme.'
     design = 'Checkpoint.md'
-    issues = '#21011'
+    issues = '#21011 #27240'
     recover = false
   []
 
@@ -212,7 +212,7 @@
     cli_args = 'Mesh/final_generator=checkpoint'
     requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix.'
     design = 'FileMeshGenerator.md'
-    issues = '#21011'
+    issues = '#21011 #27240'
     prereq = 'checkpoint_new_prefix'
     allow_warnings = True
     recover = false

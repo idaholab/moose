@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23740'
+  issues = '#23740 #27240'
   design = 'syntax/Executioner/TimeSteppers/index.md AddTimeStepperAction.md '
   'ComposeTimeStepperAction.md'
 

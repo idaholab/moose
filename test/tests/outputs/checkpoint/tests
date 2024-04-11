@@ -3,7 +3,7 @@
 
   [interval]
     requirement = "The system shall support outputting of checkpoint files:"
-    issues = '#1927 #2395'
+    issues = '#1927 #2395 #27240'
 
     [test_files]
       type = 'CheckFiles'
