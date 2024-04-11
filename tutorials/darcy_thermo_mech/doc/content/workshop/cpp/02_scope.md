@@ -29,7 +29,7 @@ void MyObject::myMethod()
   std::cout << "Hello, World!\n";
 }
 MyNamespace::a = 2.718;
-MyNamespace::myMethod();
+MyObject::myMethod();
 ```
 
 Namespaces permit data organization, but do not have all the features needed for full encapsulation

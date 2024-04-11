@@ -43,6 +43,17 @@ Used to group statements together and to define the scope of a function
 
 Creates new layer of scope
 
+```cpp
+int x = 2;
+
+{
+  int x = 5; // "Shadows" the other x - bad practice
+  assert(x == 5);
+}
+
+assert(x == 2);
+```
+
 !---
 
 ## Expressions
@@ -64,11 +75,16 @@ evaluated.
 
 !---
 
-Scope resolution operator:
+Scope resolution:
 
 ```cpp
-t = std::pow(r, 2);
-b = std::sqrt(d);
+a = std::pow(r, 2);     // Calls the standard pow() function
+b = YourLib::pow(r, 2); // Calls pow() from YourLib namespace or class
+
+using std::pow;      // Now "pow" can mean "std::pow" automatically
+using YourLib::pow;  // Or it can mean "YourLib::pow"...
+
+c = pow(r, 2); // Ambiguous, or deduced from the type of r
 ```
 
 Dot and Pointer Operator:
