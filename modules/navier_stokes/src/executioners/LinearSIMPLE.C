@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
-#include "NonlinearSystem.h"
+#include "LinearSystem.h"
 #include "KernelBase.h"
 #include "INSFVMomentumPressure.h"
 #include "libmesh/enum_point_locator_type.h"
@@ -107,7 +107,78 @@ LinearSIMPLE::init()
 std::vector<Real>
 LinearSIMPLE::solveMomentumPredictor()
 {
-  return {0.0};
+  // Temporary storage for the (flux-normalized) residuals form
+  // different momentum components
+  std::vector<Real> normalized_residuals;
+
+  // Solve the momentum equations.
+  // TO DO: These equations are VERY similar. If we can store the differences (things coming from
+  // BCs for example) separately, it is enough to construct one matrix.
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
+
+    // We will need the right hand side and the solution of the next component
+    LinearImplicitSystem & momentum_system =
+        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+
+    PetscLinearSolver<Real> & momentum_solver =
+        libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+
+    NumericVector<Number> & solution = *(momentum_system.solution);
+    NumericVector<Number> & rhs = *(momentum_system.rhs);
+    SparseMatrix<Number> & mmat = *(momentum_system.matrix);
+
+    auto diff_diagonal = solution.zero_clone();
+
+    // We plug zero in this to get the system matrix and the right hand side of the linear problem
+    _problem.computeLinearSystemSys(momentum_system, mmat, rhs);
+
+    // Still need to relax the right hand side with the same vector
+    relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
+    relaxRightHandSide(rhs, solution, *diff_diagonal);
+
+    // The normalization factor depends on the right hand side so we need to recompute it for this
+    // component
+    Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+
+    // Very important, for deciding the convergence, we need the unpreconditioned
+    // norms in the linear solve
+    KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+    // Solve this component. We don't update the ghosted solution yet, that will come at the end
+    // of the corrector step. Also setting the linear tolerances and maximum iteration counts.
+    _momentum_linear_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
+    momentum_solver.set_solver_configuration(_momentum_linear_control);
+
+    // We solve the equation
+    momentum_solver.solve(mmat, mmat, solution, rhs);
+    momentum_system.update();
+
+    // Save the normalized residual
+    normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
+
+    if (_print_fields)
+    {
+      _console << " matrix when we solve " << std::endl;
+      mmat.print();
+      _console << " rhs when we solve " << std::endl;
+      rhs.print();
+      _console << " velocity solution component " << system_i << std::endl;
+      solution.print();
+      _console << "Norm factor " << norm_factor << std::endl;
+      _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
+    }
+  }
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    LinearImplicitSystem & momentum_system =
+        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+    _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
+    _momentum_systems[system_i]->copySolutionsBackwards();
+  }
+
+  return normalized_residuals;
 }
 
 Real
@@ -178,9 +249,6 @@ LinearSIMPLE::execute()
     // Loop until converged or hit the maximum allowed iteration number
     while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
     {
-      // Residual index
-      size_t residual_index = 0;
-
       iteration_counter++;
 
       // We set the preconditioner/controllable parameters through petsc options. Linear
