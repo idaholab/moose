@@ -141,10 +141,10 @@ FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::s
     return file_name;
 
   // xxxx_mesh.cpr -> xxxx-mesh.cpr
-  const std::string old_ending = "_mesh.cpr";
+  const std::string old_ending = "_mesh.cpa";
   if (std::equal(old_ending.rbegin(), old_ending.rend(), file_name.rbegin()))
   {
-    const std::string new_ending = "-mesh.cpr";
+    const std::string new_ending = "-mesh.cpa";
     auto new_path = file_name;
     new_path.replace(new_path.size() - old_ending.size(), old_ending.size(), new_ending, 0);
     if (MooseUtils::pathExists(new_path))
