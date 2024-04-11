@@ -364,6 +364,27 @@ void print(const std::string & name)
 
 !---
 
+## Constexpr
+
+The `constexpr` keyword marks a variable or function as evaluable at compile time
+
+```cpp
+constexpr int factorial(int n)
+{
+  if (n <= 1)
+    return 1;
+  return n * factorial(n-1);
+}
+{
+  constexpr int a = factorial(6); // Compiles straight to a = 720
+  int b = 6;
+  function_which_might_modify(b);
+  int c = factorial(b); // Computed at run time
+}
+```
+
+!---
+
 ## Function Overloading
 
 In C++ you may reuse function names as long as they have different parameter lists or types. A
