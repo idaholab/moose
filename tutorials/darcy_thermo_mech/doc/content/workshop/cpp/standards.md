@@ -299,7 +299,7 @@ class MyClass:
 1. Functions should return or accept pointers only if "null" is a
    valid value, in which case it should be tested for on every use
 1. When creating a new class include dependent header files in the *.C file whenever possible
-1. Avoid using a global variables
+1. Avoid using global variables
 1. Every class with any virtual functions should have a virtual
    destructor
 1. Function definitions should be in *.C files, unless so small that they should definitely be inlined
