@@ -263,13 +263,14 @@ PicardSolve::printFixedPointConvergenceHistory()
            << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
            << '\n';
 
+  Real max_norm_old = _fixed_point_initial_norm;
   for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
     Real max_norm =
         std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
     _console << std::setw(2) << i + 1
-             << " Picard |R| = " << Console::outputNorm(_fixed_point_initial_norm, max_norm)
-             << '\n';
+             << " Picard |R| = " << Console::outputNorm(max_norm_old, max_norm) << '\n';
+    max_norm_old = max_norm;
   }
 
   _console << std::endl;
