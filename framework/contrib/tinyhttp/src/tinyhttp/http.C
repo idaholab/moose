@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iterator>
+#include <sstream>
 
 /*static*/ TCPClientStream TCPClientStream::acceptFrom(short listener) {
     struct sockaddr_in client;
