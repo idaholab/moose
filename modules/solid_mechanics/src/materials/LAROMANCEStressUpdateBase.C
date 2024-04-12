@@ -576,7 +576,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressInitialize(
   _input_values[_cell_input_index] = _old_input_values[_cell_output_index];
   _input_values[_wall_input_index] = _old_input_values[_wall_output_index];
   _input_values[_stress_input_index] = _stress_function ? _stress_function->value(_t, _q_point[_qp])
-                                                        : effective_trial_stress * 1.0e-6;
+                                                        : effective_trial_stress * _stress_ucf;
   _input_values[_old_strain_input_index] = _old_input_values[_strain_output_index];
   _input_values[_temperature_input_index] = _temperature[_qp];
   if (_environmental)
