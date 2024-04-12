@@ -32,7 +32,7 @@ MeshCut2DRankTwoTensorNucleation::validParams()
   params.addRequiredRangeCheckedParam<Real>(
       "nucleation_length",
       "nucleation_length >= 0",
-      "Size of crack to Nucleate.  Must be larger than element length crack is nucleated in.");
+      "Size of crack to nucleate.  Must be larger than the length of the element in which the crack is nucleated.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -122,9 +122,7 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
       const auto & edge1 = edge->point(1);
       if (lineLineIntersect2D(
               elem_center, -crack_dir, circumference, edge0, edge1, point_0, intersection_distance))
-      {
         is_point_0_on_external_boundary = (_current_elem->neighbor_ptr(e) == nullptr);
-      }
       else if (lineLineIntersect2D(elem_center,
                                    crack_dir,
                                    circumference,
@@ -132,9 +130,7 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
                                    edge1,
                                    point_1,
                                    intersection_distance))
-      {
         is_point_1_on_external_boundary = (_current_elem->neighbor_ptr(e) == nullptr);
-      }
     }
 
     Real bisect_length = (point_0 - point_1).norm();
@@ -167,9 +163,7 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
       point_1 = point_1 + extend_length * crack_dir.unit();
     }
     else
-    {
       mooseError("Nucleated cutter element is intersecting mesh element in an unexepected way.");
-    }
     cutterElemNodes = {point_0, point_1};
   }
 

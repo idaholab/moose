@@ -91,7 +91,10 @@ MeshCut2DNucleationBase::execute()
     bool isOnBoundary = false;
     for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
       if (_mesh.isBoundaryElem(current_eid, _initiation_boundary_ids[i]))
-        isOnBoundary = true;
+        {
+          isOnBoundary = true;
+          break;
+        }
     // This does not currently allow for nucleation in an element that is already cut
     cut_element = (!is_cut && isOnBoundary && doesElementCrack(cutterElemNodes));
   }
