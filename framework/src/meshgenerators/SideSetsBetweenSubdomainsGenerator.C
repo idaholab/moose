@@ -67,6 +67,9 @@ SideSetsBetweenSubdomainsGenerator::generate()
   typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
   std::vector<vec_type> queries(my_n_proc);
 
+  // Request to compute normal vectors
+  const std::vector<Point> & face_normals = _fe_face->get_normals();
+
   for (const auto & elem : mesh->active_element_ptr_range())
   {
     // We only need to loop over elements in the primary subdomain
@@ -88,7 +91,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
       {
         _fe_face->reinit(elem, side);
         // We'll just use the normal of the first qp
-        const Point & face_normal = _fe_face->get_normals()[0];
+        const Point & face_normal = face_normals[0];
         // Add the boundaries, if appropriate
         if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
         {
