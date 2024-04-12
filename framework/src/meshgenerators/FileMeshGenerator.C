@@ -38,9 +38,9 @@ FileMeshGenerator::validParams()
                         "because the mesh was pre-split for example.");
   params.addParam<bool>("allow_renumbering",
                         true,
-                        "Whether to allow the mesh to renumber nodes and elements. Note that this "
-                        "parameter is only relevant for non-exodus files, e.g. if reading from "
-                        "checkpoint for example. For exodus we always disallow renumbering.");
+                        "Whether to allow the mesh to renumber nodes and elements, if not "
+                        "overridden by a global parameter or by a requirement (e.g. an exodus "
+                        "restart or a constraint matrix) that disables renumbering.");
   params.addParam<bool>("clear_spline_nodes",
                         false,
                         "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
@@ -74,14 +74,13 @@ FileMeshGenerator::generate()
 {
   auto mesh = buildMeshBaseObject();
 
+  // Maybe we'll reallow renumbering after constraints are applied?
+  bool eventually_allow_renumbering = _allow_renumbering && mesh->allow_renumbering();
+
   // If we have a constraint matrix, we need its numbering to match
   // the numbering in the mesh file
   if (_matrix_file_name != "")
     mesh->allow_renumbering(false);
-
-  // But maybe we'll want to allow renumbering after the constraints
-  // are applied?
-  bool eventually_allow_renumbering = _allow_renumbering;
 
   // Figure out if we are reading an Exodus file, but not Tetgen (*.ele)
   bool exodus = (_file_name.rfind(".exd") < _file_name.size() ||
