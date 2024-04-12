@@ -138,6 +138,8 @@ struct StdinClientStream : IClientStream {
         return fread(target, 1, max, stdin);
     }
     std::string receiveLine(bool asciiOnly = true, size_t max = -1) override {
+        (void)asciiOnly;
+        (void)max;
         std::string res;
         std::getline(std::cin, res);
 
@@ -340,6 +342,7 @@ struct HandlerBuilder {
     virtual ~HandlerBuilder() = default;
 
     virtual std::unique_ptr<HttpResponse> process(const HttpRequest& req) {
+        (void)req;
         return nullptr;
     }
 };
