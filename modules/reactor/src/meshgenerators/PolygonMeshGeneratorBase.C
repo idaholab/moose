@@ -9,6 +9,7 @@
 
 #include "PolygonMeshGeneratorBase.h"
 #include "MooseUtils.h"
+#include "FormattedTable.h"
 
 #include <cmath>
 #include <iomanip>
@@ -1746,23 +1747,14 @@ PolygonMeshGeneratorBase::pitchMetaDataErrorGenerator(
     const std::vector<Real> & metadata_vals,
     const std::string & metadata_name) const
 {
-  const unsigned int input_name_size =
-      std::max_element(input_names.begin(),
-                       input_names.end(),
-                       [](const auto & a, const auto & b) { return a.size() < b.size(); })
-          ->size();
-  std::stringstream detailed_error;
-  detailed_error << std::endl;
-  detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
-  detailed_error << std::fixed << std::left << std::setw(input_name_size + 4)
-                 << std::setprecision(6) << "input name"
-                 << "|" << std::fixed << std::right << std::setw(metadata_name.size() + 2)
-                 << metadata_name << std::endl;
-  detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
+  FormattedTable table;
   for (unsigned int i = 0; i < input_names.size(); i++)
-    detailed_error << std::fixed << std::left << std::setw(input_name_size + 4) << input_names[i]
-                   << "|" << std::fixed << std::right << std::setw(metadata_name.size() + 2)
-                   << metadata_vals[i] << std::endl;
-  detailed_error << std::string(input_name_size + metadata_name.size() + 7, '-') << std::endl;
-  return detailed_error.str();
+  {
+    table.addRow(i);
+    table.addData<std::string>("input name", (std::string)input_names[i]);
+    table.addData<Real>(metadata_name, metadata_vals[i]);
+  }
+  std::stringstream detailed_error;
+  table.printTable(detailed_error);
+  return "\n" + detailed_error.str();
 }
