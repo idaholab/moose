@@ -336,7 +336,7 @@ void HttpServer::startListening(uint16_t port) {
         throw std::runtime_error("Could not set SO_REUSEADDR option");
     }
 
-    struct sockaddr_in remote = {0};
+    struct sockaddr_in remote;
 
     remote.sin_family = AF_INET;
     remote.sin_addr.s_addr = htonl(INADDR_ANY);
