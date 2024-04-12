@@ -24,7 +24,7 @@ protected:
   /// scaling factor to extend the nucleated crack beyond the element edges.
   const Real _crack_length_scale;
 
-  /// size of crack to nucleate, if unset, the nucleated crack is the length of one mesh element
+  /// Length of the nucleated cracks
   const Real _nucleation_length;
 
   /// The tensor from which the scalar quantity used as a nucleating criterion is extracted
