@@ -164,7 +164,7 @@
   []
   [uvnorm]
     type = ParsedPostprocessor
-    function = 'sqrt(unorm*unorm + vnorm*vnorm)'
+    expression = 'sqrt(unorm*unorm + vnorm*vnorm)'
     pp_names = 'unorm vnorm'
     execute_on = linear
   []

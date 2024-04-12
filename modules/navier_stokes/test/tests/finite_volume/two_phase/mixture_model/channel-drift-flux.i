@@ -296,7 +296,7 @@ velocity_interp_method = 'rc'
 [Postprocessors]
   [Re]
     type = ParsedPostprocessor
-    function = '${rho} * ${l} * ${U}'
+    expression = '${rho} * ${l} * ${U}'
     pp_names = ''
   []
   [lin]

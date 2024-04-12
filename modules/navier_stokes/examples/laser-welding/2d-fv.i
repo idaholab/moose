@@ -474,7 +474,7 @@ mu='mu'
   []
   [total_sum]
     type = ParsedPostprocessor
-    function = 'laser_flux + volume_rho_cp_dT + advection + mesh_advection + conduction + radiation'
+    expression = 'laser_flux + volume_rho_cp_dT + advection + mesh_advection + conduction + radiation'
     pp_names = 'laser_flux volume_rho_cp_dT advection mesh_advection conduction radiation'
   []
 []

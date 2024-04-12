@@ -149,7 +149,7 @@
 [Postprocessors]
   [constraint]
     type = ParsedPostprocessor
-    function = '150 - sum' # 150 is the constraint we want to satisfy
+    expression = '150 - sum' # 150 is the constraint we want to satisfy
     pp_names = sum
   []
   [dc_da]

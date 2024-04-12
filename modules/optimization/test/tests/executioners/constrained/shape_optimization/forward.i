@@ -238,7 +238,7 @@ volume_constraint = 200
   [eq_constraint]
     type = ParsedPostprocessor
     pp_names = current_volume
-    function = 'current_volume - ${volume_constraint}'
+    expression = 'current_volume - ${volume_constraint}'
   []
   [func_r0]
     type = FunctionValuePostprocessor

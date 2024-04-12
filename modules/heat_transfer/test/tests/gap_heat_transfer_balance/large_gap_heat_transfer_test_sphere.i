@@ -166,7 +166,7 @@ sphere_outer_Tinf = 300 # K
   []
   [heat_balance] # should be equal to 0 upon convergence
     type = ParsedPostprocessor
-    function = '(sphere_convective_out - ptot) / ptot'
+    expression = '(sphere_convective_out - ptot) / ptot'
     pp_names = 'sphere_convective_out ptot'
   []
 []

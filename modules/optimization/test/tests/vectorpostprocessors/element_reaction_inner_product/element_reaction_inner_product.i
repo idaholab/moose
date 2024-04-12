@@ -106,7 +106,7 @@ p2 = 2.72
   []
   [compare]
     type = ParsedPostprocessor
-    function = 'abs(udp1v + udp1v_exact) + abs(udp2v + udp2v_exact)'
+    expression = 'abs(udp1v + udp1v_exact) + abs(udp2v + udp2v_exact)'
     pp_names = 'udp1v udp2v udp1v_exact udp2v_exact'
   []
 []
