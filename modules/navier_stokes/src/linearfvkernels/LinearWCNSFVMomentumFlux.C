@@ -202,7 +202,7 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
               _current_face_info->eCN();
 
       // Cache the matrix contribution
-      _stress_rhs_contribution =
+      _stress_rhs_contribution +=
           _mu(face_arg, state_arg) *
           (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
           correction_vector;
@@ -348,5 +348,5 @@ LinearWCNSFVMomentumFlux::setCurrentFaceInfo(const FaceInfo * face_info)
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.
-  _cached_rhs_contribution = 0;
+  _stress_rhs_contribution = 0;
 }
