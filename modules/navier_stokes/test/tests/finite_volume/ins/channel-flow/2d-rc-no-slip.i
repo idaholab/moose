@@ -207,7 +207,6 @@ velocity_interp_method = 'rc'
   [Re]
     type = ParsedPostprocessor
     expression = '${rho} * ${l} * ${U}'
-    pp_names = ''
   []
   [lin]
     type = NumLinearIterations

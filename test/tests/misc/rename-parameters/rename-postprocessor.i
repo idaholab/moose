@@ -45,8 +45,7 @@
 [Postprocessors]
   [parsed]
     type = ParsedPostprocessor
-    pp_names = ''
-    function = '2'
+    expression = '2'
     execute_on = 'initial'
   []
   [avg_u]
