@@ -25,6 +25,7 @@ PoroMechanicsAction::validParams()
 {
   InputParameters params = QuasiStaticSolidMechanicsPhysics::validParams();
   params.addRequiredParam<VariableName>("porepressure", "The pore pressure variable");
+  params.addClassDescription("Adds the poro-mechanics coupling term");
   return params;
 }
 
