@@ -31,13 +31,12 @@ LinearFVAnisotropicDiffusion::validParams()
 
 LinearFVAnisotropicDiffusion::LinearFVAnisotropicDiffusion(const InputParameters & params)
   : LinearFVFluxKernel(params),
-    _diffusion_tensor(getFunctor<RealVectorValue>("diffusion_coeff")),
+    _diffusion_tensor(getFunctor<RealVectorValue>("diffusion_tensor")),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0)
 {
-  if (_use_nonorthogonal_correction)
-    _var.computeCellGradients();
+  _var.computeCellGradients();
 }
 
 void
