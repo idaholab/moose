@@ -44,18 +44,18 @@
   []
   [parsed]
     type = ParsedPostprocessor
-    function = 'L2_norm / L1_norm'
+    expression = 'L2_norm / L1_norm'
     pp_names = 'L2_norm L1_norm'
   []
   [parsed_with_t]
     type = ParsedPostprocessor
-    function = 'L2_norm + L1_norm + t'
+    expression = 'L2_norm + L1_norm + t'
     pp_names = 'L2_norm L1_norm'
     use_t = true
   []
   [parsed_with_constants]
     type = ParsedPostprocessor
-    function = 'L2_norm + 3*L1_norm + mu'
+    expression = 'L2_norm + 3*L1_norm + mu'
     pp_names = 'L2_norm L1_norm'
     constant_names = 'mu'
     constant_expressions = '4'

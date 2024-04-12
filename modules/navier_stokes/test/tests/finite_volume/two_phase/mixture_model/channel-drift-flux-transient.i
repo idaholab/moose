@@ -305,8 +305,7 @@ velocity_interp_method = 'rc'
 [Postprocessors]
   [Re]
     type = ParsedPostprocessor
-    function = '${rho} * ${l} * ${U}'
-    pp_names = ''
+    expression = '${rho} * ${l} * ${U}'
   []
   [rho_outlet]
     type = SideAverageValue

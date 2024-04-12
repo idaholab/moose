@@ -88,12 +88,12 @@
   [v_exact]
     type = ParsedPostprocessor
     pp_names = 'timestep v_old'
-    function = 't := if(timestep > 5, 5, timestep); (t^2 - 9 * t) / 8'
+    expression = 't := if(timestep > 5, 5, timestep); (t^2 - 9 * t) / 8'
   []
   [u_exact]
     type = ParsedPostprocessor
     pp_names = 'u_old v_exact'
-    function = 'u_old + v_exact'
+    expression = 'u_old + v_exact'
   []
 []
 

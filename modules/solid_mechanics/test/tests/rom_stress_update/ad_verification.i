@@ -248,19 +248,19 @@
   [rhom_diff]
     type = ParsedPostprocessor
     pp_names = 'rhom_soln rhom'
-    function = '(rhom_soln - rhom) / rhom_soln'
+    expression = '(rhom_soln - rhom) / rhom_soln'
     outputs = console
   []
   [rhoi_diff]
     type = ParsedPostprocessor
     pp_names = 'rhoi_soln rhoi'
-    function = '(rhoi_soln - rhoi) / rhoi_soln'
+    expression = '(rhoi_soln - rhoi) / rhoi_soln'
     outputs = console
   []
   [creep_rate_diff]
     type = ParsedPostprocessor
     pp_names = 'creep_rate creep_rate_soln'
-    function = '(creep_rate_soln - creep_rate) / creep_rate_soln'
+    expression = '(creep_rate_soln - creep_rate) / creep_rate_soln'
     outputs = console
   []
 

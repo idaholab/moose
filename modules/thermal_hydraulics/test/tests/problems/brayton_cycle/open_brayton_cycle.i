@@ -365,7 +365,7 @@ p_ambient = 1e5
   [p_ratio_comp]
     type = ParsedPostprocessor
     pp_names = 'p_in_comp p_out_comp'
-    function = 'p_out_comp / p_in_comp'
+    expression = 'p_out_comp / p_in_comp'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 
@@ -384,7 +384,7 @@ p_ambient = 1e5
   [p_ratio_turb]
     type = ParsedPostprocessor
     pp_names = 'p_in_turb p_out_turb'
-    function = 'p_in_turb / p_out_turb'
+    expression = 'p_in_turb / p_out_turb'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 

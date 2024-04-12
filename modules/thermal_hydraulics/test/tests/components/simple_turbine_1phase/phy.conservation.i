@@ -114,7 +114,7 @@
   [dP]
     type = ParsedPostprocessor
     pp_names = 'p_in W_dot'
-    function = 'p_in * (1 - (1-W_dot/(10*2910.06*517))^(1.4/0.4))'
+    expression = 'p_in * (1 - (1-W_dot/(10*2910.06*517))^(1.4/0.4))'
   []
   [momentum_diff]
     type = LinearCombinationPostprocessor

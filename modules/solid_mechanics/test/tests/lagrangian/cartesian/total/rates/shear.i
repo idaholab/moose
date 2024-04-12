@@ -124,7 +124,7 @@ G = 5000
   [sxx0]
     type = ParsedPostprocessor
     pp_names = 'sxx'
-    function = 'sxx/${G}'
+    expression = 'sxx/${G}'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [syy]
@@ -136,7 +136,7 @@ G = 5000
   [syy0]
     type = ParsedPostprocessor
     pp_names = 'syy'
-    function = 'syy/${G}'
+    expression = 'syy/${G}'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [sxy]
@@ -148,7 +148,7 @@ G = 5000
   [sxy0]
     type = ParsedPostprocessor
     pp_names = 'sxy'
-    function = 'sxy/${G}'
+    expression = 'sxy/${G}'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []

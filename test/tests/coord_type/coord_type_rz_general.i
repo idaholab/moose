@@ -250,7 +250,7 @@ heat_flux = ${fparse power / (perimeter * length)}
   [energy1]
     type = ParsedPostprocessor
     pp_names = 'T_integral1'
-    function = 'T_integral1 * ${rho} * ${cp} * ${perimeter}'
+    expression = 'T_integral1 * ${rho} * ${cp} * ${perimeter}'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [energy_change1]
@@ -276,7 +276,7 @@ heat_flux = ${fparse power / (perimeter * length)}
   [energy2]
     type = ParsedPostprocessor
     pp_names = 'T_integral2'
-    function = 'T_integral2 * ${rho} * ${cp}'
+    expression = 'T_integral2 * ${rho} * ${cp}'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [energy_change2]
@@ -302,7 +302,7 @@ heat_flux = ${fparse power / (perimeter * length)}
   [energy3]
     type = ParsedPostprocessor
     pp_names = 'T_integral3'
-    function = 'T_integral3 * ${rho} * ${cp}'
+    expression = 'T_integral3 * ${rho} * ${cp}'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [energy_change3]
@@ -328,7 +328,7 @@ heat_flux = ${fparse power / (perimeter * length)}
   [energy4]
     type = ParsedPostprocessor
     pp_names = 'T_integral4'
-    function = 'T_integral4 * ${rho} * ${cp}'
+    expression = 'T_integral4 * ${rho} * ${cp}'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [energy_change4]

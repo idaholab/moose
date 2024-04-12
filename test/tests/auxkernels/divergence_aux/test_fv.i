@@ -128,7 +128,7 @@
   []
   [sum_surface_current]
     type = ParsedPostprocessor
-    function = 's1 - s2 + s3 - s4'
+    expression = 's1 - s2 + s3 - s4'
     pp_names = 's1 s2 s3 s4'
   []
   [s1]

@@ -86,7 +86,7 @@
   []
   [sum]
     type = ParsedPostprocessor
-    function = 'top_back + top_bottom + top_front + top_right + top_left'
+    expression = 'top_back + top_bottom + top_front + top_right + top_left'
     pp_names = 'top_back top_bottom top_front top_right top_left'
   []
 []

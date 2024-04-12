@@ -168,7 +168,7 @@
   []
   [energy_balance]
     type = ParsedPostprocessor
-    function = 'convective_heat_transfer + advection - source'
+    expression = 'convective_heat_transfer + advection - source'
     pp_names = 'convective_heat_transfer advection source'
   []
 []

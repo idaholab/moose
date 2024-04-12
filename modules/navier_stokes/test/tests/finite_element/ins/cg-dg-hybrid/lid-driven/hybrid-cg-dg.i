@@ -223,7 +223,6 @@ U = 1
 [Postprocessors]
   [Re]
     type = ParsedPostprocessor
-    pp_names = ''
-    function = '${rho} * ${U} * ${l} / ${mu}'
+    expression = '${rho} * ${U} * ${l} / ${mu}'
   []
 []
