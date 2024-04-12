@@ -860,6 +860,39 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
+   * Returns divergence of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableDivergence containing the divergence of the coupled
+   * variable
+   * @see Kernel::_div_u
+   */
+  virtual const VectorVariableDivergence & coupledDiv(const std::string & var_name,
+                                                      unsigned int comp = 0) const;
+
+  /**
+   * Returns an old divergence from previous time step of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableDivergence containing the old divergence of the coupled
+   * variable
+   * @see Kernel::_div_u_old
+   */
+  virtual const VectorVariableDivergence & coupledDivOld(const std::string & var_name,
+                                                         unsigned int comp = 0) const;
+
+  /**
+   * Returns an old divergence from two time steps previous of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableDivergence containing the older divergence of the coupled
+   * variable
+   * @see Kernel::_div_u_older
+   */
+  virtual const VectorVariableDivergence & coupledDivOlder(const std::string & var_name,
+                                                           unsigned int comp = 0) const;
+
+  /**
    * Returns second spatial derivatives of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -1430,6 +1463,9 @@ protected:
   /// This will always be zero because the default values for optionally coupled variables is always constant
   mutable VectorVariableCurl _default_vector_curl;
 
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  mutable VectorVariableDivergence _default_div;
+
   /**
    * This will always be zero because the default values for optionally coupled variables is always
    * constant and this is used for time derivative info
@@ -1438,9 +1474,6 @@ protected:
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
   ArrayVariableGradient _default_array_gradient;
-
-  /// This will always be zero because the default values for optionally coupled variables is always constant
-  ArrayVariableCurl _default_array_curl;
 
   /**
    * Check that the right kind of variable is being coupled in
