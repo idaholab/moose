@@ -23,7 +23,7 @@ constant monomial functions. The
 [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/material_output_family)
 and
 [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/material_output_order)
-parameters allow to to select higher order monomials and even nodal variables
+parameters allow to select higher order monomials and even nodal variables
 for smooth material property output. For now let's just try a second order
 monomial with
 

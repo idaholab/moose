@@ -1,6 +1,6 @@
 # YAMLFormatter
 
-This class produces produces a yaml dump of the `InputParameters` that is machine parsable by
+This class produces a yaml dump of the `InputParameters` that is machine parsable by
 any YAML formatter.
 
 This formatter is used for the `--yaml` command line option, described

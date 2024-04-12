@@ -6,7 +6,7 @@ The `CoupledTimeDerivative` kernel is very similar to the
 [`TimeDerivative`](/TimeDerivative.md) kernel with the
 exception that the time derivative operator is applied to a coupled variable $v$ instead
 of the variable $u$ to whom's residual the `CoupledTimeDerivative` kernel
-contributes. Consequently, the strong form on the the domain $\Omega$ is
+contributes. Consequently, the strong form on the domain $\Omega$ is
 
 \begin{equation}
 \underbrace{\frac{\partial v}{\partial t}}_{\textrm{CoupledTimeDerivative}} +

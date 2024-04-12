@@ -195,7 +195,7 @@ first-order [!ac](FEM) shape functions and the first-order time integration can 
 portion of the equation and not result in temporal error accumulation.
 
 The `mms` package, as shown in [tutorial03_step04_function], is used to compute the necessary
-forcing function. The package can directly output the the input file format for the computed
+forcing function. The package can directly output the input file format for the computed
 forcing function and the assumed solution, making adding it to the input file trivial.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py id=tutorial03_step04_function link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=0
@@ -282,7 +282,7 @@ has minimal changes in time and tends to an easy-to-recognize solution of `xy`.
 T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
 
 Again, the `mms` package, as shown in [tutorial03_temporal_function], is used to compute the necessary
-forcing function. The package can directly output the the input file format of the computed
+forcing function. The package can directly output the input file format of the computed
 forcing function and the assumed solution, making adding it to the input file trivial.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py id=tutorial03_temporal_function link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=0

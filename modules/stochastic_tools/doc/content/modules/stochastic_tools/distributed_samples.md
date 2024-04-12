@@ -27,7 +27,7 @@ processors utilized. More importantly, for the distributed case is that, the ave
 process ([fig:proc]) decreases in the distributed configuration. Obviously, the iterative method performs the
 best as only a single row of data exists at any time, thus the memory impact is negligible. For
 this reason it is recommend that the `getNextLocalRow` method of sample data retrieval be used
-exclusively, unless the the calculation requires the matrix.
+exclusively, unless the calculation requires the matrix.
 
 !media memory_total.svg style=width:100%; id=fig:total
        caption=Total memory usage for four different configurations for sample data generation.

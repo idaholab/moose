@@ -48,7 +48,7 @@ Seven variables need to be specified and one value is required for each group:
   NxN values with N being the number of groups. Values are listed as $value_ij$
   (e.g. ij=11,12,21,22) with $i$ being the actual group and $j$ the secondary
   group. For $i=j$ the value represents the latent hardening coefficient
-  between one slip system and all the non co-planar ones belonging the the same
+  between one slip system and all the non co-planar ones belonging to the same
   group. For $i\neq j$, the value represents the latent hardening coefficient
   between all the slip systems belonging to group $i$ and $j$. Note that,
   usually, the matrix associated with `GroupGroup_Hardening_group_values` is

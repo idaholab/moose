@@ -46,7 +46,7 @@ In this equation
 - $z$ is the charge number of the species (if $z=0$ then see below).
 - $I$ is the ionic strength of the solution
 - $\mathring{a}$ is the ion size parameter, measured in Angstrom ($\mathring{A}$) and given for all primary basis species, redox couples and secondary species in the [chemical database](geochemistry/database/index.md)
-- Coefficients $A$, $B$ and $\dot{B}$ depend on temperature, and are given in the [chemical database](geochemistry/database/index.md).  At at 25$^{\circ}$C: $A=0.5092\,$mol$^{-1/2}$.kg$^{1/2}$, $B=0.3283\,$mol$^{-1/2}$.kg$^{1/2}$.$\mathring{A}^{-1}$ and $\dot{B}=0.0410\,$mol$^{-1}$.kg.
+- Coefficients $A$, $B$ and $\dot{B}$ depend on temperature, and are given in the [chemical database](geochemistry/database/index.md).  At 25$^{\circ}$C: $A=0.5092\,$mol$^{-1/2}$.kg$^{1/2}$, $B=0.3283\,$mol$^{-1/2}$.kg$^{1/2}$.$\mathring{A}^{-1}$ and $\dot{B}=0.0410\,$mol$^{-1}$.kg.
 
 ### Neutral species: version 1
 

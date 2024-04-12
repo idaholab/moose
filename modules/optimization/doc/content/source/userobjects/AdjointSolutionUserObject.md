@@ -4,7 +4,7 @@
 
 ## Overview
 
-This user-object is meant to be used for transient inverse optimization where the the forward solution is needed to compute the adjoint and subsequent gradient (i.e. nonlinear problems and material inversion).
+This user-object is meant to be used for transient inverse optimization where the forward solution is needed to compute the adjoint and subsequent gradient (i.e. nonlinear problems and material inversion).
 The object acts similarly to [SolutionUserObject.md] and can be used by objects such as [SolutionAux.md] and [SolutionFunction.md].
 The difference stems from the [!param](/UserObjects/AdjointSolutionUserObject/reverse_time_end) parameter where the solution loaded is reversed in time. This is due to the reverse time-stepping required to evaluate the adjoint solution.
 Due to specificity of this object's application, only exodus files can be loaded.

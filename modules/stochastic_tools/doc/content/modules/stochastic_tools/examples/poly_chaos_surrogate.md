@@ -120,7 +120,7 @@ In this section, the results of training and evaluation of the surrogate model a
 
 ### Local Sensitivity Results
 
-[local_sense] shows the results of computing the local sensitivity of each parameter for every surrogate. For reference, the the sensitivity is defined as
+[local_sense] shows the results of computing the local sensitivity of each parameter for every surrogate. For reference, the sensitivity is defined as
 
 !equation
 S_p = \frac{\partial u(\vec{\xi})}{\partial \xi_p} \frac{\xi_p}{u(\vec{\xi})}

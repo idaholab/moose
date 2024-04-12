@@ -35,7 +35,7 @@ Consider a [confined aquifer](https://en.wikipedia.org/wiki/Aquifer) with consta
 Porepressure is advantageous to use in PorousFlow because users will often like to enhance their models using the advanced inbuilt features of PorousFlow, such as
 
 - realistic equations of state for the water (or brine), in which density and viscosity are functions of porepressure
-- vadose-zone physics (unsaturated flow) which is is conventionally expressed in terms of porepressure
+- vadose-zone physics (unsaturated flow) which is conventionally expressed in terms of porepressure
 - coupling with solid mechanics through the effective stress, which is expressed in terms of porepressure
 
 Below, models are expressed in terms of hydraulic head and porepressure, but in order to facilitate easy extension of their models, users are encouraged to utilize porepressure.

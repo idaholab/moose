@@ -12,7 +12,7 @@ Equation 9.3.51 for scalar field variables.
 #### General (vector field) form
 
 !style halign=left
-The generic condition from from [!citep](jin-fem) is, in turn, based on the Sommerfeld
+The generic condition from [!citep](jin-fem) is, in turn, based on the Sommerfeld
 radiation condition for scattered fields. Given that any scattered field can be made up of a
 combination of the scattered field and the incident field
 ($\vec{E} = \vec{E}_{sc} + \vec{E}_{inc}$), then we have

@@ -81,7 +81,7 @@ The algebraic equation system in a matrix notation can be expressed as:
 \mathbf{A}(\vec{u}^{n-1})\vec{u}^n = \vec{b},
 
 where $\mathbf{A}(\vec{u^{n-1}})$ is referred to as system matrix (often just matrix) and $\vec{b}$ is the
-right hand side vector. In this specific example the the system matrix is:
+right hand side vector. In this specific example the system matrix is:
 
 !equation
 \mathbf{A}(\vec{u}^{n-1})=

@@ -16,7 +16,7 @@ A phase is a region of space that is physically distinct, mechanically separable
 
 ### Components
 
-Components are useful abstractions.  They might or might not be real things, so can even have negative mass.  For instance, consider an alkaline solution (more OH$^{-}$ than H$^{+}$).  Choose H$_{2}$O and H$^{+}$ to be the component basis set.  Each hydroxyl ion, $\mathrm{H}_{2}\mathrm{O} - \mathrm{H}^{+} \rightarrow \mathrm{OH}^{-}$, is made up of a water molecule less a hydrogen ion.  Since this is an alkaline solution, the overall composition has a positive amount of water and a negative amount of H$^{+}$.  The molality of the the H$^{+}$ species is positive, however.
+Components are useful abstractions.  They might or might not be real things, so can even have negative mass.  For instance, consider an alkaline solution (more OH$^{-}$ than H$^{+}$).  Choose H$_{2}$O and H$^{+}$ to be the component basis set.  Each hydroxyl ion, $\mathrm{H}_{2}\mathrm{O} - \mathrm{H}^{+} \rightarrow \mathrm{OH}^{-}$, is made up of a water molecule less a hydrogen ion.  Since this is an alkaline solution, the overall composition has a positive amount of water and a negative amount of H$^{+}$.  The molality of the H$^{+}$ species is positive, however.
 
 A complete set of components forms a *basis* for the reaction system.
 

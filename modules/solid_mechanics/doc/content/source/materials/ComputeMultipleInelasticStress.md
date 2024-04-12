@@ -120,7 +120,7 @@ user.
 ### Finalize Strains and the Jacobian Multiplier
 
 Once convergence on the stress is obtained, the calculation of the inelastic
-strains is finalized by by applying a weighting factor, as shown in
+strains is finalized by applying a weighting factor, as shown in
 [fig:multiple_materials]. This weighting factor has a default value of unity.
 
 #### Jacobian Multiplier and the Consistent Tangent Operator

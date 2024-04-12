@@ -47,7 +47,7 @@ where the $i$ index denotes internal faces of the cell, while $b$ denotes the on
 This means that the only thing we need to supply to this formula is a way to compute the contributions to
 the system matrix and right hand side from the boundary value $u_b$.
 For example for the Dirichlet boundary $u_b = f(x)$,
-while for the outflow boundary it can be either the the cell centroid value ($u_b = u_C$)
+while for the outflow boundary it can be either the cell centroid value ($u_b = u_C$)
 or an extrapolated value. This also means that the Dirichlet boundary contributes to
 the right hand side of the system only, whereas the outflow boundary condition can contribute to both.
 
@@ -77,7 +77,7 @@ we implemented the following four APIs:
   need the boundary value of the field, extensively used within advection kernels.
   Using the same example as above, by employing an extrapolation to the boundary face to determine the
   boundary value, we get the following expression: $u_b = u_C+\nabla u_C d_{Cf}$, where $d_{Cf}$ is
-  the vector pointing to the face center from the cell center. In this case, besides the the same matrix
+  the vector pointing to the face center from the cell center. In this case, besides the same matrix
   contribution as above, we need to add the following term to the right hand side:
   $\vec{v} \cdot \vec{n} \nabla u_C d_{Cf} |S_b|$. Therefore, this function returns $\nabla u_C d_{Cf}$
   (as it is just the value contribution) and the other multipliers are added in the advection kernel.

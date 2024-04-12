@@ -14,7 +14,7 @@ which is valid for $0 < \gamma \leq 2$. $r_\ell(x,x^\prime)$ is a scaled distanc
 !equation
 r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}.
 
-When $\gamma = 2$ is is equivalent to [](SquaredExponentialCovariance.md), save a factor of $2$ (which can be absorbed into $\vec{\ell}$).
+When $\gamma = 2$ is equivalent to [](SquaredExponentialCovariance.md), save a factor of $2$ (which can be absorbed into $\vec{\ell}$).
 
 ## Hyperparameters
 

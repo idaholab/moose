@@ -302,7 +302,7 @@ f = Cp \ ,
   large then it will dominate the numerics and MOOSE will not converge.
 
 Similarly, for the multi-component case, the flux
-of of fluid component $\kappa$ should be made proportional to the
+of fluid component $\kappa$ should be made proportional to the
 component mass fraction, $\chi^{\kappa}$:
 \begin{equation}
 f^{\kappa} = C\chi^{\kappa}p \ .

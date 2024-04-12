@@ -40,7 +40,7 @@ One may reasonably ask why we implicitly apply a zero normal-gradient condition 
 Dirichlet conditions are not applied. This is so that `FVFluxKernels` executed
 along a boundary have a value for the field in the neighboring ghost
 cell. `FVFluxKernels` are always executed along a boundary if `FVDirichletBCs`
-are active; their execution ensures that that the Dirichlet condition is weakly
+are active; their execution ensures that the Dirichlet condition is weakly
 enforced. When `FVDirichletBCs` are not active, `FVFluxKernels` may still be
 forced to execute along a boundary by specifying
 `force_boundary_execution = true` in the respective block. Forcing execution of a

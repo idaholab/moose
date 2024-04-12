@@ -106,7 +106,7 @@ MultiSmoothcircleIC sets variable values by creating `nbub` number of circles wi
 !media phase_field/LatticeSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
     caption=LatticeSmoothCircleIC
 
-LatticeSmoothcircleIC sets variable values using a set of smooth circles (see SmoothCircleIC) with centers on a uniform lattice, randomly randomly perturbed from the lattice. The value within a circle is `invalue` and outside is `outvalue`. More information can be found on the [LatticeSmoothCircleIC](/LatticeSmoothCircleIC.md) syntax page.
+LatticeSmoothcircleIC sets variable values using a set of smooth circles (see SmoothCircleIC) with centers on a uniform lattice, randomly perturbed from the lattice. The value within a circle is `invalue` and outside is `outvalue`. More information can be found on the [LatticeSmoothCircleIC](/LatticeSmoothCircleIC.md) syntax page.
 
 ### Inputs
 

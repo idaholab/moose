@@ -5,7 +5,7 @@ Allow users to use several external partitioning packages (parmetis, chaco, ptsc
 ## [ParMETIS](http://glaros.dtc.umn.edu/gkhome/metis/parmetis/overview)
 
 ParMETIS is an MPI-based parallel graph partitioner implementing mainly a multilevel K-way algorithm.  The basic idea
-of the multilevel K-way algorithm is to coarsen the graph firstly, partition the coarsened graph and then refine the the partition.
+of the multilevel K-way algorithm is to coarsen the graph firstly, partition the coarsened graph and then refine the partition.
 It is solving a multi-constraints optimization problem.
 
 ## [PTScotch](https://www.labri.fr/perso/pelegrin/scotch/)

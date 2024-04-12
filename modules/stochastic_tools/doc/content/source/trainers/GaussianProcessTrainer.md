@@ -122,7 +122,7 @@ In the matrix representation this adds a factor of $\sigma_n^2$ to diagonal of t
 !equation
 \mathbf{K}(x,x^\prime,\sigma_f, \sigma_n) = \sigma_f^2 \, \tilde{\mathbf{K}}(x,x^\prime) + \sigma_n^2 \mathbf{I}
 
-Due to the addition of $\sigma_n^2$ along the diagonal of the $K$ matrix, this hyperparameter can aid in the the inversion of the covariance matrix. For this reason adding a small amount of $\sigma_n^2$ may be preferable, even when you believe the data to be noise free.
+Due to the addition of $\sigma_n^2$ along the diagonal of the $K$ matrix, this hyperparameter can aid in the inversion of the covariance matrix. For this reason adding a small amount of $\sigma_n^2$ may be preferable, even when you believe the data to be noise free.
 
 
 ## Selected Covariance Functions

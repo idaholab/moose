@@ -51,7 +51,7 @@ other systems in MOOSE (e.g., `getPostprocessorValue` in the [Postprocessors] sy
 expects an input parameter name (`std::string`) that is prescribed in the `validParams` method.
 
 There are additional overloaded methods that allow for the setting and getting of controllable values
-with various inputs for prescribing the parameter name, but the the two listed above are generally
+with various inputs for prescribing the parameter name, but the two listed above are generally
 what is needed.  Please refer to the source code for a complete list.
 
 ## Controls Block

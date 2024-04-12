@@ -20,7 +20,7 @@ an approximate solution is reconstructed as
 \boldsymbol{\Phi}\textbf{c}(\boldsymbol{\mu}).
 
 It must be mentioned that in case of Dirichlet boundary conditions (either nodal or in weak form)
-there is a a contribution in $\textbf{A}_{Dir}^r$ and $\textbf{b}_{Dir}^r$ as well.
+there is a contribution in $\textbf{A}_{Dir}^r$ and $\textbf{b}_{Dir}^r$ as well.
 However, in this case a penalty parameter ($\gamma$) is used to enforce the boundary condition at
 reduced order level. Therefore, the slightly modified equation system can be written as:
 
@@ -48,7 +48,7 @@ approaches. Both approaches are implemented by overloading the `evaluateSolution
    !listing PODReducedBasisSurrogate.h re=\s\s/// Get the reduced solution for a given parameter sample(.*?);
 
    In this case, the approximate solution vectors are reconstructed and stored within the surrogate object and
-   the QoI-s for a given variable can be acquired using the the `getNodalQoI` function.
+   the QoI-s for a given variable can be acquired using the `getNodalQoI` function.
    A good example for this approach is the implementation of the `execute` function in [/PODSurrogateTester.C].
 
    !listing PODSurrogateTester.C re=PODSurrogateTester::execute.*?^}

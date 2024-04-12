@@ -151,7 +151,7 @@ development requires either regression or unit testing for all new code added to
 The project contains several comparisons against analytical solutions where possible and also
 other verification methods such as [MMS](python/mms.md optional=True). For stability, [!ac](MOOSE) maintains
 multiple branches to incorporate several layers of testing both internally and for dependent
-applications. Finally, performance tests are also performed as part of the the normal testing suite
+applications. Finally, performance tests are also performed as part of the normal testing suite
 to monitor code change impacts to performance.
 !! stakeholder-design-concerns-finish
 !template-end!

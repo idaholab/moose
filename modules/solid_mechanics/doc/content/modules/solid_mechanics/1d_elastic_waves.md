@@ -23,7 +23,7 @@ To convert to the frequency domain, we consider that a plane wave given by
   \label{eq2}
 \end{equation}
 is a solution to [eq1] where $B$ is in general a complex number depending on the boundary conditions, $k^2=\omega^2\rho/E$ is the wave number, $\omega=2 \pi f$ where $f$ is the frequency, and $i=\sqrt{-1}$.  
-By assuming [eq2] is a a solution to [eq1] we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
+By assuming [eq2] is a solution to [eq1] we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
 \begin{equation}
     E\frac{\partial^2 U}{\partial x^2}-\rho\omega^2 U=0.
 \label{eq3}
@@ -66,7 +66,7 @@ Both of these frequencies use the same value of $k_1$, but with the moment of in
 The simulated natural frequencies given by peaks in the FRF for a coarse mesh are:\\
 $\omega_{1a}=$600Hz\\
 $\omega_{1b}=$800Hz\\
-where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
+where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
 The simulations will fail if they are run at the natural frequencies because the solution will become singular,
 i.e the displacements blow-up as shown by the asymptotes in [cantileverfrf].
 

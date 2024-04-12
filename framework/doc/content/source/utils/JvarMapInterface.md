@@ -2,7 +2,7 @@
 
 The `JvarMapKernelInterface` and `JvarMapIntegratedBCInterface` interface
 classes (veneers), for Kernels and integrated boundary conditions respectively,
-provide a mapping from the the value of the `jvar` parameter passed into
+provide a mapping from the value of the `jvar` parameter passed into
 `computeQpOffDiagJacobian` method to
 
 - an index into the `_coupled_moose_vars` vector

@@ -46,7 +46,7 @@ comparison with analytical and numerical solutions of poro-mechanics.
 
 1. [PorousFlowConstantBiotModulus](PorousFlowConstantBiotModulus.md) Material, which computes $M$ given by [biotmoddef] during the initial stage of simulation, and keeps it fixed thereafter.  It requires a Porosity Material, but that Material's Property is only used during the initial computation.
 
-2. [PorousFlowConstantThermalExpansionCoefficient](PorousFlowConstantThermalExpansionCoefficient.md) Material, which computes $A$ given by [constthermexpdef] during the the initial stage of simulation, and keeps it fixed thereafter.  It requires a Porosity Material, but that Material's Property is only used during the initial computation.
+2. [PorousFlowConstantThermalExpansionCoefficient](PorousFlowConstantThermalExpansionCoefficient.md) Material, which computes $A$ given by [constthermexpdef] during the initial stage of simulation, and keeps it fixed thereafter.  It requires a Porosity Material, but that Material's Property is only used during the initial computation.
 
 3. The `PorousFlowFullySaturatedMassTimeDerivative` Kernel, which computes one of the following contributions, depending upon the `coupling_type` flag:
 

@@ -5,7 +5,7 @@ equation are defined in individual material classes in MOOSE. The plug-and-play 
 Solid Mechanics module requires at least three separate classes to fully describe a material model.
 
 !alert note title=Three Tensors Are Required for a Mechanics Problem
-The three tensors that must be defined for any mechanics problem are the the strain
+The three tensors that must be defined for any mechanics problem are the strain
 $\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mathcal{C}}$, and the stress
 $\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain)
 $\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.

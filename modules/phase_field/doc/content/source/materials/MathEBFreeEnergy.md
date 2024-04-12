@@ -2,7 +2,7 @@
 
 !syntax description /Materials/MathEBFreeEnergy
 
-Implements the bulk free free energy density
+Implements the bulk free energy density
 
 !equation
 f_\text{bulk}(c) = \frac14(1-c)^2(1+c)^2

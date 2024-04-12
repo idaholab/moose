@@ -143,7 +143,7 @@ Having eliminated all equilibrium redox species, the Reader can eliminate specie
 2. their dynamics is governed by kinetic rates, or
 3. they are minerals that have been explicitly included, or
 4. they are secondary species whose equilibrium reaction includes only species contained in (1), (2) and (3), or
-5. they are minerals whose equilibrium reaction includes includes only species contained in (1), (2) and (3), but aren't in the `ignore_mineral` list, or
+5. they are minerals whose equilibrium reaction includes only species contained in (1), (2) and (3), but aren't in the `ignore_mineral` list, or
 6. they are gases whose equilibrium reaction includes only species contained in (1), (2) and (3) and are in the `include_gas` list, or
 7. they are sorbing minerals whose sorbing sites includes only species in (1), but aren't in the `ignore_mineral` list, or
 8. they are surface species whose reaction involves only species in (1).
