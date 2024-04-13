@@ -11,21 +11,36 @@
 #include "Function.h"
 
 registerMooseObject("MooseApp", MatBodyForce);
+registerMooseObject("MooseApp", ADMatBodyForce);
 
+template <bool is_ad, class Parent>
 InputParameters
-MatBodyForce::validParams()
+MatBodyForceTempl<is_ad, Parent>::validParams()
 {
-  InputParameters params = BodyForce::validParams();
+  InputParameters params = Parent::validParams();
   params.addClassDescription("Kernel that defines a body force modified by a material property");
   params.addRequiredParam<MaterialPropertyName>("material_property",
                                                 "Material property defining the property");
   return params;
 }
 
+template <bool is_ad, class Parent>
+MatBodyForceTempl<is_ad, Parent>::MatBodyForceTempl(const InputParameters & parameters)
+  : Parent(parameters),
+    _property(this->template getGenericMaterialProperty<Real, is_ad>("material_property")),
+    _v_name(_var.name())
+{
+}
+
+template <bool is_ad, class Parent>
+GenericReal<is_ad>
+MatBodyForceTempl<is_ad, Parent>::computeQpResidual()
+{
+  return Parent::computeQpResidual() * _property[_qp];
+}
+
 MatBodyForce::MatBodyForce(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>(parameters),
-    _property(getMaterialProperty<Real>("material_property")),
-    _v_name(_var.name()),
+  : MatBodyForceParent(parameters),
     _dpropertydv(getMaterialPropertyDerivative<Real>("property", _v_name)),
     _dpropertydarg(_n_args)
 {
@@ -41,12 +56,6 @@ MatBodyForce::initialSetup()
 }
 
 Real
-MatBodyForce::computeQpResidual()
-{
-  return BodyForce::computeQpResidual() * _property[_qp];
-}
-
-Real
 MatBodyForce::computeQpJacobian()
 {
   return _dpropertydv[_qp] * BodyForce::computeQpResidual() * _phi[_j][_qp];
@@ -58,3 +67,5 @@ MatBodyForce::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
   return (*_dpropertydarg[cvar])[_qp] * BodyForce::computeQpResidual() * _phi[_j][_qp];
 }
+
+template class MatBodyForceTempl<true, ADBodyForce>;

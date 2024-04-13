@@ -21,24 +21,37 @@ class Function;
  * as a material. Common uses of this would be to turn off or change the
  * body force in certain regions of the mesh.
  */
-
-class MatBodyForce : public DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>
+template <bool is_ad, class Parent>
+class MatBodyForceTempl : public Parent
 {
 public:
   static InputParameters validParams();
 
+  MatBodyForceTempl(const InputParameters & parameters);
+
+protected:
+  virtual GenericReal<is_ad> computeQpResidual() override;
+
+  const GenericMaterialProperty<Real, is_ad> & _property;
+
+  /// name of the nonlinear variable (needed to retrieve the derivative material properties)
+  VariableName _v_name;
+
+  usingGenericKernelMembers;
+};
+
+using MatBodyForceParent =
+    MatBodyForceTempl<false, DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>>;
+
+class MatBodyForce : public MatBodyForceParent
+{
+public:
   MatBodyForce(const InputParameters & parameters);
   virtual void initialSetup() override;
 
 protected:
-  virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-  const MaterialProperty<Real> & _property;
-
-  /// name of the nonlinear variable (needed to retrieve the derivative material properties)
-  VariableName _v_name;
 
   /// derivative of the property wrt the kernel's nonlinear variable
   const MaterialProperty<Real> & _dpropertydv;
@@ -46,3 +59,5 @@ protected:
   ///  Reaction rate derivatives w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dpropertydarg;
 };
+
+using ADMatBodyForce = MatBodyForceTempl<true, ADBodyForce>;
