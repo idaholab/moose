@@ -8,7 +8,7 @@ All other implementation details are the same as [ADBodyForce](ADBodyForce.md).
 
 ## Example Syntax
 
-!listing test/tests/kernels/body_force/ad_mat_forcing_function_test.i block=forcing
+!listing test/tests/kernels/body_force/mat_forcing_function_test.i block=forcing
 
 !syntax parameters /Kernels/ADMatBodyForce
 
