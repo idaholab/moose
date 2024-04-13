@@ -310,7 +310,8 @@ FormattedTable::printTablePiece(std::ostream & out,
   printRowDivider(out, col_widths, col_begin, col_end);
   out << "|";
   if (_output_time)
-    out << std::setw(_column_width) << std::left << " time" << " |";
+    out << std::setw(_column_width) << std::left << " time"
+        << " |";
   for (auto header_it = col_begin; header_it != col_end; ++header_it)
     out << " " << std::setw(col_widths[*header_it]) << *header_it << "|";
   out << "\n";
