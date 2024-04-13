@@ -27,8 +27,7 @@ MatBodyForceTempl<is_ad, Parent>::validParams()
 template <bool is_ad, class Parent>
 MatBodyForceTempl<is_ad, Parent>::MatBodyForceTempl(const InputParameters & parameters)
   : Parent(parameters),
-    _property(this->template getGenericMaterialProperty<Real, is_ad>("material_property")),
-    _v_name(_var.name())
+    _property(this->template getGenericMaterialProperty<Real, is_ad>("material_property"))
 {
 }
 
@@ -41,6 +40,7 @@ MatBodyForceTempl<is_ad, Parent>::computeQpResidual()
 
 MatBodyForce::MatBodyForce(const InputParameters & parameters)
   : MatBodyForceParent(parameters),
+    _v_name(_var.name()),
     _dpropertydv(getMaterialPropertyDerivative<Real>("property", _v_name)),
     _dpropertydarg(_n_args)
 {

@@ -34,9 +34,6 @@ protected:
 
   const GenericMaterialProperty<Real, is_ad> & _property;
 
-  /// name of the nonlinear variable (needed to retrieve the derivative material properties)
-  VariableName _v_name;
-
   usingGenericKernelMembers;
 };
 
@@ -52,6 +49,9 @@ public:
 protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  /// name of the nonlinear variable (needed to retrieve the derivative material properties)
+  VariableName _v_name;
 
   /// derivative of the property wrt the kernel's nonlinear variable
   const MaterialProperty<Real> & _dpropertydv;
