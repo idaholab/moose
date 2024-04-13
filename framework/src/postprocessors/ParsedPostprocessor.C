@@ -19,7 +19,9 @@ ParsedPostprocessor::validParams()
 
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "function expression");
-  params.addRequiredParam<std::vector<PostprocessorName>>("pp_names", "Post-processors arguments");
+  params.deprecateParam("function", "expression", "05/01/2025");
+
+  params.addParam<std::vector<PostprocessorName>>("pp_names", {}, "Post-processors arguments");
   params.addParam<std::vector<std::string>>(
       "constant_names",
       {},
@@ -66,7 +68,7 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
                       getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
-  std::string function = getParam<std::string>("function");
+  std::string function = getParam<std::string>("expression");
   if (_func_F->Parse(function, postprocessors) >= 0)
     mooseError("Invalid parsed function\n", function, "\n", _func_F->ErrorMsg());
 

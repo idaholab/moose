@@ -85,7 +85,7 @@ power = 1000.0
   [inner_perimeter]
     type = ParsedPostprocessor
     pp_names = 'inner_surface_area'
-    function = 'inner_surface_area / ${length}'
+    expression = 'inner_surface_area / ${length}'
     execute_on = 'INITIAL'
   []
 []

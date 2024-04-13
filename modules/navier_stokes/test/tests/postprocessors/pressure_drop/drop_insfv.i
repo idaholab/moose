@@ -255,7 +255,7 @@ velocity_interp_method='rc'
   []
   [sum_drops]
     type = ParsedPostprocessor
-    function = 'pdrop_mid1 + pdrop_mid2 + pdrop_mid3'
+    expression = 'pdrop_mid1 + pdrop_mid2 + pdrop_mid3'
     pp_names = 'pdrop_mid1 pdrop_mid2 pdrop_mid3'
   []
 

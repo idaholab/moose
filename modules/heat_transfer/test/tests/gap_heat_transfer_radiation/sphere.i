@@ -148,7 +148,7 @@ R2 = 0.11
   [error_1]
     type = ParsedPostprocessor
     pp_names = 'code_flux_1 analytic_flux_1'
-    function = '(analytic_flux_1 - code_flux_1)/analytic_flux_1*100'
+    expression = '(analytic_flux_1 - code_flux_1)/analytic_flux_1*100'
     execute_on = 'initial timestep_end'
   []
   [code_flux_2]
@@ -166,7 +166,7 @@ R2 = 0.11
   [error_2]
     type = ParsedPostprocessor
     pp_names = 'code_flux_2 analytic_flux_2'
-    function = '(analytic_flux_2 - code_flux_2)/analytic_flux_2*100'
+    expression = '(analytic_flux_2 - code_flux_2)/analytic_flux_2*100'
     execute_on = 'initial timestep_end'
   []
 []

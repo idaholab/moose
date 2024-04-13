@@ -149,7 +149,7 @@ rpv_blocks = '3'
   []
   [heat_balance] # should be equal to 0 upon convergence
     type = ParsedPostprocessor
-    function = '(rpv_convective_out - ptot) / ptot'
+    expression = '(rpv_convective_out - ptot) / ptot'
     pp_names = 'rpv_convective_out ptot'
   []
 []

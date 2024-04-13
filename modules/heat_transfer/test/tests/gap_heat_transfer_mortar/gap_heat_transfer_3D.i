@@ -218,7 +218,7 @@ outer_Tinf = 300 # K
   []
   [heat_balance] # should be equal to 0 upon convergence
     type = ParsedPostprocessor
-    function = '(convective_out - ptot) / ptot'
+    expression = '(convective_out - ptot) / ptot'
     pp_names = 'convective_out ptot'
   []
 []

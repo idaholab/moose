@@ -71,7 +71,7 @@ press = 10e5 # Pa
   [core_delta_p]
     type = ParsedPostprocessor
     pp_names = 'core_p_in core_p_out'
-    function = 'core_p_in - core_p_out'
+    expression = 'core_p_in - core_p_out'
   []
 []
 

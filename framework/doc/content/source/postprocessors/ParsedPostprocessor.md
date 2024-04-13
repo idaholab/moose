@@ -2,7 +2,7 @@
 
 !syntax description /Postprocessors/ParsedPostprocessor
 
-The [!param](/Postprocessors/ParsedPostprocessor/function) to parse may only include other postprocessors, the time variable and
+The [!param](/Postprocessors/ParsedPostprocessor/expression) to parse may only include other postprocessors, the time variable and
 constants from the input file.
 
 !alert note

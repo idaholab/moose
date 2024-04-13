@@ -338,7 +338,7 @@ tot_power = 2000 # W
   [core_delta_p]
     type = ParsedPostprocessor
     pp_names = 'core_p_in core_p_out'
-    function = 'core_p_in - core_p_out'
+    expression = 'core_p_in - core_p_out'
   []
 
   [hx_pri_T_out]

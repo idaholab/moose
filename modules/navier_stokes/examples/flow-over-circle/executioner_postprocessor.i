@@ -38,10 +38,9 @@
 [Postprocessors]
   [Re]
     type = ParsedPostprocessor
-    function = 'rho * U * D / mu'
+    expression = 'rho * U * D / mu'
     constant_names = 'rho U D mu'
     constant_expressions = '${rho} ${fparse 2/3*inlet_velocity} ${fparse 2*circle_radius} ${mu}'
-    pp_names = ''
   []
   [point_vel_x]
     type = PointValue
@@ -66,7 +65,7 @@
   []
   [drag_coeff]
     type = ParsedPostprocessor
-    function = '2*drag_force/rho/(avgvel*avgvel)/D'
+    expression = '2*drag_force/rho/(avgvel*avgvel)/D'
     constant_names = 'rho avgvel D'
     constant_expressions = '${rho} ${fparse 2/3*inlet_velocity} ${fparse 2*circle_radius}'
     pp_names = 'drag_force'
@@ -85,7 +84,7 @@
   []
   [lift_coeff]
     type = ParsedPostprocessor
-    function = '2*lift_force/rho/(avgvel*avgvel)/D'
+    expression = '2*lift_force/rho/(avgvel*avgvel)/D'
     constant_names = 'rho avgvel D'
     constant_expressions = '${rho} ${fparse 2/3*inlet_velocity} ${fparse 2*circle_radius}'
     pp_names = 'lift_force'
