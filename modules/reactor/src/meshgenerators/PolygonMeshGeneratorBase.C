@@ -1754,6 +1754,7 @@ PolygonMeshGeneratorBase::pitchMetaDataErrorGenerator(
     table.addData<std::string>("input name", (std::string)input_names[i]);
     table.addData<Real>(metadata_name, metadata_vals[i]);
   }
+  table.outputTimeColumn(false);
   std::stringstream detailed_error;
   table.printTable(detailed_error);
   return "\n" + detailed_error.str();
