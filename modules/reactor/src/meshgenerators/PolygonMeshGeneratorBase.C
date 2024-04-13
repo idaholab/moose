@@ -9,8 +9,10 @@
 
 #include "PolygonMeshGeneratorBase.h"
 #include "MooseUtils.h"
+#include "FormattedTable.h"
 
 #include <cmath>
+#include <iomanip>
 
 InputParameters
 PolygonMeshGeneratorBase::validParams()
@@ -1737,4 +1739,23 @@ PolygonMeshGeneratorBase::modifiedSingleBdryLayerParamsCreator(
   mod_single_bdry_layer_params.intervals *= order;
   mod_single_bdry_layer_params.bias = std::pow(mod_single_bdry_layer_params.bias, 1.0 / order);
   return mod_single_bdry_layer_params;
+}
+
+std::string
+PolygonMeshGeneratorBase::pitchMetaDataErrorGenerator(
+    const std::vector<MeshGeneratorName> & input_names,
+    const std::vector<Real> & metadata_vals,
+    const std::string & metadata_name) const
+{
+  FormattedTable table;
+  for (unsigned int i = 0; i < input_names.size(); i++)
+  {
+    table.addRow(i);
+    table.addData<std::string>("input name", (std::string)input_names[i]);
+    table.addData<Real>(metadata_name, metadata_vals[i]);
+  }
+  table.outputTimeColumn(false);
+  std::stringstream detailed_error;
+  table.printTable(detailed_error);
+  return "\n" + detailed_error.str();
 }

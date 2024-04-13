@@ -792,4 +792,16 @@ protected:
   singleBdryLayerParams modifiedSingleBdryLayerParamsCreator(
       const singleBdryLayerParams & original_single_bdry_layer_params,
       const unsigned int order) const;
+
+  /**
+   * Generate a string that contains the detailed metadata information for inconsistent input mesh
+   * metadata error messages
+   * @param input_names list of input mesh generator names
+   * @param metadata_vals list of input mesh metadata values
+   * @param metadata_name name of the input mesh metadata
+   * @return a string that contains the detailed metadata information
+   */
+  std::string pitchMetaDataErrorGenerator(const std::vector<MeshGeneratorName> & input_names,
+                                          const std::vector<Real> & metadata_vals,
+                                          const std::string & metadata_name) const;
 };
