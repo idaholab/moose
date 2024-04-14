@@ -13,9 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class Function;
-
 /**
  * This kernel creates a body force that is modified by a mask defined
  * as a material. Common uses of this would be to turn off or change the

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MatBodyForce.h"
-#include "Function.h"
 
 registerMooseObject("MooseApp", MatBodyForce);
 registerMooseObject("MooseApp", ADMatBodyForce);
@@ -41,18 +40,18 @@ MatBodyForceTempl<is_ad, Parent>::computeQpResidual()
 MatBodyForce::MatBodyForce(const InputParameters & parameters)
   : MatBodyForceParent(parameters),
     _v_name(_var.name()),
-    _dpropertydv(getMaterialPropertyDerivative<Real>("property", _v_name)),
+    _dpropertydv(getMaterialPropertyDerivative<Real>("material_property", _v_name)),
     _dpropertydarg(_n_args)
 {
   // Get derivatives of property wrt coupled variables
   for (unsigned int i = 0; i < _n_args; ++i)
-    _dpropertydarg[i] = &getMaterialPropertyDerivative<Real>("property", i);
+    _dpropertydarg[i] = &getMaterialPropertyDerivative<Real>("material_property", i);
 }
 
 void
 MatBodyForce::initialSetup()
 {
-  validateNonlinearCoupling<Real>("property");
+  validateNonlinearCoupling<Real>("material_property");
 }
 
 Real
