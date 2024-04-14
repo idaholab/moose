@@ -19,7 +19,7 @@ MatBodyForceTempl<is_ad, Parent>::validParams()
   InputParameters params = Parent::validParams();
   params.addClassDescription("Kernel that defines a body force modified by a material property");
   params.addRequiredParam<MaterialPropertyName>("material_property",
-                                                "Material property defining the property");
+                                                "Material property defining the body force");
   return params;
 }
 
@@ -39,8 +39,7 @@ MatBodyForceTempl<is_ad, Parent>::computeQpResidual()
 
 MatBodyForce::MatBodyForce(const InputParameters & parameters)
   : MatBodyForceParent(parameters),
-    _v_name(_var.name()),
-    _dpropertydv(getMaterialPropertyDerivative<Real>("material_property", _v_name)),
+    _dpropertydv(getMaterialPropertyDerivative<Real>("material_property", _var.name())),
     _dpropertydarg(_n_args)
 {
   // Get derivatives of property wrt coupled variables

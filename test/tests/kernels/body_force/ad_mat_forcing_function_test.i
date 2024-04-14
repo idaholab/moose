@@ -18,7 +18,7 @@
 
 [Materials]
   [forcing_material]
-    type = DerivativeParsedMaterial
+    type = ADDerivativeParsedMaterial
     property_name = forcing_material
     extra_symbols = x
     coupled_variables = alphapi
@@ -28,30 +28,29 @@
 
 [Kernels]
   [alphapi]
-    type = Diffusion
+    type = ADDiffusion
     variable = alphapi
   []
   [diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   []
   [forcing]
-    type = MatBodyForce
+    type = ADMatBodyForce
     variable = u
     material_property = forcing_material
-    coupled_variables = alphapi
   []
 []
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     boundary = right
     value = 0
   []
   [right]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     boundary = left
     value = 0

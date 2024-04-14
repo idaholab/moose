@@ -15,8 +15,7 @@
   []
   [ad_mat_forcing_function_test]
     type = 'Exodiff'
-    input = 'mat_forcing_function_test.i'
-    cli_args = 'Kernels/forcing/type=ADMatBodyForce Materials/forcing_material/type=ADParsedMaterial Outputs/file_base=ad_mat_forcing_function_test_out'
+    input = 'ad_mat_forcing_function_test.i'
     exodiff = 'ad_mat_forcing_function_test_out.e'
     requirement = 'The system shall support applying a material property of space-time as a forcing function to the mesh domain using AD.'
   []
