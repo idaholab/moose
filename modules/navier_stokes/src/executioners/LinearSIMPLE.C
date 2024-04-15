@@ -184,7 +184,58 @@ LinearSIMPLE::solveMomentumPredictor()
 Real
 LinearSIMPLE::solvePressureCorrector()
 {
-  return 0.0;
+  _problem.setCurrentLinearSystem(_pressure_sys_number);
+
+  // We will need some members from the linear system
+  LinearImplicitSystem & pressure_system =
+      libMesh::cast_ref<LinearImplicitSystem &>(_pressure_system.system());
+
+  // We will need the solution, the right hand side and the matrix
+  NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
+  NumericVector<Number> & solution = *(pressure_system.solution);
+  SparseMatrix<Number> & mmat = *(pressure_system.matrix);
+  NumericVector<Number> & rhs = *(pressure_system.rhs);
+
+  // Fetch the linear solver from the system
+  PetscLinearSolver<Real> & pressure_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+
+  _problem.computeLinearSystemSys(pressure_system, mmat, rhs);
+
+  if (_print_fields)
+  {
+    _console << "Pressure matrix" << std::endl;
+    mmat.print();
+  }
+
+  // We compute the normalization factors based on the fluxes
+  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+
+  // We need the non-preconditioned norm to be consistent with the norm factor
+  KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+
+  // Setting the linear tolerances and maximum iteration counts
+  _pressure_linear_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
+  pressure_solver.set_solver_configuration(_pressure_linear_control);
+
+  if (_pin_pressure)
+    constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+
+  pressure_solver.solve(mmat, mmat, solution, rhs);
+  pressure_system.update();
+
+  if (_print_fields)
+  {
+    _console << " rhs when we solve pressure " << std::endl;
+    rhs.print();
+    _console << " Pressure " << std::endl;
+    solution.print();
+    _console << "Norm factor " << norm_factor << std::endl;
+  }
+
+  _pressure_system.setSolution(current_local_solution);
+
+  return pressure_solver.get_initial_residual() / norm_factor;
 }
 
 void
