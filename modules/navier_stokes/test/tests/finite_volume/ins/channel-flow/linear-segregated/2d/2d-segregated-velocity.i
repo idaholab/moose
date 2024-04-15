@@ -79,6 +79,17 @@ advected_interp_method = 'average'
     pressure = pressure
     momentum_component = 'y'
   []
+  [p_diffusion]
+    type = LinearFVAnisotropicDiffusion
+    variable = pressure
+    diffusion_tensor = Ainv
+    use_nonorthogonal_correction = false
+  []
+  [HbyA_divergence]
+    type = LinearFVDivergence
+    variable = pressure
+    face_flux = HbyA
+  []
 []
 
 [LinearFVBCs]
