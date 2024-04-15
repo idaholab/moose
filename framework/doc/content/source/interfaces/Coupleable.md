@@ -1,31 +1,62 @@
 # Coupleable
 
-This class provides API for coupling different kinds of variables values into MOOSE systems.
-The following table summarizes the methods and kinds of values they provide:
+This class provides an API for coupling different kinds of variables values into MOOSE systems.
+The following tables summarize the methods it provides.
 
-| Method | Description |
-| - | - |
-coupledValue | Values of a coupled variable in q-points
-coupledGradient | Gradients of a coupled variable in q-points
-coupledSecond | Second derivatives of a coupled variable in q-points
-adCoupledValue | Values of a coupled variable in q-points with automatic differentiation info
-adCoupledGradient | Gradients of a coupled variable in q-points with automatic differentiation info
-adCoupledSecond | Second derivatives of a coupled variable in q-points with automatic differentiation info
-coupledNodalValue | Values of a coupled variable at nodes.
-adCoupledNodalValue | Values of a coupled (vector) variable at nodes with automatic differentiation info
-coupledVectorValue | Values of a coupled vector variable in q-points
-adCoupledVectorValue | Values of a coupled vector variable in q-points with automatic differentiation info
-coupledCurl | Curl of a coupled vector variable in q-points
-coupledDot | Time derivative of a coupled variable
-coupledDotDu | Derivative of a time derivative of a coupled variable
-coupledNodalDot | Nodal value of the time derivative of a coupled variable
-coupledVectorDot | Time derivative of a coupled vector variable
-coupledVectorDotDu | Derivative of a time derivative of a coupled vector variable
-adCoupledLowerValue | Value a coupled lower-dimensional variable with automatic differentiation info
+| Methods for scalar field variables | Description |
+| :--- | :--- |
+`coupledValue`*‡§ | Value of a coupled variable at q-points
+`coupledGradient`*‡§ | Gradient of a coupled variable at q-points
+`coupledSecond`*‡§ | Second spatial derivatives of a coupled variable at q-points
+`coupledDot`†§ | Time derivative of a coupled variable at q-points
+`coupledDotDot`†§ | Second time derivative of a coupled variable at q-points
+`coupledDotDu` | Derivative with regards to the variable of the time derivative of a coupled variable at q-points
+`coupledDotDotDu` | Derivative with regards to the variable of the second time derivative of a coupled variable at q-points
+`coupledGradientDot`§ | Time derivative of the gradient of a coupled variable at q-points
+`coupledGradientDotDot` | Second time derivative of the gradient of a coupled variable at q-points
 
-For values, gradients and second derivatives, users can request old and older values in case they are running a transient simulation.
-In case of old and older values, the methods are called `coupledValueOld` and `coupledValueOlder`, respectively.
-Similarly,
+
+| Methods for nodal scalar field variables | Description |
+| :--- | :--- |
+`coupledNodalValue`*‡§ | Value of a coupled variable at nodes
+`coupledNodalDot`† | Time derivative of a coupled variable at nodes
+`coupledNodalDotDot`† | Second time derivative of a coupled variable at nodes
+
+
+| Methods for vector field variables | Description |
+| :--- | :--- |
+`coupledVectorValue`‡§ | Value of a coupled vector variable at q-points
+`coupledVectorGradient`‡§ | Gradient of a coupled vector variable at q-points
+`coupledCurl`‡ | Curl of a coupled vector variable at q-points
+`coupledDiv`‡ | Divergence of a coupled vector variable at q-points
+`coupledVectorDot`†§ | Time derivative of a coupled vector variable at q-points
+`coupledVectorDotDot`† | Second time derivative of a coupled vector variable at q-points
+`coupledVectorDotDu` | Derivative with regards to the variable of the time derivative of a coupled vector variable at q-points
+`coupledVectorDotDotDu` | Derivative with regards to the variable of the second time derivative of a coupled vector variable at q-points
+
+
+| Methods for nodal vector field variables | Description |
+| :--- | :--- |
+`coupledNodalValue`*‡§ | Value of a coupled vector variable at nodes
+`coupledNodalDot` | Time derivative of a coupled vector variable at nodes
+
+*: These methods are also provided with values from the previous Newton iteration
+by suffixing their name with `PreviousNL`, e.g. `coupledSecondPreviousNL`.
+
+†: These methods are also provided with values from the previous time step of a
+transient simulation by suffixing their name with `Old`, e.g. `coupledDotOld`.
+
+‡: These methods are also provided with values from the previous or second previous
+time steps of a transient simulation by suffixing their name with `Old` or `Older`,
+respectively, e.g. `coupledDivOld` or `coupledDivOlder`.
+
+§: These methods are also provided with automatic differentiation info by prefixing their
+name with `ad` and preserving `camelCase`, e.g. `adCoupledValue` or `adCoupledVectorDot`.
+
+Note that all of these prefixes and suffixes are mutually exclusive, i.e. none can be mixed and matched in any way.
+
+Lastly, some methods are only available with automatic differentiation info, e.g.
+`adCoupledLowerValue` returns the value of a coupled lower-dimensional variable and `adCoupledVectorSecond` returns the second spatial derivatives of a coupled vector variable.
 
 ## Optional Coupling
 
