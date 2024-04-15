@@ -21,9 +21,9 @@ AutoCheckpointAction::validParams()
       "Action to create shortcut syntax-specified checkpoints and automatic checkpoints.");
 
   params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
-  params.addParam<bool>("disable_wall_time_checkpoints",
-                        false,
-                        "Disables the output of checkpoints based on elapsed wall time.");
+  params.addParam<bool>("wall_time_checkpoint",
+                        true,
+                        "Enables the output of checkpoints based on elapsed wall time.");
 
   return params;
 }
@@ -50,8 +50,7 @@ AutoCheckpointAction::act()
     auto cp_params = _factory.getValidParams("Checkpoint");
 
     cp_params.set<bool>("_built_by_moose") = true;
-    cp_params.set<bool>("disable_wall_time_checkpoints") =
-        getParam<bool>("disable_wall_time_checkpoints");
+    cp_params.set<bool>("wall_time_checkpoint") = getParam<bool>("wall_time_checkpoint");
 
     // We need to keep track of what type of checkpoint we are creating. system created means the
     // default value of 1 for time_step_interval is ignored.

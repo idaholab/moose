@@ -51,9 +51,8 @@ Checkpoint::validParams()
       "wall_time_interval", 3600, "The target wall time interval (in seconds) at which to output");
 
   // Parameter to turn off wall time checkpoints
-  params.addParam<bool>("disable_wall_time_checkpoints",
-                        false,
-                        "Whether to disable checkpoints based on elapsed wall time");
+  params.addParam<bool>(
+      "wall_time_checkpoint", true, "Whether to enable checkpoints based on elapsed wall time");
 
   // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END
@@ -110,7 +109,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   // and should only be used in the test suite.
   Output::setWallTimeIntervalFromCommandLineParam();
   // We want to do this here and not in the constructor so it overrides --output-wall-time-interval
-  if (getParam<bool>("disable_wall_time_checkpoints"))
+  if (!getParam<bool>("wall_time_checkpoint"))
   {
     _wall_time_interval = std::numeric_limits<Real>::max();
     mooseInfo("Wall time checkpoints are disabled.");

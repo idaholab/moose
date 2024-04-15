@@ -142,7 +142,7 @@
       type = RunApp
       input = checkpoint.i
       recover = false
-      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/disable_wall_time_checkpoints=true'
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/wall_time_checkpoint=false'
       expect_out = "Wall time checkpoints are disabled."
       detail = " with an option to disable wall time checkpoints and"
     []
@@ -310,7 +310,7 @@
       type = RunApp
       input = checkpoint_block.i
       recover = false
-      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/out/disable_wall_time_checkpoints=true'
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/out/wall_time_checkpoint=false'
       expect_out = "Wall time checkpoints are disabled."
       detail = " with an option to disable wall time checkpoints and"
     []
