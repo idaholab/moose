@@ -300,10 +300,17 @@ template <typename T, typename Q>
 Q
 getIDFromName(const T & name)
 {
-  const auto id = stoi(name);
+  std::istringstream ss(name);
+  long long id = std::stoll(name);
+  Q id_Q = Q(id);
   if (id < std::numeric_limits<Q>::min() || id > std::numeric_limits<Q>::max())
-    mooseError(name, " is not within the numeric limits of the expected ID type.");
+    mooseError(MooseUtils::prettyCppType<T>(&name),
+               " ",
+               name,
+               " is not within the numeric limits of the expected ID type ",
+               MooseUtils::prettyCppType<Q>(&id_Q),
+               ".");
 
-  return Q(id);
+  return id_Q;
 }
 }
