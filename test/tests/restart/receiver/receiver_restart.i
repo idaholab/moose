@@ -1,6 +1,6 @@
 [Mesh/file]
   type = FileMeshGenerator
-  file = receiver_initial_out_cp/0001-mesh.cpa
+  file = receiver_initial_out_cp/0001-mesh.cpa.gz
 []
 
 [Postprocessors/constant]

@@ -1,5 +1,5 @@
 [Mesh]
-  file = timesequence_restart_failure1_cp/0002-mesh.cpa
+  file = timesequence_restart_failure1_cp/0002-mesh.cpa.gz
 []
 
 [Problem]
