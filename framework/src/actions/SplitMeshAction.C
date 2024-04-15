@@ -45,9 +45,9 @@ SplitMeshAction::act()
 
   // Decide whether to create ASCII or binary splits based on the split_file_arg. We use the
   // following rules to decide:
-  // 1.) No file extension -> ASCII
+  // 1.) No file extension -> ASCII + gzip
   // 2.) .cpr file extension -> binary
-  // 3.) .cpa file extension -> ASCII
+  // 3.) .cpa.gz file extension -> ASCII + gzip
   // 4.) Any other file extension -> mooseError
 
   // Get the file extension without the dot.
@@ -65,22 +65,22 @@ SplitMeshAction::act()
   {
     if (split_file_arg_ext == "cpr")
       checkpoint_binary_flag = true;
-    else if (split_file_arg_ext == "cpa")
+    else if (split_file_arg_ext == "cpa.gz")
       checkpoint_binary_flag = false;
     else
       mooseError("The argument to --split-file, ",
                  split_file_arg,
-                 ", must not end in a file extension other than .cpr or .cpa");
+                 ", must not end in a file extension other than .cpr or .cpa.gz");
   }
 
   // To name the split files, we start with the given mesh filename
   // (if set) or the argument to --split-file, strip any existing
-  // extension, and then append either .cpr or .cpa depending on the
+  // extension, and then append either .cpr or .cpa.gz depending on the
   // checkpoint_binary_flag.
   auto fname = mesh->getFileName();
   if (fname == "")
     fname = split_file_arg;
-  fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
+  fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa.gz");
 
   for (std::size_t i = 0; i < splits.size(); i++)
   {

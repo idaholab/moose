@@ -186,7 +186,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = '2d_diffusion_test_out.e'
-    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpa'
+    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpa.gz'
     recover = false
     prereq = pre_checkpoint_load_test
     requirement = 'The system shall have the ability to load the mesh from checkpoint files.'
@@ -197,7 +197,7 @@
   [checkpoint_new_prefix]
     type = 'CheckFiles'
     input = 'checkpoint_old_prefix.i'
-    check_files = 'checkpoint_old_prefix_out_cp/0001-mesh.cpa/meta_data_mesh.rd/header'
+    check_files = 'checkpoint_old_prefix_out_cp/0001-mesh.cpa.gz/meta_data_mesh.rd/header'
     cli_args = 'Outputs/checkpoint=true Mesh/final_generator=gmg'
     requirement = 'The system shall support outputting checkpoints using a consistent directory naming scheme.'
     design = 'Checkpoint.md'
@@ -208,7 +208,7 @@
   [checkpoint_old_prefix]
     type = 'RunApp'
     input = 'checkpoint_old_prefix.i'
-    expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpa'
+    expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpa.gz'
     cli_args = 'Mesh/final_generator=checkpoint'
     requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix.'
     design = 'FileMeshGenerator.md'

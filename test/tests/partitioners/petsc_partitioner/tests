@@ -145,7 +145,7 @@
     type = 'CheckFiles'
     input = 'petsc_partitioner.i'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Mesh/parallel_type=replicated --split-file petsc_partitioner_parmetis_presplit --split-mesh 4,8'
-    check_files = 'petsc_partitioner_parmetis_presplit.cpa/4/header.cpa petsc_partitioner_parmetis_presplit.cpa/4/split-4-0.cpa petsc_partitioner_parmetis_presplit.cpa/4/split-4-3.cpa petsc_partitioner_parmetis_presplit.cpa/8/header.cpa petsc_partitioner_parmetis_presplit.cpa/8/split-8-0.cpa petsc_partitioner_parmetis_presplit.cpa/8/split-8-7.cpa'
+    check_files = 'petsc_partitioner_parmetis_presplit.cpa.gz/4/header.gz petsc_partitioner_parmetis_presplit.cpa.gz/4/split-4-0.gz petsc_partitioner_parmetis_presplit.cpa.gz/4/split-4-3.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/header.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/split-8-0.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/split-8-7.gz'
     recover = false
 
     parmetis = true

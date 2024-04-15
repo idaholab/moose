@@ -3,8 +3,8 @@
     type = 'CheckFiles'
     input = 'simple_diffusion.i'
     cli_args = '--split-mesh 3 --split-file foo Mesh/parallel_type=replicated'
-    check_files = 'foo.cpa/3/header.cpa foo.cpa/3/split-3-0.cpa foo.cpa/3/split-3-1.cpa '
-                  'foo.cpa/3/split-3-2.cpa'
+    check_files = 'foo.cpa.gz/3/header.gz foo.cpa.gz/3/split-3-0.gz foo.cpa.gz/3/split-3-1.gz '
+                  'foo.cpa.gz/3/split-3-2.gz'
     recover = false
 
     issues = '#10623 #27240'
@@ -91,8 +91,8 @@
     type = 'CheckFiles'
     input = 'geometric_neighbors.i'
     cli_args = '--split-mesh 2 --split-file geometric_neighbors Mesh/parallel_type=replicated'
-    check_files = 'geometric_neighbors.cpa/2/header.cpa geometric_neighbors.cpa/2/split-2-0.cpa '
-                  'geometric_neighbors.cpa/2/split-2-1.cpa'
+    check_files = 'geometric_neighbors.cpa.gz/2/header.gz geometric_neighbors.cpa.gz/2/split-2-0.gz '
+                  'geometric_neighbors.cpa.gz/2/split-2-1.gz'
     recover = false
     compiler = '!INTEL'
     petsc_version = '>=3.8.0'
@@ -126,7 +126,7 @@
     type = 'CheckFiles'
     input = 'grid_from_file.i'
     cli_args = '--split-mesh 4'
-    check_files = 'grid_from_file.cpa/4/header.cpa grid_from_file.cpa/4/split-4-0.cpa grid_from_file.cpa/4/split-4-1.cpa grid_from_file.cpa/4/split-4-2.cpa grid_from_file.cpa/4/split-4-3.cpa'
+    check_files = 'grid_from_file.cpa.gz/4/header.gz grid_from_file.cpa.gz/4/split-4-0.gz grid_from_file.cpa.gz/4/split-4-1.gz grid_from_file.cpa.gz/4/split-4-2.gz grid_from_file.cpa.gz/4/split-4-3.gz'
     recover = false
     min_parallel = 2
     max_parallel = 2
@@ -140,7 +140,7 @@
     type = 'CheckFiles'
     input = 'grid_from_generated.i'
     cli_args = '--split-mesh=4 --split-file=grid_from_generated'
-    check_files = 'grid_from_generated.cpa/4/header.cpa grid_from_generated.cpa/4/split-4-0.cpa grid_from_generated.cpa/4/split-4-1.cpa grid_from_generated.cpa/4/split-4-2.cpa grid_from_generated.cpa/4/split-4-3.cpa'
+    check_files = 'grid_from_generated.cpa.gz/4/header.gz grid_from_generated.cpa.gz/4/split-4-0.gz grid_from_generated.cpa.gz/4/split-4-1.gz grid_from_generated.cpa.gz/4/split-4-2.gz grid_from_generated.cpa.gz/4/split-4-3.gz'
     recover = false
     min_parallel = 2
     max_parallel = 2

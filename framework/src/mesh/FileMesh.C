@@ -98,14 +98,14 @@ FileMesh::buildMesh()
     }
     else
     {
-      // Supports old suffix (xxxx_mesh.cpa -> xxxx-mesh.cpa) and LATEST
+      // Supports old suffix (xxxx_mesh.cpa.gz -> xxxx-mesh.cpa.gz) and LATEST
       _file_name = FileMeshGenerator::deduceCheckpointPath(*this, _file_name);
 
       // If we are reading a mesh while restarting, then we might have
       // a solution file that relies on that mesh partitioning and/or
       // numbering.  In that case, we need to turn off repartitioning
       // and renumbering, at least at first.
-      bool restarting = _file_name.rfind(".cpa") < _file_name.size();
+      bool restarting = _file_name.rfind(".cpa.gz") < _file_name.size();
 
       const bool skip_partitioning_later = restarting && getMesh().skip_partitioning();
       const bool allow_renumbering_later = restarting && getMesh().allow_renumbering();

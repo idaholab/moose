@@ -1,7 +1,7 @@
 [Mesh]
   [read]
     type = FileMeshGenerator
-    file = 'foo.cpa'
+    file = 'foo.cpa.gz'
   []
   [extrude]
     type = AdvancedExtruderGenerator

@@ -2396,7 +2396,7 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 const std::string &
 MooseApp::checkpointSuffix()
 {
-  static const std::string suffix = "-mesh.cpa";
+  static const std::string suffix = "-mesh.cpa.gz";
   return suffix;
 }
 
