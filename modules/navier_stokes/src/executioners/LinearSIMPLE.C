@@ -316,6 +316,33 @@ LinearSIMPLE::execute()
       // Compute the coupling fields between the momentum and pressure equations
       _rc_uo->computeHbyA(_print_fields);
 
+      // We set the preconditioner/controllable parameters for the pressure equations through
+      // petsc options. Linear tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
+
+      // Solve the pressure corrector
+      ns_residuals[momentum_residual.size()] = solvePressureCorrector();
+
+      // Compute the face velocity which is used in the advection terms
+      _rc_uo->computeFaceMassFlux();
+
+      auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
+      auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
+
+      // Relax the pressure update for the next momentum predictor
+      relaxSolutionUpdate(
+          pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
+
+      // Overwrite old solution
+      pressure_old_solution = pressure_current_solution;
+      _pressure_system.setSolution(pressure_current_solution);
+
+      // We clear out the caches so that the gradients can be computed with the relaxed solution
+      _pressure_system.computeGradients();
+
+      // Reconstruct the cell velocity as well to accelerate convergence
+      _rc_uo->computeCellVelocity();
+
       // Printing residuals
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
