@@ -25,14 +25,14 @@ MeshCut2DRankTwoTensorNucleation::validParams()
   params.addClassDescription(
       "Nucleate a crack in MeshCut2D UO based on a scalar extracted from a RankTwoTensor");
   params.addRangeCheckedParam<Real>(
-      "crack_length_scale",
+      "edge_extension_factor",
       1e-5,
-      "crack_length_scale >= 0",
+      "edge_extension_factor >= 0",
       "Crack length scaling factor to extend the nucleated crack beyond the cut element edges.");
-  params.addRequiredRangeCheckedParam<Real>(
-      "nucleation_length",
-      "nucleation_length >= 0",
-      "Size of crack to nucleate.  Must be larger than the length of the element in which the crack is nucleated.");
+  params.addRangeCheckedParam<Real>("nucleation_length",
+                                    "nucleation_length >= 0",
+                                    "Size of crack to nucleate.  Must be larger than the length of "
+                                    "the element in which the crack is nucleated.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -49,14 +49,20 @@ MeshCut2DRankTwoTensorNucleation::validParams()
       "point2",
       Point(0, 1, 0),
       "End point for axis used to calculate some cylindrical material tensor quantities");
+  params.addParam<bool>(
+      "always_cut_element",
+      false,
+      "Should element be cut if nucleation_length is smaller than element length.");
   return params;
 }
 
 MeshCut2DRankTwoTensorNucleation::MeshCut2DRankTwoTensorNucleation(
     const InputParameters & parameters)
   : MeshCut2DNucleationBase(parameters),
-    _crack_length_scale(getParam<Real>("crack_length_scale")),
-    _nucleation_length(getParam<Real>("nucleation_length")),
+    _edge_extension_factor(getParam<Real>("edge_extension_factor")),
+    _always_cut_element(getParam<bool>("always_cut_element")),
+    _is_nucleation_length_provided(isParamValid("nucleation_length")),
+    _nucleation_length(_is_nucleation_length_provided ? getParam<Real>("nucleation_length") : 0),
     _tensor(getMaterialProperty<RankTwoTensor>(getParam<std::string>("tensor"))),
     _nucleation_threshold(coupledValue("nucleation_threshold")),
     _scalar_type(getParam<MooseEnum>("scalar_type")),
@@ -133,37 +139,45 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
         is_point_1_on_external_boundary = (_current_elem->neighbor_ptr(e) == nullptr);
     }
 
+    // bisect_length is the length of a cut that goes across a single elment
+    // extend_length is the amount that needs to be added to each side of the bisect_legnth cut to
+    // make its length equal to the nucleation length
+    // We also add a small amount to the crack length to make sure it fully cuts the element edge.
+    // This factor is based on the element length.
     Real bisect_length = (point_0 - point_1).norm();
     Real extend_length = (_nucleation_length - bisect_length) / 2.0;
     if (_nucleation_length < bisect_length)
-      mooseError(
-          "Trying to nucleated crack smaller than element length, increase nucleation_length.\n  "
-          "location of crack being nucleated: ",
-          point_0,
-          "\n  nucleation_length: ",
-          _nucleation_length,
-          "\n  length to bisect element: ",
-          bisect_length);
+    {
+      if (_is_nucleation_length_provided && !_always_cut_element)
+        mooseError(
+            "Trying to nucleate crack smaller than element length, increase nucleation_length.\n  "
+            "location of crack being nucleated: ",
+            point_0,
+            "\n  nucleation_length: ",
+            _nucleation_length,
+            "\n  length to bisect element: ",
+            bisect_length,
+            "\n This error can be suppressed by setting always_cut_element=True which will "
+            "nucleate a crack the size of the element.");
+      else
+        //_edge_extension_factor is used to make sure cut will cut both edges of the element.
+        extend_length = (bisect_length * _edge_extension_factor) / 2.0;
+    }
 
-    if (is_point_0_on_external_boundary && !is_point_1_on_external_boundary)
+    // First create a cut assuming bulk nucleation
+    point_0 = point_0 - extend_length * crack_dir.unit();
+    point_1 = point_1 + extend_length * crack_dir.unit();
+
+    // modify edges of cut should go so that they are on the edge of the domain and have a length
+    // equal to nucleation_length
+    if (is_point_0_on_external_boundary)
     {
-      point_0 = point_0 - (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
-      point_1 = point_1 + 2.0 * extend_length * crack_dir.unit();
+      point_0 = point_0 - (bisect_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
     }
-    else if (is_point_1_on_external_boundary && !is_point_0_on_external_boundary)
+    else if (is_point_1_on_external_boundary)
     {
-      point_0 = point_0 - 2.0 * extend_length * crack_dir.unit();
-      point_1 = point_1 + (bisect_length * _crack_length_scale) / 2.0 * crack_dir.unit();
+      point_1 = point_1 + (bisect_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
     }
-    // bulk nucleation or element bisects single element with two boundaries.
-    else if ((!is_point_0_on_external_boundary && !is_point_1_on_external_boundary) ||
-             (is_point_0_on_external_boundary && is_point_1_on_external_boundary))
-    {
-      point_0 = point_0 - extend_length * crack_dir.unit();
-      point_1 = point_1 + extend_length * crack_dir.unit();
-    }
-    else
-      mooseError("Nucleated cutter element is intersecting mesh element in an unexepected way.");
     cutterElemNodes = {point_0, point_1};
   }
 
@@ -179,6 +193,9 @@ MeshCut2DRankTwoTensorNucleation::lineLineIntersect2D(const Point & start,
                                                       Point & intersection_point,
                                                       Real & intersection_distance)
 {
+  /// The standard "looser" tolerance to use in ray tracing when having difficulty finding intersection
+  const Real TRACE_TOLERANCE = 1e-5;
+
   const auto r = direction * length;
   const auto s = v1 - v0;
   const auto rxs = r(0) * s(1) - r(1) * s(0);
