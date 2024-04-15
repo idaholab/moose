@@ -265,8 +265,8 @@ formats with start and end characters.
 | Strong | `+` | `+strong+` | +strong+ |
 | Emphasis | `*` | `*emphasis*` | *emphasis* |
 | Strikethrough | `~` | `~strikethrough~` | ~strikethrough~ |
-| Superscript | `^` | `foo^bar^` |foo^bar^ |
-| Subscript | `@` | `foo@bar@` |foo@bar@ |
+| Superscript | `^` | `foo^bar^` | foo^bar^ |
+| Subscript | `@` | `foo@bar@` | foo@bar@ |
 
 The formatting can be arbitrarily nested and span multiple lines within the same paragraph, thus
 as shown in [format-example], complicated and compound formatting of text is possible.
