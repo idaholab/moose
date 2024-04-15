@@ -88,9 +88,15 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
 
   VectorPostprocessorValue value(getFromMultiApp()->numGlobalApps(), 0.0);
   for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); ++i)
-    if (getFromMultiApp()->hasLocalApp(i))
+  {
+    // To avoid duplication and thus a wrong pp value after summing value accross procs, we should
+    // ensure that value[i] is only set by one procs. To do this, we check isFirstLocalRank to see
+    // if the current proc is the first rank that subapp i lives on.
+    if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isFirstLocalRank())
       value[i] = getFromMultiApp()->appProblemBase(i).getPostprocessorValueByName(_sub_pp_name);
+  }
 
+  // Sum to distribute entries of 'value' accross all procs
   for (auto & v : value)
     _communicator.sum(v);
 
