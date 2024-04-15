@@ -15,7 +15,7 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
-#include "LinearFVDiffusion.h"
+#include "LinearFVAnisotropicDiffusion.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -52,10 +52,11 @@ public:
   /// Update the cell values of the velocity variables
   void computeCellVelocity();
 
-  void meshChanged() override;
-  void initialize() override;
-  void execute() override {}
-  void finalize() override {}
+  virtual void meshChanged() override;
+  virtual void initialize() override;
+  virtual void execute() override {}
+  virtual void finalize() override {}
+  virtual void initialSetup() override;
 
   /**
    * Update the momentum system-related information
@@ -104,7 +105,7 @@ protected:
   /// The thread 0 copy of the x-velocity variable
   std::vector<MooseLinearVariableFVReal *> _vel;
 
-  LinearFVDiffusion * _p_diffusion_kernel;
+  LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
 
   /**
    * A map functor from faces to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -

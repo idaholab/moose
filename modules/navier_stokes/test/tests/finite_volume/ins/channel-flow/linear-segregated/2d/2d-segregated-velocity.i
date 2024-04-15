@@ -15,6 +15,7 @@ advected_interp_method = 'average'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
+  previous_nl_solution_required = true
 []
 
 [UserObjects]
@@ -24,7 +25,7 @@ advected_interp_method = 'average'
     v = v
     pressure = pressure
     rho = ${rho}
-    p_diffusion_kernel = "bazinga"
+    p_diffusion_kernel = p_diffusion
   []
 []
 
@@ -136,7 +137,7 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 1
+  num_iterations = 10
   pressure_absolute_tolerance = 1e-13
   momentum_absolute_tolerance = 1e-13
   print_fields = true

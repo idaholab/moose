@@ -100,25 +100,6 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
   if (!dynamic_cast<LinearSIMPLE *>(getMooseApp().getExecutioner()))
     mooseError(this->name(),
                " should only be used with a linear segregated thermal-hydraulics solver!");
-
-  // std::vector<LinearFVFluxKernel *> flux_kernel;
-  // auto base_query = _fe_problem.theWarehouse()
-  //                       .query()
-  //                       .template condition<AttribThread>(_tid)
-  //                       .template condition<AttribSysNum>(_p->sys().number())
-  //                       .template condition<AttribSystem>("LinearFVFluxKernel")
-  //                       .template
-  //                       condition<AttribName>(getParam<std::string>("p_diffusion_kernel"))
-  //                       .queryInto(flux_kernel);
-  // if (flux_kernel.size() != 1)
-  //   paramError(
-  //       "p_diffusion_kernel",
-  //       "The kernel with the given name could not be found or multiple instances were
-  //       identified.");
-  // _p_diffusion_kernel = dynamic_cast<LinearFVDiffusion *>(flux_kernel[0]);
-  // if (!_p_diffusion_kernel)
-  //   paramError("p_diffusion_kernel",
-  //              "The provided diffusion kernel should of type LinearFVDiffusion!");
 }
 
 void
@@ -142,6 +123,27 @@ RhieChowMassFlux::meshChanged()
   _HbyA_flux.clear();
   _Ainv.clear();
   _face_mass_flux.clear();
+}
+
+void
+RhieChowMassFlux::initialSetup()
+{
+  std::vector<LinearFVFluxKernel *> flux_kernel;
+  auto base_query = _fe_problem.theWarehouse()
+                        .query()
+                        .template condition<AttribThread>(_tid)
+                        .template condition<AttribSysNum>(_p->sys().number())
+                        .template condition<AttribSystem>("LinearFVFluxKernel")
+                        .template condition<AttribName>(getParam<std::string>("p_diffusion_kernel"))
+                        .queryInto(flux_kernel);
+  if (flux_kernel.size() != 1)
+    paramError(
+        "p_diffusion_kernel",
+        "The kernel with the given name could not be found or multiple instances were identified.");
+  _p_diffusion_kernel = dynamic_cast<LinearFVAnisotropicDiffusion *>(flux_kernel[0]);
+  if (!_p_diffusion_kernel)
+    paramError("p_diffusion_kernel",
+               "The provided diffusion kernel should of type LinearFVDiffusion!");
 }
 
 void
@@ -220,7 +222,8 @@ RhieChowMassFlux::computeFaceMassFlux()
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    Real face_area = fi->faceArea() * fi->faceCoord();
+    _p_diffusion_kernel->setCurrentFaceInfo(fi);
+    _p_diffusion_kernel->setCurrentFaceArea(fi->faceArea() * fi->faceCoord());
 
     Real p_grad_flux = 0.0;
     if (_p->isInternalFace(*fi))
@@ -236,8 +239,7 @@ RhieChowMassFlux::computeFaceMassFlux()
 
       p_grad_flux = ((p_neighbor_value * neighbor_matrix_contribution -
                       p_elem_value * elem_matrix_contribution) +
-                     elem_rhs_contribution) *
-                    face_area;
+                     elem_rhs_contribution);
     }
     else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
     {
@@ -246,7 +248,7 @@ RhieChowMassFlux::computeFaceMassFlux()
           _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
       const auto rhs_contribution =
           _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
-      p_grad_flux = (p_elem_value * matrix_contribution + rhs_contribution) * face_area;
+      p_grad_flux = (p_elem_value * matrix_contribution + rhs_contribution);
     }
     _face_mass_flux[fi->id()] = _HbyA_flux[fi->id()] - p_grad_flux;
   }
