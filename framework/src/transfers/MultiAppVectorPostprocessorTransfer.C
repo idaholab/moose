@@ -96,6 +96,7 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
       value[i] = getFromMultiApp()->appProblemBase(i).getPostprocessorValueByName(_sub_pp_name);
   }
 
+  // Sum to distribute entries of 'value' accross all procs
   for (auto & v : value)
     _communicator.sum(v);
 

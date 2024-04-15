@@ -55,7 +55,6 @@
     type = TransientMultiApp
     input_files = 'sub.i'
     positions = '0.25 1.25 0 0.5 1.5 0'
-    min_procs_per_app = 2
   [../]
 []
 
