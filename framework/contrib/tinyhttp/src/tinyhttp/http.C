@@ -342,26 +342,15 @@ void HttpServer::startListening(uint16_t port) {
     remote.sin_family = AF_INET;
     remote.sin_addr.s_addr = htonl(INADDR_ANY);
     remote.sin_port = htons(port);
-    int iRetval;
+    int iRetval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), sizeof(remote));
 
-    while (true) {
-        iRetval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), sizeof(remote));
-
-        if (iRetval < 0) {
-            perror("Failed to bind socket, retrying in 5 seconds...");
-            #ifdef TINYHTTP_THREADING
-            std::this_thread::sleep_for(std::chrono::seconds(5));
-            #else
-            usleep(5000 * 1000);
-            #endif
-        } else break;
-    }
+    if (iRetval < 0)
+        throw std::runtime_error("Failed to find socket");
 
     iRetval = ::listen(mSocket, 3);
     if (iRetval < 0)
         throw std::runtime_error("listen() failed");
 
-    printf("Waiting for incoming connections...\n");
     while (mSocket != -1) {
         auto processor = std::make_shared<Processor>(
             std::make_shared<TCPClientStream>(TCPClientStream::acceptFrom(mSocket)),
