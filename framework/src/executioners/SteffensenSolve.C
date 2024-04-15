@@ -228,6 +228,7 @@ SteffensenSolve::printFixedPointConvergenceHistory()
            << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
            << '\n';
 
+  Real max_norm_old = _fixed_point_initial_norm;
   for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
     Real max_norm =
@@ -241,6 +242,8 @@ SteffensenSolve::printFixedPointConvergenceHistory()
       steffensen_prefix << " Steffensen step           |R| = ";
 
     _console << std::setw(2) << i + 1 << steffensen_prefix.str()
-             << Console::outputNorm(_fixed_point_initial_norm, max_norm) << '\n';
+             << Console::outputNorm(max_norm_old, max_norm) << '\n';
+
+    max_norm_old = max_norm;
   }
 }
