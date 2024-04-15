@@ -22,7 +22,13 @@ public:
 
 protected:
   /// scaling factor to extend the nucleated crack beyond the element edges.
-  const Real _crack_length_scale;
+  const Real _edge_extension_factor;
+
+  /// should element be cut if the nucleation_length is smaller than the element length.
+  const bool _always_cut_element;
+
+  /// is the nucleation length provided in the input file.
+  const bool _is_nucleation_length_provided;
 
   /// Length of the nucleated cracks
   const Real _nucleation_length;
@@ -49,8 +55,6 @@ protected:
 
   // FIXME Lynn Copy from TraceRayTools.C in rayTracing module.  Remove once this function migrates
   // to libmesh.
-  /// The standard "looser" tolerance to use in ray tracing when having difficulty finding intersection
-  const Real TRACE_TOLERANCE = 1e-5;
   bool lineLineIntersect2D(const Point & start,
                            const Point & direction,
                            const Real length,

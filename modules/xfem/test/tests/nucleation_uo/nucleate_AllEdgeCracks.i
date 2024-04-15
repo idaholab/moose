@@ -53,7 +53,7 @@
     nucleation_threshold = 180
     initiate_on_boundary = 'left'
     nucleation_radius = .21
-    crack_length_scale = 2e-5
+    edge_extension_factor = 2e-5
     nucleation_length = 0.11
   []
   [cut_mesh2]
@@ -65,7 +65,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     planar_formulation = plane_strain

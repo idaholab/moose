@@ -63,8 +63,7 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = strength
     nucleation_radius = .21
-    crack_length_scale = 1e-4
-    nucleation_length = .21
+    edge_extension_factor = .1
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -75,7 +74,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     planar_formulation = plane_strain
@@ -153,6 +152,7 @@
 [Outputs]
   csv=true
   execute_on = final
+  # exodus=true
   # [xfemcutter]
   #   type=XFEMCutMeshOutput
   #   xfem_cutter_uo=cut_mesh2
