@@ -165,45 +165,43 @@ RhieChowMassFlux::initFaceMassFlux()
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
-        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+
+    RealVectorValue density_times_velocity;
+
+    // On internal face we do a regular interpolation with geometric weights
+    if (_vel[0]->isInternalFace(*fi))
     {
-      RealVectorValue density_times_velocity;
+      const auto & elem_info = *fi->elemInfo();
+      const auto & neighbor_info = *fi->neighborInfo();
 
-      // On internal face we do a regular interpolation with geometric weights
-      if (_vel[0]->isInternalFace(*fi))
-      {
-        const auto & elem_info = *fi->elemInfo();
-        const auto & neighbor_info = *fi->neighborInfo();
+      Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+      Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
 
-        Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-        Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
-
-        for (const auto dim_i : index_range(_vel))
-          interpolate(InterpMethod::Average,
-                      density_times_velocity(dim_i),
-                      _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
-                      _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
-                      *fi,
-                      true);
-      }
-      // On the boundary, we just take the boundary values
-      else
-      {
-        const Elem * const boundary_elem =
-            hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
-
-        const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
-
-        const Real face_rho = _rho(boundary_face, time_arg);
-        for (const auto dim_i : index_range(_vel))
-          density_times_velocity(dim_i) =
-              face_rho * raw_value((*_vel[dim_i])(boundary_face, time_arg));
-      }
-
-      _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
+      for (const auto dim_i : index_range(_vel))
+        interpolate(InterpMethod::Average,
+                    density_times_velocity(dim_i),
+                    _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
+                    _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
+                    *fi,
+                    true);
     }
+    // On the boundary, we just take the boundary values
+    else
+    {
+      const Elem * const boundary_elem =
+          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+
+      const Moose::FaceArg boundary_face{
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+
+      const Real face_rho = _rho(boundary_face, time_arg);
+      for (const auto dim_i : index_range(_vel))
+        density_times_velocity(dim_i) =
+            face_rho * raw_value((*_vel[dim_i])(boundary_face, time_arg));
+    }
+
+    _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
+    std::cout << "mass flux" << fi->faceCentroid() << " " << _face_mass_flux[fi->id()] << std::endl;
   }
 }
 
@@ -281,65 +279,64 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
-        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
-    {
-      Real face_rho = 0;
-      RealVectorValue face_hbya;
-      if (_vel[0]->isInternalFace(*fi))
-      {
-        const auto & elem_info = *fi->elemInfo();
-        const auto & neighbor_info = *fi->neighborInfo();
-        const auto elem_dof =
-            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
-        const auto neighbor_dof =
-            neighbor_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
 
-        Real face_rho;
+    Real face_rho = 0;
+    RealVectorValue face_hbya;
+    if (_vel[0]->isInternalFace(*fi))
+    {
+      const auto & elem_info = *fi->elemInfo();
+      const auto & neighbor_info = *fi->neighborInfo();
+      const auto elem_dof =
+          elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+      const auto neighbor_dof =
+          neighbor_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+
+      interpolate(Moose::FV::InterpMethod::Average,
+                  face_rho,
+                  _rho(makeElemArg(fi->elemPtr()), time_arg),
+                  _rho(makeElemArg(fi->neighborPtr()), time_arg),
+                  *fi,
+                  true);
+      for (const auto dim_i : index_range(raw_hbya))
+      {
         interpolate(Moose::FV::InterpMethod::Average,
-                    face_rho,
-                    _rho(makeElemArg(fi->elemPtr()), time_arg),
-                    _rho(makeElemArg(fi->neighborPtr()), time_arg),
+                    face_hbya(dim_i),
+                    (*raw_hbya[dim_i])(elem_dof),
+                    (*raw_hbya[dim_i])(neighbor_dof),
                     *fi,
                     true);
-        for (const auto dim_i : index_range(raw_hbya))
+      }
+      std::cout << "itnernal face" << face_hbya << std::endl;
+    }
+    else
+    {
+      const ElemInfo & elem_info =
+          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+
+      if (_vel[0]->isDirichletBoundaryFace(*fi))
+      {
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem()};
+        face_rho = _rho(boundary_face, Moose::currentState());
+        for (const auto dim_i : make_range(_dim))
         {
-          interpolate(Moose::FV::InterpMethod::Average,
-                      face_hbya(dim_i),
-                      (*raw_hbya[dim_i])(elem_dof),
-                      (*raw_hbya[dim_i])(neighbor_dof),
-                      *fi,
-                      true);
+          face_hbya(dim_i) =
+              MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
         }
       }
       else
       {
-        const ElemInfo & elem_info =
-            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+        const auto elem_dof =
+            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
 
-        if (_vel[0]->isDirichletBoundaryFace(*fi))
-        {
-          const Moose::FaceArg boundary_face{
-              fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem()};
-          face_rho = _rho(boundary_face, Moose::currentState());
-          for (const auto dim_i : make_range(_dim))
-          {
-            face_hbya(dim_i) =
-                -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
-          }
-        }
-        else
-        {
-          const auto elem_dof =
-              elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
-
-          face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-          for (const auto dim_i : make_range(_dim))
-            face_hbya(dim_i) = (*raw_hbya[dim_i])(elem_dof);
-        }
+        face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+        for (const auto dim_i : make_range(_dim))
+          face_hbya(dim_i) = (*raw_hbya[dim_i])(elem_dof);
       }
-      _HbyA_flux[fi->id()] *= face_hbya * fi->normal() * face_rho;
     }
+    _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
+    std::cout << face_hbya << " " << fi->normal() << " " << face_rho << " " << _HbyA_flux[fi->id()]
+              << std::endl;
   }
 }
 
@@ -395,6 +392,18 @@ RhieChowMassFlux::populateAinv(const std::vector<std::unique_ptr<NumericVector<N
       }
     }
   }
+}
+
+void
+RhieChowMassFlux::multiplyWithCellVolume(const SolverVariableName & var_name,
+                                         NumericVector<Number> & vec_to_multiply)
+{
+  for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
+  {
+    const auto elem_dof = elem_info->dofIndices()[_pressure_system->number()][_p->number()];
+    vec_to_multiply.set(elem_dof, vec_to_multiply(elem_dof) * elem_info->volume());
+  }
+  vec_to_multiply.close();
 }
 
 void
@@ -455,7 +464,13 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     _HbyA_raw.push_back(current_local_solution.zero_clone());
     NumericVector<Number> & HbyA = *(_HbyA_raw.back());
     HbyA = 0;
-    HbyA.add(rhs);
+    HbyA.add(-1.0, rhs);
+
+    *working_vector_petsc = *pressure_gradient[system_i];
+    multiplyWithCellVolume(_p->name(), *working_vector_petsc);
+
+    // We correct the right hand side to exclude the pressure contribution
+    HbyA.add(-1.0, *working_vector_petsc);
 
     // Now we set the diagonal of our system matrix to 0 so we can create H*u
     // TODO: Add a function for this in libmesh
@@ -464,20 +479,11 @@ RhieChowMassFlux::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      _console << "H" << std::endl;
-      mmat->print();
-    }
-
-    if (verbose)
-    {
       _console << "total RHS" << std::endl;
       rhs.print();
       _console << "pressure RHS" << std::endl;
       pressure_gradient[system_i]->print();
     }
-
-    // We correct the right hand side to exclude the pressure contribution
-    HbyA.add(-1.0, *pressure_gradient[system_i]);
 
     if (verbose)
     {

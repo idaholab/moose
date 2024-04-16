@@ -78,6 +78,9 @@ public:
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
+  void multiplyWithCellVolume(const SolverVariableName & var_name,
+                              NumericVector<Number> & vec_to_multiply);
+
   /// Populate the face values of the H/A field
   void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya);
 

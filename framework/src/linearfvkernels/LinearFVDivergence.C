@@ -49,7 +49,7 @@ LinearFVDivergence::computeElemRightHandSideContribution()
 Real
 LinearFVDivergence::computeNeighborRightHandSideContribution()
 {
-  return computeFaceFlux();
+  return -computeFaceFlux();
 }
 
 Real
@@ -67,13 +67,17 @@ LinearFVDivergence::computeBoundaryRHSContribution(const LinearFVBoundaryConditi
 Real
 LinearFVDivergence::computeFaceFlux()
 {
+  const auto face_arg = makeCDFace(*_current_face_info);
+  const auto state_arg = determineState();
+
   if (!_cached_rhs_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
-    const auto state_arg = determineState();
-    _cached_rhs_contribution = false;
+    _cached_rhs_contribution = true;
     _flux_rhs_contribution = _face_flux(face_arg, state_arg) * _current_face_area;
   }
+
+  std::cout << "Face flux " << _current_face_info->faceCentroid() << " "
+            << _face_flux(face_arg, state_arg) << std::endl;
 
   return _flux_rhs_contribution;
 }
