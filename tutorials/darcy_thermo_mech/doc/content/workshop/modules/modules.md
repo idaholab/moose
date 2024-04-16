@@ -96,15 +96,14 @@ It is designed to interface easily with the porous flow module so that complicat
 
 !--
 
-## Heat Conduction
+## Heat Transfer
 
 Basic utilities for solving the transient heat conduction equation:
 
 !equation
 \rho c_p \pf{T}{t} - \nabla\cdot k \nabla T - s = 0
 
-Also contains capability for generalized heat transfer (convection, radiation, ...). Will likely be renamed
-heat transfer in the future, accordingly.
+Also contains capability for generalized heat transfer (convection, radiation, ...).
 
 !---
 

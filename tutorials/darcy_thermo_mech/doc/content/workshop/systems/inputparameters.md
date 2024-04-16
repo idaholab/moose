@@ -11,6 +11,7 @@ which every class contains.
 ## `validParams` Declaration
 
 In the class declaration,
+
 ```cpp
 public:
 ...

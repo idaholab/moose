@@ -13,7 +13,7 @@
 ## Step 7a: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step07_adaptivity
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step7a_coarse.i
@@ -30,7 +30,7 @@ cd problems
 ## Step 7b: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step07_adaptivity
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step7b_fine.i
@@ -47,7 +47,7 @@ cd problems
 ## Step 7c: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step07_adaptivity
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step7a_adapt.i

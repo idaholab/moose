@@ -45,7 +45,7 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 ## Step 9: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step09_mechanics
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step09_mechanics
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step9.i

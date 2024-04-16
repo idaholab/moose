@@ -3,9 +3,9 @@ Fundamentals
 
 !---
 
-## Intrinsic Data Types
+## Data Types
 
-| Basic Type | Variant(s) |
+| Intrinsic Type | Variant(s) |
 | :- | :- |
 | bool | |
 | char | unsigned |
@@ -15,6 +15,10 @@ Fundamentals
 | void | |
 
 Note, `void` is the "anti-datatype", used in functions returning nothing
+
+Objects of these types can be combined into more complicated
+"structure" or "class" objects, or aggregated into arrays or various
+"container" classes.
 
 !---
 
@@ -39,6 +43,17 @@ Used to group statements together and to define the scope of a function
 
 Creates new layer of scope
 
+```cpp
+int x = 2;
+
+{
+  int x = 5; // "Shadows" the other x - bad practice
+  assert(x == 5);
+}
+
+assert(x == 2);
+```
+
 !---
 
 ## Expressions
@@ -60,11 +75,16 @@ evaluated.
 
 !---
 
-Scope resolution operator:
+Scope resolution:
 
 ```cpp
-t = std::pow(r, 2);
-b = std::sqrt(d);
+a = std::pow(r, 2);     // Calls the standard pow() function
+b = YourLib::pow(r, 2); // Calls pow() from YourLib namespace or class
+
+using std::pow;      // Now "pow" can mean "std::pow" automatically
+using YourLib::pow;  // Or it can mean "YourLib::pow"...
+
+c = pow(r, 2); // Ambiguous, or deduced from the type of r
 ```
 
 Dot and Pointer Operator:
@@ -100,7 +120,14 @@ Be careful with your assumptions
 
 ```cpp
 unsigned int huge_value = 4294967295; // ok
-int i = static_cast<int>(huge_value); // won't work!
+int i = huge_value;                   // value silently changed!
+int j = static_cast<int>(huge_value); // won't help!
+```
+
+And consider safer MOOSE tools
+
+```
+int i = cast_int<int>(huge_value);    // assertion failure in non-optimized runs
 ```
 
 !---
@@ -110,9 +137,10 @@ int i = static_cast<int>(huge_value); // won't work!
 For, While, and Do-While Loops:
 
 ```cpp
-for (int i=0; i<10; ++i) { }
-while (boolean-expression)  { }
-do { } while (boolean-expression);
+for (int i=0; i<10; ++i) { foo(i); }
+for (auto val : my_container) { foo(val); }
+while (boolean-expression)  { bar(); }
+do { baz(); } while (boolean-expression);
 ```
 
 If-Then-Else Tests:
@@ -142,6 +170,7 @@ Headers generally contain +declarations+
 
 - Statement of the types we will use
 - Gives names to types
+- The argument and return type signatures of functions
 
 Bodies generally contain +definitions+
 
@@ -166,6 +195,14 @@ class ClassName
 {
   returnType methodName(type1 name1, type2 name2);
 };
+```
+
+(Pointers to) functions *themselves* are also objects, with ugly syntax
+
+```cpp
+  returnType (*f_ptr)(type1, type2) = &functionName;
+  returnType r = (*f_ptr)(a1, a2);
+  do_something_else_with(f_ptr);
 ```
 
 !---
@@ -194,9 +231,10 @@ returnType ClassName::methodName(type1 name1, type2 name2)
 
 ## Make
 
-A Makefile is a list of dependencies with rules to satisfy those dependencies
-All MOOSE-based applications are supplied with a complete Makefile
-To build a MOOSE-based application just type:
+A Makefile is a list of dependencies with rules to satisfy those dependencies. All MOOSE-based
+applications are supplied with a complete Makefile.
+
+To build a MOOSE-based application, just type:
 
 ```text
 make

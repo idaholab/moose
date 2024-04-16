@@ -4,8 +4,6 @@
 Upcoming MOOSE related training in chronological order:
 !style-end!
 
-- [MOOSE Solid Mechanics Workshop (2024 March 11-12, Duke University)](more_detail/MOOSE_2024_03_11-12_DUKE.md)
-- [MOOSE Framework Fundamentals (2024 April 2-4, Oregon State University)](more_detail/MOOSE_2024_04_02-04_OSU.md)
 - [ART/NEAMS M&S Molten Salt Reactors @PHYSOR24 (2024 April 21)](more_detail/PHYSOR_MS_2024_04_21.md)
 - [ART/NEAMS M&S Pebble Bed Reactors @PHYSOR24 (2024 April 21)](more_detail/PHYSOR_PB_2024_04_21.md)
 - [MOOSE Framework Fundamentals (2024 June 4-6, Idaho Falls)](more_detail/MOOSE_2024_06_04-06_IF.md)
@@ -13,9 +11,13 @@ Upcoming MOOSE related training in chronological order:
 
 Past Training:
 
-- MOOSE Framework Fundamentals (2024 January 16-17, MIT)
+- MOOSE Framework Fundamentals (2024 April 2-4, Oregon State University)
+
+- MOOSE Solid Mechanics Workshop (2024 March 11-12, Duke University)
 
 - BISON Fuels Performance (2024 January 18-19, MIT)
+
+- MOOSE Framework Fundamentals (2024 January 16-17, MIT)
 
 - Modeling and Simulation of Advanced Reactors (2023 Oct 23-26, Idaho Falls)
 

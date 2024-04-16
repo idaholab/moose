@@ -49,7 +49,7 @@ occurs in the element interiors.
 ## Step 4: Run
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_velocity_aux
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step04_velocity_aux
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step4.i
@@ -66,7 +66,7 @@ cd problems
 ## Tighter Solve Tolerance
 
 ```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_velocity_aux
+cd ~/projects/moose/tutorials/darcy_thermo_mech/step04_velocity_aux
 make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step4.i Executioner/nl_rel_tol=1e-12

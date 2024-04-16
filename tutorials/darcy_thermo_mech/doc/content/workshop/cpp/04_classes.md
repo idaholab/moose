@@ -333,11 +333,11 @@ Templates
 Classes
 
 - run-time polymorphism: routine calls forwarded to derived classes
-- slower execution due to cost of virtual table searches
+- slower execution due to cost of virtual table lookups
 - easier to develop with, somewhat more readable
 
 
-Both enable better code re-use, lower duplication. They are used for different purposes,
+Both enable better code re-use, lower duplication. They have different tradeoffs,
 but both concepts can be combined! For example:
 
 ```
