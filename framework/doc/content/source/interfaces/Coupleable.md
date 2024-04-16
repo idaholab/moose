@@ -15,6 +15,7 @@ The following tables summarize the methods it provides.
 `coupledGradientDot`§ | Time derivative of the gradient of a coupled variable at q-points
 `coupledGradientDotDot` | Second time derivative of the gradient of a coupled variable at q-points
 
+---
 
 | Methods for nodal scalar field variables | Description |
 | :--- | :--- |
@@ -22,6 +23,7 @@ The following tables summarize the methods it provides.
 `coupledNodalDot`† | Time derivative of a coupled variable at nodes
 `coupledNodalDotDot`† | Second time derivative of a coupled variable at nodes
 
+---
 
 | Methods for vector field variables | Description |
 | :--- | :--- |
@@ -34,11 +36,14 @@ The following tables summarize the methods it provides.
 `coupledVectorDotDu` | Derivative with regards to the variable of the time derivative of a coupled vector variable at q-points
 `coupledVectorDotDotDu` | Derivative with regards to the variable of the second time derivative of a coupled vector variable at q-points
 
+---
 
 | Methods for nodal vector field variables | Description |
 | :--- | :--- |
 `coupledNodalValue`*‡§ | Value of a coupled vector variable at nodes
 `coupledNodalDot` | Time derivative of a coupled vector variable at nodes
+
+---
 
 *: These methods are also provided with values from the previous Newton iteration
 by suffixing their name with `PreviousNL`, e.g. `coupledSecondPreviousNL`.
