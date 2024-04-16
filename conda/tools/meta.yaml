@@ -6,7 +6,7 @@
 #   framework/doc/packages_config.yml
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.03.07" %}
+{% set version = "2024.04.12" %}
 
 package:
   name: moose-tools
@@ -54,6 +54,7 @@ requirements:
     - pylint
     - python
     - pyyaml
+    - requests
     - scikit-image
     - setuptools
     - sympy
@@ -86,6 +87,7 @@ test:
     - pyflakes
     - pylatexenc
     - pylint
+    - requests
     - skimage
     - sympy
     - tabulate

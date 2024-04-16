@@ -19,6 +19,9 @@ APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/minijson/src/minijson
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/tinyhttp/src/tinyhttp
+
 #
 # pcre
 #
@@ -39,19 +42,20 @@ hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
 ifeq ($(hit_CONTENT),)
   $(error The HIT input file parser does not seem to be available. If set, make sure the HIT_DIR environment variable is set to the correct location of your HIT parser.)
 endif
-hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc
+hit_srcdir    := $(HIT_DIR)/src/hit
+hit_srcfiles  := $(hit_srcdir)/parse.cc $(hit_srcdir)/lex.cc $(hit_srcdir)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
 # dependency files
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit command line tool
-hit_CLI_srcfiles := $(HIT_DIR)/main.cc
+hit_CLI_srcfiles := $(hit_srcdir)/main.cc
 hit_CLI          := $(HIT_DIR)/hit
 
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
+pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/parse.cc $(hit_srcdir)/braceexpr.cc
 
 #
 # Dynamic library suffix
@@ -134,7 +138,7 @@ pyhit_COMPILEFLAGS += $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
 #
@@ -217,7 +221,7 @@ ignore_contrib_include := $(foreach ex_dir, $(IGNORE_CONTRIB_INC), $(if $(dir $(
 moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)
-moose_INC_DIRS += $(HIT_DIR)
+moose_INC_DIRS += $(HIT_DIR)/include
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
@@ -426,6 +430,8 @@ sa: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/hit/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pugixml/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/tinyhttp/src/tinyhttp/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/minijson/src/minijson/*.d)
 
 #
 # exodiff

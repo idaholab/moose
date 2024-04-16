@@ -1165,8 +1165,8 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "stdexcept"
 #include "typeinfo"
 #include <vector>
-#include "parse.h"
-#include "lex.h"
+#include "hit/parse.h"
+#include "hit/lex.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */

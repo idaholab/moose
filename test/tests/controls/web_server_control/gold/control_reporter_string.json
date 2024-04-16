@@ -1,0 +1,35 @@
+{
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "string_value": {
+                    "type": "std::string"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "string_value": "abcd"
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "string_value": "foo"
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "string_value": "bar"
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
