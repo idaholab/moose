@@ -1,0 +1,48 @@
+{
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "vec_string_value": {
+                    "type": "std::vector<std::string>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "vec_string_value": [
+                    "m",
+                    "o",
+                    "o",
+                    "s",
+                    "e"
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "vec_string_value": [
+                    "what",
+                    "magic"
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "vec_string_value": [
+                    "dont",
+                    "   you",
+                    " say!"
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

@@ -14,7 +14,7 @@
 #include "MooseTypes.h"
 #include "Syntax.h"
 
-#include "hit.h"
+#include "hit/hit.h"
 
 #include <vector>
 #include <string>

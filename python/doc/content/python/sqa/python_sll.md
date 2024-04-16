@@ -158,6 +158,15 @@
 > changes should be clearly visible without letting legacy uncovered code get in the way so developers
 > can focus solely on their changes.
 
+## Requests
+
+[!ac](MOOSE) Tools relies on requests, which is summarized as follows on the project website:
+[https://requests.readthedocs.io/en/latest/](https://requests.readthedocs.io/en/latest/).
+
+> Requests allows you to send HTTP/1.1 requests extremely easily. There’s no need to manually add
+> query strings to your URLs, or to form-encode your POST data. Keep-alive and HTTP connection pooling
+> are 100% automatic, thanks to urllib3.
+
 ## Tabulate
 
 [!ac](MOOSE) Tools relies on tabulate, which is summarized as follows on the project website:

@@ -222,7 +222,9 @@ FormattedTable::printNoDataRow(char intersect_char,
                                std::vector<std::string>::iterator & col_end) const
 {
   out.fill(fill_char);
-  out << std::right << intersect_char << std::setw(_column_width + 2) << intersect_char;
+  out << std::right << intersect_char;
+  if (_output_time)
+    out << std::setw(_column_width + 2) << intersect_char;
   for (auto header_it = col_begin; header_it != col_end; ++header_it)
     out << std::setw(col_widths[*header_it] + 2) << intersect_char;
   out << "\n";
@@ -306,8 +308,10 @@ FormattedTable::printTablePiece(std::ostream & out,
    * Print out the header row
    */
   printRowDivider(out, col_widths, col_begin, col_end);
-  out << "|" << std::setw(_column_width) << std::left << " time"
-      << " |";
+  out << "|";
+  if (_output_time)
+    out << std::setw(_column_width) << std::left << " time"
+        << " |";
   for (auto header_it = col_begin; header_it != col_end; ++header_it)
     out << " " << std::setw(col_widths[*header_it]) << *header_it << "|";
   out << "\n";
@@ -328,8 +332,9 @@ FormattedTable::printTablePiece(std::ostream & out,
   // Now print the remaining data rows
   for (; data_it != _data.end(); ++data_it)
   {
-    out << "|" << std::right << std::setw(_column_width) << std::scientific << data_it->first
-        << " |";
+    out << "|";
+    if (_output_time)
+      out << std::right << std::setw(_column_width) << std::scientific << data_it->first << " |";
     for (auto header_it = col_begin; header_it != col_end; ++header_it)
     {
       auto & tmp = data_it->second;

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#10319'
+  issues = '#10319 #27047'
   design = 'MultiAppVectorPostprocessorTransfer.md'
   [vector_pp_transfer]
     type = 'CSVDiff'

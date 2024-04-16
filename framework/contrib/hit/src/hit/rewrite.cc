@@ -7,7 +7,7 @@
 #include <set>
 #include <list>
 
-#include "parse.h"
+#include "hit/parse.h"
 
 using namespace hit;
 

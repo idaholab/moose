@@ -16,7 +16,7 @@
 #include "Syntax.h"
 #include "Parser.h"
 
-#include "hit.h"
+#include "hit/hit.h"
 
 #include <vector>
 #include <string>

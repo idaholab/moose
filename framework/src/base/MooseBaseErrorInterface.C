@@ -11,7 +11,7 @@
 #include "MooseBase.h"
 #include "MooseApp.h"
 
-#include "parse.h"
+#include "hit/parse.h"
 
 MooseBaseErrorInterface::MooseBaseErrorInterface(const MooseBase & base)
   : ConsoleStreamInterface(base.getMooseApp()), _moose_base(base)
