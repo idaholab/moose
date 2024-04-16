@@ -23,17 +23,13 @@ FullSolveMultiApp::validParams()
 {
   InputParameters params = MultiApp::validParams();
   params.addClassDescription("Performs a complete simulation during each execution.");
-  params.addDeprecatedParam<bool>(
-      "no_backup_and_restore",
-      false,
-      "True to turn off restore for this multiapp; use 'no_restore' instead.",
-      "This functionality has been replaced with 'no_restore' and now only disables restoration.");
   params.addParam<bool>(
-      "no_restore",
+      "no_backup_and_restore",
       false,
       "True to turn off restore for this multiapp. This is useful when doing steady-state "
       "Picard iterations where we want to use the solution of previous Picard iteration as the "
       "initial guess of the current Picard iteration.");
+  params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
   params.addParam<bool>(
       "keep_full_output_history",
       false,
@@ -46,16 +42,13 @@ FullSolveMultiApp::validParams()
 
 FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
   : MultiApp(parameters),
-    _no_restore(getParam<bool>("no_backup_and_restore") || getParam<bool>("no_restore")),
+    _no_restore(getParam<bool>("no_restore")),
     _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
 {
-  if (isParamSetByUser("no_backup_and_restore") && isParamSetByUser("no_restore"))
-    paramError("no_backup_and_restore",
-               "Cannot be used in addition to 'no_restore'; use just 'no_restore'.");
   // You could end up with some dirty hidden behavior if you do this. We could remove this check,
   // but I don't think that it's sane to do so.
   if (_no_restore && (_app.isRecovering() || _app.isRestarting()))
-    paramError(getParam<bool>("no_backup_and_restore") ? "no_backup_and_restore" : "no_restore",
+    paramError("no_restore",
                "The parent app is restarting or recovering, restoration cannot be disabled");
 }
 
