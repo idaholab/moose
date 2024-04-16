@@ -204,12 +204,16 @@ PrintMatricesNSProblem::onTimestepEnd()
     system_matrix->create_submatrix(p_vel_mat, pressure_indices, vel_indices);
 
     compute_triple_product_matrix(
-        vel_p_mat, p_mass_mat, p_vel_mat, outer_matrix_name + "-grad-div");
+        vel_p_mat, p_mass_mat, p_vel_mat, outer_matrix_name + "_grad_div");
     compute_triple_product_matrix(
-        p_vel_mat, vel_mass_mat, vel_p_mat, outer_matrix_name + "-div-grad");
+        p_vel_mat, vel_mass_mat, vel_p_mat, outer_matrix_name + "_div_grad");
   };
 
-  do_vel_p(p_indices, "vel-p");
+  if (has_p)
+    do_vel_p(p_vol_indices, "vel_p");
+  if (has_pbar)
+    do_vel_p(pb_indices, "vel_pb");
+  do_vel_p(p_indices, "vel_all_p");
 
   for (const auto & jump_name : _jump_matrices)
   {
