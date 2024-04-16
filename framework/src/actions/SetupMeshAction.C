@@ -104,10 +104,10 @@ SetupMeshAction::validParams()
       "use_split",
       false,
       "Use split distributed mesh files; is overriden by the --use-split command line option");
-  params.addParam<std::string>("split_file",
-                               "",
-                               "Optional name of split mesh file(s) to write/read; is overridden "
-                               "by the --split-file command line option");
+  params.addParam<FileName>("split_file",
+                            "",
+                            "Optional name of split mesh file(s) to write/read; is overridden "
+                            "by the --split-file command line option");
 
   // groups
   params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation",
@@ -125,7 +125,7 @@ SetupMeshAction::SetupMeshAction(const InputParameters & params)
     _use_split(getParam<bool>("use_split") || _app.getParam<bool>("use_split")),
     _split_file(_app.getParam<std::string>("split_file").size()
                     ? _app.getParam<std::string>("split_file")
-                    : getParam<std::string>("split_file"))
+                    : getParam<FileName>("split_file"))
 {
 }
 
