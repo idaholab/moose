@@ -201,7 +201,6 @@ RhieChowMassFlux::initFaceMassFlux()
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
-    std::cout << "mass flux" << fi->faceCentroid() << " " << _face_mass_flux[fi->id()] << std::endl;
   }
 }
 
@@ -221,7 +220,7 @@ RhieChowMassFlux::computeFaceMassFlux()
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
     _p_diffusion_kernel->setCurrentFaceInfo(fi);
-    _p_diffusion_kernel->setCurrentFaceArea(fi->faceArea() * fi->faceCoord());
+    _p_diffusion_kernel->setCurrentFaceArea(1.0);
 
     Real p_grad_flux = 0.0;
     if (_p->isInternalFace(*fi))
@@ -235,9 +234,9 @@ RhieChowMassFlux::computeFaceMassFlux()
       const auto elem_rhs_contribution =
           _p_diffusion_kernel->computeElemRightHandSideContribution();
 
-      p_grad_flux = ((p_neighbor_value * neighbor_matrix_contribution -
-                      p_elem_value * elem_matrix_contribution) +
-                     elem_rhs_contribution);
+      p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
+                     p_elem_value * elem_matrix_contribution) -
+                    elem_rhs_contribution;
     }
     else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
     {
@@ -246,9 +245,9 @@ RhieChowMassFlux::computeFaceMassFlux()
           _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
       const auto rhs_contribution =
           _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
-      p_grad_flux = (p_elem_value * matrix_contribution + rhs_contribution);
+      p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
     }
-    _face_mass_flux[fi->id()] = _HbyA_flux[fi->id()] - p_grad_flux;
+    _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
   }
 }
 
@@ -264,6 +263,7 @@ RhieChowMassFlux::computeCellVelocity()
     auto working_vector = _Ainv_raw[system_i]->clone();
     working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);
     working_vector->add(*_HbyA_raw[system_i]);
+    working_vector->scale(-1.0);
     (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
     _momentum_implicit_systems[system_i]->update();
     _momentum_systems[system_i]->setSolution(
@@ -306,7 +306,6 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
                     *fi,
                     true);
       }
-      std::cout << "itnernal face" << face_hbya << std::endl;
     }
     else
     {
@@ -321,7 +320,7 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
         for (const auto dim_i : make_range(_dim))
         {
           face_hbya(dim_i) =
-              MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+              -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
         }
       }
       else
@@ -335,8 +334,6 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
       }
     }
     _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
-    std::cout << face_hbya << " " << fi->normal() << " " << face_rho << " " << _HbyA_flux[fi->id()]
-              << std::endl;
   }
 }
 
@@ -370,10 +367,8 @@ RhieChowMassFlux::populateAinv(const std::vector<std::unique_ptr<NumericVector<N
         for (const auto dim_i : index_range(raw_Ainv))
           interpolate(InterpMethod::Average,
                       _Ainv[fi->id()](dim_i),
-                      elem_rho * (*raw_Ainv[dim_i])(elem_dof)*elem_info.volume() *
-                          elem_info.coordFactor(),
-                      neighbor_rho * (*raw_Ainv[dim_i])(neighbor_dof)*neighbor_info.volume() *
-                          neighbor_info.coordFactor(),
+                      elem_rho * (*raw_Ainv[dim_i])(elem_dof),
+                      neighbor_rho * (*raw_Ainv[dim_i])(neighbor_dof),
                       *fi,
                       true);
       }
@@ -387,8 +382,7 @@ RhieChowMassFlux::populateAinv(const std::vector<std::unique_ptr<NumericVector<N
         Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
 
         for (const auto dim_i : index_range(raw_Ainv))
-          _Ainv[fi->id()](dim_i) =
-              elem_rho * (*raw_Ainv[dim_i])(elem_dof)*elem_info.volume() * elem_info.coordFactor();
+          _Ainv[fi->id()](dim_i) = elem_rho * (*raw_Ainv[dim_i])(elem_dof);
       }
     }
   }
@@ -401,7 +395,8 @@ RhieChowMassFlux::multiplyWithCellVolume(const SolverVariableName & var_name,
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
   {
     const auto elem_dof = elem_info->dofIndices()[_pressure_system->number()][_p->number()];
-    vec_to_multiply.set(elem_dof, vec_to_multiply(elem_dof) * elem_info->volume());
+    vec_to_multiply.set(elem_dof,
+                        vec_to_multiply(elem_dof) * elem_info->volume() * elem_info->coordFactor());
   }
   vec_to_multiply.close();
 }
@@ -517,6 +512,7 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       _console << " (H(u)-rhs)/A" << std::endl;
       HbyA.print();
     }
+    multiplyWithCellVolume("bazinga", Ainv);
   }
 
   // We fill the 1/A functor

@@ -14,6 +14,9 @@ InputParameters
 LinearFVFluxKernel::validParams()
 {
   InputParameters params = LinearFVKernel::validParams();
+  params.addParam<bool>("force_boundary_execution",
+                        false,
+                        "Whether to force execution of this object on all external boundaries.");
   params.registerSystemAttributeName("LinearFVFluxKernel");
   return params;
 }
@@ -24,7 +27,8 @@ LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & params)
     _current_face_info(nullptr),
     _current_face_type(FaceInfo::VarFaceNeighbors::NEITHER),
     _cached_matrix_contribution(false),
-    _cached_rhs_contribution(false)
+    _cached_rhs_contribution(false),
+    _force_boundary_execution(getParam<bool>("force_boundary_execution"))
 {
 }
 
@@ -60,27 +64,35 @@ LinearFVFluxKernel::addMatrixContribution()
       (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, -neighbor_matrix_contribution);
     }
   }
-  else if (auto * bc_pointer =
-               _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
+  else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+           _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
     mooseAssert(_current_face_info->boundaryIDs().size() == 1,
                 "We should only have one boundary on every face.");
-    bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
-    const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
 
-    // We allow internal boundaries too, so we have to check on which side we
-    // are on
-    if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+    LinearFVBoundaryCondition * bc_pointer =
+        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
+
+    if (bc_pointer || _force_boundary_execution)
     {
-      const auto dof_id_elem =
-          _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
-      (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
-    }
-    else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-    {
-      const auto dof_id_neighbor =
-          _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
-      (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
+      if (bc_pointer)
+        bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
+      const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
+
+      // We allow internal boundaries too, so we have to check on which side we
+      // are on
+      if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+      {
+        const auto dof_id_elem =
+            _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
+        (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
+      }
+      else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+      {
+        const auto dof_id_neighbor =
+            _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
+        (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
+      }
     }
   }
 }
@@ -108,25 +120,35 @@ LinearFVFluxKernel::addRightHandSideContribution()
     if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
       (*_linear_system.rhs).add(dof_id_neighbor, neighbor_rhs_contribution);
   }
-  else if (auto * bc_pointer =
-               _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
+  else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+           _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
-    const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
+    mooseAssert(_current_face_info->boundaryIDs().size() == 1,
+                "We should only have one boundary on every face.");
+    LinearFVBoundaryCondition * bc_pointer =
+        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
 
-    // We allow internal boundaries too, so we have to check on which side we
-    // are on
-    if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+    if (bc_pointer || _force_boundary_execution)
     {
-      const auto dof_id_elem =
-          _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
-      (*_linear_system.rhs).add(dof_id_elem, rhs_contribution);
-    }
-    else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-    {
-      const auto dof_id_neighbor =
-          _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
-      (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
+      if (bc_pointer)
+        bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
+
+      const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
+
+      // We allow internal boundaries too, so we have to check on which side we
+      // are on
+      if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+      {
+        const auto dof_id_elem =
+            _current_face_info->elemInfo()->dofIndices()[_var.sys().number()][_var.number()];
+        (*_linear_system.rhs).add(dof_id_elem, rhs_contribution);
+      }
+      else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+      {
+        const auto dof_id_neighbor =
+            _current_face_info->neighborInfo()->dofIndices()[_var.sys().number()][_var.number()];
+        (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
+      }
     }
   }
 }

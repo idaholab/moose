@@ -98,4 +98,7 @@ protected:
   /// If we already built the right hand side contribution. This switch can be used to
   /// check if cached quantities are already available in the kernel.
   bool _cached_rhs_contribution;
+
+  /// Whether to force execution of this kernel on all external boundaries
+  const bool _force_boundary_execution;
 };

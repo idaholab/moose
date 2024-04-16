@@ -131,6 +131,9 @@ LinearSIMPLE::solveMomentumPredictor()
 
     auto diff_diagonal = solution.zero_clone();
 
+    mmat.zero();
+    rhs.zero();
+
     // We plug zero in this to get the system matrix and the right hand side of the linear problem
     _problem.computeLinearSystemSys(momentum_system, mmat, rhs);
 
@@ -159,6 +162,8 @@ LinearSIMPLE::solveMomentumPredictor()
 
     if (_print_fields)
     {
+      _console << " solution before solve " << std::endl;
+      solution.print();
       _console << " matrix when we solve " << std::endl;
       mmat.print();
       _console << " rhs when we solve " << std::endl;
@@ -195,6 +200,9 @@ LinearSIMPLE::solvePressureCorrector()
   NumericVector<Number> & solution = *(pressure_system.solution);
   SparseMatrix<Number> & mmat = *(pressure_system.matrix);
   NumericVector<Number> & rhs = *(pressure_system.rhs);
+
+  mmat.zero();
+  rhs.zero();
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =

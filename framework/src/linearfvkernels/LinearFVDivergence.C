@@ -76,8 +76,5 @@ LinearFVDivergence::computeFaceFlux()
     _flux_rhs_contribution = _face_flux(face_arg, state_arg) * _current_face_area;
   }
 
-  std::cout << "Face flux " << _current_face_info->faceCentroid() << " "
-            << _face_flux(face_arg, state_arg) << std::endl;
-
   return _flux_rhs_contribution;
 }

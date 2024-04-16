@@ -328,8 +328,6 @@ LinearWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
-  std::cout << _face_mass_flux << std::endl;
-
   const auto boundary_value_rhs_contrib = bc->computeBoundaryValueRHSContribution();
   return -boundary_value_rhs_contrib * factor * _face_mass_flux;
 }
