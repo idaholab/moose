@@ -32,7 +32,7 @@ private:
   /// Coupled temperature variable
   const GenericVariableValue<is_ad> & _temperature;
 
-  /// Vector of preexponentials
+  /// Vector of pre-exponential coefficients
   const std::vector<Real> _D_0;
 
   /// Vector of activation energies

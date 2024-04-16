@@ -5,6 +5,6 @@
     csvdiff = 'exact_out.csv'
     issues = '#22384'
     design = 'ArrheniusMaterialProperty.md'
-    requirement = 'The system material shall compute a generic material property based on an Arrhenius model that matches an analytic solution of that equation'
+    requirement = 'The system material shall compute a generic material property based on an Arrhenius model that matches an analytic solution of that equation.'
   []
 []

@@ -23,15 +23,15 @@ ArrheniusMaterialPropertyTempl<is_ad>::validParams()
   InputParameters params = Material::validParams();
 
   params.addClassDescription(
-      "Arbitrary material property of the sum of an arbitary number (i) of "
-      "Arrhenius functions A_i * exp(-Q_i / R / T), where A_i is the frequency "
-      "factor, Q_i is the activation energy, and R is the gas constant.");
+      "Arbitrary material property of the sum of an arbitary number ($i$) of "
+      "Arrhenius functions $A_i * \\exp{-Q_i / (RT)}$, where $A_i$ is the frequency "
+      "factor, $Q_i$ is the activation energy, and $R$ is the gas constant.");
 
   params.addRequiredParam<std::string>("property_name",
                                        "Specify the name of this material property");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   params.addRequiredParam<std::vector<Real>>("frequency_factor",
-                                             "List of Arrhenius preexponential coefficients");
+                                             "List of Arrhenius pre-exponential coefficients");
   params.addRequiredParam<std::vector<Real>>("activation_energy", "List of activation energies");
   params.addRangeCheckedParam<Real>("gas_constant",
                                     PhysicalConstants::ideal_gas_constant,
