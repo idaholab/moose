@@ -27,7 +27,7 @@ Developers are responsible for sizing these vectors as needed.
 
 ## Output
 
-VPP data can vary depending on the type of data being output. Again, the the "sample over line" example mentioned in the introduction,
+VPP data can vary depending on the type of data being output. Again, the "sample over line" example mentioned in the introduction,
 a complete set of values will be generated each time the VPP is executed. The VPP system handles this scenario by creating separate output
 files for each invocation. The form of the output is as follows:
 

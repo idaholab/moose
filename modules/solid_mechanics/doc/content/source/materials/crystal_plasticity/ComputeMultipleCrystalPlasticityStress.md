@@ -280,7 +280,7 @@ The rotation of a crystal during deformation is calculated within the `ComputeMu
 \end{equation}
 where $\boldsymbol{U}^{e}$ is the symmetric matrix that describes the elastic stretch of the crystal, $\boldsymbol{R}^{e}$ is the orthogonal tensor that describes the elastic part of the crystal rotation.
 
-Note here $\boldsymbol{R}^{e}$ represents the rotation of the crystal with respect to its crystal lattice. To obtain the the crystal rotation relative to the reference frame (total rotation $\boldsymbol{R}^{\text{total}}$), initial orientation of the crystal needs to be considered, i.e.,
+Note here $\boldsymbol{R}^{e}$ represents the rotation of the crystal with respect to its crystal lattice. To obtain the crystal rotation relative to the reference frame (total rotation $\boldsymbol{R}^{\text{total}}$), initial orientation of the crystal needs to be considered, i.e.,
 
 \begin{equation}
   \boldsymbol{R}^{\text{total}} = \boldsymbol{R}^{e}\cdot\boldsymbol{R}^{\text{initial}},

@@ -1722,6 +1722,54 @@ Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp) co
   return var->curlSlnOlderNeighbor();
 }
 
+const VectorVariableDivergence &
+Coupleable::coupledDiv(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVectorVar(var_name, comp);
+  if (!var)
+  {
+    _default_div.resize(_coupleable_max_qps);
+    return _default_div;
+  }
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->divSln() : var->divSlnOld();
+  return (_c_is_implicit) ? var->divSlnNeighbor() : var->divSlnOldNeighbor();
+}
+
+const VectorVariableDivergence &
+Coupleable::coupledDivOld(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVectorVar(var_name, comp);
+  if (!var)
+  {
+    _default_div.resize(_coupleable_max_qps);
+    return _default_div;
+  }
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->divSlnOld() : var->divSlnOlder();
+  return (_c_is_implicit) ? var->divSlnOldNeighbor() : var->divSlnOlderNeighbor();
+}
+
+const VectorVariableDivergence &
+Coupleable::coupledDivOlder(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVectorVar(var_name, comp);
+  if (!var)
+  {
+    _default_div.resize(_coupleable_max_qps);
+    return _default_div;
+  }
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
+
+  if (!_coupleable_neighbor)
+    return var->divSlnOlder();
+  return var->divSlnOlderNeighbor();
+}
+
 const VariableSecond &
 Coupleable::coupledSecond(const std::string & var_name, unsigned int comp) const
 {

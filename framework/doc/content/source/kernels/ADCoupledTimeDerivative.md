@@ -6,7 +6,7 @@ The `ADCoupledTimeDerivative` kernel is very similar to the
 [`TimeDerivative`](/TimeDerivative.md) kernel with the exception that the time
 derivative operator is applied to a coupled variable $v$ instead of the kernel
 variable $u$ which the `ADCoupledTimeDerivative` residual is assigned to.
-Consequently, the strong form on the the domain $\Omega$ is
+Consequently, the strong form on the domain $\Omega$ is
 
 \begin{equation}
 \underbrace{\frac{\partial v}{\partial t}}_{\textrm{ADCoupledTimeDerivative}} +

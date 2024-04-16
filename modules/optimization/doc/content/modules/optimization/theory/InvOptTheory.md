@@ -203,7 +203,7 @@ Solving [eqn:adjoint_problem] comes down to adjusting the boundary conditions an
 
 In this section we will present derivatives for steady state heat conduction [eqn:optimization_problem] with respect to the force or material parameters.  For all of these examples, measurement data is taken at specific locations where the objective function can be represented by [eqn:objective_integral].  We will present the discrete forms of our PDE and its derivative which most closely matches the implementation that will be used in MOOSE.
 
-The discrete form of the PDE constraint for steady state heat conduction in [eqn:optimization_problem] is given by the the residual, $\hat{\text R}$, as
+The discrete form of the PDE constraint for steady state heat conduction in [eqn:optimization_problem] is given by the residual, $\hat{\text R}$, as
 
 \begin{equation}\label{eq:discretePDE}
 \hat{\text R}=\textbf{J}\hat{\text T} - \hat{\text g}=0,

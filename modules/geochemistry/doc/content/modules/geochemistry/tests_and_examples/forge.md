@@ -267,7 +267,7 @@ The simulation involves injecting cold fluid into a thin, hot subsurface confine
 | Production bottomhole pressure | 20$\,$MPa |
 | Separation between injection and production wells | 100$\,$m |
 
-PorousFlow operates using mass-fractions and not mole numbers, so the species concentrations in the reservoir [table:water_60_to_220degC_result] and and injectate [table:forge_waters] must be converted, as shown in [table:mass_fractions].
+PorousFlow operates using mass-fractions and not mole numbers, so the species concentrations in the reservoir [table:water_60_to_220degC_result] and injectate [table:forge_waters] must be converted, as shown in [table:mass_fractions].
 
 !table id=table:mass_fractions caption=Mass fractions of waters (charge-balance on Cl-)
 | Species | In-situ (g/kg) | In-situ (mass frac) | Injectate (Water3) | Injectate (mass frac) |

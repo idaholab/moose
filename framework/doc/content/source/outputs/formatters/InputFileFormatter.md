@@ -1,6 +1,6 @@
 # InputFileFormatter
 
-This class produces produces a dump of the `InputParameters` that appears like the normal input
+This class produces a dump of the `InputParameters` that appears like the normal input
 file syntax.
 
 This formatter is used for the `--show-input` command line option, described

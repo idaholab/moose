@@ -29,7 +29,7 @@ shown in [chemact:inifile]. The first line of the file is ignored.
 
 The subblocks of the `ChemicalComposition` action are what triggers MOOSE objects to be built. If no block restrictions apply to the constructed [`ThermochimicaElementData`](ThermochimicaElementData.md) or [`ThermochimicaNodalData`](ThermochimicaNodalData.md), a single subblock can be used.
 
-If different user objects are needed, multiple multiple subblocks with subdomain restrictions can be used.
+If different user objects are needed, multiple subblocks with subdomain restrictions can be used.
 
 !listing modules/chemical_reactions/test/tests/thermochimica/MoRu_subblock.i block=ChemicalComposition
 

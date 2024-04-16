@@ -4,7 +4,7 @@
 
 ## Description
 
-This class assembles the integrated first Piola-Kirchhoff traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelTotalLagrangian` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
+This class assembles the integrated first Piola-Kirchhoff traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelTotalLagrangian` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for each dimension of the problem.
 The `CZMInterfaceKernelTotalLagrangian` uses the PK1 traction and its derivatives provided by a [CZM Compute Global Traction Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md)  to impose the appropriate residual and to provide the appropriate Jacobian.
 This kernel accounts for both interface area changes and rotations.
 
@@ -52,7 +52,7 @@ The Jacobian requires calculating the derivative of the residual with respect to
 \end{equation}
 
 
-Assuming the traction is only a function of the the midplane deformation gradient,$\hat{F}$, and of the displacement jump in global coordinates,  $\llbracket u \rrbracket$, the partial derivatives of the traction can be rewritten using the chain rule as:
+Assuming the traction is only a function of the midplane deformation gradient,$\hat{F}$, and of the displacement jump in global coordinates,  $\llbracket u \rrbracket$, the partial derivatives of the traction can be rewritten using the chain rule as:
 \begin{equation}
 \begin{aligned}
   \frac{\partial  T_{i}}{\partial u^{+,k}_s} & = &\frac{\partial  T_{i} }{\partial \hat{F}_{pq}} \frac{\partial \hat{F}_{pq}}{\partial u^{+,k}_s}

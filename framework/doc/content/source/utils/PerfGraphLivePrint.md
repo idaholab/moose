@@ -48,7 +48,7 @@ With the main thread writing to the execution list and the PGLP reading from it 
 
 ### Waiting and Waking Up
 
-The main execution loop for PGLP is in `start()` and is a `while()` loop that is dependent on the the object-local `_currently_destructing` variable.  Details about `_currently_destructing` are below - but the gist is that the loop will continue until `PerfGraph` tells it not to.
+The main execution loop for PGLP is in `start()` and is a `while()` loop that is dependent on the object-local `_currently_destructing` variable.  Details about `_currently_destructing` are below - but the gist is that the loop will continue until `PerfGraph` tells it not to.
 
 PGLP waits on a section completing so that we can instantly print the finishing info for it.  To do this, we use a `std::condition_variable`.  A `condition_variable` can be used to wait for a notification from the main thread.  By using `wait_for()` it is possible to wait until either the specified amount of time has passed or the thread is signaled to wakeup.  This allows the PGLP to sleep for 1 second, or until the main thread tells it that a section is complete.
 

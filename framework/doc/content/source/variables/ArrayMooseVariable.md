@@ -142,7 +142,7 @@ Eigen has some unique features that, when used properly, can significantly impac
 
 - [Aliasing](http://eigen.tuxfamily.org/dox/group__TopicAliasing.html) is a technique in Eigen that constructs temporary objects when performing matrix multiplications, this is to avoid overriding data that needs to be used later in the computation. For instance `vec = mat * vec` will create a temporary vector for `mat * vec` then assign it to `vec` at the end. However, `vec2 = mat * vec1` does not need this temporary object and assign the result to `vec2` directly, this aliasing can be avoided by doing `vec2.noalias()`. The `noalias()` function should be used with extreme caution since it can cause erroneous results.
 
-- Eigen uses what's known as [expression templates](https://en.wikipedia.org/wiki/Expression_templates), enabling operations to be known at compile time. This allows multiple operations to occur in a single element element loop, providing more compiler optimization and improved cache efficiency. With this in mind, it is often better to write multiple Eigen operations in a single line or assignment. For instance, with the following syntax:
+- Eigen uses what's known as [expression templates](https://en.wikipedia.org/wiki/Expression_templates), enabling operations to be known at compile time. This allows multiple operations to occur in a single element loop, providing more compiler optimization and improved cache efficiency. With this in mind, it is often better to write multiple Eigen operations in a single line or assignment. For instance, with the following syntax:
 
   !listing! language=cpp
   a = 3*b + 4*c + 5*d

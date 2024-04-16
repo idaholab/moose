@@ -1,6 +1,6 @@
 # ElementAverageTimeDerivative
 
-The ElementAverageTimeDerivative Postprocessor computes the average time time derivative
+The ElementAverageTimeDerivative Postprocessor computes the average time derivative
 of the specified variable, per element.
 
 !syntax description /Postprocessors/ElementAverageTimeDerivative

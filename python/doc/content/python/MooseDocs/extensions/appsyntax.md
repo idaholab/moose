@@ -20,7 +20,7 @@ settings are included in [appsyntax-description-settings].
 !devel settings module=MooseDocs.extensions.appsyntax
                 id=appsyntax-description-settings
                 object=SyntaxDescriptionCommand
-                caption=Available command settings for `!syntax description` command.
+                caption=Command settings for the `!syntax description` command.
 
 For example, the FileMesh object includes a `validParams` function as shown in
 [file-mesh-valid-params]. Notice, that the `addClassDescription` method includes a short
@@ -47,10 +47,10 @@ command are shown in [appsyntax-parameters-settings].
 !devel settings module=MooseDocs.extensions.appsyntax
                 object=SyntaxParametersCommand
                 id=appsyntax-parameters-settings
-                caption=Command settings for `!syntax parameters` command.
+                caption=Command settings for the `!syntax parameters` command.
 
 
-!devel! example id=appsyntax-parameters-example caption=Example of `!syntax parameters` command.
+!devel! example id=appsyntax-parameters-example caption=Example use of the `!syntax parameters` command.
 !syntax parameters /Dampers/ConstantDamper
 !devel-end!
 
@@ -64,7 +64,7 @@ provides the available settings for the `inputs` command.
 !devel settings module=MooseDocs.extensions.appsyntax
                 object=SyntaxInputsCommand
                 id=appsyntax-inputs-settings
-                caption=Available command settings for `!syntax inputs` commands.
+                caption=Command settings for the `!syntax inputs` command.
 
 !devel! example id=appsyntax-inputs-example caption=Example use of the `!syntax inputs` command.
 !syntax inputs /Dampers/ConstantDamper
@@ -79,14 +79,14 @@ often useful to understand which classes inherit from another. The `children` su
 list of all child classes of the given object, as shown in [appsyntax-children-example]. The
 available settings for the `children` command are provided below.
 
-!devel! example id=appsyntax-children-example caption=Example use the the `!syntax children` command.
+!devel! example id=appsyntax-children-example caption=Example use of the `!syntax children` command.
 !syntax children /Kernels/Diffusion
 !devel-end!
 
 !devel settings module=MooseDocs.extensions.appsyntax
                 object=SyntaxChildrenCommand
                 id=appsyntax-children-settings
-                caption=Command settings for `!syntax children` command.
+                caption=Command settings for the `!syntax children` command.
 
 ## Actions, Objects, and Systems (`!syntax list`)
 
@@ -98,10 +98,10 @@ settings for this command are included in [appsyntax-list-settings].
 !devel settings module=MooseDocs.extensions.appsyntax
                 object=SyntaxListCommand
                 id=appsyntax-list-settings
-                caption=Command settings for `!syntax list` command.
+                caption=Command settings for the `!syntax list` command.
 
 
-!devel! example id=appsyntax-list-example
+!devel! example id=appsyntax-list-example caption=Example use of the `!syntax list` command.
 !syntax list /Adaptivity
 !devel-end!
 

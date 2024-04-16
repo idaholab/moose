@@ -51,7 +51,7 @@ Postprocessor Values:
 
 The values computed within a Postprocessor object may be used within other objects that inherit
 from the [PostprocessorInterface](interfaces/PostprocessorInterface.md), which is nearly every
-system within MOOSE. For example, the the [PostprocessorNeumannBC.md] object allows for a
+system within MOOSE. For example, the [PostprocessorNeumannBC.md] object allows for a
 Neumann boundary condition to be set to a value computed from a postprocessor; this object will
 be used as example to demonstrate how coupling is performed.
 

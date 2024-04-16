@@ -14,7 +14,7 @@ stakeholders. It often involves acceptance and suitability with external custome
 
 ## Practice
 
-For our purposes, verification is the process of ensuring that that the software is performing calculations
+For our purposes, verification is the process of ensuring that the software is performing calculations
 as expected.
 
 For a MOOSE-based application, +ensure that the equations are solved correctly+.

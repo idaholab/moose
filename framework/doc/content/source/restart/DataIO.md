@@ -48,7 +48,7 @@ your new type.
 If any object has requested a restartable piece of data that contains or is a custom type, both the dataStore and dataLoad will
 need to be defined. These functions describe how to serialize a custom type.
 
-The declarations for the two methods that may need to be specialized for your application take on on a form similar to this:
+The declarations for the two methods that may need to be specialized for your application take on a form similar to this:
 
 !listing framework/include/restart/DataIO.h
   re=^[^\n]*Global Load Declarations.*?\n\n

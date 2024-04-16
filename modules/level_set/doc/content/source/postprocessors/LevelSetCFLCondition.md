@@ -8,7 +8,7 @@ C = \Delta t \sum_{i=1}^{n}\frac{u_{x_i}}{\Delta x_i} \leq C_{max},
 where $C$ is the Courant number, $C_{max}$ is the maximum allowed Courant number, $u$ is the magnitude of the velocity, $\Delta t$ is the time step, and $\Delta x$ is
 the interval distance, and $i$, in three dimensions, represents the index for the $x$, $y$, and $z$ components.
 
-The `LevelSetCFLCondition` postprocessor estimates $C$ by using the the magnitude of the maximum velocity across
+The `LevelSetCFLCondition` postprocessor estimates $C$ by using the magnitude of the maximum velocity across
 quadrature points of an element ($u_{max}$) and computing the minimum element length for all elements in the
 finite element mesh ($h_min$):
 

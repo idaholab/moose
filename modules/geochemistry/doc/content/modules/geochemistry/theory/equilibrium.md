@@ -24,7 +24,7 @@ Note that the index $i$, $j$, etc, gives meaning to the symbol that it is indexi
 \begin{equation}
 \mathrm{basis} = (A_{w}, A_{i}, A_{k}, A_{m}, A_{p}) \ .
 \end{equation}
-Being a basis, all other other components can be expressed in terms of it.
+Being a basis, all other components can be expressed in terms of it.
 
 ## Secondary species
 

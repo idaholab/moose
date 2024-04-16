@@ -249,7 +249,7 @@ derivative vector are left uninitialized.
 
 We can also check variable coupling. Let us assume a reaction-type problem in
 which the variable $u$ disappears at a rate directly proportional to its
-concentration and appears at at rate directly proportional to the concentration
+concentration and appears at a rate directly proportional to the concentration
 of the variable $v$. The strong form of this residual is then simply
 $u - v$. Examining the derivatives of this term produced by automatic
 differentiation

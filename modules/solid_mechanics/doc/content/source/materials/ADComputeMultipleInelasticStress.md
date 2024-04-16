@@ -122,7 +122,7 @@ converge if the outer iteration loop, shown in the top half of
 user.
 
 Once convergence on the stress is obtained, the calculation of the inelastic
-strains is finalized by by applying a weighting factor, as shown in
+strains is finalized by applying a weighting factor, as shown in
 [fig:multiple_materials]. This weighting factor has a default value of unity.
 
 #### Material Time Step Size Limitations
