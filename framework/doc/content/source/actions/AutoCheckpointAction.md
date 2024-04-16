@@ -5,14 +5,14 @@
 ## Overview
 
 An action, that acts when the `[Outputs]` block exists. It adds the
-[!param](/Outputs/checkpoint) and [!param](/Outputs/disable_wall_time_checkpoints)
+[!param](/Outputs/checkpoint) and [!param](/Outputs/wall_time_checkpoint)
 short-cut syntax parameters. For example, the following enables time_step_interval
 based checkpoints while disabling wall time based checkpoints.
 
 ```text
 [Outputs]
   checkpoint = true
-  disable_wall_time_checkpoints = true
+  wall_time_checkpoint = false
 []
 ```
 
