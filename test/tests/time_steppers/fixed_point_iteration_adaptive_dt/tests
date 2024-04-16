@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#27381'
+  design = 'source/timesteppers/FixedPointIterationAdaptiveDT.md'
+
+  [increase_dt]
+    type = CSVDiff
+    input = 'main.i'
+    csvdiff = 'increase_dt.csv'
+    requirement = "The system shall be able to increase the time step size when below the target number of fixed point iterations."
+  []
+
+  [decrease_dt]
+    type = CSVDiff
+    input = 'main.i'
+    cli_args = 'Executioner/TimeStepper/target_iterations=4 Outputs/file_base=decrease_dt'
+    csvdiff = 'decrease_dt.csv'
+    requirement = "The system shall be able to decrease the time step size when above the target number of fixed point iterations."
+  []
+
+  [error_no_multiapps]
+    type = RunException
+    input = 'main.i'
+    cli_args = "MultiApps/sub/input_files=sub_with_stepper.i"
+    expect_err = 'This time stepper can only be used if there are MultiApps in the problem'
+    requirement = 'The system shall report an error if the fixed point target time stepper is used in an application with no sub-applications.'
+  []
+[]
