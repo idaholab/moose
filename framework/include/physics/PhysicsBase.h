@@ -41,13 +41,21 @@ public:
   /// Routine to add additional setup work on additional registered tasks to a Physics
   virtual void actOnAdditionalTasks() {}
 
-  /// Add new blocks to the Physics
+  /**
+   * @brief Add new blocks to the Physics
+   * @param blocks list of blocks to add to the physics
+   */
   void addBlocks(const std::vector<SubdomainName> & blocks);
 
   /// Return the blocks this physics is defined on
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
 
-  /// Check if an external object has the same block restriction
+  /**
+   * @brief Check if an external object has the same block restriction
+   * @param object_name name of the object to check the block restriction of
+   * @param blocks the blocks for this object
+   * @param error_if_not_identical whether to error if the block restrictions dont match
+   */
   bool checkBlockRestrictionIdentical(const std::string & object_name,
                                       const std::vector<SubdomainName> & blocks,
                                       const bool error_if_not_identical = true) const;
@@ -55,24 +63,16 @@ public:
   /// Provide additional parameters for the relationship managers
   virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
 
-  /// Get a Physics from the ActionWarehouse with the requested type and name
+  /**
+   * @brief Get a Physics from the ActionWarehouse with the requested type and name
+   * @param phys_name name of the Physics to retrieve
+   * @param allow_fail whether to allow returning a nullptr if the physics does not exist
+   */
   template <typename T>
   const T * getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail = false) const;
   /// Get all Physics from the ActionWarehouse with the requested type
   template <typename T>
   const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
-
-  /// Utilities to merge two Physics of the same type together
-  /// Check that parameters are compatible for a merge with another Physics
-  virtual bool checkParametersMergeable(const InputParameters & /*param*/, bool /*warn*/) const
-  {
-    mooseError("Not implemented");
-  }
-  /// Merge these parameters into existing parameters of this Physics
-  virtual void mergeParameters(const InputParameters & /*params*/)
-  {
-    mooseError("Not implemented");
-  }
 
 protected:
   /// Return whether the Physics is solved using a transient
@@ -120,6 +120,25 @@ protected:
   /// NOTE: This does not register the task, you still need to call registerMooseAction
   void addRequiredPhysicsTask(const std::string & task) { _required_tasks.insert(task); }
 
+  /**
+   * @brief Set the blocks parameter to the input parameters of an object this Physics will create
+   * @param params the parameters of the object
+   * @param blocks the blocks to set as the parameter
+   */
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
+  /**
+   * @brief Check if a vector contains all the mesh blocks
+   * @param blocks the vector blocks to check for whether it contains every block in the mesh
+   */
+  bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
+
+  /// Routine to help create maps
+  template <typename T, typename C>
+  std::map<T, C> createMapFromVectors(std::vector<T> keys, std::vector<C> values) const;
+  template <typename T>
+  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(std::vector<T> keys,
+                                                              MultiMooseEnum values) const;
+
   /// System number for the system owning the variables
   const unsigned int _sys_number;
 
@@ -132,18 +151,6 @@ protected:
 
   /// Keep track of the subdomains the Physics is defined on
   std::vector<SubdomainName> _blocks;
-
-  /// Utilities to process and forward parameters
-  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
-  /// Check if a vector contains all the mesh blocks
-  bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
-
-  /// Routine to help create maps
-  template <typename T, typename C>
-  std::map<T, C> createMapFromVectors(std::vector<T> keys, std::vector<C> values) const;
-  template <typename T>
-  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(std::vector<T> keys,
-                                                              MultiMooseEnum values) const;
 
 private:
   /// Gathers additional parameters for the relationship managers from the Physics
@@ -244,14 +251,6 @@ PhysicsBase::createMapFromVectors(std::vector<T> keys, std::vector<C> values) co
   if (!values.size())
   {
     return map;
-    // If we cant return a map of default C, dont try it
-    // if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
-    //   return map;
-
-    // C def;
-    // for (const auto & k : keys)
-    //   map[k] = def;
-    // return map;
   }
   std::transform(keys.begin(),
                  keys.end(),
