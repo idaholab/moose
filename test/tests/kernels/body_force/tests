@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#1405'
+  design = 'BodyForce.md'
+  [forcing_function_test]
+    type = 'Exodiff'
+    input = 'forcing_function_test.i'
+    exodiff = 'forcing_function_test_out.e'
+    requirement = 'The system shall support applying a function of space-time as a forcing function to the mesh domain.'
+  []
+  [mat_forcing_function_test]
+    type = 'Exodiff'
+    input = 'mat_forcing_function_test.i'
+    exodiff = 'mat_forcing_function_test_out.e'
+    requirement = 'The system shall support applying a material property of space-time as a forcing function to the mesh domain.'
+  []
+  [ad_mat_forcing_function_test]
+    type = 'Exodiff'
+    input = 'ad_mat_forcing_function_test.i'
+    exodiff = 'ad_mat_forcing_function_test_out.e'
+    requirement = 'The system shall support applying a material property of space-time as a forcing function to the mesh domain using AD.'
+  []
+  [parsed_func_error_check]
+    type = 'RunException'
+    prereq = forcing_function_test
+    input = 'forcing_function_error_check.i'
+    expect_err = 'The expression in ParsedFunction contains quotes'
+    requirement = 'The system shall report an error when a parsed function expression contains quote characters.'
+  []
+[]
