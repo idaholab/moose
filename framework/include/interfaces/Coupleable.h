@@ -480,8 +480,8 @@ protected:
 
   /**
    * Returns value of a coupled array variable
-   * @param var_name Name of coupled vector variable
-   * @param comp Component number for vector of coupled vector variables
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
    * @return Reference to a ArrayVariableValue for the coupled vector variable
    * @see ArrayKernel::_u
    */
@@ -589,9 +589,9 @@ protected:
                                                               unsigned int comp = 0) const;
 
   /**
-   * Returns an old value from previous time step  of a coupled array variable
-   * @param var_name Name of coupled variable
-   * @param comp Component number for vector of coupled variables
+   * Returns an old value from previous time step of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
    * @return Reference to a ArrayVariableValue containing the old value of the coupled variable
    * @see ArrayKernel::_u_old
    */
@@ -600,8 +600,8 @@ protected:
 
   /**
    * Returns an old value from two time steps previous of a coupled array variable
-   * @param var_name Name of coupled variable
-   * @param comp Component number for vector of coupled variables
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
    * @return Reference to a ArrayVariableValue containing the older value of the coupled variable
    * @see ArrayKernel::_u_older
    */
@@ -1137,8 +1137,8 @@ protected:
 
   /**
    * Time derivative of a coupled array variable with respect to the coefficients
-   * @param var_name Name of coupled vector variable
-   * @param comp Component number for vector of coupled vector variables
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
    * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
    * variable
    */
