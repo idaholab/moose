@@ -64,7 +64,7 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 QuadSubChannelMesh::safeClone() const
 {
-  return libmesh_make_unique<QuadSubChannelMesh>(*this);
+  return std::make_unique<QuadSubChannelMesh>(*this);
 }
 
 void

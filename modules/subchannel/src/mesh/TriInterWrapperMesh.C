@@ -64,7 +64,7 @@ TriInterWrapperMesh::TriInterWrapperMesh(const TriInterWrapperMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 TriInterWrapperMesh::safeClone() const
 {
-  return libmesh_make_unique<TriInterWrapperMesh>(*this);
+  return std::make_unique<TriInterWrapperMesh>(*this);
 }
 
 unsigned int
