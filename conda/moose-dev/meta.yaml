@@ -17,13 +17,14 @@ source:
 
 build:
   number: 0
-  string: build_0
+  string: {{ mpi }}
   skip: true  # [win]
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
 requirements:
   run:
+    - {{ mpi }}
     - {{ moose_tools }}
     - {{ moose_libmesh }}
     - {{ moose_wasp }}

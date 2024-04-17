@@ -237,10 +237,8 @@ source ${SCRIPT_DIR}/functions/diagnostic_tests.sh
 CONDA_VERSION=$(get_value 'conda_version')
 
 # Get individual packages for now, until moose-mpi becomes available
-MPI_PACKAGES="$(get_value 'mpi')=$(get_value $(get_value 'mpi')) $(get_value 'mpi')-mpicc $(get_value 'mpi')-mpicxx $(get_value 'mpi')-mpifort"
-SUPPORT_PACKAGES="hdf5=*=mpi_* gfortran cmake make libtool autoconf automake=1.16.5 m4 zfp=0.5.5 bison=3.4 packaging pyaml jinja2 python=3.10"
-if [[ `uname` == 'Linux' ]]; then SUPPORT_PACKAGES+=" libxt-devel-cos7-x86_64=1.1.5 zlib"; fi
-MOOSE_PACKAGES="${MPI_PACKAGES} ${SUPPORT_PACKAGES}"
+MPI_PACKAGES="moose-mpi $(get_value 'default_mpi')"
+MOOSE_PACKAGES="${MPI_PACKAGES} packaging pyaml jinja2 python"
 
 INSTANCE_EXE='conda'
 INSTANCE_SUP='Miniforge3'

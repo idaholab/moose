@@ -1,3 +1,7 @@
+mpi:
+  - mpich
+  - openmpi
+
 moose_dev:
   - moose-dev 2024.07.03
 

@@ -56,14 +56,36 @@ export HYDRA_LAUNCHER=fork
 
 source $SRC_DIR/configure_libmesh.sh
 export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
-LIBMESH_DIR=${PREFIX}/libmesh \
-  configure_libmesh --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
-                    --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${vtk_friendly_version} \
-                    $*
 
-CORES=${MOOSE_JOBS:-2}
-make -j $CORES
-make install
+# Tired of failing on build events that can be fixed by an invalidation on Civet.
+# Handle retries for this one step so as to not need an entire 4 hour build target redo.
+TRY_AGAIN_REASON='Library not loaded: @rpath/'
+try_count=0
+while true; do
+  set +e
+  (
+    set -o pipefail
+    source ${SRC_DIR}/repeat_build.sh 2>&1 | tee -a ${SRC_DIR}/output.log
+  )
+  if [[ $? -eq 0 ]]; then
+    break
+  elif [[ $(cat ${SRC_DIR}/output.log | grep -c "${TRY_AGAIN_REASON}") -eq 0 ]]; then
+    tail -600 ${SRC_DIR}/output.log
+    exit 1
+  elif [[ ${try_count} > 2 ]]; then
+    tail -600 ${SRC_DIR}/output.log
+    printf "Exhausted retry attempts: ${try_count}\n"
+    exit 1
+  fi
+  let try_count+=1
+  tail -600 output.log
+  printf "\n\nLibrary not loaded Conda bug. YUCK. Trying again.\n"
+  # Start anew, clean.
+  rm -rf ${PREFIX}/libmesh
+  > ${SRC_DIR}/output.log
+done
+set -e
+
 sed_replace
 
 # Set LIBMESH_DIR, Eigen3_DIR
