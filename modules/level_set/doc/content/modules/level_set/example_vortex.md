@@ -11,7 +11,7 @@ The only significant difference between the [Rotating Bubble Example](/example_r
 and this example is the velocity function; therefore, a detailed discussion of the varying input
 files is omitted.
 
-As is the case for the the [Rotating Bubble Example](/example_rotate.md) three scenarios are
+As is the case for the [Rotating Bubble Example](/example_rotate.md) three scenarios are
 considered: the level set equation alone, with SUPG stabilization, and with reinitialization. The
 complete input files are located in the `modules/level_set/examples/vortex` directory of MOOSE.
 

@@ -32,7 +32,7 @@ includes API to get reporter data which takes care of the necessary size checks 
 distributed data indexing.
 The idea behind this is to emulate the element loop behavior in other MOOSE objects.
 For instance, in a kernel, the value of _u corresponds to the solution in an element.
-Here data referenced with `getTrainingData` will correspond to the the value of the
+Here data referenced with `getTrainingData` will correspond to the value of the
 data in a sampler row. The returned reference is to be used in the `train()` function.
 There are five functions that derived classes can call to gather training data:
 
@@ -70,7 +70,7 @@ to work with the training data (see [Surrogates/index.md]).
 
 These methods return a reference to the desired type that should be populated in the aforementioned
 `train()` method. For example, in the [PolynomialChaosTrainer.md] trainer object a scalar value,
-"order", is stored stored by declaring a reference to the desired type in the header.
+"order", is stored by declaring a reference to the desired type in the header.
 
 !listing PolynomialChaosTrainer.h line=_order
 

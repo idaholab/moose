@@ -59,7 +59,7 @@ cd ~/projects/moose/examples/ex21_debugging
 METHOD=dbg make -j12
 ```
 
-This will create a "debug version" of and application: `ex21-dbg`
+This will create a "debug version" of an application: `ex21-dbg`.
 
 !---
 
@@ -75,29 +75,29 @@ gdb --args ./ex21-dbg -i ex21.i
 lldb -- ./ex21-dbg -i ex21.i
 ```
 
-These commands will start debugger, load the executable, and open the debugger command prompt
+These commands will start the debugger, load the executable, and open the debugger command prompt.
 
 !---
 
 ## Using GDB or LLDB
 
-At any prompt in GDB or LLDB, you can type `h` and hit enter to get help
+At any prompt in GDB or LLDB, you can type "h" and hit Enter to get help.
 
-1. Set a "breakpoint" in `MPI_Abort` so that the code pauses (maintaining the stack trace)
+1. Set a "breakpoint" in `MPI_Abort` so that the code pauses (maintaining the stack trace):
 
    ```bash
    (lldb) b MPI_Abort
    Breakpoint 1: where = libmpi.12.dylib`MPI_Abort, address = 0x000000010b18f460
    ```
 
-2. Run the application, type `r` and hit enter, the application will hit the breakpoint.
+2. Run the application, type "r" and hit Enter, and the application will hit the breakpoint:
 
    ```bash
    (lldb) r
    Process 77675 launched: './ex21-dbg' (x86_64)
    ```
 
-3. When the application stops, get the backtrace
+3. When the application stops, get the backtrace:
 
    ```bash
    (lldb) bt

@@ -44,7 +44,7 @@ CIVET_SERVER_POST_EDIT_EXISTING = 1
 
 ## Code Coverage
 
-Code coverage can be added by building the the application with coverage enabled, initializing
+Code coverage can be added by building the application with coverage enabled, initializing
 the coverage, running desired tests, and reporting the coverage results.
 
 !listing! style=max-height:120px;

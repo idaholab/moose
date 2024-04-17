@@ -19,7 +19,7 @@ user can specify a minimum time step through the `dtmin` parameter in the
 `Executioner` block. If the time step must be cut back below the minimum size
 without obtaining a solution, the problem exits with an error. If the time step
 is cut back using `ConstantDT`, that cut-back step size will be used for the
-remainder of the the analysis.
+remainder of the analysis.
 
 ## Example Input Syntax
 

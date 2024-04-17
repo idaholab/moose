@@ -21,7 +21,7 @@ the left half of the domain and one for the right.
 ### `Materials`
 
 We now define two elasticity tensors in this problem, one on the left half
-(`block = 1`) and on on the right half (`block = 2`), referring to the subdomain
+(`block = 1`) and one on the right half (`block = 2`), referring to the subdomain
 IDs we assigned using the mesh generators above.
 
 Note how the stiffness of the right hand side is only half that of the left hand side.

@@ -77,7 +77,7 @@ When creating a 3D mesh with 2D fracture elements of type TRISHELL3 in Trelis/Cu
   Trelis/Cubit versions and is not a big deal as long as the user is aware of it.
 - The element type in produced exodus mesh file needs to be modified manually.
   The shell script *modif_trishell3_exodus_file.sh* in the example folder might
-  be used to to this.
+  be used to do this.
 
 Finally, the fractures elements *need to be part of a separate
 subdomain (block)*.  This is actually a requirement of the exodus

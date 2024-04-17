@@ -161,7 +161,7 @@ The split Cahn-Hilliard has the best convergence properties when we use the [New
 
 ### Executioner
 
-The executioner block tells MOOSE how to solve the problem. Many of the values in this block are arbitrary and you can experiment with changing them to see how they change the solution. See the the [Executioner](/syntax/Preconditioning/index.html) and [Preconditioning](/syntax/Executioner/index.html) pages for more information on these systems.
+The executioner block tells MOOSE how to solve the problem. Many of the values in this block are arbitrary and you can experiment with changing them to see how they change the solution. See the [Executioner](/syntax/Preconditioning/index.html) and [Preconditioning](/syntax/Executioner/index.html) pages for more information on these systems.
 
 Right now our main interest is in seeing if the model is working. So we shortened the time that the simulation runs to just be long enough to see if the grain is becoming circular.
 

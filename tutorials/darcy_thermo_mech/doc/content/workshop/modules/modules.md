@@ -75,7 +75,7 @@ behavior using an acoustic formulation for the fluid.
 A MOOSE module for continuous, mesh-agnostic, high-fidelity, reduced-data MultiApp coupling
 
 Functional expansions (FXs) are a methodology that represent information as moments of a functional
-series [!citep](Flusser2016). This is is related to a Fourier series representation of cyclic
+series [!citep](Flusser2016). This is related to a Fourier series representation of cyclic
 data. Moments are generated via numerical integration for each term in the functional series to
 represent the field of interest. These moments can then be used to reconstruct the field in a
 separate app [!citep](Wendt2018a,Wendt2017c,Kerby2017).
@@ -96,15 +96,14 @@ It is designed to interface easily with the porous flow module so that complicat
 
 !--
 
-## Heat Conduction
+## Heat Transfer
 
 Basic utilities for solving the transient heat conduction equation:
 
 !equation
 \rho c_p \pf{T}{t} - \nabla\cdot k \nabla T - s = 0
 
-Also contains capability for generalized heat transfer (convection, radiation, ...). Will likely be renamed
-heat transfer in the future, accordingly.
+Also contains capability for generalized heat transfer (convection, radiation, ...).
 
 !---
 

@@ -14,7 +14,7 @@ More information about field split preconditioning may be found in the
 
 In this example, a two level field split preconditioning is set up using the `Split` syntax.
 A Schur decomposition is used for preconditioning at the top level, and `asm` preconditioning,
-with their own sets of PETSc options, is set set up for two groups of variables.
+with their own sets of PETSc options, is set up for two groups of variables.
 
 !listing modules/phase_field/test/tests/phase_field_crystal/PFCTrad/pfct_newton_split1_asm5.i block=Splits
 

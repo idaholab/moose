@@ -1222,9 +1222,12 @@ SubProblem::getFunctor(const std::string & name,
       // Check for whether this is a valid request
       if (!requested_functor_is_ad && requestor_is_ad &&
           true_functor_is == SubProblem::TrueFunctorIs::AD)
-        mooseError("We are requesting a non-AD functor from an AD object, but the true functor is "
-                   "AD. This "
-                   "means we could be dropping important derivatives. We will not allow this");
+        mooseError("The AD object '",
+                   requestor_name,
+                   "' is requesting the functor '",
+                   name,
+                   "' as a non-AD functor even though it is truly an AD functor, which is not "
+                   "allowed, since this may unintentionally drop derivatives.");
     }
 
     return *functor;

@@ -207,7 +207,7 @@ T = t\sin(\pi x)\cdot\sin(5\pi y)
 ### Spatial Convergence: Forcing Function
 
 
-The `mms` package can compute the necessary forcing function and output the the input file syntax
+The `mms` package can compute the necessary forcing function and output the input file syntax
 for both the forcing function and the assumed solution.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=0
@@ -252,7 +252,7 @@ existing functions withing the simulation.
 
 #### Forcing Function as Heat Source
 
-The forcing function is applied the the simulation by adding another heat source `Kernel` object.
+The forcing function is applied to the simulation by adding another heat source `Kernel` object.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_spatial.i link=false block=Kernels
 
@@ -315,7 +315,7 @@ T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
 
 ### Temporal Convergence: Forcing Function
 
-The `mms` package can compute the necessary forcing function and output the the input file syntax
+The `mms` package can compute the necessary forcing function and output the input file syntax
 for both the forcing function and the assumed solution.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=0

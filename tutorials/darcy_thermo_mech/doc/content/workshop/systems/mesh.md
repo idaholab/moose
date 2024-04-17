@@ -54,7 +54,7 @@ MOOSE supports reading and writing a large number of formats and could be extend
 
 Built-in mesh generation is implemented for lines, rectangles,  rectangular prisms or [extruded reactor geometries](modules/reactor/index.md).
 
-!listing initial_adaptivity_test.i block=Mesh
+!listing face_info_tri.i block=Mesh
 
 The sides are named in a logical way and are numbered:
 
@@ -117,7 +117,7 @@ Calculations can take place in either the initial mesh configuration or, when re
 To enable displacements, provide a vector of displacement variable names for each spatial dimension
 in the Mesh block.
 
-!listing dg_displacement.i block=Mesh
+!listing /displaced/child.i block=Mesh
 
 Objects can enforce the use of the displaced mesh within the validParams function.
 

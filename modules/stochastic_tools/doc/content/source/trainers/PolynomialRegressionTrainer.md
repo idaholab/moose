@@ -75,7 +75,7 @@ To determine these, a regression matrix can be defined as:
 
 ## Ordinary Least Squares (OLS) regression
 
-Using regression matrix $\textbf{R}$ and and Ordinary Least Squares (OLS) approach described on
+Using regression matrix $\textbf{R}$ and Ordinary Least Squares (OLS) approach described on
 [Wikipedia](https://en.wikipedia.org/wiki/Polynomial_regression) in detail, the unknown
 coefficients can be determined as follows:
 

@@ -16,7 +16,7 @@ written as follows:
 where $D$ and $D_{neighbor}$ are material properties for the current element and
 its neighbor, respectively, $n$ and $n_{neighbor}$ are the outward normal vectors
 from the element and its neighbor (typically $n = - n_{neighbor})$.
-$P$ is the the penalty supplied in the parameter [!param](/InterfaceKernels/PenaltyInterfaceDiffusion/penalty).
+$P$ is the penalty supplied in the parameter [!param](/InterfaceKernels/PenaltyInterfaceDiffusion/penalty).
 
 ## Example Input File Syntax
 

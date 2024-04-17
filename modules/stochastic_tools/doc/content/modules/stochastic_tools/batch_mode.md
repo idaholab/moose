@@ -117,7 +117,7 @@ in the master input file, in the Executioner and MultiApps block, as shown in [t
 
 !listing stochastic_tools/examples/batch/transient.i id=transient-master block=Executioner MultiApps
          caption=Complete input file for a transient master application that performs stochastic
-         simulations of a diffusion problem with time varying boundary conditions using using Monte
+         simulations of a diffusion problem with time varying boundary conditions using Monte
          Carol sampling.
 
 The results shown in [transient-serial-memory] and [transient-mpi-memory] include the memory use at

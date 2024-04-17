@@ -30,7 +30,7 @@ function must exist within the modules loaded by the extension using the "module
 (see [ifelse-config]).
 
 This extension was originally created to allow content to depend on the application name, as
-such such a scenario will be used to demonstrate use of the syntax. The most basic use is a single
+such a scenario will be used to demonstrate use of the syntax. The most basic use is a single
 "if" statement. When the supplied function returns `True` the content is
 displayed (see [if-true], when `False` the content is ignored (see [if-false]).
 

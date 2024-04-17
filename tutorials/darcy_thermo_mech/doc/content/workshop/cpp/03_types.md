@@ -8,7 +8,7 @@ Standard Template Library (STL)
 
 C++ is a "statically-typed" language
 
-This means that "type checking" is performed during compile-time as opposed to run-time
+This means that "type checking" is performed at compile time as opposed to at run time
 
 Python and MATLAB are examples of "dynamically-typed" languages
 
@@ -103,15 +103,20 @@ int main()
 
 !---
 
-## C++ Standard Template Library (STL)
+## C++ Standard Template Library Classes
 
-- [vector](http://www.cplusplus.com/reference/vector/vector/)
+- [pair](http://www.cplusplus.com/reference/utility/pair/),
+  [tuple](http://www.cplusplus.com/reference/tuple/tuple/)
+- [vector](http://www.cplusplus.com/reference/vector/vector/),
+  [array](http://www.cplusplus.com/reference/array/array/)
 - [list](http://www.cplusplus.com/reference/list/list/)
-- [map](http://www.cplusplus.com/reference/map/map/), [multimap](http://www.cplusplus.com/reference/multimap/multimap)
-- [set](http://www.cplusplus.com/reference/set/set/), [multiset](http://www.cplusplus.com/reference/set/set)
+- [map](http://www.cplusplus.com/reference/map/map/), [multimap](http://www.cplusplus.com/reference/map/multimap),
+  [unordered_map](http://www.cplusplus.com/reference/unordered_map/unordered_map/),
+  [unordered_multimap](http://www.cplusplus.com/reference/unordered_map/unordered_multimap/)
+- [set](http://www.cplusplus.com/reference/set/set/), [multiset](http://www.cplusplus.com/reference/set/set),
+  [unordered_set](http://www.cplusplus.com/reference/unordered_set/unordered_set/)
+  [unordered_multiset](http://www.cplusplus.com/reference/unordered_set/unordered_multiset/)
 - [stack](http://www.cplusplus.com/reference/stack/stack/)
-- [queue](http://www.cplusplus.com/reference/queue/queue/), [priority_queue](http://www.cplusplus.com/reference/priorityqueue/priorityqueue)
-- [deque](http://www.cplusplus.com/reference/deque/deque/)
+- [queue](http://www.cplusplus.com/reference/queue/queue/), [priority_queue](http://www.cplusplus.com/reference/queue/priority_queue),
+  [deque](http://www.cplusplus.com/reference/deque/deque/)
 - [bitset](http://www.cplusplus.com/reference/bitset/bitset/)
-- [unordered_map](http://www.cplusplus.com/reference/unorderedmap/unorderedmap/)
-- [unordered_set](http://www.cplusplus.com/reference/unorderedset/unorderedset/)

@@ -14,7 +14,10 @@ Variables have a limited lifetime
 
 - When a variable goes out of scope, its destructor is called
 
-Dynamically-allocated (via new) memory *is not* automatically freed at the end of scope
+Manually dynamically-allocated (via `new`) memory *is not*
+automatically freed at the end of scope, but smart-pointers and
+containers will free dynamically-allocated memory in their
+destructors.
 
 !---
 
@@ -29,7 +32,7 @@ void MyObject::myMethod()
   std::cout << "Hello, World!\n";
 }
 MyNamespace::a = 2.718;
-MyNamespace::myMethod();
+MyObject::myMethod();
 ```
 
 Namespaces permit data organization, but do not have all the features needed for full encapsulation
@@ -50,7 +53,8 @@ Assignments are one of the most common operations in programming
 
 Two operands are required
 
-- An assignable location on the left hand side (memory location)
+- An assignable "lvalue" on the left hand side, referring to some
+  object
 - An expression on the right hand side
 
 !---
@@ -78,14 +82,14 @@ Declare a pointer
 int *p;
 ```
 
-Use the +address-of+ operator to initialize a pointer
+The +address-of+ operator on a variable gives a pointer to it, for initializing another pointer
 
 ```cpp
 int a;
 p = &a;
 ```
 
-Use the +dereference+ operator to get or set values pointed-to by the pointer
+The +dereference+ operator on a pointer gives a reference to what it points to, to get or set values
 
 ```cpp
 *p = 5;                  // set value of "a" through "p"
@@ -134,7 +138,7 @@ Now what happens when we do this?
 
 ## References to the Rescue
 
-A reference is an alternative name for an object (Stroustrup), think of it as an alias for the
+A reference is an alternative name for an object (Stroustrup), like an alias for the
 original variable
 
 ```cpp
@@ -148,28 +152,60 @@ std::cout << &r << "\n";  // prints address of a
 
 !---
 
-## References are Safe
+## References are Safer
 
-References cannot be modified
+References cannot be reseated, nor left un-initialized - even classes
+with references must initialize them in the constructor!
 
 ```cpp
 &r = &r + 1;   // won't compile
+int &r;        // won't compile
 ```
 
-References never start out un-initialized
+But references can still be incorrectly left "dangling"
 
 ```cpp
-int &r;     // won't compile
+std::vector<int> four_ints(4);
+int &r = four_ints[0];
+r = 5;  // Valid: four_ints is now {5,0,0,0}
+four_ints.clear();  // four_ints is now {}
+r = 6;  // Undefined behavior, nasal demons
 ```
 
-- Note, that class declarations may contain references
-- If so, initialization must occur in the constructor!
+!---
+
+## Rvalue References Can Be More Efficient
+
+An "lvalue" reference starts with `&`; an "rvalue" reference starts
+with `&&`.
+
+Mnemonic: lvalues can usually be assigned to, +L+eft of an = sign;
+rvalues can't, so they're found +R+ight of an = sign.
+
+Lvalue code like "copy assignment" is correct and sufficient
+
+```cpp
+Foo & Foo::operator= (const Foo & other) {
+  this->member1 = other.member1;  // Has to copy everything
+  this->member2 = other.member2;
+}
+```
+
+But rvalue code like "move assignment" may be written for optimization
+
+```cpp
+Foo & Foo::operator= (Foo && other) {
+  // std::move "makes an lvalue into an rvalue"
+  this->member1 = std::move(other.member1);  // Can cheaply "steal" memory
+  this->member2 = std::move(other.member2);
+}
+```
 
 !---
 
 ## Summary: Pointers and References
 
-A pointer is a variable that holds a memory address to another variable
+A pointer is a variable that holds a potentially-changeable memory address to another variable
 
 ```cpp
 int *iPtr;  // Declaration
@@ -177,11 +213,17 @@ iPtr = &c;
 int a = b + *iPtr;
 ```
 
-A reference is an alternative name for an object (Stroustrup), so it must reference an existing object
+An lvalue reference is an alternative name for an object, and must reference a fixed object
 
 ```cpp
 int &iRef = c;    // Must initialize
 int a = b + iRef;
+```
+
+An rvalue reference is an alternative name for a temporary object
+
+```cpp
+std::sqrt(a + b);  // "a+b" creates an object which will stop existing shortly
 ```
 
 !---
@@ -202,7 +244,7 @@ result = someFunction(a, b, my_shape);
 
 !---
 
-## Swap Example (Pass by Value)
+## "Swap" Example - Pass by Value
 
 ```cpp
 void swap(int a, int b)
@@ -220,7 +262,7 @@ std::cout << i << " " << j;   // prints 1 2
 
 !---
 
-## Swap Example (Pass by Reference)
+## Swap Example - Pass by (Lvalue) Reference
 
 ```cpp
 void swap(int &a, int &b)
@@ -251,33 +293,38 @@ Why do we need dynamic memory allocation?
 
 ## Dynamic Memory in C++
 
-"new" allocates memory
-
-"delete" frees memory
+"new" allocates memory, "delete" frees it
 
 Recall that variables typically have limited lifetimes (within the nearest enclosing scope)
 
 Dynamic memory allocations do not have limited lifetimes
 
-- No automatic memory cleanup!
-- Watch out for memory leaks
-- Should have a "delete" for every "new".
+- No deallocation when a pointer goes out of scope!
+- No automatic garbage collection when dynamic memory becomes unreachable!
+- Watch out for memory leaks - a missing "delete" is memory that
+  is lost until program exit
 
-During normal usage, dynamic memory allocation is unnecessary.
+Modern C++ provides classes that encapsulate allocation, with
+destructors that deallocate.
+
+Almost every "new"/"delete" should be a "smart pointer" or container class instead!
 
 !---
 
 ## Example: Dynamic Memory
 
 ```cpp
-int a;
-int *b;
-b = new int; // dynamic allocation, what is b's value?
-a = 4;
-*b = 5;
-int c = a + *b;
-std::cout << c;  // prints 9
-delete b;
+  {
+    int a = 4;
+    int *b = new int; // dynamic allocation; what is b's value?
+    auto c = std::make_unique<int>(6); // dynamic allocation
+    *b = 5;
+    int d = a + *b + *c;
+    std::cout << d;  // prints 15
+  }
+  // a, b, and c are no longer on the stack
+  // *c was deleted from the heap by std::unique_ptr
+  // *b is leaked memory - we forgot "delete b" and now it's too late!
 ```
 
 !---
@@ -286,13 +333,12 @@ delete b;
 
 ```cpp
 int a;
-int *b = new int;    // dynamic allocation
-int &r = *b;         // creating a reference to newly created variable
+auto b = std::make_unique<int>(); // dynamic allocation
+int &r = *b;     // creating a reference to newly allocated object
 a = 4;
 r = 5;
 int c = a + r;
 std::cout << c;  // prints 9
-delete b;
 ```
 
 !---
@@ -301,20 +347,39 @@ delete b;
 
 The `const` keyword is used to mark a variable, parameter, method or other argument as constant
 
-Typically used with references and pointers to share objects but guarantee that they will not be
-modified
+Often used with references and pointers to share objects which should not be modified
 
 ```cpp
 {
   std::string name("myObject");
   print(name);
-  ...
 }
 void print(const std::string & name)
 {
-  // Attempting to modify name here will
-  // cause a compile time error
+  name = "MineNow"; // Compile-time error
+  const_cast<std::string &>(name) = "MineNow"; // Just bad code
   ...
+}
+```
+
+!---
+
+## Constexpr
+
+The `constexpr` keyword marks a variable or function as evaluable at compile time
+
+```cpp
+constexpr int factorial(int n)
+{
+  if (n <= 1)
+    return 1;
+  return n * factorial(n-1);
+}
+{
+  constexpr int a = factorial(6); // Compiles straight to a = 720
+  int b = 6;
+  function_which_might_modify(b);
+  int c = factorial(b); // Computed at run time
 }
 ```
 

@@ -26,7 +26,7 @@ the literature.
 
 - Currently limited to parabolic, ideal solution, dilute solution chemical free energies
 
-  - Need free energy to be convex, and and the relationship between composition and chemical potential needs to be analytically invertible
+  - Need free energy to be convex, and the relationship between composition and chemical potential needs to be analytically invertible
 
 - Evolution equation for chemical potential less intuitive compared to evolution equation for composition
 

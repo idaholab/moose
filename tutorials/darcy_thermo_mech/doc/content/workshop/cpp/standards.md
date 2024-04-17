@@ -126,46 +126,70 @@ SomeOtherClass::SomeOtherClass()
 
 ## Using auto
 
-Use `auto` for most new code unless it complicates readability. Make sure your variables have
-+good+ names when using auto!
+Using `auto` improves code compatibility.  Make sure your variables have
++good+ names so auto doesn't hurt readability!
 
 ```cpp
-auto dof = elem->dof_number(0, 0, 0);
+auto dof = elem->dof_number(0, 0, 0);  // dof_id_type, default 64-bit in MOOSE
+int dof2 = elem->dof_number(0, 1, 0);  // dof2 is broken for 2B+ DoFs
 auto & obj = getSomeObject();
 auto & elem_it = mesh.active_local_elements_begin();
-auto & item_pair = map.find(some_item);
+auto & [key, value] = map.find(some_item);
 
 // Cannot use reference here
-for (auto it = obj.begin(); it != obj.end(); ++it)
-  doSomething();
+for (auto it = container.begin(); it != container.end(); ++it)
+  doSomething(*it);
 
 // Use reference here
 for (auto & obj : container)
-  doSomething();
+  doSomething(obj);
 ```
 
-Do not use `auto` in any kind of function or method declaration
+Function declarations should tell programmers what return type to
+expect; `auto` is only appropriate there if it is necessary for a
+generic algorithm.
 
 !---
 
-## Lambdas
+## Lambda Functions
+
+Ugly syntax: "Captured" variables in brackets, then arguments
+in parentheses, then code in braces
+
+Still useful enough to be *encouraged* in many cases:
+
+- Defining a new function object in the only scope where it is used
+
+- Preferring standard generic algorithms (which take function object arguments)
+
+- Improving efficiency over using function pointers for function object arguments
 
 ```cpp
-// List captured variables (by value or reference) in the capture list explicitly where possible.
+// List captured variables in the capture list explicitly where possible.
 std::for_each(container.begin(), container.end(), [= local_var](Foo & foo) {
-  foo.item = local_var;
-  foo.item2 = local_var2;
+  foo.item = local_var.item;
+  foo.item2 = local_var.item2;
 });
 ```
 
 !---
 
-## C++11
+## Modern C++ Guidelines
 
-- Use the `override` keyword on overridden `virtual` methods
-- Use `std::make_shared<T>()` when allocating new memory for shared pointers
-- Use `std::make_unique<T>()` when allocating new memory for unique pointers
-- Make use of std::move() for efficiency when possible
+Code should be as safe and as expressive as possible:
+
+- Mark all overridden `virtual` methods as `override`
+- Do not use `new` or `malloc` where it can be avoided
+- Use smart pointers, with `std::make_shared<T>()` or `std::make_unique<T>()`
+- Prefer `<algorithm>` functions over hand-written loops
+- Prefer range `for` except when an index variable is explicitly needed
+- Make methods const-correct, avoid `const_cast` where possible
+
+Optimization should be done when critical-path or non-invasive:
+
+- Use `final` keyword on classes and virtual functions with no further
+  subclass overrides
+- Use `std::move()` when applicable
 
 !---
 
@@ -174,9 +198,12 @@ std::for_each(container.begin(), container.end(), [= local_var](Foo & foo) {
 When creating a new variable use these patterns:
 
 ```cpp
-unsigned int i = 4;  // Built-in types
-SomeObject junk(17); // Objects
-SomeObject * stuff = new SomeObject(18); // Pointers
+unsigned int i = 4;                                   // Built-in types
+SomeObject junk(17);                                  // Objects
+SomeObject * stuff = functionReturningPointer();      // Pointers
+auto & [key, value] = functionReturningKVPair();      // Individual tuple members
+auto heap_memory = std::make_unique<HeapObject>(a,b); // Non-container dynamic allocation
+std::vector<int> v = {1, 2, 4, 8, 16};                // Simple containers
 ```
 
 !---
@@ -269,9 +296,14 @@ class MyClass:
 # Code Recommendations
 
 1. Use references whenever possible
-1. Methods should return pointers to objects if returned objects are stored as pointers and references
-   if returned objects are stored as references
+1. Functions should return or accept pointers only if "null" is a
+   valid value, in which case it should be tested for on every use
 1. When creating a new class include dependent header files in the *.C file whenever possible
-1. Avoid using a global variables
-1. Every destructor must be virtual
-1. All function definitions should be in *.C files, if possible
+1. Avoid using global variables
+1. Every class with any virtual functions should have a virtual
+   destructor
+1. Function definitions should be in *.C files, unless so small that they should definitely be inlined
+1. Add assertions when making any assumption that could be violated
+   by invalid code
+1. Add error handling whenever an assumption could be violated by
+   invalid user input

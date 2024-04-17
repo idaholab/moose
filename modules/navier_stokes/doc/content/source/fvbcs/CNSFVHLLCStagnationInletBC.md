@@ -27,7 +27,7 @@ heats, e.g. $c_p/c_v$.
 
 Armed with the boundary pressure and temperature, `CNSFVHLLCStagnationInletBC`
 also computes the boundary values for the specific internal energy $e$, density
-$\rho$, and specific total enthalpy $h_t$ for use the the flux expressions of
+$\rho$, and specific total enthalpy $h_t$ for use the flux expressions of
 the derived [mass](CNSFVHLLCMassStagnationInletBC.md),
 [momentum](CNSFVHLLCMomentumStagnationInletBC.md), and
 [energy](CNSFVHLLCFluidEnergyStagnationInletBC.md) classes.

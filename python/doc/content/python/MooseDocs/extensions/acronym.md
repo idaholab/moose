@@ -5,7 +5,7 @@ documentation pages. On each page the full text and acronym definition will be d
 time is used, as shown in [acronym-example].
 
 !alert note
-When viewing on the website a tooltip is created for the the acronyms, the
+When viewing on the website a tooltip is created for the acronyms, the
 full name will appear when the mouse is placed over the acronym.
 
 !devel example id=acronym-example caption=Example use of acronyms.

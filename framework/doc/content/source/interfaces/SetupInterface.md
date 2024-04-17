@@ -1,7 +1,7 @@
 # SetupInterface (execute_on)
 
 Most user-facing objects in MOOSE inherit from the SetupInterface class. This class provides two
-features to objects. Foremost, it provides the the "execute_on" parameter, which, as the name
+features to objects. Foremost, it provides the "execute_on" parameter, which, as the name
 suggests, dictates when the object is to be executed. Secondly, it adds virtual setup methods that
 allow derived classes to perform setup applications prior to execution.
 

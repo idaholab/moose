@@ -163,7 +163,7 @@ out.e.4.3
 
 ## Mesh splitting
 
-For large meshes, MOOSE provides the ability to pre-split a mesh for use in the the "distributed"
+For large meshes, MOOSE provides the ability to pre-split a mesh for use in the "distributed"
 format/mode. To split and use a mesh for distributed runs:
 
 ```

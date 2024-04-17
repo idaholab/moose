@@ -153,7 +153,7 @@ name of your app will appear instead of "MOOSE" for your individual application:
 
 ## Working with MOOSE's build system
 
-MOOSE uses the the tried and true Unix standard build tools, [GNU Make](https://www.gnu.org/software/make/)
+MOOSE uses the tried and true Unix standard build tools, [GNU Make](https://www.gnu.org/software/make/)
 and [GNU Autoconf](https://www.gnu.org/software/autoconf/). These tools are ubiquitous, reliable, and stable,
 where many other build systems are not. We believe that usability of tool includes the build process as well
 as the run-time experience and that philosophy shows in the way we've structured the Makefiles for building

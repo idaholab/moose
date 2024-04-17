@@ -1,6 +1,6 @@
 # Finished
 
-This the the end of the tutorial.
+This the end of the tutorial.
 
 
 

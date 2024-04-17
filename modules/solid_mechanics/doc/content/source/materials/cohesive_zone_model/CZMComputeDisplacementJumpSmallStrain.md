@@ -9,7 +9,7 @@ The displacement jump in global coordinates is defined as:
 \begin{equation}
 \llbracket u \rrbracket = u^+ - u^-
 \end{equation}
-and is related to the the displacement jump in interface coordinates, \llbracket \hat{u} \rrbracket by the the following expression:
+and is related to the displacement jump in interface coordinates, \llbracket \hat{u} \rrbracket by the following expression:
 \begin{equation}
 \llbracket \hat{u}  \rrbracket = Q^T_0 \llbracket u \rrbracket
 \end{equation}
