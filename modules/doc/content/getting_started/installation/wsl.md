@@ -1,6 +1,6 @@
 ## Peacock prereqs (skip if not interested in Peacock)
 
-!alert note
+!alert warning title=Windows 11
 Windows 11 users need not follow VcXsrv instructions. OpenGL is natively supported on Windows 11.
 
 - Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Windows 10 only).

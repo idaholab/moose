@@ -9,11 +9,11 @@ Caveats:
 
 <!-- double space on purpose to emphasize important bullet point -->
 
-- Different flavors of Linux are available, +but we STRONGLY urge the use of Ubuntu and at version
+- Different flavors of Linux are available, but +we STRONGLY urge the use of Ubuntu version
   20.04.x LTS.+ Use other Linux flavors and versions at your peril if you are interested in using
-  Peacock. Issues usually involve incompatible system supplied OpenGL/mesa libraries when used with
-  our Conda packages. Or, system packages that are required and missing, yet we are unfamilar with
-  which ones to ask you to install.
+  Peacock. Issues usually involve incompatible system-supplied OpenGL/mesa libraries when used with
+  our Conda packages. Or, system packages that are required might be missing, yet we are unfamiliar
+  with which ones to ask you to install.
 !alert-end!
 
 !include installation/wsl.md
