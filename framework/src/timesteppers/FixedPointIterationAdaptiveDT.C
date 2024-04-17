@@ -19,25 +19,31 @@ FixedPointIterationAdaptiveDT::validParams()
   InputParameters params = TimeStepper::validParams();
   params.addClassDescription(
       "Computes time step size based on a target number of fixed point iterations");
-  params.addRequiredParam<Real>("dt_initial", "The initial time step size");
-  params.addRequiredParam<unsigned int>("target_iterations",
-                                        "The target number of fixed point iterations");
-  params.addRequiredParam<unsigned int>(
+  params.addRequiredRangeCheckedParam<Real>(
+      "dt_initial", "dt_initial > 0", "The initial time step size");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "target_iterations", "target_iterations > 0", "The target number of fixed point iterations");
+  params.addRequiredRangeCheckedParam<unsigned int>(
       "target_window",
+      "target_window >= 0",
       "The number of iterations added to and subtracted from 'target_iterations' to determine the "
       "iteration window; the time step size will increase if the iterations were below "
       "'target_iterations' - 'target_window' and will decrease if the iterations were above "
       "'target_iterations' + 'target_window'.");
-  params.addParam<Real>("increase_factor",
-                        1.2,
-                        "Factor by which the previous time step size will increase if the previous "
-                        "number of fixed point iterations was below the target window minimum "
-                        "('target_iterations' - 'target_window').");
-  params.addParam<Real>("decrease_factor",
-                        0.8,
-                        "Factor by which the previous time step size will decrease if the previous "
-                        "number of fixed point iterations was above the target window maximum "
-                        "('target_iterations' + 'target_window').");
+  params.addRangeCheckedParam<Real>(
+      "increase_factor",
+      1.2,
+      "increase_factor >= 1",
+      "Factor by which the previous time step size will increase if the previous "
+      "number of fixed point iterations was below the target window minimum "
+      "('target_iterations' - 'target_window').");
+  params.addRangeCheckedParam<Real>(
+      "decrease_factor",
+      0.8,
+      "decrease_factor <= 1",
+      "Factor by which the previous time step size will decrease if the previous "
+      "number of fixed point iterations was above the target window maximum "
+      "('target_iterations' + 'target_window').");
 
   return params;
 }
@@ -63,6 +69,21 @@ FixedPointIterationAdaptiveDT::init()
 
   if (!_fe_problem.hasMultiApps())
     mooseError("This time stepper can only be used if there are MultiApps in the problem.");
+
+  const auto & fp_solve = _executioner.fixedPointSolve();
+  const auto min_its = fp_solve.minFixedPointIts();
+  const auto max_its = fp_solve.maxFixedPointIts();
+  if (_target_max > max_its || _target_min < min_its)
+    mooseError("The specified target iteration window, [",
+               _target_min,
+               ",",
+               _target_max,
+               "], must be within the minimum and maximum number of fixed point iterations "
+               "specified for the Executioner, [",
+               min_its,
+               ",",
+               max_its,
+               "].");
 }
 
 Real
