@@ -98,12 +98,13 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
   optim_options.print_loss = true;
   optim_options.print_epoch_loss = 20;
   optim_options.parallel_processes = getParam<unsigned int>("max_processes");
+  optim_options.classify = false;
 
   trainer.train(dataset, optim_options);
 
   std::vector<Real> test(getParam<std::vector<Real>>("monitor_point"));
   torch::Tensor test_tensor = torch::from_blob(test.data(), {1, 3}, options).to(at::kDouble);
-  auto prediction = nn->forward(test_tensor);
+  auto prediction = nn->forward(test_tensor, false);
 
   _nn_values_1.push_back(prediction[0][0].item<double>());
   _nn_values_2.push_back(prediction[0][1].item<double>());
