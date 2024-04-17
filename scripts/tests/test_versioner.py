@@ -45,7 +45,11 @@ class Test(unittest.TestCase):
 
         for hash in [None, 'HEAD']:
             for package in versioner.entities:
-                if package == 'app':
+                # TODO: deprecate mpich by skipping it. It populates in entities because we are
+                #       allowing 'mpich' as a deprecated library in versioner.yaml. But we do not
+                #       have any hashes to verify with here in unittests. Remove this deprecation
+                #       when it gets removed from versioner.yaml keys
+                if package in ['app', 'mpich']:
                     continue
 
                 def run(library, args=[]):

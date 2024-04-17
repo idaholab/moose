@@ -44,7 +44,7 @@ function env_test()
     printf "Influential Environment Variables\n\n"
     reg_exp='^LD\|^DYLD\|^PATH\|^CFLAGS\|^CPP\|^CC\|^CXX\|^FFLAGS\|^FC\|^F90\|^F95\|^F77\|^CONDA'
     reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES\|^PBS\|^SLURM\|^http'
-    reg_exp+='\|^HTTPS\|^REQUESTS_CA_BUNDLE\|^SSL_CERT_FILE\|^CURL_CA_BUNDLE'
+    reg_exp+='\|^HTTPS\|^REQUESTS_CA_BUNDLE\|^SSL_CERT_FILE\|^CURL_CA_BUNDLE\|^FI_PROVIDER'
     reg_not='CONDA_BACKUP'
     env | sort | grep "${reg_exp}" | grep -v "${reg_not}"
 }

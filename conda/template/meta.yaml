@@ -23,9 +23,11 @@ build:
 
 requirements:
   build:
+    - mpich
     - {{ moose_dev }}
 
   run:
+    - mpich
     - {{ moose_dev }}
 
 test:
@@ -38,7 +40,7 @@ about:
   summary: >
     The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element,
     multiphysics framework primarily developed by Idaho National Laboratory. This superficial
-    module (moose) if a future placeholder for binary releases of MOOSE.'
+    module is a future placeholder for binary releases of a MOOSE-based application.'
 
 extra:
   recipe-maintainers:
