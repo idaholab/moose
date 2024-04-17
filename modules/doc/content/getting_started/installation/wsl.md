@@ -1,7 +1,8 @@
 ## Peacock prereqs (skip if not interested in Peacock)
 
 !alert warning title=Windows 11
-Windows 11 users need not follow VcXsrv instructions. OpenGL is natively supported on Windows 11.
+Windows 11 users need not follow the VcXsrv instructions below. OpenGL is natively supported on
+Windows 11.
 
 - Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Windows 10 only).
 - Install video card drivers applicative to your graphics card hardware (All versions of Windows).
@@ -80,7 +81,7 @@ sudo apt upgrade
 sudo apt install x11-apps libglu1-mesa libxcb-*
 ```
 
-### Configure WSL to connecto to Windows GUI
+### Configure WSL to connect to Windows GUI
 
 !style! halign=left
 Modify the bash profile to allow WSL to connect to the Windows GUI.
