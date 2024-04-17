@@ -1,5 +1,5 @@
 [Tests]
-  issues = "#19571"
+  issues = "#19571 #27398"
   design = "LibtorchANNTrainer.md LibtorchANNSurrogate.md"
 
   [train_and_evaluate]
@@ -68,6 +68,15 @@
     cli_args = "Surrogates/surr/filename='standardized_train.rd' "
                "Outputs/file_base=evaluate_standardized"
     prereq = train-standardized
+    libtorch = true
+  []
+  [train_and_evaluate_classifier]
+    requirement = 'The system shall be able to train and evaluate a libtorch-based neural network in the same input file under the classification mode.'
+    type = CSVDiff
+    input = train_evaluate_classifier.i
+    allow_test_objects = true
+    cli_args = "Trainers/train/read_from_file=false"
+    csvdiff = 'train_evaluate_classifier_out_results_0002.csv'
     libtorch = true
   []
 []

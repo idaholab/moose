@@ -79,7 +79,7 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
-LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
+LibtorchArtificialNeuralNet::forward(torch::Tensor & x, bool classify)
 {
   torch::Tensor output(x);
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
@@ -99,6 +99,7 @@ LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
   }
 
   output = _weights[_weights.size() - 1]->forward(output);
+  output = classify ? torch::sigmoid(output) : output;
 
   return output;
 }

@@ -76,7 +76,7 @@ LibtorchDRLControl::execute()
     torch::Tensor input_tensor = prepareInputTensor();
 
     // Evaluate the neural network to get the expected control value
-    torch::Tensor output_tensor = _nn->forward(input_tensor);
+    torch::Tensor output_tensor = _nn->forward(input_tensor, false);
 
     // Sample control value (action) from Gaussian distribution
     torch::Tensor action = at::normal(output_tensor, _std);

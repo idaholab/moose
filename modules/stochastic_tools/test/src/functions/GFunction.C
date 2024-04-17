@@ -20,6 +20,8 @@ GFunction::validParams()
   params.addRequiredParam<std::vector<Real>>("q_vector", "q values for g-function");
   params.addRequiredParam<SamplerName>(
       "sampler", "The Sampler object to use to perform g-function evaluations.");
+  params.addParam<bool>("classify", false, "Flag to turn return binary values.");
+  params.addParam<Real>("limiting_value", 0.0, "True if value exceeds limiting value.");
   return params;
 }
 
@@ -27,6 +29,8 @@ GFunction::GFunction(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _sampler(getSampler("sampler")),
     _q_vector(getParam<std::vector<Real>>("q_vector")),
+    _classify(getParam<bool>("classify")),
+    _limiting_value(getParam<Real>("limiting_value")),
     _values(declareVector("g_values"))
 {
   if (_q_vector.size() != _sampler.getNumberOfCols())
@@ -46,7 +50,15 @@ GFunction::execute()
     Real y = 1;
     for (std::size_t i = 0; i < _q_vector.size(); ++i)
       y *= (std::abs(4 * x[i] - 2) + _q_vector[i]) / (1 + _q_vector[i]);
-    _values.push_back(y);
+    if (!_classify)
+      _values.push_back(y);
+    else
+    {
+      if (y > _limiting_value)
+        _values.push_back(1.0);
+      else
+        _values.push_back(0.0);
+    }
   }
 }
 

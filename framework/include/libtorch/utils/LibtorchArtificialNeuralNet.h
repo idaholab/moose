@@ -58,8 +58,9 @@ public:
    * Overriding the forward substitution function for the neural network, unfortunately
    * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
+   * @param classify Flag for classification mode, defaults to regression mode if false
    */
-  virtual torch::Tensor forward(torch::Tensor & x) override;
+  virtual torch::Tensor forward(torch::Tensor & x, bool classify) override;
 
   /// Return the name of the neural network
   const std::string & name() const { return _name; }
