@@ -110,6 +110,7 @@ LibtorchArtificialNeuralNet::forward(const torch::Tensor & x)
   }
 
   output = _weights[_weights.size() - 1]->forward(output);
+  output = classify ? torch::sigmoid(output) : output;
 
   return output;
 }

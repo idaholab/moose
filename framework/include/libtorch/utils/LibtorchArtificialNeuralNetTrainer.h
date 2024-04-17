@@ -49,6 +49,8 @@ struct LibtorchTrainingOptions
   /// multiple times. Sometimes comes in handy when only a few of them are needed to fill up
   /// empty slots in the last batch. NOTE: This may introduce a considerable BIAS!
   bool allow_duplicates = false;
+  /// Enable classification mode or default to regression mode
+  bool classify = false;
 };
 
 /**
