@@ -1,7 +1,7 @@
 mu = 1
 rho = 1
 U = 1
-n = 10
+n = 5
 l = 1
 
 [Mesh]
@@ -14,7 +14,7 @@ l = 1
     ymax = ${l}
     nx = ${n}
     ny = ${n}
-    elem_type = QUAD9
+    elem_type = TRI6
   []
 []
 
