@@ -18,27 +18,27 @@ rho = 2
 [Variables]
   [vel_x]
     family = MONOMIAL
-    order = FIRST
+    order = SECOND
   []
   [vel_y]
     family = MONOMIAL
-    order = FIRST
+    order = SECOND
   []
   [pressure]
     family = MONOMIAL
-    order = CONSTANT
+    order = FIRST
   []
   [vel_bar_x]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [vel_bar_y]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [lambda]
     family = SCALAR
