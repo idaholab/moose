@@ -1,0 +1,10 @@
+[Tests]
+  [exact]
+    type = 'CSVDiff'
+    input = 'exact.i'
+    csvdiff = 'exact_out.csv'
+    issues = '#22384'
+    design = 'ArrheniusMaterialProperty.md'
+    requirement = 'The system material shall compute a generic material property based on an Arrhenius model that matches an analytic solution of that equation.'
+  []
+[]
