@@ -80,7 +80,7 @@ sudo apt upgrade
 sudo apt install x11-apps libglu1-mesa libxcb-*
 ```
 
-### Configure WSL to use VcXsrv
+### Configure WSL to connecto to Windows GUI
 
 !style! halign=left
 Modify the bash profile to allow WSL to connect to the Windows GUI.
