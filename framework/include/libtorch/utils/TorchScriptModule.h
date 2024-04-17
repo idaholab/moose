@@ -42,6 +42,7 @@ public:
    * Overriding the forward substitution function for the neural network, unfortunately
    * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
+   * @param classify Flag for classification mode, defaults to regression mode if false
    */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 };
