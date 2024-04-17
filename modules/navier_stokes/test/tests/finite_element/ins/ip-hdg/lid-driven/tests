@@ -18,6 +18,18 @@
     installation_type = in_tree
     valgrind = 'none'
   []
+  [lid-mms-second]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLidSecond
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce third order convergence for velocity variables and second order convergence for the pressure variable when using second and first order polynomials respectively.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
   [stokes_symmetric]
     type = CSVDiff
     input = stokes-lid-driven.i
