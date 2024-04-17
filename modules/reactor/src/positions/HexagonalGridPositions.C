@@ -66,11 +66,11 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
   }
   else
   {
-    if (MooseUtils::absoluteFuzzyGreaterThan((_nr - 1) * _pin_pitch * sqrt(3),
+    if (MooseUtils::absoluteFuzzyGreaterThan((3 * _nr - 1) * _pin_pitch / sqrt(3),
                                              _lattice_flat_to_flat))
       paramError("lattice_flat_to_flat",
-                 "Lattice flat to flat distance is less than the minimum, (nr - 1) * pin_pitch * "
-                 "sqrt(3), given nr rings with a pitch of pin_pitch");
+                 "Lattice flat to flat distance is less than the minimum (3 * nr - 1) * pin_pitch "
+                 "/ sqrt(3) given nr rings with a pitch of pin_pitch");
   }
   if ((_include_in_pattern.empty() && _pattern.size()) ||
       (_include_in_pattern.size() && _pattern.empty()))
