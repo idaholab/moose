@@ -11,11 +11,11 @@
     input = test.py
     test_case = TestLid
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce second order convergence for velocity variables and first order convergence for the pressure variable when using first and zeroth order polynomials respectively.'
-    method = '!dbg'
     min_parallel = 4
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
+    method = '!dbg'
     valgrind = 'none'
   []
   [lid-mms-second]
@@ -23,11 +23,11 @@
     input = test.py
     test_case = TestLidSecond
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce third order convergence for velocity variables and second order convergence for the pressure variable when using second and first order polynomials respectively.'
-    method = '!dbg'
     min_parallel = 4
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
+    method = '!dbg'
     valgrind = 'none'
   []
   [stokes_symmetric]
@@ -38,12 +38,27 @@
     installation_type = 'in_tree' # uses JIT
   []
   [matrix_testing]
-    type = CSVDiff
-    input = matrix-testing.i
-    csvdiff = matrix-testing_out.csv
-    requirement = 'The system shall be able to generate the product of B_{up} * M_p^{-1} * B_{pu}.'
-    installation_type = 'in_tree' # uses JIT
-    max_parallel = 1 # No MatLUFactor support for mpidense
-    method = "!dbg"
+    requirement = 'The system shall show that for an interior penalty based hybridizable discontinuous Galerkin method, 1) a grad-div finite element weak form is equivalent to the matrix product B_up M_p^-1 B_pu, where u denotes volumetric velocity degrees of freedom and p denotes volumetric pressure degrees of freedom, 2) a jump finite element weak form is equivalent to the matrix product B_upb M_pb^-1 B_pbu where pb denotes pressure degrees of freedom on the facets, 3) the matrix product B_pu M_u^-1 B_up is nonsingular, and 4) the matrix product B_pbu M_u^-1 B_upb is nonsingular for'
+    [first]
+      type = CSVDiff
+      input = matrix-testing.i
+      csvdiff = matrix-testing_out.csv
+      installation_type = 'in_tree' # uses JIT
+      max_parallel = 1 # No MatLUFactor support for mpidense
+      method = "!dbg"
+      valgrind = 'none'
+      detail = 'first order polynomial bases (other than zeroth order volumetric pressure), and for'
+    []
+    [second]
+      type = CSVDiff
+      input = matrix-testing.i
+      cli_args = 'Outputs/file_base=second-order-matrix-testing Variables/vel_x/order=SECOND Variables/vel_y/order=SECOND Variables/pressure/order=FIRST Variables/vel_bar_x/order=SECOND Variables/vel_bar_y/order=SECOND Variables/pressure_bar/order=SECOND'
+      csvdiff = second-order-matrix-testing.csv
+      installation_type = 'in_tree' # uses JIT
+      max_parallel = 1 # No MatLUFactor support for mpidense
+      method = "!dbg"
+      valgrind = 'none'
+      detail = 'second order polynomial bases (other than first order volumetric pressure).'
+    []
   []
 []
