@@ -85,7 +85,7 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
-LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
+LibtorchArtificialNeuralNet::forward(torch::Tensor & x, bool classify)
 {
   torch::Tensor output(x);
   if (_data_type != output.scalar_type())
@@ -110,6 +110,7 @@ LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
   }
 
   output = _weights[_weights.size() - 1]->forward(output);
+  output = classify ? torch::sigmoid(output) : output;
 
   return output;
 }

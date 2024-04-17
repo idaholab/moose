@@ -162,7 +162,7 @@ LibtorchNeuralNetControl::execute()
     torch::Tensor input_tensor = prepareInputTensor();
 
     // Evaluate the neural network to get the control values then convert it back to vectors
-    torch::Tensor action = _nn->forward(input_tensor);
+    torch::Tensor action = _nn->forward(input_tensor, false);
 
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
