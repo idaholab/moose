@@ -61,4 +61,14 @@
       detail = 'second order polynomial bases (other than first order volumetric pressure).'
     []
   []
+  [lid_driven_fsp]
+    type = Exodiff
+    input = lid-driven-fsp.i
+    exodiff = lid-driven-fsp_out.e
+    requirement = 'The system shall be able to solve a lid-driven cavity problem with a Reynolds number of 1000 using a field split preconditioner adding grad-div and jump penalty stabilization such that the pressure mass matrix can effectively precondition the Schur complement.'
+    absent_out = 'iterations 4'
+    expect_out = 'iterations 2'
+    abs_zero = 1e-8
+    cli_args = "n=16 Outputs/active='out'"
+  []
 []
