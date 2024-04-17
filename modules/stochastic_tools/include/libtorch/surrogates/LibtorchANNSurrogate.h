@@ -34,6 +34,9 @@ protected:
 
   /// Standardizer for use with output response (y)
   const StochasticTools::Standardizer & _output_standardizer;
+
+  /// Classification or regression mode
+  const bool & _classify;
 };
 
 #endif

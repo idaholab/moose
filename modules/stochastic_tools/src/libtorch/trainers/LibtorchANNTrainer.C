@@ -59,6 +59,8 @@ LibtorchANNTrainer::validParams()
   params.addParam<bool>(
       "standardize_output", true, "Standardize (center and scale) training outputs (y values)");
 
+  params.addParam<bool>("classify", false, "Train NN for classification or regression");
+
   params.suppressParameter<MooseEnum>("response_type");
   return params;
 }
@@ -90,6 +92,7 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   _optim_options.print_loss = getParam<unsigned int>("print_epoch_loss") > 0;
   _optim_options.print_epoch_loss = getParam<unsigned int>("print_epoch_loss");
   _optim_options.parallel_processes = getParam<unsigned int>("max_processes");
+  _optim_options.classify = getParam<bool>("classify");
 }
 
 void
