@@ -48,6 +48,8 @@ PrintMatricesNSProblem::PrintMatricesNSProblem(const InputParameters & parameter
     _velocity_mass_matrix(getParam<TagName>("velocity_mass_matrix")),
     _jump_matrices(getParam<std::vector<TagName>>("jump_matrices"))
 {
+  if (_communicator.size() > 1)
+    mooseError("This problem can only be used in serial");
 }
 
 void
