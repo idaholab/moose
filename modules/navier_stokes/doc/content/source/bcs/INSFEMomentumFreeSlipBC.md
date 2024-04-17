@@ -1,20 +1,11 @@
 # INSFEMomentumFreeSlipBC
 
-!alert construction title=Undocumented Class
-The INSFEMomentumFreeSlipBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/INSFEMomentumFreeSlipBC
 
-## Overview
+A free slip boundary condition imposes both no-normal flow and no normal shear stress at the wall.
 
-!! Replace these lines with information regarding the INSFEMomentumFreeSlipBC object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the INSFEMomentumFreeSlipBC object.
+This boundary condition is based entirely on the [MomentumFreeSlipBC.md], but replacing the momentum variables
+with velocity variables, which is appropriate for incompressible flow.
 
 !syntax parameters /BCs/INSFEMomentumFreeSlipBC
 

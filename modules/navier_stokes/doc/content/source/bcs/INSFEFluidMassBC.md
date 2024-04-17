@@ -1,20 +1,21 @@
 # INSFEFluidMassBC
 
-!alert construction title=Undocumented Class
-The INSFEFluidMassBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/INSFEFluidMassBC
+
+This boundary condition can be used for porous media flow using the [!param](/BCs/INSFEFluidEnergyBC/porosity) parameter
+to define the porosity.
+This boundary condition can describe both an inlet and an outlet.
 
 ## Overview
 
-!! Replace these lines with information regarding the INSFEFluidMassBC object.
+If either the [!param](/BCs/INSFEFluidMassBC/v_fn) or [!param](/BCs/INSFEFluidMassBC/v_pps) parameters are specified, they are used to compute the boundary fluid velocity. If not, the domain velocity variables are used.
+The mass flux is computed as
 
-## Example Input File Syntax
+!equation
+\rho v_{bc}
 
-!! Describe and include an example of how to use the INSFEFluidMassBC object.
+where $\rho$ is the local fluid density and $v_{bc}$ is the boundary fluid velocity. The mass flux times the test
+function is the contribution of this boundary condition to the residual.
 
 !syntax parameters /BCs/INSFEFluidMassBC
 

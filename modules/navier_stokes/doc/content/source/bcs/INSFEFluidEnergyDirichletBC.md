@@ -1,20 +1,20 @@
 # INSFEFluidEnergyDirichletBC
 
-!alert construction title=Undocumented Class
-The INSFEFluidEnergyDirichletBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/INSFEFluidEnergyDirichletBC
 
 ## Overview
 
-!! Replace these lines with information regarding the INSFEFluidEnergyDirichletBC object.
+If the [!param](/BCs/INSFEFluidEnergyBC/v_fn) parameter is specified, it is used to compute the boundary fluid
+velocity. If not, the domain velocity variables are used. The velocity is used to determine whether the boundary is
+an inlet.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the INSFEFluidEnergyDirichletBC object.
+This boundary condition provides a `conditional' Dirichlet temperature boundary condition for the energy equation, given that no integration by parts is applied to the energy advection term.
+Without applying integration by parts to the advection term, the energy equation needs a Dirichlet temperature boundary condition for an inlet condition.
+This object additionally introduces a natural boundary condition at outlets.
+This conditional Dirichlet boundary condition relies on its `shouldApply()' function to determine if it should be applied.
+The fluid temperature is computed using the
+[!param](/BCs/INSFEFluidEnergyDirichletBC/T_fn) parameter function, or the [!param](/BCs/INSFEFluidEnergyDirichletBC/T_scalar)
+parameter scalar variable, depending on which is specified. The use of scalar variables is intended for coupling with thermal hydraulics components (in SAM).
 
 !syntax parameters /BCs/INSFEFluidEnergyDirichletBC
 
