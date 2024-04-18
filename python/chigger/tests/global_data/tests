@@ -1,0 +1,36 @@
+[Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
+  [global_data]
+    type = RunApp
+    command = global_data.py
+    expect_out = "13.960"
+    display_required = true
+    requirement = "The system shall be able to load global data."
+  []
+
+  [current_global_data]
+    type = RunApp
+    command = current_global_data.py
+    expect_out = "0.0,\s14.\d+,\s14."
+    display_required = true
+    requirement = "The system shall be able to load global data at various time steps."
+  []
+
+  [plot_global_data]
+    type = ImageDiff
+    command = plot_global_data.py
+    imagediff = 'plot_global_data.png'
+    display_required = true
+    requirement = "The system shall be able to draw line plots from global data."
+  []
+
+  [plot_current_global_data]
+    type = ImageDiff
+    command = plot_current_global_data.py
+    imagediff = 'plot_current_global_data_0.png plot_current_global_data_4.png plot_current_global_data_9.png'
+    allowed_linux = 0.95
+    display_required = true
+    requirement = "The system shall be able to draw line plots from global data at various time steps."
+  []
+[]

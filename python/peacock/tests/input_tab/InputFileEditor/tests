@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [InputFileEditor]
     type = PythonUnitTest
     input = test_InputFileEditor.py
     display_required = true
+    requirement = "The system shall include a graphical interface that lets users create new input files, including adding new blocks and suggesting missing required blocks."
   []
 []

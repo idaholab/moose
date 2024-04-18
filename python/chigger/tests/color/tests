@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = color.py
     imagediff = color.png
     display_required = true
+    requirement = 'The system shall be able to specify an RGB color to display the mesh with.'
   []
 []

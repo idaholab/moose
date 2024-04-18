@@ -1,14 +1,18 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [solid]
     type = ImageDiff
     command = background.py
     imagediff = background.png
     display_required = true
+    requirement = "The system shall be able to display a solid background."
   []
   [gradient]
     type = ImageDiff
     command = gradient.py
     imagediff = gradient.png
     display_required = true
+    requirement = "The system shall be able to display a color gradient background."
   []
 []

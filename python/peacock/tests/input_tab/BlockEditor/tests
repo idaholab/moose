@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [BlockEditor]
     type = PythonUnitTest
     input = test_BlockEditor.py
     display_required = true
+    requirement = "The system shall include a graphical interface that lets the user modify input files, for example, by adding or cloning blocks, specifying their parameters, handling the types of the parameters, and handling regex 'star' syntax."
   []
 []

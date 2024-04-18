@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [JobRunner]
     type = PythonUnitTest
     input = test_JobRunner.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can execute all time steps or a single time step for simulations, can gather basic information about the time steps and can retrieve error codes from failed runs."
   []
 []

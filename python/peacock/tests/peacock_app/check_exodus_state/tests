@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [test]
     type = PythonUnitTest
     input = test_exodus_state.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface which maintains its Exodus file viewing settings when a simulation is executed several times."
   []
 []

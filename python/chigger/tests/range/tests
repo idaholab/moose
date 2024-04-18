@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [none]
     type = ImageDiff
     command = none.py
     imagediff = 'none_0.png none_1.png'
     allowed_linux = 0.97
     display_required = true
+    requirement = "The system shall be able to plot colormaps without specifying the data ranges."
   []
 
   [min]
@@ -14,6 +17,7 @@
     allowed_linux = 0.97
     allowed_darwin = 0.97
     display_required = true
+    requirement = "The system shall be able to plot colormaps and allow specification of the minimum value in the colormap."
   []
 
   [max]
@@ -21,6 +25,7 @@
     command = max.py
     imagediff = 'max_0.png max_1.png'
     display_required = true
+    requirement = "The system shall be able to plot colormaps and allow specification of the maximum value in the colormap."
   []
 
   [minmax]
@@ -28,6 +33,7 @@
     command = minmax.py
     imagediff = 'minmax_0.png minmax_1.png'
     display_required = true
+    requirement = "The system shall be able to plot colormaps and allow specification of the minimum and the maximum value in the colormap."
   []
 
   [range]
@@ -35,6 +41,7 @@
     command = range.py
     imagediff = 'range_0.png range_1.png'
     display_required = true
+    requirement = "The system shall be able to plot colormaps and allow specification of the minimum and the maximum value in the colormap for multiple time steps."
   []
 
   [auto]
@@ -42,5 +49,6 @@
     command = auto.py
     imagediff = 'auto_1.png auto_3.png auto_5.png'
     display_required = true
+    requirement = "The system shall be able to plot colormaps and using an automatic range in the colormap that adapts for each time step."
   []
 []

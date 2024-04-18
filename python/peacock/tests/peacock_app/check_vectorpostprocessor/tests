@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [CheckVectorPostprocessor]
     type = PythonUnitTest
     input = test_check_vectorpostprocessor.py
     display_required = true
+    requirement = "The system shall include a graphical interface which can read and plot simulation vector postprocessor output data."
   []
 []

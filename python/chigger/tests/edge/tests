@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = edge.py
@@ -6,5 +8,6 @@
     allowed_linux = 0.94
     allowed_darwin = 0.96
     display_required = true
+    requirement = "The system shall be able to plot the mesh cell edges."
   []
 []

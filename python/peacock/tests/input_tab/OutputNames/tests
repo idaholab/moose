@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [Outputnames]
     type = PythonUnitTest
     input = test_OutputNames.py
     display_required = true
+    requirement = "The system shall include a graphical interface that lets users specify new file names for the application output and follows default name conventions when a new name is not specified."
   []
 []

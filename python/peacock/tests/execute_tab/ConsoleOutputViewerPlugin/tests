@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [ConsoleOutputViewerPlugin]
     type = PythonUnitTest
     input = test_ConsoleOutputViewerPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface that displays scrollable and auto-scrollable console output."
   []
 []

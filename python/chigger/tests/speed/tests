@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
+  [test]
+    type = RunApp
+    command = speed.py
+    expect_out = 'sec'
+    display_required = true
+    requirement = "The system shall be able to print timed section durations while plotting."
+  []
+[]

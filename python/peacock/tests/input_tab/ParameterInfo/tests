@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [ParameterInfo]
     type = PythonUnitTest
     input = test_ParameterInfo.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can read and store parameter information, such as, for example, the parameter name, description, values, C++ and Python value types."
   []
 []

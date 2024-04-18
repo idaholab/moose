@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [writers]
     type = PythonUnitTest
     input = writers.py
     buffer = True
     display_required = true
+    requirement = 'The system shall be able to write a plot with various formats, and error if an unsupported format is requested.'
   []
 []

@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [ExecuteTabPlugin]
     type = PythonUnitTest
     input = test_ExecuteTabPlugin.py
     display_required = true
+    requirement = "The system shall include a graphical interface that has a plugin execution tab that lets users specify execution parameters, through the command line, programmatically and on the interface, and set these run option preferences for individual plugins."
   []
 []

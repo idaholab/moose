@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [CheckMesh]
     type = PythonUnitTest
     input = test_check_mesh.py
     display_required = true
+    requirement = "The system shall include a graphical interface which can consistently output a visualized mesh with a given window size."
   []
 []

@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [newfiles]
     type = ImageDiff
     command = new_files.py
     imagediff = 'new_files_0.png new_files_1.png new_files_2.png new_files_3.png'
     display_required = true
+    requirement = "The system shall be able to read new simulation files then write new plot files."
   []
 
   [newfiles_adapt]
@@ -11,6 +14,7 @@
     command = new_files_adapt.py
     imagediff = 'new_files_adapt_0.png new_files_adapt_4.png new_files_adapt_8.png'
     display_required = true
+    requirement = "The system shall be able to read new simulation files then write new plot files when adaptivity is used and modifies the mesh every time step."
   []
 
   [old_files]
@@ -19,5 +23,6 @@
     expect_out = "[0.0, 0.5, 1.0, 2.0, 3.5, 4.5]"
     match_literal = True
     display_required = true
+    requirement = "The mesh shall be able to ignore older simulation files when plotting results with adaptivity."
   []
 []

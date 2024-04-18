@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [auto]
     type = ImageDiff
     command = multiapp.py
     imagediff = 'multiapp.png'
     display_required = true
+    requirement = 'The system shall be able to plot multiple MultiApp results in the same plot.'
   []
 []
