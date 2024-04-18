@@ -19,7 +19,7 @@ ComputeHarmonicElasticityTensor::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Compute a stiffness tensor in a two phase model");
   params.addParam<MaterialPropertyName>(
-      "h", "h", "Switching Function Material that provides h(eta)");
+      "h", "h", "Switching function material that provides h(eta)");
   params.addRequiredParam<std::string>("base_A", "Base name for the Phase A");
   params.addRequiredParam<std::string>("base_B", "Base name for the Phase B");
   params.addParam<std::string>("base_name", "Base name (optional).");
