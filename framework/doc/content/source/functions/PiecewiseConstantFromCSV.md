@@ -16,8 +16,7 @@ It can assume CSV data
 - defines an interpolation grid, with the voronoi [!param](/Functions/PiecewiseConstantFromCSV/read_type), in which case the function will locate the closest point in that interpolation grid, then return the value for that point in the CSV file
 
 
-For the latter case, the first columns of the CSV data must define the coordinates of each point forming the interpolation grid. The number of columns used to define these coordinates
-must match the dimension of the mesh.
+For the latter case, the first three columns of the CSV data must define the coordinates of each point forming the interpolation grid. The [!param](/Functions/PiecewiseConstantFromCSV/column_number) parameter should still match the actual column number in the CSV file, so it likely should be larger than 3 (the number of columns for voronoi centers coordinates).
 
 !alert note
 When use data by block or by element, if there is multiple possibilities for the element to choose from, for example at a node,
