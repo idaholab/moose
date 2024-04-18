@@ -65,7 +65,7 @@ cp = 1
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVHeatAdvection]
+    [WCNSFVFluidHeatTransfer]
       [heat]
         thermal_conductivity = ${k}
         specific_heat = ${cp}
@@ -79,7 +79,7 @@ cp = 1
         energy_advection_interpolation = 'average'
       []
     []
-    [WCNSFVScalarAdvection]
+    [WCNSFVScalarTransport]
       [heat]
         passive_scalar_names = 'scalar'
 

@@ -50,7 +50,7 @@ h_fs = 0.01
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVHeatAdvection]
+    [WCNSFVFluidHeatTransfer]
       [heat]
         thermal_conductivity = 'k'
         specific_heat = 'cp'

@@ -42,7 +42,7 @@ cp = 1
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVHeatAdvection]
+    [WCNSFVFluidHeatTransfer]
       [heat]
         add_energy_equation = true
         thermal_conductivity = 'k'

@@ -60,7 +60,7 @@ h_cv = 1.0
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVHeatAdvection]
+    [WCNSFVFluidHeatTransfer]
       [heat]
         thermal_conductivity = ${k}
         specific_heat = ${cp}

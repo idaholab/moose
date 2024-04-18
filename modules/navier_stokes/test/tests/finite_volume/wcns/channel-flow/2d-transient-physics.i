@@ -54,7 +54,7 @@ inlet_v = 0.001
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVHeatAdvection]
+    [WCNSFVFluidHeatTransfer]
       [energy]
         coupled_flow_physics = flow
 
@@ -75,7 +75,7 @@ inlet_v = 0.001
     [WCNSFVTurbulence]
       [turbulence]
         coupled_flow_physics = flow
-        heat_advection_physics = energy
+        fluid_heat_transfer_physics = energy
       []
     []
   []

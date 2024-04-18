@@ -109,9 +109,9 @@
     method = "!dbg"
     cli_args = "Physics/NavierStokes/WCNSFVFlow/flow/initial_velocity='1 1 0' "
                "Physics/NavierStokes/WCNSFVFlow/flow/initial_pressure=0 "
-               "Physics/NavierStokes/WCNSFVHeatAdvection/heat/initial_temperature=0"
+               "Physics/NavierStokes/WCNSFVFluidHeatTransfer/heat/initial_temperature=0"
     requirement = 'The system shall be able to create and transport scalar field variables in a fluid flow field using the Navier Stokes weakly-compressible Physics syntax.'
-    design = 'WCNSFVFlowPhysics.md WCNSFVScalarAdvectionPhysics.md'
+    design = 'WCNSFVFlowPhysics.md WCNSFVScalarTransportPhysics.md'
     issues = '#19472 #25642'
     valgrind = HEAVY
   []

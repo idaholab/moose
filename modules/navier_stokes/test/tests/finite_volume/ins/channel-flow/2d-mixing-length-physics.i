@@ -49,7 +49,7 @@ advected_interp_method = 'upwind'
         mass_advection_interpolation = ${advected_interp_method}
       []
     []
-    [WCNSFVScalarAdvection]
+    [WCNSFVScalarTransport]
       [scalars]
         add_scalar_equation = true
         passive_scalar_names = 'scalar'
@@ -63,7 +63,7 @@ advected_interp_method = 'upwind'
       [mixing-length]
         turbulence_handling = 'mixing-length'
         coupled_flow_physics = flow
-        scalar_advection_physics = scalars
+        scalar_transport_physics = scalars
 
         passive_scalar_schmidt_number = 1.0
 
