@@ -470,6 +470,46 @@ public:
   const ConstElemRange & getNonlinearEvaluableElementRange();
   ///@}
 
+  ///@{
+  /**
+   * These are the element and nodes that contribute to the jacobian and
+   * residual for this local processor.
+   *
+   * getCurrentAlgebraicElementRange() returns the element range that contributes to the
+   * system
+   * getCurrentAlgebraicNodeRange() returns the node range that contributes to the
+   * system
+   * getCurrentAlgebraicBndNodeRange returns the boundary node ranges that contributes
+   * to the system
+   */
+  const ConstElemRange & getCurrentAlgebraicElementRange();
+  const ConstNodeRange & getCurrentAlgebraicNodeRange();
+  const ConstBndNodeRange & getCurrentAlgebraicBndNodeRange();
+  ///@}
+
+  ///@{
+  /**
+   * These functions allow setting custom ranges for the algebraic elements, nodes,
+   * and boundary nodes that contribute to the jacobian and residual for this local
+   * processor.
+   *
+   * setCurrentAlgebraicElementRange() sets the element range that contributes to the
+   * system. A nullptr will reset the range to use the mesh's range.
+   *
+   * setCurrentAlgebraicNodeRange() sets the node range that contributes to the
+   * system. A nullptr will reset the range to use the mesh's range.
+   *
+   * setCurrentAlgebraicBndNodeRange() sets the boundary node range that contributes
+   * to the system. A nullptr will reset the range to use the mesh's range.
+   *
+   * @param range A pointer to the const range object representing the algebraic
+   *              elements, nodes, or boundary nodes.
+   */
+  void setCurrentAlgebraicElementRange(ConstElemRange * range);
+  void setCurrentAlgebraicNodeRange(ConstNodeRange * range);
+  void setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range);
+  ///@}
+
   /**
    * Set an exception, which is stored at this point by toggling a member variable in
    * this class, and which must be followed up with by a call to
@@ -2638,6 +2678,10 @@ protected:
   std::unique_ptr<ConstElemRange> _evaluable_local_elem_range;
   std::unique_ptr<ConstElemRange> _nl_evaluable_local_elem_range;
   std::unique_ptr<ConstElemRange> _aux_evaluable_local_elem_range;
+
+  std::unique_ptr<ConstElemRange> _current_algebraic_elem_range;
+  std::unique_ptr<ConstNodeRange> _current_algebraic_node_range;
+  std::unique_ptr<ConstBndNodeRange> _current_algebraic_bnd_node_range;
 
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property

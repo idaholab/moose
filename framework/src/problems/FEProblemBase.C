@@ -8717,3 +8717,62 @@ FEProblemBase::computeSystems(const ExecFlagType & type)
 
   _aux->compute(type);
 }
+
+const ConstElemRange &
+FEProblemBase::getCurrentAlgebraicElementRange()
+{
+  if (!_current_algebraic_elem_range)
+    return *_mesh.getActiveLocalElementRange();
+
+  return *_current_algebraic_elem_range;
+}
+const ConstNodeRange &
+FEProblemBase::getCurrentAlgebraicNodeRange()
+{
+  if (!_current_algebraic_node_range)
+    return *_mesh.getLocalNodeRange();
+
+  return *_current_algebraic_node_range;
+}
+const ConstBndNodeRange &
+FEProblemBase::getCurrentAlgebraicBndNodeRange()
+{
+  if (!_current_algebraic_bnd_node_range)
+    return *_mesh.getBoundaryNodeRange();
+
+  return *_current_algebraic_bnd_node_range;
+}
+
+void
+FEProblemBase::setCurrentAlgebraicElementRange(ConstElemRange * range)
+{
+  if (!range)
+  {
+    _current_algebraic_elem_range = nullptr;
+    return;
+  }
+
+  _current_algebraic_elem_range = std::make_unique<ConstElemRange>(*range);
+}
+void
+FEProblemBase::setCurrentAlgebraicNodeRange(ConstNodeRange * range)
+{
+  if (!range)
+  {
+    _current_algebraic_node_range = nullptr;
+    return;
+  }
+
+  _current_algebraic_node_range = std::make_unique<ConstNodeRange>(*range);
+}
+void
+FEProblemBase::setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range)
+{
+  if (!range)
+  {
+    _current_algebraic_bnd_node_range = nullptr;
+    return;
+  }
+
+  _current_algebraic_bnd_node_range = std::make_unique<ConstBndNodeRange>(*range);
+}
