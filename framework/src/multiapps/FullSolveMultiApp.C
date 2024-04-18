@@ -26,9 +26,10 @@ FullSolveMultiApp::validParams()
   params.addParam<bool>(
       "no_backup_and_restore",
       false,
-      "True to turn off backup/restore for this multiapp. This is useful when doing steady-state "
+      "True to turn off restore for this multiapp. This is useful when doing steady-state "
       "Picard iterations where we want to use the solution of previous Picard iteration as the "
-      "initial guess of the current Picard iteration");
+      "initial guess of the current Picard iteration.");
+  params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
   params.addParam<bool>(
       "keep_full_output_history",
       false,
@@ -40,26 +41,22 @@ FullSolveMultiApp::validParams()
 }
 
 FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
-  : MultiApp(parameters), _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
+  : MultiApp(parameters),
+    _no_restore(getParam<bool>("no_restore")),
+    _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
 {
+  // You could end up with some dirty hidden behavior if you do this. We could remove this check,
+  // but I don't think that it's sane to do so.
+  if (_no_restore && (_app.isRecovering() || _app.isRestarting()))
+    paramError("no_restore",
+               "The parent app is restarting or recovering, restoration cannot be disabled");
 }
 
 void
-FullSolveMultiApp::backup()
+FullSolveMultiApp::restore(bool force)
 {
-  if (getParam<bool>("no_backup_and_restore"))
-    return;
-  else
-    MultiApp::backup();
-}
-
-void
-FullSolveMultiApp::restore(bool /*force*/)
-{
-  if (getParam<bool>("no_backup_and_restore"))
-    return;
-  else
-    MultiApp::restore();
+  if (!_no_restore)
+    MultiApp::restore(force);
 }
 
 void
