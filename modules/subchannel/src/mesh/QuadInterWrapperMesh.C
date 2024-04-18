@@ -60,7 +60,7 @@ QuadInterWrapperMesh::QuadInterWrapperMesh(const QuadInterWrapperMesh & other_me
 std::unique_ptr<MooseMesh>
 QuadInterWrapperMesh::safeClone() const
 {
-  return std::make_unique<QuadInterWrapperMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
 
 void
