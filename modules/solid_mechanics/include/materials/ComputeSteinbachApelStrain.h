@@ -47,6 +47,7 @@ protected:
   MaterialProperty<RankFourTensor> & _ref;
   MaterialProperty<RankFourTensor> & _ref_inv;
 
+  /// Identity matrix
   MaterialProperty<RankFourTensor> & _identity;
 
   float _identity_two[6][6];
