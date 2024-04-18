@@ -27,7 +27,7 @@ protected:
   /// Switching function
   const MaterialProperty<Real> & _h_eta;
 
-  std::vector<const MaterialProperty<Real> *> _dh;
+  std::vector<const MaterialProperty<Real> *> _dh_eta;
 
   std::string _base_A;
   std::string _base_B;
