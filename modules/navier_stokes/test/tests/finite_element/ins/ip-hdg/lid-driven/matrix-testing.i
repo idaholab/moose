@@ -20,10 +20,10 @@ l = 1
 
 [Problem]
   type = PrintMatricesNSProblem
-  extra_tag_matrices = 'mass jump grad_div'
+  extra_tag_matrices = 'mass jump combined grad_div'
   pressure_mass_matrix = 'mass'
   velocity_mass_matrix = 'mass'
-  jump_matrices = 'jump grad_div'
+  jump_matrices = 'jump grad_div combined'
   u = vel_x
   v = vel_y
   pressure = pressure
@@ -126,7 +126,7 @@ l = 1
     v = vel_y
     component = 0
     vector_tags = ''
-    matrix_tags = 'grad_div'
+    matrix_tags = 'grad_div combined'
   []
   [v_jump]
     type = GradDiv
@@ -136,7 +136,7 @@ l = 1
     v = vel_y
     component = 1
     vector_tags = ''
-    matrix_tags = 'grad_div'
+    matrix_tags = 'grad_div combined'
   []
 []
 
@@ -221,7 +221,7 @@ l = 1
     v = vel_y
     component = 0
     vector_tags = ''
-    matrix_tags = 'jump'
+    matrix_tags = 'jump combined'
   []
   [v_jump]
     type = MassFluxPenalty
@@ -231,7 +231,7 @@ l = 1
     v = vel_y
     component = 1
     vector_tags = ''
-    matrix_tags = 'jump'
+    matrix_tags = 'jump combined'
   []
 []
 
@@ -342,7 +342,7 @@ l = 1
     v = vel_y
     component = 0
     vector_tags = ''
-    matrix_tags = 'jump'
+    matrix_tags = 'jump combined'
     boundary = 'left right bottom top'
   []
   [v_jump]
@@ -353,7 +353,7 @@ l = 1
     v = vel_y
     component = 1
     vector_tags = ''
-    matrix_tags = 'jump'
+    matrix_tags = 'jump combined'
     boundary = 'left right bottom top'
   []
 []
@@ -432,6 +432,11 @@ l = 1
     mat1 = 'vel_p_grad_div.mat'
     mat2 = 'grad_div.mat'
   []
+  [fe_combined_and_upall_equiv]
+    type = AreMatricesTheSame
+    mat1 = 'vel_all_p_grad_div.mat'
+    mat2 = 'combined.mat'
+  []
   [upb_grad_div_num_zero_eig]
     type = NumZeroEigenvalues
     mat = vel_pb_grad_div.mat
@@ -447,5 +452,13 @@ l = 1
   [up_div_grad_num_zero_eig]
     type = NumZeroEigenvalues
     mat = vel_p_div_grad.mat
+  []
+  [upall_grad_div_num_zero_eig]
+    type = NumZeroEigenvalues
+    mat = vel_all_p_grad_div.mat
+  []
+  [upall_div_grad_num_zero_eig]
+    type = NumZeroEigenvalues
+    mat = vel_all_p_div_grad.mat
   []
 []
