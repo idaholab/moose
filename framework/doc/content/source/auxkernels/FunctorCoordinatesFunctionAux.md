@@ -12,9 +12,11 @@ Auxiliary variables cannot store derivatives with regards to the nonlinear varia
 would be incomplete.
 
 !alert warning
-If using auxiliary variables as arguments to the `FunctorCoordinatesFunctionAux`, you must check that the ordering of execution
-is as expected, in that the auxiliary kernels that set those auxiliary variables are executed BEFORE the `FunctorCoordinatesFunctionAux`.
-This can be done with the [!param](/Debug/show_execution_order) parameter in the `[Debug]` block.
+If using [auxiliary variables](AuxVariables/index.md) as arguments to the `FunctorCoordinatesFunctionAux`, you must make sure the [AuxKernels](AuxKernels/index.md)
+computing these auxiliary variables are executed on an `execute_on` schedule happening before the [!param](/AuxKernels/FunctorCoordinatesFunctionAux/execute_on)
+schedule of the `FunctorCoordinatesFunctionAux`. This is because the auxiliary variables are read from the system solution vector, which is only
+updated after the execution of all auxiliary kernels on a given `execute_on` schedule. You can check that the ordering of execution of auxiliary
+kernels is happening on a previous `execute_on` schedule using the [!param](/Debug/show_execution_order) parameter in the `[Debug]` block.
 
 ## Example syntax
 
