@@ -5,8 +5,8 @@
 ## Description
 
 `ADRobinBC` imposes a Robin boundary condition on a boundary. `ADRobinBC` is
-an integrated boundary condition that allows for the combination of
-Dirichlet and Neumann boundary conditions.
+an integrated boundary condition similar to a [NeumannBC.md], but the derivative is
+set to a function of the variable instead of a constant.
 
 Note that `ADRobinBC` computes its Jacobian using automatic differentiation.
 
