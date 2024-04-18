@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#22384'
+  design = 'ArrheniusMaterialProperty.md'
+  [exact]
+    type = 'CSVDiff'
+    input = 'exact.i'
+    csvdiff = 'exact_out.csv'
+    requirement = 'The system shall compute a generic material property based on an Arrhenius model that matches an analytic solution of that equation while using the automatic differentiation system.'
+  []
+  [exact-jac]
+    type = 'PetscJacobianTester'
+    input = 'exact.i'
+    run_sim = 'True'
+    cli_args = "Outputs/active=''"
+    prereq = exact
+    petsc_version = '>=3.9'
+    ratio_tol = 3e-7
+    difference_tol = 1
+    requirement = 'The system shall provide perfect derivatives when using ADArrheniusMaterialProperty.'
+  []
+[]

@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = cylinder_source.py
     imagediff = 'cylinder_source.png'
     display_required = true
+    requirement = 'The system shall be able to represent cylindrical shapes, with various orientations and with edges plotted or not.'
   []
 []

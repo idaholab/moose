@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [BlockInfo]
     type = PythonUnitTest
     input = test_BlockInfo.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can gather and process parameters for input file blocks - notably their type, name, input path and value."
   []
 []

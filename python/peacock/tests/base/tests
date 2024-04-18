@@ -1,12 +1,16 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [PluginManager]
     type = RunApp
     command = test_PluginManager.py
     display_required = true
+    requirement = 'The system shall have a graphical user interface which supports Qt plugins.'
   []
   [collapsible]
     type = RunApp
     command = test_PeacockCollapsibleWidget.py
     display_required = true
+    requirement = 'The system shall have a graphical user interface which supports collapsible widgets.'
   []
 []

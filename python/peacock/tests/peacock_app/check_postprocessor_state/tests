@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [test]
     type = PythonUnitTest
     input = test_postprocessor_state.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface which can maintain vector postprocessor plotting settings when the simulation is run several times."
   []
 []

@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [default]
     type = ImageDiff
     command = line_sample_default.py
     imagediff = 'line_sample_default.png'
     allowed = 0.94
     display_required = true
+    requirement = 'The system shall be able to sample field data in simulation results and plot it in an XY plot with default parameters.'
   []
 
   [line_sample]
@@ -14,6 +17,7 @@
     expect_out = '0.049\d*\s0.400' # Test the the sampled values are present
     allowed = 0.92
     display_required = true
+    requirement = 'The system shall be able to sample field data in simulation results and plot it in an XY plot.'
   []
 
   [line_sample_elem]
@@ -22,6 +26,7 @@
     imagediff = 'line_sample_elem.png'
     allowed = 0.96
     display_required = true
+    requirement = 'The system shall be able to sample elemental field data in simulation results and plot it in an XY plot.'
   []
 
   [line_sample_error]
@@ -30,5 +35,6 @@
     expect_out = "Unable to locate the variable, invalid_name, in the supplied source data."
     errors = "zzzzzzz" # Supress default error checking
     display_required = true
+    requirement = 'The system shall report an error if the sampled variable does not exist in the source data.'
   []
 []

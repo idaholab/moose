@@ -1,10 +1,14 @@
 [Tests]
+  issues = '#12095'
+  design = 'python/index.md'
   [Parameter]
     type = PythonUnitTest
     input = test_Parameter.py
+    requirement = "The system shall be able to define parameters and associated metadata in Python that allows for type-checking, restrictions, defaults, verification, and documentation."
   []
   [InputParameters]
     type = PythonUnitTest
     input = test_InputParameters.py
+    requirement = "The system shall have a warehouse and capability to manage groups of parameters in Python objects, including parameter errors and the ability to retrieve and set parameters, to set defaults, and to validate parameters."
   []
 []

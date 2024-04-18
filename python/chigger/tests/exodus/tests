@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [reader]
     type = PythonUnitTest
     input = test_ExodusReader.py
     display_required = true
+    requirement = "The system shall be able to plot results from an Exodus file."
   []
 []

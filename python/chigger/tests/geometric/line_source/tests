@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [line]
     type = ImageDiff
     command = line_source.py
     imagediff = 'line_source.png'
     allowed_darwin = 0.96
     display_required = true
+    requirement = "The system shall be able to plot lines with various orientations."
   []
   [line_data]
     type = ImageDiff
@@ -12,11 +15,13 @@
     imagediff = 'line_source_data.png'
     allowed_darwin = 0.974
     display_required = true
+    requirement = "The system shall be able to plot lines with data represented with colors along the line."
   []
   [line_data_tube]
     type = ImageDiff
     command = line_source_data_tube.py
     imagediff = 'line_source_data_tube.png'
     display_required = true
+    requirement = "The system shall be able to plot lines as a thick tube with data represented with colors along the line."
   []
 []

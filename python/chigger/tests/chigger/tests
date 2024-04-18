@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [command_line]
     type = PythonUnitTest
     input = test_chigger.py
     display_required = true
+    requirement = "The system shall be able to execute the chigger command, display ExodusII file information and convert images to movies."
   []
 []

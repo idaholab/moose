@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [JsonData]
     type = PythonUnitTest
     input = test_JsonData.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can read syntax information from an application executable in a JSON format."
   []
 []

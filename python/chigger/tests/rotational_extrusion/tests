@@ -1,11 +1,13 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [exodus]
     type = ImageDiff
     command = rotational_extrusion.py
     imagediff = rotational_extrusion.png
     design = 'chigger/index.md'
     issues = '#12128'
-    requirement = "Chigger shall include the ability to rotate and extrude a 2D ExodusII result."
+    requirement = "The system shall include the ability to rotate and extrude a 2D ExodusII result."
     display_required = true
   []
 []

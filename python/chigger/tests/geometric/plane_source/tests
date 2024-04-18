@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [test]
     type = ImageDiff
     command = plane_source.py
     imagediff = 'plane_source.png'
     display_required = true
+    requirement = "The system shall be able to plot point gridded data over a plane."
   []
 []

@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [viewports]
     type = ImageDiff
     command = viewports.py
     imagediff = 'viewports.png'
     display_required = true
+    requirement = 'The system shall be able allow the user to specify the coordinates of a view port in the results.'
   []
 []

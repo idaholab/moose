@@ -1,37 +1,46 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [ExeLauncher]
     type = PythonUnitTest
     input = test_ExeLauncher.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can launch executables."
   []
   [RecentlyUsedMenu]
     type = PythonUnitTest
     input = test_RecentlyUsedMenu.py
     display_required = true
+    requirement = "The system shall include a graphical interface that keeps track of recently used values to improve user experience."
   []
   [ExeFinder]
     type = PythonUnitTest
     input = test_ExeFinder.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can find executables."
   []
   [FileCache]
     type = PythonUnitTest
     input = test_FileCache.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can cache files."
   []
   [TerminalUtils]
     type = PythonUnitTest
     input = test_TerminalUtils.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can output terminal output to HTML, notably preserving text color."
   []
   [Widgetutils]
     type = PythonUnitTest
     input = test_WidgetUtils.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can create widgets with buttons, labels and a progress bar."
   []
   [loadstore]
     type = PythonUnitTest
     input = test_StoreLoadWidgetState.py
     display_required = true
+    requirement = "The system shall include a graphical interface that can load and store the states of widgets."
   []
 []

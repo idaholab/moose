@@ -1,15 +1,19 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [VTKWindowPlugin]
     type = PythonUnitTest
     input = test_VTKWindowPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface that can display both mesh and solution Exodus files and lets the user modify plotting settings, load files, including series of files created with mesh adaptivity and remove files."
   []
   [FilePlugin]
     type = PythonUnitTest
     input = test_FilePlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for loading multiple input files."
   []
   [GoldDiffPlugin]
     type = PythonUnitTest
@@ -17,77 +21,90 @@
     separate = True
     display_required = true
     platform = LINUX
+    requirement = "The system shall include a graphical interface with a widget for comparing ('diff'ing) solution files."
   []
   [ColorbarPlugin]
     type = PythonUnitTest
     input = test_ColorbarPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for displaying a colorbar."
   []
   [BackgroundPlugin]
     type = PythonUnitTest
     input = test_BackgroundPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for displaying a background behind the mesh."
   []
   [ClipPlugin]
     type = PythonUnitTest
     input = test_ClipPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for clipping (cutting with a shape) the mesh or simulation results."
   []
   [ContourPlugin]
     type = PythonUnitTest
     input = test_ContourPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for performing contour plots of simulation results."
   []
   [BlockPlugin]
     type = PythonUnitTest
     input = test_BlockPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for displaying a block within a mesh or simulation results."
   []
   [MeshPlugin]
     type = PythonUnitTest
     input = test_MeshPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for displaying the mesh."
   []
   [MediaControlPlugin]
     type = PythonUnitTest
     input = test_MediaControlPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for controlling the time step displayed when showing the simulation results."
   []
   [CameraPlugin]
     type = PythonUnitTest
     input = test_CameraPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for controlling the view angle / camera when showing the simulation results."
   []
   [OutputPlugin]
     type = PythonUnitTest
     input = test_OutputPlugin.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for writing simulation results to image files."
   []
   [ExodusPluginManager]
     type = PythonUnitTest
     input = test_ExodusPluginManager.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface that can display exodus files and use python programming to set postprocessing options."
   []
   [ExodusViewer]
     type = PythonUnitTest
     input = test_ExodusViewer.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for viewing exodus files."
   []
   [ExodusViewer2]
     type = PythonUnitTest
     input = test_ExodusViewer2.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface with a widget for viewing exodus files, and set the range of the colorbars."
   []
 []

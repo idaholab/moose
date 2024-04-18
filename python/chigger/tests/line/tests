@@ -1,14 +1,13 @@
 [Tests]
   design = python/chigger/index.md
   issues = '#7451'
-
   [default]
     type = ImageDiff
     command = line.py
     imagediff = 'line.png'
     allowed_linux = 0.97
     allowed_darwin = 0.94
-    requirement = 'Chigger shall provide a line plot widget'
+    requirement = 'The system shall provide a line plot widget'
     display_required = true
   []
 
@@ -18,7 +17,7 @@
     imagediff = 'single_point.png'
     allowed_linux = 0.97
     allowed_darwin = 0.94
-    requirement = 'Chigger shall provide a scatter plot widget'
+    requirement = 'The system shall provide a scatter plot widget'
     display_required = true
   []
 
@@ -27,7 +26,7 @@
     command = empty.py
     imagediff = 'empty.png'
     allowed_linux = 0.935
-    requirement = 'An empty graph shall be a valid chigger widget'
+    requirement = 'The system shall allow an empty graph to be a valid widget'
     display_required = true
   []
 
@@ -36,7 +35,7 @@
     command = color.py
     imagediff = 'color.png'
     allowed_linux = 0.94
-    requirement = 'Chigger shall provide the capability to assign colors to curves in a graph'
+    requirement = 'The system shall provide the capability to assign colors to curves in a graph'
     display_required = true
   []
 
@@ -46,7 +45,7 @@
     imagediff = 'legend.png'
     allowed_linux = 0.94
     allowed_darwin = 0.96
-    requirement = 'Chigger shall provide an optional legend widget for curves in a graph'
+    requirement = 'The system shall provide an optional legend widget for curves in a graph'
     display_required = true
   []
 
@@ -56,7 +55,7 @@
     imagediff = 'legend_viewport.png'
     allowed_linux = 0.94
     allowed_darwin = 0.96
-    requirement = 'Chigger shall scale the legend position relative to the graph viewport'
+    requirement = 'The system shall scale the legend position relative to the graph viewport'
     display_required = true
   []
 
@@ -65,7 +64,7 @@
     command = update.py
     imagediff = 'update_0.png update_1.png update_2.png update_3.png update_4.png update_5.png'
     allowed_linux = 0.93
-    requirement = 'Chigger shall provide a capability for incremental curves updates in a graph'
+    requirement = 'The system shall provide a capability for incremental curves updates in a graph'
     display_required = true
   []
 
@@ -75,7 +74,7 @@
     imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
     allowed_linux = 0.97
     allowed_darwin = 0.95
-    requirement = 'Chigger shall provide a capability for multiple curves and secondary axis in a graph'
+    requirement = 'The system shall provide a capability for multiple curves and secondary axis in a graph'
     display_required = true
   []
 
@@ -85,7 +84,7 @@
     imagediff = 'tracer_1.png tracer_3.png tracer_5.png'
     allowed_darwin = 0.97
     allowed_linux = 0.96
-    requirement = 'Chigger shall provide a tracer line indicator capability'
+    requirement = 'The system shall provide a tracer line indicator capability'
     display_required = true
   []
 []

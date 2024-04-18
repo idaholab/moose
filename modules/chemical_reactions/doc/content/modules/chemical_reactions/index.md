@@ -183,7 +183,7 @@ provided to define $\nabla u$ on a boundary.
 The total volume fraction of a given mineral species can be calculated using a
 [`TotalMineralVolumeFraction`](/TotalMineralVolumeFraction.md) postprocessor.
 
-## Reaction network parser
+## Reaction network parser id=parser
 
 The chemical reactions module includes a reaction network parser in the `Actions` system that enables
 chemical reactions to be specified in a natural form in the input file. The parser then adds all

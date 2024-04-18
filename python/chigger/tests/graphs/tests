@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [dual]
     type = ImageDiff
     command = dual.py
@@ -6,6 +8,7 @@
     allowed_darwin = 0.94
     allowed_linux = 0.96
     display_required = true
+    requirement = 'The system shall be able to plot two series XY data in a graph with different Y axis.'
   []
   [dualx]
     type = ImageDiff
@@ -14,5 +17,6 @@
     allowed_linux = 0.96
     allowed_darwin = 0.94
     display_required = true
+    requirement = 'The system shall be able to plot two series XY data in a graph with different X axis.'
   []
 []

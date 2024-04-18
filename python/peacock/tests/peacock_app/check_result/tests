@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7451'
+  design = 'python/peacock.md'
   [CheckResult]
     type = PythonUnitTest
     input = test_check_result.py
     separate = True
     display_required = true
+    requirement = "The system shall include a graphical interface which can plot 2D simulation results, and output them to image files."
   []
 []
