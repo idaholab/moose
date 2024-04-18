@@ -1,2 +1,2 @@
-time,fe_grad_div_and_up_equiv,fe_jump_and_upb_equiv,symmetric,up_div_grad_num_zero_eig,up_grad_div_num_zero_eig,upb_div_grad_num_zero_eig,upb_grad_div_num_zero_eig
-1,1,1,1,0,450,0,345
+time,fe_combined_and_upall_equiv,fe_grad_div_and_up_equiv,fe_jump_and_upb_equiv,symmetric,up_div_grad_num_zero_eig,up_grad_div_num_zero_eig,upall_div_grad_num_zero_eig,upall_grad_div_num_zero_eig,upb_div_grad_num_zero_eig,upb_grad_div_num_zero_eig
+1,1,1,1,1,0,450,1,196,0,345
