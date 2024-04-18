@@ -87,10 +87,10 @@ bool HttpRequest::parse(std::shared_ptr<IClientStream> stream) {
         path = path.substr(0, question);
     }
 
-    if (query.empty())
-        std::cout << methodString << " " << path << std::endl;
-    else
-        std::cout << methodString << " " << path << " (Query: " << query << ")" << std::endl;
+    // if (query.empty())
+    //     std::cout << methodString << " " << path << std::endl;
+    // else
+    //     std::cout << methodString << " " << path << " (Query: " << query << ")" << std::endl;
 
     while (true) {
         std::string line = stream->receiveLine();
