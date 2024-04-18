@@ -24,6 +24,7 @@ protected:
 
   const std::string _base_name;
 
+  /// Switching function
   const MaterialProperty<Real> & _h_eta;
 
   std::vector<const MaterialProperty<Real> *> _dh;
