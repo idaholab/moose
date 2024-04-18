@@ -154,7 +154,7 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::train(LibtorchDataset & dataset
       optimizer->zero_grad();
 
       // Compute prediction
-      torch::Tensor prediction = _nn.forward(batch.data, options.classify);
+      torch::Tensor prediction = _nn.forward(batch.data);
 
       // Compute loss values using a MSE (regression) or binary cross entropy (classification)
       torch::Tensor loss = options.classify ? torch::binary_cross_entropy(prediction, batch.target)

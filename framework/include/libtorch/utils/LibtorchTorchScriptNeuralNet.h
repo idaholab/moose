@@ -39,7 +39,7 @@ public:
    * @param x Input tensor for the evaluation
    * @param classify Flag for classification mode, defaults to regression mode if false
    */
-  virtual torch::Tensor forward(torch::Tensor & x, bool classify) override;
+  virtual torch::Tensor forward(torch::Tensor & x) override;
 
 protected:
   /// Name of the torchscript containing the neural network

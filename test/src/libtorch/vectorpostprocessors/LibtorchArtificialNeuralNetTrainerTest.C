@@ -104,7 +104,7 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
 
   std::vector<Real> test(getParam<std::vector<Real>>("monitor_point"));
   torch::Tensor test_tensor = torch::from_blob(test.data(), {1, 3}, options).to(at::kDouble);
-  auto prediction = nn->forward(test_tensor, false);
+  auto prediction = nn->forward(test_tensor);
 
   _nn_values_1.push_back(prediction[0][0].item<double>());
   _nn_values_2.push_back(prediction[0][1].item<double>());

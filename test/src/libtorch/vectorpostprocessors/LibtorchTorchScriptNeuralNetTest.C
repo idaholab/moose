@@ -42,14 +42,14 @@ LibtorchTorchScriptNeuralNetTest::LibtorchTorchScriptNeuralNetTest(const InputPa
   _y_values.push_back(0.0);
   _z_values.push_back(0.0);
 
-  torch::Tensor prediction = nn->forward(input, false);
+  torch::Tensor prediction = nn->forward(input);
   _nn_values.push_back(prediction.item<double>());
 
   // Now we evaluate the neural net at two other positions and add the values to the VPPs
   for (unsigned int i = 1; i < 3; ++i)
   {
     torch::Tensor input = torch::add(at::zeros({1, 3}, at::kDouble), i * 0.5);
-    torch::Tensor prediction = nn->forward(input, false);
+    torch::Tensor prediction = nn->forward(input);
 
     _x_values.push_back(i * 0.5);
     _y_values.push_back(i * 0.5);

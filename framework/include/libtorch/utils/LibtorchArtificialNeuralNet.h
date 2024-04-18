@@ -37,7 +37,8 @@ public:
                               const unsigned int num_inputs,
                               const unsigned int num_outputs,
                               const std::vector<unsigned int> & num_neurons_per_layer,
-                              const std::vector<std::string> & activation_function = {"relu"});
+                              const std::vector<std::string> & activation_function = {"relu"},
+                              const bool & classify = false);
 
   /**
    * Copy construct an artificial neural network
@@ -60,7 +61,7 @@ public:
    * @param x Input tensor for the evaluation
    * @param classify Flag for classification mode, defaults to regression mode if false
    */
-  virtual torch::Tensor forward(torch::Tensor & x, bool classify) override;
+  virtual torch::Tensor forward(torch::Tensor & x) override;
 
   /// Return the name of the neural network
   const std::string & name() const { return _name; }
@@ -74,6 +75,8 @@ public:
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
   /// Return the multi enum containing the activation functions
   const MultiMooseEnum & activationFunctions() const { return _activation_function; }
+  /// Return whether classification mode or regression mode (i.e., true or false)
+  const bool & classify() const { return _classify; }
 
   /// Construct the neural network
   void constructNeuralNetwork();
@@ -96,6 +99,8 @@ protected:
   /// Activation functions (either one for all hidden layers or one for every layer
   /// separately)
   MultiMooseEnum _activation_function;
+  /// Classification mode when true, defaults to regression
+  bool _classify;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);

@@ -20,12 +20,14 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const unsigned int num_inputs,
     const unsigned int num_outputs,
     const std::vector<unsigned int> & num_neurons_per_layer,
-    const std::vector<std::string> & activation_function)
+    const std::vector<std::string> & activation_function,
+    const bool & classify)
   : _name(name),
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
     _num_neurons_per_layer(num_neurons_per_layer),
-    _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear", "relu"))
+    _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear", "relu")),
+    _classify(classify)
 {
   _activation_function = activation_function;
 
@@ -44,7 +46,8 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_inputs(nn.numInputs()),
     _num_outputs(nn.numOutputs()),
     _num_neurons_per_layer(nn.numNeuronsPerLayer()),
-    _activation_function(nn.activationFunctions())
+    _activation_function(nn.activationFunctions()),
+    _classify(nn.classify())
 {
 
   // We construct the NN architecture
@@ -79,7 +82,7 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
-LibtorchArtificialNeuralNet::forward(torch::Tensor & x, bool classify)
+LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
 {
   torch::Tensor output(x);
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
@@ -99,7 +102,7 @@ LibtorchArtificialNeuralNet::forward(torch::Tensor & x, bool classify)
   }
 
   output = _weights[_weights.size() - 1]->forward(output);
-  output = classify ? torch::sigmoid(output) : output;
+  output = _classify ? torch::sigmoid(output) : output;
 
   return output;
 }
@@ -175,6 +178,9 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
 
   dataStore(stream, items, context);
 
+  bool cl(nn->classify());
+  dataStore(stream, cl, context);
+
   torch::save(nn, nn->name());
 }
 
@@ -206,8 +212,11 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   activation_functions.resize(num_activation_items);
   dataLoad(stream, activation_functions, context);
 
+  bool param_classify;
+  dataLoad(stream, param_classify, context);
+
   nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
+      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, param_classify);
 
   torch::load(nn, name);
 }

@@ -51,7 +51,6 @@
   [surr]
     type = LibtorchANNSurrogate
     trainer = train
-    classify = true
   []
 []
 

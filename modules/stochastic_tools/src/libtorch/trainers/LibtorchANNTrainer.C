@@ -125,8 +125,12 @@ LibtorchANNTrainer::postTrain()
   unsigned int num_inputs = _n_dims;
 
   // We create a neural net (for the definition of the net see the header file)
-  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      _nn_filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
+  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(_nn_filename,
+                                                             num_inputs,
+                                                             1,
+                                                             _num_neurons_per_layer,
+                                                             _activation_function,
+                                                             _optim_options.classify);
 
   if (_read_from_file)
     try

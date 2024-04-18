@@ -37,7 +37,7 @@ LibtorchTorchScriptNeuralNet::loadNeuralNetwork(const std::string & filename)
 }
 
 torch::Tensor
-LibtorchTorchScriptNeuralNet::forward(torch::Tensor & x, bool /*classify*/)
+LibtorchTorchScriptNeuralNet::forward(torch::Tensor & x)
 {
   std::vector<torch::jit::IValue> inputs(1, x);
   return torch::jit::script::Module::forward(inputs).toTensor();

@@ -52,7 +52,7 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   // This is our test output (we know the result)
   torch::Tensor output = at::ones({1}, at::kDouble);
   // This is our prediction for the test input
-  torch::Tensor prediction = nn->forward(input, false);
+  torch::Tensor prediction = nn->forward(input);
   // We save our first prediction
   _nn_values.push_back(prediction.item<double>());
   // We compute the loss
@@ -62,7 +62,7 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   // We update the weights using the computed gradients
   optimizer.step();
   // Obtain another prediction
-  prediction = nn->forward(input, false);
+  prediction = nn->forward(input);
   // We save our second prediction
   _nn_values.push_back(prediction.item<double>());
 }
