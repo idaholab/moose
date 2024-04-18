@@ -20,8 +20,6 @@ public:
   static InputParameters validParams();
 
   ComputeInverseRotatedElasticityTensorBaseTempl(const InputParameters & parameters);
-
-protected:
 };
 
 typedef ComputeInverseRotatedElasticityTensorBaseTempl<false>
