@@ -68,6 +68,7 @@
   fixed_point_max_its = 10
   fixed_point_rel_tol = 1e-8
   nl_abs_tol = 1e-14
+  verbose = true
 
   [TimeStepper]
     type = FixedPointIterationAdaptiveDT
