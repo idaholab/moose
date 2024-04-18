@@ -491,6 +491,11 @@ InputParameters
 NSFVBase<BaseType>::commonMomentumEquationParams()
 {
   InputParameters params = emptyInputParameters();
+
+  params.addParam<MooseFunctorName>(
+      "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
+  params.addParam<MooseFunctorName>("density", NS::density, "The name of the density");
+
   params.addParam<bool>(
       "pin_pressure", false, "Switch to enable pressure shifting for incompressible simulations.");
 
@@ -856,11 +861,6 @@ NSFVBase<BaseType>::validParams()
       "initial_pressure", "1e5", "The initial pressure, assumed constant everywhere");
 
   params += NSFVBase<BaseType>::commonMomentumEquationParams();
-
-  params.addParam<MooseFunctorName>(
-      "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
-
-  params.addParam<MooseFunctorName>("density", NS::density, "The name of the density");
 
   /**
    * Parameters describing the momentum equations boundary conditions

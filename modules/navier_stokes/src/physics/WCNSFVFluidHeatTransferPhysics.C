@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WCNSFVHeatAdvectionPhysics.h"
+#include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
 #include "NSFVAction.h"
 
-registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVHeatAdvectionPhysics);
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_variable");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_ic");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_kernel");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_bc");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_material");
+registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_ic");
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_fv_bc");
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_material");
 
 InputParameters
-WCNSFVHeatAdvectionPhysics::validParams()
+WCNSFVFluidHeatTransferPhysics::validParams()
 {
   InputParameters params = NavierStokesPhysicsBase::validParams();
   params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
@@ -60,7 +60,7 @@ WCNSFVHeatAdvectionPhysics::validParams()
   return params;
 }
 
-WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & parameters)
+WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
     WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
     _has_energy_equation(
@@ -111,7 +111,7 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
+WCNSFVFluidHeatTransferPhysics::addNonlinearVariables()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)
@@ -135,11 +135,11 @@ WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
   else
     paramError("fluid_temperature_variable",
                "Variable (" + _fluid_temperature_name +
-                   ") supplied to the NavierStokesFV action does not exist!");
+                   ") supplied to the WCNSFVFluidHeatTransferPhysics does not exist!");
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addFVKernels()
+WCNSFVFluidHeatTransferPhysics::addFVKernels()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)
@@ -162,7 +162,7 @@ WCNSFVHeatAdvectionPhysics::addFVKernels()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyTimeKernels()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
 {
   std::string kernel_type = "INSFVEnergyTimeDerivative";
   std::string kernel_name = prefix() + "ins_energy_time";
@@ -197,7 +197,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyTimeKernels()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addWCNSEnergyTimeKernels()
+WCNSFVFluidHeatTransferPhysics::addWCNSEnergyTimeKernels()
 {
   std::string en_kernel_type = "WCNSFVEnergyTimeDerivative";
   std::string kernel_name = prefix() + "wcns_energy_time";
@@ -227,7 +227,7 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyTimeKernels()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
 {
   std::string kernel_type = "INSFVEnergyAdvection";
   std::string kernel_name = prefix() + "ins_energy_advection";
@@ -249,7 +249,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyHeatConductionKernels()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
 {
   bool vector_conductivity = processThermalConductivity();
   unsigned int num_blocks = _thermal_conductivity_blocks.size();
@@ -298,7 +298,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyHeatConductionKernels()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyAmbientConvection()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
 {
   unsigned int num_convection_blocks = _ambient_convection_blocks.size();
   unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
@@ -331,7 +331,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAmbientConvection()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyExternalHeatSource()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
 {
   const std::string kernel_type = "FVCoupledForce";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -344,7 +344,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyExternalHeatSource()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
+WCNSFVFluidHeatTransferPhysics::addWCNSEnergyMixingLengthKernels()
 {
   const std::string u_names[3] = {"u", "v", "w"};
   const std::string kernel_type = "WCNSFVMixingLengthEnergyDiffusion";
@@ -366,7 +366,7 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addFVBCs()
+WCNSFVFluidHeatTransferPhysics::addFVBCs()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)
@@ -377,7 +377,7 @@ WCNSFVHeatAdvectionPhysics::addFVBCs()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyInletBC()
 {
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
   // These are parameter errors for now. If Components add boundaries to Physics, the error
@@ -455,7 +455,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addINSEnergyWallBC()
+WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 {
   const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())
@@ -497,7 +497,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyWallBC()
 }
 
 bool
-WCNSFVHeatAdvectionPhysics::processThermalConductivity()
+WCNSFVFluidHeatTransferPhysics::processThermalConductivity()
 {
   checkBlockwiseConsistency<MooseFunctorName>("thermal_conductivity_blocks",
                                               {"thermal_conductivity"});
@@ -521,12 +521,10 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
                                                                /*thread_id=*/0))
           have_vector = true;
         else
-        {
           paramError("thermal_conductivity",
                      "We only allow functor of type ADReal or ADRealVectorValue for thermal "
                      "conductivity! Functor '" +
                          _thermal_conductivity_name[i] + "' is not of the requested type.");
-        }
       }
     }
   }
@@ -542,14 +540,16 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addInitialConditions()
+WCNSFVFluidHeatTransferPhysics::addInitialConditions()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)
     return;
   if (!_define_variables && parameters().isParamSetByUser("initial_temperature"))
-    paramError("initial_temperature",
-               "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
+    paramError(
+        "initial_temperature",
+        "T_fluid is defined externally of WCNSFVFluidHeatTransferPhysics, so should the inital "
+        "condition");
 
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
@@ -564,7 +564,7 @@ WCNSFVHeatAdvectionPhysics::addInitialConditions()
 }
 
 void
-WCNSFVHeatAdvectionPhysics::addMaterials()
+WCNSFVFluidHeatTransferPhysics::addMaterials()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)
@@ -582,7 +582,7 @@ WCNSFVHeatAdvectionPhysics::addMaterials()
 }
 
 unsigned short
-WCNSFVHeatAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+WCNSFVFluidHeatTransferPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers =

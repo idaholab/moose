@@ -9,8 +9,8 @@
 
 #include "WCNSFVTurbulencePhysics.h"
 #include "WCNSFVFlowPhysics.h"
-#include "WCNSFVHeatAdvectionPhysics.h"
-#include "WCNSFVScalarAdvectionPhysics.h"
+#include "WCNSFVFluidHeatTransferPhysics.h"
+#include "WCNSFVScalarTransportPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "NSFVAction.h"
 
@@ -43,14 +43,17 @@ WCNSFVTurbulencePhysics::validParams()
 
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
+  // It is a little risky right now because the user could forget to pass the parameter and
+  // be missing the influence of turbulence on either of these physics. There is a check in the
+  // constructor to present this from happening
   params.addParam<PhysicsName>(
-      "heat_advection_physics",
+      "fluid_heat_transfer_physics",
       "NavierStokesFV",
-      "WCNSFVHeatAdvectionPhysics generating the heat advection equations");
+      "WCNSFVFluidHeatTransferPhysics generating the heat advection equations");
   params.addParam<PhysicsName>(
-      "scalar_advection_physics",
+      "scalar_transport_physics",
       "NavierStokesFV",
-      "WCNSFVScalarAdvectionPhysics generating the scalar advection equations");
+      "WCNSFVScalarTransportPhysics generating the scalar advection equations");
 
   return params;
 }
@@ -71,10 +74,16 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
   else
     _has_flow_equations = false;
 
-  if (isParamValid("heat_advection_physics"))
+  if (isParamValid("fluid_heat_transfer_physics") && _turbulence_model != "none")
   {
-    _fluid_energy_physics = getCoupledPhysics<WCNSFVHeatAdvectionPhysics>(
-        getParam<PhysicsName>("heat_advection_physics"), true);
+    _fluid_energy_physics = getCoupledPhysics<WCNSFVFluidHeatTransferPhysics>(
+        getParam<PhysicsName>("fluid_heat_transfer_physics"), true);
+    // Check for a missing parameter / do not support isolated physics for now
+    if (!_fluid_energy_physics &&
+        !getCoupledPhysics<const WCNSFVFluidHeatTransferPhysics>(true).empty())
+      paramError("fluid_heat_transfer_physics",
+                 "We currently do not support creating both turbulence physics and fluid heat "
+                 "transfer physics that are not coupled together");
     if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation())
       _has_energy_equation = true;
     else
@@ -86,11 +95,17 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
     _fluid_energy_physics = nullptr;
   }
 
-  if (isParamValid("scalar_advection_physics"))
+  if (isParamValid("scalar_transport_physics") && _turbulence_model != "none")
   {
-    _scalar_advection_physics = getCoupledPhysics<WCNSFVScalarAdvectionPhysics>(
-        getParam<PhysicsName>("scalar_advection_physics"), true);
-    if (_scalar_advection_physics && _scalar_advection_physics->hasScalarEquations())
+    _scalar_transport_physics = getCoupledPhysics<WCNSFVScalarTransportPhysics>(
+        getParam<PhysicsName>("scalar_transport_physics"), true);
+    if (!_scalar_transport_physics &&
+        !getCoupledPhysics<const WCNSFVScalarTransportPhysics>(true).empty())
+      paramError(
+          "scalar_transport_physics",
+          "We currently do not support creating both turbulence physics and scalar transport "
+          "physics that are not coupled together");
+    if (_scalar_transport_physics && _scalar_transport_physics->hasScalarEquations())
       _has_scalar_equations = true;
     else
       _has_scalar_equations = false;
@@ -98,7 +113,23 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
   else
   {
     _has_scalar_equations = false;
-    _scalar_advection_physics = nullptr;
+    _scalar_transport_physics = nullptr;
+  }
+
+  // To help remediate the danger of the parameter setup
+  if (_verbose)
+  {
+    if (_has_energy_equation)
+      mooseInfoRepeated("Coupling turbulence physics with fluid heat transfer physics " +
+                        _fluid_energy_physics->name());
+    else
+      mooseInfoRepeated("No fluid heat transfer equation considered by this turbulence "
+                        "physics.");
+    if (_has_scalar_equations)
+      mooseInfoRepeated("Coupling turbulence physics with scalar transport physics " +
+                        _scalar_transport_physics->name());
+    else
+      mooseInfoRepeated("No scalar transport equations considered by this turbulence physics.");
   }
 
   // Parameter checks
@@ -217,7 +248,7 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     for (const auto dim_i : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
-    const auto & passive_scalar_names = _scalar_advection_physics->getAdvectedScalarNames();
+    const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
     const auto & passive_scalar_schmidt_number =
         getParam<std::vector<Real>>("passive_scalar_schmidt_number");
     if (passive_scalar_schmidt_number.size() != passive_scalar_names.size())

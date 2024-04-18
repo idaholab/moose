@@ -15,13 +15,13 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar advection equations
  */
-class WCNSFVScalarAdvectionPhysics final : public NavierStokesPhysicsBase,
+class WCNSFVScalarTransportPhysics final : public NavierStokesPhysicsBase,
                                            public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVScalarAdvectionPhysics(const InputParameters & parameters);
+  WCNSFVScalarTransportPhysics(const InputParameters & parameters);
 
   /// Get the names of the advected scalar quantity variables
   const std::vector<NonlinearVariableName> & getAdvectedScalarNames() const
@@ -41,12 +41,12 @@ private:
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
-  // /**
-  //  * Functions adding kernels for the incompressible / weakly compressible scalar advection
-  //  * equation
-  //  * If the material properties are not constant, some of these can be used for
-  //  * weakly-compressible simulations as well.
-  //  */
+  /**
+   * Functions adding kernels for the incompressible / weakly compressible scalar advection
+   * equation
+   * If the material properties are not constant, some of these can be used for
+   * weakly-compressible simulations as well.
+   */
   void addScalarTimeKernels();
   void addScalarDiffusionKernels();
   void addScalarAdvectionKernels();

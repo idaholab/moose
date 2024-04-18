@@ -430,7 +430,7 @@ InputParametersChecksUtils<C>::checkBlockwiseConsistency(
   {
     // We only check block-restrictions if the customer class is not restricted to `ANY_BLOCK_ID`.
     // If the users define blocks that are not on the mesh, they will receive errors from the
-    // objects created created by the customer class
+    // objects created by the customer class
     const auto & object_blocks = forwardBlocks();
     if (std::find(object_blocks.begin(), object_blocks.end(), "ANY_BLOCK_ID") ==
         object_blocks.end())

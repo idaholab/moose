@@ -51,7 +51,7 @@ public:
   /// Get the inlet flux postprocessor if using a flux inlet
   const std::vector<PostprocessorName> & getFluxInletPPs() const { return _flux_inlet_pps; }
   /// Return the name of the Rhie Chow user object
-  std::string rhieChowUOName() const;
+  UserObjectName rhieChowUOName() const;
   /// Return the number of algebraic ghosting layers needed
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 

@@ -26,13 +26,13 @@ For the default names of other variables used in this action, visit [this site](
 
 ## Coupling with other Physics
 
-The heat advection equation can be solved concurrently with the flow equations using an additional [WCNSFVHeatAdvectionPhysics.md].
+The energy advection equation can be solved concurrently with the flow equations using an additional [WCNSFVFluidHeatTransferPhysics.md].
 The following input performs this coupling for incompressible flow in a 2D flow channel.
 No system parameters are passed, so the equations are solved in a fully coupled manner in the same [nonlinear system](systems/NonlinearSystem.md).
 
 !listing test/tests/finite_volume/ins/channel-flow/2d-rc-transient-physics.i block=Physics
 
-Other advected scalar equations can be solved concurrently with the flow equations using an additional [WCNSFVScalarAdvectionPhysics.md].
+Other advected scalar equations can be solved concurrently with the flow equations using an additional [WCNSFVScalarTransportPhysics.md].
 The following input performs this coupling for incompressible flow in a 2D flow channel.
 No system parameters are passed, so the equations are solved in a fully coupled manner in the same [nonlinear system](systems/NonlinearSystem.md).
 
@@ -42,10 +42,10 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 
 !alert! note
 
-This action only supports Rhie-Chow interpolation for the determination
+This physics only supports Rhie-Chow interpolation for the determination
 of face velocities in the advection terms. The face interpolation of the
 advected quantities (e.g. upwind, average) can be controlled through the
-`*_advection_interpolation` action parameters.
+`*_advection_interpolation` physics parameters.
 
 !alert-end!
 

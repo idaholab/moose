@@ -12,8 +12,8 @@
 #include "NavierStokesPhysicsBase.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
-class WCNSFVHeatAdvectionPhysics;
-class WCNSFVScalarAdvectionPhysics;
+class WCNSFVFluidHeatTransferPhysics;
+class WCNSFVScalarTransportPhysics;
 
 /**
  * Creates all the objects needed to add a turbulence model to an incompressible /
@@ -55,9 +55,9 @@ private:
   bool _has_scalar_equations;
 
   /// The heat advection physics to add turbulent mixing for
-  const WCNSFVHeatAdvectionPhysics * _fluid_energy_physics;
+  const WCNSFVFluidHeatTransferPhysics * _fluid_energy_physics;
   /// The scalar advection physics to add turbulent mixing for
-  const WCNSFVScalarAdvectionPhysics * _scalar_advection_physics;
+  const WCNSFVScalarTransportPhysics * _scalar_transport_physics;
 
 private:
   /// Name of the mixing length auxiliary variable

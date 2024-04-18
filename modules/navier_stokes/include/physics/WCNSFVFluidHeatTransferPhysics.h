@@ -16,13 +16,13 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation
  */
-class WCNSFVHeatAdvectionPhysics final : public NavierStokesPhysicsBase,
-                                         public WCNSFVCoupledAdvectionPhysicsHelper
+class WCNSFVFluidHeatTransferPhysics final : public NavierStokesPhysicsBase,
+                                             public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVHeatAdvectionPhysics(const InputParameters & parameters);
+  WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
   /// Get the name of the specific heat material property
   const MooseFunctorName getSpecificHeatName() const { return _specific_heat_name; }

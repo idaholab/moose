@@ -42,10 +42,6 @@ WCNSFVFlowPhysics::validParams()
 
   params += NSFVAction::commonNavierStokesFlowParams();
 
-  // Material properties
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "dynamic_viscosity");
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "density");
-
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
   params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
@@ -253,7 +249,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
     saveNonlinearVariableName(_velocity_names[d]);
   saveNonlinearVariableName(_pressure_name);
 
-  // Check number of variables variables
+  // Check number of variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
     paramError("velocity_variable",
                "The number of velocity variable names supplied to the NSFVAction is not " +
@@ -265,10 +261,8 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   for (const auto d : make_range(dimension()))
   {
     if (nonlinearVariableExists(_velocity_names[d], true))
-    {
       checkBlockRestrictionIdentical(_velocity_names[d],
                                      getProblem().getVariable(0, _velocity_names[d]).blocks());
-    }
     else if (_define_variables)
     {
       std::string variable_type = "INSFVVelocityVariable";
@@ -289,15 +283,13 @@ WCNSFVFlowPhysics::addNonlinearVariables()
     else
       paramError("velocity_variable",
                  "Variable (" + _velocity_names[d] +
-                     ") supplied to the NavierStokesFV action does not exist!");
+                     ") supplied to the WCNSFVFlowPhysics does not exist!");
   }
 
   // Pressure
   if (nonlinearVariableExists(_pressure_name, true))
-  {
     checkBlockRestrictionIdentical(_pressure_name,
                                    getProblem().getVariable(0, _pressure_name).blocks());
-  }
   else if (_define_variables)
   {
     const bool using_pinsfv_pressure_var =
@@ -331,7 +323,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   else
     paramError("pressure_variable",
                "Variable (" + _pressure_name +
-                   ") supplied to the NavierStokesFV action does not exist!");
+                   ") supplied to the WCNSFVFlowPhysics does not exist!");
 
   // Add lagrange multiplier for pinning pressure, if needed
   if (getParam<bool>("pin_pressure"))
@@ -1193,12 +1185,12 @@ WCNSFVFlowPhysics::addInitialConditions()
       getParam<std::vector<FunctionName>>("initial_velocity").size() != 0)
     // TODO: Rework and remove this last statement once the NSFV action is removed
     paramError("initial_velocity",
-               "Velocity is defined externally of NavierStokesFV, so should the inital "
+               "Velocity is defined externally of WCNSFVFlowPhysics, so should the inital "
                "conditions");
   if (!_define_variables && parameters().isParamSetByUser("initial_pressure") &&
       parameters().isParamSetByUser("pressure_variable"))
     paramError("initial_pressure",
-               "Pressure is defined externally of NavierStokesFV, so should the inital "
+               "Pressure is defined externally of WCNSFVFlowPhysics, so should the inital "
                "condition");
 
   // Check dimension
@@ -1206,9 +1198,10 @@ WCNSFVFlowPhysics::addInitialConditions()
       getParam<std::vector<FunctionName>>("initial_velocity").size() != 3 &&
       getParam<std::vector<FunctionName>>("initial_velocity").size() != 0)
     // TODO: Rework and remove this last statement once the NSFV action is removed
-    paramError("initial_velocity",
-               "The number of velocity components in the NSFVAction initial condition is not " +
-                   std::to_string(dimension()) + " or 3!");
+    paramError(
+        "initial_velocity",
+        "The number of velocity components in the WCNSFVFlowPhysics initial condition is not " +
+            std::to_string(dimension()) + " or 3!");
 
   // do not set initial conditions if we load from file
   if (getParam<bool>("initialize_variables_from_mesh_file"))
@@ -1349,7 +1342,7 @@ WCNSFVFlowPhysics::addPostprocessors()
     }
 }
 
-std::string
+UserObjectName
 WCNSFVFlowPhysics::rhieChowUOName() const
 {
   return (_porous_medium_treatment ? +"pins_rhie_chow_interpolator" : "ins_rhie_chow_interpolator");
@@ -1397,9 +1390,7 @@ WCNSFVFlowPhysics::getCoupledTurbulencePhysics() const
     for (const auto physics : all_turbulence_physics)
       if (checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
-      {
         return physics;
-      }
   }
   // Did not find one
   return nullptr;

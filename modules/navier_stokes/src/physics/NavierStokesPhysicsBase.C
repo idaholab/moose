@@ -19,8 +19,6 @@ NavierStokesPhysicsBase::validParams()
   params.addClassDescription(
       "Base class to define the Navier Stokes incompressible and weakly-compressible equation");
 
-  params.addParam<PhysicsName>("coupled_flow_physics",
-                               "WCNSFVFlowPhysics generating the velocities");
   params.addParam<bool>(
       "define_variables",
       true,

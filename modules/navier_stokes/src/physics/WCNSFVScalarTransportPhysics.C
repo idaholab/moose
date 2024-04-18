@@ -7,31 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WCNSFVScalarAdvectionPhysics.h"
+#include "WCNSFVScalarTransportPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
 #include "NSFVAction.h"
 
-registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarAdvectionPhysics);
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_variable");
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_ic");
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_fv_kernel");
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_fv_bc");
+registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
+registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_ic");
+registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_fv_bc");
 
 InputParameters
-WCNSFVScalarAdvectionPhysics::validParams()
+WCNSFVScalarTransportPhysics::validParams()
 {
   InputParameters params = NavierStokesPhysicsBase::validParams();
   params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
   params.addClassDescription(
-      "Define the Navier Stokes weakly-compressible scalar field advection equation(s)");
+      "Define the Navier Stokes weakly-compressible scalar field transport equation(s)");
 
   params += NSFVAction::commonScalarFieldAdvectionParams();
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>(
       "add_scalar_equation",
-      "Whether to add the scalar advection equation. This parameter is not necessary if "
+      "Whether to add the scalar transport equation. This parameter is not necessary if "
       "using the Physics syntax");
 
   // These parameters are not shared because the NSFVPhysics use functors
@@ -62,7 +62,7 @@ WCNSFVScalarAdvectionPhysics::validParams()
   return params;
 }
 
-WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters & parameters)
+WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
     WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
@@ -110,7 +110,7 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addNonlinearVariables()
+WCNSFVScalarTransportPhysics::addNonlinearVariables()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -143,7 +143,7 @@ WCNSFVScalarAdvectionPhysics::addNonlinearVariables()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addFVKernels()
+WCNSFVScalarTransportPhysics::addFVKernels()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -159,7 +159,7 @@ WCNSFVScalarAdvectionPhysics::addFVKernels()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addScalarTimeKernels()
+WCNSFVScalarTransportPhysics::addScalarTimeKernels()
 {
   for (const auto & vname : _passive_scalar_names)
   {
@@ -173,7 +173,7 @@ WCNSFVScalarAdvectionPhysics::addScalarTimeKernels()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addScalarAdvectionKernels()
+WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
   const std::string kernel_type = "INSFVScalarFieldAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -192,7 +192,7 @@ WCNSFVScalarAdvectionPhysics::addScalarAdvectionKernels()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addScalarDiffusionKernels()
+WCNSFVScalarTransportPhysics::addScalarDiffusionKernels()
 {
   const auto passive_scalar_diffusivities =
       getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity");
@@ -211,7 +211,7 @@ WCNSFVScalarAdvectionPhysics::addScalarDiffusionKernels()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addScalarSourceKernels()
+WCNSFVScalarTransportPhysics::addScalarSourceKernels()
 {
   const std::string kernel_type = "FVCoupledForce";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -245,7 +245,7 @@ WCNSFVScalarAdvectionPhysics::addScalarSourceKernels()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addFVBCs()
+WCNSFVScalarTransportPhysics::addFVBCs()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -258,7 +258,7 @@ WCNSFVScalarAdvectionPhysics::addFVBCs()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addScalarInletBC()
+WCNSFVScalarTransportPhysics::addScalarInletBC()
 {
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
 
@@ -345,7 +345,7 @@ WCNSFVScalarAdvectionPhysics::addScalarInletBC()
 }
 
 void
-WCNSFVScalarAdvectionPhysics::addInitialConditions()
+WCNSFVScalarTransportPhysics::addInitialConditions()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -373,7 +373,7 @@ WCNSFVScalarAdvectionPhysics::addInitialConditions()
 }
 
 unsigned short
-WCNSFVScalarAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+WCNSFVScalarTransportPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers =
