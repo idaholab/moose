@@ -44,11 +44,11 @@ protected:
   /// Solve a momentum predictor step with a fixed pressure field
   /// @return A vector for the normalized residual norms of the momentum equations.
   ///         The length of the vector equals the dimensionality of the domain.
-  std::vector<Real> solveMomentumPredictor();
+  std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor();
 
   /// Solve a pressure corrector step.
   /// @return The normalized residual norm of the pressure equation.
-  Real solvePressureCorrector();
+  std::pair<unsigned int, Real> solvePressureCorrector();
 
   /// Solve an equation which contains an advection term that depends
   /// on the solution of the segregated Navier-Stokes equations.
@@ -58,15 +58,15 @@ protected:
   /// @param solver_config The solver configuration object for the linear solve
   /// @param abs_tol The scaled absolute tolerance for the linear solve
   /// @return The normalized residual norm of the equation.
-  Real solveAdvectedSystem(const unsigned int system_num,
-                           NonlinearSystemBase & system,
-                           const Real relaxation_factor,
-                           SolverConfiguration & solver_config,
-                           const Real abs_tol);
+  std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
+                                                    NonlinearSystemBase & system,
+                                                    const Real relaxation_factor,
+                                                    SolverConfiguration & solver_config,
+                                                    const Real abs_tol);
 
   /// Solve the solid energy conservation equation.
   /// @return The normalized residual norm of the solid equation.
-  Real solveSolidEnergySystem();
+  std::pair<unsigned int, Real> solveSolidEnergySystem();
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;

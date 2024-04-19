@@ -114,7 +114,8 @@ LinearSystem::initialSetup()
 
 void
 LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
-                                      const std::set<TagID> & matrix_tags)
+                                      const std::set<TagID> & matrix_tags,
+                                      const bool compute_gradients)
 {
   parallel_object_only();
 
@@ -126,7 +127,7 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 
   try
   {
-    computeLinearSystemInternal(vector_tags, matrix_tags);
+    computeLinearSystemInternal(vector_tags, matrix_tags, compute_gradients);
   }
   catch (MooseException & e)
   {
@@ -181,7 +182,8 @@ LinearSystem::computeGradients()
 
 void
 LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                          const std::set<TagID> & matrix_tags)
+                                          const std::set<TagID> & matrix_tags,
+                                          const bool compute_gradients)
 {
   TIME_SECTION("computeLinearSystemInternal", 3);
 
@@ -202,7 +204,8 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     }
   }
 
-  computeGradients();
+  if (compute_gradients)
+    computeGradients();
 
   // linear contributions from the domain
   PARALLEL_TRY

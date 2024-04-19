@@ -1437,7 +1437,8 @@ public:
    */
   void computeLinearSystemSys(LinearImplicitSystem & sys,
                               SparseMatrix<Number> & system_matrix,
-                              NumericVector<Number> & rhs);
+                              NumericVector<Number> & rhs,
+                              const bool compute_gradients = true);
 
   /**
    * Assemble the current linear system given a set of vector and matrix tags.
@@ -1452,7 +1453,8 @@ public:
                                SparseMatrix<Number> & system_matrix,
                                NumericVector<Number> & rhs,
                                const std::set<TagID> & vector_tags,
-                               const std::set<TagID> & matrix_tags);
+                               const std::set<TagID> & matrix_tags,
+                               const bool compute_gradients = true);
 
   virtual Real computeDamping(const NumericVector<Number> & soln,
                               const NumericVector<Number> & update);

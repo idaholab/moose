@@ -104,12 +104,20 @@ LinearSIMPLE::init()
   _rc_uo->initFaceMassFlux();
 }
 
-std::vector<Real>
+std::vector<std::pair<unsigned int, Real>>
 LinearSIMPLE::solveMomentumPredictor()
 {
   // Temporary storage for the (flux-normalized) residuals form
   // different momentum components
-  std::vector<Real> normalized_residuals;
+  std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
+
+  LinearImplicitSystem & momentum_system_0 =
+      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
+
+  PetscLinearSolver<Real> & momentum_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
+
+  momentum_solver.reuse_preconditioner(true);
 
   // Solve the momentum equations.
   // TO DO: These equations are VERY similar. If we can store the differences (things coming from
@@ -122,8 +130,8 @@ LinearSIMPLE::solveMomentumPredictor()
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
-    PetscLinearSolver<Real> & momentum_solver =
-        libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+    // PetscLinearSolver<Real> & momentum_solver =
+    //     libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -154,11 +162,12 @@ LinearSIMPLE::solveMomentumPredictor()
     momentum_solver.set_solver_configuration(_momentum_linear_control);
 
     // We solve the equation
-    momentum_solver.solve(mmat, mmat, solution, rhs);
+    auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
 
     // Save the normalized residual
-    normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
+    its_normalized_residuals.push_back(
+        std::make_pair(its_resid_pair.first, momentum_solver.get_initial_residual() / norm_factor));
 
     if (_print_fields)
     {
@@ -183,10 +192,10 @@ LinearSIMPLE::solveMomentumPredictor()
     _momentum_systems[system_i]->copySolutionsBackwards();
   }
 
-  return normalized_residuals;
+  return its_normalized_residuals;
 }
 
-Real
+std::pair<unsigned int, Real>
 LinearSIMPLE::solvePressureCorrector()
 {
   _problem.setCurrentLinearSystem(_pressure_sys_number);
@@ -208,7 +217,7 @@ LinearSIMPLE::solvePressureCorrector()
   PetscLinearSolver<Real> & pressure_solver =
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
-  _problem.computeLinearSystemSys(pressure_system, mmat, rhs);
+  _problem.computeLinearSystemSys(pressure_system, mmat, rhs, false);
 
   if (_print_fields)
   {
@@ -229,7 +238,7 @@ LinearSIMPLE::solvePressureCorrector()
   if (_pin_pressure)
     constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
 
-  pressure_solver.solve(mmat, mmat, solution, rhs);
+  auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
 
   if (_print_fields)
@@ -243,7 +252,7 @@ LinearSIMPLE::solvePressureCorrector()
 
   _pressure_system.setSolution(current_local_solution);
 
-  return pressure_solver.get_initial_residual() / norm_factor;
+  return std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
 }
 
 void
@@ -301,7 +310,7 @@ LinearSIMPLE::execute()
 
     // Assign residuals to general residual vector
     unsigned int no_systems = _momentum_systems.size() + 1;
-    std::vector<Real> ns_residuals(no_systems, 1.0);
+    std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
     std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
     ns_abs_tols.push_back(_pressure_absolute_tolerance);
 
@@ -315,8 +324,10 @@ LinearSIMPLE::execute()
       // solver, we assume that every velocity component uses the same preconditioner
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
-      // Solve the momentum predictor step
-      _pressure_system.computeGradients();
+      if (iteration_counter == 1)
+        // Solve the momentum predictor step
+        _pressure_system.computeGradients();
+
       auto momentum_residual = solveMomentumPredictor();
       for (const auto system_i : index_range(momentum_residual))
         ns_residuals[system_i] = momentum_residual[system_i];
@@ -359,9 +370,11 @@ LinearSIMPLE::execute()
                          ? std::string(" Component ") + std::to_string(system_i + 1) +
                                std::string(" ")
                          : std::string(" "))
-                 << COLOR_GREEN << ns_residuals[system_i] << COLOR_DEFAULT << std::endl;
-      _console << " Pressure equation: " << COLOR_GREEN << ns_residuals[momentum_residual.size()]
-               << COLOR_DEFAULT << std::endl;
+                 << COLOR_GREEN << ns_residuals[system_i].second << COLOR_DEFAULT
+                 << " Linear its: " << ns_residuals[system_i].first << std::endl;
+      _console << " Pressure equation: " << COLOR_GREEN
+               << ns_residuals[momentum_residual.size()].second << COLOR_DEFAULT
+               << " Linear its: " << ns_residuals[momentum_residual.size()].first << std::endl;
     }
   }
 

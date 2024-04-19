@@ -64,7 +64,8 @@ public:
    * @param matrix_tags The IDs of the matrix tags whose matrix contribution should be included
    */
   void computeLinearSystemTags(const std::set<TagID> & vector_tags,
-                               const std::set<TagID> & matrix_tags);
+                               const std::set<TagID> & matrix_tags,
+                               const bool compute_gradients = true);
 
   /**
    * Return a reference to the stored linear implicit system
@@ -121,7 +122,8 @@ protected:
    * @param matrix_tags The tags of kernels for which the system matrix is to be computed.
    */
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                   const std::set<TagID> & matrix_tags);
+                                   const std::set<TagID> & matrix_tags,
+                                   const bool compute_gradients = true);
 
   /// Base class reference to the libmesh system
   System & _sys;

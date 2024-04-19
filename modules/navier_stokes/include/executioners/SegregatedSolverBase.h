@@ -149,7 +149,8 @@ protected:
    * @param ns_residuals The current residuals for the systems.
    * @param abs_tolerances The corresponding absolute tolerances.
    */
-  bool converged(const std::vector<Real> & residuals, const std::vector<Real> & abs_tolerances);
+  bool converged(const std::vector<std::pair<unsigned int, Real>> & residuals,
+                 const std::vector<Real> & abs_tolerances);
 
   void checkDependentParameterError(const std::string & main_parameter,
                                     const std::vector<std::string> & dependent_parameters,

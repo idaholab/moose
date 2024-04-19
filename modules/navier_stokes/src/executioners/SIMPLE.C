@@ -121,12 +121,12 @@ SIMPLE::init()
   _rc_uo->initFaceVelocities();
 }
 
-std::vector<Real>
+std::vector<std::pair<unsigned int, Real>>
 SIMPLE::solveMomentumPredictor()
 {
   // Temporary storage for the (flux-normalized) residuals form
   // different momentum components
-  std::vector<Real> normalized_residuals;
+  std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
 
   // We can create this here with the assumption that every momentum component has the same number
   // of dofs
@@ -174,11 +174,12 @@ SIMPLE::solveMomentumPredictor()
     momentum_solver.set_solver_configuration(_momentum_linear_control);
 
     // We solve the equation
-    momentum_solver.solve(mmat, mmat, solution, rhs);
+    auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
 
     // Save the normalized residual
-    normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
+    its_normalized_residuals.push_back(
+        std::make_pair(its_resid_pair.first, momentum_solver.get_initial_residual() / norm_factor));
 
     if (_print_fields)
     {
@@ -201,10 +202,10 @@ SIMPLE::solveMomentumPredictor()
     _momentum_systems[system_i]->copySolutionsBackwards();
   }
 
-  return normalized_residuals;
+  return its_normalized_residuals;
 }
 
-Real
+std::pair<unsigned int, Real>
 SIMPLE::solvePressureCorrector()
 {
   _problem.setCurrentNonlinearSystem(_pressure_sys_number);
@@ -249,7 +250,7 @@ SIMPLE::solvePressureCorrector()
   if (_pin_pressure)
     constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
 
-  pressure_solver.solve(mmat, mmat, solution, rhs);
+  auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
 
   if (_print_fields)
@@ -263,10 +264,10 @@ SIMPLE::solvePressureCorrector()
 
   _pressure_system.setSolution(current_local_solution);
 
-  return pressure_solver.get_initial_residual() / norm_factor;
+  return std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
 }
 
-Real
+std::pair<unsigned int, Real>
 SIMPLE::solveAdvectedSystem(const unsigned int system_num,
                             NonlinearSystemBase & system,
                             const Real relaxation_factor,
@@ -320,7 +321,7 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
   linear_solver.set_solver_configuration(solver_config);
 
   // Solve the system and update current local solution
-  linear_solver.solve(mmat, mmat, solution, rhs);
+  auto its_res_pair = linear_solver.solve(mmat, mmat, solution, rhs);
   ni_system.update();
 
   if (_print_fields)
@@ -334,10 +335,10 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
 
   system.setSolution(current_local_solution);
 
-  return linear_solver.get_initial_residual() / norm_factor;
+  return std::make_pair(its_res_pair.first, linear_solver.get_initial_residual() / norm_factor);
 }
 
-Real
+std::pair<unsigned int, Real>
 SIMPLE::solveSolidEnergySystem()
 {
   _problem.setCurrentNonlinearSystem(_solid_energy_sys_number);
@@ -379,7 +380,7 @@ SIMPLE::solveSolidEnergySystem()
   _solid_energy_linear_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
   se_solver.set_solver_configuration(_solid_energy_linear_control);
 
-  se_solver.solve(mat, mat, solution, rhs);
+  auto its_res_pair = se_solver.solve(mat, mat, solution, rhs);
   se_system.update();
 
   if (_print_fields)
@@ -393,7 +394,7 @@ SIMPLE::solveSolidEnergySystem()
 
   _solid_energy_system->setSolution(current_local_solution);
 
-  return se_solver.get_initial_residual() / norm_factor;
+  return std::make_pair(its_res_pair.first, se_solver.get_initial_residual() / norm_factor);
 }
 
 void
@@ -455,7 +456,7 @@ SIMPLE::execute()
         _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
     if (_has_turbulence_systems)
       no_systems += _turbulence_systems.size();
-    std::vector<Real> ns_residuals(no_systems, 1.0);
+    std::vector<std::pair<unsigned int, Real>> ns_its_residuals(no_systems, std::make_pair(0, 1.0));
     std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
     ns_abs_tols.push_back(_pressure_absolute_tolerance);
     if (_has_energy_system)
@@ -469,7 +470,7 @@ SIMPLE::execute()
         ns_abs_tols.push_back(_turbulence_absolute_tolerance[system_i]);
 
     // Loop until converged or hit the maximum allowed iteration number
-    while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
+    while (iteration_counter < _num_iterations && !converged(ns_its_residuals, ns_abs_tols))
     {
       // Resdiual index
       size_t residual_index = 0;
@@ -502,7 +503,7 @@ SIMPLE::execute()
       // Solve the momentum predictor step
       auto momentum_residual = solveMomentumPredictor();
       for (const auto system_i : index_range(momentum_residual))
-        ns_residuals[system_i] = momentum_residual[system_i];
+        ns_its_residuals[system_i] = momentum_residual[system_i];
 
       // Compute the coupling fields between the momentum and pressure equations
       _rc_uo->computeHbyA(_print_fields);
@@ -512,7 +513,7 @@ SIMPLE::execute()
       Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
       // Solve the pressure corrector
-      ns_residuals[momentum_residual.size()] = solvePressureCorrector();
+      ns_its_residuals[momentum_residual.size()] = solvePressureCorrector();
       // We need this to make sure we evaluate cell gradients for the nonorthogonal correction in
       // the face velocity update
       _pressure_system.residualSetup();
@@ -551,11 +552,11 @@ SIMPLE::execute()
         // tolerances will be overridden within the solver.
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
         residual_index += 1;
-        ns_residuals[residual_index] = solveAdvectedSystem(_energy_sys_number,
-                                                           *_energy_system,
-                                                           _energy_equation_relaxation,
-                                                           _energy_linear_control,
-                                                           _energy_l_abs_tol);
+        ns_its_residuals[residual_index] = solveAdvectedSystem(_energy_sys_number,
+                                                               *_energy_system,
+                                                               _energy_equation_relaxation,
+                                                               _energy_linear_control,
+                                                               _energy_l_abs_tol);
 
         if (_has_solid_energy_system)
         {
@@ -563,7 +564,7 @@ SIMPLE::execute()
           // tolerances will be overridden within the solver.
           Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
           residual_index += 1;
-          ns_residuals[residual_index] = solveSolidEnergySystem();
+          ns_its_residuals[residual_index] = solveSolidEnergySystem();
         }
       }
 
@@ -576,7 +577,7 @@ SIMPLE::execute()
         for (auto system_i : index_range(_turbulence_systems))
         {
           residual_index += 1;
-          ns_residuals[residual_index] =
+          ns_its_residuals[residual_index] =
               solveAdvectedSystem(_turbulence_system_numbers[system_i],
                                   *_turbulence_systems[system_i],
                                   _turbulence_equation_relaxation[system_i],
@@ -612,21 +613,21 @@ SIMPLE::execute()
                          ? std::string(" Component ") + std::to_string(system_i + 1) +
                                std::string(" ")
                          : std::string(" "))
-                 << COLOR_GREEN << ns_residuals[system_i] << COLOR_DEFAULT << std::endl;
-      _console << " Pressure equation: " << COLOR_GREEN << ns_residuals[momentum_residual.size()]
-               << COLOR_DEFAULT << std::endl;
+                 << COLOR_GREEN << ns_its_residuals[system_i].second << COLOR_DEFAULT << std::endl;
+      _console << " Pressure equation: " << COLOR_GREEN
+               << ns_its_residuals[momentum_residual.size()].second << COLOR_DEFAULT << std::endl;
       residual_index = momentum_residual.size();
 
       if (_has_energy_system)
       {
         residual_index += 1;
-        _console << " Energy equation: " << COLOR_GREEN << ns_residuals[residual_index]
+        _console << " Energy equation: " << COLOR_GREEN << ns_its_residuals[residual_index].second
                  << COLOR_DEFAULT << std::endl;
         if (_has_solid_energy_system)
         {
           residual_index += 1;
-          _console << " Solid energy equation: " << COLOR_GREEN << ns_residuals[residual_index]
-                   << COLOR_DEFAULT << std::endl;
+          _console << " Solid energy equation: " << COLOR_GREEN
+                   << ns_its_residuals[residual_index].second << COLOR_DEFAULT << std::endl;
         }
       }
 
@@ -637,7 +638,7 @@ SIMPLE::execute()
         {
           residual_index += 1;
           _console << _turbulence_systems[system_i]->name() << " " << COLOR_GREEN
-                   << ns_residuals[residual_index] << COLOR_DEFAULT << std::endl;
+                   << ns_its_residuals[residual_index].second << COLOR_DEFAULT << std::endl;
         }
       }
     }
@@ -654,7 +655,8 @@ SIMPLE::execute()
       Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
 
       iteration_counter = 0;
-      std::vector<Real> passive_scalar_residuals(_passive_scalar_systems.size(), 1.0);
+      std::vector<std::pair<unsigned int, Real>> passive_scalar_residuals(
+          _passive_scalar_systems.size(), std::make_pair(0, 1.0));
       while (iteration_counter < _num_iterations &&
              !converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance))
       {
@@ -676,7 +678,7 @@ SIMPLE::execute()
         _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
         for (auto system_i : index_range(_passive_scalar_systems))
           _console << _passive_scalar_systems[system_i]->name() << " " << COLOR_GREEN
-                   << passive_scalar_residuals[system_i] << COLOR_DEFAULT << std::endl;
+                   << passive_scalar_residuals[system_i].second << COLOR_DEFAULT << std::endl;
       }
     }
   }

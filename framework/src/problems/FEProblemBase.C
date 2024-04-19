@@ -6996,7 +6996,8 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
 void
 FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
                                       SparseMatrix<Number> & system_matrix,
-                                      NumericVector<Number> & rhs)
+                                      NumericVector<Number> & rhs,
+                                      const bool compute_gradients)
 {
   TIME_SECTION("computeLinearSystemSys", 5);
 
@@ -7014,7 +7015,8 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
                           system_matrix,
                           rhs,
                           _linear_vector_tags,
-                          _linear_matrix_tags);
+                          _linear_matrix_tags,
+                          compute_gradients);
 }
 
 void
@@ -7022,7 +7024,8 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
                                        SparseMatrix<Number> & system_matrix,
                                        NumericVector<Number> & rhs,
                                        const std::set<TagID> & vector_tags,
-                                       const std::set<TagID> & matrix_tags)
+                                       const std::set<TagID> & matrix_tags,
+                                       const bool compute_gradients)
 {
   TIME_SECTION("computeLinearSystemTags", 5, "Computing Linear System");
 
@@ -7082,7 +7085,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
   _safe_access_tagged_vectors = false;
   _safe_access_tagged_matrices = false;
 
-  _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags);
+  _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags, compute_gradients);
 
   _safe_access_tagged_vectors = true;
   _safe_access_tagged_matrices = true;

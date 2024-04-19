@@ -44,11 +44,11 @@ protected:
   /// Solve a momentum predictor step with a fixed pressure field
   /// @return A vector for the normalized residual norms of the momentum equations.
   ///         The length of the vector equals the dimensionality of the domain.
-  std::vector<Real> solveMomentumPredictor();
+  std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor();
 
   /// Solve a pressure corrector step.
   /// @return The normalized residual norm of the pressure equation.
-  Real solvePressureCorrector();
+  std::pair<unsigned int, Real> solvePressureCorrector();
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
