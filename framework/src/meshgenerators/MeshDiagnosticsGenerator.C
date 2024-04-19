@@ -512,10 +512,14 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
       bool node_on_elem = false;
 
       // non-vertex nodes are not cause for the kind of non-conformality we are looking for
-      if (elem->get_node_index(node) != libMesh::invalid_uint &&
-          elem->is_vertex(elem->get_node_index(node)))
+      if (!elem->is_vertex(elem->get_node_index(node)))
+        continue;
+
+      if (elem->get_node_index(node) != libMesh::invalid_uint)
         node_on_elem = true;
 
+      // Keep track of all the elements this node is a part of. They are potentially the
+      // 'fine' (refined) elements next to a coarser element
       if (node_on_elem)
         fine_elements.insert(elem);
       // Else, the node is not part of the element considered, so if the element had been part
