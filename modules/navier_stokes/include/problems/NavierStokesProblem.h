@@ -51,10 +51,9 @@ public:
   KSP findSchurKSP(KSP node, unsigned int tree_position);
 
   /**
-   * Setup the Least Squares Commutator (LSC) preconditioner given the Schur complement \p KSP
-   * object
+   * Setup the preconditioner given the Schur complement \p KSP object
    */
-  void setupLSCMatrices(KSP schur_ksp);
+  void setupMatrices(KSP schur_ksp);
 
   /**
    * Will destroy any matrices we allocated
@@ -75,10 +74,18 @@ private:
   const TagName & _mass_matrix;
   /// The tag name of the Poisson operator
   const TagName & _L_matrix;
+  /// The tag name of the advection-diffusion operator for the velocity block
+  const TagName & _A_matrix;
+  /// The tag name of the singular perturbation to the velocity block
+  const TagName & _J_matrix;
   /// Whether the user attached a mass matrix
   const bool _have_mass_matrix;
   /// Whether the user attached a Poisson operator matrix
   const bool _have_L_matrix;
+  /// Whether the user attached an advection-diffusion operator for the velocity block
+  const bool _have_A_matrix;
+  /// Whether the user attached a matrix representing a singular perturbation to the velocity block
+  const bool _have_J_matrix;
 
   /// Whether to directly use the pressure mass matrix to form the Schur complement
   /// preconditioner. This is only appropriate for Stokes flow in which the pressure mass matrix is
@@ -90,10 +97,26 @@ private:
   /// to get to the location of the Schur complement field split
   const std::vector<unsigned int> & _schur_fs_index;
 
-  /// The mass matrix used for scaling
-  Mat _Q_scale = nullptr;
+  /// Whether to use a composite preconditioner for the velocity block
+  const bool _use_composite_for_A;
+
+  /// How much to multiply the identity matrix when adding to J and A
+  const Real _alpha;
+
+  /// The mass matrix used for LSC scaling or for directly preconditioning the Schur complement
+  Mat _M = nullptr;
   /// The Poisson operator
   Mat _L = nullptr;
+  /// The advection-diffusion operator for the velocity block
+  Mat _A = nullptr;
+  /// The singular perturbation to the velocity block
+  Mat _J = nullptr;
+  /// The diagonal of A + J
+  Mat _D = nullptr;
+  /// The sum of A + alpha * D
+  Mat _AplusD = nullptr;
+  /// The sum of J + alpha * D
+  Mat _JplusD = nullptr;
 
   /// This will end up being the same length as \p _schur_fs_index. Let's give an example of what
   /// this data member means. If the user sets "schur_fs_index = '1'", then this means the Schur
