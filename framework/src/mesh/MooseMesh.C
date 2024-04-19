@@ -168,7 +168,8 @@ MooseMesh::validParams()
 
   params.addParam<std::vector<SubdomainName>>(
       "add_subdomain_names",
-      "Optional list of subdomain names to be applied to the ids given in add_subdomain_ids.");
+      "Optional list of subdomain names to be applied to the ids given in add_subdomain_ids. "
+      "This list must contain the same number of items as add_subdomain_ids.");
 
   params += MooseAppCoordTransform::validParams();
 
@@ -406,6 +407,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     const auto add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
     _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
     
+    // do we have subdomain names explicitly given?
     if (isParamValid("add_subdomain_names"))
     {
       const auto add_subdomain_name = getParam<std::vector<SubdomainName>>("add_subdomain_names");
