@@ -406,7 +406,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   {
     const auto add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
     _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
-    
+
     // do we have subdomain names explicitly given?
     if (isParamValid("add_subdomain_names"))
     {
@@ -415,13 +415,14 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       const int n_names = add_subdomain_name.size();
 
       if (n_ids != n_names)
-        mooseError("Number of items provided in add_subdomain_ids and add_subdomain_names does not match.");
+        mooseError("Number of items provided in add_subdomain_ids and add_subdomain_names does not "
+                   "match.");
 
       for (int i = 0; i < n_ids; ++i)
         setSubdomainName(add_subdomain_id[i], add_subdomain_name[i]);
     };
-
-  } else if (isParamValid("add_subdomain_names"))
+  }
+  else if (isParamValid("add_subdomain_names"))
   {
     // the user has defined add_subdomain_names, but not add_subdomain_ids
     mooseError("In combination with add_subdomain_names, add_subdomain_ids must be defined.");
