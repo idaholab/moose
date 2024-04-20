@@ -251,11 +251,11 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
 void
 WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
 {
-  bool vector_conductivity = processThermalConductivity();
-  unsigned int num_blocks = _thermal_conductivity_blocks.size();
-  unsigned int num_used_blocks = num_blocks ? num_blocks : 1;
+  const auto vector_conductivity = processThermalConductivity();
+  const auto num_blocks = _thermal_conductivity_blocks.size();
+  const auto num_used_blocks = num_blocks ? num_blocks : 1;
 
-  for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
+  for (const auto block_i : make_range(num_used_blocks))
   {
     std::string block_name = "";
     if (num_blocks)
@@ -265,15 +265,14 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
 
     if (_porous_medium_treatment)
     {
-      const std::string kernel_type =
+      const auto kernel_type =
           vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
 
       InputParameters params = getFactory().getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      std::vector<SubdomainName> block_names =
-          num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
+      const auto block_names = num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       assignBlocks(params, block_names);
-      std::string conductivity_name = vector_conductivity ? NS::kappa : NS::k;
+      const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
       params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) =
           _flow_equations_physics->getPorosityFunctorName(true);
