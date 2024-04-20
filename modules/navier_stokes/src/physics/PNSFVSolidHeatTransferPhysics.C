@@ -31,6 +31,7 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.renameParam("temperature_name",
                      "solid_temperature_variable",
                      "Name of the solid phase temperature variable");
+  params.set<VariableName>("solid_temperature_variable") = NS::T_solid;
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
   MooseEnum face_interpol_types("average skewness-corrected", "average");
@@ -50,14 +51,14 @@ PNSFVSolidHeatTransferPhysics::validParams()
 
   // Material properties
   params.suppressParameter<MaterialPropertyName>("specific_heat");
-  params.addParam<MooseFunctorName>("cp", NS::cp, "Specific heat functor");
+  params.addParam<MooseFunctorName>("cp_solid", NS::cp + "_solid", "Specific heat functor");
   params.suppressParameter<MaterialPropertyName>("density");
-  params.addParam<MooseFunctorName>("rho", NS::density, "Density functor");
+  params.addParam<MooseFunctorName>("rho_solid", NS::density + "_solid", "Density functor");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "thermal_conductivity_blocks", "Blocks which each thermal conductivity is defined");
   params.suppressParameter<MooseFunctorName>("thermal_conductivity_functor");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
-      "thermal_conductivity",
+      "thermal_conductivity_solid",
       "Thermal conductivity, which may have different names depending on the subdomain");
 
   // Ambient convection with the liquid phase parameters
@@ -90,8 +91,9 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.addParam<unsigned short>(
       "ghost_layers", 2, "Number of layers of elements to ghost near process domain boundaries");
 
-  params.addParamNamesToGroup("rho cp thermal_conductivity thermal_conductivity_blocks",
-                              "Material properties");
+  params.addParamNamesToGroup(
+      "rho_solid cp_solid thermal_conductivity_solid thermal_conductivity_blocks",
+      "Material properties");
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
                               "ambient_temperature",
                               "Ambient convection");
@@ -107,13 +109,14 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
     _solid_temperature_name(getParam<VariableName>("solid_temperature_variable")),
     _fluid_temperature_name(getParam<NonlinearVariableName>("fluid_temperature_variable")),
     _porosity_functor_name(getParam<MooseFunctorName>(NS::porosity)),
-    _density_name(getParam<MooseFunctorName>("rho")),
-    _specific_heat_name(getParam<MooseFunctorName>("cp")),
+    _density_name(getParam<MooseFunctorName>("rho_solid")),
+    _specific_heat_name(getParam<MooseFunctorName>("cp_solid")),
     _thermal_conductivity_blocks(
         parameters.isParamValid("thermal_conductivity_blocks")
             ? getParam<std::vector<std::vector<SubdomainName>>>("thermal_conductivity_blocks")
             : std::vector<std::vector<SubdomainName>>()),
-    _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity")),
+    _thermal_conductivity_name(
+        getParam<std::vector<MooseFunctorName>>("thermal_conductivity_solid")),
     _ambient_convection_blocks(
         getParam<std::vector<std::vector<SubdomainName>>>("ambient_convection_blocks")),
     _ambient_convection_alpha(getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha")),
@@ -172,14 +175,15 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyTimeKernels()
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
-      NS::time_deriv(NS::specific_enthalpy);
+      NS::time_deriv(NS::specific_enthalpy + "_solid");
 
   params.set<MooseFunctorName>(NS::porosity) = _porosity_functor_name;
-  if (getProblem().hasFunctor(NS::time_deriv(_density_name),
+  // If modeling a variable density
+  if (getProblem().hasFunctor(NS::time_deriv(_density_name + "_solid"),
                               /*thread_id=*/0))
   {
     params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
+    params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy + "_solid";
   }
   params.set<bool>("is_solid") = true;
 
@@ -312,6 +316,7 @@ PNSFVSolidHeatTransferPhysics::addMaterials()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   params.set<MooseFunctorName>("temperature") = _solid_temperature_name;
+  params.set<std::string>("property_suffix") = "_solid";
 
   getProblem().addMaterial(
       "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);

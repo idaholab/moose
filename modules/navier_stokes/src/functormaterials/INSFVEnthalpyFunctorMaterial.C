@@ -32,6 +32,8 @@ INSFVEnthalpyFunctorMaterial::validParams()
       NS::enthalpy_density, NS::enthalpy_density, "the name of the (extensive) enthalpy");
   params.addParam<MooseFunctorName>(
       NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
+  params.addParam<std::string>(
+      "property_suffix", "", "Suffix for disambiguating functor property names");
   return params;
 }
 
@@ -39,24 +41,26 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
   : FunctorMaterial(parameters),
     _rho(getFunctor<ADReal>(NS::density)),
     _temperature(getFunctor<ADReal>("temperature")),
-    _cp(getFunctor<ADReal>(NS::cp))
+    _cp(getFunctor<ADReal>(NS::cp)),
+    _suffix(getParam<std::string>("property_suffix"))
 {
   const auto & rho_h =
-      addFunctorProperty<ADReal>(NS::enthalpy_density,
+      addFunctorProperty<ADReal>(NS::enthalpy_density + _suffix,
                                  [this](const auto & r, const auto & t)
                                  { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
 
-  const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy,
+  const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy + _suffix,
                                               [this](const auto & r, const auto & t)
                                               { return _cp(r, t) * _temperature(r, t); });
 
-  addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
-                             [this](const auto & r, const auto & t)
-                             { return _cp(r, t) * _temperature.dot(r, t); });
-
   addFunctorProperty<ADReal>(
-      "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
+      NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy) + _suffix),
+      [this](const auto & r, const auto & t) { return _cp(r, t) * _temperature.dot(r, t); });
 
-  addFunctorProperty<ADReal>("cp_temp",
+  addFunctorProperty<ADReal>("rho_cp_temp" + _suffix,
+                             [&rho_h](const auto & r, const auto & t) -> ADReal
+                             { return rho_h(r, t); });
+
+  addFunctorProperty<ADReal>("cp_temp" + _suffix,
                              [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
 }
