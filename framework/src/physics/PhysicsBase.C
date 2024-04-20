@@ -259,7 +259,8 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
   if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
   if (blocks.empty())
-    _console << "Empty block restriction assigned, did you mean to do this?" << std::endl;
+    _console << "Empty block restriction assigned to an object created by " << name()
+             << " did you mean to do this?" << std::endl;
 }
 
 bool
