@@ -25,11 +25,16 @@ HeatConductionFV::validParams()
       "Creates the heat conduction equation discretized with nonlinear finite volume");
 
   // Material properties
-  params.addRequiredParam<MooseFunctorName>("thermal_conductivity",
+  params.addRequiredParam<MooseFunctorName>("thermal_conductivity_functor",
                                             "Thermal conductivity functor (material property)");
   params.addParam<MaterialPropertyName>("specific_heat", "cp", "Specific heat  material property");
   params.addParam<MaterialPropertyName>("density", "density", "Density material property");
   params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
+
+  params.addRangeCheckedParam<Real>("temperature_scaling",
+                                    1,
+                                    "temperature_scaling > 0",
+                                    "Scaling factor for the heat conduction equation");
 
   return params;
 }
@@ -52,7 +57,8 @@ HeatConductionFV::addFVKernels()
     const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>("thermal_conductivity");
+    params.set<MooseFunctorName>("coeff") =
+        getParam<MooseFunctorName>("thermal_conductivity_functor");
     getProblem().addFVKernel(
         kernel_type, prefix() + "_" + _temperature_name + "_conduction", params);
   }
@@ -153,6 +159,7 @@ HeatConductionFV::addNonlinearVariables()
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
+  params.set<Real>("initial_condition") = getParam<Real>("initial_temperature");
 
   getProblem().addVariable(variable_type, _temperature_name, params);
 }

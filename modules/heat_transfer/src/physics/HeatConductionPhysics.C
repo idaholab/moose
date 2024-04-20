@@ -18,6 +18,8 @@ HeatConductionPhysics::validParams()
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
 
+  params.addParam<Real>("initial_temperature", 300, "Initial value of the temperature variable");
+
   // Boundary conditions
   params.addParam<std::vector<BoundaryName>>("heat_flux_boundaries",
                                              "Boundaries on which to apply a heat flux");

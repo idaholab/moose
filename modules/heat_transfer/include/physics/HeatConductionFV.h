@@ -22,9 +22,10 @@ public:
 
   HeatConductionFV(const InputParameters & parameters);
 
+  void addFVBCs() override;
+
 private:
   void initializePhysicsAdditional() override;
   void addNonlinearVariables() override;
   void addFVKernels() override;
-  void addFVBCs() override;
 };
