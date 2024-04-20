@@ -148,7 +148,6 @@ HeatConductionCG::addNonlinearVariables()
   const std::string variable_type = "MooseVariable";
   // defaults to linear lagrange FE family
   InputParameters params = getFactory().getValidParams(variable_type);
-  params.set<Real>("initial_condition") = getParam<Real>("initial_temperature");
 
   getProblem().addVariable(variable_type, _temperature_name, params);
 }

@@ -29,7 +29,8 @@ HeatConductionFV::validParams()
                                             "Thermal conductivity functor (material property)");
   params.addParam<MaterialPropertyName>("specific_heat", "cp", "Specific heat  material property");
   params.addParam<MaterialPropertyName>("density", "density", "Density material property");
-  params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
+  params.addParamNamesToGroup("thermal_conductivity_functor specific_heat density",
+                              "Thermal properties");
 
   params.addRangeCheckedParam<Real>("temperature_scaling",
                                     1,
@@ -159,7 +160,6 @@ HeatConductionFV::addNonlinearVariables()
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
-  params.set<Real>("initial_condition") = getParam<Real>("initial_temperature");
 
   getProblem().addVariable(variable_type, _temperature_name, params);
 }
