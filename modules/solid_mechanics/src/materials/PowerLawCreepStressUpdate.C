@@ -113,13 +113,21 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeStressFinalize(
     const GenericRankTwoTensor<is_ad> & plastic_strain_increment)
 {
   _creep_strain[_qp] += plastic_strain_increment;
+  // compute effective_strain_increment from tensor
+  // plastic_strain_increment is already deviatoric.
+  const Real deviatoric_strain_inc_squared =
+      MetaPhysicL::raw_value(plastic_strain_increment)
+          .doubleContraction(MetaPhysicL::raw_value(plastic_strain_increment));
+  _eff_creep_strain_inc[_qp] += std::sqrt(2.0 / 3.0 * deviatoric_strain_inc_squared);
 }
 
 template <bool is_ad>
 void
 PowerLawCreepStressUpdateTempl<is_ad>::resetIncrementalMaterialProperties()
 {
+  // fixme lynn should this be in RadialReturnCreepStressUpdateBaseTempl
   _creep_strain[_qp] = _creep_strain_old[_qp];
+  _eff_creep_strain_inc[_qp] = _eff_creep_strain_inc_old[_qp];
 }
 
 template <bool is_ad>

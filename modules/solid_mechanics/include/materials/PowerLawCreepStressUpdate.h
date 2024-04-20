@@ -90,6 +90,8 @@ protected:
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_three_shear_modulus;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain_old;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_eff_creep_strain_inc;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_eff_creep_strain_inc_old;
 
 private:
   template <typename ScalarType>

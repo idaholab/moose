@@ -33,6 +33,9 @@ protected:
   virtual void
   computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
+  virtual GenericReal<is_ad>
+  initialGuess(const GenericReal<is_ad> & /*effective_trial_stress*/) override;
+
   /**
    * This method returns the derivative of the creep strain with respect to the von mises stress. It
    * assumes the stress delta (von mises stress used to determine the creep rate) is calculated as:
@@ -50,9 +53,16 @@ protected:
     return TangentCalculationMethod::PARTIAL;
   }
 
+  ///intialGuess scalar scaling factor for creep strain increment from previous step
+  const Real _eff_creep_strain_inc_predictor_scale;
+
   /// Creep strain material property
   GenericMaterialProperty<RankTwoTensor, is_ad> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
+
+  /// Creep strain increment property
+  MaterialProperty<Real> & _eff_creep_strain_inc;
+  const MaterialProperty<Real> & _eff_creep_strain_inc_old;
 };
 
 typedef RadialReturnCreepStressUpdateBaseTempl<false> RadialReturnCreepStressUpdateBase;

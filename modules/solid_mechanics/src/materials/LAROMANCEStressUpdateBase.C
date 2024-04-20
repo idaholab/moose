@@ -534,6 +534,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::resetIncrementalMaterialProperties()
 
   _wall_dislocations_step[_qp] = 0.0;
   _cell_dislocations_step[_qp] = 0.0;
+  // fixme lynn should this call
+  // RadialReturnCreepStressUpdateBaseTempl<is_ad>::resetIncrementalMaterialProperties()
+  //  to reset creep_strain_increment
 }
 
 template <bool is_ad>
@@ -546,6 +549,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::storeIncrementalMaterialProperties(
   _number_of_substeps[_qp] = total_number_of_substeps;
 }
 
+// fixme lynn -- this needs to use a predicted effective_trial_stress.  Not yet implemented
 template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressInitialize(
