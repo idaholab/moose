@@ -54,6 +54,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("WCNSFVFluidHeatTransferPhysics", "Physics/NavierStokes/FluidHeatTransfer/*");
   registerSyntax("WCNSFVScalarTransportPhysics", "Physics/NavierStokes/ScalarTransport/*");
   registerSyntax("WCNSFVTurbulencePhysics", "Physics/NavierStokes/Turbulence/*");
+  registerSyntax("PNSFVSolidHeatTransferPhysics", "Physics/NavierStokes/SolidHeatTransfer/*");
 
   // Create the Action syntax
   registerSyntax("CNSAction", "Modules/CompressibleNavierStokes");

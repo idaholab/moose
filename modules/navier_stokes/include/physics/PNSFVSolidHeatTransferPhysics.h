@@ -25,10 +25,15 @@ public:
 protected:
 private:
   void addNonlinearVariables() override;
-  void addInitialConditions() override;
   void addFVKernels() override;
-  void addFVBCs() override;
   void addMaterials() override;
+
+  // Note that we inherit:
+  // - addInitialConditions from HeatConductionPhysics
+  // - addPreconditioning from HeatConductionPhysics
+  // - addFVBCs from HeatConductionFV
+
+  InputParameters getAdditionalRMParams() const override;
 
   /**
    * Functions adding kernels for the solid energy equation
@@ -45,15 +50,15 @@ private:
   bool processThermalConductivity();
 
   /// Solid temperature name
-  NonlinearVariableName _solid_temperature_name;
+  const NonlinearVariableName _solid_temperature_name;
   /// Fluid temperature name
-  NonlinearVariableName _fluid_temperature_name;
+  const NonlinearVariableName _fluid_temperature_name;
   /// Name of the porosity functor (usually material property)
-  MooseFunctorName _porosity_functor_name;
+  const MooseFunctorName _porosity_functor_name;
   /// Name of the density functor (usually material property)
-  MooseFunctorName _density_name;
+  const MooseFunctorName _density_name;
   /// Name of the specific heat functor (usually material property)
-  MooseFunctorName _specific_heat_name;
+  const MooseFunctorName _specific_heat_name;
   /// Vector of subdomain groups where we want to have different thermal conduction
   std::vector<std::vector<SubdomainName>> _thermal_conductivity_blocks;
   /// Name of the thermal conductivity functor for each block-group
