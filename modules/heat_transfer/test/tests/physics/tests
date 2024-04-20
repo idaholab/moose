@@ -1,10 +1,10 @@
 [Tests]
   issues = '#25642'
-  [fe]
+  [cg]
     type = Exodiff
-    input = 'test_fe.i'
-    exodiff = 'test_fe_out.e'
+    input = 'test_cg.i'
+    exodiff = 'test_cg_out.e'
     requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax.'
-    design = 'physics/HeatConductionFE.md'
+    design = 'physics/HeatConductionCG.md'
   []
 []

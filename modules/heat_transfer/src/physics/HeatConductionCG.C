@@ -7,30 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HeatConductionFE.h"
+#include "HeatConductionCG.h"
 
 // Register the actions for the objects actually used
-registerPhysicsBaseTasks("HeatTransferApp", HeatConductionFE);
-registerMooseAction("HeatTransferApp", HeatConductionFE, "add_kernel");
-registerMooseAction("HeatTransferApp", HeatConductionFE, "add_bc");
-registerMooseAction("HeatTransferApp", HeatConductionFE, "add_variable");
-registerMooseAction("HeatTransferApp", HeatConductionFE, "add_preconditioning");
+registerPhysicsBaseTasks("HeatTransferApp", HeatConductionCG);
+registerMooseAction("HeatTransferApp", HeatConductionCG, "add_kernel");
+registerMooseAction("HeatTransferApp", HeatConductionCG, "add_bc");
+registerMooseAction("HeatTransferApp", HeatConductionCG, "add_variable");
+registerMooseAction("HeatTransferApp", HeatConductionCG, "add_preconditioning");
 
 InputParameters
-HeatConductionFE::validParams()
+HeatConductionCG::validParams()
 {
   InputParameters params = HeatConductionPhysics::validParams();
   params.addClassDescription("Creates the heat conduction equation discretized with CG");
   return params;
 }
 
-HeatConductionFE::HeatConductionFE(const InputParameters & parameters)
+HeatConductionCG::HeatConductionCG(const InputParameters & parameters)
   : HeatConductionPhysics(parameters)
 {
 }
 
 void
-HeatConductionFE::addFEKernels()
+HeatConductionCG::addFEKernels()
 {
   {
     const std::string kernel_type = "ADHeatConduction";
@@ -59,7 +59,7 @@ HeatConductionFE::addFEKernels()
 }
 
 void
-HeatConductionFE::addFEBCs()
+HeatConductionCG::addFEBCs()
 {
   // We dont need to add anything for insulated boundaries, 0 flux is the default boundary condition
   if (isParamValid("heat_flux_boundaries"))
@@ -128,7 +128,7 @@ HeatConductionFE::addFEBCs()
 }
 
 void
-HeatConductionFE::addNonlinearVariables()
+HeatConductionCG::addNonlinearVariables()
 {
   if (nonlinearVariableExists(_temperature_name, /*error_if_aux=*/true))
     return;
