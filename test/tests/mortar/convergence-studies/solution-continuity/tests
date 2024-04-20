@@ -7,7 +7,7 @@
     test_case = 'P2P2'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 3 and 3 for a mortar solution continuity problem with an equal geometric discretization when using a second order basis for the temperature variable and a second order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
   []
   [p2p1]
@@ -16,7 +16,7 @@
     test_case = 'P2P1'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 3 and 2 for a mortar solution continuity problem with an equal geometric discretization when using a second order basis for the temperature variable and a first order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
   []
   [p2p0]
@@ -25,7 +25,7 @@
     test_case = 'P2P0'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 2 and 1 for a mortar solution continuity problem with an equal geometric discretization when using a second order basis for the temperature variable and a zeroth order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
   []
   [p1p1]
@@ -34,7 +34,7 @@
     test_case = 'P1P1'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 2 and 2 for a mortar solution continuity problem with an equal geometric discretization when using a first order basis for the temperature variable and a first order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
   []
   [p1p0]
@@ -43,7 +43,7 @@
     test_case = 'P1P0'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 2 and 1 for a mortar solution continuity problem with an equal geometric discretization when using a first order basis for the temperature variable and a zeroth order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
   []
 []

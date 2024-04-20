@@ -11,7 +11,7 @@
       exodiff = 'block_weighted_partitioner_out.e'
       # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       # Parmetis generates different results when using 32 bit or 64 bit integers
-      capabilities = 'petsc>=3.18.0 parmetis dof_id_bytes=8'
+      capabilities = 'petsc>=3.18.0 & parmetis & dof_id_bytes=8'
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition
@@ -26,7 +26,7 @@
       cli_args = 'Outputs/file_base=block_weighted_partitioner_out_distributed'
       # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       # Parmetis generates different results when using 32 bit or 64 bit integers
-      capabilities = 'petsc>=3.18.0 parmetis dof_id_bytes=8'
+      capabilities = 'petsc>=3.18.0 & parmetis & dof_id_bytes=8'
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition

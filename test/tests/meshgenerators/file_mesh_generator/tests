@@ -29,7 +29,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile
@@ -50,7 +50,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     exodiff = '2d_diffusion_iga_out.e'
     requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases and output spline results in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
@@ -64,7 +64,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile
@@ -85,7 +85,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     exodiff = '2d_diffusion_iga_nosplines_out.e'
 
     requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes and output Bernstein-Bezier results in ExodusII format.'
@@ -100,7 +100,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile ... and we can't add an
