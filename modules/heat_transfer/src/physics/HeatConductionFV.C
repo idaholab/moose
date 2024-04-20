@@ -14,6 +14,7 @@ registerPhysicsBaseTasks("HeatTransferApp", HeatConductionFV);
 registerMooseAction("HeatTransferApp", HeatConductionFV, "add_fv_kernel");
 registerMooseAction("HeatTransferApp", HeatConductionFV, "add_fv_bc");
 registerMooseAction("HeatTransferApp", HeatConductionFV, "add_variable");
+registerMooseAction("HeatTransferApp", HeatConductionFV, "add_ic");
 registerMooseAction("HeatTransferApp", HeatConductionFV, "add_preconditioning");
 
 InputParameters
@@ -151,6 +152,7 @@ HeatConductionFV::addNonlinearVariables()
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
+  params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
 
   getProblem().addVariable(variable_type, _temperature_name, params);
 }

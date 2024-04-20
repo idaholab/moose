@@ -7,4 +7,11 @@
     requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax.'
     design = 'physics/HeatConductionCG.md'
   []
+  [fv]
+    type = Exodiff
+    input = 'test_fv.i'
+    exodiff = 'test_fv_out.e'
+    requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax and a finite volume discretization.'
+    design = 'physics/HeatConductionFV.md'
+  []
 []
