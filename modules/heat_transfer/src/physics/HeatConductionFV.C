@@ -7,76 +7,80 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HeatConductionCG.h"
-#include "ADHeatConduction.h"
-#include "HeatConductionTimeDerivative.h"
+#include "HeatConductionFV.h"
 
 // Register the actions for the objects actually used
-registerPhysicsBaseTasks("HeatTransferApp", HeatConductionCG);
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_kernel");
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_bc");
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_variable");
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_ic");
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_preconditioning");
+registerPhysicsBaseTasks("HeatTransferApp", HeatConductionFV);
+registerMooseAction("HeatTransferApp", HeatConductionFV, "add_fv_kernel");
+registerMooseAction("HeatTransferApp", HeatConductionFV, "add_fv_bc");
+registerMooseAction("HeatTransferApp", HeatConductionFV, "add_variable");
+registerMooseAction("HeatTransferApp", HeatConductionFV, "add_preconditioning");
 
 InputParameters
-HeatConductionCG::validParams()
+HeatConductionFV::validParams()
 {
   InputParameters params = HeatConductionPhysics::validParams();
-  params.addClassDescription("Creates the heat conduction equation discretized with CG");
+  params.addClassDescription(
+      "Creates the heat conduction equation discretized with nonlinear finite volume");
 
   // Material properties
-  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
-                                             "thermal_conductivity");
-  params.transferParam<MaterialPropertyName>(HeatConductionTimeDerivative::validParams(),
-                                             "specific_heat");
+  params.addRequiredParam<MooseFunctorName>("thermal_conductivity",
+                                            "Thermal conductivity functor (material property)");
+  params.addParam<MaterialPropertyName>("specific_heat", "cp", "Specific heat  material property");
   params.addParam<MaterialPropertyName>("density", "density", "Density material property");
   params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
 
   return params;
 }
 
-HeatConductionCG::HeatConductionCG(const InputParameters & parameters)
+HeatConductionFV::HeatConductionFV(const InputParameters & parameters)
   : HeatConductionPhysics(parameters)
 {
 }
 
 void
-HeatConductionCG::addFEKernels()
+HeatConductionFV::initializePhysicsAdditional()
+{
+  getProblem().needFV();
+}
+
+void
+HeatConductionFV::addFVKernels()
 {
   {
-    const std::string kernel_type = "ADHeatConduction";
+    const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(parameters(), "thermal_conductivity");
-    getProblem().addKernel(kernel_type, prefix() + "_" + _temperature_name + "_conduction", params);
+    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>("thermal_conductivity");
+    getProblem().addFVKernel(
+        kernel_type, prefix() + "_" + _temperature_name + "_conduction", params);
   }
   if (isParamValid("heat_source_var"))
   {
-    const std::string kernel_type = "ADCoupledForce";
+    const std::string kernel_type = "FVCoupledForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
-    getProblem().addKernel(kernel_type, prefix() + "_" + _temperature_name + "_source", params);
+    params.set<MooseFunctorName>("v") = getParam<VariableName>("heat_source_var");
+    getProblem().addFVKernel(kernel_type, prefix() + "_" + _temperature_name + "_source", params);
   }
   if (isTransient())
   {
-    const std::string kernel_type = "ADHeatConductionTimeDerivative";
+    const std::string kernel_type = "FVHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(parameters(), "density_name");
     params.applyParameter(parameters(), "specific_heat");
-    getProblem().addKernel(kernel_type, prefix() + "_" + _temperature_name + "_time", params);
+    params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
+    getProblem().addFVKernel(kernel_type, prefix() + "_" + _temperature_name + "_time", params);
   }
 }
 
 void
-HeatConductionCG::addFEBCs()
+HeatConductionFV::addFVBCs()
 {
   // We dont need to add anything for insulated boundaries, 0 flux is the default boundary condition
   if (isParamValid("heat_flux_boundaries"))
   {
-    const std::string bc_type = "FunctorNeumannBC";
+    const std::string bc_type = "FVFunctorNeumannBC";
     InputParameters params = getFactory().getValidParams(bc_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
 
@@ -89,7 +93,7 @@ HeatConductionCG::addFEBCs()
     {
       params.set<std::vector<BoundaryName>>("boundary") = heat_flux_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[0];
-      getProblem().addBoundaryCondition(
+      getProblem().addFVBC(
           bc_type, prefix() + "_" + _temperature_name + "_heat_flux_bc_all", params);
     }
     else
@@ -98,16 +102,16 @@ HeatConductionCG::addFEBCs()
       {
         params.set<std::vector<BoundaryName>>("boundary") = {heat_flux_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[i];
-        getProblem().addBoundaryCondition(bc_type,
-                                          prefix() + "_" + _temperature_name + "_heat_flux_bc_" +
-                                              heat_flux_boundaries[i],
-                                          params);
+        getProblem().addFVBC(bc_type,
+                             prefix() + "_" + _temperature_name + "_heat_flux_bc_" +
+                                 heat_flux_boundaries[i],
+                             params);
       }
     }
   }
   if (isParamValid("fixed_temperature_boundaries"))
   {
-    const std::string bc_type = "FunctorDirichletBC";
+    const std::string bc_type = "FVFunctorDirichletBC";
     InputParameters params = getFactory().getValidParams(bc_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
 
@@ -121,7 +125,7 @@ HeatConductionCG::addFEBCs()
     {
       params.set<std::vector<BoundaryName>>("boundary") = temperature_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_temperatures[0];
-      getProblem().addBoundaryCondition(
+      getProblem().addFVBC(
           bc_type, prefix() + "_" + _temperature_name + "_dirichlet_bc_all", params);
     }
     else
@@ -130,23 +134,22 @@ HeatConductionCG::addFEBCs()
       {
         params.set<std::vector<BoundaryName>>("boundary") = {temperature_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_temperatures[i];
-        getProblem().addBoundaryCondition(bc_type,
-                                          prefix() + "_" + _temperature_name + "_dirichlet_bc_" +
-                                              temperature_boundaries[i],
-                                          params);
+        getProblem().addFVBC(bc_type,
+                             prefix() + "_" + _temperature_name + "_dirichlet_bc_" +
+                                 temperature_boundaries[i],
+                             params);
       }
     }
   }
 }
 
 void
-HeatConductionCG::addNonlinearVariables()
+HeatConductionFV::addNonlinearVariables()
 {
   if (nonlinearVariableExists(_temperature_name, /*error_if_aux=*/true))
     return;
 
-  const std::string variable_type = "MooseVariable";
-  // defaults to linear lagrange FE family
+  const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
 
   getProblem().addVariable(variable_type, _temperature_name, params);

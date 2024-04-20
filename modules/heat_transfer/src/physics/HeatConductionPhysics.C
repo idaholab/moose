@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatConductionPhysics.h"
-#include "ADHeatConduction.h"
-#include "HeatConductionTimeDerivative.h"
 
 InputParameters
 HeatConductionPhysics::validParams()
@@ -19,14 +17,6 @@ HeatConductionPhysics::validParams()
 
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
-
-  // Material properties
-  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
-                                             "thermal_conductivity");
-  params.transferParam<MaterialPropertyName>(HeatConductionTimeDerivative::validParams(),
-                                             "specific_heat");
-  params.addParam<MaterialPropertyName>("density", "density", "Density material property");
-  params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
 
   // Boundary conditions
   params.addParam<std::vector<BoundaryName>>("heat_flux_boundaries",

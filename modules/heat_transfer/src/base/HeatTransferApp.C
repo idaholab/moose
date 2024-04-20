@@ -50,6 +50,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("setup_dampers", "add_secondary_flux_vector");
 
   registerSyntax("HeatConductionCG", "Physics/HeatConduction/FiniteElement/*");
+  registerSyntax("HeatConductionFV", "Physics/HeatConduction/FiniteVolume/*");
 
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");
