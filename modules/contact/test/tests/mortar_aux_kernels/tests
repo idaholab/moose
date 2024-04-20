@@ -22,7 +22,7 @@
     abs_zero = 1.0e-5
     min_parallel = 1
     max_parallel = 4
-    capabilities = 'ad_size>=50 method!=dbg'
+    capabilities = 'ad_size>=50 & method!=dbg'
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
@@ -35,7 +35,7 @@
     abs_zero = 5.0e-3
     min_parallel = 1
     max_parallel = 4
-    capabilities = 'ad_size>=50 method=opt'
+    capabilities = 'ad_size>=50 & method=opt'
     heavy = true
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '

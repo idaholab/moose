@@ -9,7 +9,7 @@
     exodiff = 'frictionless-mortar-3d_out.e'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint'
-    capabilities = 'ad_size>=150 method!=dbg'
+    capabilities = 'ad_size>=150 & method!=dbg'
     valgrind = 'none'
   []
   [frictionless-mortar-3d_pg]
@@ -33,7 +33,7 @@
   [frictionless-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
-    capabilities = 'ad_size>=150 method!=dbg'
+    capabilities = 'ad_size>=150 & method!=dbg'
     csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
     mesh_mode = 'REPLICATED' # see issue 24255
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
@@ -57,7 +57,7 @@
   [frictionless-mortar-3d-action-correct-edge-dropping]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
-    capabilities = 'ad_size>=150 method!=dbg'
+    capabilities = 'ad_size>=150 & method!=dbg'
     csvdiff = 'frictionless-mortar-3d-action-correct-edge-dropping_out_contact-pressure_0002.csv'
     mesh_mode = 'REPLICATED' # see issue 24255
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
@@ -84,7 +84,7 @@
   [frictional-mortar-3d]
     type = 'Exodiff'
     input = 'frictional-mortar-3d.i'
-    capabilities = 'ad_size>=150 method!=dbg'
+    capabilities = 'ad_size>=150 & method!=dbg'
     exodiff = 'frictional-mortar-3d_out.e'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using nodal-attached geometry.'
@@ -109,7 +109,7 @@
   [frictional-mortar-3d-function]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-function.i'
-    capabilities = 'ad_size>=150 method!=dbg'
+    capabilities = 'ad_size>=150 & method!=dbg'
     exodiff = 'frictional-mortar-3d-function_out.e'
     requirement = 'The system shall solve a 3D frictional block problem with mortar constraint using '
                   'a simple frictional model dependent on relative velocity and contact pressure.'
@@ -120,7 +120,7 @@
   [frictional-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
-    capabilities = 'ad_size>=150 method!=dbg'
+    capabilities = 'ad_size>=150 & method!=dbg'
     csvdiff = 'frictional-mortar-3d-action_out_frictional-pressure_0001.csv '
               'frictional-mortar-3d-action_out_frictional-pressure-3d_0001.csv '
               'frictional-mortar-3d-action_out_tangent_x_0001.csv '

@@ -44,7 +44,11 @@
     type = 'Exodiff'
     input = 'ne_ic.i'
     exodiff = 'ne_ic_out_extra.e'
-    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra -eps_view'
+    cli_args = 'Executioner/extra_power_iterations=2
+                Outputs/exodus=true
+                Outputs/csv=false
+                Outputs/file_base=ne_ic_out_extra
+                -eps_view'
     capabilities = 'slepc>=3.8.0'
     # Make sure we do not have an extra prefix
     absent_out = '(eps_power_)'
