@@ -13,7 +13,7 @@
     run_sim = 'True'
     cli_args = "Outputs/active=''"
     prereq = exact
-    petsc_version = '>=3.9'
+    capabilities = 'petsc>=3.9'
     ratio_tol = 3e-7
     difference_tol = 1
     requirement = 'The system shall provide perfect derivatives when using ADArrheniusMaterialProperty.'

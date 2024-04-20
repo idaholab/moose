@@ -18,7 +18,7 @@ finite elements for velocity and pressure.'
     absent_out = 'iterations 14'
     exodiff = 'fsp_transient_low_Re.e'
     recover = false # executes on final
-    petsc_version = '>=3.20.0'
+    capabilities = 'petsc>=3.20.0'
   []
   [transient_lid_driven_fsp_high_Re_picard_non_ss]
     type = 'RunApp'
@@ -27,7 +27,7 @@ finite elements for velocity and pressure.'
     requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500, performing a few timesteps in a transient.'
     cli_args = "n=8 GlobalParams/picard=true -snes_linesearch_damping 0.4 Executioner/TimeStepper/optimal_iterations=50 -fieldsplit_others_fieldsplit_u_pc_type lu Executioner/num_steps=3 Outputs/active=''"
     absent_out = '4 iterations'
-    petsc_version = '>=3.20.0'
+    capabilities = 'petsc>=3.20.0'
   []
   [transient_lid_driven_fsp_high_Re_newton_ss]
     type = 'Exodiff'
@@ -38,7 +38,7 @@ finite elements for velocity and pressure.'
     absent_out = '30 iterations'
     exodiff = 'fsp_transient_high_Re.e'
     recover = false # executes on final
-    petsc_version = '>=3.20.0'
+    capabilities = 'petsc>=3.20.0'
   []
   [lid_driven_md]
     type = 'Exodiff'
@@ -58,7 +58,7 @@ finite elements for velocity and pressure.'
       custom_cmp = 'fsp.cmp'
       cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_steady_low_Re"
       detail = 'using the velocity mass matrix for scaling within the Least Squares Commutator preconditioner with a component variable implementation, or'
-      petsc_version = '>=3.20.0'
+      capabilities = 'petsc>=3.20.0'
     []
     [a_digonal_scaling]
       type = 'Exodiff'
@@ -67,7 +67,7 @@ finite elements for velocity and pressure.'
       custom_cmp = 'fsp.cmp'
       cli_args = "n=8 mu=1"
       detail = 'using the diagonal of the velocity-velocity block for scaling within the Least Squares Commutator preconditioner with a component variable implementation, or'
-      petsc_version = '>=3.20.0'
+      capabilities = 'petsc>=3.20.0'
     []
     [vector_elman]
       type = 'Exodiff'
@@ -75,7 +75,7 @@ finite elements for velocity and pressure.'
       exodiff = 'steady_vector_fsp_elman_exo.e'
       detail = 'using the velocity mass matrix for scaling within the Least Squares Commutator preconditioner with a vector variable implementation, or'
       custom_cmp = 'fsp.cmp'
-      petsc_version = '>=3.20.0'
+      capabilities = 'petsc>=3.20.0'
     []
     [vector_olshanskii]
       type = 'Exodiff'
@@ -83,7 +83,7 @@ finite elements for velocity and pressure.'
       exodiff = 'fsp_steady_low_Re_olshanskii.e'
       detail = 'commuting operators in the style of Olshanskii with a vector variable implementation.'
       custom_cmp = 'fsp.cmp'
-      petsc_version = '>=3.20.0'
+      capabilities = 'petsc>=3.20.0'
     []
   []
   [steady_lid_driven_fsp_high_Re]
@@ -94,7 +94,7 @@ finite elements for velocity and pressure.'
     issues = '#24548'
     requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of 500.'
     cli_args = "n=8 -fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_steady_high_Re"
-    petsc_version = '>=3.20.0'
+    capabilities = 'petsc>=3.20.0'
   []
   [steady_lid_driven_fsp_pressure_mass_matrix]
     requirement = 'The system shall be able to efficiently precondition Taylor-Hood finite elements using a Schur complement field split with the preconditioner for the Schur complement formed from the pressure mass matrix for a'
@@ -103,14 +103,14 @@ finite elements for velocity and pressure.'
       type = 'Exodiff'
       input = 'steady_vector_fsp_stokes.i'
       exodiff = 'steady_vector_fsp_stokes_exo.e'
-      petsc_version = '>=3.20.0'
+      capabilities = 'petsc>=3.20.0'
       detail = 'a Stokes problem and a'
     []
     [high_Re]
       type = 'Exodiff'
       input = 'steady_vector_fsp_al.i'
       exodiff = 'steady_vector_fsp_al_exo.e'
-      petsc_version = '>=3.20.0'
+      capabilities = 'petsc>=3.20.0'
       detail = 'a high Reynolds number (1000) Navier-Stokes problem with a grad-div stabilization.'
     []
   []
