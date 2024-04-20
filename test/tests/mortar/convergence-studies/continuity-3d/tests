@@ -10,7 +10,7 @@
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a zeroth order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -23,7 +23,7 @@
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a first order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -37,7 +37,7 @@
                   'the temperature variable and a first order dual basis for the Lagrange '
                   'multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'mumps method!=dbg'
+    capabilities = 'mumps & method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -51,7 +51,7 @@
                   'for the temperature variable and a zeroth order basis for the Lagrange '
                   'multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'ad_size>=100 mumps method!=dbg'
+    capabilities = 'ad_size>=100 & mumps & method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -64,7 +64,7 @@
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a first order basis for the Lagrange multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'ad_size>=100 mumps method!=dbg'
+    capabilities = 'ad_size>=100 & mumps & method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -78,7 +78,7 @@
                   'for the temperature variable and a second order basis for the Lagrange '
                   'multiplier.'
     required_python_packages = 'sympy pandas matplotlib'
-    capabilities = 'ad_size>=100 mumps method!=dbg'
+    capabilities = 'ad_size>=100 & mumps & method!=dbg'
     heavy = True
     min_parallel = 2
   []

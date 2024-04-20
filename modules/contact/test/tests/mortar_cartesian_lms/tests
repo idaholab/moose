@@ -49,8 +49,7 @@
     rel_err = 5.0e-4
     abs_zero = 1.0e-4
     max_parallel = 4
-    capabilities = 'ad_size>=50 method=opt'
-    method = 'opt'
+    capabilities = 'ad_size>=50 & method=opt'
     requirement = 'The contact module shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers.'
   []
   [two_block_1st_order_constraint_lm_xy_friction_vcp]
@@ -72,7 +71,7 @@
     rel_err = 5.0e-4
     abs_zero = 1.0e-4
     max_parallel = 4
-    capabilities = 'ad_size>=50 method=opt'
+    capabilities = 'ad_size>=50 & method=opt'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers using VCP.'
   []
