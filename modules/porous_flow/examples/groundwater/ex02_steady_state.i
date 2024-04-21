@@ -14,6 +14,7 @@
   [zmax]
     type = SideSetsFromNormalsGenerator
     input = name_blocks
+    normal_tol = 0.1
     new_boundary = zmax
     normals = '0 0 1'
   []
