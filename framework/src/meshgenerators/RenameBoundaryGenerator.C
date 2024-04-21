@@ -24,33 +24,12 @@ RenameBoundaryGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addDeprecatedParam<std::vector<BoundaryID>>(
-      "old_boundary_id",
-      "Elements with these boundary ID(s) will be given the new boundary ID(s) and/or name(s). You "
-      "must supply either 'old_boundary_id' or 'old_boundary_name'.",
-      "Use 'old_boundary' instead of 'old_boundary_id'.");
-  params.addDeprecatedParam<std::vector<BoundaryName>>(
-      "old_boundary_name",
-      "Elements with these boundary name(s) will be given the new boundary ID(s) and/or name(s). "
-      "You must supply either 'old_boundary_id' or 'old_boundary_name'.",
-      "Use 'old_boundary' instead of 'old_boundary_name'");
-  params.addDeprecatedParam<std::vector<BoundaryID>>(
-      "new_boundary_id",
-      "The new boundary ID(s) for the elements defined by "
-      "'old_boundary_id' or 'old_boundary_name'.",
-      "Use 'new_boundary' instead of 'new_boundary_id'.");
-  params.addDeprecatedParam<std::vector<BoundaryName>>(
-      "new_boundary_name",
-      "The new boundary name(s) for the elements defined by "
-      "'old_boundary_id' or 'old_boundary_name'. If 'new_boundary_id' is not provided and a "
-      "boundary with the given name does not exist, a new boundary ID will be created.",
-      "Use 'new_boundary' instead of 'new_boundary_name'.");
 
-  params.addParam<std::vector<BoundaryName>>(
+  params.addRequiredParam<std::vector<BoundaryName>>(
       "old_boundary",
       "Elements with these boundary ID(s)/name(s) will be given the new boundary information "
       "specified in 'new_boundary'");
-  params.addParam<std::vector<BoundaryName>>(
+  params.addRequiredParam<std::vector<BoundaryName>>(
       "new_boundary",
       "The new boundary ID(s)/name(s) to be given by the boundary elements defined in "
       "'old_boundary'.");
@@ -66,62 +45,12 @@ RenameBoundaryGenerator::validParams()
 RenameBoundaryGenerator::RenameBoundaryGenerator(const InputParameters & params)
   : MeshGenerator(params), _input(getMesh("input"))
 {
-  if (isParamValid("old_boundary_id") && isParamValid("old_boundary_name"))
-    paramError("old_boundary_id",
-               "Cannot use in combination with 'old_boundary_name'. Please use 'old_boundary' "
-               "instead; 'old_boundary_id' and 'old_boundary_name' are deprecated.");
-  if (isParamValid("new_boundary_id") && isParamValid("new_boundary_name"))
-    paramError("new_boundary_id",
-               "Cannot use in combination with 'new_boundary_name'. Please use 'new_boundary' "
-               "instead; 'new_boundary_id' and 'new_boundary_name' are deprecated.");
+  _old_boundary = getParam<std::vector<BoundaryName>>("old_boundary");
 
-  if (isParamValid("old_boundary_id") && isParamValid("old_boundary"))
-    paramError("old_boundary_id",
-               "Cannot use with 'old_boundary'. Use only 'old_boundary'; 'old_boundary_id' is "
-               "deprecated.");
-  if (isParamValid("old_boundary_name") && isParamValid("old_boundary"))
-    paramError(
-        "old_boundary_name",
-        "Cannot use with 'old_boundary_name'. Use only 'old_boundary'; 'old_boundary_id_name' is "
-        "deprecated.");
-
-  if (params.isParamValid("old_boundary"))
-  {
-    _old_boundary = getParam<std::vector<BoundaryName>>("old_boundary");
-    _old_boundary_param_name = "old_boundary";
-  }
-  else if (params.isParamValid("old_boundary_id"))
-  {
-    for (const auto id : getParam<std::vector<BoundaryID>>("old_boundary_id"))
-      _old_boundary.push_back(std::to_string(id));
-    _old_boundary_param_name = "old_boundary_id";
-  }
-  else
-  {
-    _old_boundary = getParam<std::vector<BoundaryName>>("old_boundary_name");
-    _old_boundary_param_name = "old_boundary_name";
-  }
-
-  if (params.isParamValid("new_boundary"))
-  {
-    _new_boundary = getParam<std::vector<BoundaryName>>("new_boundary");
-    _new_boundary_param_name = "new_boundary";
-  }
-  else if (params.isParamValid("new_boundary_id"))
-  {
-    for (const auto id : getParam<std::vector<BoundaryID>>("new_boundary_id"))
-      _new_boundary.push_back(std::to_string(id));
-    _new_boundary_param_name = "new_boundary_id";
-  }
-  else
-  {
-    _new_boundary = getParam<std::vector<BoundaryName>>("new_boundary_name");
-    _new_boundary_param_name = "new_boundary_name";
-  }
+  _new_boundary = getParam<std::vector<BoundaryName>>("new_boundary");
 
   if (_old_boundary.size() != _new_boundary.size())
-    paramError(
-        _new_boundary_param_name, "Must be the same length as '", _old_boundary_param_name, "'");
+    paramError("new_boundary", "Must be the same length as 'old_boundary'");
 }
 
 std::unique_ptr<MeshBase>
@@ -166,7 +95,7 @@ RenameBoundaryGenerator::generate()
   std::vector<BoundaryID> old_boundary_ids(num_boundaries, Moose::INVALID_BOUNDARY_ID);
   std::vector<std::string> old_boundary_names(num_boundaries);
   std::stringstream missing_boundary;
-  for (std::size_t i = 0; i < num_boundaries; ++i)
+  for (const auto i : make_range(num_boundaries))
   {
     const BoundaryName & name = _old_boundary[i];
 
@@ -191,14 +120,14 @@ RenameBoundaryGenerator::generate()
       old_boundary_names[i] = name;
   }
   if (missing_boundary.str().size())
-    paramError(_old_boundary_param_name,
+    paramError("old_boundary",
                "The following boundaries were requested to be renamed, but do not exist: ",
                missing_boundary.str());
 
   // Get the boundary IDs that we're moving to
   std::vector<BoundaryID> new_boundary_ids(num_boundaries, Moose::INVALID_BOUNDARY_ID);
   std::map<BoundaryID, std::string> new_names;
-  for (std::size_t i = 0; i < num_boundaries; ++i)
+  for (const auto i : make_range(num_boundaries))
   {
     const BoundaryName & name = _new_boundary[i];
 
@@ -265,12 +194,12 @@ RenameBoundaryGenerator::generate()
   auto temp_new_boundary_ids = new_boundary_ids;
   std::vector<std::pair<BoundaryID, BoundaryID>> temp_change_ids;
   // Loop through all new IDs
-  for (std::size_t new_i = 0; new_i < num_boundaries; ++new_i)
+  for (const auto new_i : make_range(num_boundaries))
   {
     // Look at all of the old IDs that will be moved after the move to the new ID.
     // If any of the old IDs after are IDs that we are moving to, create a temprorary
     // and keep track of it so we can move it back at the end.
-    for (std::size_t old_i = new_i + 1; old_i < num_boundaries; ++old_i)
+    for (const auto old_i : make_range(new_i + 1, num_boundaries))
       if (new_boundary_ids[new_i] == old_boundary_ids[old_i])
       {
         const auto temp_id = get_unused_boundary_id();
@@ -281,7 +210,7 @@ RenameBoundaryGenerator::generate()
   }
 
   // First pass through changing the boundary ids
-  for (std::size_t i = 0; i < num_boundaries; ++i)
+  for (const auto i : make_range(num_boundaries))
     MeshTools::Modification::change_boundary_id(
         *mesh, old_boundary_ids[i], temp_new_boundary_ids[i]);
 
@@ -290,7 +219,7 @@ RenameBoundaryGenerator::generate()
     MeshTools::Modification::change_boundary_id(*mesh, pair.first, pair.second);
 
   // First go through and remove all of the old names
-  for (std::size_t i = 0; i < num_boundaries; ++i)
+  for (const auto i : make_range(num_boundaries))
   {
     if (boundary_info.get_sideset_name_map().count(old_boundary_ids[i]))
       boundary_info.set_sideset_name_map().erase(old_boundary_ids[i]);

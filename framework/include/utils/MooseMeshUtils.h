@@ -289,4 +289,31 @@ void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node
                          std::vector<dof_id_type> & elem_id_list,
                          std::vector<dof_id_type> & ordered_node_list,
                          std::vector<dof_id_type> & ordered_elem_id_list);
+
+/**
+ * Converts a given name (BoundaryName or SubdomainName) that is known to only contain digits into a
+ * corresponding ID (BoundaryID or SubdomainID) and performs bounds checking to ensure that overflow
+ * doesn't happen.
+ * @param name Name that is to be converted into an ID.
+ * @return ID type corresponding to the type of name.
+ */
+template <typename T, typename Q>
+Q
+getIDFromName(const T & name)
+{
+  if (!MooseUtils::isDigits(name))
+    mooseError(
+        "'name' ", name, " should only contain digits that can be converted to a numerical type.");
+  long long id = std::stoll(name);
+  Q id_Q = Q(id);
+  if (id < std::numeric_limits<Q>::min() || id > std::numeric_limits<Q>::max())
+    mooseError(MooseUtils::prettyCppType<T>(&name),
+               " ",
+               name,
+               " is not within the numeric limits of the expected ID type ",
+               MooseUtils::prettyCppType<Q>(&id_Q),
+               ".");
+
+  return id_Q;
+}
 }

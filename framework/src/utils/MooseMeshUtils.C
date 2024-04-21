@@ -138,16 +138,7 @@ getBoundaryIDs(const MeshBase & mesh,
         id = boundary_info.get_id_by_name(boundary_name[i]);
     }
     else
-    {
-      std::istringstream ss(boundary_name[i]);
-      ss >> id;
-      if (ss.fail())
-        mooseError("Failed to convert integer ",
-                   boundary_name[i],
-                   " to a boundary id.  Got ",
-                   id,
-                   " instead.  Is the integer too large for boundary_id_type?");
-    }
+      id = getIDFromName<BoundaryName, BoundaryID>(boundary_name[i]);
 
     ids[i] = id;
   }
@@ -185,10 +176,7 @@ getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
   if (!MooseUtils::isDigits(boundary_name))
     id = mesh.get_boundary_info().get_id_by_name(boundary_name);
   else
-  {
-    std::istringstream ss(boundary_name);
-    ss >> id;
-  }
+    id = getIDFromName<BoundaryName, BoundaryID>(boundary_name);
 
   return id;
 }
@@ -206,10 +194,7 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
   if (!MooseUtils::isDigits(subdomain_name))
     id = mesh.get_id_by_name(subdomain_name);
   else
-  {
-    std::istringstream ss(subdomain_name);
-    ss >> id;
-  }
+    id = getIDFromName<SubdomainName, SubdomainID>(subdomain_name);
 
   return id;
 }
