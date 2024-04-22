@@ -70,6 +70,7 @@
       type = CheckFiles
       input = checkpoint.i
       cli_args = 'Outputs/checkpoint=true --test-checkpoint-half-transient'
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 3600.000000 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2"
       recover = false
 
       check_files = "checkpoint_out_cp/0004-restart-0.rd/data "
@@ -123,7 +124,7 @@
       input = checkpoint.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --output-wall-time-interval 0.02'
-      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.020000 s\s+ User Checkpoint:\s+ Disabled\s+ # Checkpoints Kept:\s+ 2"
       detail = " at specified wall time intervals and"
     []
     [wall_time_interval_recover]
@@ -143,7 +144,7 @@
       input = checkpoint.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/wall_time_checkpoint=false'
-      expect_out = "Wall time checkpoints are disabled."
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Disabled\s+ User Checkpoint:\s+ Disabled"
       detail = " with an option to disable wall time checkpoints and"
     []
     [wall_time_interval_disabled_recover]
@@ -167,7 +168,6 @@
       type = CheckFiles
       input = checkpoint.i
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_tiny_out --output-wall-time-interval 1e-50'
-      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
       recover = false
 
       check_files = "checkpoint_wall_time_interval_tiny_out_cp/0010-restart-0.rd/data "
@@ -194,7 +194,7 @@
       type = CheckFiles
       input = checkpoint_parent.i
       cli_args = '--output-wall-time-interval 1e-50'
-      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.000000 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2"
       recover = false
 
       check_files = "checkpoint_parent_out_cp/0010-restart-0.rd/data "
@@ -291,7 +291,7 @@
       input = checkpoint_block.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --output-wall-time-interval 0.02'
-      expect_out = "Checkpoints will be written every \S+ seconds of wall time or at the end of the current timestep, whichever occurs later."
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.020000 s\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2"
       detail = "at specified wall time intervals"
     []
     [wall_time_interval_recover]
@@ -311,7 +311,7 @@
       input = checkpoint_block.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/out/wall_time_checkpoint=false'
-      expect_out = "Wall time checkpoints are disabled."
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Disabled\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2"
       detail = " with an option to disable wall time checkpoints and"
     []
     [wall_time_interval_disabled_recover]
@@ -336,7 +336,15 @@
     requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined'
     type = 'RunException'
     input = 'checkpoint_block.i'
+    cli_args = 'Outputs/cp/type=Checkpoint'
+    expect_err = "Multiple Checkpoint objects are not allowed and there is more than one Checkpoint defined in the 'Outputs' block."
+  []
+  [multiple_checkpoints_error_shortcut]
+    issues = '#13562'
+    requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined'
+    type = 'RunException'
+    input = 'checkpoint_block.i'
     cli_args = 'Outputs/checkpoint=true'
-    expect_err = 'Multiple checkpoints are not allowed.'
+    expect_err = "Shortcut checkpoint syntax cannot be used with another Checkpoint object in the 'Outputs' block"
   []
 []

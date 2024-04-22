@@ -66,7 +66,8 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
     _checkpoint_type(getParam<CheckpointType>("checkpoint_type")),
     _num_files(getParam<unsigned int>("num_files")),
-    _suffix(getParam<std::string>("suffix"))
+    _suffix(getParam<std::string>("suffix")),
+    _checkpoint_info(std::vector<std::pair<std::string, std::string>>())
 {
   // Prevent the checkpoint from executing at any time other than INITIAL,
   // TIMESTEP_END, and FINAL
@@ -108,16 +109,33 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   // 'The --output-wall-time-interval parameter is necessary for testing
   // and should only be used in the test suite.
   Output::setWallTimeIntervalFromCommandLineParam();
+
   // We want to do this here and not in the constructor so it overrides --output-wall-time-interval
   if (!getParam<bool>("wall_time_checkpoint"))
-  {
     _wall_time_interval = std::numeric_limits<Real>::max();
-    mooseInfo("Wall time checkpoints are disabled.");
-  }
+
+  // Record some information about the checkpoint
+  std::string interval_info;
+  if (getParam<bool>("wall_time_checkpoint"))
+    interval_info = "Every " + std::to_string(_wall_time_interval) + " s";
   else
-    mooseInfo(
-        "Checkpoints will be written every " + std::to_string(_wall_time_interval) +
-        " seconds of wall time or at the end of the current timestep, whichever occurs later.");
+    interval_info = "Disabled";
+
+  _checkpoint_info.emplace_back("Wall Time Interval", interval_info);
+
+  std::string user_info;
+  if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
+    user_info = "Disabled";
+  else
+    user_info = "Outputs/" + name();
+
+  _checkpoint_info.emplace_back("User Checkpoint", user_info);
+
+  if (!((interval_info == "Disabled") && (user_info == "Disabled")))
+  {
+    _checkpoint_info.emplace_back("# Checkpoints Kept", std::to_string(_num_files));
+    // Add EXECUTE_ON
+  }
 }
 
 std::string

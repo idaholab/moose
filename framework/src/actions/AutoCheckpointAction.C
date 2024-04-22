@@ -39,10 +39,13 @@ AutoCheckpointAction::act()
 
   const bool shortcut_syntax = getParam<bool>("checkpoint");
 
-  if (num_checkpoints > 1 || (num_checkpoints == 1 and shortcut_syntax))
-    mooseError("Multiple checkpoints are not allowed. Check the input to ensure there "
-               "is only one Checkpoint defined in the 'Outputs' block, including the "
-               "shortcut syntax 'Outputs/checkpoint=true'.");
+  if (num_checkpoints > 1)
+    checkpoints[0]->mooseError("Multiple Checkpoint objects are not allowed and there is more than "
+                               "one Checkpoint defined in the 'Outputs' block.");
+  if (num_checkpoints == 1 && shortcut_syntax)
+    paramError("checkpoint",
+               "Shortcut checkpoint syntax cannot be used with another Checkpoint object in the "
+               "'Outputs' block");
 
   if (num_checkpoints == 0)
   {

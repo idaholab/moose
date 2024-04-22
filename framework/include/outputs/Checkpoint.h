@@ -82,6 +82,12 @@ public:
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(CheckpointType flag) { _checkpoint_type = flag; }
 
+  /// Gets information about the checkpoint
+  const std::vector<std::pair<std::string, std::string>> & getCheckpointInfo() const
+  {
+    return _checkpoint_info;
+  }
+
 protected:
   /**
    * Outputs a checkpoint file.
@@ -106,4 +112,7 @@ private:
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
+
+  /// Vector of pairs describing checkpoint structure
+  std::vector<std::pair<std::string, std::string>> _checkpoint_info;
 };

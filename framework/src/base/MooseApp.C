@@ -1775,6 +1775,12 @@ MooseApp::getOutputWarehouse()
   return _output_warehouse;
 }
 
+const OutputWarehouse &
+MooseApp::getOutputWarehouse() const
+{
+  return _output_warehouse;
+}
+
 std::string
 MooseApp::appNameToLibName(const std::string & app_name) const
 {
