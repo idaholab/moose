@@ -28,11 +28,11 @@ MeshCut2DRankTwoTensorNucleation::validParams()
       "edge_extension_factor",
       1e-5,
       "edge_extension_factor >= 0",
-      "Crack length scaling factor to extend the nucleated crack beyond the cut element edges.");
+      "Factor by which the length of cracks that have been adjusted to coincide with element edges are increased to avoid missing an intersection with the edge due to numerical tolerance issues."); 
   params.addRangeCheckedParam<Real>("nucleation_length",
                                     "nucleation_length >= 0",
                                     "Size of crack to nucleate.  Must be larger than the length of "
-                                    "the element in which the crack is nucleated.");
+                                    "the element in which the crack is nucleated, unless 'always_cut_element' is set to 'true'.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -52,7 +52,7 @@ MeshCut2DRankTwoTensorNucleation::validParams()
   params.addParam<bool>(
       "always_cut_element",
       false,
-      "Should element be cut if nucleation_length is smaller than element length.");
+      "Controls the behavior of nucleating cracks if 'nucleation_length' is smaller than the length required to travserse an element with a nucleating crack. If this is set to 'false', that condition will result in an error, but if set to true, a crack with the length needed to traverse the element will be inserted.");
   return params;
 }
 

@@ -741,7 +741,7 @@ DomainIntegralAction::act()
       if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
       {
         // The CrackFrontDefinition updates this vpp and MUST execute before it
-        // This is enforced by setting the execution_order_group = -1 for the CrackFrontDefination
+        // This is enforced by setting the execution_order_group = -1 for the CrackFrontDefinition
         // The CrackFrontDefinition must execute on nonlinear to update with xfem updates
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
       }
