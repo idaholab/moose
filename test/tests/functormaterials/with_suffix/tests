@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#27440'
+  design = 'GenericFunctorMaterial.md'
+  [no_suffix]
+    type = CSVDiff
+    input = functor_material.i
+    csvdiff = functor_material_out.csv
+    requirement = 'The system should be able to add a generic functor material without a suffix for the properties.'
+  []
+  [suffix]
+    type = CSVDiff
+    input = functor_material.i
+    csvdiff = functor_material_out.csv
+    requirement = 'The system should be able to add a generic functor material with a suffix for the properties.'
+    cli_args = "FunctorMaterials/fmat/prop_getter_suffix='bazinga' Postprocessors/get_prop1/functor=bazinga_prop1  Postprocessors/get_prop2/functor=bazinga_prop2"
+  []
+[]
