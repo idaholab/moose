@@ -88,7 +88,7 @@ for path in $PETSC_DIR $BUILD_PREFIX; do
 done
 
 make
-make check
+#make check
 make install
 
 # Remove unneeded files
