@@ -43,7 +43,7 @@
     issues = '#27054'
     type = CSVDiff
     input = nucleate_bulkCrack.i
-    cli_args = 'UserObjects/nucleate/nucleation_length=.001 UserObjects/nucleate/always_cut_element=True'
+    cli_args = 'UserObjects/nucleate/nucleation_length=.001 UserObjects/nucleate/nucleate_across_full_element=True'
     csvdiff = 'nucleate_bulkCrack_out_II_KI_1_0006.csv'
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
