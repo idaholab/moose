@@ -8,8 +8,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess, os, sys, traceback
+import subprocess, os, re, sys, traceback
 from versioner import Versioner
+from datetime import date
 
 class PreMake:
     def __init__(self):
@@ -102,12 +103,41 @@ class PreMake:
                 required += f'={required_build}'
 
             full_message = f"Conda package '{package}' is currently at version "
-            full_message += f"'{current}', but the required version is '{required}'.\n\n"
-            full_message += "The correct version can be installed via:\n\n"
-            full_message += f"    conda install {package}={required}"
+            full_message += f"'{current}' and the required version is '{required}'.\n"
+
+            # If the version is a date and the current date is newer than the
+            # required date, it's likely that MOOSE needs to be updated
+            show_conda_install = True
+            version_date = self.parseVersionDate(version)
+            required_version_date = self.parseVersionDate(required_version)
+            if version_date is not None and required_version_date is not None:
+                if required_version_date < version_date:
+                    show_conda_install = False
+                    version_delta = (version_date - required_version_date).days
+                    full_message += f"The installed version of '{package}' is newer than"
+                    full_message += f" the required version and your checkout of moose is"
+                    full_message += f" {version_delta} day(s) old.\n"
+                    full_message += "It is likely that you need to update moose."
+
+            if show_conda_install:
+                full_message += "The correct version can be installed via:\n"
+                full_message += f"    conda install {package}={required}"
+
             if msg:
                 full_message += f'\n{msg}'
             Exception.__init__(self, full_message)
+
+        @staticmethod
+        def parseVersionDate(version: str):
+            """
+            Helper for parsing a date from a version if the version is a date
+            """
+            version_date_re = re.search(r'(\d{4}).(\d{2}).(\d{2})', version)
+            if version_date_re is None:
+                return None
+            return date(int(version_date_re.group(1)),
+                        int(version_date_re.group(2)),
+                        int(version_date_re.group(3)))
 
     def check(self):
         """
