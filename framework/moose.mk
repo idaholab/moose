@@ -47,6 +47,7 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit command line tool
 hit_CLI_srcfiles := $(HIT_DIR)/main.cc
 hit_CLI          := $(HIT_DIR)/hit
+$(hit_objects): prebuild
 
 #
 # hit python bindings
@@ -131,7 +132,7 @@ else
 endif
 pyhit_COMPILEFLAGS += $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
-
+$(pyhit_srcfiles) $(hit_CLI_srcfiles): prebuild
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
@@ -153,7 +154,7 @@ gtest_deps      := $(patsubst %.cc, %.$(no-method-obj-suffix).d, $(gtest_srcfile
 moose_config := $(FRAMEWORK_DIR)/include/base/MooseConfig.h
 moose_default_config := $(FRAMEWORK_DIR)/include/base/MooseDefaultConfig.h
 
-$(moose_config):
+$(moose_config): prebuild
 	@echo "Copying default MOOSE configuration to: "$@"..."
 	@cp $(moose_default_config) $(moose_config)
 
@@ -386,7 +387,7 @@ moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
-$(pcre_LIB): $(pcre_objects)
+$(pcre_LIB): prebuild $(pcre_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR)
@@ -450,6 +451,7 @@ all: exodiff
 exodiff: app_INCLUDES := $(exodiff_includes)
 exodiff: libmesh_CXXFLAGS := -std=gnu++11 -O2 -felide-constructors -w
 exodiff: $(exodiff_APP)
+$(exodiff_objects): prebuild
 $(exodiff_APP): $(exodiff_objects)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
