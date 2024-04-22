@@ -20,6 +20,8 @@
 #include <set>
 #include <unordered_set>
 
+#include "libmesh/petsc_vector.h"
+
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
@@ -78,8 +80,10 @@ public:
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
-  void multiplyWithCellVolume(const SolverVariableName & var_name,
-                              NumericVector<Number> & vec_to_multiply);
+  void setupCellVolumes();
+
+  Real safePetscVectorAccess(const PetscVector<Number> & vector,
+                             const dof_id_type global_index) const;
 
   /// Populate the face values of the H/A field
   void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya);
@@ -124,6 +128,8 @@ protected:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _HbyA_raw;
 
+  std::vector<const PetscScalar *> _HbyA_raw_array;
+
   /**
    * A map functor from faces to $(1/A)_f$. Where $A_i$ is the diagonal of the system matrix
    * for the momentum equation.
@@ -157,6 +163,9 @@ protected:
 
   /// Pointer to the pressure system
   const LinearSystem * _pressure_system;
+
+  /// We will hold a vector of cell volumes to make sure we can do volume corrections rapidly
+  std::unique_ptr<NumericVector<Number>> _cell_volumes;
 };
 
 template <typename VarType>
