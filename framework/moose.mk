@@ -166,7 +166,7 @@ all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
 moose_all_header_dir := $(all_header_dir)
 
 define all_header_dir_rule
-$(1):
+$(1):prebuild
 	@echo Rebuilding symlinks in $$@
 	@mkdir -p $$@
 endef
@@ -197,7 +197,7 @@ $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
 moose_config_symlink := $(moose_all_header_dir)/MooseConfig.h
-$(moose_config_symlink): $(moose_config) | $(moose_all_header_dir)
+$(moose_config_symlink): prebuild $(moose_config) | $(moose_all_header_dir)
 	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
 	@ln -sf $(moose_config) $(moose_config_symlink)
 
@@ -249,7 +249,7 @@ unity_srcsubdirs := $(filter-out $(moose_non_unity), $(srcsubdirs))
 non_unity_srcsubdirs := $(filter $(moose_non_unity), $(allsrcsubdirs))
 
 define unity_dir_rule
-$(1):
+$(1):prebuild
 	@echo Creating Unity Directory $$@
 	@mkdir -p $(1)
 endef
@@ -264,17 +264,17 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # these are prereqs that must be run first - but their timestamp isn't used
 ifeq ($(UNAME10), MINGW64_NT)
 define unity_file_rule
-$(1):$(2) $(3) | $(4)
+$(1):prebuild $(2) $(3) | $(4)
 	@echo Creating Unity \(Windows\) $$@
 	$$(shell echo > $$@)
-	$$(foreach srcfile,$$(sort $$(filter-out $(3) $(4),$$^)),$$(shell echo '#include "'$$(shell cygpath -m $$(srcfile))'"' >> $$@))
+	$$(foreach srcfile,$$(sort $(2)),$$(shell echo '#include "'$$(shell cygpath -m $$(srcfile))'"' >> $$@))
 endef
 else
 define unity_file_rule
-$(1):$(2) $(3) | $(4)
+$(1):prebuild $(2) $(3) | $(4)
 	@echo Creating Unity $$@
 	$$(shell echo > $$@)
-	$$(foreach srcfile,$$(sort $$(filter-out $(3) $(4),$$^)),$$(shell echo '#include"$$(srcfile)"' >> $$@))
+	$$(foreach srcfile,$$(sort $(2)),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 endef
 endif
 # 1: The directory where the unity source files will go
@@ -378,10 +378,11 @@ wasp_submodule_status:
 
 # pre-make for checking current dependency versions and showing useful warnings
 # if things like conda packages are out of date
-premake:
+prebuild:
 	@-python $(FRAMEWORK_DIR)/../scripts/premake.py
 
-moose: premake wasp_submodule_status $(moose_revision_header) $(moose_LIB)
+wasp_submodule_status $(moose_revision_header) $(moose_LIB): prebuild
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
