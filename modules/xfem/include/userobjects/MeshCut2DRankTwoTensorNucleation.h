@@ -25,7 +25,7 @@ protected:
   const Real _edge_extension_factor;
 
   /// should element be cut if the nucleation_length is smaller than the element length.
-  const bool _always_cut_element;
+  const bool _nucleate_across_full_element;
 
   /// is the nucleation length provided in the input file.
   const bool _is_nucleation_length_provided;

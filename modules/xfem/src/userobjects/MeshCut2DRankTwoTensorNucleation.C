@@ -28,11 +28,14 @@ MeshCut2DRankTwoTensorNucleation::validParams()
       "edge_extension_factor",
       1e-5,
       "edge_extension_factor >= 0",
-      "Factor by which the length of cracks that have been adjusted to coincide with element edges are increased to avoid missing an intersection with the edge due to numerical tolerance issues."); 
-  params.addRangeCheckedParam<Real>("nucleation_length",
-                                    "nucleation_length >= 0",
-                                    "Size of crack to nucleate.  Must be larger than the length of "
-                                    "the element in which the crack is nucleated, unless 'always_cut_element' is set to 'true'.");
+      "Factor by which the length of cracks that have been adjusted to coincide with element edges "
+      "are increased to avoid missing an intersection with the edge due to numerical tolerance "
+      "issues.");
+  params.addRangeCheckedParam<Real>(
+      "nucleation_length",
+      "nucleation_length >= 0",
+      "Size of crack to nucleate.  Must be larger than the length of the element in which the "
+      "crack is nucleated, unless 'nucleate_across_full_element' is set to 'true'.");
   params.addParam<MooseEnum>(
       "scalar_type",
       RankTwoScalarTools::scalarOptions(),
@@ -50,9 +53,12 @@ MeshCut2DRankTwoTensorNucleation::validParams()
       Point(0, 1, 0),
       "End point for axis used to calculate some cylindrical material tensor quantities");
   params.addParam<bool>(
-      "always_cut_element",
+      "nucleate_across_full_element",
       false,
-      "Controls the behavior of nucleating cracks if 'nucleation_length' is smaller than the length required to travserse an element with a nucleating crack. If this is set to 'false', that condition will result in an error, but if set to true, a crack with the length needed to traverse the element will be inserted.");
+      "Controls the behavior of nucleating cracks if 'nucleation_length' is smaller than the "
+      "length required to travserse an element with a nucleating crack. If this is set to 'false', "
+      "that condition will result in an error, but if set to true, a crack with the length needed "
+      "to traverse the element will be inserted.");
   return params;
 }
 
@@ -60,7 +66,7 @@ MeshCut2DRankTwoTensorNucleation::MeshCut2DRankTwoTensorNucleation(
     const InputParameters & parameters)
   : MeshCut2DNucleationBase(parameters),
     _edge_extension_factor(getParam<Real>("edge_extension_factor")),
-    _always_cut_element(getParam<bool>("always_cut_element")),
+    _nucleate_across_full_element(getParam<bool>("nucleate_across_full_element")),
     _is_nucleation_length_provided(isParamValid("nucleation_length")),
     _nucleation_length(_is_nucleation_length_provided ? getParam<Real>("nucleation_length") : 0),
     _tensor(getMaterialProperty<RankTwoTensor>(getParam<std::string>("tensor"))),
@@ -139,29 +145,29 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
         is_point_1_on_external_boundary = (_current_elem->neighbor_ptr(e) == nullptr);
     }
 
-    // bisect_length is the length of a cut that goes across a single elment
-    // extend_length is the amount that needs to be added to each side of the bisect_legnth cut to
+    // traverse_length is the length of a cut that goes across a single elment
+    // extend_length is the amount that needs to be added to each side of the traverse_length cut to
     // make its length equal to the nucleation length
     // We also add a small amount to the crack length to make sure it fully cuts the element edge.
     // This factor is based on the element length.
-    Real bisect_length = (point_0 - point_1).norm();
-    Real extend_length = (_nucleation_length - bisect_length) / 2.0;
-    if (_nucleation_length < bisect_length)
+    Real traverse_length = (point_0 - point_1).norm();
+    Real extend_length = (_nucleation_length - traverse_length) / 2.0;
+    if (_nucleation_length < traverse_length)
     {
-      if (_is_nucleation_length_provided && !_always_cut_element)
+      if (_is_nucleation_length_provided && !_nucleate_across_full_element)
         mooseError(
             "Trying to nucleate crack smaller than element length, increase nucleation_length.\n  "
-            "location of crack being nucleated: ",
+            "Location of crack being nucleated: ",
             point_0,
             "\n  nucleation_length: ",
             _nucleation_length,
-            "\n  length to bisect element: ",
-            bisect_length,
-            "\n This error can be suppressed by setting always_cut_element=True which will "
-            "nucleate a crack the size of the element.");
+            "\n  Length to traverse element: ",
+            traverse_length,
+            "\n This error can be suppressed by setting nucleate_across_full_element=True which "
+            "will nucleate a crack the size of the element.");
       else
         //_edge_extension_factor is used to make sure cut will cut both edges of the element.
-        extend_length = (bisect_length * _edge_extension_factor) / 2.0;
+        extend_length = (traverse_length * _edge_extension_factor) / 2.0;
     }
 
     // First create a cut assuming bulk nucleation
@@ -172,11 +178,11 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
     // equal to nucleation_length
     if (is_point_0_on_external_boundary)
     {
-      point_0 = point_0 - (bisect_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
+      point_0 = point_0 - (traverse_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
     }
     else if (is_point_1_on_external_boundary)
     {
-      point_1 = point_1 + (bisect_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
+      point_1 = point_1 + (traverse_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
     }
     cutterElemNodes = {point_0, point_1};
   }
