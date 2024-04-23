@@ -315,7 +315,7 @@ protected:
   /// Momentum/mass inlet flux directions for potential coupling between applications
   const std::vector<Point> _flux_inlet_directions;
   /// Velocity function names at velocity inlet boundaries
-  const std::vector<std::vector<FunctionName>> _momentum_inlet_function;
+  const std::vector<std::vector<MooseFunctorName>> _momentum_inlet_function;
   /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
   const MultiMooseEnum _momentum_outlet_types;
   /// Velocity wall types (symmetry/noslip/slip/wallfunction)
@@ -569,9 +569,9 @@ NSFVBase<BaseType>::validParams()
                                   mom_inlet_types,
                                   "Types of inlet boundaries for the momentum equation.");
 
-  params.addParam<std::vector<std::vector<FunctionName>>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "momentum_inlet_function",
-      std::vector<std::vector<FunctionName>>(),
+      std::vector<std::vector<MooseFunctorName>>(),
       "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
       "double vector where the leading dimension corresponds to the number of fixed-velocity and "
       "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
@@ -994,7 +994,7 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
     _flux_inlet_pps(parameters.get<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(parameters.get<std::vector<Point>>("flux_inlet_directions")),
     _momentum_inlet_function(
-        parameters.get<std::vector<std::vector<FunctionName>>>("momentum_inlet_function")),
+        parameters.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_function")),
     _momentum_outlet_types(parameters.get<MultiMooseEnum>("momentum_outlet_types")),
     _momentum_wall_types(parameters.get<MultiMooseEnum>("momentum_wall_types")),
     _energy_inlet_types(parameters.get<MultiMooseEnum>("energy_inlet_types")),
