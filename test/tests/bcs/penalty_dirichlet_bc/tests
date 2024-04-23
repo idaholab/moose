@@ -8,6 +8,13 @@
     requirement = "The system shall support the application of Dirichlet type boundary conditions using the penalty method."
   [../]
 
+  [./test_penalty_dirichlet_bc_1d]
+    type = 'Exodiff'
+    input = 'penalty_dirichlet_bc_test_1d.i'
+    exodiff = 'penalty_dirichlet_bc_test_1d_out.e'
+    requirement = "The system shall support the application of Dirichlet type boundary conditions, on one-dimensional meshes, using the penalty method."
+  [../]
+
   [./test_function_penalty_dirichlet_bc]
     type = 'Exodiff'
     input = 'function_penalty_dirichlet_bc_test.i'
