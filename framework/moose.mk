@@ -378,10 +378,10 @@ wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
 # pre-make for checking current dependency versions and showing useful warnings
-# if things like conda packages are out of date
+# if things like conda packages are out of date. the "-" in "@-" means that
+# it is allowed to not exit 0
 prebuild:
-	@echo "ran prebuild"
-	@-python $(FRAMEWORK_DIR)/../scripts/premake.py
+	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
 moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
