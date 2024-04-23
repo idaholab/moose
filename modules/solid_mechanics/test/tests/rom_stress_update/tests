@@ -139,7 +139,7 @@
       type = 'RunApp'
       input = creep_ramp_sub_true.i
       expect_out = "The number of substeps computed exceeds 'maximum_number_substeps'"
-      cli_args = 'Materials/rom_stress_prediction/substep_strain_tolerance=5.0e-6'
+      cli_args = 'Materials/rom_stress_prediction/substep_strain_tolerance=4.0e-6'
       allow_test_objects = true
       allow_warnings = true
       detail = 'when substepping is on and the numerical integration error selected by the user guarantees accurate results but substepping settings require a system-wise time step cut because the computed number of substeps exceeds the maximum_number_substeps parameter.'

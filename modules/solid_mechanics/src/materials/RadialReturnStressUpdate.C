@@ -12,7 +12,7 @@
 
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
-
+#include "RankTwoScalarTools.h"
 template <bool is_ad>
 InputParameters
 RadialReturnStressUpdateTempl<is_ad>::validParams()
@@ -151,10 +151,8 @@ RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & strain_increment)
 {
   // compute an effective elastic strain measure
-  const GenericReal<is_ad> contracted_elastic_strain =
-      strain_increment.doubleContraction(strain_increment);
   const Real effective_elastic_strain =
-      std::sqrt(3.0 / 2.0 * MetaPhysicL::raw_value(contracted_elastic_strain));
+      RankTwoScalarTools::effectiveStrain(MetaPhysicL::raw_value(strain_increment));
 
   if (MooseUtils::absoluteFuzzyEqual(effective_elastic_strain, 0.0))
     return 1;

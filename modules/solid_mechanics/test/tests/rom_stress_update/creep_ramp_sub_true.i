@@ -140,7 +140,7 @@
 
     use_substepping = ERROR_BASED
     substep_strain_tolerance = 1.0e-5
-
+    maximum_number_substeps = 20
     stress_input_window_low_failure = WARN
     stress_input_window_high_failure = ERROR
     cell_input_window_high_failure = ERROR
