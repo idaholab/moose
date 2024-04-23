@@ -14,13 +14,12 @@
 /**
  * Computes the average of a functor over a side set.
  */
-template <bool is_ad>
-class SideAverageFunctorPostprocessorTempl : public SideIntegralFunctorPostprocessorTempl<is_ad>
+class SideAverageFunctorPostprocessor : public SideIntegralFunctorPostprocessorTempl<false>
 {
 public:
   static InputParameters validParams();
 
-  SideAverageFunctorPostprocessorTempl(const InputParameters & parameters);
+  SideAverageFunctorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -29,10 +28,7 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  using SideIntegralFunctorPostprocessorTempl<is_ad>::_integral_value;
+  using SideIntegralFunctorPostprocessorTempl<false>::_integral_value;
   /// Side set area
   Real _area;
 };
-
-typedef SideAverageFunctorPostprocessorTempl<false> SideAverageFunctorPostprocessor;
-typedef SideAverageFunctorPostprocessorTempl<true> ADSideAverageFunctorPostprocessor;
