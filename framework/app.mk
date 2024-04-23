@@ -363,7 +363,7 @@ $(app_LIB): curr_deps := $(depend_libs)
 $(app_LIB): curr_libs := $(depend_libs_flags)
 $(app_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
-$(app_LIB): prebuild $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
+$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS) | prebuild
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
@@ -382,7 +382,7 @@ $(app_test_LIB): curr_deps := $(depend_libs)
 $(app_test_LIB): curr_libs := $(depend_libs_flags)
 $(app_test_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_test_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
-$(app_test_LIB): prebuild $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
+$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS) | prebuild
 	@echo "Linking Test Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
@@ -428,7 +428,7 @@ ifeq ($(libmesh_static),yes)
 endif
 
 # Write resource file
-$(app_resource): prebuild
+$(app_resource): | prebuild
 	@echo "Creating Resource file $@"
 	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) \
      $(libmesh_CXXFLAGS) \
