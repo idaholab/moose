@@ -101,6 +101,16 @@ protected:
 private:
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
+  /// Determines if the requested values of execute_on are valid for checkpoints
+  void validateExecuteOn() const;
+
+  /**
+   * Gathers and records information used later for console output
+   * @param checkpoint_info A vector in which to store desired information.
+   */
+  void
+  recordCheckpointInfo(std::vector<std::pair<std::string, std::string>> & checkpoint_info) const;
+
   /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
   CheckpointType _checkpoint_type;
 
