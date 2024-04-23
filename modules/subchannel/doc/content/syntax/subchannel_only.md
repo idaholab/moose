@@ -1,7 +1,7 @@
-# MOOSE-SubChannel-only Input File Syntax
+# SubChannel-only Input File Syntax
 
-Listed below are all the reference pages for MOOSE-SubChannel specific code that
-can be used in the MOOSE-SubChannel input file.
+Listed below are all the reference pages for SubChannel specific code that
+can be used in the SubChannel input file.
 
 Click the blue links in the class names shown below to view the detailed
 description, the class purpose, theoretical models, input file examples, and
