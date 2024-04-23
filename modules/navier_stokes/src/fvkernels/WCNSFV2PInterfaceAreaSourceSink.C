@@ -63,11 +63,11 @@ WCNSFV2PInterfaceAreaSourceSink::WCNSFV2PInterfaceAreaSourceSink(const InputPara
     _sigma(getFunctor<ADReal>("sigma")),
     _particle_diameter(getFunctor<ADReal>("particle_diameter")),
     _cutoff_fraction(getParam<Real>("cutoff_fraction")),
-    _gamma_c(0.188),
-    _Kc(0.129),
-    _gamma_b(0.264),
-    _Kb(1.37),
-    _shape_factor(6.0)
+    _gamma_c(0.188),   // Model parameter - should not be tunable
+    _Kc(0.129),        // Model parameter - should not be tunable
+    _gamma_b(0.264),   // Model parameter - should not be tunable
+    _Kb(1.37),         // Model parameter - should not be tunable
+    _shape_factor(6.0) // Model parameter - should not be tunable
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -111,7 +111,8 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
     }
   }
   if (is_transient)
-    material_time_derivative_rho_d += _rho_d.dot(elem_arg, state);
+    material_time_derivative_rho_d +=
+        (_rho_d(elem_arg, state) - _rho_d(elem_arg, Moose::oldState())) / _dt;
   const auto bubble_compressibility = material_time_derivative_rho_d * xi / 3.0;
 
   // Adding area growth due to added mass
@@ -154,5 +155,5 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
       std::exp(-_Kb * sigma / (rho_l * std::pow(db, 5. / 3.) * Utility::pow<2>(u_eps)));
   const auto s_rb = f_b * exp_b;
 
-  return -bubble_added_mass - bubble_compressibility + s_rc - s_rb;
+  return -bubble_added_mass + bubble_compressibility + s_rc - s_rb;
 }
