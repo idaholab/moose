@@ -331,7 +331,7 @@ protected:
   const std::vector<MooseFunctorName> _energy_wall_function;
 
   /// Pressure function names at pressure boundaries
-  const std::vector<FunctionName> _pressure_function;
+  const std::vector<MooseFunctorName> _pressure_function;
 
   /// Subdomains where we want to have ambient convection
   const std::vector<std::vector<SubdomainName>> _ambient_convection_blocks;
@@ -594,9 +594,9 @@ NSFVBase<BaseType>::validParams()
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
                                   "Types of outlet boundaries for the momentum equation");
-  params.addParam<std::vector<FunctionName>>("pressure_function",
-                                             std::vector<FunctionName>(),
-                                             "Functions for boundary pressures at outlets.");
+  params.addParam<std::vector<MooseFunctorName>>("pressure_function",
+                                                 std::vector<MooseFunctorName>(),
+                                                 "Functions for boundary pressures at outlets.");
 
   MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction", "noslip");
   params.addParam<MultiMooseEnum>(
@@ -1001,7 +1001,7 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
     _energy_inlet_function(parameters.get<std::vector<std::string>>("energy_inlet_function")),
     _energy_wall_types(parameters.get<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_function(parameters.get<std::vector<MooseFunctorName>>("energy_wall_function")),
-    _pressure_function(parameters.get<std::vector<FunctionName>>("pressure_function")),
+    _pressure_function(parameters.get<std::vector<MooseFunctorName>>("pressure_function")),
     _ambient_convection_blocks(
         parameters.get<std::vector<std::vector<SubdomainName>>>("ambient_convection_blocks")),
     _ambient_convection_alpha(
@@ -2598,7 +2598,7 @@ NSFVBase<BaseType>::addINSOutletBC()
       const std::string bc_type = "INSFVOutletPressureBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.template set<NonlinearVariableName>("variable") = _pressure_name;
-      params.template set<FunctionName>("function") = _pressure_function[bc_ind];
+      params.template set<MooseFunctorName>("functor") = _pressure_function[bc_ind];
       params.template set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
       getProblem().addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
