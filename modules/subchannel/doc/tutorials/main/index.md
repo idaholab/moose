@@ -1,4 +1,4 @@
-# MOOSE-SubChannel Tutorial
+# SubChannel Tutorial
 
 !style halign=center fontsize=120%
 !datetime today format=%B %Y
@@ -14,7 +14,7 @@
   - Applications
   - Solving specific physics
 
-- MOOSE-SubChannel Introduction
+- SubChannel Introduction
 
   - Motivation
   - Overview
