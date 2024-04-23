@@ -1,6 +1,6 @@
 gcc: 12.2.1
 clang: 16.0.6
-minimum_gcc: 8.0.0
+minimum_gcc: 9.0.0
 minimum_clang: 10.0.1
 minimum_python: 3.7
 mpich: 4.0.2
