@@ -23,7 +23,7 @@ DK = K - T_in
 print(F)
 
 plt.figure()
-plt.plot(SC[1:] - T_in, "k^", markerfacecolor="k", label = "MOOSE-SubChannel")
+plt.plot(SC[1:] - T_in, "k^", markerfacecolor="k", label = "SubChannel")
 plt.plot(DK, "ko", markerfacecolor="r", label = "EXP")
 plt.title(r"Temperature profile 76mm downstream of heated section" "\n" "FFM-3A Run 101", fontsize=13)
 plt.xticks([i for i in range(len(Channels[:]))], [str(int(i)) for i in Channels[:]])

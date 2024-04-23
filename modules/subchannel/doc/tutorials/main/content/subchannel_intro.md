@@ -1,4 +1,4 @@
-# Introduction to MOOSE-SubChannel
+# Introduction to SubChannel
 
 !---
 
