@@ -21,6 +21,4 @@ When the above does not quite fit your needs, the following instructions are ava
 - [From Source (LLVM/Clang)](installation/manual_installation_llvm.md)
 - [installation/manual_installation_linux_lldb.md]
 
-Whatever your choice of installation method, the following requirements must be made:
-
 !include sqa/minimum_requirements.md

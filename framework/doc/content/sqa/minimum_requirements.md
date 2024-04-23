@@ -4,14 +4,21 @@
 In general, the following is required for MOOSE-based development:
 !style-end!
 
-- GCC/Clang C++17 compliant compiler (GCC @ [!package!minimum_gcc], Clang @ [!package!minimum_clang] or greater)
+A [!ac](POSIX) compliant Unix-like operating system. Any modern Linux operating system, or a
+Macintosh machine running either of the last two releases.
 
-  - Note: Intel compilers are not supported.
+| Artifact | Information |
+| :- | :- |
+| CPU Architecture | x86_64, ARM (Apple Silicon) |
+| Memory | 8 GB (16 GBs for debug compilation) |
+| Disk Space | 30GB |
 
-- Memory: 8 GBs of RAM for optimized compilation (16 GBs for debug compilation), 2 GB per core execution
-- Processor: 64-bit x86 or ARM64 (specifically, Apple Silicon)
-- Disk: 30GB
-- A [!ac](POSIX) compliant Unix-like operating system, including the two most recent versions of MacOS
-  and most current versions of Linux.
-- Git version control system
-- Python @ [!package!minimum_python] or greater
+<!-- comment to force MooseDocs to separate the tables -->
+
+| Libraries | Version / Information |
+| :- | :- |
+| GCC | [!package!minimum_gcc] - [!package!maximum_gcc] |
+| LLVM/Clang | [!package!minimum_clang] - [!package!maximum_clang] |
+| Intel | Not supported at this time |
+| Python | [!package!minimum_python] - [!package!maximum_python] |
+| Python Pkgs | [!package!python_packages] |
