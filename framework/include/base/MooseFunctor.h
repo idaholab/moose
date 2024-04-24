@@ -152,8 +152,9 @@ public:
   virtual ~FunctorBase() = default;
   FunctorBase(const MooseFunctorName & name,
               const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS})
-    : _clearance_schedule(clearance_schedule), _functor_name(name)
+    : _functor_name(name)
   {
+    setCacheClearanceSchedule(clearance_schedule);
   }
 
   /**
@@ -229,6 +230,7 @@ public:
    */
   void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
 
+  bool shouldClearCache(const ExecFlagType & flag) const;
   /**
    * Returns whether the functor is defined on this block
    */
@@ -591,7 +593,7 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const ElemArg & elem, const StateArg & state) const
 {
-  if (_clearance_schedule.count(EXEC_ALWAYS))
+  if (_clearance_schedule.empty())
     return evaluate(elem, state);
 
   mooseAssert(state.state == 0,
@@ -606,7 +608,7 @@ FunctorBase<T>::operator()(const FaceArg & face_in, const StateArg & state) cons
 {
   const auto face = checkFace(face_in);
 
-  if (_clearance_schedule.count(EXEC_ALWAYS))
+  if (_clearance_schedule.empty())
     return evaluate(face, state);
 
   mooseAssert(state.state == 0,
@@ -650,7 +652,7 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  if (_clearance_schedule.count(EXEC_ALWAYS))
+  if (_clearance_schedule.empty())
     return evaluate(elem_qp, state);
 
   const auto elem_id = elem_qp.elem->id();
@@ -671,7 +673,7 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const ElemSideQpArg & elem_side_qp, const StateArg & state) const
 {
-  if (_clearance_schedule.count(EXEC_ALWAYS))
+  if (_clearance_schedule.empty())
     return evaluate(elem_side_qp, state);
 
   const Elem * const elem = elem_side_qp.elem;
@@ -708,7 +710,17 @@ template <typename T>
 void
 FunctorBase<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
 {
-  _clearance_schedule = clearance_schedule;
+  if (clearance_schedule.count(EXEC_ALWAYS))
+    _clearance_schedule.clear();
+  else
+    _clearance_schedule = clearance_schedule;
+}
+
+template <typename T>
+bool
+FunctorBase<T>::shouldClearCache(const ExecFlagType & flag) const
+{
+  return _clearance_schedule.count(flag);
 }
 
 template <typename T>
@@ -807,7 +819,7 @@ template <typename T>
 void
 FunctorBase<T>::timestepSetup()
 {
-  if (_clearance_schedule.count(EXEC_TIMESTEP_BEGIN))
+  if (shouldClearCache(EXEC_TIMESTEP_BEGIN))
     clearCacheData();
 }
 
@@ -815,7 +827,7 @@ template <typename T>
 void
 FunctorBase<T>::residualSetup()
 {
-  if (_clearance_schedule.count(EXEC_LINEAR))
+  if (shouldClearCache(EXEC_LINEAR))
     clearCacheData();
 }
 
@@ -823,7 +835,7 @@ template <typename T>
 void
 FunctorBase<T>::jacobianSetup()
 {
-  if (_clearance_schedule.count(EXEC_NONLINEAR))
+  if (shouldClearCache(EXEC_NONLINEAR))
     clearCacheData();
 }
 
@@ -831,7 +843,7 @@ template <typename T>
 void
 FunctorBase<T>::customSetup(const ExecFlagType & exec_type)
 {
-  if (_clearance_schedule.count(exec_type))
+  if (shouldClearCache(exec_type))
     clearCacheData();
 }
 

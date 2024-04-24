@@ -128,8 +128,6 @@ protected:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _HbyA_raw;
 
-  std::vector<const PetscScalar *> _HbyA_raw_array;
-
   /**
    * A map functor from faces to $(1/A)_f$. Where $A_i$ is the diagonal of the system matrix
    * for the momentum equation.
