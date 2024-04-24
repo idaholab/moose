@@ -153,6 +153,10 @@ FileMeshGenerator::generate()
     // for constraint equations.
     matrix->get_transpose(*matrix);
     mesh->copy_constraint_rows(*matrix);
+
+    // libMesh should probably update this in copy_constraint_rows();
+    // once it does this will be a redundant sweep we can remove.
+    mesh->cache_elem_data();
   }
 
   mesh->allow_renumbering(eventually_allow_renumbering);
