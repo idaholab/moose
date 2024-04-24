@@ -410,7 +410,8 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   } 
   else if (isParamValid("add_subdomain_ids") && isParamValid("add_subdomain_names"))
   {
-    const auto add_subdomain = getParam<SubdomainID, SubdomainName>("add_subdomain_ids", "add_subdomain_names");
+    const auto add_subdomain =
+        getParam<SubdomainID, SubdomainName>("add_subdomain_ids", "add_subdomain_names");
     for (const auto & [sub_id, sub_name] : add_subdomain)
     {
       // add subdomain id
