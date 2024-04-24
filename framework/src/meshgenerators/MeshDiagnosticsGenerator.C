@@ -512,10 +512,14 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
       bool node_on_elem = false;
 
       // non-vertex nodes are not cause for the kind of non-conformality we are looking for
-      if (elem->get_node_index(node) != libMesh::invalid_uint &&
-          elem->is_vertex(elem->get_node_index(node)))
+      if (!elem->is_vertex(elem->get_node_index(node)))
+        continue;
+
+      if (elem->get_node_index(node) != libMesh::invalid_uint)
         node_on_elem = true;
 
+      // Keep track of all the elements this node is a part of. They are potentially the
+      // 'fine' (refined) elements next to a coarser element
       if (node_on_elem)
         fine_elements.insert(elem);
       // Else, the node is not part of the element considered, so if the element had been part
@@ -697,12 +701,17 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
                 if (elem_2->get_node_index(&coarse_node) != libMesh::invalid_uint)
                   node_shared = true;
             }
-            // A node for the coarse parent will appear in only one fine neighbor
+            // A node for the coarse parent will appear in only one fine neighbor (not shared)
             // and will lay on the side of the coarse neighbor
             if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol))
               tentative_coarse_nodes[i++] = &coarse_node;
             mooseAssert(i <= 5, "We went too far in this index");
           }
+
+        // We did not find 4 coarse nodes. Mesh might be disjoint and the coarse element does not
+        // contain the fine elements nodes we found
+        if (i != 4)
+          continue;
 
         // Need to order these nodes to form a valid quad / base of an hex
         // We go around the axis formed by the node and the interior node
