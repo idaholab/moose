@@ -944,7 +944,7 @@ Real
 TabulatedFluidProperties::criticalPressure() const
 {
   if (_fp)
-    return _fp->criticalPointPressure();
+    return _fp->criticalPressure();
   else
     mooseError("criticalPointPressure not specified.");
 }
@@ -953,7 +953,7 @@ Real
 TabulatedFluidProperties::criticalTemperature() const
 {
   if (_fp)
-    return _fp->criticalPointTemperature();
+    return _fp->criticalTemperature();
   else
     mooseError("criticalPointTemperature not specified.");
 }
@@ -966,6 +966,34 @@ TabulatedFluidProperties::criticalDensity() const
   else
     mooseError("criticalDensity not specified.");
 }
+
+Real 
+TabulatedFluidProperties::T_from_p_h(Real pressure, Real h) const
+{
+  const FPDualReal p = pressure;
+  const FPDualReal h = enthalpy;
+  return T_from_p_h_ad(p, h).val();
+}
+
+void 
+TabulatedFluidProperties::T_from_p_h(Real pressure, Real h, Real & T, Real & dT_dp, Real & dT_dh) const
+{
+  if (_fp)
+    _fp->T_from_p_h(pressure, h, T, dT_dp, dT_dh);
+  else
+    mooseError("fp", "T_from_p_h not implemented.");
+}
+
+FPDualReal
+TabulatedFluidProperties::T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & h) const
+{
+    if (_fp)
+      return _fp->T_from_p_h_ad(pressure, h);
+    else
+    MooseError("fp", "T_from_p_h not implemented.");
+}
+
+
 
 Real
 TabulatedFluidProperties::p_from_v_e(Real v, Real e) const

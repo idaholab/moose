@@ -113,8 +113,12 @@ public:
 
   template <typename T>
   void vaporPressureTemplate(const T & temperature, T & psat, T & dpsat_dT) const;
-  Real vaporTemperature(Real pressure) const override;
+  virtual Real vaporTemperature(Real pressure) const override;
   virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
+
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+  virtual void T_from_p_h(Real pressure, Real enthalpy, Real & T, Real & dT_dp, Real & dT_dh) const;
+  virtual FPDualReal T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
 
   virtual Real triplePointPressure() const override;
   virtual Real triplePointTemperature() const override;
