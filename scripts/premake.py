@@ -113,10 +113,7 @@ class PreMake:
             if version_date is not None and required_version_date is not None:
                 if required_version_date < version_date:
                     show_conda_install = False
-                    version_delta = (version_date - required_version_date).days
-                    full_message += f"The installed version of '{package}' is newer than"
-                    full_message += f" the required version and your checkout of moose is"
-                    full_message += f" {version_delta} day(s) old.\n"
+                    full_message += f"The installed version of '{package}' is newer than the required version.\n"
                     full_message += "It is likely that you need to update moose."
 
             if show_conda_install:
