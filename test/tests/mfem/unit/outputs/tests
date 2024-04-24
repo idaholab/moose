@@ -1,0 +1,14 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  [MFEMOutputs]
+    type = CheckFiles
+    input = output_master.i
+    check_files = 'OutputData/ParaViewCoil/Run0/Run0.pvd
+                   OutputData/ParaViewCoil/Run1/Run1.pvd
+                   OutputData/ParaViewCoil/Run0/Cycle000000/data.pvtu
+                   OutputData/ParaViewCoil/Run0/Cycle000001/data.pvtu                   
+                   OutputData/ParaViewCoil/Run1/Cycle000000/data.pvtu
+                   OutputData/ParaViewCoil/Run1/Cycle000001/data.pvtu'
+    requirement = 'Platypus shall have the ability to create DataCollections saved to enumerated folders when called in a FullSolveMultiApps.'
+  []
+[]

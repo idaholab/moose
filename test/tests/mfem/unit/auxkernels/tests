@@ -1,0 +1,30 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  [./LagrangeVectorVariableFromComponentsAux]
+    type = 'CSVDiff'
+    input = 'lagrange_vector_variable_from_components_aux.i'
+    csvdiff = 'lagrange_vector_variable_from_components_aux_out.csv'
+    requirement = 'Platypus shall have the ability to build a Lagrange vector variable from three standard Lagrange variables.'
+  []
+
+  [./MonomialVectorVariableFromComponentsAux]
+    type = 'CSVDiff'
+    input = 'monomial_vector_variable_from_components_aux.i'
+    csvdiff = 'monomial_vector_variable_from_components_aux_out.csv'
+    requirement = 'Platypus shall have the ability to build a Monomial vector variable from three standard Monomial variables.'
+  []
+
+  [./LagrangeVectorVariableToComponentsAux]
+    type = 'CSVDiff'
+    input = 'lagrange_vector_variable_to_components_aux.i'
+    csvdiff = 'lagrange_vector_variable_to_components_aux_out.csv'
+    requirement = 'Platypus shall have the ability to extract the components from a Lagrange vector variable.'
+  []
+
+  [./MonomialVectorVariableToComponentsAux]
+    type = 'CSVDiff'
+    input = 'monomial_vector_variable_to_components_aux.i'
+    csvdiff = 'monomial_vector_variable_to_components_aux_out.csv'
+    requirement = 'Platypus shall have the ability to extract the components from a constant-order Monomial vector variable.'
+  []
+[]

@@ -1,0 +1,16 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  [./LagrangeVectorL2Difference]
+    type = 'CSVDiff'
+    input = 'lagrange_vector_l2_difference.i'
+    csvdiff = 'lagrange_vector_l2_difference_out.csv'
+    requirement = 'Platypus shall have the ability to compute the element-wise l2 difference between Lagrange vector variables.'
+  []
+
+  [./MonomialVectorL2Difference]
+    type = 'CSVDiff'
+    input = 'monomial_vector_l2_difference.i'
+    csvdiff = 'monomial_vector_l2_difference_out.csv'
+    requirement = 'Platypus shall have the ability to compute the element-wise l2 difference between Monomial vector variables.'
+  []
+[]
