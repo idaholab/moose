@@ -6,9 +6,14 @@ Using MOOSE on Windows 10 and 11 is experimental and not fully supported.
 Caveats:
 
 - Peacock does not work correctly (artifacts during rendering: surface normals are flipped).
-- Different flavors of Linux are available, but *be sure to choose a distribution which we support*.
-  While MOOSE will ultimately work on just about every flavor of Linux, this document assumes you
-  have chosen Ubuntu 20.04, which is the Windows Subsystem for Linux (WSL) default as of December 2022.
+
+<!-- double space on purpose to emphasize important bullet point -->
+
+- Different flavors of Linux are available, but +we STRONGLY urge the use of Ubuntu version
+  20.04.x LTS.+ Use other Linux flavors and versions at your peril if you are interested in using
+  Peacock. Issues usually involve incompatible system-supplied OpenGL/mesa libraries when used with
+  our Conda packages. Or, system packages that are required might be missing, yet we are unfamiliar
+  with which ones to ask you to install.
 !alert-end!
 
 !include installation/wsl.md
@@ -22,7 +27,6 @@ of the Linux instructions on our
 !style-end!
 
 ## Tips
-
 
 - Like WSL installation, the following sections require performing all commands in a PowerShell or
   Command Prompt in *administrator* mode!
@@ -41,8 +45,8 @@ wsl --update
 ### Change WSL Version
 
 !style! halign=left
-In this instruction set, WSL version 2 is used (and is the default, recommended release). If WSL version
-1 is desired, this can be changed by performing the command:
+In this instruction set, WSL version 2 is used (and is the default, recommended release). If WSL
+version 1 is desired, this can be changed by performing the command:
 !style-end!
 
 ```bash
