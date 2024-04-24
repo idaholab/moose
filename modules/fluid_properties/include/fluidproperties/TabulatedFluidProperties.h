@@ -110,6 +110,19 @@ public:
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
 
+
+  template <typename T>
+  void vaporPressureTemplate(const T & temperature, T & psat, T & dpsat_dT) const;
+  Real vaporTemperature(Real pressure) const override;
+  virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
+
+  virtual Real triplePointPressure() const override;
+  virtual Real triplePointTemperature() const override;
+  virtual Real criticalPressure() const override;
+  virtual Real criticalTemperature() const override;
+  virtual Real criticalDensity() const override;
+
+
   /**
    * Derivatives like dc_dv & dc_de are computed using the chain rule
    * dy/dx(p,T) = dy/dp * dp/dx + dy/dT * dT/dx

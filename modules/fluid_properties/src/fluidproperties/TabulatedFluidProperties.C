@@ -895,6 +895,78 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
     mooseError("vaporPressure not specified.");
 }
 
+Real 
+TabulatedFluidProperties::vaporTemperature(Real pressure) const
+{
+  if (_fp)
+    return _fp->vaporTemperature(pressure);
+  else
+    mooseError("vaporTemperature not specified.");
+}
+
+void 
+TabulatedFluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
+{
+  if (_fp)
+    _fp->vaporTemperature(pressure, Tsat, dTsat_dp);
+  else
+    mooseError("vaporTemperature not specified.");
+}
+
+FPDualReal 
+TabulatedFluidProperties::vaporTemperature_ad(const FPDualReal & pressure) const
+{
+  if (_fp)
+    return _fp->vaporTemperature_ad(pressure);
+  else
+    mooseError("vaporTemperature_ad not specified.");
+}
+
+Real 
+TabulatedFluidProperties::triplePointPressure() const
+{
+  if (_fp)
+    return _fp->triplePointPressure();
+  else
+    mooseError("triplePointPressure not specified.");
+}
+
+Real 
+TabulatedFluidProperties::triplePointTemperature() const
+{
+  if (_fp)
+    return _fp->triplePointTemperature();
+  else
+    mooseError("triplePointTemperature not specified.");
+}
+
+Real 
+TabulatedFluidProperties::criticalPressure() const
+{
+  if (_fp)
+    return _fp->criticalPointPressure();
+  else
+    mooseError("criticalPointPressure not specified.");
+}
+
+Real 
+TabulatedFluidProperties::criticalTemperature() const
+{
+  if (_fp)
+    return _fp->criticalPointTemperature();
+  else
+    mooseError("criticalPointTemperature not specified.");
+}
+
+Real 
+TabulatedFluidProperties::criticalDensity() const
+{
+  if (_fp)
+    return _fp->criticalDensity();
+  else
+    mooseError("criticalDensity not specified.");
+}
+
 Real
 TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 {
