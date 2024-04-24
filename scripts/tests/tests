@@ -41,4 +41,11 @@
     design = 'python/index.md'
     requirement = "The system shall include a utility for generating a unique hash for moose dependencies and moose applications"
   []
+  [premake]
+    type = PythonUnitTest
+    input = test_premake.py
+    issues = '#27066'
+    design = 'python/index.md'
+    requirement = "The system shall include a utility for providing useful information when building an application with dependencies that are out of date"
+  []
 []
