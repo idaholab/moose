@@ -405,18 +405,18 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   if (isParamValid("add_subdomain_ids") && !isParamValid("add_subdomain_names"))
   {
     // only subdomain ids are explicitly given
-    const auto add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
+    const auto & add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
     _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
   } 
-  else if (isParamValid("add_subdomain_ids") && isParamValid("add_subdomain_names")) 
+  else if (isParamValid("add_subdomain_ids") && isParamValid("add_subdomain_names"))
   {
     const auto add_subdomain = getParam<SubdomainID, SubdomainName>("add_subdomain_ids", "add_subdomain_names");
-    for (const auto & i : add_subdomain)
+    for (const auto & [sub_id, sub_name] : add_subdomain)
     {
       // add subdomain id
-      _mesh_subdomains.insert(i.first);
+      _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
-      setSubdomainName(i.first, i.second);
+      setSubdomainName(sub_id, sub_name);
     }
   }
   else if (isParamValid("add_subdomain_names"))
