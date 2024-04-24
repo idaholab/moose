@@ -113,12 +113,14 @@ public:
 
   template <typename T>
   void vaporPressureTemplate(const T & temperature, T & psat, T & dpsat_dT) const;
+
   virtual Real vaporTemperature(Real pressure) const override;
   virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
+  FPDualReal vaporTemperature_ad(const FPDualReal & pressure) const override;
 
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
-  virtual void T_from_p_h(Real pressure, Real enthalpy, Real & T, Real & dT_dp, Real & dT_dh) const;
-  virtual FPDualReal T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
+  /// virtual void T_from_p_h(Real pressure, Real enthalpy, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  FPDualReal T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & enthalpy) const override;
 
   virtual Real triplePointPressure() const override;
   virtual Real triplePointTemperature() const override;
@@ -154,6 +156,7 @@ public:
   virtual void T_from_p_s(Real p, Real s, Real & T, Real & dT_dp, Real & dT_ds) const;
   virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
+  virtual void s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
 
   /// AD implementations needed
   using SinglePhaseFluidProperties::c_from_v_e;

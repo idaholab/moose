@@ -409,6 +409,13 @@ SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
   return result;
 }
 
+FPDualReal
+SinglePhaseFluidProperties::vaporTemperature_ad(const FPDualReal & p) const
+{
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
+
+}
+
 void
 SinglePhaseFluidProperties::rho_e_from_p_T(Real p,
                                            Real T,
@@ -523,6 +530,15 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, R
   T_from_v_e(v, e, T, dT_dv, dT_de);
   dT_dp = dT_dv * dv_dp + dT_de * de_dp;
   dT_dh = dT_dv * dv_dh + dT_de * de_dh;
+}
+
+FPDualReal
+SinglePhaseFluidProperties::T_from_p_h_ad(const FPDualReal & p, const FPDualReal & h) const
+{
+  /** 
+   * not implemented
+   */
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 #pragma GCC diagnostic pop
