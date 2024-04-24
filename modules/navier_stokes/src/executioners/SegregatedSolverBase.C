@@ -16,6 +16,7 @@
 #include "KernelBase.h"
 #include "INSFVMomentumPressure.h"
 #include "libmesh/enum_point_locator_type.h"
+#include "PetscVectorReader.h"
 
 #include "libmesh/petsc_nonlinear_solver.h"
 #include <petscerror.h>
@@ -626,14 +627,19 @@ SegregatedSolverBase::relaxMatrix(SparseMatrix<Number> & matrix,
                                   const Real relaxation_parameter,
                                   NumericVector<Number> & diff_diagonal)
 {
+  PetscMatrix<Number> * mat = dynamic_cast<PetscMatrix<Number> *>(&matrix);
+  mooseAssert(mat, "Bazinga!");
+  PetscVector<Number> * diff_diag = dynamic_cast<PetscVector<Number> *>(&diff_diagonal);
+  mooseAssert(diff_diag, "Bazinga!");
+
   // Zero the diagonal difference vector
-  diff_diagonal = 0;
+  *diff_diag = 0;
 
   // Get the diagonal of the matrix
-  matrix.get_diagonal(diff_diagonal);
+  mat->get_diagonal(*diff_diag);
 
   // Create a copy of the diagonal for later use and cast it
-  auto original_diagonal = diff_diagonal.clone();
+  auto original_diagonal = diff_diag->clone();
 
   // We cache the inverse of the relaxation parameter because doing divisions might
   // be more expensive for every row
@@ -651,27 +657,34 @@ SegregatedSolverBase::relaxMatrix(SparseMatrix<Number> & matrix,
   //
   // The trickery comes with storing everything in the diff-diagonal vector
   // to avoid the allocation and manipulation of a third vector
-  for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
-  {
-    std::vector<numeric_index_type> indices;
-    std::vector<Real> values;
-    matrix.get_row(row_i, indices, values);
-    const Real abs_sum = std::accumulate(
-        values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
-    const Real abs_diagonal = std::abs(diff_diagonal(row_i));
-    const Real new_diagonal = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
-    diff_diagonal.set(row_i, new_diagonal);
-  }
-  diff_diagonal.close();
+  std::vector<dof_id_type> indices(matrix.row_stop() - matrix.row_start());
+  std::iota(indices.begin(), indices.end(), matrix.row_start());
+  std::vector<Real> new_diagonal(matrix.row_stop() - matrix.row_start(), 0.0);
 
-  // Time to modify the diagonal of the matrix
-  for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
-    matrix.set(row_i, row_i, diff_diagonal(row_i));
-  matrix.close();
+  {
+    PetscVectorReader diff_diga_reader(*diff_diag);
+    for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
+    {
+      std::vector<numeric_index_type> indices;
+      std::vector<Real> values;
+      mat->get_row(row_i, indices, values);
+      const Real abs_sum = std::accumulate(
+          values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
+      const Real abs_diagonal = std::abs(diff_diga_reader(row_i));
+      new_diagonal[row_i] = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
+    }
+  }
+  diff_diag->insert(new_diagonal, indices);
+
+  // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
+  MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES);
+  // for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
+  //   matrix.set(row_i, row_i, diff_diagonal(row_i));
+  // matrix.close();
 
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later
-  diff_diagonal.add(-1.0, *original_diagonal);
+  diff_diag->add(-1.0, *original_diagonal);
 }
 
 void

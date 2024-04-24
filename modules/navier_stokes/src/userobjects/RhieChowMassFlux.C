@@ -111,21 +111,16 @@ RhieChowMassFlux::linkMomentumPressureSystems(
   _momentum_systems = momentum_systems;
   _momentum_system_numbers = momentum_system_numbers;
   _pressure_system = &pressure_system;
+  _global_pressure_system_number = _pressure_system->number();
 
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)
+  {
+    _global_momentum_system_numbers.push_back(system->number());
     _momentum_implicit_systems.push_back(dynamic_cast<LinearImplicitSystem *>(&system->system()));
+  }
 
   setupCellVolumes();
-}
-
-Real
-RhieChowMassFlux::safePetscVectorAccess(const PetscVector<Number> & vector,
-                                        const dof_id_type global_index) const
-{
-  mooseAssert(vector.readable(), "Make sure the vector is readable before trying to access it!");
-  const auto local_index = vector.map_global_to_local_index(global_index);
-  return vector.get_array_read()[local_index];
 }
 
 void
@@ -164,7 +159,7 @@ RhieChowMassFlux::setupCellVolumes()
   _cell_volumes = _pressure_system->currentSolution()->zero_clone();
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
   {
-    const auto elem_dof = elem_info->dofIndices()[_pressure_system->number()][_p->number()];
+    const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
     _cell_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
   }
   _cell_volumes->close();
@@ -252,9 +247,8 @@ RhieChowMassFlux::computeFaceMassFlux()
     {
       const auto & elem_info = *fi->elemInfo();
       const auto & neighbor_info = *fi->neighborInfo();
-      const auto elem_dof = elem_info.dofIndices()[_pressure_system->number()][_p->number()];
-      const auto neighbor_dof =
-          neighbor_info.dofIndices()[_pressure_system->number()][_p->number()];
+      const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
+      const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
 
       const auto p_elem_value = p_reader(elem_dof);
       const auto p_neighbor_value = p_reader(neighbor_dof);
@@ -303,7 +297,9 @@ RhieChowMassFlux::computeCellVelocity()
 }
 
 void
-RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya)
+RhieChowMassFlux::populateCouplingFunctors(
+    const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
+    const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv)
 {
   using namespace Moose::FV;
   const auto time_arg = Moose::currentState();
@@ -312,26 +308,28 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
   for (const auto dim_i : index_range(raw_hbya))
     hbya_reader.emplace_back(*raw_hbya[dim_i]);
 
+  std::vector<PetscVectorReader> ainv_reader;
+  for (const auto dim_i : index_range(raw_Ainv))
+    ainv_reader.emplace_back(*raw_Ainv[dim_i]);
+
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
 
     Real face_rho = 0;
     RealVectorValue face_hbya;
+    auto & Ainv = _Ainv[fi->id()];
+
     if (_vel[0]->isInternalFace(*fi))
     {
       const auto & elem_info = *fi->elemInfo();
       const auto & neighbor_info = *fi->neighborInfo();
-      const auto elem_dof =
-          elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
-      const auto neighbor_dof =
-          neighbor_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
+      const auto neighbor_dof = neighbor_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-      interpolate(Moose::FV::InterpMethod::Average,
-                  face_rho,
-                  _rho(makeElemArg(fi->elemPtr()), time_arg),
-                  _rho(makeElemArg(fi->neighborPtr()), time_arg),
-                  *fi,
-                  true);
+      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+
+      interpolate(Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
       for (const auto dim_i : index_range(raw_hbya))
       {
         interpolate(Moose::FV::InterpMethod::Average,
@@ -340,12 +338,19 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
                     hbya_reader[dim_i](neighbor_dof),
                     *fi,
                     true);
+        interpolate(InterpMethod::Average,
+                    Ainv(dim_i),
+                    elem_rho * ainv_reader[dim_i](elem_dof),
+                    neighbor_rho * ainv_reader[dim_i](neighbor_dof),
+                    *fi,
+                    true);
       }
     }
     else
     {
       const ElemInfo & elem_info =
           hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
       if (_vel[0]->isDirichletBoundaryFace(*fi))
       {
@@ -360,72 +365,19 @@ RhieChowMassFlux::populateHbyA(const std::vector<std::unique_ptr<NumericVector<N
       }
       else
       {
-        const auto elem_dof =
-            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
+        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
         face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
         for (const auto dim_i : make_range(_dim))
           face_hbya(dim_i) = hbya_reader[dim_i](elem_dof);
       }
+
+      Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+
+      for (const auto dim_i : index_range(raw_Ainv))
+        Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
     }
     _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
-  }
-}
-
-void
-RhieChowMassFlux::populateAinv(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv)
-{
-  using namespace Moose::FV;
-
-  const auto time_arg = Moose::currentState();
-
-  std::vector<PetscVectorReader> ainv_reader;
-  for (const auto dim_i : index_range(raw_Ainv))
-    ainv_reader.emplace_back(*raw_Ainv[dim_i]);
-
-  for (auto & fi : _fe_problem.mesh().faceInfo())
-  {
-    // We do the lookup in advance
-    auto & Ainv = _Ainv[fi->id()];
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
-        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
-    {
-      // If we are on an internal face, we just interpolate the values to the faces.
-      // Otherwise, depending on the boundary type, we take the velocity value or
-      // extrapolated HbyA values.
-      if (_vel[0]->isInternalFace(*fi))
-      {
-        const auto & elem_info = *fi->elemInfo();
-        const auto & neighbor_info = *fi->neighborInfo();
-        const auto elem_dof =
-            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
-        const auto neighbor_dof =
-            neighbor_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
-
-        Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-        Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
-
-        for (const auto dim_i : index_range(raw_Ainv))
-          interpolate(InterpMethod::Average,
-                      Ainv(dim_i),
-                      elem_rho * ainv_reader[dim_i](elem_dof),
-                      neighbor_rho * ainv_reader[dim_i](neighbor_dof),
-                      *fi,
-                      true);
-      }
-      else
-      {
-        const ElemInfo & elem_info =
-            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-        const auto elem_dof =
-            elem_info.dofIndices()[_momentum_implicit_systems[0]->number()][_vel[0]->number()];
-
-        Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-
-        for (const auto dim_i : index_range(raw_Ainv))
-          Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
-      }
-    }
   }
 }
 
@@ -544,8 +496,7 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   }
 
   // We fill the 1/A functor
-  populateAinv(_Ainv_raw);
-  populateHbyA(_HbyA_raw);
+  populateCouplingFunctors(_HbyA_raw, _Ainv_raw);
 
   if (verbose)
   {

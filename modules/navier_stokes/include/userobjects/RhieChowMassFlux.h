@@ -82,14 +82,10 @@ public:
 protected:
   void setupCellVolumes();
 
-  Real safePetscVectorAccess(const PetscVector<Number> & vector,
-                             const dof_id_type global_index) const;
-
-  /// Populate the face values of the H/A field
-  void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya);
-
-  /// Populate the face values of the 1/A field
-  void populateAinv(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
+  /// Populate the face values of the H/A and 1/A fields
+  void
+  populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
+                           const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
 
   /**
    * Check the block consistency between the passed in \p var and us
@@ -156,11 +152,17 @@ protected:
   /// Numbers of the momentum system(s)
   std::vector<unsigned int> _momentum_system_numbers;
 
+  /// Global numbers of the momentum system(s)
+  std::vector<unsigned int> _global_momentum_system_numbers;
+
   /// Pointers to the momentum equation implicit system(s)
   std::vector<LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system
   const LinearSystem * _pressure_system;
+
+  /// Global number of the pressure system
+  unsigned int _global_pressure_system_number;
 
   /// We will hold a vector of cell volumes to make sure we can do volume corrections rapidly
   std::unique_ptr<NumericVector<Number>> _cell_volumes;
