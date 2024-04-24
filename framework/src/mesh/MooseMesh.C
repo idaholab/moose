@@ -407,7 +407,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     // only subdomain ids are explicitly given
     const auto & add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
     _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
-  } 
+  }
   else if (isParamValid("add_subdomain_ids") && isParamValid("add_subdomain_names"))
   {
     const auto add_subdomain =
