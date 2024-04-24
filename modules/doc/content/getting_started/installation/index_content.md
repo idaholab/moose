@@ -20,3 +20,5 @@ When the above does not quite fit your needs, the following instructions are ava
 - [From Source (GCC)](installation/manual_installation_gcc.md)
 - [From Source (LLVM/Clang)](installation/manual_installation_llvm.md)
 - [installation/manual_installation_linux_lldb.md]
+
+!include sqa/minimum_requirements.md
