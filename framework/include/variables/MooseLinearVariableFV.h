@@ -196,6 +196,9 @@ protected:
   /// We assume that each boundary has one boundary condition only.
   std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
+  /// Cache the number of the system
+  const unsigned int _sys_num;
+
   friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
 
 private:

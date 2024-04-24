@@ -18,7 +18,10 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _linear_system_number(linear_system_num),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
         _fe_problem.getLinearSystem(_linear_system_number).system())),
-    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newGradientContainer())
+    _global_system_number(_linear_system.number()),
+    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newGradientContainer()),
+    _dof_indices(2, 0),
+    _contributions(2, 0.0)
 {
 }
 
@@ -28,9 +31,12 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _dim(x._dim),
     _linear_system_number(x._linear_system_number),
     _linear_system(x._linear_system),
+    _global_system_number(x._global_system_number),
     // This will be the vector we work on since the old gradient might still be needed
     // to compute extrapolated boundary conditions for example.
-    _new_gradient(x._new_gradient)
+    _new_gradient(x._new_gradient),
+    _dof_indices(x._dof_indices),
+    _contributions(x._contributions)
 {
 }
 
@@ -52,7 +58,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
       for (const auto & face_info : range)
       {
         const auto current_face_type =
-            face_info->faceType(std::make_pair(_current_var->number(), _linear_system.number()));
+            face_info->faceType(std::make_pair(_current_var->number(), _global_system_number));
 
         if (current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
           onInternalFace(*face_info);
@@ -66,22 +72,23 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
 void
 ComputeLinearFVGreenGaussGradientFaceThread::onInternalFace(const FaceInfo & face_info)
 {
-  const auto dof_id_elem =
-      face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
-  const auto dof_id_neighbor =
-      face_info.neighborInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
+  _dof_indices[0] =
+      face_info.elemInfo()->dofIndices()[_global_system_number][_current_var->number()];
+  _dof_indices[1] =
+      face_info.neighborInfo()->dofIndices()[_global_system_number][_current_var->number()];
 
   const auto & solution = *_linear_system.current_local_solution;
   const auto face_value = Moose::FV::linearInterpolation(
-      solution(dof_id_elem), solution(dof_id_neighbor), face_info, true);
+      solution(_dof_indices[0]), solution(_dof_indices[1]), face_info, true);
 
   const auto contribution =
       face_info.normal() * face_info.faceArea() * face_info.faceCoord() * face_value;
 
   for (const auto i : make_range(_dim))
   {
-    _new_gradient[i]->add(dof_id_elem, contribution(i));
-    _new_gradient[i]->add(dof_id_neighbor, -contribution(i));
+    _contributions[0] = contribution(i);
+    _contributions[1] = -contribution(i);
+    _new_gradient[i]->add_vector(_contributions.data(), _dof_indices);
   }
 }
 
@@ -91,7 +98,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::onBoundaryFace(const FaceInfo & fac
   auto * bc_pointer = _current_var->getBoundaryCondition(*face_info.boundaryIDs().begin());
 
   const auto face_type =
-      face_info.faceType(std::make_pair(_current_var->number(), _linear_system.number()));
+      face_info.faceType(std::make_pair(_current_var->number(), _global_system_number));
   if (bc_pointer)
     bc_pointer->setCurrentFaceInfo(&face_info, face_type);
 
@@ -100,7 +107,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::onBoundaryFace(const FaceInfo & fac
                                      : face_info.neighborInfo();
   const auto state = Moose::currentState();
 
-  const auto dof_id = elem_info->dofIndices()[_linear_system.number()][_current_var->number()];
+  const auto dof_id = elem_info->dofIndices()[_global_system_number][_current_var->number()];
 
   // If we don't have a boundary condition, then it's a natural condition. We'll use a one-term
   // expansion approximation in that case

@@ -17,7 +17,8 @@ ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradient
     _dim(_fe_problem.mesh().dimension()),
     _linear_system_number(linear_system_num),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
-        _fe_problem.getLinearSystem(_linear_system_number).system()))
+        _fe_problem.getLinearSystem(_linear_system_number).system())),
+    _global_system_number(_linear_system.number())
 {
 }
 
@@ -26,7 +27,8 @@ ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradient
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
     _linear_system_number(x._linear_system_number),
-    _linear_system(x._linear_system)
+    _linear_system(x._linear_system),
+    _global_system_number(x._global_system_number)
 {
 }
 
@@ -60,7 +62,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
         {
           const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
           const auto dof_id_elem =
-              elem_info->dofIndices()[_linear_system.number()][_current_var->number()];
+              elem_info->dofIndices()[_global_system_number][_current_var->number()];
           const auto volume = elem_info->volume() * elem_info->coordFactor();
 
           for (const auto dim_index : index_range(grad_container))

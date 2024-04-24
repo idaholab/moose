@@ -60,7 +60,9 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
     _var(*mooseLinearVariableFV()),
     _sys(_var.sys()),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system()))
+    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
+    _var_num(_var.number()),
+    _sys_num(_sys.number())
 {
   addMooseVariableDependency(&_var);
 }
@@ -68,7 +70,7 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
 bool
 LinearFVBoundaryCondition::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
 {
-  const auto ft = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
+  const auto ft = fi.faceType(std::make_pair(_var_num, _sys_num));
   if (fi_elem_side)
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else

@@ -101,4 +101,10 @@ protected:
 
   /// Whether to force execution of this kernel on all external boundaries
   const bool _force_boundary_execution;
+
+  DenseVector<dof_id_type> _dof_indices;
+
+  DenseMatrix<Real> _matrix_contribution;
+
+  DenseVector<Real> _rhs_contribution;
 };

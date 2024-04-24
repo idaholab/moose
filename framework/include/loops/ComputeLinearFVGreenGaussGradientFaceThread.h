@@ -85,6 +85,9 @@ protected:
   /// Reference to the linear system at libmesh level
   const libMesh::LinearImplicitSystem & _linear_system;
 
+  /// Global system number
+  const unsigned int _global_system_number;
+
   /// Thread ID
   THREAD_ID _tid;
 
@@ -94,4 +97,8 @@ protected:
   /// Cache for the new gradient which is being built. It is needed because in certain scenarios the
   /// old gradient is used for computing the new gradient.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _new_gradient;
+
+  std::vector<dof_id_type> _dof_indices;
+
+  std::vector<Real> _contributions;
 };

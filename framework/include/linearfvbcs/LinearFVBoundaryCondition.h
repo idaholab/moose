@@ -142,6 +142,12 @@ protected:
 
   /// Face ownership information for the current face
   FaceInfo::VarFaceNeighbors _current_face_type;
+
+  /// Cache for the variable number
+  const unsigned int _var_num;
+
+  /// Cache for the system number
+  const unsigned int _sys_num;
 };
 
 inline void
