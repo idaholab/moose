@@ -342,7 +342,7 @@
   []
   [multiple_checkpoints_error_shortcut]
     issues = '#13562'
-    requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined'
+    requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined, including the shortcut syntax'
     type = 'RunException'
     input = 'checkpoint_block.i'
     cli_args = 'Outputs/checkpoint=true'
