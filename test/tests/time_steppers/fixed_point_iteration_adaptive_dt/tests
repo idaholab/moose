@@ -1,0 +1,37 @@
+[Tests]
+  issues = '#27381'
+  design = 'source/timesteppers/FixedPointIterationAdaptiveDT.md'
+
+  [increase_dt]
+    type = CSVDiff
+    input = 'main.i'
+    csvdiff = 'increase_dt.csv'
+    requirement = "The system shall be able to increase the time step size when the simulation converges with a number of fixed point iterations below the target window."
+  []
+
+  [decrease_dt]
+    type = CSVDiff
+    input = 'main.i'
+    cli_args = 'Executioner/TimeStepper/target_iterations=4 Outputs/file_base=decrease_dt'
+    csvdiff = 'decrease_dt.csv'
+    requirement = "The system shall be able to decrease the time step size when the simulation converges with a number of fixed point iterations above the target window."
+  []
+
+  [error_reporting]
+    requirement = 'The system shall report an error for the fixed point iteration adaptive time stepper'
+    [no_multiapp]
+      type = RunException
+      input = 'main.i'
+      cli_args = "MultiApps/sub/input_files=sub_with_stepper.i"
+      expect_err = 'This time stepper can only be used if there are MultiApps in the problem'
+      detail = 'if it is used in an application with no sub-applications.'
+    []
+    [invalid_iteration_window]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Executioner/fixed_point_max_its=2 Executioner/TimeStepper/target_window=1"
+      expect_err = 'The specified target iteration window, \[5,7\], must be within the minimum and maximum number of fixed point iterations specified for the Executioner, \[1,2\]'
+      detail = 'if the specified target iteration window lies outside the executioner iteration window.'
+    []
+  []
+[]

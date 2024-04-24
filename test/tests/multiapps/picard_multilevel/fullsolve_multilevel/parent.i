@@ -78,8 +78,9 @@
     input_files = sub_level1.i
     execute_on = 'timestep_end'
 
-    # We have to make backups of the full tree in order to do a proper restore for the Picard iteration.
-    no_backup_and_restore = false
+    # We need to disable restoration within the multiapp so that the previous
+    # picard iterate is used as the starting solution within each iteration
+    no_restore = false
   []
 []
 

@@ -131,7 +131,7 @@
     csvdiff = distributions_csv_study_results_0001.csv
     requirement = 'The system shall be able to setup a Monte Carlo parameter study with uniform, normal, Weibull, lognormal, and truncated normal distributions.'
   []
-  
+
   [distribution_errors]
     requirement = 'The system shall throw an error when doing a simple parameter study if distribution parameters are '
     [missing]
@@ -196,7 +196,7 @@
       detail = 'error if there are unused statistics parameters;'
     []
   []
-  
+
   [outputs]
     requirement = 'The system shall be able to output the results of a simple parameter study with '
     [none]
@@ -275,7 +275,7 @@
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-no-restore --color off'
       csvdiff = 'monte_carlo_csv_study_results_0001.csv'
-      expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
+      expect_out = 'mode : batch-restore\n\s*no_restore : 1'
       detail = 'batches one sub-app per processor without restoring;'
     []
   []
@@ -288,7 +288,7 @@
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
       csvdiff = distributions_csv_study_results_0001.csv
       expect_out = 'mode : batch-reset'
-      detail = 'parameters are parsed;'          
+      detail = 'parameters are parsed;'
     []
     [not_controllable]
       type = CSVDiff
@@ -296,7 +296,7 @@
       cli_args = 'Outputs/file_base=monte_carlo_csv ParameterStudy/sampler_column_names=\'BCs_left_value BCs_right_value\' ParameterStudy/show_study_objects=true --color off'
       csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : batch-reset'
-      detail = 'parameters are not controllable;'          
+      detail = 'parameters are not controllable;'
     []
     [transient]
       type = CSVDiff
@@ -304,7 +304,7 @@
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
       csvdiff = 'monte_carlo_transient_csv_study_results_0001.csv'
       expect_out = 'mode : batch-restore'
-      detail = 'parameters are controllable in a transient problem;'      
+      detail = 'parameters are controllable in a transient problem;'
     []
     [pseudo_transient]
       type = CSVDiff
@@ -312,14 +312,14 @@
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
       csvdiff = 'monte_carlo_pseudo_transient_csv_study_results_0001.csv'
       expect_out = 'keep_solution_during_restore : 1\n.*\n\s*mode : batch-restore'
-      detail = 'parameters are controllable in a pseudo-transient problem;'      
+      detail = 'parameters are controllable in a pseudo-transient problem;'
     []
     [steady]
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
       csvdiff = 'monte_carlo_csv_study_results_0001.csv'
-      expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
+      expect_out = 'mode : batch-restore\n\s*no_restore : 1'
       detail = 'parameters are controllable in a steady-state problem;'
     []
     [eigen]
@@ -327,7 +327,7 @@
       input = monte_carlo_eigen.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
       csvdiff = 'monte_carlo_eigen_csv_study_results_0001.csv'
-      expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
+      expect_out = 'mode : batch-restore\n\s*no_restore : 1'
       detail = 'parameters are controllable in a eigenvalue problem;'
     []
   []

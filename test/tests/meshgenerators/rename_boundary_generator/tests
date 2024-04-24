@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/RenameBoundaryGenerator.md'
-  issues = '#11640 #14128 #16885 #21268'
+  issues = '#11640 #14128 #16885 #21268 #27175'
 
   [rename]
     requirement = 'The system shall be able to rename or renumber mesh boundaries by:'
@@ -100,7 +100,18 @@
                   --mesh-only'
       expect_err = "Must be the same length as 'old_boundary'"
 
-      detail = 'and when the provided old and new boundaries are not the same length.'
+      detail = 'when the provided old and new boundaries are not the same length.'
+    []
+
+    [id_out_of_bounds]
+      type = RunException
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary="0"
+                  Mesh/rename/new_boundary="40000"
+                  --mesh-only'
+      expect_err = "BoundaryName 40000 is not within the numeric limits of the expected ID type"
+
+      detail = 'when the user requests new boundary IDs outside the valid range of type BoundaryID.'
     []
   []
 []

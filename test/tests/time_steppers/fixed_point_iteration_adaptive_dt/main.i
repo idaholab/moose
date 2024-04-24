@@ -22,6 +22,10 @@
     variable = u
     coef = 0.1
   []
+  [time]
+    type = TimeDerivative
+    variable = u
+  []
   [force_u]
     type = CoupledForce
     variable = u
@@ -45,35 +49,52 @@
 []
 
 [Postprocessors]
-  [unorm]
-    type = ElementL2Norm
-    variable = u
-    execute_on = 'initial timestep_end'
+  [dt]
+    type = TimestepSize
+    execute_on = 'TIMESTEP_END'
   []
-  [vnorm]
-    type = ElementL2Norm
-    variable = v
-    execute_on = 'initial timestep_end'
+  [fp_its]
+    type = NumFixedPointIterations
+    execute_on = 'TIMESTEP_END'
   []
 []
 
 [Executioner]
-  type = Steady
-  nl_abs_tol = 1e-14
+  type = Transient
+  num_steps = 5
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   fixed_point_max_its = 10
+  fixed_point_rel_tol = 1e-8
+  nl_abs_tol = 1e-14
+  verbose = true
+
+  [TimeStepper]
+    type = FixedPointIterationAdaptiveDT
+    dt_initial = 0.1
+    target_iterations = 6
+    target_window = 0
+    increase_factor = 2.0
+    decrease_factor = 0.5
+  []
 []
 
 [Outputs]
-  exodus = true
+  file_base = 'increase_dt'
+  [csv]
+    type = CSV
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [MultiApps]
   [sub]
-    type = FullSolveMultiApp
-    input_files = steady_picard_sub.i
-    no_restore = true
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    positions = '0 0 0'
+    input_files = sub.i
+    sub_cycling = true
   []
 []
 

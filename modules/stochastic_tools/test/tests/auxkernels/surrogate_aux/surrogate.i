@@ -26,7 +26,7 @@
     type = SamplerFullSolveMultiApp
     input_files = model.i
     mode = batch-restore
-    no_backup_and_restore = true
+    no_restore = true
   []
 []
 

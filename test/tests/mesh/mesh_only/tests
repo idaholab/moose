@@ -19,8 +19,9 @@
     recover = false
     method = '!dbg'
     expect_out = 'Mesh Information'
-    issues = '#11917 #11921'
-    requirement = 'The system shall print out information about the mesh when writing out the mesh.'
+    absent_out = 'Option left: name:--mesh-only'
+    issues = '#11917 #11921 #26002'
+    requirement = 'The system shall print out information about the mesh when writing out the mesh and avoid emitting petsc warnings in mesh-only mode.'
   []
 
   [mesh_only_warning]

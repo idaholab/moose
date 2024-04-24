@@ -451,7 +451,7 @@ ParameterStudyAction::act()
         params.set<bool>("keep_solution_during_restore") = true;
       // batch-no-restore
       else if (_multiapp_mode == 4)
-        params.set<bool>("no_backup_and_restore") = true;
+        params.set<bool>("no_restore") = true;
     }
 
     // Set the minimum number of procs
