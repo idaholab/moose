@@ -315,7 +315,7 @@ protected:
   /// Momentum/mass inlet flux directions for potential coupling between applications
   const std::vector<Point> _flux_inlet_directions;
   /// Velocity function names at velocity inlet boundaries
-  const std::vector<std::vector<FunctionName>> _momentum_inlet_function;
+  const std::vector<std::vector<MooseFunctorName>> _momentum_inlet_function;
   /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
   const MultiMooseEnum _momentum_outlet_types;
   /// Velocity wall types (symmetry/noslip/slip/wallfunction)
@@ -328,10 +328,10 @@ protected:
   /// Energy wall types (symmetry/heatflux/fixed-temperature)
   const MultiMooseEnum _energy_wall_types;
   /// Energy function names at wall boundaries
-  const std::vector<FunctionName> _energy_wall_function;
+  const std::vector<MooseFunctorName> _energy_wall_function;
 
   /// Pressure function names at pressure boundaries
-  const std::vector<FunctionName> _pressure_function;
+  const std::vector<MooseFunctorName> _pressure_function;
 
   /// Subdomains where we want to have ambient convection
   const std::vector<std::vector<SubdomainName>> _ambient_convection_blocks;
@@ -569,9 +569,9 @@ NSFVBase<BaseType>::validParams()
                                   mom_inlet_types,
                                   "Types of inlet boundaries for the momentum equation.");
 
-  params.addParam<std::vector<std::vector<FunctionName>>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "momentum_inlet_function",
-      std::vector<std::vector<FunctionName>>(),
+      std::vector<std::vector<MooseFunctorName>>(),
       "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
       "double vector where the leading dimension corresponds to the number of fixed-velocity and "
       "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
@@ -594,9 +594,9 @@ NSFVBase<BaseType>::validParams()
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
                                   "Types of outlet boundaries for the momentum equation");
-  params.addParam<std::vector<FunctionName>>("pressure_function",
-                                             std::vector<FunctionName>(),
-                                             "Functions for boundary pressures at outlets.");
+  params.addParam<std::vector<MooseFunctorName>>("pressure_function",
+                                                 std::vector<MooseFunctorName>(),
+                                                 "Functions for boundary pressures at outlets.");
 
   MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction", "noslip");
   params.addParam<MultiMooseEnum>(
@@ -670,9 +670,9 @@ NSFVBase<BaseType>::validParams()
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
-  params.addParam<std::vector<FunctionName>>(
+  params.addParam<std::vector<MooseFunctorName>>(
       "energy_wall_function",
-      std::vector<FunctionName>(),
+      std::vector<MooseFunctorName>(),
       "Functions for Dirichlet/Neumann boundaries in the energy equation.");
 
   params.addParam<std::vector<std::vector<SubdomainName>>>(
@@ -994,14 +994,14 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
     _flux_inlet_pps(parameters.get<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(parameters.get<std::vector<Point>>("flux_inlet_directions")),
     _momentum_inlet_function(
-        parameters.get<std::vector<std::vector<FunctionName>>>("momentum_inlet_function")),
+        parameters.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_function")),
     _momentum_outlet_types(parameters.get<MultiMooseEnum>("momentum_outlet_types")),
     _momentum_wall_types(parameters.get<MultiMooseEnum>("momentum_wall_types")),
     _energy_inlet_types(parameters.get<MultiMooseEnum>("energy_inlet_types")),
     _energy_inlet_function(parameters.get<std::vector<std::string>>("energy_inlet_function")),
     _energy_wall_types(parameters.get<MultiMooseEnum>("energy_wall_types")),
-    _energy_wall_function(parameters.get<std::vector<FunctionName>>("energy_wall_function")),
-    _pressure_function(parameters.get<std::vector<FunctionName>>("pressure_function")),
+    _energy_wall_function(parameters.get<std::vector<MooseFunctorName>>("energy_wall_function")),
+    _pressure_function(parameters.get<std::vector<MooseFunctorName>>("pressure_function")),
     _ambient_convection_blocks(
         parameters.get<std::vector<std::vector<SubdomainName>>>("ambient_convection_blocks")),
     _ambient_convection_alpha(
@@ -2598,7 +2598,7 @@ NSFVBase<BaseType>::addINSOutletBC()
       const std::string bc_type = "INSFVOutletPressureBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.template set<NonlinearVariableName>("variable") = _pressure_name;
-      params.template set<FunctionName>("function") = _pressure_function[bc_ind];
+      params.template set<MooseFunctorName>("functor") = _pressure_function[bc_ind];
       params.template set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
       getProblem().addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
@@ -2743,10 +2743,10 @@ NSFVBase<BaseType>::addINSEnergyWallBC()
   {
     if (_energy_wall_types[bc_ind] == "fixed-temperature")
     {
-      const std::string bc_type = "FVFunctionDirichletBC";
+      const std::string bc_type = "FVFunctorDirichletBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.template set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      params.template set<FunctionName>("function") = _energy_wall_function[bc_ind];
+      params.template set<MooseFunctorName>("functor") = _energy_wall_function[bc_ind];
       params.template set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
       getProblem().addFVBC(
@@ -2754,10 +2754,10 @@ NSFVBase<BaseType>::addINSEnergyWallBC()
     }
     else if (_energy_wall_types[bc_ind] == "heatflux")
     {
-      const std::string bc_type = "FVFunctionNeumannBC";
+      const std::string bc_type = "FVFunctorNeumannBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.template set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      params.template set<FunctionName>("function") = _energy_wall_function[bc_ind];
+      params.template set<MooseFunctorName>("functor") = _energy_wall_function[bc_ind];
       params.template set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
       getProblem().addFVBC(
