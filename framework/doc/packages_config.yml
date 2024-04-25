@@ -1,12 +1,16 @@
 gcc: 12.2.1
 clang: 16.0.6
-minimum_gcc: 7.5.0
+minimum_gcc: 8.5.0
+maximum_gcc: 12.2.1
 minimum_clang: 10.0.1
+maximum_clang: 16.0.6
+python_default: 3.10
 minimum_python: 3.7
+maximum_python: 3.11
 mpich: 4.0.2
 petsc_alt: 3.11.4
 petsc: 3.20.3
-moose_dev: 2024.04.12
+moose_dev: 2024.04.23
 moose_tools: 2024.03.07
 apptainer_rockylinux: 8.8.20230518
 apptainer_mpich: 3.4.3
@@ -14,3 +18,4 @@ apptainer_gcc: 12.2.1
 conda_version: 23.11.0-0
 conda_mpi: moose-mpich
 mpi: mpich
+python_packages: packaging pyaml jinja2
