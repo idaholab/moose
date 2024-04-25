@@ -8,8 +8,8 @@ advected_interp_method = 'average'
     dim = 2
     dx = '0.3'
     dy = '0.3'
-    ix = '1000'
-    iy = '1000'
+    ix = '3'
+    iy = '3'
   []
 []
 
@@ -152,14 +152,14 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 40
+  num_iterations = 1
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  print_fields = false
+  print_fields = true
 []
 
 [Outputs]

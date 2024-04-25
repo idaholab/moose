@@ -115,6 +115,10 @@ public:
   /// face.
   VarFaceNeighbors & faceType(const std::pair<unsigned int, unsigned int> & var_sys);
 
+  std::vector<std::vector<VarFaceNeighbors>> & faceType() { return _face_types_by_var; }
+
+  const std::vector<std::vector<VarFaceNeighbors>> & faceType() const { return _face_types_by_var; }
+
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
   /// Returns the set of boundary ids for all boundaries that include this face.
@@ -197,7 +201,7 @@ private:
   /// a map that provides the information about what face type this is for each variable. The first
   /// member of the key is the variable number; the second member of the key is the number of the
   /// system that the variable lives in
-  std::map<std::pair<unsigned int, unsigned int>, VarFaceNeighbors> _face_types_by_var;
+  std::vector<std::vector<VarFaceNeighbors>> _face_types_by_var;
 
   /// the set of boundary ids that this face is associated with
   std::set<BoundaryID> _boundary_ids;
@@ -215,20 +219,13 @@ FaceInfo::neighbor() const
 inline FaceInfo::VarFaceNeighbors
 FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys) const
 {
-  auto it = _face_types_by_var.find(var_sys);
-  if (it == _face_types_by_var.end())
-    mooseError("Variable number ",
-               var_sys.first,
-               " in system number ",
-               var_sys.second,
-               " not found in variable to VarFaceNeighbors map");
-  return it->second;
+  return _face_types_by_var[var_sys.second][var_sys.first];
 }
 
 inline FaceInfo::VarFaceNeighbors &
 FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys)
 {
-  return _face_types_by_var[var_sys];
+  return _face_types_by_var[var_sys.second][var_sys.first];
 }
 
 inline const Point &
