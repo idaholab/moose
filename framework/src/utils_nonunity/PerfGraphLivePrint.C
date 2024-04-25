@@ -315,18 +315,18 @@ PerfGraphLivePrint::start()
   {
     std::unique_lock<std::mutex> lock(_perf_graph._destructing_mutex);
 
-    // Wait for one second, or until notified that a section is finished
+    // Wait for five seconds (by default), or until notified that a section is finished
     // For a section to have finished the execution list has to have been appended to
     // This keeps spurious wakeups from happening
     // Note that the `lock` is only protecting _destructing since the execution list uses atomics.
     // It must be atomic in order to keep the main thread from having to lock as it
     // executes.  The only downside to this is that it is possible for this thread to wake,
     // check the condition, miss the notification, then wait.  In our case this is not detrimental,
-    // as the only thing that will happen is we will wait 1 more second.  This is also very
+    // as the only thing that will happen is we will wait 5 more seconds.  This is also very
     // unlikely.
-    // One other thing: wait_for() is not guaranteed to wait for 1 second.  "Spurious" wakeups
+    // One other thing: wait_for() is not guaranteed to wait for 5 seconds.  "Spurious" wakeups
     // can occur - but the predicate here keeps us from doing anything in that case.
-    // This will either wait until 1 second has passed, the signal is sent, _or_ a spurious
+    // This will either wait until 5 seconds have passed, the signal is sent, _or_ a spurious
     // wakeup happens to find that there is work to do.
     _perf_graph._finished_section.wait_for(
         lock,
