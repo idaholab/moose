@@ -10,6 +10,7 @@
 #include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "PetscVectorReader.h"
 
 ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradientVolumeThread(
     FEProblemBase & fe_problem, const unsigned int linear_system_num)
@@ -44,40 +45,60 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
   // to compute extrapolated boundary conditions for example.
   auto & grad_container = linear_system.newGradientContainer();
 
-  for (const auto & variable : linear_system.getVariables(_tid))
+  // Computing this size can be very expensive so we only want to do it once
+  unsigned int size = 0;
+
   {
-    _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
-    mooseAssert(_current_var,
-                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                "the linear system?");
-    if (_current_var->needsGradientVectorStorage())
+    for (const auto & variable : linear_system.getVariables(_tid))
     {
-      const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
-      const auto state = Moose::currentState();
-
-      // Iterate over all the elements in the range
-      for (const auto & elem_info : range)
+      _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
+      mooseAssert(_current_var,
+                  "This should be a linear FV variable, did we somehow add a nonlinear variable to "
+                  "the linear system?");
+      if (_current_var->needsGradientVectorStorage())
       {
-        if (_current_var->hasBlocks(elem_info->subdomain_id()))
+        if (!size)
+          size = range.size();
+
+        const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
+        const auto state = Moose::currentState();
+
+        std::vector<std::vector<Real>> new_values(grad_container.size(),
+                                                  std::vector<Real>(size, 0.0));
+        std::vector<dof_id_type> dof_indices(size, 0);
         {
-          const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
-          const auto dof_id_elem =
-              elem_info->dofIndices()[_global_system_number][_current_var->number()];
-          const auto volume = elem_info->volume() * elem_info->coordFactor();
-
+          std::vector<PetscVectorReader> grad_reader;
           for (const auto dim_index : index_range(grad_container))
-          {
-            const auto normalized_value = (*grad_container[dim_index])(dof_id_elem) / volume;
-            grad_container[dim_index]->set(dof_id_elem, normalized_value);
-          }
+            grad_reader.emplace_back(*linear_system.newGradientContainer()[dim_index]);
 
-          if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
+          // Iterate over all the elements in the range
+          auto elem_iterator = range.begin();
+          for (const auto elem_i : make_range(size))
           {
-            const auto radial_contrib = _current_var->getElemValue(*elem_info, state) /
-                                        elem_info->centroid()(rz_radial_coord);
-            grad_container[rz_radial_coord]->add(dof_id_elem, radial_contrib);
+            const auto & elem_info = *elem_iterator;
+            if (_current_var->hasBlocks(elem_info->subdomain_id()))
+            {
+              const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
+              dof_indices[elem_i] =
+                  elem_info->dofIndices()[_global_system_number][_current_var->number()];
+              const auto volume = elem_info->volume() * elem_info->coordFactor();
+
+              for (const auto dim_index : index_range(grad_container))
+                new_values[dim_index][elem_i] =
+                    grad_reader[dim_index](dof_indices[elem_i]) / volume;
+
+              if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
+              {
+                const auto radial_contrib = _current_var->getElemValue(*elem_info, state) /
+                                            elem_info->centroid()(rz_radial_coord);
+                new_values[rz_radial_coord][elem_i] += radial_contrib;
+              }
+            }
+            elem_iterator++;
           }
         }
+        for (const auto dim_index : index_range(grad_container))
+          grad_container[dim_index]->insert(new_values[dim_index].data(), dof_indices);
       }
     }
   }
