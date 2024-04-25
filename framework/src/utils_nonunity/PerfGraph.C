@@ -41,7 +41,6 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _stack(),
     _execution_list_begin(0),
     _execution_list_end(0),
-    _active(true),
     _live_print_active(true),
     _destructing(false),
     _live_print_time_limit(5.0),
@@ -180,7 +179,7 @@ PerfGraph::addToExecutionList(const PerfID id,
 void
 PerfGraph::push(const PerfID id)
 {
-  if (!_active && !_live_print_active)
+  if (!_live_print_active)
     return;
 
   PerfNode * new_node = nullptr;
@@ -226,7 +225,7 @@ PerfGraph::push(const PerfID id)
 void
 PerfGraph::pop()
 {
-  if (!_active && !_live_print_active)
+  if (!_live_print_active)
     return;
 
   auto current_time = std::chrono::steady_clock::now();
