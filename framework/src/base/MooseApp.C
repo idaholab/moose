@@ -540,6 +540,8 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribSorted>("sorted");
   _the_warehouse->registerAttribute<AttribDisplaced>("displaced", -1);
 
+  _perf_graph.enableLivePrint();
+
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");

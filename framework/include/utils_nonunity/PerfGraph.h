@@ -122,6 +122,11 @@ public:
   void setLivePrintActive(bool active) { _live_print_active = active; }
 
   /**
+   * Enables Live Print
+   */
+  void enableLivePrint();
+
+  /**
    * Completely disables Live Print (cannot be restarted)
    */
   void disableLivePrint();

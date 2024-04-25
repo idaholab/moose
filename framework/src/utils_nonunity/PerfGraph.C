@@ -47,16 +47,20 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _live_print_mem_limit(100),
     _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
 {
+  push(_root_node_id);
+}
+
+PerfGraph::~PerfGraph() { disableLivePrint(); }
+
+void
+PerfGraph::enableLivePrint()
+{
   if (_pid == 0 && !_disable_live_print)
   {
     // Start the printing thread
     _print_thread = std::thread([this] { this->_live_print->start(); });
   }
-
-  push(_root_node_id);
 }
-
-PerfGraph::~PerfGraph() { disableLivePrint(); }
 
 void
 PerfGraph::disableLivePrint()
