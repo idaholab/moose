@@ -37,7 +37,8 @@ public:
   virtual void initialize() final{};
   virtual void execute() final{};
   virtual void reTrain(const std::vector<std::vector<Real>> & inputs,
-                       const std::vector<Real> & outputs) const final;
+                       const std::vector<Real> & outputs,
+                       const bool & read_from_file) const final;
 
 private:
 
@@ -51,11 +52,6 @@ private:
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data.
   const std::string _nn_filename;
-
-  /// Switch indicating if an already existing neural net should be read from a
-  /// file or not. This can be used to load existing torch files (from previous
-  /// MOOSE or python runs for retraining and further manipulation)
-  const bool _read_from_file;
 
   /// The struct which contains the information for the training of the neural net
   Moose::LibtorchTrainingOptions _optim_options;

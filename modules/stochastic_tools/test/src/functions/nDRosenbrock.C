@@ -57,6 +57,6 @@ nDRosenbrock::execute()
 void
 nDRosenbrock::finalize()
 {
-  if (_parallel_type == "REPLICATED")
+  if (_parallel_type == "DISTRIBUTED") // REPLICATED
     _communicator.gather(0, _values);
 }
