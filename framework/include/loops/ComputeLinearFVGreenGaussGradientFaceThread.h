@@ -61,18 +61,6 @@ public:
   void join(const ComputeLinearFVGreenGaussGradientFaceThread & y);
 
 protected:
-  /**
-   * Compute contributions to the gradient sum on an internal face.
-   * @param face_info The FaceInfo object that contains orientation information.
-   */
-  void onInternalFace(const FaceInfo & face_info);
-
-  /**
-   * Compute contributions to the gradient sum on a boundary face.
-   * @param face_info The FaceInfo object that contains orientation information.
-   */
-  void onBoundaryFace(const FaceInfo & face_info);
-
   /// Reference to the problem
   FEProblemBase & _fe_problem;
 
@@ -97,8 +85,4 @@ protected:
   /// Cache for the new gradient which is being built. It is needed because in certain scenarios the
   /// old gradient is used for computing the new gradient.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _new_gradient;
-
-  std::vector<dof_id_type> _dof_indices;
-
-  std::vector<Real> _contributions;
 };
