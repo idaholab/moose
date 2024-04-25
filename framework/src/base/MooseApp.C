@@ -54,7 +54,6 @@
 #include "RestartableDataWriter.h"
 #include "StringInputStream.h"
 #include "MooseMain.h"
-#include "PetscSupport.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -984,9 +983,6 @@ MooseApp::setupOptions()
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
       _syntax.addDependency("determine_system_type", "mesh_only");
       _action_warehouse.setFinalTask("mesh_only");
-      // Turn off Petsc's warning about unused petsc options since we do not use petsc in mesh-only
-      // mode
-      Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
     }
     else if (isParamValid("split_mesh"))
     {
