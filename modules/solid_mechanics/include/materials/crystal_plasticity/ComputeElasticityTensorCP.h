@@ -52,4 +52,8 @@ protected:
 
   /// flag for user-defined rotation matrix, supplied in input file
   bool _user_provided_rotation_matrix;
+
+  // The coupled Euler angles component variables
+  unsigned int _n_euler_angle_vars;
+  const std::vector<const VariableValue *> _euler_angle_vars;
 };
