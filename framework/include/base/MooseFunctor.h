@@ -271,7 +271,7 @@ public:
    * @return A face with possibly changed sidedness depending on whether we aren't defined on both
    * sides of the face
    */
-  Moose::FaceArg checkFace(const Moose::FaceArg & face) const;
+  void checkFace(const Moose::FaceArg & face) const;
 
   /**
    * Whether this functor supports evaluation with FaceArg
@@ -606,15 +606,15 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const FaceArg & face_in, const StateArg & state) const
 {
-  const auto face = checkFace(face_in);
+  checkFace(face_in);
 
   if (_clearance_schedule.empty())
-    return evaluate(face, state);
+    return evaluate(face_in, state);
 
   mooseAssert(state.state == 0,
               "Cached evaluations are only currently supported for the current state.");
 
-  return queryFVArgCache(_face_arg_to_value, face);
+  return queryFVArgCache(_face_arg_to_value, face_in);
 }
 
 template <typename T>
@@ -731,27 +731,22 @@ FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
 }
 
 template <typename T>
-FaceArg
-FunctorBase<T>::checkFace(const Moose::FaceArg & face) const
+void
+FunctorBase<T>::checkFace(const Moose::FaceArg & libmesh_dbg_var(face)) const
 {
+#if DEBUG
   const Elem * const elem = face.face_side;
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "face info should be non-null");
-  auto ret_face = face;
   bool check_elem_def = false;
   bool check_neighbor_def = false;
+  // We check if the functor is defined on both sides of the face
   if (!elem)
   {
     if (!hasFaceSide(*fi, true))
-    {
-      ret_face.face_side = fi->neighborPtr();
       check_neighbor_def = true;
-    }
     else if (!hasFaceSide(*fi, false))
-    {
-      ret_face.face_side = fi->elemPtr();
       check_elem_def = true;
-    }
   }
   else if (elem == fi->elemPtr())
     check_elem_def = true;
@@ -785,8 +780,7 @@ FunctorBase<T>::checkFace(const Moose::FaceArg & face) const
         "producer (e.g. residual object, postprocessor, etc.) has requested evaluation there.\n",
         additional_message);
   }
-
-  return ret_face;
+#endif
 }
 
 template <typename T>
@@ -858,7 +852,8 @@ template <typename T>
 typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradient(const FaceArg & face, const StateArg & state) const
 {
-  return evaluateGradient(checkFace(face), state);
+  checkFace(face);
+  return evaluateGradient(face, state);
 }
 
 template <typename T>
@@ -900,7 +895,8 @@ template <typename T>
 typename FunctorBase<T>::DotType
 FunctorBase<T>::dot(const FaceArg & face, const StateArg & state) const
 {
-  return evaluateDot(checkFace(face), state);
+  checkFace(face);
+  return evaluateDot(face, state);
 }
 
 template <typename T>
@@ -942,7 +938,8 @@ template <typename T>
 typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradDot(const FaceArg & face, const StateArg & state) const
 {
-  return evaluateGradDot(checkFace(face), state);
+  checkFace(face);
+  return evaluateGradDot(face, state);
 }
 
 template <typename T>
