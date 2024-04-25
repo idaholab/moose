@@ -19,6 +19,7 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
+#include "libmesh/remote_elem.h"
 
 InputParameters
 SideSetsGeneratorBase::validParams()
@@ -190,7 +191,8 @@ SideSetsGeneratorBase::flood(const Elem * elem,
                              const boundary_id_type & side_id,
                              MeshBase & mesh)
 {
-  if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
+  if (elem == nullptr || elem == remote_elem ||
+      (_visited[side_id].find(elem) != _visited[side_id].end()))
     return;
 
   // Skip if element is not in specified subdomains
