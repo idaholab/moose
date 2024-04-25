@@ -9,6 +9,7 @@
     input = iga_file
     normals = '-1 0 0
                1 0 0'
+    fixed_normal = true
     new_boundary = 'left right'
   []
 []
