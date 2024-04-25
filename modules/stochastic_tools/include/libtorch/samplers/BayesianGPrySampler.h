@@ -19,6 +19,7 @@
 #include "Standardizer.h"
 #include "GaussianProcess.h"
 #include "TransientInterface.h"
+#include "ReporterInterface.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: sampler step
@@ -35,10 +36,7 @@ public:
   /**
    * Returns true if the adaptive sampling is completed
    */
-  virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
-
-//   using SurrogateModel::evaluate;
-//   virtual Real evaluate(const std::vector<Real> & x) const override;
+  // virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
 
 protected:
   /// Gather all the samples
@@ -50,13 +48,15 @@ protected:
   std::vector<Distribution const *> _distributions;
 
   /// True if the sampling is completed
-  bool _is_sampling_completed = false;
+  // bool _is_sampling_completed;
 
   /// Get the libtorch classifer neural network
-  LibtorchANNSurrogate & _nn;
+  // SurrogateModel _nn; // LibtorchANNSurrogate
+  // std::vector<const LibtorchANNSurrogate *> _model;
+  // LibtorchANNSurrogate _model;
 
   /// Get the Gaussian process surrogate of log-posterior
-  const SurrogateModel & _gp;
+  // const SurrogateModel & _gp;
 
 private:
   /// Number of samples requested
