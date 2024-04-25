@@ -11,6 +11,7 @@
 
 #include "InputParameters.h"
 #include "MooseObject.h"
+#include "MooseMain.C"
 
 #include <string>
 #include <vector>
@@ -40,11 +41,14 @@
 /// to find the closest existing app name and use that.  classname is the (unquoted)
 /// c++ class.  Each object/class should only be registered once.
 #define registerMooseObject(app, classname)                                                        \
-  do{                                                                                              \
-    static const std::vector<std::string> validApps = {"App1", "App2", "App3"};                    \
+  do{                                                               
+    //Get the vector of valid app names from MooseMain.C 
+    static const std::vector<std::string> validApps = MooseMain.appNames;                                    \
     std::string actualApp = fuzzToName(app, validApps);                                            \
-    if (actualApp == "NothingClose"){                                                              \
-      std::cerr << "Warning: '" << app << "' is not a recognized app name. Did you mean something else?" << std::endl;  \
+    if (actualApp == "NothingClose")                                                               \
+    {                                                                                              \
+      std::cerr << "Warning: '" << app                                                             \
+                << "' is not a recognized app name. Did you mean something else?" << std::endl;    \
     }                                                                                              \
     static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =              \
         Registry::add<classname>({actualApp, #classname, "", "", __FILE__, __LINE__, "", ""});     \

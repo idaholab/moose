@@ -35,6 +35,8 @@ addMainCommandLineParams(InputParameters & params)
       "application_type", "Application/type=<app_type>", "Specify the application type.");
 }
 
+std::vector<string> appNames;
+
 std::shared_ptr<MooseApp>
 createMooseApp(const std::string & default_app_name, int argc, char * argv[])
 {
@@ -52,6 +54,9 @@ createMooseApp(const std::string & default_app_name, int argc, char * argv[])
   // Get command line arguments
   command_line->search("input_file", input_filenames);
   command_line->search("application_type", cl_app_type);
+
+  // Add the name of the app type to a vector used to check for if a valid app name exists later
+  appNames.push_back(cl_app_type)
 
   // loop over all the command line arguments and error out when the user uses Application block for
   // subapps
