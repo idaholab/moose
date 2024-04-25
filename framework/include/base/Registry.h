@@ -36,11 +36,19 @@
   static char combineNames(dummyvar_for_registering_action_##classname, __COUNTER__) =             \
       Registry::addAction<classname>({app, #classname, "", task, __FILE__, __LINE__, "", ""})
 
-/// Add a MooseObject to the registry with the given app name/label.  classname is the (unquoted)
+/// Add a MooseObject to the registry with the given app name/label. If a app name in spelled wrong the macro attempts
+/// to find the closest existing app name and use that.  classname is the (unquoted)
 /// c++ class.  Each object/class should only be registered once.
 #define registerMooseObject(app, classname)                                                        \
-  static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =                \
-      Registry::add<classname>({app, #classname, "", "", __FILE__, __LINE__, "", ""})
+  do{                                                                                              \
+    static const std::vector<std::string> validApps = {"App1", "App2", "App3"};                    \
+    std::string actualApp = fuzzToName(app, validApps);                                            \
+    if (actualApp == "NothingClose"){                                                              \
+      std::cerr << "Warning: '" << app << "' is not a recognized app name. Did you mean something else?" << std::endl;  \
+    }                                                                                              \
+    static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =              \
+        Registry::add<classname>({actualApp, #classname, "", "", __FILE__, __LINE__, "", ""});     \
+  } while (0)
 
 #define registerADMooseObject(app, classname) registerMooseObject(app, classname)
 
