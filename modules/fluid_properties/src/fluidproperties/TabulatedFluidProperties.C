@@ -76,7 +76,10 @@ TabulatedFluidProperties::validParams()
       false,
       "Option to use a base-10 logarithmically-spaced grid for specific volume instead of a "
       "linearly-spaced grid.");
-
+  params.addParam<bool>("p_h_variables",
+                        false,
+                        "If using p, h instead of p,t use this flag to set the correct variables"
+                        "for functions.");
   params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
                               "Variable set conversion");
@@ -111,6 +114,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
+    _p_h_variables(false),
     _density_idx(0),
     _enthalpy_idx(0),
     _internal_energy_idx(0),
@@ -597,8 +601,11 @@ TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_enthalpy)
   {
+    if (!_p_h_variables)
+    {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
+    }
   }
   else
   {

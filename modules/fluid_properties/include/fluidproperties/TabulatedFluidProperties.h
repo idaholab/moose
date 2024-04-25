@@ -236,6 +236,7 @@ protected:
   bool _interpolate_cp;
   bool _interpolate_cv;
   bool _interpolate_entropy;
+  bool _p_h_variables;
 
   /// Index of each property
   unsigned int _density_idx;
