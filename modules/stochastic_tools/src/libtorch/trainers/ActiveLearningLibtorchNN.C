@@ -39,9 +39,6 @@ ActiveLearningLibtorchNN::validParams()
       "or one value per hidden layer.");
   params.addParam<std::string>(
       "nn_filename", "net.pt", "Filename used to output the neural net parameters.");
-  params.addParam<bool>("read_from_file",
-                        false,
-                        "Switch to allow reading old trained neural nets for further training.");
   params.addParam<Real>("learning_rate", 0.001, "Learning rate (relaxation).");
   params.addRangeCheckedParam<unsigned int>(
       "print_epoch_loss",
@@ -70,7 +67,6 @@ ActiveLearningLibtorchNN::ActiveLearningLibtorchNN(const InputParameters & param
     _activation_function(declareModelData<std::vector<std::string>>(
         "activation_function", getParam<std::vector<std::string>>("activation_function"))),
     _nn_filename(getParam<std::string>("nn_filename")),
-    _read_from_file(getParam<bool>("read_from_file")),
     _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn")),
     _standardize_input(getParam<bool>("standardize_input")),
     _standardize_output(getParam<bool>("standardize_output")),
@@ -94,7 +90,8 @@ ActiveLearningLibtorchNN::ActiveLearningLibtorchNN(const InputParameters & param
 
 void
 ActiveLearningLibtorchNN::reTrain(const std::vector<std::vector<Real>> & inputs,
-                                  const std::vector<Real> & outputs) const
+                                  const std::vector<Real> & outputs,
+                                  const bool & read_from_file) const
 {
   // Addtional error check for each re-train call of the GP surrogate
   if (inputs.size() != outputs.size())
@@ -110,11 +107,7 @@ ActiveLearningLibtorchNN::reTrain(const std::vector<std::vector<Real>> & inputs,
   unsigned int num_samples = outputs.size();
   unsigned int num_inputs = inputs[0].size();
 
-  // We create a neural net (for the definition of the net see the header file)
-  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      _nn_filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
-
-  if (_read_from_file)
+  if (read_from_file)
     try
     {
       torch::load(_nn, _nn_filename);
@@ -124,8 +117,11 @@ ActiveLearningLibtorchNN::reTrain(const std::vector<std::vector<Real>> & inputs,
     {
       mooseError("The requested pytorch file could not be loaded.\n", e.msg());
     }
+  else
+    _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
+        _nn_filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
 
-  // Store inputs and outputs in a new vector real to facilitate conversion to torch tensors
+  // Store inputs (flattened) and outputs in a new vector real to facilitate conversion to torch tensors
   std::vector<Real> torch_inputs;
   std::vector<Real> torch_outputs;
   for (unsigned int i = 0; i < num_samples; ++i)
@@ -183,6 +179,8 @@ ActiveLearningLibtorchNN::reTrain(const std::vector<std::vector<Real>> & inputs,
   // We create atrainer for our neral net and train it with the dataset
   Moose::LibtorchArtificialNeuralNetTrainer<> trainer(*_nn, comm());
   trainer.train(my_data, _optim_options);
+
+  torch::save(_nn, _nn->name());
 }
 
 #endif
