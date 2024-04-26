@@ -1,8 +1,10 @@
 # Solid properties
 cp_s = 2
 rho_s = 4
-k_s = 1e-2
+k_s = '${fparse 1e-2 / 0.5}'
 h_fs = 10
+
+# thermal diffusivity is divided by 0.5 to match the reference using the action
 
 # Operating conditions
 u_inlet = 1
@@ -23,13 +25,6 @@ top_side_temperature = 150
   []
 []
 
-[Variables]
-  [T_solid]
-    type = INSFVEnergyVariable
-    initial_condition = 100
-  []
-[]
-
 [AuxVariables]
   [porosity]
     type = MooseVariableFVReal
@@ -46,76 +41,77 @@ top_side_temperature = 150
   []
 []
 
-[Modules]
-  [NavierStokesFV]
-    compressibility = 'weakly-compressible'
-    add_energy_equation = true
-    porous_medium_treatment = true
+[Physics]
+  [NavierStokes]
+    [WCNSFVFlow]
+      [flow]
+        compressibility = 'weakly-compressible'
+        porous_medium_treatment = true
+        define_variables = true
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k'
-    specific_heat = 'cp'
+        pressure_variable = 'pressure'
 
-    initial_velocity = '${u_inlet} 1e-6 0'
-    initial_pressure = '${p_outlet}'
-    initial_temperature = '${T_inlet}'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${u_inlet} 0'
-    energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '${T_inlet}'
+        initial_velocity = '${u_inlet} 1e-6 0'
+        initial_pressure = '${p_outlet}'
 
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip symmetry'
-    energy_wall_types = 'heatflux heatflux'
-    energy_wall_function = '0 0'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '${u_inlet} 0'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${p_outlet}'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip symmetry'
 
-    ambient_convection_alpha = 'h_cv'
-    ambient_temperature = 'T_solid'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_function = '${p_outlet}'
 
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
-    energy_advection_interpolation = 'average'
-  []
-[]
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
+    [WCNSFVFluidHeatTransfer]
+      [fluid]
+        thermal_conductivity = 'k'
+        specific_heat = 'cp'
 
-[FVKernels]
-  [solid_energy_time]
-    type = PINSFVEnergyTimeDerivative
-    variable = T_solid
-    cp = ${cp_s}
-    rho = ${rho_s}
-    is_solid = true
-    porosity = 'porosity'
-  []
-  [solid_energy_diffusion]
-    type = FVDiffusion
-    variable = T_solid
-    # this should use eps * k instead of k
-    coeff = ${k_s}
-  []
-  [solid_energy_convection]
-    type = PINSFVEnergyAmbientConvection
-    variable = T_solid
-    is_solid = true
-    T_fluid = 'T_fluid'
-    T_solid = 'T_solid'
-    h_solid_fluid = 'h_cv'
-  []
-[]
+        initial_temperature = '${T_inlet}'
 
-[FVBCs]
-  [heated-side]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = 'T_solid'
-    value = ${top_side_temperature}
+        energy_inlet_types = 'fixed-temperature'
+        energy_inlet_function = '${T_inlet}'
+
+        energy_wall_types = 'heatflux heatflux'
+        energy_wall_function = '0 0'
+
+        ambient_convection_alpha = 'h_cv'
+        ambient_temperature = 'T_solid'
+
+        energy_advection_interpolation = 'average'
+      []
+    []
+
+    [PNSFVSolidHeatTransfer]
+      [solid]
+        block = 0
+        initial_temperature = 100
+        transient = true
+        # To match the previous test results
+        solid_temperature_two_term_bc_expansion = true
+
+        thermal_conductivity_solid = '${k_s}'
+        cp_solid = ${cp_s}
+        rho_solid = ${rho_s}
+
+        fixed_temperature_boundaries = 'top'
+        boundary_temperatures = '${top_side_temperature}'
+
+        ambient_convection_alpha = 'h_cv'
+        ambient_convection_temperature = 'T_fluid'
+        verbose = true
+      []
+    []
   []
 []
 
