@@ -26,8 +26,9 @@ WCNSFVTurbulencePhysics::validParams()
 {
   InputParameters params = NavierStokesPhysicsBase::validParams();
   params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
-  params.addClassDescription("Define a turbulence model for a weakly-compressible Navier Stokes "
-                             "flow with a finite volume discretization");
+  params.addClassDescription(
+      "Define a turbulence model for a incompressible or weakly-compressible Navier Stokes "
+      "flow with a finite volume discretization");
 
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
@@ -40,6 +41,7 @@ WCNSFVTurbulencePhysics::validParams()
   // TODO Added to facilitate transition, remove default once NavierStokesFV action is removed
   params.addParam<AuxVariableName>(
       "mixing_length_name", "mixing_length", "Name of the mixing length auxiliary variable");
+  params.deprecateParam("mixing_length_walls", "turbulence_walls", "");
 
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
@@ -63,7 +65,7 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
     WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
     _turbulence_model(getParam<MooseEnum>("turbulence_handling")),
     _mixing_length_name(getParam<AuxVariableName>("mixing_length_name")),
-    _mixing_length_walls(getParam<std::vector<BoundaryName>>("mixing_length_walls"))
+    _turbulence_walls(getParam<std::vector<BoundaryName>>("turbulence_walls"))
 {
   if (_verbose && _turbulence_model != "none")
     _console << "Creating a " << std::string(_turbulence_model) << " turbulence model."
@@ -138,7 +140,7 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
                             "mixing-length",
                             {"mixing_length_delta",
                              "mixing_length_aux_execute_on",
-                             "mixing_length_walls",
+                             "turbulence_walls",
                              "von_karman_const",
                              "von_karman_const_0",
                              "mixing_length_two_term_bc_expansion"});
@@ -251,7 +253,8 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
     const auto & passive_scalar_schmidt_number =
         getParam<std::vector<Real>>("passive_scalar_schmidt_number");
-    if (passive_scalar_schmidt_number.size() != passive_scalar_names.size())
+    if (passive_scalar_schmidt_number.size() != passive_scalar_names.size() &&
+        passive_scalar_schmidt_number.size() != 1)
       paramError("passive_scalar_schmidt_number",
                  "The number of Schmidt numbers defined is not equal to the number of passive "
                  "scalar fields!");
@@ -259,8 +262,10 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     for (const auto & name_i : index_range(passive_scalar_names))
     {
       params.set<NonlinearVariableName>("variable") = passive_scalar_names[name_i];
-      if (passive_scalar_schmidt_number.size())
+      if (passive_scalar_schmidt_number.size() > 1)
         params.set<Real>("schmidt_number") = passive_scalar_schmidt_number[name_i];
+      else if (passive_scalar_schmidt_number.size() == 1)
+        params.set<Real>("schmidt_number") = passive_scalar_schmidt_number[0];
       else
         params.set<Real>("schmidt_number") = 1.0;
 
@@ -279,7 +284,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     InputParameters ml_params = getFactory().getValidParams(ml_kernel_type);
     assignBlocks(ml_params, _blocks);
     ml_params.set<AuxVariableName>("variable") = _mixing_length_name;
-    ml_params.set<std::vector<BoundaryName>>("walls") = _mixing_length_walls;
+    ml_params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     if (parameters().isParamValid("mixing_length_aux_execute_on"))
       ml_params.set<ExecFlagEnum>("execute_on") =
           getParam<ExecFlagEnum>("mixing_length_aux_execute_on");

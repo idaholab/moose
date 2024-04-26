@@ -63,5 +63,5 @@ private:
   /// Name of the mixing length auxiliary variable
   const VariableName _mixing_length_name;
   /// List of boundaries to act as walls for turbulence models
-  std::vector<BoundaryName> _mixing_length_walls;
+  std::vector<BoundaryName> _turbulence_walls;
 };

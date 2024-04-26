@@ -136,8 +136,8 @@ protected:
   template <typename T, typename C>
   std::map<T, C> createMapFromVectors(std::vector<T> keys, std::vector<C> values) const;
   template <typename T>
-  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(std::vector<T> keys,
-                                                              MultiMooseEnum values) const;
+  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(const std::vector<T> & keys,
+                                                              const MultiMooseEnum & values) const;
 
   /// System number for the system owning the variables
   const unsigned int _sys_number;
@@ -215,6 +215,9 @@ template <typename T>
 const T *
 PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail) const
 {
+  constexpr bool is_physics = std::is_base_of<PhysicsBase, T>::value;
+  libmesh_ignore(is_physics);
+  mooseAssert(is_physics, "Must be a PhysicsBase to be retrieved by getCoupledPhysics");
   const auto all_T_physics = _awh.getActions<T>();
   for (const auto * const physics : all_T_physics)
   {
@@ -235,6 +238,9 @@ template <typename T>
 const std::vector<T *>
 PhysicsBase::getCoupledPhysics(const bool allow_fail) const
 {
+  constexpr bool is_physics = std::is_base_of<PhysicsBase, T>::value;
+  libmesh_ignore(is_physics);
+  mooseAssert(is_physics, "Must be a PhysicsBase to be retrieved by getCoupledPhysics");
   const auto all_T_physics = _awh.getActions<T>();
   if (!allow_fail && all_T_physics.empty())
     mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
@@ -262,7 +268,8 @@ PhysicsBase::createMapFromVectors(std::vector<T> keys, std::vector<C> values) co
 
 template <typename T>
 std::map<T, MooseEnum>
-PhysicsBase::createMapFromVectorAndMultiMooseEnum(std::vector<T> keys, MultiMooseEnum values) const
+PhysicsBase::createMapFromVectorAndMultiMooseEnum(const std::vector<T> & keys,
+                                                  const MultiMooseEnum & values) const
 {
   std::map<T, MooseEnum> map;
   // No values have been specified. We cant form a map of empty MooseEnum
