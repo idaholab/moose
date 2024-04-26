@@ -35,16 +35,6 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
 
-  // These parameters are not shared because the NSFVPhysics use functors
-  params.addParam<std::vector<MooseFunctorName>>(
-      "energy_inlet_function",
-      std::vector<MooseFunctorName>(),
-      "Functors for Dirichlet/Neumann inlet boundaries in the energy equation.");
-  params.addParam<std::vector<MooseFunctorName>>(
-      "energy_wall_function",
-      std::vector<MooseFunctorName>(),
-      "Functors for Dirichlet/Neumann wall boundaries in the energy equation.");
-
   // New functor boundary conditions
   params.deprecateParam("energy_inlet_function", "energy_inlet_functors", "01/01/2025");
   params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");

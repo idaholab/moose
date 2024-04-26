@@ -55,18 +55,6 @@ WCNSFVFlowPhysics::validParams()
   // boundary conditions for advection physics in WCNSFV
   params += NSFVAction::commonMomentumBoundaryFluxesParams();
 
-  // Deprecated parameters for the boundary conditions
-  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "momentum_inlet_function",
-      std::vector<std::vector<MooseFunctorName>>(),
-      "Functors for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
-      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
-      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
-      "dimensions for fixed-velocity boundaries or is a single functor name for pressure inlets.");
-  params.addParam<std::vector<MooseFunctorName>>("pressure_function",
-                                                 std::vector<MooseFunctorName>(),
-                                                 "Functors for boundary pressures at outlets.");
-
   // New functor boundary conditions
   params.deprecateParam("momentum_inlet_function", "momentum_inlet_functors", "01/01/2025");
   params.deprecateParam("pressure_function", "pressure_functors", "01/01/2025");
