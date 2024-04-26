@@ -1045,7 +1045,7 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(47u, completions_array.size());
+  EXPECT_EQ(48u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1056,6 +1056,7 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
   std::string completions_expect = R"INPUT(
 label: active                                 text: active = '${1:__all__}'                             desc: If specified only... pos: [6.0]-[6.0] kind:  7 format: snippet
 label: add_subdomain_ids                      text: add_subdomain_ids =                                 desc: The listed subdom... pos: [6.0]-[6.0] kind: 14 format: regular
+label: add_subdomain_names                    text: add_subdomain_names =                               desc: Optional list of ... pos: [6.0]-[6.0] kind: 14 format: regular
 label: allow_renumbering                      text: allow_renumbering = ${1:true}                       desc: If allow_renumber... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: alpha_rotation                         text: alpha_rotation =                                    desc: The number of deg... pos: [6.0]-[6.0] kind: 14 format: regular
 label: beta_rotation                          text: beta_rotation =                                     desc: The number of deg... pos: [6.0]-[6.0] kind: 14 format: regular
