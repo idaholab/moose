@@ -239,9 +239,6 @@ protected:
     /// This section has already started printing
     PRINTED,
 
-    /// Something else printed, but now this printed again
-    CONTINUED,
-
     /// The section is complete
     FINISHED
   };
