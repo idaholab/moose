@@ -105,6 +105,9 @@ LStableDirk3::solve()
     // Set the time for this stage
     _fe_problem.time() = time_old + _c[_stage - 1] * _dt;
 
+    // Potentially setup finite differencing contexts for the solve
+    _nl.potentiallySetupFiniteDifferencing();
+
     // Do the solve
     _nl.system().solve();
 
