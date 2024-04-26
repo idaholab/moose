@@ -11,15 +11,27 @@
 
 #pragma once
 
+#include <torch/torch.h>
 #include "GeneralReporter.h"
 #include "Sampler.h"
 #include "BayesianGPrySampler.h"
 #include "ActiveLearningLibtorchNN.h"
+#include "LibtorchANNSurrogate.h"
+#include "ActiveLearningGaussianProcess.h"
+#include "GaussianProcess.h"
+#include "SurrogateModel.h"
+#include "SurrogateModelInterface.h"
+#include "Standardizer.h"
+#include "GaussianProcess.h"
+#include "LikelihoodFunctionBase.h"
+#include "LikelihoodInterface.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: NN and GP training step
  */
-class BayesianGPryLearner : public GeneralReporter
+class BayesianGPryLearner : public GeneralReporter,
+                            public LikelihoodInterface,
+                            public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -37,10 +49,18 @@ protected:
 
 private:
   /**
-   * Sets up the training data for the neural network classifier
+   * Sets up the training data for the neural network classifier and GP model
    * @param data_in The data matrix containing the inputs to the NNs
    */
-  virtual void setupNNData(const DenseMatrix<Real> & data_in);
+  void setupNNGPData(const std::vector<Real> & log_posterior, const DenseMatrix<Real> & data_in);
+
+  /**
+   * Compute the log of the un-normalized posterior (aka likelihood times the prior)
+   * @param log_posterior The evidence vector to be filled
+   * @param input_matrix The matrix of proposed inputs that are provided
+   */
+  void computeLogPosterior(std::vector<Real> & log_posterior,
+                           const DenseMatrix<Real> & input_matrix);
 
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
@@ -48,8 +68,36 @@ private:
   /// Adaptive Importance Sampler
   const BayesianGPrySampler * const _gpry_sampler;
 
+  /// The selected sample indices to evaluate the subApp
+  std::vector<unsigned int> & _sorted_indices;
+
+  /// Storage for the likelihood objects to be utilized
+  std::vector<const LikelihoodFunctionBase *> _likelihoods;
+
+  /// Storage for all the proposed samples
+  const std::vector<std::vector<Real>> & _inputs_all;
+
+  /// Storage for all the proposed variance samples
+  const std::vector<Real> & _var_all;
+
   /// The active learning NN trainer that permits re-training
   const ActiveLearningLibtorchNN & _al_nn;
+  /// Get the libtorch classifer neural network
+  const LibtorchANNSurrogate & _nn_eval;
+
+  /// The active learning GP trainer that permits re-training
+  const ActiveLearningGaussianProcess & _al_gp;
+  /// The GP evaluator object that permits re-evaluations
+  const SurrogateModel & _gp_eval;
+
+  /// Storage for new proposed variance samples
+  const std::vector<Real> & _new_var_samples;
+
+  /// Storage for the priors
+  const std::vector<const Distribution *> _priors;
+
+  /// Storage for the prior over the variance
+  const Distribution * _var_prior;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
@@ -62,6 +110,33 @@ private:
 
   /// SubApp outputs for neural network model
   std::vector<Real> _nn_outputs;
+
+  /// SubApp inputs for GP model
+  std::vector<std::vector<Real>> _gp_inputs;
+
+  /// SubApp outputs for GP model
+  std::vector<Real> _gp_outputs;
+
+  /// Maximum number of subApp calls in each iteration
+  unsigned int _num_samples;
+
+  /// Outputs for neural network model for the try samples
+  std::vector<Real> _nn_outputs_try;
+
+  /// Outputs for GP model for the try samples
+  std::vector<Real> _gp_outputs_try;
+
+  /// Outputs for GP model standard deviation for the try samples
+  std::vector<Real> _gp_std_try;
+
+  /// Storage for the number of parallel proposals
+  dof_id_type _props;
+
+  /// Storage for the number of experimental configuration values
+  dof_id_type _num_confg_values;
+
+  /// Storage for the number of experimental configuration parameters
+  dof_id_type _num_confg_params;
 };
 
 #endif
