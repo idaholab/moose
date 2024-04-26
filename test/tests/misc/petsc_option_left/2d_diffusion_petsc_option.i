@@ -44,7 +44,6 @@
 
   solve_type = 'NEWTON'
 
-  petsc_options = "-options_left"
   petsc_options_iname = "-pc_type"
   petsc_options_value = "hypre"
 []
