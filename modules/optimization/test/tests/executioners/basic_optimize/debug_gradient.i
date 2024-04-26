@@ -15,8 +15,8 @@
 [Executioner]
   type = Optimize
   tao_solver = taobncg
-  petsc_options_iname='-tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta'
-  petsc_options_value='true true false 1e-8'
+  petsc_options_iname='-tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_ls_type'
+  petsc_options_value='true true false 1e-8 unit'
   petsc_options = '-tao_test_gradient_view'
   verbose = true
 []
