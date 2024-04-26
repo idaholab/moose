@@ -50,4 +50,14 @@
     requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified '
                   'verification problem along y axis'
   []
+  [anis_plasticity_test2]
+    type = 'Exodiff'
+    input = 'anis_plasticity_test2.i'
+    exodiff = 'temperature_effect_test_out.e'
+    issues = '#23117'
+    requirement = 'The temperature_effect_test must verify that the anisotropic plasticity '
+                  'model accurately predicts changes in material behavior under varying '
+                  'temperature conditions, ensuring the model's reliability for thermal '
+                  'analysis in engineering applications'
+  []
 []
