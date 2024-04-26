@@ -16,7 +16,7 @@ import yaml
 import sys
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
-TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
+TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcstm')
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -276,19 +276,21 @@ def formatResult(job, options, result='', color=True, **kwargs):
     caveat_index = None
     justification_index = None
     for i, f_key in enumerate(terminal_format):
+        key = str(f_key).lower()
+
         # Store the caveat request. We will use this later.
-        if str(f_key).lower() == 'c':
+        if key == 'c':
             caveat_index = terminal_format[i]
 
         # Store the justification request. We will use this later.
-        if str(f_key).lower() == 'j':
+        if key == 'j':
             justification_index = terminal_format[i]
 
-        if str(f_key).lower() == 'p':
+        if key == 'p':
             pre_result = ' '*(8-len(status)) + status
             formatCase(f_key, (pre_result, message_color), formatted_results)
 
-        if str(f_key).lower() == 's':
+        if key == 's':
             if not result:
                 result = formatStatusMessage(job, status, message, options)
 
@@ -298,17 +300,28 @@ def formatResult(job, options, result='', color=True, **kwargs):
             else:
                 formatCase(f_key, (result, message_color), formatted_results)
 
-        if str(f_key).lower() == 'n':
+        if key == 'n':
             formatCase(f_key, (job.getTestName(), None), formatted_results)
 
         # Adjust the precision of time, so we can justify the length. The higher the
         # seconds, the lower the decimal point, ie: [0.000s] - [100.0s]. Max: [99999s]
-        if str(f_key).lower() == 't' and options.timing:
+        if key == 't' and options.timing:
             actual = float(job.getTiming())
             int_len = len(str(int(actual)))
             precision = min(3, max(0,(4-int_len)))
             f_time = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
             formatCase(f_key, (f_time, None), formatted_results)
+
+        # Maximum job memory, if available
+        if key == 'm' and options.memory:
+            maxmem = job.getTester().getMaxMemory()
+            if maxmem is None:
+                f_mem = '[    ?MB]'
+            else:
+                int_len = len(str(maxmem))
+                precision = min(3, max(0,(4-int_len)))
+                f_mem = '[' + '{0: >7}'.format('%0*dMB' % (precision, maxmem)) + ']'
+            formatCase(f_key, (f_mem, None), formatted_results)
 
     # Decorate Caveats
     if job.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
