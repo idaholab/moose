@@ -657,20 +657,22 @@ SegregatedSolverBase::relaxMatrix(SparseMatrix<Number> & matrix,
   //
   // The trickery comes with storing everything in the diff-diagonal vector
   // to avoid the allocation and manipulation of a third vector
-  std::vector<dof_id_type> indices(matrix.row_stop() - matrix.row_start());
+  const unsigned int local_size = matrix.row_stop() - matrix.row_start();
+  std::vector<dof_id_type> indices(local_size);
   std::iota(indices.begin(), indices.end(), matrix.row_start());
-  std::vector<Real> new_diagonal(matrix.row_stop() - matrix.row_start(), 0.0);
+  std::vector<Real> new_diagonal(local_size, 0.0);
 
   {
     PetscVectorReader diff_diga_reader(*diff_diag);
-    for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
+    for (const auto row_i : make_range(local_size))
     {
+      const unsigned int global_index = matrix.row_start() + row_i;
       std::vector<numeric_index_type> indices;
       std::vector<Real> values;
-      mat->get_row(row_i, indices, values);
+      mat->get_row(global_index, indices, values);
       const Real abs_sum = std::accumulate(
           values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
-      const Real abs_diagonal = std::abs(diff_diga_reader(row_i));
+      const Real abs_diagonal = std::abs(diff_diga_reader(global_index));
       new_diagonal[row_i] = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
     }
   }
@@ -678,9 +680,8 @@ SegregatedSolverBase::relaxMatrix(SparseMatrix<Number> & matrix,
 
   // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
   MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES);
-  // for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
-  //   matrix.set(row_i, row_i, diff_diagonal(row_i));
-  // matrix.close();
+  mat->close();
+  diff_diag->close();
 
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later
