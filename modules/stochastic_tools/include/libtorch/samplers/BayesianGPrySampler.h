@@ -11,22 +11,13 @@
 
 #pragma once
 
-#include "Sampler.h"
-#include <torch/torch.h>
-#include "LibtorchANNSurrogate.h"
-#include "SurrogateModel.h"
-#include "SurrogateModelInterface.h"
-#include "Standardizer.h"
-#include "GaussianProcess.h"
-#include "TransientInterface.h"
+#include "PMCMCBase.h"
 #include "ReporterInterface.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: sampler step
  */
-class BayesianGPrySampler : public Sampler,
-                            public SurrogateModelInterface,
-                            public TransientInterface
+class BayesianGPrySampler : public PMCMCBase
 {
 public:
   static InputParameters validParams();
@@ -34,57 +25,40 @@ public:
   BayesianGPrySampler(const InputParameters & parameters);
 
   /**
-   * Returns true if the adaptive sampling is completed
+   * Return the random samples for the GP and NN combo to try in the reporter class
    */
-  // virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
+  const std::vector<std::vector<Real>> & getSampleTries() const;
+
+  /**
+   * Return the random variance samples for the GP and NN combo to try in the reporter class
+   */
+  const std::vector<Real> & getVarSampleTries() const;
 
 protected:
-  /// Gather all the samples
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-  /// Return the sample for the given row and column
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual void proposeSamples(const unsigned int seed_value) override;
 
-  /// Storage for distribution objects to be utilized
-  std::vector<Distribution const *> _distributions;
+  /**
+   * Fill in the provided vector with random samples given the distributions
+   * @param vector The vector to be filled
+   * @param seed_value The seed value to generate random numbers
+   */
+  virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
 
-  /// True if the sampling is completed
-  // bool _is_sampling_completed;
-
-  /// Get the libtorch classifer neural network
-  // SurrogateModel _nn; // LibtorchANNSurrogate
-  // std::vector<const LibtorchANNSurrogate *> _model;
-  // LibtorchANNSurrogate _model;
-
-  /// Get the Gaussian process surrogate of log-posterior
-  // const SurrogateModel & _gp;
+  /// The selected sample indices to evaluate the subApp
+  const std::vector<unsigned int> & _sorted_indices;
 
 private:
-  /// Number of samples requested
-  const int & _num_iterations;
-
-  /// Maximum number of subApp calls in each iteration
-  const unsigned int & _num_samples;
-
   /// Number of samples to propose in each iteration (not all are sent for subApp evals)
   const unsigned int & _num_tries;
-
-  /// Ensure that the sampler proceeds in a sequential fashion
-  int _check_step;
 
   /// Storage for all the proposed samples
   std::vector<std::vector<Real>> _inputs_all;
 
-  /// Storage for the selected samples sent to subApp evals
-  std::vector<std::vector<Real>> _inputs_subapp;
+  /// Storage for all the proposed variances
+  std::vector<Real> _var_all;
 
-  /// Store the GP mean
-  std::vector<Real> _gp_mean;
-
-  /// Store the GP standard deviation
-  std::vector<Real> _gp_std;
-
-  /// Store the NN classifer outputs
-  std::vector<Real> _nn_outputs;
+  /// A temporary vector to facilitate the sampling
+  std::vector<Real> _sample_vector;
 };
 
 #endif
