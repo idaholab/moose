@@ -82,6 +82,8 @@
     # options for using substepping
     substep_strain_tolerance = 0.1
     max_inelastic_increment = 0.01
+
+    scale_strain_predictor = 1
   []
 []
 
@@ -101,6 +103,11 @@
 
   end_time = 0.1
   dt = 0.1
+
+  [Predictor]
+    type = SimplePredictor
+    scale = 1
+  []
 []
 
 [Outputs]

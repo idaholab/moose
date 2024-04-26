@@ -165,7 +165,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     GenericReal<is_ad> & scalar,
     std::stringstream * iter_output)
 {
-  scalar = initialGuess(effective_trial_stress);
+  scalar = initialGuess(effective_trial_stress, scalar);
   GenericReal<is_ad> scalar_old = scalar;
   GenericReal<is_ad> scalar_increment = 0.0;
   const GenericReal<is_ad> min_permissible_scalar = minimumPermissibleValue(effective_trial_stress);
@@ -447,6 +447,15 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::outputIterationSummary(
                  << MetaPhysicL::raw_value(_initial_residual) << " to "
                  << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'."
                  << std::endl;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+SingleVariableReturnMappingSolutionTempl<is_ad>::initialGuess(
+    const GenericReal<is_ad> & /*effective_trial_stress*/,
+    const GenericReal<is_ad> & effective_strain_inc) const
+{
+  return effective_strain_inc;
 }
 
 template class SingleVariableReturnMappingSolutionTempl<false>;
