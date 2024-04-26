@@ -97,6 +97,10 @@ FlexiblePatternGenerator::validParams()
       "external_boundary_id",
       "The boundary id of the external boundary in addition to the default 10000.");
 
+  params.addParam<bool>("delete_default_external_boundary_from_inputs",
+                        true,
+                        "Whether to delete the default external boundary from the input meshes.");
+
   params.addClassDescription("This FlexiblePatternGenerator object is designed to generate a "
                              "mesh with a background region with dispersed unit meshes in "
                              "it and distributed based on a series of flexible patterns.");
@@ -113,6 +117,9 @@ FlexiblePatternGenerator::validParams()
   params.addParamNamesToGroup("desired_area desired_area_func verify_holes background_subdomain_id "
                               "background_subdomain_name",
                               "Background Area Delaunay");
+  params.addParamNamesToGroup("boundary_type boundary_mesh boundary_sectors boundary_size "
+                              "delete_default_external_boundary_from_inputs external_boundary_id",
+                              "Boundary");
 
   return params;
 }
@@ -166,7 +173,9 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                                  : Moose::INVALID_BLOCK_ID),
     _background_subdomain_name(isParamValid("background_subdomain_name")
                                    ? getParam<SubdomainName>("background_subdomain_name")
-                                   : SubdomainName())
+                                   : SubdomainName()),
+    _delete_default_external_boundary_from_inputs(
+        getParam<bool>("delete_default_external_boundary_from_inputs"))
 {
   declareMeshesForSub("inputs");
 
@@ -429,11 +438,28 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
   if (std::count(input_usage_count.begin(), input_usage_count.end(), 0))
     paramError("inputs", "All the input mesh generator names are not used.");
 
+  if (_delete_default_external_boundary_from_inputs)
+  {
+    for (const auto & input_name : _input_names)
+    {
+      auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+      params.set<MeshGeneratorName>("input") = input_name;
+      params.set<std::vector<BoundaryName>>("boundary_names") = {std::to_string(OUTER_SIDESET_ID)};
+
+      addMeshSubgenerator("BoundaryDeletionGenerator",
+                          input_name + static_cast<MeshGeneratorName>("_del_ext_bdry"),
+                          params);
+    }
+  }
+
   std::vector<MeshGeneratorName> patterned_pin_mg_series;
   for (unsigned int i = 0; i < _positions.size(); i++)
   {
     auto params = _app.getFactory().getValidParams("TransformGenerator");
-    params.set<MeshGeneratorName>("input") = _input_names[_positions[i].second];
+    params.set<MeshGeneratorName>("input") =
+        _input_names[_positions[i].second] +
+        static_cast<MeshGeneratorName>(
+            _delete_default_external_boundary_from_inputs ? "_del_ext_bdry" : "");
     params.set<MooseEnum>("transform") = 1;
     params.set<RealVectorValue>("vector_value") = _positions[i].first;
 
