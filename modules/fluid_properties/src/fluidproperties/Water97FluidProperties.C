@@ -80,14 +80,14 @@ Water97FluidProperties::triplePointTemperature() const
 Real
 Water97FluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 { 
-  Moose::out << "Water97:rho_from_p_T real";
+  
   return rho_from_p_T_template(pressure, temperature);
 }
 
 ADReal
 Water97FluidProperties::rho_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
-  Moose::out << "Water97:rho_from_p_T ADReal";
+  
   return rho_from_p_T_template(pressure, temperature);
 }
 
@@ -95,7 +95,7 @@ void
 Water97FluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  Moose::out << "Water97:rho_from_p_T void";
+  
   rho_from_p_T_template(pressure, temperature, rho, drho_dp, drho_dT);
 }
 
@@ -488,7 +488,7 @@ void
 Water97FluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  Moose::out << "Water97:h_from_p_T void";
+
   h_from_p_T_template(pressure, temperature, h, dh_dp, dh_dT);
 }
 
@@ -511,35 +511,35 @@ Water97FluidProperties::h_from_p_T(const ADReal & pressure,
 
 Real Water97FluidProperties::s_from_h_p(Real h, Real p) const
 {
-  Moose::out << "Water97:s_from_h_p: The value of pressure is: " << p << "\n";
-  Moose::out << "Water97:s_from_h_p:The value of enthalpy is: " << h << "\n";
+  
+  
   Real T = T_from_p_h(p, h);
-  Moose::out << "Water97:s_from_h_p: The value of temperature is: " << T << "\n";
+  
   return s_from_p_T(p, T);
 }
 
 void
 Water97FluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const
 {
-  Moose::out << "Water97:s_from_h_p void: The value of pressure is: " << p << "\n";
-  Moose::out << "Water97:s_from_h_p void:The value of enthalpy is: " << h << "\n";
+  
+  
 
   s = s_from_h_p(h, p);
 
-  Moose::out << "Water97:s_from_h_p void: The value of entropy is: " << s << "\n";
+  
   ds_dh = 1.0 / T_from_p_h(p, h);
   Real R_specific = (8.3144621) / molarMass();
   ds_dp = -R_specific / p;
-  Moose::out << "Water97:s_from_h_p void: The value of ds_dh is: " << ds_dh << "\n";
-  Moose::out << "Water97:s_from_h_p void: The value of ds_dp is: " << ds_dp << "\n";
-  Moose::out << "Water97:s_from_h_p void: The value of R_specific is: " << R_specific << "\n";
+  
+  
+  
 }
 
 
 Real
 Water97FluidProperties::vaporPressure(Real temperature) const
 {
-  Moose::out << "Water97:vaporPressure real \n";
+  
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
@@ -563,7 +563,7 @@ Water97FluidProperties::vaporPressure(Real temperature) const
 FPDualReal
 Water97FluidProperties::vaporTemperature_ad(const FPDualReal & pressure) const
 {
-  Moose::out << "Water97:vaporTemperature_ad \n";
+  
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure.value() < 611.23 || pressure.value() > _p_critical)
@@ -584,7 +584,7 @@ Water97FluidProperties::vaporTemperature_ad(const FPDualReal & pressure) const
 Real
 Water97FluidProperties::vaporTemperature(Real pressure) const
 {
-  Moose::out << "Water97:vaporTemperature real \n";
+  
   const FPDualReal p = pressure;
 
   return vaporTemperature_ad(p).value();
@@ -593,7 +593,7 @@ Water97FluidProperties::vaporTemperature(Real pressure) const
 void
 Water97FluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
 {
-  Moose::out << "Water97:vaporTemperature void \n";
+  
   FPDualReal p = pressure;
   Moose::derivInsert(p.derivatives(), 0, 1.0);
 
@@ -734,7 +734,7 @@ Water97FluidProperties::b2bc(Real pressure) const
 Real
 Water97FluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
-  Moose::out << "Water97:T_from_p_h real";
+  
 
   const FPDualReal p = pressure;
   const FPDualReal h = enthalpy;
@@ -746,7 +746,7 @@ void
 Water97FluidProperties::T_from_p_h(
     Real pressure, Real enthalpy, Real & temperature, Real & dT_dp, Real & dT_dh) const
 {
-  Moose::out << "Water97:T_from_p_h void";
+  
 
   FPDualReal p = pressure;
   Moose::derivInsert(p.derivatives(), 0, 1.0);
@@ -764,12 +764,12 @@ FPDualReal
 Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
                                       const FPDualReal & enthalpy) const
 {
-  Moose::out << "Water97:T_from_p_h_ad";
+  "Water97:T_from_p_h_ad";
   FPDualReal temperature = 0.0;
 
   // Determine which region the point is in
   const unsigned int region = inRegionPH(pressure.value(), enthalpy.value());
-  Moose::out << "Water97:T_from_p_h_ad: The value of T is: " << temperature << "\n";
+  
   switch (region)
   {
     case 1:
@@ -780,7 +780,7 @@ Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
     {
       // First, determine which subregion the point is in:
       const unsigned int subregion = subregion2ph(pressure.value(), enthalpy.value());
-      Moose::out << "Water97:T_from_p_h_ad 2: The value of subregion is: " << subregion << "\n";
+      
       if (subregion == 1)
         temperature = temperature_from_ph2a(pressure, enthalpy);
       else if (subregion == 2)
@@ -809,8 +809,8 @@ Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
     default:
       mooseError("inRegionPH() has given an incorrect region");
   }
-  Moose::out << "Water97:T_from_p_h_ad 4: The value of T is: " << temperature << "\n";
-  Moose::out << "Water97:T_from_p_h_ad 4: The region is: " << region << "\n";
+  
+  
   return temperature;
 }
 
@@ -836,18 +836,18 @@ Water97FluidProperties::temperature_from_ph2a(const FPDualReal & pressure,
   const FPDualReal eta = enthalpy / 2000.0e3;
   FPDualReal sum = 0.0;
 
-  Moose::out << "Water97:temperature_from_ph2a: The value of pi is: " << pi << "\n";
-  Moose::out << "Water97:temperature_from_ph2a: The value of eta is: " << eta << "\n";
+  
+  
 
   // Factor out the negative in std::pow(eta - 2.1, _Jph2a[i]) to avoid fpe in dbg (see #13163)
   const Real sgn = MathUtils::sign(eta.value() - 2.1);
-  Moose::out << "Water97:temperature_from_ph2a: The value of sgn is: " << sgn << "\n";
+  
 
   for (std::size_t i = 0; i < _nph2a.size(); ++i)
     sum += _nph2a[i] * std::pow(pi, _Iph2a[i]) * std::pow(std::abs(eta - 2.1), _Jph2a[i]) *
            std::pow(sgn, _Jph2a[i]);
-  Moose::out << "Water97:temperature_from_ph2a: The value of _nph2a.size is: " << _nph2a.size() << "\n";
-  Moose::out << "Water97:temperature_from_ph2a: The value of sum is: " << sum << "\n";
+  
+  
 
   return sum;
 }
