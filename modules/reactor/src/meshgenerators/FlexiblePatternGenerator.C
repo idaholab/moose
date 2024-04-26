@@ -117,6 +117,9 @@ FlexiblePatternGenerator::validParams()
   params.addParamNamesToGroup("desired_area desired_area_func verify_holes background_subdomain_id "
                               "background_subdomain_name",
                               "Background Area Delaunay");
+  params.addParamNamesToGroup("boundary_type boundary_mesh boundary_sectors boundary_size "
+                              "delete_default_external_boundary_from_inputs external_boundary_id",
+                              "Boundary");
 
   return params;
 }
