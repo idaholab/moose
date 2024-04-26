@@ -3206,7 +3206,7 @@ NSFVBase<BaseType>::processThermalConductivity()
   }
 
   if (have_vector && !_porous_medium_treatment)
-    paramError("thermal_conductivity", "Cannot use anistropic diffusion with non-porous flows!");
+    paramError("thermal_conductivity", "Cannot use anisotropic diffusion with non-porous flows!");
 
   if (have_vector == have_scalar)
     paramError("thermal_conductivity",
