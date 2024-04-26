@@ -104,7 +104,7 @@
       exodiff = double_ext_boundary_in.e
       exodiff_opts = '-pedantic'
       recover = false
-      detail = "a hexagonal mesh with the input mesh's default external boundary deleted so that it can be used as an input of another patterning."
+      detail = "a hexagonal mesh with the input mesh's default external boundary being deleted."
     []
   []
   [error]
