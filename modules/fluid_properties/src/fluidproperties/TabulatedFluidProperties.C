@@ -114,7 +114,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
-    _p_h_variables(false),
+    _p_h_variables(getParam<bool>("p_h_variables")),
     _density_idx(0),
     _enthalpy_idx(0),
     _internal_energy_idx(0),
@@ -336,6 +336,12 @@ TabulatedFluidProperties::initialSetup()
       _entropy_idx = i;
     }
   }
+  if (_p_h_variables)
+  {
+    _interpolate_enthalpy = false;
+    _interpolate_density = false;
+    _interpolate_viscosity = false;
+  }
   constructInterpolation();
 }
 
@@ -360,18 +366,22 @@ TabulatedFluidProperties::molarMass() const
 Real
 TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
 {
+  Moose::out<< "Tab:v_from_p_T" << std::endl;
+
+
   if (_interpolate_density)
   {
     checkInputVariables(pressure, temperature);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
   }
   else
-  {
-    if (_fp)
-      return 1.0 / _fp->rho_from_p_T(pressure, temperature);
-    else
-      paramError("fp", "No fluid properties or csv data provided for density.");
-  }
+    {
+      if (_fp)
+        return 1.0 / _fp->rho_from_p_T(pressure, temperature);
+      else
+        paramError("fp", "No fluid properties or csv data provided for density.");
+    }
+
 }
 
 void
@@ -379,39 +389,61 @@ TabulatedFluidProperties::v_from_p_T(
     Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const
 {
   Real rho = 0, drho_dp = 0, drho_dT = 0;
-  if (_interpolate_density)
+  if (_p_h_variables)
   {
-    checkInputVariables(pressure, temperature);
-    _property_ipol[_density_idx]->sampleValueAndDerivatives(
-        pressure, temperature, rho, drho_dp, drho_dT);
+    if (_fp)
+      _fp->v_from_p_T(pressure, temperature, v, dv_dp, dv_dT);
+    else
+      paramError("fp", "No fluid properties or csv data provided for specific volume.");
   }
   else
   {
-    if (_fp)
-      _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+    if (_interpolate_density)
+    {
+      checkInputVariables(pressure, temperature);
+      _property_ipol[_density_idx]->sampleValueAndDerivatives(
+          pressure, temperature, rho, drho_dp, drho_dT);
+    }
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+    {
+      if (_fp)
+        _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+      else
+        paramError("fp", "No fluid properties or csv data provided for density.");
+    }
+    // convert from rho to v
+    v = 1.0 / rho;
+    dv_dp = -drho_dp / (rho * rho);
+    dv_dT = -drho_dT / (rho * rho);
   }
-  // convert from rho to v
-  v = 1.0 / rho;
-  dv_dp = -drho_dp / (rho * rho);
-  dv_dT = -drho_dT / (rho * rho);
+
 }
 
 Real
 TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_density)
-  {
-    checkInputVariables(pressure, temperature);
-    return _property_ipol[_density_idx]->sample(pressure, temperature);
-  }
-  else
+  Moose::out<< "Tab:rho_from_p_T" << std::endl;
+  if (_p_h_variables)
   {
     if (_fp)
       return _fp->rho_from_p_T(pressure, temperature);
     else
       paramError("fp", "No fluid properties or csv data provided for density.");
+  }
+  else
+  {
+    if (_interpolate_density)
+    {
+      checkInputVariables(pressure, temperature);
+      return _property_ipol[_density_idx]->sample(pressure, temperature);
+    }
+    else
+    {
+      if (_fp)
+        return _fp->rho_from_p_T(pressure, temperature);
+      else
+        paramError("fp", "No fluid properties or csv data provided for density.");
+    }
   }
 }
 
@@ -419,18 +451,29 @@ void
 TabulatedFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  if (_interpolate_density)
-  {
-    checkInputVariables(pressure, temperature);
-    _property_ipol[_density_idx]->sampleValueAndDerivatives(
-        pressure, temperature, rho, drho_dp, drho_dT);
-  }
-  else
+  Moose::out<< "Tab:rho_from_p_T void" << std::endl;
+  if (_p_h_variables)
   {
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
       paramError("fp", "No fluid properties or csv data provided for density.");
+  }
+  else
+  {
+    if (_interpolate_density)
+    {
+      checkInputVariables(pressure, temperature);
+      _property_ipol[_density_idx]->sampleValueAndDerivatives(
+          pressure, temperature, rho, drho_dp, drho_dT);
+    }
+    else
+    {
+      if (_fp)
+        _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+      else
+        paramError("fp", "No fluid properties or csv data provided for density.");
+    }
   }
 }
 
@@ -441,6 +484,8 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
                                        ADReal & drho_dp,
                                        ADReal & drho_dT) const
 {
+  Moose::out<< "Tab:rho_from_p_T ADReal" << std::endl;
+
   if (_interpolate_density)
   {
     ADReal p = pressure, T = temperature;
@@ -596,42 +641,94 @@ TabulatedFluidProperties::T_from_p_s(
   dT_ds = (T_from_p_s(pressure, s * (1 + eps)) - T) / (eps * s);
 }
 
+ADReal
+TabulatedFluidProperties::h_from_p_T(const ADReal& pressure, const ADReal& temperature) const
+{
+  Moose::out<< "Tab: h_from_p_T ADreal:" << std::endl;
+  Moose::out << "Tab  h_from_p_T ADreal: pressure: " << pressure << std::endl;
+  Moose::out << "Tab  h_from_p_T ADreal:temperature: " << temperature << std::endl;
+  Moose::out << "Tab  h_from_p_T ADreal:_interpolate_enthalpy " << _interpolate_enthalpy << std::endl;
+  Moose::out << "Tab  h_from_p_T ADreal:_p_h_variables " << _p_h_variables << std::endl;
+  
+  if (_fp) // Assuming _fp can handle ADReal types
+    return _fp->h_from_p_T(pressure, temperature);
+  else
+    paramError("fp", "Fluid properties object does not support ADReal computations.");
+}
+
+
 Real
 TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_enthalpy)
+  Moose::out<< "Tab: h_from_p_T real:" << std::endl;
+  Moose::out << "Tab  h_from_p_T real: pressure: " << pressure << std::endl;
+  Moose::out << "Tab  h_from_p_T real:temperature: " << temperature << std::endl;
+  Moose::out << "Tab  h_from_p_T real:_interpolate_enthalpy " << _interpolate_enthalpy << std::endl;
+  Moose::out << "Tab  h_from_p_T real:_p_h_variables " << _p_h_variables << std::endl;
+  
+
+  if (_p_h_variables)
   {
-    if (!_p_h_variables)
-    {
-    checkInputVariables(pressure, temperature);
-    return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
-    }
-  }
-  else
-  {
-    if (_fp)
+    if (_fp){
+      Moose::out<< "Tab: h_from_p_T Real using p_h_variables using fp" << std::endl;
       return _fp->h_from_p_T(pressure, temperature);
+    }
+
     else
       paramError("fp", "No fluid properties or csv data provided for enthalpy.");
   }
+  else {
+    if (_interpolate_enthalpy)
+    {
+      Moose::out<< "Tab: h_from_p_T Real using interpolate_enthalpy" << std::endl;
+      checkInputVariables(pressure, temperature);
+      return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
+    }
+    else {
+      if (_fp)
+        return _fp->h_from_p_T(pressure, temperature);
+      else
+        paramError("fp", "No fluid properties or csv data provided for enthalpy.");
+    }
+  }
+
 }
 
 void
 TabulatedFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  if (_interpolate_enthalpy)
+  Moose::out<< "Tab: h_from_p_T void:" << std::endl;
+  Moose::out << "Tab  h_from_p_T void: pressure: " << pressure << std::endl;
+  Moose::out << "Tab  h_from_p_T void:temperature: " << temperature << std::endl;
+  Moose::out << "Tab  h_from_p_T void:_interpolate_enthalpy " << _interpolate_enthalpy << std::endl;
+  Moose::out << "Tab  h_from_p_T void:_p_h_variables " << _p_h_variables << std::endl;
+  
+  if (_p_h_variables)
   {
-    checkInputVariables(pressure, temperature);
-    _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
-        pressure, temperature, h, dh_dp, dh_dT);
-  }
-  else
-  {
-    if (_fp)
-      _fp->h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
+    if (_fp){
+       Moose::out<< "Tab: h_from_p_T void using p_h_variables using fp" << std::endl;
+       _fp->h_from_p_T(pressure, temperature);
+    }
+
     else
       paramError("fp", "No fluid properties or csv data provided for enthalpy.");
+  }
+  else {
+    if (_interpolate_enthalpy)
+    {
+      Moose::out<< "Tab: h_from_p_T void using interpolate_enthalpy" << std::endl;
+      checkInputVariables(pressure, temperature);
+      _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(pressure, temperature, h, dh_dp, dh_dT);
+    }
+    else {
+      if (_fp){
+        Moose::out<< "Tab: h_from_p_T void using fp" << std::endl;
+        _fp->h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
+      }
+      else
+        paramError("fp", "No fluid properties or csv data provided for enthalpy.");
+    }
   }
 }
 
@@ -905,10 +1002,10 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
 Real 
 TabulatedFluidProperties::vaporTemperature(Real pressure) const
 {
-  if (_fp)
-    return _fp->vaporTemperature(pressure);
-  else
-    mooseError("vaporTemperature not specified.");
+  Moose::out<< "Tab:vaporTemperature Real" << std::endl;
+  const FPDualReal p = pressure;
+
+  return vaporTemperature_ad(p).value();
 }
 
 void 
@@ -1205,6 +1302,8 @@ Real
 TabulatedFluidProperties::s_from_h_p(Real h, Real pressure) const
 {
   Real T = T_from_h_p(h, pressure);
+  Moose::out<< "Tab:s_from_h_p, temperature is:"<< T << std::endl;
+
   return s_from_p_T(pressure, T);
 }
 

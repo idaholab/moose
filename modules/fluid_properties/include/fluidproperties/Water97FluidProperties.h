@@ -2531,6 +2531,17 @@ Water97FluidProperties::h_from_p_T_template(const T & pressure, const T & temper
 
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+
+    Moose::out << "Water97::h_from_p_T template : Region: " << region << std::endl;
+    Moose::out.flush();  // Explicitly flush the stream
+
+    Moose::out << "Water97::h_from_p_T template : Pressure: " << pressure << std::endl;
+    Moose::out.flush();  // Explicitly flush the stream
+
+    Moose::out << "Water97::h_from_p_T template : Enthalpy: " << enthalpy << std::endl;
+    Moose::out.flush();  // Explicitly flush the stream
+
+
   }
   return enthalpy;
 }
@@ -2540,6 +2551,11 @@ void
 Water97FluidProperties::h_from_p_T_template(
     const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const
 {
+  Moose::out << "Water97::h_from_p_T template void : Pressure: " << pressure << std::endl;
+  Moose::out << "Water97::h_from_p_T template void : Temperature: " << temperature << std::endl;
+  Moose::out << "Water97::h_from_p_T template void : Enthalpy: " << h << std::endl;
+  Moose::out << "Water97::h_from_p_T template void : dh_dp: " << dh_dp << std::endl;
+  Moose::out << "Water97::h_from_p_T template void : dh_dT: " << dh_dT << std::endl;
   auto functor = [this](const auto & pressure, const auto & temperature)
   { return this->h_from_p_T_template(pressure, temperature); };
 
