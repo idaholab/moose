@@ -18,6 +18,10 @@ import sys
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcstm')
 
+# Temp hack for forcing civet to output this
+if TERM_FORMAT == "tpnsc":
+    TERM_FORMAT = "tmpnsc"
+
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
                            'default'   : '64'

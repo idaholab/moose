@@ -1028,7 +1028,7 @@ class TestHarness:
         parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
         parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', help='Do not run additional tests if the load average is at least LOAD')
         parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
-        parser.add_argument('-m', '--memory', action='store_true', dest='memory', help='Report memory information')
+        parser.add_argument('-m', '--memory', default=True, action='store_true', dest='memory', help='Report memory information')
         parser.add_argument('--longest-jobs', action='store', dest='longest_jobs', type=int, default=0, help='Print the longest running jobs upon completion')
         parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
         parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='', help='The test specification file to look for')
