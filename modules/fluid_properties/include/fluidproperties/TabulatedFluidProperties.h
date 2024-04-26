@@ -74,7 +74,8 @@ public:
 
   virtual void
   h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
-
+  virtual ADReal h_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+  
   virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void mu_from_p_T(

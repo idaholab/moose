@@ -462,14 +462,25 @@ Water97FluidProperties::s_from_p_T(const ADReal & pressure,
 Real
 Water97FluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  Moose::out << "Water97:h_from_p_T real";
+  Moose::out << "Water97:h_from_p_T real"<< std::endl;
+
+  Moose::out << "Water97:h_from_p_T real pressure "<< pressure << std::endl;
+  Moose::out << "Water97:h_from_p_T real temperature "<< temperature << std::endl;
+  Moose::out << "Water97:h_from_p_T real h "<< h_from_p_T_template(pressure, temperature) << std::endl;
+  Moose::out << "Water97:h_from_p_T real done " << std::endl;
+
   return h_from_p_T_template(pressure, temperature);
 }
 
 ADReal
 Water97FluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
-  Moose::out << "Water97:h_from_p_T ADReal";
+  Moose::out << "Water97:h_from_p_T ADReal" << std::endl;
+  Moose::out << "Water97:h_from_p_T ADeal pressure "<< pressure << std::endl;
+  Moose::out << "Water97:h_from_p_T ADreal temperature "<< temperature << std::endl;
+  Moose::out << "Water97:h_from_p_T ADReal h "<< h_from_p_T_template(pressure, temperature) << std::endl;
+  Moose::out << "Water97:h_from_p_T ADReal done " << std::endl;
+
   return h_from_p_T_template(pressure, temperature);
 }
 
