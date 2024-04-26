@@ -3720,44 +3720,40 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
                             SystemBase & sys,
                             std::vector<std::vector<FaceInfo::VarFaceNeighbors>> & face_type_vector)
   {
-    if (sys.nFVVariables())
-    {
-      face_type_vector[sys.number()].resize(sys.nVariables(), FaceInfo::VarFaceNeighbors::NEITHER);
-      const auto & variables = sys.getVariables(0);
+    face_type_vector[sys.number()].resize(sys.nVariables(), FaceInfo::VarFaceNeighbors::NEITHER);
+    const auto & variables = sys.getVariables(0);
 
-      for (const auto & var : variables)
-        if (var->isFV())
-        {
-          const unsigned int var_num = var->number();
-          const unsigned int sys_num = var->sys().number();
-          std::set<SubdomainID> var_subdomains = var->blockIDs();
-          /**
-           * The following paragraph of code assigns the VarFaceNeighbors
-           * 1. The face is an internal face of this variable if it is defined on
-           *    the elem and neighbor subdomains
-           * 2. The face is an invalid face of this variable if it is neither defined
-           *    on the elem nor the neighbor subdomains
-           * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
-           *    applies
-           */
-          bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
-          bool var_defined_neighbor =
-              var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
-          if (var_defined_elem && var_defined_neighbor)
-            face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::BOTH;
-          else if (!var_defined_elem && !var_defined_neighbor)
-            face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::NEITHER;
-          else
-          {
-            // this is a boundary face for this variable, set elem or neighbor
-            if (var_defined_elem)
-              face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::ELEM;
-            else if (var_defined_neighbor)
-              face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::NEIGHBOR;
-            else
-              mooseError("Should never get here");
-          }
-        }
+    for (const auto & var : variables)
+    {
+      const unsigned int var_num = var->number();
+      const unsigned int sys_num = var->sys().number();
+      std::set<SubdomainID> var_subdomains = var->blockIDs();
+      /**
+       * The following paragraph of code assigns the VarFaceNeighbors
+       * 1. The face is an internal face of this variable if it is defined on
+       *    the elem and neighbor subdomains
+       * 2. The face is an invalid face of this variable if it is neither defined
+       *    on the elem nor the neighbor subdomains
+       * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
+       *    applies
+       */
+      bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
+      bool var_defined_neighbor =
+          var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
+      if (var_defined_elem && var_defined_neighbor)
+        face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::BOTH;
+      else if (!var_defined_elem && !var_defined_neighbor)
+        face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::NEITHER;
+      else
+      {
+        // this is a boundary face for this variable, set elem or neighbor
+        if (var_defined_elem)
+          face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::ELEM;
+        else if (var_defined_neighbor)
+          face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+        else
+          mooseError("Should never get here");
+      }
     }
   };
 
