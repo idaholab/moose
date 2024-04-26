@@ -60,10 +60,10 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [temperature]
-    order = CONSTANT
-    family = MONOMIAL
-  []
+  # [temperature]
+  #   order = CONSTANT
+  #   family = MONOMIAL
+  # []
 []
 
 [AuxKernels]
@@ -137,12 +137,12 @@
     phase = 1
     execute_on = 'initial timestep_end'
   []
-  [temperature]
-    type = PorousFlowPropertyAux
-    variable = temperature
-    property = temperature
-    execute_on = 'initial timestep_end'
-  []
+  # [temperature]
+  #   type = PorousFlowPropertyAux
+  #   variable = temperature
+  #   property = temperature
+  #   execute_on = 'initial timestep_end'
+  # []
 []
 
 [Kernels]
@@ -177,12 +177,16 @@
 []
 
 [FluidProperties]
+  
   [water_true]
     type = Water97FluidProperties
   []
   [water]
     type = TabulatedBicubicFluidProperties
     fp = water_true
+    p_h_variables = true
+    #save_file = true
+    fluid_property_file = fluid_properties.csv
   []
 []
 
@@ -191,7 +195,7 @@
     type = PorousFlowFluidStateSingleComponent
     porepressure = pliq
     enthalpy = h
-    temperature_unit = Celsius
+    temperature_unit = Kelvin
     capillary_pressure = pc
     fluid_state = fs
   []
@@ -285,11 +289,11 @@
     variable = pressure_gas
     execute_on = 'initial timestep_end'
   []
-  [temperature]
-    type = ElementAverageValue
-    variable = temperature
-    execute_on = 'initial timestep_end'
-  []
+  # [temperature]
+  #   type = ElementAverageValue
+  #   variable = temperature
+  #   execute_on = 'initial timestep_end'
+  # []
   [enthalpy]
     type = ElementAverageValue
     variable = h
@@ -308,6 +312,6 @@
 []
 
 [Outputs]
-  file_base = water_vapor_twophase
+  file_base = water_vapor_twophase_tab
   csv = true
 []
