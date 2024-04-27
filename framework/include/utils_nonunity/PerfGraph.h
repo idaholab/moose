@@ -117,21 +117,14 @@ public:
   void printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections);
 
   /**
-   * Whether or not timing is active
-   *
-   * When not active no timing information will be kept
-   */
-  bool active() const { return _active; }
-
-  /**
-   * Turn on or off timing
-   */
-  void setActive(bool active) { _active = active; }
-
-  /**
-   * Turn on or off live printing (if timing is off then live printing will be off too)
+   * Turn on or off live printing
    */
   void setLivePrintActive(bool active) { _live_print_active = active; }
+
+  /**
+   * Enables Live Print
+   */
+  void enableLivePrint();
 
   /**
    * Completely disables Live Print (cannot be restarted)
@@ -245,9 +238,6 @@ protected:
 
     /// This section has already started printing
     PRINTED,
-
-    /// Something else printed, but now this printed again
-    CONTINUED,
 
     /// The section is complete
     FINISHED
@@ -382,9 +372,6 @@ protected:
   /// to iterate over the above map much - and it makes it
   /// easier to sort
   std::vector<CumulativeSectionInfo *> _cumulative_section_info_ptrs;
-
-  /// Whether or not timing is active
-  bool _active;
 
   /// Whether or not live printing is active
   std::atomic<bool> _live_print_active;

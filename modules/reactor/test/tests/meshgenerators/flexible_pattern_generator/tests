@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/FlexiblePatternGenerator.md'
-  issues = '#24938 #26776'
+  issues = '#24938 #26776 #27471'
   [test]
     requirement = "The system shall generate "
     [single_hex_pattern_hex]
@@ -96,6 +96,15 @@
       recover = false
       mesh_mode = 'REPLICATED'
       detail = "a patterned assembly mesh by stitching flexible patterned meshes."
+    []
+    [double_ext_boundary]
+      type = Exodiff
+      input = double_ext_boundary.i
+      cli_args = "--mesh-only"
+      exodiff = double_ext_boundary_in.e
+      exodiff_opts = '-pedantic'
+      recover = false
+      detail = "a hexagonal mesh with the input mesh's default external boundary being deleted."
     []
   []
   [error]

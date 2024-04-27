@@ -166,6 +166,11 @@ MooseMesh::validParams()
       "restrictions for subdomains initially containing no elements, which can occur, for example, "
       "in additive manufacturing simulations which dynamically add and remove elements.");
 
+  params.addParam<std::vector<SubdomainName>>(
+      "add_subdomain_names",
+      "Optional list of subdomain names to be applied to the ids given in add_subdomain_ids. "
+      "This list must contain the same number of items as add_subdomain_ids.");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -397,11 +402,27 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     _mesh_subdomains.insert(elem->subdomain_id());
 
   // add explicitly requested subdomains
-  if (isParamValid("add_subdomain_ids"))
+  if (isParamValid("add_subdomain_ids") && !isParamValid("add_subdomain_names"))
   {
-    const auto add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
+    // only subdomain ids are explicitly given
+    const auto & add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
     _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
   }
+  else if (isParamValid("add_subdomain_ids") && isParamValid("add_subdomain_names"))
+  {
+    const auto add_subdomain =
+        getParam<SubdomainID, SubdomainName>("add_subdomain_ids", "add_subdomain_names");
+    for (const auto & [sub_id, sub_name] : add_subdomain)
+    {
+      // add subdomain id
+      _mesh_subdomains.insert(sub_id);
+      // set name of the subdomain just added
+      setSubdomainName(sub_id, sub_name);
+    }
+  }
+  else if (isParamValid("add_subdomain_names"))
+    // the user has defined add_subdomain_names, but not add_subdomain_ids
+    mooseError("In combination with add_subdomain_names, add_subdomain_ids must be defined.");
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
