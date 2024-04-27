@@ -105,6 +105,7 @@ failed-unittest
 compile_commands.json
 build
 framework/contrib/libtorch
+test.cache
 
 # Allow certain files in gold directories
 !**/gold/*.e

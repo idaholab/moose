@@ -1570,6 +1570,10 @@ InputParameters::addCommandLineParamHelper(const std::string & name, const std::
     cl_data->argument_type = CommandLineMetadata::ArgumentType::REQUIRED;
   else
     cl_data->argument_type = CommandLineMetadata::ArgumentType::OPTIONAL;
+
+  for (const auto & token : cl_data->syntax)
+    if (token[0] == '-')
+      libMesh::add_command_line_name(token);
 }
 
 template <typename T>
