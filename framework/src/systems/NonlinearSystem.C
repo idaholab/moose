@@ -128,6 +128,22 @@ NonlinearSystem::init()
 }
 
 void
+NonlinearSystem::potentiallySetupFiniteDifferencing()
+{
+  if (_use_finite_differenced_preconditioner)
+  {
+    _nl_implicit_sys.nonlinear_solver->fd_residual_object = &_fd_residual_functor;
+    setupFiniteDifferencedPreconditioner();
+  }
+
+  PetscNonlinearSolver<Real> & solver =
+      static_cast<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
+  solver.mffd_residual_object = &_fd_residual_functor;
+
+  solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
+}
+
+void
 NonlinearSystem::solve()
 {
   // Only attach the postcheck function to the solver if we actually
@@ -158,17 +174,7 @@ NonlinearSystem::solve()
   if (!presolve_succeeded)
     return;
 
-  if (_use_finite_differenced_preconditioner)
-  {
-    _nl_implicit_sys.nonlinear_solver->fd_residual_object = &_fd_residual_functor;
-    setupFiniteDifferencedPreconditioner();
-  }
-
-  PetscNonlinearSolver<Real> & solver =
-      static_cast<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
-  solver.mffd_residual_object = &_fd_residual_functor;
-
-  solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
+  potentiallySetupFiniteDifferencing();
 
   if (_time_integrator)
   {
@@ -181,7 +187,7 @@ NonlinearSystem::solve()
   {
     system().solve();
     _n_iters = _nl_implicit_sys.n_nonlinear_iterations();
-    _n_linear_iters = solver.get_total_linear_iterations();
+    _n_linear_iters = _nl_implicit_sys.nonlinear_solver->get_total_linear_iterations();
   }
 
   // store info about the solve

@@ -690,6 +690,12 @@ public:
 
   using SystemBase::reinitNodeFace;
 
+  /**
+   * Create finite differencing contexts for assembly of the Jacobian and/or approximating the
+   * action of the Jacobian on vectors (e.g. FD and/or MFFD respectively)
+   */
+  virtual void potentiallySetupFiniteDifferencing() {}
+
 protected:
   /**
    * Compute the residual for a given tag
