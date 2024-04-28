@@ -1,7 +1,7 @@
 # Fluid properties
 mu = 1.1
 rho = 1.1
-h_fs = 10
+h_fs = 100
 k = 0.9
 cp = 3000
 
@@ -56,9 +56,9 @@ cp_solid = 1000
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
 
-    # mass_advection_interpolation = 'average'
-    # momentum_advection_interpolation = 'average'
-    # energy_advection_interpolation = 'average'
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
+    energy_advection_interpolation = 'average'
 
     ambient_convection_alpha = 'h_cv'
     ambient_temperature = 'T_solid'
@@ -73,8 +73,8 @@ cp_solid = 1000
 
         thermal_conductivity_solid = 'k_solid'
 
-        fixed_temperature_boundaries = 'left top bottom'
-        boundary_temperatures = '300 300 300'
+        fixed_temperature_boundaries = 'left'
+        boundary_temperatures = '300'
 
         # Heat source directly in the solid
         external_heat_source = '1'
@@ -86,17 +86,6 @@ cp_solid = 1000
       []
     []
   []
-[]
-
-[AuxVariables]
-  # [T_fluid]
-  #   type = MooseVariableFVReal
-  #   initial_condition = 300
-  # []
-  # [T_solid]
-  #   type = MooseVariableFVReal
-  #   initial_condition = 300
-  # []
 []
 
 [FunctorMaterials]
@@ -132,18 +121,28 @@ cp_solid = 1000
 []
 
 # Some basic Postprocessors to visually examine the solution
-# [Postprocessors]
-#   [inlet-p]
-#     type = SideIntegralVariablePostprocessor
-#     variable = pressure
-#     boundary = 'left'
-#   []
-#   [outlet-u]
-#     type = SideIntegralVariablePostprocessor
-#     variable = superficial_vel_x
-#     boundary = 'right'
-#   []
-# []
+[Postprocessors]
+  [inlet-p]
+    type = SideIntegralVariablePostprocessor
+    variable = pressure
+    boundary = 'left'
+  []
+  [outlet-u]
+    type = SideIntegralVariablePostprocessor
+    variable = superficial_vel_x
+    boundary = 'right'
+  []
+  [outlet-Tf]
+    type = SideIntegralVariablePostprocessor
+    variable = T_fluid
+    boundary = 'right'
+  []
+  [outlet-Ts]
+    type = SideIntegralVariablePostprocessor
+    variable = T_solid
+    boundary = 'right'
+  []
+[]
 
 [Outputs]
   exodus = true

@@ -88,9 +88,15 @@ PNSFVSolidHeatTransferPhysics::validParams()
                         false,
                         "To indicate if the enthalpy material is set up outside of the action.");
 
+  // Numerical scheme
   params.addParam<unsigned short>(
       "ghost_layers", 2, "Number of layers of elements to ghost near process domain boundaries");
+  // Preconditioning has not been derived for NSFV + porous heat transfer at this point
+  MooseEnum pc_options("default none", "none");
+  params.set<MooseEnum>("preconditioning") = pc_options;
+  params.suppressParameter<MooseEnum>("preconditioning");
 
+  // Parameter groups
   params.addParamNamesToGroup(
       "rho_solid cp_solid thermal_conductivity_solid thermal_conductivity_blocks",
       "Material properties");
@@ -259,7 +265,11 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyExternalHeatSource()
   const std::string kernel_type = "FVCoupledForce";
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-  assignBlocks(params, getParam<std::vector<SubdomainName>>("external_heat_source_blocks"));
+  const auto & source_blocks = getParam<std::vector<SubdomainName>>("external_heat_source_blocks");
+  if (source_blocks.size())
+    assignBlocks(params, source_blocks);
+  else
+    assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
