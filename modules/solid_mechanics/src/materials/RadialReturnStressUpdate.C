@@ -9,10 +9,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RadialReturnStressUpdate.h"
-
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 #include "RankTwoScalarTools.h"
+
 template <bool is_ad>
 InputParameters
 RadialReturnStressUpdateTempl<is_ad>::validParams()

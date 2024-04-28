@@ -220,7 +220,8 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
-  // fixme lynn, this is the inelastic strain increment from the previous step!
+  /// inelastic strain increment from the previous step.
+  /// Using _old value as strain increment predictor
   MaterialProperty<Real> & _eff_inelastic_strain_inc;
   const MaterialProperty<Real> & _eff_inelastic_strain_inc_old;
 
@@ -267,10 +268,11 @@ protected:
   /// Maximum number of substeps. If the calculation results in a larger number, cut overall time step.
   const unsigned int _maximum_number_substeps;
 
-  const Real _scale_strain_predictor;
-
   /// original timestep (to be restored after substepping is completed)
   Real _dt_original;
+
+  /// amount to scale the effective strain increment from the previous time step to use as a predictor
+  const Real _scale_strain_predictor;
 };
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;
