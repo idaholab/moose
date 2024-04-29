@@ -63,17 +63,15 @@ PNSFVSolidHeatTransferPhysics::validParams()
 
   // Ambient convection with the liquid phase parameters
   params.addParam<std::vector<std::vector<SubdomainName>>>(
-      "ambient_convection_blocks",
-      std::vector<std::vector<SubdomainName>>(),
-      "The blocks where the ambient convection is present.");
+      "ambient_convection_blocks", {}, "The blocks where the ambient convection is present.");
   params.addParam<std::vector<MooseFunctorName>>(
       "ambient_convection_alpha",
-      std::vector<MooseFunctorName>(),
+      {},
       "The heat exchange coefficients for each block in 'ambient_convection_blocks'.");
   params.addParam<std::vector<MooseFunctorName>>(
-      "ambient_temperature",
-      std::vector<MooseFunctorName>(),
-      "The ambient temperature for each block in 'ambient_convection_blocks'.");
+      "ambient_convection_temperature",
+      {NS::T_fluid},
+      "The fluid temperature for each block in 'ambient_convection_blocks'.");
 
   // Heat source in solid porous medium parameters
   params.addParam<std::vector<SubdomainName>>("external_heat_source_blocks",
@@ -101,7 +99,7 @@ PNSFVSolidHeatTransferPhysics::validParams()
       "rho_solid cp_solid thermal_conductivity_solid thermal_conductivity_blocks",
       "Material properties");
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
-                              "ambient_temperature",
+                              "ambient_convection_temperature",
                               "Ambient convection");
   params.addParamNamesToGroup(
       "external_heat_source_blocks external_heat_source external_heat_source_coeff",
@@ -126,13 +124,14 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
     _ambient_convection_blocks(
         getParam<std::vector<std::vector<SubdomainName>>>("ambient_convection_blocks")),
     _ambient_convection_alpha(getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha")),
-    _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_temperature"))
+    _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_convection_temperature"))
 {
   saveNonlinearVariableName(_solid_temperature_name);
 
   // Parameter checks
-  checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
-                                                                       "ambient_temperature");
+  if (getParam<std::vector<MooseFunctorName>>("ambient_convection_temperature").size() != 1)
+    checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>(
+        "ambient_convection_alpha", "ambient_convection_temperature");
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
 }
 
@@ -164,7 +163,7 @@ PNSFVSolidHeatTransferPhysics::addFVKernels()
     addPINSSolidEnergyTimeKernels();
 
   addPINSSolidEnergyHeatConductionKernels();
-  if (getParam<std::vector<MooseFunctorName>>("ambient_temperature").size())
+  if (getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha").size())
     addPINSSolidEnergyAmbientConvection();
   if (isParamValid("external_heat_source"))
     addPINSSolidEnergyExternalHeatSource();
@@ -180,8 +179,14 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyTimeKernels()
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
-      NS::time_deriv(NS::specific_enthalpy + "_solid");
+
+  // Using this derivative we can model non-constant specific heat
+  if (getProblem().hasFunctor(NS::time_deriv(NS::specific_enthalpy),
+                              /*thread_id=*/0))
+    params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
+        NS::time_deriv(NS::specific_enthalpy + "_solid");
+  else
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   params.set<MooseFunctorName>(NS::porosity) = _porosity_functor_name;
   // If modeling a variable density
@@ -235,10 +240,10 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyAmbientConvection()
   const auto kernel_type = "PINSFVEnergyAmbientConvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-  params.set<MooseFunctorName>(NS::T_fluid) = _solid_temperature_name;
-  params.set<bool>("is_solid") = false;
+  params.set<MooseFunctorName>(NS::T_solid) = _solid_temperature_name;
+  params.set<bool>("is_solid") = true;
 
-  for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
+  for (const auto block_i : make_range(num_used_blocks))
   {
     std::string block_name = "";
     if (num_convection_blocks)
@@ -253,7 +258,10 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyAmbientConvection()
     }
 
     params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
-    params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
+    if (_ambient_temperature.size() > 1)
+      params.set<MooseFunctorName>(NS::T_fluid) = _ambient_temperature[block_i];
+    else
+      params.set<MooseFunctorName>(NS::T_fluid) = _ambient_temperature[0];
 
     getProblem().addFVKernel(kernel_type, prefix() + "ambient_convection_" + block_name, params);
   }
@@ -281,7 +289,7 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
 {
   if (isParamValid("thermal_conductivity_blocks"))
     checkBlockwiseConsistency<MooseFunctorName>("thermal_conductivity_blocks",
-                                                {"thermal_conductivity"});
+                                                {"thermal_conductivity_solid"});
   bool have_scalar = false;
   bool have_vector = false;
 
@@ -302,7 +310,7 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
                                                                /*thread_id=*/0))
           have_vector = true;
         else
-          paramError("thermal_conductivity",
+          paramError("thermal_conductivity_solid",
                      "We only allow functor of type ADReal or ADRealVectorValue for thermal "
                      "conductivity! Functor '" +
                          _thermal_conductivity_name[i] + "' is not of the requested type.");
@@ -311,7 +319,7 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
   }
 
   if (have_vector == have_scalar)
-    paramError("thermal_conductivity",
+    paramError("thermal_conductivity_solid",
                "The entries on thermal conductivity shall either be scalars of vectors, mixing "
                "them is not supported!");
   return have_vector;
