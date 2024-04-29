@@ -10,8 +10,10 @@
 #pragma once
 
 #include "ElementSubdomainModifier.h"
-#include "MooseEnum.h"
 
+/**
+ * This user object modifies the element subdomain ID based on the provided variable value.
+ */
 class ModifyElementSubdomainByVar : public ElementSubdomainModifier
 {
 public:
@@ -24,4 +26,6 @@ protected:
 
 private:
   const VariableValue & _v;
+  // save the subdomain IDs that are requested but do not actually exist in the mesh
+  std::unordered_set<SubdomainID> _void_sids;
 };
