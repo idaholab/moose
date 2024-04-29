@@ -28,4 +28,5 @@ private:
   const VariableValue & _v;
   // save the subdomain IDs that are requested but do not actually exist in the mesh
   std::unordered_set<SubdomainID> _void_sids;
+  std::mutex _void_sids_mutex;
 };

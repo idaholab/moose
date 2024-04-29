@@ -48,6 +48,8 @@ ModifyElementSubdomainByVar::computeSubdomainID()
         it == _mesh.meshSubdomains().end() ? *_mesh.meshSubdomains().rbegin() : *it;
 
     // Store the target subdomain ID if it hasn't been previously requested.
+    // Lock the _void_sids for thread-safe operations.
+    std::lock_guard<std::mutex> lock(_void_sids_mutex);
     if (_void_sids.find(sid) == _void_sids.end())
     {
       mooseWarning("Requested subdomain ",
