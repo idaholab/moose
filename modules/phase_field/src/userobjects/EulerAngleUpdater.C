@@ -163,19 +163,6 @@ EulerAngleUpdater::initialize()
   _first_time = false;
 }
 
-unsigned int
-EulerAngleUpdater::getGrainNum() const
-{
-  return _angles.size();
-}
-
-const EulerAngles &
-EulerAngleUpdater::getEulerAngles(unsigned int i) const
-{
-  mooseAssert(i < getGrainNum(), "Requesting Euler angles for an invalid grain id");
-  return _angles[i];
-}
-
 const EulerAngles &
 EulerAngleUpdater::getEulerAnglesOld(unsigned int i) const
 {

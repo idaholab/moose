@@ -97,6 +97,8 @@ ComputeMultipleCrystalPlasticityStress::ComputeMultipleCrystalPlasticityStress(
     _total_lagrangian_strain(
         declareProperty<RankTwoTensor>("total_lagrangian_strain")), // Lagrangian strain
     _updated_rotation(declareProperty<RankTwoTensor>("updated_rotation")),
+    _updated_rotation_old(getMaterialPropertyOld<RankTwoTensor>("updated_rotation")),
+    _misorientation(declareProperty<Real>("misorientation")),
     _crysrot(getMaterialProperty<RankTwoTensor>(
         _base_name + "crysrot")), // defined in the elasticity tensor classes for crystal plasticity
     _print_convergence_message(getParam<bool>("print_state_variable_convergence_error_messages"))
@@ -315,6 +317,10 @@ ComputeMultipleCrystalPlasticityStress::postSolveQp(RankTwoTensor & cauchy_stres
   RankTwoTensor rot;
   _elastic_deformation_gradient.getRUDecompositionRotation(rot);
   _updated_rotation[_qp] = rot * _crysrot[_qp];
+
+  // Calculate the misorientation
+  auto _misorientation_mat = _updated_rotation[_qp] * _updated_rotation_old[_qp].inverse();
+  _misorientation[_qp] = std::acos((_misorientation_mat.trace() - 1.0) / 2.0);
 }
 
 void

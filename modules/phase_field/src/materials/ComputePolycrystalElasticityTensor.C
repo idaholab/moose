@@ -24,6 +24,10 @@ ComputePolycrystalElasticityTensor::validParams()
   params.addParam<Real>("pressure_scale", 1.0e6, "Pressure scale of the problem, in pa");
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");
+  params.addParam<UserObjectName>("euler_angle_provider",
+                                  "euler"
+                                  "Name of Euler angle provider user object");
+
   return params;
 }
 
@@ -35,6 +39,8 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(
     _grain_tracker(getUserObject<GrainDataTracker<RankFourTensor>>("grain_tracker")),
     _op_num(coupledComponents("v")),
     _vals(coupledValues("v")),
+    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
+    _crysrot(declareProperty<RankTwoTensor>(_base_name + "crysrot")),
     _D_elastic_tensor(_op_num),
     _JtoeV(6.24150974e18)
 {
@@ -68,6 +74,14 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
     // Sum all rotated elasticity tensors
     _elasticity_tensor[_qp] += _grain_tracker.getData(grain_id) * h;
     sum_h += h;
+
+    EulerAngles angles;
+    angles = _euler.getEulerAngles(grain_id);
+
+    RotationTensor R(angles);
+    // R.update(angles);
+    if ((*_vals[op_index])[_qp] > 0.5)
+      _crysrot[_qp] = R; // this is done for the crystal plasticity model compatibility
   }
 
   const Real tol = 1.0e-10;
