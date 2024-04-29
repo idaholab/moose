@@ -385,6 +385,14 @@ Real SinglePhaseFluidProperties::vaporTemperature(Real) const
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
+FPDualReal
+SinglePhaseFluidProperties::vaporTemperature_ad(const FPDualReal & p) const
+{
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
+
+}
+
+
 void
 SinglePhaseFluidProperties::vaporTemperature(Real p, Real & T, Real & dT_dp) const
 {
@@ -474,6 +482,16 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h) const
   const Real e = e_from_v_h(v, h);
   return T_from_v_e(v, e);
 }
+
+FPDualReal
+SinglePhaseFluidProperties::T_from_p_h_ad(const FPDualReal & p, const FPDualReal & h) const
+{
+  /** 
+   * not implemented
+   */
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
+}
+
 
 Real
 SinglePhaseFluidProperties::p_from_h_s(Real h, Real s) const
