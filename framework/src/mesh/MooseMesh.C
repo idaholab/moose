@@ -3786,9 +3786,9 @@ MooseMesh::cacheFVElementalDoFs() const
   mooseAssert(!Threads::in_threads,
               "Performing writes to elemInfo dof indices. This must be done unthreaded!");
 
-  auto elem_lambda = [this](const ElemInfo & elem_info,
-                            SystemBase & sys,
-                            std::vector<std::vector<dof_id_type>> & dof_vector)
+  auto elem_lambda = [](const ElemInfo & elem_info,
+                        SystemBase & sys,
+                        std::vector<std::vector<dof_id_type>> & dof_vector)
   {
     if (sys.nFVVariables())
     {
