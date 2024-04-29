@@ -205,30 +205,33 @@ void
 PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
 {
   const auto vector_conductivity = processThermalConductivity();
-  const auto num_blocks = _thermal_conductivity_blocks.size();
-  const auto num_used_blocks = num_blocks ? num_blocks : 1;
 
-  for (const auto block_i : make_range(num_used_blocks))
-  {
-    std::string block_name = "";
-    if (num_blocks)
-      block_name = Moose::stringify(_thermal_conductivity_blocks[block_i]);
-    else
-      block_name = std::to_string(block_i);
+  const auto kernel_type =
+      vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
 
-    const auto kernel_type =
-        vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
+  params.set<MooseFunctorName>(NS::porosity) = _porosity_functor_name;
 
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-    const auto block_names = num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
-    assignBlocks(params, block_names);
-    const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
-    params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_functor_name;
+  // Set block restrictions
+  const bool combined = _thermal_conductivity_blocks.size() > 1;
+  std::vector<SubdomainName> thermal_conductivity_blocks;
+  for (const auto & block_group : _thermal_conductivity_blocks)
+    thermal_conductivity_blocks.insert(thermal_conductivity_blocks.end(),
+                                       std::make_move_iterator(block_group.begin()),
+                                       std::make_move_iterator(block_group.end()));
+  const auto block_names =
+      _thermal_conductivity_blocks.size() ? thermal_conductivity_blocks : _blocks;
+  assignBlocks(params, block_names);
 
-    getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_diffusion_" + block_name, params);
-  }
+  // Set thermal conductivity
+  const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
+  if (combined)
+    params.set<MooseFunctorName>(conductivity_name) = prefix() + "combined_thermal_conductivity";
+  else
+    params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[0];
+
+  getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_diffusion", params);
 }
 
 void
@@ -320,7 +323,7 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
 
   if (have_vector == have_scalar)
     paramError("thermal_conductivity_solid",
-               "The entries on thermal conductivity shall either be scalars of vectors, mixing "
+               "The entries on thermal conductivity shall either be scalars or vectors, mixing "
                "them is not supported!");
   return have_vector;
 }
@@ -328,16 +331,43 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
 void
 PNSFVSolidHeatTransferPhysics::addMaterials()
 {
-  InputParameters params = getFactory().getValidParams("INSFVEnthalpyFunctorMaterial");
-  assignBlocks(params, _blocks);
+  if (!getParam<bool>("use_external_enthalpy_material"))
+  {
+    InputParameters params = getFactory().getValidParams("INSFVEnthalpyFunctorMaterial");
+    assignBlocks(params, _blocks);
 
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<MooseFunctorName>("temperature") = _solid_temperature_name;
-  params.set<std::string>("property_suffix") = "_solid";
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+    params.set<MooseFunctorName>("temperature") = _solid_temperature_name;
+    params.set<std::string>("property_suffix") = "_solid";
 
-  getProblem().addMaterial(
-      "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);
+    getProblem().addMaterial(
+        "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);
+  }
+
+  // Combine the functors (combining scalars and vectors is not currently supported)
+  if (_thermal_conductivity_name.size() > 1)
+  {
+    const auto vector_conductivity = processThermalConductivity();
+    const auto combiner_functor = vector_conductivity ? "PiecewiseByBlockVectorFunctorMaterial"
+                                                      : "PiecewiseByBlockFunctorMaterial";
+    InputParameters params = getFactory().getValidParams(combiner_functor);
+    params.set<MooseFunctorName>("prop_name") = prefix() + "combined_thermal_conductivity";
+    std::vector<SubdomainName> blocks_list;
+    std::map<std::string, std::string> blocks_to_functors;
+    for (const auto i : index_range(_thermal_conductivity_name))
+    {
+      for (const auto & block : _thermal_conductivity_blocks[i])
+      {
+        blocks_list.push_back(block);
+        blocks_to_functors.insert(
+            std::pair<std::string, std::string>(block, _thermal_conductivity_name[i]));
+      }
+    }
+    params.set<std::vector<SubdomainName>>("block") = blocks_list;
+    params.set<std::map<std::string, std::string>>("subdomain_to_prop_value") = blocks_to_functors;
+    getProblem().addMaterial(combiner_functor, prefix() + "thermal_conductivity_combiner", params);
+  }
 }
 
 InputParameters
