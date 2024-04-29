@@ -11,7 +11,7 @@
     type = CSVDiff
     input = functor_material.i
     csvdiff = functor_material_out.csv
-    requirement = 'The system should be able to add a generic functor material with a suffix for the properties.'
-    cli_args = "FunctorMaterials/fmat/prop_getter_suffix='bazinga' Postprocessors/get_prop1/functor=bazinga_prop1  Postprocessors/get_prop2/functor=bazinga_prop2"
+    requirement = 'The system should be able to add a generic functor material with a suffix for the names of the properties.'
+    cli_args = "FunctorMaterials/fmat/prop_getter_suffix='bazinga' Postprocessors/get_prop1/functor=prop1_bazinga  Postprocessors/get_prop2/functor=prop2_bazinga"
   []
 []

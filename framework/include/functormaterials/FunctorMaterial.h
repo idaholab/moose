@@ -80,7 +80,7 @@ FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
 
   _supplied_functor_props.insert(name);
   return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
-      (_get_suffix == "" ? "" : _get_suffix + "_") + prop_name,
+      prop_name + (_get_suffix == "" ? "" : "_" + _get_suffix),
       my_lammy,
       clearance_schedule,
       _mesh,
