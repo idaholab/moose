@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#27502'
+  design = 'PNSFVSolidHeatTransferPhysics.md'
+  [connected_diffusion]
+    requirement = "The system shall be able to connect subdomains within a diffusion problem"
+    [with_fviks]
+      type = CSVDiff
+      input = 'three_zones.i'
+      csvdiff = 'three_zones_out_all_values_0001.csv'
+      detail = 'using interface kernels,'
+    []
+    [with_pbbfm]
+      type = CSVDiff
+      input = 'three_zones-physics.i'
+      csvdiff = 'three_zones-physics_out_all_values_0001.csv'
+      detail = 'using a functor material automatically defined by the physics syntax to combine the thermal diffusivities.'
+    []
+  []
+[]
