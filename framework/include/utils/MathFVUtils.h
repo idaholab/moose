@@ -100,16 +100,44 @@ bool setInterpolationMethod(const MooseObject & obj,
  * upwind interpolation with the velocity facing outward from the F1 element,
  * then the pair will be (1.0, 0.0).
  *
+ * The template is needed in case the face flux carries derivatives in an AD setting.
+ *
  * @param m The interpolation method
  * @param fi The face information
  * @param one_is_elem Whether fi.elem() == F1
  * @param face_flux The advecting face flux. Not relevant for an Average interpolation
  * @return a pair where the first Real is c_1 and the second Real is c_2
  */
-std::pair<Real, Real> interpCoeffs(const InterpMethod m,
-                                   const FaceInfo & fi,
-                                   const bool one_is_elem,
-                                   const Real face_flux = 0.0);
+template <typename T = Real>
+std::pair<Real, Real>
+interpCoeffs(const InterpMethod m,
+             const FaceInfo & fi,
+             const bool one_is_elem,
+             const T face_flux = 0.0)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+    case InterpMethod::SkewCorrectedAverage:
+    {
+      if (one_is_elem)
+        return std::make_pair(fi.gC(), 1. - fi.gC());
+      else
+        return std::make_pair(1. - fi.gC(), fi.gC());
+    }
+
+    case InterpMethod::Upwind:
+    {
+      if ((face_flux > 0) == one_is_elem)
+        return std::make_pair(1., 0.);
+      else
+        return std::make_pair(0., 1.);
+    }
+
+    default:
+      mooseError("Unrecognized interpolation method");
+  }
+}
 
 /**
  * A simple linear interpolation of values between cell centers to a cell face. The \p one_is_elem
