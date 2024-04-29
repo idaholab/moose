@@ -76,6 +76,10 @@ TabulatedFluidProperties::validParams()
       false,
       "Option to use a base-10 logarithmically-spaced grid for specific volume instead of a "
       "linearly-spaced grid.");
+  param.addParam<bool>("p_h_variables", 
+      false, 
+      "If using pressure enthalpy variables, interpolates from PT to h"
+      "may be wrong especially in multiphase.");
 
   params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
@@ -111,6 +115,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
+    _p_h_variables(getParam<bool>("p_h_variables")),
     _density_idx(0),
     _enthalpy_idx(0),
     _internal_energy_idx(0),
@@ -332,6 +337,15 @@ TabulatedFluidProperties::initialSetup()
       _entropy_idx = i;
     }
   }
+
+  // If using p_h variables, turn off interpolation for enthalpy, density, and viscosity 
+  if (_p_h_variables)
+  {
+    _interpolate_density = false;
+    _interpolate_enthalpy = false;
+    _interpolate_viscosity = false;
+  }
+  
   constructInterpolation();
 }
 
