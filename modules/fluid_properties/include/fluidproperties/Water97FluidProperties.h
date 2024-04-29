@@ -330,6 +330,16 @@ public:
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
   virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
 
+ /**
+  * Backwards equation S(h,p)
+  * entropy as a function of enthalpy and pressure
+  * @param h water entalpy
+  * @param pressure water pressure
+  * @return * Real 
+  */
+  virtual Real s_from_h_p(Real h, Real pressure) const override;
+  virtual void s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
+
   /**
    * Boundary between subregions b and c in region 2.
    * Equation 21 from Revised Release on the IAPWS Industrial

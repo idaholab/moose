@@ -79,13 +79,15 @@ Water97FluidProperties::triplePointTemperature() const
 
 Real
 Water97FluidProperties::rho_from_p_T(Real pressure, Real temperature) const
-{
+{ 
+  
   return rho_from_p_T_template(pressure, temperature);
 }
 
 ADReal
 Water97FluidProperties::rho_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
+  
   return rho_from_p_T_template(pressure, temperature);
 }
 
@@ -93,6 +95,7 @@ void
 Water97FluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
+  
   rho_from_p_T_template(pressure, temperature, rho, drho_dp, drho_dT);
 }
 
@@ -485,6 +488,7 @@ void
 Water97FluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
+
   h_from_p_T_template(pressure, temperature, h, dh_dp, dh_dT);
 }
 
@@ -498,9 +502,44 @@ Water97FluidProperties::h_from_p_T(const ADReal & pressure,
   h_from_p_T_template(pressure, temperature, h, dh_dp, dh_dT);
 }
 
+/// @brief from the Calorically Imperfect Gas
+/// @param h enthalpy
+/// @param p pressure
+/// @param s entropy
+/// @param ds_dh derivatives
+/// @param ds_dp 
+
+Real Water97FluidProperties::s_from_h_p(Real h, Real p) const
+{
+  
+  
+  Real T = T_from_p_h(p, h);
+  
+  return s_from_p_T(p, T);
+}
+
+void
+Water97FluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const
+{
+  
+  
+
+  s = s_from_h_p(h, p);
+
+  
+  ds_dh = 1.0 / T_from_p_h(p, h);
+  Real R_specific = (8.3144621) / molarMass();
+  ds_dp = -R_specific / p;
+  
+  
+  
+}
+
+
 Real
 Water97FluidProperties::vaporPressure(Real temperature) const
 {
+  
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
@@ -524,6 +563,7 @@ Water97FluidProperties::vaporPressure(Real temperature) const
 FPDualReal
 Water97FluidProperties::vaporTemperature_ad(const FPDualReal & pressure) const
 {
+  
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure.value() < 611.23 || pressure.value() > _p_critical)
@@ -544,6 +584,7 @@ Water97FluidProperties::vaporTemperature_ad(const FPDualReal & pressure) const
 Real
 Water97FluidProperties::vaporTemperature(Real pressure) const
 {
+  
   const FPDualReal p = pressure;
 
   return vaporTemperature_ad(p).value();
@@ -552,6 +593,7 @@ Water97FluidProperties::vaporTemperature(Real pressure) const
 void
 Water97FluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
 {
+  
   FPDualReal p = pressure;
   Moose::derivInsert(p.derivatives(), 0, 1.0);
 
@@ -692,6 +734,8 @@ Water97FluidProperties::b2bc(Real pressure) const
 Real
 Water97FluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
+  
+
   const FPDualReal p = pressure;
   const FPDualReal h = enthalpy;
 
@@ -702,6 +746,8 @@ void
 Water97FluidProperties::T_from_p_h(
     Real pressure, Real enthalpy, Real & temperature, Real & dT_dp, Real & dT_dh) const
 {
+  
+
   FPDualReal p = pressure;
   Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal h = enthalpy;
@@ -718,11 +764,12 @@ FPDualReal
 Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
                                       const FPDualReal & enthalpy) const
 {
+  "Water97:T_from_p_h_ad";
   FPDualReal temperature = 0.0;
 
   // Determine which region the point is in
   const unsigned int region = inRegionPH(pressure.value(), enthalpy.value());
-
+  
   switch (region)
   {
     case 1:
@@ -733,7 +780,7 @@ Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
     {
       // First, determine which subregion the point is in:
       const unsigned int subregion = subregion2ph(pressure.value(), enthalpy.value());
-
+      
       if (subregion == 1)
         temperature = temperature_from_ph2a(pressure, enthalpy);
       else if (subregion == 2)
@@ -762,7 +809,8 @@ Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
     default:
       mooseError("inRegionPH() has given an incorrect region");
   }
-
+  
+  
   return temperature;
 }
 
@@ -788,12 +836,18 @@ Water97FluidProperties::temperature_from_ph2a(const FPDualReal & pressure,
   const FPDualReal eta = enthalpy / 2000.0e3;
   FPDualReal sum = 0.0;
 
+  
+  
+
   // Factor out the negative in std::pow(eta - 2.1, _Jph2a[i]) to avoid fpe in dbg (see #13163)
   const Real sgn = MathUtils::sign(eta.value() - 2.1);
+  
 
   for (std::size_t i = 0; i < _nph2a.size(); ++i)
     sum += _nph2a[i] * std::pow(pi, _Iph2a[i]) * std::pow(std::abs(eta - 2.1), _Jph2a[i]) *
            std::pow(sgn, _Jph2a[i]);
+  
+  
 
   return sum;
 }
