@@ -129,6 +129,8 @@ PhysicsBase::act()
     addExecutioner();
   else if (_current_task == "add_executor")
     addExecutors();
+  else if (_current_task == "check_integrity_early_physics")
+    checkIntegrityEarly();
 
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
@@ -198,11 +200,15 @@ PhysicsBase::initializePhysics()
   if (_verbose)
     getProblem().setVerboseProblem(_verbose);
 
-  if (_is_transient == "true" && !getProblem().isTransient())
-    paramError("transient", "We cannot solve a physics as transient in a steady problem");
-
   // If the derived physics need additional initialization very early on
   initializePhysicsAdditional();
+}
+
+void
+PhysicsBase::checkIntegrityEarly() const
+{
+  if (_is_transient == "true" && !getProblem().isTransient())
+    paramError("transient", "We cannot solve a physics as transient in a steady problem");
 }
 
 void
