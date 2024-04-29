@@ -49,7 +49,7 @@ HeatConductionCG::addFEKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(parameters(), "thermal_conductivity");
-    getProblem().addKernel(kernel_type, prefix() + "_" + _temperature_name + "_conduction", params);
+    getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_conduction", params);
   }
   if (isParamValid("heat_source_var"))
   {
@@ -57,7 +57,7 @@ HeatConductionCG::addFEKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
-    getProblem().addKernel(kernel_type, prefix() + "_" + _temperature_name + "_source", params);
+    getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
   if (isTransient())
   {
@@ -66,7 +66,7 @@ HeatConductionCG::addFEKernels()
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(parameters(), "density_name");
     params.applyParameter(parameters(), "specific_heat");
-    getProblem().addKernel(kernel_type, prefix() + "_" + _temperature_name + "_time", params);
+    getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_time", params);
   }
 }
 
@@ -91,7 +91,7 @@ HeatConductionCG::addFEBCs()
       params.set<std::vector<BoundaryName>>("boundary") = heat_flux_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[0];
       getProblem().addBoundaryCondition(
-          bc_type, prefix() + "_" + _temperature_name + "_heat_flux_bc_all", params);
+          bc_type, prefix() + _temperature_name + "_heat_flux_bc_all", params);
     }
     else
     {
@@ -100,7 +100,7 @@ HeatConductionCG::addFEBCs()
         params.set<std::vector<BoundaryName>>("boundary") = {heat_flux_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[i];
         getProblem().addBoundaryCondition(bc_type,
-                                          prefix() + "_" + _temperature_name + "_heat_flux_bc_" +
+                                          prefix() + _temperature_name + "_heat_flux_bc_" +
                                               heat_flux_boundaries[i],
                                           params);
       }
@@ -124,7 +124,7 @@ HeatConductionCG::addFEBCs()
       params.set<std::vector<BoundaryName>>("boundary") = temperature_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_temperatures[0];
       getProblem().addBoundaryCondition(
-          bc_type, prefix() + "_" + _temperature_name + "_dirichlet_bc_all", params);
+          bc_type, prefix() + _temperature_name + "_dirichlet_bc_all", params);
     }
     else
     {
@@ -133,7 +133,7 @@ HeatConductionCG::addFEBCs()
         params.set<std::vector<BoundaryName>>("boundary") = {temperature_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_temperatures[i];
         getProblem().addBoundaryCondition(bc_type,
-                                          prefix() + "_" + _temperature_name + "_dirichlet_bc_" +
+                                          prefix() + _temperature_name + "_dirichlet_bc_" +
                                               temperature_boundaries[i],
                                           params);
       }

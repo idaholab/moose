@@ -60,8 +60,7 @@ HeatConductionFV::addFVKernels()
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("coeff") =
         getParam<MooseFunctorName>("thermal_conductivity_functor");
-    getProblem().addFVKernel(
-        kernel_type, prefix() + "_" + _temperature_name + "_conduction", params);
+    getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_conduction", params);
   }
   if (isParamValid("heat_source_var"))
   {
@@ -69,7 +68,7 @@ HeatConductionFV::addFVKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("v") = getParam<VariableName>("heat_source_var");
-    getProblem().addFVKernel(kernel_type, prefix() + "_" + _temperature_name + "_source", params);
+    getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
   if (isTransient())
   {
@@ -78,7 +77,7 @@ HeatConductionFV::addFVKernels()
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(parameters(), "specific_heat");
     params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
-    getProblem().addFVKernel(kernel_type, prefix() + "_" + _temperature_name + "_time", params);
+    getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_time", params);
   }
 }
 
@@ -102,8 +101,7 @@ HeatConductionFV::addFVBCs()
     {
       params.set<std::vector<BoundaryName>>("boundary") = heat_flux_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[0];
-      getProblem().addFVBC(
-          bc_type, prefix() + "_" + _temperature_name + "_heat_flux_bc_all", params);
+      getProblem().addFVBC(bc_type, prefix() + _temperature_name + "_heat_flux_bc_all", params);
     }
     else
     {
@@ -112,7 +110,7 @@ HeatConductionFV::addFVBCs()
         params.set<std::vector<BoundaryName>>("boundary") = {heat_flux_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[i];
         getProblem().addFVBC(bc_type,
-                             prefix() + "_" + _temperature_name + "_heat_flux_bc_" +
+                             prefix() + _temperature_name + "_heat_flux_bc_" +
                                  heat_flux_boundaries[i],
                              params);
       }
@@ -135,8 +133,7 @@ HeatConductionFV::addFVBCs()
     {
       params.set<std::vector<BoundaryName>>("boundary") = temperature_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_temperatures[0];
-      getProblem().addFVBC(
-          bc_type, prefix() + "_" + _temperature_name + "_dirichlet_bc_all", params);
+      getProblem().addFVBC(bc_type, prefix() + _temperature_name + "_dirichlet_bc_all", params);
     }
     else
     {
@@ -145,7 +142,7 @@ HeatConductionFV::addFVBCs()
         params.set<std::vector<BoundaryName>>("boundary") = {temperature_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_temperatures[i];
         getProblem().addFVBC(bc_type,
-                             prefix() + "_" + _temperature_name + "_dirichlet_bc_" +
+                             prefix() + _temperature_name + "_dirichlet_bc_" +
                                  temperature_boundaries[i],
                              params);
       }
