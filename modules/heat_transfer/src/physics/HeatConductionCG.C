@@ -85,7 +85,8 @@ HeatConductionCG::addFEBCs()
         getParam<std::vector<MooseFunctorName>>("boundary_heat_fluxes");
     // Optimization if all the same
     if (std::set<MooseFunctorName>(boundary_heat_fluxes.begin(), boundary_heat_fluxes.end())
-            .size() == 1)
+                .size() == 1 &&
+        heat_flux_boundaries.size() > 1)
     {
       params.set<std::vector<BoundaryName>>("boundary") = heat_flux_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[0];
@@ -117,7 +118,8 @@ HeatConductionCG::addFEBCs()
         getParam<std::vector<MooseFunctorName>>("boundary_temperatures");
     // Optimization if all the same
     if (std::set<MooseFunctorName>(boundary_temperatures.begin(), boundary_temperatures.end())
-            .size() == 1)
+                .size() == 1 &&
+        temperature_boundaries.size() > 1)
     {
       params.set<std::vector<BoundaryName>>("boundary") = temperature_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_temperatures[0];
