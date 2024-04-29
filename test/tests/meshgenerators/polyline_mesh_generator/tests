@@ -47,14 +47,4 @@
     recover = false
     requirement = "The system shall set a boundary name or id if requested."
   []
-  [polyline_bad_boundary]
-    design = 'meshgenerators/PolyLineMeshGenerator.md'
-    type = 'RunException'
-    input = 'polyline_mesh_generator_bad_boundary.i'
-    expect_err = "Failed to convert integer"
-    issues = '#24950'
-    cli_args = '--mesh-only'
-    recover = false
-    requirement = "The system shall detect any unsatisfiable boundary id requests."
-  []
 []

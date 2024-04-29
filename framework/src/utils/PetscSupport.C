@@ -670,10 +670,6 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
   bool matptap_found = false;
   bool hmg_strong_threshold_found = false;
 #endif
-#if !PETSC_VERSION_LESS_THAN(3, 19, 2)
-  // Check for if users have set the options_left option
-  bool options_left_set = false;
-#endif
   std::vector<std::pair<std::string, std::string>> new_options;
 
   for (const auto & option : petsc_pair_options)
@@ -743,11 +739,6 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
         fact_pattern_found = true;
       if (option.first == "-mat_superlu_dist_replacetinypivot")
         tiny_pivot_found = true;
-#endif
-
-#if !PETSC_VERSION_LESS_THAN(3, 19, 2)
-      if (option.first == "-options_left")
-        options_left_set = true;
 #endif
 
       if (!new_options.empty())
@@ -829,13 +820,6 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
 #endif
   // Set Preconditioner description
   po.pc_description += pc_description;
-
-  // Turn off default options_left warnings added in 3.19.3 pre-release for all PETSc builds
-  // (PETSc commit: 59f199a7), unless the user has set a preference.
-#if !PETSC_VERSION_LESS_THAN(3, 19, 2)
-  if (!options_left_set && !po.flags.contains("-options_left"))
-    po.pairs.emplace_back("-options_left", "0");
-#endif
 }
 
 std::set<std::string>

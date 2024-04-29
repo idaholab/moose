@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#26784'
+  design = 'FunctorCoordinatesFunctionAux.md'
+  [test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    requirement = "The system shall be able to pass functor values as the time and space coordinates "
+                  "of a function, to compute an auxiliary field."
+  []
+[]

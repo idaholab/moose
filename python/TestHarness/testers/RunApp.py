@@ -196,10 +196,6 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
-        # The test harness should never use GDB backtraces: they don't
-        # work well when dozens of expect_err jobs run at the same time.
-        cli_args.append('--no-gdb-backtrace')
-
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)

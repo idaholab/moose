@@ -69,14 +69,11 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
       std::make_shared<Parser>(parse_file_path, document_text);
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _moose_app.commandLine();
 
-  // turn output off so input check application does not affect messages
-  std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
-
   // create new application with parameters modified for input check run
   _check_apps[document_path] = AppFactory::instance().createShared(
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
-  // disable logs and enable error exceptions with initial values cached
+  // enable exceptions to be thrown for errors and cache initial setting
   bool cached_throw_on_error = Moose::_throw_on_error;
   Moose::_throw_on_error = true;
 
@@ -146,11 +143,8 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
     }
   }
 
-  // reset behaviors of performance logging and error exception throwing
+  // reset behavior of exceptions thrown for errors with initial setting
   Moose::_throw_on_error = cached_throw_on_error;
-
-  // turn output back on since it was turned off and input check is done
-  Moose::out.rdbuf(cached_output_buffer);
 
   return pass;
 }

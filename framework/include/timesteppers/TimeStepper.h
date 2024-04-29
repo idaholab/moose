@@ -103,23 +103,17 @@ public:
 
 protected:
   /**
-   * Called to compute _current_dt for the first timestep.
-   * Note that this does not return.
-   * The TimeStepper's job here is to fill in _current_dt.
+   * Computes time step size for the initial time step
    */
   virtual Real computeInitialDT() = 0;
 
   /**
-   * Called to compute _current_dt for a normal step.
-   * Note that this does not return.
-   * The TimeStepper's job here is to fill in _current_dt.
+   * Computes time step size after the initial time step
    */
   virtual Real computeDT() = 0;
 
   /**
-   * Called to compute _current_dt after a solve has failed.
-   * Note that this does not return.
-   * The TimeStepper's job here is to fill in _current_dt.
+   * Computes time step size after a failed time step
    */
   virtual Real computeFailedDT();
 

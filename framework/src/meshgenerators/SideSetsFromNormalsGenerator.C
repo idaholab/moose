@@ -42,6 +42,10 @@ SideSetsFromNormalsGenerator::validParams()
                                   "Deprecated, use 'normal_tol' instead");
   params.deprecateParam("tolerance", "normal_tol", "4/01/2025");
 
+  // We want to use a different normal_tol for this generator than from the base class to preserve
+  // old behavior.
+  params.setParameters("normal_tol", 1e-5);
+
   // We are using 'normals' instead
   params.suppressParameter<Point>("normal");
 

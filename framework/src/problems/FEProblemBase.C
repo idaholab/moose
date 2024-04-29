@@ -8333,6 +8333,13 @@ FEProblemBase::addOutput(const std::string & object_type,
   const InputParameters * common = output_warehouse.getCommonParameters();
   if (common)
     parameters.applyParameters(*common, exclude);
+  if (common && std::find(exclude.begin(), exclude.end(), "execute_on") != exclude.end() &&
+      common->isParamSetByUser("execute_on") && object_type != "Console")
+    mooseInfoRepeated(
+        "'execute_on' parameter specified in [Outputs] block is ignored for object '" +
+        object_name +
+        "'.\nDefine this object in its own sub-block of [Outputs] to modify its "
+        "execution schedule.");
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")
@@ -8709,4 +8716,63 @@ FEProblemBase::computeSystems(const ExecFlagType & type)
     solver_sys->compute(type);
 
   _aux->compute(type);
+}
+
+const ConstElemRange &
+FEProblemBase::getCurrentAlgebraicElementRange()
+{
+  if (!_current_algebraic_elem_range)
+    return *_mesh.getActiveLocalElementRange();
+
+  return *_current_algebraic_elem_range;
+}
+const ConstNodeRange &
+FEProblemBase::getCurrentAlgebraicNodeRange()
+{
+  if (!_current_algebraic_node_range)
+    return *_mesh.getLocalNodeRange();
+
+  return *_current_algebraic_node_range;
+}
+const ConstBndNodeRange &
+FEProblemBase::getCurrentAlgebraicBndNodeRange()
+{
+  if (!_current_algebraic_bnd_node_range)
+    return *_mesh.getBoundaryNodeRange();
+
+  return *_current_algebraic_bnd_node_range;
+}
+
+void
+FEProblemBase::setCurrentAlgebraicElementRange(ConstElemRange * range)
+{
+  if (!range)
+  {
+    _current_algebraic_elem_range = nullptr;
+    return;
+  }
+
+  _current_algebraic_elem_range = std::make_unique<ConstElemRange>(*range);
+}
+void
+FEProblemBase::setCurrentAlgebraicNodeRange(ConstNodeRange * range)
+{
+  if (!range)
+  {
+    _current_algebraic_node_range = nullptr;
+    return;
+  }
+
+  _current_algebraic_node_range = std::make_unique<ConstNodeRange>(*range);
+}
+void
+FEProblemBase::setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range)
+{
+  if (!range)
+  {
+    _current_algebraic_bnd_node_range = nullptr;
+    return;
+  }
+
+  _current_algebraic_bnd_node_range = std::make_unique<ConstBndNodeRange>(*range);
 }

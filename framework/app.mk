@@ -428,7 +428,7 @@ ifeq ($(libmesh_static),yes)
 endif
 
 # Write resource file
-$(app_resource):
+$(app_resource): | prebuild
 	@echo "Creating Resource file $@"
 	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) \
      $(libmesh_CXXFLAGS) \

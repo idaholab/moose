@@ -1,0 +1,23 @@
+[Tests]
+  issues = '#19497'
+  design = 'ComputeElasticityTensorCP.md'
+  [euler_angle_auxvar]
+    type = 'CSVDiff'
+    input = 'euler_angle_auxvar.i'
+    csvdiff = 'euler_angle_auxvar_out.csv'
+    requirement = 'The crystal plasticity models should be able to utilize Euler angle values supplied through AuxVariables.'
+  []
+  [euler_angle_auxvar_conflict]
+    type = 'RunException'
+    input = 'euler_angle_conflict.i'
+    expect_err = 'Euler angles cannot be supplied from both coupled variables and auxiliary input file in the option `read_prop_user_object`.'
+    requirement = 'An error will be thrown when trying to set Euler angles information from a text file and AuxVariables at the same time.'
+  []
+  [euler_angle_components]
+    type = 'RunException'
+    input = 'euler_angle_auxvar.i'
+    expect_err = 'The Euler angles should have three components.'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_variables="euler_angle_1"'
+    requirement = 'An error will be thrown when trying to set Euler angles information with less than three components.'
+  []
+[]

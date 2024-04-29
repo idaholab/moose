@@ -6,15 +6,13 @@
 
     issues = '#1405'
     design = 'SideAverageValue.md'
-    requirement = 'The system shall compute the area-weighted average of the integral of a variable '
-                  'over a side.'
+    requirement = 'The system shall compute the area-weighted average of the integral of a variable over a side.'
   []
 
   [side_average_material_property]
     issues = '#18649'
     design = 'SideAverageMaterialProperty.md'
-    requirement = 'The system shall support computing the average of a material property over a side '
-                  'on the mesh.'
+    requirement = 'The system shall support computing the average of a material property over a side on the mesh.'
     [real]
       type = 'CSVDiff'
       input = '../side_material.i side_average_material_property.i'
@@ -40,24 +38,21 @@
       type = 'CSVDiff'
       input = '../side_material.i side_average_material_property.i'
       csvdiff = 'side_average_material_property_out.csv'
-      cli_args = 'Postprocessors/average/property=rank_two_tensor_prop '
-                 'Postprocessors/average/component="1 1"'
+      cli_args = 'Postprocessors/average/property=rank_two_tensor_prop Postprocessors/average/component="1 1"'
       detail = 'if the material property is of `RankTwoTensor` type'
     []
     [rankthree]
       type = 'CSVDiff'
       input = '../side_material.i side_average_material_property.i'
       csvdiff = 'side_average_material_property_out.csv'
-      cli_args = 'Postprocessors/average/property=rank_three_tensor_prop '
-                 'Postprocessors/average/component="0 1 1"'
+      cli_args = 'Postprocessors/average/property=rank_three_tensor_prop Postprocessors/average/component="0 1 1"'
       detail = 'if the material property is of `RankThreeTensor` type'
     []
     [rankfour]
       type = 'CSVDiff'
       input = '../side_material.i side_average_material_property.i'
       csvdiff = 'side_average_material_property_out.csv'
-      cli_args = 'Postprocessors/average/property=rank_four_tensor_prop '
-                 'Postprocessors/average/component="0 0 1 1"'
+      cli_args = 'Postprocessors/average/property=rank_four_tensor_prop Postprocessors/average/component="0 0 1 1"'
       detail = 'if the material property is of `RankFourTensor` type'
     []
     [error]
@@ -66,11 +61,17 @@
       expect_err = "Material property 'realvec_prop' is 1-dimensional, but an index vector of size 3 "
                    "was supplied to select a component. It looks like you were expecting the "
                    "material property to have a different type."
-      cli_args = 'Postprocessors/average/property=realvec_prop Postprocessors/average/component="1 2 '
-                 '3"'
-      detail = 'And shall error out if the index components do not match the dimension of the '
-               'supplied property'
+      cli_args = 'Postprocessors/average/property=realvec_prop Postprocessors/average/component="1 2 3"'
+      detail = 'And shall error out if the index components do not match the dimension of the supplied property'
     []
   []
 
+  [side_average_functor_test]
+    type = 'CSVDiff'
+    input = 'side_average_functor_test.i'
+    csvdiff = 'side_average_functor_test_out.csv'
+    issues = '#27250'
+    design = 'SideAverageFunctorPostprocessor.md'
+    requirement = 'The system shall compute the area-weighted average of the integral of a functor over a side.'
+  []
 []
