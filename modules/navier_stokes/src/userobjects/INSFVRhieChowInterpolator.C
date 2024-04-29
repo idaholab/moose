@@ -658,7 +658,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                elem_has_fi ? side : loc_neighbor->which_neighbor_am_i(elem));
 
       Moose::FaceArg loc_face{
-          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem};
 
       MooseMeshUtils::coordTransformFactor(
           elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
@@ -668,8 +668,15 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                       coord_multiplier;
 
       for (const auto i : make_range(_volumetric_force.size()))
+      {
+        loc_face.face_side =
+            this->_volumetric_force[i]->hasFaceSide(*fi_loc, true)
+                ? (this->_volumetric_force[i]->hasFaceSide(*fi_loc, false) ? nullptr
+                                                                           : fi_loc->elemPtr())
+                : fi_loc->neighborPtr();
         elem_value += (*this->_volumetric_force[i])(loc_face, time) * face_volume_contribution *
                       (fi_loc->normal() * unit_basis_vector);
+      }
     }
     elem_value = elem_value / elem->volume();
 
@@ -684,7 +691,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                elem_has_fi ? side : loc_elem->which_neighbor_am_i(neighbor));
 
       Moose::FaceArg loc_face{
-          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem};
 
       MooseMeshUtils::coordTransformFactor(
           neighbor->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
@@ -694,8 +701,15 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                       coord_multiplier;
 
       for (const auto i : make_range(_volumetric_force.size()))
+      {
+        loc_face.face_side =
+            this->_volumetric_force[i]->hasFaceSide(*fi_loc, true)
+                ? (this->_volumetric_force[i]->hasFaceSide(*fi_loc, false) ? nullptr
+                                                                           : fi_loc->elemPtr())
+                : fi_loc->neighborPtr();
         neigh_value += (*this->_volumetric_force[i])(loc_face, time) * face_volume_contribution *
                        (fi_loc->normal() * unit_basis_vector);
+      }
     }
     neigh_value = neigh_value / neighbor->volume();
 
