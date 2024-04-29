@@ -207,6 +207,13 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
   // plane strain consistency check
   if (_planar_formulation != PlanarFormulation::None)
   {
+    if (_lagrangian_kernels)
+      mooseDocumentedError(
+          "moose",
+          27340,
+          "Planar formulations are not yet available through the Physics syntax with new_system = "
+          "true. They can be enabled by manually setting up the appropriate objects. Please refer "
+          "to the documentation and regression tests for examples.");
     if (params.isParamSetByUser("out_of_plane_strain") &&
         _planar_formulation != PlanarFormulation::WeakPlaneStress)
       mooseError(
@@ -328,9 +335,6 @@ QuasiStaticSolidMechanicsPhysics::act()
   {
     if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
-      if (_lagrangian_kernels)
-        paramError("Plane formulation not available with Lagrangian kernels");
-
       if (_use_ad)
         paramError("use_automatic_differentiation", "AD not setup for use with PlaneStrain");
       // Set the action parameters
