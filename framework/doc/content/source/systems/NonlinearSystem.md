@@ -61,7 +61,8 @@ a solution to the system of nonlinear equations is found. Therefore, after each 
 we need to check if the current guess is "close enough" to being a solution.
 
 There are two primary convergence criteria, and the nonlinear system is said to be converged
-if _either_ of the two is satisfied:
+if *either* of the two is satisfied:
+
 1. Absolute convergence: The norm of the residual evaluated at the current guess is below
    a certain tolerance, i.e. $\lVert \vec{r} \rVert \leq \mathrm{atol}$ where $\mathrm{atol}$
    is the absolute tolerance. This tolerance is specified via the `nl_abs_tol` parameter in the
@@ -74,6 +75,7 @@ if _either_ of the two is satisfied:
    [`Executioner`](Executioner.md) block.
 
 MOOSE supports several definitions of the reference residual:
+
 - Initial residual: The residual evaluated at the 0-th nonlinear iteration. To select this definition,
   set `use_pre_SMO_residual = false` in the [`Executioner`](Executioner.md) block.
 - Pre-SMO residual: The residual evaluated before any solution-modifying object is executed, and
