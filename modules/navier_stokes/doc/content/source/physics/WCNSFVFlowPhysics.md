@@ -1,6 +1,6 @@
 # WCNSFVFlowPhysics
 
-!syntax description /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
+!syntax description /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
 ## Automatically defined variables
 
@@ -53,8 +53,8 @@ advected quantities (e.g. upwind, average) can be controlled through the
 
 Please see [the Bernoulli pressure variable documentation](BernoulliPressureVariable.md) for more information.
 
-!syntax parameters /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
+!syntax parameters /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
-!syntax inputs /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
+!syntax inputs /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
-!syntax children /Physics/NavierStokes/WCNSFVFlow/WCNSFVFlowPhysics
+!syntax children /Physics/NavierStokes/Flow/WCNSFVFlowPhysics

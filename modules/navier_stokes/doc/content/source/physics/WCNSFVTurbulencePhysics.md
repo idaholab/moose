@@ -1,6 +1,6 @@
 # WCNSFVTurbulencePhysics
 
-!syntax description /Physics/NavierStokes/WCNSFVTurbulence/WCNSFVTurbulencePhysics
+!syntax description /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics
 
 ## Coupling with other Physics
 
@@ -16,8 +16,8 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 
 !listing test/tests/finite_volume/ins/channel-flow/2d-mixing-length-physics.i block=Physics
 
-!syntax parameters /Physics/NavierStokes/WCNSFVTurbulence/WCNSFVTurbulencePhysics
+!syntax parameters /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics
 
-!syntax inputs /Physics/NavierStokes/WCNSFVTurbulence/WCNSFVTurbulencePhysics
+!syntax inputs /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics
 
-!syntax children /Physics/NavierStokes/WCNSFVTurbulence/WCNSFVTurbulencePhysics
+!syntax children /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics

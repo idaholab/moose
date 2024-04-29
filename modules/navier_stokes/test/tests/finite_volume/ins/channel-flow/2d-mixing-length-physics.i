@@ -24,7 +24,7 @@ advected_interp_method = 'upwind'
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
 
@@ -49,7 +49,7 @@ advected_interp_method = 'upwind'
         mass_advection_interpolation = ${advected_interp_method}
       []
     []
-    [WCNSFVScalarTransport]
+    [ScalarTransport]
       [scalars]
         add_scalar_equation = true
         passive_scalar_names = 'scalar'
@@ -59,7 +59,7 @@ advected_interp_method = 'upwind'
         passive_scalar_advection_interpolation = ${advected_interp_method}
       []
     []
-    [WCNSFVTurbulence]
+    [Turbulence]
       [mixing-length]
         turbulence_handling = 'mixing-length'
         coupled_flow_physics = flow

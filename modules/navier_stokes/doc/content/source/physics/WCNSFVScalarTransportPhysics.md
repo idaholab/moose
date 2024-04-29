@@ -1,6 +1,6 @@
 # WCNSFVScalarTransportPhysics
 
-!syntax description /Physics/NavierStokes/WCNSFVScalarTransport/WCNSFVScalarTransportPhysics
+!syntax description /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics
 
 ## Coupling with other Physics
 
@@ -10,8 +10,8 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 
 !listing test/tests/finite_volume/ins/channel-flow/2d-scalar-transport-physics.i block=Physics
 
-!syntax parameters /Physics/NavierStokes/WCNSFVScalarTransport/WCNSFVScalarTransportPhysics
+!syntax parameters /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics
 
-!syntax inputs /Physics/NavierStokes/WCNSFVScalarTransport/WCNSFVScalarTransportPhysics
+!syntax inputs /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics
 
-!syntax children /Physics/NavierStokes/WCNSFVScalarTransport/WCNSFVScalarTransportPhysics
+!syntax children /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics

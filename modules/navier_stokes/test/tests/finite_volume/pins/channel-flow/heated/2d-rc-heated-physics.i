@@ -33,7 +33,7 @@ h_cv = 1.0
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
         porous_medium_treatment = true
@@ -60,7 +60,7 @@ h_cv = 1.0
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVFluidHeatTransfer]
+    [FluidHeatTransfer]
       [heat]
         thermal_conductivity = ${k}
         specific_heat = ${cp}

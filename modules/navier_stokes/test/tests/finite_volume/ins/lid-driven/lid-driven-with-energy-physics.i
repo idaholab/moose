@@ -18,7 +18,7 @@ cp = 1
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
 
@@ -42,7 +42,7 @@ cp = 1
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVFluidHeatTransfer]
+    [FluidHeatTransfer]
       [heat]
         add_energy_equation = true
         thermal_conductivity = 'k'

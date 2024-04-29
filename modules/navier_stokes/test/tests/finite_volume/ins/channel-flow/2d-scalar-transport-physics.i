@@ -43,7 +43,7 @@ cp = 1
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
 
@@ -65,7 +65,7 @@ cp = 1
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVFluidHeatTransfer]
+    [FluidHeatTransfer]
       [heat]
         thermal_conductivity = ${k}
         specific_heat = ${cp}
@@ -79,7 +79,7 @@ cp = 1
         energy_advection_interpolation = 'average'
       []
     []
-    [WCNSFVScalarTransport]
+    [ScalarTransport]
       [heat]
         passive_scalar_names = 'scalar'
 

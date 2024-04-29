@@ -1,6 +1,6 @@
 # WCNSFVFluidHeatTransferPhysics
 
-!syntax description /Physics/NavierStokes/WCNSFVFluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
+!syntax description /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
 
 ## Automatically defined variables
 
@@ -23,8 +23,8 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 
 !listing test/tests/finite_volume/ins/channel-flow/2d-rc-transient-physics.i block=Physics
 
-!syntax parameters /Physics/NavierStokes/WCNSFVFluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
+!syntax parameters /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
 
-!syntax inputs /Physics/NavierStokes/WCNSFVFluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
+!syntax inputs /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
 
-!syntax children /Physics/NavierStokes/WCNSFVFluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
+!syntax children /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics

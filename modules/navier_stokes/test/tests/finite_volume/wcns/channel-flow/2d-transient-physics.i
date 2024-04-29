@@ -27,7 +27,7 @@ inlet_v = 0.001
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'weakly-compressible'
 
@@ -54,7 +54,7 @@ inlet_v = 0.001
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVFluidHeatTransfer]
+    [FluidHeatTransfer]
       [energy]
         coupled_flow_physics = flow
 
@@ -72,7 +72,7 @@ inlet_v = 0.001
         energy_advection_interpolation = 'average'
       []
     []
-    [WCNSFVTurbulence]
+    [Turbulence]
       [turbulence]
         coupled_flow_physics = flow
         fluid_heat_transfer_physics = energy
