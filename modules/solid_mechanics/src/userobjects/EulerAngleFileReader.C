@@ -28,19 +28,6 @@ EulerAngleFileReader::EulerAngleFileReader(const InputParameters & params)
   readFile();
 }
 
-unsigned int
-EulerAngleFileReader::getGrainNum() const
-{
-  return _angles.size();
-}
-
-const EulerAngles &
-EulerAngleFileReader::getEulerAngles(unsigned int i) const
-{
-  mooseAssert(i < getGrainNum(), "Requesting Euler angles for an invalid grain id");
-  return _angles[i];
-}
-
 void
 EulerAngleFileReader::readFile()
 {
