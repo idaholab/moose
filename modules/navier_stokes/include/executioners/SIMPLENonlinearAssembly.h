@@ -24,15 +24,16 @@ class InputParameters;
 class FEProblemBase;
 
 /**
- * Executioner set up to solve a thermal-hydraulics problem using the SIMPLE algorithm.
- * It utilizes segregated linearized systems which are solved using a fixed-point iteration.
+ * Executioner set up to solve a thermal-hydraulics problem using the
+ * SIMPLENonlinearAssembly algorithm. It utilizes segregated linearized systems
+ * which are solved using a fixed-point iteration.
  */
-class SIMPLE : public SegregatedSolverBase
+class SIMPLENonlinearAssembly : public SegregatedSolverBase
 {
 public:
   static InputParameters validParams();
 
-  SIMPLE(const InputParameters & parameters);
+  SIMPLENonlinearAssembly(const InputParameters & parameters);
 
   virtual void init() override;
   virtual void execute() override;

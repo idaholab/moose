@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22356'
-  design = 'SIMPLE.md'
+  design = 'SIMPLENonlinearAssembly.md'
   [3d-segregated-momentum]
     type = 'Exodiff'
     input = 3d-segregated-velocity.i

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "SIMPLE.h"
+#include "SIMPLENonlinearAssembly.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
@@ -22,14 +22,15 @@
 #include <petscsys.h>
 #include <petscksp.h>
 
-registerMooseObject("NavierStokesApp", SIMPLE);
+registerMooseObject("NavierStokesApp", SIMPLENonlinearAssembly);
 
 InputParameters
-SIMPLE::validParams()
+SIMPLENonlinearAssembly::validParams()
 {
   InputParameters params = SegregatedSolverBase::validParams();
 
-  params.addClassDescription("Solves the Navier-Stokes equations using the SIMPLE algorithm.");
+  params.addClassDescription("Solves the Navier-Stokes equations using the "
+                             "SIMPLENonlinearAssembly algorithm.");
 
   params.addParam<TagName>("pressure_gradient_tag",
                            "pressure_momentum_kernels",
@@ -38,7 +39,7 @@ SIMPLE::validParams()
   return params;
 }
 
-SIMPLE::SIMPLE(const InputParameters & parameters)
+SIMPLENonlinearAssembly::SIMPLENonlinearAssembly(const InputParameters & parameters)
   : SegregatedSolverBase(parameters),
     _pressure_sys_number(_problem.nlSysNum(getParam<SolverSystemName>("pressure_system"))),
     _energy_sys_number(_has_energy_system
@@ -86,7 +87,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
 }
 
 void
-SIMPLE::init()
+SIMPLENonlinearAssembly::init()
 {
   SegregatedSolverBase::init();
 
@@ -122,7 +123,7 @@ SIMPLE::init()
 }
 
 std::vector<std::pair<unsigned int, Real>>
-SIMPLE::solveMomentumPredictor()
+SIMPLENonlinearAssembly::solveMomentumPredictor()
 {
   // Temporary storage for the (flux-normalized) residuals form
   // different momentum components
@@ -206,7 +207,7 @@ SIMPLE::solveMomentumPredictor()
 }
 
 std::pair<unsigned int, Real>
-SIMPLE::solvePressureCorrector()
+SIMPLENonlinearAssembly::solvePressureCorrector()
 {
   _problem.setCurrentNonlinearSystem(_pressure_sys_number);
 
@@ -268,11 +269,11 @@ SIMPLE::solvePressureCorrector()
 }
 
 std::pair<unsigned int, Real>
-SIMPLE::solveAdvectedSystem(const unsigned int system_num,
-                            NonlinearSystemBase & system,
-                            const Real relaxation_factor,
-                            SolverConfiguration & solver_config,
-                            const Real absolute_tol)
+SIMPLENonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
+                                             NonlinearSystemBase & system,
+                                             const Real relaxation_factor,
+                                             SolverConfiguration & solver_config,
+                                             const Real absolute_tol)
 {
   _problem.setCurrentNonlinearSystem(system_num);
 
@@ -339,7 +340,7 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
 }
 
 std::pair<unsigned int, Real>
-SIMPLE::solveSolidEnergySystem()
+SIMPLENonlinearAssembly::solveSolidEnergySystem()
 {
   _problem.setCurrentNonlinearSystem(_solid_energy_sys_number);
 
@@ -398,17 +399,19 @@ SIMPLE::solveSolidEnergySystem()
 }
 
 void
-SIMPLE::execute()
+SIMPLENonlinearAssembly::execute()
 {
   if (_app.isRecovering())
   {
-    _console << "\nCannot recover SIMPLE solves!\nExiting...\n" << std::endl;
+    _console << "\nCannot recover SIMPLENonlinearAssembly solves!\nExiting...\n" << std::endl;
     return;
   }
 
   if (_problem.adaptivity().isOn())
   {
-    _console << "\nCannot use SIMPLE solves with mesh adaptivity!\nExiting...\n" << std::endl;
+    _console << "\nCannot use SIMPLENonlinearAssembly solves with mesh "
+                "adaptivity!\nExiting...\n"
+             << std::endl;
     return;
   }
 
@@ -705,7 +708,7 @@ SIMPLE::execute()
 }
 
 void
-SIMPLE::checkIntegrity(NonlinearSystemBase & system)
+SIMPLENonlinearAssembly::checkIntegrity(NonlinearSystemBase & system)
 {
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   if (system.containsTimeKernel())

@@ -1,6 +1,6 @@
-# SIMPLE
+# SIMPLENonlinearAssembly
 
-!syntax description /Executioner/SIMPLE
+!syntax description /Executioner/SIMPLENonlinearAssembly
 
 ## Overview
 
@@ -117,7 +117,7 @@ Currently, this solver only respects the following `execute_on` flags: `INITAL`,
 
 The setup of a problem with the segregated solver in MOOSE is slightly different compared to
 conventional monolithic solvers. In this section, we highlight the main differences.
-For setting up a 2D simulation with the SIMPLE algorithms, we need three systems in MOOSE:
+For setting up a 2D simulation with the SIMPLENonlinearAssembly algorithms, we need three systems in MOOSE:
 one for each momentum component and another for the pressure. The different systems
 can be created within the `Problem` block:
 
@@ -140,18 +140,18 @@ user object responsible for generating these fields:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=UserObjects
 
-Next, we add the SIMPLE executioner:
+Next, we add the SIMPLENonlinearAssembly executioner:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=Executioner
 
-We see that it has a parameter called [!param](/Executioner/SIMPLE/pressure_gradient_tag). This tag needs to be added to the
+We see that it has a parameter called [!param](/Executioner/SIMPLENonlinearAssembly/pressure_gradient_tag). This tag needs to be added to the
 pressure gradient kernels to enable the separation of terms needed in $A^{-1}H$. This can be easily done as follows in the `FVKernels`:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=u_pressure v_pressure
 
 
-!syntax parameters /Executioner/SIMPLE
+!syntax parameters /Executioner/SIMPLENonlinearAssembly
 
-!syntax inputs /Executioner/SIMPLE
+!syntax inputs /Executioner/SIMPLENonlinearAssembly
 
-!syntax children /Executioner/SIMPLE
+!syntax children /Executioner/SIMPLENonlinearAssembly
