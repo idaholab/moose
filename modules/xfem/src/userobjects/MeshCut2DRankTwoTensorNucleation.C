@@ -57,7 +57,8 @@ MeshCut2DRankTwoTensorNucleation::validParams()
       false,
       "Controls the behavior of nucleating cracks if 'nucleation_length' is smaller than the "
       "length required to travserse an element with a nucleating crack. If this is set to 'false', "
-      "that condition will result in an error, but if set to true, a crack with the length needed "
+      "that condition will result in an error, but if set to 'true', a crack with the length "
+      "needed "
       "to traverse the element will be inserted.");
   return params;
 }
