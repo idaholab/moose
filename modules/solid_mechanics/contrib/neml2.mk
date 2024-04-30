@@ -72,6 +72,7 @@ $(info Compiling MOOSE with NEML2.)
 app_non_unity_dirs += $(shell find $(APPLICATION_DIR)/src/neml2 -type d -not -path '*/.libs*' 2> /dev/null)
 app_non_unity_dirs += $(shell find $(APPLICATION_DIR)/test/src/neml2 -type d -not -path '*/.libs*' 2> /dev/null)
 
+NEML2_MOOSE          := $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2_moose
 NEML2_INCLUDE        := $(NEML2_DIR)/include $(addsuffix /include,$(ADDITIONAL_NEML2_DIRS))
 NEML2_SRC_DIRS       := $(NEML2_DIR)/src $(addsuffix /src,$(ADDITIONAL_NEML2_DIRS))
 NEML2_SRC            := $(shell find $(NEML2_SRC_DIRS) -name "*.cxx")
@@ -89,8 +90,9 @@ $(NEML2_OBJ) : %.$(obj-suffix) : %.cxx
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-ADDITIONAL_INCLUDES  += $(addprefix -iquote,$(NEML2_INCLUDE))
-ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED -DDTYPE=Float64 -DINT_DTYPE=Int64
+
+ADDITIONAL_INCLUDES  += $(addprefix -iquote,$(NEML2_INCLUDE)) $(addprefix -iquote,$(NEML2_MOOSE))
+ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED
 ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD)
 ADDITIONAL_DEPEND_LIBS += $(NEML2_LIB)
 

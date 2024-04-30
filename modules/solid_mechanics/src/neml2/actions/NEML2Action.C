@@ -88,7 +88,7 @@ NEML2Action::act()
   if (_current_task == "parse_neml2")
   {
     neml2::HITParser parser;
-    const auto all_options = parser.parse(_fname);
+    const auto all_options = parser.parse(std::string(_fname));
     neml2::Factory::load(all_options);
 
     if (_verbose)
