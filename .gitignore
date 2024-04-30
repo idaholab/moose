@@ -183,9 +183,9 @@ framework/contrib/asio/
 *.rd-*
 
 # Checkpoint Files
-*.cpa
+*.cpa.gz
 *.cpr
-*.cpa-*
+*.cpa.gz-*
 *.cpr-*
 
 # Ignore petsc arch
