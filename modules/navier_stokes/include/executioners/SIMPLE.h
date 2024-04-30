@@ -27,12 +27,12 @@ class FEProblemBase;
  * Executioner set up to solve a thermal-hydraulics problem using the SIMPLE algorithm.
  * It utilizes segregated linear systems which are solved using a fixed-point iteration.
  */
-class LinearSIMPLE : public SegregatedSolverBase
+class SIMPLE : public SegregatedSolverBase
 {
 public:
   static InputParameters validParams();
 
-  LinearSIMPLE(const InputParameters & parameters);
+  SIMPLE(const InputParameters & parameters);
 
   virtual void init() override;
   virtual void execute() override;

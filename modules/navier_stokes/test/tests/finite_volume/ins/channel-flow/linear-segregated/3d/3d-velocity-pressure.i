@@ -188,7 +188,7 @@ advected_interp_method = 'average'
 []
 
 [Executioner]
-  type = LinearSIMPLE
+  type = SIMPLE
   momentum_l_abs_tol = 1e-9
   pressure_l_abs_tol = 1e-9
   momentum_l_tol = 0

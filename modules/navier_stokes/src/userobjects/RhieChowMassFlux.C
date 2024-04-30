@@ -17,7 +17,7 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
-#include "LinearSIMPLE.h"
+#include "SIMPLE.h"
 #include "PetscVectorReader.h"
 
 #include "libmesh/mesh_base.h"
@@ -97,7 +97,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
   }
 
-  if (!dynamic_cast<LinearSIMPLE *>(getMooseApp().getExecutioner()))
+  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()))
     mooseError(this->name(),
                " should only be used with a linear segregated thermal-hydraulics solver!");
 }

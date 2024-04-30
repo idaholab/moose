@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "LinearSIMPLE.h"
+#include "SIMPLE.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
@@ -22,10 +22,10 @@
 #include <petscsys.h>
 #include <petscksp.h>
 
-registerMooseObject("NavierStokesApp", LinearSIMPLE);
+registerMooseObject("NavierStokesApp", SIMPLE);
 
 InputParameters
-LinearSIMPLE::validParams()
+SIMPLE::validParams()
 {
   InputParameters params = SegregatedSolverBase::validParams();
 
@@ -74,7 +74,7 @@ LinearSIMPLE::validParams()
   return params;
 }
 
-LinearSIMPLE::LinearSIMPLE(const InputParameters & parameters)
+SIMPLE::SIMPLE(const InputParameters & parameters)
   : SegregatedSolverBase(parameters),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number))
@@ -89,7 +89,7 @@ LinearSIMPLE::LinearSIMPLE(const InputParameters & parameters)
 }
 
 void
-LinearSIMPLE::init()
+SIMPLE::init()
 {
   SegregatedSolverBase::init();
 
@@ -105,7 +105,7 @@ LinearSIMPLE::init()
 }
 
 std::vector<std::pair<unsigned int, Real>>
-LinearSIMPLE::solveMomentumPredictor()
+SIMPLE::solveMomentumPredictor()
 {
   // Temporary storage for the (flux-normalized) residuals form
   // different momentum components
@@ -196,7 +196,7 @@ LinearSIMPLE::solveMomentumPredictor()
 }
 
 std::pair<unsigned int, Real>
-LinearSIMPLE::solvePressureCorrector()
+SIMPLE::solvePressureCorrector()
 {
   _problem.setCurrentLinearSystem(_pressure_sys_number);
 
@@ -256,17 +256,17 @@ LinearSIMPLE::solvePressureCorrector()
 }
 
 void
-LinearSIMPLE::execute()
+SIMPLE::execute()
 {
   if (_app.isRecovering())
   {
-    _console << "\nCannot recover LinearSIMPLE solves!\nExiting...\n" << std::endl;
+    _console << "\nCannot recover SIMPLE solves!\nExiting...\n" << std::endl;
     return;
   }
 
   if (_problem.adaptivity().isOn())
   {
-    _console << "\nCannot use LinearSIMPLE solves with mesh adaptivity!\nExiting...\n" << std::endl;
+    _console << "\nCannot use SIMPLE solves with mesh adaptivity!\nExiting...\n" << std::endl;
     return;
   }
 
