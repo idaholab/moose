@@ -134,7 +134,7 @@ Ny = 50
   [T]
     type = INSFVEnergyVariable
     initial_condition = '${T_cold}'
-    scaling = 1.0
+    scaling = 1e-4
   []
 []
 
@@ -361,16 +361,19 @@ Ny = 50
 
   [TimeStepper]
     type = IterationAdaptiveDT
-    optimal_iterations = 10
+    # Raise time step often but not by as much
+    # There's a rough spot for convergence near 10% fluid fraction
+    optimal_iterations = 15
+    growth_factor = 1.5
     dt = 0.1
   []
 
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  nl_rel_tol = 1e-2
-  nl_abs_tol = 1e-4
+  nl_rel_tol = 1e-6
   nl_max_its = 30
+  line_search = 'none'
 []
 
 [Postprocessors]
