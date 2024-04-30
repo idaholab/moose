@@ -13,7 +13,7 @@ equations together with the continuity constraint. Let's take the steady-state i
 in the following form:
 
 !equation id=momentum-eq
-\nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right) - \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u} +\nabla \vec{u}^T\right)\right) = -\nabla p + \vec{G}.
+\nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right) - \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u} +\nabla \vec{u}^T \right)\right) = -\nabla p + \vec{G}.
 
 !equation id=continuity-eq
 \nabla \cdot \left(\rho \vec{u}\right) = 0.
