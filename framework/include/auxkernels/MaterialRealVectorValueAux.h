@@ -11,18 +11,13 @@
 
 // MOOSE includes
 #include "MaterialAuxBase.h"
-
-// Forward declarations
-template <bool>
-class MaterialRealVectorValueAuxTempl;
-typedef MaterialRealVectorValueAuxTempl<false> MaterialRealVectorValueAux;
-typedef MaterialRealVectorValueAuxTempl<true> ADMaterialRealVectorValueAux;
+#include "SymmetricRankTwoTensor.h"
 
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable
  */
-template <bool is_ad>
-class MaterialRealVectorValueAuxTempl : public MaterialAuxBaseTempl<RealVectorValue, is_ad>
+template <typename T, bool is_ad>
+class MaterialRealVectorValueAuxTempl : public MaterialAuxBaseTempl<T, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -39,3 +34,8 @@ protected:
   /// The vector component to output
   unsigned int _component;
 };
+
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue, false> MaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue,true> ADMaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, false> MaterialSymmetricRankTwoTensorAux;
+typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor,true> ADMaterialSymmetricRankTwoTensorAux;

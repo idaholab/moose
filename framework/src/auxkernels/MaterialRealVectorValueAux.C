@@ -8,17 +8,19 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MaterialRealVectorValueAux.h"
-
 #include "metaphysicl/raw_type.h"
+#include <type_traits>
 
 registerMooseObject("MooseApp", MaterialRealVectorValueAux);
 registerMooseObject("MooseApp", ADMaterialRealVectorValueAux);
+registerMooseObject("MooseApp", MaterialSymmetricRankTwoTensorAux);
+registerMooseObject("MooseApp", ADMaterialSymmetricRankTwoTensorAux);
 
-template <bool is_ad>
+template <typename T, bool is_ad>
 InputParameters
-MaterialRealVectorValueAuxTempl<is_ad>::validParams()
+MaterialRealVectorValueAuxTempl<T, is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBaseTempl<RealVectorValue, is_ad>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<T, is_ad>::validParams();
   params.addClassDescription(
       "Capture a component of a vector material property in an auxiliary variable.");
   params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
@@ -26,23 +28,36 @@ MaterialRealVectorValueAuxTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-MaterialRealVectorValueAuxTempl<is_ad>::MaterialRealVectorValueAuxTempl(
+template <typename T, bool is_ad>
+MaterialRealVectorValueAuxTempl<T, is_ad>::MaterialRealVectorValueAuxTempl(
     const InputParameters & parameters)
-  : MaterialAuxBaseTempl<RealVectorValue, is_ad>(parameters),
+  : MaterialAuxBaseTempl<T, is_ad>(parameters),
     _component(this->template getParam<unsigned int>("component"))
 {
-  if (_component > LIBMESH_DIM)
-    this->mooseError(
-        "The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
+  if constexpr (std::is_same_v<T, RealVectorValue>)
+  {
+    if (_component > LIBMESH_DIM)
+      this->mooseError("The component ",
+                       _component,
+                       " does not exist for ",
+                       LIBMESH_DIM,
+                       " dimensional problems");
+  }
+  else
+  {
+    if (_component > T::N)
+      this->mooseError("The component ", _component, " does not exist.");
+  }
 }
 
-template <bool is_ad>
+template <typename T, bool is_ad>
 Real
-MaterialRealVectorValueAuxTempl<is_ad>::getRealValue()
+MaterialRealVectorValueAuxTempl<T, is_ad>::getRealValue()
 {
   return MetaPhysicL::raw_value(this->_prop[this->_qp](_component));
 }
 
-template class MaterialRealVectorValueAuxTempl<false>;
-template class MaterialRealVectorValueAuxTempl<true>;
+template class MaterialRealVectorValueAuxTempl<RealVectorValue, false>;
+template class MaterialRealVectorValueAuxTempl<RealVectorValue, true>;
+template class MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, false>;
+template class MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, true>;

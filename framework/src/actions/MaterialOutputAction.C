@@ -15,7 +15,9 @@
 #include "AddOutputAction.h"
 #include "MaterialBase.h"
 #include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "SymmetricRankFourTensor.h"
 #include "MooseEnum.h"
 #include "MooseVariableConstMonomial.h"
 #include "FunctorMaterial.h"
@@ -52,7 +54,23 @@ std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADRankTwoTen
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<SymmetricRankTwoTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADSymmetricRankTwoTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankFourTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<SymmetricRankFourTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADSymmetricRankFourTensor>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
@@ -275,8 +293,21 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
   else if (hasADProperty<RankTwoTensor>(property_name))
     names = materialOutputHelper<ADRankTwoTensor>(property_name, material, get_names_only);
 
+  else if (hasProperty<SymmetricRankTwoTensor>(property_name))
+    names = materialOutputHelper<SymmetricRankTwoTensor>(property_name, material, get_names_only);
+
+  else if (hasADProperty<SymmetricRankTwoTensor>(property_name))
+    names = materialOutputHelper<ADSymmetricRankTwoTensor>(property_name, material, get_names_only);
+
   else if (hasProperty<RankFourTensor>(property_name))
     names = materialOutputHelper<RankFourTensor>(property_name, material, get_names_only);
+
+  else if (hasProperty<SymmetricRankFourTensor>(property_name))
+    names = materialOutputHelper<SymmetricRankFourTensor>(property_name, material, get_names_only);
+
+  else if (hasADProperty<SymmetricRankFourTensor>(property_name))
+    names =
+        materialOutputHelper<ADSymmetricRankFourTensor>(property_name, material, get_names_only);
 
   else if (hasFunctorProperty<Real>(property_name))
     names = functorMaterialOutputHelper<Real>(property_name, material, get_names_only);
@@ -482,6 +513,106 @@ MaterialOutputAction::materialOutputHelper<ADRankTwoTensor>(const std::string & 
         params.set<unsigned int>("i") = i;
         params.set<unsigned int>("j") = j;
         _problem->addAuxKernel("ADMaterialRankTwoTensorAux", material.name() + oss.str(), params);
+      }
+    }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<SymmetricRankTwoTensor>(
+    const std::string & property_name, const MaterialBase & material, bool get_names_only)
+{
+  std::vector<std::string> names;
+
+  for (const auto i : make_range(SymmetricRankTwoTensor::N))
+  {
+    const auto name = property_name + "_" + Moose::stringify(i);
+    names.push_back(name);
+
+    if (!get_names_only)
+    {
+      auto params = getParams("MaterialSymmetricRankTwoTensorAux", property_name, name, material);
+      params.set<unsigned int>("component") = i;
+      _problem->addAuxKernel("MaterialSymmetricRankTwoTensorAux", material.name() + name, params);
+    }
+  }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<ADSymmetricRankTwoTensor>(
+    const std::string & property_name, const MaterialBase & material, bool get_names_only)
+{
+  std::vector<std::string> names;
+
+  for (const auto i : make_range(ADSymmetricRankTwoTensor::N))
+  {
+    const auto name = property_name + "_" + Moose::stringify(i);
+    names.push_back(name);
+
+    if (!get_names_only)
+    {
+      auto params = getParams("ADMaterialSymmetricRankTwoTensorAux", property_name, name, material);
+      params.set<unsigned int>("component") = i;
+      _problem->addAuxKernel("ADMaterialSymmetricRankTwoTensorAux", material.name() + name, params);
+    }
+  }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<SymmetricRankFourTensor>(
+    const std::string & property_name, const MaterialBase & material, bool get_names_only)
+{
+  std::vector<std::string> names;
+
+  for (const auto i : make_range(SymmetricRankFourTensor::N))
+    for (const auto j : make_range(SymmetricRankFourTensor::N))
+    {
+      const auto name = property_name + "_" + Moose::stringify(i) + Moose::stringify(j);
+      names.push_back(name);
+
+      if (!get_names_only)
+      {
+        auto params =
+            getParams("MaterialSymmetricRankFourTensorAux", property_name, name, material);
+        params.set<unsigned int>("i") = i;
+        params.set<unsigned int>("j") = j;
+        _problem->addAuxKernel(
+            "MaterialSymmetricRankFourTensorAux", material.name() + name, params);
+      }
+    }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<ADSymmetricRankFourTensor>(
+    const std::string & property_name, const MaterialBase & material, bool get_names_only)
+{
+  std::vector<std::string> names;
+
+  for (const auto i : make_range(ADSymmetricRankFourTensor::N))
+    for (const auto j : make_range(ADSymmetricRankFourTensor::N))
+    {
+      const auto name = property_name + "_" + Moose::stringify(i) + Moose::stringify(j);
+      names.push_back(name);
+
+      if (!get_names_only)
+      {
+        auto params =
+            getParams("ADMaterialSymmetricRankFourTensorAux", property_name, name, material);
+        params.set<unsigned int>("i") = i;
+        params.set<unsigned int>("j") = j;
+        _problem->addAuxKernel(
+            "ADMaterialSymmetricRankFourTensorAux", material.name() + name, params);
       }
     }
 
