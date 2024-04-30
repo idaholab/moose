@@ -6,4 +6,11 @@
     method = '!DBG'
     check_input = True
   [../]
+  [./echebarria_iso]
+      type = RunApp
+      input = 'echebarria_iso.i'
+      cli_args = 'Mesh/nx=6 Mesh/ny=15'
+      method = '!DBG'
+      check_input = True
+  [../]
 []
