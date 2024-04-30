@@ -8,4 +8,11 @@
     requirement = 'The system shall be able to simulate the melting of galium.'
     heavy = true
   []
+  [galium_melting_physics]
+    type = RunApp
+    input = 'galium_melting-physics.i'
+    cli_args = "Nx=20 Ny=10"
+    requirement = 'The system shall be able to simulate the melting of galium using the Navier Stokes physics syntax.'
+    heavy = true
+  []
 []

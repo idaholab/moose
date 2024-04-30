@@ -318,22 +318,22 @@ Ny = 50
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = rho_mixture
     cp = cp_mixture
     temperature = 'T'
   []
   [eff_cp]
-    type = NSFVMixtureMaterial
+    type = NSFVMixtureFunctorMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'
     phase_1_fraction = fl
   []
   [mushy_zone_resistance]
-    type = INSFVMushyPorousFrictionMaterial
+    type = INSFVMushyPorousFrictionFunctorMaterial
     liquid_fraction = 'fl'
     mu = '${mu}'
     rho_l = '${rho_liquid}'
@@ -357,6 +357,7 @@ Ny = 50
   # Time-stepping parameters
   start_time = 0.0
   end_time = 200.0
+  num_steps = 2
 
   [TimeStepper]
     type = IterationAdaptiveDT
@@ -372,7 +373,33 @@ Ny = 50
   nl_max_its = 30
 []
 
+[Postprocessors]
+  [ave_p]
+    type = ElementAverageValue
+    variable = 'pressure'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [ave_fl]
+    type = ElementAverageValue
+    variable = 'fl'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [ave_T]
+    type = ElementAverageValue
+    variable = 'T'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+[]
+
+[VectorPostprocessors]
+  [vel_x]
+    type = ElementValueSampler
+    variable = 'vel_x fl'
+    sort_by = 'x'
+  []
+[]
+
 [Outputs]
   exodus = true
-  csv = false
+  csv = true
 []
