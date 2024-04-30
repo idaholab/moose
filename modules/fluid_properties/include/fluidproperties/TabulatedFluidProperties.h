@@ -112,23 +112,16 @@ public:
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
 
-    template <typename T>
-  void vaporPressureTemplate(const T & temperature, T & psat, T & dpsat_dT) const;
-
   virtual Real vaporTemperature(Real pressure) const override;
   virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
-  FPDualReal vaporTemperature_ad(const FPDualReal & pressure) const override;
 
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
-
-  FPDualReal T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & enthalpy) const override;
 
   virtual Real triplePointPressure() const override;
   virtual Real triplePointTemperature() const override;
   virtual Real criticalPressure() const override;
   virtual Real criticalTemperature() const override;
   virtual Real criticalDensity() const override;
-
 
   /**
    * Derivatives like dc_dv & dc_de are computed using the chain rule
@@ -158,7 +151,8 @@ public:
   virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_v_e(Real v, Real e) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
-  virtual void s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
+  virtual void
+  s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
 
   /// AD implementations needed
   using SinglePhaseFluidProperties::c_from_v_e;
@@ -232,6 +226,10 @@ protected:
 
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;
+
+  // Utility to forward errors related to fluid properties methods not implemented
+  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine,
+                                                bool is_ad) const;
 
   /// File name of input tabulated data file
   FileName _file_name_in;
