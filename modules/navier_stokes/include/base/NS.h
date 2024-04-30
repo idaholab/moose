@@ -134,6 +134,11 @@ static const std::string c = "c";
 static const std::string speed = "speed";
 static const std::string sound_speed = "sound_speed";
 
+// Two phase materials
+static const std::string latent_heat = "latent_heat";
+static const std::string T_liquidus = "T_liquidus";
+static const std::string T_solidus = "T_solidus";
+
 // other Navier-Stokes terms
 static const std::string component = "component";
 static const std::string source_scaling = "source_scaling";
