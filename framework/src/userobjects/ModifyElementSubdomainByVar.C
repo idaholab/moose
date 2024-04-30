@@ -39,12 +39,14 @@ ModifyElementSubdomainByVar::computeSubdomainID()
 
   SubdomainID sid = (unsigned int)(round(val));
 
-  // Check if the target subdomain ID exists in the mesh. Use the nearest subdomain ID if the
-  // target subdomain ID does not exist in the mesh.
+  // Verify whether the specified target subdomain ID is present within the mesh. If it is not
+  // found, locate the smallest subdomain ID in the mesh that matches or exceeds the target
+  // subdomain ID. Or select the largest subdomain ID present in the mesh if all subdomain IDs are
+  // smaller than the target.
   if (_mesh.meshSubdomains().find(sid) == _mesh.meshSubdomains().end())
   {
     auto it = _mesh.meshSubdomains().lower_bound(sid);
-    SubdomainID nearest_id =
+    SubdomainID lower_bound_id =
         it == _mesh.meshSubdomains().end() ? *_mesh.meshSubdomains().rbegin() : *it;
 
     // Store the target subdomain ID if it hasn't been previously requested.
@@ -55,12 +57,12 @@ ModifyElementSubdomainByVar::computeSubdomainID()
       mooseWarning("Requested subdomain ",
                    sid,
                    " does not exist. Subdomain ID ",
-                   nearest_id,
+                   lower_bound_id,
                    " is assigned. Please ensure the passed variable falls within the range of the "
                    "mesh's subdomain IDs for the expected behavior.");
       _void_sids.insert(sid);
     }
-    return nearest_id;
+    return lower_bound_id;
   }
   return sid;
 }
