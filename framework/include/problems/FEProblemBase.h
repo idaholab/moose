@@ -648,7 +648,10 @@ public:
   /**
    * Output information about the object just added to the problem
    */
-  void logAdd(const std::string & system, const std::string & name, const std::string & type) const;
+  void logAdd(const std::string & system,
+              const std::string & name,
+              const std::string & type,
+              const InputParameters & params) const;
 
   // Function /////
   virtual void
@@ -2676,7 +2679,7 @@ protected:
   bool _parallel_barrier_messaging;
 
   /// Whether or not to be verbose during setup
-  bool _verbose_setup;
+  MooseEnum _verbose_setup;
 
   /// Whether or not to be verbose with multiapps
   bool _verbose_multiapps;
@@ -2909,7 +2912,7 @@ FEProblemBase::addObject(const std::string & type,
 {
   parallel_object_only();
 
-  logAdd(MooseUtils::prettyCppType<T>(), name, type);
+  logAdd(MooseUtils::prettyCppType<T>(), name, type, parameters);
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name, var_param_name);
 
