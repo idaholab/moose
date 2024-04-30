@@ -24,6 +24,9 @@ public:
 
   WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
+  /// Get the name of the fluid temperature variable
+  const MooseFunctorName getFluidTemperatureName() const { return _fluid_temperature_name; }
+
   /// Get the name of the specific heat material property
   const MooseFunctorName getSpecificHeatName() const { return _specific_heat_name; }
   const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
