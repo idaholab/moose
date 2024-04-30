@@ -132,13 +132,6 @@ protected:
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
 
-  /// Routine to help create maps
-  template <typename T, typename C>
-  std::map<T, C> createMapFromVectors(std::vector<T> keys, std::vector<C> values) const;
-  template <typename T>
-  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(const std::vector<T> & keys,
-                                                              const MultiMooseEnum & values) const;
-
   /// System number for the system owning the variables
   const unsigned int _sys_number;
 
@@ -246,45 +239,4 @@ PhysicsBase::getCoupledPhysics(const bool allow_fail) const
     mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
   else
     return all_T_physics;
-}
-
-template <typename T, typename C>
-std::map<T, C>
-PhysicsBase::createMapFromVectors(std::vector<T> keys, std::vector<C> values) const
-{
-  std::map<T, C> map;
-  // No values have been specified.
-  if (!values.size())
-  {
-    return map;
-  }
-  std::transform(keys.begin(),
-                 keys.end(),
-                 values.begin(),
-                 std::inserter(map, map.end()),
-                 [](T a, C b) { return std::make_pair(a, b); });
-  return map;
-}
-
-template <typename T>
-std::map<T, MooseEnum>
-PhysicsBase::createMapFromVectorAndMultiMooseEnum(const std::vector<T> & keys,
-                                                  const MultiMooseEnum & values) const
-{
-  std::map<T, MooseEnum> map;
-  // No values have been specified. We cant form a map of empty MooseEnum
-  if (!values.size())
-    return map;
-  std::transform(keys.begin(),
-                 keys.end(),
-                 values.begin(),
-                 std::inserter(map, map.end()),
-                 [values](T a, MooseEnumItem b)
-                 {
-                   // Create a MooseEnum from the available values in the MultiMooseEnum and an
-                   // actual current active item from that same MultiMooseEnum
-                   MooseEnum single_value(values.getRawNames(), b.name());
-                   return std::make_pair(a, single_value);
-                 });
-  return map;
 }

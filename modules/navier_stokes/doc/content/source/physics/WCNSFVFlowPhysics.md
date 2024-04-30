@@ -1,4 +1,4 @@
-# WCNSFVFlowPhysics
+# Navier Stokes Flow / WCNSFVFlowPhysics
 
 !syntax description /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 

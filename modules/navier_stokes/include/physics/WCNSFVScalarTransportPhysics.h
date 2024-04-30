@@ -13,7 +13,7 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
 /**
- * Creates all the objects needed to solve the Navier Stokes scalar advection equations
+ * Creates all the objects needed to solve the Navier Stokes scalar transport equations
  */
 class WCNSFVScalarTransportPhysics final : public NavierStokesPhysicsBase,
                                            public WCNSFVCoupledAdvectionPhysicsHelper
@@ -42,7 +42,7 @@ private:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
   /**
-   * Functions adding kernels for the incompressible / weakly compressible scalar advection
+   * Functions adding kernels for the incompressible / weakly-compressible scalar transport
    * equation
    * If the material properties are not constant, some of these can be used for
    * weakly-compressible simulations as well.

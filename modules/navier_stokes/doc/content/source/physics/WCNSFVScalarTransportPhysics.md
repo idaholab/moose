@@ -1,4 +1,4 @@
-# WCNSFVScalarTransportPhysics
+# Navier Stokes Scalar Transport / WCNSFVScalarTransportPhysics
 
 !syntax description /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics
 

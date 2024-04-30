@@ -1,4 +1,4 @@
-# WCNSFVFluidHeatTransferPhysics
+# Navier Stokes Fluid Heat Transfer / WCNSFVFluidHeatTransferPhysics
 
 !syntax description /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
 

@@ -151,7 +151,7 @@ PhysicsBase::prepareCopyVariablesFromMesh() const
 bool
 PhysicsBase::isTransient() const
 {
-  mooseAssert(_problem, "We dont have a problem yet");
+  mooseAssert(_problem, "We don't have a problem yet");
   if (_is_transient == "true")
     return true;
   else if (_is_transient == "false")

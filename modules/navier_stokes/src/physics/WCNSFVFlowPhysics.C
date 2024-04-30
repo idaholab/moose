@@ -10,6 +10,7 @@
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVTurbulencePhysics.h"
 #include "NSFVAction.h"
+#include "MapConversionUtils.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
@@ -127,9 +128,9 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _momentum_inlet_types(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+    _momentum_inlet_types(Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
         _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"))),
-    _momentum_outlet_types(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+    _momentum_outlet_types(Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
         _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"))),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
@@ -145,10 +146,11 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                                                                "flux_inlet_directions");
 
   // Create maps for boundary-restricted parameters
-  _momentum_inlet_functors = createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
-      _inlet_boundaries,
-      getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
-  _pressure_functors = createMapFromVectors<BoundaryName, MooseFunctorName>(
+  _momentum_inlet_functors =
+      Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+          _inlet_boundaries,
+          getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
+  _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
       _outlet_boundaries, getParam<std::vector<MooseFunctorName>>("pressure_functors"));
 
   // Friction parameter checks
