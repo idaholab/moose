@@ -121,9 +121,13 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 
   // Parameter groups
   // TODO Rename parameter groups
-  params.addParamNamesToGroup("other_phase_density_name other_phase_viscosity_name "
-                              "other_phase_specific_heat_name use_external_mixture_properties",
-                              "Mixture material properties");
+  params.addParamNamesToGroup(
+      "first_phase_density_name first_phase_viscosity_name "
+      "first_phase_specific_heat_name first_phase_thermal_conductivity_name "
+      "other_phase_density_name other_phase_viscosity_name "
+      "other_phase_specific_heat_name other_phase_thermal_conductivity_name "
+      "use_external_mixture_properties",
+      "Mixture material properties");
 
   return params;
 }
@@ -175,9 +179,6 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
     _fluid_energy_physics = nullptr;
   }
 
-  std::cout << _has_energy_equation << " " << _fluid_energy_physics->hasEnergyEquation()
-            << std::endl;
-
   // Check that the mixture parameters are correctly in use in the other physics
   if (_has_energy_equation)
   {
@@ -185,9 +186,6 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
       mooseError("Density name should for Physics '",
                  _fluid_energy_physics->name(),
                  "' should be 'rho_mixture'");
-    // if (_fluid_energy_physics->dynamicViscosityName() != "mu_mixture")
-    //   mooseError("Viscosity name should for Physics '", _fluid_energy_physics->name(), "' should
-    //   be 'mu_mixture'");
     if (_fluid_energy_physics->getSpecificHeatName() != "cp_mixture")
       mooseError("Specific heat name should for Physics '",
                  _fluid_energy_physics->name(),
@@ -199,17 +197,14 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
       mooseError("Density name should for Physics ,",
                  _flow_equations_physics->name(),
                  "' should be 'rho_mixture'");
-    // if (_flow_equations_physics->dynamicViscosityName() != "mu_mixture")
-    //   mooseError("Viscosity name should for Physics ,", _flow_equations_physics->name(), "'
-    //   should be 'mu_mixture'");
   }
 
   if (_verbose)
   {
     if (_flow_equations_physics)
-      mooseInfo("Coupled to fluid flow physics " + _flow_equations_physics->name());
+      mooseInfoRepeated("Coupled to fluid flow physics " + _flow_equations_physics->name());
     if (_has_energy_equation)
-      mooseInfo("Coupled to fluid heat transfer physics " + _fluid_energy_physics->name());
+      mooseInfoRepeated("Coupled to fluid heat transfer physics " + _fluid_energy_physics->name());
   }
 }
 
@@ -287,10 +282,11 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
     auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
     assignBlocks(params, _blocks);
     params.set<std::string>("expression") = "1 - " + _liquid_phase_fraction;
-    params.set<std::vector<std::string>>("functor_names") = {_other_phase_fraction_name};
+    params.set<std::vector<std::string>>("functor_names") = {_liquid_phase_fraction};
     params.set<std::string>("property_name") = _other_phase_fraction_name;
     params.set<std::vector<std::string>>("output_properties") = {_other_phase_fraction_name};
     params.set<std::vector<OutputName>>("outputs") = {"all"};
+    getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "other_phase_fraction", params);
   }
 
   // Compute mixture properties
