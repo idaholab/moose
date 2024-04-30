@@ -150,6 +150,8 @@ private:
 
   /// Name of the density material property
   const MooseFunctorName _density_name;
+  /// Name of the density material property used for gravity and Boussinesq terms
+  const MooseFunctorName _density_gravity_name;
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
 

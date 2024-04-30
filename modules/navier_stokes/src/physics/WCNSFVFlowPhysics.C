@@ -43,6 +43,11 @@ WCNSFVFlowPhysics::validParams()
 
   params += NSFVAction::commonNavierStokesFlowParams();
 
+  // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
+  params.addParam<MooseFunctorName>(
+      "density_gravity",
+      "If specified, replaces the 'density' for the Boussinesq and gravity momentum kernels");
+
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
   params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
@@ -146,6 +151,9 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                                 ? getParam<NonlinearVariableName>("fluid_temperature_variable")
                                 : NS::T_fluid),
     _density_name(getParam<MooseFunctorName>("density")),
+    _density_gravity_name(isParamValid("density_gravity")
+                              ? getParam<MooseFunctorName>("density_gravity")
+                              : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
@@ -204,7 +212,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   // Boussinesq parameters checks
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "thermal_expansion");
-  checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "density_liquid");
 
   // Porosity correction checks
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "use_friction_correction");
@@ -620,7 +627,7 @@ WCNSFVFlowPhysics::addINSMomentumGravityKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-    params.set<MooseFunctorName>(NS::density) = _density_liquid_name;
+    params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     if (_porous_medium_treatment)
       params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
@@ -660,7 +667,7 @@ WCNSFVFlowPhysics::addINSMomentumBoussinesqKernels()
     assignBlocks(params, _blocks);
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-    params.set<MooseFunctorName>(NS::density) = _density_liquid_name;
+    params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
     params.set<MooseFunctorName>("alpha_name") = getParam<MooseFunctorName>("thermal_expansion");
