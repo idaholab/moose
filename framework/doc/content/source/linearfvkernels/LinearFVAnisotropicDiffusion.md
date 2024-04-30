@@ -9,7 +9,7 @@ a vector of diffusion coefficients, where every entry describes the diffusion co
 a principal direction. This is equivalent to supplying a diagonal tensor in the
 fully anisotropic diffusion case.
 
-The implementation in this kernel is based on the derivation in [!cite](bazinga). The
+The implementation in this kernel is based on the derivation in [!cite](liu2015finite). The
 contributions of the system matrix and right hand side can be derived using the divergence
 theorem:
 
@@ -18,7 +18,7 @@ theorem:
 \sum\limits_f \int\limits_{S_f} \mathbb{D} \nabla u \cdot \vec{n} dS,
 
 where $\mathbb{D}$ denotes a space dependent diagonal diffusion tensor.
-Following [!cite](bazinga), we can manipulate this expression to arrive to the
+Following [!cite](liu2015finite), we can manipulate this expression to arrive to the
 following form:
 
 !equation

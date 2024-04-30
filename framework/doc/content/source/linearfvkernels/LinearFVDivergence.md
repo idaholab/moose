@@ -11,7 +11,7 @@ field $\vec{u}$ in a finite volume setting can be approximated as follows:
 \int\limits_{V_C} \nabla \cdot \vec{u} \approx \sum\limits_\text{f} \vec{u}_f \cdot \vec{n_f} |S_f|
 
 where $\vec{n_f}$ and $|S_f|$ are the normal and area of surface $f$.
-Unlike [FVivergence.md], this kernel expects the face flux
+Unlike [FVDivergence.md], this kernel expects the face flux
 ($\vec{u}_f \cdot \vec{n_f}$) as an input through the [!param](/LinearFVKernels/LinearFVDivergence/face_flux) parameter.
 
 !syntax parameters /LinearFVKernels/LinearFVDivergence

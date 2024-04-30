@@ -47,10 +47,10 @@ the system matrix, only to the right hand side.
 
 For incompressible simulations with constant viscosity fields, the last two terms are
 provably 0. Furthermore, in most scenarios, these two terms are negligible compared to
-the first term so the user can elect to disable them using [!param](bazinga) parameter.
+the first term so the user can elect to disable them using [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms) parameter.
 
 Similarly to [LinearFVDiffusion.md], once can select to utilize nonorthogonal corrections
-for the first term using the [!param](/LinearFVKernels/LinearFVDiffusion/use_nonorthogonal_correction) parameter.
+for the first term using the [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_nonorthogonal_correction) parameter.
 
 
 !syntax parameters /LinearFVKernels/LinearWCNSFVMomentumFlux
