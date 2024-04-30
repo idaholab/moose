@@ -161,7 +161,6 @@ public:
   void updateEffectiveInelasticStrain(const GenericReal<is_ad> & increment)
   {
     _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + increment;
-    _eff_inelastic_strain_inc[_qp] = MetaPhysicL::raw_value(increment);
   }
 
   /**
@@ -220,10 +219,10 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
-  /// inelastic strain increment from the previous step.
-  /// Using _old value as strain increment predictor
-  MaterialProperty<Real> & _eff_inelastic_strain_inc;
-  const MaterialProperty<Real> & _eff_inelastic_strain_inc_old;
+  /// inelastic strain rate.
+  /// Using _old*_dt value as strain increment predictor
+  MaterialProperty<Real> & _eff_inelastic_strain_rate;
+  const MaterialProperty<Real> & _eff_inelastic_strain_rate_old;
 
   /// Stores the scalar effective inelastic strain increment from Newton iteration
   GenericReal<is_ad> _effective_inelastic_strain_increment;

@@ -39,7 +39,7 @@ protected:
 
   virtual GenericReal<is_ad>
   initialGuess(const GenericReal<is_ad> & /*effective_trial_stress*/,
-               const GenericReal<is_ad> & /*effective_strain_inc*/) const override
+               const GenericReal<is_ad> & /*effective_strain_inc*/) override
   {
     return _initial_guess;
   }

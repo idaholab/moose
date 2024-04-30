@@ -175,6 +175,18 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   _iteration = 0;
 
   computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+
+  // check for strain_increment predictor being too large putting state inside yield surface
+  // This will result in a newton iteration that converges from below
+  const GenericReal<is_ad> scalar_inc_check = -_residual / _derivative;
+  const GenericReal<is_ad> scalar_check = scalar_old + scalar_inc_check;
+  if (computeReferenceResidual(effective_trial_stress, scalar_check) < 0.0)
+  {
+    scalar = initialGuess(effective_trial_stress, 0.0);
+    scalar_old = scalar;
+    computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+  }
+
   _initial_residual = _residual;
 
   GenericReal<is_ad> residual_old = _residual;
@@ -453,7 +465,7 @@ template <bool is_ad>
 GenericReal<is_ad>
 SingleVariableReturnMappingSolutionTempl<is_ad>::initialGuess(
     const GenericReal<is_ad> & /*effective_trial_stress*/,
-    const GenericReal<is_ad> & effective_strain_inc) const
+    const GenericReal<is_ad> & effective_strain_inc)
 {
   return effective_strain_inc;
 }

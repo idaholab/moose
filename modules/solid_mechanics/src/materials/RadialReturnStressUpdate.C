@@ -66,9 +66,10 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
   params.addParam<unsigned>("maximum_number_substeps",
                             25,
                             "The maximum number of substeps allowed before cutting the time step.");
-  params.addParam<Real>("scale_strain_predictor",
-                        0.0,
-                        "Scaling factor for the inelastic strain increment predictor.");
+  params.addRangeCheckedParam<Real>("scale_strain_predictor",
+                                    0.0,
+                                    "scale_strain_predictor <= 1 & scale_strain_predictor >= 0",
+                                    "Scaling factor for the inelastic strain increment predictor.");
   return params;
 }
 
@@ -83,12 +84,12 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _effective_inelastic_strain_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name +
         this->template getParam<std::string>("effective_inelastic_strain_name"))),
-    _eff_inelastic_strain_inc(this->template declareProperty<Real>(
+    _eff_inelastic_strain_rate(this->template declareProperty<Real>(
         this->_base_name + this->template getParam<std::string>("effective_inelastic_strain_name") +
-        "_inc")),
-    _eff_inelastic_strain_inc_old(this->template getMaterialPropertyOld<Real>(
+        "_rate")),
+    _eff_inelastic_strain_rate_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name + this->template getParam<std::string>("effective_inelastic_strain_name") +
-        "_inc")),
+        "_rate")),
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
     _identity_two(RankTwoTensor::initIdentity),
@@ -136,7 +137,7 @@ void
 RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
-  _eff_inelastic_strain_inc[_qp] = 0.0;
+  _eff_inelastic_strain_rate[_qp] = 0.0;
 }
 
 template <bool is_ad>
@@ -154,7 +155,7 @@ void
 RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
-  _eff_inelastic_strain_inc[_qp] = _eff_inelastic_strain_inc_old[_qp];
+  _eff_inelastic_strain_rate[_qp] = _eff_inelastic_strain_rate_old[_qp];
 }
 
 template <bool is_ad>
@@ -162,12 +163,9 @@ int
 RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & strain_increment)
 {
-  // compute an effective elastic strain measure and remove predicted strain increment from it
-  const Real scaled_strain_inc_predictor =
-      _scale_strain_predictor * _eff_inelastic_strain_inc_old[_qp];
+  // compute an effective elastic strain measure
   const Real effective_elastic_strain =
-      RankTwoScalarTools::effectiveStrain(MetaPhysicL::raw_value(strain_increment)) -
-      scaled_strain_inc_predictor;
+      RankTwoScalarTools::effectiveStrain(MetaPhysicL::raw_value(strain_increment));
 
   if (MooseUtils::absoluteFuzzyEqual(effective_elastic_strain, 0.0))
     return 1;
@@ -272,13 +270,15 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   // Initialize models around a stress that uses the previous inelastic strain increment to
   // predict the final stress state for this step. (Dunne & Petrinic eq 5.16 )
   // fixme three shear mod is set in comptueStressInitialize
-  const Real predicted_eff_strain_inc =
-      _scale_strain_predictor * _eff_inelastic_strain_inc_old[_qp];
+  Real predicted_eff_strain_inc =
+      _scale_strain_predictor * _eff_inelastic_strain_rate_old[_qp] * _dt;
+
   const Real three_shear_modulus =
       3.0 *
       MetaPhysicL::raw_value(ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor));
   const GenericReal<is_ad> predictor_effective_trial_stress =
       effective_trial_stress - three_shear_modulus * predicted_eff_strain_inc;
+
   computeStressInitialize(predictor_effective_trial_stress, elasticity_tensor);
 
   mooseAssert(
@@ -305,6 +305,11 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   {
     strain_increment -= inelastic_strain_increment;
     updateEffectiveInelasticStrain(_effective_inelastic_strain_increment);
+    // ternary checking for _dt=0 on first timestep.
+    // The effective strain rate updated here making.
+    // For substepping, this will make it the rate over a single substep.
+    _eff_inelastic_strain_rate[_qp] =
+        (_dt == 0) ? 0 : MetaPhysicL::raw_value(_effective_inelastic_strain_increment) / _dt;
 
     // Use the old elastic strain here because we require tensors used by this class
     // to be isotropic and this method natively allows for changing in time

@@ -65,7 +65,7 @@ protected:
    * @param effective_strain_inc Effective strain increment
    */
   virtual GenericReal<is_ad> initialGuess(const GenericReal<is_ad> & effective_trial_stress,
-                                          const GenericReal<is_ad> & effective_strain_inc) const;
+                                          const GenericReal<is_ad> & effective_strain_inc);
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be

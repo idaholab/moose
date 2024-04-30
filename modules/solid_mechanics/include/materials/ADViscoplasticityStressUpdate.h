@@ -48,7 +48,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    */
   virtual ADReal initialGuess(const ADReal & effective_trial_stress,
-                              const ADReal & effective_strain_inc) const override;
+                              const ADReal & effective_strain_inc) override;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
