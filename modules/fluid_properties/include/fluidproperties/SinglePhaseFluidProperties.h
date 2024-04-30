@@ -299,7 +299,7 @@ public:
    */
   virtual Real vaporPressure(Real T) const;
   virtual void vaporPressure(Real T, Real & psat, Real & dpsat_dT) const;
-  ADReal vaporPressure(const ADReal & T) const;
+  virtual DualReal vaporPressure(const DualReal & T) const;
 
   /**
    * Vapor temperature. Used to delineate liquid and gas phases.
@@ -312,8 +312,21 @@ public:
    */
   virtual Real vaporTemperature(Real p) const;
   virtual void vaporTemperature(Real p, Real & Tsat, Real & dTsat_dp) const;
-  ADReal vaporTemperature(const ADReal & p) const;
+  virtual DualReal vaporTemperature(const DualReal & p) const;
+  virtual FPDualReal vaporTemperature_ad(const FPDualReal & p) const;
 
+   /**
+   * AD version of backwards equation T(p, h) (used internally)
+   * From Revised Release on the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+
+
+  virtual FPDualReal T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
   /**
    * Henry's law coefficients for dissolution in water
    * @return Henry's constant coefficients
