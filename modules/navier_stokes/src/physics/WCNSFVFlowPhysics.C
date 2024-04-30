@@ -204,6 +204,7 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   // Boussinesq parameters checks
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "thermal_expansion");
+  checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "density_liquid");
 
   // Porosity correction checks
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "use_friction_correction");
@@ -619,7 +620,7 @@ WCNSFVFlowPhysics::addINSMomentumGravityKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::density) = _density_liquid_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     if (_porous_medium_treatment)
       params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
@@ -659,12 +660,14 @@ WCNSFVFlowPhysics::addINSMomentumBoussinesqKernels()
     assignBlocks(params, _blocks);
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::density) = _density_liquid_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
     params.set<MooseFunctorName>("alpha_name") = getParam<MooseFunctorName>("thermal_expansion");
     if (_porous_medium_treatment)
       params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+    // User declared the flow to be incompressible, we have to trust them
+    params.set<bool>("_override_constant_check") = true;
 
     for (const auto d : make_range(dimension()))
     {
@@ -1364,6 +1367,51 @@ WCNSFVFlowPhysics::getPorosityFunctorName(bool smoothed) const
     return _flow_porosity_functor_name;
   else
     return _porosity_name;
+}
+
+MooseFunctorName
+WCNSFVFlowPhysics::getLinearFrictionCoefName() const
+{
+  // Check all blocks. If more than one block, they would need to be consolidated #include in
+  // a single functor material. We won't implement this for now
+  if (_friction_types.empty())
+    return "0";
+  else if (_friction_types.size() == 1)
+  {
+    for (const auto & type_i : index_range(_friction_types[0]))
+    {
+      const auto upper_name = MooseUtils::toUpper(_friction_types[0][type_i]);
+      if (upper_name == "DARCY")
+        return _friction_coeffs[0][type_i];
+    }
+    // No linear type found
+    return "0";
+  }
+  else if (_friction_types.size() > 1)
+  {
+    bool linear_friction_factor_found = false;
+    MooseFunctorName linear_friction_factor;
+    for (const auto block_i : index_range(_friction_types))
+      for (const auto & type_i : index_range(_friction_types[0]))
+      {
+        const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
+        if (upper_name == "DARCY" && !linear_friction_factor_found)
+        {
+          linear_friction_factor_found = true;
+          linear_friction_factor = _friction_types[block_i][type_i];
+        }
+        else if (upper_name == "DARCY" && !linear_friction_factor_found)
+          if (linear_friction_factor != _friction_types[block_i][type_i])
+            mooseError("Multiple linear friction factor with different names have been specified. "
+                       "This is not currently supported as a single name should be retrievable. "
+                       "Use a PiecewiseByBlockFunctorMaterial to consolidate them.");
+      }
+    if (linear_friction_factor_found)
+      return linear_friction_factor;
+    else
+      return "0";
+  }
+  mooseError("Should not get here");
 }
 
 const WCNSFVTurbulencePhysics *

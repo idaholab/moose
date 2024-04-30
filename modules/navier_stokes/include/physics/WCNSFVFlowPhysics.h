@@ -36,6 +36,8 @@ public:
   const MooseEnum & compressibility() const { return _compressibility; }
   /// Return whether a porous medium treatment is applied
   bool porousMediumTreatment() const { return _porous_medium_treatment; }
+  /// Return the gravity vector
+  RealVectorValue gravityVector() const { return getParam<RealVectorValue>("gravity"); }
   /// Return the name of the density functor
   const MooseFunctorName & densityName() const { return _density_name; }
   /// Return the name of the dynamic viscosity functor
@@ -50,6 +52,8 @@ public:
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
   /// Get the inlet flux postprocessor if using a flux inlet
   const std::vector<PostprocessorName> & getFluxInletPPs() const { return _flux_inlet_pps; }
+  /// Get the name of the linear friction coefficient
+  MooseFunctorName getLinearFrictionCoefName() const;
   /// Return the name of the Rhie Chow user object
   UserObjectName rhieChowUOName() const;
   /// Return the number of algebraic ghosting layers needed

@@ -26,6 +26,7 @@ INSFVMomentumBoussinesq::validParams()
                                     "this is of the form rho = rho*(1-alpha (T-T_ref))");
   params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
+  params.addPrivateParam("_override_constant_check", false);
   return params;
 }
 
@@ -38,7 +39,7 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
     _ref_temperature(getParam<Real>("ref_temperature")),
     _rho(getFunctor<ADReal>(NS::density))
 {
-  if (!_rho.isConstant())
+  if (!_rho.isConstant() && !getParam<bool>("_override_constant_check"))
     paramError(NS::density, "The density in the boussinesq term is not constant!");
 }
 
