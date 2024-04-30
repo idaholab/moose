@@ -105,6 +105,10 @@ LStableDirk3::solve()
     // Set the time for this stage
     _fe_problem.time() = time_old + _c[_stage - 1] * _dt;
 
+    // If we previously used coloring, destroy the old object so it doesn't leak when we allocate a
+    // new object in the following lines
+    _nl.destroyColoring();
+
     // Potentially setup finite differencing contexts for the solve
     _nl.potentiallySetupFiniteDifferencing();
 
