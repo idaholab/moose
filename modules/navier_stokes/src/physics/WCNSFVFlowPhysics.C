@@ -93,6 +93,10 @@ WCNSFVFlowPhysics::validParams()
                              "pressure_allow_expansion_on_bernoulli_faces");
   params.transferParam<bool>(NSFVAction::validParams(), "momentum_two_term_bc_expansion");
   params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>("mu_interp_method",
+                             coeff_interp_method,
+                             "Switch that can select face interpolation method for the viscosity.");
 
   // Nonlinear solver parameters
   params.transferParam<Real>(NSFVAction::validParams(), "mass_scaling");
@@ -568,6 +572,7 @@ WCNSFVFlowPhysics::addINSMomentumViscousDissipationKernels()
   assignBlocks(params, _blocks);
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
 
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
