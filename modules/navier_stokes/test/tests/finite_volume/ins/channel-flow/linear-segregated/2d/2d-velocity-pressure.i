@@ -142,7 +142,7 @@ advected_interp_method = 'average'
 []
 
 [Executioner]
-  type = SIMPLENonlinearAssembly
+  type = SIMPLE
   momentum_l_abs_tol = 1e-9
   pressure_l_abs_tol = 1e-9
   momentum_l_tol = 0
@@ -152,14 +152,14 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 1
+  num_iterations = 50
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  print_fields = true
+  print_fields = false
 []
 
 [Outputs]

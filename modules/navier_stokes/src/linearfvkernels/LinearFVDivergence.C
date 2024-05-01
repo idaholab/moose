@@ -9,7 +9,7 @@
 
 #include "LinearFVDivergence.h"
 
-registerMooseObject("MooseApp", LinearFVDivergence);
+registerMooseObject("NavierStokesApp", LinearFVDivergence);
 
 InputParameters
 LinearFVDivergence::validParams()
