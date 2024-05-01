@@ -193,6 +193,7 @@ WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  setSlipVelocityParams(params);
 
   for (const auto & vname : _passive_scalar_names)
   {

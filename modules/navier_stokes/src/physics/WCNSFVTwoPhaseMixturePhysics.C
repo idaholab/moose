@@ -238,6 +238,16 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
 }
 
 void
+WCNSFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
+{
+  params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
+  if (dimension() >= 2)
+    params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
+  if (dimension() >= 3)
+    params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
+}
+
+void
 WCNSFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 {
   auto params = getFactory().getValidParams("NSFVMixturePhaseInterface");

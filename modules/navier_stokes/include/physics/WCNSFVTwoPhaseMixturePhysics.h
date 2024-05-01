@@ -30,6 +30,9 @@ private:
   void addFVKernels() override;
   void addMaterials() override;
 
+  /// Adds the slip velocity parameters
+  virtual void setSlipVelocityParams(InputParameters & params) const override;
+
   /**
    * Functions adding kernels for the other physics
    */

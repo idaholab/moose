@@ -50,6 +50,7 @@ private:
   void addScalarTimeKernels();
   void addScalarDiffusionKernels();
   void addScalarAdvectionKernels();
+  virtual void setSlipVelocityParams(InputParameters & /* params */) const {}
   /// Equivalent of NSFVAction addScalarCoupledSourceKernels
   void addScalarSourceKernels();
 
