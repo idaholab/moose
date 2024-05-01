@@ -71,6 +71,8 @@ public:
 
   void residualAndJacobianTogether() override;
 
+  virtual void potentiallySetupFiniteDifferencing() override;
+
 protected:
   void computeScalingJacobian() override;
   void computeScalingResidual() override;

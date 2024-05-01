@@ -43,7 +43,7 @@ class Test:
         self.args = args
         self.dur_secs = 0
         self.perflog = []
-        self.getpot_options = ['Outputs/console=false', 'Outputs/exodus=false', 'Outputs/csv=false', '--no-gdb-backtrace']
+        self.getpot_options = ['Outputs/console=false', 'Outputs/exodus=false', 'Outputs/csv=false']
         self.have_perflog = perflog
         if self.have_perflog:
             self.getpot_options.append('UserObjects/perflog/type=PerflogDumper')

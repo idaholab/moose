@@ -81,6 +81,7 @@ LStableDirk2::solve()
   _stage = 1;
   _fe_problem.time() = time_stage1;
   _nl.system().solve();
+  _nl.destroyColoring();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
@@ -94,6 +95,7 @@ LStableDirk2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;
   _fe_problem.time() = time_new;
+  _nl.potentiallySetupFiniteDifferencing();
   _nl.system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();

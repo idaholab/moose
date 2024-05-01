@@ -1,12 +1,23 @@
 [Tests]
   design = 'FEProblem.md'
-  issues = '#15129'
 
   [test_options_not_left]
     type = RunApp
     input = '2d_diffusion_petsc_option.i'
-    expect_out = 'PETSc Option Table'
     absent_out = "Option left.*value.*hypre"
     requirement = "The system shall use the default PETSc option database in the parent app to handle system-level PETSc parameters"
+    issues = '#15129'
+    petsc_version = '>=3.19.2'
+  []
+
+  [test_non_petsc_options_not_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = "-not_a_moose_or_petsc_option 20 --show-input"
+    expect_out = "Option left:\s+name:-not_a_moose_or_petsc_option\s+value:\s+20"
+    absent_out = "Option left:\s+name:--show_input"
+    requirement = "The system shall warn the user of unused options if and only if they are not valid moose options."
+    issues = '#25577'
+    petsc_version = '>=3.19.2'
   []
 []

@@ -86,6 +86,13 @@ toNEML2(const std::vector<Real> & v)
 }
 
 template <>
+Real
+toMOOSE(const neml2::BatchTensor & t)
+{
+  return t.item<Real>();
+}
+
+template <>
 SymmetricRankTwoTensor
 toMOOSE(const neml2::BatchTensor & t)
 {

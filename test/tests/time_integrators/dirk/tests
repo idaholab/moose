@@ -1,25 +1,49 @@
-
 [Tests]
   design = 'LStableDirk2.md'
-  issues = '#1953'
-
   [group]
     requirement = "The system shall support the L-stable DIRK method for time integration"
-
+    issues = '#1953'
     [dirk-2d-heat]
       type = 'Exodiff'
       input = 'dirk-2d-heat.i'
       exodiff = 'dirk-2d-heat_out.e'
-
       detail = "with and"
     []
-
     [dirk-2d-heat-adap]
       type = 'Exodiff'
       input = 'dirk-2d-heat-adap.i'
       exodiff = 'dirk-2d-heat-adap_out.e-s005'
-
       detail = "without mesh adaptivity."
     []
+  []
+  [dirk_fdp]
+    type = 'Exodiff'
+    input = 'dirk-2d-heat.i'
+    exodiff = 'dirk-2d-heat_out.e'
+    prereq = 'group/dirk-2d-heat'
+    cli_args = 'Preconditioning/fdp/type=FDP'
+    issues = '#10304'
+    requirement = 'The system shall be able to use a finite difference preconditioner with two-stage L-stable DIRK time integration.'
+    allow_warnings = true
+  []
+  [dirk3_fdp]
+    type = 'Exodiff'
+    input = 'dirk-2d-heat.i'
+    exodiff = 'dirk-2d-heat-3stage.e'
+    cli_args = 'Preconditioning/fdp/type=FDP Executioner/TimeIntegrator/type=LStableDirk3 Outputs/file_base=dirk-2d-heat-3stage Executioner/nl_rel_tol=1e-8'
+    issues = '#10304'
+    requirement = 'The system shall be able to use a finite difference preconditioner with three-stage L-stable DIRK time integration.'
+    allow_warnings = true
+    abs_zero = 5e-10
+  []
+  [dirk4_fdp]
+    type = 'Exodiff'
+    input = 'dirk-2d-heat.i'
+    exodiff = 'dirk-2d-heat-4stage.e'
+    cli_args = 'Preconditioning/fdp/type=FDP Executioner/TimeIntegrator/type=LStableDirk4 Outputs/file_base=dirk-2d-heat-4stage Executioner/nl_rel_tol=1e-8'
+    issues = '#10304'
+    requirement = 'The system shall be able to use a finite difference preconditioner with four-stage L-stable DIRK time integration.'
+    allow_warnings = true
+    abs_zero = 5e-10
   []
 []

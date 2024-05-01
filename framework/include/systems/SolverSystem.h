@@ -75,6 +75,12 @@ protected:
 
   virtual NumericVector<Number> & solutionInternal() const override final;
 
+  /**
+   * Whether a system matrix is formed from coloring. This influences things like when to compute
+   * time derivatives
+   */
+  virtual bool matrixFromColoring() const { return false; }
+
   /// solution vector from solver
   const NumericVector<Number> * _current_solution;
 
@@ -85,13 +91,6 @@ protected:
 
   /// Boolean to see if solution is invalid
   bool _solution_is_invalid;
-
-private:
-  /**
-   * Whether a system matrix is formed from coloring. This influences things like when to compute
-   * time derivatives
-   */
-  virtual bool matrixFromColoring() const { return false; }
 };
 
 inline const NumericVector<Number> * const &
