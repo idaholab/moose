@@ -1,15 +1,17 @@
-mu = 2.6
-rho = 1.0
+mu = .01
+rho = 1
 advected_interp_method = 'average'
 
 [Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
+  [gen]
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = '0.3'
-    dy = '0.3'
-    ix = '3'
-    iy = '3'
+    xmin = 0
+    xmax = .1
+    ymin = 0
+    ymax = .1
+    nx = 3
+    ny = 3
   []
 []
 
@@ -32,13 +34,13 @@ advected_interp_method = 'average'
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.5
+    initial_condition = 0.0
     solver_sys = u_system
   []
   [vel_y]
     type = MooseLinearVariableFVReal
-    solver_sys = v_system
     initial_condition = 0.0
+    solver_sys = v_system
   []
   [pressure]
     type = MooseLinearVariableFVReal
@@ -97,47 +99,29 @@ advected_interp_method = 'average'
 []
 
 [LinearFVBCs]
-  [inlet-u]
+  [top_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'left'
     variable = vel_x
-    functor = '1.1'
+    boundary = 'top'
+    functor = 1
   []
-  [inlet-v]
+  [no_slip_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'left'
-    variable = vel_y
-    functor = '0.0'
-  []
-  [walls-u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
     variable = vel_x
-    functor = 0.0
+    boundary = 'left right bottom'
+    functor = 0
   []
-  [walls-v]
+  [no_slip_y]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
     variable = vel_y
-    functor = 0.0
+    boundary = 'left right top bottom'
+    functor = 0
   []
-  [outlet_p]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'right'
+  [pressure-extrapolation]
+    type = LinearFVAdvectionDiffusionExtrapolatedBC
+    boundary = 'left right top bottom'
     variable = pressure
-    functor = 1.4
-  []
-  [outlet_u]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    variable = vel_x
-    use_two_term_expansion = false
-    boundary = right
-  []
-  [outlet_v]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    variable = vel_y
-    use_two_term_expansion = false
-    boundary = right
+    use_two_term_expansion = true
   []
 []
 
@@ -152,7 +136,7 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 50
+  num_iterations = 200
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -160,8 +144,16 @@ advected_interp_method = 'average'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
+
+  pin_pressure = true
+  pressure_pin_value = 0.0
+  pressure_pin_point = '0.01 0.099 0.0'
 []
 
 [Outputs]
   exodus = true
+  csv = false
+  perf_graph = false
+  print_nonlinear_residuals = false
+  print_linear_residuals = true
 []
