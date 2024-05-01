@@ -121,8 +121,11 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value)
                                                        : _var_prior->quantile(getRand(seed_value));
       if (_new_var_samples[j] < 0.0)
         indicator = 1;
+      if (_variance_bound)
+        indicator = (_new_var_samples[j] > (*_variance_bound)) ? 1 : indicator;
     }
     if (!indicator)
       ++j;
   }
+  std::cout << Moose::stringify(_new_samples) << std::endl;
 }

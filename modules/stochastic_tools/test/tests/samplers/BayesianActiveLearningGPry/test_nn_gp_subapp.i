@@ -3,26 +3,32 @@
 
 [Distributions]
   [left]
-    type = Normal
+    type = TruncatedNormal
     mean = 0.0
     standard_deviation = 1.0
+    # type = Uniform
+    lower_bound = -1.0
+    upper_bound = 1.0
   []
   [right]
-    type = Normal
+    type = TruncatedNormal
     mean = 0.0
     standard_deviation = 1.0
+    # type = Uniform
+    lower_bound = -1.0
+    upper_bound = 1.0
   []
   [variance]
     type = Uniform
     lower_bound = 0.0
-    upper_bound = 0.5
+    upper_bound = 0.1
   []
 []
 
 [Likelihood]
   [gaussian]
     type = Gaussian
-    noise = 'mcmc_reporter/noise'
+    noise = 'conditional/noise'
     file_name = 'exp_0_05.csv'
     log_likelihood = false
   []
@@ -39,17 +45,8 @@
     num_tries = 1000
     seed = 2547
     initial_values = '0.1 0.1'
-    previous_state = 'mcmc_reporter/inputs'
-    previous_state_var = 'mcmc_reporter/variance'
     prior_variance = 'variance'
   []
-  # [test]
-  #   type = MonteCarlo
-  #   distributions = 'normal normal'
-  #   num_rows = 1000
-  #   seed = 100
-  #   execute_on = PRE_MULTIAPP_SETUP
-  # []
 []
 
 [MultiApps]
@@ -58,11 +55,6 @@
     input_files = sub.i
     sampler = sample
   []
-  # [sub_test]
-  #   type = SamplerFullSolveMultiApp
-  #   input_files = sub.i
-  #   sampler = test
-  # []
 []
 
 [Transfers]
@@ -73,13 +65,6 @@
     from_multi_app = sub
     sampler = sample
   []
-  # [reporter_transfer_test]
-  #   type = SamplerReporterTransfer
-  #   from_reporter = 'average/value'
-  #   stochastic_reporter = 'constant_test'
-  #   from_multi_app = sub_test
-  #   sampler = test
-  # []
 []
 
 [Controls]
@@ -87,23 +72,14 @@
     type = MultiAppSamplerControl
     multi_app = sub
     sampler = sample
-    param_names = 'left_bc right_bc'
+    param_names = 'left_bc right_bc mesh1'
   []
-  # [cmdline_test]
-  #   type = MultiAppSamplerControl
-  #   multi_app = sub_test
-  #   sampler = test
-  #   param_names = 'left_bc right_bc'
-  # []
 []
 
 [Reporters]
   [constant]
     type = StochasticReporter
   []
-  # [constant_test]
-  #   type = StochasticReporter
-  # []
   [conditional]
     type = BayesianGPryLearner
     output_value = constant/reporter_transfer:average:value
@@ -112,25 +88,19 @@
     nn_evaluator = surr
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
+    likelihoods = 'gaussian'
   []
-  # [results]
-  #   type = EvaluateSurrogate
-  #   model = surr
-  #   sampler = test
-  #   execute_on = FINAL
-  #   parallel_type = ROOT
-  # []
 []
 
 [Trainers]
   [train]
     type = ActiveLearningLibtorchNN
-    num_epochs = 15000
+    num_epochs = 10
     num_batches = 250
     num_neurons_per_layer = '40 40 40'
-    learning_rate = 0.001
+    learning_rate = 0.0001
     nn_filename = classifier_net.pt
-    print_epoch_loss = 1000
+    print_epoch_loss = 10
     max_processes = 1
     standardize_input = true
     standardize_output = false
@@ -144,8 +114,8 @@
     standardize_data = 'true'
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    iter_adam = 5000
-    learning_rate_adam = 0.001
+    iter_adam = 1000
+    learning_rate_adam = 0.0005
     show_optimization_details = true
     batch_size = 100
   []
@@ -167,22 +137,32 @@
   [covar]
     type = SquaredExponentialCovariance
     signal_variance = 1.0
-    noise_variance = 1e-4
-    length_factor = '1.0 1.0'
+    noise_variance = 0.0 # 1e-8
+    length_factor = '1.0 1.0 1.0'
   []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 75
 []
 
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  csv = false
+  execute_on = TIMESTEP_END
+  perf_graph = true
   [out]
     type = SurrogateTrainerOutput
     trainers = 'train'
     execute_on = FINAL
+  []
+  [out1]
+    type = JSON
+    execute_system_information_on = NONE
+  []
+  [out2]
+    type = SurrogateTrainerOutput
+    trainers = 'GP_al_trainer'
+    # execute_on = FINAL
   []
 []
