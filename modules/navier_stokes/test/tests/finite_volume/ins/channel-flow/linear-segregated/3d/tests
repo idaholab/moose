@@ -3,9 +3,9 @@
   design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
   [momentum-pressure]
     type = 'Exodiff'
-    input = 2d-velocity-pressure.i
-    exodiff = 2d-velocity-pressure_out.e
-    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+    input = 3d-velocity-pressure.i
+    exodiff = 3d-velocity-pressure_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 3D "
                   "channel using the SIMPLE algorithm using the optimized finite volume system."
     recover = false # we don't support recovery for SIMPLE yet
   []

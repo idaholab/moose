@@ -1,4 +1,4 @@
-mu = 1.0
+mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
 
@@ -9,9 +9,9 @@ advected_interp_method = 'average'
     dx = '0.3'
     dy = '0.3'
     dz = '0.3'
-    ix = '80'
-    iy = '80'
-    iz = '80'
+    ix = '3'
+    iy = '3'
+    iz = '3'
   []
 []
 
@@ -189,8 +189,8 @@ advected_interp_method = 'average'
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-9
-  pressure_l_abs_tol = 1e-9
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
   momentum_l_tol = 0
   pressure_l_tol = 0
   rhie_chow_user_object = 'rc'
@@ -198,13 +198,11 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 20
-  pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-9
-  # momentum_petsc_options = '-pc_hypre_boomeramg_print_statistics'
+  num_iterations = 100
+  pressure_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-10
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths -pc_hypre_boomeramg_truncfactor -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type'
   momentum_petsc_options_value = 'hypre boomeramg 4 1 0.1 0.6 HMIS ext+i'
-  # pressure_petsc_options = '-pc_hypre_boomeramg_print_statistics'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths -pc_hypre_boomeramg_truncfactor -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type'
   pressure_petsc_options_value = 'hypre boomeramg 2 1 0.1 0.6 HMIS ext+i'
   print_fields = false
