@@ -51,9 +51,18 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                      "phase_fraction_diffusivity",
                      "Functor names for the diffusivities used for the main phase fraction.");
 
+  // Phase change parameters
+  params.addParam<MaterialPropertyName>(NS::alpha_exc,
+                                        "Name of the volumetric exchange coefficient");
+
+  // Drift flux model parameters
   params.addParam<bool>("add_drift_flux_momentum_terms",
                         true,
                         "Whether to add the drift flux terms to the momentum equation");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>("density_interp_method",
+                             coeff_interp_method,
+                             "Face interpolation method for the density in the drift flux term.");
 
   // Properties of the first phase (can be a liquid or a gas)
   params.renameParam(
@@ -129,6 +138,9 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
       "use_external_mixture_properties",
       "Mixture material properties");
 
+  params.addParamNamesToGroup("fluid_heat_transfer_physics alpha_exc", "Phase change");
+  params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method", "Drift flux");
+
   return params;
 }
 
@@ -199,6 +211,8 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
                  "' should be 'rho_mixture'");
   }
 
+  // TODO add more parameter checking
+
   if (_verbose)
   {
     if (_flow_equations_physics)
@@ -230,7 +244,7 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _liquid_phase_fraction;
   params.set<MooseFunctorName>("phase_coupled") = _other_phase_fraction_name;
-  params.set<MaterialPropertyName>("alpha") = getParam<MaterialPropertyName>("alpha");
+  params.set<MaterialPropertyName>("alpha") = getParam<MaterialPropertyName>(NS::alpha_exc);
   getProblem().addFVKernel("NSFVMixturePhaseInterface", prefix() + "phase_interface", params);
 }
 
@@ -260,16 +274,18 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") =
         _flow_equations_physics->getVelocityNames()[dim];
-    params.set<MooseFunctorName>("u_slip") = "u_slip";
+    params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
     if (dimension() >= 2)
-      params.set<MooseFunctorName>("v_slip") = "v_slip";
+      params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
     if (dimension() >= 3)
-      params.set<MooseFunctorName>("w_slip") = "w_slip";
+      params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
     params.set<MooseFunctorName>("rho_d") = _other_phase_density;
     params.set<MooseFunctorName>("fd") = _other_phase_fraction_name;
-    params.set<MooseEnum>("component") = components[dim];
+    params.set<MooseEnum>("momentum_component") = components[dim];
+    params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
+    params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     getProblem().addFVKernel(
-        "WCNSFV2PMomentumDriftFlux", prefix() + "phase_interface_" + Moose::stringify(dim), params);
+        "WCNSFV2PMomentumDriftFlux", prefix() + "drift_flux_" + components[dim], params);
   }
 }
 
@@ -325,8 +341,8 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + components[dim];
       params.set<MooseEnum>("momentum_component") = components[dim];
       for (const auto j : make_range(dimension()))
-        params.set<MooseFunctorName>(vel_components[j]) =
-            _flow_equations_physics->getVelocityNames()[j];
+        params.set<std::vector<VariableName>>(vel_components[j]) = {
+            _flow_equations_physics->getVelocityNames()[j]};
       params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
       params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
       params.set<MooseFunctorName>("rho_d") = _other_phase_density;
@@ -337,7 +353,8 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
           getParam<MooseFunctorName>("particle_diameter");
       if (getParam<bool>("output_all_properties"))
         params.set<std::vector<OutputName>>("outputs") = {"all"};
-      getProblem().addMaterial("WCNSFV2PSlipVelocityFunctorMaterial", prefix() + "mixture", params);
+      getProblem().addMaterial(
+          "WCNSFV2PSlipVelocityFunctorMaterial", prefix() + "slip_" + components[dim], params);
     }
   }
 }
