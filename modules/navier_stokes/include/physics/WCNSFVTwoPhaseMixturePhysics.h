@@ -39,6 +39,7 @@ private:
   void addPhaseInterfaceTerm();
   void addPhaseChangeEnergySource();
   void addPhaseDriftFluxTerm();
+  void addAdvectionSlipTerm();
 
   /// Fluid heat transfer physics
   const WCNSFVFluidHeatTransferPhysics * _fluid_energy_physics;
@@ -74,6 +75,8 @@ private:
   /// Whether to define the mixture model internally or use fluid properties instead
   const bool _use_external_mixture_properties;
 
-  /// Whether to add the drift flux momentum terms to the each component momentum equation
+  /// Whether to add the drift flux momentum terms to each component momentum equation
   const bool _use_drift_flux;
+  /// Whether to add the advection slip term to each component of the momentum equation
+  const bool _use_advection_slip;
 };

@@ -63,6 +63,7 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.addParam<MooseEnum>("density_interp_method",
                              coeff_interp_method,
                              "Face interpolation method for the density in the drift flux term.");
+  params.addParam<bool>("add_advection_slip_term", false, "Whether to use the advection-slip model");
 
   // Properties of the first phase (can be a liquid or a gas)
   params.renameParam(
@@ -160,7 +161,8 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
     _other_phase_thermal_conductivity(
         getParam<MooseFunctorName>("other_phase_thermal_conductivity_name")),
     _use_external_mixture_properties(getParam<bool>("use_external_mixture_properties")),
-    _use_drift_flux(getParam<bool>("add_drift_flux_momentum_terms"))
+    _use_drift_flux(getParam<bool>("add_drift_flux_momentum_terms")),
+    _use_advection_slip(getParam<bool>("add_advection_slip_term"))
 {
   // Check that only one scalar was passed, as we are using vector parameters
   if (_passive_scalar_names.size() > 1)
@@ -235,6 +237,8 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
 
   if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() && _use_drift_flux)
     addPhaseDriftFluxTerm();
+  if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() && _use_advection_slip)
+    addAdvectionSlipTerm();
 }
 
 void
@@ -290,12 +294,39 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
     params.set<MooseFunctorName>("rho_d") = _other_phase_density;
-    params.set<MooseFunctorName>("fd") = _other_phase_fraction_name;
+    params.set<MooseFunctorName>("fraction_dispersed") = _other_phase_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
     params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     getProblem().addFVKernel(
         "WCNSFV2PMomentumDriftFlux", prefix() + "drift_flux_" + components[dim], params);
+  }
+}
+
+void
+WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
+{
+  const std::vector<std::string> components = {"x", "y", "z"};
+  for (const auto dim : make_range(dimension()))
+  {
+    auto params = getFactory().getValidParams("WCNSFV2PMomentumAdvectionSlip");
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") =
+        _flow_equations_physics->getVelocityNames()[dim];
+    params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
+    if (dimension() >= 2)
+      params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
+    if (dimension() >= 3)
+      params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
+    params.set<MooseFunctorName>(NS::density) = "rho_mixture";
+    params.set<MooseFunctorName>("rho_d") = _other_phase_density;
+    params.set<MooseFunctorName>("fraction_dispersed") = _other_phase_fraction_name;
+    params.set<MooseEnum>("momentum_component") = components[dim];
+    params.set<MooseEnum>("advected_interp_method") = getParam<MooseEnum>("phase_advection_interpolation");
+    params.set<MooseEnum>("velocity_interp_method") = _flow_equations_physics->getVelocityFaceInterpolationMethod();
+    params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+    getProblem().addFVKernel(
+        "WCNSFV2PMomentumAdvectionSlip", prefix() + "drift_flux_" + components[dim], params);
   }
 }
 
@@ -353,7 +384,7 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
       for (const auto j : make_range(dimension()))
         params.set<std::vector<VariableName>>(vel_components[j]) = {
             _flow_equations_physics->getVelocityNames()[j]};
-      params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+      params.set<MooseFunctorName>(NS::density) = _first_phase_density;
       params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
       params.set<MooseFunctorName>("rho_d") = _other_phase_density;
       params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
