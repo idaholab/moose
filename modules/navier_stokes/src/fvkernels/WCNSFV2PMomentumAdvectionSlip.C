@@ -27,6 +27,7 @@ WCNSFV2PMomentumAdvectionSlip::validParams()
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
+  params.renameParam("fd", "fraction_dispersed", "");
   return params;
 }
 

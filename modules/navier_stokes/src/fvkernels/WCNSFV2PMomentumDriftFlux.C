@@ -26,6 +26,7 @@ WCNSFV2PMomentumDriftFlux::validParams()
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
+  params.renameParam("fd", "fraction_dispersed", "");
 
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("density_interp_method",
