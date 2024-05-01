@@ -25,13 +25,17 @@
 #include "GaussianProcess.h"
 #include "LikelihoodFunctionBase.h"
 #include "LikelihoodInterface.h"
+// #include "CovarianceInterface.h"
+// #include "GaussianProcessHandler.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: NN and GP training step
  */
 class BayesianGPryLearner : public GeneralReporter,
                             public LikelihoodInterface,
+                            // public CovarianceInterface,
                             public SurrogateModelInterface
+
 {
 public:
   static InputParameters validParams();
@@ -39,6 +43,16 @@ public:
   virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
+
+  /**
+   * This function is called by LoadCovarianceDataAction when the surrogate is
+   * loading training data from a file. The action must recreate the covariance
+   * object before this surrogate can set the correct pointer.
+   */
+  // virtual void setupCovariance(UserObjectName _covar_name);
+
+  // StochasticTools::GaussianProcessHandler & gpHandler() { return _gp_handler; }
+  // const StochasticTools::GaussianProcessHandler & getGPHandler() const { return _gp_handler; }
 
 protected:
   /// Model output value from SubApp
@@ -48,6 +62,8 @@ protected:
   std::vector<Real> & _output_comm;
 
 private:
+  // StochasticTools::GaussianProcessHandler & _gp_handler;
+
   /**
    * Sets up the training data for the neural network classifier and GP model
    * @param data_in The data matrix containing the inputs to the NNs
@@ -98,6 +114,12 @@ private:
 
   /// Storage for the prior over the variance
   const Distribution * _var_prior;
+
+  /// Model noise term to pass to Likelihoods object
+  Real & _noise;
+
+  /// The maximum value of the acquistion function in the current iteration
+  std::vector<Real> & _acquisition_function;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;

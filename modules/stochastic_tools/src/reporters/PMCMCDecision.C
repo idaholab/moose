@@ -39,7 +39,7 @@ PMCMCDecision::validParams()
 PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
+    _output_value(getReporterValue<std::vector<Real>>("output_value")), // , REPORTER_MODE_DISTRIBUTED
     _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
@@ -51,8 +51,8 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _new_var_samples(_pmcmc->getVarSamples()),
     _priors(_pmcmc->getPriors()),
     _var_prior(_pmcmc->getVarPrior()),
-    _local_comm(_sampler.getLocalComm()),
-    _check_step(std::numeric_limits<int>::max())
+    _check_step(std::numeric_limits<int>::max()),
+    _local_comm(_sampler.getLocalComm())
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
