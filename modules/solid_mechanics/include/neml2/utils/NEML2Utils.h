@@ -88,6 +88,8 @@ T toMOOSE(const neml2::BatchTensor &);
 
 // @{ Template specializations
 template <>
+Real toMOOSE(const neml2::BatchTensor & t);
+template <>
 SymmetricRankTwoTensor toMOOSE(const neml2::BatchTensor & t);
 template <>
 std::vector<Real> toMOOSE(const neml2::BatchTensor & t);
