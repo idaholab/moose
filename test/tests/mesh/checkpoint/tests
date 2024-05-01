@@ -8,6 +8,7 @@
 
     requirement = 'The system shall generate pre-split (2) mesh files using a standard input file combined with command line arguments.'
     recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_2]
     prereq = 'test_2_generate_split'
@@ -27,6 +28,7 @@
 
     requirement = 'The system shall generate pre-split (2) binary mesh files using a standard input file combined with command line arguments.'
     recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_2a]
     prereq = 'test_2a_generate_split'
@@ -46,6 +48,7 @@
 
     requirement = 'The system shall generate pre-split (4) mesh files using a standard input file combined with command line arguments.'
     recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_4]
     prereq = 'test_4_generate_split'
@@ -65,6 +68,7 @@
 
     requirement = 'The system shall generate pre-split (4) binary mesh files using a standard input file combined with command line arguments.'
     recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_4a]
     prereq = 'test_4a_generate_split'
@@ -84,6 +88,7 @@
 
     requirement = 'The system shall generate pre-split (8) mesh files using a standard input file combined with command line arguments.'
     recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_8]
     prereq = 'test_8_generate_split'
@@ -103,6 +108,7 @@
 
     requirement = 'The system shall generate pre-split (8) binary mesh files using a standard input file combined with command line arguments.'
     recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_8a]
     prereq = 'test_8a_generate_split'
