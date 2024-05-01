@@ -56,7 +56,6 @@ velocity_interp_method = 'rc'
 []
 
 [FVKernels]
-
   [mass]
     type = INSFVMassAdvection
     variable = pressure
@@ -77,6 +76,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_x
     rho_d = ${rho_d}
+    # this is a mistake. See this to phase_2
     fd = 'rho_mixture_var'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
@@ -108,6 +108,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_y
     rho_d = ${rho_d}
+    # this is a mistake. See this to phase_2
     fd = 'rho_mixture_var'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
