@@ -29,6 +29,13 @@
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model.'
     installation_type = in_tree
   []
+  [mixture_channel_drift_flux_physics]
+    type = 'Exodiff'
+    input = 'channel-drift-flux-physics.i'
+    exodiff = 'channel-drift-flux-physics_out.e'
+    requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model using the Navier Stokes Physics syntax.'
+    installation_type = in_tree
+  []
   [mixture_channel_drift_flux_transient]
     type = 'CSVDiff'
     input = 'channel-drift-flux-transient.i'
@@ -41,6 +48,13 @@
     input = 'channel-advection-slip.i'
     exodiff = 'channel-advection-slip_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture advection-slip model.'
+    installation_type = in_tree
+  []
+  [mixture_channel_advection_slip_physics]
+    type = 'Exodiff'
+    input = 'channel-advection-slip-physics.i'
+    exodiff = 'channel-advection-slip-physics_out.e'
+    requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture advection-slip model using the Navier Stokes Physics syntax.'
     installation_type = in_tree
   []
 []
