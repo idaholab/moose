@@ -41,5 +41,5 @@ MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & p
 Real
 MaterialRealTensorValueAux::getRealValue()
 {
-  return _prop[_qp](_row, _col);
+  return _full_value(_row, _col);
 }

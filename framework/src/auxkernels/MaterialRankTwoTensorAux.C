@@ -43,7 +43,7 @@ template <typename T, bool is_ad>
 Real
 MaterialRankTwoTensorAuxTempl<T, is_ad>::getRealValue()
 {
-  return MetaPhysicL::raw_value(this->_prop[this->_qp](_i, _j));
+  return MetaPhysicL::raw_value(this->_full_value(_i, _j));
 }
 
 template class MaterialRankTwoTensorAuxTempl<RankTwoTensor, false>;

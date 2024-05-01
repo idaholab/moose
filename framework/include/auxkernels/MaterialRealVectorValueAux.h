@@ -36,6 +36,8 @@ protected:
 };
 
 typedef MaterialRealVectorValueAuxTempl<RealVectorValue, false> MaterialRealVectorValueAux;
-typedef MaterialRealVectorValueAuxTempl<RealVectorValue,true> ADMaterialRealVectorValueAux;
-typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, false> MaterialSymmetricRankTwoTensorAux;
-typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor,true> ADMaterialSymmetricRankTwoTensorAux;
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue, true> ADMaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, false>
+    MaterialSymmetricRankTwoTensorAux;
+typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, true>
+    ADMaterialSymmetricRankTwoTensorAux;

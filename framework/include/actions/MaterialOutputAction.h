@@ -13,9 +13,14 @@
 #include "Action.h"
 #include "MaterialData.h"
 #include "FEProblemBase.h"
+#include "SerialAccess.h"
 
 class MooseObjectAction;
 class MaterialBase;
+
+struct MaterialOutputActionDescriptor
+{
+};
 
 /**
  * Creates AuxVariables and AuxKernels for automatic output of material properties
@@ -32,7 +37,44 @@ public:
   MaterialOutputAction(const InputParameters & params);
   virtual void act() override;
 
+  /// output function called from SetupOutput::apply (through Moose::typeLoop)
+  template <typename T, int I>
+  void setupOutput(const MaterialPropertyName & prop_name, const MaterialBase & material);
+
 protected:
+  template <typename T, int I, bool is_ad, bool is_functor>
+  void setupOutputHelper(const MaterialPropertyName & prop_name, const MaterialBase & material);
+
+  /// List of supported raw types (equivalent AD types are also supported)
+  typedef Moose::TypeList<Real,
+                          RealVectorValue,
+                          RealTensorValue,
+                          RankTwoTensor,
+                          RankFourTensor,
+                          SymmetricRankTwoTensor,
+                          SymmetricRankFourTensor>
+      SupportedTypes;
+
+  /// List of AuxKernels used for the respective property type output ('AD' prefix is added automatically for is_ad)
+  static const std::vector<std::string> _aux_kernel_names;
+
+  /// List of index symbols
+  static const std::vector<std::string> _index_symbols;
+
+  /// List of coefficient parameter names
+  static const std::vector<std::vector<std::string>> _param_names;
+
+  template <typename T, int I>
+  struct SetupOutput
+  {
+    static void apply(MaterialOutputAction * self,
+                      const MaterialPropertyName & prop_name,
+                      const MaterialBase & material)
+    {
+      self->setupOutput<T, I>(prop_name, material);
+    }
+  };
+
   /**
    * Helper method for testing if the material exists as a block or boundary material
    * @tparam T The property type (e.g., REAL)
@@ -58,13 +100,6 @@ protected:
   bool hasFunctorProperty(const std::string & property_name);
 
   /**
-   * A function to be overriden by derived actions to handle a set of material property types
-   */
-  virtual std::vector<std::string> materialOutput(const std::string & property_name,
-                                                  const MaterialBase & material,
-                                                  bool get_names_only);
-
-  /**
    * A method for retrieving and partially filling the InputParameters object for an AuxVariable
    * @param type The type of AuxVariable
    * @param property_name The property name to associated with that action
@@ -73,49 +108,13 @@ protected:
    *
    * @return An InputParameter object with common properties added.
    */
+  template <bool is_functor>
   InputParameters getParams(const std::string & type,
                             const std::string & property_name,
                             const std::string & variable_name,
                             const MaterialBase & material);
 
 private:
-  /**
-   * Template method for creating the necessary objects for the various material property types
-   * @tparam T The type of material property that automatic output is being performed
-   * @param property_name The name of the material property to output
-   * @param material A pointer to the MaterialBase object containing the property of interest
-   * @param get_names_only A bool used to indicate that only the variable names should be returned
-   *
-   * @return A vector of names that can be used as AuxVariable names
-   *
-   * By default this function produces an mooseError, you must create a specialization for any type
-   * that you wish to have the automatic output capability. Also, you need to add a test for this
-   * type within the act() method.
-   */
-  template <typename T>
-  std::vector<std::string> materialOutputHelper(const std::string & property_name,
-                                                const MaterialBase & material,
-                                                bool get_names_only);
-
-  /**
-   * Template method for creating the necessary objects for the various functor material property
-   * types
-   * @tparam T The type of material property that automatic output is being performed
-   * @param property_name The name of the functor material property to output
-   * @param material A pointer to the MaterialBase object containing the property of interest
-   * @param get_names_only A bool used to indicate that only the variable names should be returned
-   *
-   * @return A vector of names that can be used as AuxVariable names
-   *
-   * By default this function produces a mooseError, you must create a specialization for any type
-   * that you wish to have the automatic output capability. Also, you need to add a test for this
-   * type within the act() method.
-   */
-  template <typename T>
-  std::vector<std::string> functorMaterialOutputHelper(const std::string & property_name,
-                                                       const MaterialBase & material,
-                                                       bool get_names_only);
-
   /// Pointer the MaterialData object storing the block restricted materials
   const MaterialData * _block_material_data;
 
@@ -125,8 +124,14 @@ private:
   /// Map of variable name that contains the blocks to which the variable should be restricted
   std::map<std::string, std::set<SubdomainID>> _block_variable_map;
 
-  /// List of variables for the current MaterialBase object
+  /// variables for the current MaterialBase object
   std::set<std::string> _material_variable_names;
+
+  /// all variables added by this action
+  std::set<std::string> _all_variable_names;
+
+  /// property names we succeeded to set output up for
+  std::set<std::string> _supported_properties;
 
   /// Map of output names and list of variables associated with the output
   std::map<OutputName, std::set<std::string>> _material_variable_names_map;
@@ -137,24 +142,6 @@ private:
   /// Output only on TIMESTEP_END, not on INITIAL?
   const bool _output_only_on_timestep_end;
 };
-
-template <typename T>
-std::vector<std::string>
-MaterialOutputAction::materialOutputHelper(const std::string & /*property_name*/,
-                                           const MaterialBase & /*material*/,
-                                           bool /*get_names_only*/)
-{
-  mooseError("Unknown type, you must create a specialization of materialOutputHelper");
-}
-
-template <typename T>
-std::vector<std::string>
-MaterialOutputAction::functorMaterialOutputHelper(const std::string & /*property_name*/,
-                                                  const MaterialBase & /*material*/,
-                                                  bool /*get_names_only*/)
-{
-  mooseError("Unknown type, you must create a specialization of functorMaterialOutputHelper");
-}
 
 template <typename T>
 bool
@@ -182,5 +169,9 @@ template <typename T>
 bool
 MaterialOutputAction::hasFunctorProperty(const std::string & property_name)
 {
-  return _problem->hasFunctorWithType<T>(property_name, 0);
+  // functors support a limited set of types
+  if constexpr (std::is_same_v<T, Real> || std::is_same_v<T, RealVectorValue>)
+    return _problem->hasFunctorWithType<T>(property_name, 0);
+  else
+    return false;
 }

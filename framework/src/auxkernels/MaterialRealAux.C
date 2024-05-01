@@ -31,7 +31,7 @@ template <bool is_ad>
 Real
 MaterialRealAuxTempl<is_ad>::getRealValue()
 {
-  return MetaPhysicL::raw_value(this->_prop[this->_qp]);
+  return MetaPhysicL::raw_value(this->_full_value);
 }
 
 template class MaterialRealAuxTempl<false>;

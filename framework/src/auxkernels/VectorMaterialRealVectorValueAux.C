@@ -37,7 +37,7 @@ template <bool is_ad>
 RealVectorValue
 VectorMaterialRealVectorValueAuxTempl<is_ad>::getRealValue()
 {
-  return MetaPhysicL::raw_value(this->_prop[this->_qp]);
+  return MetaPhysicL::raw_value(this->_full_value);
 }
 
 template class VectorMaterialRealVectorValueAuxTempl<false>;

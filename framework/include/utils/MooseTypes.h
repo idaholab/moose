@@ -383,6 +383,11 @@ struct ADType<ChainedReal>
   typedef ChainedADReal type;
 };
 template <>
+struct ADType<RealVectorValue>
+{
+  typedef ADRealVectorValue type;
+};
+template <>
 struct ADType<RankTwoTensor>
 {
   typedef ADRankTwoTensor type;
@@ -413,6 +418,11 @@ template <template <typename> class W>
 struct ADType<W<Real>>
 {
   typedef W<ADReal> type;
+};
+template <template <typename> class W>
+struct ADType<W<RealVectorValue>>
+{
+  typedef W<ADRealVectorValue> type;
 };
 template <>
 struct ADType<RealEigenVector>
@@ -476,6 +486,11 @@ template <template <typename> class W>
 struct ADType<W<ADReal>>
 {
   typedef W<ADReal> type;
+};
+template <template <typename> class W>
+struct ADType<W<ADRealVectorValue>>
+{
+  typedef W<ADRealVectorValue> type;
 };
 
 template <>
@@ -552,7 +567,7 @@ using ADVariablePhiGradient = ADTemplateVariablePhiGradient<Real>;
 namespace Moose
 {
 template <typename T, bool is_ad>
-using GenericType = typename std::conditional<is_ad, typename ADType<T>::type, T>::type;
+using GenericType = typename std::conditional<is_ad, typename Moose::ADType<T>::type, T>::type;
 } // namespace Moose
 
 template <bool is_ad>
