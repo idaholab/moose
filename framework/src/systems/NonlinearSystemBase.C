@@ -126,6 +126,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
+    _fdcoloring(nullptr),
     _have_decomposition(false),
     _use_field_split_preconditioner(false),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
@@ -4008,4 +4009,14 @@ NonlinearSystemBase::preSolve()
   assembleScalingVector();
 
   return true;
+}
+
+void
+NonlinearSystemBase::destroyColoring()
+{
+  if (matrixFromColoring())
+  {
+    auto ierr = MatFDColoringDestroy(&_fdcoloring);
+    LIBMESH_CHKERR(ierr);
+  }
 }

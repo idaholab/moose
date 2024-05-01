@@ -696,6 +696,11 @@ public:
    */
   virtual void potentiallySetupFiniteDifferencing() {}
 
+  /**
+   * Destroy the coloring object if it exists
+   */
+  void destroyColoring();
+
 protected:
   /**
    * Compute the residual for a given tag

@@ -23,7 +23,27 @@
     prereq = 'group/dirk-2d-heat'
     cli_args = 'Preconditioning/fdp/type=FDP'
     issues = '#10304'
-    requirement = 'The system shall be able to use a finite difference preconditioner with L-stable DIRK time integratino.'
+    requirement = 'The system shall be able to use a finite difference preconditioner with two-stage L-stable DIRK time integration.'
     allow_warnings = true
+  []
+  [dirk3_fdp]
+    type = 'Exodiff'
+    input = 'dirk-2d-heat.i'
+    exodiff = 'dirk-2d-heat-3stage.e'
+    cli_args = 'Preconditioning/fdp/type=FDP Executioner/TimeIntegrator/type=LStableDirk3 Outputs/file_base=dirk-2d-heat-3stage Executioner/nl_rel_tol=1e-8'
+    issues = '#10304'
+    requirement = 'The system shall be able to use a finite difference preconditioner with three-stage L-stable DIRK time integration.'
+    allow_warnings = true
+    abs_zero = 5e-10
+  []
+  [dirk4_fdp]
+    type = 'Exodiff'
+    input = 'dirk-2d-heat.i'
+    exodiff = 'dirk-2d-heat-4stage.e'
+    cli_args = 'Preconditioning/fdp/type=FDP Executioner/TimeIntegrator/type=LStableDirk4 Outputs/file_base=dirk-2d-heat-4stage Executioner/nl_rel_tol=1e-8'
+    issues = '#10304'
+    requirement = 'The system shall be able to use a finite difference preconditioner with four-stage L-stable DIRK time integration.'
+    allow_warnings = true
+    abs_zero = 5e-10
   []
 []
