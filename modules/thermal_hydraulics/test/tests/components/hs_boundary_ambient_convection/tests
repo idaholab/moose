@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#19848 #19710'
+  issues = '#19848 #19710 #25275'
   design = 'HSBoundaryAmbientConvection.md'
   [energy_conservation_cylindrical]
     type = 'CSVDiff'
@@ -23,5 +23,11 @@
     # because output has execute_on = 'final'
     recover = false
     requirement = 'The system shall be able to simulate ambient convection on the boundary of a heat structure created from a 3D mesh in a file and show conservation of energy.'
+  []
+  [fin_enhancement]
+    type = Exodiff
+    input = 'cylindrical_with_fins.i'
+    exodiff = 'cylindrical_with_fins_out.e'
+    requirement = 'The system shall be able to enhance convective heat transfer on the boundary of a cylindrical heat structure using fins.'
   []
 []
