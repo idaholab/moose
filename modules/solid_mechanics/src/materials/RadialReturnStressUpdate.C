@@ -84,10 +84,10 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _effective_inelastic_strain_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name +
         this->template getParam<std::string>("effective_inelastic_strain_name"))),
-    _eff_inelastic_strain_rate(this->template declareProperty<Real>(
+    _effective_inelastic_strain_rate(this->template declareProperty<Real>(
         this->_base_name + this->template getParam<std::string>("effective_inelastic_strain_name") +
         "_rate")),
-    _eff_inelastic_strain_rate_old(this->template getMaterialPropertyOld<Real>(
+    _effective_inelastic_strain_rate_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name + this->template getParam<std::string>("effective_inelastic_strain_name") +
         "_rate")),
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
@@ -137,7 +137,7 @@ void
 RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
-  _eff_inelastic_strain_rate[_qp] = 0.0;
+  _effective_inelastic_strain_rate[_qp] = 0.0;
 }
 
 template <bool is_ad>
@@ -155,7 +155,7 @@ void
 RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
-  _eff_inelastic_strain_rate[_qp] = _eff_inelastic_strain_rate_old[_qp];
+  _effective_inelastic_strain_rate[_qp] = _effective_inelastic_strain_rate_old[_qp];
 }
 
 template <bool is_ad>
@@ -270,14 +270,14 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   // Initialize models around a stress that uses the previous inelastic strain increment to
   // predict the final stress state for this step. (Dunne & Petrinic eq 5.16 )
   // fixme three shear mod is set in comptueStressInitialize
-  Real predicted_eff_strain_inc =
-      _scale_strain_predictor * _eff_inelastic_strain_rate_old[_qp] * _dt;
+  Real predicted_effective_strain_increment =
+      _scale_strain_predictor * _effective_inelastic_strain_rate_old[_qp] * _dt;
 
   const Real three_shear_modulus =
       3.0 *
       MetaPhysicL::raw_value(ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor));
   const GenericReal<is_ad> predictor_effective_trial_stress =
-      effective_trial_stress - three_shear_modulus * predicted_eff_strain_inc;
+      effective_trial_stress - three_shear_modulus * predicted_effective_strain_increment;
 
   computeStressInitialize(predictor_effective_trial_stress, elasticity_tensor);
 
@@ -286,7 +286,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
       "Shear modulus is zero. Ensure that the base class computeStressInitialize() is called.");
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
-  _effective_inelastic_strain_increment = predicted_eff_strain_inc;
+  _effective_inelastic_strain_increment = predicted_effective_strain_increment;
   if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
   {
     this->returnMappingSolve(
@@ -308,7 +308,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
     // ternary checking for _dt=0 on first timestep.
     // The effective strain rate updated here making.
     // For substepping, this will make it the rate over a single substep.
-    _eff_inelastic_strain_rate[_qp] =
+    _effective_inelastic_strain_rate[_qp] =
         (_dt == 0) ? 0 : MetaPhysicL::raw_value(_effective_inelastic_strain_increment) / _dt;
 
     // Use the old elastic strain here because we require tensors used by this class
