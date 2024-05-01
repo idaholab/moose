@@ -28,6 +28,7 @@ public:
 protected:
   virtual void execute() override;
 
+  /// Coupled MOOSE variable to read data from
   const VariableValue & _moose_variable;
 };
 

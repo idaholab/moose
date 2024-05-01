@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "MOOSEToNEML2.h"
 #include "NEML2Utils.h"
+#include "MOOSEToNEML2.h"
 
 #ifndef NEML2_ENABLED
 NEML2ObjectStubHeader(MOOSERealMaterialPropertyToNEML2, ElementUserObject);
@@ -32,6 +32,7 @@ public:
 protected:
   virtual void execute() override;
 
+  /// MOOSE material property to read data from
   const MaterialProperty<T> & _mat_prop;
 };
 

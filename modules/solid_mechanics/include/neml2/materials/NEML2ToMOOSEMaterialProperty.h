@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "Material.h"
 #include "NEML2Utils.h"
+#include "Material.h"
 
 #ifndef NEML2_ENABLED
 NEML2ObjectStubHeader(NEML2ToRealMOOSEMaterialProperty, Material);

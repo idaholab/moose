@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "NEML2Utils.h"
 #include "ElementUserObject.h"
 
 #ifndef NEML2_ENABLED
@@ -38,7 +39,7 @@ public:
 
   ExecuteNEML2Model(const InputParameters & params);
 
-  void initialSetup() override;
+  virtual void initialSetup() override;
   virtual void timestepSetup() override;
 
   virtual void initialize() override;

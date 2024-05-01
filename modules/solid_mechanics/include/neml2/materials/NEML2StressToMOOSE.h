@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "ComputeLagrangianObjectiveStress.h"
 #include "NEML2Utils.h"
+#include "ComputeLagrangianObjectiveStress.h"
 
 #ifndef NEML2_ENABLED
 NEML2ObjectStubHeader(NEML2StressToMOOSE, Material);

@@ -143,7 +143,9 @@ ExecuteNEML2Model::initialize()
   _elem_to_batch_index.clear();
   _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
   _batch_index = 0;
-  _output_ready = false;
+
+  if (shouldCompute())
+    _output_ready = false;
 }
 
 void

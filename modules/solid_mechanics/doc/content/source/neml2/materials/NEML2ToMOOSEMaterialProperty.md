@@ -7,7 +7,7 @@
 Objects in this family assign a selected NEML2 model output computed through [ExecuteNEML2Model](ExecuteNEML2Model.md) to a MOOSE MaterialProperty. The following flavors exist:
 
 !table caption=`NEML2ToMOOSEMaterialProperty` objects
-| Object nam | Moose MaterialProperty type |
+| Object name | MOOSE material property type |
 | - | - |
 | `NEML2ToRealMOOSEMaterialProperty`  | `Real` |
 | `NEML2ToStdVectorRealMOOSEMaterialProperty` | `std::vector<Real>` |

@@ -18,7 +18,7 @@ NEML2TestModel::expected_options()
 {
   using vecstr = std::vector<std::string>;
   auto options = Model::expected_options();
-  options.set<VariableName>("A") = vecstr{"forces", std::string("A")};
+  options.set<VariableName>("A") = VariableName("forces", "A");
   options.set<VariableName>("B") = vecstr{"forces", std::string("B")};
   options.set<VariableName>("sum") = vecstr{"state", "internal", "sum"};
   options.set<VariableName>("product") = vecstr{"state", "internal", "product"};
@@ -41,8 +41,9 @@ NEML2TestModel::NEML2TestModel(const OptionSet & options)
 void
 NEML2TestModel::set_value(bool out, bool dout_din, bool d2out_din2)
 {
-  neml_assert_dbg(!d2out_din2, "I am too lazy to implement second derivatives");
-  neml_assert_dbg(!dout_din, "Try AD");
+  neml_assert_dbg(
+      !dout_din && !d2out_din2,
+      "This model requires use_AD_first_derivative=true and use_AD_second_derivative=true.");
 
   if (!out)
     return;

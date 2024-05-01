@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "ElementUserObject.h"
 #include "NEML2Utils.h"
+#include "ElementUserObject.h"
 
 #ifndef NEML2_ENABLED
 NEML2ObjectStubHeader(MOOSEToNEML2, ElementUserObject);
@@ -39,8 +39,10 @@ protected:
   virtual void finalize() override {}
   virtual void threadJoin(const UserObject &) override;
 
+  /// NEML2 input variable to transfer data to
   const neml2::VariableName _neml2_variable;
 
+  /// Intermediate data buffer, filled during the element loop
   std::vector<torch::Tensor> _buffer;
 };
 

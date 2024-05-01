@@ -4,7 +4,7 @@
 
 ## Description
 
-This object uses the specified NEML2 material model to perform mesh-wise batched
+This object uses the specified NEML2 material model to perform mesh-wise (or subdomain-wise) batched
 material update.
 
 Each NEML2 model +input+ is gathered by a [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) or [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md) user object given in [!param](/UserObjects/ExecuteNEML2Model/gather_uos).
