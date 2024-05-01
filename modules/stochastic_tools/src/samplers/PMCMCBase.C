@@ -34,6 +34,7 @@ PMCMCBase::validParams()
       "num_columns", "Number of columns to be used in the CSV file with the configuration values.");
   params.addParam<std::vector<Real>>("lower_bound", "Lower bounds for making the next proposal.");
   params.addParam<std::vector<Real>>("upper_bound", "Upper bounds for making the next proposal.");
+  params.addParam<Real>("variance_bound", "Upper bound for variance for making the next proposal.");
   params.addRequiredParam<std::vector<Real>>("initial_values",
                                              "The starting values of the inputs to be calibrated.");
   params.addParam<unsigned int>(
@@ -51,6 +52,7 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
                                              : nullptr),
     _upper_bound(isParamValid("upper_bound") ? &getParam<std::vector<Real>>("upper_bound")
                                              : nullptr),
+    _variance_bound(isParamValid("variance_bound") ? &getParam<Real>("variance_bound") : nullptr),
     _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds"))
@@ -189,6 +191,12 @@ const std::vector<Real> &
 PMCMCBase::getVarSamples() const
 {
   return _new_var_samples;
+}
+
+const std::vector<std::vector<Real>> &
+PMCMCBase::getSamples() const
+{
+  return _new_samples;
 }
 
 const std::vector<const Distribution *>
