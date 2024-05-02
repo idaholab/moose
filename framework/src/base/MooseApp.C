@@ -724,7 +724,7 @@ MooseApp::setupOptions()
   {
     _pars.set<bool>("timing") = false;
 
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.setActive(false);
   }
 
   if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
