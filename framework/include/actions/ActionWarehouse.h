@@ -27,6 +27,7 @@ class MooseMesh;
 class Syntax;
 class ActionFactory;
 class FEProblem;
+class PhysicsBase;
 
 /**
  * Storage for action instances.
@@ -134,6 +135,18 @@ public:
     }
     return *p;
   }
+  template <class T>
+  T * getPhysics(const std::string & name)
+  {
+    auto physics = const_cast<T *>(&getAction<T>(name));
+    if (!dynamic_cast<PhysicsBase *>(physics))
+      mooseError("The Physics requested of type '",
+                 MooseUtils::prettyCppType<T>(),
+                 "' and name '",
+                 name,
+                 "' is not derived from the PhysicsBase class");
+    return physics;
+  }
 
   /**
    * Retrieve all actions in a specific type ordered by their names.
@@ -155,6 +168,28 @@ public:
     for (auto & pair : actions)
       action_vector.push_back(pair.second.get());
     return action_vector;
+  }
+
+  /**
+   * Retrieve all Physics with a specific type ordered by their names
+   */
+  template <class T>
+  std::vector<T *> getPhysics()
+  {
+    // we need to create the map first to ensure that all physics in the map are unique
+    // and the physics are sorted by their names
+    typename std::map<std::string, const std::shared_ptr<T>> physics;
+    for (auto act_ptr : _all_ptrs)
+    {
+      auto p = std::dynamic_pointer_cast<T>(act_ptr);
+      if (p)
+        physics.insert(std::make_pair(act_ptr->name(), p));
+    }
+    // construct the vector from the map entries
+    std::vector<T *> physics_vector;
+    for (auto & pair : physics)
+      physics_vector.push_back(pair.second.get());
+    return physics_vector;
   }
 
   /**

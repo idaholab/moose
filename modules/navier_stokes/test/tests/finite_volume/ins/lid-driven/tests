@@ -67,7 +67,7 @@
     input = 'lid-driven-action.i'
     requirement = 'The system shall throw an error if the user requests integral value pressure pinning while specifying a point for the pin.'
     expect_err = "This parameter should not be given by the user with the corresponding "
-                 "pinned_pressure_type setting!"
+                 "pinned_pressure_type setting"
     cli_args = "Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0'"
   []
   [nonsingular]
@@ -101,6 +101,15 @@
     input = 'lid-driven-with-energy-action.i'
     exodiff = 'lid-driven-with-energy-action_out.e'
     requirement = 'The system shall be able to get the same result as the enthalpy transport example using the NSFVAction to set up the run.'
+    method = '!dbg'
+    valgrind = HEAVY
+    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+  []
+  [with-temp-physics]
+    type = 'Exodiff'
+    input = 'lid-driven-with-energy-physics.i'
+    exodiff = 'lid-driven-with-energy-physics_out.e'
+    requirement = 'The system shall be able to get the same result as the enthalpy transport example using the Physics syntax to set up the run.'
     method = '!dbg'
     valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'

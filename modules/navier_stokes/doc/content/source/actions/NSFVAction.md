@@ -1,6 +1,10 @@
 # NavierStokesFV Action
 
-!syntax description /Modules/NavierStokesFV/NSFVAction
+This class allows us to set up Navier-Stokes equations for porous medium or clean fluid flows using incompressible or weakly compressible approximations with a finite volume discretization.
+
+!alert warning
+This action is deprecated and is replaced by the `WCNSFVPhysics` classes. The deprecated
+syntax can currently still be used.
 
 ## Overview
 

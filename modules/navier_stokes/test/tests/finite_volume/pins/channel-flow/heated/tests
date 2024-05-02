@@ -89,6 +89,18 @@
     valgrind = HEAVY
     cli_args = "Outputs/file_base='rc-heated-solid-fluid-action'"
   []
+  [solid-fluid-physics]
+    type = 'Exodiff'
+    input = 2d-rc-heated-physics.i
+    exodiff = rc-heated-solid-fluid-physics.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    design = 'WCNSFVFlowPhysics.md WCNSFVFluidHeatTransferPhysics.md'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel using the WCNSFV Physics syntax.'
+    valgrind = HEAVY
+    cli_args = "Outputs/file_base='rc-heated-solid-fluid-physics'"
+  []
   [solid-fluid-block]
     type = 'Exodiff'
     input = 2d-rc-heated.i

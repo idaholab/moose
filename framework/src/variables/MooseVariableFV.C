@@ -48,7 +48,7 @@ MooseVariableFV<OutputType>::validParams()
   MooseEnum face_interp_method("average skewness-corrected", "average");
   params.template addParam<MooseEnum>("face_interp_method",
                                       face_interp_method,
-                                      "Switch that can select between face interpoaltion methods.");
+                                      "Switch that can select between face interpolation methods.");
   params.template addParam<bool>(
       "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
   // Just evaluating finite volume variables at an arbitrary location in a cell requires a layer of
