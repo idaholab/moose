@@ -117,9 +117,9 @@ Component::checkSetupStatus(const EComponentSetupStatus & status) const
   if (_component_setup_status < status)
     mooseError(name(),
                ": The component setup status (",
-               _component_setup_status,
+               stringify(_component_setup_status),
                ") is less than the required status (",
-               status,
+               stringify(status),
                ")");
 }
 
@@ -228,5 +228,26 @@ Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & par
 
     if (n_provided_params != 0)
       logError("Only one of the parameters ", params_list_string, " can be provided");
+  }
+}
+
+/// Return a string for the setup status
+std::string
+Component::stringify(EComponentSetupStatus status) const
+{
+  switch (status)
+  {
+    case CREATED:
+      return "component created";
+    case MESH_PREPARED:
+      return "component mesh set up";
+    case INITIALIZED_PRIMARY:
+      return "primary initialization completed";
+    case INITIALIZED_SECONDARY:
+      return "secondary initialization completed";
+    case CHECKED:
+      return "component fully set up and checked";
+    default:
+      mooseError("Should not reach here");
   }
 }

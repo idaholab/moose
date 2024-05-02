@@ -52,7 +52,7 @@
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential using the NSFVAction syntax.'
     abs_zero = 1e-9
     issues = "#19472"
-    cli_args = "Modules/NavierStokesFV/inlet_boundaries='' Modules/NavierStokesFV/momentum_inlet_types='' Modules/NavierStokesFV/momentum_inlet_function='' Modules/NavierStokesFV/outlet_boundaries='left right' Modules/NavierStokesFV/momentum_outlet_types='fixed-pressure fixed-pressure' Modules/NavierStokesFV/momentum_wall_types='noslip noslip'  Modules/NavierStokesFV/pinned_pressure_value=0.01  Outputs/file_base='rc-no-slip-delta-pressure-action' Modules/NavierStokesFV/pressure_function='1 0'"
+    cli_args = "Modules/NavierStokesFV/inlet_boundaries='' Modules/NavierStokesFV/momentum_inlet_types='' Modules/NavierStokesFV/momentum_inlet_function='' Modules/NavierStokesFV/outlet_boundaries='left right' Modules/NavierStokesFV/momentum_outlet_types='fixed-pressure fixed-pressure' Modules/NavierStokesFV/momentum_wall_types='noslip noslip' Outputs/file_base='rc-no-slip-delta-pressure-action' Modules/NavierStokesFV/pressure_function='1 0'"
   []
   [no-slip-pressure-average]
     type = 'Exodiff'

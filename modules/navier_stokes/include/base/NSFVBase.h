@@ -26,6 +26,14 @@ class NSFVBase : public BaseType
 public:
   static InputParameters validParams();
 
+  static InputParameters commonNavierStokesFlowParams();
+  static InputParameters commonMomentumEquationParams();
+  static InputParameters commonMomentumBoundaryTypesParams();
+  static InputParameters commonMomentumBoundaryFluxesParams();
+  static InputParameters commonFluidEnergyEquationParams();
+  static InputParameters commonScalarFieldAdvectionParams();
+  static InputParameters commonTurbulenceParams();
+
   NSFVBase(const InputParameters & parameters);
 
   ///@{ general public interface functions
@@ -289,8 +297,7 @@ protected:
   const MooseFunctorName _porosity_name;
   /// The name of the functor for the smoothed porosity field
   const MooseFunctorName _flow_porosity_functor_name;
-  /// Switch to enable friction correction for the porous medium momentum
-  /// equations
+  /// Switch to enable friction correction for the porous medium momentum equations
   const bool _use_friction_correction;
 
   /// Velocity names in case they are defined externally. For example in a situation when
@@ -324,7 +331,7 @@ protected:
   /// Energy intlet types (fixed-velocity/mass-flow/momentum-inflow)
   const MultiMooseEnum _energy_inlet_types;
   /// Energy function names at inlet boundaries
-  const std::vector<std::string> _energy_inlet_function;
+  const std::vector<MooseFunctorName> _energy_inlet_function;
   /// Energy wall types (symmetry/heatflux/fixed-temperature)
   const MultiMooseEnum _energy_wall_types;
   /// Energy function names at wall boundaries
@@ -445,50 +452,12 @@ protected:
 
 template <class BaseType>
 InputParameters
-NSFVBase<BaseType>::validParams()
+NSFVBase<BaseType>::commonNavierStokesFlowParams()
 {
-  InputParameters params = BaseType::validParams();
-
-  /**
-   * Add params relevant to the objects we may add
-   */
-  params += INSFVRhieChowInterpolator::uniqueParams();
-  params += INSFVMomentumAdvection::uniqueParams();
-
-  /**
-   * General parameters used to set up the simulation.
-   */
-
+  InputParameters params = emptyInputParameters();
   MooseEnum comp_type("incompressible weakly-compressible", "incompressible");
   params.addParam<MooseEnum>(
       "compressibility", comp_type, "Compressibility constraint for the Navier-Stokes equations.");
-
-  params.addParam<bool>(
-      "porous_medium_treatment", false, "Whether to use porous medium kernels or not.");
-
-  params.addParam<bool>("initialize_variables_from_mesh_file",
-                        false,
-                        "Determines if the variables that are added by the action are initialized "
-                        "from the mesh file (only for Exodus format)");
-  params.addParam<std::string>(
-      "initial_from_file_timestep",
-      "LATEST",
-      "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
-      "for a given variable. (Default: LATEST)");
-
-  MooseEnum turbulence_type("mixing-length none", "none");
-  params.addParam<MooseEnum>(
-      "turbulence_handling",
-      turbulence_type,
-      "The way additional diffusivities are determined in the turbulent regime.");
-
-  params.addParam<bool>("add_flow_equations", true, "True to add mass and momentum equations");
-  params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
-  params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
-
-  params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
-                              "add_flow_equations add_energy_equation add_scalar_equation ",
-                              "General control");
 
   params.addParam<std::vector<std::string>>(
       "velocity_variable",
@@ -504,36 +473,6 @@ NSFVBase<BaseType>::validParams()
       "If supplied, the system checks for available fluid "
       "temperature variable. Otherwise, it is created within the action.");
 
-  params.addParamNamesToGroup("velocity_variable pressure_variable fluid_temperature_variable",
-                              "External variable");
-
-  /**
-   * Parameters influencing the porous medium treatment.
-   */
-
-  params.addParam<MooseFunctorName>(
-      "porosity", NS::porosity, "The name of the auxiliary variable for the porosity field.");
-
-  params.addParam<unsigned short>(
-      "porosity_smoothing_layers",
-      "The number of interpolation-reconstruction operations to perform on the porosity.");
-
-  MooseEnum porosity_interface_pressure_treatment("automatic bernoulli", "automatic");
-  params.addParam<MooseEnum>("porosity_interface_pressure_treatment",
-                             porosity_interface_pressure_treatment,
-                             "How to treat pressure at a porosity interface");
-
-  params.addParam<bool>("use_friction_correction",
-                        "If friction correction should be applied in the momentum equation.");
-
-  params.addParam<Real>(
-      "consistent_scaling",
-      "Scaling parameter for the friction correction in the momentum equation (if requested).");
-
-  params.addParamNamesToGroup("porosity porosity_smoothing_layers use_friction_correction "
-                              "consistent_scaling porosity_interface_pressure_treatment",
-                              "Porous medium treatment");
-
   /**
    * Parameters used to define the boundaries of the domain.
    */
@@ -544,63 +483,18 @@ NSFVBase<BaseType>::validParams()
       "outlet_boundaries", std::vector<BoundaryName>(), "Names of outlet boundaries");
   params.addParam<std::vector<BoundaryName>>(
       "wall_boundaries", std::vector<BoundaryName>(), "Names of wall boundaries");
+  return params;
+}
 
-  /**
-   * Parameters used to define the handling of the momentum-mass equations.
-   */
-  std::vector<FunctionName> default_initial_velocity = {"1e-15", "1e-15", "1e-15"};
-  params.addParam<std::vector<FunctionName>>("initial_velocity",
-                                             default_initial_velocity,
-                                             "The initial velocity, assumed constant everywhere");
-
-  params.addParam<FunctionName>(
-      "initial_pressure", "1e5", "The initial pressure, assumed constant everywhere");
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::commonMomentumEquationParams()
+{
+  InputParameters params = emptyInputParameters();
 
   params.addParam<MooseFunctorName>(
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
-
   params.addParam<MooseFunctorName>("density", NS::density, "The name of the density");
-
-  params.addParam<RealVectorValue>(
-      "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
-
-  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass fixed-pressure");
-  params.addParam<MultiMooseEnum>("momentum_inlet_types",
-                                  mom_inlet_types,
-                                  "Types of inlet boundaries for the momentum equation.");
-
-  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "momentum_inlet_function",
-      std::vector<std::vector<MooseFunctorName>>(),
-      "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
-      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
-      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
-      "dimensions for fixed-velocity boundaries or is a single function name for pressure inlets.");
-  params.addParam<std::vector<PostprocessorName>>(
-      "flux_inlet_pps",
-      std::vector<PostprocessorName>(),
-      "The name of the postprocessors which compute the mass flow/ velocity magnitude. "
-      "Mainly used for coupling between different applications.");
-  params.addParam<std::vector<Point>>(
-      "flux_inlet_directions",
-      std::vector<Point>(),
-      "The directions which can be used to define the orientation of the flux with respect to the "
-      "mesh. This can be used to define a flux which is incoming with an angle or to adjust the "
-      "flux direction with respect to the normal. If the inlet surface is defined on an internal "
-      "face, this is necessary to ensure the arbitrary orientation of the normal does not result "
-      "in non-physical results.");
-
-  MultiMooseEnum mom_outlet_types("fixed-pressure zero-gradient fixed-pressure-zero-gradient");
-  params.addParam<MultiMooseEnum>("momentum_outlet_types",
-                                  mom_outlet_types,
-                                  "Types of outlet boundaries for the momentum equation");
-  params.addParam<std::vector<MooseFunctorName>>("pressure_function",
-                                                 std::vector<MooseFunctorName>(),
-                                                 "Functions for boundary pressures at outlets.");
-
-  MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction", "noslip");
-  params.addParam<MultiMooseEnum>(
-      "momentum_wall_types", mom_wall_types, "Types of wall boundaries for the momentum equation");
 
   params.addParam<bool>(
       "pin_pressure", false, "Switch to enable pressure shifting for incompressible simulations.");
@@ -623,6 +517,9 @@ NSFVBase<BaseType>::validParams()
 
   params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
 
+  params.addParam<RealVectorValue>(
+      "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
+
   params.addRangeCheckedParam<Real>(
       "ref_temperature",
       273.15,
@@ -639,14 +536,93 @@ NSFVBase<BaseType>::validParams()
       "Momentum equation");
 
   /**
-   * Equations used to set up the energy equation/enthalpy equation if it is required.
+   * Parameters controlling the friction terms in case of porous medium simulations.
    */
 
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
+      "friction_blocks",
+      {},
+      "The blocks where the friction factors are applied to emulate flow resistances.");
+
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "friction_types", {}, "The types of friction forces for every block in 'friction_blocks'.");
+
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "friction_coeffs",
+      {},
+      "The friction coefficients for every item in 'friction_types'. Note that if "
+      "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
+      "multiplier but they are not multiplied with density yet!");
+
+  params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs", "Friction control");
+  return params;
+}
+
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::commonMomentumBoundaryTypesParams()
+{
+  InputParameters params = emptyInputParameters();
+  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass fixed-pressure");
+  params.addParam<MultiMooseEnum>("momentum_inlet_types",
+                                  mom_inlet_types,
+                                  "Types of inlet boundaries for the momentum equation.");
+
+  MultiMooseEnum mom_outlet_types("fixed-pressure zero-gradient fixed-pressure-zero-gradient");
+  params.addParam<MultiMooseEnum>("momentum_outlet_types",
+                                  mom_outlet_types,
+                                  "Types of outlet boundaries for the momentum equation");
+  params.addParam<std::vector<MooseFunctorName>>("pressure_function",
+                                                 std::vector<MooseFunctorName>(),
+                                                 "Functions for boundary pressures at outlets.");
+
+  MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction");
+  params.addParam<MultiMooseEnum>(
+      "momentum_wall_types", mom_wall_types, "Types of wall boundaries for the momentum equation");
+
+  return params;
+}
+
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::commonMomentumBoundaryFluxesParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
+      "momentum_inlet_function",
+      std::vector<std::vector<MooseFunctorName>>(),
+      "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
+      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
+      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
+      "dimensions for fixed-velocity boundaries or is a single function name for pressure inlets.");
+  params.addParam<std::vector<PostprocessorName>>(
+      "flux_inlet_pps",
+      std::vector<PostprocessorName>(),
+      "The name of the postprocessors which compute the mass flow/ velocity magnitude. "
+      "Mainly used for coupling between different applications.");
+  params.addParam<std::vector<Point>>(
+      "flux_inlet_directions",
+      std::vector<Point>(),
+      "The directions which can be used to define the orientation of the flux with respect to the "
+      "mesh. This can be used to define a flux which is incoming with an angle or to adjust the "
+      "flux direction with respect to the normal. If the inlet surface is defined on an internal "
+      "face, this is necessary to ensure the arbitrary orientation of the normal does not result "
+      "in non-physical results.");
+
+  return params;
+}
+
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::commonFluidEnergyEquationParams()
+{
+  InputParameters params = emptyInputParameters();
   params.addParam<FunctionName>(
       "initial_temperature", "300", "The initial temperature, assumed constant everywhere");
 
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "thermal_conductivity_blocks",
+      {},
       "The blocks where the user wants define different thermal conductivities.");
 
   params.addParam<std::vector<MooseFunctorName>>(
@@ -661,12 +637,12 @@ NSFVBase<BaseType>::validParams()
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
 
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<MooseFunctorName>>(
       "energy_inlet_function",
-      std::vector<std::string>(),
+      std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux", "heatflux");
+  MultiMooseEnum en_wall_types("fixed-temperature heatflux");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
@@ -704,29 +680,14 @@ NSFVBase<BaseType>::validParams()
                               "use_external_enthalpy_material",
                               "Energy equation");
 
-  /**
-   * Parameters controlling the friction terms in case of porous medium simulations.
-   */
+  return params;
+}
 
-  params.addParam<std::vector<std::vector<SubdomainName>>>(
-      "friction_blocks",
-      "The blocks where the friction factors are applied to emulate flow resistances.");
-
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "friction_types", "The types of friction forces for every block in 'friction_blocks'.");
-
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "friction_coeffs",
-      "The friction coefficients for every item in 'friction_types'. Note that if "
-      "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
-      "multiplier but they are not multiplied with density yet!");
-
-  params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs", "Friction control");
-
-  /**
-   * Parameters describing the handling of advected scalar fields
-   */
-
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
+{
+  InputParameters params = emptyInputParameters();
   params.addParam<std::vector<NonlinearVariableName>>(
       "passive_scalar_names",
       std::vector<NonlinearVariableName>(),
@@ -739,10 +700,6 @@ NSFVBase<BaseType>::validParams()
       "passive_scalar_diffusivity",
       std::vector<MooseFunctorName>(),
       "Functor names for the diffusivities used for the passive scalar fields.");
-
-  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
-                                     std::vector<Real>(),
-                                     "Schmidt numbers used for the passive scalar fields.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_source",
@@ -767,15 +724,170 @@ NSFVBase<BaseType>::validParams()
       ps_inlet_types,
       "Types for the inlet boundaries for the passive scalar equation.");
 
+  params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
+                              "passive_scalar_source passive_scalar_coupled_source "
+                              "passive_scalar_coupled_source_coeff",
+                              "Passive scalar control");
+  return params;
+}
+
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::commonTurbulenceParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  /**
+   * Parameter controlling the turbulence handling used for the equations.
+   */
+  params.addParam<std::vector<BoundaryName>>(
+      "mixing_length_walls",
+      std::vector<BoundaryName>(),
+      "Walls where the mixing length model should be utilized.");
+
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  params.addParam<ExecFlagEnum>("mixing_length_aux_execute_on",
+                                exec_enum,
+                                "When the mixing length aux kernels should be executed.");
+
+  params.addParam<MooseFunctorName>(
+      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
+  params.addParam<MooseFunctorName>("von_karman_const_0", 0.09, "'Escudier' model parameter");
+  params.addParam<MooseFunctorName>(
+      "mixing_length_delta",
+      1.0,
+      "Tunable parameter related to the thickness of the boundary layer."
+      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
+      "retrieved.");
+  params.addRangeCheckedParam<Real>("turbulent_prandtl",
+                                    1,
+                                    "turbulent_prandtl > 0",
+                                    "Turbulent Prandtl number for energy turbulent diffusion");
+  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
+                                     std::vector<Real>(),
+                                     "Schmidt numbers used for the passive scalar fields.");
+
+  params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
+                              "von_karman_const_0 mixing_length_delta turbulent_prandtl",
+                              "Turbulence");
+
+  return params;
+}
+
+template <class BaseType>
+InputParameters
+NSFVBase<BaseType>::validParams()
+{
+  InputParameters params = BaseType::validParams();
+
+  /**
+   * Add params relevant to the objects we may add
+   */
+  params += INSFVRhieChowInterpolator::uniqueParams();
+  params += INSFVMomentumAdvection::uniqueParams();
+
+  /**
+   * General parameters used to set up the simulation.
+   */
+  params += NSFVBase<BaseType>::commonNavierStokesFlowParams();
+
+  params.addParam<bool>(
+      "porous_medium_treatment", false, "Whether to use porous medium kernels or not.");
+
+  MooseEnum turbulence_type("mixing-length none", "none");
+  params.addParam<MooseEnum>(
+      "turbulence_handling",
+      turbulence_type,
+      "The way additional diffusivities are determined in the turbulent regime.");
+
+  params.addParam<bool>("initialize_variables_from_mesh_file",
+                        false,
+                        "Determines if the variables that are added by the action are initialized "
+                        "from the mesh file (only for Exodus format)");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
+      "for a given variable. (Default: LATEST)");
+
+  params.addParam<bool>("add_flow_equations", true, "True to add mass and momentum equations");
+  params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
+  params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
+
+  params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
+                              "add_flow_equations add_energy_equation add_scalar_equation ",
+                              "General control");
+
+  params.addParamNamesToGroup("velocity_variable pressure_variable fluid_temperature_variable",
+                              "External variable");
+
+  /**
+   * Parameters influencing the porous medium treatment.
+   */
+
+  params.addParam<MooseFunctorName>(
+      "porosity", NS::porosity, "The name of the auxiliary variable for the porosity field.");
+
+  params.addParam<unsigned short>(
+      "porosity_smoothing_layers",
+      "The number of interpolation-reconstruction operations to perform on the porosity.");
+
+  MooseEnum porosity_interface_pressure_treatment("automatic bernoulli", "automatic");
+  params.addParam<MooseEnum>("porosity_interface_pressure_treatment",
+                             porosity_interface_pressure_treatment,
+                             "How to treat pressure at a porosity interface");
+
+  params.addParam<bool>("use_friction_correction",
+                        false,
+                        "If friction correction should be applied in the momentum equation.");
+
+  params.addParam<Real>(
+      "consistent_scaling",
+      "Scaling parameter for the friction correction in the momentum equation (if requested).");
+
+  params.addParamNamesToGroup("porosity porosity_smoothing_layers use_friction_correction "
+                              "consistent_scaling porosity_interface_pressure_treatment",
+                              "Porous medium treatment");
+
+  /**
+   * Parameters used to define the handling of the momentum-mass equations.
+   */
+  std::vector<FunctionName> default_initial_velocity = {"1e-15", "1e-15", "1e-15"};
+  params.addParam<std::vector<FunctionName>>("initial_velocity",
+                                             default_initial_velocity,
+                                             "The initial velocity, assumed constant everywhere");
+
+  params.addParam<FunctionName>(
+      "initial_pressure", "1e5", "The initial pressure, assumed constant everywhere");
+
+  params += NSFVBase<BaseType>::commonMomentumEquationParams();
+
+  /**
+   * Parameters describing the momentum equations boundary conditions
+   */
+  params += NSFVBase<BaseType>::commonMomentumBoundaryTypesParams();
+  params += NSFVBase<BaseType>::commonMomentumBoundaryFluxesParams();
+
+  /**
+   * Parameters describing the fluid energy equation
+   */
+  params += NSFVBase<BaseType>::commonFluidEnergyEquationParams();
+
+  /**
+   * Parameters describing the handling of advected scalar fields
+   */
+  params += NSFVBase<BaseType>::commonScalarFieldAdvectionParams();
+
+  // These parameters are not shared because the WCNSFVPhysics use functors
   params.addParam<std::vector<std::vector<std::string>>>(
       "passive_scalar_inlet_function",
       std::vector<std::vector<std::string>>(),
       "Functions for inlet boundaries in the passive scalar equations.");
 
-  params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
-                              "passive_scalar_schmidt_number passive_scalar_source "
-                              "passive_scalar_coupled_source passive_scalar_coupled_source_coeff",
-                              "Passive scalar control");
+  /**
+   * Parameters describing the handling of turbulence
+   */
+  params += NSFVBase<BaseType>::commonTurbulenceParams();
 
   /**
    * Parameters allowing the control over numerical schemes for different terms in the
@@ -902,39 +1014,7 @@ NSFVBase<BaseType>::validParams()
 
   params.addParamNamesToGroup("ghost_layers", "Parallel Execution Tuning");
 
-  /**
-   * Parameter controlling the turbulence handling used for the equations.
-   */
-  params.addParam<std::vector<BoundaryName>>(
-      "mixing_length_walls",
-      std::vector<BoundaryName>(),
-      "Walls where the mixing length model should be utilized.");
-
-  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
-  params.addParam<ExecFlagEnum>("mixing_length_aux_execute_on",
-                                exec_enum,
-                                "When the mixing length aux kernels should be executed.");
-
-  params.addParam<MooseFunctorName>(
-      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
-  params.addParam<MooseFunctorName>("von_karman_const_0", 0.09, "'Escudier' model parameter");
-  params.addParam<MooseFunctorName>(
-      "mixing_length_delta",
-      1.0,
-      "Tunable parameter related to the thickness of the boundary layer."
-      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
-      "retrieved.");
-  params.addRangeCheckedParam<Real>("turbulent_prandtl",
-                                    1,
-                                    "turbulent_prandtl > 0",
-                                    "Turbulent Prandtl number for energy turbulent diffusion");
-
-  params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
-                              "von_karman_const_0 mixing_length_delta turbulent_prandtl",
-                              "Turbulence");
-
   // Create input parameter groups
-
   params.addParamNamesToGroup("dynamic_viscosity density thermal_expansion "
                               "thermal_conductivity_blocks thermal_conductivity specific_heat",
                               "Material property");
@@ -970,9 +1050,7 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
                                         parameters.get<unsigned short>("porosity_smoothing_layers")
                                     ? NS::smoothed_porosity
                                     : _porosity_name),
-    _use_friction_correction(parameters.isParamValid("use_friction_correction")
-                                 ? parameters.get<bool>("use_friction_correction")
-                                 : false),
+    _use_friction_correction(parameters.get<bool>("use_friction_correction")),
     _velocity_name(
         parameters.isParamValid("velocity_variable")
             ? parameters.get<std::vector<std::string>>("velocity_variable")
@@ -998,7 +1076,7 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
     _momentum_outlet_types(parameters.get<MultiMooseEnum>("momentum_outlet_types")),
     _momentum_wall_types(parameters.get<MultiMooseEnum>("momentum_wall_types")),
     _energy_inlet_types(parameters.get<MultiMooseEnum>("energy_inlet_types")),
-    _energy_inlet_function(parameters.get<std::vector<std::string>>("energy_inlet_function")),
+    _energy_inlet_function(parameters.get<std::vector<MooseFunctorName>>("energy_inlet_function")),
     _energy_wall_types(parameters.get<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_function(parameters.get<std::vector<MooseFunctorName>>("energy_wall_function")),
     _pressure_function(parameters.get<std::vector<MooseFunctorName>>("pressure_function")),
@@ -3106,7 +3184,7 @@ NSFVBase<BaseType>::processThermalConductivity()
   }
 
   if (have_vector && !_porous_medium_treatment)
-    paramError("thermal_conductivity", "Cannot use anistropic diffusion with non-porous flows!");
+    paramError("thermal_conductivity", "Cannot use anisotropic diffusion with non-porous flows!");
 
   if (have_vector == have_scalar)
     paramError("thermal_conductivity",

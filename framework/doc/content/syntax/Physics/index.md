@@ -13,7 +13,8 @@ The interaction with Components is one of the main goals of the Physics system. 
 If you have *not* created the kernels, boundary conditions, and so on, the `Physics` system is not a good place
 to start. You must start with a working implementation of your equations before attempting to create a `Physics` object.
 
-If you do have a working set of kernels, boundary conditions, and other MOOSE objects, that let you solve an equation in MOOSE, you should consider the following before implementing a `Physics`:
+If you do have a working set of kernels, boundary conditions, and other MOOSE objects, that let you solve an equation in MOOSE,
+you should consider the following before implementing a `Physics`:
 
 - is user-friendliness a priority for the expansion of my work?
 - is the current workflow unsatisfactory in that regard?

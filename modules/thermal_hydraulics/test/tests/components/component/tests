@@ -12,7 +12,7 @@
   [err:setup_status]
     type = 'RunException'
     input = 'err.setup_status.i'
-    expect_err = "pipe: The component setup status \(1\) is less than the required status \(2\)"
+    expect_err = "pipe: The component setup status \(component mesh set up\) is less than the required status \(primary initialization completed\)"
     allow_test_objects = true
     requirement = 'The system shall report an error if the components are not setup in the expected order and are not in the correct setup status for an operation.'
   []

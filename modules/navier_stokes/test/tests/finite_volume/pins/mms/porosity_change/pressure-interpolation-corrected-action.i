@@ -1,7 +1,7 @@
-mu=1.1
-rho=1.1
-darcy=1.1
-forch=1.1
+mu = 1.1
+rho = 1.1
+darcy = 1.1
+forch = 1.1
 
 [Mesh]
   [gen]
@@ -31,35 +31,39 @@ forch=1.1
   []
 []
 
-[Modules]
-  [NavierStokesFV]
-    compressibility = 'incompressible'
+[Physics]
+  [NavierStokes]
+    [Flow]
+      [flow]
+        compressibility = 'incompressible'
 
-    porous_medium_treatment = true
-    porosity = porosity
-    porosity_smoothing_layers = 2
+        porous_medium_treatment = true
+        porosity = porosity
+        porosity_smoothing_layers = 2
 
-    friction_types = 'darcy forchheimer'
-    friction_coeffs = 'Darcy_coefficient Forchheimer_coefficient'
-    use_friction_correction = true
-    consistent_scaling = 1.0
+        friction_types = 'darcy forchheimer'
+        friction_coeffs = 'Darcy_coefficient Forchheimer_coefficient'
+        use_friction_correction = true
+        consistent_scaling = 1.0
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    initial_velocity = '1 1 0'
-    initial_pressure = 0.0
+        initial_velocity = '1 1 0'
+        initial_pressure = 0.0
 
-    inlet_boundaries = 'left top bottom'
-    momentum_inlet_types = 'fixed-velocity fixed-velocity fixed-velocity'
-    momentum_inlet_function = 'exact_u exact_v; exact_u exact_v; exact_u exact_v'
+        inlet_boundaries = 'left top bottom'
+        momentum_inlet_types = 'fixed-velocity fixed-velocity fixed-velocity'
+        momentum_inlet_functors = 'exact_u exact_v; exact_u exact_v; exact_u exact_v'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = 'exact_p'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_functors = 'exact_p'
 
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
   []
 []
 

@@ -10,18 +10,21 @@
 #pragma once
 
 #include "Action.h"
+#include "InputParametersChecksUtils.h"
 
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
 #include "Factory.h"
+#include "MultiMooseEnum.h"
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
-  registerMooseAction(app_name, derived_name, "init_physics")
+  registerMooseAction(app_name, derived_name, "init_physics");                                     \
+  registerMooseAction(app_name, derived_name, "copy_vars_physics")
 
 /**
- * Base class to help creates an entire physics
+ * Base class to help creating an entire physics
  */
-class PhysicsBase : public Action
+class PhysicsBase : public Action, public InputParametersChecksUtils<PhysicsBase>
 {
 public:
   static InputParameters validParams();
@@ -38,15 +41,38 @@ public:
   /// Routine to add additional setup work on additional registered tasks to a Physics
   virtual void actOnAdditionalTasks() {}
 
-  /// Add new blocks to the Physics
+  /**
+   * @brief Add new blocks to the Physics
+   * @param blocks list of blocks to add to the physics
+   */
   void addBlocks(const std::vector<SubdomainName> & blocks);
+
+  /// Return the blocks this physics is defined on
+  const std::vector<SubdomainName> & blocks() const { return _blocks; }
+
+  /**
+   * @brief Check if an external object has the same block restriction
+   * @param object_name name of the object to check the block restriction of
+   * @param blocks the blocks for this object
+   * @param error_if_not_identical whether to error if the block restrictions dont match
+   */
+  bool checkBlockRestrictionIdentical(const std::string & object_name,
+                                      const std::vector<SubdomainName> & blocks,
+                                      const bool error_if_not_identical = true) const;
 
   /// Provide additional parameters for the relationship managers
   virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
 
-  /// Get a Physics from the ActionWarehouse with the requested type and name
+  /**
+   * @brief Get a Physics from the ActionWarehouse with the requested type and name
+   * @param phys_name name of the Physics to retrieve
+   * @param allow_fail whether to allow returning a nullptr if the physics does not exist
+   */
   template <typename T>
-  const T * getCoupledPhysics(const PhysicsName & phys_name) const;
+  const T * getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail = false) const;
+  /// Get all Physics from the ActionWarehouse with the requested type
+  template <typename T>
+  const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
 
 protected:
   /// Return whether the Physics is solved using a transient
@@ -56,7 +82,8 @@ protected:
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  Factory & getFactory() const { return _factory; }
+  virtual Factory & getFactory() { return _factory; }
+  virtual Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem()
@@ -71,7 +98,7 @@ protected:
   }
 
   /// Tell the app if we want to use Exodus restart
-  void prepareCopyNodalVariables() const;
+  void prepareCopyVariablesFromMesh() const;
   /// Copy variables from the mesh file
   void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy);
 
@@ -86,32 +113,24 @@ protected:
     _nl_var_names.push_back(var_name);
   }
 
-  // BEGIN: Utilities for checking parameters.
-  // These will be replaced by being baked into the validParams() logic, one day
-  /// Check in debug mode that this parameter has been added to the validParams
-  template <typename T>
-  void assertParamDefined(const std::string & param) const;
-  /// Check that two parameters are either both set or both not set
-  void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
-  /// Check that a parameter is set only if the first one is set to true
-  void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
-                                             const std::string & param2) const;
-  /// Check that the two vector parameters are of the same length
-  template <typename T, typename S>
-  void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
-  /// Check that there is no overlap between the items in each vector parameters
-  /// Each vector parameter should also have unique items
-  template <typename T>
-  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
-
-  // END: parameter checking utilities
-
   /// Check whether a nonlinear variable already exists
   bool nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
 
   /// Add a new required task for all physics deriving from this class
   /// NOTE: This does not register the task, you still need to call registerMooseAction
   void addRequiredPhysicsTask(const std::string & task) { _required_tasks.insert(task); }
+
+  /**
+   * @brief Set the blocks parameter to the input parameters of an object this Physics will create
+   * @param params the parameters of the object
+   * @param blocks the blocks to set as the parameter
+   */
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
+  /**
+   * @brief Check if a vector contains all the mesh blocks
+   * @param blocks the vector blocks to check for whether it contains every block in the mesh
+   */
+  bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
 
   /// System number for the system owning the variables
   const unsigned int _sys_number;
@@ -134,6 +153,8 @@ private:
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
+  /// Additional initialization work that should happen very early, as soon as the problem is created
+  virtual void initializePhysicsAdditional() {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
@@ -185,67 +206,37 @@ private:
 
 template <typename T>
 const T *
-PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
+PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name, const bool allow_fail) const
 {
+  constexpr bool is_physics = std::is_base_of<PhysicsBase, T>::value;
+  libmesh_ignore(is_physics);
+  mooseAssert(is_physics, "Must be a PhysicsBase to be retrieved by getCoupledPhysics");
   const auto all_T_physics = _awh.getActions<T>();
   for (const auto * const physics : all_T_physics)
   {
     if (physics->name() == phys_name)
       return physics;
   }
-  mooseError("Requested Physics '",
-             phys_name,
-             "' does not exist or is not of type '",
-             MooseUtils::prettyCppType<T>(),
-             "'");
+  if (!allow_fail)
+    mooseError("Requested Physics '",
+               phys_name,
+               "' does not exist or is not of type '",
+               MooseUtils::prettyCppType<T>(),
+               "'");
+  else
+    return nullptr;
 }
 
 template <typename T>
-void
-PhysicsBase::assertParamDefined(const std::string & libmesh_dbg_var(param)) const
+const std::vector<T *>
+PhysicsBase::getCoupledPhysics(const bool allow_fail) const
 {
-  mooseAssert(parameters().have_parameter<T>(param),
-              "Parameter '" + param + "' is not defined with type '" +
-                  MooseUtils::prettyCppType<T>() + "' in object type '" +
-                  MooseUtils::prettyCppType(type()) + "'. Check your code.");
-}
-
-template <typename T, typename S>
-void
-PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
-                                         const std::string & param2) const
-{
-  assertParamDefined<std::vector<T>>(param1);
-  assertParamDefined<std::vector<S>>(param2);
-
-  if (isParamValid(param1) && isParamValid(param2))
-  {
-    const auto size_1 = getParam<std::vector<T>>(param1).size();
-    const auto size_2 = getParam<std::vector<S>>(param2).size();
-    if (size_1 != size_2)
-      paramError(param1,
-                 "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
-                     param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
-  }
-  // handle empty vector defaults
-  else if (isParamValid(param1) || isParamValid(param2))
-    if (getParam<std::vector<T>>(param1).size() || getParam<std::vector<T>>(param2).size())
-      checkParamsBothSetOrNotSet(param1, param2);
-}
-
-template <typename T>
-void
-PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const
-{
-  std::set<std::string> unique_params;
-  for (const auto & param : param_vec)
-  {
-    assertParamDefined<std::vector<T>>(param);
-
-    for (const auto & value : getParam<std::vector<T>>(param))
-      if (!unique_params.insert(value).second)
-        mooseError("Item '" + value + "' specified in vector parameter '" + param +
-                   "' is also present in one or more of the parameters '" +
-                   Moose::stringify(param_vec) + "'. This is disallowed.");
-  }
+  constexpr bool is_physics = std::is_base_of<PhysicsBase, T>::value;
+  libmesh_ignore(is_physics);
+  mooseAssert(is_physics, "Must be a PhysicsBase to be retrieved by getCoupledPhysics");
+  const auto all_T_physics = _awh.getActions<T>();
+  if (!allow_fail && all_T_physics.empty())
+    mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
+  else
+    return all_T_physics;
 }

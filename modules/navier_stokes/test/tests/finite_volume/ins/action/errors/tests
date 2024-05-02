@@ -1,169 +1,202 @@
 [Tests]
-  issues = '#19472 #21135 #24498'
-  design = 'NSFVAction.md'
+  issues = '#19472 #21135 #24498 #25642'
+  design = "NSFVAction.md WCNSFVFlowPhysics.md WCNSFVFluidHeatTransferPhysics.md "
+           "WCNSFVScalarTransportPhysics.md WCNSFVTurbulencePhysics.md"
+  # Two options for each error message: the old NSFVAction error message and the new Physics error message
+  # The first option should be removed once the NSFVAction is removed
   [momentum-inlet-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' "
-                 "\(size 1\)"
+    expect_err = "(Size \(0\) is not the same as the number of inlet boundaries in "
+                 "'inlet_boundaries' \(size 1\)|Parameters 'inlet_boundaries' and "
+                 "'momentum_inlet_types' must be either both set or both not set)"
   []
   [momentum-inlet-function-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet functions is not equal to the problem dimension for a fixed-velocity inlet.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1'"
-    expect_err = "Size \(1\) is not the same as the number of entries  in  the momentum_inlet_types "
-                 "subvector for fixed-velocity inlet: left \(size 2\)"
+    expect_err = "(Size \(1\) is not the same as the number of entries  in  the momentum_inlet_types "
+                 "subvector for fixed-velocity inlet: left \(size 2\)|Subvector for boundary 'left' "
+                 "\(size 1\) is not the same size as the number of dimensions of the physics \(2\))"
   []
   [momentum-inlet-function-error-2]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of entries for momentum inlet types does not match the total number of fixed-velocity and fixed-pressure inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1 1; 2'"
-    expect_err = "Size \(2\) is not the same as the number of fixed-velocity and fixed-pressure "
-                 "entries in momentum_inlet_types \(size 1\)"
+    expect_err = "(Size \(2\) is not the same as the number of fixed-velocity and fixed-pressure "
+                 "entries in momentum_inlet_types \(size 1\)|Vector parameter 'inlet_boundaries' "
+                 "\(size 1\) should be the same size as parameter 'momentum_inlet_functors' and "
+                 "'flux_inlet_pps combined \(total size 2\))"
   []
   [momentum-outlet-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum outlet types does not match the number of outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_outlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of outlet boundaries in "
-                 "'outlet_boundaries' \(size 1\)"
+    expect_err = "(Size \(0\) is not the same as the number of outlet boundaries in "
+                 "'outlet_boundaries' \(size 1\)|Parameters 'outlet_boundaries' and "
+                 "'momentum_outlet_types' must be either both set or both not set.)"
   []
   [pressure-outlet-function-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of pressure outlet functions is not the same the pressure outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/pressure_function=''"
-    expect_err = "Size \(0\) is not the same as the number of pressure outlet boundaries in "
-                 "'fixed-pressure/fixed-pressure-zero-gradient' \(size 1\)"
+    expect_err = "(Size \(0\) is not the same as the number of pressure outlet boundaries in "
+                 "'fixed-pressure/fixed-pressure-zero-gradient' \(size 1\)|Vector parameters "
+                 "'outlet_boundaries' \(size 1\) and 'pressure_functors' \(size 0\) must be the same "
+                 "size)"
   []
   [momentum-wall-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types=''"
-    expect_err = "Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' "
-                 "\(size 2\)"
+    expect_err = "(Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' "
+                 "\(size 2\)|Parameters 'wall_boundaries' and 'momentum_wall_types' must be either "
+                 "both set or both not set.)"
   []
   [energy-inlet-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' "
-                 "\(size 1\)"
+    expect_err = "(Size \(0\) is not the same as the number of inlet boundaries in "
+                 "'inlet_boundaries' \(size 1\)|Energy inlet types \(size 0\) should be the same "
+                 "size as inlet_boundaries \(size 1\))"
   []
   [passive-scalar-inlet-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries times number of "
-                 "transported scalars in 'inlet_boundaries' \(size 1\)"
+    expect_err = "(Size \(0\) is not the same as the number of inlet boundaries times number of "
+                 "transported scalars in 'inlet_boundaries' \(size 1\)|Vector of vector parameter "
+                 "'passive_scalar_inlet_functors' \(total size 1\) is not the same size as "
+                 "vector-enumeration parameter 'passive_scalar_inlet_types' \(size 0\))"
   []
   [passive-scalar-inlet-function-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet function blocks does not match the number of scalar variables.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_function=''"
-    expect_err = "Size \(0\) is not the same as the number of names in 'passive_scalar_names' \(size "
-                 "1\)"
+    expect_err = "(Size \(0\) is not the same as the number of names in 'passive_scalar_names' "
+                 "\(size 1\)|Parameter 'passive_scalar_names' \(size 1\) and "
+                 "'passive_scalar_inlet_functors' \(size 0\) must be the same size if set.)"
   []
   [passive-scalar-multiple-inlet-function-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet functions does not match the number of inlet boundaries for a specific scalar variable.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_function='0 0;'"
-    expect_err = "Size \(1\) is not the same as the number of entries in "
-                 "'passive_scalar_inlet_function index 0' \(size 2\)"
+    expect_err = "(Size \(1\) is not the same as the number of entries in "
+                 "'passive_scalar_inlet_function index 0' \(size 2\)|Vector of vector parameter "
+                 "'passive_scalar_inlet_functors' \(total size 2\) is not the same size as "
+                 "vector-enumeration parameter 'passive_scalar_inlet_types' \(size 1\))"
   []
   [energy-wall-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_wall_types=''"
-    expect_err = "Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' "
-                 "\(size 2\)"
+    expect_err = "(Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' "
+                 "\(size 2\)|Energy wall types \(size 0\) should be the same size as wall_boundaries "
+                 "\(size 2\))"
   []
   [energy-wall-function-action-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
     cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
-    expect_err = "Size \(0\) is not the same as the number of Dirichlet/Neumann conditions in "
-                 "'energy_wall_types' \(size 2\)"
+    expect_err = "(Size \(0\) is not the same as the number of Dirichlet/Neumann conditions in "
+                 "'energy_wall_types' \(size 2\)|Vector parameters 'energy_wall_functors' \(size 0\) "
+                 "and 'energy_wall_types' \(size 2\) must be the same size)"
   []
   [scalar-ic-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of defined initial conditions is different than the number of created scalar variables.'
-    cli_args = "Modules/NavierStokesFV/passive_scalar_names='scalar1 scalar2' "
-               "Modules/NavierStokesFV/initial_scalar_variables='0'"
-    expect_err = "The number of initial conditions \(1\) is not equal to the number of "
-                 "self-generated variables \(2\) !"
+    cli_args = "Modules/NavierStokesFV/initial_scalar_variables='0 3'"
+    expect_err = "(The number of initial conditions \(2\) is not equal to the number of "
+                 "self-generated variables \(1\) !|Parameter 'passive_scalar_names' \(size 1\) and "
+                 "'initial_scalar_variables' \(size 2\) must be the same size if set.)"
   []
   [velocity-ic-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the number of components for the initial velocity is not 3.'
-    cli_args = "Modules/NavierStokesFV/initial_velocity='0 0'"
-    expect_err = "The number of velocity components in the NSFVAction initial condition is not 3!"
+    requirement = 'The system shall throw an error if the number of components for the initial velocity is not equal to the dimension or 3.'
+    cli_args = "Modules/NavierStokesFV/initial_velocity='0'"
+    expect_err = "(The number of velocity components in the NSFVAction initial condition is not "
+                 "3!|The number of velocity components in the WCNSFVFlowPhysics initial condition is "
+                 "not 2 or 3!)"
   []
   [porosity-correction-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if friction correction is requested with no porous medium treatment.'
     cli_args = "Modules/NavierStokesFV/use_friction_correction='true'"
-    expect_err = "This parameter should not be defined if the porous medium treatment is disabled!"
+    expect_err = "(This parameter should not be defined if the porous medium treatment is "
+                 "disabled!|Parameter 'porous_medium_treatment' cannot be set to false if parameter "
+                 "'use_friction_correction' is set by the user)"
   []
   [porosity-scaling-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if consistent scaling is defined without using friction correction'
     cli_args = "Modules/NavierStokesFV/consistent_scaling='true'"
-    expect_err = "Consistent scaling should not be defined if friction correction is disabled!"
+    expect_err = "(Consistent scaling should not be defined if friction correction is "
+                 "disabled!|Parameter 'use_friction_correction' cannot be set to false if parameter "
+                 "'consistent_scaling' is set by the user)"
   []
   [porosity-smoothing-layer-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if porosity smoothing is requested without porous medium treatment.'
     cli_args = "Modules/NavierStokesFV/porosity_smoothing_layers=4"
-    expect_err = "This parameter should not be defined if the porous medium treatment is disabled!"
+    expect_err = "(This parameter should not be defined if the porous medium treatment is "
+                 "disabled!|Parameter 'porous_medium_treatment' cannot be set to false if parameter "
+                 "'porosity_smoothing_layers' is set by the user)"
   []
   [no-bernoulli-two-term-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if two-term extrapolation is elected for prosity jump faces without enabling the Bernoulli treatment.'
     cli_args = "Modules/NavierStokesFV/pressure_allow_expansion_on_bernoulli_faces=true"
-    expect_err = "This parameter should not be given by the user with the corresponding porosity_interface_pressure_treatment setting!"
+    expect_err = "(This parameter should not be given by the user with the corresponding "
+                 "porosity_interface_pressure_treatment setting!|Parameter "
+                 "'pressure_allow_expansion_on_bernoulli_faces' should not be set by the user if "
+                 "parameter 'porosity_interface_pressure_treatment' has not been set to 'bernoulli')"
   []
   [passive-scalar-diffusivity-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar diffusivities'
     cli_args = "Modules/NavierStokesFV/passive_scalar_diffusivity='0.5 0.6'"
-    expect_err = "The number of diffusivities defined is not equal to the number of passive scalar "
-                 "fields!"
+    expect_err = "(The number of diffusivities defined is not equal to the number of passive scalar "
+                 "fields!|Parameter 'passive_scalar_names' \(size 1\) and "
+                 "'passive_scalar_diffusivity' \(size 2\) must be the same size if set)"
   []
   [passive-scalar-source-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar source functions'
     cli_args = "Modules/NavierStokesFV/passive_scalar_source='0.5 0.6'"
-    expect_err = "The number of external sources defined is not equal to the number of passive "
-                 "scalar fields!"
+    expect_err = "(The number of external sources defined is not equal to the number of passive "
+                 "scalar fields!|Parameter 'passive_scalar_names' \(size 1\) and "
+                 "'passive_scalar_source' \(size 2\) must be the same size if set.)"
   []
   [passive-scalar-coupled-source-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source functions'
     cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v; w'"
-    expect_err = "The number of coupled sources defined is not equal to the number of passive scalar "
-                 "fields!"
+    expect_err = "(The number of coupled sources defined is not equal to the number of passive "
+                 "scalar fields!|Parameter 'passive_scalar_names' \(size 1\) and "
+                 "'passive_scalar_coupled_source' \(size 2\) must be the same size if set.)"
   []
   [passive-scalar-coupled-source-coeff-error-1]
     type = 'RunException'
@@ -171,8 +204,9 @@
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source coefficients with regards to the number of scalar equations'
     cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v' "
                "Modules/NavierStokesFV/passive_scalar_coupled_source_coeff='0.1; 0.2'"
-    expect_err = "The number of coupled sources coefficients defined is not equal to the number of "
-                 "passive scalar fields!"
+    expect_err = "(The number of coupled sources coefficients defined is not equal to the number of "
+                 "passive scalar fields!| Vector parameters 'passive_scalar_coupled_source' \(size "
+                 "1\) and 'passive_scalar_coupled_source_coeff' \(size 2\) must be the same size)"
   []
   [passive-scalar-coupled-source-coeff-error-2]
     type = 'RunException'
@@ -180,31 +214,39 @@
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source coefficients with regards to the number of sources'
     cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v' "
                "Modules/NavierStokesFV/passive_scalar_coupled_source_coeff='0.1 0.2'"
-    expect_err = "The number of coupled sources coefficients defined is not equal to the number of "
-                 "coupled sources!"
+    expect_err = "(The number of coupled sources coefficients defined is not equal to the number of "
+                 "coupled sources!|Vector at index 0 of 2D vector parameter "
+                 "'passive_scalar_coupled_source' is not the same size as its counterpart from 2D "
+                 "vector parameter 'passive_scalar_coupled_source_coeff')"
   []
   [passive-scalar-schmidt-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar Schmidt numbers'
-    cli_args = "Modules/NavierStokesFV/passive_scalar_schmidt_number='0.5 0.6'"
+    cli_args = "Modules/NavierStokesFV/passive_scalar_schmidt_number='0.5 0.6' "
+               "Modules/NavierStokesFV/turbulence_handling='mixing-length' "
+               "Modules/NavierStokesFV/scalar_advection_physics='NavierStokesFV'"
     expect_err = "The number of Schmidt numbers defined is not equal to the number of passive scalar "
                  "fields!"
+    # Wall distance mixing length aux currently does not support distributed meshes
+    mesh_mode = 'replicated'
   []
   [velocity-variable-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user supplies a velocity variable which does not exist'
     cli_args = "Modules/NavierStokesFV/velocity_variable='velx vel_y' Variables/inactive='pressure "
-               "T_fluid scalar'"
-    expect_err = "Variable \(velx\) supplied to the NavierStokesFV action does not exist!"
+               "vel_x T_fluid scalar' Modules/NavierStokesFV/define_variables=false"
+    expect_err = "(Variable \(velx\) supplied to the NavierStokesFV action does not exist!|Variable "
+                 "\(velx\) supplied to the WCNSFVFlowPhysics does not exist!)"
   []
   [velocity-component-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user supplies an inappropriate number of externally created velocity components'
     cli_args = "Modules/NavierStokesFV/velocity_variable='vel_x vel_y vel_z vel_q' "
-               "Variables/inactive='pressure T_fluid scalar'"
+               "Modules/NavierStokesFV/initial_velocity='' Variables/inactive='scalar' "
+               "Modules/NavierStokesFV/define_variables=false"
     expect_err = "The number of velocity variable names supplied to the NSFVAction is not 2 \(mesh "
                  "dimension\) or 3!"
   []
@@ -215,23 +257,28 @@
     cli_args = "Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
                "Modules/NavierStokesFV/porous_medium_treatment=true "
                "Variables/vel_x/type=MooseVariableFVReal Variables/vel_y/type=MooseVariableFVReal"
-    expect_err = "For porous medium simulations, functor name vel\_x is already reserved for the automatically-computed interstitial velocity. Please choose another name for your external velocity variable!"
+    expect_err = "For porous medium simulations, functor name vel\_x is already reserved for the "
+                 "automatically-computed interstitial velocity. Please choose another name for your "
+                 "external velocity variable!"
   []
   [pressure-variable-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user supplies a pressure variable which does not exist'
-    cli_args = "Modules/NavierStokesFV/pressure_variable='pessure' Variables/inactive='vel_x vel_y "
-               "T_fluid scalar'"
-    expect_err = "Variable \(pessure\) supplied to the NavierStokesFV action does not exist!"
+    cli_args = "Variables/inactive='' Modules/NavierStokesFV/pressure_variable='pessure' "
+               "Modules/NavierStokesFV/define_variables=false"
+    expect_err = "(Variable \(pessure\) supplied to the NavierStokesFV action does not "
+                 "exist!|Variable \(pessure\) supplied to the WCNSFVFlowPhysics does not exist!)"
   []
   [fluid-temperature-variable-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user supplies a fluid temperature variable which does not exist'
-    cli_args = "Modules/NavierStokesFV/pressure_variable='T_fuid' Variables/inactive='vel_x vel_y "
-               "pressure scalar'"
-    expect_err = "Variable \(T_fuid\) supplied to the NavierStokesFV action does not exist!"
+    cli_args = "Variables/inactive='' Modules/NavierStokesFV/fluid_temperature_variable='T_fuid' "
+               "Modules/NavierStokesFV/define_variables=false"
+    expect_err = "(Variable \(T_fuid\) supplied to the NavierStokesFV action does not "
+                 "exist!|Variable \(T_fuid\) supplied to the WCNSFVFluidHeatTransferPhysics does not "
+                 "exist!)"
   []
   [porous_scalar_error]
     type = 'RunException'
@@ -255,24 +302,30 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user supplies vector thermal conductivity with non-porous treatment'
     cli_args = "Modules/NavierStokesFV/thermal_conductivity='kappa'"
-    expect_err = "Cannot use anistropic diffusion with non-porous flows!"
+    expect_err = "Cannot use anisotropic diffusion with non-porous flows!"
   []
   [thermal-conductivity-block-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines a non-existing block for thermal conductivity'
-    cli_args = "Modules/NavierStokesFV/block='1 2' "
+    cli_args = "Mesh/add_subdomain_ids=3 Modules/NavierStokesFV/block='1 2' "
                "Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' "
-               "Modules/NavierStokesFV/thermal_conductivity='kappa kappa'"
-    expect_err = "Block '3' is not present in the block restriction of the fluid flow action!"
+               "Modules/NavierStokesFV/thermal_conductivity='kappa kappa' "
+               "FunctorMaterials/kappa/type=ADGenericFunctorMaterial "
+               "FunctorMaterials/kappa/prop_names='kappa dummy dummy2' Postprocessors/temp/block='1 "
+               "2'"
+    expect_err = "(Block '3' is not present in the block restriction of the fluid flow action!|Block "
+                 "'3' is not present in the block restriction of NavierStokesFV)"
   []
   [friction-block-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if there is a mismatch in the number of friction coefficients and the number of friction types'
     cli_args = "Modules/NavierStokesFV/friction_coeffs='1.0; 1.0 1.0'"
-    expect_err = "The number of friction coefficients for block\(s\): 2 is not the same as the "
-                 "number of requested friction types!"
+    expect_err = "(The number of friction coefficients for block\(s\): 2 is not the same as the "
+                 "number of requested friction types!|Vector at index 1 of 2D vector parameter "
+                 "'friction_types' is not the same size as its counterpart from 2D vector parameter "
+                 "'friction_coeffs')"
   []
   [initial_conditions]
     requirement = "The system shall throw an error if"
@@ -280,27 +333,34 @@
       type = 'RunException'
       input = 2d-rc-error-action.i
       detail = 'an initial condition is provided for velocities when they are defined outside of the action'
-      cli_args = "Variables/inactive='pressure T_fluid scalar' "
-                 "Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
-                 "Modules/NavierStokesFV/block=1"
-      expect_err = "Velocity is defined externally of NavierStokesFV, so should the inital "
-                   "conditions"
+      cli_args = "Variables/inactive='scalar' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
+                 "Modules/NavierStokesFV/define_variables=false"
+      expect_err = "(Velocity is defined externally of NavierStokesFV, so should the inital "
+                   "conditions|Velocity is defined externally of WCNSFVFlowPhysics, so should the "
+                   "inital conditions)"
     []
     [pressure]
       type = 'RunException'
       input = 2d-rc-error-action.i
       detail = 'an initial condition is provided for pressure when it is defined outside of the action'
-      cli_args = "Variables/inactive='vel_x vel_y T_fluid scalar' "
-                 "Modules/NavierStokesFV/pressure_variable='pressure' Modules/NavierStokesFV/block=1"
-      expect_err = "Pressure is defined externally of NavierStokesFV, so should the inital condition"
+      cli_args = "Variables/inactive='scalar' Modules/NavierStokesFV/pressure_variable='pressure' "
+                 "Modules/NavierStokesFV/define_variables=false Modules/velocity_variable='vel_x "
+                 "vel_y'"
+      expect_err = "(Pressure is defined externally of NavierStokesFV, so should the inital "
+                   "condition|Pressure is defined externally of WCNSFVFlowPhysics, so should the "
+                   "inital condition)"
     []
     [temperature]
       type = 'RunException'
       input = 2d-rc-error-action.i
       detail = 'an initial condition is provided for temperature when it is defined outside of the action'
-      cli_args = "Variables/T_f/type=INSFVEnergyVariable "
-                 "Modules/NavierStokesFV/fluid_temperature_variable='T_f'"
-      expect_err = "T_fluid is defined externally of NavierStokesFV, so should the inital condition"
+      cli_args = "Variables/inactive='scalar' Variables/T_f/type=INSFVEnergyVariable "
+                 "Modules/NavierStokesFV/fluid_temperature_variable='T_f' "
+                 "Modules/NavierStokesFV/define_variables=false Modules/velocity_variable='vel_x "
+                 "vel_y' Modules/pressure_variable='pressure'"
+      expect_err = "(T_fluid is defined externally of NavierStokesFV, so should the inital "
+                   "condition|T_fluid is defined externally of WCNSFVFluidHeatTransferPhysics, so "
+                   "should the inital condition)"
     []
   []
 []
