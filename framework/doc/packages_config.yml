@@ -10,8 +10,8 @@ maximum_python: 3.11
 mpich: 4.0.2
 petsc_alt: 3.11.4
 petsc: 3.20.3
-moose_dev: 2024.04.23
-moose_tools: 2024.03.07
+moose_dev: 2024.05.02
+moose_tools: 2024.05.02
 apptainer_rockylinux: 8.8.20230518
 apptainer_mpich: 3.4.3
 apptainer_gcc: 12.2.1
