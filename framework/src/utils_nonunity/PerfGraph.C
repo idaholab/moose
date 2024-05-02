@@ -184,7 +184,7 @@ PerfGraph::addToExecutionList(const PerfID id,
 void
 PerfGraph::push(const PerfID id)
 {
-  if (!_active && !_live_print_active)
+  if (!_active)
     return;
 
   PerfNode * new_node = nullptr;
@@ -230,7 +230,7 @@ PerfGraph::push(const PerfID id)
 void
 PerfGraph::pop()
 {
-  if (!_active && !_live_print_active)
+  if (!_active)
     return;
 
   auto current_time = std::chrono::steady_clock::now();

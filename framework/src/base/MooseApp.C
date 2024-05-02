@@ -721,11 +721,7 @@ MooseApp::setupOptions()
 
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
-  {
     _pars.set<bool>("timing") = false;
-
-    _perf_graph.setActive(false);
-  }
 
   if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
     mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");

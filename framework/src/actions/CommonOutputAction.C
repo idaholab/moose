@@ -267,17 +267,24 @@ CommonOutputAction::act()
       }
       else if (_app.getParam<bool>("timing"))
       {
-        from_param_name = "show_controls";
+        from_param_name = "timing";
         from_params = &_app.parameters();
       }
       if (from_param_name)
         create("PerfGraphOutput", *from_param_name, from_params);
-    }
 
-    if (!_app.getParam<bool>("no_timing") && getParam<bool>("perf_graph_live"))
-      perfGraph().setLivePrintActive(true);
+      if (!getParam<bool>("perf_graph_live"))
+      {
+        if (!from_param_name)
+          perfGraph().setActive(false);
+        perfGraph().setLivePrintActive(false);
+      }
+    }
     else
+    {
+      perfGraph().setActive(false);
       perfGraph().setLivePrintActive(false);
+    }
 
     perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
     perfGraph().setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));
