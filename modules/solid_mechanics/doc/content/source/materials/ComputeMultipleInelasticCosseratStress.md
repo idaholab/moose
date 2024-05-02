@@ -12,7 +12,7 @@ These two terms are computed in the same way as [ComputeCosseratLinearElasticStr
 If finite strain rotations are considered, then the these two terms are further modified with the rotation increment $R$:
 
 !equation
-$\boldsymbol{\sigma}_c$ := R $\boldsymbol{\sigma}_c$ R^T
+\boldsymbol{\sigma}_c := R \boldsymbol{\sigma}_c R^T
 
 The derivative tensor of the coupled Cosserat elastic stress with regards to strain is rotated by the rotation increment.
 

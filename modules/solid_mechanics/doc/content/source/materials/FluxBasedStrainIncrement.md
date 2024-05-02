@@ -3,7 +3,7 @@
 !syntax description /Materials/FluxBasedStrainIncrement
 
 The strain is computed from flux instead of the displacements. The gradient of the flux is
-first computed from the gradient of each components of the flux specified by the user:
+first computed from the gradient of each component of the flux specified by the user:
 
 !equation
 \nabla F = (\nabla F_x, \nabla F_y, \nabla F_z)
@@ -17,7 +17,7 @@ where:
 The strain increment tensor is then computed as:
 
 !equation
-\boldsymbol{\epsilon}_{inc} = -\dfrac{1}{2}(\nabla F + ^T(\nabla F)) *  (1.0 - G) * _dt;
+\boldsymbol{\epsilon}_{inc} = -\dfrac{1}{2}(\nabla F + ^T(\nabla F)) *  (1.0 - G) * \text{dt};
 
 where $G$ is the grain boundary order parameter.
 

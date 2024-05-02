@@ -25,7 +25,7 @@ where
 The curvature tensor $C$ and its increment are also computed by this `Material` from the gradients of the Cosserat rotations as:
 
 !equation
-C_{inc} = \nabla_{j}\theta_{c}_{i} - \nabla_{j}\theta_{c,old}_{i}
+C_{inc} = \nabla_{j}\theta_{c}^{i} - \nabla_{j}\theta_{c,old}^{i}
 
 !equation
 C = C_{old} + C_{inc}

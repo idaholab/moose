@@ -18,7 +18,7 @@ where
 The curvature tensor $C$ is also computed by this `Material` from the gradients of the Cosserat rotations as:
 
 !equation
-C = \nabla_{j}\theta_{c}_{i}
+C = \nabla_{j}\theta_{c}^{i}
 
 !alert note
 This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/cosserat.pdf))
