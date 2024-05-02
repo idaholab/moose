@@ -345,7 +345,7 @@ MooseApp::validParams()
       true,
       "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
   params.addParam<bool>(
-      "use_legacy_initial_residual_evaluation_bahavior",
+      "use_legacy_initial_residual_evaluation_behavior",
       true,
       "The legacy behavior performs an often times redundant residual evaluation before the "
       "solution modifying objects are executed prior to the initial (0th nonlinear iteration) "
