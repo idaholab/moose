@@ -14,12 +14,12 @@
 /**
  * This user object modifies the element subdomain ID based on the provided variable value.
  */
-class ModifyElementSubdomainByVar : public ElementSubdomainModifier
+class VariableValueElementSubdomainModifier : public ElementSubdomainModifier
 {
 public:
   static InputParameters validParams();
 
-  ModifyElementSubdomainByVar(const InputParameters & parameters);
+  VariableValueElementSubdomainModifier(const InputParameters & parameters);
 
 protected:
   virtual SubdomainID computeSubdomainID() override;

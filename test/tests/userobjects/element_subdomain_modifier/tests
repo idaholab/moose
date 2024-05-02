@@ -1,6 +1,6 @@
  [Tests]
   issues = '#15795 #17100 #17239 #21383 #27486'
-  design = 'CoupledVarThresholdElementSubdomainModifier.md ModifyElementSubdomainByVar.md'
+  design = 'CoupledVarThresholdElementSubdomainModifier.md VariableValueElementSubdomainModifier.md'
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during '
                   'simulation'

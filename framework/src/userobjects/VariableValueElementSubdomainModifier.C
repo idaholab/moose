@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ModifyElementSubdomainByVar.h"
+#include "VariableValueElementSubdomainModifier.h"
 
-registerMooseObject("MooseApp", ModifyElementSubdomainByVar);
+registerMooseObject("MooseApp", VariableValueElementSubdomainModifier);
 
 InputParameters
-ModifyElementSubdomainByVar::validParams()
+VariableValueElementSubdomainModifier::validParams()
 {
   InputParameters params = ElementSubdomainModifier::validParams();
 
@@ -23,13 +23,14 @@ ModifyElementSubdomainByVar::validParams()
   return params;
 }
 
-ModifyElementSubdomainByVar::ModifyElementSubdomainByVar(const InputParameters & parameters)
+VariableValueElementSubdomainModifier::VariableValueElementSubdomainModifier(
+    const InputParameters & parameters)
   : ElementSubdomainModifier(parameters), _v(coupledValue("coupled_var"))
 {
 }
 
 SubdomainID
-ModifyElementSubdomainByVar::computeSubdomainID()
+VariableValueElementSubdomainModifier::computeSubdomainID()
 {
   // Calculate the desired subdomain ID for the current element.
   Real val = 0.0;

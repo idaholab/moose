@@ -67,7 +67,7 @@
 
 [UserObjects]
   [assign_block_id]
-    type = ModifyElementSubdomainByVar
+    type = VariableValueElementSubdomainModifier
     coupled_var = 'block_id'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
