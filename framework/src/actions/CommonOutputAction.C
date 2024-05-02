@@ -277,13 +277,13 @@ CommonOutputAction::act()
       {
         if (!from_param_name)
           perfGraph().setActive(false);
-        perfGraph().setLivePrintActive(false);
+        perfGraph().disableLivePrint();
       }
     }
     else
     {
       perfGraph().setActive(false);
-      perfGraph().setLivePrintActive(false);
+      perfGraph().disableLivePrint();
     }
 
     perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));

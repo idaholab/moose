@@ -129,11 +129,6 @@ public:
   void setActive(bool active) { _active = active; }
 
   /**
-   * Turn on or off live printing (if timing is off then live printing will be off too)
-   */
-  void setLivePrintActive(bool active) { _live_print_active = active; }
-
-  /**
    * Enables Live Print
    */
   void enableLivePrint();
@@ -387,9 +382,6 @@ protected:
 
   /// Whether or not timing is active
   bool _active;
-
-  /// Whether or not live printing is active
-  std::atomic<bool> _live_print_active;
 
   /// The promise to the print thread that will signal when to stop
   std::promise<bool> _done;

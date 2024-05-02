@@ -42,7 +42,6 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _execution_list_begin(0),
     _execution_list_end(0),
     _active(true),
-    _live_print_active(true),
     _destructing(false),
     _live_print_time_limit(5.0),
     _live_print_mem_limit(100),
@@ -222,7 +221,7 @@ PerfGraph::push(const PerfID id)
   _stack[_current_position] = new_node;
 
   // Add this to the execution list unless the message is empty - but pre-emted by live_print_all
-  if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
+  if ((_pid == 0 && !_disable_live_print) &&
       (!_perf_graph_registry.readSectionInfo(id)._live_message.empty() || _live_print_all))
     addToExecutionList(id, IncrementState::STARTED, current_time, start_memory);
 }
@@ -254,7 +253,7 @@ PerfGraph::pop()
   _current_position--;
 
   // Add this to the exection list
-  if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
+  if ((_pid == 0 && !_disable_live_print) &&
       (!_perf_graph_registry.readSectionInfo(current_node->id())._live_message.empty() ||
        _live_print_all))
   {
