@@ -1,23 +1,20 @@
-mu = .01
-rho = 1
+mu = 1.2
+rho = 1.1
 advected_interp_method = 'average'
-
-[Mesh]
-  [gen]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = .1
-    ymin = 0
-    ymax = .1
-    nx = 3
-    ny = 3
-  []
-[]
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
   previous_nl_solution_required = true
+[]
+
+
+[Mesh]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  []
 []
 
 [UserObjects]
@@ -31,6 +28,7 @@ advected_interp_method = 'average'
   []
 []
 
+
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
@@ -39,13 +37,13 @@ advected_interp_method = 'average'
   []
   [vel_y]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.0
     solver_sys = v_system
+    initial_condition = 0.0
   []
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
-    initial_condition = 0.2
+    initial_condition = 0
   []
 []
 
@@ -84,6 +82,16 @@ advected_interp_method = 'average'
     pressure = pressure
     momentum_component = 'y'
   []
+  [u_forcing]
+    type = LinearFVSource
+    variable = vel_x
+    source_density = forcing_u
+  []
+  [v_forcing]
+    type = LinearFVSource
+    variable = vel_y
+    source_density = forcing_v
+  []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusion
     variable = pressure
@@ -99,29 +107,46 @@ advected_interp_method = 'average'
 []
 
 [LinearFVBCs]
-  [top_x]
+  [no-slip-wall-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'left right top bottom'
     variable = vel_x
-    boundary = 'top'
-    functor = 1
+    functor = '0'
   []
-  [no_slip_x]
+  [no-slip-wall-v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    variable = vel_x
-    boundary = 'left right bottom'
-    functor = 0
-  []
-  [no_slip_y]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'left right top bottom'
     variable = vel_y
-    boundary = 'left right top bottom'
-    functor = 0
+    functor = '0'
   []
-  [pressure-extrapolation]
-    type = LinearFVAdvectionDiffusionExtrapolatedBC
-    boundary = 'left right top bottom'
-    variable = pressure
-    use_two_term_expansion = true
+[]
+
+[Functions]
+  [exact_u]
+    type = ParsedFunction
+    expression = 'x^2*(1-x)^2*(2*y-6*y^2+4*y^3)'
+  []
+  [exact_v]
+    type = ParsedFunction
+    expression = '-y^2*(1-y)^2*(2*x-6*x^2+4*x^3)'
+  []
+  [exact_p]
+    type = ParsedFunction
+    expression = 'x*(1-x)+0.75'
+  []
+  [forcing_u]
+    type = ParsedFunction
+    expression = '-4*mu*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+rho*4*x^3'
+            '*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
+  []
+  [forcing_v]
+    type = ParsedFunction
+    expression = '4*mu*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+rho*4*y^3*x^2*(2'
+            '*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
 []
 
@@ -136,7 +161,7 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 200
+  num_iterations = 2000
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -146,14 +171,43 @@ advected_interp_method = 'average'
   print_fields = false
 
   pin_pressure = true
-  pressure_pin_value = 0.0
-  pressure_pin_point = '0.01 0.099 0.0'
+  pressure_pin_value = 0.1
+  pressure_pin_point = '0.5 0.5 0.0'
 []
 
 [Outputs]
   exodus = true
-  csv = false
-  perf_graph = false
-  print_nonlinear_residuals = false
-  print_linear_residuals = true
+  [csv]
+    type = CSV
+    execute_on = FINAL
+  []
+[]
+
+[Postprocessors]
+  [h]
+    type = AverageElementSize
+    outputs = 'csv'
+    execute_on = FINAL
+  []
+  [L2u]
+    type = ElementL2FunctorError
+    approximate = vel_x
+    exact = exact_u
+    outputs = 'csv'
+    execute_on = FINAL
+  []
+  [L2v]
+    type = ElementL2FunctorError
+    approximate = vel_y
+    exact = exact_v
+    outputs = 'csv'
+    execute_on = FINAL
+  []
+  [L2p]
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
+    outputs = 'csv'
+    execute_on = FINAL
+  []
 []
