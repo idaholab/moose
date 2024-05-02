@@ -42,7 +42,7 @@ n_elems_radial = 5
     thermal_conductivity = ${k_fin}
     fin_efficiency_name = fin_efficiency
   []
-  [fin_ehancement_fmat]
+  [fin_enhancement_fmat]
     type = FinEnhancementFactorFunctorMaterial
     fin_efficiency = fin_efficiency
     fin_area_fraction = ${fin_area_fraction}
