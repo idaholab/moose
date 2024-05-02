@@ -21,8 +21,8 @@ ComputeLayeredCosseratElasticityTensor::validParams()
   params.addClassDescription("Computes Cosserat elasticity and flexural bending rigidity tensors "
                              "relevant for simulations with layered materials.  The layering "
                              "direction is assumed to be perpendicular to the 'z' direction.");
-  params.addRequiredParam<Real>("young", "The Young's modulus");
-  params.addRequiredParam<Real>("poisson", "The Poisson's ratio");
+  params.addRequiredParam<Real>("young", "The Young's modulus of the layered materials");
+  params.addRequiredParam<Real>("poisson", "The Poisson's ratio of the layered materials");
   params.addRequiredRangeCheckedParam<Real>(
       "layer_thickness", "layer_thickness>=0", "The layer thickness");
   params.addRequiredRangeCheckedParam<Real>(
