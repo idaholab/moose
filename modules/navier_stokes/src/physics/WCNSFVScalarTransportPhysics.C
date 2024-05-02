@@ -97,8 +97,9 @@ WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters
       "passive_scalar_names", "initial_scalar_variables", true);
   checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
       "passive_scalar_names", "passive_scalar_inlet_functors", true);
-  checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
-      "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
+  if (_passive_scalar_inlet_functors.size())
+    checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
+        "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
 
   if (_passive_scalar_sources_coef.size())
     checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
@@ -261,6 +262,8 @@ void
 WCNSFVScalarTransportPhysics::addScalarInletBC()
 {
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
+  if (inlet_boundaries.empty())
+    return;
 
   // Boundary checks
   // TODO: once we have vectors of MooseEnum, we could use the same templated check for types and
