@@ -60,9 +60,10 @@ protected:
    * @param[in] W_neighbor   Primitive solution vector for each neighbor
    * @param[in] x_neighbor   Position for each neighbor
    */
-  void getNeighborPrimitiveVariables(const Elem * elem,
-                                     std::vector<std::vector<GenericReal<is_ad>>> & W_neighbor,
-                                     std::vector<Point> & x_neighbor) const;
+  virtual void
+  getNeighborPrimitiveVariables(const Elem * elem,
+                                std::vector<std::vector<GenericReal<is_ad>>> & W_neighbor,
+                                std::vector<Point> & x_neighbor) const;
 
   /**
    * Gets limited slopes for the primitive variables in the 1-D direction
