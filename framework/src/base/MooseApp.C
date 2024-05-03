@@ -556,7 +556,7 @@ MooseApp::MooseApp(InputParameters parameters)
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
 
-  if (isParamValid("start_in_debugger") && _multiapp_level == 0)
+  if (isParamValid("start_in_debugger") && isUltimateMaster())
   {
     auto command = getParam<std::string>("start_in_debugger");
 
@@ -593,7 +593,7 @@ MooseApp::MooseApp(InputParameters parameters)
     std::this_thread::sleep_for(std::chrono::seconds(10));
   }
 
-  if (!parameters.isParamSetByAddParam("stop_for_debugger"))
+  if (!parameters.isParamSetByAddParam("stop_for_debugger") && isUltimateMaster())
   {
     Moose::out << "\nStopping for " << getParam<unsigned int>("stop_for_debugger")
                << " seconds to allow attachment from a debugger.\n";

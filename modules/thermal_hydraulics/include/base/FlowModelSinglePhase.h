@@ -27,7 +27,7 @@ public:
 protected:
   virtual void addNumericalFluxUserObject();
   virtual void addRDGAdvectionDGKernels();
-  void addRDGMooseObjects();
+  virtual void addRDGMooseObjects();
 
   /// Slope reconstruction type for rDG
   const MooseEnum _rdg_slope_reconstruction;
