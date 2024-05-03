@@ -101,10 +101,13 @@
       detail = "with optional non-uniform refinement based on a custom function."
     []
     [auto_area_func]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'xydelaunay_auto_area_func.i'
-      cli_args = '--mesh-only'
-      exodiff = 'xydelaunay_auto_area_func_in.e'
+      csvdiff = 'xydelaunay_auto_area_func_out.csv'
+      # Use a loose tolerance to accomodate the randomless in triangulation when using different number of processors
+      override_columns = 'avg_quality elem_size'
+      override_rel_err = '1.0e-1 1.0e-1'
+      override_abs_zero = '1.0e-10 1.0e-10'
       recover = false
       detail = "with optional non-uniform refinement based on an automatically generated function."
     []

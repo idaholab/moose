@@ -31,8 +31,50 @@
     boundary = 'outer_bdy'
     holes = 'hole_1
              hole_2'
-    refine_boundary=false
-    refine_holes="false false"
-    use_auto_area_func="true"
+    refine_boundary = false
+    refine_holes = "false false"
+    use_auto_area_func = "true"
   []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[AuxVariables]
+  [quality]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [qa]
+    type = ElementQualityAux
+    variable = quality
+    metric = SHAPE
+  []
+[]
+
+[Executioner]
+  type = Transient
+  num_steps = 1
+[]
+
+[Postprocessors]
+  [avg_quality]
+    type = ElementAverageValue
+    variable = quality
+  []
+  [elem_size]
+    type = AverageElementSize
+  []
+  [area]
+    type = VolumePostprocessor
+  []
+[]
+
+[Outputs]
+  csv = true
+  execute_on = 'FINAL'
 []
