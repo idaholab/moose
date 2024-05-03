@@ -111,6 +111,22 @@
       recover = false
       detail = "with optional non-uniform refinement based on an automatically generated function."
     []
+    [quadratic_tri6]
+      type = 'Exodiff'
+      input = 'xydelaunay_quadratic.i'
+      cli_args = '--mesh-only xydelaunay_quadratic_tri6.e'
+      exodiff = 'xydelaunay_quadratic_tri6.e'
+      recover = false
+      detail = "with quadratic TRI6 elements."
+    []
+    [quadratic_tri7]
+      type = 'Exodiff'
+      input = 'xydelaunay_quadratic.i'
+      cli_args = '--mesh-only xydelaunay_quadratic_tri7.e'
+      exodiff = 'xydelaunay_quadratic_tri7.e'
+      recover = false
+      detail = "with quadratic TRI7 elements."
+    []
   []
   [errors]
     requirement = "The system shall throw an error when triangulating a polyline boundary"

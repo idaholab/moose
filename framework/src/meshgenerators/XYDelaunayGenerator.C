@@ -30,6 +30,7 @@ XYDelaunayGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
+  MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
 
   params.addRequiredParam<MeshGeneratorName>(
       "boundary",
@@ -103,6 +104,8 @@ XYDelaunayGenerator::validParams()
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addParam<MooseEnum>(
+      "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
 
@@ -134,6 +137,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _auto_area_function_num_points(getParam<unsigned int>("auto_area_function_num_points")),
     _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
+    _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
   if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
@@ -259,6 +263,11 @@ XYDelaunayGenerator::generate()
         _auto_area_func_default_size > 0.0 ? _auto_area_func_default_size : 0.0,
         _auto_area_func_default_size_dist > 0.0 ? _auto_area_func_default_size_dist : -1.0);
   }
+  
+  if (_tri_elem_type == "TRI6")
+    poly2tri.elem_type() = libMesh::ElemType::TRI6;
+  else if (_tri_elem_type == "TRI7")
+    poly2tri.elem_type() = libMesh::ElemType::TRI7;
 
   poly2tri.triangulate();
 
