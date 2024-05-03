@@ -172,6 +172,7 @@ MeshCut2DUserObjectBase::getCrackFrontPoints(unsigned int number_crack_front_poi
                " does not match the number of nodes given in "
                "_original_and_current_front_node_ids=" +
                Moose::stringify(_original_and_current_front_node_ids.size()));
+
   for (unsigned int i = 0; i < number_crack_front_points; ++i)
   {
     dof_id_type id = _original_and_current_front_node_ids[i].second;
@@ -213,22 +214,33 @@ MeshCut2DUserObjectBase::getCrackPlaneNormals(unsigned int number_crack_front_po
 
     bool found_it0 = (it0 != _original_and_current_front_node_ids.end());
     bool found_it1 = (it1 != _original_and_current_front_node_ids.end());
-    if (found_it0 || found_it1)
-    {
 
+    // Newly nucleated crack elements can have one normal if they are on the edge OR
+    // two normals if they are in the bulk.
+    if (found_it0)
+    {
       Point end_pt, connecting_pt;
-      if (found_it0)
-      {
-        end_pt = elem->node_ref(0);
-        connecting_pt = elem->node_ref(1);
-        id = it0->first; // sort by original crack front node ids
-      }
-      else
-      {
-        end_pt = elem->node_ref(1);
-        connecting_pt = elem->node_ref(0);
-        id = it1->first; // sort by original crack front node ids
-      }
+
+      end_pt = elem->node_ref(0);
+      connecting_pt = elem->node_ref(1);
+      id = it0->first; // sort by original crack front node ids
+
+      Point fracture_dir = end_pt - connecting_pt;
+      // The crack normal is orthogonal to the crack extension direction (fracture_dir),
+      // and is defined in this implementation as the cross product of the direction of crack
+      // extension with the tangent direction, which is always (0, 0, 1) in 2D.
+      RealVectorValue normal_dir{fracture_dir(1), -fracture_dir(0), 0};
+      normal_dir /= normal_dir.norm();
+      crack_plane_normals.push_back(std::make_pair(id, normal_dir));
+    }
+
+    if (found_it1)
+    {
+      Point end_pt, connecting_pt;
+
+      end_pt = elem->node_ref(1);
+      connecting_pt = elem->node_ref(0);
+      id = it1->first; // sort by original crack front node ids
 
       Point fracture_dir = end_pt - connecting_pt;
       // The crack normal is orthogonal to the crack extension direction (fracture_dir),
@@ -361,14 +373,18 @@ MeshCut2DUserObjectBase::addNucleatedCracksToMesh()
       }
       _cutter_mesh->add_elem(new_elem);
       // now add the nucleated nodes to the crack id data struct
+      // edge nucleated cracks will add one node to _original_and_current_front_node_ids
+      // bulk nucleated cracks will add two nodes to _original_and_current_front_node_ids
       Point & point_0 = *node_0;
       const Elem * crack_front_elem_0 = (*pl)(point_0);
       if (crack_front_elem_0 != NULL)
         _original_and_current_front_node_ids.push_back(std::make_pair(node_id_0, node_id_0));
+
       Point & point_1 = *node_1;
       const Elem * crack_front_elem_1 = (*pl)(point_1);
       if (crack_front_elem_1 != NULL)
         _original_and_current_front_node_ids.push_back(std::make_pair(node_id_1, node_id_1));
+
       _is_mesh_modified = true;
     }
     _cutter_mesh->prepare_for_use();

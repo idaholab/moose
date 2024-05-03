@@ -20,7 +20,7 @@ InputParameters
 MeshCut2DNucleationBase::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addRequiredParam<std::vector<BoundaryName>>(
+  params.addParam<std::vector<BoundaryName>>(
       "initiate_on_boundary",
       "Cracks can only initiate on elements adjacent to specified boundaries.");
   params.addParam<Real>("nucleation_radius",
@@ -56,7 +56,7 @@ MeshCut2DNucleationBase::MeshCut2DNucleationBase(const InputParameters & paramet
   {
     std::vector<BoundaryName> initiation_boundary_names =
         getParam<std::vector<BoundaryName>>("initiate_on_boundary");
-    _initiation_boundary_ids = _mesh.getBoundaryIDs(initiation_boundary_names, true);
+    _initiation_boundary_ids = _mesh.getBoundaryIDs(initiation_boundary_names);
   }
 }
 
@@ -74,21 +74,36 @@ MeshCut2DNucleationBase::execute()
   if (_current_elem->processor_id() != processor_id())
     return;
 
-  bool isOnBoundary = false;
   unsigned int current_eid = _current_elem->id();
   std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>>::iterator mit;
   mit = _nucleated_elems.find(current_eid);
 
-  for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
-    if (_mesh.isBoundaryElem(current_eid, _initiation_boundary_ids[i]))
-      isOnBoundary = true;
-  // This does not currently allow for nucleation in an element that is already cut
-  if (!is_cut && isOnBoundary && doesElementCrack(cutterElemNodes))
+  bool cut_element = false;
+  if (_initiation_boundary_ids.empty())
+  {
+    // nucleating crack in bulk
+    //  This does not currently allow for nucleation in an element that is already cut
+    cut_element = (!is_cut && doesElementCrack(cutterElemNodes));
+  }
+  else
+  {
+    // nucleating crack on specified boundary
+    bool isOnBoundary = false;
+    for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
+      if (_mesh.isBoundaryElem(current_eid, _initiation_boundary_ids[i]))
+      {
+        isOnBoundary = true;
+        break;
+      }
+    // This does not currently allow for nucleation in an element that is already cut
+    cut_element = (!is_cut && isOnBoundary && doesElementCrack(cutterElemNodes));
+  }
+
+  if (cut_element)
   {
     if (mit != _nucleated_elems.end())
-    {
       mooseError("ERROR: element ", current_eid, " already marked for crack nucleation.");
-    }
+
     _nucleated_elems[current_eid] = cutterElemNodes;
   }
 }
@@ -97,7 +112,6 @@ void
 MeshCut2DNucleationBase::threadJoin(const UserObject & y)
 {
   const auto & xmuo = static_cast<const MeshCut2DNucleationBase &>(y);
-
   for (std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>>::const_iterator mit =
            xmuo._nucleated_elems.begin();
        mit != xmuo._nucleated_elems.end();

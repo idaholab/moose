@@ -374,7 +374,11 @@ DomainIntegralAction::act()
 
     InputParameters params = _factory.getValidParams(uo_type_name);
     if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
+    {
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR};
+      // The CrackFrontDefinition updates the vpps and MUST execute before them
+      params.set<int>("execution_order_group") = -1;
+    }
     else
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
@@ -735,7 +739,12 @@ DomainIntegralAction::act()
         params.set<std::vector<OutputName>>("outputs") = {"none"};
 
       if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
+      {
+        // The CrackFrontDefinition updates this vpp and MUST execute before it
+        // This is enforced by setting the execution_order_group = -1 for the CrackFrontDefinition
+        // The CrackFrontDefinition must execute on nonlinear to update with xfem updates
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
+      }
       else
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
 
