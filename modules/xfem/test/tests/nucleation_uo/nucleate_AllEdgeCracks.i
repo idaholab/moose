@@ -52,8 +52,9 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = 180
     initiate_on_boundary = 'left'
-    nucleation_length = .2
     nucleation_radius = .21
+    edge_extension_factor = 2e-5
+    nucleation_length = 0.11
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -64,7 +65,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     planar_formulation = plane_strain
@@ -141,6 +142,5 @@
 
 [Outputs]
   csv=true
-  exodus=true
   execute_on = TIMESTEP_END
 []

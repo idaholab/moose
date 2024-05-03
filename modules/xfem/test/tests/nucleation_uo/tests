@@ -1,21 +1,52 @@
 [Tests]
-  issues = '#24714'
   design = 'MeshCut2DRankTwoTensorNucleation.md'
-  [nucleateCrack]
+  [nucleateGrowCrack]
+    issues = '#24714 #27054'
     type = CSVDiff
-    input = nucleate_edge_crack_2d.i
-    csvdiff = 'nucleate_edge_crack_2d_out_II_KI_1_0004.csv'
+    input = nucleate_edge_bulk_crack_2d.i
+    csvdiff = 'nucleate_edge_bulk_crack_2d_out_II_KI_1_0011.csv'
+    rel_err = 1e-3
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall nucleate and grow cracks based on a nucleation threshold given by an auxvariable.'
+    requirement = 'The system shall nucleate and grow edge and bulk cracks based on a nucleation threshold given by an auxvariable.'
   []
   [filterNucleation]
+    issues = '#24714'
     type = CSVDiff
     input = nucleate_AllEdgeCracks.i
     csvdiff = 'nucleate_AllEdgeCracks_out_II_KI_1_0005.csv nucleate_AllEdgeCracks_out_II_KI_1_0003.csv'
-    rel_err = 0.1    
+    rel_err = 1e-1
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall not nucleate cracks within a nucleation_radius of other cracks.'
+    requirement = 'The system shall not nucleate edge cracks within a nucleation_radius of other cracks.'
+  []
+  [nucleateEdgeBulkCrack]
+    issues = '#27054'
+    type = CSVDiff
+    input = nucleate_bulkCrack.i
+    csvdiff = 'nucleate_bulkCrack_out_II_KI_1_0006.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The system shall nucleate bulk and edge cracks that cut a single element if no nucleation length is given.'
+  []
+  [errorSmallCut]
+    issues = '#27054'
+    type = RunException
+    input = nucleate_bulkCrack.i
+    cli_args = 'UserObjects/nucleate/nucleation_length=.001'
+    expect_err = 'Trying to nucleate crack smaller than element length'
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The system shall error if the nucleation length is smaller than the element being cut.'
+  []
+  [suppressErrorSmallCut]
+    issues = '#27054'
+    type = CSVDiff
+    input = nucleate_bulkCrack.i
+    cli_args = 'UserObjects/nucleate/nucleation_length=.001 UserObjects/nucleate/nucleate_across_full_element=True'
+    csvdiff = 'nucleate_bulkCrack_out_II_KI_1_0006.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The system shall suppress the error if the nucleation length is smaller than the element being cut and nucleate a cut across the single element.'
   []
 []
