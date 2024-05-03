@@ -447,7 +447,8 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
       params.set<std::vector<BoundaryName>>("boundary_names") = {std::to_string(OUTER_SIDESET_ID)};
 
       addMeshSubgenerator("BoundaryDeletionGenerator",
-                          input_name + static_cast<MeshGeneratorName>("_del_ext_bdry"),
+                          input_name +
+                              static_cast<MeshGeneratorName>("_" + name() + "_del_ext_bdry"),
                           params);
     }
   }
@@ -459,7 +460,7 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
     params.set<MeshGeneratorName>("input") =
         _input_names[_positions[i].second] +
         static_cast<MeshGeneratorName>(
-            _delete_default_external_boundary_from_inputs ? "_del_ext_bdry" : "");
+            _delete_default_external_boundary_from_inputs ? ("_" + name() + "_del_ext_bdry") : "");
     params.set<MooseEnum>("transform") = 1;
     params.set<RealVectorValue>("vector_value") = _positions[i].first;
 
