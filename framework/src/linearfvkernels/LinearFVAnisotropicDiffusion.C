@@ -24,6 +24,9 @@ LinearFVAnisotropicDiffusion::validParams()
       "use_nonorthogonal_correction",
       true,
       "If the nonorthogonal correction should be used when computing the normal gradient.");
+  params.addParam<bool>(
+      "use_nonorthogonal_correction_on_boundary",
+      "If the nonorthogonal correction should be used when computing the normal gradient.");
   params.addRequiredParam<MooseFunctorName>("diffusion_tensor",
                                             "Functor describing a diagonal diffusion tensor.");
   return params;
@@ -33,6 +36,10 @@ LinearFVAnisotropicDiffusion::LinearFVAnisotropicDiffusion(const InputParameters
   : LinearFVFluxKernel(params),
     _diffusion_tensor(getFunctor<RealVectorValue>("diffusion_tensor")),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
+    _use_nonorthogonal_correction_on_boundary(
+        isParamValid("use_nonorthogonal_correction_on_boundary")
+            ? getParam<bool>("use_nonorthogonal_correction_on_boundary")
+            : _use_nonorthogonal_correction),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0)
 {
@@ -209,7 +216,7 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction)
+  if (_use_nonorthogonal_correction_on_boundary)
   {
     const auto correction_vector =
         _current_face_info->normal() -

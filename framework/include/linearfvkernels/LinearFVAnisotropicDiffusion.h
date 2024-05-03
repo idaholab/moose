@@ -63,6 +63,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
 
+  /// Switch to enable/disable nonorthogonal correction on boundary
+  const bool _use_nonorthogonal_correction_on_boundary;
+
   /// The cached matrix contribution
   Real _flux_matrix_contribution;
 

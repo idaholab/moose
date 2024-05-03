@@ -293,7 +293,7 @@ protected:
   const bool _pin_pressure;
 
   /// The value we want to enforce for pressure
-  const bool _pressure_pin_value;
+  const Real _pressure_pin_value;
 
   /// The dof ID where the pressure needs to be pinned
   dof_id_type _pressure_pin_dof;

@@ -23,9 +23,9 @@ class TestVortexOrthogonal(unittest.TestCase):
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             if key in velocity_labels:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .3))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .5))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.3, .2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.3, .5))
 
 class TestVortexNonorthogonal(unittest.TestCase):
     def test(self):

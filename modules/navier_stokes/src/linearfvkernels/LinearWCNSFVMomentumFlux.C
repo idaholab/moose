@@ -213,56 +213,56 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
     // scenario (2), we will have to account for non-constant viscosity. In this case
     // we have to use the transpose of the gradients to create the symmetric stress
     // tensor.
-    else if (_use_deviatoric_terms)
-    {
-      // Interpolate the two gradients to the face
-      const auto interp_coeffs =
-          interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
+    // else if (_use_deviatoric_terms)
+    // {
+    //   // Interpolate the two gradients to the face
+    //   const auto interp_coeffs =
+    //       interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
 
-      const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
-      const auto u_grad_neighbor = _u_var->gradSln(*_current_face_info->neighborInfo());
+    //   const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
+    //   const auto u_grad_neighbor = _u_var->gradSln(*_current_face_info->neighborInfo());
 
-      Real trace_elem = 0;
-      Real trace_neighbor = 0;
-      RealVectorValue deviatoric_vector_elem;
-      RealVectorValue deviatoric_vector_neighbor;
+    //   Real trace_elem = 0;
+    //   Real trace_neighbor = 0;
+    //   RealVectorValue deviatoric_vector_elem;
+    //   RealVectorValue deviatoric_vector_neighbor;
 
-      deviatoric_vector_elem(0) = u_grad_elem(_index);
-      deviatoric_vector_neighbor(0) = u_grad_neighbor(_index);
-      trace_elem += u_grad_elem(0);
-      trace_neighbor += u_grad_neighbor(0);
+    //   deviatoric_vector_elem(0) = u_grad_elem(_index);
+    //   deviatoric_vector_neighbor(0) = u_grad_neighbor(_index);
+    //   trace_elem += u_grad_elem(0);
+    //   trace_neighbor += u_grad_neighbor(0);
 
-      const auto face_arg = makeCDFace(*_current_face_info);
-      const auto state_arg = determineState();
+    //   const auto face_arg = makeCDFace(*_current_face_info);
+    //   const auto state_arg = determineState();
 
-      if (_dim > 1)
-      {
-        const auto v_grad_elem = _v_var->gradSln(*_current_face_info->elemInfo());
-        const auto v_grad_neighbor = _v_var->gradSln(*_current_face_info->neighborInfo());
+    //   if (_dim > 1)
+    //   {
+    //     const auto v_grad_elem = _v_var->gradSln(*_current_face_info->elemInfo());
+    //     const auto v_grad_neighbor = _v_var->gradSln(*_current_face_info->neighborInfo());
 
-        deviatoric_vector_elem(1) = v_grad_elem(_index);
-        deviatoric_vector_neighbor(1) = v_grad_neighbor(_index);
-        trace_elem += v_grad_elem(1);
-        trace_neighbor += v_grad_neighbor(1);
-        if (_dim > 2)
-        {
-          const auto w_grad_elem = _w_var->gradSln(*_current_face_info->elemInfo());
-          const auto w_grad_neighbor = _w_var->gradSln(*_current_face_info->neighborInfo());
+    //     deviatoric_vector_elem(1) = v_grad_elem(_index);
+    //     deviatoric_vector_neighbor(1) = v_grad_neighbor(_index);
+    //     trace_elem += v_grad_elem(1);
+    //     trace_neighbor += v_grad_neighbor(1);
+    //     if (_dim > 2)
+    //     {
+    //       const auto w_grad_elem = _w_var->gradSln(*_current_face_info->elemInfo());
+    //       const auto w_grad_neighbor = _w_var->gradSln(*_current_face_info->neighborInfo());
 
-          deviatoric_vector_elem(2) = w_grad_elem(_index);
-          deviatoric_vector_neighbor(2) = w_grad_neighbor(_index);
-          trace_elem += w_grad_elem(2);
-          trace_neighbor += w_grad_neighbor(2);
-        }
-      }
-      deviatoric_vector_elem(_index) = trace_elem;
-      deviatoric_vector_neighbor(_index) = trace_neighbor;
+    //       deviatoric_vector_elem(2) = w_grad_elem(_index);
+    //       deviatoric_vector_neighbor(2) = w_grad_neighbor(_index);
+    //       trace_elem += w_grad_elem(2);
+    //       trace_neighbor += w_grad_neighbor(2);
+    //     }
+    //   }
+    //   deviatoric_vector_elem(_index) = trace_elem;
+    //   deviatoric_vector_neighbor(_index) = trace_neighbor;
 
-      _stress_rhs_contribution += _mu(face_arg, state_arg) *
-                                  (interp_coeffs.first * deviatoric_vector_elem +
-                                   interp_coeffs.second * deviatoric_vector_neighbor) *
-                                  _current_face_info->normal();
-    }
+    //   _stress_rhs_contribution += _mu(face_arg, state_arg) *
+    //                               (interp_coeffs.first * deviatoric_vector_elem +
+    //                                interp_coeffs.second * deviatoric_vector_neighbor) *
+    //                               _current_face_info->normal();
+    // }
     _cached_rhs_contribution = true;
   }
 

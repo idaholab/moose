@@ -1,5 +1,5 @@
-mu = 1.2
-rho = 1.1
+mu = 1
+rho = 1
 advected_interp_method = 'average'
 
 [Problem]
@@ -119,6 +119,12 @@ advected_interp_method = 'average'
     variable = vel_y
     functor = '0'
   []
+  [pressure-extrapolation]
+    type = LinearFVAdvectionDiffusionExtrapolatedBC
+    boundary = 'left right top bottom'
+    variable = pressure
+    use_two_term_expansion = false
+  []
 []
 
 [Functions]
@@ -132,7 +138,7 @@ advected_interp_method = 'average'
   []
   [exact_p]
     type = ParsedFunction
-    expression = 'x*(1-x)+0.75'
+    expression = 'x*(1-x)'
   []
   [forcing_u]
     type = ParsedFunction
@@ -171,7 +177,7 @@ advected_interp_method = 'average'
   print_fields = false
 
   pin_pressure = true
-  pressure_pin_value = 0.1
+  pressure_pin_value = 0.25
   pressure_pin_point = '0.5 0.5 0.0'
 []
 

@@ -313,7 +313,7 @@ SegregatedSolverBase::validParams()
   params.addParam<bool>(
       "pin_pressure", false, "If the pressure field needs to be pinned at a point.");
   params.addParam<Real>(
-      "pressure_pin_value", 0, "The value which needs to be enforced for the pressure.");
+      "pressure_pin_value", 0.0, "The value which needs to be enforced for the pressure.");
   params.addParam<Point>("pressure_pin_point", "The point where the pressure needs to be pinned.");
 
   params.addParamNamesToGroup("pin_pressure pressure_pin_value pressure_pin_point", "Pressure Pin");
@@ -386,6 +386,8 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value"))
 {
+  std::cout << _pressure_pin_value << std::endl;
+
   if (_momentum_system_names.size() != _problem.mesh().dimension())
     paramError("momentum_systems",
                "The number of momentum components should be equal to the number of "
@@ -766,8 +768,9 @@ SegregatedSolverBase::constrainSystem(SparseMatrix<Number> & mx,
   if (dof_id >= mx.row_start() && dof_id < mx.row_stop())
   {
     Real diag = mx(dof_id, dof_id);
+    std::cout << desired_value << " " << diag << std::endl;
     rhs.add(dof_id, desired_value * diag);
-    mx.set(dof_id, dof_id, 2 * diag);
+    mx.add(dof_id, dof_id, diag);
   }
 }
 

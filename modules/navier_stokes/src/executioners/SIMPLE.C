@@ -237,6 +237,7 @@ SIMPLE::solvePressureCorrector()
 
   if (_pin_pressure)
     constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+  pressure_system.update();
 
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
@@ -297,6 +298,8 @@ SIMPLE::execute()
   _problem.execute(EXEC_TIMESTEP_BEGIN);
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
   _problem.updateActiveObjects();
+
+  std::cout << _pressure_pin_value << std::endl;
 
   if (_problem.shouldSolve())
   {

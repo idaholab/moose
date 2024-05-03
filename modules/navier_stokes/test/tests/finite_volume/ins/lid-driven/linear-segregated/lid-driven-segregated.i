@@ -136,18 +136,18 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 200
+  num_iterations = 100
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  print_fields = false
+  print_fields = true
 
   pin_pressure = true
   pressure_pin_value = 0.0
-  pressure_pin_point = '0.01 0.099 0.0'
+  pressure_pin_point = '0.05 0.05 0.0'
 []
 
 [Outputs]
