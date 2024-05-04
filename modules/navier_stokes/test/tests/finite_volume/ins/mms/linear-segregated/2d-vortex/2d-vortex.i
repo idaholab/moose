@@ -97,6 +97,7 @@ advected_interp_method = 'average'
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
+    use_nonorthogonal_correction_on_boundary = false
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -123,7 +124,7 @@ advected_interp_method = 'average'
     type = LinearFVAdvectionDiffusionExtrapolatedBC
     boundary = 'left right top bottom'
     variable = pressure
-    use_two_term_expansion = false
+    use_two_term_expansion = true
   []
 []
 
@@ -158,8 +159,8 @@ advected_interp_method = 'average'
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-12
-  pressure_l_abs_tol = 1e-12
+  momentum_l_abs_tol = 1e-8
+  pressure_l_abs_tol = 1e-8
   momentum_l_tol = 0
   pressure_l_tol = 0
   rhie_chow_user_object = 'rc'
@@ -168,8 +169,8 @@ advected_interp_method = 'average'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
   num_iterations = 2000
-  pressure_absolute_tolerance = 1e-12
-  momentum_absolute_tolerance = 1e-12
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'

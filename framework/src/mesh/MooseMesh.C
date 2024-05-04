@@ -3618,8 +3618,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   for (auto & ei : _elem_to_elem_info)
     if (ei.second.elem()->processor_id() == this->processor_id())
       _elem_info.push_back(&ei.second);
-
-  std::cout << "elem side to face" << _elem_side_to_face_info.size() << std::endl;
 }
 
 const FaceInfo *

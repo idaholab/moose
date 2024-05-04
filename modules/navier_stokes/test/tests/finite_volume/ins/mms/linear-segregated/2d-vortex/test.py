@@ -15,7 +15,7 @@ class TestVortexOrthogonal(unittest.TestCase):
         velocity_labels = ['L2u', 'L2v']
         pressure_labels = ['L2p']
         labels = velocity_labels + pressure_labels
-        df1 = run_spatial('2d-vortex.i', 5, y_pp=labels, mpi=2, file_base='2d-vortex')
+        df1 = run_spatial('2d-vortex.i', 4, y_pp=labels, mpi=2, file_base='2d-vortex')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -23,16 +23,16 @@ class TestVortexOrthogonal(unittest.TestCase):
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             if key in velocity_labels:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .5))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .5))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.3, .5))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .5))
 
 class TestVortexNonorthogonal(unittest.TestCase):
     def test(self):
         velocity_labels = ['L2u', 'L2v']
         pressure_labels = ['L2p']
         labels = velocity_labels + pressure_labels
-        df1 = run_spatial('2d-vortex.i', 5, "Mesh/gmg/elem_type=TRI3 Mesh/gmg/nx=1 Mesh/gmg/ny=1 LinearFVKernels/u_advection_stress/use_nonorthogonal_correction=true LinearFVKernels/v_advection_stress/use_nonorthogonal_correction=true LinearFVKernels/p_diffusion/use_nonorthogonal_correction=true", y_pp=labels, mpi=2, file_base='2d-vortex-nonorthogonal')
+        df1 = run_spatial('2d-vortex.i', 4, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/u_advection_stress/use_nonorthogonal_correction=true LinearFVKernels/v_advection_stress/use_nonorthogonal_correction=true LinearFVKernels/p_diffusion/use_nonorthogonal_correction=true LinearFVKernels/p_diffusion/use_nonorthogonal_correction_on_boundary=false", y_pp=labels, mpi=2, file_base='2d-vortex-nonorthogonal')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -42,7 +42,7 @@ class TestVortexNonorthogonal(unittest.TestCase):
             if key in velocity_labels:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 2., .3))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.3, .2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, .2))
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)

@@ -100,11 +100,11 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryValueRHSContribution() 
 Real
 LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryGradientMatrixContribution() const
 {
-  return 0; // 1.0 / computeCellToFaceDistance();
+  return 0;
 }
 
 Real
 LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryGradientRHSContribution() const
 {
-  return 0; // computeBoundaryValue() / computeCellToFaceDistance();
+  return 0;
 }

@@ -66,6 +66,9 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
                      &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
                : nullptr)
 {
+  if (_use_nonorthogonal_correction || _use_deviatoric_terms)
+    _var.computeCellGradients();
+
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
 
   if (!_u_var)

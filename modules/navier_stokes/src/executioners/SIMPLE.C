@@ -299,8 +299,6 @@ SIMPLE::execute()
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
   _problem.updateActiveObjects();
 
-  std::cout << _pressure_pin_value << std::endl;
-
   if (_problem.shouldSolve())
   {
     // Dummy solver parameter file which is needed for switching petsc options

@@ -17,9 +17,9 @@
     input = test.py
     test_case = TestVortexNonorthogonal
     method = '!dbg'
-    min_parallel = 2
+    min_parallel = 4
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
-    # TODO: We can make the pressure second order by doing linear extrapolation to the boundary
+    # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
   []
