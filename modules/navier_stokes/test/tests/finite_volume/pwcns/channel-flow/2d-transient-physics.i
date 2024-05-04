@@ -43,7 +43,7 @@ top_side_temperature = 150
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'weakly-compressible'
         porous_medium_treatment = true
@@ -72,7 +72,7 @@ top_side_temperature = 150
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVFluidHeatTransfer]
+    [FluidHeatTransfer]
       [fluid]
         thermal_conductivity = 'k'
         specific_heat = 'cp'
@@ -92,7 +92,7 @@ top_side_temperature = 150
       []
     []
 
-    [PNSFVSolidHeatTransfer]
+    [SolidHeatTransfer]
       [solid]
         block = 0
         initial_temperature = 100

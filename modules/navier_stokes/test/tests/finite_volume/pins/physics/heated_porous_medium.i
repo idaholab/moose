@@ -67,7 +67,7 @@ cp_solid = 1000
 
 [Physics]
   [NavierStokes]
-    [PNSFVSolidHeatTransfer]
+    [SolidHeatTransfer]
       [solid]
         block = 0
 

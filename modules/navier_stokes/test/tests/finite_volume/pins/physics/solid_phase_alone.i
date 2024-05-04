@@ -13,7 +13,7 @@
 
 [Physics]
   [NavierStokes]
-    [PNSFVSolidHeatTransfer]
+    [SolidHeatTransfer]
       [solid]
         block = 0
 
