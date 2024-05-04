@@ -45,7 +45,7 @@ PhysicsBase::validParams()
       "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
                               "Restart from Exodus");
-
+  params.addParamNamesToGroup("active inactive", "Advanced");
   return params;
 }
 

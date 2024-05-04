@@ -93,6 +93,29 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<Real>(NSFVAction::validParams(), "mass_scaling");
   params.transferParam<Real>(NSFVAction::validParams(), "momentum_scaling");
 
+  // Parameter groups
+  params.addParamNamesToGroup(
+      "velocity_variable pressure_variable initial_pressure initial_velocity", "Variables");
+  params.addParamNamesToGroup("density dynamic_viscosity characteristic_speed",
+                              "Material properties");
+  params.addParamNamesToGroup("inlet_boundaries momentum_inlet_types momentum_inlet_functors",
+                              "Inlet boundary conditions");
+  params.addParamNamesToGroup("outlet_boundaries momentum_outlet_types pressure_functors",
+                              "Outlet boundary conditions");
+  params.addParamNamesToGroup("wall_boundaries momentum_wall_types", "Wall boundary conditions");
+  params.addParamNamesToGroup("coupled_turbulence_physics", "Coupled Physics");
+  params.addParamNamesToGroup(
+      "porosity_interface_pressure_treatment pressure_allow_expansion_on_bernoulli_faces "
+      "porosity_smoothing_layers use_friction_correction consistent_scaling",
+      "Flow medium discontinuity treatment");
+  params.addParamNamesToGroup(
+      "velocity_interpolation pressure_face_interpolation momentum_face_interpolation "
+      "mass_advection_interpolation momentum_advection_interpolation "
+      "pressure_two_term_bc_expansion momentum_two_term_bc_expansion mass_scaling momentum_scaling",
+      "Numerical scheme");
+  // TODO Add default preconditioning and move scaling parameters to a preconditioning group
+  params.addParamNamesToGroup("thermal_expansion", "Gravity treatment");
+
   return params;
 }
 

@@ -47,6 +47,16 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   // Nonlinear equation solver scaling
   params.transferParam<Real>(NSFVAction::validParams(), "energy_scaling");
 
+  params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
+                              "use_external_enthalpy_material",
+                              "Material properties");
+  params.addParamNamesToGroup("energy_advection_interpolation energy_face_interpolation "
+                              "energy_two_term_bc_expansion energy_scaling",
+                              "Numerical scheme");
+  params.addParamNamesToGroup("energy_inlet_types energy_inlet_functors",
+                              "Inlet boundary conditions");
+  params.addParamNamesToGroup("energy_wall_types energy_wall_functors", "Wall boundary conditions");
+
   return params;
 }
 

@@ -21,6 +21,7 @@ WCNSFVCoupledAdvectionPhysicsHelper::validParams()
 
   params.addParam<PhysicsName>("coupled_flow_physics",
                                "WCNSFVFlowPhysics generating the velocities");
+  params.addParamNamesToGroup("coupled_flow_physics", "Coupled Physics");
 
   return params;
 }

@@ -95,15 +95,19 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.suppressParameter<MooseEnum>("preconditioning");
 
   // Parameter groups
-  params.addParamNamesToGroup(
-      "rho_solid cp_solid thermal_conductivity_solid thermal_conductivity_blocks",
-      "Material properties");
+  params.addParamNamesToGroup("rho_solid cp_solid thermal_conductivity_solid "
+                              "thermal_conductivity_blocks use_external_enthalpy_material",
+                              "Material properties");
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
                               "ambient_convection_temperature",
                               "Ambient convection");
   params.addParamNamesToGroup(
       "external_heat_source_blocks external_heat_source external_heat_source_coeff",
       "Solid porous medium heat source");
+  params.addParamNamesToGroup(
+      "solid_temperature_face_interpolation solid_temperature_two_term_bc_expansion",
+      "Numerical scheme");
+  params.addParamNamesToGroup("ghost_layers", "Advanced");
 
   return params;
 }

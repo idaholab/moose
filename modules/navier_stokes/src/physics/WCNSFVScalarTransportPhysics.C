@@ -59,6 +59,15 @@ WCNSFVScalarTransportPhysics::validParams()
       "passive_scalar_scaling > 0.0",
       "The scaling factor for the passive scalar field variables.");
 
+  // Parameter groups
+  params.addParamNamesToGroup("passive_scalar_names initial_scalar_variables", "Variable");
+  params.addParamNamesToGroup(
+      "passive_scalar_advection_interpolation passive_scalar_face_interpolation "
+      "passive_scalar_two_term_bc_expansion passive_scalar_scaling",
+      "Numerical scheme");
+  params.addParamNamesToGroup("passive_scalar_inlet_types passive_scalar_inlet_functors",
+                              "Inlet boundary");
+
   return params;
 }
 
