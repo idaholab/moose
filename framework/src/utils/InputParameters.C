@@ -1359,8 +1359,6 @@ InputParameters::renameParamInternal(const std::string & old_name,
   auto new_metadata = std::move(params_it->second);
   if (!docstring.empty())
     new_metadata._doc_string = docstring;
-  else
-    new_metadata._doc_string = params_it->second._doc_string;
   _params.emplace(new_name, std::move(new_metadata));
   _params.erase(params_it);
 
