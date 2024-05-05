@@ -129,7 +129,7 @@
       cli_args = '--mesh-only err.e
                   Mesh/triang/use_auto_area_func="true"'
       expect_err = "Only one of the three methods"
-      detail = "if more than one element area limit methods are enabled"
+      detail = "if more than one element area limiting methods are specified by the user"
     []
   []
 []

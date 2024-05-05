@@ -85,7 +85,9 @@ FlexiblePatternGenerator::validParams()
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
 
-  params.addParam<bool>("use_auto_area_func", false, "Use the automatic area function.");
+  params.addParam<bool>("use_auto_area_func",
+                        false,
+                        "Use the automatic area function for triangle-meshing in the background.");
   params.addParam<Real>(
       "auto_area_func_default_size",
       0,

@@ -38,7 +38,8 @@ PeripheralTriangleMeshGenerator::validParams()
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
 
-  params.addParam<bool>("use_auto_area_func", false, "Use the automatic area function.");
+  params.addParam<bool>(
+      "use_auto_area_func", false, "Use the automatic area function in the peripheral region.");
   params.addParam<Real>(
       "auto_area_func_default_size",
       0,
@@ -68,7 +69,7 @@ PeripheralTriangleMeshGenerator::validParams()
   params.addParamNamesToGroup("desired_area desired_area_func use_auto_area_func "
                               "auto_area_func_default_size auto_area_func_default_size_dist "
                               "auto_area_function_num_points auto_area_function_power",
-                              "Area Limit Delaunay");
+                              "Peripheral Area Delaunay");
   return params;
 }
 

@@ -77,7 +77,9 @@ XYDelaunayGenerator::validParams()
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
 
-  params.addParam<bool>("use_auto_area_func", false, "Use the automatic area function.");
+  params.addParam<bool>("use_auto_area_func",
+                        false,
+                        "Use the automatic area function for the triangle meshing region.");
   params.addParam<Real>(
       "auto_area_func_default_size",
       0,
@@ -108,7 +110,7 @@ XYDelaunayGenerator::validParams()
 
   params.addParamNamesToGroup(
       "use_auto_area_func auto_area_func_default_size auto_area_func_default_size_dist",
-      "Automatic Area Function");
+      "Automatic triangle meshing area control");
 
   return params;
 }
