@@ -208,7 +208,6 @@
       detail = 'linear finite volume elemental kernels,'
       # in parallel, no guarantee block 1 is present on rank 0
       max_parallel = 1
-      max_threads = 1 # see libmesh issue #3808
     []
     [linear_fv_flux_kernels]
       type = RunApp
@@ -218,7 +217,6 @@
       detail = 'linear finite volume flux kernels,'
       # in parallel, no guarantee block 1 is present on rank 0
       max_parallel = 1
-      max_threads = 1 # see libmesh issue #3808
     []
     # Nodal loops
     [nodal_kernel_bcs]
