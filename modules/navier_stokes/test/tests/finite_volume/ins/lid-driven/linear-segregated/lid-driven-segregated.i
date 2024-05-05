@@ -143,7 +143,7 @@ advected_interp_method = 'average'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  print_fields = true
+  print_fields = false
 
   pin_pressure = true
   pressure_pin_value = 0.0
