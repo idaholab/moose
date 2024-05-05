@@ -26,3 +26,21 @@ LinearFVAdvectionDiffusionOutflowBC::LinearFVAdvectionDiffusionOutflowBC(
   : LinearFVAdvectionDiffusionExtrapolatedBC(parameters)
 {
 }
+
+Real
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryNormalGradient() const
+{
+  return 0;
+}
+
+Real
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientMatrixContribution() const
+{
+  return 0;
+}
+
+Real
+LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientRHSContribution() const
+{
+  return 0;
+}

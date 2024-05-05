@@ -12,7 +12,7 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Class implementing an outflow boundary condition for linear finite
+ * Class implementing an extrapolated boundary condition for linear finite
  * volume variables. This is compatible with advection-diffusion problems.
  */
 class LinearFVAdvectionDiffusionExtrapolatedBC : public LinearFVAdvectionDiffusionBC

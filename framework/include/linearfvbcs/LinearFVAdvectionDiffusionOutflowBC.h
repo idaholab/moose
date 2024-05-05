@@ -25,4 +25,14 @@ public:
    * @param parameters The InputParameters for the object
    */
   LinearFVAdvectionDiffusionOutflowBC(const InputParameters & parameters);
+
+  /**
+   * We assume zero normal gradient for outflow boundary conditions so these
+   * need to be changed
+   */
+  ///@{
+  virtual Real computeBoundaryNormalGradient() const override;
+  virtual Real computeBoundaryGradientMatrixContribution() const override;
+  virtual Real computeBoundaryGradientRHSContribution() const override;
+  ///@}
 };

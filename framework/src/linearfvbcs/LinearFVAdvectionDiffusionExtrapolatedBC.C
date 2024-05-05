@@ -60,7 +60,7 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryNormalGradient() const
   // have a zero gradient.
   Real normal_gradient = 0.0;
 
-  // If we request linear extrapolation, we will have a gradient
+  // If we request linear extrapolation, we will have a gradient. We use
   if (_two_term_expansion)
   {
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -100,11 +100,11 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryValueRHSContribution() 
 Real
 LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryGradientMatrixContribution() const
 {
-  return 0;
+  return 1.0 / computeCellToFaceDistance();
 }
 
 Real
 LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryGradientRHSContribution() const
 {
-  return 0;
+  return computeBoundaryValue() / computeCellToFaceDistance();
 }

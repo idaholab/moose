@@ -118,7 +118,7 @@ advected_interp_method = 'average'
     functor = 0
   []
   [pressure-extrapolation]
-    type = LinearFVAdvectionDiffusionExtrapolatedBC
+    type = LinearFVExtrapolatedPressureBC
     boundary = 'left right top bottom'
     variable = pressure
     use_two_term_expansion = true
