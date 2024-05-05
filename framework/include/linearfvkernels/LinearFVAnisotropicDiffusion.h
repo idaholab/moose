@@ -12,8 +12,8 @@
 #include "LinearFVFluxKernel.h"
 
 /**
- * Kernel that adds contributions from a diffusion term discretized using the finite volume method
- * to a linear system.
+ * Kernel that adds contributions from an anisotropic diffusion term discretized using the finite
+ * volume method to a linear system.
  */
 class LinearFVAnisotropicDiffusion : public LinearFVFluxKernel
 {
@@ -57,13 +57,14 @@ protected:
    */
   Real computeFluxRHSContribution();
 
-  /// The functor for the diffusion coefficient
+  /// The functor for the diagonal diffusion tensor (diagonal entries arranged in a vector)
   const Moose::Functor<RealVectorValue> & _diffusion_tensor;
 
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
 
-  /// Switch to enable/disable nonorthogonal correction on boundary
+  /// Switch to enable/disable nonorthogonal correction on boundary, this is mostly used
+  /// to disable boundary contributions to the right hand side.
   const bool _use_nonorthogonal_correction_on_boundary;
 
   /// The cached matrix contribution

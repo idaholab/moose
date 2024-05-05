@@ -115,10 +115,13 @@ public:
   /// face.
   VarFaceNeighbors & faceType(const std::pair<unsigned int, unsigned int> & var_sys);
 
+  /// Getter for the face type for every stored variable
   std::vector<std::vector<VarFaceNeighbors>> & faceType() { return _face_types_by_var; }
 
+  /// Const getter for the face type for every stored variable
   const std::vector<std::vector<VarFaceNeighbors>> & faceType() const { return _face_types_by_var; }
 
+  /// Const getter for every associated boundary ID
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
   /// Returns the set of boundary ids for all boundaries that include this face.
@@ -198,9 +201,9 @@ private:
   /// Geometric weighting factor for face value interpolation
   Real _gc;
 
-  /// a map that provides the information about what face type this is for each variable. The first
-  /// member of the key is the variable number; the second member of the key is the number of the
-  /// system that the variable lives in
+  /// A vector that provides the information about what face type this is for each variable. The first
+  /// index is the system number; the second index of the key is the variable number within the
+  /// system.
   std::vector<std::vector<VarFaceNeighbors>> _face_types_by_var;
 
   /// the set of boundary ids that this face is associated with

@@ -1434,6 +1434,8 @@ public:
    * @param sys The linear system which should be assembled
    * @param system_matrix The sparse matrix which should hold the system matrix
    * @param rhs The vector which should hold the right hand side
+   * @param compute_gradients A flag to disable the computation of new gradients during the
+   * assembly, can be used to lag gradients
    */
   void computeLinearSystemSys(LinearImplicitSystem & sys,
                               SparseMatrix<Number> & system_matrix,
@@ -1448,6 +1450,8 @@ public:
    * @param rhs The vector which should hold the right hand side
    * @param vector_tags The vector tags for the right hand side
    * @param matrix_tags The matrix tags for the matrix
+   * @param compute_gradients A flag to disable the computation of new gradients during the
+   * assembly, can be used to lag gradients
    */
   void computeLinearSystemTags(const NumericVector<Number> & soln,
                                SparseMatrix<Number> & system_matrix,
