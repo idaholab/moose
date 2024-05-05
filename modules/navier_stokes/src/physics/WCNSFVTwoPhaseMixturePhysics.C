@@ -130,7 +130,7 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                      "The scaling factor for the phase transport equation");
 
   // Parameter groups
-  // TODO Rename parameter groups
+  params.renameParameterGroup("Passive scalar control", "Mixture transport control");
   params.addParamNamesToGroup(
       "first_phase_density_name first_phase_viscosity_name "
       "first_phase_specific_heat_name first_phase_thermal_conductivity_name "
