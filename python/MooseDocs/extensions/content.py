@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import re
 import uuid
 import collections
 import logging
@@ -88,7 +89,12 @@ class ContentExtension(command.CommandExtension):
             h_node = heading.find_heading(node)
             if h_node is not None:
                 text = h_node.text()
+                # Remove spaces inserted around numbers
+                # Numbers are tokens like words, hence the insertion of a separator
+                text = re.sub(r'\s(\d)\s', r'\1', text)
+                # Replace intended spaces by dashes which are rendered as spaces
                 label = text.replace(' ', '-').lower()
+
                 if method == ContentExtension.LETTER:
                     key = label[0]
                 elif method == ContentExtension.FOLDER:
