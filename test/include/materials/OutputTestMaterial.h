@@ -13,7 +13,8 @@
 #include "Material.h"
 #include "RankTwoTensorForward.h"
 #include "RankFourTensorForward.h"
-
+#include "SymmetricRankTwoTensorForward.h"
+#include "SymmetricRankFourTensorForward.h"
 class OutputTestMaterial : public Material
 {
 public:
@@ -41,6 +42,8 @@ protected:
   MaterialProperty<RealTensorValue> & _tensor_property;
   MaterialProperty<RankTwoTensor> & _ranktwotensor_property;
   MaterialProperty<RankFourTensor> & _rankfourtensor_property;
+  MaterialProperty<SymmetricRankTwoTensor> & _symmetricranktwotensor_property;
+  MaterialProperty<SymmetricRankFourTensor> & _symmetricrankfourtensor_property;
   MaterialProperty<std::vector<Real>> * _stdvector_property;
   Real _factor;
   const VariableValue & _variable;

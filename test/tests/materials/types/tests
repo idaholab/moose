@@ -14,7 +14,7 @@
     input = test.i
     prereq = test
     cli_args = 'Outputs/file_base=except1 AuxKernels/stdvec0_qp0/selected_qp=10'
-    expect_err = 'MaterialStdVectorAux.  selected_qp specified as 10 but there are only 4 quadpoints in the element'
+    expect_err = 'Trying to evaluate qp 10 but there are only 4 quadrature points in the element'
 
     requirement = 'The system shall report and error when invalid indices are requested when attempting to output material properties through auxiliary field variables.'
   [../]
