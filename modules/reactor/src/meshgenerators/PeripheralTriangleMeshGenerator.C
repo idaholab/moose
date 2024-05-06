@@ -125,12 +125,17 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<Real>("desired_area") = _desired_area;
     params.set<std::string>("desired_area_func") = _desired_area_func;
     params.set<bool>("use_auto_area_func") = getParam<bool>("use_auto_area_func");
-    params.set<Real>("auto_area_func_default_size") = getParam<Real>("auto_area_func_default_size");
-    params.set<Real>("auto_area_func_default_size_dist") =
-        getParam<Real>("auto_area_func_default_size_dist");
-    params.set<unsigned int>("auto_area_function_num_points") =
-        getParam<unsigned int>("auto_area_function_num_points");
-    params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
+    if (isParamSetByUser("auto_area_func_default_size"))
+      params.set<Real>("auto_area_func_default_size") =
+          getParam<Real>("auto_area_func_default_size");
+    if (isParamSetByUser("auto_area_func_default_size_dist"))
+      params.set<Real>("auto_area_func_default_size_dist") =
+          getParam<Real>("auto_area_func_default_size_dist");
+    if (isParamSetByUser("auto_area_function_num_points"))
+      params.set<unsigned int>("auto_area_function_num_points") =
+          getParam<unsigned int>("auto_area_function_num_points");
+    if (isParamSetByUser("auto_area_function_power"))
+      params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
     params.set<bool>("refine_boundary") = false;
     params.set<std::vector<bool>>("refine_holes") = std::vector<bool>{false};
     params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>{true};

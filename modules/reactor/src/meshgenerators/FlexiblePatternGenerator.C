@@ -507,12 +507,16 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
   params.set<Real>("desired_area") = getParam<Real>("desired_area");
   params.set<std::string>("desired_area_func") = getParam<std::string>("desired_area_func");
   params.set<bool>("use_auto_area_func") = getParam<bool>("use_auto_area_func");
-  params.set<Real>("auto_area_func_default_size") = getParam<Real>("auto_area_func_default_size");
-  params.set<Real>("auto_area_func_default_size_dist") =
-      getParam<Real>("auto_area_func_default_size_dist");
-  params.set<unsigned int>("auto_area_function_num_points") =
-      getParam<unsigned int>("auto_area_function_num_points");
-  params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
+  if (isParamSetByUser("auto_area_func_default_size"))
+    params.set<Real>("auto_area_func_default_size") = getParam<Real>("auto_area_func_default_size");
+  if (isParamSetByUser("auto_area_func_default_size_dist"))
+    params.set<Real>("auto_area_func_default_size_dist") =
+        getParam<Real>("auto_area_func_default_size_dist");
+  if (isParamSetByUser("auto_area_function_num_points"))
+    params.set<unsigned int>("auto_area_function_num_points") =
+        getParam<unsigned int>("auto_area_function_num_points");
+  if (isParamSetByUser("auto_area_function_power"))
+    params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
   params.set<BoundaryName>("output_boundary") = std::to_string(OUTER_SIDESET_ID);
   addMeshSubgenerator("XYDelaunayGenerator", name() + "_pattern", params);
 

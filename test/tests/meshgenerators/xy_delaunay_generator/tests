@@ -131,5 +131,13 @@
       expect_err = "Only one of the three methods"
       detail = "if more than one element area limiting methods are specified by the user"
     []
+    [err_unneeded_auto_area_func_params]
+      type = RunException
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/triang/auto_area_function_power=2'
+      expect_err = "the following parameters should not be set"
+      detail = "if the user specifies parameters for the auto area function when it is not used"
+    []
   []
 []

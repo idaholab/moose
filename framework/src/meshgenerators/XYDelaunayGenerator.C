@@ -143,6 +143,16 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
                "Only one of the three methods ('desired_area', 'desired_area_func', and "
                "'_use_auto_area_func') to set element area limit should be used.");
 
+  if (!_use_auto_area_func)
+    if (isParamSetByUser("auto_area_func_default_size") ||
+        isParamSetByUser("auto_area_func_default_size_dist") ||
+        isParamSetByUser("auto_area_function_num_points") ||
+        isParamSetByUser("auto_area_function_power"))
+      paramError("use_auto_area_func",
+                 "If this parameter is set to false, the following parameters should not be set: "
+                 "'auto_area_func_default_size', 'auto_area_func_default_size_dist', "
+                 "'auto_area_function_num_points', 'auto_area_function_power'.");
+
   if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
 
