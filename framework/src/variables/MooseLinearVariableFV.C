@@ -165,14 +165,8 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))
   {
     mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
-
-    const auto * const original_face_info = bc_pointer->currentFaceInfo();
-    if (fi != original_face_info)
-      bc_pointer->setCurrentFaceInfo(fi, face_type);
-
-    const auto boundary_value = bc_pointer->computeBoundaryValue();
-
-    return boundary_value;
+    bc_pointer->setCurrentFaceInfo(fi, face_type);
+    return bc_pointer->computeBoundaryValue();
   }
   // If no boundary condition is defined but we are evaluating on a boundary, just return the
   // element value
