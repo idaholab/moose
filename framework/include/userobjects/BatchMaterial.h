@@ -248,7 +248,9 @@ void
 BatchMaterial<Tuple, Output, Input...>::initialize()
 {
   _index = 0;
-  _output_ready = false;
+
+  if (shouldCompute())
+    _output_ready = false;
 }
 
 template <typename Tuple, typename Output, typename... Input>
