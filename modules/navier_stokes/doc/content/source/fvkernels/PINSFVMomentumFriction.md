@@ -3,7 +3,11 @@
 This kernel adds the friction term to the porous media Navier Stokes momentum
 equations. This kernel must be used with the canonical PINSFV variable set,
 e.g. pressure and superficial velocity, and supports Darcy and
-Forchheimer friction models:
+Forchheimer friction models in two flavors:
+
+## Standard friction formulation
+
+Set parameter: [!param](/FVKernels/PINSFVMomentumFriction/standard_friction_formulation) = 'true'
 
 Darcy drag model
 \begin{equation}
@@ -16,19 +20,37 @@ Forchheimer drag model
 \epsilon F_i = - f_i \frac{\rho}{2} \epsilon \frac{v_{D,i}}{\epsilon}\frac{|\vec{v_D}|}{\epsilon} = - f_i \frac{\rho}{2} v_{D,i} \frac{|\vec{v_D}|}{\epsilon}
 \end{equation}
 
+## Simplified friction formulation
+
+Set parameter: [!param](/FVKernels/PINSFVMomentumFriction/standard_friction_formulation) = 'false'
+
+Darcy drag model
+\begin{equation}
+\label{darcy2}
+\epsilon F_i = - f_i \epsilon \frac{v_{D,i}}{\epsilon} = -f_i v_{D,i}
+\end{equation}
+Forchheimer drag model
+\begin{equation}
+\label{forchheimer2}
+\epsilon F_i = - f_i \epsilon \frac{v_{D,i}}{\epsilon}\frac{|\vec{v_D}|}{\epsilon} = - f_i v_{D,i} \frac{|\vec{v_D}|}{\epsilon}
+\end{equation}
+
 where $F_i$ is the i-th component of the friction force (denoted by
 $\mathbf{F_f}$ in [!eqref](pinsfv.md#eq:pinsfv_mom)), $f_i$ the friction factor,
-which may be anisotropic, $\epsilon$ the porosity, $\mu$ the fluid dynamic
-viscosity, $\rho$ the fluid density, and $v_{D,i}$ the i-th component of the
-fluid superficial velocity. We have used a negative sign to match the notation
+which may be anisotropic, $\mu$ the fluid dynamic viscosity, $\rho$ the fluid density,
+and $v_{D,i}$ the i-th component of the fluid superficial velocity.
+We have used a negative sign to match the notation
 used in [!eqref](pinsfv.md#eq:pinsfv_mom) where the friction force is on the
 right-hand-side of the equation. When moved to the left-hand side, which is done
 when setting up a Newton scheme, the term becomes positive which is what is
 shown in the source code itself.  Darcy and Forchheimer terms represent
 fundamentally different friction effects. Darcy is meant to represent viscous
-effects and as shown in [darcy] has a linear dependence on the fluid
+effects and as shown in [darcy],[darcy2], it has a linear dependence on the fluid
 velocity. Meanwhile, Forchheimer is meant to represent inertial effects and as
-shown in [forchheimer] has a quadratic dependence on velocity.
+shown in [forchheimer], [forchheimer2] it has a quadratic dependence on velocity.
+
+For the non-porous medium version of the above equations set parameter [!param](/FVKernels/PINSFVMomentumFriction/is_porous_medium)  to `false`.
+(epsilon = 1)
 
 ## Computation of friction factors and pre-factors id=friction_example
 

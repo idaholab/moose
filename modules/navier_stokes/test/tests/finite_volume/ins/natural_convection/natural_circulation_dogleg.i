@@ -2,7 +2,7 @@
 height = 2.2
 density = 1.2
 gravity = 10
-head = ${fparse height * density * gravity}
+head = '${fparse height * density * gravity}'
 
 [Mesh]
   [mesh]
@@ -74,7 +74,8 @@ head = ${fparse height * density * gravity}
     mass_advection_interpolation = 'upwind'
     friction_blocks = '1'
     friction_types = 'Darcy'
-    friction_coeffs = '2'
+    friction_coeffs = 'friction_coefficient'
+    standard_friction_formulation = false
   []
 []
 
@@ -91,6 +92,11 @@ head = ${fparse height * density * gravity}
     type = ADGenericFunctorMaterial
     prop_names = 'rho'
     prop_values = '${density}'
+  []
+  [friction_coefficient]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient'
+    prop_values = '2 2 2'
   []
 []
 

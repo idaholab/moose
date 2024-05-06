@@ -81,16 +81,20 @@ gamma = 1.4
 
 [FVKernels]
   [u_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = superficial_vel_x
-    linear_coef_name = linear_friction_coeff
+    Darcy_name = linear_friction_coeff
     momentum_component = 'x'
+    standard_friction_formulation = false
+    rho = rho
   []
   [v_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = superficial_vel_y
-    linear_coef_name = linear_friction_coeff
+    Darcy_name = linear_friction_coeff
     momentum_component = 'y'
+    standard_friction_formulation = false
+    rho = rho
   []
 []
 
@@ -138,11 +142,17 @@ gamma = 1.4
     prop_values = '1       1.3'
   []
 
-  [linear_friction_coeff]
+  [linear_friction]
     type = ADParsedFunctorMaterial
-    property_name = 'linear_friction_coeff'
+    property_name = 'linear_friction'
     expression = 'loss_coeff * rho'
     functor_names = 'loss_coeff rho'
+  []
+
+  [linear_friction_coeff]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'linear_friction_coeff'
+    prop_values = 'linear_friction linear_friction linear_friction'
   []
 []
 
