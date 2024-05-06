@@ -8,6 +8,7 @@
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
   []
   [mms-adr-1d-outflow]
     type = PythonUnitTest
@@ -16,6 +17,7 @@
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with an outflow boundary condition using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
   []
   [mms-adr-2d-dirichlet]
     type = PythonUnitTest
@@ -24,6 +26,7 @@
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Dirichlet boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
   []
   [mms-adr-2d-outflow]
     type = PythonUnitTest
@@ -32,5 +35,6 @@
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with outflow boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
   []
 []

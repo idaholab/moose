@@ -9,5 +9,6 @@
     recover = false # we don't support recovery for SIMPLE yet
     valgrind = heavy
     method = '!dbg'
+    max_threads = 1 # see libmesh issue #3808
   []
 []

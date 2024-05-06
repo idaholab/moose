@@ -11,6 +11,7 @@
     # TODO: We can make the pressure second order by doing linear extrapolation to the boundary
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
+    max_threads = 1 # see libmesh issue #3808
   []
   [vortex-nonorthogonal]
     type = PythonUnitTest
@@ -22,5 +23,6 @@
     # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
+    max_threads = 1 # see libmesh issue #3808
   []
 []

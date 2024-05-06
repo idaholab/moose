@@ -43,8 +43,6 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  const auto state = Moose::currentState();
-
   unsigned int size = 0;
 
   for (const auto & variable :
@@ -128,7 +126,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
             const auto contribution = face_info->normal() * face_info->faceArea() *
                                       face_info->faceCoord() *
                                       (bc_pointer ? bc_pointer->computeBoundaryValue()
-                                                  : _current_var->getElemValue(*elem_info, state));
+                                                  : solution_reader(dof_id_container[face_i]));
 
             for (const auto i : make_range(_dim))
               contribution_container[i][face_i] = contribution(i);
