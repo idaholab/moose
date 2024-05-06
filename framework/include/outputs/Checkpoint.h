@@ -82,11 +82,15 @@ public:
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(CheckpointType flag) { _checkpoint_type = flag; }
 
-  /// Gets information about the checkpoint
-  const std::vector<std::pair<std::string, std::string>> & getCheckpointInfo() const
-  {
-    return _checkpoint_info;
-  }
+  /**
+   * Gathers and records information used later for console output
+   * @return A stringstream containing the following entries:
+   * Wall Time Interval : interval length in seconds, if any, otherwise "Disabled"
+   * User Checkpoint    : name of user-define checkpoint, if any, otherwise "Disabled"
+   * # Checkpoints Kept : value if the 'num_files' parameter
+   * Execute On         : value of the 'execute_on' parameter
+   */
+  std::stringstream checkpointInfo() const;
 
 protected:
   /**
@@ -103,13 +107,6 @@ private:
 
   /// Determines if the requested values of execute_on are valid for checkpoints
   void validateExecuteOn() const;
-
-  /**
-   * Gathers and records information used later for console output
-   * @param checkpoint_info A vector in which to store desired information.
-   */
-  void
-  recordCheckpointInfo(std::vector<std::pair<std::string, std::string>> & checkpoint_info) const;
 
   /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
   CheckpointType _checkpoint_type;

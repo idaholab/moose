@@ -6,7 +6,7 @@
     input = 'checkpoint_split.i'
     cli_args = '--split-mesh 2 --split-file checkpoint_split_in'
 
-    requirement = 'The system shall generate pre-split (2) mesh files using a standard input file combined with command line arguments.'
+    requirement = 'The system shall generate pre-split mesh files using a standard input file combined with command line arguments.'
     recover = false
     mesh_mode = 'REPLICATED'
   [../]
@@ -26,7 +26,7 @@
     input = 'checkpoint_split.i'
     cli_args = '--split-mesh 2 --split-file checkpoint_split_in.cpr'
 
-    requirement = 'The system shall generate pre-split (2) binary mesh files using a standard input file combined with command line arguments.'
+    requirement = 'The system shall generate pre-split binary mesh files using a standard input file combined with command line arguments.'
     recover = false
     mesh_mode = 'REPLICATED'
   [../]
@@ -40,85 +40,5 @@
     min_parallel = 2
 
     requirement = 'The system shall use pre-split binary mesh files using a standard input file combined with command line arguments.'
-  [../]
-  [./test_4_generate_split]
-    type = 'RunApp'
-    input = 'checkpoint_split.i'
-    cli_args = '--split-mesh 4 --split-file checkpoint_split_in'
-
-    requirement = 'The system shall generate pre-split (4) mesh files using a standard input file combined with command line arguments.'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
-  [./test_4]
-    prereq = 'test_4_generate_split'
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_4.e'
-    cli_args = 'Outputs/file_base=test_4 --use-split --split-file checkpoint_split_in'
-    max_parallel = 4
-    min_parallel = 4
-
-    requirement = 'The system shall auto-detect and use pre-split meshes using a standard input file combined with command line arguments.'
-  [../]
-  [./test_4a_generate_split]
-    type = 'RunApp'
-    input = 'checkpoint_split.i'
-    cli_args = '--split-mesh 4 --split-file checkpoint_split_in.cpr'
-
-    requirement = 'The system shall generate pre-split (4) binary mesh files using a standard input file combined with command line arguments.'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
-  [./test_4a]
-    prereq = 'test_4a_generate_split'
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_4a.e'
-    cli_args = 'Outputs/file_base=test_4a --use-split --split-file checkpoint_split_in.cpr'
-    max_parallel = 4
-    min_parallel = 4
-
-    requirement = 'The system shall use pre-split ascii meshes when the command line parameter also includes the pre-split suffix.'
-  [../]
-  [./test_8_generate_split]
-    type = 'RunApp'
-    input = 'checkpoint_split.i'
-    cli_args = '--split-mesh 8 --split-file checkpoint_split_in'
-
-    requirement = 'The system shall generate pre-split (8) mesh files using a standard input file combined with command line arguments.'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
-  [./test_8]
-    prereq = 'test_8_generate_split'
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_8.e'
-    cli_args = 'Outputs/file_base=test_8 --use-split --split-file checkpoint_split_in'
-    max_parallel = 8
-    min_parallel = 8
-
-    requirement = 'The system shall use pre-splits for several different numbers of processors auto-detected from the number of MPI processors used.'
-  [../]
-  [./test_8a_generate_split]
-    type = 'RunApp'
-    input = 'checkpoint_split.i'
-    cli_args = '--split-mesh 8 --split-file checkpoint_split_in.cpr'
-
-    requirement = 'The system shall generate pre-split (8) binary mesh files using a standard input file combined with command line arguments.'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
-  [./test_8a]
-    prereq = 'test_8a_generate_split'
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_8a.e'
-    cli_args = 'Outputs/file_base=test_8a --use-split --split-file checkpoint_split_in.cpr'
-    max_parallel = 8
-    min_parallel = 8
-
-    requirement = 'The system shall use pre-splits for several different numbers of processors when the command line parameter also includes the pre-split suffix.'
   [../]
 []

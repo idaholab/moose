@@ -48,8 +48,7 @@ outputFrameworkInformation(const MooseApp & app)
   {
     const auto & info_pairs = checkpoints[0]->getCheckpointInfo();
     oss << std::left << "Checkpoint:\n";
-    for (const auto & pair : info_pairs)
-      oss << std::setw(console_field_width) << ("  " + pair.first + ":") << pair.second << '\n';
+    oss << checkpoints[0]->checkpointInfo();
     oss << std::endl;
   }
 

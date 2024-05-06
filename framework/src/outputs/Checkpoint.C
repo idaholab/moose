@@ -83,9 +83,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   // We want to do this here so it overrides --output-wall-time-interval
   if (!getParam<bool>("wall_time_checkpoint"))
     _wall_time_interval = std::numeric_limits<Real>::max();
-
-  // Record some information about the checkpoint
-  recordCheckpointInfo(_checkpoint_info);
 }
 
 std::string
@@ -235,49 +232,29 @@ void
 Checkpoint::validateExecuteOn() const
 {
   const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
-
-  // Create a vector containing all valid values of execute_on
-  std::vector<ExecFlagEnum> valid_execute_on_values(7);
-  {
-    ExecFlagEnum valid_execute_on_value = execute_on;
-    valid_execute_on_value = {EXEC_INITIAL};
-    valid_execute_on_values[0] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_TIMESTEP_END};
-    valid_execute_on_values[1] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_FINAL};
-    valid_execute_on_values[2] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    valid_execute_on_values[3] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_TIMESTEP_END, EXEC_FINAL};
-    valid_execute_on_values[4] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_INITIAL, EXEC_FINAL};
-    valid_execute_on_values[5] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_FINAL};
-    valid_execute_on_values[6] = valid_execute_on_value;
-  }
-
-  // Check if the value of execute_on is valid
-  auto it = std::find(valid_execute_on_values.begin(), valid_execute_on_values.end(), execute_on);
-  const bool is_valid_value = (it != valid_execute_on_values.end());
-  if (!is_valid_value)
-    paramError("execute_on",
-               "The checkpoint system may only be used with execute_on values ",
-               "INITIAL, TIMESTEP_END, and FINAL, not '",
-               execute_on,
-               "'.");
+  const std::set<ExecFlagType> allowed = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_FINAL};
+  for (const auto & value : execute_on)
+    if (!allowed.count(value))
+      paramError("execute_on",
+                 "The exec flag ",
+                 value,
+                 " is not allowed. Allowed flags are INITIAL, TIMESTEP_END, and FINAL.");
 }
 
-void
-Checkpoint::recordCheckpointInfo(
-    std::vector<std::pair<std::string, std::string>> & checkpoint_info) const
+std::stringstream
+Checkpoint::checkpointInfo() const
 {
+  static const unsigned int console_field_width = 27;
+  std::stringstream checkpoint_info;
+
   std::string interval_info;
   if (getParam<bool>("wall_time_checkpoint"))
     interval_info = "Every " + std::to_string(_wall_time_interval) + " s";
   else
     interval_info = "Disabled";
 
-  checkpoint_info.emplace_back("Wall Time Interval", interval_info);
+  checkpoint_info << std::setw(console_field_width) << "  Wall Time Interval:" << interval_info
+                  << "\n";
 
   std::string user_info;
   if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
@@ -285,14 +262,17 @@ Checkpoint::recordCheckpointInfo(
   else
     user_info = "Outputs/" + name();
 
-  checkpoint_info.emplace_back("User Checkpoint", user_info);
+  checkpoint_info << std::setw(console_field_width) << "  User Checkpoint:" << user_info << "\n";
 
   if (!((interval_info == "Disabled") && (user_info == "Disabled")))
   {
-    checkpoint_info.emplace_back("# Checkpoints Kept", std::to_string(_num_files));
+    checkpoint_info << std::setw(console_field_width)
+                    << "  # Checkpoints Kept:" << std::to_string(_num_files) << "\n";
     std::string exec_on_values = "";
     for (const auto & item : _execute_on)
       exec_on_values += item.name() + " ";
-    checkpoint_info.emplace_back("Execute On", exec_on_values);
+    checkpoint_info << std::setw(console_field_width) << "  Execute On:" << exec_on_values << "\n";
   }
+
+  return checkpoint_info;
 }
