@@ -13,6 +13,9 @@
 #include "TimedElementSubdomainModifier.h"
 #include "DelimitedFileReaderOfString.h"
 
+/**
+ * Modifies elements from entire subdomains based on user input or file input
+ */
 class TimedSubdomainModifier : public TimedElementSubdomainModifier
 {
 public:
@@ -20,7 +23,7 @@ public:
 
   TimedSubdomainModifier(const InputParameters & parameters);
 
-  virtual void initialize();
+  virtual void initialize() override;
 
 protected:
   /**
@@ -40,9 +43,12 @@ private:
   void buildFromParameters();
   void buildFromFile();
 
+  /// Times to change the subdomains on. If the time steps do not align with the times,
+  /// the subdomain changes will happen at the end of the time step
   std::vector<Real> _times;
 
-  /// storage for the block ids.
+  /// Source subdomains to change from
   std::vector<SubdomainID> _blocks_from;
+  /// Target subdomains to change the source subdomains to
   std::vector<SubdomainID> _blocks_to;
 };

@@ -10,8 +10,10 @@
 #pragma once
 
 #include "ElementSubdomainModifier.h"
-#include "DelimitedFileReaderOfString.h"
 
+/**
+ * Modifies element subdomains only at a given list of times
+ */
 class TimedElementSubdomainModifier : public ElementSubdomainModifier
 {
 public:
@@ -19,7 +21,7 @@ public:
 
   TimedElementSubdomainModifier(const InputParameters & parameters);
 
-  virtual void initialize();
+  virtual void initialize() override;
 
 protected:
   virtual SubdomainID computeSubdomainID() override;

@@ -9,7 +9,7 @@
 
 #include "TimedSubdomainModifier.h"
 #include "TimedElementSubdomainModifier.h"
-#include "DelimitedFileReaderOfString.h"
+#include "DelimitedFileReader.h"
 #include "MooseMesh.h"
 
 registerMooseObject("MooseApp", TimedSubdomainModifier);
@@ -23,7 +23,7 @@ TimedSubdomainModifier::validParams()
   params.addParam<std::vector<SubdomainName>>("blocks_from",
                                               "Names or ids of the 'old' block(s), to be renamed.");
   params.addParam<std::vector<SubdomainName>>("blocks_to", "Names or ids of the 'new' block.");
-  params.addParamNamesToGroup("times blocks_from blocks_to", "Direct subdomain changes data input");
+  params.addParamNamesToGroup("times blocks_from blocks_to", "Subdomain change data from input");
 
   // parameters for file-based data supply
   params.addParam<FileName>("data_file", "File holding CSV data");
@@ -43,7 +43,7 @@ TimedSubdomainModifier::validParams()
   params.addParamNamesToGroup(
       "data_file header delimiter comment time_column_index blocks_from_column_index "
       "blocks_to_column_index time_column_text blocks_from_column_text blocks_to_column_text",
-      "Subdomain change data input from CSV file");
+      "Subdomain change data from CSV file");
 
   params.addClassDescription("Renames entire blocks at user-specified times.");
 
@@ -77,14 +77,12 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
     mooseError("Data on times and blocks must be provided either via a CSV file ('data_file' and "
                "corresponding blocks), or via direct parameter input ('times', 'blocks_from', and "
                "'blocks_to').");
-  };
+  }
 
   if (from_parameters > 0)
   {
     if (from_parameters != 3)
-    {
       mooseError("All parameters 'times', and 'blocks_from', and 'blocks_to' must be specified.");
-    };
     buildFromParameters();
   }
   else if (from_data_file > 0)
@@ -106,17 +104,15 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
     buildFromFile();
   }
   else
-  {
     mooseError("Unknown data source. Are you missing a parameter? Did you misspell one?");
-  };
 }
 
 void
 TimedSubdomainModifier::buildFromParameters()
 {
 
-  _times = this->template getParam<std::vector<Real>>("times");
-  size_t n = _times.size();
+  _times = getParam<std::vector<Real>>("times");
+  const auto n = _times.size();
 
   const auto raw_from = getParam<std::vector<SubdomainName>>("blocks_from");
   const auto raw_to = getParam<std::vector<SubdomainName>>("blocks_to");
@@ -135,7 +131,7 @@ TimedSubdomainModifier::buildFromParameters()
   {
     _blocks_from[i] = _mesh->getSubdomainID(raw_from[i]);
     _blocks_to[i] = _mesh->getSubdomainID(raw_to[i]);
-  };
+  }
 }
 
 void
@@ -144,27 +140,27 @@ TimedSubdomainModifier::buildFromFile()
   const auto _file_name = getParam<FileName>("data_file");
 
   /// Flag indicating if the file contains a header.
-  auto _header_flag = MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
+  auto _header_flag = MooseUtils::DelimitedFileOfStringReader::HeaderFlag::OFF;
   if (isParamValid("header"))
   {
     _header_flag = getParam<bool>("header")
-                       ? MooseUtils::DelimitedFileReaderOfString::HeaderFlag::ON
-                       : MooseUtils::DelimitedFileReaderOfString::HeaderFlag::OFF;
-  };
+                       ? MooseUtils::DelimitedFileOfStringReader::HeaderFlag::ON
+                       : MooseUtils::DelimitedFileOfStringReader::HeaderFlag::OFF;
+  }
 
   std::string _delimiter = ",";
   if (isParamValid("delimiter"))
   {
     _delimiter = getParam<std::string>("delimiter");
-  };
+  }
 
   std::string _comment = ",";
   if (isParamValid("comment"))
   {
     _comment = getParam<std::string>("comment");
-  };
+  }
 
-  MooseUtils::DelimitedFileReaderOfString file(_file_name);
+  MooseUtils::DelimitedFileOfStringReader file(_file_name);
 
   file.setHeaderFlag(_header_flag);
   file.setDelimiter(_delimiter);
@@ -184,7 +180,7 @@ TimedSubdomainModifier::buildFromFile()
   else if (isParamValid("time_column_index"))
   {
     _time_column = getParam<size_t>("time_column_index");
-  };
+  }
 
   size_t _blocks_from_column = 1;
   if (isParamValid("blocks_from_column_text"))
@@ -199,7 +195,7 @@ TimedSubdomainModifier::buildFromFile()
   else if (isParamValid("blocks_from_column_index"))
   {
     _blocks_from_column = getParam<size_t>("blocks_from_column_index");
-  };
+  }
 
   size_t _blocks_to_column = 2;
   if (isParamValid("blocks_to_column_text"))
@@ -212,9 +208,7 @@ TimedSubdomainModifier::buildFromFile()
     _blocks_to_column = std::distance(_names.begin(), it);
   }
   else if (isParamValid("blocks_to_column_index"))
-  {
     _blocks_to_column = getParam<size_t>("blocks_to_column_index");
-  };
 
   const auto max_needed_column_index =
       std::max({_time_column, _blocks_from_column, _blocks_to_column});
@@ -236,16 +230,26 @@ TimedSubdomainModifier::buildFromFile()
   if (n_rows == 0)
     mooseError("empty sequence in file ", _file_name);
   if (n_rows != strBlockFrom.size())
-    mooseError("inconsistent data in ", _file_name);
+    mooseError("Inconsistent source block data size in ",
+               _file_name,
+               ". Expected ",
+               n_rows,
+               " and read ",
+               strBlockFrom.size());
   if (n_rows != strBlockTo.size())
-    mooseError("inconsistent data in ", _file_name);
+    mooseError("Inconsistent target block data size in ",
+               _file_name,
+               ". Expected ",
+               n_rows,
+               " and read ",
+               strBlockTo.size());
 
   // resize variables to fit the data
   _times.resize(n_rows);
   _blocks_from.resize(n_rows);
   _blocks_to.resize(n_rows);
 
-  // parse the data given by the user
+  // fill the to and from blocks vectors
   const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
   std::transform(
       strTimes.begin(), strTimes.end(), _times.begin(), [](std::string x) { return std::stod(x); });
@@ -278,7 +282,8 @@ TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const 
   // get the subdomain-id of the current element
   SubdomainID resulting_subdomain_id = _current_elem->subdomain_id();
 
-  // iterate all block changes issued by the user and apply if appropriate
+  // check for all the subdomain changes that can have been requested between the previous and the
+  // current time
   const auto n_rows = _times_and_indices.size();
   for (size_t i = 0; i < n_rows; ++i)
   {
@@ -294,7 +299,7 @@ TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const 
       // we have to change the subdomain-id using the original index (stored in 'j')
       resulting_subdomain_id = _blocks_to[j];
     }
-  };
+  }
 
   return resulting_subdomain_id;
 }

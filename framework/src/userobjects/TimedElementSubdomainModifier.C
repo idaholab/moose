@@ -10,8 +10,6 @@
 // Base class to move elements to a specific subdomain at the given times.
 
 #include "TimedElementSubdomainModifier.h"
-#include "DelimitedFileReaderOfString.h"
-#include "MooseMesh.h"
 
 registerMooseObject("MooseApp", TimedElementSubdomainModifier);
 
@@ -19,7 +17,6 @@ InputParameters
 TimedElementSubdomainModifier::validParams()
 {
   InputParameters params = ElementSubdomainModifier::validParams();
-
   params.addParam<std::vector<Real>>("times", "The times of the subdomain modifications.");
 
   return params;
