@@ -82,6 +82,7 @@ protected:
                                 FEProblemBase & to_problem,
                                 dof_id_type index,
                                 unsigned int time_index = 0);
+
   /*
    * Transferring reporter value from one vector reporter value to a single
    * reporter value.

@@ -34,11 +34,11 @@ to be root or replicated.
 |
 | $\begin{pmatrix}1\\2\end{pmatrix}$ $\begin{pmatrix}3\\4\\5\end{pmatrix}$ $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ $\begin{pmatrix}10\\11\\12\end{pmatrix}$ | $\begin{pmatrix}1\\2\end{pmatrix}$ | $\begin{pmatrix}3\\4\\5\end{pmatrix}$ | $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ | $\begin{pmatrix}10\\11\\12\end{pmatrix}$ |
 
-!alert warning title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector) only works with certain reporter modes.
+!alert warning title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector)  is only implemented for certain reporter modes.
 The main
 app reporter is assumed to be `REPORTER_MODE_REPLICATED` while the subapp reporters are assumed
 to be `REPORTER_MODE_ROOT` or `REPORTER_MODE_REPLICATED`. This operation will
-error out with any reporters that
+error out with any reporter that
 are `REPORTER_MODE_DISTRIBUTED`.
 
 ## Example Input File Syntax
@@ -99,11 +99,11 @@ Here, we are transferring integer and string data between reporters:
 
 
 
-### Distributed Reporter
+### Distribution of a vector Reporter
 
 Here we are transferring a vector reporter and a vector of vectors reporter in a
 scatter and gather fashion. The main application holds a vector of vectors and a
-single vector,while each subapp has a vector and a Real (scalar) reporter.
+single vector, while each subapp has a vector and a Real (scalar) reporter.
 This test shows the
 scatter operation by distributing a vector and a single Real to each subapp and
 shows the gather operation by aggregating the same values into a

@@ -157,17 +157,21 @@ MultiAppReporterTransfer::executeFromMultiapp()
   if (!hasFromMultiApp())
     return;
 
+  // subapp indices to perform transfers on
   std::vector<unsigned int> indices;
   if (_distribute_reporter_vector)
   {
+    // If distributing, resize the indices vector to the number of global apps
     indices.resize(getFromMultiApp()->numGlobalApps());
     std::iota(indices.begin(), indices.end(), 0);
   }
   else if (_subapp_index == std::numeric_limits<unsigned int>::max())
   {
+    // if _subapp_index not set indices is set to 0
     indices = {0};
   }
   else
+    // set indices to specific _subapp_index
     indices = {_subapp_index};
 
   if (_distribute_reporter_vector)
@@ -202,9 +206,12 @@ MultiAppReporterTransfer::executeFromMultiapp()
                            hasToMultiApp() ? getToMultiApp()->appProblemBase(ind) // !
                                            : getFromMultiApp()->problemBase());
       }
+
   if (_distribute_reporter_vector)
     for (unsigned int n : make_range(_to_reporter_names.size()))
     {
+      // Perform summing operation that makes sure all procs have the correct
+      // Reporter values.
       sumVectorReporter(_to_reporter_names[n], getFromMultiApp()->problemBase());
     }
 }

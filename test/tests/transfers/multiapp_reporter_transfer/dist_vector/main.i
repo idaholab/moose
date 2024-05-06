@@ -48,6 +48,7 @@
   []
 []
 [Transfers]
+  active = 'to_sub from_sub'
   [to_sub]
     type = MultiAppReporterTransfer
     to_multi_app = sub

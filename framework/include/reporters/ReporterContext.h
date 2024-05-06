@@ -11,6 +11,7 @@
 #include <iostream>
 #include <typeinfo>
 
+#include "MooseError.h"
 #include "libmesh/id_types.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_object.h"
@@ -140,6 +141,7 @@ public:
                                 const ReporterName & r_name,
                                 dof_id_type index,
                                 unsigned int time_index = 0) const = 0;
+
   /**
    * Helper for enabling generic transfer of a vector Reporter of values to a
    * single value
@@ -190,13 +192,11 @@ public:
 
   /**
    * Helper for clearing vector data
-   *
    */
   virtual void clear() = 0;
 
   /**
    * Helper for summing reporter value.
-   *
    */
   virtual void vectorSum() = 0;
 
@@ -529,6 +529,13 @@ ReporterGeneralContext<T>::vectorSum()
       if constexpr (std::is_arithmetic<InnerValueType>::value &&
                     !std::is_same<InnerValueType, bool>::value)
       {
+#ifdef DEBUG
+        auto vec_size = this->_state.value().size();
+        this->comm().max(vec_size);
+        // Assert only passes on all ranks if they are all the same size.
+        mooseAssert(this->_state.value().size() == vec_size,
+                    "Reporter vector have different sizes on different ranks.");
+#endif
         // Iterate over each inner vector in the outer vector
         for (auto & innerVector : this->_state.value())
         {
@@ -759,20 +766,38 @@ public:
     if constexpr (std::is_arithmetic<T>::value &&
                   !std::is_same<T, bool>::value) // We can't sum bools.
     {
+      // Resize vector to max size
+      dof_id_type vec_size = this->_state.value().size();
+      this->comm().max(vec_size);
+      this->_state.value().resize(vec_size);
+
       this->comm().sum(this->_state.value());
       return;
     }
     // Case 2: T is a vector
     else if constexpr (is_std_vector<T>::value)
     {
+      // Resize vector to max size
+      dof_id_type vec_size = this->_state.value().size();
+      this->comm().max(vec_size);
+      this->_state.value().resize(vec_size);
+
       using ValueType = typename T::value_type;
       // Check if the ValueType is a vector
       if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
         for (auto & val_vec : this->_state.value())
         { //_state.value()-> vector<vector<R>
+
+          // Resize vector to max size
+          dof_id_type val_vec_size = val_vec.size();
+          this->comm().max(val_vec_size);
+          val_vec.resize(val_vec_size);
+
           this->comm().sum(val_vec);
           return;
         }
+      else
+        mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
     }
     else
       mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
