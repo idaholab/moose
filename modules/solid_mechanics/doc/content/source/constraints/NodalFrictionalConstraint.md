@@ -3,7 +3,7 @@
 !syntax description /Constraints/NodalFrictionalConstraint
 
 Only a penalty formulation is implemented.
-First the previous time step tangeantial force is computed as:
+First, the previous time step tangential force is computed as:
 
 !equation
 F_{old} = \text{tangeantial penalty} (u_{primary-old} - u_{secondary-old})

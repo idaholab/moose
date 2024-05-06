@@ -2,7 +2,7 @@
 
 !syntax description /Constraints/NodalStickConstraint
 
-Both a kinematic and a penalty formulations are implemented.
+Both kinematic and penalty formulations are implemented.
 
 For the penalty formulation, the contribution to the residual for the constrained nodes on the primary side is equal to
 

@@ -2,7 +2,7 @@
 
 !syntax description /BCs/PresetVelocity
 
-This Dirichlet boundary conditions lets user set the displacement using the [!param](/BCs/PresetVelocity/function) and [!param](/BCs/PresetVelocity/velocity) parameters.
+This Dirichlet boundary condition lets the user set the displacement using the [!param](/BCs/PresetVelocity/function) and [!param](/BCs/PresetVelocity/velocity) parameters.
 
 The displacement is updated as:
 
