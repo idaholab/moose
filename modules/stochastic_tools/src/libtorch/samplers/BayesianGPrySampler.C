@@ -47,6 +47,22 @@ BayesianGPrySampler::fillVector(std::vector<Real> & vector, const unsigned int &
     vector[i] = _priors[i]->quantile(getRand(seed_value));
 }
 
+void
+BayesianGPrySampler::fillVectorUnitBall(std::vector<Real> & vector,
+                                        const unsigned int & seed_value,
+                                        const std::vector<Real> & seed_vector)
+{
+  Real tmp_value;
+  for (unsigned int i = 0; i < _priors.size(); ++i)
+  {
+    // std::cout << Normal::quantile(_priors[i]->cdf(seed_vector[i]), 0.0, 1.0) << std::endl;
+    tmp_value = Normal::quantile(
+        getRand(seed_value), Normal::quantile(_priors[i]->cdf(seed_vector[i]), 0.0, 1.0), 1.0);
+    // std::cout << tmp_value << std::endl;
+    vector[i] = _priors[i]->quantile(Normal::cdf(tmp_value, 0.0, 1.0));
+  }
+}
+
 const std::vector<std::vector<Real>> &
 BayesianGPrySampler::getSampleTries() const
 {
@@ -81,7 +97,8 @@ BayesianGPrySampler::proposeSamples(const unsigned int seed_value)
     }
   }
 
-  // Finally, generate several new samples randomly for the GP and NN to try and pass it to the reporter
+  // Finally, generate several new samples randomly for the GP and NN to try and pass it to the
+  // reporter
   for (dof_id_type i = 0; i < _num_tries; ++i)
   {
     fillVector(_sample_vector, seed_value);
@@ -89,6 +106,55 @@ BayesianGPrySampler::proposeSamples(const unsigned int seed_value)
     if (_var_prior)
       _var_all[i] = _var_prior->quantile(getRand(seed_value));
   }
+
+  // unsigned int seed_index_fill = 0;
+  // Real tmp_value;
+  // if (_t_step <= 200 || _t_step % 5 == 0)
+  // {
+  //   for (dof_id_type i = 0; i < _num_tries; ++i)
+  //   {
+  //     fillVector(_sample_vector, seed_value);
+  //     _inputs_all[i] = _sample_vector;
+  //     if (_var_prior)
+  //       _var_all[i] = _var_prior->quantile(getRand(seed_value));
+  //   }
+  // }
+  // else
+  // {
+  //   for (unsigned int i = 0; i < _num_tries; ++i)
+  //   {
+  //     seed_index_fill =
+  //         ((i + 1) % _num_parallel_proposals == 0) ? ++seed_index_fill : seed_index_fill;
+  //     fillVectorUnitBall(_sample_vector, seed_value, _new_samples[seed_index_fill]);
+  //     _inputs_all[i] = _sample_vector;
+  //     if (_var_prior)
+  //     {
+  //       tmp_value = Normal::quantile(
+  //           getRand(seed_value),
+  //           Normal::quantile(_var_prior->cdf(_new_var_samples[seed_index_fill]), 0.0, 1.0),
+  //           1.0);
+  //       _var_all[i] = _var_prior->quantile(Normal::cdf(tmp_value, 0.0, 1.0));
+  //     }
+  //   }
+  // }
+
+  // for (dof_id_type i = 0; i < _num_tries; ++i)
+  // {
+  //   // std::cout << "Here **** " << seed_index_fill << std::endl;
+  //   // std::cout << "Here 2 **** " << i << std::endl;
+  //   seed_index_fill = ((i + 1) % index == 0) ? ++seed_index_fill : seed_index_fill;
+  //   fillVectorUnitBall(_sample_vector, seed_value, _new_samples[seed_index_fill]);
+  //   _inputs_all[i] = _sample_vector;
+  //   std::cout << Moose::stringify(_sample_vector) << std::endl;
+  //   if (_var_prior)
+  //   {
+  //     tmp_value = Normal::quantile(_var_prior->cdf(_new_var_samples[seed_index_fill]), 0.0, 1.0);
+  //     tmp_value = Normal::quantile(getRand(seed_value), tmp_value, 1.0);
+  //     _var_all[i] = _var_prior->quantile(Normal::cdf(tmp_value, 0.0, 1.0));
+  //   }
+  //   std::cout << Moose::stringify(_var_all[i]) << std::endl;
+  //   std::cout << "Here final **** " << std::endl;
+  // }
 }
 
 #endif

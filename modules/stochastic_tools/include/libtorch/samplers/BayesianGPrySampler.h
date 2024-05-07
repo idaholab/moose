@@ -44,6 +44,15 @@ protected:
    */
   virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
 
+  /**
+   * Fill in the provided vector with random samples around a unit ball of the seeds
+   * @param vector The vector to be filled
+   * @param seed_value The seed value to generate random numbers
+   */
+  virtual void fillVectorUnitBall(std::vector<Real> & vector,
+                                  const unsigned int & seed_value,
+                                  const std::vector<Real> & seed_vector);
+
   /// The selected sample indices to evaluate the subApp
   const std::vector<unsigned int> & _sorted_indices;
 

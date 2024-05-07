@@ -38,9 +38,9 @@
   [sample]
     type = AffineInvariantDES
     prior_distributions = 'left right'
-    num_parallel_proposals = 5
+    num_parallel_proposals = 50
     file_name = 'confg.csv'
-    execute_on = 'initial timestep_end'
+    execute_on =  PRE_MULTIAPP_SETUP
     seed = 100
     initial_values = '-0.98945095 -0.35257103'
     previous_state = 'mcmc_reporter/inputs'
@@ -52,28 +52,53 @@
   []
 []
 
+[MultiApps]
+  [sub]
+    type = SamplerFullSolveMultiApp
+    input_files = sub.i
+    sampler = sample
+  []
+[]
+
+[Controls]
+  [cmdline]
+    type = MultiAppSamplerControl
+    multi_app = sub
+    sampler = sample
+    param_names = 'left_bc right_bc mesh1'
+  []
+[]
+
+[Transfers]
+  [reporter_transfer]
+    type = SamplerReporterTransfer
+    from_reporter = 'average/value'
+    stochastic_reporter = 'constant'
+    from_multi_app = sub
+    sampler = sample
+  []
+[]
+
 [Reporters]
   [constant]
-    type = ConstantReporter
-    real_vector_names = vec
-    real_vector_values = '3 4'
+    type = StochasticReporter
   []
   [mcmc_reporter]
     type = AffineInvariantDifferentialDecisionwithGPry
-    output_value = constant/vec
+    output_value = constant/reporter_transfer:average:value
     sampler = sample
     likelihoods = 'gaussian'
     gp_evaluator = GP_eval
-    nn_evaluator = surr
+    # nn_evaluator = surr
   []
 []
 
 [Surrogates]
-  [surr]
-    type = LibtorchANNSurrogate
-    filename = 'test_nn_gp_subapp_out_train.rd'
-    classify = true
-  []
+  # [surr]
+  #   type = LibtorchANNSurrogate
+  #   filename = 'test_nn_gp_subapp_out_train.rd'
+  #   classify = true
+  # []
   [GP_eval]
     type = GaussianProcess
     filename = 'test_nn_gp_subapp_out2_GP_al_trainer.rd'
@@ -82,11 +107,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 200
 []
 
 [Outputs]
-  execute_on = 'INITIAL TIMESTEP_END'
+  execute_on = TIMESTEP_END
   file_base = 'des_gpry' # 'test' # 'des_gpry'
   perf_graph = true
   [out]
