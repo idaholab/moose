@@ -146,6 +146,13 @@ class RunPBS(RunParallel):
         """Gets the aboslute path for the qsub script for a PBS job"""
         return self.getPBSJobOutputPathPrefix(job) + '.qsub'
 
+    @staticmethod
+    def parseMPICommand(command):
+        find_mpi = re.search('^mpiexec -n [0-9]+ ', command)
+        if find_mpi is not None:
+            return find_mpi.group(0)
+        return None
+
     def submitJob(self, job):
         """Submits a PBS job"""
         tester = job.getTester()
@@ -162,10 +169,13 @@ class RunPBS(RunParallel):
 
         # Set up the command. We have special logic here for when we're using apptainer,
         # where we need to put the MPI command outside of the apptainer call
-        command, mpi_command = tester.getCommand(options)
         full_command = ''
+        command = tester.getCommand(options)
+        mpi_command = self.parseMPICommand(command)
         if mpi_command:
-            full_command += f'{mpi_command} '
+            command = command.replace(mpi_command, '')
+            full_command += mpi_command
+
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
             apptainer_cmd = f'apptainer exec {APPTAINER_CONTAINER}'

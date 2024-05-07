@@ -68,7 +68,7 @@ class AnalyzeJacobian(FileTester):
         if len(specs['cli_args']):
             command += '--cli-args "' + (' '.join(specs['cli_args']) + '"')
 
-        return command, None
+        return command
 
 
     def processResults(self, moose_dir, options, output):

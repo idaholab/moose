@@ -83,4 +83,4 @@ class CheckFiles(FileTester):
             self.setStatus(self.skip)
             return False
 
-        return FileTester.checkRunnable(self, options)
+        return super().checkRunnable(options)
