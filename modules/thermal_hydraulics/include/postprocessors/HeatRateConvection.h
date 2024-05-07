@@ -28,8 +28,8 @@ protected:
   const Function & _T_ambient_fn;
   /// Ambient heat transfer coefficient function
   const Function & _htc_ambient_fn;
-  /// Function by which to scale the heat flux
-  const Function & _scale_fn;
+  /// Functor by which to scale the heat flux
+  const Moose::Functor<Real> & _scale;
 
 public:
   static InputParameters validParams();

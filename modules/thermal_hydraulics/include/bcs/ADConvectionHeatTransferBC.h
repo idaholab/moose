@@ -23,10 +23,8 @@ protected:
   const Function & _T_ambient_fn;
   /// Ambient heat transfer coefficient function
   const Function & _htc_ambient_fn;
-  /// Post-processor by which to scale boundary condition
-  const PostprocessorValue & _scale_pp;
-  /// Function by which to scale the boundary condition
-  const Function & _scale_fn;
+  /// Functor by which to scale the boundary condition
+  const Moose::Functor<ADReal> & _scale;
 
 public:
   static InputParameters validParams();
