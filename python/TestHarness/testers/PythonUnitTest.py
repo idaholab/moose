@@ -46,4 +46,5 @@ class PythonUnitTest(RunApp):
         else:
             cmd = "python3 -m unittest" + use_buffer + "-v " + test_case
 
-        return cmd  + ' '.join(self.specs['cli_args'])
+        # We need to append PYTHONPATH here for running these within apptainer
+        return f'PYTHONPATH={self.getMooseDir()}/python ' + cmd  + ' '.join(self.specs['cli_args']), None
