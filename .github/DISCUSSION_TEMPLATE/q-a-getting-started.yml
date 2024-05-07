@@ -4,15 +4,15 @@ body:
     attributes:
       label: Check these boxes if you have followed the posting rules.
       options:
-        - label: Q&A Getting Started is the most appropriate section for my question (trouble installing, beginner user, ...)
+        - label: Q&A Getting Started is the most appropriate category for my question (trouble installing, beginner user, ...)
           required: true
         - label: I have consulted the posting Guidelines on the Discussions front page
           required: true
-        - label: I have searched the forum and this question has not been asked before
+        - label: I have searched the Discussions forum and my question has not been asked before
           required: true
         - label: I have searched the MOOSE website and the documentation does not answer my question
           required: true
-        - label: I have formatted my post following the posting guidelines (screenshots as a last resort, triple back quotes around pasted text)
+        - label: I have formatted my post following the posting guidelines (avoid screenshots if possible, triple back quotes before/after pasted text, etc)
           required: true
   - type: textarea
     id: question
