@@ -34,7 +34,7 @@ Currently, the number of columns of matrix $\pmb{A}_q$ is restricted to $R=1$. T
 
 ## Example Input File Syntax
 
-!listing test/tests/surrogates/multioutputGP/mogp.i block=OutputCovariance
+!listing test/tests/surrogates/multioutput_gp/mogp.i block=OutputCovariance
 
 !syntax parameters /OutputCovariance/IntrinsicCoregionalizationModel
 

@@ -21,7 +21,7 @@
 #include "OutputCovarianceBase.h"
 #include "OutputCovarianceInterface.h"
 
-#include "MultiOutputGaussianProcessHandler.h"
+#include "MultiOutputGaussianProcess.h"
 
 class MultiOutputGaussianProcessTrainer : public SurrogateTrainer,
                                           public CovarianceInterface,
@@ -34,8 +34,8 @@ public:
   virtual void train() override;
   virtual void postTrain() override;
 
-  StochasticTools::MultiOutputGaussianProcessHandler & mogpHandler() { return _mogp_handler; }
-  const StochasticTools::MultiOutputGaussianProcessHandler & getmoGPHandler() const
+  StochasticTools::MultiOutputGaussianProcess & mogpHandler() { return _mogp_handler; }
+  const StochasticTools::MultiOutputGaussianProcess & getmoGPHandler() const
   {
     return _mogp_handler;
   }
@@ -45,7 +45,7 @@ private:
   const std::vector<Real> & _predictor_row;
 
   /// Gaussian process handler responsible for managing training related tasks
-  StochasticTools::MultiOutputGaussianProcessHandler & _mogp_handler;
+  StochasticTools::MultiOutputGaussianProcess & _mogp_handler;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
   std::vector<std::vector<Real>> _params_buffer;
@@ -60,7 +60,7 @@ private:
   RealEigenMatrix _training_data;
 
   /// Struct holding parameters necessary for parameter tuning
-  const StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions _optimization_opts;
+  const StochasticTools::MultiOutputGaussianProcess::GPOptimizerOptions _optimization_opts;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;

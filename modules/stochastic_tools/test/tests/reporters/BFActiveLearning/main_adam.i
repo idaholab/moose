@@ -94,9 +94,9 @@
     n_train = 8
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
-    learning_function='Ufunction'
+    learning_function = 'Ufunction'
     learning_function_parameter = 349.345
-    learning_function_threshold=2.0
+    learning_function_threshold = 2.0
     outputs_lf = constant/reporter_transfer_lf:avg:value
   []
 []
@@ -118,14 +118,14 @@
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = GP_al_trainer
   []
 []
 
 [Covariance]
   [covar]
-    type= SquaredExponentialCovariance
+    type = SquaredExponentialCovariance
     signal_variance = 1.0
     noise_variance = 1e-8
     length_factor = '1.0 1.0 1.0'

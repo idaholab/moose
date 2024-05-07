@@ -61,7 +61,7 @@
 
 [Reporters]
   [conditional]
-    type =  ActiveLearningGPDecision
+    type = ActiveLearningGPDecision
     sampler = sample
     parallel_type = ROOT
     execute_on = 'initial timestep_begin'
@@ -72,7 +72,7 @@
     n_train = 5
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
-    learning_function='Ufunction'
+    learning_function = 'Ufunction'
     learning_function_parameter = 0.65
     learning_function_threshold = 2.0
   []
@@ -107,14 +107,14 @@
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = GP_al_trainer
   []
 []
 
 [Covariance]
   [covar]
-    type= SquaredExponentialCovariance
+    type = SquaredExponentialCovariance
     signal_variance = 1.0
     noise_variance = 1e-8
     length_factor = '1.0 1.0'

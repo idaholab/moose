@@ -47,7 +47,7 @@ ActiveLearningGPDecision::ActiveLearningGPDecision(const InputParameters & param
     _learning_function_threshold(getParam<Real>("learning_function_threshold")),
     _learning_function_parameter(getParam<Real>("learning_function_parameter")),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
-    _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
+    _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _flag_sample(declareValue<std::vector<bool>>(
         "flag_sample", std::vector<bool>(sampler().getNumberOfRows(), false))),
     _n_train(getParam<int>("n_train")),

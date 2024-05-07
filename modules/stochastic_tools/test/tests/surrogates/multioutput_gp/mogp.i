@@ -11,7 +11,6 @@
     type = Normal
     mean = 1000.0
     standard_deviation = 100.0
-
   []
 []
 
@@ -96,7 +95,7 @@
 
 [Covariance]
   [covar]
-    type= SquaredExponentialCovariance
+    type = SquaredExponentialCovariance
     signal_variance = 2.76658083
     noise_variance = 0.0
     length_factor = '3.67866381 2.63421705'
@@ -105,13 +104,13 @@
 
 [OutputCovariance]
   [outcovar]
-    type=IntrinsicCoregionalizationModel
+    type = IntrinsicCoregionalizationModel
   []
 []
 
 [Surrogates]
   [mogp_surrogate]
-    type = MultiOutputGaussianProcess
+    type = MultiOutputGaussianProcessSurrogate
     trainer = mogp
   []
 []

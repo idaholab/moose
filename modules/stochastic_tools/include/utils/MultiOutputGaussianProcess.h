@@ -12,7 +12,7 @@
 #include "Standardizer.h"
 #include <Eigen/Dense>
 
-#include "GaussianProcessHandler.h"
+#include "GaussianProcess.h"
 
 #include "CovarianceFunctionBase.h"
 #include "OutputCovarianceBase.h"
@@ -25,10 +25,10 @@ namespace StochasticTools
  * Multi Output Gaussian Processes. It can be used to standardize parameters, manipulate
  * covariance data and compute additional stored matrices.
  */
-class MultiOutputGaussianProcessHandler
+class MultiOutputGaussianProcess
 {
 public:
-  MultiOutputGaussianProcessHandler() {}
+  MultiOutputGaussianProcess() {}
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -280,9 +280,9 @@ protected:
 
 template <>
 void dataStore(std::ostream & stream,
-               StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+               StochasticTools::MultiOutputGaussianProcess & gp_utils,
                void * context);
 template <>
 void dataLoad(std::istream & stream,
-              StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+              StochasticTools::MultiOutputGaussianProcess & gp_utils,
               void * context);

@@ -22,10 +22,10 @@ namespace StochasticTools
  * Gaussian Processes. It can be used to standardize parameters, manipulate
  * covariance data and compute additional stored matrices.
  */
-class GaussianProcessHandler
+class GaussianProcess
 {
 public:
-  GaussianProcessHandler();
+  GaussianProcess();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -277,9 +277,6 @@ template <>
 void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
-void dataStore(std::ostream & stream,
-               StochasticTools::GaussianProcessHandler & gp_utils,
-               void * context);
+void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
 template <>
-void
-dataLoad(std::istream & stream, StochasticTools::GaussianProcessHandler & gp_utils, void * context);
+void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);

@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiOutputGaussianProcess.h"
+#include "MultiOutputGaussianProcessSurrogate.h"
 #include "Sampler.h"
 
 #include "CovarianceFunctionBase.h"
 
-registerMooseObject("StochasticToolsApp", MultiOutputGaussianProcess);
+registerMooseObject("StochasticToolsApp", MultiOutputGaussianProcessSurrogate);
 
 InputParameters
-MultiOutputGaussianProcess::validParams()
+MultiOutputGaussianProcessSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription(
@@ -23,12 +23,12 @@ MultiOutputGaussianProcess::validParams()
   return params;
 }
 
-MultiOutputGaussianProcess::MultiOutputGaussianProcess(const InputParameters & parameters)
+MultiOutputGaussianProcessSurrogate::MultiOutputGaussianProcessSurrogate(
+    const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
     OutputCovarianceInterface(parameters),
-    _mogp_handler(
-        declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
+    _mogp_handler(declareModelData<StochasticTools::MultiOutputGaussianProcess>("_mogp_handler")),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
     _kappa_cho_decomp(_mogp_handler.getKappaCholeskyDecomp()),
     _K_train(_mogp_handler.getK()),
@@ -38,7 +38,8 @@ MultiOutputGaussianProcess::MultiOutputGaussianProcess(const InputParameters & p
 }
 
 void
-MultiOutputGaussianProcess::evaluate(const std::vector<Real> & x, std::vector<Real> & y) const
+MultiOutputGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
+                                              std::vector<Real> & y) const
 {
   // Gather the required inputs and matrices
   unsigned int n_params = _training_params.cols();

@@ -44,10 +44,9 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
     CovarianceInterface(parameters),
     OutputCovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    _mogp_handler(
-        declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
+    _mogp_handler(declareModelData<StochasticTools::MultiOutputGaussianProcess>("_mogp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
-    _optimization_opts(StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions(
+    _optimization_opts(StochasticTools::MultiOutputGaussianProcess::GPOptimizerOptions(
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("iterations"),
         getParam<unsigned int>("batch_size"),

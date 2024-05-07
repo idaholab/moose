@@ -7,31 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianProcess.h"
+#include "GaussianProcessSurrogate.h"
 #include "Sampler.h"
 
 #include "CovarianceFunctionBase.h"
 
-registerMooseObject("StochasticToolsApp", GaussianProcess);
+registerMooseObject("StochasticToolsApp", GaussianProcessSurrogate);
 
 InputParameters
-GaussianProcess::validParams()
+GaussianProcessSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
   return params;
 }
 
-GaussianProcess::GaussianProcess(const InputParameters & parameters)
+GaussianProcessSurrogate::GaussianProcessSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
-    _gp_handler(declareModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
+    _gp_handler(declareModelData<StochasticTools::GaussianProcess>("_gp_handler")),
     _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {
 }
 
 void
-GaussianProcess::setupCovariance(UserObjectName covar_name)
+GaussianProcessSurrogate::setupCovariance(UserObjectName covar_name)
 {
   if (_gp_handler.getCovarFunctionPtr() != nullptr)
     ::mooseError("Attempting to redefine covariance function using setupCovariance.");
@@ -39,7 +39,7 @@ GaussianProcess::setupCovariance(UserObjectName covar_name)
 }
 
 Real
-GaussianProcess::evaluate(const std::vector<Real> & x) const
+GaussianProcessSurrogate::evaluate(const std::vector<Real> & x) const
 {
   // Overlaod for evaluate to maintain general compatibility. Only returns mean
   Real dummy = 0;
@@ -47,7 +47,7 @@ GaussianProcess::evaluate(const std::vector<Real> & x) const
 }
 
 Real
-GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
+GaussianProcessSurrogate::evaluate(const std::vector<Real> & x, Real & std_dev) const
 {
 
   unsigned int _n_params = _training_params.cols();

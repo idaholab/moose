@@ -57,12 +57,12 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   : SurrogateTrainer(parameters),
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    _gp_handler(declareModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
+    _gp_handler(declareModelData<StochasticTools::GaussianProcess>("_gp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
-    _optimization_opts(StochasticTools::GaussianProcessHandler::GPOptimizerOptions(
+    _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
         getParam<MooseEnum>("tuning_algorithm"),
         getParam<std::string>("tao_options"),
         getParam<bool>("show_optimization_details"),

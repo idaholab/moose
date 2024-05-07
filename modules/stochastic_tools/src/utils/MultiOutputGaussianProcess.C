@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiOutputGaussianProcessHandler.h"
+#include "MultiOutputGaussianProcess.h"
 #include "FEProblemBase.h"
 
 #include <petsctao.h>
@@ -24,7 +24,7 @@
 namespace StochasticTools
 {
 
-MultiOutputGaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
+MultiOutputGaussianProcess::GPOptimizerOptions::GPOptimizerOptions(
     const bool inp_show_optimization_details,
     const unsigned int inp_iter,
     const unsigned int inp_batch_size,
@@ -37,19 +37,19 @@ MultiOutputGaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
 }
 
 void
-MultiOutputGaussianProcessHandler::initialize(OutputCovarianceBase * output_covariance,
-                                              CovarianceFunctionBase * covariance_function,
-                                              const std::vector<std::string> params_to_tune,
-                                              std::vector<Real> min,
-                                              std::vector<Real> max)
+MultiOutputGaussianProcess::initialize(OutputCovarianceBase * output_covariance,
+                                       CovarianceFunctionBase * covariance_function,
+                                       const std::vector<std::string> params_to_tune,
+                                       std::vector<Real> min,
+                                       std::vector<Real> max)
 {
   linkCovarianceFunction(output_covariance, covariance_function);
   generateTuningMap(params_to_tune, min, max);
 }
 
 void
-MultiOutputGaussianProcessHandler::linkCovarianceFunction(
-    OutputCovarianceBase * output_covariance, CovarianceFunctionBase * covariance_function)
+MultiOutputGaussianProcess::linkCovarianceFunction(OutputCovarianceBase * output_covariance,
+                                                   CovarianceFunctionBase * covariance_function)
 {
   // For outputs
   _output_covariance = output_covariance;
@@ -61,9 +61,9 @@ MultiOutputGaussianProcessHandler::linkCovarianceFunction(
 }
 
 void
-MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                                                         const RealEigenMatrix & training_data,
-                                                         const GPOptimizerOptions & opts)
+MultiOutputGaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
+                                                  const RealEigenMatrix & training_data,
+                                                  const GPOptimizerOptions & opts)
 {
   const bool batch_decision = opts.batch_size > 0 && opts.batch_size <= training_params.rows();
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
@@ -101,16 +101,16 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
 }
 
 void
-MultiOutputGaussianProcessHandler::setupStoredMatrices(const RealEigenMatrix & input)
+MultiOutputGaussianProcess::setupStoredMatrices(const RealEigenMatrix & input)
 {
   _kappa_cho_decomp = _kappa.ldlt();
   _kappa_results_solve = _kappa_cho_decomp.solve(input);
 }
 
 void
-MultiOutputGaussianProcessHandler::generateTuningMap(const std::vector<std::string> params_to_tune,
-                                                     std::vector<Real> min_vector,
-                                                     std::vector<Real> max_vector)
+MultiOutputGaussianProcess::generateTuningMap(const std::vector<std::string> params_to_tune,
+                                              std::vector<Real> min_vector,
+                                              std::vector<Real> max_vector)
 {
   _num_tunable_inp = 0;
 
@@ -143,26 +143,26 @@ MultiOutputGaussianProcessHandler::generateTuningMap(const std::vector<std::stri
 }
 
 void
-MultiOutputGaussianProcessHandler::standardizeParameters(RealEigenMatrix & data)
+MultiOutputGaussianProcess::standardizeParameters(RealEigenMatrix & data)
 {
   _param_standardizer.computeSet(data);
   _param_standardizer.getStandardized(data);
 }
 
 void
-MultiOutputGaussianProcessHandler::standardizeData(RealEigenMatrix & data)
+MultiOutputGaussianProcess::standardizeData(RealEigenMatrix & data)
 {
   _data_standardizer.computeCovariance(data);
   _data_standardizer.getStandardizedCovariance(data);
 }
 
 void
-MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                                                       const RealEigenMatrix & training_data,
-                                                       unsigned int iter,
-                                                       const unsigned int & batch_size,
-                                                       const Real & learning_rate,
-                                                       const bool & show_optimization_details)
+MultiOutputGaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
+                                                const RealEigenMatrix & training_data,
+                                                unsigned int iter,
+                                                const unsigned int & batch_size,
+                                                const Real & learning_rate,
+                                                const bool & show_optimization_details)
 {
   libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable_inp);
   _batch_size = batch_size;
@@ -244,7 +244,7 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
 }
 
 Real
-MultiOutputGaussianProcessHandler::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
+MultiOutputGaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
   _output_covariance->computeBCovarianceMatrix(_B, _latent);
@@ -260,7 +260,7 @@ MultiOutputGaussianProcessHandler::getLoss(RealEigenMatrix & inputs, RealEigenMa
 }
 
 std::vector<Real>
-MultiOutputGaussianProcessHandler::getGradient(RealEigenMatrix & inputs)
+MultiOutputGaussianProcess::getGradient(RealEigenMatrix & inputs)
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix B_grad(_B.rows(), _B.rows());
@@ -301,7 +301,7 @@ MultiOutputGaussianProcessHandler::getGradient(RealEigenMatrix & inputs)
 }
 
 void
-MultiOutputGaussianProcessHandler::mapToPetscVec(
+MultiOutputGaussianProcess::mapToPetscVec(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
     const std::unordered_map<std::string, Real> & scalar_map,
@@ -325,7 +325,7 @@ MultiOutputGaussianProcessHandler::mapToPetscVec(
 }
 
 void
-MultiOutputGaussianProcessHandler::petscVecToMap(
+MultiOutputGaussianProcess::petscVecToMap(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
     std::unordered_map<std::string, Real> & scalar_map,
@@ -348,7 +348,7 @@ MultiOutputGaussianProcessHandler::petscVecToMap(
 template <>
 void
 dataStore(std::ostream & stream,
-          StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+          StochasticTools::MultiOutputGaussianProcess & gp_utils,
           void * context)
 {
   dataStore(stream, gp_utils.hyperparamMap(), context);
@@ -365,7 +365,7 @@ dataStore(std::ostream & stream,
 template <>
 void
 dataLoad(std::istream & stream,
-         StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+         StochasticTools::MultiOutputGaussianProcess & gp_utils,
          void * context)
 {
   dataLoad(stream, gp_utils.hyperparamMap(), context);

@@ -10,32 +10,32 @@ A covariance function is created by inheriting from `OutputCovarianceFunctionBas
 
 ## Using a OutputCovariance Function
 
-#### In the MultiOutputGaussianProcessHandler
+#### In the MultiOutputGaussianProcess
 
-The [/utils/MultiOutputGaussianProcessHandler.md] is a class which incorporates the necessary data structures and
+The [/utils/MultiOutputGaussianProcess.md] is a class which incorporates the necessary data structures and
 functions to create, train, and use MOGPs. One of the most important members
 of this handler class is the output covariance function:
 
-!listing stochastic_tools/include/utils/MultiOutputGaussianProcessHandler.h line=OutputCovarianceBase *
+!listing stochastic_tools/include/utils/MultiOutputGaussianProcess.h line=OutputCovarianceBase *
 
 The covariance function can be initialized in the handler by following the examples
-given in [source description](/utils/MultiOutputGaussianProcessHandler.md). Objects like
-[/trainers/MultiOutputGaussianProcessTrainer.md] or [/surrogates/MultiOutputGaussianProcess.md] can then access the
-output covariance function through the handler class. These objects can also access the covariance between the inputs using [/utils/MultiOutputGaussianProcessHandler.md].
+given in [source description](/utils/MultiOutputGaussianProcess.md). Objects like
+[/trainers/MultiOutputGaussianProcessTrainer.md] or [/surrogates/MultiOutputGaussianProcessSurrogate.md] can then access the
+output covariance function through the handler class. These objects can also access the covariance between the inputs using [/utils/MultiOutputGaussianProcess.md].
 
 #### OutputCovarianceInterface
 
 Alternatively, by inheriting from
 `OutputCovarianceInterface`, the child classes can easily fetch covariance functions
 using the helper functions. Good examples are the [MultiOutputGaussianProcessTrainer.md] and
-[/surrogates/MultiOutputGaussianProcess.md] which utilize the helper functions to link an input
-covariance function to the [MultiOutputGaussianProcessHandler.md]:
+[/surrogates/MultiOutputGaussianProcessSurrogate.md] which utilize the helper functions to link an input
+covariance function to the [MultiOutputGaussianProcess.md]:
 
 !listing stochastic_tools/src/trainers/MultiOutputGaussianProcessTrainer.C start=_mogp_handler.initialize( end=}
 
 ## Example Input File Syntax
 
-!listing test/tests/surrogates/multioutputGP/mogp.i block=OutputCovariance
+!listing test/tests/surrogates/multioutput_gp/mogp.i block=OutputCovariance
 
 !syntax list /OutputCovariance objects=True actions=False subsystems=False
 

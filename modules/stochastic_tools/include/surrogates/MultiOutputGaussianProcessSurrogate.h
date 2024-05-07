@@ -15,26 +15,26 @@
 #include <Eigen/Dense>
 #include "CovarianceInterface.h"
 #include "OutputCovarianceInterface.h"
-#include "MultiOutputGaussianProcessHandler.h"
+#include "MultiOutputGaussianProcess.h"
 
-class MultiOutputGaussianProcess : public SurrogateModel,
-                                   public CovarianceInterface,
-                                   public OutputCovarianceInterface
+class MultiOutputGaussianProcessSurrogate : public SurrogateModel,
+                                            public CovarianceInterface,
+                                            public OutputCovarianceInterface
 {
 public:
   static InputParameters validParams();
-  MultiOutputGaussianProcess(const InputParameters & parameters);
+  MultiOutputGaussianProcessSurrogate(const InputParameters & parameters);
   using SurrogateModel::evaluate;
   virtual void evaluate(const std::vector<Real> & x, std::vector<Real> & y) const override;
 
-  StochasticTools::MultiOutputGaussianProcessHandler & mogpHandler() { return _mogp_handler; }
-  const StochasticTools::MultiOutputGaussianProcessHandler & getmoGPHandler() const
+  StochasticTools::MultiOutputGaussianProcess & mogpHandler() { return _mogp_handler; }
+  const StochasticTools::MultiOutputGaussianProcess & getmoGPHandler() const
   {
     return _mogp_handler;
   }
 
 private:
-  StochasticTools::MultiOutputGaussianProcessHandler & _mogp_handler;
+  StochasticTools::MultiOutputGaussianProcess & _mogp_handler;
 
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;

@@ -1,4 +1,4 @@
-# MultiOutputGaussianProcess
+# MultiOutputGaussianProcessSurrogate
 
 To understand how multi-output Gaussian processes (MOGPs) function, [/trainers/MultiOutputGaussianProcessTrainer.md] will be a good place to start. Here, only the evaluation of MOGPs will be disucssed after finishing the training.
 
@@ -31,13 +31,13 @@ where, $\bar{\pmb{K}}_{\hat{\pmb{y}}_*,\hat{\pmb{y}}_*}$ is the full covariance 
 
 To facilitate the evaluation of MOGPs, `evaluate()` function which can broadcast vector outputs is provided.
 
-!listing surrogates/MultiOutputGaussianProcess.C line=MultiOutputGaussianProcess::evaluate(const std::vector<Real> & x, std::vector<Real> & y)
+!listing surrogates/MultiOutputGaussianProcessSurrogate.C start=MultiOutputGaussianProcessSurrogate::evaluate( end={
 
 !alert note title=Output format for MOGPs
 Vector of MOGPs means and standard deviations are output to a JSON file. Both normalized means and standard deviations followed by the un-normalized ones are output.
 
-!syntax parameters /Surrogates/MultiOutputGaussianProcess
+!syntax parameters /Surrogates/MultiOutputGaussianProcessSurrogate
 
-!syntax inputs /Surrogates/MultiOutputGaussianProcess
+!syntax inputs /Surrogates/MultiOutputGaussianProcessSurrogate
 
-!syntax children /Surrogates/MultiOutputGaussianProcess
+!syntax children /Surrogates/MultiOutputGaussianProcessSurrogate

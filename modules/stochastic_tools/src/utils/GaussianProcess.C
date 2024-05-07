@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianProcessHandler.h"
+#include "GaussianProcess.h"
 #include "FEProblemBase.h"
 
 #include <petsctao.h>
@@ -24,13 +24,12 @@
 namespace StochasticTools
 {
 
-GaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
-    const MooseEnum & inp_opt_type,
-    const std::string & inp_tao_options,
-    const bool inp_show_optimization_details,
-    const unsigned int inp_iter_adam,
-    const unsigned int inp_batch_size,
-    const Real inp_learning_rate_adam)
+GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const MooseEnum & inp_opt_type,
+                                                        const std::string & inp_tao_options,
+                                                        const bool inp_show_optimization_details,
+                                                        const unsigned int inp_iter_adam,
+                                                        const unsigned int inp_batch_size,
+                                                        const Real inp_learning_rate_adam)
   : opt_type(inp_opt_type),
     tao_options(inp_tao_options),
     show_optimization_details(inp_show_optimization_details),
@@ -40,29 +39,29 @@ GaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
 {
 }
 
-GaussianProcessHandler::GaussianProcessHandler() : _tao_comm(MPI_COMM_SELF) {}
+GaussianProcess::GaussianProcess() : _tao_comm(MPI_COMM_SELF) {}
 
 void
-GaussianProcessHandler::initialize(CovarianceFunctionBase * covariance_function,
-                                   const std::vector<std::string> params_to_tune,
-                                   std::vector<Real> min,
-                                   std::vector<Real> max)
+GaussianProcess::initialize(CovarianceFunctionBase * covariance_function,
+                            const std::vector<std::string> params_to_tune,
+                            std::vector<Real> min,
+                            std::vector<Real> max)
 {
   linkCovarianceFunction(covariance_function);
   generateTuningMap(params_to_tune, min, max);
 }
 
 void
-GaussianProcessHandler::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
+GaussianProcess::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
 {
   _covariance_function = covariance_function;
   _covar_type = _covariance_function->type();
 }
 
 void
-GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                                              const RealEigenMatrix & training_data,
-                                              const GPOptimizerOptions & opts)
+GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
+                                       const RealEigenMatrix & training_data,
+                                       const GPOptimizerOptions & opts)
 {
   const bool batch_decision = opts.batch_size > 0 && opts.batch_size <= training_params.rows();
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
@@ -92,16 +91,16 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
 }
 
 void
-GaussianProcessHandler::setupStoredMatrices(const RealEigenMatrix & input)
+GaussianProcess::setupStoredMatrices(const RealEigenMatrix & input)
 {
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(input);
 }
 
 void
-GaussianProcessHandler::generateTuningMap(const std::vector<std::string> params_to_tune,
-                                          std::vector<Real> min_vector,
-                                          std::vector<Real> max_vector)
+GaussianProcess::generateTuningMap(const std::vector<std::string> params_to_tune,
+                                   std::vector<Real> min_vector,
+                                   std::vector<Real> max_vector)
 {
   _num_tunable = 0;
 
@@ -134,7 +133,7 @@ GaussianProcessHandler::generateTuningMap(const std::vector<std::string> params_
 }
 
 void
-GaussianProcessHandler::standardizeParameters(RealEigenMatrix & data, bool keep_moments)
+GaussianProcess::standardizeParameters(RealEigenMatrix & data, bool keep_moments)
 {
   if (!keep_moments)
     _param_standardizer.computeSet(data);
@@ -142,7 +141,7 @@ GaussianProcessHandler::standardizeParameters(RealEigenMatrix & data, bool keep_
 }
 
 void
-GaussianProcessHandler::standardizeData(RealEigenMatrix & data, bool keep_moments)
+GaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_moments)
 {
   if (!keep_moments)
     _data_standardizer.computeSet(data);
@@ -150,10 +149,10 @@ GaussianProcessHandler::standardizeData(RealEigenMatrix & data, bool keep_moment
 }
 
 PetscErrorCode
-GaussianProcessHandler::tuneHyperParamsTAO(const RealEigenMatrix & training_params,
-                                           const RealEigenMatrix & training_data,
-                                           std::string tao_options,
-                                           bool show_optimization_details)
+GaussianProcess::tuneHyperParamsTAO(const RealEigenMatrix & training_params,
+                                    const RealEigenMatrix & training_data,
+                                    std::string tao_options,
+                                    bool show_optimization_details)
 {
   PetscErrorCode ierr;
   Tao tao;
@@ -218,7 +217,7 @@ GaussianProcessHandler::tuneHyperParamsTAO(const RealEigenMatrix & training_para
 }
 
 PetscErrorCode
-GaussianProcessHandler::formInitialGuessTAO(Vec theta_vec)
+GaussianProcess::formInitialGuessTAO(Vec theta_vec)
 {
   PetscFunctionBegin;
   libMesh::PetscVector<Number> theta(theta_vec, _tao_comm);
@@ -228,8 +227,8 @@ GaussianProcessHandler::formInitialGuessTAO(Vec theta_vec)
 }
 
 void
-GaussianProcessHandler::buildHyperParamBoundsTAO(libMesh::PetscVector<Number> & theta_l,
-                                                 libMesh::PetscVector<Number> & theta_u) const
+GaussianProcess::buildHyperParamBoundsTAO(libMesh::PetscVector<Number> & theta_l,
+                                          libMesh::PetscVector<Number> & theta_u) const
 {
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
@@ -242,20 +241,16 @@ GaussianProcessHandler::buildHyperParamBoundsTAO(libMesh::PetscVector<Number> & 
 }
 
 PetscErrorCode
-GaussianProcessHandler::formFunctionGradientWrapper(
+GaussianProcess::formFunctionGradientWrapper(
     Tao tao, Vec theta_vec, PetscReal * f, Vec grad_vec, void * ptr)
 {
-  PetscFunctionBegin;
-  GaussianProcessHandler * GP_ptr = (GaussianProcessHandler *)ptr;
+  GaussianProcess * GP_ptr = (GaussianProcess *)ptr;
   GP_ptr->formFunctionGradient(tao, theta_vec, f, grad_vec);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void
-GaussianProcessHandler::formFunctionGradient(Tao /*tao*/,
-                                             Vec theta_vec,
-                                             PetscReal * f,
-                                             Vec grad_vec)
+GaussianProcess::formFunctionGradient(Tao /*tao*/, Vec theta_vec, PetscReal * f, Vec grad_vec)
 {
   libMesh::PetscVector<Number> theta(theta_vec, _tao_comm);
   libMesh::PetscVector<Number> grad(grad_vec, _tao_comm);
@@ -287,12 +282,12 @@ GaussianProcessHandler::formFunctionGradient(Tao /*tao*/,
 }
 
 void
-GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                                            const RealEigenMatrix & training_data,
-                                            unsigned int iter,
-                                            const unsigned int & batch_size,
-                                            const Real & learning_rate,
-                                            const bool & show_optimization_details)
+GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
+                                     const RealEigenMatrix & training_data,
+                                     unsigned int iter,
+                                     const unsigned int & batch_size,
+                                     const Real & learning_rate,
+                                     const bool & show_optimization_details)
 {
   libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
   _batch_size = batch_size;
@@ -362,7 +357,7 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
 }
 
 Real
-GaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
+GaussianProcess::getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
   setupStoredMatrices(outputs);
@@ -375,7 +370,7 @@ GaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & 
 }
 
 std::vector<Real>
-GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
+GaussianProcess::getGradientAdam(RealEigenMatrix & inputs)
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
@@ -404,7 +399,7 @@ GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
 }
 
 void
-GaussianProcessHandler::mapToPetscVec(
+GaussianProcess::mapToPetscVec(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
     const std::unordered_map<std::string, Real> & scalar_map,
@@ -428,7 +423,7 @@ GaussianProcessHandler::mapToPetscVec(
 }
 
 void
-GaussianProcessHandler::petscVecToMap(
+GaussianProcess::petscVecToMap(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
     std::unordered_map<std::string, Real> & scalar_map,
@@ -469,7 +464,7 @@ dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * con
 
 template <>
 void
-dataStore(std::ostream & stream, StochasticTools::GaussianProcessHandler & gp_utils, void * context)
+dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
 {
   dataStore(stream, gp_utils.hyperparamMap(), context);
   dataStore(stream, gp_utils.hyperparamVectorMap(), context);
@@ -483,7 +478,7 @@ dataStore(std::ostream & stream, StochasticTools::GaussianProcessHandler & gp_ut
 
 template <>
 void
-dataLoad(std::istream & stream, StochasticTools::GaussianProcessHandler & gp_utils, void * context)
+dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
 {
   dataLoad(stream, gp_utils.hyperparamMap(), context);
   dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
