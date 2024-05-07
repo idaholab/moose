@@ -93,6 +93,7 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
   _gp_outputs_try.resize(_inputs_all.size());
   _gp_std_try.resize(_inputs_all.size());
   _acquisition_function.resize(_inputs_all.size());
+  _length_scales.resize(_priors.size());
 }
 
 // void
@@ -156,6 +157,39 @@ BayesianGPryLearner::computeLogPosterior(std::vector<Real> & log_posterior,
 }
 
 void
+BayesianGPryLearner::acqWithCorrelations(std::vector<Real> & acq,
+                                         std::vector<unsigned int> & sorted)
+{
+  Real correlation = 0.0;
+  std::vector<size_t> ind;
+  Moose::indirectSort(acq.begin(), acq.end(), ind);
+  sorted[0] = ind[0];
+  _acquisition_function[0] = -acq[ind[0]];
+  for (unsigned int i = 0; i < _inputs_all.size()-1; ++i)
+  {
+    for (unsigned int j = 0; j < _inputs_all.size(); ++j)
+    {
+      computeCorrelation(_inputs_all[j], _inputs_all[ind[0]], correlation);
+      acq[j] = acq[j] * correlation;
+    }
+    Moose::indirectSort(acq.begin(), acq.end(), ind);
+    sorted[i+1] = ind[0];
+    _acquisition_function[i+1] = -acq[ind[0]];
+  }
+}
+
+void
+BayesianGPryLearner::computeCorrelation(const std::vector<Real> & input1,
+                                        const std::vector<Real> & input2,
+                                        Real & corr)
+{
+  corr = 0.0;
+  for (unsigned int i = 0; i < input1.size(); ++i)
+    corr -= Utility::pow<2>(input1[i] - input2[i]) / (2 * Utility::pow<2>(_length_scales[i]));
+  corr = 1.0 - std::exp(corr);
+}
+
+void
 BayesianGPryLearner::execute()
 {
   if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _t_step)
@@ -179,7 +213,7 @@ BayesianGPryLearner::execute()
   std::vector<Real> log_posterior(_props);
   computeLogPosterior(log_posterior, data_in);
 
-  if (_t_step > 1)
+  if (_t_step > 2)
   {
     setupNNGPData(log_posterior, data_in);
 
@@ -188,6 +222,9 @@ BayesianGPryLearner::execute()
     //     read_nn = true;
     _al_nn.reTrain(_nn_inputs, _nn_outputs, read_nn);
     _al_gp.reTrain(_gp_inputs, _gp_outputs);
+
+    _al_gp.getLengthScales(_length_scales);
+    // std::cout << Moose::stringify(_length_scales) << std::endl;
 
     std::vector<Real> tmp;
     if (_var_prior)
@@ -229,19 +266,17 @@ BayesianGPryLearner::execute()
         // std::cout << "gp_mean " << gp_mean << std::endl;
         // std::cout << "gp_std " << gp_std << std::endl;
       acq[i] = -std::exp(2.0 * psi * gp_mean) * (std::exp(gp_std) - 1.0);
-      _acquisition_function[i] = -acq[i];
+      // _acquisition_function[i] = -acq[i];
     }
-    // std::cout << "gp_mean " << gp_mean << std::endl;
-    // std::cout << "gp_std " << gp_std << std::endl;
-    // std::cout << "acq " << Moose::stringify(acq) << std::endl;
-    std::vector<size_t> ind;
-    Moose::indirectSort(acq.begin(), acq.end(), ind);
-    // std::cout << "ind " << Moose::stringify(ind) << std::endl;
-    // _acquisition_function = -acq[ind[0]];
-
+    std::vector<unsigned int> tmp_indices;
+    tmp_indices.resize(_inputs_all.size());
+    acqWithCorrelations(acq, tmp_indices);
     for (unsigned int i = 0; i < _props; ++i)
-      _sorted_indices[i] = ind[i];
+      _sorted_indices[i] = tmp_indices[i];
   }
+  else
+    for (unsigned int i = 0; i < _props; ++i)
+      _sorted_indices[i] = i;
 
   // Track the current step
   _check_step = _t_step;

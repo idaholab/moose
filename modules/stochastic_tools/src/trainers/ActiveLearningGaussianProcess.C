@@ -107,3 +107,9 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   // Setup the covariance
   _gp.setupCovarianceMatrix(_training_params, training_data, _optimization_opts);
 }
+
+void
+ActiveLearningGaussianProcess::getLengthScales(std::vector<Real> & length_scales) const
+{
+  length_scales = _gp_handler.getScales();
+}

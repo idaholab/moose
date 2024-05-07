@@ -114,10 +114,10 @@
     standardize_data = 'true'
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    iter_adam = 1000
+    iter_adam = 2000
     learning_rate_adam = 0.0005
     show_optimization_details = true
-    batch_size = 100
+    batch_size = 250
   []
 []
 
@@ -137,7 +137,7 @@
   [covar]
     type = SquaredExponentialCovariance
     signal_variance = 1.0
-    noise_variance = 0.0 # 1e-8
+    noise_variance = 1e-8 # 1e-8
     length_factor = '1.0 1.0 1.0'
   []
 []
