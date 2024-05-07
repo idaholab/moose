@@ -225,16 +225,15 @@ class RunApp(Tester):
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
-        mpi_command = None
         if self.force_mpi or options.parallel or ncpus > 1:
-            # Arbitrary proxy command, but keep track of the command so that someone could use it later
-            if specs.isValid('command_proxy'):
-                raise Exception('no worky yet')
-                # command = command.replace('"', r'\"')
-                # command = f'RUNAPP_COMMAND="{command}" {os.path.join(specs["test_dir"], specs["command_proxy"])}'
-            mpi_command = f'{self.mpi_command} -n {ncpus}'
+            command = f'{self.mpi_command} -n {ncpus} {command}'
 
-        return command, mpi_command
+        # Arbitrary proxy command, but keep track of the command so that someone could use it later
+        if specs.isValid('command_proxy'):
+            command = command.replace('"', r'\"')
+            return f'RUNAPP_COMMAND="{command}" {os.path.join(specs["test_dir"], specs["command_proxy"])}'
+
+        return command
 
     def testFileOutput(self, moose_dir, options, output):
         """ Set a failure status for expressions found in output """

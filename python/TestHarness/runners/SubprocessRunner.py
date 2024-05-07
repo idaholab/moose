@@ -32,9 +32,7 @@ class SubprocessRunner(Runner):
     def spawn(self, timer):
         tester = self.job.getTester()
         use_shell = tester.specs["use_shell"]
-        cmd, mpi_cmd = tester.getCommand(self.options)
-        if mpi_cmd is not None:
-            cmd = f'{mpi_cmd} {cmd}'
+        cmd = tester.getCommand(self.options)
         tester.setCommandRan(cmd)
 
         # Split command into list of args to be passed to Popen
@@ -59,7 +57,7 @@ class SubprocessRunner(Runner):
             process_kwargs['preexec_fn'] = os.setsid
 
         # Set this for OpenMPI so that we don't clobber state
-        if self.tester.hasOpenMPI():
+        if tester.hasOpenMPI():
             popen_env = os.environ.copy()
             popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
             process_kwargs['env'] = popen_env

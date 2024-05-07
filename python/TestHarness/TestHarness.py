@@ -594,11 +594,7 @@ class TestHarness:
             if job.getCommandRan():
                 command = job.getCommandRan()
             else:
-                cmd, mpi_cmd = job.getCommand()
-                command = ''
-                if mpi_cmd:
-                    command += f'{mpi_cmd} '
-                command += cmd
+                command = job.getCommand()
             output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + command + '\n'
             output += util.trimOutput(job, self.options)
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
