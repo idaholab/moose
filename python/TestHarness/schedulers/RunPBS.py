@@ -94,6 +94,11 @@ class RunPBS(RunParallel):
             print(f'ERROR: --pbs-pre-source path {self.options.queue_source_command} does not exist')
             sys.exit(1)
 
+        # Load the pre-source if it exists
+        self.source_contents = None
+        if self.options.queue_source_command:
+            self.source_contents = open(self.options.queue_source_command, 'r').read()
+
     class CallPBSException(Exception):
         """Exception class for providing extra context for PBS submission errors"""
         def __init__(self, run_pbs, description, command, result=None):
@@ -197,7 +202,9 @@ class RunPBS(RunParallel):
         if self.options.queue_queue:
             template_env['QUEUE'] = self.options.queue_queue
         if self.options.queue_source_command:
-            template_env['SOURCE_COMMAND'] = self.options.queue_source_command
+            template_env['SOURCE_FILE'] = self.options.queue_source_command
+        if self.source_contents:
+            template_env['SOURCE_CONTENTS'] = self.source_contents
 
         # Build the script
         jinja_env = jinja2.Environment()
