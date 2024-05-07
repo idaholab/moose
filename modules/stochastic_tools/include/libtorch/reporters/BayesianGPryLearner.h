@@ -78,6 +78,23 @@ private:
   void computeLogPosterior(std::vector<Real> & log_posterior,
                            const DenseMatrix<Real> & input_matrix);
 
+  /**
+   * Modify the acqusition function by considering correlations between the inputs
+   * @param acq The current values of the acquistion function
+   * @param sorted The sorted indices in the order of importance
+   */
+  void acqWithCorrelations(std::vector<Real> & acq, std::vector<unsigned int> & sorted);
+
+  /**
+   * Compute the correlations between the given inputs
+   * @param input1 The first input
+   * @param input2 The second input
+   * @param corr The computed correlation
+   */
+  void computeCorrelation(const std::vector<Real> & input1,
+                          const std::vector<Real> & input2,
+                          Real & corr);
+
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
 
@@ -159,6 +176,9 @@ private:
 
   /// Storage for the number of experimental configuration parameters
   dof_id_type _num_confg_params;
+
+  /// Storage for the length scales after the GP training 
+  std::vector<Real> _length_scales;
 };
 
 #endif
