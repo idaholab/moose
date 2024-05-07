@@ -220,7 +220,7 @@ class TestHarness:
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
-        self._infiles = ['tests', 'speedtests']
+        self._infiles = ['tests']
         self.parse_errors = []
         self.test_table = []
         self.num_passed = 0
@@ -1109,13 +1109,6 @@ class TestHarness:
         if opts.verbose and opts.quiet:
             print('Do not be an oxymoron with --verbose and --quiet')
             sys.exit(1)
-
-        # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
-        # We can not support running two spec files during one launch into a third party queue manager.
-        # This is because Jobs created by spec files, have no way of accessing other jobs created by
-        # other spec files. They only know about the jobs a single spec file generates.
-        # NOTE: Which means, tests and speedtests running simultaneously currently have a chance to
-        # clobber each others output during normal operation!?
 
         # Update any keys from the environment as necessary
         if not self.options.method:
