@@ -10,9 +10,9 @@
 #PBS -o {{ OUTPUT }}
 #PBS -l place={{ PLACE }}
 
-{%- if SOURCE_COMMAND is defined %}
-# Set by the --pbs-pre-source TestHarness option
-source {{ SOURCE_COMMAND }} || exit $?
+{%- if SOURCE_FILE is defined %}
+# Loaded from {{ SOURCE_FILE }}
+{{ SOURCE_CONTENTS }}
 {%- endif %}
 
 # Print a useful header
