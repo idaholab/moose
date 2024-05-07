@@ -33,7 +33,7 @@ class ImageDiff(FileTester):
         elif 'skimage' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' skimage'
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         return self.specs['imagediff']
 
     def processResults(self, moose_dir, options, output):

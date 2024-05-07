@@ -38,11 +38,14 @@ class RunException(RunApp):
         return RunApp.checkRunnable(self, options)
 
     def prepare(self, options):
-        if self.getProcs(options) > 1:
-            file_paths = []
-            for processor_id in range(self.getProcs(options)):
-                file_paths.append(self.name() + '.processor.{}'.format(processor_id))
-            util.deleteFilesAndFolders(self.getTestDir(), file_paths, False)
+        if self.hasRedirectedOutput(options):
+            files = self.getRedirectedOutputFiles(options)
+            util.deleteFilesAndFolders(self.getTestDir(), files, False)
+
+    def getOutputFiles(self, options):
+        if self.hasRedirectedOutput(options):
+            return self.getRedirectedOutputFiles(options)
+        return []
 
     def processResults(self, moose_dir, options, output):
         # Exceptions are written to stderr, which can be interleaved so we normally redirect these

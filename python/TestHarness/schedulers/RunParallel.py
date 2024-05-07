@@ -32,7 +32,10 @@ class RunParallel(Scheduler):
         """ Run a tester command """
 
         tester = job.getTester()
-        tester.setRunner(self.buildRunner(tester))
+
+        # Build and set the runner that will actually run the commands
+        # This is abstracted away so we can support local runners and PBS/slurm runners
+        tester.setRunner(self.buildRunner(job, self.options))
 
         # Do not execute app, and do not processResults
         if self.options.dry_run:
@@ -83,7 +86,7 @@ class RunParallel(Scheduler):
                         output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
                 self.setSuccessfulMessage(tester)
-        except Exception as e:
+        except Exception:
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
             tester.setStatus(StatusSystem().error, 'TESTER EXCEPTION')
 
@@ -96,13 +99,13 @@ class RunParallel(Scheduler):
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
 
-    def buildRunner(self, tester: Tester) -> Runner:
+    def buildRunner(self, job, options) -> Runner:
         """Builds the runner for a given tester
 
         This exists as a method so that derived schedulers can change how they
         run commands (i.e., for PBS and slurm)
         """
-        return SubprocessRunner(tester)
+        return SubprocessRunner(job, options)
 
     def setSuccessfulMessage(self, tester):
         """ properly set a finished successful message for tester """
