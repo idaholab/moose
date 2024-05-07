@@ -10,6 +10,8 @@
 #PBS -o {{ OUTPUT }}
 #PBS -l place={{ PLACE }}
 
+set -e
+
 {%- if SOURCE_FILE is defined %}
 # Loaded from {{ SOURCE_FILE }}
 {{ SOURCE_CONTENTS }}
@@ -29,6 +31,8 @@ echo "##########################################################################
 
 # Move into the test directory
 cd {{ CWD }}
+
+set +e
 
 # Run the command
 {{ COMMAND }}
