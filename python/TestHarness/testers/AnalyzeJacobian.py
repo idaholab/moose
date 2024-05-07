@@ -28,7 +28,7 @@ class AnalyzeJacobian(FileTester):
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         # analizejacobian.py outputs files prefixed with the input file name
         return [self.specs['input']]
 
@@ -68,7 +68,7 @@ class AnalyzeJacobian(FileTester):
         if len(specs['cli_args']):
             command += '--cli-args "' + (' '.join(specs['cli_args']) + '"')
 
-        return command
+        return command, None
 
 
     def processResults(self, moose_dir, options, output):
@@ -88,3 +88,12 @@ class AnalyzeJacobian(FileTester):
             self.setStatus(self.fail, reason)
 
         return output
+
+    def checkRunnable(self, options):
+        # We cannot rely on an external script running things with PBS
+        if options.pbs:
+            self.addCaveats('PBS NOT SUPPORTED')
+            self.setStatus(self.skip)
+            return False
+
+        return FileTester.checkRunnable(self, options)

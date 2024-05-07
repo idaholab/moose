@@ -59,12 +59,7 @@ class Scheduler(MooseObject):
         # The Scheduler class can be initialized with no "max_processes" argument and it'll default
         # to a soft limit. If however a max_processes is passed we'll treat it as a hard limit.
         # The difference is whether or not we allow single jobs to exceed the number of slots.
-        if params['max_processes'] == None:
-            self.available_slots = 1
-            self.soft_limit = True
-        else:
-            self.available_slots = params['max_processes'] # hard limit
-            self.soft_limit = False
+        self.available_slots, self.soft_limit = self.availableSlots(params)
 
         self.average_load = params['average_load']
 
@@ -113,6 +108,29 @@ class Scheduler(MooseObject):
         # True when scheduler.waitFinish() is called. This alerts the scheduler, no more jobs are
         # to be scheduled. KeyboardInterrupts are then handled by the thread pools.
         self.__waiting = False
+
+        # Whether or not to report long running jobs as RUNNING
+        self.report_long_jobs = True
+        # Whether or not to enforce the timeout of jobs
+        self.enforce_timeout = True
+
+        # The job lock
+        self.j_lock = None
+
+    def availableSlots(self, params):
+        """
+        Get the number of available slots for processing jobs and
+        whether or not that limit is a soft or hard limit.
+
+        Needed so that derived schedulers can modify this limit.
+        """
+        if params['max_processes'] == None:
+            available_slots = 1
+            soft_limit = True
+        else:
+            available_slots = params['max_processes'] # hard limit
+            soft_limit = False
+        return available_slots, soft_limit
 
     def triggerErrorState(self):
         self.__error_state = True
@@ -173,6 +191,14 @@ class Scheduler(MooseObject):
         for (jobs, j_dag, j_lock) in sorted_jobs:
             self.queueJobs(jobs, j_lock)
 
+    def setAndOutputJobStatus(self, job, status):
+        """
+        Sets a Job's status and forces the status to be output asap
+        """
+        job.setStatus(status)
+        job.force_report_status = True
+        self.status_pool.apply_async(self.jobStatus, (job, None, self.j_lock))
+
     def waitFinish(self):
         """
         Inform the Scheduler to begin running. Block until all jobs finish.
@@ -221,7 +247,7 @@ class Scheduler(MooseObject):
         # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)
         jobs = JobDAG(self.options)
         j_dag = jobs.createJobs(testers)
-        j_lock = threading.Lock()
+        self.j_lock = threading.Lock()
 
         # Allow derived schedulers access to the jobs before they launch
         self.augmentJobs(jobs)
@@ -230,11 +256,11 @@ class Scheduler(MooseObject):
         if j_dag.size() != len(testers):
             raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
 
-        with j_lock:
+        with self.j_lock:
             # As testers (jobs) finish, they are removed from job_bank
             self.__job_bank.update(j_dag.topological_sort())
             # List of objects relating to eachother (used for thread locking this job group)
-            self.__dag_bank.append([jobs, j_dag, j_lock])
+            self.__dag_bank.append([jobs, j_dag, self.j_lock])
 
         # Store all scheduled jobs
         self.__scheduled_jobs.append(j_dag.topological_sort())
@@ -336,13 +362,19 @@ class Scheduler(MooseObject):
         # Peform within a try, to allow keyboard ctrl-c
         try:
             with j_lock:
-                if job.isRunning():
-                    # already reported this job once before
+                # This job is set to force a status
+                force_status = job.force_report_status
+
+                if force_status:
+                    with self.activity_lock:
+                        self.jobs_reported.add(job)
+                    job.force_report_status = False
+                elif job.isRunning():
                     if job in self.jobs_reported:
                         return
 
                     # this job will be reported as 'RUNNING'
-                    elif clock() - self.last_reported_time >= self.min_report_time:
+                    if clock() - self.last_reported_time >= self.min_report_time:
                         # prevent 'finished' caveat with options expecting to take lengthy amounts of time
                         if (not self.options.sep_files
                            and not self.options.ok_files
@@ -354,7 +386,6 @@ class Scheduler(MooseObject):
 
                         with self.activity_lock:
                             self.jobs_reported.add(job)
-
                     # TestHarness has not yet been inactive long enough to warrant a report
                     else:
                         # adjust the next report time based on delta of last report time
@@ -408,16 +439,21 @@ class Scheduler(MooseObject):
                 with self.activity_lock:
                     self.__active_jobs.add(job)
 
-                timeout_timer = threading.Timer(float(job.getMaxTime()),
-                                                self.handleTimeoutJob,
-                                                (job, j_lock,))
+                if self.enforce_timeout:
+                    timeout_timer = threading.Timer(float(job.getMaxTime()),
+                                                    self.handleTimeoutJob,
+                                                    (job, j_lock,))
+                    timeout_timer.start()
+                else:
+                    timeout_timer = None
 
-                job.report_timer = threading.Timer(self.min_report_time,
-                                                   self.handleLongRunningJob,
-                                                   (job, jobs, j_lock,))
-
-                job.report_timer.start()
-                timeout_timer.start()
+                if self.report_long_jobs:
+                    job.report_timer = threading.Timer(self.min_report_time,
+                                                    self.handleLongRunningJob,
+                                                    (job, jobs, j_lock,))
+                    job.report_timer.start()
+                else:
+                    job.report_timer = None
 
                 # We have a try here because we want to explicitly catch things like
                 # python errors in _only_ the Job; exceptions that happen in the Tester
@@ -428,14 +464,17 @@ class Scheduler(MooseObject):
                     with j_lock:
                         job.setStatus(StatusSystem().error, 'JOB EXCEPTION')
                         job.setOutput('Encountered an exception while running Job: %s' % (traceback.format_exc()))
-                timeout_timer.cancel()
+
+                if timeout_timer:
+                    timeout_timer.cancel()
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:
                     self.slots_in_use = max(0, self.slots_in_use - job.getSlots())
 
                 # Stop the long running timer
-                job.report_timer.cancel()
+                if job.report_timer:
+                    job.report_timer.cancel()
 
                 # All done
                 with j_lock:

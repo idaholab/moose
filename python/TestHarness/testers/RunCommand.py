@@ -24,7 +24,7 @@ class RunCommand(Tester):
 
     def getCommand(self, options):
         # Create the command line string to run
-        return self.command
+        return self.command, None
 
     def processResults(self, moose_dir, options, output):
         if self.getExitCode() == 77 :

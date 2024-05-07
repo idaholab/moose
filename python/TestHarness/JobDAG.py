@@ -225,7 +225,7 @@ class JobDAG(object):
         output_to_job = {}
         for job in self.__job_dag.topological_sort():
             if job.getRunnable() and not job.isFinished():
-                for output_file in job.getOutputFiles():
+                for output_file in job.getOutputFiles(self.options):
                     output_to_job[output_file] = output_to_job.get(output_file, [])
                     output_to_job[output_file].append(job)
 

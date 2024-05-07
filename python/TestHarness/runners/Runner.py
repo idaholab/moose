@@ -15,13 +15,17 @@ class Runner:
     this specialized so that we can either run things locally
     or externally (i.e., PBS, slurm, etc on HPC)
     """
-    def __init__(self, tester):
-        # The tester that we're going to run
-        self.tester = tester
+    def __init__(self, job, options):
+        # The job that this runner is for
+        self.job = job
+        # The test harness options
+        self.options = options
         # The job's exit code, should be set after wait()
         self.exit_code = None
+        # The output the job produced; to be filled in wait()
+        self.output = None
 
-    def spawn(self, cmd, cwd, timer):
+    def spawn(self, timer):
         """
         Spawns the process.
 
@@ -53,7 +57,7 @@ class Runner:
 
         Should be overridden.
         """
-        return None
+        return self.output
 
     def getExitCode(self):
         """
@@ -64,7 +68,13 @@ class Runner:
     def isOutputReady(self):
         """
         Whether or not the output is ready for reading.
-
-        Should be overridden.
         """
-        return None
+        return self.output is not None
+
+    def sendSignal(self, signal):
+        """
+        Sends a signal to the process.
+
+        Can be overridden.
+        """
+        raise Exception('sendSignal not supported for this Runner')

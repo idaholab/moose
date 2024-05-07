@@ -15,7 +15,7 @@ import json
 import yaml
 import sys
 
-TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
+TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', os.get_terminal_size().columns * 5/6))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
 MOOSE_OPTIONS = {

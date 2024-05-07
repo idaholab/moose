@@ -7,16 +7,14 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os, sys, pkgutil, shutil, shlex
+import re, os, sys, shutil
 import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.runners.Runner import Runner
 from FactorySystem.MooseObject import MooseObject
-from tempfile import SpooledTemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 from pathlib import Path
-import subprocess
-from signal import SIGTERM
 
 class Tester(MooseObject):
     """
@@ -167,6 +165,10 @@ class Tester(MooseObject):
         # The object that'll actually do the run
         self._runner = None
 
+        # The command that we actually ended up running; this may change
+        # depending on the runner which might inject something
+        self.command_ran = None
+
     def getTempDirectory(self):
         """
         Gets a shared temp directory that will be cleaned up for this Tester
@@ -254,6 +256,10 @@ class Tester(MooseObject):
         """ return test name """
         return self.specs['test_name']
 
+    def getTestNameShort(self):
+        """ return test short name (not including the path) """
+        return self.specs['test_name_short']
+
     def getPrereqs(self):
         """ return list of prerequisite tests this test depends on """
         return self.specs['prereq']
@@ -298,7 +304,7 @@ class Tester(MooseObject):
         """ return the contents of the input file applicable to this Tester """
         return None
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         """ return the output files if applicable to this Tester """
         return []
 
@@ -348,10 +354,6 @@ class Tester(MooseObject):
         """ return number of slots to use for this tester """
         return self.getThreads(options) * self.getProcs(options)
 
-    def getCommand(self, options):
-        """ return the executable command that will be executed by the tester """
-        return ''
-
     def hasOpenMPI(self):
         """ return whether we have openmpi for execution
 
@@ -372,48 +374,38 @@ class Tester(MooseObject):
             return False
         return Path(which_mpiexec).parent.absolute() == Path(which_ompi_info).parent.absolute()
 
-    def spawnProcessFromOptions(self, timer, options):
+    def getCommand(self, options):
         """
-        Spawns a process based on given options, sets output and error files,
-        and starts timer.
+        Return the command that the Tester wants ran
+
+        We say "wants ran" here because the Runner may inject something
+        within the command, for example when running within a container.
+        Due to this distinction, you can obtain the command that was
+        actually ran via getCommandRan()
+
+        The first value is the argument without a parallel executor
+        (something like mpiexec -n ...) and the second value is
+        the parallel argument (if any, otherwise None)
         """
-        cmd = self.getCommand(options)
-        cwd = self.getTestDir()
+        return None, None
 
-        # Verify that the working directory is available right before we execute.
-        if not os.path.exists(cwd):
-            # Timers must be used since they are directly indexed in the Job class
-            timer.start()
-            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
-            timer.stop()
-            return 1
-
-        # Spawn the process
-        self._runner.spawn(cmd, cwd, timer)
-
-        return 0
-
-    def finishAndCleanupProcess(self, timer):
+    def setCommandRan(self, command):
         """
-        Waits for the current process to finish, stops the timer, and
-        cleans up.
+        Sets the command that was actually ran.
+
+        This is needed to account for running commands within containers
+        and needing to run an additional command up front (i.e., with
+        a pbs or slurm scheduler calling something like qsub)
         """
+        self.command_ran = command
 
-        self._runner.wait(timer)
-
-    def runCommand(self, timer, options):
+    def getCommandRan(self):
         """
-        Helper method for running external (sub)processes as part of the tester's execution.  This
-        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
-        be the same timer passed to the run method.  Results from running the subprocess is stored
-        in the tester's output and exit_code fields.
+        Gets the command that was actually ran.
+
+        See setCommandRan() for the distinction.
         """
-
-        exit_code = self.spawnProcessFromOptions(timer, options)
-        if exit_code: # Something went wrong
-            return
-
-        self.finishAndCleanupProcess(timer)
+        return self.command_ran
 
     def killCommand(self):
         """
@@ -424,7 +416,7 @@ class Tester(MooseObject):
         # Try to clean up anything else that we can
         self.cleanup()
 
-    def run(self, timer, options):
+    def run(self, job, options, timer):
         """
         This is a method that is the tester's main execution code.  Subclasses can override this
         method with custom code relevant to their specific testing needs.  By default this method
@@ -433,7 +425,28 @@ class Tester(MooseObject):
         if needed. The run method is responsible to call the start+stop methods on timer to record
         the time taken to run the actual test.  start+stop can be called multiple times.
         """
-        self.runCommand(timer, options)
+        # Verify that the working directory is available right before we execute.
+        if not os.path.exists(self.getTestDir()):
+            # Timers must be used since they are directly indexed in the Job class
+            timer.start()
+            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
+            timer.stop()
+            return
+
+        # Spawn the process
+        try:
+            self._runner.spawn(timer)
+        except Exception as e:
+            raise Exception('Failed to spawn process') from e
+
+        # And wait for it to complete
+        self._runner.wait(timer)
+
+    def postSpawn(self):
+        """
+        Entry point for after the process has been spawned
+        """
+        return
 
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """
@@ -468,6 +481,18 @@ class Tester(MooseObject):
         """ Clear any caveats stored in tester """
         self.__caveats = set([])
         return self.getCaveats()
+
+    def mustOutputExist(self):
+        """ Whether or not we should check for the output once it has ran
+
+        We need this because the PBS/slurm Runner objects, which use
+        networked file IO, need to wait until the output is available on
+        on the machine that submitted the jobs. A good example is RunException,
+        where we should only look for output when we get a nonzero return
+        code."""
+        return self.getExitCode() == 0
+
+    # need something that will tell  us if we should try to read the result
 
     def checkRunnableBase(self, options):
         """

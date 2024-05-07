@@ -1,16 +1,45 @@
 #!/bin/bash
-#PBS -N <JOB_NAME>
-#PBS -l select=<NODES>:ncpus=<MPI_PROCS>
-#PBS -l walltime=<WALLTIME>
-<PBS_PROJECT>
-<PBS_QUEUE>
+#PBS -N {{ NAME }}
+#PBS -l select={{ SELECT }}
+#PBS -l walltime={{ WALLTIME }}
+#PBS -P {{ PROJECT }}
+{%- if QUEUE is defined %}
+#PBS -q {{ QUEUE }}
+{%- endif %}
 #PBS -j oe
-#PBS -o <OUTPUT>
-#PBS -l place=free
-<PRE_COMMAND>
-JOB_NUM=${PBS_JOBID%\.*}
+#PBS -o {{ OUTPUT }}
+#PBS -l place={{ PLACE }}
 
-export MV2_ENABLE_AFFINITY=0
+{%- if SOURCE_COMMAND is defined %}
+# Set by the --pbs-pre-source TestHarness option
+source {{ SOURCE_COMMAND }} || exit $?
+{%- endif %}
 
-cd <WORKING_DIR>
-<COMMAND>
+# Print a useful header
+echo "################################################################################"
+echo "Beginning TestHarness RunPBS job"
+echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
+echo "Hostname: $(hostname)"
+echo "Time: $(date)"
+echo "Directory: {{ CWD }}"
+echo "Output: {{ OUTPUT }}"
+echo "Command: {{ COMMAND }}"
+module list
+echo "################################################################################"
+
+# Move into the test directory
+cd {{ CWD }}
+
+# Run the command
+{{ COMMAND }}
+# ...and capture the return code cause we're not done yet
+return_code=$?
+
+# Append a recognizable string at the end of the output. We look
+# for this string when parsing the output so that we can be sure
+# that we have obtained all of the output
+echo "{{ ENDING_COMMENT }}"
+
+# Exit with the real return code from the job that we ran
+exit $return_code
+

@@ -112,6 +112,10 @@ class Test:
 
         shutil.rmtree(tmpdir)
 
+    def getOutput(self):
+        # this has never produced any output :(
+        return ''
+
 class SpeedTest(Tester):
     @staticmethod
     def validParams():
@@ -153,7 +157,7 @@ class SpeedTest(Tester):
         return True
 
     # override
-    def run(self, timer, options):
+    def run(self, job, options, timer):
         p = self.params
         if not self.check_only and options.method not in ['opt', 'oprof', 'dbg']:
             raise ValueError('cannot run benchmark with "' + options.method + '" build')
