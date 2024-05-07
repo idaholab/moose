@@ -19,8 +19,7 @@ AffineInvariantDifferentialDecisionwithGPry::validParams()
   InputParameters params = PMCMCDecision::validParams();
   params.addClassDescription("Perform decision making for Affine Invariant differential MCMC with GPry surrogate.");
   params.addRequiredParam<UserObjectName>("gp_evaluator", "Evaluate the trained GP.");
-  params.addRequiredParam<UserObjectName>("nn_evaluator", "Evaluate the trained NN.");
-  //   params.suppressParameter<ReporterName>("output_value");
+  // params.addRequiredParam<UserObjectName>("nn_evaluator", "Evaluate the trained NN.");
   return params;
 }
 
@@ -29,7 +28,7 @@ AffineInvariantDifferentialDecisionwithGPry::AffineInvariantDifferentialDecision
   : PMCMCDecision(parameters),
     SurrogateModelInterface(this),
     _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
-    _nn_eval(getSurrogateModel<LibtorchANNSurrogate>("nn_evaluator")),
+    // _nn_eval(getSurrogateModel<LibtorchANNSurrogate>("nn_evaluator")),
     _new_samples(_pmcmc->getSamples())
 {
 }
@@ -137,6 +136,7 @@ AffineInvariantDifferentialDecisionwithGPry::execute()
   {
     // std::cout << Moose::stringify(_new_samples) << std::endl;
     computeEvidence(evidence, data_in);
+    std::cout << Moose::stringify(evidence) << std::endl;
     computeTransitionVector(_tpm, evidence);
   }
   else
