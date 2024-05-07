@@ -127,5 +127,4 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value)
     if (!indicator)
       ++j;
   }
-  std::cout << Moose::stringify(_new_samples) << std::endl;
 }

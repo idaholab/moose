@@ -45,7 +45,7 @@ protected:
   const SurrogateModel & _gp_eval;
 
   /// The libtorch classifer neural network
-  const LibtorchANNSurrogate & _nn_eval;
+  // const LibtorchANNSurrogate & _nn_eval;
 
   /// Storage for new proposed samples
   const std::vector<std::vector<Real>> & _new_samples;
