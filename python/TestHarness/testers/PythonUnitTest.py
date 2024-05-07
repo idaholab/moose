@@ -48,3 +48,11 @@ class PythonUnitTest(RunApp):
 
         # We need to append PYTHONPATH here for running these within apptainer
         return f'PYTHONPATH={self.getMooseDir()}/python ' + cmd  + ' '.join(self.specs['cli_args'])
+
+    def checkRunnable(self, options):
+        if options.pbs:
+            self.addCaveats('PBS NOT SUPPORTED')
+            self.setStatus(self.skip)
+            return False
+
+        return super().checkRunnable(options)
