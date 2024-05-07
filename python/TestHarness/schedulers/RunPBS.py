@@ -7,214 +7,340 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, re, json
-from QueueManager import QueueManager
-from TestHarness import util # to execute qsub
-import math # to compute node requirement
+import os, sys, re, json, socket, datetime, threading
+from RunParallel import RunParallel
+from TestHarness.runners.PBSRunner import PBSRunner
+from timeit import default_timer as clock
 from PBScodes import *
+import paramiko
+
+import jinja2
+from jinja2 import meta
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
-class RunPBS(QueueManager):
+class RunPBS(RunParallel):
     @staticmethod
     def validParams():
-        params = QueueManager.validParams()
+        params = RunParallel.validParams()
         params.addParam('queue_template', os.path.join(os.path.abspath(os.path.dirname(__file__)), 'pbs_template'), "Location of the PBS template")
         return params
 
+    class PBSJob:
+        """
+        Structure that represents the cached information about a PBS job
+        """
+        def __init__(self, id, command):
+            # The PBS job identifier
+            self.id = id
+            # Whether or not this job is done; here done doesn't mean if it
+            # was successful or not, just if it is not running/queued anymore
+            self.done = False
+            # The exit code of the command that was ran (if any)
+            self.exit_code = None
+            # The job state as defined by PBS
+            self.state = None
+            # The command that was ran within the qsub script
+            self.command = command
+            # Whether or not this job was killed; used so what we don't
+            # bother killing a job multiple times
+            self.killed = False
+
     def __init__(self, harness, params):
-        QueueManager.__init__(self, harness, params)
+        RunParallel.__init__(self, harness, params)
         self.params = params
-        self.harness = harness
-        self.options = self.harness.getOptions()
+        self.options = harness.getOptions()
 
-    def getBadKeyArgs(self):
-        """ arguments we need to remove from sys.argv """
-        return ['--pbs']
+        # We don't want to report long running jobs here because we will
+        # manually set jobs as RUNNING as we notice their PBS status change
+        self.report_long_jobs = False
+        # We don't want to enforce the timeout here because we don't want to
+        # check it while the jobs are queued and PBS itself will handle the
+        # timeout because the job itself will be forcefully killed by PBS
+        self.enforce_timeout = False
 
-    def _readJobOutput(self, output_file, N=5):
-        """ return last few lines in output_file for job group """
-        output = []
-        if os.path.exists(output_file):
-            with open(output_file, 'r') as outfile:
-                for line in (outfile.readlines() [-N:]):
-                    output.append(line)
-            output.append(f'Last {N} lines read. Full output file available at:\n{output_file}')
-        return '\n'.join(output)
+        # Lock for accessing self.pbs_jobs
+        self.pbs_jobs_lock = threading.Lock()
+        # The last time statues were updated in getPBSJob() (if any)
+        self.pbs_jobs_status_timer = None
+        # How often to poll for status updates in getPBSJob()
+        self.pbs_jobs_update_interval = 10
+        # Map of Job -> PBSJob
+        self.pbs_jobs = {}
 
-    def hasQueuingFailed(self, job_data):
-        """ Determine if PBS killed the job prematurely """
-        queue_plugin = self.__class__.__name__
-        jobs = job_data.jobs.getJobs()
-        meta_data = job_data.json_data.get(jobs[0].getTestDir())
-        launch_id = meta_data.get(queue_plugin, {}).get('ID', '').split('.')[0]
-        output_file = os.path.join(jobs[0].getTestDir(), 'qsub.output')
+        # The jump hostname for running PBS commands, if any
+        self.pbs_ssh_host = self.options.queue_host
+        # Setup the remote PBS host, if any (needed when submitted in a container)
+        self.pbs_ssh = None
+        # The lock for calling PBS commands via SSH, if any
+        self.pbs_ssh_lock = None
+        # Setup the jump host if provided
+        if self.pbs_ssh_host:
+            self.pbs_ssh_lock = threading.Lock()
+            self.pbs_ssh = paramiko.SSHClient()
+            self.pbs_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.pbs_ssh.connect(self.pbs_ssh_host)
 
-        # Job was never originally launched
-        if not meta_data.get(queue_plugin, False) or not launch_id:
-            return False
+        # Load the PBS template
+        template_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'pbs_template')
+        self.default_template = open(template_path, 'r').read()
 
-        # Job ran to completion
-        elif os.path.exists(os.path.join(jobs[0].getTestDir(), '.previous_test_results.json')):
-            return False
+        if os.environ.get('APPTAINER_CONTAINER'):
+            if not self.pbs_ssh_host:
+                print('ERROR: --pbs-host must be set when using --pbs within apptainer')
+                sys.exit(1)
+            if not self.options.queue_source_command:
+                default_pre_source =  os.path.join(os.path.abspath(os.path.dirname(__file__)), 'pbs_source_apptainer')
+                self.options.queue_source_command = default_pre_source
+                print(f'INFO: Setting --pbs-pre-source={default_pre_source}')
+        if self.options.queue_source_command and not os.path.exists(self.options.queue_source_command):
+            print(f'ERROR: --pbs-pre-source path {self.options.queue_source_command} does not exist')
+            sys.exit(1)
 
-        ### Job has some other status ###
+    class CallPBSException(Exception):
+        """Exception class for providing extra context for PBS submission errors"""
+        def __init__(self, run_pbs, description, command, result=None):
+            message = f'{description}'
+            if run_pbs.pbs_ssh:
+                message += f' on host "{run_pbs.pbs_ssh_host}"'
+            message += f'\nCommand: {command}'
+            if result:
+                message += f'\n\nResult:\n{result}'
+            super().__init__(message)
 
-        # Check qstat for current status
-        qstat_command_result = util.runCommand(f'qstat -xf -F json {launch_id}')
+    def callPBS(self, command):
+        """Wrapper for calling a PBS command (qsub, qstat, etc) that supports
+        SSH-ing to another host as needed when calling from within apptainer"""
+        if not self.pbs_ssh:
+            raise Exception('PBS not currently supported outside of a container')
 
-        # Catch json parsing errors
-        try:
-            json_out = json.loads(qstat_command_result)
-            pbs_server = json_out['pbs_server']
-            job_meta = json_out['Jobs'][f'{launch_id}.{pbs_server}']
+        with self.pbs_ssh_lock:
+            try:
+                _, stdout, stderr = self.pbs_ssh.exec_command(command)
+                exit_code = stdout.channel.recv_exit_status()
+                result = ''.join(stdout.readlines())
+                if exit_code != 0:
+                    result += ''.join(stderr.readlines())
+            except Exception as e:
+                raise RunPBS.CallPBSException(self, 'Failed to execute remote PBS command', command) from e
+            return exit_code, result.rstrip()
 
-        # JobID no longer exists (stale after 1 week)
-        except json.decoder.JSONDecodeError:
-            # Job did not run to completion (no .previous_test_results.json file exists)
-            if os.path.exists(output_file):
-                qstat_command_result = (f'ERROR: {self._readJobOutput(output_file)}'
-                                        '\n\nMore information available in\n'
-                                        f' {output_file}\n')
+    def availableSlots(self, params):
+        return 250, False
 
-            # Failed parse, and no output file. Perhaps the PBS job was canceled, deleted, etc
-            else:
-                qstat_command_result = ('ERROR: TestHarness encountered an error while'
-                                       f'determining what to make of PBS JobID {launch_id}:\n'
-                                       f'{qstat_command_result}')
+    def getPBSJobName(self, job):
+        """Gets the name of the PBS job given a tester
 
-        # Handle a qstat execution failure
-        if qstat_command_result.find('ERROR') != -1:
-            for job in job_data.jobs.getJobs():
-                job.setOutput(f'ERROR invoking `qstat`:\n{qstat_command_result}')
-                job.setStatus(job.error, 'QSTAT')
-            return True
+        PBS doesn't like ":" or "/", hence changing them to "."
+        """
+        return job.getTestName().replace(':', '.').replace('/', '.')
 
-        # Use qstat json output to examine current status
-        job_result = job_meta.get('Exit_status', False)
+    def getPBSJobOutputPathPrefix(self, job):
+        """Gets the absolute path prefix for a PBS job"""
+        return os.path.join(job.getTestDir(), "pbs_" + job.getTestNameShort().replace('/', '.'))
 
-        # Set the status as seen by qstat
-        meta_data[self.__class__.__name__]['STATUS'] = PBS_STATUSES[job_meta['job_state']]
+    def getPBSJobOutputPath(self, job):
+        """Gets the absolute path for stdout/stderr for a PBS job"""
+        return self.getPBSJobOutputPathPrefix(job) + '.out'
 
-        # Woops. This job was killed by PBS for some reason
-        if job_result and str(job_result) in PBS_User_EXITCODES.keys():
-            output = f'{self._readJobOutput(output_file)}\n{PBS_User_EXITCODES[str(job_result)]}'
-            for job in jobs:
-                job.setOutput(output)
-                job.addCaveats(f'PBS ERROR: {job_result}')
-            return True
+    def getPBSJobSubmissionPath(self, job):
+        """Gets the aboslute path for the qsub script for a PBS job"""
+        return self.getPBSJobOutputPathPrefix(job) + '.qsub'
 
-        # Capture TestHarness exceptions
-        elif job_result and job_result != "0":
-            if os.path.exists(output_file):
-                with open(output_file, 'r') as f:
-                    output_string = util.readOutput(f, None, jobs[0].getTester())
-                jobs[0].setOutput(output_string)
-            # Add a caveat to each job, explaining that one of the jobs caused a TestHarness exception
-            for job in jobs:
-                job.addCaveats('TESTHARNESS EXCEPTION')
-            return True
-
-        return False
-
-    def _augmentTemplate(self, job):
-        """ populate qsub script template with paramaters """
-        job_data = self.options.results_storage.get(job.getTestDir(), {})
-        queue_meta = job_data.get(self.__class__.__name__, { self.__class__.__name__: {} })
-
-        template = {}
-
-        # Launch script location
-        template['launch_script'] = os.path.join(job.getTestDir(), os.path.basename(job.getTestNameShort()) + '.qsub')
-
-        # NCPUS
-        template['mpi_procs'] = queue_meta.get('QUEUEING_NCPUS', 1)
-
-        # Compute node requirement
-        if self.options.pbs_node_cpus and template['mpi_procs'] > self.options.pbs_node_cpus:
-            nodes = template['mpi_procs']/self.options.pbs_node_cpus
-            template['mpi_procs'] = self.options.pbs_node_cpus
-        else:
-            nodes = 1
-        template['nodes'] = math.ceil(nodes)
-
-        # Convert MAX_TIME to hours:minutes for walltime use
-        max_time = queue_meta.get('QUEUEING_MAXTIME', 1)
-        hours = int(int(max_time) / 3600)
-        minutes = int(int(max_time) / 60) % 60
-        template['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
-
-        # Job Name
-        template['job_name'] = os.path.basename(job.getTestNameShort())
-
-        # PBS Project group
-        template['pbs_project'] = '#PBS -P %s' % (self.options.queue_project)
-
-        # PBS Queue
-        if self.options.queue_queue:
-            template['pbs_queue'] = '#PBS -q %s' % (self.options.queue_queue)
-        else:
-            template['pbs_queue'] = ''
-
-        # Apply source command
-        if self.options.queue_source_command and os.path.exists(self.options.queue_source_command):
-            template['pre_command'] = 'source %s || exit 1' % (os.path.abspath(self.options.queue_source_command))
-        else:
-            template['pre_command'] = ''
-
-        # Redirect stdout to this location
-        template['output'] = os.path.join(job.getTestDir(), 'qsub.output')
-
-        # Root directory
-        template['working_dir'] = self.harness.base_dir
-
-        # Command
-        template['command'] = ' '.join(self.getRunTestsCommand(job, template['mpi_procs']))
-
-        return template
-
-    def run(self, job):
-        """ execute qsub and return the launch id """
+    def submitJob(self, job):
+        """Submits a PBS job"""
         tester = job.getTester()
-        if self.options.dry_run:
-            tester.setStatus(tester.success, 'DRY_RUN')
-            return
+        options = self.options
 
-        template = self._augmentTemplate(job)
-        job_meta = self.options.results_storage.get(job.getTestDir(), { job.getTestDir() : {} })
-        self.createQueueScript(job, template)
-        command = ' '.join(['qsub', template['launch_script']])
-        launch_results = util.runCommand(command, job.getTestDir())
+        # The qsub script we're going to write to
+        qsub_file = self.getPBSJobSubmissionPath(job)
+        # The combined stdout+stderr from the PBS job
+        output_file = self.getPBSJobOutputPath(job)
+        # Clean these two files
+        for file in [qsub_file, output_file]:
+            if os.path.exists(file):
+                os.remove(file)
 
-        # List of files we need to clean up when we are done
-        dirty_files = [template['launch_script'],
-                       template['output'],
-                       os.path.join(job.getTestDir(), self.harness.results_file)]
+        # Set up the command. We have special logic here for when we're using apptainer,
+        # where we need to put the MPI command outside of the apptainer call
+        command, mpi_command = tester.getCommand(options)
+        full_command = ''
+        if mpi_command:
+            full_command += f'{mpi_command} '
+        APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
+        if APPTAINER_CONTAINER:
+            apptainer_cmd = f'apptainer exec {APPTAINER_CONTAINER}'
+            full_command += f'{apptainer_cmd} '
+        # The double quotes around the exec command here are important as apptainer exec
+        # doesn't work well with our command line arguments for some reason
+        full_command += f'"{command}"'
 
-        if launch_results.find('ERROR') != -1:
-            # The executor job failed (so fail all jobs in this group)
-            job_dag = job.getDAG()
+        num_procs = tester.getProcs(options)
+        num_threads = tester.getThreads(options)
+        walltime = str(datetime.timedelta(seconds=tester.getMaxTime()))
 
-            for other_job in [x for x in job_dag.topological_sort() if x != job]:
-                other_job.clearCaveats()
-                other_tester = other_job.getTester()
-                other_tester.setStatus(other_tester.fail, 'launch failure')
+        # Set up the template
+        template_env = {'NAME': self.getPBSJobName(job),
+                        'SELECT': f'{num_procs}:mpiprocs=1:ncpus={num_threads}',
+                        'WALLTIME': walltime,
+                        'PROJECT': self.options.queue_project,
+                        'OUTPUT': output_file,
+                        'PLACE': 'scatter',
+                        'SUBMITTED_HOSTNAME': socket.gethostname(),
+                        'CWD': tester.getTestDir(),
+                        'COMMAND': full_command,
+                        'ENDING_COMMENT': self.getOutputEndingComment()}
+        if self.options.queue_queue:
+            template_env['QUEUE'] = self.options.queue_queue
+        if self.options.queue_source_command:
+            template_env['SOURCE_COMMAND'] = self.options.queue_source_command
 
-            # This is _only_ to make the failed message more useful
-            tester.specs['command'] = command
-            tester.setStatus(tester.fail, 'QSUB Group Failure')
-            job.setOutput(launch_results)
+        # Build the script
+        jinja_env = jinja2.Environment()
+        definition_template = jinja_env.from_string(self.default_template)
+        jinja_env.trim_blocks = True
+        jinja_env.lstrip_blocks = True
+        script = definition_template.render(**template_env)
 
-        else:
-            # While RunPBS believes this was a successful launch, perhaps this system's PBS system
-            # failed to launch for some other strange reason, and didn't error (above .find(ERROR)
-            # routine). In which case, it helps to set some 'past tense' grammar as our result
-            # in our '--pbs some_name' json file
-            job_meta[self.__class__.__name__].update({'ID'           : launch_results,
-                                                      'QSUB_COMMAND' : command,
-                                                      'NCPUS'        : template['mpi_procs'],
-                                                      'WALLTIME'     : template['walltime'],
-                                                      'QSUB_OUTPUT'  : template['output'],
-                                                      'STATUS'       : 'PREVIOUSLY LAUNCHED',
-                                                      'DIRTY_FILES'  : dirty_files})
+        # Write the script
+        open(qsub_file, 'w').write(script)
 
-            tester.setStatus(tester.queued, 'LAUNCHING')
+        # qsub submission command
+        qsub_command = [f'cd {tester.getTestDir()}']
+        qsub_command += [f'qsub {qsub_file}']
+        qsub_command = '; '.join(qsub_command)
+
+        # Set what we've ran for this job so that we can
+        # potentially get the context in an error
+        command_ran = qsub_command
+        if self.pbs_ssh:
+            command_ran = f"ssh {self.pbs_ssh_host} '{qsub_command}'"
+        job.getTester().setCommandRan(command_ran)
+
+        # Do the submission; this is thread safe
+        # Eventually we might want to make this a pool so we can submit multiple
+        # jobs at the same time
+        exit_code, result = self.callPBS(qsub_command)
+
+        # Nonzero return code
+        if exit_code != 0:
+            raise self.CallPBSException(self, 'qsub failed', qsub_command, result)
+
+        # Make sure the job ID is something we'd expect
+        job_id = result
+        search = re.search('^[0-9]+.[a-zA-Z0-9_-]+$', job_id)
+        if not search:
+            raise self.CallPBSException(self, f'qsub has unexpected ID "{job_id}"', qsub_command)
+
+        # Job has been submitted, so set it as queued
+        job.addCaveats(job_id)
+        self.setAndOutputJobStatus(job, job.queued)
+
+        # Setup the job in the status map
+        with self.pbs_jobs_lock:
+            if job in self.pbs_jobs:
+                raise Exception('Job has already been submitted')
+            self.pbs_jobs[job] = self.PBSJob(job_id, full_command)
+
+    def killJob(self, job):
+        """Kills a PBS job"""
+        with self.pbs_jobs_lock:
+            if job not in self.pbs_jobs:
+                return
+            pbs_job = self.pbs_jobs[job]
+            if pbs_job.done or pbs_job.killed:
+                return
+            job_id = self.pbs_jobs[job].id
+
+        # Don't care about whether or not this failed
+        self.callPBS(f'qdel {job_id}')
+
+    def killRemaining(self, keyboard=False):
+        """Kills all currently running PBS jobs"""
+        job_ids = []
+        with self.pbs_jobs_lock:
+            for pbs_job in self.pbs_jobs.values():
+                if not pbs_job.done:
+                    job_ids.append(pbs_job.id)
+
+        # Don't care about whether or not this failed
+        self.callPBS(f'qdel {" ".join(job_ids)}')
+
+        with self.pbs_jobs_lock:
+            for pbs_job in self.pbs_jobs.values():
+                if not pbs_job.done:
+                    pbs_job.killed = True
+
+        RunParallel.killRemaining(self, keyboard)
+
+    def buildRunner(self, job, options):
+        return PBSRunner(job, options, self)
+
+    def getOutputEndingComment(self):
+        """Gets the text we append to the PBS stderr+stdout file to desginate
+        that it is complete"""
+        return 'Completed TestHarness RunPBS job'
+
+    def getPBSJob(self, job):
+        """Gets the PBSJob object for a given Job
+
+        This will periodically update the PBSJob in a thread safe manner so
+        that we are not constantly calling qstat for every call."""
+
+        with self.pbs_jobs_lock:
+            # If this is the first time seeing this job, initialize it in the list
+            if job not in self.pbs_jobs:
+                raise Exception('Failed to get status for unsubmitted job')
+
+            # Only update the statues periodically as this is called across threads
+            if self.pbs_jobs_status_timer is None or ((clock() - self.pbs_jobs_status_timer) > self.pbs_jobs_update_interval):
+                # Obtain the IDs of jobs that are active that we need to poll for
+                active_job_ids = []
+                for job, pbs_job in self.pbs_jobs.items():
+                    if not pbs_job.done:
+                        active_job_ids.append(pbs_job.id)
+
+                # Poll for all of the jobs within a single call
+                cmd = ['qstat', '-xf', '-F', 'json'] + active_job_ids
+                exit_code, result = self.callPBS(' '.join(cmd))
+                if exit_code != 0:
+                    raise self.CallPBSException(self, 'Failed to get job status', cmd, result)
+
+                # Register that we've updated the status
+                self.pbs_jobs_status_timer = clock()
+
+                # Attempt to parse the status from the jobs
+                try:
+                    json_result = json.loads(result)
+                    job_results = json_result['Jobs']
+
+                    for job, pbs_job in self.pbs_jobs.items():
+                        # We're only updating jobs that aren't done yet
+                        if pbs_job.done:
+                            continue
+
+                        # This job's result from the qstat command
+                        job_result = job_results[pbs_job.id]
+                        exit_code = job_result.get('Exit_status')
+                        if exit_code is not None:
+                            exit_code = int(exit_code)
+                        state = job_result.get('job_state')
+                        substate = job_result.get('substate')
+                        terminated = int(substate) == 91 if substate else False
+                        done = exit_code is not None or terminated
+
+                        # Get the job state, and report running if it switched to running
+                        if state == 'R' and pbs_job.state != 'R':
+                            self.setAndOutputJobStatus(job, job.running)
+
+                        # Update the PBSJob structure
+                        pbs_job.done = done
+                        pbs_job.exit_code = exit_code
+                        pbs_job.state = state
+
+                        # Mark the job as terminated (past walltime, over resources, killed)
+                        if terminated:
+                            job.setStatus(job.error, 'PBS JOB TERMINATED')
+                except Exception as e:
+                    raise self.CallPBSException(self, f'Failed to parse collective job status', cmd, result) from e
+
+            return self.pbs_jobs[job]

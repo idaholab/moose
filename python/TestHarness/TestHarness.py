@@ -420,7 +420,6 @@ class TestHarness:
                             # Create the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
 
-
                             # Schedule the testers (non blocking)
                             self.scheduler.schedule(testers)
 
@@ -516,8 +515,8 @@ class TestHarness:
 
         params['spec_file'] = filename
         params['test_name'] = formatted_name
+        params['test_name_short'] = relative_hitpath
         params['test_dir'] = test_dir
-        params['relative_path'] = relative_path
         params['executable'] = testroot_params.get("executable", self.executable)
         params['app_name'] = self.app_name
         params['hostname'] = self.host_name
@@ -592,7 +591,15 @@ class TestHarness:
         output = ''
         # Print what ever status the tester has at the time
         if self.options.verbose or (job.isFail() and not self.options.quiet):
-            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + job.getCommand() + '\n'
+            if job.getCommandRan():
+                command = job.getCommandRan()
+            else:
+                cmd, mpi_cmd = job.getCommand()
+                command = ''
+                if mpi_cmd:
+                    command += f'{mpi_cmd} '
+                command += cmd
+            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + command + '\n'
             output += util.trimOutput(job, self.options)
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n')
@@ -639,17 +646,11 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                print((util.formatResult(job, self.options, result='RUNNING', caveats=False)))
+                # TODO: changed this caveats=True
+                print((util.formatResult(job, self.options, result=job.getStatus().status, caveats=True)))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
-        if self.options.queue_cleanup and self.options.results_file:
-            try:
-                os.remove(self.options.results_file)
-            except OSError:
-                pass
-            return
-
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if len(self.parse_errors) > 0:
@@ -671,10 +672,6 @@ class TestHarness:
         if len(self.parse_errors) > 0:
             fatal_error += ', <r>FATAL PARSER ERROR</r>'
             self.error_code = self.error_code | 0x80
-
-        # Alert the user to their session file
-        if self.options.queueing and not self.options.dry_run:
-            print(('Your session file is %s' % self.options.results_file))
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
@@ -797,10 +794,6 @@ class TestHarness:
         # Write some useful data to our results_storage
         for job_group in all_jobs:
             for job in job_group:
-                # If queueing, do not store silent results in session file
-                if job.isSilent() and self.options.queueing:
-                    continue
-
                 status, message, message_color, status_code, sort_value = job.getJointStatus()
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
@@ -896,17 +889,8 @@ class TestHarness:
         plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
         self.factory.loadPlugins(plugin_paths, 'schedulers', "IS_SCHEDULER")
 
-        self.options.queueing = False
         if self.options.pbs:
-            # original_storage will become the results file for each test being launched by PBS, and will be
-            # saved in the same directory as the test spec file. This is so we can launch multiple 'run_tests'
-            # without clobbering the parent results_file. Meanwhile, the new results_file is going to be
-            # renamed to whatever the user decided to identify their PBS launch with.
-            self.original_storage = self.options.results_file
-            self.options.results_file = os.path.abspath(self.options.pbs)
-            self.options.queueing = True
             scheduler_plugin = 'RunPBS'
-
         # The default scheduler plugin
         else:
             scheduler_plugin = 'RunParallel'
@@ -1064,12 +1048,11 @@ class TestHarness:
         outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
 
         queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
-        queuegroup.add_argument('--pbs', nargs=1, action='store', metavar='name', help='Launch tests using PBS as your scheduler. You must supply a name to identify this session with')
+        queuegroup.add_argument('--pbs', action='store_true', dest='pbs', help='Launch tests using PBS as your scheduler')
         queuegroup.add_argument('--pbs-pre-source', nargs=1, action="store", dest='queue_source_command', metavar='', help='Source specified file before launching tests')
         queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
         queuegroup.add_argument('--pbs-queue', nargs=1, action='store', dest='queue_queue', type=str, metavar='', help='Submit jobs to the specified queue')
-        queuegroup.add_argument('--pbs-node-cpus', nargs=1, action='store', type=int, default=None, metavar='', help='CPUS Per Node. The default (no setting), will always use only one node')
-        queuegroup.add_argument('--pbs-cleanup', nargs=1, action="store", dest='queue_cleanup', metavar='name', help='Clean up files generated by supplied --pbs name')
+        queuegroup.add_argument('--pbs-host', nargs=1, action='store', dest='queue_host', metavar='', help='The PBS host to use for submitting jobs')
 
         code = True
         if self.code.decode() in argv:
@@ -1108,9 +1091,6 @@ class TestHarness:
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
-        if opts.queue_cleanup and not opts.pbs:
-            print('ERROR: --queue-cleanup cannot be used without additional queue options')
-            sys.exit(1)
         if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
             print('ERROR: pre-source supplied but path does not exist')
             sys.exit(1)
@@ -1136,8 +1116,6 @@ class TestHarness:
         # other spec files. They only know about the jobs a single spec file generates.
         # NOTE: Which means, tests and speedtests running simultaneously currently have a chance to
         # clobber each others output during normal operation!?
-        if opts.pbs and not opts.input_file_name:
-            self.options.input_file_name = 'tests'
 
         # Update any keys from the environment as necessary
         if not self.options.method:

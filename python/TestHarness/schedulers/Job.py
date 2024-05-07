@@ -7,8 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, json
-import time
+import re, os, json, time
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
@@ -95,6 +94,10 @@ class Job(object):
         # Initialize jobs with a holding status
         self.setStatus(self.hold)
 
+        # Whether or not we should forcefully report the status of this Job
+        # the next time report statuses
+        self.force_report_status = False
+
     def getUpstreams(self):
         """ Return a list of all the jobs that needed to be completed before this job """
         dag = self.getDAG()
@@ -125,7 +128,7 @@ class Job(object):
 
     def getTestNameShort(self):
         """ Return the shorthand Test name """
-        return self.getTestName().split('.')[1]
+        return self.__tester.getTestNameShort()
 
     def getPrereqs(self):
         """ Wrapper method to return the testers prereqs """
@@ -151,13 +154,17 @@ class Job(object):
         """ Wrapper method for returing command """
         return self.__tester.getCommand(self.options)
 
+    def getCommandRan(self):
+        """ Wrapper method for returing command ran """
+        return self.__tester.getCommandRan()
+
     def getRunnable(self):
         """ Wrapper method to return getRunnable """
         return self.__tester.getRunnable(self.options)
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         """ Wrapper method to return getOutputFiles """
-        return self.__tester.getOutputFiles()
+        return self.__tester.getOutputFiles(options)
 
     def getMaxTime(self):
         """ Wrapper method to return getMaxTime """
@@ -227,10 +234,10 @@ class Job(object):
 
         self.__start_time = clock()
         self.timer.reset()
-        self.__tester.run(self.timer, self.options)
+        self.__tester.run(self, self.options, self.timer)
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
-        self.__joined_out = self.__tester.joined_out
+        self.__joined_out = self.__tester.getOutput()
 
         if self.options.pedantic_checks and self.canParallel():
             # Check if the files we checked on earlier were modified.
@@ -359,7 +366,7 @@ class Job(object):
         return (_status == self.queued and self.isNoStatus()) \
             or (_status in self.__finished_statuses and self.__tester.isQueued())
     def isRunning(self):
-        return self.getStatus() == self.running
+        return self.getStatus() in self.job_status.getPendingStatuses()
     def isTimeout(self):
         return self.getStatus() == self.timeout
     def isPending(self):
