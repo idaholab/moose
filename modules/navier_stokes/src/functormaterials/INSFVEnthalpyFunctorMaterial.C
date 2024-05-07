@@ -33,7 +33,9 @@ INSFVEnthalpyFunctorMaterial::validParams()
   params.addParam<MooseFunctorName>(
       NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
   params.addParam<std::string>(
-      "property_suffix", "", "Suffix for disambiguating functor property names");
+      "property_suffix",
+      "",
+      "Suffix to append to declared functor property names for global property disambiguation");
   return params;
 }
 

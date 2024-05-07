@@ -35,10 +35,11 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
   MooseEnum face_interpol_types("average skewness-corrected", "average");
-  params.addParam<MooseEnum>("solid_temperature_face_interpolation",
-                             face_interpol_types,
-                             "The numerical scheme to interpolate the temperature/energy to the "
-                             "face (separate from the advected quantity interpolation).");
+  params.addParam<MooseEnum>(
+      "solid_temperature_face_interpolation",
+      face_interpol_types,
+      "The numerical scheme to interpolate the temperature/energy to the "
+      "face for conduction (separate from the advected quantity interpolation).");
   params.addParam<bool>(
       "solid_temperature_two_term_bc_expansion",
       true,
@@ -116,7 +117,7 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
   : HeatConductionFV(parameters),
     _solid_temperature_name(getParam<VariableName>("solid_temperature_variable")),
     _fluid_temperature_name(getParam<NonlinearVariableName>("fluid_temperature_variable")),
-    _porosity_functor_name(getParam<MooseFunctorName>(NS::porosity)),
+    _porosity_name(getParam<MooseFunctorName>(NS::porosity)),
     _density_name(getParam<MooseFunctorName>("rho_solid")),
     _specific_heat_name(getParam<MooseFunctorName>("cp_solid")),
     _thermal_conductivity_blocks(
@@ -192,7 +193,7 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyTimeKernels()
   else
     params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
-  params.set<MooseFunctorName>(NS::porosity) = _porosity_functor_name;
+  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
   // If modeling a variable density
   if (getProblem().hasFunctor(NS::time_deriv(_density_name + "_solid"),
                               /*thread_id=*/0))
@@ -215,7 +216,7 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-  params.set<MooseFunctorName>(NS::porosity) = _porosity_functor_name;
+  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
   // Set block restrictions
   const bool combined = _thermal_conductivity_blocks.size() > 1;
@@ -318,7 +319,7 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
           have_vector = true;
         else
           paramError("thermal_conductivity_solid",
-                     "We only allow functor of type ADReal or ADRealVectorValue for thermal "
+                     "We only allow functor of type (AD)Real or (AD)RealVectorValue for thermal "
                      "conductivity! Functor '" +
                          _thermal_conductivity_name[i] + "' is not of the requested type.");
       }
@@ -381,7 +382,8 @@ PNSFVSolidHeatTransferPhysics::getAdditionalRMParams() const
   if (getParam<MooseEnum>("solid_temperature_face_interpolation") == "skewness-corrected")
     necessary_layers = std::max(necessary_layers, (unsigned short)3);
 
-  // Just an object that has a ghost_layers parameter
+  // Just an object that has a ghost_layers parameter and performs geometric, algebraic, and
+  // coupling ghosting
   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.template set<unsigned short>("ghost_layers") = necessary_layers;

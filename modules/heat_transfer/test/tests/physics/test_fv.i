@@ -51,14 +51,6 @@
   []
 []
 
-# [Materials]
-#   [mat_k]
-#     type = ADGenericConstantMaterial
-#     prop_names = 'density'
-#     prop_values = '10'
-#   []
-# []
-
 [Outputs]
   exodus = true
 []

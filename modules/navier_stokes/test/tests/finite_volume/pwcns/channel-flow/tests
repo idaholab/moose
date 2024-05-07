@@ -41,7 +41,7 @@
     method = "!dbg"
     abs_zero = 1e-9
     issues = '#25642'
-    requirement = 'The system shall be able to solve weakly compressible transient problems with the WCNSFV Physics syntax.'
+    requirement = 'The system shall be able to solve weakly compressible transient problems with flow physics syntax.'
     valgrind = HEAVY
     recover = false # see #19126
   []

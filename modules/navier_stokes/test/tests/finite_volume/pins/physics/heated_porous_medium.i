@@ -10,10 +10,6 @@ rho_solid = 1.1
 k_solid = 13
 cp_solid = 1000
 
-[Problem]
-  error_on_jacobian_nonzero_reallocation = true
-[]
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -27,46 +23,51 @@ cp_solid = 1000
   []
 []
 
-[Modules]
-  [NavierStokesFV]
-    compressibility = 'incompressible'
-    porous_medium_treatment = true
-    add_energy_equation = true
-
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    porosity = 'porosity'
-    specific_heat = 'cp'
-
-    initial_velocity = '1 1e-6 0'
-    initial_pressure = 0.0
-    initial_temperature = 300
-
-    # Boundary conditions
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
-    energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '300'
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip slip'
-    energy_wall_types = 'heatflux heatflux'
-    energy_wall_function = '0 0'
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
-
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
-    energy_advection_interpolation = 'average'
-
-    ambient_convection_alpha = 'h_cv'
-    ambient_temperature = 'T_solid'
-  []
-[]
-
 [Physics]
   [NavierStokes]
+    [Flow]
+      [fluid]
+        compressibility = 'incompressible'
+        porous_medium_treatment = true
+
+        density = 'rho'
+        dynamic_viscosity = 'mu'
+        porosity = 'porosity'
+
+        initial_velocity = '1 1e-6 0'
+        initial_pressure = 0.0
+
+        # Boundary conditions
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '1 0'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip slip'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_function = '0'
+
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
+    [FluidHeatTransfer]
+      [fluid]
+        specific_heat = 'cp'
+        initial_temperature = 300
+
+        # See Flow for inlet and wall boundaries
+        energy_inlet_types = 'fixed-temperature'
+        energy_inlet_function = '300'
+        energy_wall_types = 'heatflux heatflux'
+        energy_wall_function = '0 0'
+
+        ambient_convection_alpha = 'h_cv'
+        ambient_temperature = 'T_solid'
+
+        energy_advection_interpolation = 'average'
+      []
+    []
     [SolidHeatTransfer]
       [solid]
         block = 0

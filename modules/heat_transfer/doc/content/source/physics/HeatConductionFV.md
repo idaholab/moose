@@ -1,7 +1,7 @@
 # HeatConductionFV
 
 This [Physics](syntax/Physics/index.md) object implements the heat conduction equation over a
-volumetric domain using a face-centered finite volume discretization.
+volumetric domain using a cell-centered finite volume discretization.
 
 It creates the kernels for each term of the equation:
 

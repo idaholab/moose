@@ -24,16 +24,16 @@ public:
 
 protected:
 private:
-  void addNonlinearVariables() override;
-  void addFVKernels() override;
-  void addMaterials() override;
+  virtual void addNonlinearVariables() override;
+  virtual void addFVKernels() override;
+  virtual void addMaterials() override;
 
   // Note that we inherit:
   // - addInitialConditions from HeatConductionPhysics
   // - addPreconditioning from HeatConductionPhysics
   // - addFVBCs from HeatConductionFV
 
-  InputParameters getAdditionalRMParams() const override;
+  virtual InputParameters getAdditionalRMParams() const override;
 
   /**
    * Functions adding kernels for the solid energy equation
@@ -42,8 +42,6 @@ private:
   void addPINSSolidEnergyHeatConductionKernels();
   void addPINSSolidEnergyAmbientConvection();
   void addPINSSolidEnergyExternalHeatSource();
-
-  // TODO Add interfaces
 
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
@@ -54,7 +52,7 @@ private:
   /// Fluid temperature name
   const NonlinearVariableName _fluid_temperature_name;
   /// Name of the porosity functor (usually material property)
-  const MooseFunctorName _porosity_functor_name;
+  const MooseFunctorName _porosity_name;
   /// Name of the density functor (usually material property)
   const MooseFunctorName _density_name;
   /// Name of the specific heat functor (usually material property)
