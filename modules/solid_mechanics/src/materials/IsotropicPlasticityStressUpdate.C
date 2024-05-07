@@ -201,7 +201,7 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeYieldStress(
 {
   if (_yield_stress_function)
   {
-    static const MooseADWrapper<Point, is_ad> p;
+    static const GenericType<Point, is_ad> p;
     _yield_stress = _yield_stress_function->value(_temperature[_qp], p);
 
     if (_yield_stress <= 0.0)

@@ -28,7 +28,7 @@ public:
   virtual void computeProperties() override;
 
 protected:
-  using ADR2 = Moose::GenericType<R2, true>;
+  using ADR2 = GenericType<R2, true>;
 
   /**
    * Computes the current and old deformation gradients and passes back the

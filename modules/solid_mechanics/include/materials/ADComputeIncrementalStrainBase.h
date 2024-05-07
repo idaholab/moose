@@ -36,7 +36,7 @@ public:
   void initialSetup() override;
 
 protected:
-  using ADR2 = Moose::GenericType<R2, true>;
+  using ADR2 = GenericType<R2, true>;
 
   virtual void initQpStatefulProperties() override;
 

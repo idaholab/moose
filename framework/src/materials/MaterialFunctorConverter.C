@@ -57,7 +57,7 @@ MaterialFunctorConverterTempl<T>::MaterialFunctorConverterTempl(const InputParam
   _reg_props_out.resize(reg_props_out.size());
 
   for (const auto i : make_range(_num_functors_to_convert))
-    _functors_in[i] = &getFunctor<Moose::GenericType<T, true>>(functors_in[i]);
+    _functors_in[i] = &getFunctor<GenericType<T, true>>(functors_in[i]);
 
   for (const auto i : index_range(ad_props_out))
     _ad_props_out[i] = &declareADProperty<T>(ad_props_out[i]);

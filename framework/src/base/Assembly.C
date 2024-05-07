@@ -4946,14 +4946,14 @@ template void coordTransformFactor<ADPoint, ADReal>(const MooseMesh & mesh,
                                                     SubdomainID neighbor_sub_id);
 
 template <>
-const MooseArray<MooseADWrapper<Point, false>> &
+const MooseArray<GenericType<Point, false>> &
 Assembly::genericQPoints<false>() const
 {
   return qPoints();
 }
 
 template <>
-const MooseArray<MooseADWrapper<Point, true>> &
+const MooseArray<GenericType<Point, true>> &
 Assembly::genericQPoints<true>() const
 {
   return adQPoints();

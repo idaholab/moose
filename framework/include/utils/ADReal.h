@@ -110,3 +110,15 @@ struct ScalarBinaryOpTraits<MetaPhysicL::DualNumber<V, D, asd>, Real, BinaryOp>
   typedef MetaPhysicL::DualNumber<V, D, asd> ReturnType;
 };
 } // namespace Eigen
+
+namespace Moose
+{
+template <typename T>
+struct ADType;
+
+template <typename T, int M, int N, int O, int M2, int N2>
+struct ADType<Eigen::Matrix<T, M, N, O, M2, N2>>
+{
+  typedef typename Eigen::Matrix<typename ADType<T>::type, M, N, O, M2, N2> type;
+};
+}

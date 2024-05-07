@@ -39,5 +39,5 @@ protected:
 
 private:
   template <bool is_ad>
-  MooseADWrapper<Real, is_ad> sampleInternal(const MooseADWrapper<GridPoint, is_ad> pt) const;
+  GenericType<Real, is_ad> sampleInternal(const GenericType<GridPoint, is_ad> pt) const;
 };

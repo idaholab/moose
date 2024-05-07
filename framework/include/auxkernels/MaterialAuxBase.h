@@ -31,7 +31,7 @@ public:
   /// Functors really only work for Real and RealVectorValue for now :(
   using MaterialAuxFunctorType =
       typename std::conditional<std::is_same_v<T, Real> || std::is_same_v<T, RealVectorValue>,
-                                Moose::Functor<Moose::GenericType<T, is_ad>>,
+                                Moose::Functor<GenericType<T, is_ad>>,
                                 void>::type;
 
 protected:
@@ -53,7 +53,7 @@ protected:
   const unsigned int _selected_qp;
 
   /// T Value evaluated from either the property or the functor
-  Moose::GenericType<T, is_ad> _full_value;
+  GenericType<T, is_ad> _full_value;
 
 private:
   /// Multiplier for the material property
@@ -97,9 +97,12 @@ MaterialAuxBaseTempl<T, is_ad, RT>::MaterialAuxBaseTempl(const InputParameters &
     _functor(this->isParamValid("functor")
                  ? [this]() {
                     if constexpr (!std::is_same_v<MaterialAuxFunctorType, void>)
-                      return &this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
+                      return &this->template getFunctor<GenericType<T, is_ad>>("functor");
                     else
+                    {
+                      libmesh_ignore(this);
                       return nullptr;
+                    }
                  }()
                  : nullptr),
     _selected_qp(this->isParamValid("selected_qp") ? this->template getParam<unsigned int>("selected_qp") : libMesh::invalid_uint),
