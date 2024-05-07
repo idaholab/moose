@@ -86,10 +86,10 @@ The `MultiApps` block is shown in [multiapps].  The optimization executioner uti
 
 `Transfers` makes up the next section of the main input file.  TAO interacts
 with the various sub-apps using the reporter system and the
-[MultiAppReporterTransfer.md].  The first three `Transfers` in [transfers]
+[MultiAppReporterTransfer.md].  The first two `Transfers` in [transfers]
 communicate data with the forward sub-app.  These `Transfers` are used by TAO to
 compute the objective. The first transfer `[toForward_measument]` communicates
-the measurement locations to the forward app object [OptimizationData.md].
+the measurement locations to the forward app object [OptimizationData.md].  This transfer can be avoided by placing the [OptimizationData.md] block on the forward solve input file instead of the main optimization input file.
 These are the locations where the objective function is computed by minimizing
 the difference between the simulated and experimental data at discrete points,
 see [!eqref](theory/InvOptTheory.md#eqn:objective_integral).  The second
@@ -106,7 +106,7 @@ a new objective function for TAO.
           id=transfers
           caption=Main application `Transfers` for point load parameterization shown in [figSetup]
 
-The next set of `Transfers` in [transfers] communicate reporter values between the main-app and adjoint sub-app to compute the gradient of the objective function with respect to the controllable parameter.  The fourth transfer named `[toAdjoint]` sends the misfit data at each measurement point to an [OptimizationData.md] reporter on the adjoint-app which is then consumed by the [ReporterPointSource.md] dirackernel to apply the misfit source loading as described by the top equation in [!eqref](theory/InvOptTheory.md#eqn:adjoint_problem).  The fifth transfer named `[fromAdjoint]` retrieves the gradient from the adjoint-app for TAO.
+The next set of `Transfers` in [transfers] communicate reporter values between the main-app and adjoint sub-app to compute the gradient of the objective function with respect to the controllable parameter.  The third transfer named `[toAdjoint]` sends the misfit data at each measurement point to an [OptimizationData.md] reporter on the adjoint-app which is then consumed by the [ReporterPointSource.md] dirackernel to apply the misfit source loading as described by the top equation in [!eqref](theory/InvOptTheory.md#eqn:adjoint_problem).  The fourth transfer named `[fromAdjoint]` retrieves the gradient from the adjoint-app for TAO.  The sibling transfer system could have been used to transfer the misfit data directly from the forward solve to the adjoint solve.
 
 The final set of `Transfers` in [transfers] communicate reporter values between
 the main-app and the homogeneous forward sub-app to compute a matrix free
