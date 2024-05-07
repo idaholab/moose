@@ -382,12 +382,8 @@ class Tester(MooseObject):
         within the command, for example when running within a container.
         Due to this distinction, you can obtain the command that was
         actually ran via getCommandRan()
-
-        The first value is the argument without a parallel executor
-        (something like mpiexec -n ...) and the second value is
-        the parallel argument (if any, otherwise None)
         """
-        return None, None
+        return None
 
     def setCommandRan(self, command):
         """
