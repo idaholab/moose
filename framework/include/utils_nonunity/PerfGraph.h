@@ -117,9 +117,16 @@ public:
   void printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections);
 
   /**
-   * Turn on or off live printing
+   * Whether or not timing is active
+   *
+   * When not active no timing information will be kept
    */
-  void setLivePrintActive(bool active) { _live_print_active = active; }
+  bool active() const { return _active; }
+
+  /**
+   * Turn on or off timing
+   */
+  void setActive(bool active) { _active = active; }
 
   /**
    * Enables Live Print
@@ -373,8 +380,8 @@ protected:
   /// easier to sort
   std::vector<CumulativeSectionInfo *> _cumulative_section_info_ptrs;
 
-  /// Whether or not live printing is active
-  std::atomic<bool> _live_print_active;
+  /// Whether or not timing is active
+  bool _active;
 
   /// The promise to the print thread that will signal when to stop
   std::promise<bool> _done;

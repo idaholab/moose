@@ -704,7 +704,7 @@ NonlinearSystemBase::shouldEvaluatePreSMOResidual() const
   // This is not ideal and has been fixed by #23472. This legacy option ensures a smooth transition
   // to the new behavior. Modules and Apps that want to migrate to the new behavior should set this
   // parameter to false.
-  if (_app.parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+  if (_app.parameters().get<bool>("use_legacy_initial_residual_evaluation_behavior"))
     return true;
 
   return _use_pre_smo_residual;

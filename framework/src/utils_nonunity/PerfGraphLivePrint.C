@@ -18,7 +18,6 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _execution_list(perf_graph._execution_list),
     _currently_destructing(false),
-    _should_print(true),
     _time_limit(perf_graph._live_print_time_limit),
     _mem_limit(perf_graph._live_print_mem_limit),
     _stack_level(0),
@@ -345,13 +344,6 @@ PerfGraphLivePrint::start()
     if (this->_currently_destructing &&
         this->_last_execution_list_end == this->_current_execution_list_end)
       return;
-
-    // We store this off for one execution of this loop so that it's consistent all for the whole
-    // iteration
-    _should_print = _perf_graph._live_print_active;
-
-    if (!_should_print)
-      continue;
 
     // The last entry in the current execution list for convenience
     _current_execution_list_last = static_cast<long int>(_current_execution_list_end) - 1 >= 0
