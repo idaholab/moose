@@ -168,7 +168,7 @@ class RunPBS(RunParallel):
         # Set up the command. We have special logic here for when we're using apptainer,
         # where we need to put the MPI command outside of the apptainer call
         full_command = ''
-        command = tester.getCommand(options)
+        command = tester.getCommand(options).replace('"', "'")
         mpi_command = self.parseMPICommand(command)
         if mpi_command:
             command = command.replace(mpi_command, '')
@@ -176,10 +176,7 @@ class RunPBS(RunParallel):
 
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
-            apptainer_cmd = f'apptainer exec {APPTAINER_CONTAINER}'
-            full_command += f'{apptainer_cmd} '
-        # The double quotes around the exec command here are important as apptainer exec
-        # doesn't work well with our command line arguments for some reason
+            full_command += f'apptainer exec {APPTAINER_CONTAINER} '
         full_command += f'"{command}"'
 
         num_procs = tester.getProcs(options)
