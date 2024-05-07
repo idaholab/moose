@@ -29,17 +29,17 @@ The following units are currently supported
 | `degF` | $\frac59\,\text{K}$ | Fahrenheit | temperature - As long as this unit stands alone the additive shift in the scale is taken into account. In all other cases this unit behaves like Rankine |
 | `degR` | $\frac59\,\text{K}$ | Rankine | temperature |
 | `Ang` | $10^{-10}\, \text{m}$ | Angstrom | length |
-| `Ang` | $10^{-10}\, \text{m}$ | Angstrom | length |
 | `m` | $\text{m}$ | meter | length |
 | `g` | $0.001\, \text{kg}$ | gram | mass |
 | `s` | $\text{s}$ | second | time |
 | `A` | $\text{A}$ | Ampere | electric current |
 | `K` | $\text{K}$ | Kelvin | temperature |
-| `mol` | $6.02214\cdot10^{23}\, \text{at}$ | mole | amount of substance |
+| `mol` | $6.02214076e23\cdot10^{23}\, \text{at}$ | mole | amount of substance |
 | `cd` | $\text{cd}$ | candela | luminous intensity |
 | `N` | $\text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | Newton | force, weight |
 | `Pa` | $\text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Pascal | pressure, stress |
 | `J` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | Joule | energy, work, heat |
+| `cal` | $4.184\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | Calorie | energy, work, heat |
 | `W` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-3}$ | Watt | power, radiant flux |
 | `C` | $\text{A}\cdot \text{s}$ | Coulomb | electric charge |
 | `V` | $\text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-3}\cdot \text{A}^{-1}$ | Volt | voltage (electrical potential), emf |
@@ -52,16 +52,16 @@ The following units are currently supported
 | `dyn` | $10^{-5}\, \text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | dyne | force, weight |
 | `ft` | $0.3048\, \text{m}$ | Foot | length |
 | `in` | $0.0254\, \text{m}$ | Inch | length |
-| `lb` | $0.453592\, \text{kg}$ | pound  | mass |
-| `lbf` | $4.44822\, \text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | pound-force | force |
-| `psi` | $6894.76\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | pound-force per square inch | pressure, stress |
+| `lb` | $0.45359237\, \text{kg}$ | pound  | mass |
+| `lbf` | $4.4482216152605\, \text{kg}\cdot \text{m}\cdot \text{s}^{-2}$ | pound-force | force |
+| `psi` | $6894.757\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | pound-force per square inch | pressure, stress |
 | `BTU` | $1055.06\, \text{kg}\cdot \text{m}^{2}\cdot \text{s}^{-2}$ | ISO 31-4 British thermal unit | heat |
 | `bar` | $10^5\, \text{kg}\cdot \text{m}^{-1}\cdot \text{s}^{-2}$ | Bar | pressure, stress |
 | `h` | $3600\, \text{s}$ | hour | time |
 | `day` | $86400\, \text{s}$ | day | time (`d` would create an ambiguity between centi-day and candela) |
-| `year` | $365.25\, \text{day}$ | annum | time (Julian calendar year, `a` would create an ambiguity between Peta-annum and Pascal) |
+| `year` | $365.25\cdot86400\, \text{s}$ | annum | time (Julian calendar year, `a` would create an ambiguity between Peta-annum and Pascal) |
 | `l` | $0.001\, \text{m}^{3}$ | liter | volume |
-| `u` | $1.66054\cdot10^{-27}\, \text{kg}^{3}$ | unified atomic mass unit | mass |
+| `u` | $1.6605390666\cdot10^{-27}\, \text{kg}^{3}$ | unified atomic mass unit | mass |
 | `at` | $\text{at}$ | atom | single count of substance |
 
 ## Operators
