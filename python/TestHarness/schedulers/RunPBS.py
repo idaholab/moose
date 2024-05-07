@@ -146,9 +146,9 @@ class RunPBS(RunParallel):
 
     @staticmethod
     def parseMPICommand(command):
-        find_mpi = re.search('^mpiexec -n [0-9]+ ', command)
+        find_mpi = re.search('^(mpiexec -n [0-9]+ )', command)
         if find_mpi is not None:
-            return find_mpi.group(0)
+            return find_mpi.group(1)
         return None
 
     def submitJob(self, job):
