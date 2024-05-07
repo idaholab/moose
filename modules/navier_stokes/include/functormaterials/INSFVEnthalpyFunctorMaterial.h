@@ -31,7 +31,4 @@ protected:
 
   /// the specific heat capacity
   const Moose::Functor<ADReal> & _cp;
-
-  /// suffix for disambiguation of property names
-  const std::string & _suffix;
 };

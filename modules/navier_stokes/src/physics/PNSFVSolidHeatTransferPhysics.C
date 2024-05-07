@@ -185,17 +185,19 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyTimeKernels()
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
 
+  // The '_solid' suffix has been declared when creating the INSFVEnthalpyMaterial
+  // only for thermal functor material properties
   // Using this derivative we can model non-constant specific heat
-  if (getProblem().hasFunctor(NS::time_deriv(NS::specific_enthalpy),
+  if (getProblem().hasFunctor(NS::time_deriv(NS::specific_enthalpy) + "_solid",
                               /*thread_id=*/0))
     params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
-        NS::time_deriv(NS::specific_enthalpy + "_solid");
+        NS::time_deriv(NS::specific_enthalpy) + "_solid";
   else
     params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
   // If modeling a variable density
-  if (getProblem().hasFunctor(NS::time_deriv(_density_name + "_solid"),
+  if (getProblem().hasFunctor(NS::time_deriv(_density_name),
                               /*thread_id=*/0))
   {
     params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
@@ -344,7 +346,7 @@ PNSFVSolidHeatTransferPhysics::addMaterials()
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
     params.set<MooseFunctorName>("temperature") = _solid_temperature_name;
-    params.set<std::string>("property_suffix") = "_solid";
+    params.set<MaterialPropertyName>("declare_suffix") = "solid";
 
     getProblem().addMaterial(
         "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);

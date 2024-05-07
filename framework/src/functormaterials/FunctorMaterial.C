@@ -27,7 +27,6 @@ FunctorMaterial::validParams()
 
   // Remove MaterialBase parameters that are not used
   params.suppressParameter<bool>("compute");
-  params.suppressParameter<MaterialPropertyName>("declare_suffix");
 
   return params;
 }

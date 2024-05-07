@@ -374,10 +374,14 @@ protected:
   const FaceInfo * _face_info = nullptr;
 
 private:
+  /// Suffix to append to the name of the material property/ies when declaring it/them
   const MaterialPropertyName _declare_suffix;
 
   /// Whether or not to force stateful init; see forceStatefulInit()
   const bool _force_stateful_init;
+
+  /// To let it access the declaration suffix
+  friend class FunctorMaterial;
 };
 
 template <typename T>
