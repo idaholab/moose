@@ -1,0 +1,31 @@
+title: "<Use a descriptive title here> "
+body:
+  - type: checkboxes
+    attributes:
+      label: Check these boxes if you have followed the posting rules.
+      options:
+        - label: Q&A Getting Started is the most appropriate category for my question (trouble installing, beginner user, ...)
+          required: true
+        - label: I have consulted the posting Guidelines on the Discussions front page
+          required: true
+        - label: I have searched the Discussions forum and my question has not been asked before
+          required: true
+        - label: I have searched the MOOSE website and the documentation does not answer my question
+          required: true
+        - label: I have formatted my post following the posting guidelines (avoid screenshots if possible, triple back quotes before/after pasted text, etc)
+          required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Issue or question about MOOSE
+      description: Please give as much context as you think we could need
+      value: "<Your question here>"
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics for MOOSE installation issues
+      description: The diagnostics script in moose/scripts provides helpful information for solving installation issues
+      value: "[Optional] Output of the diagnostics scripts. To run the script:
+              cd ~/projects/moose/scripts; ./diagnostics.sh"

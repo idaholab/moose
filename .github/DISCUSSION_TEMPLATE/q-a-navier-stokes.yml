@@ -1,0 +1,35 @@
+title: "<Use a descriptive title here> "
+body:
+  - type: checkboxes
+    attributes:
+      label: Check these boxes if you have followed the posting rules.
+      options:
+        - label: Q&A Navier Stokes is the most appropriate category for my question
+          required: true
+        - label: I have consulted the posting Guidelines on the Discussions front page
+          required: true
+        - label: I have searched the Discussions forum and my question has not been asked before
+          required: true
+        - label: I have searched the MOOSE website and the documentation does not answer my question
+          required: true
+        - label: I have formatted my post following the posting guidelines (avoid screenshots if possible, triple back quotes before/after pasted text, etc)
+          required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Please give as much context as you think we could need
+      value: "<Your question here>"
+    validations:
+      required: true
+  - type: textarea
+    id: info
+    attributes:
+      label: Additional information
+      description: Information we usually need to discuss an issue
+      value: "Mesh size and type:\n
+              Reynolds number:\n
+              Discretization (finite element CG/DG, finite volume, etc):\n
+              Models (turbulence, porous media, etc):\n
+              Solver method (fully coupled, segregated, multiapps, etc):\n
+              Base input you started from:"

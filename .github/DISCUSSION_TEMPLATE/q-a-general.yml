@@ -1,9 +1,5 @@
 title: "<Use a descriptive title here> "
 body:
-  - type: markdown
-    attributes:
-      value: |
-        # Type your question here
   - type: checkboxes
     attributes:
       label: Check these boxes if you have followed the posting rules.
@@ -12,11 +8,17 @@ body:
           required: true
         - label: I have consulted the posting Guidelines on the Discussions front page
           required: true
-        - label: I have searched the forum and this question has not been asked before
+        - label: I have searched the Discussions forum and my question has not been asked before
           required: true
         - label: I have searched the MOOSE website and the documentation does not answer my question
           required: true
         - label: I have formatted my post following the posting guidelines (screenshots as a last resort, triple back quotes around pasted text)
           required: true
-        - label: I am not trying to get support on an old version of MOOSE
-          required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Please give as much context as you think we could need
+      value: "<Your question here>"
+    validations:
+      required: true
