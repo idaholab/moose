@@ -48,12 +48,15 @@ The [Optimize](Optimize.md) executioner block in [executionerBlock] , provides a
 
 The [optimize](Optimize.md) executioner requires an
 [OptimizationReporter](syntax/OptimizationReporter/index.md). In this example
-the [GeneralOptimization.md] reporter is used. A [OptimizationData.md] reporter
+the [GeneralOptimization.md] reporter is used. A [GeneralOptimization.md] reporter
 is used to
 transfer data between the optimization executioner and the transfers used for
-communicating with the sub-apps.
+communicating with the sub-apps. The
+[!param](/OptimizationReporter/GeneralOptimization/objective_name) is used to
+name the reporter that holds the objective value to optimize.
 [!param](/OptimizationReporter/GeneralOptimization/parameter_names) are the list
-of parameters being controlled.  The
+of parameters being controlled. A gradient reporter is automatically created for
+each parameter with a name that is "grad_" concatenated to the parmater name provided. The
 [!param](/OptimizationReporter/GeneralOptimization/num_values) specifies the
 number of parameters per group of `parameter_names` being controlled.  In this
 case there is a single parameter being controlled and that parameter contains
