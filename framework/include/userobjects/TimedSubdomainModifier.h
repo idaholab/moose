@@ -11,7 +11,7 @@
 
 #include "ElementSubdomainModifier.h"
 #include "TimedElementSubdomainModifier.h"
-#include "DelimitedFileReaderOfString.h"
+#include "DelimitedFileReader.h"
 
 /**
  * Modifies elements from entire subdomains based on user input or file input

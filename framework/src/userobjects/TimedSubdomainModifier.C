@@ -154,7 +154,7 @@ TimedSubdomainModifier::buildFromFile()
     _delimiter = getParam<std::string>("delimiter");
   }
 
-  std::string _comment = ",";
+  std::string _comment = "#";
   if (isParamValid("comment"))
   {
     _comment = getParam<std::string>("comment");
