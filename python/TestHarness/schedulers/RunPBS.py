@@ -13,9 +13,7 @@ from TestHarness.runners.PBSRunner import PBSRunner
 from timeit import default_timer as clock
 from PBScodes import *
 import paramiko
-
 import jinja2
-from jinja2 import meta
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(RunParallel):
