@@ -19,7 +19,7 @@
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 #include "SolutionInvalidity.h"
-#include "PreCheckThread.h"
+#include "HDGPrimalSolutionUpdateThread.h"
 #include "HDGKernel.h"
 #include "AuxiliarySystem.h"
 
@@ -406,7 +406,7 @@ NonlinearSystem::precheck(const NumericVector<Number> & /*precheck_soln*/,
     TIME_SECTION("HDG kernel primal solution update",
                  3 /*, "Computing hybridized kernel primal solution update"*/);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    PreCheckThread pre_thread(_fe_problem, _hybridized_kernels);
+    HDGPrimalSolutionUpdateThread pre_thread(_fe_problem, _hybridized_kernels);
     Threads::parallel_reduce(elem_range, pre_thread);
   }
   PARALLEL_CATCH;

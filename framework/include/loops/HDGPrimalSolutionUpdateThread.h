@@ -20,21 +20,26 @@ template <typename>
 class MooseObjectWarehouse;
 class HDGKernel;
 
-class PreCheckThread : public ThreadedElementLoop<ConstElemRange>
+/**
+ * This loop is run right after the linear solve for the Lagrange multiplier solution update, and
+ * updates the primal solution using the Lagrange multiplier update
+ */
+class HDGPrimalSolutionUpdateThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  PreCheckThread(FEProblemBase & fe_problem, MooseObjectWarehouse<HDGKernel> & hybridized_kernels);
+  HDGPrimalSolutionUpdateThread(FEProblemBase & fe_problem,
+                                MooseObjectWarehouse<HDGKernel> & hybridized_kernels);
 
   // Splitting Constructor
-  PreCheckThread(PreCheckThread & x, Threads::split split);
+  HDGPrimalSolutionUpdateThread(HDGPrimalSolutionUpdateThread & x, Threads::split split);
 
-  virtual ~PreCheckThread();
+  virtual ~HDGPrimalSolutionUpdateThread();
 
   virtual void subdomainChanged() override;
   virtual void onElement(const Elem * elem) override;
   virtual void post() override;
 
-  void join(const PreCheckThread &) {}
+  void join(const HDGPrimalSolutionUpdateThread &) {}
 
 protected:
   /// the hybridized kernels we will call the pre-check method for

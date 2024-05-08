@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PreCheckThread.h"
+#include "HDGPrimalSolutionUpdateThread.h"
 #include "FEProblemBase.h"
 #include "MooseObjectWarehouse.h"
 #include "HDGKernel.h"
 
-PreCheckThread::PreCheckThread(FEProblemBase & fe_problem,
-                               MooseObjectWarehouse<HDGKernel> & hybridized_kernels)
+HDGPrimalSolutionUpdateThread::HDGPrimalSolutionUpdateThread(
+    FEProblemBase & fe_problem, MooseObjectWarehouse<HDGKernel> & hybridized_kernels)
   : ThreadedElementLoop<ConstElemRange>(fe_problem), _hybridized_kernels(hybridized_kernels)
 {
   mooseAssert(
@@ -22,15 +22,16 @@ PreCheckThread::PreCheckThread(FEProblemBase & fe_problem,
 }
 
 // Splitting Constructor
-PreCheckThread::PreCheckThread(PreCheckThread & x, Threads::split split)
+HDGPrimalSolutionUpdateThread::HDGPrimalSolutionUpdateThread(HDGPrimalSolutionUpdateThread & x,
+                                                             Threads::split split)
   : ThreadedElementLoop<ConstElemRange>(x, split), _hybridized_kernels(x._hybridized_kernels)
 {
 }
 
-PreCheckThread::~PreCheckThread() {}
+HDGPrimalSolutionUpdateThread::~HDGPrimalSolutionUpdateThread() {}
 
 void
-PreCheckThread::subdomainChanged()
+HDGPrimalSolutionUpdateThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
@@ -47,7 +48,7 @@ PreCheckThread::subdomainChanged()
 }
 
 void
-PreCheckThread::onElement(const Elem * const elem)
+HDGPrimalSolutionUpdateThread::onElement(const Elem * const elem)
 {
   // Set up Sentinel class so that, even if reinitMaterials() throws in prepareElement, we
   // still remember to swap back during stack unwinding.
@@ -61,7 +62,7 @@ PreCheckThread::onElement(const Elem * const elem)
 }
 
 void
-PreCheckThread::post()
+HDGPrimalSolutionUpdateThread::post()
 {
   clearVarsAndMaterials();
 }
