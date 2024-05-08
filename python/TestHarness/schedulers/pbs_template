@@ -17,6 +17,9 @@ set -e
 {{ SOURCE_CONTENTS }}
 {%- endif %}
 
+# Add MOOSE's python path for python scripts
+export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
+
 # Print a useful header
 echo "################################################################################"
 echo "Beginning TestHarness RunPBS job"
