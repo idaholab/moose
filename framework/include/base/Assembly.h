@@ -23,8 +23,6 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem_side_builder.h"
 
-#include "DualRealOps.h"
-
 #include <unordered_map>
 
 // libMesh forward declarations
@@ -2376,7 +2374,7 @@ private:
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord;
   /// The AD version of the current coordinate transformation coefficients
-  MooseArray<DualReal> _ad_coord;
+  MooseArray<ADReal> _ad_coord;
 
   /// Data structure for tracking/grouping a set of quadrature rules for a
   /// particular dimensionality of mesh element.
@@ -2777,30 +2775,30 @@ protected:
   std::vector<Point> _temp_reference_points;
 
   /// AD quantities
-  std::vector<VectorValue<DualReal>> _ad_dxyzdxi_map;
-  std::vector<VectorValue<DualReal>> _ad_dxyzdeta_map;
-  std::vector<VectorValue<DualReal>> _ad_dxyzdzeta_map;
-  std::vector<VectorValue<DualReal>> _ad_d2xyzdxi2_map;
-  std::vector<VectorValue<DualReal>> _ad_d2xyzdxideta_map;
-  std::vector<VectorValue<DualReal>> _ad_d2xyzdeta2_map;
-  std::vector<DualReal> _ad_jac;
-  MooseArray<DualReal> _ad_JxW;
-  MooseArray<VectorValue<DualReal>> _ad_q_points;
-  std::vector<DualReal> _ad_dxidx_map;
-  std::vector<DualReal> _ad_dxidy_map;
-  std::vector<DualReal> _ad_dxidz_map;
-  std::vector<DualReal> _ad_detadx_map;
-  std::vector<DualReal> _ad_detady_map;
-  std::vector<DualReal> _ad_detadz_map;
-  std::vector<DualReal> _ad_dzetadx_map;
-  std::vector<DualReal> _ad_dzetady_map;
-  std::vector<DualReal> _ad_dzetadz_map;
+  std::vector<VectorValue<ADReal>> _ad_dxyzdxi_map;
+  std::vector<VectorValue<ADReal>> _ad_dxyzdeta_map;
+  std::vector<VectorValue<ADReal>> _ad_dxyzdzeta_map;
+  std::vector<VectorValue<ADReal>> _ad_d2xyzdxi2_map;
+  std::vector<VectorValue<ADReal>> _ad_d2xyzdxideta_map;
+  std::vector<VectorValue<ADReal>> _ad_d2xyzdeta2_map;
+  std::vector<ADReal> _ad_jac;
+  MooseArray<ADReal> _ad_JxW;
+  MooseArray<VectorValue<ADReal>> _ad_q_points;
+  std::vector<ADReal> _ad_dxidx_map;
+  std::vector<ADReal> _ad_dxidy_map;
+  std::vector<ADReal> _ad_dxidz_map;
+  std::vector<ADReal> _ad_detadx_map;
+  std::vector<ADReal> _ad_detady_map;
+  std::vector<ADReal> _ad_detadz_map;
+  std::vector<ADReal> _ad_dzetadx_map;
+  std::vector<ADReal> _ad_dzetady_map;
+  std::vector<ADReal> _ad_dzetadz_map;
 
-  MooseArray<DualReal> _ad_JxW_face;
-  MooseArray<VectorValue<DualReal>> _ad_normals;
-  MooseArray<VectorValue<DualReal>> _ad_q_points_face;
+  MooseArray<ADReal> _ad_JxW_face;
+  MooseArray<VectorValue<ADReal>> _ad_normals;
+  MooseArray<VectorValue<ADReal>> _ad_q_points_face;
   MooseArray<Real> _curvatures;
-  MooseArray<DualReal> _ad_curvatures;
+  MooseArray<ADReal> _ad_curvatures;
 
   /**
    * Container of displacement numbers and directions

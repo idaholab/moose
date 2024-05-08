@@ -50,7 +50,7 @@ public:
    * @return average molar mass (kg/mol)
    */
   Real molarMass(Real xnacl) const;
-  FPDualReal molarMass(const FPDualReal & xnacl) const;
+  FPADReal molarMass(const FPADReal & xnacl) const;
 
   /**
    * NaCl molar mass
@@ -67,9 +67,9 @@ public:
   virtual Real rho_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
   using MultiComponentFluidProperties::rho_from_p_T_X;
 
-  FPDualReal rho_from_p_T_X(const FPDualReal & pressure,
-                            const FPDualReal & temperature,
-                            const FPDualReal & xnacl) const;
+  FPADReal rho_from_p_T_X(const FPADReal & pressure,
+                          const FPADReal & temperature,
+                          const FPADReal & xnacl) const;
 
   virtual void rho_from_p_T_X(Real pressure,
                               Real temperature,
@@ -90,9 +90,9 @@ public:
                              Real & dmu_dT,
                              Real & dmu_dx) const override;
 
-  FPDualReal h_from_p_T_X(const FPDualReal & pressure,
-                          const FPDualReal & temperature,
-                          const FPDualReal & xnacl) const;
+  FPADReal h_from_p_T_X(const FPADReal & pressure,
+                        const FPADReal & temperature,
+                        const FPADReal & xnacl) const;
 
   virtual Real h_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
   using MultiComponentFluidProperties::h_from_p_T_X;
@@ -107,9 +107,9 @@ public:
 
   virtual Real cp_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
-  FPDualReal e_from_p_T_X(const FPDualReal & pressure,
-                          const FPDualReal & temperature,
-                          const FPDualReal & xnacl) const;
+  FPADReal e_from_p_T_X(const FPADReal & pressure,
+                        const FPADReal & temperature,
+                        const FPADReal & xnacl) const;
 
   virtual Real e_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
@@ -162,7 +162,7 @@ public:
   Real henryConstant(Real temperature, const std::vector<Real> & coeffs) const;
   void
   henryConstant(Real temperature, const std::vector<Real> & coeffs, Real & Kh, Real & dKh_dT) const;
-  DualReal henryConstant(const DualReal & temperature, const std::vector<Real> & coeffs) const;
+  ADReal henryConstant(const ADReal & temperature, const std::vector<Real> & coeffs) const;
 
   /// Fluid component numbers for water and NaCl
   static const unsigned int WATER = 0;
@@ -184,7 +184,7 @@ protected:
    * @return mole fraction (mol/mol)
    */
   Real massFractionToMoleFraction(Real xnacl) const;
-  FPDualReal massFractionToMoleFraction(const FPDualReal & xnacl) const;
+  FPADReal massFractionToMoleFraction(const FPADReal & xnacl) const;
 
   /// Water97FluidProperties UserObject (for Henry's law)
   const Water97FluidProperties * _water97_fp;

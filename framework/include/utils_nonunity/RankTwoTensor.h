@@ -141,7 +141,7 @@ public:
   void printReal(std::ostream & stm = Moose::out) const;
 
   /// Print the Real part of the RankTwoTensorTempl<ADReal> along with its first nDual dual numbers
-  void printDualReal(unsigned int nDual, std::ostream & stm = Moose::out) const;
+  void printADReal(unsigned int nDual, std::ostream & stm = Moose::out) const;
 
   /// @}
 

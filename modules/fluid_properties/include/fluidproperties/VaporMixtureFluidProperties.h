@@ -18,8 +18,8 @@
  */
 
 #define propfuncAD(want, prop1, prop2)                                                             \
-  virtual DualReal want##_from_##prop1##_##prop2(                                                  \
-      const DualReal & p1, const DualReal & p2, const std::vector<DualReal> & x) const             \
+  virtual ADReal want##_from_##prop1##_##prop2(                                                    \
+      const ADReal & p1, const ADReal & p2, const std::vector<ADReal> & x) const                   \
   {                                                                                                \
     Real p1_raw = p1.value();                                                                      \
     Real p2_raw = p2.value();                                                                      \
@@ -33,20 +33,20 @@
     std::vector<Real> dy_dx(x.size(), 0);                                                          \
     want##_from_##prop1##_##prop2(p1_raw, p2_raw, x_raw, y_raw, dy_dp1, dy_dp2, dy_dx);            \
                                                                                                    \
-    DualReal result = y_raw;                                                                       \
+    ADReal result = y_raw;                                                                         \
     result.derivatives() = p1.derivatives() * dy_dp1 + p2.derivatives() * dy_dp2;                  \
     for (unsigned int i = 0; i < x.size(); ++i)                                                    \
       result.derivatives() += x[i].derivatives() * dy_dx[i];                                       \
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \
-  virtual void want##_from_##prop1##_##prop2(const DualReal & prop1,                               \
-                                             const DualReal & prop2,                               \
-                                             std::vector<DualReal> & x,                            \
-                                             DualReal & val,                                       \
-                                             DualReal & d##want##d1,                               \
-                                             DualReal & d##want##d2,                               \
-                                             std::vector<DualReal> & d##want##dx) const            \
+  virtual void want##_from_##prop1##_##prop2(const ADReal & prop1,                                 \
+                                             const ADReal & prop2,                                 \
+                                             std::vector<ADReal> & x,                              \
+                                             ADReal & val,                                         \
+                                             ADReal & d##want##d1,                                 \
+                                             ADReal & d##want##d2,                                 \
+                                             std::vector<ADReal> & d##want##dx) const              \
   {                                                                                                \
     fluidPropError(                                                                                \
         name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not  implemented.");           \

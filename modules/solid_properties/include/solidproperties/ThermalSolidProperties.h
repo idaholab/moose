@@ -17,14 +17,14 @@
  * overriden in derived classes.
  */
 #define propfuncAD(want)                                                                           \
-  virtual DualReal want##_from_T(const DualReal & T) const                                         \
+  virtual ADReal want##_from_T(const ADReal & T) const                                             \
   {                                                                                                \
     Real x = 0;                                                                                    \
     Real raw = T.value();                                                                          \
     Real dxdT = 0;                                                                                 \
     want##_from_T(raw, x, dxdT);                                                                   \
                                                                                                    \
-    DualReal result = x;                                                                           \
+    ADReal result = x;                                                                             \
     result.derivatives() = T.derivatives() * dxdT;                                                 \
     return result;                                                                                 \
   }                                                                                                \

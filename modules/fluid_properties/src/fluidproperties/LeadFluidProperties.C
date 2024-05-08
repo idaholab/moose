@@ -52,10 +52,10 @@ LeadFluidProperties::c_from_v_e(Real v, Real e) const
   return 1953 - 0.246 * T;
 }
 
-DualReal
-LeadFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
+ADReal
+LeadFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
 {
-  DualReal T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+  ADReal T = SinglePhaseFluidProperties::T_from_v_e(v, e);
   return 1953 - 0.246 * T;
 }
 
@@ -125,11 +125,8 @@ LeadFluidProperties::rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Re
 }
 
 void
-LeadFluidProperties::rho_from_p_T(const DualReal & p,
-                                  const DualReal & T,
-                                  DualReal & rho,
-                                  DualReal & drho_dp,
-                                  DualReal & drho_dT) const
+LeadFluidProperties::rho_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const
 {
   rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
   drho_dp = 0;

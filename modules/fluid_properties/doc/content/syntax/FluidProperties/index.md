@@ -65,13 +65,13 @@ at the quadrature points using the values of `_v[_qp]` and `_e[_qp]`.
 !listing modules/fluid_properties/src/materials/FluidPropertiesMaterialVE.C start=computeQpProperties
 
 In a similar fashion, fluid properties can be accessed using the Automatic Differentiation interface
-using the `DualReal` version which provides both the value and derivatives
+using the `ADReal` version which provides both the value and derivatives
 
 ```
-DualReal rho = _fp.p_from_T_v(T, v);
+ADReal rho = _fp.p_from_T_v(T, v);
 ```
 
-where $T$ and $v$ are `DualReal`'s. The result (density `rho` in this example) then contains both the
+where $T$ and $v$ are `ADReal`'s. The result (density `rho` in this example) then contains both the
 value of density and its derivatives with respect to the primary variables `T` and `v`.
 
 ### Input file syntax

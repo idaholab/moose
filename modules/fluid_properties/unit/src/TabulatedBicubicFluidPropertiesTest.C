@@ -328,9 +328,9 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
     Moose::derivInsert(dedx, 0, 0);
     Moose::derivInsert(dedx, 1, 1);
 
-    DualReal v_ad(v, dvdx);
-    DualReal e_ad(e, dedx);
-    DualReal p_ad = _tab_fp_ve->p_from_v_e(v_ad, e_ad);
+    ADReal v_ad(v, dvdx);
+    ADReal e_ad(e, dedx);
+    ADReal p_ad = _tab_fp_ve->p_from_v_e(v_ad, e_ad);
 
     Real pp, dp_dv, dp_de;
     _tab_fp_ve->p_from_v_e(v, e, pp, dp_dv, dp_de);
@@ -351,9 +351,9 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
     Moose::derivInsert(dedx, 0, 0);
     Moose::derivInsert(dedx, 1, 1);
 
-    DualReal v_ad(v, dvdx);
-    DualReal e_ad(e, dedx);
-    DualReal T_ad = _tab_fp_ve->T_from_v_e(v_ad, e_ad);
+    ADReal v_ad(v, dvdx);
+    ADReal e_ad(e, dedx);
+    ADReal T_ad = _tab_fp_ve->T_from_v_e(v_ad, e_ad);
 
     Real TT, dT_dv, dT_de;
     _tab_fp_ve->T_from_v_e(v, e, TT, dT_dv, dT_de);

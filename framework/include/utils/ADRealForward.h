@@ -9,6 +9,39 @@
 
 #pragma once
 
-#include "DualReal.h"
+#include "MooseConfig.h"
+#include "libmesh/libmesh_common.h"
+#include "metaphysicl/metaphysicl_version.h"
 
-typedef DualReal ADReal;
+#if METAPHYSICL_MAJOR_VERSION < 1
+namespace MetaPhysicL
+{
+template <typename, typename>
+class DualNumber;
+}
+#else
+#include "metaphysicl/dualnumber_forward.h"
+#endif
+
+namespace MetaPhysicL
+{
+template <typename, typename, typename>
+class SemiDynamicSparseNumberArray;
+template <std::size_t N>
+struct NWrapper;
+}
+
+using libMesh::Real;
+using MetaPhysicL::DualNumber;
+using MetaPhysicL::NWrapper;
+using MetaPhysicL::SemiDynamicSparseNumberArray;
+
+typedef SemiDynamicSparseNumberArray<Real,
+                                     libMesh::dof_id_type,
+                                     NWrapper<MOOSE_AD_MAX_DOFS_PER_ELEM>>
+    DNDerivativeType;
+
+template <std::size_t N>
+using DNDerivativeSize = SemiDynamicSparseNumberArray<Real, libMesh::dof_id_type, NWrapper<N>>;
+
+typedef DualNumber<Real, DNDerivativeType, /*allow_skiping_derivatives=*/true> ADReal;

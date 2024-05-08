@@ -11,8 +11,6 @@
 
 #include "DGKernelBase.h"
 
-#include "DualRealOps.h"
-
 class ADDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<Real>
 {
 public:

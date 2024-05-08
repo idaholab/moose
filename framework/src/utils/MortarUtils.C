@@ -14,6 +14,8 @@
 #include "metaphysicl/dualnumberarray.h"
 #include "Eigen/Dense"
 
+using MetaPhysicL::NumberArray;
+
 typedef DualNumber<Real, NumberArray<2, Real>> Dual2;
 
 namespace Moose

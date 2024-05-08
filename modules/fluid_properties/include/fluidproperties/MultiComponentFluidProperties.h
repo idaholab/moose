@@ -37,8 +37,8 @@
     val = want##_from_##prop1##_##prop2##_##prop3(prop1, prop2, prop3);                            \
   }                                                                                                \
                                                                                                    \
-  DualReal want##_from_##prop1##_##prop2##_##prop3(                                                \
-      const DualReal & p1, const DualReal & p2, const DualReal & p3) const                         \
+  ADReal want##_from_##prop1##_##prop2##_##prop3(                                                  \
+      const ADReal & p1, const ADReal & p2, const ADReal & p3) const                               \
   {                                                                                                \
     const Real raw1 = p1.value();                                                                  \
     const Real raw2 = p2.value();                                                                  \
@@ -49,7 +49,7 @@
     Real dxd3 = 0.0;                                                                               \
     want##_from_##prop1##_##prop2##_##prop3(raw1, raw2, raw3, x, dxd1, dxd2, dxd3);                \
                                                                                                    \
-    DualReal result = x;                                                                           \
+    ADReal result = x;                                                                             \
     result.derivatives() =                                                                         \
         p1.derivatives() * dxd1 + p2.derivatives() * dxd2 + p3.derivatives() * dxd3;               \
                                                                                                    \
@@ -112,7 +112,7 @@ public:
      * your_fluid_properties_object.rho_from_p_T_X(p, T, X, rho, drho_dp, drho_dT, drho_dX);
      * @endcode
      *
-     * Automatic differentiation (AD) support is provided through prop_from_p_T_X(DualReal p, DualReal T, DualReal X) versions
+     * Automatic differentiation (AD) support is provided through prop_from_p_T_X(ADReal p, ADReal T, ADReal X) versions
      * of the functions where p, T and X must be ADReal/DualNumber's calculated using all AD-supporting values.
      */
     ///@{
@@ -146,7 +146,7 @@ public:
   rho_mu_from_p_T_X(Real pressure, Real temperature, Real xmass, Real & rho, Real & mu) const;
 
   virtual void rho_mu_from_p_T_X(
-      DualReal pressure, DualReal temperature, DualReal xmass, DualReal & rho, DualReal & mu) const;
+      ADReal pressure, ADReal temperature, ADReal xmass, ADReal & rho, ADReal & mu) const;
 
   /**
    * Density and viscosity and their derivatives wrt pressure, temperature

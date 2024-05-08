@@ -749,7 +749,7 @@ ADRankTwoTensor::printReal(std::ostream & stm) const
 
 template <>
 void
-ADRankTwoTensor::printDualReal(unsigned int nDual, std::ostream & stm) const
+ADRankTwoTensor::printADReal(unsigned int nDual, std::ostream & stm) const
 {
   const ADRankTwoTensor & a = *this;
   for (const auto i : make_range(N))

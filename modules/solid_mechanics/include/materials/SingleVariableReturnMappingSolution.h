@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "DualRealOps.h"
 #include "ChainedReal.h"
 #include "ChainedADReal.h"
 #include "InputParameters.h"

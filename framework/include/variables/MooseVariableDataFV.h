@@ -22,7 +22,6 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/enum_fe_family.h"
-#include "DualRealOps.h"
 #include "SubProblem.h"
 
 #include <functional>
@@ -315,7 +314,7 @@ private:
   FieldVariableValue _increment;
 
   /// A zero AD variable
-  const DualReal _ad_zero;
+  const ADReal _ad_zero;
 
   /// SolutionState second_u flags
   mutable bool _need_second;
@@ -356,9 +355,9 @@ private:
   ADTemplateVariableValue<OutputShape> _ad_u;
   ADTemplateVariableGradient<OutputShape> _ad_grad_u;
   ADTemplateVariableSecond<OutputShape> _ad_second_u;
-  MooseArray<DualReal> _ad_dof_values;
-  MooseArray<DualReal> _ad_dofs_dot;
-  MooseArray<DualReal> _ad_dofs_dotdot;
+  MooseArray<ADReal> _ad_dof_values;
+  MooseArray<ADReal> _ad_dofs_dot;
+  MooseArray<ADReal> _ad_dofs_dotdot;
   ADTemplateVariableValue<OutputShape> _ad_u_dot;
   ADTemplateVariableValue<OutputShape> _ad_u_dotdot;
   ADTemplateVariableGradient<OutputShape> _ad_grad_u_dot;

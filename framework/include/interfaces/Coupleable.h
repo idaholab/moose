@@ -1395,7 +1395,7 @@ protected:
       _default_value;
 
   /// Will hold the default value for optional coupled variables for automatic differentiation.
-  mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<DualReal>>> _ad_default_value;
+  mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADReal>>> _ad_default_value;
 
   /// Will hold the default value for optional vector coupled variables.
   mutable std::unordered_map<std::string, std::unique_ptr<VectorVariableValue>>
@@ -1432,7 +1432,7 @@ protected:
   /// Zero value of a variable
   const VariableValue & _zero;
   const VariablePhiValue & _phi_zero;
-  const MooseArray<DualReal> & _ad_zero;
+  const MooseArray<ADReal> & _ad_zero;
 
   /// Zero gradient of a variable
   const VariableGradient & _grad_zero;

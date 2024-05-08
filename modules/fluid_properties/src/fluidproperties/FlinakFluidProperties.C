@@ -73,12 +73,12 @@ FlinakFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real &
 
 void
 FlinakFluidProperties::p_from_v_e(
-    const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
 {
   p = SinglePhaseFluidProperties::p_from_v_e(v, e);
 
   // chain rule, (dp_de)_v = (dp_dT)_v * (dT_de)_v
-  DualReal T, dT_dv, dT_de;
+  ADReal T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
   dp_de = _dp_dT_at_constant_v * dT_de;
 
@@ -127,7 +127,7 @@ FlinakFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real &
 
 void
 FlinakFluidProperties::T_from_v_e(
-    const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
+    const ADReal & v, const ADReal & e, ADReal & T, ADReal & dT_dv, ADReal & dT_de) const
 {
   T = SinglePhaseFluidProperties::T_from_v_e(v, e);
 
@@ -182,11 +182,8 @@ FlinakFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Rea
 }
 
 void
-FlinakFluidProperties::cv_from_v_e(const DualReal & v,
-                                   const DualReal & e,
-                                   DualReal & cv,
-                                   DualReal & dcv_dv,
-                                   DualReal & dcv_de) const
+FlinakFluidProperties::cv_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & cv, ADReal & dcv_dv, ADReal & dcv_de) const
 {
   cv = SinglePhaseFluidProperties::cv_from_v_e(v, e);
   dcv_dv = -_dp_dT_at_constant_v;
@@ -223,19 +220,19 @@ FlinakFluidProperties::rho_from_p_T(
 }
 
 void
-FlinakFluidProperties::rho_from_p_T(const DualReal & pressure,
-                                    const DualReal & temperature,
-                                    DualReal & rho,
-                                    DualReal & drho_dp,
-                                    DualReal & drho_dT) const
+FlinakFluidProperties::rho_from_p_T(const ADReal & pressure,
+                                    const ADReal & temperature,
+                                    ADReal & rho,
+                                    ADReal & drho_dp,
+                                    ADReal & drho_dT) const
 {
   rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
   drho_dp = _drho_dp;
   drho_dT = _drho_dT;
 }
 
-DualReal
-FlinakFluidProperties::v_from_p_T(const DualReal & pressure, const DualReal & temperature) const
+ADReal
+FlinakFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
   return 1.0 / (_drho_dT * temperature + _drho_dp * (pressure - _p_atm) + _c0);
 }

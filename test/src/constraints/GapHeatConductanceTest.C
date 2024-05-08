@@ -94,7 +94,7 @@ GapHeatConductanceTest::computeQpResidual(MortarType type)
 void
 GapHeatConductanceTest::computeJacobian(MortarType mortar_type)
 {
-  std::vector<DualReal> residuals;
+  std::vector<ADReal> residuals;
   size_t test_space_size = 0;
   typedef ConstraintJacobianType JType;
   typedef MortarType MType;

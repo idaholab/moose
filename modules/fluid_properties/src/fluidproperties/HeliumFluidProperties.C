@@ -121,11 +121,11 @@ HeliumFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real &
 
 void
 HeliumFluidProperties::p_from_v_e(
-    const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
 {
   p = p_from_v_e(v, e);
 
-  DualReal T, dT_dv, dT_de;
+  ADReal T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
 
   auto val = 48.14 * v - 0.4446 / std::pow(T, 0.2);
@@ -203,7 +203,7 @@ HeliumFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real &
 
 void
 HeliumFluidProperties::T_from_v_e(
-    const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
+    const ADReal & v, const ADReal & e, ADReal & T, ADReal & dT_dv, ADReal & dT_de) const
 {
   T = SinglePhaseFluidProperties::T_from_v_e(v, e);
   dT_dv = 0.0;
@@ -232,17 +232,17 @@ HeliumFluidProperties::c_from_v_e(Real v, Real e) const
 void
 HeliumFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
-  DualReal myv = v;
+  ADReal myv = v;
   Moose::derivInsert(myv.derivatives(), 0, 1);
   Moose::derivInsert(myv.derivatives(), 1, 0);
-  DualReal mye = e;
+  ADReal mye = e;
   Moose::derivInsert(mye.derivatives(), 0, 0);
   Moose::derivInsert(mye.derivatives(), 1, 1);
 
   auto p = SinglePhaseFluidProperties::p_from_v_e(myv, mye);
   auto T = SinglePhaseFluidProperties::T_from_v_e(myv, mye);
 
-  DualReal rho, drho_dp, drho_dT;
+  ADReal rho, drho_dp, drho_dT;
   rho_from_p_T(p, T, rho, drho_dp, drho_dT);
 
   auto cc = std::sqrt(-(p / rho / rho - _cv / drho_dT) / (_cv * drho_dp / drho_dT));
@@ -315,11 +315,11 @@ HeliumFluidProperties::rho_from_p_T(
 }
 
 void
-HeliumFluidProperties::rho_from_p_T(const DualReal & pressure,
-                                    const DualReal & temperature,
-                                    DualReal & rho,
-                                    DualReal & drho_dp,
-                                    DualReal & drho_dT) const
+HeliumFluidProperties::rho_from_p_T(const ADReal & pressure,
+                                    const ADReal & temperature,
+                                    ADReal & rho,
+                                    ADReal & drho_dp,
+                                    ADReal & drho_dT) const
 {
   rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
   auto val = 1.0 / (temperature + 0.4446e-5 * pressure / std::pow(temperature, 0.2));

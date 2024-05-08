@@ -12,7 +12,6 @@
 #include "Assembly.h"
 #include "Function.h"
 #include "MortarContactUtils.h"
-#include "DualRealOps.h"
 
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"

@@ -143,11 +143,11 @@ public:
    */
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual void rho_from_p_T(const DualReal & pressure,
-                            const DualReal & temperature,
-                            DualReal & rho,
-                            DualReal & drho_dp,
-                            DualReal & drho_dT) const override;
+  virtual void rho_from_p_T(const ADReal & pressure,
+                            const ADReal & temperature,
+                            ADReal & rho,
+                            ADReal & drho_dp,
+                            ADReal & drho_dT) const override;
 
   /**
    * Specific volume from pressure and temperature

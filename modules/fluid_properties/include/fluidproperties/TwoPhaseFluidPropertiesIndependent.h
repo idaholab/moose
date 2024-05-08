@@ -29,13 +29,13 @@ public:
   virtual Real p_critical() const override;
   virtual Real T_triple() const override;
   virtual Real T_sat(Real p) const override;
-  virtual DualReal T_sat(const DualReal & p) const override;
+  virtual ADReal T_sat(const ADReal & p) const override;
   virtual Real p_sat(Real T) const override;
-  virtual DualReal p_sat(const DualReal & T) const override;
+  virtual ADReal p_sat(const ADReal & T) const override;
   virtual Real dT_sat_dp(Real p) const override;
   virtual Real L_fusion() const override;
   virtual Real sigma_from_T(Real T) const override;
-  virtual DualReal sigma_from_T(const DualReal & T) const override;
+  virtual ADReal sigma_from_T(const ADReal & T) const override;
   virtual Real dsigma_dT_from_T(Real T) const override;
 
   virtual bool supportsPhaseChange() const override { return false; }

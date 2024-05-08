@@ -1003,7 +1003,7 @@ struct IsLikeReal<Real>
   static constexpr bool value = true;
 };
 template <>
-struct IsLikeReal<DualReal>
+struct IsLikeReal<ADReal>
 {
   static constexpr bool value = true;
 };

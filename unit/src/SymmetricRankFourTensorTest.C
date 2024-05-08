@@ -290,7 +290,7 @@ TEST_F(SymmetricRankFourTensorTest, invSym)
 TEST_F(SymmetricRankFourTensorTest, bignum)
 {
   constexpr std::size_t derivative_size = 1000;
-  typedef NumberArray<derivative_size, Real> DNDerivativeType;
+  typedef MetaPhysicL::NumberArray<derivative_size, Real> DNDerivativeType;
   typedef DualNumber<Real, DNDerivativeType, /*allow_skiping_derivatives=*/true> ADBig;
 
   SymmetricRankFourTensorTempl<ADBig> A = _s2;

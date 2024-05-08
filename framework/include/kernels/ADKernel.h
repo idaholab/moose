@@ -11,7 +11,6 @@
 
 #include "KernelBase.h"
 #include "ADFunctorInterface.h"
-#include "DualRealOps.h"
 
 // forward declarations
 template <typename>

@@ -245,11 +245,11 @@ SimpleFluidProperties::rho_from_p_T(
 }
 
 void
-SimpleFluidProperties::rho_from_p_T(const DualReal & pressure,
-                                    const DualReal & temperature,
-                                    DualReal & rho,
-                                    DualReal & drho_dp,
-                                    DualReal & drho_dT) const
+SimpleFluidProperties::rho_from_p_T(const ADReal & pressure,
+                                    const ADReal & temperature,
+                                    ADReal & rho,
+                                    ADReal & drho_dp,
+                                    ADReal & drho_dT) const
 {
   rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
   drho_dp = rho / _bulk_modulus;
@@ -294,7 +294,7 @@ SimpleFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real &
 
 void
 SimpleFluidProperties::T_from_v_e(
-    const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
+    const ADReal & v, const ADReal & e, ADReal & T, ADReal & dT_dv, ADReal & dT_de) const
 {
   T = SinglePhaseFluidProperties::T_from_v_e(v, e);
   dT_dv = 0.0;
@@ -347,7 +347,7 @@ SimpleFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real &
 
 void
 SimpleFluidProperties::p_from_v_e(
-    const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
 {
   p = SinglePhaseFluidProperties::p_from_v_e(v, e);
   dp_dv = -_bulk_modulus / v;
