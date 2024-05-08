@@ -89,6 +89,9 @@ class RunParallel(Scheduler):
         except Exception:
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
             tester.setStatus(StatusSystem().error, 'TESTER EXCEPTION')
+            # Forcefully set the output here because it might have not initialized
+            # because the job might not have even run
+            job.setOutput(output, force=True)
 
         # Clean up now that we're done
         tester.cleanup()

@@ -276,9 +276,9 @@ class Job(object):
                                                  'txt']))
             return os.path.join(output_dir, output_file)
 
-    def setOutput(self, output):
+    def setOutput(self, output, force=False):
         """ Method to allow schedulers to overwrite the output if certain conditions are met """
-        if not self.__tester.isOutputReady():
+        if not self.__tester.isOutputReady() and not force:
             return
 
         # Check for invalid unicode in output
