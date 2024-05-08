@@ -81,43 +81,35 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
 std::vector<Real>
 ParameterMeshOptimization::parseData(const std::vector<unsigned int> & exodus_timestep,
                                      const ParameterMesh & pmesh,
-                                     Real constantDataFromInput,
-                                     const std::string & meshVarName,
+                                     Real const_data_from_input,
+                                     const std::string & mesh_var_name,
                                      unsigned int ntimes) const
 {
-  unsigned int numberOfControllableParameters = pmesh.size() * ntimes;
-  std::vector<Real> parsedData;
+  unsigned int num_cont_params = pmesh.size() * ntimes;
+  std::vector<Real> parsed_data;
   // read from mesh
-  if (!meshVarName.empty())
+  if (!mesh_var_name.empty())
   {
     for (auto const & step : exodus_timestep)
     {
-      std::vector<Real> data = pmesh.getParameterValues(meshVarName, step);
-      parsedData.insert(parsedData.end(), data.begin(), data.end());
+      std::vector<Real> data = pmesh.getParameterValues(mesh_var_name, step);
+      parsed_data.insert(parsed_data.end(), data.begin(), data.end());
     }
-    if (parsedData.size() != numberOfControllableParameters)
+    if (parsed_data.size() != num_cont_params)
       mooseError("Number of parameters assigned by ",
-                 meshVarName,
+                 mesh_var_name,
                  " is not equal to the number of parameters on the mesh.  Mesh contains ",
-                 numberOfControllableParameters,
+                 num_cont_params,
                  " parameters and ",
-                 meshVarName,
+                 mesh_var_name,
                  " assigned ",
-                 parsedData.size(),
+                 parsed_data.size(),
                  " parameters.");
   }
   else // read in constant or default values
-    parsedData.resize(parsedData.size() + numberOfControllableParameters, constantDataFromInput);
+    parsed_data.resize(parsed_data.size() + num_cont_params, const_data_from_input);
 
-  return parsedData;
-}
-
-// function only used for test objects
-void
-ParameterMeshOptimization::setSimulationValuesForTesting(std::vector<Real> & /*data*/)
-{
-  // _simulation_values.clear();
-  // _simulation_values = data;
+  return parsed_data;
 }
 
 void

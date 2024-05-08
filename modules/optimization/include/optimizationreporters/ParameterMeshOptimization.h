@@ -36,5 +36,4 @@ private:
                               Real constantDataFromInput,
                               const std::string & meshVarName,
                               unsigned int ntimes) const;
-  virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };

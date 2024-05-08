@@ -27,7 +27,4 @@ public:
 
 protected:
   virtual void setICsandBounds() override;
-
-private:
-  virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };

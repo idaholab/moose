@@ -103,11 +103,3 @@ OptimizationReporter::setMisfitToSimulatedValues()
 {
   _misfit_values = _simulation_values;
 }
-
-// function only used for test objects
-void
-OptimizationReporter::setSimulationValuesForTesting(std::vector<Real> & data)
-{
-  _simulation_values.clear();
-  _simulation_values = data;
-}
