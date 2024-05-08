@@ -29,8 +29,8 @@ PiecewiseByBlockFunctorMaterialTempl<T>::validParams()
   auto params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a property value on a per-subdomain basis");
   // Somehow min gcc doesn't know the typename of params here
-  params.template addRequiredParam<MaterialPropertyName>("prop_name",
-                                                         "The name of the property to declare");
+  params.template addRequiredParam<MooseFunctorName>("prop_name",
+                                                     "The name of the property to declare");
   params.template addRequiredParam<std::map<std::string, std::string>>(
       "subdomain_to_prop_value",
       "Map from subdomain to property value. The value may be a constant"

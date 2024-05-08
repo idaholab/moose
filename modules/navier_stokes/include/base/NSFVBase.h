@@ -534,9 +534,10 @@ NSFVBase<BaseType>::commonMomentumEquationParams()
       "The name of the thermal expansion coefficient in the Boussinesq approximation");
 
   params.addParamNamesToGroup(
-      "pin_pressure pinned_pressure_type pinned_pressure_point pinned_pressure_value "
-      "ref_temperature boussinesq_approximation gravity",
-      "Momentum equation");
+      "pin_pressure pinned_pressure_type pinned_pressure_point pinned_pressure_value ",
+      "Incompressible flow pressure constraint");
+  params.addParamNamesToGroup("ref_temperature boussinesq_approximation gravity",
+                              "Gravity treatment");
 
   /**
    * Parameters controlling the friction terms in case of porous medium simulations.
@@ -683,9 +684,10 @@ NSFVBase<BaseType>::commonFluidEnergyEquationParams()
                         "To indicate if the enthalpy material is set up outside of the action.");
 
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
-                              "ambient_temperature external_heat_source external_heat_source_coeff "
-                              "use_external_enthalpy_material",
-                              "Energy equation");
+                              "ambient_temperature",
+                              "Volumetric heat convection");
+  params.addParamNamesToGroup("external_heat_source external_heat_source_coeff", "Heat source");
+  params.addParamNamesToGroup("use_external_enthalpy_material", "Material properties");
 
   return params;
 }
@@ -775,8 +777,8 @@ NSFVBase<BaseType>::commonTurbulenceParams()
                                      "Schmidt numbers used for the passive scalar fields.");
 
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
-                              "von_karman_const_0 mixing_length_delta turbulent_prandtl",
-                              "Turbulence");
+                              "von_karman_const_0 mixing_length_delta",
+                              "Mixing length model");
 
   return params;
 }

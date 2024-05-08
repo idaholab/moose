@@ -54,6 +54,7 @@ DynamicSolidMechanicsPhysics::validParams()
       "accelerations",
       std::vector<AuxVariableName>({"accel_x", "accel_y", "accel_z"}),
       "Names of the acceleration variables");
+  params.addParamNamesToGroup("velocities accelerations", "Variables");
 
   params.addParam<Real>("hht_alpha",
                         0,

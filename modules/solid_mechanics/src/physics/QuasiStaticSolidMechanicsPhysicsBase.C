@@ -240,6 +240,10 @@ QuasiStaticSolidMechanicsPhysicsBase::validParams()
                              "and updated Lagrangian (UPDATED) formulations "
                              "for the new kernel system.");
 
+  params.addParamNamesToGroup("add_variables displacements temperature", "Variables");
+  params.addParamNamesToGroup("strain incremental use_finite_deform_jacobian eigenstrain_names",
+                              "Strain");
+
   return params;
 }
 

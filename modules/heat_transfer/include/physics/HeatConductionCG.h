@@ -14,12 +14,12 @@
 /**
  * Creates all the objects needed to solve the heat conduction equations with CG
  */
-class HeatConductionFE : public HeatConductionPhysics
+class HeatConductionCG : public HeatConductionPhysics
 {
 public:
   static InputParameters validParams();
 
-  HeatConductionFE(const InputParameters & parameters);
+  HeatConductionCG(const InputParameters & parameters);
 
 private:
   void addNonlinearVariables() override;

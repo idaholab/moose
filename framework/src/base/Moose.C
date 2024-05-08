@@ -228,6 +228,7 @@ addActionTypes(Syntax & syntax)
   registerTask("check_integrity", true);
   registerTask("resolve_optional_materials", true);
   registerTask("check_integrity_early", true);
+  registerTask("check_integrity_early_physics", false);
   registerTask("setup_quadrature", true);
 
   /// Additional Actions
@@ -311,6 +312,7 @@ addActionTypes(Syntax & syntax)
                            "(read_executor)"
                            "(add_executor)"
                            "(check_integrity_early)"
+                           "(check_integrity_early_physics)"
                            "(setup_predictor)"
                            "(init_displaced_problem)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"

@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatConductionPhysics.h"
-#include "ADHeatConduction.h"
-#include "HeatConductionTimeDerivative.h"
 
 InputParameters
 HeatConductionPhysics::validParams()
@@ -20,26 +18,23 @@ HeatConductionPhysics::validParams()
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
 
-  // Material properties
-  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
-                                             "thermal_conductivity");
-  params.transferParam<MaterialPropertyName>(HeatConductionTimeDerivative::validParams(),
-                                             "specific_heat");
-  params.addParam<MaterialPropertyName>("density", "density", "Density material property");
-  params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
+  params.addParam<FunctionName>(
+      "initial_temperature", 300, "Initial value of the temperature variable");
 
   // Boundary conditions
-  params.addParam<std::vector<BoundaryName>>("heat_flux_boundaries",
-                                             "Boundaries on which to apply a heat flux");
-  params.addParam<std::vector<BoundaryName>>("insulated_boundaries",
-                                             "Boundaries on which to apply a zero heat flux");
-  params.addParam<std::vector<BoundaryName>>("fixed_temperature_boundaries",
-                                             "Boundaries on which to apply a fixed temperature");
+  params.addParam<std::vector<BoundaryName>>(
+      "heat_flux_boundaries", {}, "Boundaries on which to apply a heat flux");
+  params.addParam<std::vector<BoundaryName>>(
+      "insulated_boundaries", {}, "Boundaries on which to apply a zero heat flux");
+  params.addParam<std::vector<BoundaryName>>(
+      "fixed_temperature_boundaries", {}, "Boundaries on which to apply a fixed temperature");
   params.addParam<std::vector<MooseFunctorName>>(
       "boundary_heat_fluxes",
+      {},
       "Functors to compute the heat flux on each boundary in 'heat_flux_boundaries'");
   params.addParam<std::vector<MooseFunctorName>>(
       "boundary_temperatures",
+      {},
       "Functors to compute the heat flux on each boundary in 'fixed_temperature_boundaries'");
   params.addParamNamesToGroup(
       "heat_flux_boundaries insulated_boundaries fixed_temperature_boundaries boundary_heat_fluxes "
@@ -66,6 +61,19 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
       {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries"});
 
   addRequiredPhysicsTask("add_preconditioning");
+}
+
+void
+HeatConductionPhysics::addInitialConditions()
+{
+  // Always obey the user, but dont set a hidden default when restarting
+  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
+  {
+    InputParameters params = getFactory().getValidParams("FunctionIC");
+    params.set<VariableName>("variable") = _temperature_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
+    getProblem().addInitialCondition("FunctionIC", _temperature_name + "_ic", params);
+  }
 }
 
 void

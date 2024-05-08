@@ -45,7 +45,7 @@ PhysicsBase::validParams()
       "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
                               "Restart from Exodus");
-
+  params.addParamNamesToGroup("active inactive", "Advanced");
   return params;
 }
 
@@ -129,6 +129,8 @@ PhysicsBase::act()
     addExecutioner();
   else if (_current_task == "add_executor")
     addExecutors();
+  else if (_current_task == "check_integrity_early_physics")
+    checkIntegrityEarly();
 
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
@@ -198,11 +200,15 @@ PhysicsBase::initializePhysics()
   if (_verbose)
     getProblem().setVerboseProblem(_verbose);
 
-  if (_is_transient == "true" && !getProblem().isTransient())
-    paramError("transient", "We cannot solve a physics as transient in a steady problem");
-
   // If the derived physics need additional initialization very early on
   initializePhysicsAdditional();
+}
+
+void
+PhysicsBase::checkIntegrityEarly() const
+{
+  if (_is_transient == "true" && !getProblem().isTransient())
+    paramError("transient", "We cannot solve a physics as transient in a steady problem");
 }
 
 void
@@ -259,7 +265,8 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
   if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
   if (blocks.empty())
-    _console << "Empty block restriction assigned, did you mean to do this?" << std::endl;
+    _console << "Empty block restriction assigned to an object created by " << name()
+             << " did you mean to do this?" << std::endl;
 }
 
 bool

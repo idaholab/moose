@@ -1,1 +1,1 @@
-.././../../../source/physics/HeatConductionFE.md
+../../../../source/physics/HeatConductionCG.md

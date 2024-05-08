@@ -57,7 +57,6 @@ FunctorMaterial::addFunctorProperty(const std::string & name,
                                     PolymorphicLambda my_lammy,
                                     const std::set<ExecFlagType> & clearance_schedule)
 {
-  _supplied_functor_props.insert(name);
   return addFunctorPropertyByBlocks<T>(name, my_lammy, blockIDs(), clearance_schedule);
 }
 
@@ -78,9 +77,9 @@ FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
       prop_name = _pars.get<MooseFunctorName>(name);
   }
 
-  _supplied_functor_props.insert(name);
+  _supplied_functor_props.insert(name + (_declare_suffix.empty() ? "" : ("_" + _declare_suffix)));
   return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
-      prop_name + (_get_suffix == "" ? "" : "_" + _get_suffix),
+      prop_name + (_declare_suffix.empty() ? "" : ("_" + _declare_suffix)),
       my_lammy,
       clearance_schedule,
       _mesh,
