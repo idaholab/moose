@@ -46,9 +46,8 @@ outputFrameworkInformation(const MooseApp & app)
   const auto checkpoints = app.getOutputWarehouse().getOutputs<Checkpoint>();
   if (checkpoints.size())
   {
-    const auto & info_pairs = checkpoints[0]->getCheckpointInfo();
     oss << std::left << "Checkpoint:\n";
-    oss << checkpoints[0]->checkpointInfo();
+    oss << checkpoints[0]->checkpointInfo().str();
     oss << std::endl;
   }
 

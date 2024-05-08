@@ -328,7 +328,7 @@
       type = 'RunException'
       input = 'checkpoint_block.i'
       cli_args = 'Outputs/out/execute_on=TIMESTEP_BEGIN'
-      expect_err = 'The checkpoint system may only be used with execute_on values INITIAL, TIMESTEP_END, and FINAL'
+      expect_err = 'The exec flag TIMESTEP_BEGIN is not allowed. Allowed flags are INITIAL, TIMESTEP_END, and FINAL.'
       detail = 'catching invalid values of execute_on'
     []
   []

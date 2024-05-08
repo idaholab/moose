@@ -253,8 +253,8 @@ Checkpoint::checkpointInfo() const
   else
     interval_info = "Disabled";
 
-  checkpoint_info << std::setw(console_field_width) << "  Wall Time Interval:" << interval_info
-                  << "\n";
+  checkpoint_info << std::left << std::setw(console_field_width)
+                  << "  Wall Time Interval:" << interval_info << "\n";
 
   std::string user_info;
   if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
@@ -262,16 +262,18 @@ Checkpoint::checkpointInfo() const
   else
     user_info = "Outputs/" + name();
 
-  checkpoint_info << std::setw(console_field_width) << "  User Checkpoint:" << user_info << "\n";
+  checkpoint_info << std::left << std::setw(console_field_width)
+                  << "  User Checkpoint:" << user_info << "\n";
 
   if (!((interval_info == "Disabled") && (user_info == "Disabled")))
   {
-    checkpoint_info << std::setw(console_field_width)
+    checkpoint_info << std::left << std::setw(console_field_width)
                     << "  # Checkpoints Kept:" << std::to_string(_num_files) << "\n";
     std::string exec_on_values = "";
     for (const auto & item : _execute_on)
       exec_on_values += item.name() + " ";
-    checkpoint_info << std::setw(console_field_width) << "  Execute On:" << exec_on_values << "\n";
+    checkpoint_info << std::left << std::setw(console_field_width)
+                    << "  Execute On:" << exec_on_values << "\n";
   }
 
   return checkpoint_info;
