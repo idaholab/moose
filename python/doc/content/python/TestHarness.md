@@ -89,7 +89,6 @@ Tester system is completely pluggable and extendable. The list of default tester
 - [AnalyzeJacobian](AnalyzeJacobian.md)
 - [PetscJacobianTester](PetscJacobianTester.md)
 - [PythonUnitTest](PythonUnitTest.md) (includes [Method of Manufactured solutions](python/mms.md) testing)
-- [BenchmarkTesting](application_development/performance_benchmarking.md)
 
 
 ## Test Specifications
