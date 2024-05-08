@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "AuxKernel.h"
+#include "Assembly.h"
 
 /**
  * A base class for the various Material related AuxKernal objects.
