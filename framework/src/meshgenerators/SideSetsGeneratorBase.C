@@ -63,9 +63,7 @@ SideSetsGeneratorBase::validParams()
                                     "only added if face_normal.normal_hat >= "
                                     "1 - normal_tol, where normal_hat = "
                                     "normal/|normal|");
-  params.addDeprecatedParam<Real>("variance",
-                                  "The variance allowed when comparing normals",
-                                  "Deprecated, use 'normal_tol' instead");
+  params.addParam<Real>("variance", "The variance allowed when comparing normals");
   params.deprecateParam("variance", "normal_tol", "4/01/2025");
 
   // Sideset restriction param group

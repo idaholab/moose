@@ -1787,6 +1787,9 @@ InputParameters::addDeprecatedParam(const std::string & name,
                                     const std::string & deprecation_message)
 {
   _show_deprecated_message = false;
+  mooseAssert(!_old_to_new_name_and_dep.count(name),
+              "Attempting to deprecate via addDeprecatedParam the parameter, '"
+                  << name << "', already deprecated via deprecateParam or renamed via renameParam");
   addParam<T>(name, value, doc_string);
 
   _params[name]._deprecation_message = deprecation_message;
@@ -1800,6 +1803,9 @@ InputParameters::addDeprecatedParam(const std::string & name,
                                     const std::string & deprecation_message)
 {
   _show_deprecated_message = false;
+  mooseAssert(!_old_to_new_name_and_dep.count(name),
+              "Attempting to deprecate via addDeprecatedParam the parameter, '"
+                  << name << "', already deprecated via deprecateParam or renamed via renameParam");
   addParam<T>(name, doc_string);
 
   _params[name]._deprecation_message = deprecation_message;
