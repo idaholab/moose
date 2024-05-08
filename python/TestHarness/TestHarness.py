@@ -218,9 +218,10 @@ class TestHarness:
         # For installed binaries, the apps will exist in RELEASE_PATH/scripts, where in
         # this case RELEASE_PATH is moose_dir
         share_dir = os.path.join(moose_dir, 'share')
-        for dir in os.listdir(share_dir):
-            if dir != 'moose':
-                app_dirs.append(os.path.join(share_dir, dir))
+        if os.path.isdir(share_dir):
+            for dir in os.listdir(share_dir):
+                if dir != 'moose': # already included
+                    app_dirs.append(os.path.join(share_dir, dir))
         # Add scripts/TestHarness for all of the above
         dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in app_dirs])
 
