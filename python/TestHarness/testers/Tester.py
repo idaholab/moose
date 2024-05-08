@@ -435,6 +435,9 @@ class Tester(MooseObject):
         except Exception as e:
             raise Exception('Failed to spawn process') from e
 
+        # Entry point for testers to do other things
+        self.postSpawn()
+
         # And wait for it to complete
         self._runner.wait(timer)
 
