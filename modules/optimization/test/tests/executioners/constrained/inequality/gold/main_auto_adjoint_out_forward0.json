@@ -21,6 +21,9 @@
                 "misfit_values": {
                     "type": "std::vector<double>"
                 },
+                "objective_value": {
+                    "type": "double"
+                },
                 "simulation_values": {
                     "type": "std::vector<double>"
                 }
@@ -54,11 +57,12 @@
                     0.0
                 ],
                 "misfit_values": [],
+                "objective_value": 0.0,
                 "simulation_values": []
             },
             "params": {
                 "left": [
-                    150.0000479466251,
+                    149.99995053111815,
                     0.0
                 ]
             },
@@ -83,15 +87,16 @@
                     0.0
                 ],
                 "misfit_values": [
-                    -23.00742856470839
+                    -23.007431157629952
                 ],
+                "objective_value": 264.6709442365408,
                 "simulation_values": [
-                    183.9925714352916
+                    183.99256884237005
                 ]
             },
             "params": {
                 "left": [
-                    150.0000479466251,
+                    149.99995053111815,
                     0.0
                 ]
             },

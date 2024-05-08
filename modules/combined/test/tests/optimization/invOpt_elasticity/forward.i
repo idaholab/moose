@@ -96,6 +96,7 @@
   [measure_data]
     type = OptimizationData
     variable = ux
+    objective_name = objective_value
   []
   [parametrization]
     type = ConstantReporter

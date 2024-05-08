@@ -66,12 +66,6 @@ OptimizationReporterTest::validParams()
   params.addParam<std::vector<Real>>("expected_upper_bounds",
                                      "Testing that OptimizationReporter upper bounds "
                                      "can be set and used in the objective calculations");
-  params.addRequiredParam<std::vector<Real>>("values_to_set_simulation_measurements_to",
-                                             "Testing that OptimizationReporter simulation data "
-                                             "can be set and used in the objective calculations");
-  params.addRequiredParam<Real>(
-      "expected_objective_value",
-      "Testing that OptimizationReporter computes the objective function.");
   return params;
 }
 
@@ -127,6 +121,7 @@ OptimizationReporterTest::initialSetup()
 void
 OptimizationReporterTest::execute()
 {
+  // Tests that parameters can be changed correctly
   std::vector<Real> valuesToSetOnOptRepParams(
       getParam<std::vector<Real>>("values_to_set_parameters_to"));
   size_t i = 0;
@@ -134,16 +129,4 @@ OptimizationReporterTest::execute()
     _optSolverParameters->set(i++, val);
 
   _optReporter->updateParameters(*_optSolverParameters.get());
-  // // Objective
-  std::vector<Real> valuesToSetOnOptRepSim(
-      getParam<std::vector<Real>>("values_to_set_simulation_measurements_to"));
-  _optReporter->setSimulationValuesForTesting(valuesToSetOnOptRepSim);
-  Real expectedObjectiveValue(getParam<Real>("expected_objective_value"));
-  Real objectiveValue = _optReporter->computeObjective();
-  Real diff = std::abs(expectedObjectiveValue - objectiveValue);
-  if (diff > _namespaced_tol)
-    mooseError("OptimizationReporter objective= ",
-               objectiveValue,
-               " is different from that given in the input for expected_objective_value= ",
-               expectedObjectiveValue);
 }

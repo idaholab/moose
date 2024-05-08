@@ -11,7 +11,7 @@
 
 #include "libmesh/int_range.h"
 
-registerMooseObject("OptimizationApp", OptimizationReporter);
+registerMooseObjectDeprecated("OptimizationApp", OptimizationReporter, "12/31/2024 24:00");
 
 InputParameters
 OptimizationReporter::validParams()
@@ -43,6 +43,10 @@ OptimizationReporter::validParams()
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
   : OptimizationDataTempl<OptimizationReporterBase>(parameters)
 {
+  mooseDeprecated(
+      "The 'OptimizationReporter' is deprecated. Please use 'GeneralOptimization' instead. "
+      "You can achieve the same functionality by using an 'OptimizationData' object in the "
+      "forward application to calculate the objective value, similar to the method used here.");
 }
 void
 OptimizationReporter::setICsandBounds()
@@ -98,12 +102,4 @@ void
 OptimizationReporter::setMisfitToSimulatedValues()
 {
   _misfit_values = _simulation_values;
-}
-
-// function only used for test objects
-void
-OptimizationReporter::setSimulationValuesForTesting(std::vector<Real> & data)
-{
-  _simulation_values.clear();
-  _simulation_values = data;
 }

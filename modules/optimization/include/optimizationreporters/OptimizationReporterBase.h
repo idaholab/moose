@@ -163,6 +163,4 @@ protected:
 private:
   friend class OptimizeSolve;
   friend class OptimizationReporterTest;
-  /// private method for testing optimizationData with test src
-  virtual void setSimulationValuesForTesting(std::vector<Real> & /*data*/){};
 };

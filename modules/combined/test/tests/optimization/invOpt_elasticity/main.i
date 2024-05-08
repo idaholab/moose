@@ -2,25 +2,31 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = 'youngs_modulus'
   num_values = '3'
-  #initial_condition = '5 4 3'
   initial_condition = '5.0 5.0 5.0'
   lower_bounds = '0.1'
   upper_bounds = '10.0'
-  measurement_points = '-1.0 -1.0 0.0
-                        -1.0  0.0 0.0
-                        -1.0  1.0 0.0
-                         0.0 -1.0 0.0
-                         0.0  0.0 0.0
-                         0.0  1.0 0.0
-                         1.0 -1.0 0.0
-                         1.0  0.0 0.0
-                         1.0  1.0 0.0'
-  measurement_values = '2.270471e+00 3.448233e+00 4.766029e+00
-  2.205754e+00 3.374848e+00 4.691352e+00
-  2.172435e+00 3.326780e+00 4.642104e+00'
+[]
+
+[Reporters]
+  [main]
+    type = OptimizationData
+    measurement_points = '-1.0 -1.0 0.0
+                          -1.0  0.0 0.0
+                          -1.0  1.0 0.0
+                           0.0 -1.0 0.0
+                           0.0  0.0 0.0
+                           0.0  1.0 0.0
+                           1.0 -1.0 0.0
+                           1.0  0.0 0.0
+                           1.0  1.0 0.0'
+    measurement_values = '2.270471e+00 3.448233e+00 4.766029e+00
+    2.205754e+00 3.374848e+00 4.691352e+00
+    2.172435e+00 3.326780e+00 4.642104e+00'
+  []
 []
 
 [Executioner]
@@ -53,11 +59,11 @@
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/youngs_modulus'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -69,8 +75,8 @@
   [get_misfit]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    from_reporters = 'measure_data/misfit_values measure_data/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
   [set_state_for_adjoint]
     type = MultiAppCopyTransfer
@@ -82,11 +88,11 @@
   [setup_adjoint_run]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/misfit_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/misfit_values
                       OptimizationReporter/youngs_modulus'
     to_reporters = 'misfit/measurement_xcoord
                     misfit/measurement_ycoord

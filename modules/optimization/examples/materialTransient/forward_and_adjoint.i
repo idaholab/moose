@@ -69,7 +69,9 @@
   []
   [data]
     type = OptimizationData
+    objective_name = objective_value
     variable = u
+    outputs = none
   []
 []
 
