@@ -32,16 +32,6 @@ public:
                                     const unsigned int p,
                                     const bool is_self_covariance);
 
-  /// Used for outputting Hyper-parameter settings
-  void buildAdditionalHyperParamMap(
-      std::unordered_map<std::string, Real> & map,
-      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
-
-  /// Used for setting Hyper-parameter settings
-  void loadAdditionalHyperParamMap(
-      std::unordered_map<std::string, Real> & map,
-      std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
-
   /// Redirect dK/dhp for hyperparameter "hp"
   void computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
@@ -56,7 +46,30 @@ public:
                            const unsigned int p,
                            const int ind);
 
+  /// Used for outputting Hyper-parameter settings
+  virtual void
+  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
+                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
+
+  /// Used for outputting Hyper-parameter settings for use in surrogate
+  virtual void
+  loadHyperParamMap(std::unordered_map<std::string, Real> & map,
+                    std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
+
+  /// Get the default minima, maxima, sizes of a hyper parameter
+  virtual void
+  getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const override;
+
 private:
+  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
+  std::vector<Real> _length_factor;
+
+  /// signal variance (\sigma_f^2)
+  Real _sigma_f_squared;
+
+  /// noise variance (\sigma_n^2)
+  Real _sigma_n_squared;
+
   /// non-negative p factor for use in Matern half-int. \nu = p+(1/2) in terms of general Matern
   unsigned int _p;
 };

@@ -14,6 +14,9 @@
 
 #include "CovarianceFunctionBase.h"
 
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
+
 namespace StochasticTools
 {
 

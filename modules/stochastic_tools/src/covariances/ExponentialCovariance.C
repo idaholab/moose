@@ -17,15 +17,22 @@ ExponentialCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
   params.addClassDescription("Exponential covariance function.");
-  params.makeParamRequired<std::vector<Real>>("length_factor");
-  params.makeParamRequired<Real>("signal_variance");
-  params.makeParamRequired<Real>("noise_variance");
+  params.addRequiredParam<std::vector<Real>>("length_factor",
+                                             "Length factors to use for Covariance Kernel");
+  params.addRequiredParam<Real>("signal_variance",
+                                "Signal Variance ($\\sigma_f^2$) to use for kernel calculation.");
+  params.addParam<Real>(
+      "noise_variance", 0.0, "Noise Variance ($\\sigma_n^2$) to use for kernel calculation.");
   params.addRequiredParam<Real>("gamma", "Gamma to use for Exponential Covariance Kernel");
   return params;
 }
 
 ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters), _gamma(getParam<Real>("gamma"))
+  : CovarianceFunctionBase(parameters),
+    _length_factor(getParam<std::vector<Real>>("length_factor")),
+    _sigma_f_squared(getParam<Real>("signal_variance")),
+    _sigma_n_squared(getParam<Real>("noise_variance")),
+    _gamma(getParam<Real>("gamma"))
 {
   _tunable_hp.insert("noise_variance");
   _tunable_hp.insert("signal_variance");
@@ -33,19 +40,45 @@ ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
 }
 
 void
-ExponentialCovariance::buildAdditionalHyperParamMap(
+ExponentialCovariance::buildHyperParamMap(
     std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) const
+    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
+  map["noise_variance"] = _sigma_n_squared;
+  map["signal_variance"] = _sigma_f_squared;
+  vec_map["length_factor"] = _length_factor;
   map["gamma"] = _gamma;
 }
 
 void
-ExponentialCovariance::loadAdditionalHyperParamMap(
+ExponentialCovariance::loadHyperParamMap(
     std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/)
+    std::unordered_map<std::string, std::vector<Real>> & vec_map)
 {
+  _sigma_n_squared = map["noise_variance"];
+  _sigma_f_squared = map["signal_variance"];
+  _length_factor = vec_map["length_factor"];
   _gamma = map["gamma"];
+}
+
+void
+ExponentialCovariance::getTuningData(std::string name,
+                                     unsigned int & size,
+                                     Real & min,
+                                     Real & max) const
+{
+  if ((name == "noise_variance") || (name == "signal_variance"))
+  {
+    min = 1e-9;
+    max = 1e9;
+    size = 1;
+  }
+  else if (name == "length_factor")
+  {
+    min = 1e-9;
+    max = 1e9;
+    size = _length_factor.size();
+  }
 }
 
 void
