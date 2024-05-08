@@ -73,10 +73,21 @@ class RunPBS(RunParallel):
         self.pbs_ssh_lock = None
         # Setup the jump host if provided
         if self.pbs_ssh_host:
+            # Try to find a key to use
+            key_filename = None
+            try:
+                ssh_config = os.path.expanduser('~/.ssh/config')
+                config = paramiko.SSHConfig.from_path(ssh_config).lookup(self.pbs_ssh_host)
+                identityfile = config.get('identityfile')
+                if identityfile is not None and len(identityfile) > 0:
+                    key_filename = identityfile[-1]
+            except:
+                pass
+
             self.pbs_ssh_lock = threading.Lock()
             self.pbs_ssh = paramiko.SSHClient()
             self.pbs_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.pbs_ssh.connect(self.pbs_ssh_host)
+            self.pbs_ssh.connect(self.pbs_ssh_host, key_filename=key_filename)
 
         # Load the PBS template
         template_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'pbs_template')
