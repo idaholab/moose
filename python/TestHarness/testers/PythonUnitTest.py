@@ -46,8 +46,7 @@ class PythonUnitTest(RunApp):
         else:
             cmd = "python3 -m unittest" + use_buffer + "-v " + test_case
 
-        # We need to append PYTHONPATH here for running these within apptainer
-        return f'PYTHONPATH={self.getMooseDir()}/python ' + cmd  + ' '.join(self.specs['cli_args'])
+        return cmd + ' '.join(self.specs['cli_args'])
 
     def checkRunnable(self, options):
         # Can't run within apptainer in parallel because mpiexec needs to be
