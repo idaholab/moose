@@ -321,7 +321,7 @@ class RunApp(Tester):
                 reason = 'ERRMSG'
             elif self.getExitCode() == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
-            elif self.getExitCode() != 0 and specs['should_crash'] == False:
+            elif self.getExitCode() != 0 and specs['should_crash'] == False and self.shouldExecute():
                 # Let's look at the error code to see if we can perhaps further split this out later with a post exam
                 reason = 'CRASH'
             # Valgrind runs
