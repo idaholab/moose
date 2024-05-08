@@ -222,7 +222,7 @@ protected:
   const MooseArray<std::vector<Real>> & _scalar_phi_face;
   const MooseArray<std::vector<Real>> & _lm_phi_face;
 
-  // Material properties
+  /// The diffusivity
   const MaterialProperty<Real> & _diff;
 
   // Number of dofs on elem

@@ -1,4 +1,4 @@
-nu=4e-3
+mu=4e-3
 
 [GlobalParams]
   variable = face_vel_x
@@ -10,7 +10,8 @@ nu=4e-3
   face_v = face_vel_y
   pressure = p
   enclosure_lm = lm
-  nu = ${nu}
+  mu = ${mu}
+  rho = 1
 []
 
 [Mesh]

@@ -1,4 +1,5 @@
-nu=1.1
+mu=1.1
+rho=1.1
 
 [GlobalParams]
   variable = face_vel_x
@@ -10,7 +11,8 @@ nu=1.1
   face_v = face_vel_y
   pressure = p
   enclosure_lm = lm
-  nu = ${nu}
+  mu = ${mu}
+  rho = ${rho}
 []
 
 [Mesh]
@@ -82,9 +84,9 @@ nu=1.1
   []
   [forcing_u]
     type = ParsedFunction
-    expression = 'nu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*nu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
-    symbol_names = 'nu'
-    symbol_values = '${nu}'
+    expression = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + rho*sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_v]
     type = ParsedFunction
@@ -92,9 +94,9 @@ nu=1.1
   []
   [forcing_v]
     type = ParsedFunction
-    expression = 'nu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*nu*sin(x)*cos((1/2)*y*pi) - pi*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y) + sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi)'
-    symbol_names = 'nu'
-    symbol_values = '${nu}'
+    expression = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + rho*sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y)'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction

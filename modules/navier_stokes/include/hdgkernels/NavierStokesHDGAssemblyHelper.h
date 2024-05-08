@@ -34,22 +34,26 @@ protected:
    * @param u_sol The x-velocity solution, can correspond to either the volumetric or face velocity
    * @param v_sol The y-velocity solution, can correspond to either the volumetric or face velocity
    */
-  static RealVectorValue velCrossVelResidual(const MooseArray<Number> & u_sol,
-                                             const MooseArray<Number> & v_sol,
-                                             const unsigned int qp,
-                                             const unsigned int vel_component);
+  template <typename NSHDG>
+  static RealVectorValue rhoVelCrossVelResidual(const NSHDG & obj,
+                                                const MooseArray<Number> & u_sol,
+                                                const MooseArray<Number> & v_sol,
+                                                const unsigned int qp,
+                                                const unsigned int vel_component);
 
   /**
    * @param u_sol The x-velocity solution, can correspond to either the volumetric or face velocity
    * @param v_sol The y-velocity solution, can correspond to either the volumetric or face velocity
    */
-  static RealVectorValue velCrossVelJacobian(const MooseArray<Number> & u_sol,
-                                             const MooseArray<Number> & v_sol,
-                                             const unsigned int qp,
-                                             const unsigned int vel_component,
-                                             const unsigned int vel_j_component,
-                                             const MooseArray<std::vector<Real>> & phi,
-                                             const unsigned int j);
+  template <typename NSHDG>
+  static RealVectorValue rhoVelCrossVelJacobian(const NSHDG & obj,
+                                                const MooseArray<Number> & u_sol,
+                                                const MooseArray<Number> & v_sol,
+                                                const unsigned int qp,
+                                                const unsigned int vel_component,
+                                                const unsigned int vel_j_component,
+                                                const MooseArray<std::vector<Real>> & phi,
+                                                const unsigned int j);
 
   /**
    * Compute the volumetric contributions to a velocity residual for a provided velocity
@@ -216,6 +220,9 @@ protected:
   const MooseArray<Number> & _p_sol;
   const MooseArray<Number> * const _global_lm_dof_value;
 
+  /// The density
+  const Real _rho;
+
   /// Number of dofs on elem
   std::size_t _p_n_dofs;
   std::size_t _global_lm_n_dofs;
@@ -258,7 +265,8 @@ NavierStokesHDGAssemblyHelper::scalarVolumeResidual(NSHDG & obj,
 
   for (const auto qp : make_range(obj._qrule->n_points()))
   {
-    const auto vel_cross_vel = velCrossVelResidual(obj._u_sol, obj._v_sol, qp, vel_component);
+    const auto rho_vel_cross_vel =
+        rhoVelCrossVelResidual(obj, obj._u_sol, obj._v_sol, qp, vel_component);
     Gradient qp_p;
     qp_p(vel_component) = obj._p_sol[qp];
 
@@ -268,7 +276,8 @@ NavierStokesHDGAssemblyHelper::scalarVolumeResidual(NSHDG & obj,
       obj._PrimalVec(i_offset + i) -= obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * qp_p);
 
       // Scalar equation dependence on scalar dofs
-      obj._PrimalVec(i_offset + i) -= obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * vel_cross_vel);
+      obj._PrimalVec(i_offset + i) -=
+          obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * rho_vel_cross_vel);
     }
   }
 }
@@ -302,17 +311,17 @@ NavierStokesHDGAssemblyHelper::scalarVolumeJacobian(NSHDG & obj,
       {
         // derivatives wrt 0th component
         {
-          const auto vel_cross_vel =
-              velCrossVelJacobian(obj._u_sol, obj._v_sol, qp, vel_component, 0, obj._scalar_phi, j);
+          const auto rho_vel_cross_vel = rhoVelCrossVelJacobian(
+              obj, obj._u_sol, obj._v_sol, qp, vel_component, 0, obj._scalar_phi, j);
           obj._PrimalMat(i_offset + i, u_j_offset + j) -=
-              obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * vel_cross_vel);
+              obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * rho_vel_cross_vel);
         }
         // derivatives wrt 1th component
         {
-          const auto vel_cross_vel =
-              velCrossVelJacobian(obj._u_sol, obj._v_sol, qp, vel_component, 1, obj._scalar_phi, j);
+          const auto rho_vel_cross_vel = rhoVelCrossVelJacobian(
+              obj, obj._u_sol, obj._v_sol, qp, vel_component, 1, obj._scalar_phi, j);
           obj._PrimalMat(i_offset + i, v_j_offset + j) -=
-              obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * vel_cross_vel);
+              obj._JxW[qp] * (obj._grad_scalar_phi[i][qp] * rho_vel_cross_vel);
         }
       }
     }
@@ -393,24 +402,28 @@ NavierStokesHDGAssemblyHelper::pressureVolumeJacobian(NSHDG & obj,
   }
 }
 
+template <typename NSHDG>
 inline RealVectorValue
-NavierStokesHDGAssemblyHelper::velCrossVelResidual(const MooseArray<Number> & u_sol,
-                                                   const MooseArray<Number> & v_sol,
-                                                   const unsigned int qp,
-                                                   const unsigned int vel_component)
+NavierStokesHDGAssemblyHelper::rhoVelCrossVelResidual(const NSHDG & obj,
+                                                      const MooseArray<Number> & u_sol,
+                                                      const MooseArray<Number> & v_sol,
+                                                      const unsigned int qp,
+                                                      const unsigned int vel_component)
 {
   const RealVectorValue U(u_sol[qp], v_sol[qp]);
-  return U * U(vel_component);
+  return obj._rho * U * U(vel_component);
 }
 
+template <typename NSHDG>
 inline RealVectorValue
-NavierStokesHDGAssemblyHelper::velCrossVelJacobian(const MooseArray<Number> & u_sol,
-                                                   const MooseArray<Number> & v_sol,
-                                                   const unsigned int qp,
-                                                   const unsigned int vel_component,
-                                                   const unsigned int vel_j_component,
-                                                   const MooseArray<std::vector<Real>> & phi,
-                                                   const unsigned int j)
+NavierStokesHDGAssemblyHelper::rhoVelCrossVelJacobian(const NSHDG & obj,
+                                                      const MooseArray<Number> & u_sol,
+                                                      const MooseArray<Number> & v_sol,
+                                                      const unsigned int qp,
+                                                      const unsigned int vel_component,
+                                                      const unsigned int vel_j_component,
+                                                      const MooseArray<std::vector<Real>> & phi,
+                                                      const unsigned int j)
 {
   const RealVectorValue U(u_sol[qp], v_sol[qp]);
   RealVectorValue vector_phi;
@@ -418,6 +431,7 @@ NavierStokesHDGAssemblyHelper::velCrossVelJacobian(const MooseArray<Number> & u_
   auto ret = vector_phi * U(vel_component);
   if (vel_component == vel_j_component)
     ret += U * phi[j][qp];
+  ret *= obj._rho;
   return ret;
 }
 
@@ -473,7 +487,8 @@ NavierStokesHDGAssemblyHelper::scalarFaceResidual(NSHDG & obj,
   {
     Gradient qp_p;
     qp_p(vel_component) = obj._p_sol[qp];
-    const auto vel_cross_vel = velCrossVelResidual(obj._lm_u_sol, obj._lm_v_sol, qp, vel_component);
+    const auto rho_vel_cross_vel =
+        rhoVelCrossVelResidual(obj, obj._lm_u_sol, obj._lm_v_sol, qp, vel_component);
 
     for (const auto i : make_range(obj._scalar_n_dofs))
     {
@@ -483,7 +498,7 @@ NavierStokesHDGAssemblyHelper::scalarFaceResidual(NSHDG & obj,
 
       // lm from convection term
       obj._PrimalVec(i_offset + i) +=
-          obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
+          obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * rho_vel_cross_vel * obj._normals[qp];
     }
   }
 }
@@ -523,17 +538,19 @@ NavierStokesHDGAssemblyHelper::scalarFaceJacobian(NSHDG & obj,
 
         // derivatives wrt 0th component
         {
-          const auto vel_cross_vel = velCrossVelJacobian(
-              obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 0, obj._lm_phi_face, j);
-          obj._PrimalLM(i_offset + i, lm_u_j_offset + j) +=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
+          const auto rho_vel_cross_vel = rhoVelCrossVelJacobian(
+              obj, obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 0, obj._lm_phi_face, j);
+          obj._PrimalLM(i_offset + i, lm_u_j_offset + j) += obj._JxW_face[qp] *
+                                                            obj._scalar_phi_face[i][qp] *
+                                                            rho_vel_cross_vel * obj._normals[qp];
         }
         // derivatives wrt 1th component
         {
-          const auto vel_cross_vel = velCrossVelJacobian(
-              obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 1, obj._lm_phi_face, j);
-          obj._PrimalLM(i_offset + i, lm_v_j_offset + j) +=
-              obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
+          const auto rho_vel_cross_vel = rhoVelCrossVelJacobian(
+              obj, obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 1, obj._lm_phi_face, j);
+          obj._PrimalLM(i_offset + i, lm_v_j_offset + j) += obj._JxW_face[qp] *
+                                                            obj._scalar_phi_face[i][qp] *
+                                                            rho_vel_cross_vel * obj._normals[qp];
         }
       }
     }
@@ -554,7 +571,8 @@ NavierStokesHDGAssemblyHelper::lmFaceResidual(NSHDG & obj,
   {
     Gradient qp_p;
     qp_p(vel_component) = obj._p_sol[qp];
-    const auto vel_cross_vel = velCrossVelResidual(obj._lm_u_sol, obj._lm_v_sol, qp, vel_component);
+    const auto rho_vel_cross_vel =
+        rhoVelCrossVelResidual(obj, obj._lm_u_sol, obj._lm_v_sol, qp, vel_component);
 
     for (const auto i : make_range(obj._lm_n_dofs))
     {
@@ -567,7 +585,7 @@ NavierStokesHDGAssemblyHelper::lmFaceResidual(NSHDG & obj,
       if (obj._neigh)
         // lm from convection term
         obj._LMVec(i_offset + i) +=
-            obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
+            obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * rho_vel_cross_vel * obj._normals[qp];
     }
   }
 }
@@ -603,17 +621,17 @@ NavierStokesHDGAssemblyHelper::lmFaceJacobian(NSHDG & obj,
         {
           // derivatives wrt 0th component
           {
-            const auto vel_cross_vel = velCrossVelJacobian(
-                obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 0, obj._lm_phi_face, j);
+            const auto rho_vel_cross_vel = rhoVelCrossVelJacobian(
+                obj, obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 0, obj._lm_phi_face, j);
             obj._LMMat(i_offset + i, lm_u_j_offset + j) +=
-                obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
+                obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * rho_vel_cross_vel * obj._normals[qp];
           }
           // derivatives wrt 1th component
           {
-            const auto vel_cross_vel = velCrossVelJacobian(
-                obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 1, obj._lm_phi_face, j);
+            const auto rho_vel_cross_vel = rhoVelCrossVelJacobian(
+                obj, obj._lm_u_sol, obj._lm_v_sol, qp, vel_component, 1, obj._lm_phi_face, j);
             obj._LMMat(i_offset + i, lm_v_j_offset + j) +=
-                obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * vel_cross_vel * obj._normals[qp];
+                obj._JxW_face[qp] * obj._lm_phi_face[i][qp] * rho_vel_cross_vel * obj._normals[qp];
           }
         }
     }
@@ -668,7 +686,8 @@ NavierStokesHDGAssemblyHelper::scalarDirichletResidual(
 
       // dirichlet lm from advection term
       obj._PrimalVec(i_offset + i) += obj._JxW_face[qp] * obj._scalar_phi_face[i][qp] *
-                                      (dirichlet_velocity * obj._normals[qp]) * scalar_value;
+                                      (obj._rho * dirichlet_velocity * obj._normals[qp]) *
+                                      scalar_value;
     }
   }
 }

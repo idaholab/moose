@@ -41,7 +41,8 @@ NavierStokesHDGAssemblyHelper::validParams()
       "enclosure_lm",
       "For enclosed problems like the lid driven cavity this variable can be provided to remove "
       "the pressure nullspace");
-  params.renameParam("diffusivity", "nu", "The kinematic viscosity");
+  params.renameParam("diffusivity", NS::mu, "The dynamic viscosity");
+  params.addRequiredParam<Real>(NS::density, "The density");
   return params;
 }
 
@@ -92,6 +93,7 @@ NavierStokesHDGAssemblyHelper::NavierStokesHDGAssemblyHelper(const MooseObject *
     _lm_w_sol(_w_face_var ? &_w_face_var->sln() : nullptr),
     _p_sol(_pressure_var.sln()),
     _global_lm_dof_value(_enclosure_lm_var ? &_enclosure_lm_var->sln() : nullptr),
+    _rho(moose_obj->getParam<Real>(NS::density)),
     // initialize local number of dofs
     _p_n_dofs(0),
     _global_lm_n_dofs(_enclosure_lm_var ? 1 : 0)
