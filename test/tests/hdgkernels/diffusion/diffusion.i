@@ -89,6 +89,9 @@
     boundary = top
     variable = u
   []
+  [symmetric]
+    type = IsMatrixSymmetric
+  []
 []
 
 [Outputs]
