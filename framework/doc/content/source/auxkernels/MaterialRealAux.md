@@ -23,9 +23,11 @@ will be ignored.
 ## Example Input Syntax
 
 ### Material property
+
 !listing test/tests/materials/boundary_material/elem_aux_bc_on_bnd.i block=AuxKernels
 
 ### Functor
+
 !listing test/tests/auxkernels/functor_material_aux/real.i block=AuxKernels
 
 !syntax parameters /AuxKernels/MaterialRealAux

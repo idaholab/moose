@@ -10,13 +10,12 @@
 #pragma once
 
 // MOOSE includes
+#include "MooseTypes.h"
 #include "HashMap.h"
 #include "InfixIterator.h"
 #include "MooseEnumItem.h"
 #include "MooseError.h"
-#include "MooseTypes.h"
 #include "Moose.h"
-#include "ADReal.h"
 #include "ExecutablePath.h"
 #include "ConsoleUtils.h"
 

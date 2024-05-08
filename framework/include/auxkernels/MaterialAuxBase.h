@@ -68,8 +68,11 @@ InputParameters
 MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::validParams()
 {
   InputParameters params = AuxKernelTempl<RT>::validParams();
-  params.addRequiredParam<MaterialPropertyName>("property",
-                                                "The scalar (functor)material property name.");
+  if constexpr (is_functor)
+    params.addRequiredParam<MooseFunctorName>("functor", "The functor name.");
+  else
+    params.addRequiredParam<MaterialPropertyName>("property", "The material property name.");
+
   params.addParam<Real>(
       "factor", 1, "The factor by which to multiply your material property for visualization");
   params.addParam<RT>("offset", 0, "The offset to add to your material property for visualization");
@@ -93,7 +96,7 @@ MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
   : AuxKernelTempl<RT>(parameters),
     _prop([this]() -> const auto & {
       if constexpr (is_functor)
-        return this->template getFunctor<Moose::GenericType<T, is_ad>>("property");
+        return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
       else
         return this->template getGenericMaterialProperty<T, is_ad>("property");
     }()),

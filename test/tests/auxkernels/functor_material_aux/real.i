@@ -29,12 +29,12 @@
   [u]
     type = FunctorMaterialRealAux
     variable = u
-    property = functor
+    functor = functor
   []
   [v]
     type = FunctorMaterialRealAux
     variable = v
-    property = functor
+    functor = functor
   []
 []
 

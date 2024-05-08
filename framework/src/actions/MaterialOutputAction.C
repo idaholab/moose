@@ -24,30 +24,6 @@
 
 #include "libmesh/utility.h"
 
-// /// List of AuxKernels used for the respective property type output (one entry for each type in SupportedTypes)
-// const std::vector<std::string> MaterialOutputAction::_aux_kernel_names = {
-//     "MaterialRealAux",
-//     "MaterialRealVectorValueAux",
-//     "MaterialRealTensorValueAux",
-//     "MaterialRankTwoTensorAux",
-//     "MaterialRankFourTensorAux",
-//     "MaterialSymmetricRankTwoTensorAux",
-//     "MaterialSymmetricRankFourTensorAux"};
-
-// /// List of index symbols (one entry for each type in SupportedTypes)
-// const std::vector<std::string> MaterialOutputAction::_index_symbols = {
-//     "", "xyz", "012", "012", "012", "012345", "012345"};
-
-// /// List of coefficient parameter names (one entry for each type in SupportedTypes)
-// const std::vector<std::vector<std::string>> MaterialOutputAction::_param_names = {
-//     {},
-//     {"component"},
-//     {"row", "column"},
-//     {"i", "j"},
-//     {"i", "j", "k", "l"},
-//     {"component"},
-//     {"i", "j"}};
-
 registerMooseAction("MooseApp", MaterialOutputAction, "add_output_aux_variables");
 registerMooseAction("MooseApp", MaterialOutputAction, "add_aux_kernel");
 
@@ -338,7 +314,7 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
 
 std::vector<std::string>
 MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & metadata,
-                                   const MaterialPropertyName & property_name,
+                                   const std::string & property_name,
                                    const std::string & var_name_base,
                                    const MaterialBase & material,
                                    bool get_names_only)
@@ -382,7 +358,12 @@ MaterialOutputAction::getParams(const std::string & type,
 
   // Set the action parameters
   InputParameters params = _factory.getValidParams(type);
-  params.set<MaterialPropertyName>("property") = property_name;
+  if (params.have_parameter<MaterialPropertyName>("property"))
+    params.set<MaterialPropertyName>("property") = property_name;
+  else if (params.have_parameter<MooseFunctorName>("functor"))
+    params.set<MooseFunctorName>("functor") = property_name;
+  else
+    mooseError("Internal error. AuxKernel has neither a `functor` nor a `property` parameter.");
 
   params.set<AuxVariableName>("variable") = variable_name;
   if (_output_only_on_timestep_end)

@@ -46,7 +46,7 @@ protected:
 
   /// Universal output object setup function
   std::vector<std::string> outputHelper(const OutputMetaData & metadata,
-                                        const MaterialPropertyName & property_name,
+                                        const std::string & property_name,
                                         const std::string & var_name_base,
                                         const MaterialBase & material,
                                         bool get_names_only);

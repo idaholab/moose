@@ -10,13 +10,13 @@
 #pragma once
 
 // MOOSE includes
+#include "MooseUtils.h"
 #include "MooseBase.h"
 #include "MooseBaseParameterInterface.h"
 #include "MooseBaseErrorInterface.h"
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
-#include "MooseUtils.h"
 #include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
 

@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "ADReal.h"
+#include "EigenADReal.h"
 #include "ChainedReal.h"
 #include "ChainedADReal.h"
 #include "ADRankTwoTensorForward.h"
