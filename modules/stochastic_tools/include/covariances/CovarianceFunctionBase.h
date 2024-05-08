@@ -47,9 +47,11 @@ public:
   }
 
 protected:
-  const Real & addRealHyperParameter(const std::string & name, const Real value);
+  const Real &
+  addRealHyperParameter(const std::string & name, const Real value, const bool is_tunable);
   const std::vector<Real> & addVectorRealHyperParameter(const std::string & name,
-                                                        const std::vector<Real> value);
+                                                        const std::vector<Real> value,
+                                                        const bool is_tunable);
 
   /// Map of real-valued hyperparameters
   std::unordered_map<std::string, Real> _hp_map_real;

@@ -28,14 +28,13 @@ SquaredExponentialCovariance::validParams()
 
 SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters & parameters)
   : CovarianceFunctionBase(parameters),
-    _length_factor(
-        addVectorRealHyperParameter("length_factor", getParam<std::vector<Real>>("length_factor"))),
-    _sigma_f_squared(addRealHyperParameter("signal_variance", getParam<Real>("signal_variance"))),
-    _sigma_n_squared(addRealHyperParameter("noise_variance", getParam<Real>("noise_variance")))
+    _length_factor(addVectorRealHyperParameter(
+        "length_factor", getParam<std::vector<Real>>("length_factor"), true)),
+    _sigma_f_squared(
+        addRealHyperParameter("signal_variance", getParam<Real>("signal_variance"), true)),
+    _sigma_n_squared(
+        addRealHyperParameter("noise_variance", getParam<Real>("noise_variance"), true))
 {
-  _tunable_hp.insert("noise_variance");
-  _tunable_hp.insert("signal_variance");
-  _tunable_hp.insert("length_factor");
 }
 
 void

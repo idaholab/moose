@@ -35,15 +35,22 @@ CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
 }
 
 const Real &
-CovarianceFunctionBase::addRealHyperParameter(const std::string & name, const Real value)
+CovarianceFunctionBase::addRealHyperParameter(const std::string & name,
+                                              const Real value,
+                                              const bool is_tunable)
 {
+  if (is_tunable)
+    _tunable_hp.insert(name);
   return _hp_map_real.emplace(name, value).first->second;
 }
 
 const std::vector<Real> &
 CovarianceFunctionBase::addVectorRealHyperParameter(const std::string & name,
-                                                    const std::vector<Real> value)
+                                                    const std::vector<Real> value,
+                                                    const bool is_tunable)
 {
+  if (is_tunable)
+    _tunable_hp.insert(name);
   return _hp_map_vector_real.emplace(name, value).first->second;
 }
 

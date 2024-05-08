@@ -39,4 +39,8 @@ public:
 
 protected:
   const unsigned int _num_expansion_terms;
+  const unsigned int _num_outputs;
+  std::vector<const CovarianceFunctionBase *> _covariance_functions;
+  std::vector<const std::vector<Real> *> _a_coeffs;
+  std::vector<const std::vector<Real> *> _lambdas;
 };
