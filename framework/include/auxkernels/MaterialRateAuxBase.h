@@ -44,8 +44,6 @@ MaterialRateAuxBaseTempl<T, is_ad, RT>::MaterialRateAuxBaseTempl(const InputPara
   : MaterialAuxBaseTempl<RT, is_ad>(parameters),
     _prop_old(this->template getMaterialPropertyOld<T>("property"))
 {
-  if (!this->_property)
-    this->paramError("functor", "This object does not support functors yet.");
 }
 
 template <typename T = Real>

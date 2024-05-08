@@ -29,8 +29,8 @@ public:
   virtual void initQpStatefulProperties() override;
 
 protected:
-  using ADR2 = GenericType<R2, true>;
-  using ADR4 = GenericType<R4, true>;
+  using ADR2 = Moose::GenericType<R2, true>;
+  using ADR4 = Moose::GenericType<R4, true>;
 
   virtual void computeQpStress() override;
 

@@ -16,8 +16,8 @@
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable
  */
-template <typename T, bool is_ad>
-class MaterialRealVectorValueAuxTempl : public MaterialAuxBaseTempl<T, is_ad>
+template <typename T, bool is_ad, bool is_functor>
+class MaterialRealVectorValueAuxTempl : public MaterialAuxBaseTempl<T, is_ad, is_functor>
 {
 public:
   static InputParameters validParams();
@@ -35,9 +35,13 @@ protected:
   unsigned int _component;
 };
 
-typedef MaterialRealVectorValueAuxTempl<RealVectorValue, false> MaterialRealVectorValueAux;
-typedef MaterialRealVectorValueAuxTempl<RealVectorValue, true> ADMaterialRealVectorValueAux;
-typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, false>
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue, false, false> MaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue, true, false> ADMaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue, false, true>
+    FunctorMaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<RealVectorValue, true, true>
+    ADFunctorMaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, false, false>
     MaterialSymmetricRankTwoTensorAux;
-typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, true>
+typedef MaterialRealVectorValueAuxTempl<SymmetricRankTwoTensor, true, false>
     ADMaterialSymmetricRankTwoTensorAux;

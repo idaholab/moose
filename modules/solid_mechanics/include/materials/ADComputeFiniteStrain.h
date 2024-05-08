@@ -32,7 +32,7 @@ public:
   static MooseEnum decompositionType();
 
 protected:
-  using ADR2 = GenericType<R2, true>;
+  using ADR2 = Moose::GenericType<R2, true>;
   using FADR2 = FactorizedRankTwoTensorTempl<ADR2>;
 
   virtual void computeQpStrain();

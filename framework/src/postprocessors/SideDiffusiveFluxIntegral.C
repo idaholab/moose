@@ -51,7 +51,7 @@ SideDiffusiveFluxIntegralTempl<is_ad, T>::SideDiffusiveFluxIntegralTempl(
                         ? &getGenericMaterialProperty<T, is_ad>("diffusivity")
                         : nullptr),
     _functor_diffusion_coef(isParamValid("functor_diffusivity")
-                                ? &getFunctor<GenericType<T, is_ad>>("functor_diffusivity")
+                                ? &getFunctor<Moose::GenericType<T, is_ad>>("functor_diffusivity")
                                 : nullptr)
 {
   if (_fv && !isParamValid("functor_diffusivity"))

@@ -55,9 +55,9 @@ public:
   using Material::_qp;
 
   using GR2 = GenericRankTwoTensor<is_ad>;
-  using GSR2 = GenericType<R2, is_ad>;
+  using GSR2 = Moose::GenericType<R2, is_ad>;
   using GR4 = GenericRankFourTensor<is_ad>;
-  using GSR4 = GenericType<R4, is_ad>;
+  using GSR4 = Moose::GenericType<R4, is_ad>;
 
   /**
    * Given a strain increment that results in a trial stress, perform some

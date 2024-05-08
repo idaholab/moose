@@ -36,7 +36,7 @@ protected:
   Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   const GenericMaterialProperty<T, is_ad> * const _diffusion_coef;
-  const Moose::Functor<GenericType<T, is_ad>> * const _functor_diffusion_coef;
+  const Moose::Functor<Moose::GenericType<T, is_ad>> * const _functor_diffusion_coef;
 
 private:
   /// Routine to get the diffusive flux with a Real diffusivity

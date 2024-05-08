@@ -14,7 +14,7 @@
 #include "InfixIterator.h"
 #include "MooseEnumItem.h"
 #include "MooseError.h"
-#include "MooseADWrapper.h"
+#include "MooseTypes.h"
 #include "Moose.h"
 #include "ADReal.h"
 #include "ExecutablePath.h"

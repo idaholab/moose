@@ -42,7 +42,7 @@ protected:
   const PostprocessorValue & _postprocessor;
 
   // AD/non-AD version of the quadrature point coordinates
-  const MooseArray<GenericType<Point, is_ad>> * _generic_q_point;
+  const MooseArray<Moose::GenericType<Point, is_ad>> * _generic_q_point;
 
   usingGenericKernelMembers;
 };

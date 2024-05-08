@@ -46,7 +46,7 @@ PenaltyInterfaceDiffusionTempl<T, is_ad>::computeQpResidual(Moose::DGResidualTyp
 {
   GenericReal<is_ad> r = 0;
 
-  GenericType<T, is_ad> jump_value = 0;
+  Moose::GenericType<T, is_ad> jump_value = 0;
 
   if (_jump != nullptr)
     jump_value = (*_jump)[_qp];

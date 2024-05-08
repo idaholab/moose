@@ -61,12 +61,12 @@ PiecewiseMultiInterpolation::PiecewiseMultiInterpolation(const InputParameters &
 PiecewiseMultiInterpolation::~PiecewiseMultiInterpolation() {}
 
 template <bool is_ad>
-GenericType<PiecewiseMultiInterpolation::GridPoint, is_ad>
-PiecewiseMultiInterpolation::pointInGrid(const GenericType<Real, is_ad> & t,
-                                         const GenericType<Point, is_ad> & p) const
+Moose::GenericType<PiecewiseMultiInterpolation::GridPoint, is_ad>
+PiecewiseMultiInterpolation::pointInGrid(const Moose::GenericType<Real, is_ad> & t,
+                                         const Moose::GenericType<Point, is_ad> & p) const
 {
   // convert the inputs to an input to the sample function using _axes
-  GenericType<GridPoint, is_ad> point_in_grid(_dim);
+  Moose::GenericType<GridPoint, is_ad> point_in_grid(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
   {
     if (_axes[i] < 3)

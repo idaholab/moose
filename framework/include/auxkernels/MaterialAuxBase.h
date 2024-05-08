@@ -16,7 +16,7 @@
  * A base class for the various Material related AuxKernal objects.
  * \p RT is short for return type
  */
-template <typename T, bool is_ad, typename RT = Real>
+template <typename T, bool is_ad, bool is_functor = false, typename RT = Real>
 class MaterialAuxBaseTempl : public AuxKernelTempl<RT>
 {
 public:
@@ -29,10 +29,9 @@ public:
   MaterialAuxBaseTempl(const InputParameters & parameters);
 
   /// Functors really only work for Real and RealVectorValue for now :(
-  using MaterialAuxFunctorType =
-      typename std::conditional<std::is_same_v<T, Real> || std::is_same_v<T, RealVectorValue>,
-                                Moose::Functor<GenericType<T, is_ad>>,
-                                void>::type;
+  using PropertyType = typename std::conditional<is_functor,
+                                                 Moose::Functor<Moose::GenericType<T, is_ad>>,
+                                                 GenericMaterialProperty<T, is_ad>>::type;
 
 protected:
   virtual RT computeValue() override;
@@ -43,17 +42,14 @@ protected:
   /// Returns material property values at quadrature points
   virtual RT getRealValue() = 0;
 
-  /// Material property for this AuxKernel
-  const GenericMaterialProperty<T, is_ad> * _property;
-
-  /// Functor for this AuxKernel
-  const MaterialAuxFunctorType * _functor;
+  /// (Functor)Material property for this AuxKernel
+  const PropertyType & _prop;
 
   /// Evaluate at this quadrature point only
   const unsigned int _selected_qp;
 
   /// T Value evaluated from either the property or the functor
-  GenericType<T, is_ad> _full_value;
+  Moose::GenericType<T, is_ad> _full_value;
 
 private:
   /// Multiplier for the material property
@@ -61,67 +57,76 @@ private:
 
   /// Value to be added to the material property
   const RT _offset;
+
+  /// ID of the subdomain currently being iterated over
+  const SubdomainID & _current_subdomain_id;
 };
 
-template <typename T, bool is_ad, typename RT>
+template <typename T, bool is_ad, bool is_functor, typename RT>
 InputParameters
-MaterialAuxBaseTempl<T, is_ad, RT>::validParams()
+MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::validParams()
 {
   InputParameters params = AuxKernelTempl<RT>::validParams();
-  params.addParam<MaterialPropertyName>(
-      "property", "The scalar material property name (set either this or `functor`).");
-  // functors do not support all types
-  if constexpr (!std::is_same_v<MaterialAuxFunctorType, void>)
-    params.addParam<MooseFunctorName>(
-        "functor", "The scalar material property name (set either this or `property`).");
+  params.addRequiredParam<MaterialPropertyName>("property",
+                                                "The scalar (functor)material property name.");
   params.addParam<Real>(
       "factor", 1, "The factor by which to multiply your material property for visualization");
   params.addParam<RT>("offset", 0, "The offset to add to your material property for visualization");
 
-  params.addParam<unsigned int>(
-      "selected_qp",
-      "Evaluate the material property at a specified quadrature point. This only needs "
-      "to be used if you are interested in a particular quadrature point in each element. "
-      "Otherwise do not include this parameter in your input file.");
-  params.addParamNamesToGroup("selected_qp", "Advanced");
+  if constexpr (!is_functor)
+  {
+    params.addParam<unsigned int>(
+        "selected_qp",
+        "Evaluate the material property at a specified quadrature point. This only needs "
+        "to be used if you are interested in a particular quadrature point in each element. "
+        "Otherwise do not include this parameter in your input file.");
+    params.addParamNamesToGroup("selected_qp", "Advanced");
+  }
 
   return params;
 }
 
-template <typename T, bool is_ad, typename RT>
-MaterialAuxBaseTempl<T, is_ad, RT>::MaterialAuxBaseTempl(const InputParameters & parameters)
+template <typename T, bool is_ad, bool is_functor, typename RT>
+MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
+    const InputParameters & parameters)
   : AuxKernelTempl<RT>(parameters),
-    _property(this->isParamValid("property")
-                  ? &this->template getGenericMaterialProperty<T, is_ad>("property")
-                  : nullptr),
-    _functor(this->isParamValid("functor")
-                 ? [this]() {
-                    if constexpr (!std::is_same_v<MaterialAuxFunctorType, void>)
-                      return &this->template getFunctor<GenericType<T, is_ad>>("functor");
-                    else
-                    {
-                      libmesh_ignore(this);
-                      return nullptr;
-                    }
-                 }()
-                 : nullptr),
-    _selected_qp(this->isParamValid("selected_qp") ? this->template getParam<unsigned int>("selected_qp") : libMesh::invalid_uint),
+    _prop([this]() -> const auto & {
+      if constexpr (is_functor)
+        return this->template getFunctor<Moose::GenericType<T, is_ad>>("property");
+      else
+        return this->template getGenericMaterialProperty<T, is_ad>("property");
+    }()),
+    _selected_qp(this->isParamValid("selected_qp")
+                     ? this->template getParam<unsigned int>("selected_qp")
+                     : libMesh::invalid_uint),
     _factor(this->template getParam<Real>("factor")),
-    _offset(this->template getParam<RT>("offset"))
+    _offset(this->template getParam<RT>("offset")),
+    _current_subdomain_id(this->_assembly.currentSubdomainID())
 {
-  if (!_property == !_functor)
-    mooseError("Specify either a `property` or a `functor` parameter.");
-  if (_functor && _selected_qp != libMesh::invalid_uint)
-    this->paramError("selected_qp",
-                     "Selective quadrature point evaluation is not implemented for functors.");
 }
 
-template <typename T, bool is_ad, typename RT>
+template <typename T, bool is_ad, bool is_functor, typename RT>
 RT
-MaterialAuxBaseTempl<T, is_ad, RT>::computeValue()
+MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::computeValue()
 {
-  // Material Property Values
-  if (_property)
+  // Functor Values
+  if constexpr (is_functor)
+  {
+    if (this->isNodal())
+    {
+      const Moose::NodeArg node_arg{this->_current_node, _current_subdomain_id};
+      const auto state = this->determineState();
+      _full_value = _prop(node_arg, state);
+    }
+    else
+    {
+      const auto elem_arg = this->makeElemArg(this->_current_elem);
+      const auto state = this->determineState();
+      _full_value = _prop(elem_arg, state);
+    }
+  }
+  // Material Properties
+  else
   {
     if (_selected_qp != libMesh::invalid_uint)
     {
@@ -135,29 +140,15 @@ MaterialAuxBaseTempl<T, is_ad, RT>::computeValue()
                          this->_q_point.size(),
                          " quadrature points in the element");
       }
-      _full_value = (*_property)[_selected_qp];
+      _full_value = _prop[_selected_qp];
     }
     else
-      _full_value = (*_property)[this->_qp];
-  }
-
-  // Functor Values
-  if (_functor)
-  {
-    if constexpr (!std::is_same_v<MaterialAuxFunctorType, void>)
-    {
-      const auto elem_arg = this->makeElemArg(this->_current_elem);
-      const auto state = this->determineState();
-      _full_value = (*_functor)(elem_arg, state);
-    }
-    else
-      mooseError("Unsupported functor type");
+      _full_value = _prop[this->_qp];
   }
 
   checkFullValue();
-
   return _factor * getRealValue() + _offset;
 }
 
 template <typename T = Real>
-using MaterialAuxBase = MaterialAuxBaseTempl<T, false, Real>;
+using MaterialAuxBase = MaterialAuxBaseTempl<T, false, false, Real>;

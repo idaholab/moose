@@ -12,16 +12,11 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
-// Forward Declarations
-template <bool>
-class MaterialRealAuxTempl;
-typedef MaterialRealAuxTempl<false> MaterialRealAux;
-
 /**
  * Object for passing a scalar, REAL material property to an AuxVariable
  */
-template <bool is_ad>
-class MaterialRealAuxTempl : public MaterialAuxBaseTempl<Real, is_ad>
+template <bool is_ad, bool is_functor>
+class MaterialRealAuxTempl : public MaterialAuxBaseTempl<Real, is_ad, is_functor>
 {
 public:
   static InputParameters validParams();
@@ -37,4 +32,7 @@ protected:
   Real getRealValue() override;
 };
 
-typedef MaterialRealAuxTempl<true> ADMaterialRealAux;
+typedef MaterialRealAuxTempl<false, false> MaterialRealAux;
+typedef MaterialRealAuxTempl<true, false> ADMaterialRealAux;
+typedef MaterialRealAuxTempl<false, true> FunctorMaterialRealAux;
+typedef MaterialRealAuxTempl<true, true> ADFunctorMaterialRealAux;

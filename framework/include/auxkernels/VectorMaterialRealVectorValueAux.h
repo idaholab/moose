@@ -17,7 +17,7 @@
  */
 template <bool is_ad>
 class VectorMaterialRealVectorValueAuxTempl
-  : public MaterialAuxBaseTempl<RealVectorValue, is_ad, RealVectorValue>
+  : public MaterialAuxBaseTempl<RealVectorValue, is_ad, false, RealVectorValue>
 {
 public:
   static InputParameters validParams();

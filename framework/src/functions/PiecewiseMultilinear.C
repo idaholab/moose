@@ -44,8 +44,8 @@ PiecewiseMultilinear::sample(const ADGridPoint & pt) const
 }
 
 template <bool is_ad>
-GenericType<Real, is_ad>
-PiecewiseMultilinear::sampleInternal(const GenericType<GridPoint, is_ad> pt) const
+Moose::GenericType<Real, is_ad>
+PiecewiseMultilinear::sampleInternal(const Moose::GenericType<GridPoint, is_ad> pt) const
 {
   /*
    * left contains the indices of the point to the 'left', 'down', etc, of pt
@@ -63,8 +63,8 @@ PiecewiseMultilinear::sampleInternal(const GenericType<GridPoint, is_ad> pt) con
    * those vertices, and weighting the contributions to the
    * final result depending on the distance of pt from the vertex
    */
-  GenericType<Real, is_ad> f = 0;
-  GenericType<Real, is_ad> weight;
+  Moose::GenericType<Real, is_ad> f = 0;
+  Moose::GenericType<Real, is_ad> weight;
   GridIndex arg(_dim);
   // number of points in hypercube = 2^_dim
   for (unsigned int i = 0; i < (1u << _dim); ++i)

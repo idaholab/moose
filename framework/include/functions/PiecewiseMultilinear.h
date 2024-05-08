@@ -39,5 +39,6 @@ protected:
 
 private:
   template <bool is_ad>
-  GenericType<Real, is_ad> sampleInternal(const GenericType<GridPoint, is_ad> pt) const;
+  Moose::GenericType<Real, is_ad>
+  sampleInternal(const Moose::GenericType<GridPoint, is_ad> pt) const;
 };

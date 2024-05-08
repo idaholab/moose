@@ -18,7 +18,6 @@
 #include "MeshChangedInterface.h"
 #include "ScalarCoupleable.h"
 #include "MooseFunctor.h"
-#include "MooseADWrapper.h"
 #include "ChainedReal.h"
 
 // libMesh
@@ -209,7 +208,7 @@ template <typename U>
 auto
 Function::value(const U & t) const
 {
-  static const GenericType<Point, MooseIsADType<U>::value> p;
+  static const Moose::GenericType<Point, Moose::IsADType<U>::value> p;
   return value(t, p);
 }
 
@@ -217,7 +216,7 @@ template <typename U>
 auto
 Function::value(const U & t, const U & x, const U & y, const U & z) const
 {
-  GenericType<Point, MooseIsADType<U>::value> p(x, y, z);
+  Moose::GenericType<Point, Moose::IsADType<U>::value> p(x, y, z);
   return value(t, p);
 }
 
@@ -225,7 +224,7 @@ template <typename U>
 auto
 Function::timeDerivative(const U & t) const
 {
-  static const GenericType<Point, MooseIsADType<U>::value> p;
+  static const Moose::GenericType<Point, Moose::IsADType<U>::value> p;
   return timeDerivative(t, p);
 }
 
@@ -233,6 +232,6 @@ template <typename U>
 auto
 Function::timeDerivative(const U & t, const U & x, const U & y, const U & z) const
 {
-  GenericType<Point, MooseIsADType<U>::value> p(x, y, z);
+  Moose::GenericType<Point, Moose::IsADType<U>::value> p(x, y, z);
   return timeDerivative(t, p);
 }

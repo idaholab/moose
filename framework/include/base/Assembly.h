@@ -358,7 +358,7 @@ public:
   }
 
   template <bool is_ad>
-  const MooseArray<GenericType<Point, is_ad>> & genericQPoints() const;
+  const MooseArray<Moose::GenericType<Point, is_ad>> & genericQPoints() const;
 
   /**
    * Return the current element

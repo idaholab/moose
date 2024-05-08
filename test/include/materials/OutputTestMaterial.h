@@ -15,13 +15,10 @@
 #include "RankFourTensorForward.h"
 #include "SymmetricRankTwoTensorForward.h"
 #include "SymmetricRankFourTensorForward.h"
+
 class OutputTestMaterial : public Material
 {
 public:
-  /**
-   * Class constructor
-   * @param prop_name
-   */
   static InputParameters validParams();
 
   OutputTestMaterial(const InputParameters & parameters);
