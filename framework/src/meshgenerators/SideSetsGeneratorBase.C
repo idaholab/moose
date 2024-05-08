@@ -114,6 +114,8 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
   _fe_face = FEBase::build(dim, fe_type);
   _qface = std::make_unique<QGauss>(dim - 1, FIRST);
   _fe_face->attach_quadrature_rule(_qface.get());
+  // Must always pre-request quantities you want to compute
+  _fe_face->get_normals();
 
   // Handle incompatible parameters
   if (_include_only_external_sides && _check_neighbor_subdomains)
