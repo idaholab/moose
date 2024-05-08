@@ -208,14 +208,21 @@ class TestHarness:
         # Build a Warehouse to hold the MooseObjects
         self.warehouse = Warehouse()
 
-        # Get dependant applications and load dynamic tester plugins
-        # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
+        # Testers from this directory
         dirs = [os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))]
-        dirs.append(os.path.join(moose_dir, 'share', 'moose', 'python', 'TestHarness', 'testers'))
 
-        # Use the find_dep_apps script to get the dependant applications for an app
-        depend_app_dirs = findDepApps(app_name, use_current_only=True)
-        dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
+        # Get dependent applications and load dynamic tester plugins
+        # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
+        # Use the find_dep_apps script to get the dependent applications for an app
+        app_dirs = findDepApps(app_name, use_current_only=True).split('\n')
+        # For installed binaries, the apps will exist in RELEASE_PATH/scripts, where in
+        # this case RELEASE_PATH is moose_dir
+        share_dir = os.path.join(moose_dir, 'share')
+        for dir in os.listdir(share_dir):
+            if dir != 'moose':
+                app_dirs.append(os.path.join(share_dir, dir))
+        # Add scripts/TestHarness for all of the above
+        dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in app_dirs])
 
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
