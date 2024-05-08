@@ -13,4 +13,19 @@
     exodiff = channel_out.e
     requirement = 'The system shall be able to solve a channel flow problem using a hybridized discontinuous Galerkin discretization.'
   []
+  [stokes_symmetric]
+    requirement = 'The system shall produce a symmetric matrix for a hybridizable discontinuous Galerkin discretization of the Stokes equation for a'
+    [lid]
+      type = CSVDiff
+      input = stokes-lid.i
+      csvdiff = stokes-lid_out.csv
+      detail = 'lid driven cavity problem, and'
+    []
+    [channel]
+      type = CSVDiff
+      input = stokes-channel.i
+      csvdiff = stokes-channel_out.csv
+      detail = 'channel flow problem.'
+    []
+  []
 []
