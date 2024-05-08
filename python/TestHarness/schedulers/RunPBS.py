@@ -189,7 +189,7 @@ class RunPBS(RunParallel):
         walltime = str(datetime.timedelta(seconds=tester.getMaxTime()))
 
         # Add MOOSE's python path for python scripts
-        moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../..'))
+        moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..'))
 
         # Set up the template
         template_env = {'NAME': self.getPBSJobName(job),
