@@ -46,30 +46,16 @@ public:
                            const Real gamma,
                            const int ind);
 
-  /// Used for outputting Hyper-parameter settings
-  virtual void
-  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
-
-  /// Used for outputting Hyper-parameter settings for use in surrogate
-  virtual void
-  loadHyperParamMap(std::unordered_map<std::string, Real> & map,
-                    std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
-
-  /// Get the default minima, maxima, sizes of a hyper parameter
-  virtual void
-  getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const override;
-
 private:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  std::vector<Real> _length_factor;
+  const std::vector<Real> & _length_factor;
 
   /// signal variance (\sigma_f^2)
-  Real _sigma_f_squared;
+  const Real & _sigma_f_squared;
 
   /// noise variance (\sigma_n^2)
-  Real _sigma_n_squared;
+  const Real & _sigma_n_squared;
 
   /// gamma exponential factor for use in kernel
-  Real _gamma;
+  const Real & _gamma;
 };

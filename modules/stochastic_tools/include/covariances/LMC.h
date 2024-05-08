@@ -37,28 +37,6 @@ public:
                            const Real sigma_f_squared,
                            const int ind);
 
-  /// Used for outputting Hyper-parameter settings
-  virtual void buildHyperParamMap(
-      std::unordered_map<std::string, Real> & /*map*/,
-      std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) const override
-  {
-  }
-
-  /// Used for outputting Hyper-parameter settings for use in surrogate
-  virtual void
-  loadHyperParamMap(std::unordered_map<std::string, Real> & /*map*/,
-                    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) override
-  {
-  }
-
-  /// Get the default minima, maxima, sizes of a hyper parameter
-  virtual void getTuningData(std::string /*name*/,
-                             unsigned int & /*size*/,
-                             Real & /*min*/,
-                             Real & /*max*/) const override
-  {
-  }
-
 protected:
   const unsigned int _num_expansion_terms;
 };

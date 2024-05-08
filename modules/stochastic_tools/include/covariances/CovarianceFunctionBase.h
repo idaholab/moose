@@ -24,17 +24,13 @@ public:
                                        const RealEigenMatrix & xp,
                                        const bool is_self_covariance) const = 0;
 
-  /// Used for outputting Hyper-parameter settings
-  virtual void
-  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
+  void loadHyperParamMap(const std::unordered_map<std::string, Real> & map,
+                         const std::unordered_map<std::string, std::vector<Real>> & vec_map);
 
-  /// Used for outputting Hyper-parameter settings for use in surrogate
-  virtual void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
-                                 std::unordered_map<std::string, std::vector<Real>> & vec_map) = 0;
+  void buildHyperParamMap(std::unordered_map<std::string, Real> & map,
+                          std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
 
-  virtual void
-  getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const = 0;
+  virtual void getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const;
 
   /// Redirect dK/dhp for hyperparameter "hp"
   virtual void computedKdhyper(RealEigenMatrix & dKdhp,
@@ -44,7 +40,23 @@ public:
 
   virtual bool isTunable(std::string name) const;
 
+  std::unordered_map<std::string, Real> & hyperParamMapReal() { return _hp_map_real; }
+  std::unordered_map<std::string, std::vector<Real>> & hyperParamMapVectorReal()
+  {
+    return _hp_map_vector_real;
+  }
+
 protected:
+  const Real & addRealHyperParameter(const std::string & name, const Real value);
+  const std::vector<Real> & addVectorRealHyperParameter(const std::string & name,
+                                                        const std::vector<Real> value);
+
+  /// Map of real-valued hyperparameters
+  std::unordered_map<std::string, Real> _hp_map_real;
+
+  /// Map of vector-valued hyperparameters
+  std::unordered_map<std::string, std::vector<Real>> _hp_map_vector_real;
+
   /// list of tunable hyper-parameters
   std::unordered_set<std::string> _tunable_hp;
 };
