@@ -118,6 +118,11 @@ PatternedCartesianMeshGenerator::validParams()
       "interface_boundary_id_shift_pattern",
       "User-defined shift values for each pattern cell. A double-indexed array starting with the "
       "upper-left corner.");
+  MooseEnum quad_elem_type("QUAD4 QUAD8 QUAD9", "QUAD4");
+  params.addParam<MooseEnum>(
+      "boundary_element_type",
+      quad_elem_type,
+      "Type of the quadrilateral elements to be generated in the boundary region.");
   params.addParamNamesToGroup(
       "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
       "external_boundary_id external_boundary_name create_inward_interface_boundaries "
@@ -169,7 +174,9 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _use_reporting_id(isParamValid("id_name")),
     _use_exclude_id(isParamValid("exclude_id")),
-    _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern"))
+    _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern")),
+    _boundary_quad_elem_type(
+        getParam<MooseEnum>("boundary_element_type").template getEnum<QUAD_ELEM_TYPE>())
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
   declareMeshProperty("input_pitch_meta", 0.0);
@@ -831,6 +838,32 @@ PatternedCartesianMeshGenerator::generate()
         out_mesh->add_point(p_tmp, node_azi_list[i * side_intervals + j - 1].second);
       }
     }
+
+    // adjust quadratic mid-edge nodes after boundary node redistribution
+    if (_boundary_quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
+    {
+      for (auto elem = out_mesh->elements_begin(); elem != out_mesh->elements_end(); ++elem)
+      {
+        // only adjust elements on outer boundary
+        if (!(*elem)->on_boundary())
+          continue;
+
+        // adjust point 5
+        Point pt_5 = ((*elem)->point(1) + (*elem)->point(2)) / 2.0;
+        out_mesh->add_point(pt_5, (*elem)->node_ptr(5)->id());
+
+        // adjoin point 7
+        Point pt_7 = ((*elem)->point(0) + (*elem)->point(3)) / 2.0;
+        out_mesh->add_point(pt_7, (*elem)->node_ptr(7)->id());
+
+        // adjust point 8 for QUAD9
+        if (_boundary_quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
+        {
+          Point pt_8 = (*elem)->centroid();
+          out_mesh->add_point(pt_8, (*elem)->node_ptr(8)->id());
+        }
+      }
+    }
     MeshTools::Modification::rotate(*out_mesh, 45.0, 0.0, 0.0);
   }
 
@@ -1032,9 +1065,11 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
                                           sub_positions_inner,
                                           sub_d_positions_outer,
                                           i,
+                                          _boundary_quad_elem_type,
                                           _create_inward_interface_boundaries,
                                           (i != extra_dist.size() - 1) &&
                                               _create_outward_interface_boundaries);
+
       if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
         meshp0->prepare_for_use();
 
