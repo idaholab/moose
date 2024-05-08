@@ -50,8 +50,10 @@ class PythonUnitTest(RunApp):
         return f'PYTHONPATH={self.getMooseDir()}/python ' + cmd  + ' '.join(self.specs['cli_args'])
 
     def checkRunnable(self, options):
-        if options.pbs:
-            self.addCaveats('PBS NOT SUPPORTED')
+        # Can't run within apptainer in parallel because mpiexec needs to be
+        # executed outside of the apptainer call
+        if os.environ.get('APPTAINER_CONTAINER') and self.getProcs(options) > 1:
+            self.addCaveats('PARALLEL APPTAINER')
             self.setStatus(self.skip)
             return False
 
