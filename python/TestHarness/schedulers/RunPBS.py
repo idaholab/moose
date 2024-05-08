@@ -188,6 +188,9 @@ class RunPBS(RunParallel):
         num_threads = tester.getThreads(options)
         walltime = str(datetime.timedelta(seconds=tester.getMaxTime()))
 
+        # Add MOOSE's python path for python scripts
+        moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../..'))
+
         # Set up the template
         template_env = {'NAME': self.getPBSJobName(job),
                         'SELECT': f'{num_procs}:mpiprocs=1:ncpus={num_threads}',
@@ -198,7 +201,8 @@ class RunPBS(RunParallel):
                         'SUBMITTED_HOSTNAME': socket.gethostname(),
                         'CWD': tester.getTestDir(),
                         'COMMAND': full_command,
-                        'ENDING_COMMENT': self.getOutputEndingComment()}
+                        'ENDING_COMMENT': self.getOutputEndingComment(),
+                        'MOOSE_PYTHONPATH': moose_python}
         if self.options.queue_queue:
             template_env['QUEUE'] = self.options.queue_queue
         if self.options.queue_source_command:
