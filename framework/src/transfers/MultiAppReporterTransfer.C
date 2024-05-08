@@ -32,10 +32,11 @@ MultiAppReporterTransfer::validParams()
       "sub-application. If unset and transferring to the sub-applications then all "
       "sub-applications will receive data. The value must be set when transferring from a "
       "sub-application.");
-  params.addParam<bool>(
-      "distribute_reporter_vector",
-      false,
-      "Reporters will be transfered in a distributed fashion. N to 1 or 1 to N type of transfer.");
+  params.addParam<bool>("distribute_reporter_vector",
+                        false,
+                        "Transfer to/from a vector reporter to reporters on child applications. N "
+                        "to 1 or 1 to N type of transfer. The number of child applications must "
+                        "match the size of the vector reporter");
   return params;
 }
 
