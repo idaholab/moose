@@ -29,7 +29,7 @@
     [multiple]
       type = RunException
       input = 'add_raybc_action.i'
-      cli_args = 'RayBCs/active=multiple_studies "UserObjects/active=\'study another_study\'"'
+      cli_args = 'RayBCs/active=multiple_studies UserObjects/active="study another_study"'
       expect_err = "While constructing the NullRayBC 'multiple_studies', multiple RayTracingStudy objects were found."
       allow_test_objects = true
 
