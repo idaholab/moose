@@ -2175,14 +2175,12 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     for (const auto i : elem->node_index_range())
       elem->set_node(i) = mesh.node_ptr(i);
 
-    std::unique_ptr<FEBase> fe(FEBase::build(dim, p_refinable_fe_type));
     std::unique_ptr<FEBase> fe_face(FEBase::build(dim, p_refinable_fe_type));
     fe_face->get_phi();
     const auto & face_phys_points = fe_face->get_xyz();
-
-    fe->attach_quadrature_rule(qrule);
     fe_face->attach_quadrature_rule(qrule_face);
-    fe->reinit(elem);
+
+    qrule->init(elem->type(), elem->p_level());
     volume_ref_points_coarse = qrule->get_points();
     fe_face->reinit(elem, (unsigned int)0);
     FEInterface::inverse_map(
@@ -2195,7 +2193,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     for (const auto p_level : p_levels)
     {
       mesh_refinement.uniformly_p_refine(1);
-      fe->reinit(elem);
+      qrule->init(elem->type(), elem->p_level());
       volume_ref_points_fine = qrule->get_points();
       fe_face->reinit(elem, (unsigned int)0);
       FEInterface::inverse_map(
