@@ -26,13 +26,21 @@ namespace StochasticTools
 
 GaussianProcessGeneral::GPOptimizerOptions::GPOptimizerOptions(
     const bool inp_show_optimization_details,
-    const unsigned int inp_iter_adam,
+    const unsigned int inp_num_iter,
     const unsigned int inp_batch_size,
-    const Real inp_learning_rate_adam)
+    const Real inp_learning_rate,
+    const Real inp_b1,
+    const Real inp_b2,
+    const Real inp_eps,
+    const Real inp_lambda)
   : show_optimization_details(inp_show_optimization_details),
-    iter_adam(inp_iter_adam),
+    num_iter(inp_num_iter),
     batch_size(inp_batch_size),
-    learning_rate_adam(inp_learning_rate_adam)
+    learning_rate(inp_learning_rate),
+    b1(inp_b1),
+    b2(inp_b2),
+    eps(inp_eps),
+    lambda(inp_lambda)
 {
 }
 
@@ -64,12 +72,7 @@ GaussianProcessGeneral::setupCovarianceMatrix(const RealEigenMatrix & training_p
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(batch_size, batch_size);
 
-  tuneHyperParamsAdam(training_params,
-                      training_data,
-                      opts.iter_adam,
-                      batch_size,
-                      opts.learning_rate_adam,
-                      opts.show_optimization_details);
+  tuneHyperParamsAdam(training_params, training_data, opts);
 
   _K.resize(training_params.rows(), training_params.rows());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
@@ -136,22 +139,18 @@ GaussianProcessGeneral::standardizeData(RealEigenMatrix & data, bool keep_moment
 void
 GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                                             const RealEigenMatrix & training_data,
-                                            unsigned int iter,
-                                            const unsigned int & batch_size,
-                                            const Real & learning_rate,
-                                            const bool & show_optimization_details)
+                                            const GPOptimizerOptions & opts)
 {
   std::vector<Real> theta(_num_tunable, 0.0);
-  _batch_size = batch_size;
+  _batch_size = opts.batch_size;
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-  Real b1;
-  Real b2;
-  Real eps;
+
   // Internal params for Adam; set to the recommended values in the paper
-  b1 = 0.9;
-  b2 = 0.999;
-  eps = 1e-7;
+  Real b1 = opts.b1;
+  Real b2 = opts.b2;
+  Real eps = opts.eps;
+
   std::vector<Real> m0(_num_tunable, 0.0);
   std::vector<Real> v0(_num_tunable, 0.0);
 
@@ -166,9 +165,9 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   RealEigenMatrix inputs(_batch_size, training_params.cols());
   RealEigenMatrix outputs(_batch_size, 1);
-  if (show_optimization_details)
+  if (opts.show_optimization_details)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
-  for (unsigned int ss = 0; ss < iter; ++ss)
+  for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
   {
     // Shuffle data
     MooseRandom generator;
@@ -183,7 +182,7 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
     }
 
     store_loss = getLoss(inputs, outputs);
-    if (show_optimization_details && ss == 0)
+    if (opts.num_iter && ss == 0)
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
     grad1 = getGradient(inputs);
     for (unsigned int ii = 0; ii < _num_tunable; ++ii)
@@ -192,7 +191,7 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
       v0[ii] = b2 * v0[ii] + (1 - b2) * grad1[ii] * grad1[ii];
       m_hat = m0[ii] / (1 - std::pow(b1, (ss + 1)));
       v_hat = v0[ii] / (1 - std::pow(b2, (ss + 1)));
-      new_val = theta[ii] - learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+      new_val = theta[ii] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
       if (new_val < 0.01) // constrain params on the lower side
         new_val = 0.01;
       theta[ii] = new_val;
@@ -200,7 +199,7 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
     vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   }
-  if (show_optimization_details)
+  if (opts.show_optimization_details)
   {
     Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
     Moose::out << Moose::stringify(theta) << std::endl;

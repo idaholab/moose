@@ -50,18 +50,30 @@ public:
     GPOptimizerOptions();
     /// Construct using user-input
     GPOptimizerOptions(const bool inp_show_optimization_details,
-                       const unsigned int inp_iter_adam_ = 1000,
+                       const unsigned int inp_num_iter = 1000,
                        const unsigned int inp_batch_size = 0,
-                       const Real inp_learning_rate_adam = 1e-3);
+                       const Real inp_learning_rate = 1e-3,
+                       const Real inp_b1 = 0.9,
+                       const Real inp_b2 = 0.999,
+                       const Real inp_eps = 1e-7,
+                       const Real inp_lambda = 0.0);
 
     /// Switch to enable verbose output for parameter tuning
-    bool show_optimization_details = false;
+    const bool show_optimization_details = false;
     /// The number of iterations for Adam optimizer
-    unsigned int iter_adam = 1000;
+    const unsigned int num_iter = 1000;
     /// The batch isize for Adam optimizer
-    unsigned int batch_size = 0;
+    const unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
-    Real learning_rate_adam = 1e-3;
+    const Real learning_rate = 1e-3;
+    /// Tuning parameter from the paper
+    const Real b1 = 0.9;
+    /// Tuning parameter from the paper
+    const Real b2 = 0.999;
+    /// Tuning parameter from the paper
+    const Real eps = 1e-7;
+    /// Tuning parameter from the paper
+    const Real lambda = 0.0;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -116,10 +128,7 @@ public:
   // Tune hyperparameters using Adam
   void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                            const RealEigenMatrix & training_data,
-                           unsigned int iter,
-                           const unsigned int & batch_size,
-                           const Real & learning_rate,
-                           const bool & verbose);
+                           const GPOptimizerOptions & opts);
 
   // Computes the loss function
   Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
