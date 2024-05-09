@@ -94,6 +94,15 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
     pressure = pressure
   []
+  [u_friction]
+    type = PINSFVMomentumFriction
+    Darcy_name = Darcy_coefficient_vec
+    is_porous_medium = false
+    momentum_component = x
+    mu = mu_mixture
+    rho = rho_mixture
+    variable = vel_x
+  []
 
   [v_advection]
     type = INSFVMomentumAdvection
@@ -124,6 +133,15 @@ velocity_interp_method = 'rc'
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
+  []
+  [v_friction]
+    type = PINSFVMomentumFriction
+    Darcy_name = Darcy_coefficient_vec
+    is_porous_medium = false
+    momentum_component = y
+    mu = mu_mixture
+    rho = rho_mixture
+    variable = vel_y
   []
 
   [phase_2_advection]

@@ -77,11 +77,8 @@ k_d = 1
         phase_fraction_inlet_type = 'fixed-value'
         phase_fraction_inlet_functors = '${inlet_phase_2}'
 
-        ghost_layers = 5
+        ghost_layers = 7
 
-        # Drift flux parameters
-        add_drift_flux_momentum_terms = false
-        density_interp_method = 'average'
         add_advection_slip_term = true
 
         # Base phase material properties

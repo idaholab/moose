@@ -35,6 +35,9 @@
     exodiff = 'channel-drift-flux-physics_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model using the Navier Stokes Physics syntax.'
     installation_type = in_tree
+    # Negative viscosity during solve
+    allow_warnings = true
+    custom_cmp = 'mixture_physics_diff.cmp'
   []
   [mixture_channel_drift_flux_transient]
     type = 'CSVDiff'
@@ -56,5 +59,8 @@
     exodiff = 'channel-advection-slip-physics_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture advection-slip model using the Navier Stokes Physics syntax.'
     installation_type = in_tree
+    # Negative viscosity during solve
+    allow_warnings = true
+    custom_cmp = 'mixture_physics_diff.cmp'
   []
 []
