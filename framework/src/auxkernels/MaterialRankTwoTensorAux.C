@@ -13,12 +13,14 @@
 
 registerMooseObject("MooseApp", MaterialRankTwoTensorAux);
 registerMooseObject("MooseApp", ADMaterialRankTwoTensorAux);
+registerMooseObject("MooseApp", MaterialSymmetricRankFourTensorAux);
+registerMooseObject("MooseApp", ADMaterialSymmetricRankFourTensorAux);
 
-template <bool is_ad>
+template <typename T, bool is_ad>
 InputParameters
-MaterialRankTwoTensorAuxTempl<is_ad>::validParams()
+MaterialRankTwoTensorAuxTempl<T, is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBaseTempl<RankTwoTensor, is_ad>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<T, is_ad>::validParams();
   params.addClassDescription(
       "Access a component of a RankTwoTensor for automatic material property output");
   params.addRequiredParam<unsigned int>("i", "The index i of ij for the tensor to output");
@@ -26,20 +28,25 @@ MaterialRankTwoTensorAuxTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-MaterialRankTwoTensorAuxTempl<is_ad>::MaterialRankTwoTensorAuxTempl(
+template <typename T, bool is_ad>
+MaterialRankTwoTensorAuxTempl<T, is_ad>::MaterialRankTwoTensorAuxTempl(
     const InputParameters & parameters)
-  : MaterialAuxBaseTempl<RankTwoTensor, is_ad>(parameters),
+  : MaterialAuxBaseTempl<T, is_ad>(parameters),
     _i(this->template getParam<unsigned int>("i")),
     _j(this->template getParam<unsigned int>("j"))
 {
-  mooseAssert(_i < LIBMESH_DIM, "i component out of range for current LIBMESH_DIM");
-  mooseAssert(_j < LIBMESH_DIM, "j component out of range for current LIBMESH_DIM");
+  mooseAssert(_i < T::N, "i component out of range.");
+  mooseAssert(_j < T::N, "j component out of range.");
 }
 
-template <bool is_ad>
+template <typename T, bool is_ad>
 Real
-MaterialRankTwoTensorAuxTempl<is_ad>::getRealValue()
+MaterialRankTwoTensorAuxTempl<T, is_ad>::getRealValue()
 {
-  return MetaPhysicL::raw_value(this->_prop[this->_qp](_i, _j));
+  return MetaPhysicL::raw_value(this->_full_value(_i, _j));
 }
+
+template class MaterialRankTwoTensorAuxTempl<RankTwoTensor, false>;
+template class MaterialRankTwoTensorAuxTempl<RankTwoTensor, true>;
+template class MaterialRankTwoTensorAuxTempl<SymmetricRankFourTensor, false>;
+template class MaterialRankTwoTensorAuxTempl<SymmetricRankFourTensor, true>;

@@ -1,0 +1,10 @@
+[Tests]
+  [real]
+    type = Exodiff
+    input = real.i
+    requirement = "The system shall be able to output a functor to a nodal or elemental variable."
+    design = "MaterialRealAux.md"
+    issues = '#27513'
+    exodiff = real_out.e
+  []
+[]

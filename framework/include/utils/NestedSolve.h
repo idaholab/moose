@@ -11,7 +11,6 @@
 
 #include "MooseTypes.h"
 #include "RankTwoTensor.h"
-#include "MooseADWrapper.h"
 #include "InputParameters.h"
 
 #include "libmesh/utility.h"
@@ -49,9 +48,9 @@ public:
   NestedSolveTempl(const InputParameters & params);
 
   /// AD/non-AD switched type shortcuts
-  using NSReal = MooseADWrapper<Real, is_ad>;
-  using NSRealVectorValue = MooseADWrapper<RealVectorValue, is_ad>;
-  using NSRankTwoTensor = MooseADWrapper<RankTwoTensor, is_ad>;
+  using NSReal = Moose::GenericType<Real, is_ad>;
+  using NSRealVectorValue = Moose::GenericType<RealVectorValue, is_ad>;
+  using NSRankTwoTensor = Moose::GenericType<RankTwoTensor, is_ad>;
   /// Eigen type shortcuts
   using DynamicVector = Eigen::Matrix<NSReal, Eigen::Dynamic, 1>;
   using DynamicMatrix = Eigen::Matrix<NSReal, Eigen::Dynamic, Eigen::Dynamic>;

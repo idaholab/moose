@@ -10,6 +10,8 @@
 #include "OutputTestMaterial.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
+#include "SymmetricRankFourTensor.h"
 
 registerMooseObject("MooseTestApp", OutputTestMaterial);
 
@@ -29,6 +31,15 @@ OutputTestMaterial::validParams()
   params.addParam<std::string>("rankfourtensor_property_name",
                                "rankfourtensor_property",
                                "The name of the rank four tensor property");
+
+  // variable names are limited to 32 characters
+  params.addParam<std::string>("symmetricranktwotensor_property_name",
+                               "symmetricr2t_property",
+                               "The name of the symmetric rank two tensor property");
+  params.addParam<std::string>("symmetricrankfourtensor_property_name",
+                               "symmetricr4t_property",
+                               "The name of the symmetric rank four tensor property");
+
   params.addParam<std::string>("stdvector_property_name",
                                "The name of the standard vector property");
   params.addParam<Real>(
@@ -49,6 +60,10 @@ OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters)
         declareProperty<RankTwoTensor>(getParam<std::string>("ranktwotensor_property_name"))),
     _rankfourtensor_property(
         declareProperty<RankFourTensor>(getParam<std::string>("rankfourtensor_property_name"))),
+    _symmetricranktwotensor_property(declareProperty<SymmetricRankTwoTensor>(
+        getParam<std::string>("symmetricranktwotensor_property_name"))),
+    _symmetricrankfourtensor_property(declareProperty<SymmetricRankFourTensor>(
+        getParam<std::string>("symmetricrankfourtensor_property_name"))),
     _factor(getParam<Real>("real_factor")),
     _variable(coupledValue("variable"))
 {
@@ -79,13 +94,19 @@ OutputTestMaterial::computeQpProperties()
 
   _ranktwotensor_property[_qp] = tensor;
 
-  RankFourTensor rankfourtensor;
   for (const auto i : make_range(Moose::dim))
     for (const auto j : make_range(Moose::dim))
       for (const auto k : make_range(Moose::dim))
         for (const auto l : make_range(Moose::dim))
           _rankfourtensor_property[_qp](i, j, k, l) =
               i * 1000 + j * 100 + k * 10 + l + _variable[_qp] / 10.0;
+
+  for (const auto i : make_range(SymmetricRankTwoTensor::N))
+    _symmetricranktwotensor_property[_qp](i) = i + _variable[_qp] / 10.0;
+
+  for (const auto i : make_range(SymmetricRankFourTensor::N))
+    for (const auto j : make_range(SymmetricRankFourTensor::N))
+      _symmetricrankfourtensor_property[_qp](i, j) = i * 10 + j + _variable[_qp] / 10.0;
 
   if (_stdvector_property)
   {
