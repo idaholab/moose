@@ -69,7 +69,7 @@ PINSFVEnergyDiffusion::computeQpResidual()
     const auto face_neighbor = neighborArg();
 
     auto value1 = _porosity_factored_in ? _k(face_elem, state)
-                                        : _k(face_neighbor, state) * _eps(face_neighbor, state);
+                                        : _k(face_elem, state) * _eps(face_elem, state);
     auto value2 = _porosity_factored_in ? _k(face_neighbor, state)
                                         : _k(face_neighbor, state) * _eps(face_neighbor, state);
 

@@ -6,7 +6,7 @@
     input = 2d-rc-friction.i
     exodiff = 2d-rc-friction_out.e
     requirement = 'The system shall be able to model linear volumetric friction in a channel.'
-    design = 'INSFVMomentumFriction.md'
+    design = 'PINSFVMomentumFriction.md'
   []
   [quadratic-friction]
     type = 'Exodiff'
@@ -15,7 +15,7 @@
     requirement = 'The system shall be able to model quadratic volumetric friction in a channel.'
     cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear "
                "v_friction_linear'"
-    design = 'INSFVMomentumFriction.md'
+    design = 'PINSFVMomentumFriction.md'
   []
   [exponential-friction-factor]
     type = 'Exodiff'
@@ -55,7 +55,7 @@
     exodiff = 2d-rc-friction-exp-factor-action_out.e
     requirement = 'The system shall be able to model quadratic volumetric friction with an exponential friction factor correlation in a channel a custom action syntax.'
     cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' "
-               "Modules/NavierStokesFV/friction_coeffs='friction_coefficient' "
+               "FunctorMaterials/inactive='friction_coefficient' "
                "Outputs/file_base='2d-rc-friction-exp-factor-action_out' "
     design = 'ExponentialFrictionFunctorMaterial.md'
   []

@@ -28,4 +28,5 @@ protected:
 
 private:
   virtual void addPreconditioning() override;
+  virtual void addInitialConditions() override;
 };

@@ -109,7 +109,7 @@ protected:
 
 private:
   /**
-   * Internal helper that casts the UserObject \p uo_base to the reqested type. Exits with
+   * Internal helper that casts the UserObject \p uo_base to the requested type. Exits with
    * a useful error if the casting failed. If the parameter \p param_name is provided and
    * is valid, a paramError() will be used instead.
    */

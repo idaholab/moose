@@ -86,10 +86,8 @@ CommonOutputAction::validParams()
                                             "of outputs when using MultiApps.");
   params.addParam<unsigned int>(
       "time_step_interval", 1, "The interval (number of time steps) at which output occurs");
-  params.addDeprecatedParam<unsigned int>(
-      "interval",
-      "The interval (number of time steps) at which output occurs",
-      "Deprecated, use time_step_interval");
+  params.addParam<unsigned int>("interval",
+                                "The interval (number of time steps) at which output occurs");
   params.deprecateParam("interval", "time_step_interval", "02/01/2025");
   params.addParam<std::vector<Real>>("sync_times",
                                      std::vector<Real>(),
@@ -267,17 +265,24 @@ CommonOutputAction::act()
       }
       else if (_app.getParam<bool>("timing"))
       {
-        from_param_name = "show_controls";
+        from_param_name = "timing";
         from_params = &_app.parameters();
       }
       if (from_param_name)
         create("PerfGraphOutput", *from_param_name, from_params);
-    }
 
-    if (!_app.getParam<bool>("no_timing") && getParam<bool>("perf_graph_live"))
-      perfGraph().setLivePrintActive(true);
+      if (!getParam<bool>("perf_graph_live"))
+      {
+        if (!from_param_name)
+          perfGraph().setActive(false);
+        perfGraph().disableLivePrint();
+      }
+    }
     else
-      perfGraph().setLivePrintActive(false);
+    {
+      perfGraph().setActive(false);
+      perfGraph().disableLivePrint();
+    }
 
     perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
     perfGraph().setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));

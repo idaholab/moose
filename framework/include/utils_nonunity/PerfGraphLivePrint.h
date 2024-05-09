@@ -82,11 +82,6 @@ private:
    */
   std::atomic<bool> _currently_destructing;
 
-  /// Whether or not printing is currently turned on
-  /// This shadows PerfGraph._live_print_active so that we have consistency
-  /// during a single printing
-  bool _should_print;
-
   /// Limit (in seconds) before printing
   std::atomic<Real> & _time_limit;
 

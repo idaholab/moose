@@ -420,11 +420,10 @@ MultiAppProjectionTransfer::execute()
     FEType fe_type = system.variable_type(0);
     std::unique_ptr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
     QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
-    fe->attach_quadrature_rule(&qrule);
 
     for (const auto & elem : to_mesh.active_local_element_ptr_range())
     {
-      fe->reinit(elem);
+      qrule.init(elem->type(), elem->p_level());
 
       bool element_is_evaled = false;
       std::vector<Real> evals(qrule.n_points(), 0.);

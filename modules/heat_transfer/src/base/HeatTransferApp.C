@@ -19,7 +19,7 @@ HeatTransferApp::validParams()
   InputParameters params = MooseApp::validParams();
 
   params.set<bool>("use_legacy_material_output") = false;
-  params.set<bool>("use_legacy_initial_residual_evaluation_bahavior") = false;
+  params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
 
   return params;
 }
@@ -49,7 +49,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_secondary_flux_vector", "ready_to_init");
   addTaskDependency("setup_dampers", "add_secondary_flux_vector");
 
-  registerSyntax("HeatConductionFE", "Physics/HeatConduction/FiniteElement/*");
+  registerSyntax("HeatConductionCG", "Physics/HeatConduction/FiniteElement/*");
+  registerSyntax("HeatConductionFV", "Physics/HeatConduction/FiniteVolume/*");
 
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");

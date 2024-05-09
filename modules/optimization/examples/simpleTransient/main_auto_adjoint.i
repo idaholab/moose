@@ -2,8 +2,8 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
-
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = 'source'
   num_values = '44'
 []
@@ -26,8 +26,8 @@
   [from_forward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measured_data/misfit_values measured_data/simulation_values adjoint/inner_product'
-    to_reporters = 'OptimizationReporter/misfit_values OptimizationReporter/simulation_values OptimizationReporter/grad_source'
+    from_reporters = 'measured_data/objective_value adjoint/inner_product'
+    to_reporters = 'OptimizationReporter/objective_value OptimizationReporter/grad_source'
   []
 []
 

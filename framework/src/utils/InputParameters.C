@@ -1513,12 +1513,12 @@ InputParameters::renameParamInternal(const std::string & old_name,
     mooseError("Requested to rename parameter '",
                old_name,
                "' but that parameter name doesn't exist in the parameters object.");
+  mooseAssert(params_it->second._deprecation_message.empty(),
+              "Attempting to rename the parameter, '" << old_name << "', that is deprecated");
 
   auto new_metadata = std::move(params_it->second);
   if (!docstring.empty())
     new_metadata._doc_string = docstring;
-  else
-    new_metadata._doc_string = params_it->second._doc_string;
   _params.emplace(new_name, std::move(new_metadata));
   _params.erase(params_it);
 

@@ -3,18 +3,25 @@
 
 [OptimizationReporter]
   type = ParameterMeshOptimization
+  objective_name = objective_value
   parameter_names = 'reaction_rate'
   parameter_meshes = 'parameter_mesh_out.e'
 
   constant_group_initial_condition = 0
   constant_group_lower_bounds = 0
 
-  measurement_file = forward_exact_csv_sample_0011.csv
-  file_xcoord = measurement_xcoord
-  file_ycoord = measurement_ycoord
-  file_zcoord = measurement_zcoord
-  file_time = measurement_time
-  file_value = simulation_values
+[]
+
+[Reporters]
+  [main]
+    type = OptimizationData
+    measurement_file = forward_exact_csv_sample_0011.csv
+    file_xcoord = measurement_xcoord
+    file_ycoord = measurement_ycoord
+    file_zcoord = measurement_zcoord
+    file_time = measurement_time
+    file_value = simulation_values
+  []
 []
 
 [MultiApps]
@@ -29,11 +36,11 @@
   [to_forward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/reaction_rate'
     to_reporters = 'data/measurement_xcoord
                     data/measurement_ycoord
@@ -45,10 +52,8 @@
   [from_forward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data/simulation_values
-                      adjoint/inner_product'
-    to_reporters = 'OptimizationReporter/simulation_values
-                    OptimizationReporter/grad_reaction_rate'
+    from_reporters = 'adjoint/inner_product data/objective_value'
+    to_reporters = 'OptimizationReporter/grad_reaction_rate OptimizationReporter/objective_value'
   []
 []
 

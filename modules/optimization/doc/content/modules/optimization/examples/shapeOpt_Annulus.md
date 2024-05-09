@@ -105,9 +105,9 @@ system.  The main application contains the optimization executioner and the
 sub-application solve the forward problem.
 
 For this optimization example, the [GeneralOptimization.md] reporter is used. The
-[!param](/OptimizationReporter/OptimizationReporter/equality_names) option lists
+[!param](/OptimizationReporter/GeneralOptimization/equality_names) option lists
 equality constraints. There is also a
-[!param](/OptimizationReporter/OptimizationReporter/inequality_names), not shown
+[!param](/OptimizationReporter/GeneralOptimization/inequality_names), not shown
 below, for listing the inequality constraints. The
 [GeneralOptimization.md] also expects
 the controllable parameters

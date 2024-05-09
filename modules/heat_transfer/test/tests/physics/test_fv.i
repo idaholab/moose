@@ -9,13 +9,16 @@
 
 [Physics]
   [HeatConduction]
-    [FiniteElement]
+    [FiniteVolume]
       [h1]
         temperature_name = 'T'
         heat_source_var = 'Q'
+        initial_temperature = 0
 
         # Thermal properties
-        thermal_conductivity = 'k0'
+        thermal_conductivity_functor = 'k0'
+        specific_heat = 5
+        density = 10
 
         # Boundary conditions
         heat_flux_boundaries = 'left right'
@@ -29,7 +32,8 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 1
   verbose = true
 []
 
@@ -39,9 +43,9 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [mat_k]
-    type = ADGenericConstantMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'k0'
     prop_values = '1'
   []

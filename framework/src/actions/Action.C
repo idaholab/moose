@@ -36,6 +36,7 @@ Action::validParams()
   params.addParam<std::vector<std::string>>(
       "control_tags",
       "Adds user-defined labels for accessing object parameters via control logic.");
+  params.addParamNamesToGroup("control_tags", "Advanced");
   params.registerBase("Action");
   return params;
 }

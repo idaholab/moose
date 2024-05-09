@@ -83,6 +83,7 @@
 [Reporters]
   [measure_data]
     type = OptimizationData
+    objective_name = objective_value
     variable = T
   []
   [params]

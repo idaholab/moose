@@ -42,7 +42,7 @@ DiffusionFV::addFVKernels()
     params.set<MooseFunctorName>("coeff") = isParamValid("diffusivity_functor")
                                                 ? getParam<MooseFunctorName>("diffusivity_functor")
                                                 : "1";
-    getProblem().addFVKernel(kernel_type, prefix() + "_" + _var_name + "_diffusion", params);
+    getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }
   // Source term
   if (isParamValid("source_functor"))
@@ -85,7 +85,7 @@ DiffusionFV::addFVKernels()
       params.set<MooseFunctorName>("v") = {source};
     }
 
-    getProblem().addFVKernel(kernel_type, prefix() + "_" + _var_name + "_source", params);
+    getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_source", params);
   }
   // Time derivative
   if (isTransient())
@@ -93,7 +93,7 @@ DiffusionFV::addFVKernels()
     const std::string kernel_type = "FVTimeKernel";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    getProblem().addFVKernel(kernel_type, prefix() + "_" + _var_name + "_time", params);
+    getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_time", params);
   }
 }
 
@@ -128,7 +128,7 @@ DiffusionFV::addFVBCs()
         params.set<MooseFunctorName>("functor") = bc_flux;
 
       getProblem().addFVBC(
-          bc_type, prefix() + "_" + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
+          bc_type, prefix() + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
     }
   }
 
@@ -159,9 +159,8 @@ DiffusionFV::addFVBCs()
       else
         params.set<MooseFunctorName>("functor") = bc_value;
 
-      getProblem().addFVBC(bc_type,
-                           prefix() + "_" + _var_name + "_dirichlet_bc_" + _dirichlet_boundaries[i],
-                           params);
+      getProblem().addFVBC(
+          bc_type, prefix() + _var_name + "_dirichlet_bc_" + _dirichlet_boundaries[i], params);
     }
   }
 }

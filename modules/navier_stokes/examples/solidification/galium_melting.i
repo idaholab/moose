@@ -180,11 +180,16 @@ Ny = 50
     pressure = pressure
   []
   [u_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_x
     momentum_component = 'x'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    u = vel_x
+    v = vel_y
+    Darcy_name = 'Darcy_coeff'
+    Forchheimer_name = 'Forchheimer_coeff'
+    rho = ${rho_liquid}
+    mu = ${mu}
+    standard_friction_formulation = false
   []
   [u_buoyancy]
     type = INSFVMomentumBoussinesq
@@ -230,11 +235,16 @@ Ny = 50
     pressure = pressure
   []
   [v_friction]
-    type = INSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = vel_y
     momentum_component = 'y'
-    linear_coef_name = 'Darcy_coefficient'
-    quadratic_coef_name = 'Forchheimer_coefficient'
+    u = vel_x
+    v = vel_y
+    Darcy_name = 'Darcy_coeff'
+    Forchheimer_name = 'Forchheimer_coeff'
+    rho = ${rho_liquid}
+    mu = ${mu}
+    standard_friction_formulation = false
   []
   [v_buoyancy]
     type = INSFVMomentumBoussinesq
@@ -279,7 +289,6 @@ Ny = 50
     T_solidus = ${T_solidus}
     rho = 'rho_mixture'
   []
-
 []
 
 [FVBCs]
@@ -329,6 +338,11 @@ Ny = 50
     mu = '${mu}'
     rho_l = '${rho_liquid}'
     dendrite_spacing_scaling = 1e-1
+  []
+  [friction]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coeff Forchheimer_coeff'
+    prop_values = 'darcy_coef darcy_coef darcy_coef fch_coef fch_coef fch_coef'
   []
   [const_functor]
     type = ADGenericFunctorMaterial

@@ -403,7 +403,7 @@ outputLegacyInformation(MooseApp & app)
         << COLOR_DEFAULT << std::endl;
   }
 
-  if (app.parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+  if (app.parameters().get<bool>("use_legacy_initial_residual_evaluation_behavior"))
   {
     oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
     oss << " This application uses the legacy initial residual evaluation behavior. The legacy "
@@ -412,7 +412,7 @@ outputLegacyInformation(MooseApp & app)
            "evaluation. The new behavior skips that redundant residual evaluation unless the "
            "parameter Executioner/use_pre_smo_residual is set to true. To remove this message and "
            "enable the new behavior, set the parameter "
-           "'use_legacy_initial_residual_evaluation_bahavior' to false in *App.C. Some tests that "
+           "'use_legacy_initial_residual_evaluation_behavior' to false in *App.C. Some tests that "
            "rely on the side effects of the legacy behavior may fail/diff and should be "
            "re-golded.\n"
         << COLOR_DEFAULT << std::endl;

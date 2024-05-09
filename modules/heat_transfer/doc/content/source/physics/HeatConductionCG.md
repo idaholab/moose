@@ -1,4 +1,4 @@
-# HeatConductionFE
+# HeatConductionCG
 
 This [Physics](syntax/Physics/index.md) object implements the heat conduction equation over a
 volumetric domain using a continuous Galerkin finite element discretization.
@@ -18,8 +18,8 @@ A boundary condition object is created for each boundary, except if the same arg
 can be used across all boundaries in which case a single object is created and restricted to
 the union of boundaries.
 
-!syntax parameters /Physics/HeatConduction/FiniteElement/HeatConductionFE
+!syntax parameters /Physics/HeatConduction/FiniteElement/HeatConductionCG
 
-!syntax inputs /Physics/HeatConduction/FiniteElement/HeatConductionFE
+!syntax inputs /Physics/HeatConduction/FiniteElement/HeatConductionCG
 
-!syntax children /Physics/HeatConduction/FiniteElement/HeatConductionFE
+!syntax children /Physics/HeatConduction/FiniteElement/HeatConductionCG

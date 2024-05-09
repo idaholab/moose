@@ -17,7 +17,7 @@ ReactorApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
-  params.set<bool>("use_legacy_initial_residual_evaluation_bahavior") = false;
+  params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
   return params;
 }
 

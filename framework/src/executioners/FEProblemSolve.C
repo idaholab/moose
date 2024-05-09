@@ -87,14 +87,12 @@ FEProblemSolve::validParams()
       "Specifies whether or not to reuse the base vector for matrix-free calculation");
   params.addParam<bool>(
       "skip_exception_check", false, "Specifies whether or not to skip exception check");
-  params.addDeprecatedParam<bool>("compute_initial_residual_before_preset_bcs",
-                                  false,
-                                  "Use the residual norm computed *before* preset BCs are imposed "
-                                  "in relative convergence check.",
-                                  "This parameter is deprecated in favor of 'use_pre_SMO_residual' "
-                                  "and is recommended to stay false.");
+  params.addParam<bool>("compute_initial_residual_before_preset_bcs",
+                        false,
+                        "Use the residual norm computed *before* solution modifying objects like "
+                        "preset BCs are imposed in relative convergence check.");
   params.deprecateParam(
-      "compute_initial_residual_before_preset_bcs", "use_pre_SMO_residual", "12/31/2025");
+      "compute_initial_residual_before_preset_bcs", "use_pre_SMO_residual", "12/31/2024");
   params.addParam<bool>(
       "use_pre_SMO_residual",
       false,

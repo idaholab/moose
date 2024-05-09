@@ -1,4 +1,4 @@
-# Solid Mechanics Action
+# Solid Mechanics QuasiStatic Physics
 
 ## Description
 

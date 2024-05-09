@@ -68,7 +68,7 @@ CappedWeakPlaneStressUpdate::CappedWeakPlaneStressUpdate(const InputParameters &
     _in_trial12(0.0),
     _in_q_trial(0.0)
 {
-  // With arbitary UserObjects, it is impossible to check everything,
+  // With arbitrary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
   if (_tan_phi.value(0) < 0 || _tan_psi.value(0) < 0)
     mooseError("CappedWeakPlaneStressUpdate: Weak-plane friction and dilation angles must lie in "

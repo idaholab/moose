@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#25642'
+  design = 'Physics/index.md'
+  [fv]
+    type = RunException
+    input = 'base_fv.i'
+    requirement = 'The system shall error if the physics is specified as a transient, when the executioner is designed for steady solves.'
+    expect_err = "We cannot solve a physics as transient in a steady problem"
+  []
+[]

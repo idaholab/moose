@@ -82,6 +82,7 @@
 [Reporters]
   [measurement_locations]
     type = OptimizationData
+    objective_name = objective_value
     variable = forwardT
   []
   [params]

@@ -24,6 +24,7 @@
   [data]
     type = OptimizationData
     variable = u
+    objective_name = objective_value
     measurement_file = forward_exact_csv_sample_0011.csv
     file_xcoord = measurement_xcoord
     file_ycoord = measurement_ycoord

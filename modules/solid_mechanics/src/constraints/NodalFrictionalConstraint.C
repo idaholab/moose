@@ -261,7 +261,7 @@ NodalFrictionalConstraint::computeQpResidual(Moose::ConstraintType type)
 void
 NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
 {
-  // Calculate Jacobian enteries and cache those entries along with the row and column indices
+  // Calculate Jacobian entries and cache those entries along with the row and column indices
   std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
   std::vector<dof_id_type> primarydof = _var.dofIndices();
 

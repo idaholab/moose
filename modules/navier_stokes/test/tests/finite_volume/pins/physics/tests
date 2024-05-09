@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#27502'
+  design = 'navier_stokes/pinsfv.md PNSFVSolidHeatTransferPhysics.md'
+  [solid-only]
+    type = 'Exodiff'
+    input = solid_phase_alone.i
+    exodiff = solid_phase_alone_out.e
+    requirement = 'The system shall be able to model a heated porous solid phase.'
+  []
+  [solid_and_fluid]
+    type = 'Exodiff'
+    input = heated_porous_medium.i
+    exodiff = heated_porous_medium_out.e
+    requirement = 'The system shall be able to model heated flow in a porous medium with convection between phases.'
+  []
+[]

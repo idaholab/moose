@@ -34,6 +34,17 @@
     valgrind = HEAVY
     recover = false # see #19126
   []
+  [transient-physics]
+    type = 'Exodiff'
+    input = 2d-transient-physics.i
+    exodiff = 2d-transient-physics_out.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#25642'
+    requirement = 'The system shall be able to solve weakly compressible transient problems with flow physics syntax.'
+    valgrind = HEAVY
+    recover = false # see #19126
+  []
   [transient-jac]
     type = 'PetscJacobianTester'
     input = 2d-transient.i

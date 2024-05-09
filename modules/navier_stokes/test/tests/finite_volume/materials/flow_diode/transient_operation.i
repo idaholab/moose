@@ -118,6 +118,7 @@ ny = 5
 
     friction_blocks = 'fluid; diode'
     friction_types = 'darcy forchheimer; darcy forchheimer'
+    standard_friction_formulation = true
     # Base friction
     # friction_coeffs = 'Darcy Forchheimer; Darcy Forchheimer'
     # Combined with diode

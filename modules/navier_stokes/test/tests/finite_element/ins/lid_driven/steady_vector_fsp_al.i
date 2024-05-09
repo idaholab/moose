@@ -41,7 +41,7 @@ gamma=${U}
     type = MassMatrix
     variable = p
     matrix_tags = 'mass'
-    density = ${fparse -gamma - mu}
+    density = ${fparse -1/(gamma + mu)}
   []
   [momentum_advection]
     type = INSADMomentumAdvection

@@ -23,6 +23,8 @@ InputParameters
 MassTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
+  params.addClassDescription(
+      "Computes the mass of the solid as the integral of the density material property");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }

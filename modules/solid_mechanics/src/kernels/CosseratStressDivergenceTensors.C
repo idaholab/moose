@@ -21,6 +21,8 @@ CosseratStressDivergenceTensors::validParams()
 {
   InputParameters params = StressDivergenceTensors::validParams();
   params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");
+  params.addClassDescription("Stress divergence tensor with the additional Jacobian terms for the "
+                             "Cosserat rotation variables.");
   return params;
 }
 

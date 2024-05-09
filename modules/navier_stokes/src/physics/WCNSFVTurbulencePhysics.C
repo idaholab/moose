@@ -43,6 +43,9 @@ WCNSFVTurbulencePhysics::validParams()
       "mixing_length_name", "mixing_length", "Name of the mixing length auxiliary variable");
   params.deprecateParam("mixing_length_walls", "turbulence_walls", "");
 
+  // Not implemented, re-enable with k-epsilon
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
   // It is a little risky right now because the user could forget to pass the parameter and
@@ -56,6 +59,13 @@ WCNSFVTurbulencePhysics::validParams()
       "scalar_transport_physics",
       "NavierStokesFV",
       "WCNSFVScalarTransportPhysics generating the scalar advection equations");
+
+  // Parameter groups
+  params.addParamNamesToGroup("mixing_length_name mixing_length_two_term_bc_expansion",
+                              "Mixing length model");
+  params.addParamNamesToGroup("fluid_heat_transfer_physics turbulent_prandtl "
+                              "scalar_transport_physics passive_scalar_schmidt_number",
+                              "Coupled Physics");
 
   return params;
 }

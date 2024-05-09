@@ -42,7 +42,7 @@
     x_coord_name = measurement_locations/measurement_xcoord
     y_coord_name = measurement_locations/measurement_ycoord
     z_coord_name = measurement_locations/measurement_zcoord
-    value_name   = measurement_locations/misfit_values
+    value_name = measurement_locations/misfit_values
   []
 []
 
@@ -94,6 +94,7 @@
 [Reporters]
   [measurement_locations]
     type = OptimizationData
+    objective_name = objective_value
     variable = forwardT
   []
   [params]

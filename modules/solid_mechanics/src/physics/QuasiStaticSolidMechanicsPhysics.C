@@ -116,6 +116,12 @@ QuasiStaticSolidMechanicsPhysics::validParams()
                                              "Functions giving the target "
                                              "values of each constraint.");
 
+  params.addParamNamesToGroup("scaling", "Variables");
+  params.addParamNamesToGroup("strain_base_name automatic_eigenstrain_names", "Strain");
+  params.addParamNamesToGroup(
+      "cylindrical_axis_point1 cylindrical_axis_point2 spherical_center_point direction",
+      "Coordinate system");
+
   return params;
 }
 

@@ -345,7 +345,7 @@ MooseApp::validParams()
       true,
       "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
   params.addParam<bool>(
-      "use_legacy_initial_residual_evaluation_bahavior",
+      "use_legacy_initial_residual_evaluation_behavior",
       true,
       "The legacy behavior performs an often times redundant residual evaluation before the "
       "solution modifying objects are executed prior to the initial (0th nonlinear iteration) "
@@ -721,11 +721,7 @@ MooseApp::setupOptions()
 
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
-  {
     _pars.set<bool>("timing") = false;
-
-    _perf_graph.setLivePrintActive(false);
-  }
 
   if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
     mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");

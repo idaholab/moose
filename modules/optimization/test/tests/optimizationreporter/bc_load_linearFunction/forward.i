@@ -97,6 +97,7 @@
   [measure_data]
     type = OptimizationData
     variable = temperature
+    objective_name = objective_value
     variable_weight_names = weightForTemperature
   []
   [params_left]
