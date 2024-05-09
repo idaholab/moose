@@ -214,6 +214,18 @@ public:
   void
   h_from_p_T_template(const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const;
 
+  template <typename T>
+  T s_from_h_p_template(const T & enthalpy, const T & pressure) const;
+
+  template <typename T>
+  void
+  s_from_h_p_template(const T & enthalpy, const T & pressure, T & s, T & ds_dp, T & ds_dT) const;
+
+  virtual Real s_from_h_p(Real enthalpy, Real pressure) const override;
+  ADReal s_from_h_p(const ADReal & enthalpy, const ADReal & pressure) const override;
+  void
+  s_from_h_p(Real enthalpy, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
+
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
@@ -2646,4 +2658,23 @@ Water97FluidProperties::s_from_p_T_template(
   { return this->s_from_p_T_template(pressure, temperature); };
 
   xyDerivatives(pressure, temperature, s, ds_dp, ds_dT, functor);
+}
+
+template <typename T>
+T
+Water97FluidProperties::s_from_h_p_template(const T & enthalpy, const T & pressure) const
+{
+  T temperature = T_from_h_p(enthalpy, pressure);
+  return s_from_p_T_template(pressure, temperature);
+}
+
+template <typename T>
+void
+Water97FluidProperties::s_from_h_p_template(
+    const T & enthalpy, const T & pressure, T & s, T & ds_dp, T & ds_dT) const
+{
+  auto functor = [this](const auto & enthalpy, const auto & pressure)
+  { return this->s_from_p_T_template(enthalpy, pressure); };
+
+  xyDerivatives(enthalpy, pressure, s, ds_dp, ds_dT, functor);
 }
