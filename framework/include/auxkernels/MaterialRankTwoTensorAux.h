@@ -11,11 +11,7 @@
 
 #include "MaterialAuxBase.h"
 #include "RankTwoTensor.h"
-
-template <bool>
-class MaterialRankTwoTensorAuxTempl;
-typedef MaterialRankTwoTensorAuxTempl<false> MaterialRankTwoTensorAux;
-typedef MaterialRankTwoTensorAuxTempl<true> ADMaterialRankTwoTensorAux;
+#include "SymmetricRankFourTensor.h"
 
 /**
  * MaterialRankTwoTensorAux is designed to take the data in the RankTwoTensor material
@@ -23,8 +19,8 @@ typedef MaterialRankTwoTensorAuxTempl<true> ADMaterialRankTwoTensorAux;
  * supplied indices.
  */
 
-template <bool is_ad>
-class MaterialRankTwoTensorAuxTempl : public MaterialAuxBaseTempl<RankTwoTensor, is_ad>
+template <typename T, bool is_ad>
+class MaterialRankTwoTensorAuxTempl : public MaterialAuxBaseTempl<T, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -39,3 +35,10 @@ protected:
   const unsigned int _j;
   ///@}
 };
+
+typedef MaterialRankTwoTensorAuxTempl<RankTwoTensor, false> MaterialRankTwoTensorAux;
+typedef MaterialRankTwoTensorAuxTempl<RankTwoTensor, true> ADMaterialRankTwoTensorAux;
+typedef MaterialRankTwoTensorAuxTempl<SymmetricRankFourTensor, false>
+    MaterialSymmetricRankFourTensorAux;
+typedef MaterialRankTwoTensorAuxTempl<SymmetricRankFourTensor, true>
+    ADMaterialSymmetricRankFourTensorAux;

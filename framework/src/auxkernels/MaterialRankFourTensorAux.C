@@ -40,5 +40,5 @@ MaterialRankFourTensorAux::MaterialRankFourTensorAux(const InputParameters & par
 Real
 MaterialRankFourTensorAux::getRealValue()
 {
-  return _prop[_qp](_i, _j, _k, _l);
+  return _full_value(_i, _j, _k, _l);
 }

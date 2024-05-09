@@ -13,7 +13,7 @@
 #include "MaterialAuxBase.h"
 
 /**
- * A base class for the various Material related AuxKernal objects
+ * A base class for the various Material related AuxKernel objects
  */
 template <typename T, bool is_ad>
 class MaterialStdVectorAuxBaseTempl : public MaterialAuxBaseTempl<std::vector<T>, is_ad>
@@ -24,15 +24,10 @@ public:
   MaterialStdVectorAuxBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue() override;
-
-  /// index of the vecor element
+  /// index of the vector element
   unsigned int _index;
 
-  // Explicitly declare the origin of the following inherited members
-  // https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members
-  using MaterialAuxBaseTempl<std::vector<T>, is_ad, Real>::_qp;
-  using MaterialAuxBaseTempl<std::vector<T>, is_ad, Real>::_prop;
+  using MaterialAuxBaseTempl<std::vector<T>, is_ad>::_full_value;
 };
 
 template <typename T, bool is_ad>
@@ -50,16 +45,6 @@ MaterialStdVectorAuxBaseTempl<T, is_ad>::MaterialStdVectorAuxBaseTempl(
   : MaterialAuxBaseTempl<std::vector<T>, is_ad>(parameters),
     _index(this->template getParam<unsigned int>("index"))
 {
-}
-
-template <typename T, bool is_ad>
-Real
-MaterialStdVectorAuxBaseTempl<T, is_ad>::computeValue()
-{
-  mooseAssert(_prop[_qp].size() > _index,
-              "MaterialStdVectorRealGradientAux: You chose to extract component "
-                  << _index << " but your Material property only has size " << _prop[_qp].size());
-  return MaterialAuxBaseTempl<std::vector<T>, is_ad>::computeValue();
 }
 
 template <typename T = Real>

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADReal.h"
+#include "EigenADReal.h"
 #include <Eigen/Dense>
 
 /**

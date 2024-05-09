@@ -10,7 +10,7 @@
 #include "Moose.h"
 #include "Material.h"
 #include "DenseMatrix.h"
-#include "ADReal.h"
+#include "EigenADReal.h"
 
 #include "libmesh/dense_vector.h"
 #include "gtest_include.h"

@@ -2,7 +2,8 @@
 
 !syntax description /AuxKernels/MaterialRealVectorValueAux
 
-Converting a field from the material system, here a component of a vector material property,
+Converting a field from the material system, here a component of a vector material property
+(`MaterialRealVectorValueAux`) or a vector valued functor (`FunctorMaterialRealVectorValueAux`),
 to a variable may be desirable for several reasons: to match the format expected by certain
 kernels, for lagging the field between time steps or for output/testing/debugging.
 
@@ -12,8 +13,9 @@ or specify `output_material_properties` in the parameters of the desired output 
 the `[Outputs]` block.
 
 !alert note
-The AD system currently does not support auxiliary variables. If you convert material properties, which
-do support automatic differentiation, to auxiliary variables, the derivatives will be ignored.
+The AD system currently does not support auxiliary variables. If you convert material properties
+or functors, which do support automatic differentiation, to auxiliary variables, the derivatives
+will be ignored.
 
 ## Example syntax
 

@@ -18,7 +18,7 @@ template <bool is_ad>
 InputParameters
 VectorMaterialRealVectorValueAuxTempl<is_ad>::validParams()
 {
-  auto params = MaterialAuxBaseTempl<RealVectorValue, is_ad, RealVectorValue>::validParams();
+  auto params = MaterialAuxBaseTempl<RealVectorValue, is_ad, false, RealVectorValue>::validParams();
 
   params.addClassDescription(
       "Converts a vector-quantity material property into a vector auxiliary variable");
@@ -29,7 +29,7 @@ VectorMaterialRealVectorValueAuxTempl<is_ad>::validParams()
 template <bool is_ad>
 VectorMaterialRealVectorValueAuxTempl<is_ad>::VectorMaterialRealVectorValueAuxTempl(
     const InputParameters & parameters)
-  : MaterialAuxBaseTempl<RealVectorValue, is_ad, RealVectorValue>(parameters)
+  : MaterialAuxBaseTempl<RealVectorValue, is_ad, false, RealVectorValue>(parameters)
 {
 }
 
@@ -37,7 +37,7 @@ template <bool is_ad>
 RealVectorValue
 VectorMaterialRealVectorValueAuxTempl<is_ad>::getRealValue()
 {
-  return MetaPhysicL::raw_value(this->_prop[this->_qp]);
+  return MetaPhysicL::raw_value(this->_full_value);
 }
 
 template class VectorMaterialRealVectorValueAuxTempl<false>;

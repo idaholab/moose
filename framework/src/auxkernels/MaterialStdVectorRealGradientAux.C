@@ -36,5 +36,5 @@ MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(
 Real
 MaterialStdVectorRealGradientAux::getRealValue()
 {
-  return _prop[_qp][_index](_component);
+  return this->_full_value[_index](_component);
 }

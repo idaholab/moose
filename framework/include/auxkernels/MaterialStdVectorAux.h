@@ -25,16 +25,8 @@ public:
 protected:
   virtual Real getRealValue() override;
 
-  /// whether or not selected_qp has been set
-  const bool _has_selected_qp;
-
-  /// The std::vector will be evaluated at this quadpoint only
-  const unsigned int _selected_qp;
-
-  using MaterialStdVectorAuxBaseTempl<Real, is_ad>::_qp;
-  using MaterialStdVectorAuxBaseTempl<Real, is_ad>::_q_point;
-  using MaterialStdVectorAuxBaseTempl<Real, is_ad>::_prop;
   using MaterialStdVectorAuxBaseTempl<Real, is_ad>::_index;
+  using MaterialStdVectorAuxBaseTempl<Real, is_ad>::getRealValue;
 };
 
 typedef MaterialStdVectorAuxTempl<false> MaterialStdVectorAux;

@@ -9,10 +9,10 @@
 
 #pragma once
 
+#include "TwoVector.h"
 #include "PenaltyWeightedGapUserObject.h"
 #include "WeightedVelocitiesUserObject.h"
 #include "AugmentedLagrangeInterface.h"
-#include "TwoVector.h"
 
 /**
  * User object that interface pressure resulting from a simple traction separation law.

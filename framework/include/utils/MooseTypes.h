@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "ADReal.h"
+#include "EigenADReal.h"
 #include "ChainedReal.h"
 #include "ChainedADReal.h"
 #include "ADRankTwoTensorForward.h"
@@ -371,7 +372,12 @@ namespace Moose
 
 // type conversion from regular to AD
 template <typename T>
-struct ADType;
+struct ADType
+{
+  // unless a specialization exists we assume there is no specific AD type
+  typedef T type;
+};
+
 template <>
 struct ADType<Real>
 {
@@ -381,6 +387,17 @@ template <>
 struct ADType<ChainedReal>
 {
   typedef ChainedADReal type;
+};
+template <>
+struct ADType<Point>
+{
+  typedef ADPoint type;
+};
+
+template <>
+struct ADType<RealVectorValue>
+{
+  typedef ADRealVectorValue type;
 };
 template <>
 struct ADType<RankTwoTensor>
@@ -409,11 +426,45 @@ struct ADType<SymmetricRankFourTensor>
   typedef ADSymmetricRankFourTensor type;
 };
 
-template <template <typename> class W>
-struct ADType<W<Real>>
+template <template <typename T> class W, typename T>
+struct ADType<W<T>>
 {
-  typedef W<ADReal> type;
+  typedef W<typename ADType<T>::type> type;
 };
+
+template <typename T>
+struct ADType<std::vector<T, std::allocator<T>>>
+{
+  typedef typename ADType<T>::type adT;
+  typedef std::vector<adT, std::allocator<adT>> type;
+};
+
+template <typename T>
+struct ADType<std::list<T, std::allocator<T>>>
+{
+  typedef typename ADType<T>::type adT;
+  typedef std::list<adT, std::allocator<adT>> type;
+};
+
+template <typename T>
+struct ADType<std::set<T, std::less<T>, std::allocator<T>>>
+{
+  typedef typename ADType<T>::type adT;
+  typedef std::set<adT, std::less<adT>, std::allocator<adT>> type;
+};
+
+template <typename T>
+struct ADType<DenseVector<T>>
+{
+  typedef DenseVector<typename ADType<T>::type> type;
+};
+
+template <typename T>
+struct ADType<DenseMatrix<T>>
+{
+  typedef DenseMatrix<typename ADType<T>::type> type;
+};
+
 template <>
 struct ADType<RealEigenVector>
 {
@@ -472,12 +523,6 @@ struct ADType<ADSymmetricRankFourTensor>
   typedef ADSymmetricRankFourTensor type;
 };
 
-template <template <typename> class W>
-struct ADType<W<ADReal>>
-{
-  typedef W<ADReal> type;
-};
-
 template <>
 struct ADType<ADVariableValue>
 {
@@ -494,6 +539,36 @@ struct ADType<ADVariableSecond>
   typedef ADVariableSecond type;
 };
 
+template <typename T>
+struct IsADType
+{
+  static constexpr bool value = false;
+};
+
+template <>
+struct IsADType<ADReal>
+{
+  static constexpr bool value = true;
+};
+
+template <>
+struct IsADType<ADPoint>
+{
+  static constexpr bool value = true;
+};
+
+template <template <typename T, typename... Args> class W, typename T, typename... Args>
+struct IsADType<W<T, Args...>>
+{
+  static constexpr bool value = IsADType<T>::value;
+};
+
+template <typename T, typename... Args>
+struct IsADType<MetaPhysicL::DualNumber<T, Args...>>
+{
+  static constexpr bool value = true;
+};
+
 /**
  * This is a helper variable template for cases when we want to use a default compile-time
  * error with constexpr-based if conditions. The templating delays the triggering
@@ -505,7 +580,7 @@ constexpr std::false_type always_false{};
 } // namespace Moose
 
 /**
- * some AD typedefs for backwards compatability
+ * some AD typedefs for backwards compatibility
  */
 typedef ADRealVectorValue DualRealVectorValue;
 typedef ADRealTensorValue DualRealTensorValue;
@@ -553,34 +628,32 @@ namespace Moose
 {
 template <typename T, bool is_ad>
 using GenericType = typename std::conditional<is_ad, typename ADType<T>::type, T>::type;
-} // namespace Moose
+}
 
 template <bool is_ad>
-using GenericReal = typename Moose::GenericType<Real, is_ad>;
+using GenericReal = Moose::GenericType<Real, is_ad>;
 template <bool is_ad>
-using GenericChainedReal = typename Moose::GenericType<ChainedReal, is_ad>;
+using GenericChainedReal = Moose::GenericType<ChainedReal, is_ad>;
 template <bool is_ad>
-using GenericRealVectorValue = typename Moose::GenericType<RealVectorValue, is_ad>;
+using GenericRealVectorValue = Moose::GenericType<RealVectorValue, is_ad>;
 template <bool is_ad>
-using GenericRealTensorValue = typename Moose::GenericType<RealTensorValue, is_ad>;
+using GenericRealTensorValue = Moose::GenericType<RealTensorValue, is_ad>;
 template <bool is_ad>
-using GenericRankTwoTensor = typename Moose::GenericType<RankTwoTensor, is_ad>;
+using GenericRankTwoTensor = Moose::GenericType<RankTwoTensor, is_ad>;
 template <bool is_ad>
-using GenericRankThreeTensor = typename Moose::GenericType<RankThreeTensor, is_ad>;
+using GenericRankThreeTensor = Moose::GenericType<RankThreeTensor, is_ad>;
 template <bool is_ad>
-using GenericRankFourTensor = typename Moose::GenericType<RankFourTensor, is_ad>;
+using GenericRankFourTensor = Moose::GenericType<RankFourTensor, is_ad>;
 template <bool is_ad>
-using GenericVariableValue = typename Moose::GenericType<VariableValue, is_ad>;
+using GenericVariableValue = Moose::GenericType<VariableValue, is_ad>;
 template <bool is_ad>
-using GenericVariableGradient = typename Moose::GenericType<VariableGradient, is_ad>;
+using GenericVariableGradient = Moose::GenericType<VariableGradient, is_ad>;
 template <bool is_ad>
-using GenericVariableSecond = typename Moose::GenericType<VariableSecond, is_ad>;
+using GenericVariableSecond = Moose::GenericType<VariableSecond, is_ad>;
 template <bool is_ad>
-using GenericDenseVector =
-    typename std::conditional<is_ad, DenseVector<ADReal>, DenseVector<Real>>::type;
+using GenericDenseVector = Moose::GenericType<DenseVector<Real>, is_ad>;
 template <bool is_ad>
-using GenericDenseMatrix =
-    typename std::conditional<is_ad, DenseMatrix<ADReal>, DenseMatrix<Real>>::type;
+using GenericDenseMatrix = Moose::GenericType<DenseMatrix<Real>, is_ad>;
 
 namespace Moose
 {

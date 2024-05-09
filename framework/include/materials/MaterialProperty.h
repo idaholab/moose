@@ -13,7 +13,6 @@
 #include <memory>
 #include <typeinfo>
 
-#include "MooseADWrapper.h"
 #include "MooseArray.h"
 #include "MooseTypes.h"
 #include "DataIO.h"
@@ -110,7 +109,7 @@ template <typename T, bool is_ad>
 class MaterialPropertyBase : public PropertyValue
 {
 public:
-  typedef MooseADWrapper<T, is_ad> value_type;
+  typedef Moose::GenericType<T, is_ad> value_type;
 
   MaterialPropertyBase(const PropertyValue::id_type id) : PropertyValue(id) {}
 
@@ -119,12 +118,12 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const MooseArray<MooseADWrapper<T, is_ad>> & get() const { return _value; }
+  const MooseArray<Moose::GenericType<T, is_ad>> & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  MooseArray<MooseADWrapper<T, is_ad>> & set() { return _value; }
+  MooseArray<Moose::GenericType<T, is_ad>> & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
@@ -141,12 +140,12 @@ public:
   /**
    * Get element i out of the array as a writeable reference.
    */
-  MooseADWrapper<T, is_ad> & operator[](const unsigned int i) { return _value[i]; }
+  Moose::GenericType<T, is_ad> & operator[](const unsigned int i) { return _value[i]; }
 
   /**
    * Get element i out of the array as a ready-only reference.
    */
-  const MooseADWrapper<T, is_ad> & operator[](const unsigned int i) const { return _value[i]; }
+  const Moose::GenericType<T, is_ad> & operator[](const unsigned int i) const { return _value[i]; }
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -197,7 +196,7 @@ private:
 
 protected:
   /// Stored parameter value.
-  MooseArray<MooseADWrapper<T, is_ad>> _value;
+  MooseArray<Moose::GenericType<T, is_ad>> _value;
 };
 
 template <typename T>
@@ -471,7 +470,7 @@ public:
   operator=(const GenericOptionalMaterialProperty<T, is_ad> &) = delete;
 
   /// pass through operator[] to provide a similar API as MaterialProperty
-  const MooseADWrapper<T, is_ad> & operator[](const unsigned int i) const
+  const Moose::GenericType<T, is_ad> & operator[](const unsigned int i) const
   {
     // check if the optional property is valid in debug mode
     mooseAssert(
