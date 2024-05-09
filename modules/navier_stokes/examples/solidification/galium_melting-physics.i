@@ -125,7 +125,8 @@ Ny = 50
         add_phase_transport_equation = false
         add_drift_flux_momentum_terms = false
         fluid_heat_transfer_physics = energy
-        phase_fraction_name = 'fl'
+        add_phase_change_energy_term = true
+        use_dispersed_phase_drag_model = false
 
         # Base phase material properties
         first_phase_density_name = ${rho_liquid}
@@ -135,7 +136,6 @@ Ny = 50
         output_all_properties = true
 
         # Other phase material properties
-        other_phase_fraction_name = 'solid'
         other_phase_density_name = ${rho_solid}
         other_phase_viscosity_name = ${mu}
         other_phase_specific_heat_name = ${cp_solid}
@@ -152,6 +152,14 @@ Ny = 50
     mu = '${mu}'
     rho_l = '${rho_liquid}'
     dendrite_spacing_scaling = 1e-1
+    # We have to use this to make the coefficients vectors
+    Darcy_coef_name = Darcy
+    Forchheimer_coef_name = Forchheimer
+  []
+  [friction_coefs]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient Forchheimer_coefficient'
+    prop_values = 'Darcy Darcy Darcy Forchheimer Forchheimer Forchheimer'
   []
   [boussinesq_coefficient]
     type = ADGenericFunctorMaterial

@@ -100,6 +100,9 @@ private:
   void addINSOutletBC();
   void addINSWallsBC();
 
+  /// Return whether a Forchheimer friction model is in use
+  bool hasForchheimerFriction() const;
+
   /// Add material to define the local speed in porous medium flows
   void addPorousMediumSpeedMaterial();
   /// Add material to define the local speed with no porous medium treatment

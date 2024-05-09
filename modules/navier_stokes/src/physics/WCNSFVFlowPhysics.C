@@ -706,7 +706,8 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseFunctorName>(NS::speed) = NS::speed;
+  if (hasForchheimerFriction())
+    params.set<MooseFunctorName>(NS::speed) = NS::speed;
   params.set<bool>("standard_friction_formulation") =
       getParam<bool>("standard_friction_formulation");
   params.set<bool>("is_porous_medium") = _porous_medium_treatment;
@@ -1153,10 +1154,20 @@ WCNSFVFlowPhysics::addUserObjects()
 void
 WCNSFVFlowPhysics::addMaterials()
 {
-  if (_porous_medium_treatment)
+  if (hasForchheimerFriction())
     addPorousMediumSpeedMaterial();
   else
     addNonPorousMediumSpeedMaterial();
+}
+
+bool
+WCNSFVFlowPhysics::hasForchheimerFriction() const
+{
+  for (const auto block_i : index_range(_friction_types))
+    for (const auto & type_i : index_range(_friction_types[0]))
+      if (MooseUtils::toUpper(_friction_types[block_i][type_i]) == "FORCHHEIMER")
+        return true;
+  return false;
 }
 
 void
@@ -1167,7 +1178,11 @@ WCNSFVFlowPhysics::addPorousMediumSpeedMaterial()
 
   for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
     params.set<MooseFunctorName>(NS::superficial_velocity_vector[dim_i]) = _velocity_names[dim_i];
-  params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  else
+    params.set<MooseFunctorName>(NS::porosity) = "1";
+  params.set<bool>("define_interstitial_velocity_components") = _porous_medium_treatment;
 
   getProblem().addMaterial("PINSFVSpeedFunctorMaterial", prefix() + "pins_speed_material", params);
 }
