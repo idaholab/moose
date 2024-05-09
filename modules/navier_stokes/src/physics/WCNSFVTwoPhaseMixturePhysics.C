@@ -53,11 +53,12 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 
   // Phase change parameters
   params.addParam<MaterialPropertyName>(NS::alpha_exc,
+                                        0,
                                         "Name of the volumetric exchange coefficient");
 
   // Drift flux model parameters
   params.addParam<bool>("add_drift_flux_momentum_terms",
-                        true,
+                        false,
                         "Whether to add the drift flux terms to the momentum equation");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("density_interp_method",
@@ -149,7 +150,9 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
       "Mixture material properties");
 
   params.addParamNamesToGroup("fluid_heat_transfer_physics alpha_exc", "Phase change");
-  params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method", "Drift flux");
+  params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method",
+                              "Drift flux model");
+  params.addParamNamesToGroup("add_advection_slip_term", "Advection slip model");
 
   return params;
 }
@@ -238,7 +241,7 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
 {
   WCNSFVScalarTransportPhysics::addFVKernels();
 
-  if (_add_phase_equation)
+  if (_add_phase_equation && isParamSetByUser("alpha_exc"))
     addPhaseInterfaceTerm();
 
   if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation())
@@ -380,7 +383,7 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
   }
 
   // Compute slip terms as functors, used by the drift flux kernels
-  if (_use_advection_slip || _use_drift_flux)
+  if (_use_advection_slip || _use_drift_flux || _add_phase_equation)
   {
     const std::vector<std::string> vel_components = {"u", "v", "w"};
     const std::vector<std::string> components = {"x", "y", "z"};
