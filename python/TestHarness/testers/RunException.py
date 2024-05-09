@@ -9,6 +9,7 @@
 
 from TestHarness import util
 from RunApp import RunApp
+import os
 
 class RunException(RunApp):
 
@@ -35,6 +36,12 @@ class RunException(RunApp):
             self.addCaveats('type=RunException')
             self.setStatus(self.skip)
             return False
+        # We seem to have issues with --redirect-output causing
+        # "Inappropriate ioctl for device (25)" errors, so if this test
+        # requires more procs, we can't run it
+        if options.pbs and int(self.specs['min_parallel'] > 1):
+            self.addCaveats('PBS max_parallel=1')
+            return False
         return RunApp.checkRunnable(self, options)
 
     def prepare(self, options):
@@ -46,6 +53,16 @@ class RunException(RunApp):
         if self.hasRedirectedOutput(options):
             return self.getRedirectedOutputFiles(options)
         return []
+
+    def getProcs(self, options):
+        procs = super().getProcs(options)
+        # We seem to have issues with --redirect-output causing
+        # "Inappropriate ioctl for device (25)" errors, so if this test
+        # doesn't require more procs, just set it to zero
+        if options.pbs and int(self.specs['min_parallel']) == 1 and procs != 1:
+            self.addCaveats('PBS max_parallel=1')
+            return 1
+        return procs
 
     def processResults(self, moose_dir, options, output):
         # Exceptions are written to stderr, which can be interleaved so we normally redirect these
