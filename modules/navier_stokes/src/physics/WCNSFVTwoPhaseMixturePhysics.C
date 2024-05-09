@@ -36,10 +36,11 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
       "NavierStokesFV",
       "WCNSFVFluidHeatTransferPhysics generating the fluid energy equation");
 
-  params.addParam<bool>("use_external_mixture_properties",
-                        false,
-                        "Whether to use the simple NSFVMixtureMaterial or use a more complex model "
-                        "defined outside of the Physics");
+  params.addParam<bool>(
+      "use_external_mixture_properties",
+      false,
+      "Whether to use the simple NSFVMixtureFunctorMaterial or use a more complex model "
+      "defined outside of the Physics");
   params.addParam<bool>("output_all_properties",
                         false,
                         "Whether to output every functor material property defined to Exodus");
@@ -330,11 +331,12 @@ WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
       params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
-    params.set<MooseFunctorName>(NS::density) = "rho_mixture";
+    params.set<MooseFunctorName>(NS::density) = _first_phase_density;
     params.set<MooseFunctorName>("rho_d") = _other_phase_density;
     params.set<MooseFunctorName>("fraction_dispersed") = _other_phase_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
-    params.set<MooseEnum>("advected_interp_method") = getParam<MooseEnum>("phase_advection_interpolation");
+    params.set<MooseEnum>("advected_interp_method") =
+        _flow_equations_physics->getMomentumFaceInterpolationMethod();
     params.set<MooseEnum>("velocity_interp_method") = _flow_equations_physics->getVelocityFaceInterpolationMethod();
     params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     getProblem().addFVKernel(
@@ -366,17 +368,18 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
     params.set<std::vector<MooseFunctorName>>("prop_names") = {
         "rho_mixture", "mu_mixture", "cp_mixture", "k_mixture"};
     // The phase_1 and phase_2 assignments are only local to this object.
-    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {
+    // We use the advected phase variable to save a functor evaluation
+    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {
         _first_phase_density,
         _first_phase_viscosity,
         _first_phase_specific_heat,
         _first_phase_thermal_conductivity};
-    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {
+    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {
         _other_phase_density,
         _other_phase_viscosity,
         _other_phase_specific_heat,
         _other_phase_thermal_conductivity};
-    params.set<MooseFunctorName>("phase_1_fraction") = _liquid_phase_fraction;
+    params.set<MooseFunctorName>("phase_1_fraction") = _other_phase_fraction_name;
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
     getProblem().addMaterial("NSFVMixtureFunctorMaterial", prefix() + "mixture", params);

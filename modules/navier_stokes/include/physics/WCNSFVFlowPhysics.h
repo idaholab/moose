@@ -44,6 +44,11 @@ public:
   const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
   /// Get the face interpolation method for velocity
   const MooseEnum & getVelocityFaceInterpolationMethod() const { return _velocity_interpolation; }
+  /// Get the face interpolation method for velocity
+  const MooseEnum & getMomentumFaceInterpolationMethod() const
+  {
+    return _momentum_face_interpolation;
+  }
   /// Get the inlet boundaries
   const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
   /// Get the wall boundaries
@@ -158,8 +163,10 @@ private:
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
 
-  /// The velocity / momentum face interpolation method for advecting other quantities
+  /// The velocity face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
+  /// The momentum face interpolation method for being advected
+  const MooseEnum _momentum_face_interpolation;
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;
