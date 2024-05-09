@@ -26,7 +26,7 @@ DiffusionHDGKernel::validParams()
 
 DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters),
-    DiffusionHDGAssemblyHelper(this, this, _sys, _aux_sys, _tid),
+    DiffusionHDGAssemblyHelper(this, this, this, _sys, _aux_sys, _tid),
     _source(getFunction("source"))
 {
 }
@@ -37,7 +37,7 @@ DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & parameters)
 void
 DiffusionHDGKernel::onElement()
 {
-  resizeData(*this);
+  resizeData();
 
   // Populate LM dof indices
   _lm_dof_indices = _lm_u_dof_indices;
@@ -51,20 +51,20 @@ DiffusionHDGKernel::onElement()
   }
 
   // qu and u
-  vectorVolumeResidual(*this, 0, _qu_sol, _u_sol);
-  scalarVolumeResidual(*this, _vector_n_dofs, _qu_sol, _source);
-  vectorVolumeJacobian(*this, 0, 0, _vector_n_dofs);
-  scalarVolumeJacobian(*this, _vector_n_dofs, 0);
+  vectorVolumeResidual(0, _qu_sol, _u_sol, _JxW, *_qrule);
+  scalarVolumeResidual(_vector_n_dofs, _qu_sol, _source, _JxW, *_qrule, _q_point);
+  vectorVolumeJacobian(0, 0, _vector_n_dofs, _JxW, *_qrule);
+  scalarVolumeJacobian(_vector_n_dofs, 0, _JxW, *_qrule);
 }
 
 void
 DiffusionHDGKernel::onInternalSide()
 {
   // qu, u, lm_u
-  vectorFaceResidual(*this, 0, _lm_u_sol);
-  vectorFaceJacobian(*this, 0, 0);
-  scalarFaceResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol);
-  scalarFaceJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs, 0);
-  lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol);
-  lmFaceJacobian(*this, 0, 0, _vector_n_dofs, 0);
+  vectorFaceResidual(0, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
+  vectorFaceJacobian(0, 0, _JxW_face, *_qrule_face, _normals);
+  scalarFaceResidual(_vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
+  scalarFaceJacobian(_vector_n_dofs, 0, _vector_n_dofs, 0, _JxW_face, *_qrule_face, _normals);
+  lmFaceResidual(0, _qu_sol, _u_sol, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
+  lmFaceJacobian(0, 0, _vector_n_dofs, 0, _JxW_face, *_qrule_face, _normals);
 }

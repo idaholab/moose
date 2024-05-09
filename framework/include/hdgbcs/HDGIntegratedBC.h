@@ -16,7 +16,9 @@
 /**
  * An integrated boundary condition for hybridized finite element formulations
  */
-class HDGIntegratedBC : public IntegratedBCBase, public HDGData, public NonADFunctorInterface
+class HDGIntegratedBC : public IntegratedBCBase,
+                        virtual public HDGData,
+                        public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();

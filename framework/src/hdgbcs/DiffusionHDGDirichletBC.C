@@ -28,7 +28,7 @@ DiffusionHDGDirichletBC::validParams()
 
 DiffusionHDGDirichletBC::DiffusionHDGDirichletBC(const InputParameters & parameters)
   : HDGIntegratedBC(parameters),
-    DiffusionHDGAssemblyHelper(this, this, _sys, _aux_sys, _tid),
+    DiffusionHDGAssemblyHelper(this, this, this, _sys, _aux_sys, _tid),
     _dirichlet_val(getFunctor<Real>("functor"))
 {
 }
@@ -36,15 +36,31 @@ DiffusionHDGDirichletBC::DiffusionHDGDirichletBC(const InputParameters & paramet
 void
 DiffusionHDGDirichletBC::onBoundary()
 {
-  resizeData(*this);
+  resizeData();
 
   // For notation, please read "A superconvergent LDG-hybridizable Galerkin method for second-order
   // elliptic problems" by Cockburn
 
   // qu, u
-  vectorDirichletResidual(*this, 0, _dirichlet_val);
-  scalarDirichletResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _dirichlet_val);
-  scalarDirichletJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs);
+  vectorDirichletResidual(0,
+                          _dirichlet_val,
+                          _JxW_face,
+                          *_qrule_face,
+                          _normals,
+                          _current_elem,
+                          _current_side,
+                          _q_point_face);
+  scalarDirichletResidual(_vector_n_dofs,
+                          _qu_sol,
+                          _u_sol,
+                          _dirichlet_val,
+                          _JxW_face,
+                          *_qrule_face,
+                          _normals,
+                          _current_elem,
+                          _current_side,
+                          _q_point_face);
+  scalarDirichletJacobian(_vector_n_dofs, 0, _vector_n_dofs, _JxW_face, *_qrule_face, _normals);
 
   // Set the LMs on these Dirichlet boundary faces to 0
   createIdentityResidual(_lm_phi_face, _lm_u_sol, _lm_n_dofs, 0);

@@ -30,7 +30,7 @@ DiffusionHDGPrescribedGradientBC::validParams()
 DiffusionHDGPrescribedGradientBC::DiffusionHDGPrescribedGradientBC(
     const InputParameters & parameters)
   : HDGIntegratedBC(parameters),
-    DiffusionHDGAssemblyHelper(this, this, _sys, _aux_sys, _tid),
+    DiffusionHDGAssemblyHelper(this, this, this, _sys, _aux_sys, _tid),
     _normal_gradient(getFunctor<Real>("normal_gradient"))
 {
 }
@@ -38,18 +38,18 @@ DiffusionHDGPrescribedGradientBC::DiffusionHDGPrescribedGradientBC(
 void
 DiffusionHDGPrescribedGradientBC::onBoundary()
 {
-  resizeData(*this);
+  resizeData();
 
   // For notation, please read "A superconvergent LDG-hybridizable Galerkin method for second-order
   // elliptic problems" by Cockburn
 
   // qu, u, lm_u
-  vectorFaceResidual(*this, 0, _lm_u_sol);
-  vectorFaceJacobian(*this, 0, 0);
-  scalarFaceResidual(*this, _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol);
-  scalarFaceJacobian(*this, _vector_n_dofs, 0, _vector_n_dofs, 0);
-  lmFaceResidual(*this, 0, _qu_sol, _u_sol, _lm_u_sol);
-  lmFaceJacobian(*this, 0, 0, _vector_n_dofs, 0);
+  vectorFaceResidual(0, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
+  vectorFaceJacobian(0, 0, _JxW_face, *_qrule_face, _normals);
+  scalarFaceResidual(_vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
+  scalarFaceJacobian(_vector_n_dofs, 0, _vector_n_dofs, 0, _JxW_face, *_qrule_face, _normals);
+  lmFaceResidual(0, _qu_sol, _u_sol, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
+  lmFaceJacobian(0, 0, _vector_n_dofs, 0, _JxW_face, *_qrule_face, _normals);
 
   for (const auto qp : make_range(_qrule_face->n_points()))
     for (const auto i : make_range(_lm_n_dofs))

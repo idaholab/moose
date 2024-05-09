@@ -21,7 +21,7 @@ class HDGIntegratedBC;
 /**
  * A kernel for hybridized finite element formulations
  */
-class HDGKernel : public KernelBase, public HDGData
+class HDGKernel : public KernelBase, virtual public HDGData
 {
 public:
   static InputParameters validParams();

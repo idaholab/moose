@@ -35,6 +35,4 @@ protected:
 private:
   /// optional source
   const Function & _source;
-
-  friend class DiffusionHDGAssemblyHelper;
 };

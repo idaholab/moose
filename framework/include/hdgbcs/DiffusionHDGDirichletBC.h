@@ -34,6 +34,4 @@ protected:
 private:
   /// Dirichlet function
   const Moose::Functor<Real> & _dirichlet_val;
-
-  friend class DiffusionHDGAssemblyHelper;
 };

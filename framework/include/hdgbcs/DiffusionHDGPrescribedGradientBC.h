@@ -31,6 +31,4 @@ protected:
   /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
   /// condition
   const Moose::Functor<Real> & _normal_gradient;
-
-  friend class DiffusionHDGAssemblyHelper;
 };

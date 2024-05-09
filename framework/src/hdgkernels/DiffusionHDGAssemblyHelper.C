@@ -33,6 +33,7 @@ DiffusionHDGAssemblyHelper::validParams()
 
 DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(const MooseObject * const moose_obj,
                                                        MaterialPropertyInterface * const mpi,
+                                                       const TransientInterface * const ti,
                                                        SystemBase & nl_sys,
                                                        SystemBase & aux_sys,
                                                        const THREAD_ID tid)
@@ -63,6 +64,327 @@ DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(const MooseObject * const
     // initialize local number of dofs
     _vector_n_dofs(0),
     _scalar_n_dofs(0),
-    _lm_n_dofs(0)
+    _lm_n_dofs(0),
+    _ti(*ti)
 {
+}
+
+void
+DiffusionHDGAssemblyHelper::resizeData()
+{
+  _vector_n_dofs = _qu_dof_indices.size();
+  _scalar_n_dofs = _u_dof_indices.size();
+  _lm_n_dofs = _lm_u_dof_indices.size();
+
+  libmesh_assert_equal_to(_vector_n_dofs, _vector_phi.size());
+  libmesh_assert_equal_to(_scalar_n_dofs, _scalar_phi.size());
+
+  _primal_size = _vector_n_dofs + _scalar_n_dofs;
+  _lm_size = _lm_n_dofs;
+
+  // prepare our matrix/vector data structures
+  _PrimalMat.setZero(_primal_size, _primal_size);
+  _PrimalVec.setZero(_primal_size);
+  _LMMat.setZero(_lm_size, _lm_size);
+  _LMVec.setZero(_lm_size);
+  _PrimalLM.setZero(_primal_size, _lm_size);
+  _LMPrimal.setZero(_lm_size, _primal_size);
+}
+
+void
+DiffusionHDGAssemblyHelper::vectorVolumeResidual(const unsigned int i_offset,
+                                                 const MooseArray<Gradient> & vector_sol,
+                                                 const MooseArray<Number> & scalar_sol,
+                                                 const MooseArray<Real> & JxW,
+                                                 const QBase & qrule)
+{
+  for (const auto qp : make_range(qrule.n_points()))
+    for (const auto i : make_range(_vector_n_dofs))
+    {
+      // Vector equation dependence on vector dofs
+      _PrimalVec(i_offset + i) += JxW[qp] * (_vector_phi[i][qp] * vector_sol[qp]);
+
+      // Vector equation dependence on scalar dofs
+      _PrimalVec(i_offset + i) += JxW[qp] * (_div_vector_phi[i][qp] * scalar_sol[qp]);
+    }
+}
+
+void
+DiffusionHDGAssemblyHelper::vectorVolumeJacobian(const unsigned int i_offset,
+                                                 const unsigned int vector_j_offset,
+                                                 const unsigned int scalar_j_offset,
+                                                 const MooseArray<Real> & JxW,
+                                                 const QBase & qrule)
+{
+  for (const auto qp : make_range(qrule.n_points()))
+    for (const auto i : make_range(_vector_n_dofs))
+    {
+      // Vector equation dependence on vector dofs
+      for (const auto j : make_range(_vector_n_dofs))
+        _PrimalMat(i_offset + i, vector_j_offset + j) +=
+            JxW[qp] * (_vector_phi[i][qp] * _vector_phi[j][qp]);
+
+      // Vector equation dependence on scalar dofs
+      for (const auto j : make_range(_scalar_n_dofs))
+        _PrimalMat(i_offset + i, scalar_j_offset + j) +=
+            JxW[qp] * (_div_vector_phi[i][qp] * _scalar_phi[j][qp]);
+    }
+}
+
+void
+DiffusionHDGAssemblyHelper::scalarVolumeResidual(const unsigned int i_offset,
+                                                 const MooseArray<Gradient> & vector_field,
+                                                 const Function & source,
+                                                 const MooseArray<Real> & JxW,
+                                                 const QBase & qrule,
+                                                 const MooseArray<Point> & q_point)
+{
+  for (const auto qp : make_range(qrule.n_points()))
+  {
+    // Evaluate source
+    const auto f = source.value(_ti.time(), q_point[qp]);
+
+    for (const auto i : make_range(_scalar_n_dofs))
+    {
+      _PrimalVec(i_offset + i) +=
+          JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * vector_field[qp]);
+
+      // Scalar equation RHS
+      _PrimalVec(i_offset + i) -= JxW[qp] * _scalar_phi[i][qp] * f;
+    }
+  }
+}
+
+void
+DiffusionHDGAssemblyHelper::scalarVolumeJacobian(const unsigned int i_offset,
+                                                 const unsigned int vector_field_j_offset,
+                                                 const MooseArray<Real> & JxW,
+                                                 const QBase & qrule)
+{
+  for (const auto qp : make_range(qrule.n_points()))
+    for (const auto i : make_range(_scalar_n_dofs))
+      // Scalar equation dependence on vector dofs
+      for (const auto j : make_range(_vector_n_dofs))
+        _PrimalMat(i_offset + i, vector_field_j_offset + j) +=
+            JxW[qp] * _diff[qp] * (_grad_scalar_phi[i][qp] * _vector_phi[j][qp]);
+}
+
+void
+DiffusionHDGAssemblyHelper::vectorFaceResidual(const unsigned int i_offset,
+                                               const MooseArray<Number> & lm_sol,
+                                               const MooseArray<Real> & JxW_face,
+                                               const QBase & qrule_face,
+                                               const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    // Vector equation dependence on LM dofs
+    for (const auto i : make_range(_vector_n_dofs))
+      _PrimalVec(i_offset + i) -=
+          JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * lm_sol[qp];
+}
+
+void
+DiffusionHDGAssemblyHelper::vectorFaceJacobian(const unsigned int i_offset,
+                                               const unsigned int lm_j_offset,
+                                               const MooseArray<Real> & JxW_face,
+                                               const QBase & qrule_face,
+                                               const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    // Vector equation dependence on LM dofs
+    for (const auto i : make_range(_vector_n_dofs))
+      for (const auto j : make_range(_lm_n_dofs))
+        _PrimalLM(i_offset + i, lm_j_offset + j) -=
+            JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * _lm_phi_face[j][qp];
+}
+
+void
+DiffusionHDGAssemblyHelper::scalarFaceResidual(const unsigned int i_offset,
+                                               const MooseArray<Gradient> & vector_sol,
+                                               const MooseArray<Number> & scalar_sol,
+                                               const MooseArray<Number> & lm_sol,
+                                               const MooseArray<Real> & JxW_face,
+                                               const QBase & qrule_face,
+                                               const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    for (const auto i : make_range(_scalar_n_dofs))
+    {
+      // vector
+      _PrimalVec(i_offset + i) -=
+          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
+
+      // scalar from stabilization term
+      _PrimalVec(i_offset + i) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] *
+                                  normals[qp] * normals[qp];
+
+      // lm from stabilization term
+      _PrimalVec(i_offset + i) -=
+          JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * lm_sol[qp] * normals[qp] * normals[qp];
+    }
+}
+
+void
+DiffusionHDGAssemblyHelper::scalarFaceJacobian(const unsigned int i_offset,
+                                               const unsigned int vector_j_offset,
+                                               const unsigned int scalar_j_offset,
+                                               const unsigned int lm_j_offset,
+                                               const MooseArray<Real> & JxW_face,
+                                               const QBase & qrule_face,
+                                               const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    for (const auto i : make_range(_scalar_n_dofs))
+    {
+      for (const auto j : make_range(_vector_n_dofs))
+        _PrimalMat(i_offset + i, vector_j_offset + j) -= JxW_face[qp] * _diff[qp] *
+                                                         _scalar_phi_face[i][qp] *
+                                                         (_vector_phi_face[j][qp] * normals[qp]);
+
+      for (const auto j : make_range(_scalar_n_dofs))
+        _PrimalMat(i_offset + i, scalar_j_offset + j) += JxW_face[qp] * _scalar_phi_face[i][qp] *
+                                                         _tau * _scalar_phi_face[j][qp] *
+                                                         normals[qp] * normals[qp];
+
+      for (const auto j : make_range(_lm_n_dofs))
+        // from stabilization term
+        _PrimalLM(i_offset + i, lm_j_offset + j) -= JxW_face[qp] * _scalar_phi_face[i][qp] * _tau *
+                                                    _lm_phi_face[j][qp] * normals[qp] * normals[qp];
+    }
+}
+
+void
+DiffusionHDGAssemblyHelper::lmFaceResidual(const unsigned int i_offset,
+                                           const MooseArray<Gradient> & vector_sol,
+                                           const MooseArray<Number> & scalar_sol,
+                                           const MooseArray<Number> & lm_sol,
+                                           const MooseArray<Real> & JxW_face,
+                                           const QBase & qrule_face,
+                                           const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    for (const auto i : make_range(_lm_n_dofs))
+    {
+      // vector
+      _LMVec(i_offset + i) -=
+          JxW_face[qp] * _diff[qp] * _lm_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
+
+      // scalar from stabilization term
+      _LMVec(i_offset + i) +=
+          JxW_face[qp] * _lm_phi_face[i][qp] * _tau * scalar_sol[qp] * normals[qp] * normals[qp];
+
+      // lm from stabilization term
+      _LMVec(i_offset + i) -=
+          JxW_face[qp] * _lm_phi_face[i][qp] * _tau * lm_sol[qp] * normals[qp] * normals[qp];
+    }
+}
+
+void
+DiffusionHDGAssemblyHelper::lmFaceJacobian(const unsigned int i_offset,
+                                           const unsigned int vector_j_offset,
+                                           const unsigned int scalar_j_offset,
+                                           const unsigned int lm_j_offset,
+                                           const MooseArray<Real> & JxW_face,
+                                           const QBase & qrule_face,
+                                           const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    for (const auto i : make_range(_lm_n_dofs))
+    {
+      for (const auto j : make_range(_vector_n_dofs))
+        _LMPrimal(i_offset + i, vector_j_offset + j) -= JxW_face[qp] * _diff[qp] *
+                                                        _lm_phi_face[i][qp] *
+                                                        (_vector_phi_face[j][qp] * normals[qp]);
+
+      for (const auto j : make_range(_scalar_n_dofs))
+        _LMPrimal(i_offset + i, scalar_j_offset + j) += JxW_face[qp] * _lm_phi_face[i][qp] * _tau *
+                                                        _scalar_phi_face[j][qp] * normals[qp] *
+                                                        normals[qp];
+
+      for (const auto j : make_range(_lm_n_dofs))
+        // from stabilization term
+        _LMMat(i_offset + i, lm_j_offset + j) -= JxW_face[qp] * _lm_phi_face[i][qp] * _tau *
+                                                 _lm_phi_face[j][qp] * normals[qp] * normals[qp];
+    }
+}
+
+void
+DiffusionHDGAssemblyHelper::vectorDirichletResidual(const unsigned int i_offset,
+                                                    const Moose::Functor<Real> & dirichlet_value,
+                                                    const MooseArray<Real> & JxW_face,
+                                                    const QBase & qrule_face,
+                                                    const MooseArray<Point> & normals,
+                                                    const Elem * const current_elem,
+                                                    const unsigned int current_side,
+                                                    const MooseArray<Point> & q_point_face)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto scalar_value = dirichlet_value(
+        Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
+        _ti.determineState());
+
+    // External boundary -> Dirichlet faces -> Vector equation RHS
+    for (const auto i : make_range(_vector_n_dofs))
+      _PrimalVec(i_offset + i) -=
+          JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * scalar_value;
+  }
+}
+
+void
+DiffusionHDGAssemblyHelper::scalarDirichletResidual(const unsigned int i_offset,
+                                                    const MooseArray<Gradient> & vector_sol,
+                                                    const MooseArray<Number> & scalar_sol,
+                                                    const Moose::Functor<Real> & dirichlet_value,
+                                                    const MooseArray<Real> & JxW_face,
+                                                    const QBase & qrule_face,
+                                                    const MooseArray<Point> & normals,
+                                                    const Elem * const current_elem,
+                                                    const unsigned int current_side,
+                                                    const MooseArray<Point> & q_point_face)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto scalar_value = dirichlet_value(
+        Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
+        _ti.determineState());
+
+    for (const auto i : make_range(_scalar_n_dofs))
+    {
+      // vector
+      _PrimalVec(i_offset + i) -=
+          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
+
+      // scalar from stabilization term
+      _PrimalVec(i_offset + i) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] *
+                                  normals[qp] * normals[qp];
+
+      // dirichlet lm from stabilization term
+      _PrimalVec(i_offset + i) -=
+          JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_value * normals[qp] * normals[qp];
+    }
+  }
+}
+
+void
+DiffusionHDGAssemblyHelper::scalarDirichletJacobian(const unsigned int i_offset,
+                                                    const unsigned int vector_j_offset,
+                                                    const unsigned int scalar_j_offset,
+                                                    const MooseArray<Real> & JxW_face,
+                                                    const QBase & qrule_face,
+                                                    const MooseArray<Point> & normals)
+{
+  for (const auto qp : make_range(qrule_face.n_points()))
+    for (const auto i : make_range(_scalar_n_dofs))
+    {
+      for (const auto j : make_range(_vector_n_dofs))
+        _PrimalMat(i_offset + i, vector_j_offset + j) -= JxW_face[qp] * _diff[qp] *
+                                                         _scalar_phi_face[i][qp] *
+                                                         (_vector_phi_face[j][qp] * normals[qp]);
+
+      for (const auto j : make_range(_scalar_n_dofs))
+        _PrimalMat(i_offset + i, scalar_j_offset + j) += JxW_face[qp] * _scalar_phi_face[i][qp] *
+                                                         _tau * _scalar_phi_face[j][qp] *
+                                                         normals[qp] * normals[qp];
+    }
 }
