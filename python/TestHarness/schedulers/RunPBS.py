@@ -207,6 +207,14 @@ class RunPBS(RunParallel):
         # Add MOOSE's python path for python scripts
         moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..'))
 
+        # The output files that we're expected to generate so that the
+        # PBS job can add a terminator for them so that we can verify
+        # they are complete on the executing host
+        output_files = []
+        for file in tester.getOutputFiles(options):
+            output_files.append(f'"{os.path.join(tester.getTestDir(), file)}"')
+        output_files = ' '.join(output_files)
+
         # Set up the template
         template_env = {'NAME': self.getPBSJobName(job),
                         'SELECT': f'{num_procs}:mpiprocs=1:ncpus={num_threads}',
@@ -218,7 +226,8 @@ class RunPBS(RunParallel):
                         'CWD': tester.getTestDir(),
                         'COMMAND': full_command,
                         'ENDING_COMMENT': self.getOutputEndingComment(),
-                        'MOOSE_PYTHONPATH': moose_python}
+                        'MOOSE_PYTHONPATH': moose_python,
+                        'OUTPUT_FILES': output_files}
         if self.options.queue_queue:
             template_env['QUEUE'] = self.options.queue_queue
         if self.options.queue_source_command:
@@ -310,7 +319,7 @@ class RunPBS(RunParallel):
     def getOutputEndingComment(self):
         """Gets the text we append to the PBS stderr+stdout file to desginate
         that it is complete"""
-        return 'Completed TestHarness RunPBS job'
+        return 'TESTHARNESS RUNPBS FILE TERMINATOR'
 
     def getPBSJob(self, job):
         """Gets the PBSJob object for a given Job
