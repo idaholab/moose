@@ -180,6 +180,11 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
                                                                "flux_inlet_directions");
 
+  // Most likely to be a mistake
+  if (getParam<bool>("pin_pressure") &&
+      getParam<std::vector<MooseFunctorName>>("pressure_functors").size())
+    paramError("pin_pressure", "Cannot pin the pressure if a pressure boundary exists");
+
   // Create maps for boundary-restricted parameters
   _momentum_inlet_functors =
       Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
