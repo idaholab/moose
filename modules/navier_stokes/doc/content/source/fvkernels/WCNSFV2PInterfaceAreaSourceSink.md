@@ -16,7 +16,7 @@ where:
 - $\rho_d$ is the density of the dispersed phase $d$, e.g., the density of the gas in bubbles,
 - $t$ is time,
 - $\vec{u}$ is the velocity vector,
-- $D_b$ is a diffusion coefficient for the interface area concentration, which may be assumed as `0` if unknown,
+- $D_b$ is a diffusion coefficient for the interface area concentration, which may be assumed to be `0` if unknown,
 - $\frac{D (\bullet)}{Dt} = \frac{\partial (\bullet)}{\partial t} + \vec{u} \cdot \nabla (\bullet)$ is the material derivative,
 - $S_T$, $S_C$, and $S_B$ are the interface area concentration sources due to mass transfer, coalescence, and breakage, respectively.
 
@@ -80,7 +80,7 @@ where:
 !alert note
 Many of the parameters in the coalescence model are provided as functors,
 which means that spatially dependent fields may be specified for these parameters.
-However, the validation of this model has only been performed using constant parameters for this model.
+However, the validation of this model has only been performed using constant parameters.
 
 ## Interface area concentration source due to breakage
 
@@ -104,7 +104,7 @@ where:
 !alert note
 Many of the parameters in the breakage model are provided as functors,
 which means that spatially dependent fields may be specified for these parameters.
-However, the validation of this model has only been performed using constant parameters for this model.
+However, the validation of this model has only been performed using constant parameters.
 
 
 !syntax parameters /FVKernels/WCNSFV2PInterfaceAreaSourceSink
