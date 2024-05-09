@@ -96,8 +96,13 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.addRequiredParam<MooseFunctorName>(
       "other_phase_thermal_conductivity_name",
       "Name of the thermal conductivity functor for the other phase");
+
+  // Dispersed phase properties
   params.addParam<MooseFunctorName>(
       "particle_diameter", 1, "Particle size if using a dispersed phase");
+  params.addParam<bool>("use_dispersed_phase_drag_model",
+                        true,
+                        "Adds a linear friction term with the dispersed phase drag model");
 
   // Not applicable currently
   params.suppressParameter<std::vector<MooseFunctorName>>("passive_scalar_source");
@@ -392,8 +397,15 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
       params.set<MooseFunctorName>("rho_d") = _other_phase_density;
       params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
-      params.set<MooseFunctorName>("linear_coef_name") =
-          getParam<MooseFunctorName>("slip_linear_friction_name");
+      if (isParamValid("slip_linear_friction_name"))
+        params.set<MooseFunctorName>("linear_coef_name") =
+            getParam<MooseFunctorName>("slip_linear_friction_name");
+      else if (getParam<bool>("use_dispersed_phase_drag_model"))
+        params.set<MooseFunctorName>("linear_coef_name") = "Darcy_coefficient";
+      else
+        paramError("slip_linear_friction_name",
+                   "WCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "
+                   "field linear friction factor.");
       params.set<MooseFunctorName>("particle_diameter") =
           getParam<MooseFunctorName>("particle_diameter");
       if (getParam<bool>("output_all_properties"))
@@ -401,5 +413,26 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
       getProblem().addMaterial(
           "WCNSFV2PSlipVelocityFunctorMaterial", prefix() + "slip_" + components[dim], params);
     }
+  }
+
+  // Add a default drag model for a dispersed phase
+  if (getParam<bool>("use_dispersed_phase_drag_model"))
+  {
+    const std::vector<std::string> vel_components = {"u", "v", "w"};
+
+    auto params = getFactory().getValidParams("NSFVDispersePhaseDragFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<MooseFunctorName>("drag_coef_name") = "Darcy_coefficient";
+    for (const auto j : make_range(dimension()))
+      params.set<MooseFunctorName>(vel_components[j]) = {
+          _flow_equations_physics->getVelocityNames()[j]};
+    params.set<MooseFunctorName>(NS::density) = "rho_mixture";
+    params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
+    params.set<MooseFunctorName>("particle_diameter") =
+        getParam<MooseFunctorName>("particle_diameter");
+    if (getParam<bool>("output_all_properties"))
+      params.set<std::vector<OutputName>>("outputs") = {"all"};
+    getProblem().addMaterial(
+        "NSFVDispersePhaseDragFunctorMaterial", prefix() + "dispersed_drag", params);
   }
 }

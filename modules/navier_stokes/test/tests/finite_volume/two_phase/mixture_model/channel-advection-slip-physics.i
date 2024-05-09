@@ -83,7 +83,6 @@ k_d = 1
         add_drift_flux_momentum_terms = false
         density_interp_method = 'average'
         add_advection_slip_term = true
-        slip_linear_friction_name = "Darcy_coefficient"
 
         # Base phase material properties
         first_phase_density_name = ${rho}
@@ -96,23 +95,11 @@ k_d = 1
         other_phase_viscosity_name = ${mu_d}
         other_phase_specific_heat_name = ${cp_d}
         other_phase_thermal_conductivity_name = ${k_d}
-        particle_diameter = 0.01
+        use_dispersed_phase_drag_model = true
+        particle_diameter = ${dp}
         output_all_properties = true
       []
     []
-  []
-[]
-
-[FunctorMaterials]
-  [CD]
-    type = NSFVDispersePhaseDragFunctorMaterial
-    rho = 'rho_mixture'
-    mu = mu_mixture
-    u = 'vel_x'
-    v = 'vel_y'
-    particle_diameter = ${dp}
-    outputs = 'all'
-    output_properties = 'Darcy_coefficient'
   []
 []
 
