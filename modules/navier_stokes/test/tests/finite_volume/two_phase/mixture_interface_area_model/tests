@@ -14,7 +14,7 @@
     input = 'turbulent_driven_growth.i'
     exodiff = 'turbulent_driven_growth_out.e'
     rel_err = 1.0E-6
-    requirement = 'The system shall be able to track interfacial area in steady-state, two-phase problems dominated by turbulent driven growth.'
+    requirement = 'The system shall be able to track interfacial area in steady-state, two-phase problems dominated by turbulence driven growth.'
     installation_type = in_tree
   []
   [mixture_interface_pressure_driven_transient]

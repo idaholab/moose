@@ -13,7 +13,7 @@
 #include "INSFVVelocityVariable.h"
 
 /**
- * Computes source the sink terms for the turbulent kinetic energy.
+ * Computes source the sink terms for the interface area in the mixture model of two-phase flows.
  */
 class WCNSFV2PInterfaceAreaSourceSink : public FVElementalKernel
 {
@@ -55,7 +55,7 @@ protected:
   const Moose::Functor<ADReal> & _f_d;
 
   /// Maximum Void Fraction
-  const Real & _f_d_max;
+  const Real  _f_d_max;
 
   /// Surface Tension
   const Moose::Functor<ADReal> & _sigma;

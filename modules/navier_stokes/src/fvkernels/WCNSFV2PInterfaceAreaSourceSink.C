@@ -35,7 +35,7 @@ WCNSFV2PInterfaceAreaSourceSink::validParams()
   params.addParam<Real>("fd_max", 1.0, "Maximum dispersed phase fraction.");
 
   params.addParam<MooseFunctorName>("sigma", 1.0, "Surface tension between phases.");
-  params.addParam<MooseFunctorName>("particle_diameter", 1.0, "Maximum Particle Diameter.");
+  params.addParam<MooseFunctorName>("particle_diameter", 1.0, "Maximum particle diameter.");
 
   params.addParam<Real>("cutoff_fraction",
                         0.1,
