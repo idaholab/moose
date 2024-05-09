@@ -39,4 +39,7 @@ protected:
 
   /// Phase 1 fraction
   const Moose::Functor<ADReal> & _phase_1_fraction;
+
+  /// Whether to bound the phase fraction between 0 and 1 to avoid outlandish properties
+  const bool _limit_pf;
 };
