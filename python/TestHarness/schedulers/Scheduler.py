@@ -301,6 +301,15 @@ class Scheduler(MooseObject):
         while self.slots_in_use > 1 and self.getLoad() >= self.average_load:
             sleep(1.0)
 
+    def getJobSlots(self, job):
+        """
+        Gets the number of slots a job will use.
+
+        This exists so that HPC runners can override it, as
+        jobs like PBS jobs only use one slot because they are
+        ran externally."""
+        return job.getSlots()
+
     def reserveSlots(self, job, j_lock):
         """
         Method which allocates resources to perform the job. Returns bool if job
@@ -311,23 +320,25 @@ class Scheduler(MooseObject):
             self.satisfyLoad()
 
         with self.slot_lock:
+            job_slots = self.getJobSlots(job)
+
             can_run = False
-            if self.slots_in_use + job.getSlots() <= self.available_slots:
+            if self.slots_in_use + job_slots <= self.available_slots:
                 can_run = True
 
             # Check for insufficient slots -soft limit
-            elif job.getSlots() > self.available_slots and self.soft_limit:
+            elif job_slots > self.available_slots and self.soft_limit:
                 job.addCaveats('OVERSIZED')
                 can_run = True
 
             # Check for insufficient slots -hard limit (skip this job)
-            elif job.getSlots() > self.available_slots and not self.soft_limit:
+            elif job_slots > self.available_slots and not self.soft_limit:
                 job.addCaveats('insufficient slots')
                 with j_lock:
                     job.setStatus(job.skip)
 
             if can_run:
-                self.slots_in_use += job.getSlots()
+                self.slots_in_use += job_slots
         return can_run
 
     def handleTimeoutJob(self, job, j_lock):
@@ -470,7 +481,7 @@ class Scheduler(MooseObject):
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:
-                    self.slots_in_use = max(0, self.slots_in_use - job.getSlots())
+                    self.slots_in_use = max(0, self.slots_in_use - self.getJobSlots(job))
 
                 # Stop the long running timer
                 if job.report_timer:
