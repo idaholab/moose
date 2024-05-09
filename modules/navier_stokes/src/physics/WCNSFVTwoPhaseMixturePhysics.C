@@ -53,9 +53,8 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                      "Functor names for the diffusivities used for the main phase fraction.");
 
   // Phase change parameters
-  params.addParam<MaterialPropertyName>(NS::alpha_exc,
-                                        0,
-                                        "Name of the volumetric exchange coefficient");
+  params.addParam<MaterialPropertyName>(
+      NS::alpha_exc, 0, "Name of the volumetric exchange coefficient");
 
   // Drift flux model parameters
   params.addParam<bool>("add_drift_flux_momentum_terms",
@@ -65,7 +64,8 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.addParam<MooseEnum>("density_interp_method",
                              coeff_interp_method,
                              "Face interpolation method for the density in the drift flux term.");
-  params.addParam<bool>("add_advection_slip_term", false, "Whether to use the advection-slip model");
+  params.addParam<bool>(
+      "add_advection_slip_term", false, "Whether to use the advection-slip model");
   params.addParam<MooseFunctorName>(
       "slip_linear_friction_name",
       "Name of the functor providing the scalar linear friction coefficient");
@@ -337,7 +337,8 @@ WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("advected_interp_method") =
         _flow_equations_physics->getMomentumFaceInterpolationMethod();
-    params.set<MooseEnum>("velocity_interp_method") = _flow_equations_physics->getVelocityFaceInterpolationMethod();
+    params.set<MooseEnum>("velocity_interp_method") =
+        _flow_equations_physics->getVelocityFaceInterpolationMethod();
     params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     getProblem().addFVKernel(
         "WCNSFV2PMomentumAdvectionSlip", prefix() + "advection_slip_" + components[dim], params);
@@ -415,7 +416,14 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>("particle_diameter") =
           getParam<MooseFunctorName>("particle_diameter");
       if (getParam<bool>("output_all_properties"))
-        params.set<std::vector<OutputName>>("outputs") = {"all"};
+      {
+        if (!isTransient())
+          params.set<std::vector<OutputName>>("outputs") = {"all"};
+        else
+          paramInfo("output_all_properties",
+                    "Slip velocity functor material output currently unsupported in Physics "
+                    "in transient conditions.");
+      }
       getProblem().addMaterial(
           "WCNSFV2PSlipVelocityFunctorMaterial", prefix() + "slip_" + components[dim], params);
     }

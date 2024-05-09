@@ -79,8 +79,7 @@ cp_d = 1
         other_phase_viscosity_name = ${mu_d}
         other_phase_specific_heat_name = ${cp_d}
         other_phase_thermal_conductivity_name = ${k_d}
-        # We can't output the slip velocities on initial during a transient currently
-        # output_all_properties = true
+        output_all_properties = true
 
         # Friction model, not actually used!
         use_dispersed_phase_drag_model = true
