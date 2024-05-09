@@ -11,6 +11,16 @@
     installation_type = in_tree
     valgrind = none
   []
+  [mixture_lid_driven_two_phase_physics]
+    type = 'CSVDiff'
+    input = 'lid-driven-two-phase-physics.i'
+    csvdiff = 'lid-driven-two-phase-physics_CSV.csv'
+    requirement = 'The system shall give the correct solution for two phase flow in a lid-driven cavity with the mixture model using the Navier Stokes Physics syntax.'
+    recover = false
+    allow_warnings = true
+    installation_type = in_tree
+    valgrind = none
+  []
   [mixture_rayleigh_bernard_two_phase]
     type = 'CSVDiff'
     input = 'rayleigh-bernard-two-phase.i'
