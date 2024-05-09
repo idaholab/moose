@@ -40,7 +40,7 @@ class RunException(RunApp):
         # "Inappropriate ioctl for device (25)" errors, so if this test
         # requires more procs, we can't run it
         if options.pbs and int(self.specs['min_parallel'] > 1):
-            self.addCaveats('PBS max_parallel=1')
+            self.addCaveats('PBS max_cpus=1')
             return False
         return RunApp.checkRunnable(self, options)
 
@@ -60,7 +60,7 @@ class RunException(RunApp):
         # "Inappropriate ioctl for device (25)" errors, so if this test
         # doesn't require more procs, just set it to zero
         if options.pbs and int(self.specs['min_parallel']) == 1 and procs != 1:
-            self.addCaveats('PBS max_parallel=1')
+            self.addCaveats('PBS max_cpus=1')
             return 1
         return procs
 
