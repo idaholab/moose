@@ -76,10 +76,10 @@ DumpObjectsProblem::dumpObjectHelper(const std::string & system,
 
   // clang-format off
   _generated_syntax[path][system] +=
-        "  [./" + name + "]\n"
+        "  [" + name + "]\n"
       + "    type = " + type + '\n'
       +      param_text
-      + "  [../]\n";
+      + "  []\n";
   // clang-format on
 }
 
@@ -124,9 +124,9 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 
   // clang-format off
   _generated_syntax[path][system] +=
-        "  [./" + var_name + "]\n"
+        "  [" + var_name + "]\n"
       +      param_text
-      + "  [../]\n";
+      + "  []\n";
   // clang-format on
 }
 
