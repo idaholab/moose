@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarness.runners.Runner import Runner
-import time, os
+import re, time, os, subprocess
 
 class PBSRunner(Runner):
     """Runner that spawns a process with PBS.
@@ -24,7 +24,7 @@ class PBSRunner(Runner):
         # if the job ended in an unexpected state, it might
         # not even be using the output and we don't want to
         # just hang forever
-        self.wait_output_time = 60
+        self.wait_output_time = 120
 
     def spawn(self, timer):
         from TestHarness.schedulers.RunPBS import RunPBS
@@ -86,26 +86,18 @@ class PBSRunner(Runner):
                 wait_files.add(os.path.join(tester.getTestDir(), file))
 
         # Wait for all of the files to be available
-        file_poll_interval = 0.5
+        file_poll_interval = 0.25
         waited_time = 0
         while wait_files:
             # Look for each file
             for file in wait_files.copy():
-                # File exists
-                if os.path.exists(file) and os.path.isfile(file):
-                    # Special case for stdout/stderr, where we append
-                    # something to the end to show that it's actually done
-                    # and then need to read it
-                    # TODO: shorten output as an option?
-                    if file == output_file:
-                        output = open(file, 'r').read()
-                        ending_comment = self.run_pbs.getOutputEndingComment()
-                        if ending_comment in output:
-                            self.output = output.replace(ending_comment, '')
-                        else:
-                            continue
-                    # Done with this file
-                    wait_files.discard(file)
+                if not self.checkFile(file):
+                    continue
+                # Store the output
+                if file == output_file:
+                    self.output = open(file, 'r').read()
+                # Done with this file
+                wait_files.discard(file)
 
             # We've waited for files for too long
             if wait_files and waited_time >= self.wait_output_time:
@@ -120,6 +112,111 @@ class PBSRunner(Runner):
 
             waited_time += file_poll_interval
             time.sleep(file_poll_interval)
+
+    def checkFile(self, file):
+        """
+        Checks if a file is ready for reading.
+
+        In summary:
+        - Check if the file exists
+        - If the file exists, make sure that it has the terminator
+          string (to know that we have the full file)
+        - Remove the terminator string
+        """
+        if not os.path.exists(file) or not os.path.isfile(file):
+            return False
+
+        # The file terminator check (to we have the up-to-date copy of the file)
+        # is dependent on whether or not the file is a binary
+        is_binary = self.isFileBinary(file)
+        # If this returns None, it means that the "file" command couldn't determine
+        # the file type, which may be the case if we have an incomplete file so
+        # just continue and check on the next iteration
+        if is_binary is None:
+            return False
+
+        ending_comment = self.run_pbs.getOutputEndingComment()
+
+        # Binary file
+        if is_binary:
+            with open(file, "rb+") as file:
+                # We'll be looking for this many characters
+                len_comment = len(ending_comment)
+
+                # Move to the end and figure out the position
+                # back where our terminator should be
+                file.seek(0, os.SEEK_END)
+                pos = file.tell() - len_comment
+
+                # File is shorter than our comment
+                if pos < 0:
+                    return False
+
+                # Move to the position where our terminator _should_ be
+                file.seek(pos)
+
+                # We try here in the event that we're loading
+                # an earlier part of the file and we can't decode
+                try:
+                    contents = file.read(len_comment).decode('utf-8')
+                except:
+                    return False
+
+                # Terminator isn't there
+                if contents != ending_comment:
+                    return False
+
+                # Remove the terminator
+                file.seek(pos)
+                file.truncate()
+
+                return True
+        # Text file
+        else:
+            # Load just the last line of the file
+            last_line = subprocess.check_output(['tail', '-1', file], text=True)
+            # Found the match, remove the last line and consider this file available
+            if ending_comment == last_line:
+                self.removeLastLine(file)
+                return True
+
+        return False
+
+    @staticmethod
+    def removeLastLine(file):
+        """
+        Removes the last line from the given text file.
+
+        Used to remove the terminator that we append to all output
+        files on the compute host in order to make sure that the
+        entire output file is synced"""
+        # stackoverflow.com/questions/1877999/delete-final-line-in-file-with-python
+        with open(file, "r+", encoding="utf-8") as file:
+            file.seek(0, os.SEEK_END)
+            pos = file.tell() - 1
+            while pos > 0 and file.read(1) != "\n":
+                pos -= 1
+                file.seek(pos, os.SEEK_SET)
+            if pos > 0:
+                file.seek(pos, os.SEEK_SET)
+                file.truncate()
+
+    @staticmethod
+    def isFileBinary(file):
+        """
+        Returns whether or not the given file is a binary file.
+
+        If None, a failure was encountered when checking the file type.
+        """
+        try:
+            call_file = subprocess.check_output(['file', '--mime-encoding', file], text=True)
+        except:
+            return None
+
+        # Will return something like "<filename>: <encoding>",
+        # where <encoding>=binary when the file is binary
+        find_binary = re.search('binary$', call_file)
+        return find_binary is not None
 
     def kill(self):
         self.run_pbs.killJob(self.job)

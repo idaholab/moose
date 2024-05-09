@@ -42,6 +42,25 @@ set +e
 # ...and capture the return code cause we're not done yet
 return_code=$?
 
+set +e
+
+# Append a terminator to all of the output files for file syncing across NFS
+OUTPUT_FILES=({{ OUTPUT_FILES }})
+for file in ${OUTPUT_FILES[@]}; do
+    if [ ! -e "$file" ]; then
+        echo "Failed to find output file $file"
+        exit 1
+    fi
+
+    # No newline for binaries
+    if [[ $(file --mime-encoding ${file}) = *binary ]]; then
+        printf "{{ ENDING_COMMENT }}" >> $file;
+    # Newline for plain text
+    else
+        printf "\n{{ ENDING_COMMENT }}" >> $file;
+    fi
+done
+
 # Append a recognizable string at the end of the output. We look
 # for this string when parsing the output so that we can be sure
 # that we have obtained all of the output
