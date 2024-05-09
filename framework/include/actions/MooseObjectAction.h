@@ -24,7 +24,7 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
 
   /**
-   * Retreive the parameters of the object to be created by this action
+   * Retrieve the parameters of the object to be created by this action
    */
   InputParameters & getObjectParams() { return _moose_object_pars; }
 

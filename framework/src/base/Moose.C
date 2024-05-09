@@ -437,6 +437,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("DiffusionCG", "Physics/Diffusion/ContinuousGalerkin/*");
   registerSyntax("DiffusionFV", "Physics/Diffusion/FiniteVolume/*");
 
+  registerSyntax("AddActionComponentAction", "Components/*");
+
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
