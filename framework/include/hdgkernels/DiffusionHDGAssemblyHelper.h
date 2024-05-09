@@ -49,7 +49,7 @@ public:
 
 protected:
   virtual std::string physics() const override { return "diffusion"; }
-  virtual std::set<std::string> variables() const override;
+  virtual std::set<const MooseVariableBase *> variables() const override;
 
   /**
    * Set the number of degree of freedom variables and resize the Eigen data structures
@@ -57,10 +57,10 @@ protected:
   void resizeData();
 
   /**
-   * Implements a residual for the weak form:
+   * Computes a local residual vector for the weak form:
    * (q, v) + (u, div(v))
-   * where q is the vector field representing the gradient, v are its associated test functions, and
-   * u is the scalar field
+   * where q is the vector field representing the gradient of u, v are its associated test
+   * functions, and u is the diffused scalar field
    */
   void vectorVolumeResidual(const unsigned int i_offset,
                             const MooseArray<Gradient> & vector_sol,
@@ -69,7 +69,7 @@ protected:
                             const QBase & qrule);
 
   /**
-   * Implements a Jacobian for the weak form:
+   * Computes a local Jacobian matrix for the weak form:
    * (q, v) + (u, div(v))
    * where q is the vector field representing the gradient, v are its associated test functions, and
    * u is the scalar field
@@ -81,20 +81,21 @@ protected:
                             const QBase & qrule);
 
   /**
-   * Implements a residual for the weak form:
+   * Computes a local residual vector for the weak form:
    * (Dq, grad(w)) - (f, w)
    * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
    * a forcing function
    */
   void scalarVolumeResidual(const unsigned int i_offset,
                             const MooseArray<Gradient> & vector_field,
-                            const Function & source,
+                            const Moose::Functor<Real> & source,
                             const MooseArray<Real> & JxW,
                             const QBase & qrule,
+                            const Elem * const current_elem,
                             const MooseArray<Point> & q_point);
 
   /**
-   * Implements a Jacobian for the weak form:
+   * Computes a local Jacobian matrix for the weak form:
    * (Dq, grad(w)) - (f, w)
    * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
    * a forcing function
@@ -109,7 +110,7 @@ protected:
   //
 
   /**
-   * Implements a residual for the weak form:
+   * Computes a local residual vector for the weak form:
    * -<\hat{u}, n*v>
    * where \hat{u} is the trace of the scalar field, n is the normal vector, and v are the test
    * functions associated with the gradient field
@@ -121,7 +122,7 @@ protected:
                           const MooseArray<Point> & normals);
 
   /**
-   * Implements a Jacobian for the weak form:
+   * Computes a local Jacobian matrix for the weak form:
    * -<\hat{u}, n*v>
    * where \hat{u} is the trace of the scalar field, n is the normal vector, and v are the test
    * functions associated with the gradient field
@@ -133,7 +134,7 @@ protected:
                           const MooseArray<Point> & normals);
 
   /**
-   * Implements a residual for the weak form:
+   * Computes a local residual vector for the weak form:
    * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
    */
   void scalarFaceResidual(const unsigned int i_offset,
@@ -145,7 +146,7 @@ protected:
                           const MooseArray<Point> & normals);
 
   /**
-   * Implements a Jacobian for the weak form:
+   * Computes a local Jacobian matrix for the weak form:
    * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
    */
   void scalarFaceJacobian(const unsigned int i_offset,
@@ -157,7 +158,7 @@ protected:
                           const MooseArray<Point> & normals);
 
   /**
-   * Implements a residual for the weak form:
+   * Computes a local residual vector for the weak form:
    * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
    */
   void lmFaceResidual(const unsigned int i_offset,
@@ -169,7 +170,7 @@ protected:
                       const MooseArray<Point> & normals);
 
   /**
-   * Implements a Jacobian for the weak form:
+   * Computes a local Jacobian matrix for the weak form:
    * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
    */
   void lmFaceJacobian(const unsigned int i_offset,

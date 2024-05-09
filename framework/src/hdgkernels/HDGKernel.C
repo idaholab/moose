@@ -37,6 +37,7 @@ const std::string HDGKernel::lm_increment_vector_name = "hybrid_lm_increment";
 
 HDGKernel::HDGKernel(const InputParameters & parameters)
   : KernelBase(parameters),
+    ADFunctorInterface(this),
     _aux_sys(_fe_problem.getAuxiliarySystem()),
     _lm_increment(nullptr),
     _current_bnd_id(_assembly.currentBoundaryID()),
@@ -47,7 +48,7 @@ HDGKernel::HDGKernel(const InputParameters & parameters)
     _normals(_assembly.normals()),
     _neigh(nullptr),
     _current_side(_assembly.side()),
-    _computing_global_data(true),
+    _preparing_for_solve(true),
     _hibc_warehouse(
         *getCheckedPointerParam<MooseObjectWarehouse<HDGIntegratedBC> *>("hibc_warehouse"))
 {
@@ -129,9 +130,19 @@ HDGKernel::assemble()
     }
   }
 
+  //
+  // We've now completed our local finite element assembly. We now add this local data into the
+  // global data structures. When preparing for the linear solve, which only occurs for the Lagrange
+  // multiplier degrees of freedom, we fill the global residual and Jacobian (this is during the
+  // ComputeResidualAndJacobianThread). Else we are in the post-linear-solve stage when we already
+  // have already compute our Lagrange multiplier increment, and with that we can compute the primal
+  // solution increment and add it into the auxiliary system vector which holds the primal degrees
+  // of freedom (this is during the HDGPrimalSolutionUpdateThread)
+  //
+
   _PrimalMatInv = _PrimalMat.inverse();
   const auto lm_size = _lm_dof_indices.size();
-  if (_computing_global_data)
+  if (_preparing_for_solve)
   {
     _K_libmesh.resize(lm_size, lm_size);
     _F_libmesh.resize(lm_size);
@@ -185,6 +196,17 @@ HDGKernel::initialSetup()
 {
   const auto our_physics = physics();
   const auto & our_vars = variables();
+  std::set<std::string> our_var_names, their_var_names;
+  for (const auto * const our_var : our_vars)
+  {
+    our_var_names.insert(our_var->name());
+    if (!MooseUtils::relativeFuzzyEqual(our_var->scalingFactor(), Real(1)))
+      mooseError("Scaling factors disrupt the relationship between Lagrange multiplier and primal "
+                 "solution increments. '",
+                 our_var->name(),
+                 "' has a non-unity scaling factor");
+  }
+
   const auto & bcs = _hibc_warehouse.getObjects(_tid);
   for (const auto & bc : bcs)
   {
@@ -196,6 +218,12 @@ HDGKernel::initialSetup()
                  "' physics, which doesn't match our '",
                  our_physics,
                  "' physics");
+
+    const auto & their_vars = bc->variables();
+    their_var_names.clear();
+    for (const auto * const their_var : their_vars)
+      their_var_names.insert(their_var->name());
+
     if (bc->variables() != our_vars)
       mooseError("Different variables are being used in the boundary condition '",
                  bc->name(),

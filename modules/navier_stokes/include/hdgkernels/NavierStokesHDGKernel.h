@@ -33,9 +33,9 @@ protected:
   virtual void onInternalSide() override;
 
   // body forces
-  const Function & _body_force_x;
-  const Function & _body_force_y;
-  const Function & _body_force_z;
-  std::vector<const Function *> _body_forces;
+  const Moose::Functor<Real> & _body_force_x;
+  const Moose::Functor<Real> & _body_force_y;
+  const Moose::Functor<Real> & _body_force_z;
+  std::vector<const Moose::Functor<Real> *> _body_forces;
   const Function & _pressure_mms_forcing_function;
 };

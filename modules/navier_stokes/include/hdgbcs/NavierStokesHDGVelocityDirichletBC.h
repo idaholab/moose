@@ -12,14 +12,7 @@
 #include "HDGIntegratedBC.h"
 #include "NavierStokesHDGAssemblyHelper.h"
 
-#include <vector>
-
-template <typename>
-class MooseVariableFE;
-class MooseVariableScalar;
-template <typename>
-class MooseArray;
-class Function;
+#include <array>
 
 /**
  * Weakly imposes Dirichlet boundary conditions for the velocity for a hybridized discretization of
@@ -40,5 +33,5 @@ protected:
 
 private:
   /// Dirichlet velocity
-  std::array<const Function *, 3> _dirichlet_vel;
+  std::array<const Moose::Functor<Real> *, 3> _dirichlet_vel;
 };

@@ -11,14 +11,12 @@
 
 #include "IntegratedBCBase.h"
 #include "HDGData.h"
-#include "NonADFunctorInterface.h"
+#include "ADFunctorInterface.h"
 
 /**
  * An integrated boundary condition for hybridized finite element formulations
  */
-class HDGIntegratedBC : public IntegratedBCBase,
-                        virtual public HDGData,
-                        public NonADFunctorInterface
+class HDGIntegratedBC : public IntegratedBCBase, virtual public HDGData, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -32,11 +30,20 @@ public:
   virtual void computeResidualAndJacobian() override final;
 
 protected:
+  /**
+   * Creates residuals corresponding to the weak form (v, \hat{u}), or stated simply this routine
+   * can be used to drive Lagrange multiplier values on the boundary to zero. This should be used on
+   * boundaries where there are Dirichlet conditions for the primal variables such that there is no
+   * need for the Lagrange multiplier variables
+   */
   void createIdentityResidual(const MooseArray<std::vector<Real>> & phi,
                               const MooseArray<Number> & sol,
                               const std::size_t n_dofs,
                               const unsigned int i_offset);
 
+  /**
+   * As above, but for the Jacobians
+   */
   void createIdentityJacobian(const MooseArray<std::vector<Real>> & phi,
                               const std::size_t n_dofs,
                               const unsigned int ij_offset);
@@ -44,7 +51,9 @@ protected:
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
 
-  /// The auxiliary system
+  /// The auxiliary system which holds the primal variables. We will update the primal variable
+  /// degrees of freedom based off the Lagrange multiplier increment computed by the linear solve
+  /// (during the Newton iteration)
   SystemBase & _aux_sys;
 
   /// transformed Jacobian weights on the face
@@ -64,6 +73,7 @@ private:
 
   /**
    * Perform finite element assembly for this boundary condition
+    This is mostly performed by filling the HDGData data members.
    */
   virtual void onBoundary() = 0;
 };

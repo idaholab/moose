@@ -44,4 +44,11 @@
     expect_err = "Different variables are being used in the boundary condition 'left'\. HDG kernels and boundary conditions must all operate on the same variables"
     cli_args = 'AuxVariables/v/family=L2_LAGRANGE HDGBCs/left/u=v'
   []
+  [bad_scaling_factor]
+    requirement = 'The system shall error if a user attempts to use a non-unity scaling factor for a variable in a hybridized Discontinuous Galerkin discretization.'
+    input = diffusion.i
+    type = RunException
+    expect_err = "Scaling factors disrupt the relationship between Lagrange multiplier and primal solution increments\. 'face_u' has a non-unity scaling factor"
+    cli_args = 'Variables/face_u/scaling=2'
+  []
 []

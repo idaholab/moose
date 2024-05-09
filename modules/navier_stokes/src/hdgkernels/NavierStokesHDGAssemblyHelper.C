@@ -131,13 +131,14 @@ void
 NavierStokesHDGAssemblyHelper::scalarVolumeResidual(const unsigned int i_offset,
                                                     const MooseArray<Gradient> & vel_gradient,
                                                     const unsigned int vel_component,
-                                                    const Function & body_force,
+                                                    const Moose::Functor<Real> & body_force,
                                                     const MooseArray<Real> & JxW,
                                                     const QBase & qrule,
+                                                    const Elem * const current_elem,
                                                     const MooseArray<Point> & q_point)
 {
   DiffusionHDGAssemblyHelper::scalarVolumeResidual(
-      i_offset, vel_gradient, body_force, JxW, qrule, q_point);
+      i_offset, vel_gradient, body_force, JxW, qrule, current_elem, q_point);
 
   for (const auto qp : make_range(qrule.n_points()))
   {
@@ -182,14 +183,14 @@ NavierStokesHDGAssemblyHelper::scalarVolumeJacobian(const unsigned int i_offset,
       // Scalar equation dependence on scalar dofs
       for (const auto j : make_range(_scalar_n_dofs))
       {
-        // derivatives wrt 0th component
+        // derivatives wrt 0th component of velocity
         {
           const auto rho_vel_cross_vel =
               rhoVelCrossVelJacobian(_u_sol, _v_sol, qp, vel_component, 0, _scalar_phi, j);
           _PrimalMat(i_offset + i, u_j_offset + j) -=
               JxW[qp] * (_grad_scalar_phi[i][qp] * rho_vel_cross_vel);
         }
-        // derivatives wrt 1th component
+        // derivatives wrt 1th component of velocity
         {
           const auto rho_vel_cross_vel =
               rhoVelCrossVelJacobian(_u_sol, _v_sol, qp, vel_component, 1, _scalar_phi, j);
@@ -407,14 +408,14 @@ NavierStokesHDGAssemblyHelper::scalarFaceJacobian(const unsigned int i_offset,
         // from convection term
         //
 
-        // derivatives wrt 0th component
+        // derivatives wrt 0th component of velocity
         {
           const auto rho_vel_cross_vel =
               rhoVelCrossVelJacobian(_lm_u_sol, _lm_v_sol, qp, vel_component, 0, _lm_phi_face, j);
           _PrimalLM(i_offset + i, lm_u_j_offset + j) +=
               JxW_face[qp] * _scalar_phi_face[i][qp] * rho_vel_cross_vel * normals[qp];
         }
-        // derivatives wrt 1th component
+        // derivatives wrt 1th component of velocity
         {
           const auto rho_vel_cross_vel =
               rhoVelCrossVelJacobian(_lm_u_sol, _lm_v_sol, qp, vel_component, 1, _lm_phi_face, j);
@@ -491,14 +492,14 @@ NavierStokesHDGAssemblyHelper::lmFaceJacobian(const unsigned int i_offset,
       for (const auto j : make_range(_lm_n_dofs))
         if (neigh)
         {
-          // derivatives wrt 0th component
+          // derivatives wrt 0th component of velocity
           {
             const auto rho_vel_cross_vel =
                 rhoVelCrossVelJacobian(_lm_u_sol, _lm_v_sol, qp, vel_component, 0, _lm_phi_face, j);
             _LMMat(i_offset + i, lm_u_j_offset + j) +=
                 JxW_face[qp] * _lm_phi_face[i][qp] * rho_vel_cross_vel * normals[qp];
           }
-          // derivatives wrt 1th component
+          // derivatives wrt 1th component of velocity
           {
             const auto rho_vel_cross_vel =
                 rhoVelCrossVelJacobian(_lm_u_sol, _lm_v_sol, qp, vel_component, 1, _lm_phi_face, j);
@@ -512,17 +513,22 @@ NavierStokesHDGAssemblyHelper::lmFaceJacobian(const unsigned int i_offset,
 void
 NavierStokesHDGAssemblyHelper::pressureDirichletResidual(
     const unsigned int i_offset,
-    const std::array<const Function *, 3> & dirichlet_vel,
+    const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
     const MooseArray<Real> & JxW_face,
     const QBase & qrule_face,
     const MooseArray<Point> & normals,
+    const Elem * const current_elem,
+    const unsigned int current_side,
     const MooseArray<Point> & q_point_face)
 {
   for (const auto qp : make_range(qrule_face.n_points()))
   {
-    const RealVectorValue dirichlet_velocity(dirichlet_vel[0]->value(_ti.time(), q_point_face[qp]),
-                                             dirichlet_vel[1]->value(_ti.time(), q_point_face[qp]),
-                                             dirichlet_vel[2]->value(_ti.time(), q_point_face[qp]));
+    const Moose::ElemSideQpArg elem_side_qp_arg{
+        current_elem, current_side, qp, &qrule_face, q_point_face[qp]};
+    const auto time_arg = _ti.determineState();
+    const RealVectorValue dirichlet_velocity((*dirichlet_vel[0])(elem_side_qp_arg, time_arg),
+                                             (*dirichlet_vel[1])(elem_side_qp_arg, time_arg),
+                                             (*dirichlet_vel[2])(elem_side_qp_arg, time_arg));
     const auto vdotn = dirichlet_velocity * normals[qp];
     for (const auto i : make_range(_p_n_dofs))
       _LMVec(i_offset + i) += JxW_face[qp] * vdotn * _scalar_phi_face[i][qp];
@@ -535,7 +541,7 @@ NavierStokesHDGAssemblyHelper::scalarDirichletResidual(
     const MooseArray<Gradient> & vector_sol,
     const MooseArray<Number> & scalar_sol,
     const unsigned int vel_component,
-    const std::array<const Function *, 3> & dirichlet_vel,
+    const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
     const MooseArray<Real> & JxW_face,
     const QBase & qrule_face,
     const MooseArray<Point> & normals,
@@ -559,9 +565,12 @@ NavierStokesHDGAssemblyHelper::scalarDirichletResidual(
     Gradient qp_p;
     qp_p(vel_component) = _p_sol[qp];
 
-    const RealVectorValue dirichlet_velocity(dirichlet_vel[0]->value(_ti.time(), q_point_face[qp]),
-                                             dirichlet_vel[1]->value(_ti.time(), q_point_face[qp]),
-                                             dirichlet_vel[2]->value(_ti.time(), q_point_face[qp]));
+    const Moose::ElemSideQpArg elem_side_qp_arg{
+        current_elem, current_side, qp, &qrule_face, q_point_face[qp]};
+    const auto time_arg = _ti.determineState();
+    const RealVectorValue dirichlet_velocity((*dirichlet_vel[0])(elem_side_qp_arg, time_arg),
+                                             (*dirichlet_vel[1])(elem_side_qp_arg, time_arg),
+                                             (*dirichlet_vel[2])(elem_side_qp_arg, time_arg));
     const auto scalar_value = dirichlet_velocity(vel_component);
 
     for (const auto i : make_range(_scalar_n_dofs))
@@ -601,22 +610,22 @@ NavierStokesHDGAssemblyHelper::scalarDirichletJacobian(const unsigned int i_offs
       }
 }
 
-std::set<std::string>
+std::set<const MooseVariableBase *>
 NavierStokesHDGAssemblyHelper::variables() const
 {
   auto ret = DiffusionHDGAssemblyHelper::variables();
-  ret.insert(_v_var.name());
-  ret.insert(_grad_v_var.name());
-  ret.insert(_v_face_var.name());
-  ret.insert(_pressure_var.name());
+  ret.insert(&_v_var);
+  ret.insert(&_grad_v_var);
+  ret.insert(&_v_face_var);
+  ret.insert(&_pressure_var);
   if (_w_var)
   {
-    ret.insert(_w_var->name());
-    ret.insert(_grad_w_var->name());
-    ret.insert(_w_face_var->name());
+    ret.insert(_w_var);
+    ret.insert(_grad_w_var);
+    ret.insert(_w_face_var);
   }
   if (_enclosure_lm_var)
-    ret.insert(_enclosure_lm_var->name());
+    ret.insert(_enclosure_lm_var);
 
   return ret;
 }

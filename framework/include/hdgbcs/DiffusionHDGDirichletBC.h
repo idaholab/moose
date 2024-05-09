@@ -14,8 +14,6 @@
 
 #include <vector>
 
-class Function;
-
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
@@ -32,6 +30,6 @@ protected:
   virtual void onBoundary() override;
 
 private:
-  /// Dirichlet function
+  /// Functor computing the Dirichlet boundary value
   const Moose::Functor<Real> & _dirichlet_val;
 };

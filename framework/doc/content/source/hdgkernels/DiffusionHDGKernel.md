@@ -17,7 +17,10 @@ functions, $u$ is the scalar field, $\omega$ are its associated test functions,
 $\hat{u}$ is the trace of the scalar field, $\mu$ are its associated test
 functions, $\tau$ is a stabilization parameter, $f$ is a forcing function, $D$
 is the diffusivity coefficient, and $q_N$ represents a prescribed gradient on a
-Neumann boundary, $\partial\Omega_N$.
+Neumann boundary, $\partial\Omega_N$. As indicated by the test functions, the
+first equation is the equation for the variable $\vec{q}$, the second is for the
+variable $u$, and the third is for the trace or Lagrange multiplier variable
+$\hat{u}$.
 
 !syntax parameters /HDGKernels/DiffusionHDGKernel
 

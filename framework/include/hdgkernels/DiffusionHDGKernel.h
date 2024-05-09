@@ -14,8 +14,6 @@
 
 #include <vector>
 
-class Function;
-
 /**
  * Implements the diffusion equation for a hybridized discretization
  */
@@ -34,5 +32,5 @@ protected:
 
 private:
   /// optional source
-  const Function & _source;
+  const Moose::Functor<Real> & _source;
 };

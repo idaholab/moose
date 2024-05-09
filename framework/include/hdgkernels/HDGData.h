@@ -31,7 +31,7 @@ protected:
   /**
    * The primal and Lagrange multiplier variables that contribute to the HDG discretization
    */
-  virtual std::set<std::string> variables() const = 0;
+  virtual std::set<const MooseVariableBase *> variables() const = 0;
 
   /// Matrix data structures for on-diagonal coupling
   EigenMatrix _PrimalMat, _LMMat;

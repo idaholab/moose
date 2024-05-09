@@ -22,11 +22,11 @@ NavierStokesHDGVelocityDirichletBC::validParams()
   params += NavierStokesHDGAssemblyHelper::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for the velocity for a "
                              "hybridized discretization of the Navier-Stokes equations");
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "dirichlet_u", 0, "The Dirichlet value for the x-component of velocity");
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "dirichlet_v", 0, "The Dirichlet value for the y-component of velocity");
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "dirichlet_w", 0, "The Dirichlet value for the z-component of velocity");
 
   return params;
@@ -37,9 +37,9 @@ NavierStokesHDGVelocityDirichletBC::NavierStokesHDGVelocityDirichletBC(
   : HDGIntegratedBC(parameters),
     NavierStokesHDGAssemblyHelper(this, this, this, _sys, _aux_sys, _mesh, _tid)
 {
-  _dirichlet_vel[0] = &getFunction("dirichlet_u");
-  _dirichlet_vel[1] = &getFunction("dirichlet_v");
-  _dirichlet_vel[2] = &getFunction("dirichlet_w");
+  _dirichlet_vel[0] = &getFunctor<Real>("dirichlet_u");
+  _dirichlet_vel[1] = &getFunctor<Real>("dirichlet_v");
+  _dirichlet_vel[2] = &getFunctor<Real>("dirichlet_w");
 }
 
 void
@@ -100,8 +100,14 @@ NavierStokesHDGVelocityDirichletBC::onBoundary()
                           _normals);
 
   // p
-  pressureDirichletResidual(
-      2 * _lm_n_dofs, _dirichlet_vel, _JxW_face, *_qrule_face, _normals, _q_point_face);
+  pressureDirichletResidual(2 * _lm_n_dofs,
+                            _dirichlet_vel,
+                            _JxW_face,
+                            *_qrule_face,
+                            _normals,
+                            _current_elem,
+                            _current_side,
+                            _q_point_face);
 
   // Set the LMs on these Dirichlet boundary faces to 0
   createIdentityResidual(_lm_phi_face, _lm_u_sol, _lm_n_dofs, 0);

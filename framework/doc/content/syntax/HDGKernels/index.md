@@ -64,3 +64,14 @@ dependence of LM dofs on primal dofs. The `_PrimalVec` and `_LMVec` objects hold
 the residuals for the primal and LM degrees of freedom
 respectively. `_primal_dof_indices` and `_lm_dof_indices` hold the primal and LM
 global degree of freedom numbers respectively for the current element.
+
+Note that local finite element assembly occurs twice within a single iteration
+of Newton's method. The first assembly occurs prior to the linear solve and adds
+into the global residual and Jacobian data structures which represent only the
+trace/Lagrange-multiplier degrees of freedom. The linear solve then occurs which
+computes the Newton update for the Lagrange multiplier degrees of freedom. This
+Lagrange multiplier increment is then used in the second assembly
+post-linear-solve to compute the primal variable solution increment. Because
+only the Lagrange multiplier variables and their degrees of freedom participate
+in the global solve, they are the only variables that live in the nonlinear
+system. The primal variables live in the auxiliary system.

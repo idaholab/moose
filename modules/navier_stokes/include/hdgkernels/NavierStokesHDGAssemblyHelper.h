@@ -33,7 +33,7 @@ public:
 
 protected:
   virtual std::string physics() const override { return "incompressible Navier-Stokes"; }
-  virtual std::set<std::string> variables() const override;
+  virtual std::set<const MooseVariableBase *> variables() const override;
 
   /**
    * Set the number of degree of freedom variables and resize the Eigen data structures
@@ -71,9 +71,10 @@ protected:
   void scalarVolumeResidual(const unsigned int i_offset,
                             const MooseArray<Gradient> & vel_gradient,
                             const unsigned int vel_component,
-                            const Function & body_force,
+                            const Moose::Functor<Real> & body_force,
                             const MooseArray<Real> & JxW,
                             const QBase & qrule,
+                            const Elem * const current_elem,
                             const MooseArray<Point> & q_point);
 
   /**
@@ -188,17 +189,19 @@ protected:
                       const Elem * const neigh);
 
   void pressureDirichletResidual(const unsigned int i_offset,
-                                 const std::array<const Function *, 3> & dirichlet_vel,
+                                 const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
                                  const MooseArray<Real> & JxW_face,
                                  const QBase & qrule_face,
                                  const MooseArray<Point> & normals,
+                                 const Elem * const current_elem,
+                                 const unsigned int current_side,
                                  const MooseArray<Point> & q_point_face);
 
   void scalarDirichletResidual(const unsigned int i_offset,
                                const MooseArray<Gradient> & vector_sol,
                                const MooseArray<Number> & scalar_sol,
                                const unsigned int vel_component,
-                               const std::array<const Function *, 3> & dirichlet_vel,
+                               const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
                                const MooseArray<Real> & JxW_face,
                                const QBase & qrule_face,
                                const MooseArray<Point> & normals,

@@ -11,6 +11,7 @@
 
 #include "KernelBase.h"
 #include "HDGData.h"
+#include "ADFunctorInterface.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 
@@ -21,7 +22,7 @@ class HDGIntegratedBC;
 /**
  * A kernel for hybridized finite element formulations
  */
-class HDGKernel : public KernelBase, virtual public HDGData
+class HDGKernel : public KernelBase, virtual public HDGData, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -59,11 +60,13 @@ protected:
   virtual void onInternalSide() = 0;
 
   /**
-   * Whether we are currently computing global data
+   * Whether we are currently assembling to prepare for the global trace degree of freedom solve
    */
-  bool computingGlobalData() const { return _computing_global_data; }
+  bool preparingForSolve() const { return _preparing_for_solve; }
 
-  /// The auxiliary system
+  /// The auxiliary system which holds the primal variables. We will update the primal variable
+  /// degrees of freedom based off the Lagrange multiplier increment computed by the linear solve
+  /// (during the Newton iteration)
   SystemBase & _aux_sys;
 
   /**
@@ -81,7 +84,7 @@ protected:
   /// The physical locations of the quadrature points on the face
   const MooseArray<Point> & _q_point_face;
 
-  /// transformed Jacobian weights on the face
+  /// transformed Jacobian weights on the current element face
   const MooseArray<Real> & _JxW_face;
 
   /// coordinate transformation on the face
@@ -100,12 +103,12 @@ protected:
 
 private:
   /**
-   * Local finite element assembly
+   * Local assembly for an element and its sides
    */
   void assemble();
 
   /*
-   * Add-in data from the hybridized integrated bc
+   * Add-in HDGData for element sides with boundary conditions
    */
   void addBCData(const HDGIntegratedBC & hibc);
 
@@ -113,7 +116,7 @@ private:
   const unsigned int & _current_side;
 
   /// Whether we are assembling the Lagrange multiplier residual and Jacobian
-  bool _computing_global_data;
+  bool _preparing_for_solve;
 
   /// The warehouse holding the hybridized integrated boundary conditions
   MooseObjectWarehouse<HDGIntegratedBC> & _hibc_warehouse;
@@ -160,13 +163,13 @@ HDGKernel::computeOffDiagJacobianScalar(unsigned int)
 inline void
 HDGKernel::computeResidualAndJacobian()
 {
-  _computing_global_data = true;
+  _preparing_for_solve = true;
   assemble();
 }
 
 inline void
 HDGKernel::computePostLinearSolve()
 {
-  _computing_global_data = false;
+  _preparing_for_solve = false;
   assemble();
 }

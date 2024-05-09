@@ -69,10 +69,10 @@ DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(const MooseObject * const
 {
 }
 
-std::set<std::string>
+std::set<const MooseVariableBase *>
 DiffusionHDGAssemblyHelper::variables() const
 {
-  return {_u_var.name(), _grad_u_var.name(), _u_face_var.name()};
+  return {&_u_var, &_grad_u_var, &_u_face_var};
 }
 
 void
@@ -140,15 +140,17 @@ DiffusionHDGAssemblyHelper::vectorVolumeJacobian(const unsigned int i_offset,
 void
 DiffusionHDGAssemblyHelper::scalarVolumeResidual(const unsigned int i_offset,
                                                  const MooseArray<Gradient> & vector_field,
-                                                 const Function & source,
+                                                 const Moose::Functor<Real> & source,
                                                  const MooseArray<Real> & JxW,
                                                  const QBase & qrule,
+                                                 const Elem * const current_elem,
                                                  const MooseArray<Point> & q_point)
 {
   for (const auto qp : make_range(qrule.n_points()))
   {
     // Evaluate source
-    const auto f = source.value(_ti.time(), q_point[qp]);
+    const auto f =
+        source(Moose::ElemQpArg{current_elem, qp, &qrule, q_point[qp]}, _ti.determineState());
 
     for (const auto i : make_range(_scalar_n_dofs))
     {

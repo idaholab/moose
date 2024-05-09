@@ -19,11 +19,11 @@ NavierStokesHDGKernel::validParams()
 {
   auto params = HDGKernel::validParams();
   params += NavierStokesHDGAssemblyHelper::validParams();
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "body_force_x", 0, "Body force for the momentum equation in the x-direction");
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "body_force_y", 0, "Body force for the momentum equation in the y-direction");
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "body_force_z", 0, "Body force for the momentum equation in the z-direction");
   params.addParam<FunctionName>(
       "pressure_mms_forcing_function",
@@ -39,9 +39,9 @@ NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters),
     NavierStokesHDGAssemblyHelper(this, this, this, _sys, _aux_sys, _mesh, _tid),
     // body forces
-    _body_force_x(getFunction("body_force_x")),
-    _body_force_y(getFunction("body_force_y")),
-    _body_force_z(getFunction("body_force_z")),
+    _body_force_x(getFunctor<Real>("body_force_x")),
+    _body_force_y(getFunctor<Real>("body_force_y")),
+    _body_force_z(getFunctor<Real>("body_force_z")),
     _pressure_mms_forcing_function(getFunction("pressure_mms_forcing_function"))
 {
   _body_forces.push_back(&_body_force_x);
@@ -63,7 +63,7 @@ NavierStokesHDGKernel::onElement()
         _lm_dof_indices.end(), _global_lm_dof_indices->begin(), _global_lm_dof_indices->end());
 
   // Populate primal dof indices if we are computing the primal increment
-  if (!computingGlobalData())
+  if (!preparingForSolve())
   {
     _primal_dof_indices = _qu_dof_indices;
     auto append = [this](const auto & dofs)
@@ -75,7 +75,8 @@ NavierStokesHDGKernel::onElement()
 
   // qu and u
   vectorVolumeResidual(0, _qu_sol, _u_sol, _JxW, *_qrule);
-  scalarVolumeResidual(_vector_n_dofs, _qu_sol, 0, _body_force_x, _JxW, *_qrule, _q_point);
+  scalarVolumeResidual(
+      _vector_n_dofs, _qu_sol, 0, _body_force_x, _JxW, *_qrule, _current_elem, _q_point);
   vectorVolumeJacobian(0, 0, _vector_n_dofs, _JxW, *_qrule);
   scalarVolumeJacobian(_vector_n_dofs,
                        0,
@@ -88,8 +89,14 @@ NavierStokesHDGKernel::onElement()
 
   // qv and v
   vectorVolumeResidual(_vector_n_dofs + _scalar_n_dofs, _qv_sol, _v_sol, _JxW, *_qrule);
-  scalarVolumeResidual(
-      2 * _vector_n_dofs + _scalar_n_dofs, _qv_sol, 1, _body_force_y, _JxW, *_qrule, _q_point);
+  scalarVolumeResidual(2 * _vector_n_dofs + _scalar_n_dofs,
+                       _qv_sol,
+                       1,
+                       _body_force_y,
+                       _JxW,
+                       *_qrule,
+                       _current_elem,
+                       _q_point);
   vectorVolumeJacobian(_vector_n_dofs + _scalar_n_dofs,
                        _vector_n_dofs + _scalar_n_dofs,
                        2 * _vector_n_dofs + _scalar_n_dofs,
