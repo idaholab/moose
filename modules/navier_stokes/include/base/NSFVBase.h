@@ -558,7 +558,10 @@ NSFVBase<BaseType>::commonMomentumEquationParams()
       "multiplier but they are not multiplied with density yet!");
 
   params.addParam<bool>(
-      "standard_friction_formulation", true, "Flag to enable standard friction formulation");
+      "standard_friction_formulation",
+      true,
+      "Flag to enable the standard friction formulation or its alternative, "
+      "which is a simplified version (see user documentation for PINSFVMomentumFriction).");
 
   params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs "
                               "standard_friction_formulation",
@@ -3484,9 +3487,6 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::checkFrictionParameterErrors()
 {
-  if (parameters().isParamSetByUser("friction_types"))
-    checkDependentParameterError("friction_types", {"standard_friction_formulation"}, true);
-
   checkBlockwiseConsistency<std::vector<std::string>>("friction_blocks",
                                                       {"friction_types", "friction_coeffs"});
   for (unsigned int block_i = 0; block_i < _friction_types.size(); ++block_i)
