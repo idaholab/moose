@@ -36,7 +36,4 @@ public:
 
 protected:
   virtual void onBoundary() override;
-
-  friend class NavierStokesHDGAssemblyHelper;
-  friend class DiffusionHDGAssemblyHelper;
 };

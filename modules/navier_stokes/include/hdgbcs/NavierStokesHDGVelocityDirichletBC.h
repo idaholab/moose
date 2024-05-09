@@ -41,7 +41,4 @@ protected:
 private:
   /// Dirichlet velocity
   std::array<const Function *, 3> _dirichlet_vel;
-
-  friend class NavierStokesHDGAssemblyHelper;
-  friend class DiffusionHDGAssemblyHelper;
 };

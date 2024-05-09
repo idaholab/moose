@@ -38,7 +38,4 @@ protected:
   const Function & _body_force_z;
   std::vector<const Function *> _body_forces;
   const Function & _pressure_mms_forcing_function;
-
-  friend class NavierStokesHDGAssemblyHelper;
-  friend class DiffusionHDGAssemblyHelper;
 };
