@@ -138,8 +138,13 @@ class RunPBS(RunParallel):
                 raise RunPBS.CallPBSException(self, 'Failed to execute remote PBS command', command) from e
             return exit_code, result.rstrip()
 
+    def getJobSlots(self, job):
+        # Jobs only use one slot because they are ran externally
+        return 1
+
     def availableSlots(self, params):
-        return 250, False
+        # Support managing 500 HPC jobs concurrently
+        return 500, False
 
     def getPBSJobName(self, job):
         """Gets the name of the PBS job given a tester
