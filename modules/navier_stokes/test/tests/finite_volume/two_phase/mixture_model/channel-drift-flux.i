@@ -76,8 +76,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_x
     rho_d = ${rho_d}
-    # this is a mistake. See this to phase_2
-    fd = 'rho_mixture_var'
+    fd = 'phase_2'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
     momentum_component = 'x'
@@ -108,8 +107,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_y
     rho_d = ${rho_d}
-    # this is a mistake. See this to phase_2
-    fd = 'rho_mixture_var'
+    fd = 'phase_2'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
     momentum_component = 'x'

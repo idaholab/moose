@@ -31,13 +31,9 @@ k_d = 1
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
-
-        pin_pressure = true
-        pinned_pressure_type = 'average'
-        pinned_pressure_value = 0
 
         density = 'rho_mixture'
         dynamic_viscosity = 'mu_mixture'
@@ -60,7 +56,8 @@ k_d = 1
 
         # Friction is done in drift flux term
         friction_types = "Darcy"
-        friction_coeffs = "Darcy_coefficient"
+        friction_coeffs = "Darcy_vec"
+        standard_friction_formulation = true
 
         mass_advection_interpolation = '${advected_interp_method}'
         momentum_advection_interpolation = '${advected_interp_method}'
@@ -68,37 +65,40 @@ k_d = 1
         mu_interp_method = 'average'
       []
     []
-    [WCNSFVTwoPhaseMixture]
+    [TwoPhaseMixture]
       [mixture]
-        add_phase_transport_equation = true
-        phase_fraction_name = 'phase_2'
-        alpha_exc = 0.1
+        liquid_phase_fraction_name = 'phase_1'
+        dispersed_phase_fraction_name = 'phase_2'
 
+        # Phase transport equation
+        add_phase_transport_equation = true
+        alpha_exc = 0.1
         phase_advection_interpolation = 'upwind'
-        ghost_layers = 3
+        # see flow for inlet boundaries
+        phase_fraction_inlet_type = 'fixed-value'
+        phase_fraction_inlet_functors = '${inlet_phase_2}'
+
+        # Needed for some reason
+        ghost_layers = 5
 
         # Drift flux parameters
         add_drift_flux_momentum_terms = true
         density_interp_method = 'average'
+        slip_linear_friction_name = 'Darcy'
 
         # Base phase material properties
         first_phase_density_name = ${rho}
         first_phase_viscosity_name = ${mu}
         first_phase_specific_heat_name = ${cp}
         first_phase_thermal_conductivity_name = ${k}
-        output_all_properties = true
         particle_diameter = 0.01
 
-        # see flow for inlet boundaries
-        phase_fraction_inlet_type = 'fixed-value'
-        phase_fraction_inlet_functors = '${inlet_phase_2}'
-
         # Other phase material properties
-        other_phase_fraction_name = 'phase_1'
         other_phase_density_name = ${rho_d}
         other_phase_viscosity_name = ${mu_d}
         other_phase_specific_heat_name = ${cp_d}
         other_phase_thermal_conductivity_name = ${k_d}
+        output_all_properties = true
       []
     []
   []
@@ -107,6 +107,7 @@ k_d = 1
 [FunctorMaterials]
   [CD]
     type = NSFVDispersePhaseDragFunctorMaterial
+    drag_coef_name = 'Darcy'
     rho = 'rho_mixture'
     mu = mu_mixture
     u = 'vel_x'
@@ -130,11 +131,6 @@ k_d = 1
     petsc_options_iname = '-pc_type -pc_factor_shift_type'
     petsc_options_value = 'lu       NONZERO'
   []
-[]
-
-[Problem]
-  # the physics uses the phase fraction in the drift
-  error_on_jacobian_nonzero_reallocation = false
 []
 
 [Outputs]
