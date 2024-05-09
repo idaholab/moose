@@ -23,6 +23,16 @@ typedef Eigen::VectorXd EigenVector;
 class HDGData
 {
 protected:
+  /**
+   * Indicate what types of physics are being solved
+   */
+  virtual std::string physics() const = 0;
+
+  /**
+   * The primal and Lagrange multiplier variables that contribute to the HDG discretization
+   */
+  virtual std::set<std::string> variables() const = 0;
+
   /// Matrix data structures for on-diagonal coupling
   EigenMatrix _PrimalMat, _LMMat;
   /// Vector data structures

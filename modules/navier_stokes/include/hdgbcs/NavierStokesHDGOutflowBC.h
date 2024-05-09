@@ -23,7 +23,7 @@ class Function;
 
 /**
  * Implements an outflow boundary condition for use with a hybridized discretization of the
- * Navier-Stokes equations
+ * incompressible Navier-Stokes equations
  */
 class NavierStokesHDGOutflowBC : public HDGIntegratedBC, public NavierStokesHDGAssemblyHelper
 {

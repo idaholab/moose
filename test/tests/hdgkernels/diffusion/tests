@@ -37,4 +37,11 @@
     type = CSVDiff
     cli_args = "HDGBCs/inactive='right' Outputs/file_base=prescribed_gradient"
   []
+  [different_vars]
+    requirement = 'The system shall error if hybridized discontinuous Galerkin kernels and boundary conditions operate on a different variable set.'
+    input = diffusion.i
+    type = RunException
+    expect_err = "Different variables are being used in the boundary condition 'left'\. HDG kernels and boundary conditions must all operate on the same variables"
+    cli_args = 'AuxVariables/v/family=L2_LAGRANGE HDGBCs/left/u=v'
+  []
 []

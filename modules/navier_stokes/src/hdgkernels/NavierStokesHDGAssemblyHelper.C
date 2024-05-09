@@ -600,3 +600,23 @@ NavierStokesHDGAssemblyHelper::scalarDirichletJacobian(const unsigned int i_offs
             JxW_face[qp] * _scalar_phi_face[i][qp] * (p_phi * normals[qp]);
       }
 }
+
+std::set<std::string>
+NavierStokesHDGAssemblyHelper::variables() const
+{
+  auto ret = DiffusionHDGAssemblyHelper::variables();
+  ret.insert(_v_var.name());
+  ret.insert(_grad_v_var.name());
+  ret.insert(_v_face_var.name());
+  ret.insert(_pressure_var.name());
+  if (_w_var)
+  {
+    ret.insert(_w_var->name());
+    ret.insert(_grad_w_var->name());
+    ret.insert(_w_face_var->name());
+  }
+  if (_enclosure_lm_var)
+    ret.insert(_enclosure_lm_var->name());
+
+  return ret;
+}

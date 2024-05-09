@@ -21,7 +21,7 @@ NavierStokesHDGOutflowBC::validParams()
   auto params = HDGIntegratedBC::validParams();
   params += NavierStokesHDGAssemblyHelper::validParams();
   params.addClassDescription("Implements an outflow boundary condition for use with a hybridized "
-                             "discretization of the Navier-Stokes equations");
+                             "discretization of the incompressible Navier-Stokes equations");
   return params;
 }
 

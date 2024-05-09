@@ -28,4 +28,11 @@
       detail = 'channel flow problem.'
     []
   []
+  [mismatching_physics]
+    requirement = 'The system shall error if hybridized discontinuous Galerkin kernels and boundary conditions implement different physics.'
+    type = RunException
+    input = lid.i
+    expect_err = "'walls' implements 'incompressible Navier-Stokes' physics, which doesn't match our 'diffusion' physics"
+    cli_args = 'HDGKernels/ns/type=DiffusionHDGKernel HDGKernels/ns/diffusivity=1'
+  []
 []

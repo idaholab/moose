@@ -13,8 +13,8 @@
 #include "DiffusionHDGAssemblyHelper.h"
 
 /**
- * Implements a zero-flux boundary condition for use with a hybridized discretization of the
- * diffusion equation
+ * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
+ * the diffusion equation
  */
 class DiffusionHDGPrescribedGradientBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
 {

@@ -35,13 +35,13 @@ public:
 
   virtual void computeResidualAndJacobian() override final;
 
+  virtual void initialSetup() override;
+
   /**
    * Here we compute the updates to the primal variables (solution and gradient) now that we have
    * the update to our dual (Lagrange multiplier) variable
    */
   void computePostLinearSolve();
-
-  virtual void initialSetup() override;
 
   /// The name of the \p NumericVector that holds the changes in all the global (dual) degrees of
   /// freedom from one Newton iteration to the next
@@ -169,11 +169,4 @@ HDGKernel::computePostLinearSolve()
 {
   _computing_global_data = false;
   assemble();
-}
-
-inline void
-HDGKernel::initialSetup()
-{
-  KernelBase::initialSetup();
-  _lm_increment = &_sys.getVector(lm_increment_vector_name);
 }

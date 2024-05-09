@@ -48,6 +48,9 @@ public:
                              const THREAD_ID tid);
 
 protected:
+  virtual std::string physics() const override { return "diffusion"; }
+  virtual std::set<std::string> variables() const override;
+
   /**
    * Set the number of degree of freedom variables and resize the Eigen data structures
    */

@@ -102,7 +102,7 @@ HDGKernel::assemble()
           // the current face
           _fe_problem.reinitMaterialsBoundary(_current_bnd_id, _tid);
 
-        libmesh_assert(_current_side == side);
+        mooseAssert(_current_side == side, "The sides should be the same");
         const auto & bcs = _hibc_warehouse.getActiveBoundaryObjects(bnd_id, _tid);
         for (const auto & bc : bcs)
         {
@@ -124,7 +124,7 @@ HDGKernel::assemble()
             _fe_problem, _tid, _current_elem, side, Moose::INVALID_BOUNDARY_ID);
       }
 
-      libmesh_assert(_current_side == side);
+      mooseAssert(_current_side == side, "The sides should be the same");
       onInternalSide();
     }
   }
@@ -138,9 +138,14 @@ HDGKernel::assemble()
     const auto LMProductMat = -_LMPrimal * _PrimalMatInv;
     _LMMat += LMProductMat * _PrimalLM;
     _LMVec += LMProductMat * _PrimalVec;
-    libmesh_assert(cast_int<std::size_t>(_LMMat.rows()) == lm_size);
-    libmesh_assert(cast_int<std::size_t>(_LMMat.cols()) == lm_size);
-    libmesh_assert(cast_int<std::size_t>(_LMVec.size()) == lm_size);
+    mooseAssert(cast_int<std::size_t>(_LMMat.rows()) == lm_size,
+                "The number of on-diagonal LM matrix rows should match the number of LM degrees of "
+                "freedom");
+    mooseAssert(cast_int<std::size_t>(_LMMat.cols()) == lm_size,
+                "The number of on-diagonal LM matrix columns should match the number of LM degrees "
+                "of freedom");
+    mooseAssert(cast_int<std::size_t>(_LMVec.size()) == lm_size,
+                "The size of the LM vector should match the number of LM degrees of freedom");
 
     for (const auto i : make_range(lm_size))
     {
@@ -173,4 +178,30 @@ HDGKernel::assemble()
 
     _aux_sys.solution().add_vector(_primal_increment_dof_values, _primal_dof_indices);
   }
+}
+
+void
+HDGKernel::initialSetup()
+{
+  const auto our_physics = physics();
+  const auto & our_vars = variables();
+  const auto & bcs = _hibc_warehouse.getObjects(_tid);
+  for (const auto & bc : bcs)
+  {
+    if (bc->physics() != our_physics)
+      mooseError("'",
+                 bc->name(),
+                 "' implements '",
+                 bc->physics(),
+                 "' physics, which doesn't match our '",
+                 our_physics,
+                 "' physics");
+    if (bc->variables() != our_vars)
+      mooseError("Different variables are being used in the boundary condition '",
+                 bc->name(),
+                 "'. HDG kernels and boundary conditions must all operate on the same variables");
+  }
+
+  KernelBase::initialSetup();
+  _lm_increment = &_sys.getVector(lm_increment_vector_name);
 }

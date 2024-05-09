@@ -69,6 +69,12 @@ DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(const MooseObject * const
 {
 }
 
+std::set<std::string>
+DiffusionHDGAssemblyHelper::variables() const
+{
+  return {_u_var.name(), _grad_u_var.name(), _u_face_var.name()};
+}
+
 void
 DiffusionHDGAssemblyHelper::resizeData()
 {

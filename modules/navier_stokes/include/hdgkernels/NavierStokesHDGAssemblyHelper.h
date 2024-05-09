@@ -11,6 +11,13 @@
 
 #include "DiffusionHDGAssemblyHelper.h"
 
+/**
+ * Implements all the methods for assembling a hybridized local discontinuous Galerkin (LDG-H),
+ * which is a type of HDG method, discretization of the incompressible Navier-Stokes equations.
+ * These routines may be called by both HDG kernels and integrated boundary conditions. The
+ * implementation here is based on "An implicit high-order hybridizable discontinuous Galerkin
+ * method for the incompressible Navier-Stokes equations" by Nguyen and Cockburn
+ */
 class NavierStokesHDGAssemblyHelper : public DiffusionHDGAssemblyHelper
 {
 public:
@@ -25,6 +32,9 @@ public:
                                 const THREAD_ID tid);
 
 protected:
+  virtual std::string physics() const override { return "incompressible Navier-Stokes"; }
+  virtual std::set<std::string> variables() const override;
+
   /**
    * Set the number of degree of freedom variables and resize the Eigen data structures
    */
