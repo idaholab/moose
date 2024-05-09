@@ -13,8 +13,9 @@
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
 #include "INSFVVelocityVariable.h"
+#include "SolutionInvalidInterface.h"
 
-class INSFVMomentumDiffusion : public INSFVFluxKernel
+class INSFVMomentumDiffusion : public INSFVFluxKernel, public SolutionInvalidInterface
 {
 public:
   static InputParameters validParams();
