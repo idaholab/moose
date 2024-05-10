@@ -21,22 +21,20 @@ LMC::validParams()
                              "Linear Model of Coregionalization (LMC).");
   params.addParam<unsigned int>(
       "num_latent_funcs", 1., "The number of latent functions for the expansion of the outputs.");
-  params.addParam<std::vector<UserObjectName>>("covariance_functions",
-                                               "The covariance function for each expansion term.");
-  params.addRequiredParam<unsigned int>(
-      "num_outputs", "The number of outputs expected for this covariance function.");
+  params.makeParamRequired<unsigned int>("num_outputs");
+  params.makeParamRequired<std::vector<UserObjectName>>("covariance_functions");
   return params;
 }
 
 LMC::LMC(const InputParameters & parameters)
   : CovarianceFunctionBase(parameters),
-    CovarianceInterface(parameters),
     _num_expansion_terms(getParam<unsigned int>("num_latent_funcs")),
     _num_outputs(getParam<unsigned int>("num_outputs"))
 {
-
   MooseRandom generator_latent;
   generator_latent.seed(0, 1980);
+
+  const auto & covar_function_names = getParam<std::vector<UserObjectName>>("covariance_functions");
 
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
@@ -69,7 +67,7 @@ LMC::computeCovarianceMatrix(RealEigenMatrix & /*K*/,
 void
 LMC::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
                      const RealEigenMatrix & /*x*/,
-                     std::string /*hyper_param_name*/,
+                     const std::string & /*hyper_param_name*/,
                      unsigned int /*ind*/) const
 {
 }

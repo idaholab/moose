@@ -84,7 +84,7 @@ SquaredExponentialCovariance::SquaredExponentialFunction(RealEigenMatrix & K,
 void
 SquaredExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
                                               const RealEigenMatrix & x,
-                                              std::string hyper_param_name,
+                                              const std::string & hyper_param_name,
                                               unsigned int ind) const
 {
   if (hyper_param_name == "noise_variance")

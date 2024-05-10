@@ -34,7 +34,7 @@ public:
   /// Redirect dK/dhp for hyperparameter "hp"
   void computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
-                       std::string hyper_param_name,
+                       const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
   /// Computes dK/dlf for individual length factors

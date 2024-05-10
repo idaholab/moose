@@ -11,8 +11,9 @@
 
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
+#include "CovarianceInterface.h"
 
-class CovarianceFunctionBase : public MooseObject
+class CovarianceFunctionBase : public MooseObject, public CovarianceInterface
 {
 public:
   static InputParameters validParams();
@@ -25,20 +26,31 @@ public:
                                        const bool is_self_covariance) const = 0;
 
   void loadHyperParamMap(const std::unordered_map<std::string, Real> & map,
-                         const std::unordered_map<std::string, std::vector<Real>> & vec_map);
+                         const std::unordered_map<std::string, std::vector<Real>> & vec_map,
+                         const std::string & prefix = "");
 
   void buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                          std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
+                          std::unordered_map<std::string, std::vector<Real>> & vec_map,
+                          const std::string & prefix = "") const;
 
-  virtual void getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const;
+  virtual void getTuningData(const std::string & name,
+                             unsigned int & size,
+                             Real & min,
+                             Real & max,
+                             const std::string & prefix = "") const;
+
+  /// New function that stores all the types of all the nested covariances
+  void dependentCovarianceTypes(std::map<UserObjectName, std::string> name_type_map) const;
 
   /// Redirect dK/dhp for hyperparameter "hp"
   virtual void computedKdhyper(RealEigenMatrix & dKdhp,
                                const RealEigenMatrix & x,
-                               std::string hyper_param_name,
+                               const std::string & hyper_param_name,
                                unsigned int ind) const;
 
-  virtual bool isTunable(std::string name) const;
+  virtual bool isTunable(const std::string & name, const std::string & prefix = "") const;
+
+  unsigned int numOutputs() const { return _num_outputs; }
 
   std::unordered_map<std::string, Real> & hyperParamMapReal() { return _hp_map_real; }
   std::unordered_map<std::string, std::vector<Real>> & hyperParamMapVectorReal()
@@ -53,6 +65,8 @@ protected:
                                                         const std::vector<Real> value,
                                                         const bool is_tunable);
 
+  std::string getHPName(const std::string & hp_name_in) const;
+
   /// Map of real-valued hyperparameters
   std::unordered_map<std::string, Real> _hp_map_real;
 
@@ -61,4 +75,12 @@ protected:
 
   /// list of tunable hyper-parameters
   std::unordered_set<std::string> _tunable_hp;
+
+  const std::vector<UserObjectName> _dependent_covariance_names;
+
+  std::vector<std::string> _dependent_covariance_types;
+
+  std::vector<CovarianceFunctionBase *> _covariance_functions;
+
+  const unsigned int _num_outputs;
 };

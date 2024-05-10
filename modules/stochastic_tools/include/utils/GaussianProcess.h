@@ -193,6 +193,12 @@ public:
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
+  const std::string & getCovarName() const { return _covar_name; }
+  const std::map<UserObjectName, std::string> & getDependentCovarTypes() const
+  {
+    return _dependent_covar_types;
+  }
+  const unsigned int & getCovarNumOutputs() const { return _num_outputs; }
   const unsigned int & getNumTunableParams() const { return _num_tunable; }
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
   const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
@@ -214,6 +220,9 @@ public:
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   std::string & covarType() { return _covar_type; }
+  std::string & covarName() { return _covar_name; }
+  std::map<UserObjectName, std::string> & dependentCovarTypes() { return _dependent_covar_types; }
+  unsigned int & covarNumOutputs() { return _num_outputs; }
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> & tuningData()
   {
     return _tuning_data;
@@ -237,6 +246,12 @@ protected:
 
   /// Type of covariance function used for this surrogate
   std::string _covar_type;
+
+  std::string _covar_name;
+
+  std::map<UserObjectName, std::string> _dependent_covar_types;
+
+  unsigned int _num_outputs;
 
   /// Tao Communicator
   Parallel::Communicator _tao_comm;

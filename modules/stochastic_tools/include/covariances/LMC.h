@@ -10,9 +10,8 @@
 #pragma once
 
 #include "CovarianceFunctionBase.h"
-#include "CovarianceInterface.h"
 
-class LMC : public CovarianceFunctionBase, public CovarianceInterface
+class LMC : public CovarianceFunctionBase
 {
 public:
   static InputParameters validParams();
@@ -27,20 +26,13 @@ public:
   /// Redirect dK/dhp for hyperparameter "hp"
   void computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
-                       std::string hyper_param_name,
+                       const std::string & hyper_param_name,
                        unsigned int ind) const override;
-
-  /// Computes dK/dlf for individual length factors
-  static void computedKdlf(RealEigenMatrix & K,
-                           const RealEigenMatrix & x,
-                           const std::vector<Real> & length_factor,
-                           const Real sigma_f_squared,
-                           const int ind);
 
 protected:
   const unsigned int _num_expansion_terms;
   const unsigned int _num_outputs;
-  std::vector<const CovarianceFunctionBase *> _covariance_functions;
+
   std::vector<const std::vector<Real> *> _a_coeffs;
   std::vector<const std::vector<Real> *> _lambdas;
 };
