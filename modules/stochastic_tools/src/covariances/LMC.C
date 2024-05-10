@@ -36,7 +36,7 @@ LMC::LMC(const InputParameters & parameters)
 
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
-    const std::string a_coeff_name = "a_" + std::to_string(exp_i);
+    const std::string a_coeff_name = "acoeff_" + std::to_string(exp_i);
     _a_coeffs.push_back(
         &addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true));
 
@@ -72,11 +72,36 @@ LMC::computeCovarianceMatrix(RealEigenMatrix & K,
 }
 
 void
-LMC::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                     const RealEigenMatrix & /*x*/,
-                     const std::string & /*hyper_param_name*/,
-                     unsigned int /*ind*/) const
+LMC::computedKdhyper(RealEigenMatrix & dKdhp,
+                     const RealEigenMatrix & x,
+                     const std::string & hyper_param_name,
+                     unsigned int ind,
+                     const std::string & prefix) const
 {
+  if (_tunable_hp.find(hyper_param_name) != _tunable_hp.end())
+  {
+    std::string acoeff_prefix = "acoeff_";
+    std::string lambda_prefix = "lambda_";
+    RealEigenMatrix dBdhp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
+    RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), x.rows());
+
+    if (hyper_param_name.find(acoeff_prefix) != std::string::npos)
+    {
+      const int number = std::stoi(name.substr(acoeff_prefix.length()));
+      computeAGradient(dBdhp, number, ind);
+      _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
+    }
+    else if (hyper_param_name.find(lambda_prefix) != std::string::npos)
+    {
+      const int number = std::stoi(name.substr(lambda_prefix.length()));
+      computeLambdaGradient(dBdhp, number, ind);
+      _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
+    }
+    MathUtils::kron(dKdhp, dBdhp, K_params);
+  }
+  else
+  {
+  }
 }
 
 void
