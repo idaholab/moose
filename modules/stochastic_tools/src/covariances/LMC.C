@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LMC.h"
-#include <cmath>
 #include "MooseRandom.h"
 
 registerMooseObject("StochasticToolsApp", LMC);
@@ -33,8 +32,6 @@ LMC::LMC(const InputParameters & parameters)
 {
   MooseRandom generator_latent;
   generator_latent.seed(0, 1980);
-
-  const auto & covar_function_names = getParam<std::vector<UserObjectName>>("covariance_functions");
 
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
@@ -70,4 +67,44 @@ LMC::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
                      const std::string & /*hyper_param_name*/,
                      unsigned int /*ind*/) const
 {
+}
+
+void
+LMC::computeBMatrices(std::vector<RealEigenMatrix> & B) const
+{
+  B.clear();
+  for (const auto exp_i : make_range(_num_expansion_terms))
+  {
+    const auto & a_coeffs = *_a_coeffs[exp_i];
+    const auto & lambda_coeffs = *_lambdas[exp_i];
+
+    B.emplace_back(_num_outputs, _num_outputs);
+    auto & Bmat = B.back();
+
+    for (const auto row_i : make_range(_num_outputs))
+      for (const auto col_i : make_range(_num_outputs))
+      {
+        Bmat(row_i, col_i) = a_coeffs[row_i] * a_coeffs[col_i];
+        if (row_i == col_i)
+          Bmat(row_i, col_i) + lambda_coeffs[col_i];
+      }
+  }
+}
+
+RealEigenMatrix
+LMC::computeAGradients(const unsigned int exp_i, const unsigned int index) const
+{
+  const auto & a_coeffs = *_a_coeffs[exp_i];
+  RealEigenMatrix grad = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
+  for (const auto col_i : make_range(_num_outputs))
+    grad(index, col_i) = a_coeffs[col_i];
+  return grad + grad.transpose();
+}
+
+RealEigenMatrix
+LMC::computeLambdaGradients(const unsigned int /*exp_i*/, const unsigned int index) const
+{
+  RealEigenMatrix grad = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
+  grad(index, index) = 1.0;
+  return grad;
 }
