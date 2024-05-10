@@ -9,6 +9,7 @@
 
 #include "LMC.h"
 #include "MooseRandom.h"
+#include "MathUtils.h"
 
 registerMooseObject("StochasticToolsApp", LMC);
 
@@ -54,11 +55,20 @@ LMC::LMC(const InputParameters & parameters)
 }
 
 void
-LMC::computeCovarianceMatrix(RealEigenMatrix & /*K*/,
-                             const RealEigenMatrix & /*x*/,
-                             const RealEigenMatrix & /*xp*/,
-                             const bool /*is_self_covariance*/) const
+LMC::computeCovarianceMatrix(RealEigenMatrix & K,
+                             const RealEigenMatrix & x,
+                             const RealEigenMatrix & xp,
+                             const bool is_self_covariance) const
 {
+  RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), xp.rows());
+  RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
+
+  for (const auto exp_i : make_range(_num_expansion_terms))
+  {
+    _covariance_functions[exp_i]->computeCovarianceMatrix(K_params, x, xp, is_self_covariance);
+    computeBMatrix(B, exp_i);
+    MathUtils::kron(K, B, K_params);
+  }
 }
 
 void
@@ -70,41 +80,41 @@ LMC::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
 }
 
 void
-LMC::computeBMatrices(std::vector<RealEigenMatrix> & B) const
-{
-  B.clear();
-  for (const auto exp_i : make_range(_num_expansion_terms))
-  {
-    const auto & a_coeffs = *_a_coeffs[exp_i];
-    const auto & lambda_coeffs = *_lambdas[exp_i];
-
-    B.emplace_back(_num_outputs, _num_outputs);
-    auto & Bmat = B.back();
-
-    for (const auto row_i : make_range(_num_outputs))
-      for (const auto col_i : make_range(_num_outputs))
-      {
-        Bmat(row_i, col_i) = a_coeffs[row_i] * a_coeffs[col_i];
-        if (row_i == col_i)
-          Bmat(row_i, col_i) + lambda_coeffs[col_i];
-      }
-  }
-}
-
-RealEigenMatrix
-LMC::computeAGradients(const unsigned int exp_i, const unsigned int index) const
+LMC::computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
-  RealEigenMatrix grad = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-  for (const auto col_i : make_range(_num_outputs))
-    grad(index, col_i) = a_coeffs[col_i];
-  return grad + grad.transpose();
+  const auto & lambda_coeffs = *_lambdas[exp_i];
+
+  for (const auto row_i : make_range(_num_outputs))
+    for (const auto col_i : make_range(_num_outputs))
+    {
+      Bmat(row_i, col_i) = a_coeffs[row_i] * a_coeffs[col_i];
+      if (row_i == col_i)
+        Bmat(row_i, col_i) + lambda_coeffs[col_i];
+    }
 }
 
-RealEigenMatrix
-LMC::computeLambdaGradients(const unsigned int /*exp_i*/, const unsigned int index) const
+void
+LMC::computeAGradient(RealEigenMatrix & grad,
+                      const unsigned int exp_i,
+                      const unsigned int index) const
 {
-  RealEigenMatrix grad = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
+  const auto & a_coeffs = *_a_coeffs[exp_i];
+  // Add asserts here
+  grad.setZero();
+  for (const auto row_i : make_range(_num_outputs))
+    for (const auto col_i : make_range(_num_outputs))
+    {
+      grad(index, col_i) = a_coeffs[col_i];
+    }
+  grad += grad.transpose();
+}
+
+void
+LMC::computeLambdaGradient(RealEigenMatrix & grad,
+                           const unsigned int /*exp_i*/,
+                           const unsigned int index) const
+{
+  grad.setZero();
   grad(index, index) = 1.0;
-  return grad;
 }

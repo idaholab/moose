@@ -29,11 +29,15 @@ public:
                        const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
-  void computeBMatrices(std::vector<RealEigenMatrix> & B) const;
+  void computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const;
 
-  RealEigenMatrix computeAGradients(const unsigned int exp_i, const unsigned int index) const;
+  void computeAGradient(RealEigenMatrix & grad,
+                        const unsigned int exp_i,
+                        const unsigned int index) const;
 
-  RealEigenMatrix computeLambdaGradients(const unsigned int exp_i, const unsigned int index) const;
+  void computeLambdaGradient(RealEigenMatrix & grad,
+                             const unsigned int exp_i,
+                             const unsigned int index) const;
 
 protected:
   const unsigned int _num_expansion_terms;

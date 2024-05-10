@@ -454,6 +454,8 @@ timeDerivName(const T & base_prop_name)
   return "d" + base_prop_name + "_dt";
 }
 
+void kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B);
+
 } // namespace MathUtils
 
 /// A helper function for MathUtils::multiIndex
