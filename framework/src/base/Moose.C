@@ -438,6 +438,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("DiffusionFV", "Physics/Diffusion/FiniteVolume/*");
 
   registerSyntax("AddActionComponentAction", "Components/*");
+  registerSyntax("CombineDisjoinedComponent", "Components");
 
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");

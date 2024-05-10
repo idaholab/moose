@@ -168,6 +168,9 @@ public:
    */
   void dataDrivenError(const MeshGenerator & generator, const std::string & message) const;
 
+  /// Get the name of the final mesh generator
+  MeshGeneratorName getFinalMeshGeneratorName() const { return _final_generator_name; }
+
 private:
   /**
    * Gets the MeshGeneratorNames that are referenced in an object's parameters.

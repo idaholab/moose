@@ -52,16 +52,17 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
 {
   if (!appendingMeshGenerators())
     mooseError("Can only call appendMeshGenerator() during the append_mesh_generator task");
+  const auto param_name_mg_name_pairs = getMeshGeneratorParamDependencies(params, true);
 
   // Make sure this mesh generator has one and _only_ one input, as "input"
-  const auto param_name_mg_name_pairs = getMeshGeneratorParamDependencies(params, true);
-  if (param_name_mg_name_pairs.size() != 1 || param_name_mg_name_pairs[0].first != "input")
+  if ((param_name_mg_name_pairs.size() != 1 || param_name_mg_name_pairs[0].first != "input") &&
+      param_name_mg_name_pairs[0].first != "inputs")
     mooseError("While adding ",
                type,
                " '",
                name,
                "' via appendMeshGenerator():\nCan only append a mesh generator that takes a "
-               "single input mesh generator via the parameter named 'input'");
+               "single input mesh generator via the parameter named 'input' or 'inputs'.");
 
   // If no final generator is set, we need to make sure that we have one; we will hit
   // this the first time we add an appended MeshGenerator and only need to do it once.
@@ -80,7 +81,14 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
 
   // Set the final generator as the input
   mooseAssert(hasMeshGenerator(_final_generator_name), "Missing final generator");
-  params.set<MeshGeneratorName>("input") = _final_generator_name;
+  if (params.have_parameter<MeshGeneratorName>("input"))
+    params.set<MeshGeneratorName>("input") = _final_generator_name;
+  else
+  {
+    std::vector<MeshGeneratorName> inputs = params.get<std::vector<MeshGeneratorName>>("inputs");
+    inputs.push_back(_final_generator_name);
+    params.set<std::vector<MeshGeneratorName>>("inputs") = inputs;
+  }
 
   // Keep track of the new final generator
   _final_generator_name = name;
@@ -328,7 +336,7 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
       std::ostringstream oss;
       oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
           << final_generators.back()->name()
-          << " and one or more of the following from an independent set: \"";
+          << "\" and one or more of the following from an independent set: \"";
       bool first = true;
       for (const auto & gen : ind_tree)
       {
@@ -389,7 +397,6 @@ MeshGeneratorSystem::executeMeshGenerators()
     for (const auto & generator : generator_set)
     {
       const auto & name = generator->name();
-
       auto current_mesh = generator->generateInternal();
 
       // Only generating data for this generator
