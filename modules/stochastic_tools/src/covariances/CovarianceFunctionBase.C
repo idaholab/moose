@@ -159,7 +159,7 @@ CovarianceFunctionBase::getTuningData(const std::string & name,
     dependent_covar->getTuningData(name, size, min, max, new_prefix);
   }
 
-  const std::string name_without_prefix(prefix, std::string::npos);
+  const std::string name_without_prefix = name.substr(prefix.length());
 
   if (_hp_map_real.find(name_without_prefix) != _hp_map_real.end())
     size = 1;

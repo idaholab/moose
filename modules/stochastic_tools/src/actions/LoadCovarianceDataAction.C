@@ -93,16 +93,17 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
     {
       const auto & map_it = map.find(param);
       if (map_it != map.end())
-        covar_params.set<Real>(param) = map_it.second;
+        covar_params.set<Real>(param) = map_it->second;
 
       const auto & vec_map_it = vec_map.find(param);
       if (vec_map_it != vec_map.end())
-        covar_params.set<std::vector<Real>>(param) = vec_map_it.second;
+        covar_params.set<std::vector<Real>>(param) = vec_map_it->second;
     };
   }
 
-  _problem->addObject<CovarianceFunctionBase>(
+  auto covar_object = _problem->addObject<CovarianceFunctionBase>(
       covar_type, covar_name, covar_params, /* threaded = */ false);
+  covar_object[0]->loadHyperParamMap(map, vec_map);
 
   model.setupCovariance(covar_name);
 }
