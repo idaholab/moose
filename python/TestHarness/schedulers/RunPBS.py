@@ -195,9 +195,12 @@ class RunPBS(RunParallel):
             command = command.replace(mpi_command, '')
             full_command += mpi_command
 
+        # Wrap the command with apptainer if we're in a container, and also bind
+        # in the root directory that the test is contained in
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
-            full_command += f'apptainer exec {APPTAINER_CONTAINER} '
+            root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
+            full_command += f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER} '
         full_command += f'"{command}"'
 
         num_procs = tester.getProcs(options)
