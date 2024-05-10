@@ -27,8 +27,8 @@ public:
 
   virtual void act() override final;
 
-  /// Use this if registering a new task to the derived ComponentAction
-  virtual void actOnAdditionalTasks(){};
+  /// Get the name of the mesh generator created by this component that generates the mesh for it
+  const MeshGeneratorName & meshName() const { return _mg_name; }
 
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
@@ -40,4 +40,13 @@ protected:
 
   // These routines can help define a component that also defines a Physics
   virtual void addNonlinearVariables() {}
+
+  /// Use this if registering a new task to the derived ComponentAction
+  virtual void actOnAdditionalTasks(){};
+
+  /// Maximum dimension of the component
+  unsigned int _dimension;
+
+  /// Name of the final mesh generator creating the mesh for the component
+  MeshGeneratorName _mg_name;
 };
