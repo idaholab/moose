@@ -84,36 +84,47 @@ class PBSRunner(Runner):
         if tester.mustOutputExist():
             for file in tester.getOutputFiles(self.options):
                 wait_files.add(os.path.join(tester.getTestDir(), file))
+        # The files that we can read, but are incomplete (no terminator)
+        incomplete_files = set()
 
         # Wait for all of the files to be available
         file_poll_interval = 0.25
         waited_time = 0
-        while wait_files:
+        while wait_files or incomplete_files:
             # Look for each file
             for file in wait_files.copy():
-                if not self.checkFile(file):
-                    continue
-                # Store the output
-                if file == output_file:
-                    self.output = open(file, 'r').read()
-                # Done with this file
-                wait_files.discard(file)
+                if os.path.exists(file) and os.path.isfile(file):
+                    wait_files.discard(file)
+                    incomplete_files.add(file)
+
+            # Check for file completeness
+            for file in incomplete_files.copy():
+                if self.fileIsReady(file):
+                    # Store the output
+                    if file == output_file:
+                        self.output = open(file, 'r').read()
+                    # Done with this file
+                    incomplete_files.discard(file)
 
             # We've waited for files for too long
-            if wait_files and waited_time >= self.wait_output_time:
+            if (wait_files or incomplete_files) and waited_time >= self.wait_output_time:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
                 if not self.output:
                     self.output = ''
-                self.output += '#' * 80 + '\nUnavailable output file(s)\n' + '#' * 80 + '\n'
-                for file in wait_files:
-                    self.output += file + '\n'
-                self.output += '\n'
+                def print_files(files, type):
+                    if files:
+                        self.output += '#' * 80 + f'\n{type} output file(s)\n' + '#' * 80 + '\n'
+                        for file in files:
+                            self.output += file + '\n'
+                        self.output += '\n'
+                print_files(wait_files, 'Unavailable')
+                print_files(incomplete_files, 'Incomplete')
                 break
 
             waited_time += file_poll_interval
             time.sleep(file_poll_interval)
 
-    def checkFile(self, file):
+    def fileIsReady(self, file):
         """
         Checks if a file is ready for reading.
 
@@ -123,9 +134,6 @@ class PBSRunner(Runner):
           string (to know that we have the full file)
         - Remove the terminator string
         """
-        if not os.path.exists(file) or not os.path.isfile(file):
-            return False
-
         # The file terminator check (to we have the up-to-date copy of the file)
         # is dependent on whether or not the file is a binary
         is_binary = self.isFileBinary(file)
