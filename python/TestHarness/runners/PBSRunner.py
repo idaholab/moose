@@ -173,14 +173,31 @@ class PBSRunner(Runner):
                 return True
         # Text file
         else:
-            # Load just the last line of the file
-            last_line = subprocess.check_output(['tail', '-1', file], text=True)
-            # Found the match, remove the last line and consider this file available
-            if ending_comment == last_line:
-                self.removeLastLine(file)
+            line, pos = self.getLastLine(file)
+            if ending_comment == line:
+                with open(file, "r+", encoding="utf-8") as f:
+                    f.seek(pos)
+                    f.truncate()
                 return True
 
         return False
+
+    @staticmethod
+    def getLastLine(file):
+        """
+        Gets the last line of a text file and the position
+        in the file at which that last line is.
+        """
+        with open(file, 'rb') as f:
+            try:
+                f.seek(-2, os.SEEK_END)
+                while f.read(1) != b'\n':
+                    f.seek(-2, os.SEEK_CUR)
+            except OSError: # one line filecd
+                f.seek(0)
+            pos = f.tell()
+            line = f.readline().decode('utf-8')
+            return line, pos
 
     @staticmethod
     def removeLastLine(file):
@@ -191,15 +208,15 @@ class PBSRunner(Runner):
         files on the compute host in order to make sure that the
         entire output file is synced"""
         # stackoverflow.com/questions/1877999/delete-final-line-in-file-with-python
-        with open(file, "r+", encoding="utf-8") as file:
-            file.seek(0, os.SEEK_END)
-            pos = file.tell() - 1
-            while pos > 0 and file.read(1) != "\n":
+        with open(file, "r+", encoding="utf-8") as f:
+            f.seek(0, os.SEEK_END)
+            pos = f.tell() - 1
+            while pos > 0 and f.read(1) != "\n":
                 pos -= 1
-                file.seek(pos, os.SEEK_SET)
+                f.seek(pos, os.SEEK_SET)
             if pos > 0:
-                file.seek(pos, os.SEEK_SET)
-                file.truncate()
+                f.seek(pos, os.SEEK_SET)
+                f.truncate()
 
     @staticmethod
     def isFileBinary(file):

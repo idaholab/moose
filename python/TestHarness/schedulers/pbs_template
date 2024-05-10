@@ -10,6 +10,7 @@
 #PBS -o {{ OUTPUT }}
 #PBS -l place={{ PLACE }}
 
+# Exit on failure
 set -e
 
 {%- if SOURCE_FILE is defined %}
@@ -35,6 +36,7 @@ echo "##########################################################################
 # Move into the test directory
 cd {{ CWD }}
 
+# Don't exit on failure: need to capture the actual run's return code
 set +e
 
 # Run the command
@@ -42,7 +44,8 @@ set +e
 # ...and capture the return code cause we're not done yet
 return_code=$?
 
-set +e
+# Exit on failure
+set -e
 
 # Append a terminator to all of the output files for file syncing across NFS
 OUTPUT_FILES=({{ OUTPUT_FILES }})
@@ -64,7 +67,7 @@ done
 # Append a recognizable string at the end of the output. We look
 # for this string when parsing the output so that we can be sure
 # that we have obtained all of the output
-echo "{{ ENDING_COMMENT }}"
+printf "\n{{ ENDING_COMMENT }}"
 
 # Exit with the real return code from the job that we ran
 exit $return_code
