@@ -50,6 +50,8 @@ GeneratedMeshGenerator::validParams()
                              "requested dimension)");
   params.addParam<std::vector<SubdomainID>>("subdomain_ids",
                                             "Subdomain IDs for each element, default to all zero");
+  params.addParam<SubdomainName>("subdomain_name",
+                                 "If specified, single subdomain name for all elements");
 
   params.addParam<bool>(
       "gauss_lobatto_grid",
@@ -199,6 +201,23 @@ GeneratedMeshGenerator::generate()
       unsigned int i = iz * _nx * _ny + iy * _nx + ix;
       elem->subdomain_id() = bids[i];
     }
+  }
+
+  if (isParamValid("subdomain_name"))
+  {
+    const auto & subdomain_name = getParam<SubdomainName>("subdomain_name");
+    if (isParamValid("subdomain_ids"))
+    {
+      const auto & bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
+      if (bids.size() > 1)
+        paramError(
+            "subdomain_ids",
+            "Specifying a subdomain_name is only supported for a single entry in subdomain_ids");
+      else
+        mesh->subdomain_name(bids[0]) = subdomain_name;
+    }
+    else
+      mesh->subdomain_name(0) = subdomain_name;
   }
 
   // rename and shift boundaries
