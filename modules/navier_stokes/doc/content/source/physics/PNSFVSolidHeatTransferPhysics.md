@@ -4,7 +4,7 @@
 
 ## Equation
 
-This [Physics.md] object creates the kernels and boundary conditions to solve the heat transfer
+This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the heat transfer
 equation for the solid phase in a porous media flow problem.
 
 !equation

@@ -4,7 +4,7 @@
 
 ## Equation
 
-This [Physics.md] object creates the kernels and boundary conditions to solve the advection-diffusion-reaction
+This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the advection-diffusion-reaction
 equation for several scalar quantities advected by the flow.
 
 !equation

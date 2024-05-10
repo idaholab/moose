@@ -48,6 +48,7 @@
     # Negative viscosity during solve
     allow_warnings = true
     custom_cmp = 'mixture_physics_diff.cmp'
+    min_ad_size = 80
   []
   [mixture_channel_drift_flux_transient]
     type = 'CSVDiff'

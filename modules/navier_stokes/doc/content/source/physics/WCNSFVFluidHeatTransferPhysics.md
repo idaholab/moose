@@ -4,7 +4,7 @@
 
 ## Equation
 
-This [Physics.md] object creates the kernels and boundary conditions to solve the advection-diffusion
+This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the advection-diffusion
 equation for the fluid temperature.
 For clean flow in a non-porous media:
 
@@ -43,8 +43,7 @@ The kernels created for flow in a non-porous medium are:
 
 For flow in a porous medium:
 
-- [PINSFVEnergyTimeDerivative.md] for the time derivative for incompressible flow a transient solve
-- [PWCNSFVEnergyTimeDerivative.md] for the time derivative for weakly-compressible flow a transient solve
+- [PINSFVEnergyTimeDerivative.md] for the time derivative in a transient solve
 - [PINSFVEnergyAdvection.md] for energy advection
 - [PINSFVEnergyDiffusion.md] for energy diffusion with an isotropic thermal diffusivity
 - [PINSFVEnergyAnisotropicDiffusion.md] for energy diffusion with an anisotropic thermal diffusivity

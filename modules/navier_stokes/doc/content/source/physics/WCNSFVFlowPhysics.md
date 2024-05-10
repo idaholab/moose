@@ -4,7 +4,7 @@
 
 ## Equations
 
-This [Physics.md] object creates the kernels and boundary conditions to solve the mass and momentum Navier Stokes equations for the flow.
+This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the mass and momentum Navier Stokes equations for the flow.
 For regular flow in a non-porous medium:
 
 !equation
@@ -48,8 +48,8 @@ for porous media flow:
 
 The kernels created for the momentum equation for clean flow:
 
-- [WCNSFVMomentumTimeDerivative.md] for weakly-compressible flow in a transient case
-- [INSFVMomentumTimeDerivative.md] for incompressible flow in a transient case
+- [WCNSFVMomentumTimeDerivative.md] for the time derivative for weakly-compressible flow in a transient case
+- [INSFVMomentumTimeDerivative.md] for the time derivative incompressible flow in a transient case
 - [INSFVMomentumAdvection.md] for the momentum advection term
 - [INSFVMomentumDiffusion.md] for the momentum diffusion term
 - [INSFVMomentumPressure.md] for the pressure gradient term
@@ -58,8 +58,7 @@ The kernels created for the momentum equation for clean flow:
 
 for porous media flow:
 
-- [PWCNSFVMomentumTimeDerivative.md] for weakly-compressible flow
-- [PINSFVMomentumTimeDerivative.md] for incompressible flow
+- [PINSFVMomentumTimeDerivative.md] for the time derivative
 - [PINSFVMomentumAdvection.md] for the momentum advection term
 - [PINSFVMomentumDiffusion.md] for the momentum diffusion term
 - [PINSFVMomentumPressure.md] for the pressure gradient term
