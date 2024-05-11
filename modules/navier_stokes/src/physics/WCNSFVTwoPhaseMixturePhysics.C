@@ -54,7 +54,11 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 
   // Phase change parameters
   params.addParam<MaterialPropertyName>(
-      NS::alpha_exc, 0, "Name of the volumetric exchange coefficient");
+      NS::alpha_exc, 0, "Name of the volumetric phase exchange coefficient");
+  params.addParam<bool>("add_phase_change_energy_term",
+                        false,
+                        "Whether to add a phase change term based on the latent heat of fusion in "
+                        "the energy equation");
 
   // Drift flux model parameters
   params.addParam<bool>("add_drift_flux_momentum_terms",
@@ -150,7 +154,9 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
       "use_external_mixture_properties",
       "Mixture material properties");
 
-  params.addParamNamesToGroup("fluid_heat_transfer_physics alpha_exc", "Phase change");
+  params.addParamNamesToGroup("fluid_heat_transfer_physics " + NS::alpha_exc +
+                                  " add_phase_change_energy_term",
+                              "Phase change");
   params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method",
                               "Drift flux model");
   params.addParamNamesToGroup("add_advection_slip_term", "Advection slip model");
@@ -226,8 +232,6 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
                  "' should be 'rho_mixture'");
   }
 
-  // TODO add more parameter checking
-
   if (_verbose)
   {
     if (_flow_equations_physics)
@@ -235,6 +239,11 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
     if (_has_energy_equation)
       mooseInfoRepeated("Coupled to fluid heat transfer physics " + _fluid_energy_physics->name());
   }
+
+  // Parameter checking
+  // The two models are not consistent
+  if (isParamSetByUser("alpha_exc") && getParam<bool>("add_phase_change_energy_term"))
+    errorDependentParameter("add_phase_change_energy_term", "true", {"alpha_exc"});
 }
 
 void
@@ -245,7 +254,8 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
   if (_add_phase_equation && isParamSetByUser("alpha_exc"))
     addPhaseInterfaceTerm();
 
-  if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation())
+  if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation() &&
+      getParam<bool>("add_phase_change_energy_term"))
     addPhaseChangeEnergySource();
 
   if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations() && _use_drift_flux)

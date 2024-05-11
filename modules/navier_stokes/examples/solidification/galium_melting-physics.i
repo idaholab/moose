@@ -36,9 +36,6 @@ Ny = 50
 []
 
 [AuxVariables]
-  [U]
-    type = MooseVariableFVReal
-  []
   [fl]
     type = MooseVariableFVReal
     initial_condition = 0.0
@@ -46,12 +43,6 @@ Ny = 50
 []
 
 [AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
   # Note that because this is only executed on timestep end,
   # the phase fractions are constant over each time step
   [compute_fl]
@@ -66,7 +57,7 @@ Ny = 50
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlow]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
 
@@ -104,7 +95,7 @@ Ny = 50
         velocity_interpolation = '${velocity_interp_method}'
       []
     []
-    [WCNSFVFluidHeatTransfer]
+    [FluidHeatTransfer]
       [energy]
         coupled_flow_physics = flow
 
@@ -120,10 +111,12 @@ Ny = 50
         energy_advection_interpolation = '${advected_interp_method}'
       []
     []
-    [WCNSFVTwoPhaseMixture]
+    [TwoPhaseMixture]
       [mixture]
         add_phase_transport_equation = false
-        add_drift_flux_momentum_terms = false
+        liquid_phase_fraction_name = 'phase_1'
+        dispersed_phase_fraction_name = 'fl'
+
         fluid_heat_transfer_physics = energy
         add_phase_change_energy_term = true
         use_dispersed_phase_drag_model = false
@@ -219,7 +212,7 @@ Ny = 50
 []
 
 [VectorPostprocessors]
-  [vel_x]
+  [vel_x_pp]
     type = ElementValueSampler
     variable = 'vel_x fl'
     sort_by = 'x'
