@@ -88,8 +88,8 @@ for path in $PETSC_DIR $BUILD_PREFIX; do
 done
 
 make
-make check
 make install
+make check
 
 # Remove unneeded files
 rm -f ${PREFIX}/lib/petsc/conf/configure-hash
