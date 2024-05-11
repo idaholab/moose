@@ -78,10 +78,10 @@ gold_conda_list = [{
     "build_number": 0,
     "build_string": "build_0",
     "channel": "public",
-    "dist_name": "moose-petsc-3.20.3-build_0",
+    "dist_name": "moose-petsc-3.21.1-build_0",
     "name": "moose-petsc",
     "platform": "osx-arm64",
-    "version": "3.20.3"
+    "version": "3.21.1"
 },
 {
     "base_url": "https://conda.software.inl.gov/public",
