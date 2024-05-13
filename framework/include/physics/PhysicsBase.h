@@ -47,6 +47,7 @@ public:
    * @param blocks list of blocks to add to the physics
    */
   void addBlocks(const std::vector<SubdomainName> & blocks);
+  void addBlocksById(const std::vector<SubdomainID> & block_ids);
 
   /// Return the blocks this physics is defined on
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
