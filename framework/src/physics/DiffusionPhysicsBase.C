@@ -63,7 +63,8 @@ DiffusionPhysicsBase::DiffusionPhysicsBase(const InputParameters & parameters)
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("dirichlet_boundaries",
                                                               "boundary_values");
   checkVectorParamsNoOverlap<BoundaryName>({"neumann_boundaries", "dirichlet_boundaries"});
-  checkParamsBothSetOrNotSet("source_functor", "source_coef");
+  if (isParamSetByUser("source_coef"))
+    checkParamsBothSetOrNotSet("source_functor", "source_coef");
 
   addRequiredPhysicsTask("add_preconditioning");
 }
