@@ -42,4 +42,9 @@ protected:
 
   /// The (offsets) positions for each mesh
   std::vector<Point> _positions;
+
+  /// Boolean to control whether to prevent merging subdomains
+  const bool _avoid_merging_subdomains;
+  /// Boolean to control whether to prevent merging boundaries
+  const bool _avoid_merging_boundaries;
 };
