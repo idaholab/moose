@@ -13,6 +13,7 @@
 
 registerMooseAction("MooseApp", Cylinder, "add_mesh_generator");
 registerMooseAction("MooseApp", Cylinder, "add_positions");
+registerMooseAction("MooseApp", Cylinder, "init_physics");
 
 InputParameters
 Cylinder::validParams()
@@ -33,7 +34,10 @@ Cylinder::validParams()
   params.addParam<unsigned int>("n_radial", 1, "Radial mesh of the cylinder");
   params.addParam<unsigned int>("n_azimuthal", 1, "Azimuthal mesh of the cylinder");
 
-  params.addParam<SubdomainName>("block", "Block for the cylinder");
+  params.addParam<std::vector<SubdomainName>>("block", "Block for the cylinder");
+
+  params.addParam<std::vector<PhysicsName>>(
+      "physics", {}, "Physics object(s) active on the Component");
 
   return params;
 }
@@ -48,19 +52,25 @@ Cylinder::addMeshGenerators()
 {
   if (_dimension == 1 || _dimension == 2)
   {
-    InputParameters params = _factory.getValidParams("CartesianMeshGenerator");
+    InputParameters params = _factory.getValidParams("GeneratedMeshGenerator");
     params.set<MooseEnum>("dim") = _dimension;
-    params.set<std::vector<Real>>("dx") = {getParam<Real>("height")};
-    params.set<std::vector<unsigned int>>("ix") = {getParam<unsigned int>("n_axial")};
+    params.set<Real>("xmax") = {getParam<Real>("height")};
+    params.set<unsigned int>("nx") = {getParam<unsigned int>("n_axial")};
+    params.set<std::string>("boundary_name_prefix") = name();
     if (_dimension == 2)
     {
-      params.set<std::vector<Real>>("dy") = {getParam<Real>("radius")};
-      params.set<std::vector<unsigned int>>("iy") = {getParam<unsigned int>("n_radial")};
+      params.set<Real>("ymax") = {getParam<Real>("radius")};
+      params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
     }
     if (isParamValid("block"))
-      params.set<SubdomainName>("subdomain_name") = getParam<SubdomainName>("block");
+    {
+      params.set<SubdomainName>("subdomain_name") =
+          getParam<std::vector<SubdomainName>>("block")[0];
+      mooseAssert(getParam<std::vector<SubdomainName>>("block").size() == 1,
+                  "Coded only for size 1");
+    }
     _app.getMeshGeneratorSystem().addMeshGenerator(
-        "CartesianMeshGenerator", name() + "_base", params);
+        "GeneratedMeshGenerator", name() + "_base", params);
     _mg_name = name() + "_base";
 
     // TODO: Change coordinate system of block
@@ -105,4 +115,22 @@ void
 Cylinder::addPositionsObject()
 {
   std::cout << "add_position got registered, wow. My name is " << name() << std::endl;
+}
+
+void
+Cylinder::addPhysics()
+{
+  for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
+    _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
+
+  if (isParamValid("block"))
+  {
+    std::cout << "Block " << Moose::stringify(getParam<std::vector<SubdomainName>>("block"))
+              << std::endl;
+    for (auto physics : _physics)
+    {
+      _console << "adding " << physics->name() << std::endl;
+      physics->addBlocks(getParam<std::vector<SubdomainName>>("block"));
+    }
+  }
 }
