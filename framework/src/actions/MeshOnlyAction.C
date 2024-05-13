@@ -192,7 +192,7 @@ MeshOnlyAction::act()
     }
   }
 
-  else if (mesh_file.find(".cpa.gz") + 4 == mesh_file.size())
+  else if (mesh_file.find(".cpa.gz") + 7 == mesh_file.size())
   {
     TIME_SECTION("act", 1, "Writing Checkpoint");
 
