@@ -232,6 +232,10 @@ XYDelaunayGenerator::generate()
   std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
   std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
   std::vector<std::unique_ptr<MeshBase>> hole_ptrs(_hole_ptrs.size());
+  // This tells us the element orders of the hole meshes
+  // For the boundary meshes, it can be access through poly2tri.segment_midpoints.
+  std::vector<bool> holes_with_midpoints(_hole_ptrs.size());
+  bool stitch_second_order_holes(false);
 
   // Make sure pointers here aren't invalidated by a resize
   meshed_holes.reserve(_hole_ptrs.size());
@@ -239,11 +243,17 @@ XYDelaunayGenerator::generate()
   {
     hole_ptrs[hole_i] = std::move(*_hole_ptrs[hole_i]);
     meshed_holes.emplace_back(*hole_ptrs[hole_i]);
+    holes_with_midpoints[hole_i] = meshed_holes.back().n_midpoints();
+    stitch_second_order_holes =
+        (holes_with_midpoints.back() && _stitch_holes[hole_i]) || stitch_second_order_holes;
     if (hole_i < _refine_holes.size())
       meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
 
     triangulator_hole_ptrs[hole_i] = &meshed_holes.back();
   }
+  if (stitch_second_order_holes && (_tri_elem_type == "TRI3" || _tri_elem_type == "DEFAULT"))
+    paramError("tri_element_type",
+               "Cannot use first order elements with stitched quadratic element holes.");
 
   if (!triangulator_hole_ptrs.empty())
     poly2tri.attach_hole_list(&triangulator_hole_ptrs);
@@ -409,6 +419,14 @@ XYDelaunayGenerator::generate()
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
     {
       UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*hole_ptrs[hole_i]);
+      // increase hole mesh order if the triangulation mesh has higher order
+      if (!holes_with_midpoints[hole_i])
+      {
+        if (_tri_elem_type == "TRI6")
+          hole_mesh.all_second_order();
+        else if (_tri_elem_type == "TRI7")
+          hole_mesh.all_complete_order();
+      }
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
 
       // Our algorithm here requires a serialized Mesh.  To avoid
