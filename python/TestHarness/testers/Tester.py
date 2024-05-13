@@ -114,6 +114,9 @@ class Tester(MooseObject):
         params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.")
         params.addParam("collections", [], "A means for defining a collection of tests for SQA process.")
         params.addParam("classification", 'functional', "A means for defining a requirement classification for SQA process.")
+
+        params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
+
         return params
 
     def __del__(self):
@@ -761,6 +764,10 @@ class Tester(MooseObject):
 
         if self.specs['use_shell'] and options.pbs and os.environ.get('APPTAINER_CONTAINER'):
             reasons['use_shell'] = 'no use_shell with apptainer PBS'
+
+        # Explicitly skip HPC tests
+        if not self.specs['hpc'] and options.pbs:
+            reasons['hpc'] = 'hpc=false'
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
