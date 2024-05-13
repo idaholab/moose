@@ -75,9 +75,9 @@ private:
   /// List of boundaries to act as walls for turbulence models
   std::vector<BoundaryName> _turbulence_walls;
   /// Name of the turbulent kinetic energy
-  const VariableName _tke_name("tke");
+  const VariableName _tke_name = NS::TKE;
   /// Name of the turbulent kinetic energy dissipation
-  const VariableName _tked_name(NS::TKED);
+  const VariableName _tked_name = NS::TKED;
   /// Name of the turbulence viscosity auxiliary variable (or property)
-  const VariableName _turbulent_viscosity_name(NS::mu_turb);
+  const VariableName _turbulent_viscosity_name = NS::mu_t;
 };

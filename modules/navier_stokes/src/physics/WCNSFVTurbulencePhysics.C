@@ -12,11 +12,12 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVScalarTransportPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
-#include "NSFVBase.h"
+#include "INSFVTurbulentViscosityWallFunction.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics);
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_material");
@@ -50,20 +51,33 @@ WCNSFVTurbulencePhysics::validParams()
   params.addParam<Real>("initial_tke", "Initial value for the turbulence kinetic energy");
   params.addParam<Real>("initial_tked",
                         "Initial value for the turbulence kinetic energy dissipation");
+  params.addParam<Real>("initial_mu_t", "Initial value for the turbulence viscosity");
 
-  params.addParam<Real>("C_mu", "C_mu coefficient");
   params.addParam<Real>("C1_eps",
                         "C1 coefficient for the turbulent kinetic energy dissipation equation");
   params.addParam<Real>("C2_eps",
                         "C2 coefficient for the turbulent kinetic energy dissipation equation");
-  params.addParam<Real>("sigma_k",
-                        "Scaling coefficient for the turbulent kinetic energy diffusion term");
-  params.addParam<Real>(
+  params.addParam<MooseFunctorName>(
+      "sigma_k", "Scaling coefficient for the turbulent kinetic energy diffusion term");
+  params.addParam<MooseFunctorName>(
       "sigma_eps",
       "Scaling coefficient for the turbulent kinetic energy dissipation diffusion term");
+  params.addParam<bool>(
+      "non_equilibrium_treatment",
+      false,
+      "Whether to apply a non-equilibrium treatment for the source and sink terms");
+
+  // Boundary parameters
+  params.addParam<bool>("linearized_yplus", false, "Whether to use a linearized Y-plus model");
+  params.addParam<bool>("bulk_wall_treatment", true, "Whether to treat the wall cell as bulk");
+  params.transferParam<MooseEnum>(INSFVTurbulentViscosityWallFunction::validParams(),
+                                  "wall_treatment");
+  params.transferParam<Real>(INSFVTurbulentViscosityWallFunction::validParams(), "C_mu");
+  params.addParam<Real>("max_mixing_length", 0.1, "Maximum value for the mixing length");
 
   // K-Epsilon numerical scheme parameters
   MooseEnum face_interpol_types("average skewness-corrected", "average");
+  MooseEnum adv_interpol_types("average upwind", "upwind");
   params.addRangeCheckedParam<Real>(
       "tke_scaling",
       1.0,
@@ -73,6 +87,10 @@ WCNSFVTurbulencePhysics::validParams()
                              face_interpol_types,
                              "The numerical scheme to interpolate the TKE to the "
                              "face (separate from the advected quantity interpolation).");
+  params.addParam<MooseEnum>("tke_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to interpolate the TKE to the "
+                             "face when in the advection kernel.");
   params.addParam<bool>(
       "tke_two_term_bc_expansion",
       true,
@@ -87,6 +105,10 @@ WCNSFVTurbulencePhysics::validParams()
                              face_interpol_types,
                              "The numerical scheme to interpolate the TKED to the "
                              "face (separate from the advected quantity interpolation).");
+  params.addParam<MooseEnum>("tked_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to interpolate the TKED to the "
+                             "face when in the advection kernel.");
   params.addParam<bool>(
       "tked_two_term_bc_expansion",
       true,
@@ -292,6 +314,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
     if (isParamValid("turbulent_viscosity_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("turbulent_viscosity_two_term_bc_expansion");
+    const auto rho_name = _flow_equations_physics->densityName();
     getProblem().addAuxVariable("MooseVariableFVReal", _turbulent_viscosity_name, params);
   }
 }
@@ -348,17 +371,18 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     // We rely on using the turbulent viscosity in the flow equation
     // This check is rudimentary, we should think of a better way
     // We could also check for the use of 'mu_t' with the right parameters already
-    if (_flow_equations_physics->viscosityName() != "mu")
+    if (_flow_equations_physics->dynamicViscosityName() != "mu" &&
+        !MooseUtils::isFloat(_flow_equations_physics->dynamicViscosityName()))
       mooseError(
           "Regular fluid viscosity 'mu' should be used for the momentum diffusion term. You are "
           "currently using: " +
-          _flow_equations_physics->viscosityName());
+          _flow_equations_physics->dynamicViscosityName());
 
     const std::string u_names[3] = {"u", "v", "w"};
     const std::string kernel_type = "INSFVMomentumDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<MooseFunctorName>("mu") = "mu_turbulent";
+    params.set<MooseFunctorName>("mu") = _turbulent_viscosity_name;
     params.set<bool>("complete_expansion") = true;
 
     std::string kernel_name = prefix() + "ins_momentum_k_epsilon_reynolds_stress_";
@@ -451,6 +475,105 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
 }
 
 void
+WCNSFVTurbulencePhysics::addKEpsilonTimeDerivatives()
+{
+  const std::string kernel_type = "FVFunctorTimeKernel";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+
+  params.set<NonlinearVariableName>("variable") = _tke_name;
+  getProblem().addFVKernel(kernel_type, prefix() + "tke_time", params);
+  params.set<NonlinearVariableName>("variable") = _tked_name;
+  getProblem().addFVKernel(kernel_type, prefix() + "tked_time", params);
+}
+
+void
+WCNSFVTurbulencePhysics::addKEpsilonAdvection()
+{
+  const std::string kernel_type = "INSFVTurbulentAdvection";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+
+  assignBlocks(params, _blocks);
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
+  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+  params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+
+  params.set<MooseEnum>("advected_interp_method") =
+      getParam<MooseEnum>("tke_advection_interpolation");
+  params.set<NonlinearVariableName>("variable") = _tke_name;
+  getProblem().addFVKernel(kernel_type, prefix() + "tke_advection", params);
+  params.set<NonlinearVariableName>("variable") = _tked_name;
+  params.set<MooseEnum>("advected_interp_method") =
+      getParam<MooseEnum>("tked_advection_interpolation");
+  getProblem().addFVKernel(kernel_type, prefix() + "tked_advection", params);
+}
+
+void
+WCNSFVTurbulencePhysics::addKEpsilonDiffusion()
+{
+  const std::string kernel_type = "INSFVTurbulentDiffusion";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+
+  assignBlocks(params, _blocks);
+  params.set<NonlinearVariableName>("variable") = _tke_name;
+  params.set<MooseFunctorName>("coeff") = _flow_equations_physics->dynamicViscosityName();
+  getProblem().addFVKernel(kernel_type, prefix() + "tke_diffusion_mu", params);
+
+  params.set<NonlinearVariableName>("variable") = _tked_name;
+  getProblem().addFVKernel(kernel_type, prefix() + "tked_diffusion_mu", params);
+
+  params.set<NonlinearVariableName>("variable") = _tke_name;
+  params.set<MooseFunctorName>("coeff") = _turbulent_viscosity_name;
+  params.set<MooseFunctorName>("scaling_coef") = getParam<MooseFunctorName>("sigma_k");
+  getProblem().addFVKernel(kernel_type, prefix() + "tke_diffusion_mu_eff", params);
+
+  params.set<NonlinearVariableName>("variable") = _tked_name;
+  params.set<MooseFunctorName>("scaling_coef") = getParam<MooseFunctorName>("sigma_eps");
+  getProblem().addFVKernel(kernel_type, prefix() + "tked_diffusion_mu_eff", params);
+}
+
+void
+WCNSFVTurbulencePhysics::addKEpsilonSink()
+{
+  const std::string u_names[3] = {"u", "v", "w"};
+  {
+    const std::string kernel_type = "INSFVTKESourceSink";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") = _tke_name;
+    params.set<MooseFunctorName>(NS::TKED) = _tked_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
+    params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
+    params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
+    params.set<Real>("max_mixing_length") = getParam<Real>("max_mixing_length");
+    for (const auto d : make_range(dimension()))
+      params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+    getProblem().addFVKernel(kernel_type, prefix() + "tke_source_sink", params);
+  }
+
+  {
+    const std::string kernel_type = "INSFVTKEDSourceSink";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") = _tked_name;
+    params.set<MooseFunctorName>(NS::TKE) = _tke_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
+    params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
+    params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
+    params.set<Real>("C2_eps") = getParam<Real>("C2_eps");
+    params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
+    params.set<Real>("max_mixing_length") = getParam<Real>("max_mixing_length");
+    for (const auto d : make_range(dimension()))
+      params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+    getProblem().addFVKernel(kernel_type, prefix() + "tked_source_sink", params);
+  }
+}
+
+void
 WCNSFVTurbulencePhysics::addAuxiliaryKernels()
 {
   // Note that if we are restarting this will overwrite the restarted mixing-length
@@ -476,23 +599,23 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
   }
   else if (_turbulence_model == "k-epsilon")
   {
+    const std::string u_names[3] = {"u", "v", "w"};
     const std::string mut_kernel_type = "kEpsilonViscosityAux";
     InputParameters params = getFactory().getValidParams(mut_kernel_type);
     assignBlocks(params, _blocks);
     params.set<AuxVariableName>("variable") = _turbulent_viscosity_name;
-    params.set<MooseFunctorName>("u") = _flow_equations_physics->getVelocityNames()[0];
-    params.set<MooseFunctorName>("v") = _flow_equations_physics->getVelocityNames()[1];
-    params.set<MooseFunctorName>("w") = _flow_equations_physics->getVelocityNames()[2];
+    for (const auto d : make_range(dimension()))
+      params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
     params.set<MooseFunctorName>(NS::TKE) = _tke_name;
     params.set<MooseFunctorName>(NS::TKED) = _tked_name;
     params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
-    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->viscosityName();
+    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<Real>("C_mu") = getParam<Real>("C_mu");
     params.set<bool>("linearized_yplus") = getParam<bool>("linearized_yplus");
     params.set<bool>("bulk_wall_treatment") = getParam<bool>("bulk_wall_treatment");
     params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_NONLINEAR};
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
     getProblem().addAuxKernel(mut_kernel_type, prefix() + "mixing_length_aux ", params);
   }
 }
@@ -508,7 +631,8 @@ WCNSFVTurbulencePhysics::addFVBCs()
     params.set<std::vector<BoundaryName>>("boundary") = _turbulence_walls;
     params.set<NonlinearVariableName>("variable") = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
-    params.set<MooseFunctorName>("mu_t") = _turbulent_viscosity_name;
+    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
+    params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::TKE) = _tke_name;
     params.set<MooseEnum>("wall_treatment") = getParam<MooseEnum>("wall_treatment");
     for (const auto d : make_range(dimension()))
@@ -538,6 +662,26 @@ WCNSFVTurbulencePhysics::addMaterials()
     getProblem().addMaterial("MixingLengthTurbulentViscosityFunctorMaterial",
                              prefix() + "mixing_length_material",
                              params);
+  }
+  else if (_turbulence_model == "k-epsilon")
+  {
+    InputParameters params = getFactory().getValidParams("ADParsedFunctorMaterial");
+    assignBlocks(params, _blocks);
+    const auto mu_name = _flow_equations_physics->dynamicViscosityName();
+    if (!MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(mu_name))
+      params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name, mu_name};
+    else if (MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(mu_name))
+      params.set<std::vector<std::string>>("functor_names") = {mu_name};
+    else if (!MooseUtils::isFloat(_turbulent_viscosity_name) && MooseUtils::isFloat(mu_name))
+      params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name};
+
+    if (!getProblem().hasFunctor(NS::mu_eff, /*thread_id=*/0))
+    {
+      params.set<std::string>("expression") =
+          _flow_equations_physics->dynamicViscosityName() + " + " + _turbulent_viscosity_name;
+      params.set<std::string>("property_name") = NS::mu_eff;
+      getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "effective_viscosity", params);
+    }
   }
 }
 
