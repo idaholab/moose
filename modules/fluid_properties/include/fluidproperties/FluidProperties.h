@@ -14,13 +14,13 @@
 
 // Forward Declarations
 
-// The default DualReal size allows functions of many more variables than
+// The default ADReal size allows functions of many more variables than
 // common in the FluidProperties module. This makes the computations much
 // slower than necessary, so use a smaller definition in the FluidProperties
-// module, FPDualReal, which is suitable for up to five variables.
+// module, FPADReal, which is suitable for up to five variables.
 // This is useful for the cases where we wish to use AD to compute the derivatives
 // rather than hand-coding them in derived classes.
-typedef DualNumber<Real, DNDerivativeSize<5>> FPDualReal;
+typedef DualNumber<Real, DNDerivativeSize<5>> FPADReal;
 
 class FluidProperties : public ThreadedGeneralUserObject, public SolutionInvalidInterface
 {

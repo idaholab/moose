@@ -61,11 +61,11 @@ public:
 
   Real rho_from_p_T(Real p, Real T) const override;
   void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  void rho_from_p_T(const DualReal & p,
-                    const DualReal & T,
-                    DualReal & rho,
-                    DualReal & drho_dp,
-                    DualReal & drho_dT) const override;
+  void rho_from_p_T(const ADReal & p,
+                    const ADReal & T,
+                    ADReal & rho,
+                    ADReal & drho_dp,
+                    ADReal & drho_dT) const override;
 
   Real v_from_p_T(Real p, Real T) const override;
   void v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const override;
@@ -104,7 +104,7 @@ public:
   Real bulk_modulus_from_p_T(Real p, Real T) const;
 
   Real c_from_v_e(Real v, Real e) const override;
-  DualReal c_from_v_e(const DualReal & v, const DualReal & e) const override;
+  ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
 
 private:
   /// Melting temperature of 2LiF-BeF2

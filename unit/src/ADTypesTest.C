@@ -27,7 +27,7 @@ public:
 
 TEST(ADTypesTest, vector_DenseMatrix_Real)
 {
-  std::vector<DenseMatrix<DualReal>> vm(2);
+  std::vector<DenseMatrix<ADReal>> vm(2);
   auto & m1 = vm[0];
   auto & m2 = vm[1];
   m1.resize(3, 3);
@@ -46,7 +46,7 @@ TEST(ADTypesTest, vector_DenseMatrix_Real)
 
 TEST(ADTypesTest, vector_DenseVector_Real)
 {
-  std::vector<DenseVector<DualReal>> vv(2);
+  std::vector<DenseVector<ADReal>> vv(2);
   auto & v1 = vv[0];
   auto & v2 = vv[1];
   v1.resize(3);

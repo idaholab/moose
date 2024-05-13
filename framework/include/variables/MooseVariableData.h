@@ -452,7 +452,7 @@ private:
    * values as they're referred to here in this class). These methods are only truly meaningful
    * for nodal basis families
    */
-  void assignADNodalValue(const DualReal & value, const unsigned int & component);
+  void assignADNodalValue(const ADReal & value, const unsigned int & component);
   void fetchADDoFValues();
 
   const FEType & _fe_type;
@@ -480,7 +480,7 @@ private:
   typename Moose::ADType<OutputType>::type _ad_nodal_value;
 
   /// A zero AD variable
-  DualReal _ad_zero;
+  ADReal _ad_zero;
 
   /// AD u dot flags
   mutable bool _need_ad_u_dot;

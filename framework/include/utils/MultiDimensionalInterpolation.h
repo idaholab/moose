@@ -11,7 +11,7 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
-#include "DualReal.h"
+#include "ADReal.h"
 #include "MultiIndex.h"
 #include <vector>
 #include <string>
@@ -84,5 +84,5 @@ private:
 };
 
 typedef MultiDimensionalInterpolationTempl<Real> MultiDimensionalInterpolation;
-typedef MultiDimensionalInterpolationTempl<DualReal> DualMultiDimensionalInterpolation;
+typedef MultiDimensionalInterpolationTempl<ADReal> DualMultiDimensionalInterpolation;
 typedef DualMultiDimensionalInterpolation ADMultiDimensionalInterpolation;

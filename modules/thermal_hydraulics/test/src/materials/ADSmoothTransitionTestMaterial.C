@@ -10,7 +10,7 @@
 #include "ADSmoothTransitionTestMaterial.h"
 #include "ADReal.h"
 
-#include "DualReal.h"
+#include "ADReal.h"
 registerMooseObject("ThermalHydraulicsTestApp", ADSmoothTransitionTestMaterial);
 
 InputParameters

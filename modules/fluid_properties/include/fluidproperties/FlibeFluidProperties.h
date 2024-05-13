@@ -39,11 +39,11 @@ public:
    */
   virtual Real p_from_v_e(Real v, Real e) const override;
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
-  virtual void p_from_v_e(const DualReal & v,
-                          const DualReal & e,
-                          DualReal & p,
-                          DualReal & dp_dv,
-                          DualReal & dp_de) const override;
+  virtual void p_from_v_e(const ADReal & v,
+                          const ADReal & e,
+                          ADReal & p,
+                          ADReal & dp_dv,
+                          ADReal & dp_de) const override;
 
   /**
    * Temperature and its derivatives from pressure and specific enthalpy
@@ -72,11 +72,11 @@ public:
    * @param[out] dT_de   derivative of temperature w.r.t. specific internal energy
    */
   virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
-  virtual void T_from_v_e(const DualReal & v,
-                          const DualReal & e,
-                          DualReal & T,
-                          DualReal & dT_dv,
-                          DualReal & dT_de) const override;
+  virtual void T_from_v_e(const ADReal & v,
+                          const ADReal & e,
+                          ADReal & T,
+                          ADReal & dT_dv,
+                          ADReal & dT_de) const override;
 
   /**
    * Temperature and its derivatives from pressure and specific enthalpy
@@ -126,11 +126,11 @@ public:
    * @param[out] dcv_de derivative of isochoric specific heat w.r.t. specific internal energy
    */
   virtual void cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
-  virtual void cv_from_v_e(const DualReal & v,
-                           const DualReal & e,
-                           DualReal & cv,
-                           DualReal & dcv_dv,
-                           DualReal & dcv_de) const override;
+  virtual void cv_from_v_e(const ADReal & v,
+                           const ADReal & e,
+                           ADReal & cv,
+                           ADReal & dcv_dv,
+                           ADReal & dcv_de) const override;
 
   using SinglePhaseFluidProperties::mu_from_v_e;
 
@@ -174,11 +174,11 @@ public:
    */
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual void rho_from_p_T(const DualReal & p,
-                            const DualReal & T,
-                            DualReal & rho,
-                            DualReal & drho_dp,
-                            DualReal & drho_dT) const override;
+  virtual void rho_from_p_T(const ADReal & p,
+                            const ADReal & T,
+                            ADReal & rho,
+                            ADReal & drho_dp,
+                            ADReal & drho_dT) const override;
 
   /**
    * Specific volume from pressure and temperature
@@ -188,7 +188,7 @@ public:
    * @return specific volume (m$^3$/kg)
    */
   virtual Real v_from_p_T(Real p, Real T) const override;
-  virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const override;
+  virtual ADReal v_from_p_T(const ADReal & p, const ADReal & T) const override;
 
   /**
    * Specific volume and its derivatives from pressure and temperature

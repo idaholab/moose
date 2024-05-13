@@ -102,7 +102,7 @@ TEST(EquilibriumConstantInterpolatorTest, linear)
   EXPECT_NEAR(logk.sampleDerivative(50.0), 0.048, tol);
 
   // Check sampleDerivative() with the AD version
-  DualReal Tad = 50.0;
+  ADReal Tad = 50.0;
   Moose::derivInsert(Tad.derivatives(), 0, 1.0);
   EXPECT_NEAR(logk.sampleDerivative(50.0), logk.sample(Tad).derivatives()[0], tol);
 
@@ -122,7 +122,7 @@ TEST(EquilibriumConstantInterpolatorTest, linear)
   EXPECT_NEAR(logk2.sampleDerivative(50.0), 0.048, tol);
 
   // Check sampleDerivative() with the AD version
-  DualReal Tad2 = 50.01;
+  ADReal Tad2 = 50.01;
   Moose::derivInsert(Tad2.derivatives(), 0, 1.0);
   EXPECT_NEAR(logk.sampleDerivative(50.01), logk.sample(Tad2).derivatives()[0], tol);
 }
@@ -164,7 +164,7 @@ TEST(EquilibriumConstantInterpolatorTest, fourthOrder)
   EXPECT_NEAR(logk.sample(125.0), -6.567092778770316, tol);
 
   // Check sampleDerivative() with the AD version
-  DualReal T2 = 50.0;
+  ADReal T2 = 50.0;
   Moose::derivInsert(T2.derivatives(), 0, 1.0);
   EXPECT_NEAR(logk.sampleDerivative(50.0), logk.sample(T2).derivatives()[0], tol);
 }
@@ -206,7 +206,7 @@ TEST(EquilibriumConstantInterpolatorTest, maierKelly)
   EXPECT_NEAR(logk.sample(125.0), -1.0053697469019622, tol);
 
   // Check sampleDerivative() with the AD version
-  DualReal T2 = 50.0;
+  ADReal T2 = 50.0;
   Moose::derivInsert(T2.derivatives(), 0, 1.0);
   EXPECT_NEAR(logk.sampleDerivative(50.0), logk.sample(T2).derivatives()[0], tol);
 }
@@ -252,7 +252,7 @@ TEST(EquilibriumConstantInterpolatorTest, fourthOrderNullValues)
   EXPECT_NEAR(logk.sample(300.0), -0.060966149023565674, tol);
 
   // Check sampleDerivative() with the AD version
-  DualReal T2 = 50.0;
+  ADReal T2 = 50.0;
   Moose::derivInsert(T2.derivatives(), 0, 1.0);
   EXPECT_NEAR(logk.sampleDerivative(50.0), logk.sample(T2).derivatives()[0], tol);
 }
@@ -279,7 +279,7 @@ TEST(EquilibriumConstantInterpolatorTest, fourthOrderUserDefinedNullValues)
   EXPECT_NEAR(logk.sample(300.0), -0.060966149023565674, tol);
 
   // Check sampleDerivative() with the AD version
-  DualReal T2 = 50.0;
+  ADReal T2 = 50.0;
   Moose::derivInsert(T2.derivatives(), 0, 1.0);
   EXPECT_NEAR(logk.sampleDerivative(50.0), logk.sample(T2).derivatives()[0], tol);
 }
@@ -306,7 +306,7 @@ TEST(EquilibriumConstantInterpolatorTest, piecewiselinear)
   EXPECT_EQ(logk.sampleDerivative(600.0), 0.0);
 
   // Check sampleDerivative() with the AD version produces the correct error
-  DualReal T2 = 5.0;
+  ADReal T2 = 5.0;
   Moose::derivInsert(T2.derivatives(), 0, 1.0);
   try
   {

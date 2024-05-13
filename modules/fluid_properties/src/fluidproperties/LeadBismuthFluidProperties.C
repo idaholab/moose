@@ -52,10 +52,10 @@ LeadBismuthFluidProperties::c_from_v_e(Real v, Real e) const
   return 1855 - 0.212 * T;
 }
 
-DualReal
-LeadBismuthFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
+ADReal
+LeadBismuthFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
 {
-  DualReal T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+  ADReal T = SinglePhaseFluidProperties::T_from_v_e(v, e);
   return 1855 - 0.212 * T;
 }
 
@@ -217,11 +217,8 @@ LeadBismuthFluidProperties::rho_from_p_T(
 }
 
 void
-LeadBismuthFluidProperties::rho_from_p_T(const DualReal & p,
-                                         const DualReal & T,
-                                         DualReal & rho,
-                                         DualReal & drho_dp,
-                                         DualReal & drho_dT) const
+LeadBismuthFluidProperties::rho_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const
 {
   rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
   drho_dp = 0;

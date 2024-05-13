@@ -42,9 +42,9 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
 }
 
 void
-CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot,
+CentralDifference::computeADTimeDerivatives(ADReal & ad_u_dot,
                                             const dof_id_type & dof,
-                                            DualReal & ad_u_dotdot) const
+                                            ADReal & ad_u_dotdot) const
 {
   computeTimeDerivativeHelper(ad_u_dot, ad_u_dotdot, _solution_old(dof), _solution_older(dof));
 }

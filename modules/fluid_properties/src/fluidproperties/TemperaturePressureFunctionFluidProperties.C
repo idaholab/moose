@@ -184,11 +184,11 @@ TemperaturePressureFunctionFluidProperties::rho_from_p_T(
 }
 
 void
-TemperaturePressureFunctionFluidProperties::rho_from_p_T(const DualReal & pressure,
-                                                         const DualReal & temperature,
-                                                         DualReal & rho,
-                                                         DualReal & drho_dp,
-                                                         DualReal & drho_dT) const
+TemperaturePressureFunctionFluidProperties::rho_from_p_T(const ADReal & pressure,
+                                                         const ADReal & temperature,
+                                                         ADReal & rho,
+                                                         ADReal & drho_dp,
+                                                         ADReal & drho_dT) const
 {
   rho = rho_from_p_T(pressure, temperature);
   const ADRealVectorValue grad_function =

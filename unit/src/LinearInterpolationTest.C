@@ -10,10 +10,8 @@
 #include "gtest/gtest.h"
 
 #include "LinearInterpolation.h"
-#include "DualReal.h"
+#include "ADReal.h"
 #include "ChainedReal.h"
-
-#include "DualRealOps.h"
 
 #include <cmath>
 

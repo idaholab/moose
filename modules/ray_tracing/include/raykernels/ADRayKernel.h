@@ -15,7 +15,6 @@
 // MOOSE Includes
 #include "MooseVariableInterface.h"
 #include "TaggingInterface.h"
-#include "DualRealOps.h"
 
 // Forward declarations
 template <typename>

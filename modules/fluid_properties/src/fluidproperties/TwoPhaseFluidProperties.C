@@ -64,26 +64,26 @@ TwoPhaseFluidProperties::T_triple() const
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
-DualReal
-TwoPhaseFluidProperties::T_sat(const DualReal & p) const
+ADReal
+TwoPhaseFluidProperties::T_sat(const ADReal & p) const
 {
   const Real p_real = p.value();
   const Real T_sat_real = T_sat(p_real);
   const Real dT_sat_dp_real = dT_sat_dp(p_real);
 
-  DualReal T_sat = T_sat_real;
+  ADReal T_sat = T_sat_real;
   T_sat.derivatives() = p.derivatives() * dT_sat_dp_real;
   return T_sat;
 }
 
-DualReal
-TwoPhaseFluidProperties::p_sat(const DualReal & T) const
+ADReal
+TwoPhaseFluidProperties::p_sat(const ADReal & T) const
 {
   const Real T_real = T.value();
   const Real p_sat_real = p_sat(T_real);
   const Real dp_sat_dT_real = 1.0 / dT_sat_dp(p_sat_real);
 
-  DualReal p_sat = p_sat_real;
+  ADReal p_sat = p_sat_real;
   p_sat.derivatives() = T.derivatives() * dp_sat_dT_real;
   return p_sat;
 }
@@ -94,8 +94,8 @@ TwoPhaseFluidProperties::h_lat(Real p, Real T) const
   return _fp_vapor->h_from_p_T(p, T) - _fp_liquid->h_from_p_T(p, T);
 }
 
-DualReal
-TwoPhaseFluidProperties::h_lat(const DualReal & p, const DualReal & T) const
+ADReal
+TwoPhaseFluidProperties::h_lat(const ADReal & p, const ADReal & T) const
 {
   return _fp_vapor->h_from_p_T(p, T) - _fp_liquid->h_from_p_T(p, T);
 }
@@ -111,14 +111,14 @@ Real TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
-DualReal
-TwoPhaseFluidProperties::sigma_from_T(const DualReal & T) const
+ADReal
+TwoPhaseFluidProperties::sigma_from_T(const ADReal & T) const
 {
   const Real T_real = T.value();
   const Real sigma_real = sigma_from_T(T_real);
   const Real dsigma_dT = dsigma_dT_from_T(T_real);
 
-  DualReal sigma = sigma_real;
+  ADReal sigma = sigma_real;
   sigma.derivatives() = T.derivatives() * dsigma_dT;
   return sigma;
 }

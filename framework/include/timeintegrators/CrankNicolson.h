@@ -29,9 +29,9 @@ public:
   virtual void init() override;
   virtual int order() override { return 2; }
   virtual void computeTimeDerivatives() override;
-  void computeADTimeDerivatives(DualReal & ad_u_dot,
+  void computeADTimeDerivatives(ADReal & ad_u_dot,
                                 const dof_id_type & dof,
-                                DualReal & ad_u_dotdot) const override;
+                                ADReal & ad_u_dotdot) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual void postStep() override;
 

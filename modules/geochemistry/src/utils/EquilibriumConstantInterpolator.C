@@ -167,8 +167,8 @@ EquilibriumConstantInterpolator::sampleDerivative(Real T)
   }
 }
 
-DualReal
-EquilibriumConstantInterpolator::sample(DualReal T)
+ADReal
+EquilibriumConstantInterpolator::sample(const ADReal & T)
 {
   switch (_fit_type)
   {

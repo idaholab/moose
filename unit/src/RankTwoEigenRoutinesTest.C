@@ -9,10 +9,8 @@
 
 #include "gtest/gtest.h"
 
-#include "DualRealOps.h"
-
 #include "MooseTypes.h"
-#include "DualReal.h"
+#include "ADReal.h"
 
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
@@ -33,7 +31,7 @@
     }                                                                                              \
                                                                                                    \
     ADRankTwoTensor m_ad(a11, a22, a33, a23, a13, a12);                                            \
-    std::vector<DualReal> eigvals_ad;                                                              \
+    std::vector<ADReal> eigvals_ad;                                                                \
     ADRankTwoTensor eigvecs_ad;                                                                    \
                                                                                                    \
     m_ad.symmetricEigenvaluesEigenvectors(eigvals_ad, eigvecs_ad);                                 \
@@ -134,36 +132,36 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_dual_number_consiste
   Moose::derivInsert(da11_dx, 0, 1);
   Moose::derivInsert(da11_dx, 1, 2);
   Moose::derivInsert(da11_dx, 2, 3);
-  DualReal a11(241.6329, da11_dx);
+  ADReal a11(241.6329, da11_dx);
   DNDerivativeType da22_dx;
   Moose::derivInsert(da22_dx, 0, -2);
   Moose::derivInsert(da22_dx, 1, -5);
   Moose::derivInsert(da22_dx, 2, 1);
-  DualReal a22(222.3506, da22_dx);
+  ADReal a22(222.3506, da22_dx);
   DNDerivativeType da33_dx;
   Moose::derivInsert(da33_dx, 0, 2);
   Moose::derivInsert(da33_dx, 1, 1);
   Moose::derivInsert(da33_dx, 2, 4);
-  DualReal a33(236.0164, da33_dx);
+  ADReal a33(236.0164, da33_dx);
   DNDerivativeType da23_dx;
   Moose::derivInsert(da23_dx, 0, 2);
   Moose::derivInsert(da23_dx, 1, 4);
   Moose::derivInsert(da23_dx, 2, 6);
-  DualReal a23(168.9006, da23_dx);
+  ADReal a23(168.9006, da23_dx);
   DNDerivativeType da13_dx;
   Moose::derivInsert(da13_dx, 0, 1);
   Moose::derivInsert(da13_dx, 1, 3);
   Moose::derivInsert(da13_dx, 2, 5);
-  DualReal a13(-73.07, da13_dx);
+  ADReal a13(-73.07, da13_dx);
   DNDerivativeType da12_dx;
   Moose::derivInsert(da12_dx, 0, 2);
   Moose::derivInsert(da12_dx, 1, 3);
   Moose::derivInsert(da12_dx, 2, 4);
-  DualReal a12(96.7902, da12_dx);
+  ADReal a12(96.7902, da12_dx);
 
   ADRankTwoTensor m(a11, a22, a33, a23, a13, a12);
   ADRankTwoTensor eigvecs;
-  std::vector<DualReal> eigvals;
+  std::vector<ADReal> eigvals;
 
   m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
   ADRankTwoTensor D_ad;

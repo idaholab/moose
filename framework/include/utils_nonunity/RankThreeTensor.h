@@ -45,7 +45,7 @@ void mooseSetToZero(T & v);
 template <>
 void mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v);
 template <>
-void mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v);
+void mooseSetToZero<RankThreeTensorTempl<ADReal>>(RankThreeTensorTempl<ADReal> & v);
 }
 
 /**

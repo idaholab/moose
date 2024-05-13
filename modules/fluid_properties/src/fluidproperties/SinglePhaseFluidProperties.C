@@ -365,8 +365,8 @@ SinglePhaseFluidProperties::vaporPressure(Real T, Real & p, Real & dp_dT) const
   p = vaporPressure(T);
 }
 
-DualReal
-SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
+ADReal
+SinglePhaseFluidProperties::vaporPressure(const ADReal & T) const
 {
   Real p = 0.0;
   Real temperature = T.value();
@@ -374,7 +374,7 @@ SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
 
   vaporPressure(temperature, p, dpdT);
 
-  DualReal result = p;
+  ADReal result = p;
   result.derivatives() = T.derivatives() * dpdT;
 
   return result;
@@ -394,8 +394,8 @@ SinglePhaseFluidProperties::vaporTemperature(Real p, Real & T, Real & dT_dp) con
   T = vaporTemperature(p);
 }
 
-DualReal
-SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
+ADReal
+SinglePhaseFluidProperties::vaporTemperature(const ADReal & p) const
 {
   Real T = 0.0;
   Real pressure = p.value();
@@ -403,7 +403,7 @@ SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
 
   vaporTemperature(pressure, T, dTdp);
 
-  DualReal result = T;
+  ADReal result = T;
   result.derivatives() = p.derivatives() * dTdp;
 
   return result;
@@ -445,10 +445,10 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(Real p,
 }
 
 void
-SinglePhaseFluidProperties::rho_mu_from_p_T(const DualReal & p,
-                                            const DualReal & T,
-                                            DualReal & rho,
-                                            DualReal & mu) const
+SinglePhaseFluidProperties::rho_mu_from_p_T(const ADReal & p,
+                                            const ADReal & T,
+                                            ADReal & rho,
+                                            ADReal & mu) const
 {
   rho = rho_from_p_T(p, T);
   mu = mu_from_p_T(p, T);

@@ -16,8 +16,6 @@
 #include "Conversion.h"
 #include "MathUtils.h"
 
-#include "DualRealOps.h"
-
 #include <limits>
 #include <string>
 #include <cmath>

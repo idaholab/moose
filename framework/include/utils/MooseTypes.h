@@ -365,7 +365,7 @@ typedef MooseArray<ADRealVectorValue> ADVariableGradient;
 typedef MooseArray<ADRealTensorValue> ADVariableSecond;
 typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
 typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
-typedef MooseArray<libMesh::TypeNTensor<3, DualReal>> ADVectorVariableSecond;
+typedef MooseArray<libMesh::TypeNTensor<3, ADReal>> ADVectorVariableSecond;
 
 namespace Moose
 {
@@ -582,9 +582,9 @@ constexpr std::false_type always_false{};
 /**
  * some AD typedefs for backwards compatibility
  */
-typedef ADRealVectorValue DualRealVectorValue;
-typedef ADRealTensorValue DualRealTensorValue;
-typedef ADRealGradient DualRealGradient;
+typedef ADRealVectorValue ADRealVectorValue;
+typedef ADRealTensorValue ADRealTensorValue;
+typedef ADRealGradient ADRealGradient;
 
 template <typename T>
 using ADTemplateVariableValue =

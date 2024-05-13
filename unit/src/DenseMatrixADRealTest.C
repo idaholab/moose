@@ -7,35 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DualReal.h"
+#include "ADReal.h"
 #include "DenseMatrix.h"
 
 #include "libmesh/dense_vector.h"
-
-#include "DualRealOps.h"
 
 #include "gtest/gtest.h"
 
 using namespace libMesh;
 
-TEST(DenseMatrixDualReal, TryOperations)
+TEST(DenseMatrixADReal, TryOperations)
 {
-  DenseMatrix<DualReal> a(3, 3);
-  DenseMatrix<DualReal> b(3, 3);
+  DenseMatrix<ADReal> a(3, 3);
+  DenseMatrix<ADReal> b(3, 3);
   a.left_multiply(b);
   a.left_multiply_transpose(b);
   a.right_multiply(b);
   a.right_multiply_transpose(b);
 
-  DenseVector<DualReal> vec(3);
-  DenseVector<DualReal> dest(3);
+  DenseVector<ADReal> vec(3);
+  DenseVector<ADReal> dest(3);
 
   a.vector_mult(dest, vec);
   a.vector_mult_transpose(dest, vec);
   a.vector_mult_add(dest, 1, vec);
   a.outer_product(vec, dest);
 
-  DenseMatrix<DualReal> sub(2, 2);
+  DenseMatrix<ADReal> sub(2, 2);
   a.get_principal_submatrix(2, 2, sub);
 
   vec(0) = 1;

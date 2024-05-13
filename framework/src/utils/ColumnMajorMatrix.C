@@ -10,8 +10,6 @@
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
 
-#include "DualRealOps.h"
-
 #include "libmesh/petsc_macro.h"
 
 // PETSc includes
@@ -165,8 +163,8 @@ ColumnMajorMatrixTempl<T>::eigen(ColumnMajorMatrixTempl<T> & eval,
 
 template <>
 void
-ColumnMajorMatrixTempl<DualReal>::eigen(ColumnMajorMatrixTempl<DualReal> &,
-                                        ColumnMajorMatrixTempl<DualReal> &) const
+ColumnMajorMatrixTempl<ADReal>::eigen(ColumnMajorMatrixTempl<ADReal> &,
+                                      ColumnMajorMatrixTempl<ADReal> &) const
 {
   mooseError("Eigen solves with AD types is not supported.");
 }
@@ -227,10 +225,10 @@ ColumnMajorMatrixTempl<T>::eigenNonsym(ColumnMajorMatrixTempl<T> & eval_real,
 
 template <>
 void
-ColumnMajorMatrixTempl<DualReal>::eigenNonsym(ColumnMajorMatrixTempl<DualReal> &,
-                                              ColumnMajorMatrixTempl<DualReal> &,
-                                              ColumnMajorMatrixTempl<DualReal> &,
-                                              ColumnMajorMatrixTempl<DualReal> &) const
+ColumnMajorMatrixTempl<ADReal>::eigenNonsym(ColumnMajorMatrixTempl<ADReal> &,
+                                            ColumnMajorMatrixTempl<ADReal> &,
+                                            ColumnMajorMatrixTempl<ADReal> &,
+                                            ColumnMajorMatrixTempl<ADReal> &) const
 {
   mooseError("Eigen solves with AD types is not supported.");
 }
@@ -302,7 +300,7 @@ ColumnMajorMatrixTempl<T>::checkShapeEquality(const ColumnMajorMatrixTempl<T> & 
 
 template <>
 void
-ColumnMajorMatrixTempl<DualReal>::inverse(ColumnMajorMatrixTempl<DualReal> &) const
+ColumnMajorMatrixTempl<ADReal>::inverse(ColumnMajorMatrixTempl<ADReal> &) const
 {
   mooseError("Inverse solves with AD types is not supported for the ColumnMajorMatrix class.");
 }
@@ -330,4 +328,4 @@ ColumnMajorMatrixTempl<T>::norm()
 }
 
 template class ColumnMajorMatrixTempl<Real>;
-template class ColumnMajorMatrixTempl<DualReal>;
+template class ColumnMajorMatrixTempl<ADReal>;

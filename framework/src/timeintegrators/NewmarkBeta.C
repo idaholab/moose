@@ -96,9 +96,9 @@ NewmarkBeta::computeTimeDerivatives()
 }
 
 void
-NewmarkBeta::computeADTimeDerivatives(DualReal & ad_u_dot,
+NewmarkBeta::computeADTimeDerivatives(ADReal & ad_u_dot,
                                       const dof_id_type & dof,
-                                      DualReal & ad_u_dotdot) const
+                                      ADReal & ad_u_dotdot) const
 {
   const auto & u_old = _solution_old(dof);
   const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);

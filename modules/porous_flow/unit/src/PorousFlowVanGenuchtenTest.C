@@ -172,7 +172,7 @@ TEST(PorousFlowVanGenuchtenTest, d2relperm)
 
 TEST(PorousFlowVanGenuchtenTest, adrelperm)
 {
-  DualReal sat = 0.3;
+  ADReal sat = 0.3;
   Moose::derivInsert(sat.derivatives(), 0, 1.0);
 
   const auto adrelperm = PorousFlowVanGenuchten::relativePermeability(sat, 0.7);
@@ -224,7 +224,7 @@ TEST(PorousFlowVanGenuchtenTest, d2relpermNW)
 
 TEST(PorousFlowVanGenuchtenTest, adrelpermnw)
 {
-  DualReal sat = 0.3;
+  ADReal sat = 0.3;
   Moose::derivInsert(sat.derivatives(), 0, 1.0);
 
   const auto adrelperm = PorousFlowVanGenuchten::relativePermeabilityNW(sat, 0.7);
