@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADFluidPropsTest.h"
-#include "DualReal.h"
+#include "ADReal.h"
 #include "Moose.h"
 
 TEST_F(ADFluidPropsTest, ad_basic)
@@ -30,8 +30,8 @@ TEST_F(ADFluidPropsTest, ad_basic)
   Moose::derivInsert(dedx, 1, 0);
   Moose::derivInsert(dedx, 2, 2);
 
-  DualReal v_ad(v, dvdx);
-  DualReal e_ad(e, dedx);
+  ADReal v_ad(v, dvdx);
+  ADReal e_ad(e, dedx);
   auto p_ad = _fp->p_from_v_e(v_ad, e_ad);
 
   EXPECT_DOUBLE_EQ(p, p_ad.value());
@@ -54,8 +54,8 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
   Moose::derivInsert(dTdU, 1, 0);
   Moose::derivInsert(dTdU, 2, 2);
 
-  const DualReal p_ad(p, dpdU);
-  const DualReal T_ad(T, dTdU);
+  const ADReal p_ad(p, dpdU);
+  const ADReal T_ad(T, dTdU);
 
   const auto & fp_2phase = buildTwoPhaseFluidProperties();
   const auto & fp_liquid = _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getLiquidName());
@@ -78,7 +78,7 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
   const Real dh_lat_dp = dh_vapor_dp - dh_liquid_dp;
   const Real dh_lat_dT = dh_vapor_dT - dh_liquid_dT;
 
-  const DualReal h_lat_ad = fp_2phase.h_lat(p_ad, T_ad);
+  const ADReal h_lat_ad = fp_2phase.h_lat(p_ad, T_ad);
 
   EXPECT_DOUBLE_EQ(h_lat, h_lat_ad.value());
   for (size_t i = 0; i < 3; i++)
@@ -88,7 +88,7 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
 
   const Real sigma = fp_2phase.sigma_from_T(T);
   const Real dsigma_dT = fp_2phase.dsigma_dT_from_T(T);
-  const DualReal sigma_ad = fp_2phase.sigma_from_T(T_ad);
+  const ADReal sigma_ad = fp_2phase.sigma_from_T(T_ad);
 
   EXPECT_DOUBLE_EQ(sigma, sigma_ad.value());
   for (size_t i = 0; i < 3; i++)
@@ -98,7 +98,7 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
 
   const Real T_sat = fp_2phase.T_sat(p);
   const Real dT_sat_dp = fp_2phase.dT_sat_dp(p);
-  const DualReal T_sat_ad = fp_2phase.T_sat(p_ad);
+  const ADReal T_sat_ad = fp_2phase.T_sat(p_ad);
 
   EXPECT_DOUBLE_EQ(T_sat, T_sat_ad.value());
   for (size_t i = 0; i < 3; i++)
@@ -108,7 +108,7 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
 
   const Real p_sat = fp_2phase.p_sat(T);
   const Real dp_sat_dT = 1.0 / fp_2phase.dT_sat_dp(p_sat);
-  const DualReal p_sat_ad = fp_2phase.p_sat(T_ad);
+  const ADReal p_sat_ad = fp_2phase.p_sat(T_ad);
 
   EXPECT_DOUBLE_EQ(p_sat, p_sat_ad.value());
   for (size_t i = 0; i < 3; i++)
@@ -117,8 +117,8 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
 
 TEST_F(ADFluidPropsTest, error_imperfect_jacobian)
 {
-  DualReal v = .7;
-  DualReal e = 214000;
+  ADReal v = .7;
+  ADReal e = 214000;
 
   // This throws because g_from_v_e has no derivatives version implemented:
   EXPECT_THROW(_fp->g_from_v_e(v, e), std::runtime_error);

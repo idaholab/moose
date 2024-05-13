@@ -15,7 +15,6 @@
 #include "TimeIntegrator.h"
 #include "MooseVariableFE.h"
 #include "MooseTypes.h"
-#include "DualRealOps.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -1812,14 +1811,14 @@ MooseVariableData<RealEigenVector>::fetchADDoFValues()
 
 template <>
 void
-MooseVariableData<Real>::assignADNodalValue(const DualReal & value, const unsigned int &)
+MooseVariableData<Real>::assignADNodalValue(const ADReal & value, const unsigned int &)
 {
   _ad_nodal_value = value;
 }
 
 template <>
 void
-MooseVariableData<RealVectorValue>::assignADNodalValue(const DualReal & value,
+MooseVariableData<RealVectorValue>::assignADNodalValue(const ADReal & value,
                                                        const unsigned int & component)
 {
   _ad_nodal_value(component) = value;

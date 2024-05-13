@@ -1142,3 +1142,112 @@ TEST(HitTests, BlockMerge)
   // check that merging of blocks is correct when the parse tree is rendered
   EXPECT_EQ(render_expect, "\n" + root->render() + "\n");
 }
+
+// test ability to override values of parameters when using included inputs
+TEST(HitTests, ParamOverrideSuccess)
+{
+  // base input that includes content from file to be written on disk below
+  std::string file_a = R"INPUT(
+[Block]
+  param_01 :=         value_01_from_file_a
+  param_02 :override= value_02_from_file_a
+  param_03 =          value_03_from_file_a
+  param_04 =          value_04_from_file_a
+  param_05 =          value_05_from_file_a
+[]
+!include file_b.i
+)INPUT";
+
+  // write content to file on disk that gets included from base input above
+  std::ofstream file_b("file_b.i");
+  file_b << R"INPUT(
+[Block]
+  param_01 =          value_01_from_file_b
+  param_02 =          value_02_from_file_b
+  param_03 :=         value_03_from_file_b
+  param_04 :override= value_04_from_file_b
+  param_05 =          value_05_from_file_b
+[]
+)INPUT";
+  file_b.close();
+
+  // parse base input string to also consume all content from included file
+  auto root = hit::parse("FILE-A", file_a);
+
+  // delete extra file which was put on disk to be parsed from base include
+  std::remove("file_b.i");
+
+  // expected render after parameter conflicts are resolved using overrides
+  std::string render_expect = R"INPUT(
+[Block]
+  param_01 = value_01_from_file_a
+  param_02 = value_02_from_file_a
+  param_03 = value_03_from_file_b
+  param_04 = value_04_from_file_b
+  param_05 = value_05_from_file_a
+  param_05 = value_05_from_file_b
+[]
+)INPUT";
+
+  // check override resolution is as expected when parse tree gets rendered
+  EXPECT_EQ(render_expect, "\n" + root->render() + "\n");
+
+  // expected origin information of input after override conflicts resolved
+  std::string tree_expect = R"INPUT(
+/                            - fname: FILE-A                          line:  2 column:  1
+/Block                       - fname: FILE-A                          line:  2 column:  1
+/Block/param_01 (value_01_from_file_a) - fname: FILE-A                          line:  3 column:  3
+/Block/param_02 (value_02_from_file_a) - fname: FILE-A                          line:  4 column:  3
+/Block/param_03 (value_03_from_file_b) - fname: ./file_b.i                      line:  5 column:  3
+/Block/param_04 (value_04_from_file_b) - fname: ./file_b.i                      line:  6 column:  3
+/Block/param_05 (value_05_from_file_a) - fname: FILE-A                          line:  7 column:  3
+/Block/param_05 (value_05_from_file_b) - fname: ./file_b.i                      line:  7 column:  3
+)INPUT";
+
+  // traverse parse tree recursively to capture origin information of input
+  std::ostringstream tree_actual;
+  tree_list(root, tree_actual);
+
+  // check parameter origin locations resolved by overrides are as expected
+  EXPECT_EQ(tree_expect, "\n" + tree_actual.str());
+}
+
+// test error condition of conflicting parameters both specifying overrides
+TEST(HitTests, ParamOverrideFailure)
+{
+  // base input that includes content from file to be written on disk below
+  std::string file_a = R"INPUT(
+[Block]
+  param_01 := value_01_from_file_a
+[]
+!include file_b.i
+)INPUT";
+
+  // write content to file on disk that gets included from base input above
+  std::ofstream file_b("file_b.i");
+  file_b << R"INPUT(
+[Block]
+  param_01 :override= value_01_from_file_b
+[]
+)INPUT";
+  file_b.close();
+
+  // expected error if parameter is specified more than once using override
+  std::string error_expect = R"INPUT(
+FILE-A:3.3: 'Block/param_01' specified more than once with override syntax
+)INPUT";
+
+  // parse and expect error due to parameter specified using override twice
+  try
+  {
+    hit::parse("FILE-A", file_a);
+    FAIL() << "Exception was not thrown";
+  }
+  catch (hit::ParseError & err)
+  {
+    EXPECT_EQ(error_expect, "\n" + std::string(err.what()) + "\n");
+  }
+
+  // delete extra file which was put on disk to be parsed from base include
+  std::remove("file_b.i");
+}

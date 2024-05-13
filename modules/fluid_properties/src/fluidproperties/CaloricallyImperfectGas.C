@@ -270,7 +270,7 @@ CaloricallyImperfectGas::p_from_v_e(const ADReal & v, const ADReal & e) const
   Real dxd2 = 0;
   p_from_v_e(raw1, raw2, x, dxd1, dxd2);
 
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
   return result;
 }
@@ -304,7 +304,7 @@ CaloricallyImperfectGas::T_from_v_e(const ADReal & v, const ADReal & e) const
   Real dxd2 = 0;
   T_from_v_e(raw1, raw2, x, dxd1, dxd2);
 
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
   return result;
 }
@@ -415,7 +415,7 @@ CaloricallyImperfectGas::cv_from_v_e(ADReal v, ADReal e) const
   Real dxd2 = 0;
   cv_from_v_e(raw1, raw2, x, dxd1, dxd2);
 
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
   return result;
 }
@@ -446,7 +446,7 @@ CaloricallyImperfectGas::gamma_from_v_e(ADReal v, ADReal e) const
   Real dxd2 = 0;
   gamma_from_v_e(raw1, raw2, x, dxd1, dxd2);
 
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
   return result;
 }
@@ -492,7 +492,7 @@ CaloricallyImperfectGas::gamma_from_p_T(ADReal p, ADReal T) const
   Real dxd1 = 0;
   Real dxd2 = 0;
   gamma_from_p_T(raw1, raw2, x, dxd1, dxd2);
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = p.derivatives() * dxd1 + T.derivatives() * dxd2;
   return result;
 }
@@ -630,11 +630,8 @@ CaloricallyImperfectGas::rho_from_p_T(const ADReal & p, const ADReal & T) const
 }
 
 void
-CaloricallyImperfectGas::rho_from_p_T(const DualReal & p,
-                                      const DualReal & T,
-                                      DualReal & rho,
-                                      DualReal & drho_dp,
-                                      DualReal & drho_dT) const
+CaloricallyImperfectGas::rho_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const
 {
   rho = rho_from_p_T(p, T);
   drho_dp = _molar_mass / (_R * T);
@@ -700,7 +697,7 @@ CaloricallyImperfectGas::e_from_T_v(const ADReal & T, const ADReal & v) const
   Real dxd2 = 0;
   e_from_T_v(raw1, raw2, x, dxd1, dxd2);
 
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = T.derivatives() * dxd1 + v.derivatives() * dxd2;
   return result;
 }
@@ -796,7 +793,7 @@ CaloricallyImperfectGas::e_from_p_T(ADReal p, ADReal T) const
   Real dxd2 = 0;
   e_from_p_T(raw1, raw2, x, dxd1, dxd2);
 
-  DualReal result = x;
+  ADReal result = x;
   result.derivatives() = p.derivatives() * dxd1 + T.derivatives() * dxd2;
   return result;
 }

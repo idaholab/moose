@@ -15,4 +15,4 @@
 typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 
 // for backward compatibility
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> DualRankTwoTensor;

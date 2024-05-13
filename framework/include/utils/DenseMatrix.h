@@ -9,12 +9,11 @@
 
 #pragma once
 
+#include "ADReal.h"
 #include "libmesh/dense_matrix.h"
-
-#include "DualRealOps.h"
 
 namespace libMesh
 {
 template <>
-DenseMatrix<DualReal>::DenseMatrix(const unsigned int new_m, const unsigned int new_n);
+DenseMatrix<ADReal>::DenseMatrix(const unsigned int new_m, const unsigned int new_n);
 }

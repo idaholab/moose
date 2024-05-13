@@ -40,9 +40,9 @@ ImplicitEuler::computeTimeDerivatives()
 }
 
 void
-ImplicitEuler::computeADTimeDerivatives(DualReal & ad_u_dot,
+ImplicitEuler::computeADTimeDerivatives(ADReal & ad_u_dot,
                                         const dof_id_type & dof,
-                                        DualReal & /*ad_u_dotdot*/) const
+                                        ADReal & /*ad_u_dotdot*/) const
 {
   computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof));
 }

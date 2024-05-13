@@ -9,9 +9,8 @@
 
 #pragma once
 
-#include "DualReal.h"
+#include "ADReal.h"
 
-#include "DualRealOps.h"
 #include "libmesh/libmesh_common.h"
 
 using namespace libMesh;
@@ -29,7 +28,7 @@ namespace fp
  * @return Reynolds number
  */
 Real reynolds(Real rho, Real vel, Real L, Real mu);
-DualReal reynolds(DualReal rho, DualReal vel, DualReal L, DualReal mu);
+ADReal reynolds(ADReal rho, ADReal vel, ADReal L, ADReal mu);
 
 /**
  * Compute Prandtl number
@@ -40,7 +39,7 @@ DualReal reynolds(DualReal rho, DualReal vel, DualReal L, DualReal mu);
  * @return Prandtl number
  */
 Real prandtl(Real cp, Real mu, Real k);
-DualReal prandtl(DualReal cp, DualReal mu, DualReal k);
+ADReal prandtl(ADReal cp, ADReal mu, ADReal k);
 
 /**
  * Compute Grashof number
@@ -55,13 +54,13 @@ DualReal prandtl(DualReal cp, DualReal mu, DualReal k);
  * @return Grashof number
  */
 Real grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real gravity_magnitude);
-DualReal grashof(DualReal beta,
-                 DualReal T_s,
-                 DualReal T_bulk,
-                 DualReal L,
-                 DualReal rho,
-                 DualReal mu,
-                 DualReal gravity_magnitude);
+ADReal grashof(ADReal beta,
+               ADReal T_s,
+               ADReal T_bulk,
+               ADReal L,
+               ADReal rho,
+               ADReal mu,
+               ADReal gravity_magnitude);
 
 /**
  * Compute Laplace number
@@ -73,7 +72,7 @@ DualReal grashof(DualReal beta,
  * @return Laplace number
  */
 Real laplace(Real sigma, Real rho, Real L, Real mu);
-DualReal laplace(DualReal sigma, DualReal rho, DualReal L, DualReal mu);
+ADReal laplace(ADReal sigma, ADReal rho, ADReal L, ADReal mu);
 
 /**
  * Compute thermal diffusivity
@@ -84,7 +83,7 @@ DualReal laplace(DualReal sigma, DualReal rho, DualReal L, DualReal mu);
  * @return Thermal diffusivity
  */
 Real thermalDiffusivity(Real k, Real rho, Real cp);
-DualReal thermalDiffusivity(DualReal k, DualReal rho, DualReal cp);
+ADReal thermalDiffusivity(ADReal k, ADReal rho, ADReal cp);
 
 /**
  * Compute Peclet number
@@ -95,6 +94,6 @@ DualReal thermalDiffusivity(DualReal k, DualReal rho, DualReal cp);
  * @return Peclet number
  */
 Real peclet(Real vel, Real L, Real diffusivity);
-DualReal peclet(DualReal vel, DualReal L, DualReal diffusivity);
+ADReal peclet(ADReal vel, ADReal L, ADReal diffusivity);
 
 } // namespace fp

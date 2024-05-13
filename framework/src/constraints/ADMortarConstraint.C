@@ -67,7 +67,7 @@ ADMortarConstraint::computeResidual(Moose::MortarType mortar_type)
 void
 ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
-  std::vector<DualReal> residuals;
+  std::vector<ADReal> residuals;
   std::size_t test_space_size = 0;
   typedef Moose::ConstraintJacobianType JType;
   typedef Moose::MortarType MType;

@@ -21,8 +21,6 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/enum_solver_package.h"
 
-#include "DualRealOps.h"
-
 template <>
 void
 dataStore(std::ostream & stream, Real & v, void * /*context*/)
@@ -88,11 +86,11 @@ dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
 
 template <>
 void
-dataStore(std::ostream & stream, DualReal & dn, void * context)
+dataStore(std::ostream & stream, ADReal & dn, void * context)
 {
   dataStore(stream, dn.value(), context);
 
-  if (DualReal::do_derivatives)
+  if (ADReal::do_derivatives)
   {
     auto & derivatives = dn.derivatives();
     std::size_t size = derivatives.size();
@@ -227,7 +225,7 @@ dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
 }
 
 template void dataStore(std::ostream & stream, TensorValue<Real> & v, void * context);
-template void dataStore(std::ostream & stream, TensorValue<DualReal> & v, void * context);
+template void dataStore(std::ostream & stream, TensorValue<ADReal> & v, void * context);
 
 template <typename T>
 void
@@ -246,7 +244,7 @@ dataStore(std::ostream & stream, DenseMatrix<T> & v, void * context)
 }
 
 template void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context);
-template void dataStore(std::ostream & stream, DenseMatrix<DualReal> & v, void * context);
+template void dataStore(std::ostream & stream, DenseMatrix<ADReal> & v, void * context);
 
 template <typename T>
 void
@@ -262,7 +260,7 @@ dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
 }
 
 template void dataStore(std::ostream & stream, VectorValue<Real> & v, void * context);
-template void dataStore(std::ostream & stream, VectorValue<DualReal> & v, void * context);
+template void dataStore(std::ostream & stream, VectorValue<ADReal> & v, void * context);
 
 void
 dataStore(std::ostream & stream, Point & p, void * context)
@@ -399,11 +397,11 @@ dataLoad(std::istream & stream, std::vector<bool> & v, void * context)
 
 template <>
 void
-dataLoad(std::istream & stream, DualReal & dn, void * context)
+dataLoad(std::istream & stream, ADReal & dn, void * context)
 {
   dataLoad(stream, dn.value(), context);
 
-  if (DualReal::do_derivatives)
+  if (ADReal::do_derivatives)
   {
     auto & derivatives = dn.derivatives();
     std::size_t size = 0;
@@ -562,7 +560,7 @@ dataLoad(std::istream & stream, TensorValue<T> & v, void * context)
 }
 
 template void dataLoad(std::istream & stream, TensorValue<Real> & v, void * context);
-template void dataLoad(std::istream & stream, TensorValue<DualReal> & v, void * context);
+template void dataLoad(std::istream & stream, TensorValue<ADReal> & v, void * context);
 
 template <typename T>
 void
@@ -582,7 +580,7 @@ dataLoad(std::istream & stream, DenseMatrix<T> & v, void * context)
 }
 
 template void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * context);
-template void dataLoad(std::istream & stream, DenseMatrix<DualReal> & v, void * context);
+template void dataLoad(std::istream & stream, DenseMatrix<ADReal> & v, void * context);
 
 template <typename T>
 void
@@ -599,7 +597,7 @@ dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
 }
 
 template void dataLoad(std::istream & stream, VectorValue<Real> & v, void * context);
-template void dataLoad(std::istream & stream, VectorValue<DualReal> & v, void * context);
+template void dataLoad(std::istream & stream, VectorValue<ADReal> & v, void * context);
 
 void
 dataLoad(std::istream & stream, Point & p, void * context)

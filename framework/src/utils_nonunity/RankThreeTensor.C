@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DualRealOps.h"
 #include "RankThreeTensorImplementation.h"
 
 template class RankThreeTensorTempl<Real>;
-template class RankThreeTensorTempl<DualReal>;
+template class RankThreeTensorTempl<ADReal>;
 
 namespace MathUtils
 {

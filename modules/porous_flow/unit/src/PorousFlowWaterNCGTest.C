@@ -20,16 +20,16 @@ TEST_F(PorousFlowWaterNCGTest, name) { EXPECT_EQ("water-ncg", _fs->fluidStateNam
  */
 TEST_F(PorousFlowWaterNCGTest, equilibriumMassFraction)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   const Real dp = 1.0e-1;
   const Real dT = 1.0e-6;
 
-  DualReal Xncg, Yh2o, Xncg1, Yh2o1, Xncg2, Yh2o2;
+  ADReal Xncg, Yh2o, Xncg1, Yh2o1, Xncg2, Yh2o2;
   _fs->equilibriumMassFractions(p, T, Xncg, Yh2o);
   _fs->equilibriumMassFractions(p - dp, T, Xncg1, Yh2o1);
   _fs->equilibriumMassFractions(p + dp, T, Xncg2, Yh2o2);
@@ -56,27 +56,27 @@ TEST_F(PorousFlowWaterNCGTest, equilibriumMassFraction)
  */
 TEST_F(PorousFlowWaterNCGTest, MassFraction)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
   std::vector<FluidStateProperties> fsp(2, FluidStateProperties(2));
 
   // Liquid region
-  DualReal Z = 0.0001;
+  ADReal Z = 0.0001;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::LIQUID);
 
   // Verfify mass fraction values
-  DualReal Xncg = fsp[0].mass_fraction[1];
-  DualReal Yncg = fsp[1].mass_fraction[1];
-  DualReal Xh2o = fsp[0].mass_fraction[0];
-  DualReal Yh2o = fsp[1].mass_fraction[0];
+  ADReal Xncg = fsp[0].mass_fraction[1];
+  ADReal Yncg = fsp[1].mass_fraction[1];
+  ADReal Xh2o = fsp[0].mass_fraction[0];
+  ADReal Yh2o = fsp[1].mass_fraction[0];
   ABS_TEST(Xncg.value(), Z.value(), 1.0e-12);
   ABS_TEST(Yncg.value(), 0.0, 1.0e-12);
   ABS_TEST(Xh2o.value(), 1.0 - Z.value(), 1.0e-12);
@@ -137,7 +137,7 @@ TEST_F(PorousFlowWaterNCGTest, MassFraction)
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
   // Equilibrium mass fractions and derivatives
-  DualReal Xncg_eq, Yh2o_eq;
+  ADReal Xncg_eq, Yh2o_eq;
   _fs->equilibriumMassFractions(p, T, Xncg_eq, Yh2o_eq);
 
   // Verfify mass fraction values
@@ -167,11 +167,11 @@ TEST_F(PorousFlowWaterNCGTest, MassFraction)
   // Use finite differences to verify derivative wrt Z is unaffected by Z
   const Real dZ = 1.0e-8;
   _fs->massFractions(p, T, Z + dZ, phase_state, fsp);
-  DualReal Xncg1 = fsp[0].mass_fraction[1];
-  DualReal Yncg1 = fsp[1].mass_fraction[1];
+  ADReal Xncg1 = fsp[0].mass_fraction[1];
+  ADReal Yncg1 = fsp[1].mass_fraction[1];
   _fs->massFractions(p, T, Z - dZ, phase_state, fsp);
-  DualReal Xncg2 = fsp[0].mass_fraction[1];
-  DualReal Yncg2 = fsp[1].mass_fraction[1];
+  ADReal Xncg2 = fsp[0].mass_fraction[1];
+  ADReal Yncg2 = fsp[1].mass_fraction[1];
 
   ABS_TEST(dXncg_dZ, (Xncg1 - Xncg2).value() / (2.0 * dZ), 1.0e-8);
   ABS_TEST(dYncg_dZ, (Yncg1 - Yncg2).value() / (2.0 * dZ), 1.0e-8);
@@ -182,25 +182,25 @@ TEST_F(PorousFlowWaterNCGTest, MassFraction)
  */
 TEST_F(PorousFlowWaterNCGTest, gasDensity)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
   std::vector<FluidStateProperties> fsp(2, FluidStateProperties(2));
 
   // Gas region
-  DualReal Z = 0.995;
+  ADReal Z = 0.995;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::GAS);
 
-  const DualReal gas_density = _fs->gasDensity(p, T, fsp);
+  const ADReal gas_density = _fs->gasDensity(p, T, fsp);
 
-  const DualReal density =
+  const ADReal density =
       _ncg_fp->rho_from_p_T(Z * p, T) + _water_fp->rho_from_p_T(_water_fp->vaporPressure(T), T);
 
   ABS_TEST(gas_density, density, 1.0e-12);
@@ -211,17 +211,17 @@ TEST_F(PorousFlowWaterNCGTest, gasDensity)
  */
 TEST_F(PorousFlowWaterNCGTest, gasProperties)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
   std::vector<FluidStateProperties> fsp(2, FluidStateProperties(2));
 
   // Gas region
-  DualReal Z = 0.995;
+  ADReal Z = 0.995;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Z, phase_state, fsp);
@@ -229,16 +229,16 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
 
   // Verify fluid density, viscosity and enthalpy
   _fs->gasProperties(p, T, fsp);
-  DualReal gas_density = fsp[1].density;
-  DualReal gas_viscosity = fsp[1].viscosity;
-  DualReal gas_enthalpy = fsp[1].enthalpy;
+  ADReal gas_density = fsp[1].density;
+  ADReal gas_viscosity = fsp[1].viscosity;
+  ADReal gas_enthalpy = fsp[1].enthalpy;
 
-  DualReal density =
+  ADReal density =
       _ncg_fp->rho_from_p_T(Z * p, T) + _water_fp->rho_from_p_T(_water_fp->vaporPressure(T), T);
-  DualReal viscosity = Z * _ncg_fp->mu_from_p_T(Z * p, T) +
-                       (1.0 - Z) * _water_fp->mu_from_p_T(_water_fp->vaporPressure(T), T);
-  DualReal enthalpy = Z * _ncg_fp->h_from_p_T(Z * p, T) +
-                      (1.0 - Z) * _water_fp->h_from_p_T(_water_fp->vaporPressure(T), T);
+  ADReal viscosity = Z * _ncg_fp->mu_from_p_T(Z * p, T) +
+                     (1.0 - Z) * _water_fp->mu_from_p_T(_water_fp->vaporPressure(T), T);
+  ADReal enthalpy = Z * _ncg_fp->h_from_p_T(Z * p, T) +
+                    (1.0 - Z) * _water_fp->h_from_p_T(_water_fp->vaporPressure(T), T);
 
   ABS_TEST(gas_density, density, 1.0e-10);
   ABS_TEST(gas_viscosity, viscosity, 1.0e-10);
@@ -257,14 +257,14 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
 
   const Real dp = 1.0e-1;
   _fs->gasProperties(p + dp, T, fsp);
-  DualReal rho1 = fsp[1].density;
-  DualReal mu1 = fsp[1].viscosity;
-  DualReal h1 = fsp[1].enthalpy;
+  ADReal rho1 = fsp[1].density;
+  ADReal mu1 = fsp[1].viscosity;
+  ADReal h1 = fsp[1].enthalpy;
 
   _fs->gasProperties(p - dp, T, fsp);
-  DualReal rho2 = fsp[1].density;
-  DualReal mu2 = fsp[1].viscosity;
-  DualReal h2 = fsp[1].enthalpy;
+  ADReal rho2 = fsp[1].density;
+  ADReal mu2 = fsp[1].viscosity;
+  ADReal h2 = fsp[1].enthalpy;
 
   REL_TEST(ddensity_dp, (rho1 - rho2).value() / (2.0 * dp), 1.0e-7);
   REL_TEST(dviscosity_dp, (mu1 - mu2).value() / (2.0 * dp), 1.0e-7);
@@ -379,15 +379,15 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
  */
 TEST_F(PorousFlowWaterNCGTest, liquidDensity)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  const DualReal liquid_density = _fs->liquidDensity(p, T);
+  const ADReal liquid_density = _fs->liquidDensity(p, T);
 
-  const DualReal density = _water_fp->rho_from_p_T(p, T);
+  const ADReal density = _water_fp->rho_from_p_T(p, T);
   ABS_TEST(liquid_density, density, 1.0e-12);
 }
 
@@ -399,10 +399,10 @@ TEST_F(PorousFlowWaterNCGTest, liquidDensity)
  */
 TEST_F(PorousFlowWaterNCGTest, liquidProperties)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
@@ -410,13 +410,13 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
 
   // Verify fluid density and viscosity
   _fs->liquidProperties(p, T, fsp);
-  DualReal liquid_density = fsp[0].density;
-  DualReal liquid_viscosity = fsp[0].viscosity;
-  DualReal liquid_enthalpy = fsp[0].enthalpy;
+  ADReal liquid_density = fsp[0].density;
+  ADReal liquid_viscosity = fsp[0].viscosity;
+  ADReal liquid_enthalpy = fsp[0].enthalpy;
 
-  DualReal density = _water_fp->rho_from_p_T(p, T);
-  DualReal viscosity = _water_fp->mu_from_p_T(p, T);
-  DualReal enthalpy = _water_fp->h_from_p_T(p, T);
+  ADReal density = _water_fp->rho_from_p_T(p, T);
+  ADReal viscosity = _water_fp->mu_from_p_T(p, T);
+  ADReal enthalpy = _water_fp->h_from_p_T(p, T);
 
   ABS_TEST(liquid_density, density, 1.0e-12);
   ABS_TEST(liquid_viscosity, viscosity, 1.0e-12);
@@ -435,14 +435,14 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
 
   const Real dp = 10.0;
   _fs->liquidProperties(p + dp, T, fsp);
-  DualReal rho1 = fsp[0].density;
-  DualReal mu1 = fsp[0].viscosity;
-  DualReal h1 = fsp[0].enthalpy;
+  ADReal rho1 = fsp[0].density;
+  ADReal mu1 = fsp[0].viscosity;
+  ADReal h1 = fsp[0].enthalpy;
 
   _fs->liquidProperties(p - dp, T, fsp);
-  DualReal rho2 = fsp[0].density;
-  DualReal mu2 = fsp[0].viscosity;
-  DualReal h2 = fsp[0].enthalpy;
+  ADReal rho2 = fsp[0].density;
+  ADReal mu2 = fsp[0].viscosity;
+  ADReal h2 = fsp[0].enthalpy;
 
   REL_TEST(ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
   REL_TEST(dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
@@ -463,7 +463,7 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
   REL_TEST(dviscosity_dT, (mu1 - mu2) / (2.0 * dT), 1.0e-8);
   REL_TEST(denthalpy_dT, (h1 - h2) / (2.0 * dT), 1.0e-8);
 
-  DualReal Z = 0.0001;
+  ADReal Z = 0.0001;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   const Real dZ = 1.0e-8;
@@ -533,10 +533,10 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
  */
 TEST_F(PorousFlowWaterNCGTest, saturation)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
@@ -545,14 +545,14 @@ TEST_F(PorousFlowWaterNCGTest, saturation)
   // In the two-phase region, the mass fractions are the equilibrium values, so
   // a temporary value of Z can be used (as long as it corresponds to the two-phase
   // region)
-  DualReal Z = 0.45;
+  ADReal Z = 0.45;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
   // Calculate Z that gives a saturation of 0.25
-  DualReal target_gas_saturation = 0.25;
+  ADReal target_gas_saturation = 0.25;
   fsp[1].saturation = target_gas_saturation;
 
   // Calculate gas density and liquid density
@@ -560,13 +560,13 @@ TEST_F(PorousFlowWaterNCGTest, saturation)
   _fs->liquidProperties(p, T, fsp);
 
   // The mass fraction that corresponds to a gas_saturation = 0.25
-  DualReal Zc =
+  ADReal Zc =
       (target_gas_saturation * fsp[1].density * fsp[1].mass_fraction[1] +
        (1.0 - target_gas_saturation) * fsp[0].density * fsp[0].mass_fraction[1]) /
       (target_gas_saturation * fsp[1].density + (1.0 - target_gas_saturation) * fsp[0].density);
 
   // Calculate the gas saturation and derivatives
-  DualReal gas_saturation = _fs->saturation(p, T, Zc, fsp);
+  ADReal gas_saturation = _fs->saturation(p, T, Zc, fsp);
 
   REL_TEST(gas_saturation, target_gas_saturation, 1.0e-6);
 
@@ -579,10 +579,10 @@ TEST_F(PorousFlowWaterNCGTest, saturation)
   Real dgas_saturation_dZ = gas_saturation.derivatives()[_Zidx];
 
   _fs->massFractions(p + dp, T, Z, phase_state, fsp);
-  DualReal gsat1 = _fs->saturation(p + dp, T, Z, fsp);
+  ADReal gsat1 = _fs->saturation(p + dp, T, Z, fsp);
 
   _fs->massFractions(p - dp, T, Z, phase_state, fsp);
-  DualReal gsat2 = _fs->saturation(p - dp, T, Z, fsp);
+  ADReal gsat2 = _fs->saturation(p - dp, T, Z, fsp);
 
   REL_TEST(dgas_saturation_dp, (gsat1 - gsat2).value() / (2.0 * dp), 1.0e-7);
 
@@ -612,16 +612,16 @@ TEST_F(PorousFlowWaterNCGTest, saturation)
  */
 TEST_F(PorousFlowWaterNCGTest, twoPhase)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
   std::vector<FluidStateProperties> fsp(2, FluidStateProperties(2));
 
-  DualReal Z = 0.45;
+  ADReal Z = 0.45;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   // Dummy qp value that isn't needed to test this
@@ -631,16 +631,16 @@ TEST_F(PorousFlowWaterNCGTest, twoPhase)
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
   _fs->twoPhaseProperties(p, T, Z, qp, fsp);
-  DualReal liquid_density = fsp[0].density;
-  DualReal liquid_viscosity = fsp[0].viscosity;
-  DualReal liquid_enthalpy = fsp[0].enthalpy;
-  DualReal gas_saturation = fsp[1].saturation;
-  DualReal gas_density = fsp[1].density;
-  DualReal gas_viscosity = fsp[1].viscosity;
-  DualReal gas_enthalpy = fsp[1].enthalpy;
+  ADReal liquid_density = fsp[0].density;
+  ADReal liquid_viscosity = fsp[0].viscosity;
+  ADReal liquid_enthalpy = fsp[0].enthalpy;
+  ADReal gas_saturation = fsp[1].saturation;
+  ADReal gas_density = fsp[1].density;
+  ADReal gas_viscosity = fsp[1].viscosity;
+  ADReal gas_enthalpy = fsp[1].enthalpy;
 
   // As all the values are provided by the gasProperties(), liquidProperties() and
-  // saturation(), we can simply compare the DualReal results are the same (really
+  // saturation(), we can simply compare the ADReal results are the same (really
   // only need to make sure that liquid properties are calculated correctly given the saturation)
   std::vector<FluidStateProperties> fsp2(2, FluidStateProperties(2));
 
@@ -648,7 +648,7 @@ TEST_F(PorousFlowWaterNCGTest, twoPhase)
   _fs->gasProperties(p, T, fsp2);
   fsp2[1].saturation = _fs->saturation(p, T, Z, fsp2);
 
-  const DualReal pliq = p - _pc->capillaryPressure(1.0 - fsp2[1].saturation, qp);
+  const ADReal pliq = p - _pc->capillaryPressure(1.0 - fsp2[1].saturation, qp);
   _fs->liquidProperties(pliq, T, fsp2);
 
   ABS_TEST(gas_density, fsp2[1].density, 1.0e-12);
@@ -677,13 +677,13 @@ TEST_F(PorousFlowWaterNCGTest, totalMassFraction)
   FluidStatePhaseEnum phase_state;
   std::vector<FluidStateProperties> fsp(2, FluidStateProperties(2));
 
-  DualReal pressure = p;
-  DualReal temperature = T;
-  DualReal z = Z;
+  ADReal pressure = p;
+  ADReal temperature = T;
+  ADReal z = Z;
   _fs->massFractions(pressure, temperature, z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
-  DualReal gas_saturation = _fs->saturation(pressure, temperature, z, fsp);
+  ADReal gas_saturation = _fs->saturation(pressure, temperature, z, fsp);
   REL_TEST(gas_saturation, s, 1.0e-5);
 }
 
@@ -695,11 +695,11 @@ TEST_F(PorousFlowWaterNCGTest, totalMassFraction)
 TEST_F(PorousFlowWaterNCGTest, enthalpyOfDissolution)
 {
   // T = 50C
-  DualReal T = 323.15;
+  ADReal T = 323.15;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   // Enthalpy of dissolution of NCG in water
-  DualReal hdis = _fs->enthalpyOfDissolution(T);
+  ADReal hdis = _fs->enthalpyOfDissolution(T);
   REL_TEST(hdis.value(), -3.45731e5, 1.0e-5);
 
   // T = 350C
@@ -712,8 +712,8 @@ TEST_F(PorousFlowWaterNCGTest, enthalpyOfDissolution)
 
   // Test the derivative wrt temperature
   const Real dT = 1.0e-4;
-  DualReal hdis2 = _fs->enthalpyOfDissolution(T + dT);
-  DualReal hdis3 = _fs->enthalpyOfDissolution(T - dT);
+  ADReal hdis2 = _fs->enthalpyOfDissolution(T + dT);
+  ADReal hdis3 = _fs->enthalpyOfDissolution(T - dT);
 
   REL_TEST(hdis.derivatives()[_Tidx], (hdis2 - hdis3) / (2.0 * dT), 1.0e-6);
 }

@@ -191,7 +191,7 @@ INSADTauMaterialTempl<T>::computeHMax()
   for (unsigned int n_outer = 0; n_outer < _current_elem->n_vertices(); n_outer++)
     for (unsigned int n_inner = n_outer + 1; n_inner < _current_elem->n_vertices(); n_inner++)
     {
-      VectorValue<DualReal> diff = (_current_elem->point(n_outer) - _current_elem->point(n_inner));
+      VectorValue<ADReal> diff = (_current_elem->point(n_outer) - _current_elem->point(n_inner));
       for (const auto i : index_range(disps))
       {
         const auto disp_num = disps[i];

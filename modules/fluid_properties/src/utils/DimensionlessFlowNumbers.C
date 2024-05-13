@@ -9,8 +9,6 @@
 
 #include "DimensionlessFlowNumbers.h"
 
-#include "DualRealOps.h"
-
 namespace fp
 {
 
@@ -20,8 +18,8 @@ reynolds(Real rho, Real vel, Real L, Real mu)
   return rho * std::fabs(vel) * L / mu;
 }
 
-DualReal
-reynolds(DualReal rho, DualReal vel, DualReal L, DualReal mu)
+ADReal
+reynolds(ADReal rho, ADReal vel, ADReal L, ADReal mu)
 {
   return rho * std::fabs(vel) * L / mu;
 }
@@ -32,8 +30,8 @@ prandtl(Real cp, Real mu, Real k)
   return cp * mu / k;
 }
 
-DualReal
-prandtl(DualReal cp, DualReal mu, DualReal k)
+ADReal
+prandtl(ADReal cp, ADReal mu, ADReal k)
 {
   return cp * mu / k;
 }
@@ -45,14 +43,14 @@ grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real gravit
          (mu * mu);
 }
 
-DualReal
-grashof(DualReal beta,
-        DualReal T_s,
-        DualReal T_bulk,
-        DualReal L,
-        DualReal rho,
-        DualReal mu,
-        DualReal gravity_magnitude)
+ADReal
+grashof(ADReal beta,
+        ADReal T_s,
+        ADReal T_bulk,
+        ADReal L,
+        ADReal rho,
+        ADReal mu,
+        ADReal gravity_magnitude)
 {
   return gravity_magnitude * beta * std::abs(T_s - T_bulk) * std::pow(L, 3) * (rho * rho) /
          (mu * mu);
@@ -64,8 +62,8 @@ laplace(Real sigma, Real rho, Real L, Real mu)
   return sigma * rho * L / (mu * mu);
 }
 
-DualReal
-laplace(DualReal sigma, DualReal rho, DualReal L, DualReal mu)
+ADReal
+laplace(ADReal sigma, ADReal rho, ADReal L, ADReal mu)
 {
   return sigma * rho * L / (mu * mu);
 }
@@ -76,8 +74,8 @@ thermalDiffusivity(Real k, Real rho, Real cp)
   return k / (rho * cp);
 }
 
-DualReal
-thermalDiffusivity(DualReal k, DualReal rho, DualReal cp)
+ADReal
+thermalDiffusivity(ADReal k, ADReal rho, ADReal cp)
 {
   return k / (rho * cp);
 }
@@ -88,8 +86,8 @@ peclet(Real vel, Real L, Real diffusivity)
   return std::fabs(vel) * L / diffusivity;
 }
 
-DualReal
-peclet(DualReal vel, DualReal L, DualReal diffusivity)
+ADReal
+peclet(ADReal vel, ADReal L, ADReal diffusivity)
 {
   return std::fabs(vel) * L / diffusivity;
 }

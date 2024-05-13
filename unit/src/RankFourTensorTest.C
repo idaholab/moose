@@ -403,7 +403,7 @@ TEST_F(RankFourTensorTest, bignum)
       RankFourTensor::general);
 
   constexpr std::size_t derivative_size = 1000;
-  typedef NumberArray<derivative_size, Real> DNDerivativeType;
+  typedef MetaPhysicL::NumberArray<derivative_size, Real> DNDerivativeType;
   typedef DualNumber<Real, DNDerivativeType, /*allow_skiping_derivatives=*/true> ADBig;
 
   RankFourTensorTempl<ADBig> A = tensor;

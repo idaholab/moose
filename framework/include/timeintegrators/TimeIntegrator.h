@@ -108,9 +108,9 @@ public:
   /**
    * method for computing local automatic differentiation time derivatives
    */
-  virtual void computeADTimeDerivatives(DualReal & ad_u_dot,
+  virtual void computeADTimeDerivatives(ADReal & ad_u_dot,
                                         const dof_id_type & dof,
-                                        DualReal & ad_u_dot_dot) const = 0;
+                                        ADReal & ad_u_dot_dot) const = 0;
 
   /**
    * Gets the total number of nonlinear iterations over all stages of the time step.

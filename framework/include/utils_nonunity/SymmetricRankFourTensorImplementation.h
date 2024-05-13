@@ -31,8 +31,7 @@ namespace MathUtils
 template <>
 void mooseSetToZero<SymmetricRankFourTensorTempl<Real>>(SymmetricRankFourTensorTempl<Real> & v);
 template <>
-void
-mooseSetToZero<SymmetricRankFourTensorTempl<DualReal>>(SymmetricRankFourTensorTempl<DualReal> & v);
+void mooseSetToZero<SymmetricRankFourTensorTempl<ADReal>>(SymmetricRankFourTensorTempl<ADReal> & v);
 }
 
 template <typename T>

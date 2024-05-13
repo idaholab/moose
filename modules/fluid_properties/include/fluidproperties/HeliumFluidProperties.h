@@ -59,11 +59,11 @@ public:
    */
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
 
-  void p_from_v_e(const DualReal & v,
-                  const DualReal & e,
-                  DualReal & p,
-                  DualReal & dp_dv,
-                  DualReal & dp_de) const override;
+  void p_from_v_e(const ADReal & v,
+                  const ADReal & e,
+                  ADReal & p,
+                  ADReal & dp_dv,
+                  ADReal & dp_de) const override;
 
   /**
    * Temperature from specific volume and specific internal energy
@@ -94,11 +94,11 @@ public:
    */
   virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
 
-  void T_from_v_e(const DualReal & v,
-                  const DualReal & e,
-                  DualReal & T,
-                  DualReal & dT_dv,
-                  DualReal & dT_de) const override;
+  void T_from_v_e(const ADReal & v,
+                  const ADReal & e,
+                  ADReal & T,
+                  ADReal & dT_dv,
+                  ADReal & dT_de) const override;
 
   /**
    * Temperature from pressure and specific enthalpy
@@ -215,11 +215,11 @@ public:
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
-  virtual void rho_from_p_T(const DualReal & p,
-                            const DualReal & T,
-                            DualReal & rho,
-                            DualReal & drho_dp,
-                            DualReal & drho_dT) const override;
+  virtual void rho_from_p_T(const ADReal & p,
+                            const ADReal & T,
+                            ADReal & rho,
+                            ADReal & drho_dp,
+                            ADReal & drho_dT) const override;
   /**
    * Specific internal energy from pressure and temperature
    *

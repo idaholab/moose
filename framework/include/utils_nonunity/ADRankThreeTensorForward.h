@@ -15,4 +15,4 @@
 typedef RankThreeTensorTempl<ADReal> ADRankThreeTensor;
 
 // for backward compatibility
-typedef RankThreeTensorTempl<DualReal> DualRankThreeTensor;
+typedef RankThreeTensorTempl<ADReal> DualRankThreeTensor;

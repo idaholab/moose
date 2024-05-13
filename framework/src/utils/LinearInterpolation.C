@@ -9,7 +9,6 @@
 
 #include "LinearInterpolation.h"
 
-#include "DualRealOps.h"
 #include "ChainedReal.h"
 
 #include <cassert>

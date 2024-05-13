@@ -1,6 +1,6 @@
-# DualReal
+# ADReal
 
-`DualReal` is the type underpinning all of MOOSE's automatic differentiation (AD)
+`ADReal` is the type underpinning all of MOOSE's automatic differentiation (AD)
 capabilities.
 
 [#overview]
@@ -8,7 +8,7 @@ capabilities.
 
 ## Overview id=overview
 
-`DualReal` is a MOOSE typedef defined from the
+`ADReal` is a MOOSE typedef defined from the
 [MetaPhysicL](https://github.com/libMesh/MetaPhysicL) template class
 `DualNumber`. `DualNumber` takes two template arguments `T` and `D`; `T`
 represents the "value" type of the `DualNumber`, e.g. the type of $f(\vec{x})$,

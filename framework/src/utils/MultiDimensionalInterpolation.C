@@ -9,8 +9,6 @@
 
 #include "MultiDimensionalInterpolation.h"
 
-#include "DualRealOps.h"
-
 #include <cassert>
 #include <fstream>
 #include <stdexcept>
@@ -268,4 +266,4 @@ MultiDimensionalInterpolationTempl<T>::multiLinearInterpolation(const std::vecto
 }
 
 template class MultiDimensionalInterpolationTempl<Real>;
-template class MultiDimensionalInterpolationTempl<DualReal>;
+template class MultiDimensionalInterpolationTempl<ADReal>;

@@ -39,7 +39,7 @@ MultiComponentFluidProperties::rho_mu_from_p_T_X(
 
 void
 MultiComponentFluidProperties::rho_mu_from_p_T_X(
-    DualReal pressure, DualReal temperature, DualReal xmass, DualReal & rho, DualReal & mu) const
+    ADReal pressure, ADReal temperature, ADReal xmass, ADReal & rho, ADReal & mu) const
 {
   rho = rho_from_p_T_X(pressure, temperature, xmass);
   mu = mu_from_p_T_X(pressure, temperature, xmass);

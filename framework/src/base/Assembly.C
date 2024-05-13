@@ -1069,7 +1069,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
       {
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
-        libMesh::VectorValue<DualReal> elem_point = node;
+        libMesh::VectorValue<ADReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
@@ -1119,7 +1119,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
       {
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
-        libMesh::VectorValue<DualReal> elem_point = node;
+        libMesh::VectorValue<ADReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(
@@ -1195,7 +1195,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
       {
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
-        libMesh::VectorValue<DualReal> elem_point = node;
+        libMesh::VectorValue<ADReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(
@@ -1377,7 +1377,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       else
         _ad_normals[0] = Point(1.);
 
-      VectorValue<DualReal> side_point;
+      VectorValue<ADReal> side_point;
       if (_calculate_face_xyz)
       {
         const Node & node = side_elem.node_ref(0);
@@ -1425,7 +1425,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
         const Node & node = side_elem.node_ref(i);
-        VectorValue<DualReal> side_point = node;
+        VectorValue<ADReal> side_point = node;
 
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
@@ -1445,7 +1445,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       for (unsigned int p = 0; p < n_qp; p++)
       {
         _ad_normals[p] =
-            (VectorValue<DualReal>(_ad_dxyzdxi_map[p](1), -_ad_dxyzdxi_map[p](0), 0.)).unit();
+            (VectorValue<ADReal>(_ad_dxyzdxi_map[p](1), -_ad_dxyzdxi_map[p](0), 0.)).unit();
         const auto the_jac = _ad_dxyzdxi_map[p].norm();
         _ad_JxW_face[p] = the_jac * qw[p];
         if (_calculate_curvatures)
@@ -1491,7 +1491,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
         const Node & node = side_elem.node_ref(i);
-        VectorValue<DualReal> side_point = node;
+        VectorValue<ADReal> side_point = node;
 
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)

@@ -75,7 +75,7 @@ ExplicitSSPRungeKutta::computeTimeDerivatives()
 void
 ExplicitSSPRungeKutta::computeADTimeDerivatives(ADReal & ad_u_dot,
                                                 const dof_id_type & dof,
-                                                DualReal & /*ad_u_dotdot*/) const
+                                                ADReal & /*ad_u_dotdot*/) const
 {
   // Note that if the solution for the current stage is not a nullptr, then neither
   // are the previous stages.

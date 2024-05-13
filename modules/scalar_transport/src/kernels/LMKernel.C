@@ -12,7 +12,6 @@
 #include "MooseVariable.h"
 #include "InputParameters.h"
 #include "MooseArray.h"
-#include "DualRealOps.h"
 #include "SystemBase.h"
 
 #include "libmesh/quadrature.h"

@@ -132,3 +132,40 @@ Other input files may be included using the following syntax:
 This can be used in any arbitrary nested context in an input file and included files
 can include other included files. The only requirement is that the included files
 must contain a set of syntactically complete blocks or parameters.
+
+## Parameter override syntax
+
+It may be useful to include a file containing common parameter defaults and just override specific values.
+
+This can be done by using the `param := value` override syntax on the parameter taking precedence.
+
+For example, suppose a file named `default_settings.i` is set up defining these parameter defaults:
+
+```
+[section]
+  field_01 = field_01_default
+  field_02 = field_02_default
+  field_03 = field_03_default
+[]
+```
+
+A problem specific input may then use those default settings and override just one parameter value with:
+
+```
+!include default_settings.i
+[section]
+  field_02 := field_02_problem_specific
+[]
+```
+
+This would result in the following specification which uses the default settings and overridden parameter:
+
+```
+[section]
+  field_01 = field_01_default
+  field_02 = field_02_problem_specific
+  field_03 = field_03_default
+[]
+```
+
+The `param := value` syntax and verbose `param :override= value` syntax are interchangeable.

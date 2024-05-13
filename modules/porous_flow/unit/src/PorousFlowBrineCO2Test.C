@@ -34,13 +34,13 @@ TEST_F(PorousFlowBrineCO2Test, indices)
  */
 TEST_F(PorousFlowBrineCO2Test, equilibriumConstants)
 {
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   const Real dT = 1.0e-6;
 
-  DualReal K0H2O = _fs->equilibriumConstantH2O(T);
-  DualReal K0CO2 = _fs->equilibriumConstantCO2(T);
+  ADReal K0H2O = _fs->equilibriumConstantH2O(T);
+  ADReal K0CO2 = _fs->equilibriumConstantCO2(T);
 
   ABS_TEST(K0H2O.value(), 0.412597711705, 1.0e-10);
   ABS_TEST(K0CO2.value(), 74.0435888596, 1.0e-10);
@@ -78,18 +78,18 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumConstants)
 TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
 {
   // Test the low temperature formulation
-  DualReal p = 40.0e6;
+  ADReal p = 40.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.0;
+  ADReal Xnacl = 0.0;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
-  DualReal co2_density = _co2_fp->rho_from_p_T(p, T);
+  ADReal co2_density = _co2_fp->rho_from_p_T(p, T);
 
-  DualReal phiH2O, phiCO2;
+  ADReal phiH2O, phiCO2;
   _fs->fugacityCoefficientsLowTemp(p, T, co2_density, phiCO2, phiH2O);
   ABS_TEST(phiCO2.value(), 0.401939386415, 1.0e-8);
   ABS_TEST(phiH2O.value(), 0.0898968578757, 1.0e-8);
@@ -97,7 +97,7 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   // Test the high temperature formulation
   T = 423.15;
 
-  DualReal xco2, yh2o;
+  ADReal xco2, yh2o;
   co2_density = _co2_fp->rho_from_p_T(p, T);
 
   _fs->solveEquilibriumMoleFractionHighTemp(
@@ -109,7 +109,7 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   ABS_TEST(phiCO2.value(), 0.641936639599, 1.0e-8);
 
   // Test that the same results are returned in fugacityCoefficientsHighTemp()
-  DualReal phiCO2_2, phiH2O_2;
+  ADReal phiCO2_2, phiH2O_2;
   _fs->fugacityCoefficientsHighTemp(p, T, co2_density, xco2, yh2o, phiCO2_2, phiH2O_2);
 
   ABS_TEST(phiH2O, phiH2O_2, 1.0e-12);
@@ -121,11 +121,11 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
  */
 TEST_F(PorousFlowBrineCO2Test, activityCoefficients)
 {
-  DualReal xco2 = 0.01;
-  DualReal T = 350.0;
+  ADReal xco2 = 0.01;
+  ADReal T = 350.0;
 
-  DualReal gammaH2O = _fs->activityCoefficientH2O(T, xco2);
-  DualReal gammaCO2 = _fs->activityCoefficientCO2(T, xco2);
+  ADReal gammaH2O = _fs->activityCoefficientH2O(T, xco2);
+  ADReal gammaCO2 = _fs->activityCoefficientCO2(T, xco2);
 
   ABS_TEST(gammaH2O.value(), 1.0, 1.0e-10);
   ABS_TEST(gammaCO2.value(), 1.0, 1.0e-10);
@@ -145,13 +145,13 @@ TEST_F(PorousFlowBrineCO2Test, activityCoefficients)
  */
 TEST_F(PorousFlowBrineCO2Test, activityCoefficientCO2Brine)
 {
-  DualReal p = 10.0e6;
+  ADReal p = 10.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   const Real dp = 1.0e-1;
@@ -159,10 +159,10 @@ TEST_F(PorousFlowBrineCO2Test, activityCoefficientCO2Brine)
   const Real dx = 1.0e-8;
 
   // Low temperature regime
-  DualReal gamma = _fs->activityCoefficient(p, T, Xnacl);
+  ADReal gamma = _fs->activityCoefficient(p, T, Xnacl);
   ABS_TEST(gamma.value(), 1.43276649338, 1.0e-8);
 
-  DualReal gamma_2 = _fs->activityCoefficient(p + dp, T, Xnacl);
+  ADReal gamma_2 = _fs->activityCoefficient(p + dp, T, Xnacl);
 
   Real dgamma_dp_fd = (gamma_2.value() - gamma.value()) / dp;
   REL_TEST(gamma.derivatives()[_pidx], dgamma_dp_fd, 1.0e-6);
@@ -208,15 +208,15 @@ TEST_F(PorousFlowBrineCO2Test, activityCoefficientCO2Brine)
  */
 TEST_F(PorousFlowBrineCO2Test, partialDensity)
 {
-  DualReal T = 473.15;
+  ADReal T = 473.15;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   const Real dT = 1.0e-6;
 
-  DualReal partial_density = _fs->partialDensityCO2(T);
+  ADReal partial_density = _fs->partialDensityCO2(T);
   ABS_TEST(partial_density.value(), 893.332, 1.0e-3);
 
-  DualReal partial_density_2 = _fs->partialDensityCO2(T + dT);
+  ADReal partial_density_2 = _fs->partialDensityCO2(T + dT);
 
   Real dpartial_density_dT_fd = (partial_density_2.value() - partial_density.value()) / dT;
   REL_TEST(partial_density.derivatives()[_Tidx], dpartial_density_dT_fd, 1.0e-6);
@@ -228,27 +228,27 @@ TEST_F(PorousFlowBrineCO2Test, partialDensity)
 TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
 {
   // Low temperature regime
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   const Real dp = 1.0e-2;
   const Real dT = 1.0e-6;
   const Real dx = 1.0e-8;
 
-  DualReal X, Y;
+  ADReal X, Y;
   _fs->equilibriumMassFractions(p, T, Xnacl, X, Y);
 
   ABS_TEST(X.value(), 0.0035573020148, 1.0e-10);
   ABS_TEST(Y.value(), 0.0171977397214, 1.0e-10);
 
   // Derivative wrt pressure
-  DualReal X1, Y1, X2, Y2;
+  ADReal X1, Y1, X2, Y2;
   _fs->equilibriumMassFractions(p - dp, T, Xnacl, X1, Y1);
   _fs->equilibriumMassFractions(p + dp, T, Xnacl, X2, Y2);
 
@@ -297,13 +297,13 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
  */
 TEST_F(PorousFlowBrineCO2Test, MassFraction)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
@@ -312,18 +312,18 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   std::vector<FluidStateProperties> fsp(np, FluidStateProperties(nc));
 
   // Liquid region
-  DualReal Z = 0.0001;
+  ADReal Z = 0.0001;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::LIQUID);
 
   // Verfify mass fraction values
-  DualReal Xco2 = fsp[0].mass_fraction[1];
-  DualReal Yco2 = fsp[1].mass_fraction[1];
-  DualReal Xh2o = fsp[0].mass_fraction[0];
-  DualReal Yh2o = fsp[1].mass_fraction[0];
-  DualReal Xnacl2 = fsp[0].mass_fraction[2];
+  ADReal Xco2 = fsp[0].mass_fraction[1];
+  ADReal Yco2 = fsp[1].mass_fraction[1];
+  ADReal Xh2o = fsp[0].mass_fraction[0];
+  ADReal Yh2o = fsp[1].mass_fraction[0];
+  ADReal Xnacl2 = fsp[0].mass_fraction[2];
   ABS_TEST(Xco2.value(), Z.value(), 1.0e-8);
   ABS_TEST(Yco2.value(), 0.0, 1.0e-8);
   ABS_TEST(Xh2o.value(), 1.0 - Z.value(), 1.0e-8);
@@ -353,7 +353,7 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   Yco2 = fsp[1].mass_fraction[1];
   Xh2o = fsp[0].mass_fraction[0];
   Yh2o = fsp[1].mass_fraction[0];
-  DualReal Ynacl = fsp[1].mass_fraction[2];
+  ADReal Ynacl = fsp[1].mass_fraction[2];
   ABS_TEST(Xco2.value(), 0.0, 1.0e-8);
   ABS_TEST(Yco2.value(), Z.value(), 1.0e-8);
   ABS_TEST(Xh2o.value(), 0.0, 1.0e-8);
@@ -381,10 +381,10 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
   // Equilibrium mass fractions and derivatives
-  DualReal Xco2_eq, Yh2o_eq;
+  ADReal Xco2_eq, Yh2o_eq;
   _fs->equilibriumMassFractions(p, T, Xnacl, Xco2_eq, Yh2o_eq);
 
-  // Verfify mass fraction values - comparing DualReals verifies that derivatives
+  // Verfify mass fraction values - comparing ADReals verifies that derivatives
   // are also identical
   Xco2 = fsp[0].mass_fraction[1];
   Yco2 = fsp[1].mass_fraction[1];
@@ -398,11 +398,11 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   // Use finite differences to verify derivative wrt Z is unaffected by Z
   const Real dZ = 1.0e-8;
   _fs->massFractions(p, T, Xnacl, Z + dZ, phase_state, fsp);
-  DualReal Xco21 = fsp[0].mass_fraction[1];
-  DualReal Yco21 = fsp[1].mass_fraction[1];
+  ADReal Xco21 = fsp[0].mass_fraction[1];
+  ADReal Yco21 = fsp[1].mass_fraction[1];
   _fs->massFractions(p, T, Xnacl, Z - dZ, phase_state, fsp);
-  DualReal Xco22 = fsp[0].mass_fraction[1];
-  DualReal Yco22 = fsp[1].mass_fraction[1];
+  ADReal Xco22 = fsp[0].mass_fraction[1];
+  ADReal Yco22 = fsp[1].mass_fraction[1];
 
   ABS_TEST(Xco2.derivatives()[_Zidx], (Xco21.value() - Xco22.value()) / (2.0 * dZ), 1.0e-8);
   ABS_TEST(Yco2.derivatives()[_Zidx], (Yco21.value() - Yco22.value()) / (2.0 * dZ), 1.0e-8);
@@ -415,13 +415,13 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
  */
 TEST_F(PorousFlowBrineCO2Test, gasProperties)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
@@ -430,7 +430,7 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
   std::vector<FluidStateProperties> fsp(np, FluidStateProperties(nc));
 
   // Gas region
-  DualReal Z = 0.995;
+  ADReal Z = 0.995;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
@@ -438,9 +438,9 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
 
   // Verify fluid density, viscosity and enthalpy
   _fs->gasProperties(p, T, fsp);
-  DualReal gas_density = fsp[1].density;
-  DualReal gas_viscosity = fsp[1].viscosity;
-  DualReal gas_enthalpy = fsp[1].enthalpy;
+  ADReal gas_density = fsp[1].density;
+  ADReal gas_viscosity = fsp[1].viscosity;
+  ADReal gas_enthalpy = fsp[1].enthalpy;
 
   Real density = _co2_fp->rho_from_p_T(p.value(), T.value());
   Real viscosity = _co2_fp->mu_from_p_T(p.value(), T.value());
@@ -505,13 +505,13 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
  */
 TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
@@ -520,7 +520,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   std::vector<FluidStateProperties> fsp(np, FluidStateProperties(nc));
 
   // Liquid region
-  DualReal Z = 0.0001;
+  ADReal Z = 0.0001;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
@@ -529,9 +529,9 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   // Verify fluid density and viscosity
   _fs->liquidProperties(p, T, Xnacl, fsp);
 
-  DualReal liquid_density = fsp[0].density;
-  DualReal liquid_viscosity = fsp[0].viscosity;
-  DualReal liquid_enthalpy = fsp[0].enthalpy;
+  ADReal liquid_density = fsp[0].density;
+  ADReal liquid_viscosity = fsp[0].viscosity;
+  ADReal liquid_enthalpy = fsp[0].enthalpy;
 
   Real co2_partial_density = _fs->partialDensityCO2(T).value();
   Real brine_density = _brine_fp->rho_from_p_T_X(p.value(), T.value(), Xnacl.value());
@@ -704,13 +704,13 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
  */
 TEST_F(PorousFlowBrineCO2Test, saturation)
 {
-  DualReal p = 1.0e6;
+  ADReal p = 1.0e6;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
 
-  DualReal T = 350.0;
+  ADReal T = 350.0;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   FluidStatePhaseEnum phase_state;
@@ -721,27 +721,27 @@ TEST_F(PorousFlowBrineCO2Test, saturation)
   // In the two-phase region, the mass fractions are the equilibrium values, so
   // a temporary value of Z can be used (as long as it corresponds to the two-phase
   // region)
-  DualReal Z = 0.45;
+  ADReal Z = 0.45;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
   // Calculate Z that gives a saturation of 0.25
-  DualReal gas_saturation = 0.25;
-  DualReal liquid_pressure = p - _pc->capillaryPressure(1.0 - gas_saturation);
+  ADReal gas_saturation = 0.25;
+  ADReal liquid_pressure = p - _pc->capillaryPressure(1.0 - gas_saturation);
 
   // Calculate gas density and liquid density
   _fs->gasProperties(p, T, fsp);
   _fs->liquidProperties(liquid_pressure, T, Xnacl, fsp);
 
   // The mass fraction that corresponds to a gas_saturation = 0.25
-  DualReal Zc = (gas_saturation * fsp[1].density * fsp[1].mass_fraction[1] +
-                 (1.0 - gas_saturation) * fsp[0].density * fsp[0].mass_fraction[1]) /
-                (gas_saturation * fsp[1].density + (1.0 - gas_saturation) * fsp[0].density);
+  ADReal Zc = (gas_saturation * fsp[1].density * fsp[1].mass_fraction[1] +
+               (1.0 - gas_saturation) * fsp[0].density * fsp[0].mass_fraction[1]) /
+              (gas_saturation * fsp[1].density + (1.0 - gas_saturation) * fsp[0].density);
 
   // Calculate the gas saturation and derivatives
-  DualReal saturation = _fs->saturation(p, T, Xnacl, Zc, fsp);
+  ADReal saturation = _fs->saturation(p, T, Xnacl, Zc, fsp);
   ABS_TEST(saturation.value(), gas_saturation.value(), 1.0e-6);
 
   // Test the derivatives of gas saturation
@@ -808,14 +808,14 @@ TEST_F(PorousFlowBrineCO2Test, totalMassFraction)
   const unsigned int nc = _fs->numComponents();
   std::vector<FluidStateProperties> fsp(np, FluidStateProperties(nc));
 
-  DualReal pressure = p;
-  DualReal temperature = T;
-  DualReal z = Z;
-  DualReal x = Xnacl;
+  ADReal pressure = p;
+  ADReal temperature = T;
+  ADReal z = Z;
+  ADReal x = Xnacl;
   _fs->massFractions(pressure, temperature, x, z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
-  DualReal gas_saturation = _fs->saturation(pressure, temperature, x, z, fsp);
+  ADReal gas_saturation = _fs->saturation(pressure, temperature, x, z, fsp);
   ABS_TEST(gas_saturation, s, 1.0e-6);
 }
 
@@ -827,13 +827,13 @@ TEST_F(PorousFlowBrineCO2Test, totalMassFraction)
  */
 TEST_F(PorousFlowBrineCO2Test, henryConstant)
 {
-  DualReal T = 373.15;
+  ADReal T = 373.15;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
-  DualReal Kh = _fs->henryConstant(T, Xnacl);
+  ADReal Kh = _fs->henryConstant(T, Xnacl);
   REL_TEST(Kh.value(), 7.46559e+08, 1.0e-3);
 
   T = 473.15;
@@ -847,8 +847,8 @@ TEST_F(PorousFlowBrineCO2Test, henryConstant)
 
   // Test the derivative wrt temperature
   const Real dT = 1.0e-4;
-  DualReal Kh1 = _fs->henryConstant(T + dT, Xnacl);
-  DualReal Kh2 = _fs->henryConstant(T - dT, Xnacl);
+  ADReal Kh1 = _fs->henryConstant(T + dT, Xnacl);
+  ADReal Kh2 = _fs->henryConstant(T - dT, Xnacl);
 
   REL_TEST(Kh.derivatives()[_Tidx], (Kh1.value() - Kh2.value()) / (2.0 * dT), 1.0e-6);
 
@@ -868,14 +868,14 @@ TEST_F(PorousFlowBrineCO2Test, henryConstant)
 TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolutionGas)
 {
   // T = 50C
-  DualReal T = 323.15;
+  ADReal T = 323.15;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
-  DualReal Xnacl = 0.1;
+  ADReal Xnacl = 0.1;
   Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
 
   // Enthalpy of dissolution of CO2 in brine
-  DualReal hdis = _fs->enthalpyOfDissolutionGas(T, Xnacl);
+  ADReal hdis = _fs->enthalpyOfDissolutionGas(T, Xnacl);
   REL_TEST(hdis, -3.20130e5, 1.0e-3);
 
   // T = 350C
@@ -910,11 +910,11 @@ TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolutionGas)
 TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolution)
 {
   // T = 50C
-  DualReal T = 323.15;
+  ADReal T = 323.15;
   Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   // Enthalpy of dissolution of CO2 in water
-  DualReal hdis = _fs->enthalpyOfDissolution(T);
+  ADReal hdis = _fs->enthalpyOfDissolution(T);
   REL_TEST(hdis.value(), -3.38185e5, 1.0e-3);
 
   // T = 350C
@@ -975,11 +975,11 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
 {
   // Test pure water (Xnacl = 0)
   // Low temperature regime
-  DualReal p = 20.0e6;
-  DualReal T = 323.15;
-  DualReal Xnacl = 0.0;
+  ADReal p = 20.0e6;
+  ADReal T = 323.15;
+  ADReal Xnacl = 0.0;
 
-  DualReal x, y;
+  ADReal x, y;
   _fs->equilibriumMoleFractions(p, T, Xnacl, x, y);
   ABS_TEST(y.value(), 0.00696393845155, 1.0e-8);
   ABS_TEST(x.value(), 0.0236554537395, 1.0e-8);

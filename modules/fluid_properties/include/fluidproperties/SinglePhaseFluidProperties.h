@@ -19,7 +19,7 @@
  * overriden in derived classes.
  */
 #define propfuncAD(want, prop1, prop2)                                                             \
-  virtual DualReal want##_from_##prop1##_##prop2(const DualReal & p1, const DualReal & p2) const   \
+  virtual ADReal want##_from_##prop1##_##prop2(const ADReal & p1, const ADReal & p2) const         \
   {                                                                                                \
     Real x = 0;                                                                                    \
     Real raw1 = p1.value();                                                                        \
@@ -28,16 +28,16 @@
     Real dxd2 = 0;                                                                                 \
     want##_from_##prop1##_##prop2(raw1, raw2, x, dxd1, dxd2);                                      \
                                                                                                    \
-    DualReal result = x;                                                                           \
+    ADReal result = x;                                                                             \
     result.derivatives() = p1.derivatives() * dxd1 + p2.derivatives() * dxd2;                      \
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \
-  virtual void want##_from_##prop1##_##prop2(const DualReal & prop1,                               \
-                                             const DualReal & prop2,                               \
-                                             DualReal & val,                                       \
-                                             DualReal & d##want##d1,                               \
-                                             DualReal & d##want##d2) const                         \
+  virtual void want##_from_##prop1##_##prop2(const ADReal & prop1,                                 \
+                                             const ADReal & prop2,                                 \
+                                             ADReal & val,                                         \
+                                             ADReal & d##want##d1,                                 \
+                                             ADReal & d##want##d2) const                           \
   {                                                                                                \
     unimplementedDerivativeMethod(__PRETTY_FUNCTION__);                                            \
     Real dummy, tmp1, tmp2;                                                                        \
@@ -166,8 +166,8 @@ public:
    * your_fluid_properties_object.p_from_v_e(specific_vol, specific_energy, pressure, dp_dv, dp_de);
    * @endcode
    *
-   * Automatic differentiation (AD) support is provided through x_from_a_b(DualReal a, DualReal b) and
-   * x_from_a_b(DualReal a, DualReal b, DualReal x, DualReal dx_da, DualReal dx_db) versions of the
+   * Automatic differentiation (AD) support is provided through x_from_a_b(ADReal a, ADReal b) and
+   * x_from_a_b(ADReal a, ADReal b, ADReal x, ADReal dx_da, ADReal dx_db) versions of the
    * functions where a and b must be ADReal/DualNumber's calculated using all AD-supporting values:
    *
    * @begincode
@@ -298,7 +298,7 @@ public:
    */
   virtual Real vaporPressure(Real T) const;
   virtual void vaporPressure(Real T, Real & psat, Real & dpsat_dT) const;
-  DualReal vaporPressure(const DualReal & T) const;
+  ADReal vaporPressure(const ADReal & T) const;
 
   /**
    * Vapor temperature. Used to delineate liquid and gas phases.
@@ -311,7 +311,7 @@ public:
    */
   virtual Real vaporTemperature(Real p) const;
   virtual void vaporTemperature(Real p, Real & Tsat, Real & dTsat_dp) const;
-  DualReal vaporTemperature(const DualReal & p) const;
+  ADReal vaporTemperature(const ADReal & p) const;
 
   /**
    * Henry's law coefficients for dissolution in water
@@ -348,8 +348,7 @@ public:
                                Real & mu,
                                Real & dmu_dp,
                                Real & dmu_dT) const;
-  virtual void
-  rho_mu_from_p_T(const DualReal & p, const DualReal & T, DualReal & rho, DualReal & mu) const;
+  virtual void rho_mu_from_p_T(const ADReal & p, const ADReal & T, ADReal & rho, ADReal & mu) const;
 
   virtual void rho_e_from_p_T(Real p,
                               Real T,
