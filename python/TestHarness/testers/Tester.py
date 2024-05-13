@@ -756,6 +756,9 @@ class Tester(MooseObject):
                                                 or options.sep_files):
             reasons['working_directory'] = '--sep-files* enabled'
 
+        if self.specs['use_shell'] and options.pbs and os.environ.get('APPTAINER_CONTAINER'):
+            reasons['use_shell'] = 'no use_shell with apptainer PBS'
+
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
