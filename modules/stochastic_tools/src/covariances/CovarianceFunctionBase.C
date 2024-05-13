@@ -38,11 +38,12 @@ CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameter
   }
 }
 
-void
+bool
 CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
                                         const RealEigenMatrix & /*x*/,
                                         const std::string & /*hyper_param_name*/,
-                                        unsigned int /*ind*/) const
+                                        unsigned int /*ind*/,
+                                        const std::string & /*prefix*/) const
 {
   mooseError("Hyperparameter tuning not set up for this covariance function. Please define "
              "computedKdhyper() to compute gradient.");

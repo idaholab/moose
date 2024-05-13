@@ -96,20 +96,34 @@ MaternHalfIntCovariance::maternHalfIntFunction(RealEigenMatrix & K,
   }
 }
 
-void
+bool
 MaternHalfIntCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
                                          const RealEigenMatrix & x,
                                          const std::string & hyper_param_name,
-                                         unsigned int ind) const
+                                         unsigned int ind,
+                                         const std::string & prefix) const
 {
-  if (hyper_param_name == "noise_variance")
+  const std::string name_without_prefix = hyper_param_name.substr(prefix.length());
+
+  if (name_without_prefix == "noise_variance")
+  {
     maternHalfIntFunction(dKdhp, x, x, _length_factor, 0, 1, _p, true);
+    return true;
+  }
 
-  if (hyper_param_name == "signal_variance")
+  if (name_without_prefix == "signal_variance")
+  {
     maternHalfIntFunction(dKdhp, x, x, _length_factor, 1, 0, _p, false);
+    return true;
+  }
 
-  if (hyper_param_name == "length_factor")
+  if (name_without_prefix == "length_factor")
+  {
     computedKdlf(dKdhp, x, _length_factor, _sigma_f_squared, _p, ind);
+    return true;
+  }
+
+  return false;
 }
 
 void

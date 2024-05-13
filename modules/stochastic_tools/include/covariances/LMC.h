@@ -24,10 +24,11 @@ public:
                                const bool is_self_covariance) const override;
 
   /// Redirect dK/dhp for hyperparameter "hp"
-  void computedKdhyper(RealEigenMatrix & dKdhp,
+  bool computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
                        const std::string & hyper_param_name,
-                       unsigned int ind) const override;
+                       unsigned int ind,
+                       const std::string & prefix = "") const override;
 
   void computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const;
 

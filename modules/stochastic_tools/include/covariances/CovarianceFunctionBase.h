@@ -43,10 +43,11 @@ public:
   void dependentCovarianceTypes(std::map<UserObjectName, std::string> name_type_map) const;
 
   /// Redirect dK/dhp for hyperparameter "hp"
-  virtual void computedKdhyper(RealEigenMatrix & dKdhp,
+  virtual bool computedKdhyper(RealEigenMatrix & dKdhp,
                                const RealEigenMatrix & x,
                                const std::string & hyper_param_name,
-                               unsigned int ind) const;
+                               unsigned int ind,
+                               const std::string & prefix = "") const;
 
   virtual bool isTunable(const std::string & name, const std::string & prefix = "") const;
 
@@ -76,11 +77,11 @@ protected:
   /// list of tunable hyper-parameters
   std::unordered_set<std::string> _tunable_hp;
 
+  const unsigned int _num_outputs;
+
   const std::vector<UserObjectName> _dependent_covariance_names;
 
   std::vector<std::string> _dependent_covariance_types;
 
   std::vector<CovarianceFunctionBase *> _covariance_functions;
-
-  const unsigned int _num_outputs;
 };
