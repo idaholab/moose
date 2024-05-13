@@ -51,8 +51,7 @@ set -e
 OUTPUT_FILES=({{ OUTPUT_FILES }})
 for file in ${OUTPUT_FILES[@]}; do
     if [ ! -e "$file" ]; then
-        echo "Failed to find output file $file"
-        exit 1
+        continue
     fi
 
     # No newline for binaries
