@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, json, time
+import itertools, re, os, json, time
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
@@ -44,7 +44,11 @@ class Job(object):
     The Job class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, and the start and end times.
     """
+    # Iterator for producing a unique Job ID
+    id_iter = itertools.count()
+
     def __init__(self, tester, job_dag, options):
+        self.id = next(self.id_iter)
         self.options = options
         self.__tester = tester
         self.specs = tester.specs
@@ -97,6 +101,10 @@ class Job(object):
         # Whether or not we should forcefully report the status of this Job
         # the next time report statuses
         self.force_report_status = False
+
+    def getID(self):
+        """Returns the unique ID for the job"""
+        return self.id
 
     def getUpstreams(self):
         """ Return a list of all the jobs that needed to be completed before this job """

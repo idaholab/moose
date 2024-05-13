@@ -11,6 +11,7 @@ from .schedulers.Job import Job
 from contrib import dag
 import pyhit
 import os
+import sys
 
 class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
@@ -103,6 +104,7 @@ class JobDAG(object):
 
             self._doMakeDependencies()
             self._doLast()
+            self._checkOutputCollisions()
 
             # If there are race conditions, then there may be more skipped jobs
             if self._doRaceConditions():
@@ -218,6 +220,44 @@ class JobDAG(object):
                     d_job.setStatus(d_job.skip)
                     d_job.addCaveats('skipped dependency')
                 self.__job_dag.delete_edge_if_exists(job, d_job)
+
+    def _checkOutputCollisions(self):
+        """
+        If running in parallel, checks to see if any tests have outputs
+        that would collide when ran in parallel if prereqs are set.
+        """
+        # No need to check if this spec can't run in parallel, because
+        # all tests will be run sequentially, with no more than one at once
+        if not self.canParallel():
+            return
+
+        jobs = list(self.__job_dag.topological_sort())
+        # Sort by ID so we get it in the input file from top down
+        jobs = sorted(jobs, key = lambda job: job.getID())
+
+        # Work down the file, starting with the second input and looking up for
+        # collisions. By doing it in this order, we will error at the first occurance.
+        # This is nice because if we list all of the collisions it could be a lot of
+        # confusing output
+        for i in range(1, len(jobs)):
+            job = jobs[i]
+            for other_i in reversed(range(i)):
+                other_job = jobs[other_i]
+                tester = job.getTester()
+                other_tester = other_job.getTester()
+                files = set(tester.getOutputFiles(self.options))
+                other_files = set(other_tester.getOutputFiles(self.options))
+                conflicting_files = list(files.intersection(other_files))
+                if conflicting_files \
+                    and not self.__job_dag.is_dependency(other_job, job):
+                    print(f'In {tester.getSpecFile()}:\n')
+                    print('  This test spec is set to run in parallel, but a race condition was found')
+                    print('  that could lead to multiple tests reading/writing from the same file.\n')
+                    print(f'  Tests: {tester.getTestNameShort()}, {other_tester.getTestNameShort()}')
+                    print(f'  File(s): {", ".join(conflicting_files)}\n')
+                    print('  You can resolve this issue by setting the approprate prerequisites')
+                    print('  between your tests with the "prereq" parameter')
+                    sys.exit(1)
 
     def _doRaceConditions(self):
         """ Check for race condition errors within in the DAG"""
