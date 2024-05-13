@@ -241,7 +241,7 @@ linearized_model = false
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
@@ -288,7 +288,7 @@ linearized_model = false
 [Materials]
   [mu_t_material]
     type = INSFVkEpsilonViscosityMaterial
-    k = TKE
+    tke = TKE
     epsilon = TKED
     rho = ${rho}
   []

@@ -1,4 +1,20 @@
 [Tests]
+  # Testing summary
+  # Input                        Wall function           Solver         Energy   Energy wall function
+  # lid-driven-turb-std-wall.i      std                  segregated     no
+  # lid-driven-turb-std-wall.i      std + bulk-wall       segregated    no
+  # lid-driven-turb-non-eq-wall.i   non-eq               segregated     no
+  # lid-driven-turb-linear-wall.i   linear               segregated     no
+  # lid-driven-turb-inc-wall.i      incremental          segregated     no
+  # lid-driven-turb-no-wall.i       none                 segregated     no
+  # lid-driven-turb-no-wall.i       none in log regime   segregated     no
+  # lid-driven-turb-non-eq-bulk.i   non-eq-bulk          segregated     no
+  # lid-driven-turb-energy.i        std                  segregated     yes      none
+  # lid-driven-turb-energy-wall.i   std                  segregated     yes      log-regime
+  # lid-driven-turb-energy-wall.i   linear               segregated     yes      linear
+  # lid-driven-turb-energy-wall.i   std in log region    segregated     yes      incremental
+  # lid-driven-turb-capped.i        std + capped mixing  segregated     no
+  # lid-driven-turb-std-wall-nonlinear.i std             fully-coupled  no
   design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
   issues = '#9007'
   [lid_driven_turb_std_wall]
