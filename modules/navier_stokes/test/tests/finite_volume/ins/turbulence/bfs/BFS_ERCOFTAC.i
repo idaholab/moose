@@ -2,7 +2,7 @@
 # ERCOFTAC test case foe BFS
 # Case Number: 031
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model
 # Equilibrium + Newton wall treatement
@@ -20,7 +20,7 @@ advected_interp_method = 'upwind'
 
 pressure_tag = "pressure_grad"
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
