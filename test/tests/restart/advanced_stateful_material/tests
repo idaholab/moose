@@ -19,6 +19,10 @@
       expect_err = 'The stateful material properties in RestartStatefulMaterial "test" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
       prereq = checkpoint
       detail = 'a stateful property for a single material object is removed'
+      # RunException with some cases will only run in serial, which means if
+      # "checkpoint" runs in parallel we'll actually get an error with a
+      # processor mismatch instead of the one that we want
+      hpc = false
     []
     [add_prop]
       type = RunException
