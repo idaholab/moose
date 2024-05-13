@@ -143,8 +143,8 @@ class RunPBS(RunParallel):
         return 1
 
     def availableSlots(self, params):
-        # Support managing 200 HPC jobs concurrently
-        return 200, False
+        # Support managing 250 HPC jobs concurrently
+        return 250, False
 
     def getPBSJobName(self, job):
         """Gets the name of the PBS job given a tester
