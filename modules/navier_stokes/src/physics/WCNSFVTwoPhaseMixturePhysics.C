@@ -107,7 +107,7 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.addParam<MooseFunctorName>(
       "particle_diameter", 1, "Particle size if using a dispersed phase");
   params.addParam<bool>("use_dispersed_phase_drag_model",
-                        true,
+                        false,
                         "Adds a linear friction term with the dispersed phase drag model");
 
   // Not applicable currently
@@ -243,7 +243,19 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
   // Parameter checking
   // The two models are not consistent
   if (isParamSetByUser("alpha_exc") && getParam<bool>("add_phase_change_energy_term"))
-    errorDependentParameter("add_phase_change_energy_term", "true", {"alpha_exc"});
+    paramError("alpha_exc",
+               "A phase exchange coefficient cannot be specified if the phase change is handled "
+               "with a phase change heat loss model");
+  if (_liquid_phase_fraction == _other_phase_fraction_name)
+    paramError("liquid_phase_fraction_name",
+               "Liquid phase fraction name should be different from the other phase fraction name");
+  if (_use_drift_flux && _use_advection_slip)
+    paramError("add_drift_flux_momentum_terms",
+               "Drift flux model cannot be used at the same time as the advection slip model");
+  if (!getParam<bool>("add_drift_flux_momentum_terms"))
+    errorDependentParameter("add_drift_flux_momentum_terms", "true", {"density_interp_method"});
+  if (!getParam<bool>("use_dispersed_phase_drag_model"))
+    errorDependentParameter("use_dispersed_phase_drag_model", "true", {"particle_diameter"});
 }
 
 void

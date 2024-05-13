@@ -91,6 +91,8 @@ k_d = 1
         first_phase_viscosity_name = ${mu}
         first_phase_specific_heat_name = ${cp}
         first_phase_thermal_conductivity_name = ${k}
+
+        use_dispersed_phase_drag_model = true
         particle_diameter = 0.01
 
         # Other phase material properties
