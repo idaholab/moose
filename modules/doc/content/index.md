@@ -16,6 +16,11 @@ Multiphysics Object-Oriented Simulation Environment
 !media large_media/organization_logos/23-50052_webbanner_R1-03.jpg dark_src=large_media/organization_logos/23-50052_webbanner_R1-03_dark.jpg style=width:100%;display:block;
 
 !style! halign=center
+Abstract submission is now open. Click
+[here](https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1zeoLEagiVVm9wO) to submit your abstract.
+!style-end!
+
+!style! halign=center
 *Conference registration link coming soon!*
 !style-end!
 
