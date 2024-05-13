@@ -190,6 +190,17 @@ PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
 }
 
 void
+PhysicsBase::addBlocksById(const std::vector<SubdomainID> & block_ids)
+{
+  if (block_ids.size())
+  {
+    for (const auto bid : block_ids)
+      _blocks.push_back(_mesh->getSubdomainName(bid));
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  }
+}
+
+void
 PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   InputParameters params = getAdditionalRMParams();
