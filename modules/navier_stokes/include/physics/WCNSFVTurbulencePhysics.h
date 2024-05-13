@@ -11,6 +11,7 @@
 
 #include "NavierStokesPhysicsBase.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
+#include "NS.h"
 
 class WCNSFVFluidHeatTransferPhysics;
 class WCNSFVScalarTransportPhysics;
@@ -34,18 +35,27 @@ protected:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 private:
-  void addNonlinearVariables() override;
-  void addAuxiliaryVariables() override;
-  void addFVKernels() override;
-  void addAuxiliaryKernels() override;
-  void addMaterials() override;
+  virtual void addNonlinearVariables() override;
+  virtual void addAuxiliaryVariables() override;
+  virtual void addFVKernels() override;
+  virtual void addFVBCs() override;
+  virtual void addAuxiliaryKernels() override;
+  virtual void addMaterials() override;
 
   /**
-   * Functions adding kernels for the turbulence equation(s)
+   * Functions adding kernels for turbulence in the other equation(s)
    */
   void addFlowTurbulenceKernels();
   void addFluidEnergyTurbulenceKernels();
   void addScalarAdvectionTurbulenceKernels();
+
+  /**
+   * Functions adding kernels for the k-epsilon to the k-epsilon equations
+   */
+  void addKEpsilonTimeDerivatives();
+  void addKEpsilonAdvection();
+  void addKEpsilonDiffusion();
+  void addKEpsilonSink();
 
   /// Turbulence model to create the equation(s) for
   const MooseEnum _turbulence_model;
@@ -64,4 +74,10 @@ private:
   const VariableName _mixing_length_name;
   /// List of boundaries to act as walls for turbulence models
   std::vector<BoundaryName> _turbulence_walls;
+  /// Name of the turbulent kinetic energy
+  const VariableName _tke_name("tke");
+  /// Name of the turbulent kinetic energy dissipation
+  const VariableName _tked_name(NS::TKED);
+  /// Name of the turbulence viscosity auxiliary variable (or property)
+  const VariableName _turbulent_viscosity_name(NS::mu_turb);
 };
