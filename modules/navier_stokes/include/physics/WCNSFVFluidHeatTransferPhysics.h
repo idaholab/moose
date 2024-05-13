@@ -30,6 +30,16 @@ public:
   /// Get the name of the specific heat material property
   const MooseFunctorName getSpecificHeatName() const { return _specific_heat_name; }
   const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
+  /// Get the ambient convection parameters for parameter checking
+  std::vector<std::vector<SubdomainName>> getAmbientConvectionBlocks() const
+  {
+    return _ambient_convection_blocks;
+  }
+  /// Name of the ambient convection heat transfer coefficients for each block-group
+  std::vector<MooseFunctorName> getAmbientConvectionHTCs() const
+  {
+    return _ambient_convection_alpha;
+  }
 
   /// Whether the physics is actually creating the heat equation
   bool hasEnergyEquation() const { return _has_energy_equation; }
