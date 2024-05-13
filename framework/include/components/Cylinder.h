@@ -28,4 +28,5 @@ public:
 protected:
   virtual void addMeshGenerators() override;
   virtual void addPositionsObject() override;
+  virtual void addPhysics() override;
 };

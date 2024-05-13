@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "Action.h"
 
+class PhysicsBase;
+
 /**
  * Base class for components that are defined using an action
  */
@@ -44,9 +46,14 @@ protected:
   /// Use this if registering a new task to the derived ComponentAction
   virtual void actOnAdditionalTasks(){};
 
+  virtual void addPhysics(){};
+
   /// Maximum dimension of the component
   unsigned int _dimension;
 
   /// Name of the final mesh generator creating the mesh for the component
   MeshGeneratorName _mg_name;
+
+  /// Pointers to the Physics defined on the component
+  std::vector<PhysicsBase *> _physics;
 };

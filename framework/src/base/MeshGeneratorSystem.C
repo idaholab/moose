@@ -79,16 +79,11 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
     _ordered_mesh_generators.clear();
   }
 
-  // Set the final generator as the input
+  // Set the final generator as the input if a single generator
   mooseAssert(hasMeshGenerator(_final_generator_name), "Missing final generator");
   if (params.have_parameter<MeshGeneratorName>("input"))
     params.set<MeshGeneratorName>("input") = _final_generator_name;
-  else
-  {
-    std::vector<MeshGeneratorName> inputs = params.get<std::vector<MeshGeneratorName>>("inputs");
-    inputs.push_back(_final_generator_name);
-    params.set<std::vector<MeshGeneratorName>>("inputs") = inputs;
-  }
+  // We'll trust the final combiner generator with its list of inputs
 
   // Keep track of the new final generator
   _final_generator_name = name;

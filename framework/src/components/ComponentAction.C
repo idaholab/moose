@@ -12,11 +12,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
-
-registerMooseAction("MooseApp", ComponentAction, "add_mesh_generator");
-registerMooseAction("MooseApp", ComponentAction, "add_position");
-registerMooseAction("MooseApp", ComponentAction, "add_user_object");
-registerMooseAction("MooseApp", ComponentAction, "add_variable");
+#include "PhysicsBase.h"
 
 InputParameters
 ComponentAction::validParams()
@@ -41,10 +37,13 @@ ComponentAction::act()
   // These tasks are conceptually what we image a mostly-geometrical component should do
   if (_current_task == "add_mesh_generator")
     addMeshGenerators();
-  else if (_current_task == "add_position")
+  else if (_current_task == "add_positions")
     addPositionsObject();
   else if (_current_task == "add_user_object")
     addUserObjects();
+  // If we define the Physics in a Physics block
+  else if (_current_task == "init_physics")
+    addPhysics();
   // These tasks are there to match what the current combined Physics + Component do
   // These combined components will likely still exist in the future, when it makes more
   // sense to include the physics than to split it off into its own block
