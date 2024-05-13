@@ -59,15 +59,9 @@ class PBSRunner(Runner):
         # so we have an invalid state for processing in the Tester
         if self.job.isFinished():
             self.exit_code = -1
-            self.output = ''
 
             # If we have output, we should try to add it
-            # TODO: shorten output as an option?
-            if os.path.exists(output_file) and os.path.isfile(output_file):
-                try:
-                    self.output = open(file, 'r').read()
-                except:
-                    pass
+            self.trySetOutput()
 
             # Don't bother looking for the rest of the output
             return
@@ -102,15 +96,15 @@ class PBSRunner(Runner):
                 if self.fileIsReady(file):
                     # Store the output
                     if file == output_file:
-                        self.output = open(file, 'r').read()
+                        self.trySetOutput(throw=True)
                     # Done with this file
                     incomplete_files.discard(file)
 
             # We've waited for files for too long
             if (wait_files or incomplete_files) and waited_time >= self.wait_output_time:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
-                if not self.output:
-                    self.output = ''
+                if self.output is None:
+                    self.trySetOutput()
                 def print_files(files, type):
                     if files:
                         self.output += '#' * 80 + f'\n{type} output file(s)\n' + '#' * 80 + '\n'
@@ -123,6 +117,20 @@ class PBSRunner(Runner):
 
             waited_time += file_poll_interval
             time.sleep(file_poll_interval)
+
+    def trySetOutput(self, throw=False):
+        if self.output is None:
+            self.output = ''
+
+        # TODO: shorten output as an option?
+        output_file = self.run_pbs.getPBSJobOutputPath(self.job)
+        if os.path.exists(output_file) and os.path.isfile(output_file):
+            try:
+                self.output = open(output_file, 'r').read()
+            except:
+                if throw:
+                    raise
+                pass
 
     def fileIsReady(self, file):
         """
