@@ -120,7 +120,7 @@ static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
-static const std::string mu_t = "mu_t";
+static const std::string mu_t = "mu_total";
 static const std::string k = "k";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";
@@ -161,11 +161,12 @@ static const std::string Z = "Z";
 static const std::string K = "K";
 static const std::string mass_flux = "mass_flux";
 
-// Turbuelnce
+// Turbulence
 
 // Turbulence variables
 static const std::string TKE = "k";
 static const std::string TKED = "epsilon";
+static const std::string mu_turb = "mu_turb";
 
 /**
  * Wall treatment options

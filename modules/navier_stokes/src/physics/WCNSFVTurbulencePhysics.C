@@ -347,10 +347,35 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
   {
     // We rely on using the turbulent viscosity in the flow equation
     // This check is rudimentary, we should think of a better way
-    if (_flow_equations_physics->viscosityName() != "mu_t")
-      mooseError("Total viscosity mu_t should be used for the momentum diffusion term. You are "
-                 "currently using: " +
-                 _flow_equations_physics->viscosityName());
+    // We could also check for the use of 'mu_t' with the right parameters already
+    if (_flow_equations_physics->viscosityName() != "mu")
+      mooseError(
+          "Regular fluid viscosity 'mu' should be used for the momentum diffusion term. You are "
+          "currently using: " +
+          _flow_equations_physics->viscosityName());
+
+    const std::string u_names[3] = {"u", "v", "w"};
+    const std::string kernel_type = "INSFVMomentumDiffusion";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<MooseFunctorName>("mu") = "mu_turbulent";
+    params.set<bool>("complete_expansion") = true;
+
+    std::string kernel_name = prefix() + "ins_momentum_k_epsilon_reynolds_stress_";
+    if (_porous_medium_treatment)
+      kernel_name = prefix() + "pins_momentum_k_epsilon_reynolds_stress_";
+
+    params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+    for (const auto dim_i : make_range(dimension()))
+      params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
+
+    for (const auto d : make_range(dimension()))
+    {
+      params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+      getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+    }
   }
 }
 
@@ -469,6 +494,27 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_NONLINEAR};
     getProblem().addAuxKernel(mut_kernel_type, prefix() + "mixing_length_aux ", params);
+  }
+}
+
+void
+WCNSFVTurbulencePhysics::addFVBCs()
+{
+  if (_turbulence_model == "k-epsilon")
+  {
+    const std::string u_names[3] = {"u", "v", "w"};
+    const std::string bc_type = "INSFVTurbulentViscosityWallFunction";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<std::vector<BoundaryName>>("boundary") = _turbulence_walls;
+    params.set<NonlinearVariableName>("variable") = _turbulent_viscosity_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+    params.set<MooseFunctorName>("mu_t") = _turbulent_viscosity_name;
+    params.set<MooseFunctorName>(NS::TKE) = _tke_name;
+    params.set<MooseEnum>("wall_treatment") = getParam<MooseEnum>("wall_treatment");
+    for (const auto d : make_range(dimension()))
+      params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+
+    getProblem().addFVBC(bc_type, prefix() + "turbulence_walls", params);
   }
 }
 
