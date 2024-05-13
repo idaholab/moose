@@ -61,7 +61,7 @@ class JobDAG(object):
 
     def getJobs(self):
         """ Return a list of available jobs """
-        if (self.canParallel() or self.options.pbs) and not self.options.pedantic_checks:
+        if self.canParallel() and not self.options.pedantic_checks:
             return self.__job_dag.ind_nodes()
         return self.getJob()
 
