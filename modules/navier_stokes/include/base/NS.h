@@ -113,14 +113,16 @@ static const std::string drhos_dTs = "drhos_dTs";
 static const std::string dks_dTs = "dks_dTs";
 static const std::string kappa = "kappa";
 static const std::string kappa_s = "kappa_s";
-static const std::string mu_eff = "mu_eff";
 static const std::string rho_s = "rho_s";
 static const std::string cp_s = "cp_s";
 static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
-static const std::string mu_t = "mu_total";
+// Turbulent viscosity
+static const std::string mu_t = "mu_t";
+// Effective viscosity = sum of viscosities
+static const std::string mu_eff = "mu_eff";
 static const std::string k = "k";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";
@@ -164,9 +166,8 @@ static const std::string mass_flux = "mass_flux";
 // Turbulence
 
 // Turbulence variables
-static const std::string TKE = "k";
+static const std::string TKE = "tke";
 static const std::string TKED = "epsilon";
-static const std::string mu_turb = "mu_turb";
 
 /**
  * Wall treatment options
