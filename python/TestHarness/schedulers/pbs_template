@@ -47,6 +47,8 @@ return_code=$?
 # Exit on failure
 set -e
 
+echo "################################################################################"
+
 # Append a terminator to all of the output files for file syncing across NFS
 OUTPUT_FILES=({{ OUTPUT_FILES }})
 for file in ${OUTPUT_FILES[@]}; do
@@ -62,6 +64,11 @@ for file in ${OUTPUT_FILES[@]}; do
         printf "\n{{ ENDING_COMMENT }}" >> $file;
     fi
 done
+
+# We will read this output later on to try to capture the return code
+# in the event that PBS doesn't get it to us correctly
+echo "Completed TestHarness RunPBS job; exit code = $return_code"
+echo "################################################################################"
 
 # Append a recognizable string at the end of the output. We look
 # for this string when parsing the output so that we can be sure

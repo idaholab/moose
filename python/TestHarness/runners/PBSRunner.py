@@ -127,6 +127,12 @@ class PBSRunner(Runner):
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
                 self.output = open(output_file, 'r').read()
+
+                # If we can parse the exit code here, do it. Sometimes PBS
+                # will do screwy stuff with not capturing the actual exit code...
+                find_exit_code = re.search('Completed TestHarness RunPBS job; exit code = (\d+)', self.output)
+                if find_exit_code:
+                    self.exit_code = int(find_exit_code.group(1))
             except:
                 if throw:
                     raise
