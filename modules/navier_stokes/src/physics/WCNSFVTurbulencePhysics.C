@@ -18,6 +18,7 @@ registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics)
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_bc");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_material");
@@ -48,10 +49,10 @@ WCNSFVTurbulencePhysics::validParams()
   params.suppressParameter<MooseEnum>("preconditioning");
 
   // K-Epsilon parameters
-  params.addParam<Real>("initial_tke", "Initial value for the turbulence kinetic energy");
-  params.addParam<Real>("initial_tked",
-                        "Initial value for the turbulence kinetic energy dissipation");
-  params.addParam<Real>("initial_mu_t", "Initial value for the turbulence viscosity");
+  params.addParam<FunctionName>("initial_tke", "Initial value for the turbulence kinetic energy");
+  params.addParam<FunctionName>("initial_tked",
+                                "Initial value for the turbulence kinetic energy dissipation");
+  params.addParam<FunctionName>("initial_mu_t", "Initial value for the turbulence viscosity");
 
   params.addParam<Real>("C1_eps",
                         "C1 coefficient for the turbulent kinetic energy dissipation equation");
@@ -314,7 +315,6 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
     if (isParamValid("turbulent_viscosity_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("turbulent_viscosity_two_term_bc_expansion");
-    const auto rho_name = _flow_equations_physics->densityName();
     getProblem().addAuxVariable("MooseVariableFVReal", _turbulent_viscosity_name, params);
   }
 }
@@ -640,6 +640,34 @@ WCNSFVTurbulencePhysics::addFVBCs()
 
     getProblem().addFVBC(bc_type, prefix() + "turbulence_walls", params);
   }
+}
+
+void
+WCNSFVTurbulencePhysics::addInitialConditions()
+{
+  const std::string ic_type = "FunctionIC";
+  InputParameters params = getFactory().getValidParams(ic_type);
+  const auto rho_name = _flow_equations_physics->densityName();
+  if (MooseUtils::isFloat(rho_name) && MooseUtils::isFloat(getParam<FunctionName>("initial_tke")) &&
+      MooseUtils::isFloat(getParam<FunctionName>("initial_tked")))
+    params.set<FunctionName>("function") =
+        std::to_string(std::atof(rho_name.c_str()) * getParam<Real>("C_mu") *
+                       std::pow(std::atof(getParam<FunctionName>("initial_tke").c_str()), 2) /
+                       std::atof(getParam<FunctionName>("initial_tked").c_str()));
+  else if (isParamValid("initial_mu_t"))
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_mu_t");
+  else
+    paramError("Initial turbulent viscosity should be provided");
+
+  params.set<VariableName>("variable") = _turbulent_viscosity_name;
+  getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_eff", params);
+
+  params.set<VariableName>("variable") = _tke_name;
+  params.set<FunctionName>("function") = getParam<FunctionName>("initial_tke");
+  getProblem().addInitialCondition(ic_type, prefix() + "initial_tke", params);
+  params.set<VariableName>("variable") = _tked_name;
+  params.set<FunctionName>("function") = getParam<FunctionName>("initial_tked");
+  getProblem().addInitialCondition(ic_type, prefix() + "initial_tked", params);
 }
 
 void

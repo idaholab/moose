@@ -39,6 +39,7 @@ private:
   virtual void addAuxiliaryVariables() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
+  virtual void addInitialConditions() override;
   virtual void addAuxiliaryKernels() override;
   virtual void addMaterials() override;
 
