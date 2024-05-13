@@ -58,6 +58,7 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the diffusivity parameter from the Physics to the kernel
     if (isParamValid("diffusivity_matprop"))
@@ -89,6 +90,7 @@ DiffusionCG::addFEKernels()
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the source and coefficient parameter from the Physics to the kernel
     const auto coef = getParam<Real>("source_coef");
@@ -119,6 +121,7 @@ DiffusionCG::addFEKernels()
     const std::string kernel_type = _use_ad ? "ADTimeDerivative" : "TimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
     getProblem().addKernel(kernel_type, prefix() + _var_name + "_time", params);
   }
 }
@@ -226,6 +229,7 @@ DiffusionCG::addNonlinearVariables()
   const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<MooseEnum>("order") = getParam<MooseEnum>("variable_order");
+  assignBlocks(params, _blocks);
 
   getProblem().addVariable(variable_type, _var_name, params);
 }
