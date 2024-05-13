@@ -46,6 +46,57 @@ WCNSFVTurbulencePhysics::validParams()
   // Not implemented, re-enable with k-epsilon
   params.suppressParameter<MooseEnum>("preconditioning");
 
+  // K-Epsilon parameters
+  params.addParam<Real>("initial_tke", "Initial value for the turbulence kinetic energy");
+  params.addParam<Real>("initial_tked",
+                        "Initial value for the turbulence kinetic energy dissipation");
+
+  params.addParam<Real>("C_mu", "C_mu coefficient");
+  params.addParam<Real>("C1_eps",
+                        "C1 coefficient for the turbulent kinetic energy dissipation equation");
+  params.addParam<Real>("C2_eps",
+                        "C2 coefficient for the turbulent kinetic energy dissipation equation");
+  params.addParam<Real>("sigma_k",
+                        "Scaling coefficient for the turbulent kinetic energy diffusion term");
+  params.addParam<Real>(
+      "sigma_eps",
+      "Scaling coefficient for the turbulent kinetic energy dissipation diffusion term");
+
+  // K-Epsilon numerical scheme parameters
+  MooseEnum face_interpol_types("average skewness-corrected", "average");
+  params.addRangeCheckedParam<Real>(
+      "tke_scaling",
+      1.0,
+      "tke_scaling > 0.0",
+      "The scaling factor for the turbulent kinetic energy equation.");
+  params.addParam<MooseEnum>("tke_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the TKE to the "
+                             "face (separate from the advected quantity interpolation).");
+  params.addParam<bool>(
+      "tke_two_term_bc_expansion",
+      true,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the turbulent kinetic energy.");
+  params.addRangeCheckedParam<Real>(
+      "tked_scaling",
+      1.0,
+      "tked_scaling > 0.0",
+      "The scaling factor for the turbulent kinetic energy dissipation equation.");
+  params.addParam<MooseEnum>("tked_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the TKED to the "
+                             "face (separate from the advected quantity interpolation).");
+  params.addParam<bool>(
+      "tked_two_term_bc_expansion",
+      true,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the turbulent kinetic energy dissipation.");
+  params.addParam<MooseEnum>("turbulent_viscosity_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the turbulent viscosity to the "
+                             "face.");
+
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
   // It is a little risky right now because the user could forget to pass the parameter and
@@ -147,6 +198,8 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
   }
 
   // Parameter checks
+  if (_turbulence_model == "none")
+    errorInconsistentDependentParameter("turbulence_handling", "none", {"turbulence_walls"});
   if (_turbulence_model != "mixing-length")
     errorDependentParameter("turbulence_handling",
                             "mixing-length",
@@ -155,6 +208,22 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
                              "von_karman_const",
                              "von_karman_const_0",
                              "mixing_length_two_term_bc_expansion"});
+  else if (_turbulence_model != "k-epsilon")
+    errorDependentParameter("turbulence_handling",
+                            "k-epsilon",
+                            {"C_mu",
+                             "C1_eps",
+                             "C2_eps",
+                             "linearized_yplus",
+                             "bulk_wall_treatment",
+                             "non_equilibrium_treatment",
+                             "tke_scaling",
+                             "tke_face_interpolation",
+                             "tke_two_term_bc_expansion",
+                             "tked_scaling",
+                             "tked_face_interpolation",
+                             "tked_two_term_bc_expansion",
+                             "turbulent_viscosity_two_term_bc_expansion"});
 }
 
 void
@@ -191,9 +260,10 @@ WCNSFVTurbulencePhysics::addNonlinearVariables()
     {
       auto params = getFactory().getValidParams("INSFVEnergyVariable");
       assignBlocks(params, _blocks);
-      params.set<std::vector<Real>>("scaling") = {getParam<Real>("tke_scaling")};
-      params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("tke_face_interpolation");
-      params.set<bool>("two_term_boundary_expansion") = getParam<bool>("tke_two_term_bc_expansion");
+      params.set<std::vector<Real>>("scaling") = {getParam<Real>("tked_scaling")};
+      params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("tked_face_interpolation");
+      params.set<bool>("two_term_boundary_expansion") =
+          getParam<bool>("tked_two_term_bc_expansion");
       getProblem().addVariable("INSFVEnergyVariable", _tked_name, params);
     }
     else
@@ -397,7 +467,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     params.set<bool>("bulk_wall_treatment") = getParam<bool>("bulk_wall_treatment");
     params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_NONLINEAR};
     getProblem().addAuxKernel(mut_kernel_type, prefix() + "mixing_length_aux ", params);
   }
 }
