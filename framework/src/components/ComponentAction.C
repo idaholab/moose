@@ -41,6 +41,8 @@ ComponentAction::act()
     addPositionsObject();
   else if (_current_task == "add_user_object")
     addUserObjects();
+  else if (_current_task == "setup_component")
+    setupComponent();
   // If we define the Physics in a Physics block
   else if (_current_task == "init_physics")
     addPhysics();

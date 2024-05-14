@@ -39,14 +39,15 @@ protected:
   virtual void addMeshGenerators() {}
   virtual void addPositionsObject() {}
   virtual void addUserObjects() {}
+  virtual void setupComponent() {}
 
   // These routines can help define a component that also defines a Physics
   virtual void addNonlinearVariables() {}
 
   /// Use this if registering a new task to the derived ComponentAction
-  virtual void actOnAdditionalTasks(){};
+  virtual void actOnAdditionalTasks() {};
 
-  virtual void addPhysics(){};
+  virtual void addPhysics() {};
 
   /// Maximum dimension of the component
   unsigned int _dimension;
