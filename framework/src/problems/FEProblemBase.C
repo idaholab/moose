@@ -528,6 +528,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   if (!_app.isUltimateMaster())
     PetscOptionsCreate(&_petsc_option_data_base);
 #endif
+
+  if (!_solve)
+  {
+    // If we are not solving, we do not care about seeing unused petsc options
+    Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
+    // We don't want petscSetOptions being called in solve and clearing the option that was just set
+    _is_petsc_options_inserted = true;
+  }
 }
 
 const MooseMesh &
@@ -5926,10 +5934,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   _fail_next_nonlinear_convergence_check = false;
 
   if (_solve)
+  {
     _current_nl_sys->solve();
-
-  if (_solve)
     _current_nl_sys->update();
+  }
 
   // sync solutions in displaced problem
   if (_displaced_problem)

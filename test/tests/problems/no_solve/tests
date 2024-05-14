@@ -5,6 +5,7 @@
     exodiff = 'no_solve_out.e'
 
     requirement = 'The system shall have the ability to disable the actual nonlinear system solve in a simulation.'
+    absent_out = 'WARNING! There are options you set that were not used!'
     issues = '#1978'
     design = 'Problem/index.md'
   [../]
@@ -17,7 +18,7 @@
     issues = '#27084'
     slepc = true
     slepc_version = '>=3.13.0'
-  []    
+  []
   [eigen_problem_skip_solve]
     type = 'RunApp'
     prereq = eigen_problem_solve_fail
@@ -25,6 +26,7 @@
     # regex meant to make sure no messaged about solve failing is printed last
     # \S+ is to consume the ansi color characters
     expect_out = 'Solve Skipped!\S+\s+(?!Aborting)'
+    absent_out = 'WARNING! There are options you set that were not used!'
     input = 'ne_fail.i'
     cli_args = Problem/solve=false
     design = 'Problem/index.md'
