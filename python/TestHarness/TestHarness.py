@@ -1053,10 +1053,10 @@ class TestHarness:
 
         queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
         queuegroup.add_argument('--pbs', action='store_true', dest='pbs', help='Launch tests using PBS as your scheduler')
-        queuegroup.add_argument('--pbs-pre-source', nargs=1, action="store", dest='queue_source_command', metavar='', help='Source specified file before launching tests')
         queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
         queuegroup.add_argument('--pbs-queue', nargs=1, action='store', dest='queue_queue', type=str, metavar='', help='Submit jobs to the specified queue')
-        queuegroup.add_argument('--pbs-host', nargs=1, action='store', dest='queue_host', metavar='', help='The PBS host to use for submitting jobs')
+        queuegroup.add_argument('--hpc-host', nargs=1, action='store', dest='queue_host', metavar='', help='The host to use for submitting HPC jobs')
+        queuegroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='queue_source_command', metavar='', help='Source specified file before launching HPC tests')
 
         code = True
         if self.code.decode() in argv:
