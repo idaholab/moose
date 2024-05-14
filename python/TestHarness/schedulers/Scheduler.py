@@ -457,6 +457,15 @@ class Scheduler(MooseObject):
                 with job.getLock():
                     job.setStatus(job.running)
 
+                    # Setup the long running timer, if any
+                    if self.report_long_jobs:
+                        job.report_timer = threading.Timer(self.min_report_time,
+                                                           self.handleJobStatus,
+                                                           (job,))
+                        job.report_timer.start()
+                    else:
+                        job.report_timer = None
+
                 with self.activity_lock:
                     self.__active_jobs.add(job)
 
@@ -467,14 +476,6 @@ class Scheduler(MooseObject):
                     timeout_timer.start()
                 else:
                     timeout_timer = None
-
-                if self.report_long_jobs:
-                    job.report_timer = threading.Timer(self.min_report_time,
-                                                       self.handleJobStatus,
-                                                       (job,))
-                    job.report_timer.start()
-                else:
-                    job.report_timer = None
 
                 # We have a try here because we want to explicitly catch things like
                 # python errors in _only_ the Job; exceptions that happen in the Tester
@@ -493,12 +494,12 @@ class Scheduler(MooseObject):
                 with self.slot_lock:
                     self.slots_in_use = max(0, self.slots_in_use - self.getJobSlots(job))
 
-                # Stop the long running timer
-                if job.report_timer:
-                    job.report_timer.cancel()
-
-                # All done
                 with job.getLock():
+                    # Stop the long running timer
+                    if job.report_timer:
+                        job.report_timer.cancel()
+
+                    # All done
                     job.setStatus(StatusSystem().finished)
 
                 with self.activity_lock:
