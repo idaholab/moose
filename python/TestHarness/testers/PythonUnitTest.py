@@ -57,3 +57,15 @@ class PythonUnitTest(RunApp):
             return False
 
         return super().checkRunnable(options)
+
+    def getProcs(self, options):
+        procs = super().getProcs(options)
+        # If we start within a script within apptainer and then call mpiexec on HPC,
+        # it will not work because the mpiexec call needs to be outside of the apptainer
+        # call. So, limit these tests to 1 proc
+        if options.pbs and \
+            os.environ.get('APPTAINER_CONTAINER') and \
+            int(self.specs['min_parallel']) == 1 and procs != 1:
+            self.addCaveats('hpc apptainer max_cpus=1')
+            return 1
+        return procs
