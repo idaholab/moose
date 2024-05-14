@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, re, os, json, time
+import itertools, re, os, json, time, threading
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
@@ -50,6 +50,7 @@ class Job(object):
     def __init__(self, tester, job_dag, options):
         self.id = next(self.id_iter)
         self.options = options
+        self.__j_lock = threading.Lock()
         self.__tester = tester
         self.specs = tester.specs
         self.__job_dag = job_dag
@@ -105,6 +106,10 @@ class Job(object):
     def getID(self):
         """Returns the unique ID for the job"""
         return self.id
+
+    def getLock(self):
+        """ Get the lock associated with this job """
+        return self.__j_lock
 
     def getUpstreams(self):
         """ Return a list of all the jobs that needed to be completed before this job """
