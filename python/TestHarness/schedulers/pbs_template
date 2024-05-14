@@ -25,7 +25,6 @@ export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 echo "Time: $(date)"
 echo "Test: {{ TEST_NAME }}"
 echo "Directory: {{ CWD }}"
-echo "Command: {{ COMMAND }}"
 echo "Hostname: $(hostname)"
 echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
 echo "Output: {{ OUTPUT }}"
