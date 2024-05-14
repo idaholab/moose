@@ -273,7 +273,7 @@ XYDelaunayGenerator::generate()
         _auto_area_func_default_size > 0.0 ? _auto_area_func_default_size : 0.0,
         _auto_area_func_default_size_dist > 0.0 ? _auto_area_func_default_size_dist : -1.0);
   }
-  
+
   if (_tri_elem_type == "TRI6")
     poly2tri.elem_type() = libMesh::ElemType::TRI6;
   else if (_tri_elem_type == "TRI7")
@@ -312,7 +312,9 @@ XYDelaunayGenerator::generate()
   if (_smooth_tri || _output_subdomain_id)
     for (auto elem : mesh->element_ptr_range())
     {
-      mooseAssert(elem->type() == TRI3, "Unexpected non-Tri3 found in triangulation");
+      mooseAssert(elem->type() ==
+                      (_tri_elem_type == "TRI6" ? TRI6 : (_tri_elem_type == "TRI7" ? TRI7 : TRI3)),
+                  "Unexpected non-Tri found in triangulation");
 
       elem->subdomain_id() = _output_subdomain_id;
 

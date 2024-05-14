@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYDelaunayGenerator.md'
-  issues = '#20192 #26776'
+  issues = '#20192 #26776 #27545'
   [xydelaunay]
     requirement = "The system shall have the capability of triangulating a polyline boundary"
     [basic]
@@ -185,6 +185,7 @@
                   Mesh/triang/auto_area_function_power=2'
       expect_err = "the following parameters should not be set"
       detail = "if the user specifies parameters for the auto area function when it is not used"
+    []
     [err_stiching_quadratic_holes]
       type = RunException
       input = 'xydelaunay_quadratic.i'
