@@ -189,11 +189,14 @@ class RunPBS(RunParallel):
         # Set up the command. We have special logic here for when we're using apptainer,
         # where we need to put the MPI command outside of the apptainer call
         full_command = ''
-        command = tester.getCommand(options).replace('"', "'")
+        command = tester.getCommand(options)
         mpi_command = self.parseMPICommand(command)
         if mpi_command:
             command = command.replace(mpi_command, '')
             full_command += mpi_command
+        # Split out whitespace in the command and then use json dumps to
+        # escape quoted characters
+        command = json.dumps(command.replace('\n', ' '))
 
         # Wrap the command with apptainer if we're in a container, and also bind
         # in the root directory that the test is contained in
@@ -201,7 +204,8 @@ class RunPBS(RunParallel):
         if APPTAINER_CONTAINER:
             root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
             full_command += f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER} '
-        full_command += f'"{command}"'
+
+        full_command += command
 
         num_procs = tester.getProcs(options)
         num_threads = tester.getThreads(options)
@@ -225,6 +229,7 @@ class RunPBS(RunParallel):
                         'PROJECT': self.options.queue_project,
                         'OUTPUT': output_file,
                         'PLACE': 'scatter',
+                        'TEST_NAME': tester.getTestName(),
                         'SUBMITTED_HOSTNAME': socket.gethostname(),
                         'CWD': tester.getTestDir(),
                         'COMMAND': full_command,

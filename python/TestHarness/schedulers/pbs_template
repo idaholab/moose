@@ -22,15 +22,16 @@ set -e
 export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 
 # Print a useful header
-echo "################################################################################"
-echo "Beginning TestHarness RunPBS job"
-echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
-echo "Hostname: $(hostname)"
 echo "Time: $(date)"
+echo "Test: {{ TEST_NAME }}"
 echo "Directory: {{ CWD }}"
-echo "Output: {{ OUTPUT }}"
 echo "Command: {{ COMMAND }}"
+echo "Hostname: $(hostname)"
+echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
+echo "Output: {{ OUTPUT }}"
 module list
+echo "################################################################################"
+echo "Beginning TestHarness RunPBS test execution"
 echo "################################################################################"
 
 # Move into the test directory
@@ -47,6 +48,10 @@ return_code=$?
 # Exit on failure
 set -e
 
+# We will read this output later on to try to capture the return code
+# in the event that PBS doesn't get it to us correctly
+echo "################################################################################"
+echo "Completed TestHarness RunPBS test execution; exit code = $return_code"
 echo "################################################################################"
 
 # Append a terminator to all of the output files for file syncing across NFS
@@ -64,11 +69,6 @@ for file in ${OUTPUT_FILES[@]}; do
         printf "\n{{ ENDING_COMMENT }}" >> $file;
     fi
 done
-
-# We will read this output later on to try to capture the return code
-# in the event that PBS doesn't get it to us correctly
-echo "Completed TestHarness RunPBS job; exit code = $return_code"
-echo "################################################################################"
 
 # Append a recognizable string at the end of the output. We look
 # for this string when parsing the output so that we can be sure
