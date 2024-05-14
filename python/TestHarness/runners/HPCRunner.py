@@ -10,14 +10,15 @@
 from TestHarness.runners.Runner import Runner
 import re, time, os, subprocess
 
-class PBSRunner(Runner):
-    """Runner that spawns a process with PBS.
-
-    To be used with the RunPBS scheduler.
+class HPCRunner(Runner):
     """
-    def __init__(self, job, options, run_pbs):
-        Runner.__init__(self, job, options)
-        self.run_pbs = run_pbs
+    Base Runner to be used with HPC schedulers (PBS, slurm)
+    """
+    def __init__(self, job, options, run_hpc):
+        super().__init__(job, options)
+
+        # The RunHPC object
+        self.run_hpc = run_hpc
 
         # Number of seconds to try to wait for the output
         # We don't want to wait forever for output because
@@ -27,33 +28,29 @@ class PBSRunner(Runner):
         self.wait_output_time = 120
 
     def spawn(self, timer):
-        from TestHarness.schedulers.RunPBS import RunPBS
-
-        # Submit the job
-        self.run_pbs.submitJob(self.job)
-
+        self.run_hpc.submitJob(self.job)
         timer.start()
 
     def wait(self, timer):
         # Need to import here to avoid cyclic includes
-        from TestHarness.schedulers.RunPBS import RunPBS
+        from TestHarness.schedulers.RunHPC import RunHPC
 
         # Poll loop waiting for the job to be finished
         # This gets a structure that represents the job, and the
-        # polling itself is only done on occasion within RunPBS
+        # polling itself is only done on occasion within RunHPC
         while True:
             time.sleep(1)
-            pbs_job = self.run_pbs.getPBSJob(self.job)
+            hpc_job = self.run_hpc.getHPCJob(self.job)
 
             # We're done
-            if pbs_job.done:
-                self.exit_code = pbs_job.exit_code
+            if hpc_job.done:
+                self.exit_code = hpc_job.exit_code
                 break
 
         timer.stop()
 
         # The PBS output (stdout+stderr)
-        output_file = self.run_pbs.getPBSJobOutputPath(self.job)
+        output_file = self.run_hpc.getHPCJobOutputPath(self.job)
 
         # If the Job is already finished, something happened in PBS
         # so we have an invalid state for processing in the Tester
@@ -70,7 +67,7 @@ class PBSRunner(Runner):
 
         # We've actually ran something now and not just qsub, so update the
         # command to what was ran there
-        tester.setCommandRan(pbs_job.command)
+        tester.setCommandRan(hpc_job.command)
 
         # Determine the output files that we need to wait for to be complete
         wait_files = set([output_file])
@@ -118,19 +115,25 @@ class PBSRunner(Runner):
             waited_time += file_poll_interval
             time.sleep(file_poll_interval)
 
+    def kill(self):
+        self.run_hpc.killJob(self.job)
+
     def trySetOutput(self, throw=False):
         if self.output is None:
             self.output = ''
 
-        # TODO: shorten output as an option?
-        output_file = self.run_pbs.getPBSJobOutputPath(self.job)
+        output_file = self.run_hpc.getHPCJobOutputPath(self.job)
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
-                self.output = self.readTruncated(output_file)
+                # If we're trying to read output, we can't truncate it
+                if self.job.getTester().needFullOutput(self.options):
+                    self.output = open(output_file, 'r').read()
+                else:
+                    self.output = self.readTruncated(output_file)
 
                 # If we can parse the exit code here, do it. Sometimes PBS
                 # will do screwy stuff with not capturing the actual exit code...
-                find_exit_code = re.search('Completed TestHarness RunPBS test execution; exit code = (\d+)', self.output)
+                find_exit_code = re.search('Completed TestHarness RunHPC test execution; exit code = (\d+)', self.output)
                 if find_exit_code:
                     self.exit_code = int(find_exit_code.group(1))
             except:
@@ -157,7 +160,7 @@ class PBSRunner(Runner):
         if is_binary is None:
             return False
 
-        ending_comment = self.run_pbs.getOutputEndingComment()
+        ending_comment = self.run_hpc.getOutputEndingComment()
 
         # Binary file
         if is_binary:
@@ -203,6 +206,40 @@ class PBSRunner(Runner):
                 return True
 
         return False
+
+    @staticmethod
+    def isFileBinary(file):
+        """
+        Returns whether or not the given file is a binary file.
+
+        If None, a failure was encountered when checking the file type.
+        """
+        try:
+            call_file = subprocess.check_output(['file', '--mime-encoding', file], text=True)
+        except:
+            return None
+
+        # Will return something like "<filename>: <encoding>",
+        # where <encoding>=binary when the file is binary
+        find_binary = re.search('binary$', call_file)
+        return find_binary is not None
+
+    @staticmethod
+    def getLastLine(file):
+        """
+        Gets the last line of a text file and the position
+        in the file at which that last line is.
+        """
+        with open(file, 'rb') as f:
+            try:
+                f.seek(-2, os.SEEK_END)
+                while f.read(1) != b'\n':
+                    f.seek(-2, os.SEEK_CUR)
+            except OSError: # one line filecd
+                f.seek(0)
+            pos = f.tell()
+            line = f.readline().decode('utf-8')
+            return line, pos
 
     @staticmethod
     def readTruncated(file, start_lines=1000, end_lines=1000):
@@ -263,40 +300,3 @@ class PBSRunner(Runner):
             output += '\n'.join(tail)
 
         return output
-
-    @staticmethod
-    def getLastLine(file):
-        """
-        Gets the last line of a text file and the position
-        in the file at which that last line is.
-        """
-        with open(file, 'rb') as f:
-            try:
-                f.seek(-2, os.SEEK_END)
-                while f.read(1) != b'\n':
-                    f.seek(-2, os.SEEK_CUR)
-            except OSError: # one line filecd
-                f.seek(0)
-            pos = f.tell()
-            line = f.readline().decode('utf-8')
-            return line, pos
-
-    @staticmethod
-    def isFileBinary(file):
-        """
-        Returns whether or not the given file is a binary file.
-
-        If None, a failure was encountered when checking the file type.
-        """
-        try:
-            call_file = subprocess.check_output(['file', '--mime-encoding', file], text=True)
-        except:
-            return None
-
-        # Will return something like "<filename>: <encoding>",
-        # where <encoding>=binary when the file is binary
-        find_binary = re.search('binary$', call_file)
-        return find_binary is not None
-
-    def kill(self):
-        self.run_pbs.killJob(self.job)

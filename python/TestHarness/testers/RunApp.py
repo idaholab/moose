@@ -358,3 +358,11 @@ class RunApp(Tester):
         if self.specs['should_crash']:
             return self.getExitCode() != 0
         return self.getExitCode() == 0
+
+    def needFullOutput(self, options):
+        # We need the full output when we're trying to read from said output
+        params = ['expect_err', 'expect_assert', 'expect_out', 'absent_out']
+        for param in params:
+            if self.specs.isValid(param):
+                return True
+        return super().needFullOutput(options)

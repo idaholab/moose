@@ -31,7 +31,7 @@ echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
 echo "Output: {{ OUTPUT }}"
 module list
 echo "################################################################################"
-echo "Beginning TestHarness RunPBS test execution"
+echo "Beginning TestHarness RunHPC test execution"
 echo "################################################################################"
 
 # Move into the test directory
@@ -51,7 +51,7 @@ set -e
 # We will read this output later on to try to capture the return code
 # in the event that PBS doesn't get it to us correctly
 echo "################################################################################"
-echo "Completed TestHarness RunPBS test execution; exit code = $return_code"
+echo "Completed TestHarness RunHPC test execution; exit code = $return_code"
 echo "################################################################################"
 
 # Append a terminator to all of the output files for file syncing across NFS

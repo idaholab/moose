@@ -803,3 +803,13 @@ class Tester(MooseObject):
         # Check the return values of the derived classes
         self._runnable = self.checkRunnable(options)
         return self._runnable
+
+    def needFullOutput(self, options):
+        """
+        Whether or not the full output is needed.
+
+        If this is True, it means that we cannot truncate
+        the stderr/stdout output. This is often needed
+        when we're trying to read something from the output.
+        """
+        return False
