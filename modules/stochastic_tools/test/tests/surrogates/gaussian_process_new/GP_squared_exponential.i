@@ -100,12 +100,8 @@
 []
 
 [Outputs]
-  [csv]
+  [out]
     type = CSV
-    execute_on = FINAL
-  []
-  [json]
-    type = JSON
     execute_on = FINAL
   []
 []

@@ -83,7 +83,7 @@
 
 [VectorPostprocessors]
   [hyperparams]
-    type = GaussianProcessData
+    type = GaussianProcessDataGeneral
     gp_name = 'GP_avg'
     execute_on = final
   []
@@ -96,7 +96,7 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     covariance_function = 'covar' #Choose a squared exponential for the kernel
     standardize_params = 'true' #Center and scale the training params
@@ -104,17 +104,16 @@
     sampler = train_sample
     response = results/data:avg:value
     tune_parameters = 'signal_variance length_factor'
-    tuning_algorithm = 'adam'
-    iter_adam = 1000
+    num_iters = 1000
     batch_size = 20
-    learning_rate_adam = 0.005
+    learning_rate = 0.005
     show_optimization_details = true
   []
 []
 
 [Surrogates]
   [GP_avg]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = GP_avg_trainer
   []
 []
@@ -122,7 +121,7 @@
 [Covariance]
   [covar]
     type = SquaredExponentialCovariance
-    signal_variance = 1.0 #Use a signal variance of 1 in the kernel
+    signal_variance = 1 #Use a signal variance of 1 in the kernel
     noise_variance = 1e-6 #A small amount of noise can help with numerical stability
     length_factor = '1.0 1.0' #Select a length factor for each parameter (k and q)
   []

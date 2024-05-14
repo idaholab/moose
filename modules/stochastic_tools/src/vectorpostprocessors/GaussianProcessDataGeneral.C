@@ -8,12 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "GaussianProcessData.h"
+#include "GaussianProcessDataGeneral.h"
 
-registerMooseObject("StochasticToolsApp", GaussianProcessData);
+registerMooseObject("StochasticToolsApp", GaussianProcessDataGeneral);
 
 InputParameters
-GaussianProcessData::validParams()
+GaussianProcessDataGeneral::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params += SurrogateModelInterface::validParams();
@@ -24,20 +24,19 @@ GaussianProcessData::validParams()
   return params;
 }
 
-GaussianProcessData::GaussianProcessData(const InputParameters & parameters)
+GaussianProcessDataGeneral::GaussianProcessDataGeneral(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SurrogateModelInterface(this),
-    _gp_uo(getSurrogateModel<GaussianProcessSurrogate>("gp_name"))
+    _gp_uo(getSurrogateModel<GaussianProcessSurrogateGeneral>("gp_name"))
 {
 }
 
 void
-GaussianProcessData::initialize()
+GaussianProcessDataGeneral::initialize()
 {
-  const std::unordered_map<std::string, Real> & _hyperparam_map =
-      _gp_uo.getGPHandler().getHyperParamMap();
+  const std::unordered_map<std::string, Real> & _hyperparam_map = _gp_uo.getGP().getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map =
-      _gp_uo.getGPHandler().getHyperParamVectorMap();
+      _gp_uo.getGP().getHyperParamVectorMap();
 
   for (auto iter = _hyperparam_map.begin(); iter != _hyperparam_map.end(); ++iter)
   {

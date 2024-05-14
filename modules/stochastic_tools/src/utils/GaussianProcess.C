@@ -334,8 +334,8 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     }
 
     store_loss = getLossAdam(inputs, outputs);
-    if (show_optimization_details && ss == 0)
-      Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
+    if (show_optimization_details)
+      Moose::out << "Iteration: " << ss + 1 << " LOSS: " << store_loss << std::endl;
     grad1 = getGradientAdam(inputs);
     for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
     {

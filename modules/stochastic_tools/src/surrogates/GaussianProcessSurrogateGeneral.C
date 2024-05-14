@@ -76,6 +76,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
               "Number of parameters provided for evaluation does not match number of parameters "
               "used for training.");
   y = std::vector<Real>(_n_outputs, 0.0);
+  std = std::vector<Real>(_n_outputs, 0.0);
 
   RealEigenMatrix test_points(1, _n_dims);
   for (unsigned int ii = 0; ii < _n_dims; ++ii)
@@ -83,7 +84,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
 
   _gp.getParamStandardizer().getStandardized(test_points);
 
-  RealEigenMatrix K_train_test(_n_outputs, _training_params.rows() * _n_outputs);
+  RealEigenMatrix K_train_test(_training_params.rows() * _n_outputs, _n_outputs);
   _gp.getCovarFunction().computeCovarianceMatrix(
       K_train_test, _training_params, test_points, false);
   RealEigenMatrix K_test(_n_outputs, _n_outputs);
