@@ -10,6 +10,7 @@
 from RunParallel import RunParallel
 import threading, os, re, sys, datetime, json
 import paramiko
+from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
 
 class RunHPC(RunParallel):
@@ -41,13 +42,36 @@ class RunHPC(RunParallel):
 
         # The jump hostname for running commands, if any
         self.ssh_host = self.options.queue_host
-        # Setup the remote HPC host, if any (needed when submitted in a container)
-        self.ssh = None
-        # The lock for calling commands via SSH, if any
-        self.ssh_lock = threading.Lock()
+        # The SSH key to use for connections
+        self.ssh_key_filename = None
+        # The pool of processes for running threaded SSH comments
+        self.ssh_pool = None
+        # The threaded SSHClient objects, mapped by thread identifier
+        self.ssh_clients = None
+        # The lock for calling commands via SSH,
+        self.ssh_clients_lock = None
         # Setup the jump host if provided
         if self.ssh_host:
-            self._connectSSH()
+            self.ssh_pool = ThreadPool(processes=5)
+            self.ssh_clients = {}
+            self.ssh_clients_lock = threading.Lock()
+
+            # Try to find a key to use
+            try:
+                ssh_config = os.path.expanduser('~/.ssh/config')
+                config = paramiko.SSHConfig.from_path(ssh_config).lookup(self.ssh_host)
+                identityfile = config.get('identityfile')
+                if identityfile is not None and len(identityfile) > 0:
+                    self.ssh_key_filename = identityfile[-1]
+            except:
+                pass
+
+            # Make sure that we can connect up front
+            try:
+                self.callHPC('hostname')
+            except:
+                print(f'Failed to connect to HPC host {self.ssh_host}')
+                sys.exit(1)
 
         if os.environ.get('APPTAINER_CONTAINER'):
             if not self.ssh_host:
@@ -93,61 +117,62 @@ class RunHPC(RunParallel):
         """
         def __init__(self, run_hpc, description, command, result=None):
             message = f'{description}'
-            if run_hpc.ssh:
+            if run_hpc.ssh_host:
                 message += f' on host "{run_hpc.ssh_host}"'
             message += f'\nCommand: {command}'
             if result:
                 message += f'\n\nResult:\n{result}'
             super().__init__(message)
 
-    def _connectSSH(self):
+    def _getSSHClient(self, reconnect=False):
         """
-        Connects to the HPC SSH host.
+        Gets a SSH client owned by a thread.
 
-        This is separate so that if the connection is dropped we can attempt
-        to connect to it again.
+        This is threaded so that we can operate a few connections at once.
         """
-        if not self.ssh_host:
-            raise Exception('SSH host not configured')
+        process = threading.get_ident()
+        with self.ssh_clients_lock:
+            if process not in self.ssh_clients or reconnect:
+                self.ssh_clients[process] = paramiko.SSHClient()
+                self.ssh_clients[process].set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                self.ssh_clients[process].connect(self.ssh_host, key_filename=self.ssh_key_filename)
+            return self.ssh_clients.get(process)
 
-        # Try to find a key to use
-        key_filename = None
+    def _callSSH(self, command):
+        """
+        Calls a SSH command.
+
+        Should only be used via apply with the self.ssh_pool.
+        """
+        client = self._getSSHClient()
         try:
-            ssh_config = os.path.expanduser('~/.ssh/config')
-            config = paramiko.SSHConfig.from_path(ssh_config).lookup(self.ssh_host)
-            identityfile = config.get('identityfile')
-            if identityfile is not None and len(identityfile) > 0:
-                key_filename = identityfile[-1]
-        except:
-            pass
-
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.ssh.connect(self.ssh_host, key_filename=key_filename)
-
-    def callHPC(self, command):
-        """Wrapper for calling a HPC command (qsub, qstat, etc) that supports
-        SSH-ing to another host as needed when calling from within apptainer"""
-        if not self.ssh:
-            raise Exception('HPC not currently supported outside of a container')
-
-        with self.ssh_lock:
+            _, stdout, stderr = client.exec_command(command)
+        # SSH connection might have died, so try to create a new one
+        except paramiko.ssh_exception.SSHException:
             try:
-                # This inner try is for if the SSH connection has died.
-                try:
-                    _, stdout, stderr = self.ssh.exec_command(command)
-                # Try to reconnect and run again
-                except paramiko.ssh_exception.SSHException:
-                    self._connectSSH()
-                    _, stdout, stderr = self.ssh.exec_command(command)
-
-                exit_code = stdout.channel.recv_exit_status()
-                result = ''.join(stdout.readlines())
-                if exit_code != 0:
-                    result += ''.join(stderr.readlines())
+                client = self._getSSHClient(reconnect=True)
+                _, stdout, stderr = client.exec_command(command)
             except Exception as e:
                 raise RunHPC.CallHPCException(self, 'Failed to execute remote command', command) from e
-            return exit_code, result.rstrip()
+        # An even worse failure happened here
+        except Exception as e:
+             raise RunHPC.CallHPCException(self, 'Failed to execute remote command', command) from e
+
+        exit_code = stdout.channel.recv_exit_status()
+        result = ''.join(stdout.readlines())
+        if exit_code != 0:
+            result += ''.join(stderr.readlines())
+        return exit_code, result.rstrip()
+
+    def callHPC(self, command):
+        """
+        Wrapper for calling a HPC command (qsub, qstat, etc) that supports
+        SSH-ing to another host as needed when calling from within apptainer
+        """
+        if not self.ssh_host:
+            raise Exception('HPC not currently supported outside of a container')
+
+        return self.ssh_pool.apply(self._callSSH, (command,))
 
     def getJobSlots(self, job):
         # Jobs only use one slot because they are ran externally
