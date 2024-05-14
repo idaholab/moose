@@ -762,9 +762,6 @@ class Tester(MooseObject):
                                                 or options.sep_files):
             reasons['working_directory'] = '--sep-files* enabled'
 
-        if self.specs['use_shell'] and options.pbs and os.environ.get('APPTAINER_CONTAINER'):
-            reasons['use_shell'] = 'no use_shell with apptainer PBS'
-
         # Explicitly skip HPC tests
         if not self.specs['hpc'] and options.pbs:
             reasons['hpc'] = 'hpc=false'
