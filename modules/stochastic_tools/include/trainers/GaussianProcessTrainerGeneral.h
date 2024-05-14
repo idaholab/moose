@@ -43,7 +43,7 @@ private:
   std::vector<std::vector<Real>> _params_buffer;
 
   /// Data (y) used for training.
-  std::vector<Real> _data_buffer;
+  std::vector<std::vector<Real>> _data_buffer;
 
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
@@ -65,13 +65,4 @@ private:
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
-
-  /// Predictor values from reporters
-  std::vector<const Real *> _pvals;
-
-  /// Columns from sampler for predictors
-  std::vector<unsigned int> _pcols;
-
-  /// Total number of parameters/dimensions
-  unsigned int _n_params;
 };

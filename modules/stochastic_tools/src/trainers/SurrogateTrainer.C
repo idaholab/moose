@@ -90,6 +90,8 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
     _rvecval(nullptr),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
     _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
+    _n_dims(declareModelData<unsigned int>("_n_dims", _pvals.size() + _pcols.size())),
+    _n_outputs(declareModelData<unsigned int>("_n_outputs", 1)),
     _row_data(_sampler.getNumberOfCols()),
     _skip_unconverged(getParam<bool>("skip_unconverged_samples")),
     _converged(nullptr),
@@ -143,7 +145,6 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
     _pcols.resize(_sampler.getNumberOfCols());
     std::iota(_pcols.begin(), _pcols.end(), 0);
   }
-  _n_dims = (_pvals.size() + _pcols.size());
 
   _predictor_data.resize(_n_dims);
 }
