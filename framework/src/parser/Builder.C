@@ -1079,6 +1079,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(FileNameNoExtension, string);
         setscalar(RelativeFileName, string);
         setscalar(DataFileName, string);
+        setscalar(ComponentName, string);
         setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
@@ -1180,6 +1181,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
         setvector(CLIArgString, string);
+        setvector(ComponentName, string);
         setvector(PhysicsName, string);
         setvector(PositionsName, string);
         setvector(TimesName, string);

@@ -1125,6 +1125,9 @@ DerivativeStringClass(ExtraElementIDName);
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
 DerivativeStringClass(ReporterValueName);
 
+/// Name of a Component object
+DerivativeStringClass(ComponentName);
+
 /// Name of a Physics object
 DerivativeStringClass(PhysicsName);
 
