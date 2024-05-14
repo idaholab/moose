@@ -76,6 +76,29 @@ XYDelaunayGenerator::validParams()
       "desired_area_func",
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
+
+  params.addParam<bool>("use_auto_area_func",
+                        false,
+                        "Use the automatic area function for the triangle meshing region.");
+  params.addParam<Real>(
+      "auto_area_func_default_size",
+      0,
+      "Background size for automatic area function, or 0 to use non background size");
+  params.addParam<Real>("auto_area_func_default_size_dist",
+                        -1.0,
+                        "Effective distance of background size for automatic area "
+                        "function, or negative to use non background size");
+  params.addParam<unsigned int>("auto_area_function_num_points",
+                                10,
+                                "Maximum number of nearest points used for the inverse distance "
+                                "interpolation algorithm for automatic area function calculation.");
+  params.addRangeCheckedParam<Real>(
+      "auto_area_function_power",
+      1.0,
+      "auto_area_function_power>0",
+      "Polynomial power of the inverse distance interpolation algorithm for automatic area "
+      "function calculation.");
+
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
@@ -84,6 +107,10 @@ XYDelaunayGenerator::validParams()
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
 
   params.addClassDescription("Triangulates meshes within boundaries defined by input meshes.");
+
+  params.addParamNamesToGroup(
+      "use_auto_area_func auto_area_func_default_size auto_area_func_default_size_dist",
+      "Automatic triangle meshing area control");
 
   return params;
 }
@@ -101,9 +128,31 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
     _desired_area(getParam<Real>("desired_area")),
     _desired_area_func(getParam<std::string>("desired_area_func")),
+    _use_auto_area_func(getParam<bool>("use_auto_area_func")),
+    _auto_area_func_default_size(getParam<Real>("auto_area_func_default_size")),
+    _auto_area_func_default_size_dist(getParam<Real>("auto_area_func_default_size_dist")),
+    _auto_area_function_num_points(getParam<unsigned int>("auto_area_function_num_points")),
+    _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
+  if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
+      (_desired_area > 0.0 && _use_auto_area_func) ||
+      (!_desired_area_func.empty() && _use_auto_area_func))
+    paramError("desired_area_func",
+               "Only one of the three methods ('desired_area', 'desired_area_func', and "
+               "'_use_auto_area_func') to set element area limit should be used.");
+
+  if (!_use_auto_area_func)
+    if (isParamSetByUser("auto_area_func_default_size") ||
+        isParamSetByUser("auto_area_func_default_size_dist") ||
+        isParamSetByUser("auto_area_function_num_points") ||
+        isParamSetByUser("auto_area_function_power"))
+      paramError("use_auto_area_func",
+                 "If this parameter is set to false, the following parameters should not be set: "
+                 "'auto_area_func_default_size', 'auto_area_func_default_size_dist', "
+                 "'auto_area_function_num_points', 'auto_area_function_power'.");
+
   if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
 
@@ -176,13 +225,6 @@ XYDelaunayGenerator::generate()
   poly2tri.minimum_angle() = 0; // Not yet supported
   poly2tri.smooth_after_generating() = _smooth_tri;
 
-  if (_desired_area_func != "")
-  {
-    // poly2tri will clone this so it's fine going out of scope
-    ParsedFunction<Real> area_func{_desired_area_func};
-    poly2tri.set_desired_area_function(&area_func);
-  }
-
   std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
   std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
   std::vector<std::unique_ptr<MeshBase>> hole_ptrs(_hole_ptrs.size());
@@ -201,6 +243,22 @@ XYDelaunayGenerator::generate()
 
   if (!triangulator_hole_ptrs.empty())
     poly2tri.attach_hole_list(&triangulator_hole_ptrs);
+
+  if (_desired_area_func != "")
+  {
+    // poly2tri will clone this so it's fine going out of scope
+    ParsedFunction<Real> area_func{_desired_area_func};
+    poly2tri.set_desired_area_function(&area_func);
+  }
+  else if (_use_auto_area_func)
+  {
+    poly2tri.set_auto_area_function(
+        this->comm(),
+        _auto_area_function_num_points,
+        _auto_area_function_power,
+        _auto_area_func_default_size > 0.0 ? _auto_area_func_default_size : 0.0,
+        _auto_area_func_default_size_dist > 0.0 ? _auto_area_func_default_size_dist : -1.0);
+  }
 
   poly2tri.triangulate();
 
