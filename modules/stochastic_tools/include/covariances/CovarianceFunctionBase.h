@@ -66,8 +66,6 @@ protected:
                                                         const std::vector<Real> value,
                                                         const bool is_tunable);
 
-  std::string getHPName(const std::string & hp_name_in) const;
-
   /// Map of real-valued hyperparameters
   std::unordered_map<std::string, Real> _hp_map_real;
 

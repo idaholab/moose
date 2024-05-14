@@ -61,6 +61,9 @@ GaussianProcessGeneral::linkCovarianceFunction(CovarianceFunctionBase * covarian
 {
   _covariance_function = covariance_function;
   _covar_type = _covariance_function->type();
+  _covar_name = _covariance_function->name();
+  _covariance_function->dependentCovarianceTypes(_dependent_covar_types);
+  _num_outputs = _covariance_function->numOutputs();
 }
 
 void
@@ -70,7 +73,7 @@ GaussianProcessGeneral::setupCovarianceMatrix(const RealEigenMatrix & training_p
 {
   const bool batch_decision = opts.batch_size > 0 && opts.batch_size <= training_params.rows();
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
-  _K.resize(batch_size, batch_size);
+  _K.resize(_num_outputs * batch_size, _num_outputs * batch_size);
 
   tuneHyperParamsAdam(training_params, training_data, opts);
 
@@ -185,16 +188,25 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
     if (opts.num_iter && ss == 0)
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
     grad1 = getGradient(inputs);
-    for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+    for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
     {
-      m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
-      v0[ii] = b2 * v0[ii] + (1 - b2) * grad1[ii] * grad1[ii];
-      m_hat = m0[ii] / (1 - std::pow(b1, (ss + 1)));
-      v_hat = v0[ii] / (1 - std::pow(b2, (ss + 1)));
-      new_val = theta[ii] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
-      if (new_val < 0.01) // constrain params on the lower side
-        new_val = 0.01;
-      theta[ii] = new_val;
+      const auto first_index = std::get<0>(iter->second);
+      const auto num_entries = std::get<1>(iter->second);
+      for (unsigned int ii = 0; ii < num_entries; ++ii)
+      {
+        const auto global_index = first_index + ii;
+        m0[global_index] = b1 * m0[global_index] + (1 - b1) * grad1[global_index];
+        v0[global_index] =
+            b2 * v0[global_index] + (1 - b2) * grad1[global_index] * grad1[global_index];
+        m_hat = m0[global_index] / (1 - std::pow(b1, (ss + 1)));
+        v_hat = v0[global_index] / (1 - std::pow(b2, (ss + 1)));
+        new_val = theta[global_index] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+
+        const auto min_value = std::get<2>(iter->second);
+        const auto max_value = std::get<3>(iter->second);
+
+        theta[global_index] = std::min(std::max(new_val, min_value), max_value);
+      }
     }
     vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -227,23 +239,17 @@ GaussianProcessGeneral::getGradient(RealEigenMatrix & inputs)
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
-  int count;
-  count = 1;
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
     std::string hyper_param_name = iter->first;
-    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    const auto first_index = std::get<0>(iter->second);
+    const auto num_entries = std::get<1>(iter->second);
+    for (unsigned int ii = 0; ii < num_entries; ++ii)
     {
+      const auto global_index = first_index + ii;
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
       RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      Real grad1 = -tmp.trace() / 2.0;
-      if (hyper_param_name.compare("length_factor") == 0)
-      {
-        grad_vec[count] = grad1;
-        ++count;
-      }
-      else
-        grad_vec[0] = grad1;
+      grad_vec[global_index] = -tmp.trace() / 2.0;
     }
   }
   return grad_vec;
@@ -301,6 +307,9 @@ dataStore(std::ostream & stream, StochasticTools::GaussianProcessGeneral & gp_ut
   dataStore(stream, gp_utils.hyperparamMap(), context);
   dataStore(stream, gp_utils.hyperparamVectorMap(), context);
   dataStore(stream, gp_utils.covarType(), context);
+  dataStore(stream, gp_utils.covarName(), context);
+  dataStore(stream, gp_utils.covarNumOutputs(), context);
+  dataStore(stream, gp_utils.dependentCovarTypes(), context);
   dataStore(stream, gp_utils.K(), context);
   dataStore(stream, gp_utils.KResultsSolve(), context);
   dataStore(stream, gp_utils.KCholeskyDecomp(), context);
@@ -315,6 +324,9 @@ dataLoad(std::istream & stream, StochasticTools::GaussianProcessGeneral & gp_uti
   dataLoad(stream, gp_utils.hyperparamMap(), context);
   dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
   dataLoad(stream, gp_utils.covarType(), context);
+  dataLoad(stream, gp_utils.covarName(), context);
+  dataLoad(stream, gp_utils.covarNumOutputs(), context);
+  dataLoad(stream, gp_utils.dependentCovarTypes(), context);
   dataLoad(stream, gp_utils.K(), context);
   dataLoad(stream, gp_utils.KResultsSolve(), context);
   dataLoad(stream, gp_utils.KCholeskyDecomp(), context);

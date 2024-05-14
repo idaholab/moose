@@ -337,16 +337,23 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     if (show_optimization_details && ss == 0)
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
     grad1 = getGradientAdam(inputs);
-    for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+    for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
     {
-      m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
-      v0[ii] = b2 * v0[ii] + (1 - b2) * grad1[ii] * grad1[ii];
-      m_hat = m0[ii] / (1 - std::pow(b1, (ss + 1)));
-      v_hat = v0[ii] / (1 - std::pow(b2, (ss + 1)));
-      new_val = theta(ii) - learning_rate * m_hat / (std::sqrt(v_hat) + eps);
-      if (new_val < 0.01) // constrain params on the lower side
-        new_val = 0.01;
-      theta.set(ii, new_val);
+      const auto first_index = std::get<0>(iter->second);
+      const auto num_entries = std::get<1>(iter->second);
+      for (unsigned int ii = 0; ii < num_entries; ++ii)
+      {
+        const auto global_index = first_index + ii;
+        m0[global_index] = b1 * m0[global_index] + (1 - b1) * grad1[global_index];
+        v0[global_index] =
+            b2 * v0[global_index] + (1 - b2) * grad1[global_index] * grad1[global_index];
+        m_hat = m0[global_index] / (1 - std::pow(b1, (ss + 1)));
+        v_hat = v0[global_index] / (1 - std::pow(b2, (ss + 1)));
+        new_val = theta(global_index) - learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+        if (new_val < 0.01) // constrain params on the lower side
+          new_val = 0.01;
+        theta.set(global_index, new_val);
+      }
     }
     petscVecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -379,23 +386,18 @@ GaussianProcess::getGradientAdam(RealEigenMatrix & inputs)
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
-  int count;
-  count = 1;
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
     std::string hyper_param_name = iter->first;
-    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    const auto first_index = std::get<0>(iter->second);
+    const auto num_entries = std::get<1>(iter->second);
+
+    for (unsigned int ii = 0; ii < num_entries; ++ii)
     {
+      const auto global_index = first_index + ii;
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
       RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      Real grad1 = -tmp.trace() / 2.0;
-      if (hyper_param_name.compare("length_factor") == 0)
-      {
-        grad_vec[count] = grad1;
-        ++count;
-      }
-      else
-        grad_vec[0] = grad1;
+      grad_vec[global_index] = -tmp.trace() / 2.0;
     }
   }
   return grad_vec;

@@ -59,6 +59,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
     const auto & name = it.first;
     const auto & type = it.second;
     InputParameters covar_params = _factory.getValidParams(type);
+    covar_params.set<unsigned int>("num_outputs") = num_outputs;
 
     const auto param_list = covar_params.getParametersList();
     for (const auto & param : param_list)
@@ -85,6 +86,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
   }
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
+  covar_params.set<unsigned int>("num_outputs") = num_outputs;
 
   const auto param_list = covar_params.getParametersList();
   for (const auto & param : param_list)
