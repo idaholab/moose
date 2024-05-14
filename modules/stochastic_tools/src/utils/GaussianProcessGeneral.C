@@ -75,7 +75,8 @@ GaussianProcessGeneral::setupCovarianceMatrix(const RealEigenMatrix & training_p
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * batch_size, _num_outputs * batch_size);
 
-  tuneHyperParamsAdam(training_params, training_data, opts);
+  if (_tuning_data.size())
+    tuneHyperParamsAdam(training_params, training_data, opts);
 
   _K.resize(training_params.rows(), training_params.rows());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
