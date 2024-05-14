@@ -118,7 +118,6 @@ FileMeshGenerator::generate()
     if (_pars.isParamSetByUser("use_for_exodus_restart"))
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
-    // Supports old suffix (xxxx_mesh.cpa.gz -> xxxx-mesh.cpa.gz) and LATEST
     const auto file_name = deduceCheckpointPath(*this, _file_name);
     MooseUtils::checkFileReadable(file_name);
 
@@ -139,29 +138,6 @@ FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::s
   // Just exists, use it
   if (MooseUtils::pathExists(file_name))
     return file_name;
-
-  // xxxx_mesh.cpa.gz -> xxxx-mesh.cpa.gz
-  const std::string old_ending = "_mesh.cpa.gz";
-  if (std::equal(old_ending.rbegin(), old_ending.rend(), file_name.rbegin()))
-  {
-    const std::string new_ending = "-mesh.cpa.gz";
-    auto new_path = file_name;
-    new_path.replace(new_path.size() - old_ending.size(), old_ending.size(), new_ending, 0);
-    if (MooseUtils::pathExists(new_path))
-    {
-      std::stringstream warning;
-      warning
-          << "The supplied checkpoint " << std::filesystem::path(file_name).filename()
-          << " uses the previous default checkpoint suffix of \"" << old_ending
-          << "\".\nThe new default checkpoint suffix is \"" << new_ending << "\".\n\n"
-          << "Your supplied checkpoint was not found, but one with the new ending was found in\n\""
-          << new_path << "\".\n\n"
-          << "The above checkpoint is being used instead.\nYou should modify your input "
-             "accordingly.";
-      object.paramWarning("file", warning.str());
-      return new_path;
-    }
-  }
 
   // LATEST
   return MooseUtils::convertLatestCheckpoint(file_name) + object.getMooseApp().checkpointSuffix();

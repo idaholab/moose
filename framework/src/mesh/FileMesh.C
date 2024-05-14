@@ -98,7 +98,6 @@ FileMesh::buildMesh()
     }
     else
     {
-      // Supports old suffix (xxxx_mesh.cpa.gz -> xxxx-mesh.cpa.gz) and LATEST
       _file_name = FileMeshGenerator::deduceCheckpointPath(*this, _file_name);
 
       // If we are reading a mesh while restarting, then we might have
