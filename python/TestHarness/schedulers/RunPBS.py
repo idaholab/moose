@@ -70,24 +70,10 @@ class RunPBS(RunParallel):
         # Setup the remote PBS host, if any (needed when submitted in a container)
         self.pbs_ssh = None
         # The lock for calling PBS commands via SSH, if any
-        self.pbs_ssh_lock = None
+        self.pbs_ssh_lock = threading.Lock()
         # Setup the jump host if provided
         if self.pbs_ssh_host:
-            # Try to find a key to use
-            key_filename = None
-            try:
-                ssh_config = os.path.expanduser('~/.ssh/config')
-                config = paramiko.SSHConfig.from_path(ssh_config).lookup(self.pbs_ssh_host)
-                identityfile = config.get('identityfile')
-                if identityfile is not None and len(identityfile) > 0:
-                    key_filename = identityfile[-1]
-            except:
-                pass
-
-            self.pbs_ssh_lock = threading.Lock()
-            self.pbs_ssh = paramiko.SSHClient()
-            self.pbs_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.pbs_ssh.connect(self.pbs_ssh_host, key_filename=key_filename)
+            self._connectSSH()
 
         # Load the PBS template
         template_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'pbs_template')
@@ -110,6 +96,31 @@ class RunPBS(RunParallel):
         if self.options.queue_source_command:
             self.source_contents = open(self.options.queue_source_command, 'r').read()
 
+    def _connectSSH(self):
+        """
+        Connects to the PBS SSH host.
+
+        This is separate so that if the connection is dropped we can attempt
+        to connect to it again.
+        """
+        if not self.pbs_ssh_host:
+            raise Exception('PBS SSH host not configured')
+
+        # Try to find a key to use
+        key_filename = None
+        try:
+            ssh_config = os.path.expanduser('~/.ssh/config')
+            config = paramiko.SSHConfig.from_path(ssh_config).lookup(self.pbs_ssh_host)
+            identityfile = config.get('identityfile')
+            if identityfile is not None and len(identityfile) > 0:
+                key_filename = identityfile[-1]
+        except:
+            pass
+
+        self.pbs_ssh = paramiko.SSHClient()
+        self.pbs_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.pbs_ssh.connect(self.pbs_ssh_host, key_filename=key_filename)
+
     class CallPBSException(Exception):
         """Exception class for providing extra context for PBS submission errors"""
         def __init__(self, run_pbs, description, command, result=None):
@@ -129,7 +140,14 @@ class RunPBS(RunParallel):
 
         with self.pbs_ssh_lock:
             try:
-                _, stdout, stderr = self.pbs_ssh.exec_command(command)
+                # This inner try is for if the SSH connection has died.
+                try:
+                    _, stdout, stderr = self.pbs_ssh.exec_command(command)
+                # Try to reconnect and run again
+                except paramiko.ssh_exception.SSHException:
+                    self._connectSSH()
+                    _, stdout, stderr = self.pbs_ssh.exec_command(command)
+
                 exit_code = stdout.channel.recv_exit_status()
                 result = ''.join(stdout.readlines())
                 if exit_code != 0:
