@@ -12,12 +12,14 @@ from contrib import dag
 import pyhit
 import os
 import sys
+import threading
 
 class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
     def __init__(self, options):
         self.__job_dag = dag.DAG()
         self.__parallel_scheduling = None
+        self.__j_lock = threading.Lock()
         self.options = options
 
     def _setParallel(self):
@@ -35,6 +37,10 @@ class JobDAG(object):
             self.__parallel_scheduling = root.children[0].get('parallel_scheduling', False)
 
         return self.__parallel_scheduling
+
+    def getLock(self):
+        """ Return the lock for this test spec (folder of jobs) """
+        return self.__j_lock
 
     def canParallel(self):
         """ Return bool whether or not this group runs in parallel """
