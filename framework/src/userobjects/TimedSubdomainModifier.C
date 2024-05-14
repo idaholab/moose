@@ -57,18 +57,18 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
 
   // helper variables for parameter consistency checks
   const auto from_data_file =
-      isParamValid("data_file") + isParamValid("header") + isParamValid("delimiter") +
-      isParamValid("comment") + isParamValid("time_column_index") +
-      isParamValid("blocks_from_column_index") + isParamValid("blocks_to_column_index") +
-      isParamValid("time_column_text") + isParamValid("blocks_from_column_text") +
-      isParamValid("blocks_to_column_text");
+      isParamSetByUser("data_file") + isParamSetByUser("header") + isParamSetByUser("delimiter") +
+      isParamSetByUser("comment") + isParamSetByUser("time_column_index") +
+      isParamSetByUser("blocks_from_column_index") + isParamSetByUser("blocks_to_column_index") +
+      isParamSetByUser("time_column_text") + isParamSetByUser("blocks_from_column_text") +
+      isParamSetByUser("blocks_to_column_text");
 
-  const auto from_data_File_needs_header = isParamValid("time_column_text") +
-                                           isParamValid("blocks_from_column_text") +
-                                           isParamValid("blocks_to_column_text");
+  const auto from_data_File_needs_header = isParamSetByUser("time_column_text") +
+                                           isParamSetByUser("blocks_from_column_text") +
+                                           isParamSetByUser("blocks_to_column_text");
 
   const auto from_parameters =
-      isParamValid("times") + isParamValid("blocks_from") + isParamValid("blocks_to");
+      isParamSetByUser("times") + isParamSetByUser("blocks_from") + isParamSetByUser("blocks_to");
 
   // Check parameter set for inconsistencies
   const auto from_source_count = ((from_data_file > 0) + (from_parameters > 0));

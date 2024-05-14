@@ -40,7 +40,7 @@ DelimitedFileReaderTempl<T>::read()
   std::size_t n_cols;
 
   // Storage for the raw data
-  std::vector<double> raw;
+  std::vector<T> raw;
   std::size_t size_raw = 0;
   std::size_t size_offsets = 0;
 
@@ -99,10 +99,10 @@ DelimitedFileReaderTempl<T>::read()
   // Process "row" formatted data
   if (_format_flag == FormatFlag::ROWS)
   {
-    std::vector<double>::iterator start = raw.begin();
+    typename std::vector<T>::iterator start = raw.begin();
     for (std::size_t j = 0; j < n_cols; ++j)
     {
-      _data[j] = std::vector<double>(start, start + _row_offsets[j]);
+      _data[j] = std::vector<T>(start, start + _row_offsets[j]);
       std::advance(start, _row_offsets[j]);
     }
   }
@@ -288,7 +288,7 @@ DelimitedFileReaderTempl<T>::readRowData(std::ifstream & stream_data, std::vecto
 {
   // Local storage for the data being read
   std::string line;
-  std::vector<double> row;
+  std::vector<T> row;
   unsigned int linenum = 0; // line number in file
 
   // Clear existing data
@@ -412,4 +412,7 @@ DelimitedFileReaderTempl<T>::header(const std::string & line)
       return contains_alpha;
   }
 }
+
+template class DelimitedFileReaderTempl<Real>;
+template class DelimitedFileReaderTempl<std::string>;
 } // MooseUtils

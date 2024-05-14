@@ -38,10 +38,7 @@ If the data on the subdomains and times should be provided directly in the input
 - [!param](/UserObjects/TimedSubdomainModifier/blocks_from): Vector of subdomain/blocks to move from. The subdomains/blocks may be given as ID or name.
 - [!param](/UserObjects/TimedSubdomainModifier/blocks_to): Vector of subdomain/blocks to move to. The subdomains/blocks may be given as ID or name.
 
-
-<!-- 
-!listing test/tests/userobjects/element_subdomain_modifier/initial_condition.i start=[AuxVariables] end=[Executioner] 
--->
+!listing test/tests/userobjects/element_subdomain_modifier/tsm_direct.i start=[UserObjects] end=[UserObjects] 
 
 ### Reading data from CSV file 
 
@@ -55,10 +52,11 @@ To read the data on the subdomains and times from an CSV file, the following par
 - [!param](/UserObjects/TimedSubdomainModifier/blocks_from_column_index) -or- [!param](/UserObjects/TimedSubdomainModifier/blocks_from_column_text): Zero-based index or name of the column defining the subdomains/blocks to move all elements from.
 - [!param](/UserObjects/TimedSubdomainModifier/blocks_to_column_index) -or- [!param](/UserObjects/TimedSubdomainModifier/blocks_to_column_text): Zero-based index or name of the column defining the subdomains/blocks to move all elements to.
 
+!listing test/tests/userobjects/element_subdomain_modifier/tsm_csv.i start=[UserObjects] end=[UserObjects] 
 
-<!-- 
-!listing test/tests/userobjects/element_subdomain_modifier/initial_condition.i start=[AuxVariables] end=[Executioner]
--->
+With the corresponding CSV-file:
+
+!listing test/tests/userobjects/element_subdomain_modifier/tsm.csv
 
 !syntax parameters /UserObjects/TimedSubdomainModifier
 
