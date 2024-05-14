@@ -52,6 +52,6 @@ ComponentAction::act()
   else if (_current_task == "add_variable")
     addNonlinearVariables();
   else
-    // For a new task that isnt registed to ComponentAction in the framework
+    // For a new task that isn't registered to ComponentAction in the framework
     actOnAdditionalTasks();
 }
