@@ -16,6 +16,7 @@
 #include "MooseVariable.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
+#include "GhostBoundary.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -77,6 +78,15 @@ GapHeatTransfer::validParams()
   // Node based options
   params.addCoupledVar("gap_distance", "Distance across the gap");
   params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
+
+  params.addRelationshipManager(
+      "GhostBoundary",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        rm_params.set<BoundaryName>("boundary") = obj_params.get<BoundaryName>("primary");
+        rm_params.set<BoundaryName>("paired_boundary") = obj_params.get<BoundaryName>("secondary");
+      });
 
   return params;
 }
