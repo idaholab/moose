@@ -66,6 +66,10 @@ WCNSFVFlowPhysics::validParams()
 
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
+  params.addParam<bool>(
+      "include_deviatoric_stress",
+      false,
+      "Whether to include the full expansion (the transposed term as well) of the stress tensor");
 
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
@@ -619,6 +623,13 @@ WCNSFVFlowPhysics::addINSMomentumViscousDissipationKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
   params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
+  if (getParam<bool>("include_deviatoric_stress"))
+  {
+    params.set<bool>("complete_expansion") = true;
+    const std::string u_names[3] = {"u", "v", "w"};
+    for (unsigned int i = 0; i < dimension(); ++i)
+      params.set<MooseFunctorName>(u_names[i]) = _velocity_names[i];
+  }
 
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
