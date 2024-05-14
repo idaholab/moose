@@ -126,7 +126,7 @@ class PBSRunner(Runner):
         output_file = self.run_pbs.getPBSJobOutputPath(self.job)
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
-                self.output = open(output_file, 'r').read()
+                self.output = self.readTruncated(output_file)
 
                 # If we can parse the exit code here, do it. Sometimes PBS
                 # will do screwy stuff with not capturing the actual exit code...
@@ -205,6 +205,66 @@ class PBSRunner(Runner):
         return False
 
     @staticmethod
+    def readTruncated(file, start_lines=1000, end_lines=1000):
+        """
+        Reads a file and truncates it past a certain amount of lines.
+        """
+        with open(file, 'rb') as f:
+            # Find the end position of the file so that we don't read past
+            f.seek(0, os.SEEK_END)
+            total_bytes = f.tell()
+
+            # Read the set of lines
+            f.seek(0)
+            head_lines_read = 0
+            head = ''
+            while head_lines_read < start_lines and f.tell() < total_bytes:
+                head += f.read(1).decode('utf-8')
+                if len(head) > 1 and head[-1:] == '\n':
+                    head_lines_read += 1
+
+            # Keep the end of the head position so that we don't read
+            # backwards past it for the tail
+            head_pos = f.tell()
+
+            # Seek to the end and start reading ending lines
+            f.seek(0, os.SEEK_END)
+
+            # Keep reading the ending lines until we've reached the max
+            # number of lines we want or have reached the head output
+            tail_lines_read = 0
+            tail = []
+            while tail_lines_read < end_lines and f.tell() > head_pos:
+                # Read each character in the line until we reach
+                # the beginning or a new line
+                line = []
+                while f.tell() > 1:
+                    f.seek(-2, os.SEEK_CUR)
+                    char = f.read(1).decode('utf-8')
+                    if char == '\n' or f.tell() == 0:
+                        break
+                    line.append(char)
+
+                # Append the new read line
+                line.reverse()
+                tail.append(''.join(line))
+                tail_lines_read += 1
+
+            # Whether or not we have truncated output
+            # (have hit the location of the head output)
+            truncated = f.tell() != head_pos
+
+        # Form the combined output
+        output = head
+        if truncated:
+            output += f'{"#" * 80}\nOUTPUT TRIMMED\n{"#" * 80}\n'
+        if tail:
+            tail.reverse()
+            output += '\n'.join(tail)
+
+        return output
+
+    @staticmethod
     def getLastLine(file):
         """
         Gets the last line of a text file and the position
@@ -220,25 +280,6 @@ class PBSRunner(Runner):
             pos = f.tell()
             line = f.readline().decode('utf-8')
             return line, pos
-
-    @staticmethod
-    def removeLastLine(file):
-        """
-        Removes the last line from the given text file.
-
-        Used to remove the terminator that we append to all output
-        files on the compute host in order to make sure that the
-        entire output file is synced"""
-        # stackoverflow.com/questions/1877999/delete-final-line-in-file-with-python
-        with open(file, "r+", encoding="utf-8") as f:
-            f.seek(0, os.SEEK_END)
-            pos = f.tell() - 1
-            while pos > 0 and f.read(1) != "\n":
-                pos -= 1
-                f.seek(pos, os.SEEK_SET)
-            if pos > 0:
-                f.seek(pos, os.SEEK_SET)
-                f.truncate()
 
     @staticmethod
     def isFileBinary(file):

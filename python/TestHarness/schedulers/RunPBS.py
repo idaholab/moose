@@ -299,8 +299,7 @@ class RunPBS(RunParallel):
             raise self.CallPBSException(self, f'qsub has unexpected ID "{job_id}"', qsub_command)
 
         # Job has been submitted, so set it as queued
-        with job.lock():
-            job.addCaveats(job_id)
+        job.addCaveats(job_id)
         self.setAndOutputJobStatus(job, job.queued)
 
         # Setup the job in the status map
