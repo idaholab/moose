@@ -223,7 +223,10 @@ class RunPBS(RunParallel):
             root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
             full_command += f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER} '
 
+        # Build the full command
         full_command += command
+        # Build an escaped command so that we can print it out in the header
+        escaped_command = json.dumps(full_command)
 
         num_procs = tester.getProcs(options)
         num_threads = tester.getThreads(options)
@@ -251,6 +254,7 @@ class RunPBS(RunParallel):
                         'SUBMITTED_HOSTNAME': socket.gethostname(),
                         'CWD': tester.getTestDir(),
                         'COMMAND': full_command,
+                        'ESCAPED_COMMAND': escaped_command,
                         'ENDING_COMMENT': self.getOutputEndingComment(),
                         'MOOSE_PYTHONPATH': moose_python,
                         'OUTPUT_FILES': output_files}
