@@ -7,10 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, re, json, socket, datetime, threading
+import os, re, json, socket, time
 from RunParallel import RunParallel
 from RunHPC import RunHPC
-from timeit import default_timer as clock
 from PBScodes import *
 import jinja2
 
@@ -71,9 +70,18 @@ class RunPBS(RunHPC):
         # Write the script
         open(job_data.submission_file, 'w').write(script)
 
-        # qsub submission command
-        qsub_command = [f'cd {tester.getTestDir()}']
-        qsub_command += [f'qsub {job_data.submission_file}']
+        # Submission command. Here we have a simple bash loop
+        # that will try to wait for the file if it doesn't exist yet
+        qsub_command = [f'cd {tester.getTestDir()}',
+                        f'FILE="{job_data.submission_file}"',
+                        'for i in {1..40}',
+                            'do if [ -e "$FILE" ]',
+                                'then qsub $FILE',
+                                'exit $?',
+                            'else sleep 0.25',
+                            'fi',
+                        'done',
+                        'exit 1']
         qsub_command = '; '.join(qsub_command)
 
         # Set what we've ran for this job so that we can
