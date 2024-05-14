@@ -740,7 +740,7 @@ class TestHarness:
                 # The TestHarness receives individual jobs out of order (can't realistically use self.test_table)
                 tester_dirs = {}
                 dag_table = []
-                for jobs, dag, thread_lock in self.scheduler.retrieveDAGs():
+                for jobs, dag in self.scheduler.retrieveDAGs():
                     original_dag = dag.getOriginalDAG()
                     total_time = float(0.0)
                     tester = None
