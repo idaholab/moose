@@ -87,7 +87,7 @@ class RunPBS(RunHPC):
         # Set what we've ran for this job so that we can
         # potentially get the context in an error
         command_ran = qsub_command
-        if self.ssh:
+        if self.ssh_host:
             command_ran = f"ssh {self.ssh_host} '{qsub_command}'"
         job.getTester().setCommandRan(command_ran)
 
