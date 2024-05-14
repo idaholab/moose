@@ -1,0 +1,141 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+// App includes
+#include "GhostBoundary.h"
+#include "Executioner.h"
+#include "FEProblemBase.h"
+#include "MooseApp.h"
+
+// libMesh includes
+#include "libmesh/elem.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/boundary_info.h"
+
+registerMooseObject("MooseApp", GhostBoundary);
+
+using namespace libMesh;
+
+InputParameters
+GhostBoundary::validParams()
+{
+  InputParameters params = RelationshipManager::validParams();
+  params.addRequiredParam<BoundaryName>("boundary", "The name of the primary boundary sideset.");
+  params.addRequiredParam<BoundaryName>("paired_boundary",
+                                        "The name of the primary boundary sideset.");
+  params.addParam<bool>(
+      "ghost_point_neighbors",
+      false,
+      "Whether we should ghost point neighbors of secondary lower-dimensional elements and "
+      "also their mortar interface couples for applications such as mortar nodal auxiliary "
+      "kernels.");
+
+  // We want to wait until our mortar mesh has been built before trying to delete remote elements.
+  // And our mortar mesh cannot be built until the entire mesh has been generated. By setting this
+  // parameter to false we will make sure that any prepare_for_use calls during the mesh generation
+  // phase will not delete remote elements *and* we will set a flag on the moose mesh saying that we
+  // need to delete remote elements after the addition of late geometric ghosting functors
+  // (including this ghosting functor)
+  params.set<bool>("attach_geometric_early") = false;
+  return params;
+}
+
+GhostBoundary::GhostBoundary(const InputParameters & params)
+  : RelationshipManager(params),
+    _boundary_name(getParam<BoundaryName>("boundary")),
+    _paired_boundary_name(getParam<BoundaryName>("paired_boundary")),
+    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING)),
+    _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors"))
+{
+}
+
+GhostBoundary::GhostBoundary(const GhostBoundary & other)
+  : RelationshipManager(other),
+    _boundary_name(other._boundary_name),
+    _paired_boundary_name(other._paired_boundary_name),
+    _is_coupling_functor(other._is_coupling_functor),
+    _ghost_point_neighbors(other._ghost_point_neighbors)
+{
+}
+
+void
+GhostBoundary::internalInitWithMesh(const MeshBase &)
+{
+}
+
+std::string
+GhostBoundary::getInfo() const
+{
+  std::ostringstream oss;
+  oss << "GhostBoundary";
+  return oss.str();
+}
+
+void
+GhostBoundary::operator()(const MeshBase::const_element_iterator & range_begin,
+                          const MeshBase::const_element_iterator & range_end,
+                          const processor_id_type p,
+                          map_type & coupled_elements)
+{
+  // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
+  // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
+  // to the MooseMesh
+  const bool generating_mesh = !_moose_mesh->getMeshPtr();
+  const auto boundary_id =
+      generating_mesh ? Moose::INVALID_BOUNDARY_ID : _moose_mesh->getBoundaryID(_boundary_name);
+
+  for (const Elem * const elem : _mesh->active_element_ptr_range())
+  {
+    if (generating_mesh)
+    {
+      // We are still generating the mesh, so it's possible we don't even have the right boundary
+      // ids created yet! So we actually ghost all boundary elements and all lower dimensional
+      // elements who have parents on a boundary
+      if (elem->on_boundary())
+        coupled_elements.insert(std::make_pair(elem, _null_mat));
+      else if (const Elem * const ip = elem->interior_parent())
+      {
+        if (ip->on_boundary())
+          coupled_elements.insert(std::make_pair(elem, _null_mat));
+      }
+    }
+    else
+    {
+      // We've finished generating our mesh so we can be selective and only ghost elements lying
+      // in our lower-dimensional subdomains and their interior parents
+      mooseAssert(boundary_id != Moose::INVALID_BOUNDARY_ID, "Boundary id should exist by now");
+
+      // Higher-dimensional boundary elements
+      const BoundaryInfo & binfo = _mesh->get_boundary_info();
+
+      for (auto side : elem->side_index_range())
+        if ((elem->processor_id() != p) && (binfo.has_boundary_id(elem, side, boundary_id)))
+          coupled_elements.insert(std::make_pair(elem, _null_mat));
+    }
+  }
+}
+
+bool
+GhostBoundary::operator>=(const RelationshipManager & other) const
+{
+  if (auto asoi = dynamic_cast<const GhostBoundary *>(&other))
+  {
+    if (_boundary_name == asoi->_boundary_name &&
+        _paired_boundary_name == asoi->_paired_boundary_name &&
+        _ghost_point_neighbors >= asoi->_ghost_point_neighbors)
+      return true;
+  }
+  return false;
+}
+
+std::unique_ptr<GhostingFunctor>
+GhostBoundary::clone() const
+{
+  return _app.getFactory().copyConstruct(*this);
+}
