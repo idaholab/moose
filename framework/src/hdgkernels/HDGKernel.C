@@ -52,8 +52,6 @@ HDGKernel::HDGKernel(const InputParameters & parameters)
     _hibc_warehouse(
         *getCheckedPointerParam<MooseObjectWarehouse<HDGIntegratedBC> *>("hibc_warehouse"))
 {
-  // This class handles residuals and Jacobians for multiple variables
-  _fe_problem.setKernelCoverageCheck(false);
 }
 
 void

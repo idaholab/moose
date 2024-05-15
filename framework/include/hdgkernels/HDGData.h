@@ -20,6 +20,9 @@ typedef Eigen::MatrixXd EigenMatrix;
 typedef Eigen::VectorXd EigenVector;
 #endif
 
+/**
+ * Class to hold data structures shared between kernels and boundary conditions
+ */
 class HDGData
 {
 protected:

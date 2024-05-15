@@ -25,7 +25,8 @@ IsMatrixSymmetric::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report whether the system matrix is symmetric or not.");
-  params.addParam<Real>("symmetry_tol", 1e-8, "The tolerance for comparing symmetry");
+  params.addParam<Real>(
+      "symmetry_tol", 1e-8, "The tolerance (both relative and absolute) for comparing symmetry");
   return params;
 }
 

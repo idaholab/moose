@@ -41,7 +41,8 @@ internal faces respectively. External boundary condition integration occurs in
 [HDGBCs/index.md].
 
 Within `onElement` and `onInternalSide`, hybridized kernel developers have eight
-different data structures they need to populate. These are
+different data structures they need to populate. Six are inherited from the `HDGData`
+class). These are
 
 ```
   /// Matrix data structures for on-diagonal coupling
@@ -50,7 +51,9 @@ different data structures they need to populate. These are
   EigenVector _PrimalVec, _LMVec;
   /// Matrix data structures for off-diagonal coupling
   EigenMatrix _PrimalLM, _LMPrimal;
-
+```
+And the two declared in `HDGKernel`:
+```
   /// Containers for the global degree of freedom numbers for primal and LM variables
   /// respectively
   std::vector<dof_id_type> _primal_dof_indices;
@@ -63,7 +66,9 @@ dofs; `_PrimalLM` is dependence of primal dofs on LM dofs; `_LMPrimal` is
 dependence of LM dofs on primal dofs. The `_PrimalVec` and `_LMVec` objects hold
 the residuals for the primal and LM degrees of freedom
 respectively. `_primal_dof_indices` and `_lm_dof_indices` hold the primal and LM
-global degree of freedom numbers respectively for the current element.
+global degree of freedom numbers respectively for the current
+element. `HDGIntegratedBC` classes also inherit from `HDGData` and must also fill
+the six matrix and vector structures within their `onBoundary` method.
 
 Note that local finite element assembly occurs twice within a single iteration
 of Newton's method. The first assembly occurs prior to the linear solve and adds

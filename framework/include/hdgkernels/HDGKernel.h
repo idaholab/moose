@@ -137,9 +137,7 @@ private:
 inline void
 HDGKernel::computeResidual()
 {
-  // Would be nice to error for this but at the time of writing we still do a usually unnecessary
-  // initial residual evaluation
-  computeResidualAndJacobian();
+  mooseError("HDGKernels should not need individual residual evaluations");
 }
 
 inline void

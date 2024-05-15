@@ -17,6 +17,9 @@ template <typename>
 class PetscMatrix;
 }
 
+/**
+ * Checks whether the nonlinear system matrix is symmetric
+ */
 class IsMatrixSymmetric : public GeneralPostprocessor
 {
 public:
@@ -32,7 +35,10 @@ public:
   virtual Real getValue() const override;
 
 protected:
+  /// Tolerance for the comparison between coefficients and transpose counterparts
   const Real _symm_tol;
+  /// Transpose of the system matrix
   std::unique_ptr<SparseMatrix<Number>> _mat_transpose;
+  /// Whether the matrix is symmetric
   bool _equiv = true;
 };
