@@ -119,7 +119,4 @@ private:
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
-
-  /// Vector of pairs describing checkpoint structure
-  std::vector<std::pair<std::string, std::string>> _checkpoint_info;
 };

@@ -66,8 +66,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
     _checkpoint_type(getParam<CheckpointType>("checkpoint_type")),
     _num_files(getParam<unsigned int>("num_files")),
-    _suffix(getParam<std::string>("suffix")),
-    _checkpoint_info(std::vector<std::pair<std::string, std::string>>())
+    _suffix(getParam<std::string>("suffix"))
 {
   // Prevent the checkpoint from executing at any time other than INITIAL,
   // TIMESTEP_END, and FINAL
