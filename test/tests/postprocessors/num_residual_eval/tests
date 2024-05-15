@@ -13,6 +13,8 @@
     # This test requires a different number of residual evaluations in older PETScs
     # due to the changes in 3061bbd5d.
     petsc_version = '>=3.8.3'
+    # Difficult to have consistent solve behavior when running across nodes
+    hpc = false
 
     requirement = 'The system shall be capable of outputting the number of Residual evaluations'
     issues = '#2089'

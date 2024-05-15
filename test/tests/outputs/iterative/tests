@@ -78,6 +78,8 @@
     recover = false
     petsc_version_release = true
     compiler = '!INTEL'
+    # MPI dependent
+    hpc = false
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the CSV format."
   [../]
