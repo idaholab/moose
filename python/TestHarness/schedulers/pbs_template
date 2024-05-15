@@ -22,12 +22,14 @@ set -e
 export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 
 # Print a useful header
+echo "################################################################################"
+echo "TestHarness RunPBS job on $(hostname) in job ${PBS_JOBID}"
 echo "Time: $(date)"
 echo "Test: {{ TEST_NAME }}"
 echo "Directory: {{ CWD }}"
-echo "Command: {{ ESCAPED_COMMAND }}"
-echo "Hostname: $(hostname)"
+echo "Command: {{ COMMAND_PRINTABLE }}"
 echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
+echo "Submission script: {{ SUBMISSION_SCRIPT }}"
 echo "Output: {{ OUTPUT }}"
 module list
 echo "################################################################################"
