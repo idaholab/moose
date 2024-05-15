@@ -10,12 +10,15 @@
 #pragma once
 
 #include "Action.h"
+#include "ActionWarehouse.h"
 #include "InputParametersChecksUtils.h"
 
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
 #include "Factory.h"
 #include "MultiMooseEnum.h"
+
+class ComponentAction;
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
   registerMooseAction(app_name, derived_name, "init_physics");                                     \
@@ -78,6 +81,12 @@ public:
 
   /// Return the maximum dimension of the blocks the Physics is active on
   unsigned int dimension() const;
+
+  /// Get a component with the requested name
+  const ComponentAction & getComponent(const ComponentName & comp_name)
+  {
+    return _awh.getAction<ComponentAction>(comp_name);
+  }
 
 protected:
   /// Return whether the Physics is solved using a transient
