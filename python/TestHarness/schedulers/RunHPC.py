@@ -187,14 +187,33 @@ class RunHPC(RunParallel):
         Helper struct for storing the information to generate a job
         """
         def __init__(self):
+            # The command to be ran in the job
             self.command = None
+            # self.command but escaped so that it can be printed
+            self.command_printable = None
+            # The name of the job
             self.name = None
+            # The number of procs to run the job with
             self.num_procs = None
+            # The number of threads to run the job with
             self.num_threads = None
+            # The combined stdout+stderr output file
             self.output_file = None
+            # The additonal output files to be read (csv, exodus, etc)
             self.output_files = None
-            self.submission_file = None
+            # The path to the submission script
+            self.submission_script = None
+            # The walltime to run the job with
             self.walltime = None
+
+    @staticmethod
+    def escapeCommand(command: str) -> str:
+        """
+        Escapes quotes and newlines in a command.
+        """
+        if command:
+            return json.dumps(command.replace('\n', ' '))[1:-1]
+        return ''
 
     def submitJob(self, job):
         """
@@ -208,35 +227,48 @@ class RunHPC(RunParallel):
         job_data = self.JobData()
 
         # The submission script we're going to write to
-        job_data.submission_file = self.getHPCJobSubmissionPath(job)
+        job_data.submission_script = self.getHPCJobSubmissionPath(job)
         # The combined stdout+stderr from the job
         job_data.output_file = self.getHPCJobOutputPath(job)
         # Clean these two files
-        for file in [job_data.submission_file, job_data.output_file]:
+        for file in [job_data.submission_script, job_data.output_file]:
             if os.path.exists(file):
                 os.remove(file)
 
-        # Set up the command. We have special logic here for when we're using apptainer,
-        # where we need to put the MPI command outside of the apptainer call
-        full_command = ''
-        command = tester.getCommand(options)
-        mpi_command = self.parseMPICommand(command)
-        if mpi_command:
-            command = command.replace(mpi_command, '')
-            full_command += mpi_command
-        # Split out whitespace in the command and then use json dumps to
-        # escape quoted characters
-        command = json.dumps(command.replace('\n', ' '))
+        # The escaped command to be ran
+        command = self.escapeCommand(tester.getCommand(options))
 
-        # Wrap the command with apptainer if we're in a container, and also bind
-        # in the root directory that the test is contained in
+        # Special logic for when we're running with apptainer, in which case
+        # we need to manipulate the command like such
+        # Original command: <mpiexec ...> </path/to/binary ...>
+        # New command: <mpiexec ...> apptainer exec /path/to/image "</path/to/binary ...>"
+        # This is also the reason why we have to form job_data.command_printable;
+        # the extra quotes around </path/to/binary ...> need to be escaped.
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
-            root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
-            full_command += f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER} '
-        full_command += command
+            # Separate out the MPI command
+            mpi_command = self.escapeCommand(self.parseMPICommand(command))
+            # Remove the MPI command from the run command
+            command = command.replace(mpi_command, '')
 
-        job_data.command = full_command
+            # Start with the mpiexec call
+            job_data.command = mpi_command
+            job_data.command_printable = mpi_command
+
+            # The root filesystem path that we're in so that we can be sure to bind
+            # it into the container
+            root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
+            # The apptainer command that will get sandwiched in the middle
+            apptainer_command = f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER}'
+            apptainer_command = self.escapeCommand(apptainer_command)
+            # Append the apptainer command along with the command to be ran
+            job_data.command += f'{apptainer_command} "{command}"'
+            job_data.command_printable += f'{apptainer_command} \\"{command}\\"'
+        # Not in apptainer, so we can just use the escaped command as is
+        else:
+            job_data.command = command
+            job_data.command_printable = command
+
         job_data.name = self.getHPCJobName(job)
         job_data.num_procs = tester.getProcs(options)
         job_data.num_threads = tester.getThreads(options)
