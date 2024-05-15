@@ -258,5 +258,5 @@ protected:
   std::size_t _primal_size, _lm_size;
 
   /// Our stabilization coefficient
-  static constexpr Real _tau = 1;
+  const Real _tau;
 };

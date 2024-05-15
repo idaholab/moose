@@ -28,6 +28,10 @@ DiffusionHDGAssemblyHelper::validParams()
   params.addRequiredParam<NonlinearVariableName>(
       "face_u", "The concentration of the diffusing specie on faces");
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
+  params.addParam<Real>("tau",
+                        1,
+                        "The stabilization coefficient required for discontinuous Galerkin "
+                        "schemes. This may be set to 0 for a mixed method with Raviart-Thomas.");
   return params;
 }
 
@@ -65,7 +69,8 @@ DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(const MooseObject * const
     _vector_n_dofs(0),
     _scalar_n_dofs(0),
     _lm_n_dofs(0),
-    _ti(*ti)
+    _ti(*ti),
+    _tau(moose_obj->getParam<Real>("tau"))
 {
 }
 

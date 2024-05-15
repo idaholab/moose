@@ -29,7 +29,7 @@ MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()
 {
   return MooseEnum("LAGRANGE MONOMIAL SCALAR LAGRANGE_VEC MONOMIAL_VEC L2_HIERARCHIC "
-                   "L2_HIERARCHIC_VEC L2_LAGRANGE L2_LAGRANGE_VEC",
+                   "L2_HIERARCHIC_VEC L2_LAGRANGE L2_LAGRANGE_VEC L2_RAVIART_THOMAS",
                    "LAGRANGE",
                    true);
 }
