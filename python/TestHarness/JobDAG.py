@@ -240,6 +240,8 @@ class JobDAG(object):
         jobs = list(self.__job_dag.topological_sort())
         # Sort by ID so we get it in the input file from top down
         jobs = sorted(jobs, key = lambda job: job.getID())
+        # Don't check skipped jobs because their dependencies will have been removed
+        jobs = [job for job in jobs if not job.isSkip()]
 
         # Work down the file, starting with the second input and looking up for
         # collisions. By doing it in this order, we will error at the first occurance.
@@ -255,8 +257,8 @@ class JobDAG(object):
                 other_files = set(other_tester.getOutputFiles(self.options))
                 conflicting_files = list(files.intersection(other_files))
                 if conflicting_files \
-                    and not self.__job_dag.is_dependency(other_job, job):
-                    print(f'In {tester.getSpecFile()}:\n')
+                    and not self.__job_dag.is_dependency(other_job, job) \
+                    and not self.__job_dag.is_dependency(job, other_job):
                     print('  This test spec is set to run in parallel, but a race condition was found')
                     print('  that could lead to multiple tests reading/writing from the same file.\n')
                     print(f'  Tests: {tester.getTestNameShort()}, {other_tester.getTestNameShort()}')
