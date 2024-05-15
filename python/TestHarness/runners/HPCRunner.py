@@ -34,7 +34,9 @@ class HPCRunner(Runner):
         self.file_completion_poll_time = 0.1
 
     def spawn(self, timer):
+        # Rely on the RunHPC object to submit the job
         self.run_hpc.submitJob(self.job)
+
         timer.start()
 
     def wait(self, timer):
@@ -98,7 +100,9 @@ class HPCRunner(Runner):
                 if self.fileIsReady(file):
                     # Store the output
                     if file == output_file:
-                        self.trySetOutput(throw=True)
+                        # It's now required because its complete
+                        if not self.trySetOutput(required=True):
+                            break
                     # Done with this file
                     incomplete_files.discard(file)
 
@@ -123,16 +127,33 @@ class HPCRunner(Runner):
     def kill(self):
         self.run_hpc.killJob(self.job)
 
-    def trySetOutput(self, throw=False):
+    def trySetOutput(self, required=False):
+        """
+        Tries to set the output if it exists.
+
+        If required is set, this will fail the job.
+
+        Returns whether or not the output was set.
+        """
+        # self.output is originally set to None so that other objects
+        # cannot attempt to write to it before we have at least obtained
+        # some object, hence why we need to set it here because we're
+        # signaling that we're ready for output
         if self.output is None:
             self.output = ''
 
+        # Whether or not we actually set it
+        did_set = False
+
+        # Only do something if the output actually exists
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
-                # If we're trying to read output, we can't truncate it
+                # If we're trying to parse output, we can't truncate it
+                # because it might appear in the truncated portion
                 if self.job.getTester().needFullOutput(self.options):
                     self.output = open(output_file, 'r').read()
+                # Not parsing the output, so just read it truncated
                 else:
                     self.output = self.readTruncated(output_file)
 
@@ -141,10 +162,16 @@ class HPCRunner(Runner):
                 find_exit_code = re.search('Completed TestHarness RunHPC test execution; exit code = (\d+)', self.output)
                 if find_exit_code:
                     self.exit_code = int(find_exit_code.group(1))
+
+                did_set = True
             except:
-                if throw:
-                    raise
                 pass
+
+        # If required and we didn't load it, mark this error
+        if required and not did_set:
+            self.job.setStatus(self.job.error, 'FAILED OUTPUT READ')
+
+        return did_set
 
     def fileIsReady(self, file):
         """
