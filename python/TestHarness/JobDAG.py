@@ -107,10 +107,14 @@ class JobDAG(object):
     def _checkDAG(self):
         """ perform some sanity checks on the current DAG """
         if self.__job_dag.size():
+            # Add edges based on prereqs
+            self._setupPrereqs()
 
-            self._doMakeDependencies()
-            self._doLast()
+            # Check for race conditions in output
             self._checkOutputCollisions()
+
+            # Remove edges for jobs that are skipped
+            self._doSkippedDependencies()
 
             # If there are race conditions, then there may be more skipped jobs
             if self._doRaceConditions():
@@ -130,22 +134,17 @@ class JobDAG(object):
             parent.setOutput('Cyclic dependency error!\n\t' + err_output)
             parent.setStatus(parent.error, 'Cyclic or Invalid Dependency Detected!')
 
-    def _doLast(self):
-        for job in self.__job_dag.topological_sort():
-            if 'ALL' in job.getPrereqs():
-                for a_job in self.__job_dag.topological_sort():
-                    if a_job != job and not a_job.isSkip():
-                        if '.ALL' in a_job.getTestName():
-                            a_job.setStatus(a_job.error, 'Test named ALL when "prereq = ALL" elsewhere in test spec file!')
-                        self._addEdge(a_job, job)
-        self._doSkippedDependencies()
-
-    def _doMakeDependencies(self):
+    def _setupPrereqs(self):
         """ Setup dependencies within the current Job DAG """
+        # The jobs that have 'ALL' as a prereq
+        all_prereq_jobs = []
+
+        # Setup explicit dependencies (without 'ALL')
         for job in self.__job_dag.ind_nodes():
             prereq_jobs = job.getPrereqs()
             if prereq_jobs == ['ALL']:
-                prereq_jobs = []
+                all_prereq_jobs.append(job)
+                continue
             for prereq_job in prereq_jobs:
                 try:
                     self.__name_to_job[prereq_job]
@@ -156,6 +155,14 @@ class JobDAG(object):
                 # test file has invalid prereq set
                 except KeyError:
                     job.setStatus(job.error, f'unknown dependency {prereq_job}')
+
+        # Setup dependencies for 'ALL'
+        for job in all_prereq_jobs:
+            for a_job in self.__job_dag.topological_sort():
+                if a_job != job and not a_job.isSkip():
+                    if '.ALL' in a_job.getTestName():
+                        a_job.setStatus(a_job.error, 'Test named ALL when "prereq = ALL" elsewhere in test spec file!')
+                    self._addEdge(a_job, job)
 
     def _fix_cornercases(self, prereq_job, job):
         """
@@ -240,8 +247,6 @@ class JobDAG(object):
         jobs = list(self.__job_dag.topological_sort())
         # Sort by ID so we get it in the input file from top down
         jobs = sorted(jobs, key = lambda job: job.getID())
-        # Don't check skipped jobs because their dependencies will have been removed
-        jobs = [job for job in jobs if not job.isSkip()]
 
         # Work down the file, starting with the second input and looking up for
         # collisions. By doing it in this order, we will error at the first occurance.
