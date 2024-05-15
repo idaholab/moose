@@ -9,7 +9,6 @@
 
 from TestHarness import util
 from RunApp import RunApp
-import os
 
 class RunException(RunApp):
 
