@@ -263,6 +263,15 @@ class Tester(MooseObject):
         """ return test short name (not including the path) """
         return self.specs['test_name_short']
 
+    def appendTestName(self, value):
+        """
+        Appends a value to the test name.
+
+        Used when creating duplicate Testers for recover tests.
+        """
+        self.specs['test_name'] += value
+        self.specs['test_name_short'] += value
+
     def getPrereqs(self):
         """ return list of prerequisite tests this test depends on """
         return self.specs['prereq']

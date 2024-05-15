@@ -565,8 +565,8 @@ class TestHarness:
                 part2 = copy.deepcopy(part1)
 
                 # Part 1:
+                part1.appendTestName('_part1')
                 part1_params = part1.parameters()
-                part1_params['test_name'] += '_part1'
                 part1_params['cli_args'].append('--test-checkpoint-half-transient')
                 if self.options.recoversuffix == 'cpa':
                     part1_params['cli_args'].append('Outputs/out/type=Checkpoint')
