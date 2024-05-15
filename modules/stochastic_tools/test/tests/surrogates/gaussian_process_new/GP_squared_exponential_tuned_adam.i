@@ -103,7 +103,7 @@
     standardize_data = 'true' #Center and scale the training data
     sampler = train_sample
     response = results/data:avg:value
-    tune_parameters = 'signal_variance length_factor'
+    tune_parameters = 'covar:signal_variance covar:length_factor'
     num_iters = 1000
     batch_size = 20
     learning_rate = 0.005

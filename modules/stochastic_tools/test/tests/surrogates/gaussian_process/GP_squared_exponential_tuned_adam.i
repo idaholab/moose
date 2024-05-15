@@ -103,7 +103,7 @@
     standardize_data = 'true' #Center and scale the training data
     sampler = train_sample
     response = results/data:avg:value
-    tune_parameters = 'signal_variance length_factor'
+    tune_parameters = 'covar:signal_variance covar:length_factor'
     tuning_algorithm = 'adam'
     iter_adam = 1000
     batch_size = 20

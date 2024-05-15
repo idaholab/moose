@@ -75,9 +75,13 @@ bool
 LMC::computedKdhyper(RealEigenMatrix & dKdhp,
                      const RealEigenMatrix & x,
                      const std::string & hyper_param_name,
-                     unsigned int ind,
-                     const std::string & prefix) const
+                     unsigned int ind) const
 {
+  if (name().length() + 1 > hyper_param_name.length())
+    return false;
+
+  const std::string name_without_prefix = hyper_param_name.substr(name().length() + 1);
+
   if (_tunable_hp.find(hyper_param_name) != _tunable_hp.end())
   {
     const std::string acoeff_prefix = "acoeff_";
@@ -85,15 +89,15 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
     RealEigenMatrix dBdhp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
     RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), x.rows());
 
-    if (hyper_param_name.find(acoeff_prefix) != std::string::npos)
+    if (name_without_prefix.find(acoeff_prefix) != std::string::npos)
     {
-      const int number = std::stoi(hyper_param_name.substr(acoeff_prefix.length()));
+      const int number = std::stoi(name_without_prefix.substr(acoeff_prefix.length()));
       computeAGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
     }
-    else if (hyper_param_name.find(lambda_prefix) != std::string::npos)
+    else if (name_without_prefix.find(lambda_prefix) != std::string::npos)
     {
-      const int number = std::stoi(hyper_param_name.substr(lambda_prefix.length()));
+      const int number = std::stoi(name_without_prefix.substr(lambda_prefix.length()));
       computeLambdaGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
     }
@@ -115,16 +119,17 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
     // First, check the dependent covariances
     bool found = false;
     for (const auto dependent_covar : _covariance_functions)
-    {
-      const std::string new_prefix = prefix + dependent_covar->name() + ":";
       if (!found)
-        found = dependent_covar->computedKdhyper(dKdhp_sub, x, hyper_param_name, ind, new_prefix);
-    }
+        found = dependent_covar->computedKdhyper(dKdhp_sub, x, hyper_param_name, ind);
+
     if (!found)
       mooseError("Hyperparameter ", hyper_param_name, "not found!");
+
     MathUtils::kron(dKdhp, B, dKdhp_sub);
+
     return true;
   }
+
   return false;
 }
 

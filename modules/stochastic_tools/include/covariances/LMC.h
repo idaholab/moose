@@ -27,8 +27,7 @@ public:
   bool computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
                        const std::string & hyper_param_name,
-                       unsigned int ind,
-                       const std::string & prefix = "") const override;
+                       unsigned int ind) const override;
 
   void computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const;
 

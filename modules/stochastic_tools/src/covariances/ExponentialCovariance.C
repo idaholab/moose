@@ -89,10 +89,12 @@ bool
 ExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
                                        const RealEigenMatrix & x,
                                        const std::string & hyper_param_name,
-                                       unsigned int ind,
-                                       const std::string & prefix) const
+                                       unsigned int ind) const
 {
-  const std::string name_without_prefix = hyper_param_name.substr(prefix.length());
+  if (name().length() + 1 > hyper_param_name.length())
+    return false;
+
+  const std::string name_without_prefix = hyper_param_name.substr(name().length() + 1);
 
   if (name_without_prefix == "noise_variance")
   {

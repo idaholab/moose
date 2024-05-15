@@ -26,18 +26,13 @@ public:
                                        const bool is_self_covariance) const = 0;
 
   void loadHyperParamMap(const std::unordered_map<std::string, Real> & map,
-                         const std::unordered_map<std::string, std::vector<Real>> & vec_map,
-                         const std::string & prefix = "");
+                         const std::unordered_map<std::string, std::vector<Real>> & vec_map);
 
   void buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                          std::unordered_map<std::string, std::vector<Real>> & vec_map,
-                          const std::string & prefix = "") const;
+                          std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
 
-  virtual void getTuningData(const std::string & name,
-                             unsigned int & size,
-                             Real & min,
-                             Real & max,
-                             const std::string & prefix = "") const;
+  virtual void
+  getTuningData(const std::string & name, unsigned int & size, Real & min, Real & max) const;
 
   /// New function that stores all the types of all the nested covariances
   void dependentCovarianceTypes(std::map<UserObjectName, std::string> name_type_map) const;
@@ -46,10 +41,9 @@ public:
   virtual bool computedKdhyper(RealEigenMatrix & dKdhp,
                                const RealEigenMatrix & x,
                                const std::string & hyper_param_name,
-                               unsigned int ind,
-                               const std::string & prefix = "") const;
+                               unsigned int ind) const;
 
-  virtual bool isTunable(const std::string & name, const std::string & prefix = "") const;
+  virtual bool isTunable(const std::string & name) const;
 
   unsigned int numOutputs() const { return _num_outputs; }
 

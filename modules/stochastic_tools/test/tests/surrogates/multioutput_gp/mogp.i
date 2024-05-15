@@ -85,7 +85,7 @@
     covariance_function = 'covar'
     output_covariance = 'outcovar'
     sampler = sample
-    tune_parameters = 'signal_variance length_factor'
+    tune_parameters = 'covar:signal_variance covar:length_factor'
     iterations = 10000
     batch_size = 20
     learning_rate = 5e-4

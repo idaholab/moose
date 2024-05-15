@@ -42,8 +42,7 @@ bool
 CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
                                         const RealEigenMatrix & /*x*/,
                                         const std::string & /*hyper_param_name*/,
-                                        unsigned int /*ind*/,
-                                        const std::string & /*prefix*/) const
+                                        unsigned int /*ind*/) const
 {
   mooseError("Hyperparameter tuning not set up for this covariance function. Please define "
              "computedKdhyper() to compute gradient.");
@@ -54,9 +53,10 @@ CovarianceFunctionBase::addRealHyperParameter(const std::string & name,
                                               const Real value,
                                               const bool is_tunable)
 {
+  const auto prefixed_name = _name + ":" + name;
   if (is_tunable)
-    _tunable_hp.insert(name);
-  return _hp_map_real.emplace(name, value).first->second;
+    _tunable_hp.insert(prefixed_name);
+  return _hp_map_real.emplace(prefixed_name, value).first->second;
 }
 
 const std::vector<Real> &
@@ -64,30 +64,26 @@ CovarianceFunctionBase::addVectorRealHyperParameter(const std::string & name,
                                                     const std::vector<Real> value,
                                                     const bool is_tunable)
 {
+  const auto prefixed_name = _name + ":" + name;
   if (is_tunable)
-    _tunable_hp.insert(name);
-  return _hp_map_vector_real.emplace(name, value).first->second;
+    _tunable_hp.insert(prefixed_name);
+  return _hp_map_vector_real.emplace(prefixed_name, value).first->second;
 }
 
 bool
-CovarianceFunctionBase::isTunable(const std::string & name, const std::string & prefix) const
+CovarianceFunctionBase::isTunable(const std::string & name) const
 {
   // First, we check if the dependent covariances have the parameter
   for (const auto dependent_covar : _covariance_functions)
-  {
-    const std::string new_prefix = prefix + dependent_covar->name() + ":";
-    if (dependent_covar->isTunable(name, new_prefix))
+    if (dependent_covar->isTunable(name))
       return true;
-  }
 
-  const std::string name_without_prefix = name.substr(prefix.length());
-
-  if (_tunable_hp.find(name_without_prefix) != _tunable_hp.end())
+  if (_tunable_hp.find(name) != _tunable_hp.end())
     return true;
-  else if (_hp_map_real.find(name_without_prefix) != _hp_map_real.end() ||
-           _hp_map_vector_real.find(name_without_prefix) != _hp_map_vector_real.end())
+  else if (_hp_map_real.find(name) != _hp_map_real.end() ||
+           _hp_map_vector_real.find(name) != _hp_map_vector_real.end())
     mooseError("We found hyperparameter ",
-               name_without_prefix,
+               name,
                " in ",
                this->name(),
                " but it was not declared tunable!");
@@ -98,26 +94,22 @@ CovarianceFunctionBase::isTunable(const std::string & name, const std::string & 
 void
 CovarianceFunctionBase::loadHyperParamMap(
     const std::unordered_map<std::string, Real> & map,
-    const std::unordered_map<std::string, std::vector<Real>> & vec_map,
-    const std::string & prefix)
+    const std::unordered_map<std::string, std::vector<Real>> & vec_map)
 {
   // First, load the hyperparameters of the dependent covariance functions
   for (const auto dependent_covar : _covariance_functions)
-  {
-    const std::string new_prefix = prefix + dependent_covar->name() + ":";
-    dependent_covar->loadHyperParamMap(map, vec_map, new_prefix);
-  }
+    dependent_covar->loadHyperParamMap(map, vec_map);
 
   // Then we load the hyperparameters of this object
   for (auto & iter : _hp_map_real)
   {
-    const auto & map_iter = map.find(prefix + iter.first);
+    const auto & map_iter = map.find(iter.first);
     if (map_iter != map.end())
       iter.second = map_iter->second;
   }
   for (auto & iter : _hp_map_vector_real)
   {
-    const auto & map_iter = vec_map.find(prefix + iter.first);
+    const auto & map_iter = vec_map.find(iter.first);
     if (map_iter != vec_map.end())
       iter.second = map_iter->second;
   }
@@ -126,47 +118,37 @@ CovarianceFunctionBase::loadHyperParamMap(
 void
 CovarianceFunctionBase::buildHyperParamMap(
     std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & vec_map,
-    const std::string & prefix) const
+    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
   // First, add the hyperparameters of the dependent covariance functions
   for (const auto dependent_covar : _covariance_functions)
-  {
-    const std::string new_prefix = prefix + dependent_covar->name() + ":";
-    dependent_covar->buildHyperParamMap(map, vec_map, new_prefix);
-  }
+    dependent_covar->buildHyperParamMap(map, vec_map);
 
   // At the end we just append the hyperparameters this object owns
   for (const auto & iter : _hp_map_real)
-    map[prefix + iter.first] = iter.second;
+    map[iter.first] = iter.second;
   for (const auto & iter : _hp_map_vector_real)
-    vec_map[prefix + iter.first] = iter.second;
+    vec_map[iter.first] = iter.second;
 }
 
 void
 CovarianceFunctionBase::getTuningData(const std::string & name,
                                       unsigned int & size,
                                       Real & min,
-                                      Real & max,
-                                      const std::string & prefix) const
+                                      Real & max) const
 {
   min = 1e-9;
   max = 1e9;
 
   // First, check the dependent covariances
   for (const auto dependent_covar : _covariance_functions)
-  {
-    const std::string new_prefix = prefix + dependent_covar->name() + ":";
-    dependent_covar->getTuningData(name, size, min, max, new_prefix);
-  }
+    dependent_covar->getTuningData(name, size, min, max);
 
-  const std::string name_without_prefix = name.substr(prefix.length());
-
-  if (_hp_map_real.find(name_without_prefix) != _hp_map_real.end())
+  if (_hp_map_real.find(name) != _hp_map_real.end())
     size = 1;
-  else if (_hp_map_vector_real.find(name_without_prefix) != _hp_map_vector_real.end())
+  else if (_hp_map_vector_real.find(name) != _hp_map_vector_real.end())
   {
-    const auto & vector_value = _hp_map_vector_real.find(name_without_prefix);
+    const auto & vector_value = _hp_map_vector_real.find(name);
     size = vector_value->second.size();
   }
   else

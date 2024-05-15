@@ -75,7 +75,7 @@
     standardize_data = 'true'                 #Center and scale the training data
     sampler = sample
     response = results/data:avg:value
-    tune_parameters = ' signal_variance length_factor'
+    tune_parameters = 'rbf:signal_variance rbf:length_factor'
     tuning_algorithm = 'adam'
     tuning_min = ' 1e-9 1e-3'
     tuning_max = ' 100  100'

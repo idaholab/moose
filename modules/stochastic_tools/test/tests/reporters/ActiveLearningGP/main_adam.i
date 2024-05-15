@@ -85,7 +85,7 @@
     covariance_function = 'covar'
     standardize_params = 'true'
     standardize_data = 'true'
-    tune_parameters = 'signal_variance length_factor'
+    tune_parameters = 'covar:signal_variance covar:length_factor'
     tuning_algorithm = 'adam'
     iter_adam = 1000
     learning_rate_adam = 0.005
