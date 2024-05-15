@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex, json
+import threading, os, re, sys, datetime
 import paramiko
 from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
