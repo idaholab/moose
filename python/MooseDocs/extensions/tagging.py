@@ -53,6 +53,7 @@ class TaggingExtension(command.CommandExtension):
                                   "keys allowed.")
         config['js_file'] = (None,
                              "Javascript file used for filtering / search page.")
+        config['csv_file'] = (None, "CSV file used for examining the tag database")
         # Disable by default
         config['active'] = (False, config['active'][1])
         return config
@@ -90,14 +91,22 @@ class TaggingExtension(command.CommandExtension):
         At completion execution process, collect and process all current data attributes. Then,
         collect javascript template content, find/replace, and write to destination.
         """
+        # Helper for CSV data output
+        name_key_val_dict = {}
+        create_csv = (self['csv_file'] is not None)
+
+        # Data dictionary saved as a string
         replace_str = ""
         for iter in self.getAttributeItems():
             if bool(re.search('tag_', iter[0])):
                 tag_dict_str=str(iter[1])
-                key_list_regex=self._allowed_keys+['name', 'path', 'key_vals']
+                key_list_regex = ['name', 'path', 'key_vals'] + self._allowed_keys
                 for entry in key_list_regex:
-                    regex_replace=f"'{entry}':"
-                    tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
+
+                    # Remove single quotes around entry
+                    regex_replace = f"'{entry}':"
+                    tag_dict_str = re.sub(regex_replace, entry+':', tag_dict_str)
+
                     # add relative link built from the path at the end of the tagging entry
                     if (entry == 'path'):
                         path_value = tag_dict_str.split("path: ")[1].split(',')[0].replace("'", "")
@@ -140,6 +149,10 @@ class TaggingExtension(command.CommandExtension):
                 else:
                     replace_str += "," + tag_dict_str
 
+            # Save some data for the CSV output
+            if (create_csv):
+                name_key_val_dict[iter[1]['name']] = iter[1]['key_vals']
+
         # Replace the dummy tag dictionary in the JS file with the collected dictionary from parsing the pages
         replace_str = "{data:[" + replace_str + "]}"
 
@@ -160,6 +173,31 @@ class TaggingExtension(command.CommandExtension):
         with open(js_dest_path, 'w') as f:
             f.writelines(content)
             f.close()
+
+        # Write the CSV file if requested
+        if (create_csv):
+            csv_path = self['csv_file']
+            entry_names = name_key_val_dict.keys()
+            # Get all the unique keys, sort them
+            all_keys = []
+            for each_dict in  name_key_val_dict.values():
+                all_keys += each_dict.keys()
+            all_keys = list(set(all_keys))
+            all_keys.sort()
+
+            # Fill in missing keys for tags that dont have them all
+            for entry in entry_names:
+                for key in all_keys:
+                    name_key_val_dict[entry].setdefault(key, ' - ')
+
+            with open(csv_path,'w') as f:
+                # Write out 'names' (the word) then keys as a header
+                f.write('names,' + ",".join(all_keys) + "\n")
+                for entry in entry_names:
+                    # Write the name (remove commas) and all all the values
+                    entry_dict = dict(sorted(name_key_val_dict[entry].items()))
+                    f.write(entry.replace(",", "") + ',' + ",".join(entry_dict.values()) + "\n")
+                f.close()
 
 
 class TaggingCommand(command.CommandComponent):
