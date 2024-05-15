@@ -39,7 +39,7 @@ class HPCRunner(Runner):
         # This gets a structure that represents the job, and the
         # polling itself is only done on occasion within RunHPC
         while True:
-            time.sleep(1)
+            time.sleep(0.1)
             hpc_job = self.run_hpc.getHPCJob(self.job)
 
             # We're done
@@ -79,7 +79,7 @@ class HPCRunner(Runner):
         incomplete_files = set()
 
         # Wait for all of the files to be available
-        file_poll_interval = 0.25
+        file_poll_interval = 0.1
         waited_time = 0
         while wait_files or incomplete_files:
             # Look for each file
