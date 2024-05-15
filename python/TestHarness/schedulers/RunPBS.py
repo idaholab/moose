@@ -53,7 +53,7 @@ class RunPBS(RunHPC):
                         'COMMAND_PRINTABLE': job_data.command_printable,
                         'ENDING_COMMENT': self.getOutputEndingComment(),
                         'MOOSE_PYTHONPATH': moose_python,
-                        'OUTPUT_FILES': job_data.output_files}
+                        'ADDITIONAL_OUTPUT_FILES': job_data.additional_output_files}
         if self.options.queue_queue:
             template_env['QUEUE'] = options.queue_queue
         if self.options.queue_source_command:
