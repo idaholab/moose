@@ -27,6 +27,12 @@ class HPCRunner(Runner):
         # just hang forever
         self.wait_output_time = 120
 
+        # Interval in seconds for polling for job status
+        self.job_status_poll_time = 0.1
+
+        # Interval in seconds for polling for file completion
+        self.file_completion_poll_time = 0.1
+
     def spawn(self, timer):
         self.run_hpc.submitJob(self.job)
         timer.start()
@@ -39,7 +45,7 @@ class HPCRunner(Runner):
         # This gets a structure that represents the job, and the
         # polling itself is only done on occasion within RunHPC
         while True:
-            time.sleep(0.1)
+            time.sleep(self.job_status_poll_time)
             hpc_job = self.run_hpc.getHPCJob(self.job)
 
             # We're done
@@ -79,7 +85,6 @@ class HPCRunner(Runner):
         incomplete_files = set()
 
         # Wait for all of the files to be available
-        file_poll_interval = 0.1
         waited_time = 0
         while wait_files or incomplete_files:
             # Look for each file
@@ -112,8 +117,8 @@ class HPCRunner(Runner):
                 print_files(incomplete_files, 'Incomplete')
                 break
 
-            waited_time += file_poll_interval
-            time.sleep(file_poll_interval)
+            waited_time += self.file_completion_poll_time
+            time.sleep(self.file_completion_poll_time)
 
     def kill(self):
         self.run_hpc.killJob(self.job)
