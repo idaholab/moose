@@ -154,7 +154,7 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 void
 EigenProblem::execute(const ExecFlagType & exec_type)
 {
-  if (exec_type == EXEC_INITIAL)
+  if (exec_type == EXEC_INITIAL && !_app.isRestarting())
     // we need to scale the solution properly and we can do this only all initial setup of
     // depending objects by the residual evaluations has been done to this point.
     preScaleEigenVector(std::pair<Real, Real>(_initial_eigenvalue, 0));

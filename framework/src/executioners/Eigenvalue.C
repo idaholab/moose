@@ -169,7 +169,7 @@ Eigenvalue::init()
   // a random vector as the initial guess. The motivation to offer this option is
   // that we have to initialize ONLY eigen variables in multiphysics simulation.
   // auto_initialization can be overriden by initial conditions.
-  if (getParam<bool>("auto_initialization"))
+  if (getParam<bool>("auto_initialization") && !_app.isRestarting())
     _eigen_problem.initEigenvector(1.0);
 
   // Some setup

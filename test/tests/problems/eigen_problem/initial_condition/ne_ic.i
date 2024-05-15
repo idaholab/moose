@@ -65,5 +65,6 @@
 [Outputs]
   exodus = true
   csv = true
+  checkpoint = true
   execute_on = 'timestep_end'
 []
