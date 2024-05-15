@@ -36,9 +36,12 @@ class SchemaDiff(RunApp):
         # So that derived classes can internally pass skip regex paths
         self.exclude_regex_paths = []
 
+    def getOutputFiles(self, options):
+        return self.specs['schemadiff']
+
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
+            util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
 
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
