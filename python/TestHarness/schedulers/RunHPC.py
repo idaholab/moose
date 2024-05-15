@@ -200,7 +200,7 @@ class RunHPC(RunParallel):
             # The combined stdout+stderr output file
             self.output_file = None
             # The additonal output files to be read (csv, exodus, etc)
-            self.output_files = None
+            self.additional_output_files = None
             # The path to the submission script
             self.submission_script = None
             # The walltime to run the job with
@@ -247,7 +247,7 @@ class RunHPC(RunParallel):
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
             # Separate out the MPI command
-            mpi_command = self.escapeCommand(self.parseMPICommand())
+            mpi_command = self.escapeCommand(self.parseMPICommand(command))
             # Add MPI command as the prefix and remove it from the base command
             if mpi_command:
                 command_prefix = mpi_command
@@ -281,10 +281,10 @@ class RunHPC(RunParallel):
         # The output files that we're expected to generate so that the
         # HPC job can add a terminator for them so that we can verify
         # they are complete on the executing host
-        job_data.output_files = []
+        additional_output = []
         for file in tester.getOutputFiles(options):
-            job_data.output_files.append(f'"{os.path.join(tester.getTestDir(), file)}"')
-        job_data.output_files = ' '.join(job_data.output_files)
+            additional_output.append(f'"{os.path.join(tester.getTestDir(), file)}"')
+        job_data.additional_output_files = ' '.join(additional_output)
 
         # Let the derived class actually submit the job
         job_id = self._submitJob(job, job_data)

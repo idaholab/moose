@@ -57,8 +57,8 @@ echo "Completed TestHarness RunHPC test execution; exit code = $return_code"
 echo "################################################################################"
 
 # Append a terminator to all of the output files for file syncing across NFS
-OUTPUT_FILES=({{ OUTPUT_FILES }})
-for file in ${OUTPUT_FILES[@]}; do
+ADDITIONAL_OUTPUT_FILES=({{ ADDITIONAL_OUTPUT_FILES }})
+for file in ${ADDITIONAL_OUTPUT_FILES[@]}; do
     if [ ! -e "$file" ]; then
         continue
     fi
