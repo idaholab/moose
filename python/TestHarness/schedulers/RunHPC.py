@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime, json
+import threading, os, re, sys, datetime, shlex
 import paramiko
 from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
@@ -209,10 +209,14 @@ class RunHPC(RunParallel):
     @staticmethod
     def escapeCommand(command: str) -> str:
         """
-        Escapes quotes and newlines in a command.
+        Escapes a command for use as a bash command
         """
         if command:
-            return json.dumps(command.replace('\n', ' '))[1:-1]
+            # escape for bash; [1:-1] removes start+end quotes
+            command = shlex.quote(command)[1:-1]
+            # remove newlines
+            command = command.replace('\n', ' ')
+            return command
         return ''
 
     def submitJob(self, job):

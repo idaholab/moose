@@ -25,7 +25,7 @@ export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 echo "################################################################################"
 echo "TestHarness RunPBS job on $(hostname) in job ${PBS_JOBID}"
 echo "Time: $(date)"
-echo "Test: {{ TEST_NAME }}"
+echo "Test: {{ TEST_SPEC }}:{{ TEST_NAME }}"
 echo "Directory: {{ CWD }}"
 echo "Command: {{ COMMAND_PRINTABLE }}"
 echo "Submitted hostname: {{ SUBMITTED_HOSTNAME }}"
