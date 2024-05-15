@@ -44,12 +44,13 @@ class RunPBS(RunHPC):
                         'WALLTIME': job_data.walltime,
                         'PROJECT': self.options.queue_project,
                         'OUTPUT': job_data.output_file,
+                        'SUBMISSION_SCRIPT': job_data.submission_script,
                         'PLACE': 'scatter',
                         'TEST_NAME': tester.getTestName(),
                         'SUBMITTED_HOSTNAME': socket.gethostname(),
                         'CWD': tester.getTestDir(),
                         'COMMAND': job_data.command,
-                        'ESCAPED_COMMAND': json.dumps(job_data.command),
+                        'COMMAND_PRINTABLE': job_data.command_printable,
                         'ENDING_COMMENT': self.getOutputEndingComment(),
                         'MOOSE_PYTHONPATH': moose_python,
                         'OUTPUT_FILES': job_data.output_files}
@@ -68,12 +69,12 @@ class RunPBS(RunHPC):
         script = definition_template.render(**template_env)
 
         # Write the script
-        open(job_data.submission_file, 'w').write(script)
+        open(job_data.submission_script, 'w').write(script)
 
         # Submission command. Here we have a simple bash loop
         # that will try to wait for the file if it doesn't exist yet
         qsub_command = [f'cd {tester.getTestDir()}',
-                        f'FILE="{job_data.submission_file}"',
+                        f'FILE="{job_data.submission_script}"',
                         'for i in {1..40}',
                             'do if [ -e "$FILE" ]',
                                 'then qsub $FILE',
