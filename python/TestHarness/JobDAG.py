@@ -52,7 +52,7 @@ class JobDAG(object):
         self.__name_to_job = {}
         for tester in testers:
             job = Job(tester, self, self.options)
-            name = job.getTestName()
+            name = job.getTestNameShort()
             if name not in self.__name_to_job:
                 self.__name_to_job[name] = job
             else:
@@ -155,7 +155,7 @@ class JobDAG(object):
 
                 # test file has invalid prereq set
                 except KeyError:
-                    job.setStatus(job.error, 'unknown dependency')
+                    job.setStatus(job.error, f'unknown dependency {prereq_job}')
 
     def _fix_cornercases(self, prereq_job, job):
         """
