@@ -206,23 +206,6 @@ class RunHPC(RunParallel):
             # The walltime to run the job with
             self.walltime = None
 
-    @staticmethod
-    def escapeCommand(command: str) -> str:
-        """
-        Escapes a command for use as a bash command
-        """
-        if command:
-            # For the following, [1:-1] removes the additional
-            # quotes that were added to wrap the command
-            # General escape for bash
-            command = shlex.quote(command)[1:-1]
-            # Escape ' and ""
-            command = json.dumps(command)[1:-1]
-            # Remove newlines
-            command = command.replace('\n', ' ')
-            return command
-        return ''
-
     def submitJob(self, job):
         """
         Method for submitting an HPC job for the given Job.
@@ -243,19 +226,25 @@ class RunHPC(RunParallel):
             if os.path.exists(file):
                 os.remove(file)
 
-        # The escaped command to be ran
-        command = self.escapeCommand(tester.getCommand(options))
+        # The command to be ran. We're going to wrap this command in single quotes
+        # so that we don't bash evaluate anything, hence the replacement of a
+        # single quote. Yes, this truly is madness. But it looks like it works.
+        # Pro tip: don't ever have to run things in bash with complex syntax
+        # that is quite bash like.
+        command = tester.getCommand(options)
+        command = command.replace('\n', ' ')
+        command = command.replace("'", "\'\\'\'")
 
         # Special logic for when we're running with apptainer, in which case
         # we need to manipulate the command like such
         # Original command: <mpiexec ...> </path/to/binary ...>
-        # New command: <mpiexec ...> apptainer exec /path/to/image "</path/to/binary ...>"
+        # New command: <mpiexec ...> apptainer exec /path/to/image '</path/to/binary ...>'
         # This is also the reason why we have to form job_data.command_printable;
         # the extra quotes around </path/to/binary ...> need to be escaped.
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
             # Separate out the MPI command
-            mpi_command = self.escapeCommand(self.parseMPICommand(command))
+            mpi_command = self.parseMPICommand(command)
             # Add MPI command as the prefix and remove it from the base command
             if mpi_command:
                 command_prefix = mpi_command
@@ -272,14 +261,13 @@ class RunHPC(RunParallel):
             root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
             # The apptainer command that will get sandwiched in the middle
             apptainer_command = f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER}'
-            apptainer_command = self.escapeCommand(apptainer_command)
             # Append the apptainer command along with the command to be ran
-            job_data.command += f'{apptainer_command} "{command}"'
-            job_data.command_printable += f'{apptainer_command} \\"{command}\\"'
+            job_data.command += f"{apptainer_command} '{command}'"
+            job_data.command_printable += f"{apptainer_command} \'\\'\'{command}\'\\'\'"
         # Not in apptainer, so we can just use the escaped command as is
         else:
-            job_data.command = command
-            job_data.command_printable = command
+            job_data.command = f"'{command}'"
+            job_data.command_printable += f"\'\\'\'{command}\'\\'\'"
 
         job_data.name = self.getHPCJobName(job)
         job_data.num_procs = tester.getProcs(options)
