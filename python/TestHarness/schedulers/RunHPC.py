@@ -247,13 +247,17 @@ class RunHPC(RunParallel):
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
             # Separate out the MPI command
-            mpi_command = self.escapeCommand(self.parseMPICommand(command))
-            # Remove the MPI command from the run command
-            command = command.replace(mpi_command, '')
+            mpi_command = self.escapeCommand(self.parseMPICommand())
+            # Add MPI command as the prefix and remove it from the base command
+            if mpi_command:
+                command_prefix = mpi_command
+                command = command.replace(mpi_command, '')
+            # No MPI command; nothing to do
+            else:
+                command_prefix = ''
 
-            # Start with the mpiexec call
-            job_data.command = mpi_command
-            job_data.command_printable = mpi_command
+            job_data.command = command_prefix
+            job_data.command_printable = command_prefix
 
             # The root filesystem path that we're in so that we can be sure to bind
             # it into the container
