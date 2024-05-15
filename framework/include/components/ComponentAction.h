@@ -11,8 +11,10 @@
 
 // MOOSE includes
 #include "Action.h"
+#include "ActionWarehouse.h"
 
 class PhysicsBase;
+class FEProblem;
 
 /**
  * Base class for components that are defined using an action
@@ -49,11 +51,30 @@ protected:
 
   virtual void addPhysics() {};
 
+  /// Get problem from action warehouse
+  FEProblem & getProblem()
+  {
+    mooseAssert(_awh.problem().get(), "There should be a problem");
+    return *_awh.problem().get();
+  }
+
+  /// Return the outer surface boundaries
+  const std::vector<BoundaryName> & outerSurfaceBoundaries();
+
+  /// Return the component volume
+  Real volume() = 0;
+
+  /// Return the component outer boundary area
+  Real outerSurfaceArea() = 0;
+
   /// Maximum dimension of the component
   unsigned int _dimension;
 
   /// Name of the final mesh generator creating the mesh for the component
   MeshGeneratorName _mg_name;
+
+  /// Names of the boundaries on the component outer surface
+  std::vector<BoundaryName> _outer_boundaries;
 
   /// Pointers to the Physics defined on the component
   std::vector<PhysicsBase *> _physics;
