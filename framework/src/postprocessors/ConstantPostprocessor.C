@@ -25,6 +25,11 @@ ConstantPostprocessor::validParams()
 ConstantPostprocessor::ConstantPostprocessor(const InputParameters & params)
   : GeneralPostprocessor(params), _value(getParam<Real>("value"))
 {
+  const PostprocessorReporterName r_name(name());
+  auto & write_data = _fe_problem.getReporterData(ReporterData::WriteKey());
+
+  // Initialize value
+  write_data.setReporterValue<PostprocessorValue>(r_name, _value);
 }
 
 Real

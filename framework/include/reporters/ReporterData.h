@@ -63,6 +63,7 @@ public:
     friend class Reporter;
     friend class Postprocessor;
     friend class Receiver;
+    friend class ConstantPostprocessor;
     friend class VectorPostprocessor;
     friend class ReporterTransferInterface;
   };

@@ -98,7 +98,18 @@
       cli_args = '--mesh-only'
       exodiff = 'xydelaunay_area_func_in.e'
       recover = false
-      detail = "with optional non-uniform refinement."
+      detail = "with optional non-uniform refinement based on a custom function."
+    []
+    [auto_area_func]
+      type = 'CSVDiff'
+      input = 'xydelaunay_auto_area_func.i'
+      csvdiff = 'xydelaunay_auto_area_func_out.csv'
+      # Use a loose tolerance to accomodate the randomless in triangulation when using different number of processors
+      override_columns = 'avg_quality elem_size'
+      override_rel_err = '1.0e-1 1.0e-1'
+      override_abs_zero = '1.0e-10 1.0e-10'
+      recover = false
+      detail = "with optional non-uniform refinement based on an automatically generated function."
     []
   []
   [errors]
@@ -111,6 +122,22 @@
                   Mesh/triang/holes="hole_1_name hole_2_name_2"'
       expect_err = "The hole meshes contain subdomain name maps with conflicts."
       detail = "if the input hole meshes contain subdomain name maps with conflicts"
+    []
+    [err_redundant_area_limits]
+      type = RunException
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/triang/use_auto_area_func="true"'
+      expect_err = "Only one of the three methods"
+      detail = "if more than one element area limiting methods are specified by the user"
+    []
+    [err_unneeded_auto_area_func_params]
+      type = RunException
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/triang/auto_area_function_power=2'
+      expect_err = "the following parameters should not be set"
+      detail = "if the user specifies parameters for the auto area function when it is not used"
     []
   []
 []
