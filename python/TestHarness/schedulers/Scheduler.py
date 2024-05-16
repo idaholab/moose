@@ -253,7 +253,7 @@ class Scheduler(MooseObject):
         j_dag = jobs.createJobs(testers)
 
         # Allow derived schedulers access to the jobs before they launch
-        self.augmentJobs(jobs)
+        self.augmentJobs(jobs.getJobs())
 
         # job-count to tester-count sanity check
         if j_dag.size() != len(testers):
