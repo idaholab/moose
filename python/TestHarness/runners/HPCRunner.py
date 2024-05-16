@@ -26,6 +26,9 @@ class HPCRunner(Runner):
         # Interval in seconds for polling for file completion
         self.file_completion_poll_time = 0.1
 
+        # Whether or not the primary output has been loaded fully
+        self.output_completed = False
+
     def spawn(self, timer):
         # Rely on the RunHPC object to submit the job
         self.run_hpc.submitJob(self.job)
@@ -59,8 +62,12 @@ class HPCRunner(Runner):
             if self.exit_code is None:
                 self.exit_code = -1
 
-            # If we have output, we should try to add it
-            self.trySetOutput()
+            # If we have _some_ output, at least try to load it.
+            # Try this for 10s and then call it a loss
+            for i in range(40):
+                if self.trySetOutput():
+                    break
+                time.sleep(0.25)
 
             # Don't bother looking for the rest of the output
             return
@@ -103,7 +110,7 @@ class HPCRunner(Runner):
             # We've waited for files for too long
             if (wait_files or incomplete_files) and waited_time >= self.options.hpc_file_timeout:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
-                if self.output is None:
+                if not self.output_completed:
                     self.trySetOutput()
                 def print_files(files, type):
                     if files:
@@ -139,7 +146,6 @@ class HPCRunner(Runner):
         # Whether or not we actually set it
         did_set = False
 
-        # Only do something if the output actually exists
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
@@ -161,9 +167,12 @@ class HPCRunner(Runner):
             except:
                 pass
 
-        # If required and we didn't load it, mark this error
-        if required and not did_set:
-            self.job.setStatus(self.job.error, 'FAILED OUTPUT READ')
+        if did_set:
+            self.output_completed = True
+        else:
+            self.output = f'Failed to load output file {output_file}\n'
+            if required:
+                self.job.setStatus(self.job.error, 'FAILED OUTPUT READ')
 
         return did_set
 
