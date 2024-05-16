@@ -277,7 +277,7 @@ class HPCRunner(Runner):
             return line, pos
 
     @staticmethod
-    def readTruncated(file, start_lines=1000, end_lines=1000):
+    def readTruncated(file, start_lines=500, end_lines=500):
         """
         Reads a file and truncates it past a certain amount of lines.
         """
