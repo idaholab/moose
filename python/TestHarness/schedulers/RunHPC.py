@@ -340,6 +340,17 @@ class RunHPC(RunParallel):
         from TestHarness.runners.HPCRunner import HPCRunner
         return HPCRunner(job, options, self)
 
+    def augmentJobs(self, jobs):
+        super().augmentJobs(jobs)
+
+        # If a job has its default time, double it. We grant a little more time
+        # to small jobs on HPC due to slower IO, etc
+        for job in jobs:
+            tester = job.getTester()
+            max_time = tester.getMaxTime()
+            if max_time == tester.getDefaultMaxTime():
+                tester.setMaxTime(max_time * 2)
+
     @staticmethod
     def getHPCJobName(job) -> str:
         """Gets the name of the HPC job given a tester

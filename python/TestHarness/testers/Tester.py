@@ -25,10 +25,10 @@ class Tester(MooseObject):
         params = MooseObject.validParams()
 
         # Common Options
-        params.addRequiredParam('type', "The type of test of Tester to create for this test.")
-        params.addParam('max_time',   int(os.getenv('MOOSE_TEST_MAX_TIME', 300)), "The maximum in seconds that the test will be allowed to run.")
-        params.addParam('skip',     "Provide a reason this test will be skipped.")
-        params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
+        params.addRequiredParam('type',   "The type of test of Tester to create for this test.")
+        params.addParam('max_time',       Tester.getDefaultMaxTime(), "The maximum in seconds that the test will be allowed to run.")
+        params.addParam('skip',           "Provide a reason this test will be skipped.")
+        params.addParam('deleted',        "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
         params.addParam('unique_test_id', "The unique hash given to a test")
 
         params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
@@ -301,6 +301,19 @@ class Tester(MooseObject):
         """ return maximum time elapse before reporting a 'timeout' status """
         return float(self.specs['max_time'])
 
+    def setMaxTime(self, value):
+        """
+        Sets the max time for the job
+        """
+        self.specs['max_time'] = float(value)
+
+    @staticmethod
+    def getDefaultMaxTime():
+        """
+        Gets the default max run time
+        """
+        return int(os.getenv('MOOSE_TEST_MAX_TIME', 300))
+
     def getUniqueTestID(self):
         """ return unique hash for test """
         return self.specs['unique_test_id']
@@ -329,9 +342,9 @@ class Tester(MooseObject):
     def setValgrindMode(self, mode):
         """ Increase the alloted time for tests when running with the valgrind option """
         if mode == 'NORMAL':
-            self.specs['max_time'] = float(self.specs['max_time']) * 2
+            self.setMaxTime(self.getMaxTime() * 2)
         elif mode == 'HEAVY':
-            self.specs['max_time'] = float(self.specs['max_time']) * 6
+            self.setMaxTime(self.getMaxTime() * 6)
 
     def checkRunnable(self, options):
         """
