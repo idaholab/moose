@@ -15,6 +15,7 @@ from time import sleep
 from timeit import default_timer as clock
 from multiprocessing.pool import ThreadPool
 import threading # for thread locking and thread timers
+import pyhit
 
 class SchedulerError(Exception):
     pass
@@ -247,9 +248,16 @@ class Scheduler(MooseObject):
         # If we are not to schedule any more jobs for some reason, return now
         if self.__error_state:
             return
+        # Nothing to do if there aren't any testers
+        if not testers:
+            return
+
+        # Whether or not we have parallel scheduling
+        root = pyhit.load(testers[0].getSpecFile())
+        parallel_scheduling = root.children[0].get('parallel_scheduling', False)
 
         # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)
-        jobs = JobDAG(self.options)
+        jobs = JobDAG(self.options, parallel_scheduling)
         j_dag = jobs.createJobs(testers)
 
         # Allow derived schedulers access to the jobs before they launch
