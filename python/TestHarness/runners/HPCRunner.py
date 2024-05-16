@@ -63,11 +63,10 @@ class HPCRunner(Runner):
                 self.exit_code = -1
 
             # If we have _some_ output, at least try to load it.
-            # Try this for 10s and then call it a loss
-            for i in range(40):
+            for i in range(int(self.options.hpc_file_timeout / self.file_completion_poll_time)):
                 if self.trySetOutput():
                     break
-                time.sleep(0.25)
+                time.sleep(self.file_completion_poll_time)
 
             # Don't bother looking for the rest of the output
             return
