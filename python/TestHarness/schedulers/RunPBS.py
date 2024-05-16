@@ -42,7 +42,7 @@ class RunPBS(RunHPC):
         template_env = {'NAME': job_data.name,
                         'SELECT': f'{job_data.num_procs}:mpiprocs=1:ncpus={job_data.num_threads}',
                         'WALLTIME': job_data.walltime,
-                        'PROJECT': self.options.queue_project,
+                        'PROJECT': self.options.pbs_project,
                         'OUTPUT': job_data.output_file,
                         'SUBMISSION_SCRIPT': job_data.submission_script,
                         'PLACE': 'scatter',
@@ -55,10 +55,10 @@ class RunPBS(RunHPC):
                         'ENDING_COMMENT': self.getOutputEndingComment(),
                         'MOOSE_PYTHONPATH': moose_python,
                         'ADDITIONAL_OUTPUT_FILES': job_data.additional_output_files}
-        if self.options.queue_queue:
-            template_env['QUEUE'] = options.queue_queue
-        if self.options.queue_source_command:
-            template_env['SOURCE_FILE'] = options.queue_source_command
+        if self.options.hpc_queue:
+            template_env['QUEUE'] = options.hpc_queue
+        if self.options.hpc_pre_source:
+            template_env['SOURCE_FILE'] = options.hpc_pre_source
         if self.source_contents:
             template_env['SOURCE_CONTENTS'] = self.source_contents
 

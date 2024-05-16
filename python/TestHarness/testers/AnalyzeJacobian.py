@@ -90,9 +90,9 @@ class AnalyzeJacobian(FileTester):
         return output
 
     def checkRunnable(self, options):
-        # We cannot rely on an external script running things with PBS
-        if options.pbs:
-            self.addCaveats('PBS NOT SUPPORTED')
+        # We cannot rely on an external script running things within HPC
+        if options.hpc:
+            self.addCaveats('hpc unsupported')
             self.setStatus(self.skip)
             return False
 
