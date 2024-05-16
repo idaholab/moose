@@ -9,34 +9,16 @@
 
 from .schedulers.Job import Job
 from contrib import dag
-import pyhit
-import os
 import sys
 import threading
 
 class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
-    def __init__(self, options):
-        self.__job_dag = dag.DAG()
-        self.__parallel_scheduling = None
-        self.__j_lock = threading.Lock()
+    def __init__(self, options, parallel_scheduling):
         self.options = options
-
-    def _setParallel(self):
-        """ Read the test spec file and determine if parallel_scheduling is set. """
-        if self.__parallel_scheduling is not None:
-            return self.__parallel_scheduling
-        self.__parallel_scheduling = False
-
-        job = self.getJob()
-        if job:
-            # We only need a single tester so we know what spec file to load.
-            # TODO: would be nice to have access to this without needing tester.specs
-            tester = job[0].getTester()
-            root = pyhit.load(os.path.join(tester.specs['test_dir'], tester.specs['spec_file']))
-            self.__parallel_scheduling = root.children[0].get('parallel_scheduling', False)
-
-        return self.__parallel_scheduling
+        self.__parallel_scheduling = parallel_scheduling
+        self.__job_dag = dag.DAG()
+        self.__j_lock = threading.Lock()
 
     def getLock(self):
         """ Return the lock for this test spec (folder of jobs) """
@@ -44,7 +26,7 @@ class JobDAG(object):
 
     def canParallel(self):
         """ Return bool whether or not this group runs in parallel """
-        return self._setParallel()
+        return self.__parallel_scheduling
 
     def createJobs(self, testers):
         """ Return a usable Job DAG based on supplied list of tester objects """
@@ -66,18 +48,12 @@ class JobDAG(object):
         """ return the running DAG object """
         return self.__job_dag
 
-    def getJobs(self):
+    def getAvailableJobs(self):
         """ Return a list of available jobs """
+        available_jobs = [job for job in self.__job_dag.ind_nodes() if job.isHold()]
         if self.canParallel() and not self.options.pedantic_checks:
-            return self.__job_dag.ind_nodes()
-        return self.getJob()
-
-    def getJob(self):
-        """ Return a single available job """
-        concurrent_jobs = self.__job_dag.ind_nodes()
-        if [x for x in concurrent_jobs if x.isHold()]:
-            return [[x for x in concurrent_jobs if x.isHold()][0]]
-        return []
+            return available_jobs
+        return available_jobs[0:1]
 
     def getJobsAndAdvance(self):
         """
@@ -92,7 +68,7 @@ class JobDAG(object):
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
 
-        next_jobs.update(self.getJobs())
+        next_jobs.update(self.getAvailableJobs())
         return next_jobs
 
     def removeAllDependencies(self):
@@ -298,7 +274,7 @@ class JobDAG(object):
             # Multiple tests will clobber eachothers output file
             # Only check this with parallel_scheduling enabled because otherwise
             # all of these jobs will be serialized
-            elif len(job_list) > 1 and self._setParallel():
+            elif len(job_list) > 1 and self.canParallel():
                 for job in job_list:
                     job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
                     job.setStatus(job.error, 'OUTFILE RACE CONDITION')
