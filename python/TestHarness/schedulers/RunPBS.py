@@ -144,13 +144,17 @@ class RunPBS(RunHPC):
                 done = exit_code is not None or terminated
 
                 # Get the job state, and report running if it switched to running
-                if state == 'R' and pbs_job.state != 'R':
+                if state == 'R' and not pbs_job.running:
+                    pbs_job.running = True
                     self.setAndOutputJobStatus(job, job.running)
+
+                # If we were running but now we're done, we're not running anymore
+                if pbs_job.running and done:
+                    pbs_job.running = False
 
                 # Update the PBSJob structure
                 pbs_job.done = done
                 pbs_job.exit_code = exit_code
-                pbs_job.state = state
 
                 # Negative exit code, means PBS killed it for some reason
                 # Try to find it in our pbs exit code list to return something useful
