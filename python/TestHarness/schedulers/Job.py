@@ -275,8 +275,7 @@ class Job(object):
 
     def getOutputFile(self):
         """ Return the output file path """
-        if ((self.options.pbs
-             or self.options.ok_files
+        if ((self.options.ok_files
              or self.options.fail_files
              or self.options.sep_files)
              and (self.isPass() or self.isFail())):

@@ -120,7 +120,7 @@ class RunApp(Tester):
                 return False
 
         if options.pbs and self.specs.isValid('command_proxy') and os.environ.get('APPTAINER_CONTAINER') is not None:
-            self.addCaveats('PBS NOT SUPPORTED')
+            self.addCaveats('hpc unsupported')
             self.setStatus(self.skip)
             return False
 

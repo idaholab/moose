@@ -41,7 +41,7 @@ class RunHPC(RunParallel):
         self.hpc_jobs = {}
 
         # The jump hostname for running commands, if any
-        self.ssh_host = self.options.queue_host
+        self.ssh_host = self.options.hpc_host
         # The SSH key to use for connections
         self.ssh_key_filename = None
         # The pool of processes for running threaded SSH comments
@@ -77,19 +77,25 @@ class RunHPC(RunParallel):
             if not self.ssh_host:
                 print('ERROR: --hpc-host must be set when using HPC jobs within apptainer')
                 sys.exit(1)
-            if not self.options.queue_source_command:
+            if not self.options.hpc_pre_source:
                 default_pre_source =  os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_source')
-                self.options.queue_source_command = default_pre_source
+                self.options.hpc_pre_source = default_pre_source
                 print(f'INFO: Setting --hpc-pre-source={default_pre_source}')
 
-        if self.options.queue_source_command and not os.path.exists(self.options.queue_source_command):
-            print(f'ERROR: --hpc-pre-source path {self.options.queue_source_command} does not exist')
+        if self.options.hpc_pre_source and not os.path.exists(self.options.hpc_pre_source):
+            print(f'ERROR: --hpc-pre-source path {self.options.hpc_pre_source} does not exist')
+            sys.exit(1)
+        if self.options.hpc and self.options.pedantic_checks:
+            print('ERROR: --hpc and --pedantic-checks cannot be used simultaneously')
+            sys.exit(1)
+        if self.options.hpc and self.options.jobs:
+            print('ERROR: --hpc and -j|--jobs cannot be used simultaneously')
             sys.exit(1)
 
         # Load the pre-source if it exists
         self.source_contents = None
-        if self.options.queue_source_command:
-            self.source_contents = open(self.options.queue_source_command, 'r').read()
+        if self.options.hpc_pre_source:
+            self.source_contents = open(self.options.hpc_pre_source, 'r').read()
 
     class HPCJob:
         """

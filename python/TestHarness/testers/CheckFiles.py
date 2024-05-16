@@ -78,8 +78,8 @@ class CheckFiles(FileTester):
 
     def checkRunnable(self, options):
         # We cannot reliably check if files do not exist with a networked file system
-        if options.pbs and self.specs['check_not_exists']:
-            self.addCaveats('PBS NOT SUPPORTED')
+        if options.hpc and self.specs['check_not_exists']:
+            self.addCaveats('hpc unsupported')
             self.setStatus(self.skip)
             return False
 
