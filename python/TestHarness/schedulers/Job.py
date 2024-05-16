@@ -252,6 +252,15 @@ class Job(object):
         self.__end_time = self.timer.ends[-1]
         self.__joined_out = self.__tester.getOutput()
 
+        # Remove NULL output and fail if it exists
+        if self.__joined_out:
+            null_chars = ['\0', '\x00']
+            for null_char in null_chars:
+                if null_char in self.__joined_out:
+                    self.__joined_out = self.__joined_out.replace(null_char, 'NULL')
+                    if not self.isFail():
+                        self.setStatus(self.error, f'NULL characters in output')
+
         if self.options.pedantic_checks and self.canParallel():
             # Check if the files we checked on earlier were modified.
             self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
