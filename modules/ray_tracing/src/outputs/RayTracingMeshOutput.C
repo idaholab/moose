@@ -69,8 +69,6 @@ RayTracingMeshOutput::RayTracingMeshOutput(const InputParameters & params)
     _pid_var(invalid_uint),
     _processor_crossings_var(invalid_uint),
     _trajectory_changes_var(invalid_uint),
-    _data_start_var(invalid_uint),
-    _aux_data_start_var(invalid_uint),
     _segmented_rays(false)
 {
   if ((_output_data || _output_data_names) && !_study.dataOnCacheTraces())
@@ -588,13 +586,11 @@ RayTracingMeshOutput::fillFields()
   };
 
   // Helper for filling data and aux data (if enabled)
-  const auto fill_data = [&set_solution](const DofObject * const dof,
-                                         const auto & vars,
-                                         const unsigned int start_var,
-                                         const auto & data)
+  const auto fill_data =
+      [&set_solution](const DofObject * const dof, const auto & vars, const auto & data)
   {
     mooseAssert(dof, "Nullptr dof");
-    for (const auto & [data_index, var_num])
+    for (const auto & [data_index, var_num] : vars)
       set_solution(dof, var_num, data[data_index]);
   };
 
@@ -632,13 +628,14 @@ RayTracingMeshOutput::fillFields()
         set_solution(elem, _processor_crossings_var, trace_data._processor_crossings);
         set_solution(elem, _trajectory_changes_var, trace_data._trajectory_changes);
       }
-      // Elemental data fields
       const auto & point_data = trace_data._point_data[i];
-      fill_data(elem, _data_vars, point_data._data);
-      fill_data(elem, _aux_data_vars, point_data._aux_data);
-      // Nodal data fields
-      if (_output_data_nodal !trace_data.stationary())
+      // Data fields
+      if (_output_data_nodal && !trace_data.stationary())
         fill_data(elem->node_ptr(1), _data_vars, point_data._data);
+      else
+        fill_data(elem, _data_vars, point_data._data);
+      // Aux data fields
+      fill_data(elem, _aux_data_vars, point_data._aux_data);
 
       // Advance to the next element
       if (!trace_data.stationary())
