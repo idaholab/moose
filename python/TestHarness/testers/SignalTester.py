@@ -39,8 +39,10 @@ class SignalTester(RunApp):
             raise e
 
     def checkRunnable(self, options):
-        if options.pbs:
-            self.addCaveats('PBS NOT SUPPORTED')
+        # We could probably configure sending signals via pbs and slurm
+        # but for now that's a no
+        if options.hpc:
+            self.addCaveats('hpc unsupported')
             self.setStatus(self.skip)
             return False
 

@@ -785,8 +785,7 @@ class TestHarness:
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
         # Record that we are using --sep-files* options
-        self.options.results_storage['SEP_FILES'] = (True if self.options.pbs else False
-                                                     or self.options.ok_files
+        self.options.results_storage['SEP_FILES'] = (self.options.ok_files
                                                      or self.options.fail_files
                                                      or self.options.sep_files)
 
@@ -802,7 +801,7 @@ class TestHarness:
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
 
                 # If output has been stored in separate files, don't make additional copies by
-                # storing that data in this json results file (--pbs || --sep-files, etc options).
+                # storing that data in this json results file (--sep-files, etc options).
                 output = '' if job.getOutputFile() else job.getOutput()
 
                 self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
@@ -891,7 +890,7 @@ class TestHarness:
         plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
         self.factory.loadPlugins(plugin_paths, 'schedulers', "IS_SCHEDULER")
 
-        if self.options.pbs:
+        if self.options.hpc == 'pbs':
             scheduler_plugin = 'RunPBS'
         # The default scheduler plugin
         else:
@@ -964,7 +963,7 @@ class TestHarness:
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
         if (os.path.exists(self.options.results_file)
-            and (self.options.failed_tests or self.options.pbs or self.options.show_last_run)):
+            and (self.options.failed_tests or self.options.show_last_run)):
             return True
         elif ((self.options.failed_tests or self.options.show_last_run)
             and not os.path.exists(self.options.results_file)):
@@ -1049,12 +1048,13 @@ class TestHarness:
         outputgroup.add_argument("--results-file", nargs=1, default=self.results_file, help="Save run_tests results to an alternative json file (default: %(default)s)")
         outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
 
-        queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
-        queuegroup.add_argument('--pbs', action='store_true', dest='pbs', help='Launch tests using PBS as your scheduler')
-        queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
-        queuegroup.add_argument('--pbs-queue', nargs=1, action='store', dest='queue_queue', type=str, metavar='', help='Submit jobs to the specified queue')
-        queuegroup.add_argument('--hpc-host', nargs=1, action='store', dest='queue_host', metavar='', help='The host to use for submitting HPC jobs')
-        queuegroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='queue_source_command', metavar='', help='Source specified file before launching HPC tests')
+        # Options for HPC execution
+        hpcgroup = parser.add_argument_group('HPC Options', 'Options controlling HPC execution')
+        hpcgroup.add_argument('--hpc', dest='hpc', choices=['pbs'], help='Launch tests using a HPC scheduler')
+        hpcgroup.add_argument('--hpc-host', nargs=1, action='store', dest='hpc_host', metavar='', help='The host to use for submitting HPC jobs')
+        hpcgroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='hpc_pre_source', metavar='', help='Source specified file before launching HPC tests')
+        hpcgroup.add_argument('--pbs-project', nargs=1, action='store', dest='pbs_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
+        hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
 
         code = True
         if self.code.decode() in argv:
@@ -1093,20 +1093,8 @@ class TestHarness:
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
-        if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
-            print('ERROR: pre-source supplied but path does not exist')
-            sys.exit(1)
-        if opts.failed_tests and not opts.pbs and not os.path.exists(opts.results_file):
+        if opts.failed_tests and not os.path.exists(opts.results_file):
             print('ERROR: --failed-tests could not detect a previous run')
-            sys.exit(1)
-        if opts.pbs and opts.pedantic_checks:
-            print('ERROR: --pbs and --pedantic-checks cannot be used simultaneously')
-            sys.exit(1)
-        if opts.pbs and opts.jobs:
-            print('ERROR: --pbs and -j|--jobs cannot be used simultaneously')
-            sys.exit(1)
-        if opts.pbs and opts.extra_info:
-            print('ERROR: --pbs and -e (extra info) cannot be used simultaneously')
             sys.exit(1)
         if opts.verbose and opts.quiet:
             print('Do not be an oxymoron with --verbose and --quiet')
