@@ -56,7 +56,8 @@ class HPCRunner(Runner):
         # If the Job is already finished, something happened in PBS
         # so we have an invalid state for processing in the Tester
         if self.job.isFinished():
-            self.exit_code = -1
+            if self.exit_code is None:
+                self.exit_code = -1
 
             # If we have output, we should try to add it
             self.trySetOutput()

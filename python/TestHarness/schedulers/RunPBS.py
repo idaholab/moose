@@ -10,7 +10,7 @@
 import os, re, json, socket, time
 from RunParallel import RunParallel
 from RunHPC import RunHPC
-from PBScodes import *
+from PBScodes import PBS_User_EXITCODES
 import jinja2
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
@@ -152,8 +152,17 @@ class RunPBS(RunHPC):
                 pbs_job.exit_code = exit_code
                 pbs_job.state = state
 
+                # Negative exit code, means PBS killed it for some reason
+                # Try to find it in our pbs exit code list to return something useful
+                if exit_code is not None and exit_code < 0:
+                    name_reason_tup = PBS_User_EXITCODES.get(exit_code)
+                    if name_reason_tup is not None:
+                        name, _ = name_reason_tup
+                        job.setStatus(job.error, f'PBS ERROR: {name}')
+                    else:
+                        terminated = True
                 # Mark the job as terminated (past walltime, over resources, killed)
-                if terminated:
+                if terminated and not job.isFinished():
                     job.setStatus(job.error, 'PBS JOB TERMINATED')
         except Exception as e:
             raise self.CallHPCException(self, f'Failed to parse collective job status', cmd, result) from e
