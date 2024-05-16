@@ -114,8 +114,8 @@ class RunHPC(RunParallel):
             # Whether or not this job was killed; used so what we don't
             # bother killing a job multiple times
             self.killed = False
-            # The job state as defined by PBS
-            self.state = None
+            # Whether or not the job is currently running
+            self.running = False
 
     class CallHPCException(Exception):
         """
