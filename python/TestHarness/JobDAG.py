@@ -99,7 +99,7 @@ class JobDAG(object):
         """ Flatten current DAG so that it no longer contains any dependency information """
         if self.__name_to_job and self.__job_dag.size():
             tmp_job_dag = dag.DAG()
-            for job in self.__job_dag.topological_sort():
+            for job in self.getJobs():
                 tmp_job_dag.add_node(job)
             self.__job_dag = tmp_job_dag
         return self.__job_dag
@@ -158,7 +158,7 @@ class JobDAG(object):
 
         # Setup dependencies for 'ALL'
         for job in all_prereq_jobs:
-            for a_job in self.__job_dag.topological_sort():
+            for a_job in self.getJobs():
                 if a_job != job and not a_job.isSkip():
                     if '.ALL' in a_job.getTestName():
                         a_job.setStatus(a_job.error, 'Test named ALL when "prereq = ALL" elsewhere in test spec file!')
@@ -211,7 +211,7 @@ class JobDAG(object):
 
     def _doSkippedDependencies(self):
         """ Determine which jobs in the DAG should be skipped """
-        for job in list(self.__job_dag.topological_sort()):
+        for job in self.getJobs():
             dep_jobs = set([])
 
             if self.options.failed_tests:
@@ -244,9 +244,8 @@ class JobDAG(object):
         if not self.canParallel():
             return
 
-        jobs = list(self.__job_dag.topological_sort())
         # Sort by ID so we get it in the input file from top down
-        jobs = sorted(jobs, key = lambda job: job.getID())
+        jobs = sorted(self.getJobs(), key = lambda job: job.getID())
 
         # Work down the file, starting with the second input and looking up for
         # collisions. By doing it in this order, we will error at the first occurance.
@@ -276,7 +275,7 @@ class JobDAG(object):
         """ Check for race condition errors within in the DAG"""
         # Build output_file in relation to job dictionary
         output_to_job = {}
-        for job in self.__job_dag.topological_sort():
+        for job in self.getJobs():
             if job.getRunnable() and not job.isFinished():
                 for output_file in job.getOutputFiles(self.options):
                     output_to_job[output_file] = output_to_job.get(output_file, [])
@@ -324,6 +323,12 @@ class JobDAG(object):
         for d_job in downstreams:
             cyclic_path.append('%s -->'% (d_job.getTestNameShort()))
         return ' '.join(cyclic_path)
+
+    def getJobs(self):
+        """
+        Returns the sorted jobs in the DAG
+        """
+        return self.__job_dag.topological_sort()
 
     def printDAG(self):
         """ Print the current structure of the DAG  """
