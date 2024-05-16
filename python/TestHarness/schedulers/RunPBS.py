@@ -45,7 +45,7 @@ class RunPBS(RunHPC):
                         'PROJECT': self.options.pbs_project,
                         'OUTPUT': job_data.output_file,
                         'SUBMISSION_SCRIPT': job_data.submission_script,
-                        'PLACE': 'scatter',
+                        'PLACE': 'free',
                         'TEST_SPEC': tester.getSpecFile(),
                         'TEST_NAME': tester.getTestNameShort(),
                         'SUBMITTED_HOSTNAME': socket.gethostname(),
