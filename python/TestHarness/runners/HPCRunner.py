@@ -20,13 +20,6 @@ class HPCRunner(Runner):
         # The RunHPC object
         self.run_hpc = run_hpc
 
-        # Number of seconds to try to wait for the output
-        # We don't want to wait forever for output because
-        # if the job ended in an unexpected state, it might
-        # not even be using the output and we don't want to
-        # just hang forever
-        self.wait_output_time = 120
-
         # Interval in seconds for polling for job status
         self.job_status_poll_time = 0.1
 
@@ -107,7 +100,7 @@ class HPCRunner(Runner):
                     incomplete_files.discard(file)
 
             # We've waited for files for too long
-            if (wait_files or incomplete_files) and waited_time >= self.wait_output_time:
+            if (wait_files or incomplete_files) and waited_time >= self.options.hpc_file_timeout:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
                 if self.output is None:
                     self.trySetOutput()
