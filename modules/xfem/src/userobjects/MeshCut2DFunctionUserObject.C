@@ -53,6 +53,10 @@ MeshCut2DFunctionUserObject::initialize()
     growFront();
   }
   _time_of_previous_call_to_UO = _t;
+
+  // always trigger crack_front_definition to be updated
+  _is_mesh_modified = true;
+  _crack_front_definition->isCutterModified(_is_mesh_modified);
 }
 
 void

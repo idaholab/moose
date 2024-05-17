@@ -25,6 +25,9 @@ MeshCut2DUserObjectBase::validParams()
       "mesh_file",
       "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported");
   params.addParam<UserObjectName>("nucleate_uo", "The MeshCutNucleation UO for nucleating cracks.");
+  params.addParam<UserObjectName>("crack_front_definition",
+                                  "crackFrontDefinition",
+                                  "The CrackFrontDefinition user object name");
   params.addClassDescription("Creates a UserObject base class for a mesh cutter in 2D problems");
   return params;
 }
@@ -35,9 +38,12 @@ MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & paramet
     _nucleate_uo(isParamValid("nucleate_uo")
                      ? &getUserObject<MeshCut2DNucleationBase>("nucleate_uo")
                      : nullptr),
-
     _is_mesh_modified(false)
 {
+  // add user object dependencies by name (the UOs do not need to exist yet for this)
+  // fixme Lynn do I need this????
+  _depend_uo.insert(getParam<UserObjectName>("crack_front_definition"));
+
   // only the Exodus type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
   _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
@@ -51,8 +57,15 @@ MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & paramet
       mooseError("The input cut mesh should have 1D elements (in a 2D space) only!");
   }
 
-  // find node fronts of the original cutmesh.  This is used to order everything
+  // find node fronts of the original cutmesh.  This is used to order EVERYTHING.
   findOriginalCrackFrontNodes();
+}
+
+void
+MeshCut2DUserObjectBase::initialSetup()
+{
+  const auto uo_name = getParam<UserObjectName>("crack_front_definition");
+  _crack_front_definition = &_fe_problem.getUserObject<CrackFrontDefinition>(uo_name);
 }
 
 bool
@@ -311,6 +324,9 @@ MeshCut2DUserObjectBase::growFront()
 
       Point new_node_offset = direction_iter->second;
       Point x = this_point + new_node_offset;
+
+      // FIXME LYNN check if line between this_point and x crosses an element in the mesh.
+      // use MeshCut2DRankTwoTensorNucleation::lineLineIntersect2D
 
       // add node to front
       this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
