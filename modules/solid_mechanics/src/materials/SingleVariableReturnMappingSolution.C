@@ -165,18 +165,6 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     GenericReal<is_ad> & scalar,
     std::stringstream * iter_output)
 {
-  // we switch off forward mode derivatives until we have a converged solution
-  const auto did_derivatives = ADReal::do_derivatives;
-  if constexpr (is_ad)
-  {
-    // We have the option of using dual numbers to compute the newton solve derivatives. In those
-    // cases we cannot simply switch of derivative calculation, or teh Newton iterations will never
-    // converge.
-    if (!_ad_derivative)
-      ADReal::do_derivatives = false;
-  }
-  else
-    libmesh_ignore(did_derivatives);
 
   scalar = initialGuess(effective_trial_stress);
   GenericReal<is_ad> scalar_old = scalar;
@@ -194,6 +182,19 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
   Real reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
 
+  // we switch off forward mode derivatives until we have a converged solution
+  const auto did_derivatives = ADReal::do_derivatives;
+  if constexpr (is_ad)
+  {
+    // We have the option of using dual numbers to compute the newton solve derivatives. In those
+    // cases we cannot simply switch of derivative calculation, or teh Newton iterations will never
+    // converge.
+    if (!_ad_derivative)
+      ADReal::do_derivatives = false;
+  }
+  else
+    libmesh_ignore(did_derivatives);
+
   if (converged(_residual, reference_residual))
   {
     iterationFinalize(scalar);
@@ -208,8 +209,10 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
            !convergedAcceptable(_iteration, reference_residual))
     {
       preStep(scalar_old, _residual, _derivative);
-
-      scalar_increment = -_residual / _derivative;
+      if (_derivative != 0.0)
+        scalar_increment = -_residual / _derivative;
+      else
+        scalar_increment = -_residual;
       scalar = scalar_old + scalar_increment;
 
       if (_check_range)
@@ -320,7 +323,14 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
       // computeResidualAndDerivativeHelper(effective_trial_stress, scalar_old);
       // scalar = scalar_old - _residual / _derivative;
       computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
-      scalar = scalar - _residual / _derivative;
+      if (_derivative != 0.0)
+        scalar = scalar - _residual / _derivative;
+      else
+      {
+        scalar += _absolute_tolerance;
+        computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+        scalar = scalar - _residual / _derivative;
+      }
     }
   }
 
