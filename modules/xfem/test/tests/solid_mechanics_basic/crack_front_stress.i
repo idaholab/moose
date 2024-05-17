@@ -1,9 +1,9 @@
-# checks that the stress averages computed by CrackFrontStress are correct
+# checks that the stress averages computed by CrackFrontNormalStress are correct
 
-# Left Crack Tip: moves in y with stress_11=y and crackFrontStress is equal to y_pos+box_length/2
-# At boundary when the crackFrontStress box intersects the boundary, crackFrontStress is properly scaled
+# Left Crack Tip: moves in y with stress_11=y and crackFrontNormalStress is equal to y_pos+box_length/2
+# At boundary when the crackFrontNormalStress box intersects the boundary, crackFrontNormalStress is properly scaled
 
-# Right Crack Tip: moves at 45deg with stress_10&_01=y.  crackFrontStress is equal to y_pos+box_length/sqrt(8)
+# Right Crack Tip: moves at 45deg with stress_10&_01=y.  crackFrontNormalStress is equal to y_pos+box_length/sqrt(8)
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -13,10 +13,8 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    # nx = 90
-    # ny = 30
-    nx = 400
-    ny = 140
+    nx = 40
+    ny = 14
     xmin = -0.4
     xmax = 0.5
     ymin = 0.4
@@ -130,18 +128,11 @@
 
 [Executioner]
   type = Transient
-  # time control
   start_time = 0.0
   dt = 1.0
   end_time = 4
 []
 
 [Outputs]
-  exodus = true
   csv = true
-  # execute_on = TIMESTEP_END
-  [xfemcutter]
-    type = XFEMCutMeshOutput
-    xfem_cutter_uo = cut_mesh2
-  []
 []
