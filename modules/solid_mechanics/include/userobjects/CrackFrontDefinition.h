@@ -69,6 +69,13 @@ public:
   const RealVectorValue & getCrackFrontTangent(const std::size_t point_index) const;
 
   /**
+   * Get the vector normal to the crack front at a specified position
+   * @param point_index Index of the point
+   * @return normal vector
+   */
+  const RealVectorValue & getCrackFrontNormal(const std::size_t point_index) const;
+
+  /**
    * Get the length of the line segment on the crack front ahead of the specified position
    * @param point_index Index of the point
    * @return Line segment length

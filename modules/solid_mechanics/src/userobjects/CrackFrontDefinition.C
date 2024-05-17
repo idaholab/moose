@@ -373,6 +373,9 @@ CrackFrontDefinition::initialize()
     if (_q_function_type == "GEOMETRY")
       for (std::size_t i = 0; i < num_crack_front_points; ++i)
       {
+        // FIXME LYNN is this ever true?  How can a crack front point ever be a boundary node?
+        // I also don't see _is_point_on_intersecting_boundary ever being cleared so this push_back
+        //  could make it get huge, way bigger than the number of crack front points.
         bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
         _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
       }
@@ -1213,6 +1216,13 @@ CrackFrontDefinition::getCrackFrontTangent(const std::size_t point_index) const
   return _tangent_directions[point_index];
 }
 
+const RealVectorValue &
+CrackFrontDefinition::getCrackFrontNormal(const std::size_t point_index) const
+{
+  mooseAssert(point_index < _crack_plane_normals.size(), "point_index out of range");
+  return _crack_plane_normals[point_index];
+}
+
 Real
 CrackFrontDefinition::getCrackFrontForwardSegmentLength(const std::size_t point_index) const
 {
@@ -1611,7 +1621,6 @@ void
 CrackFrontDefinition::createQFunctionRings()
 {
   // In the variable names, "cfn" = crack front node
-
   if (_treat_as_2d && _use_mesh_cutter == false) // 2D: the q-function defines an integral domain
                                                  // that is constant along the crack front
   {
@@ -1665,7 +1674,7 @@ CrackFrontDefinition::createQFunctionRings()
                                                             connected_nodes_this_cfn.end());
     }
   }
-  else // 3D: The q-function defines one integral domain around each crack front node
+  else // _use_mesh_cutter: The q-function defines one integral domain around each crack front node
   {
     std::size_t num_crack_front_points = _ordered_crack_front_nodes.size();
     std::vector<std::vector<const Elem *>> nodes_to_elem_map;
