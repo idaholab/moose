@@ -176,7 +176,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (isParamValid("block_names"))
   {
     if (getReactorParam<bool>(RGMB::region_id_as_block_name))
-      paramError("block_names", "If ReactorMeshParams/region_id_as_block_name is set, block_names should not be specified in PinMeshGenerator");
+      paramError("block_names",
+                 "If ReactorMeshParams/region_id_as_block_name is set, block_names should not be "
+                 "specified in PinMeshGenerator");
     _has_block_names = true;
     _block_names = getParam<std::vector<std::vector<std::string>>>("block_names");
     if (_region_ids.size() != _block_names.size())

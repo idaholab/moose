@@ -223,7 +223,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   if (isParamValid("background_block_name"))
   {
     if (getReactorParam<bool>(RGMB::region_id_as_block_name))
-      paramError("background_block_name", "If ReactorMeshParams/region_id_as_block_name is set, background_block_name should not be specified in AssemblyMeshGenerator");
+      paramError("background_block_name",
+                 "If ReactorMeshParams/region_id_as_block_name is set, background_block_name "
+                 "should not be specified in AssemblyMeshGenerator");
     _has_background_block_name = true;
     _background_block_name = getParam<std::vector<std::string>>("background_block_name");
     if (_background_region_id.size() != _background_block_name.size())
@@ -235,7 +237,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   if (isParamValid("duct_block_names"))
   {
     if (getReactorParam<bool>(RGMB::region_id_as_block_name))
-      paramError("duct_block_names", "If ReactorMeshParams/region_id_as_block_name is set, duct_block_names should not be specified in AssemblyMeshGenerator");
+      paramError("duct_block_names",
+                 "If ReactorMeshParams/region_id_as_block_name is set, duct_block_names should not "
+                 "be specified in AssemblyMeshGenerator");
     _has_duct_block_names = true;
     _duct_block_names = getParam<std::vector<std::vector<std::string>>>("duct_block_names");
     if (_duct_region_ids.size() != _duct_block_names.size())

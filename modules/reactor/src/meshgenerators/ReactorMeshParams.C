@@ -81,7 +81,8 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::mesh_dimensions, int(_dim));
   this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
-  this->declareMeshProperty(RGMB::region_id_as_block_name, getParam<bool>(RGMB::region_id_as_block_name));
+  this->declareMeshProperty(RGMB::region_id_as_block_name,
+                            getParam<bool>(RGMB::region_id_as_block_name));
 
   // Option to bypass mesh generation is controlled by presence of Mesh/data_driven_generator
   // and whether the current generator is in data only mode
