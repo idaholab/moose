@@ -44,7 +44,7 @@ ComponentAction::act()
   else if (_current_task == "setup_component")
     setupComponent();
   // If we define the Physics in a Physics block
-  else if (_current_task == "init_physics")
+  else if (_current_task == "init_component_physics")
     addPhysics();
   // These tasks are there to match what the current combined Physics + Component do
   // These combined components will likely still exist in the future, when it makes more
