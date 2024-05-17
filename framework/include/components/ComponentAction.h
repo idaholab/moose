@@ -78,4 +78,7 @@ protected:
 
   /// Names of the boundaries on the component outer surface
   std::vector<BoundaryName> _outer_boundaries;
+
+  /// Whether the component setup should be verbose
+  const bool _verbose;
 };
