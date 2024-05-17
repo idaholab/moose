@@ -81,8 +81,11 @@ GaussianProcessGeneral::setupCovarianceMatrix(const RealEigenMatrix & training_p
   _K.resize(training_params.rows(), training_params.rows());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
 
+  RealEigenMatrix flattened_data =
+      training_data.reshaped(training_params.rows() * training_data.cols(), 1);
+
   // Compute the Cholesky decomposition and inverse action of the covariance matrix
-  setupStoredMatrices(training_data);
+  setupStoredMatrices(flattened_data);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }

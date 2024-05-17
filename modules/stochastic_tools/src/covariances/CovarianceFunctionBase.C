@@ -32,8 +32,7 @@ CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameter
 {
   for (const auto & name : _dependent_covariance_names)
   {
-    _covariance_functions.push_back(
-        getCovarianceFunctionByName(parameters.get<UserObjectName>(name)));
+    _covariance_functions.push_back(getCovarianceFunctionByName(name));
     _dependent_covariance_types.push_back(_covariance_functions.back()->type());
   }
 }

@@ -56,3 +56,14 @@
     variable = T
   []
 []
+
+[VectorPostprocessors]
+  [T_vec]
+    type = LineValueSampler
+    variable = T
+    start_point = '0.05 0 0'
+    end_point = '0.12 0 0'
+    num_points = 2
+    sort_by = x
+  []
+[]

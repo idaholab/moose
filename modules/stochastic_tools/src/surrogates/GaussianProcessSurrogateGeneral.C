@@ -91,7 +91,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
-  RealEigenMatrix pred_value = (K_train_test.transpose() * _gp.getKResultsSolve());
+  RealEigenMatrix pred_value = (K_train_test.transpose() * _gp.getKResultsSolve()).transpose();
   // De-center/scale the value and store for return
   _gp.getDataStandardizer().getDestandardized(pred_value);
 
@@ -104,7 +104,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
 
   for (const auto output_i : make_range(_n_outputs))
   {
-    y[output_i] = pred_value(output_i, 0);
+    y[output_i] = pred_value(0, output_i);
     std[output_i] = std_dev_mat(output_i, output_i);
   }
 }

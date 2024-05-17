@@ -37,18 +37,20 @@ LMC::LMC(const InputParameters & parameters)
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string a_coeff_name = "acoeff_" + std::to_string(exp_i);
+    const std::string a_coeff_name_with_prefix = _name + ":" + a_coeff_name;
     _a_coeffs.push_back(
         &addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true));
 
-    auto & vector = _hp_map_vector_real[a_coeff_name];
+    auto & vector = _hp_map_vector_real[a_coeff_name_with_prefix];
     for (const auto out_i : make_range(_num_outputs))
       vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
 
     const std::string lambda_name = "lambda_" + std::to_string(exp_i);
+    const std::string lambda_name_with_prefix = _name + ":" + lambda_name;
     _lambdas.push_back(
         &addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true));
 
-    vector = _hp_map_vector_real[lambda_name];
+    vector = _hp_map_vector_real[lambda_name_with_prefix];
     for (const auto out_i : make_range(_num_outputs))
       vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
   }
