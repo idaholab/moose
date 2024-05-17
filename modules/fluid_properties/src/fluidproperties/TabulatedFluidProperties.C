@@ -1014,7 +1014,6 @@ TabulatedFluidProperties::criticalTemperature() const
 Real
 TabulatedFluidProperties::criticalDensity() const
 {
-
   if (_fp)
     return _fp->criticalDensity();
   else
@@ -1024,7 +1023,15 @@ TabulatedFluidProperties::criticalDensity() const
 Real
 TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
+  if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    FluidPropertiesForwardError("T_from_p_h", false);
+}
 
+ADReal
+TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
+{
   if (_fp)
     return _fp->T_from_p_h(pressure, enthalpy);
   else

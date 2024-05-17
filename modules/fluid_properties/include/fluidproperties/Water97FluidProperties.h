@@ -214,17 +214,9 @@ public:
   void
   h_from_p_T_template(const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const;
 
-  template <typename T>
-  T s_from_h_p_template(const T & enthalpy, const T & pressure) const;
-
-  template <typename T>
-  void
-  s_from_h_p_template(const T & enthalpy, const T & pressure, T & s, T & ds_dp, T & ds_dT) const;
-
   virtual Real s_from_h_p(Real enthalpy, Real pressure) const override;
-  ADReal s_from_h_p(const ADReal & enthalpy, const ADReal & pressure) const override;
-  void
-  s_from_h_p(Real enthalpy, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
+  FPADReal s_from_h_p(const FPADReal & enthalpy, const FPADReal & pressure) const;
+  void virtual s_from_h_p(Real enthalpy, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const;
 
   virtual Real vaporPressure(Real temperature) const override;
 
@@ -341,6 +333,7 @@ public:
    */
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
   virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
 
   /**
    * Boundary between subregions b and c in region 2.
@@ -2658,23 +2651,4 @@ Water97FluidProperties::s_from_p_T_template(
   { return this->s_from_p_T_template(pressure, temperature); };
 
   xyDerivatives(pressure, temperature, s, ds_dp, ds_dT, functor);
-}
-
-template <typename T>
-T
-Water97FluidProperties::s_from_h_p_template(const T & enthalpy, const T & pressure) const
-{
-  T temperature = T_from_h_p(enthalpy, pressure);
-  return s_from_p_T_template(pressure, temperature);
-}
-
-template <typename T>
-void
-Water97FluidProperties::s_from_h_p_template(
-    const T & enthalpy, const T & pressure, T & s, T & ds_dp, T & ds_dT) const
-{
-  auto functor = [this](const auto & enthalpy, const auto & pressure)
-  { return this->s_from_p_T_template(enthalpy, pressure); };
-
-  xyDerivatives(enthalpy, pressure, s, ds_dp, ds_dT, functor);
 }

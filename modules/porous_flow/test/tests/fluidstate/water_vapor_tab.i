@@ -60,10 +60,10 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  # [temperature]
-  #   order = CONSTANT
-  #   family = MONOMIAL
-  # []
+  [temperature]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -137,12 +137,12 @@
     phase = 1
     execute_on = 'initial timestep_end'
   []
-  # [temperature]
-  #   type = PorousFlowPropertyAux
-  #   variable = temperature
-  #   property = temperature
-  #   execute_on = 'initial timestep_end'
-  # []
+  [temperature]
+    type = PorousFlowPropertyAux
+    variable = temperature
+    property = temperature
+    execute_on = 'initial timestep_end'
+  []
 []
 
 [Kernels]

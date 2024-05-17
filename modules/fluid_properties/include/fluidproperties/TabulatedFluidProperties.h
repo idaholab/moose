@@ -116,6 +116,7 @@ public:
   virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
 
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
 
   virtual Real triplePointPressure() const override;
   virtual Real triplePointTemperature() const override;
