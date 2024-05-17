@@ -19,12 +19,12 @@ ComponentAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Base class for components that are defined using action.");
-
+  params.addParam<bool>("verbose", false, "Whether the component setup should be verbose");
   return params;
 }
 
 ComponentAction::ComponentAction(const InputParameters & params)
-  : Action(params), _dimension(libMesh::invalid_uint)
+  : Action(params), _dimension(libMesh::invalid_uint), _verbose(getParam<bool>("verbose"))
 {
 }
 
