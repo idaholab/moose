@@ -175,6 +175,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   }
   if (isParamValid("block_names"))
   {
+    if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+      paramError("block_names", "If ReactorMeshParams/region_id_as_block_name is set, block_names should not be specified in PinMeshGenerator");
     _has_block_names = true;
     _block_names = getParam<std::vector<std::vector<std::string>>>("block_names");
     if (_region_ids.size() != _block_names.size())
@@ -561,7 +563,7 @@ PinMeshGenerator::generate()
   std::string plane_id_name = "plane_id";
   std::string radial_id_name = "radial_id";
   const std::string default_block_name =
-      std::string("RGMB_") + (_is_assembly ? std::string("ASSEMBLY_") : std::string("PIN_")) +
+      std::string("RGMB_") + (_is_assembly ? std::string("ASSEMBLY") : std::string("PIN")) +
       std::to_string(_pin_type);
 
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name);
@@ -615,6 +617,8 @@ PinMeshGenerator::generate()
     auto elem_block_name = default_block_name;
     if (_has_block_names)
       elem_block_name += "_" + _block_names[std::size_t(z_id)][radial_idx];
+    else if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+      elem_block_name += "_REG" + std::to_string(elem_region_id);
     if (elem->type() == TRI3 || elem->type() == PRISM6)
       elem_block_name += "_TRI";
     updateElementBlockNameId(
