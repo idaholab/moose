@@ -121,7 +121,7 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
       circumference += edge->length(0, 1);
     }
 
-    // Temproraries for doing things below
+    // Temporaries for doing things below
     Real intersection_distance;
 
     Point point_0;

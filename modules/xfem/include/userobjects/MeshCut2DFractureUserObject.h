@@ -27,21 +27,12 @@ public:
 
   MeshCut2DFractureUserObject(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
   virtual void initialize() override;
 
 protected:
   virtual void findActiveBoundaryGrowth() override;
 
 private:
-  /// critical k value for crack growth
-  const Real & _k_critical;
-  /// amount to grow crack by for each xfem update step
-  const Real & _growth_increment;
-
-  const std::string _ring_number_string;
-
-  CrackFrontDefinition * _crack_front_definition;
   /**
    * Compute all of the maximum hoop stress fracture integrals for all crack trips from the fracture
    * integral vector post processors
@@ -50,4 +41,27 @@ private:
    * @return computed fracture integral squared
    */
   std::vector<Real> getKSquared(const std::vector<Real> & k1, const std::vector<Real> & k2) const;
+
+  /// amount to grow crack by for each xfem update step
+  const Real & _growth_increment;
+
+  /// are fracture integrals used for growing crack
+  const bool _use_k;
+  /// is stress used to grow crack
+  const bool _use_stress;
+
+  /// critical k value for crack growth
+  const Real _k_critical;
+  /// Maximum stress criterion threshold for crack growth.
+  const Real _stress_threshold;
+
+  /// dummy vectors for vpps to point to if not defined(these are not const because reporters can change their size)
+  std::vector<Real> _zeros_vec;
+
+  /// References fracture integral ki if input
+  const std::vector<Real> & _ki_vpp;
+  /// References fracture integral kii if input
+  const std::vector<Real> & _kii_vpp;
+  /// References crack front stress if input
+  const std::vector<Real> & _stress_vpp;
 };

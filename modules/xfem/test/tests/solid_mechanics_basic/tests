@@ -83,29 +83,33 @@
     requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by CrackMeshCut3DUserObject'
     design = 'CrackMeshCut3DUserObject.md'
   [../]
-  [./edge_crack_2d_propagation]
-    type = Exodiff
-    input = edge_crack_2d_propagation.i
-    exodiff = 'edge_crack_2d_propagation_xfemcutter.e-s0002 edge_crack_2d_propagation_out.e-s002'
-    abs_zero = 1e-8
-    map = false
-    # XFEM requires --enable-unique-ids in libmesh
-    unique_id = true
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFunctionUserObject and crack growth is defined by a user provided function'
-    design = 'MeshCut2DFunctionUserObject.md'
-  [../]
-  [./edge_crack_2d_propagation_mhs]
-    type = Exodiff
-    input = edge_crack_2d_propagation_mhs.i
-    exodiff = 'edge_crack_2d_propagation_mhs_xfemcutter.e edge_crack_2d_propagation_mhs_out.e'
-    abs_zero = 1e-8
-    map = false
-    # XFEM requires --enable-unique-ids in libmesh
-    unique_id = true
-    installation_type = in_tree
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFractureUserObject where crack growth and direction is computed by a fracture integral'
-    design = 'MeshCut2DFractureUserObject.md'
-  [../]
+  [mesh_cutter_2d]
+    requirement =The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFunctionUserObject"
+    issues = '#23572 #27659'
+    [function_growth]
+      type = Exodiff
+      input = edge_crack_2d_propagation.i
+      exodiff = 'edge_crack_2d_propagation_xfemcutter.e-s0002 edge_crack_2d_propagation_out.e-s002'
+      abs_zero = 1e-8
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      detail = 'crack growth is defined by a user provided function'
+      design = 'MeshCut2DFunctionUserObject.md'
+    []
+    [k_growth]
+      type = Exodiff
+      input = edge_crack_2d_propagation_mhs.i
+      exodiff = 'edge_crack_2d_propagation_mhs_xfemcutter.e edge_crack_2d_propagation_mhs_out.e'
+      abs_zero = 1e-8
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      installation_type = in_tree
+      detail = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFractureUserObject where crack growth and direction is computed by a fracture integral'
+      design = 'MeshCut2DFractureUserObject.md'
+    []
+  []
   [./elliptical_crack]
     type = Exodiff
     input = elliptical_crack.i
