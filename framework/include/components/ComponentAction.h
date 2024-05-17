@@ -34,6 +34,18 @@ public:
   /// Get the name of the mesh generator created by this component that generates the mesh for it
   const MeshGeneratorName & meshName() const { return _mg_name; }
 
+  /// Return the outer surface boundaries
+  virtual const std::vector<BoundaryName> & outerSurfaceBoundaries() const
+  {
+    return _outer_boundaries;
+  };
+
+  /// Return the component volume
+  virtual Real volume() const { mooseError("Not implemented"); }
+
+  /// Return the component outer boundary area
+  virtual Real outerSurfaceArea() const { mooseError("Not implemented"); }
+
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
   // to be defining an object of every type
@@ -58,15 +70,6 @@ protected:
     return *_awh.problem().get();
   }
 
-  /// Return the outer surface boundaries
-  const std::vector<BoundaryName> & outerSurfaceBoundaries();
-
-  /// Return the component volume
-  Real volume() = 0;
-
-  /// Return the component outer boundary area
-  Real outerSurfaceArea() = 0;
-
   /// Maximum dimension of the component
   unsigned int _dimension;
 
@@ -75,7 +78,4 @@ protected:
 
   /// Names of the boundaries on the component outer surface
   std::vector<BoundaryName> _outer_boundaries;
-
-  /// Pointers to the Physics defined on the component
-  std::vector<PhysicsBase *> _physics;
 };
