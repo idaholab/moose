@@ -212,7 +212,7 @@ namespace Moose
 /// This is used for places where we initialize some qp-sized data structures
 /// that would end up being sized too small after the quadrature order gets
 /// bumped (dynamically in-sim).  So for these cases, we just use this constant
-/// to size those data structures overly large to accomodate rather than come
+/// to size those data structures overly large to accommodate rather than come
 /// up with some overkill complex mechanism for dynamically resizing them.
 /// Eventually, we may need or implement that more sophisticated mechanism and
 /// will no longer need this.
