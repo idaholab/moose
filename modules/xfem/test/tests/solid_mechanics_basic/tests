@@ -110,7 +110,7 @@
     []
     [stress_check]
       type = CSVDiff
-      input = edge_crack_2d_propagation_stress.i
+      input = crack_front_stress.i
       csvdiff = 'crack_front_stress_out_CrackFrontNormalStress_0001.csv crack_front_stress_out_CrackFrontNormalStress_0002.csv crack_front_stress_out_CrackFrontNormalStress_0003.csv crack_front_stress_out_CrackFrontNormalStress_0004.csv'
       # XFEM requires --enable-unique-ids in libmesh
       unique_id = true
