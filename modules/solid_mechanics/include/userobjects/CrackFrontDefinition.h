@@ -337,9 +337,7 @@ protected:
   std::vector<BoundaryID> _intersecting_boundary_ids;
   /// Coordinates of crack mouth
   RealVectorValue _crack_mouth_coordinates;
-  /// Vector normal to the crack plane of a planar crack
-  RealVectorValue _crack_plane_normal;
-  /// Vector normals to a nonplanar crack described by the cutter mesh when _use_mesh_cutter = true
+  /// Vector normals to a nonplanar crack
   std::vector<RealVectorValue> _crack_plane_normals;
   /// Whether to treat the model as 2D for computation of fracture integrals
   bool _treat_as_2d;

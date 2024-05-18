@@ -10,6 +10,7 @@
 #include "CrackFrontDefinition.h"
 
 // MOOSE includes
+#include "MooseError.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "RankTwoTensor.h"
@@ -280,7 +281,6 @@ CrackFrontDefinition::execute()
 {
   // Because J-Integral is based on original geometry, the crack front geometry
   // is never updated, so everything that needs to happen is done in initialSetup()
-  // fixme Lynn Help with this Benjamin Spencer.  Not suer if this is true after this commit
   if (_t_stress == true && _treat_as_2d == false)
     calculateTangentialStrainAlongFront();
 }
@@ -799,8 +799,6 @@ CrackFrontDefinition::maxNodeCoor(std::vector<Node *> & nodes, unsigned int dir0
 void
 CrackFrontDefinition::updateCrackFrontGeometry()
 {
-  updateDataForCrackDirection();
-
   _segment_lengths.clear();
   _tangent_directions.clear();
   _crack_directions.clear();
@@ -837,13 +835,13 @@ CrackFrontDefinition::updateCrackFrontGeometry()
         _crack_plane_normals =
             _crack_front_points_provider->getCrackPlaneNormals(num_crack_front_points);
         mooseAssert(!_crack_plane_normals.empty(), "_crack_plane_normals is empty.");
-        rot_mat.fillRow(1, _crack_plane_normals[i]);
       }
       else
       {
-        _crack_plane_normal = tangent_direction.cross(crack_direction);
-        rot_mat.fillRow(1, _crack_plane_normal);
+        _crack_plane_normals.push_back(tangent_direction.cross(crack_direction));
       }
+      mooseAssert(!_crack_plane_normals.size() < i, "_crack_plane_normals is the wrong size.");
+      rot_mat.fillRow(1, _crack_plane_normals[i]);
       _rot_matrix.push_back(rot_mat);
 
       _segment_lengths.push_back(std::make_pair(0.0, 0.0));
@@ -853,6 +851,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   }
   else
   {
+    updateDataForCrackDirection();
     std::size_t num_crack_front_points = getNumCrackFrontPoints();
     _segment_lengths.reserve(num_crack_front_points);
     _tangent_directions.reserve(num_crack_front_points);
@@ -926,10 +925,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
           _end_direction_method == END_DIRECTION_METHOD::END_CRACK_DIRECTION_VECTOR &&
           (ntype == END_1_NODE || ntype == END_2_NODE))
       {
-        if (_use_mesh_cutter)
-          _tangent_directions[i] = _crack_plane_normals[i].cross(_crack_directions[i]);
-        else
-          _tangent_directions[i] = _crack_plane_normal.cross(_crack_directions[i]);
+        _tangent_directions[i] = _crack_plane_normals[i].cross(_crack_directions[i]);
       }
 
       back_segment = forward_segment;
@@ -940,11 +936,12 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
     {
       std::size_t mid_id = (num_crack_front_points - 1) / 2;
-      _crack_plane_normal = _tangent_directions[mid_id].cross(_crack_directions[mid_id]);
+      _crack_plane_normals.assign(num_crack_front_points,
+                                  _tangent_directions[mid_id].cross(_crack_directions[mid_id]));
 
       // Make sure the normal vector is non-zero
       RealVectorValue zero_vec(0.0);
-      if (_crack_plane_normal.absolute_fuzzy_equals(zero_vec, _tol))
+      if (_crack_plane_normals.front().absolute_fuzzy_equals(zero_vec, _tol))
         mooseError("Crack plane normal vector evaluates to zero");
     }
 
@@ -955,7 +952,8 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       RealVectorValue origin_to_first_node = *getCrackFrontPoint(0) - _crack_mouth_coordinates;
       Real hyp = origin_to_first_node.norm();
       RealVectorValue norm_origin_to_first_node = origin_to_first_node / hyp;
-      RealVectorValue tangent_to_first_node = -norm_origin_to_first_node.cross(_crack_plane_normal);
+      RealVectorValue tangent_to_first_node =
+          -norm_origin_to_first_node.cross(_crack_plane_normals.front());
       tangent_to_first_node /= tangent_to_first_node.norm();
 
       for (std::size_t i = 0; i < num_crack_front_points; ++i)
@@ -999,10 +997,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     {
       RankTwoTensor rot_mat;
       rot_mat.fillRow(0, _crack_directions[i]);
-      if (_use_mesh_cutter)
-        rot_mat.fillRow(1, _crack_plane_normals[i]);
-      else
-        rot_mat.fillRow(1, _crack_plane_normal);
+      rot_mat.fillRow(1, _crack_plane_normals[i]);
       rot_mat.fillRow(2, _tangent_directions[i]);
       _rot_matrix.push_back(rot_mat);
     }
@@ -1070,7 +1065,7 @@ CrackFrontDefinition::updateDataForCrackDirection()
 
   if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT && !_use_mesh_cutter)
   {
-    _crack_plane_normal.zero();
+    _crack_plane_normals.clear();
 
     // Get 3 nodes on crack front
     std::size_t num_points = getNumCrackFrontPoints();
@@ -1103,12 +1098,13 @@ CrackFrontDefinition::updateDataForCrackDirection()
     RealVectorValue v2 = *end - *mid;
 
     // Take cross product to get normal
-    _crack_plane_normal = v1.cross(v2);
-    _crack_plane_normal = _crack_plane_normal.unit();
+    Point crack_plane_normal = v1.cross(v2);
+    crack_plane_normal = crack_plane_normal.unit();
+    _crack_plane_normals.assign(num_points, crack_plane_normal);
 
     // Make sure they're not collinear
     RealVectorValue zero_vec(0.0);
-    if (_crack_plane_normal.absolute_fuzzy_equals(zero_vec, _tol))
+    if (_crack_plane_normals.front().absolute_fuzzy_equals(zero_vec, _tol))
     {
       mooseError("Nodes on crack front are too close to being collinear");
     }
@@ -1169,10 +1165,7 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Point & crack_front_poi
     }
     else if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT)
     {
-      if (_use_mesh_cutter)
-        crack_dir = tangent_direction.cross(_crack_plane_normals[crack_front_point_index]);
-      else
-        crack_dir = tangent_direction.cross(_crack_plane_normal);
+      crack_dir = tangent_direction.cross(_crack_plane_normals[crack_front_point_index]);
     }
   }
   crack_dir = crack_dir.unit();
@@ -1362,11 +1355,8 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp,
   }
 
   // Find theta, the angle between r and the crack front plane
-  RealVectorValue crack_plane_normal;
-  if (_use_mesh_cutter)
-    crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normals[point_index], point_index);
-  else
-    crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normal, point_index);
+  RealVectorValue crack_plane_normal =
+      rotateToCrackFrontCoords(_crack_plane_normals[point_index], point_index);
   Real p_to_plane_dist = std::abs(closest_point_to_p * crack_plane_normal);
 
   // Determine if qp is above or below the crack plane
