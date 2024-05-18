@@ -362,13 +362,16 @@ AdvancedExtruderGenerator::generate()
   // We know a priori how many elements we'll need
   mesh->reserve_elem(total_num_layers * orig_elem);
 
-  // For straightforward meshes we need one or two additional layers per
-  // element.
-  if (input->elements_begin() != input->elements_end() &&
-      (*input->elements_begin())->default_order() == SECOND)
-    order = 2;
+  // Look for higher order elements which introduce an extra layer
+  std::set<ElemType> higher_orders = {EDGE3, EDGE4, TRI6, TRI7, QUAD8, QUAD9};
+  std::vector<ElemType> types;
+  MeshTools::elem_types(*input, types);
+  for (const auto elem_type : types)
+    if (higher_orders.count(elem_type))
+      order = 2;
   mesh->comm().max(order);
 
+  // Reserve for the max number possibly needed
   mesh->reserve_nodes((order * total_num_layers + 1) * orig_nodes);
 
   // Container to catch the boundary IDs handed back by the BoundaryInfo object
