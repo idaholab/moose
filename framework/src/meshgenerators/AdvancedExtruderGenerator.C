@@ -364,12 +364,18 @@ AdvancedExtruderGenerator::generate()
 
   // Look for higher order elements which introduce an extra layer
   std::set<ElemType> higher_orders = {EDGE3, EDGE4, TRI6, TRI7, QUAD8, QUAD9};
+  bool extruding_quad_eights = false;
   std::vector<ElemType> types;
   MeshTools::elem_types(*input, types);
   for (const auto elem_type : types)
+  {
     if (higher_orders.count(elem_type))
       order = 2;
+    if (elem_type == QUAD8)
+      extruding_quad_eights = true;
+  }
   mesh->comm().max(order);
+  mesh->comm().max(extruding_quad_eights);
 
   // Reserve for the max number possibly needed
   mesh->reserve_nodes((order * total_num_layers + 1) * orig_nodes);
@@ -380,6 +386,7 @@ AdvancedExtruderGenerator::generate()
   Point old_distance;
   Point current_distance;
 
+  // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
     unsigned int current_node_layer = 0;
@@ -1065,6 +1072,10 @@ AdvancedExtruderGenerator::generate()
                                                             input_nodeset_map.end());
 
   mesh->set_isnt_prepared();
+  // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
+  // which will crash both paraview and trigger exodiff. Best to be safe.
+  if (extruding_quad_eights)
+    mesh->prepare_for_use();
 
   return mesh;
 }
