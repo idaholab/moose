@@ -265,6 +265,8 @@ RhieChowMassFlux::computeFaceMassFlux()
     }
     else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
     {
+      mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
+
       const auto p_elem_value = _p->getElemValue(*fi->elemInfo(), time_arg);
       const auto matrix_contribution =
           _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
@@ -283,7 +285,7 @@ RhieChowMassFlux::computeCellVelocity()
 
   // We set the dof value in the solution vector the same logic applies:
   // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
-  for (auto system_i : index_range(_momentum_implicit_systems))
+  for (const auto system_i : index_range(_momentum_implicit_systems))
   {
     auto working_vector = _Ainv_raw[system_i]->clone();
     working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);

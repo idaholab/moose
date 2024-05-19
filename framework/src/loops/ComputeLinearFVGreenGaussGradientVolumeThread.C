@@ -48,58 +48,61 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
   // Computing this size can be very expensive so we only want to do it once
   unsigned int size = 0;
 
+  for (const auto & variable : linear_system.getVariables(_tid))
   {
-    for (const auto & variable : linear_system.getVariables(_tid))
+    _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
+    mooseAssert(_current_var,
+                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
+                "the linear system?");
+    if (_current_var->needsGradientVectorStorage())
     {
-      _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
-      mooseAssert(_current_var,
-                  "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                  "the linear system?");
-      if (_current_var->needsGradientVectorStorage())
+      if (!size)
+        size = range.size();
+
+      const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
+      const auto state = Moose::currentState();
+
+      std::vector<std::vector<Real>> new_values(grad_container.size(),
+                                                std::vector<Real>(size, 0.0));
+      std::vector<dof_id_type> dof_indices(size, 0);
       {
-        if (!size)
-          size = range.size();
-
-        const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
-        const auto state = Moose::currentState();
-
-        std::vector<std::vector<Real>> new_values(grad_container.size(),
-                                                  std::vector<Real>(size, 0.0));
-        std::vector<dof_id_type> dof_indices(size, 0);
-        {
-          std::vector<PetscVectorReader> grad_reader;
-          for (const auto dim_index : index_range(grad_container))
-            grad_reader.emplace_back(*linear_system.newGradientContainer()[dim_index]);
-
-          // Iterate over all the elements in the range
-          auto elem_iterator = range.begin();
-          for (const auto elem_i : make_range(size))
-          {
-            const auto & elem_info = *elem_iterator;
-            if (_current_var->hasBlocks(elem_info->subdomain_id()))
-            {
-              const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
-              dof_indices[elem_i] =
-                  elem_info->dofIndices()[_global_system_number][_current_var->number()];
-              const auto volume = elem_info->volume() * elem_info->coordFactor();
-
-              for (const auto dim_index : index_range(grad_container))
-                new_values[dim_index][elem_i] =
-                    grad_reader[dim_index](dof_indices[elem_i]) / volume;
-
-              if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
-              {
-                const auto radial_contrib = _current_var->getElemValue(*elem_info, state) /
-                                            elem_info->centroid()(rz_radial_coord);
-                new_values[rz_radial_coord][elem_i] += radial_contrib;
-              }
-            }
-            elem_iterator++;
-          }
-        }
+        std::vector<PetscVectorReader> grad_reader;
         for (const auto dim_index : index_range(grad_container))
-          grad_container[dim_index]->insert(new_values[dim_index].data(), dof_indices);
+          grad_reader.emplace_back(*linear_system.newGradientContainer()[dim_index]);
+
+        // Iterate over all the elements in the range
+        auto elem_iterator = range.begin();
+        for (const auto elem_i : make_range(size))
+        {
+          const auto & elem_info = *elem_iterator;
+          if (_current_var->hasBlocks(elem_info->subdomain_id()))
+          {
+            const auto coord_type = _fe_problem.mesh().getCoordSystem(elem_info->subdomain_id());
+
+            mooseAssert(coord_type != Moose::CoordinateSystemType::COORD_RSPHERICAL,
+                        "We have not yet implemented the correct translation from gradient to "
+                        "divergence for "
+                        "spherical coordinates yet.");
+
+            dof_indices[elem_i] =
+                elem_info->dofIndices()[_global_system_number][_current_var->number()];
+            const auto volume = elem_info->volume() * elem_info->coordFactor();
+
+            for (const auto dim_index : index_range(grad_container))
+              new_values[dim_index][elem_i] = grad_reader[dim_index](dof_indices[elem_i]) / volume;
+
+            if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
+            {
+              const auto radial_contrib = _current_var->getElemValue(*elem_info, state) /
+                                          elem_info->centroid()(rz_radial_coord);
+              new_values[rz_radial_coord][elem_i] += radial_contrib;
+            }
+          }
+          elem_iterator++;
+        }
       }
+      for (const auto dim_index : index_range(grad_container))
+        grad_container[dim_index]->insert(new_values[dim_index].data(), dof_indices);
     }
   }
 }

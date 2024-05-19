@@ -6,7 +6,7 @@
     input = 3d-velocity-pressure.i
     exodiff = 3d-velocity-pressure_out.e
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 3D "
-                  "channel using the SIMPLE algorithm using the optimized finite volume system."
+                  "channel using the SIMPLE algorithm using the linear finite volume system."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []

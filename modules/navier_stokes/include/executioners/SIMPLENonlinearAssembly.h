@@ -111,9 +111,9 @@ protected:
 private:
   /**
    * Check if the system contains a time kernel or not. This is a steady-state executioner so we
-   * wanna make sure the user doesn't have kernels that add time-derivatives.
+   * want to make sure the user doesn't have kernels that add time-derivatives.
    * @param system Reference to the system which holds the kernels. This is not const because
-   * the constainsTimeKernel() routine is not const.
+   * the containsTimeKernel() routine is not const.
    */
   void checkIntegrity(NonlinearSystemBase & system);
 

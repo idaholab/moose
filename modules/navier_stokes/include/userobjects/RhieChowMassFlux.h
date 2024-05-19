@@ -108,6 +108,7 @@ protected:
   /// The thread 0 copy of the x-velocity variable
   std::vector<MooseLinearVariableFVReal *> _vel;
 
+  /// Pointer to the pressure diffusion term in the pressure Poisson equation
   LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
 
   /**

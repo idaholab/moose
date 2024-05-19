@@ -146,7 +146,7 @@ protected:
 
   /**
    * Determine if the iterative process on a set of equations converged or not
-   * @param ns_residuals The current residuals for the systems.
+   * @param residuals The current (linear iteration number, residual) pairs for the systems.
    * @param abs_tolerances The corresponding absolute tolerances.
    */
   bool converged(const std::vector<std::pair<unsigned int, Real>> & residuals,
@@ -162,7 +162,11 @@ protected:
   /// Check for wrong execute on flags in the transfers
   bool hasTransferError(const ExecFlagEnum & flags);
 
+  /// Reference to the MOOSE Problem which contains this executioner
   FEProblemBase & _problem;
+
+  /// Time-related member variables. Only used to set the steady-state result
+  /// at time 1.0;
   Real _system_time;
   int & _time_step;
   Real & _time;
@@ -235,10 +239,10 @@ protected:
   /// Options which hold the petsc settings for the pressure equation
   Moose::PetscSupport::PetscOptions _pressure_petsc_options;
 
-  /// Options which hold the petsc settings for the energy equation
+  /// Options which hold the petsc settings for the fluid energy equation
   Moose::PetscSupport::PetscOptions _energy_petsc_options;
 
-  /// Options which hold the petsc settings for the energy equation
+  /// Options which hold the petsc settings for the solid energy equation
   Moose::PetscSupport::PetscOptions _solid_energy_petsc_options;
 
   /// Options which hold the petsc settings for the passive scalar equation(s)

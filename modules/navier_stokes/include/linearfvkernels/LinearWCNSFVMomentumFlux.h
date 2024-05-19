@@ -28,8 +28,6 @@ public:
    */
   LinearWCNSFVMomentumFlux(const InputParameters & params);
 
-  virtual void initialSetup() override;
-
   virtual Real computeElemMatrixContribution() override;
 
   virtual Real computeNeighborMatrixContribution() override;

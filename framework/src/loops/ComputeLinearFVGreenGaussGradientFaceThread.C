@@ -67,7 +67,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
       {
         PetscVectorReader solution_reader(*_linear_system.current_local_solution);
 
-        // Iterate over all the elements in the range
+        // Iterate over all the face infos in the range
         auto face_iterator = range.begin();
         for (const auto & face_i : make_range(size))
         {
@@ -76,6 +76,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
           const auto current_face_type =
               face_info->faceType(std::make_pair(_current_var->number(), _global_system_number));
 
+          // First we check if this face is internal to the variable, if yes, contribute to both
+          // sides
           if (current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
           {
             dof_indices_elem[face_i] =
@@ -99,6 +101,9 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
               new_values_neighbor[i][face_i] = -contribution(i);
             }
           }
+          // If this face is on the boundary of the block where the variable is defined, we
+          // check for boundary conditions. If we don't find any we use an automatic one-term
+          // expansion to compute the face value.
           else if (current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
                    current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
           {

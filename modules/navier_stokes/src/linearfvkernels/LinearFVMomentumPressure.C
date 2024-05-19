@@ -18,8 +18,8 @@ InputParameters
 LinearFVMomentumPressure::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
-  params.addClassDescription(
-      "Represents the pressure gradient term in the Navier Stokes equations.");
+  params.addClassDescription("Represents the pressure gradient term in the Navier Stokes momentum "
+                             "equations, added to the right hand side.");
   params.addParam<VariableName>(NS::pressure,
                                 "The pressure variable whose gradient should be used.");
   MooseEnum momentum_component("x=0 y=1 z=2");

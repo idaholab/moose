@@ -111,10 +111,9 @@ LinearFVAnisotropicDiffusion::computeFluxMatrixContribution()
 Real
 LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
 {
+  // Cache the RHS contribution
   if (!_cached_rhs_contribution)
   {
-    // We only have contributions on the right hand side from internal faces
-    // if the nonorthogonal correction is enabled.
     const auto face_arg = makeCDFace(*_current_face_info);
     const auto state_arg = determineState();
 
@@ -149,7 +148,6 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
           1 / (_current_face_info->normal() * _current_face_info->eCN()) *
               _current_face_info->eCN();
 
-      // Cache the matrix contribution
       _flux_rhs_contribution +=
           normal_scaled_diff_tensor * interpolated_gradient * correction_vector;
     }

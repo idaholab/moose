@@ -15,7 +15,9 @@ InputParameters
 LinearFVExtrapolatedPressureBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionExtrapolatedBC::validParams();
-  params.addClassDescription("Adds an extrapolated pressure boundary condition.");
+  params.addClassDescription(
+      "Adds a boundary condition which can be used to extrapolate pressure values to the boundary "
+      "using either a two-term or a one-term expansion.");
   return params;
 }
 

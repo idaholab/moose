@@ -669,6 +669,8 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
       for (const auto i : make_range(_volumetric_force.size()))
       {
+        // Add which side (can be both, then we use a nullptr) of the face info the force is defined
+        // on
         loc_face.face_side =
             this->_volumetric_force[i]->hasFaceSide(*fi_loc, true)
                 ? (this->_volumetric_force[i]->hasFaceSide(*fi_loc, false) ? nullptr

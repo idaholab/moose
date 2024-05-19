@@ -20,7 +20,7 @@ segregated solver:
 
 Besides these capabilities, this user object is also responsible for reconstructing
 cell velocities at the end of the pressure corrector step.
-For more information on these fields and precesses, we suggest visiting [SIMPLE.md].
+For more information on these fields and processes, we suggest visiting [SIMPLE.md].
 
 !syntax parameters /UserObjects/RhieChowMassFlux
 

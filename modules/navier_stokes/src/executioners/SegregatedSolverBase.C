@@ -192,11 +192,6 @@ SegregatedSolverBase::validParams()
       "turbulence_absolute_tolerance",
       std::vector<Real>(),
       "The absolute tolerance(s) on the normalized residual(s) of the turbulence equation(s).");
-  params.addRangeCheckedParam<unsigned int>("num_iterations",
-                                            1000,
-                                            "0<num_iterations",
-                                            "The number of momentum-pressure iterations needed.");
-
   params.addRangeCheckedParam<unsigned int>(
       "num_iterations",
       1000,
@@ -628,9 +623,9 @@ SegregatedSolverBase::relaxMatrix(SparseMatrix<Number> & matrix,
                                   NumericVector<Number> & diff_diagonal)
 {
   PetscMatrix<Number> * mat = dynamic_cast<PetscMatrix<Number> *>(&matrix);
-  mooseAssert(mat, "Bazinga!");
+  mooseAssert(mat, "This should be a PetscMatrix!");
   PetscVector<Number> * diff_diag = dynamic_cast<PetscVector<Number> *>(&diff_diagonal);
-  mooseAssert(diff_diag, "Bazinga!");
+  mooseAssert(diff_diag, "This should be a PetscVector!");
 
   // Zero the diagonal difference vector
   *diff_diag = 0;

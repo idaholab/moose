@@ -17,8 +17,9 @@
  * applied), we need to extrapolate the pressure when we compute the gradients but we can't add a
  * source term to the boundary (so no lagged values can go to the boundary).
  * This means that for the time being we need to build the pressure diffusion system
- * assuming a one-term expansion even if the user needs . For other purposes the extrapolation can
- * be controlled using the `use_two_term_expansion` parameter.
+ * assuming a one-term expansion even if the user requested two.
+ * For other purposes the extrapolation can be controlled using the `use_two_term_expansion`
+ * parameter.
  */
 class LinearFVExtrapolatedPressureBC : public LinearFVAdvectionDiffusionExtrapolatedBC
 {

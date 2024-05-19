@@ -3757,6 +3757,8 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
     }
   };
 
+  // We loop through the faces and check if they are internal, boundary or external to
+  // the variables in the problem
   for (FaceInfo & face : _all_face_info)
   {
     const SubdomainID elem_subdomain_id = face.elemSubdomainID();
@@ -3767,12 +3769,14 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
     face_type_vector.clear();
     face_type_vector.resize(num_eqs);
 
+    // First, we check the variables in the solver systems (linear/nonlinear)
     for (const auto i : make_range(_app.feProblem().numSolverSystems()))
       face_lambda(elem_subdomain_id,
                   neighbor_subdomain_id,
                   _app.feProblem().getSolverSystem(i),
                   face_type_vector);
 
+    // Then we check the variables in the auxiliary system
     face_lambda(elem_subdomain_id,
                 neighbor_subdomain_id,
                 _app.feProblem().getAuxiliarySystem(),
@@ -3814,6 +3818,8 @@ MooseMesh::cacheFVElementalDoFs() const
 
   const unsigned int num_eqs = _app.feProblem().es().n_systems();
 
+  // We loop through the elements in the mesh and cache the dof indices
+  // for the corresponding variables.
   for (auto & ei_pair : _elem_to_elem_info)
   {
     auto & elem_info = ei_pair.second;
@@ -3822,9 +3828,11 @@ MooseMesh::cacheFVElementalDoFs() const
     dof_vector.clear();
     dof_vector.resize(num_eqs);
 
+    // First, we cache the dof indices for the variables in the solver systems (linear, nonlinear)
     for (const auto i : make_range(_app.feProblem().numSolverSystems()))
       elem_lambda(elem_info, _app.feProblem().getSolverSystem(i), dof_vector);
 
+    // Then we cache the dof indices for the auxvariables
     elem_lambda(elem_info, _app.feProblem().getAuxiliarySystem(), dof_vector);
   }
 }

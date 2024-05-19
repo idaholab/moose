@@ -52,7 +52,6 @@ LinearFVFluxKernel::addMatrixContribution()
     const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
 
     // Populate matrix
-
     if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
     {
       _matrix_contribution(0, 0) = elem_matrix_contribution;
@@ -66,6 +65,8 @@ LinearFVFluxKernel::addMatrixContribution()
     }
     (*_linear_system.matrix).add_matrix(_matrix_contribution, _dof_indices.get_values());
   }
+  // We are at a block boundary where the variable is not defined on one of the adjacent cells.
+  // We check if we have a boundary condition here
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
@@ -81,8 +82,8 @@ LinearFVFluxKernel::addMatrixContribution()
         bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
       const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
 
-      // We allow internal boundaries too, so we have to check on which side we
-      // are on
+      // We allow internal (for the mesh) boundaries too, so we have to check on which side we
+      // are on (assuming that this is a boundary for the variable)
       if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
@@ -122,6 +123,8 @@ LinearFVFluxKernel::addRightHandSideContribution()
     (*_linear_system.rhs)
         .add_vector(_rhs_contribution.get_values().data(), _dof_indices.get_values());
   }
+  // We are at a block boundary where the variable is not defined on one of the adjacent cells.
+  // We check if we have a boundary condition here
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
@@ -137,8 +140,8 @@ LinearFVFluxKernel::addRightHandSideContribution()
 
       const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
 
-      // We allow internal boundaries too, so we have to check on which side we
-      // are on
+      // We allow internal (for the mesh) boundaries too, so we have to check on which side we
+      // are on (assuming that this is a boundary for the variable)
       if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];

@@ -130,9 +130,6 @@ SIMPLE::solveMomentumPredictor()
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
-    // PetscLinearSolver<Real> & momentum_solver =
-    //     libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
-
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
     SparseMatrix<Number> & mmat = *(momentum_system.matrix);

@@ -12,7 +12,8 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds the right component to the pressure gradient.
+ * Kernel that adds the component of the pressure gradient in the momentum
+ * equations to the right hand side.
  */
 class LinearFVMomentumPressure : public LinearFVElementalKernel
 {
@@ -32,8 +33,7 @@ public:
 protected:
   const MooseLinearVariableFV<Real> & getPressureVariable(const std::string & vname);
 
-  /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
-  /// in the stress term
+  /// Index x|y|z of the momentum equation component
   const unsigned int _index;
 
   /// Pointer to the linear finite volume pressure variable
