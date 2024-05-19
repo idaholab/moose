@@ -3,7 +3,7 @@
 ## Description
 
 This kernel contributes to the system matrix and the right hand side of a system
-which is solved for a linear finite volume variable [MooseLinearVariableFV.md].
+which is solved for a [linear finite volume variable](MooseLinearVariableFV.md).
 The difference between this kernel and [LinearFVDiffusion.md] is that this kernel requires
 a vector of diffusion coefficients, where every entry describes the diffusion coefficient for
 a principal direction. This is equivalent to supplying a diagonal tensor in the
@@ -21,6 +21,16 @@ where $\mathbb{D}$ denotes a space dependent diagonal diffusion tensor, while th
 describes the sum of the surface integrals on each side of cell $C$.
 Following [!cite](liu2015finite) and using the assumption that the tensor is diagonal,
 we can manipulate this expression to arrive to the following form:
+
+!equation
+\sum\limits_f \int\limits_{S_f} \mathbb{D} \vec{n} \cdot \nabla u dS,
+
+where $mathbb{D} \vec{n}$ can be split into two contributions:
+
+!equation
+\mathbb{D} \vec{n} = (\mathbb{D}\vec{n}\cdot \vec{n}) \vec{n} + (\mathbb{D}\vec{n} - \mathbb{D}\vec{n}\cdot \vec{n} \vec{n}).
+
+Plugging this expression back to the surface integral, we get the following:
 
 !equation
 \sum\limits_f \int\limits_{S_f} (\mathbb{D}\vec{n}\cdot \vec{n}) \vec{n} \cdot \nabla u +
