@@ -101,20 +101,31 @@ Here, we are transferring integer and string data between reporters:
 
 ### Distribution of a vector Reporter
 
-Here we are transferring a vector reporter and a vector of vectors reporter in a
-scatter and gather fashion. The main application holds a vector of vectors and a
-single vector, while each subapp has a vector and a Real (scalar) reporter.
-This test shows the
-scatter operation by distributing a vector and a single Real to each subapp and
-shows the gather operation by aggregating the same values into a
-different set of reporters. This is to demonstrate that order of the
-scatter/gather operations are consistent.
+#### Scatter vector Reporter
 
-!listing dist_vector/main.i block=Reporters caption=Main application reporters
+Here we are transferring a vector reporter and a vector of vectors reporter in a
+scatter fashion. The main application holds a vector of vectors and a
+single vector, while each subapp has a vector and a Real (scalar) reporter.
+During the transfer the subapp's reporters are populated from the scattering of
+the mainapp's vector reporter and a vector of vectors reporter.
+
+!listing dist_vector/main_send.i block=Reporters caption=Main application reporters
 
 !listing dist_vector/sub.i block=Reporters caption=Sub-application reporters
 
-!listing dist_vector/main.i block=Transfers caption=Main application reporter transfers
+!listing dist_vector/main_send.i block=Transfers caption=Main application reporter transfers
+   indent=2 header=[Transfers] footer=[]
+
+
+#### Gather vector Reporter
+
+Here we are transferring a vector reporter and a vector of vectors reporter in a gather fashion. The main application holds a vector of vectors and a single vector, while each subapp has a vector and a Real (scalar) reporter. This test shows the gather operation by aggregating the same values from each subapp into a set of reporters in the main application.
+
+!listing dist_vector/main_rec.i block=Reporters caption=Main application reporters
+
+!listing dist_vector/sub.i block=Reporters caption=Sub-application reporters
+
+!listing dist_vector/main_rec.i block=Transfers caption=Main application reporter transfers
    indent=2 header=[Transfers] footer=[]
 
 !syntax parameters /Transfers/MultiAppReporterTransfer
