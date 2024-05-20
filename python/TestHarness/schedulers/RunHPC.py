@@ -312,7 +312,7 @@ class RunHPC(RunParallel):
 
         # Job has been submitted, so set it as queued
         job.addCaveats(job_id)
-        self.setAndOutputJobStatus(job, job.queued)
+        self.setAndOutputJobStatus(job, job.queued, caveats=True)
 
         # Setup the job in the status map
         with self.hpc_jobs_lock:

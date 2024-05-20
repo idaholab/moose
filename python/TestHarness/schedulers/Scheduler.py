@@ -192,14 +192,14 @@ class Scheduler(MooseObject):
         for jobs, _ in sorted_jobs:
             self.queueJobs(jobs)
 
-    def setAndOutputJobStatus(self, job, status):
+    def setAndOutputJobStatus(self, job, status, caveats=None):
         """
         Sets a Job's status and forces the status to be output asap
         """
         with job.getLock():
             job.setStatus(status)
             job.force_report_status = True
-        self.handleJobStatus(job)
+        self.handleJobStatus(job, caveats=caveats)
 
     def waitFinish(self):
         """
