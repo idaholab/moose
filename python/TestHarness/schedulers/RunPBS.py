@@ -52,7 +52,7 @@ class RunPBS(RunHPC):
                         'CWD': tester.getTestDir(),
                         'COMMAND': job_data.command,
                         'COMMAND_PRINTABLE': job_data.command_printable,
-                        'ENDING_COMMENT': self.getOutputEndingComment(),
+                        'ENDING_COMMENT': self.getOutputEndingComment('${PBS_JOBID}'),
                         'MOOSE_PYTHONPATH': moose_python,
                         'ADDITIONAL_OUTPUT_FILES': job_data.additional_output_files}
         if self.options.hpc_queue:
@@ -198,3 +198,6 @@ class RunPBS(RunHPC):
                     hpc_job.killed = True
 
         RunParallel.killRemaining(self, keyboard)
+
+    def getOutputEndingComment(self, job_id):
+        return f'TESTHARNESS RUNPBS FILE TERMINATOR FOR {job_id}'
