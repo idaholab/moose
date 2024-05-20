@@ -1,0 +1,10 @@
+[Tests]
+  design = 'CrackFrontNormalStress.md'
+  issues = '#27659'
+  [crack_front_stress]
+    type = 'CSVDiff'
+    input = 'crack_front_normal_stress.i'
+    csvdiff = 'crack_front_normal_stress_out_CrackFrontNormalStress_0001.csv'
+    requirement = 'The system shall compute the average stress at each crack point in a 3D domain.'
+  []
+[]

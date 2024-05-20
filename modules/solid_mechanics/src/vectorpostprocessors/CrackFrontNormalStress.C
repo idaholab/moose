@@ -27,8 +27,8 @@ CrackFrontNormalStress::validParams()
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   params.addRequiredParam<Real>("box_length", "Distance in front of crack front.");
-  params.addRequiredParam<Real>("box_width", "Distance tangent to front of crack front.");
   params.addRequiredParam<Real>("box_height", "Distance normal to front of crack front.");
+  params.addParam<Real>("box_width", 1, "Distance tangent to front of crack front.");
 
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
@@ -52,6 +52,8 @@ CrackFrontNormalStress::CrackFrontNormalStress(const InputParameters & parameter
     _position(declareVector("id")),
     _avg_crack_tip_stress(declareVector("crack_tip_stress"))
 {
+  if (_mesh.dimension() == 3 && !isParamSetByUser("box_width"))
+    paramError("box_width", "Must define box_width in 3D problems.");
   // add user object dependencies by name (the UOs do not need to exist yet for this)
   _depend_uo.insert(getParam<UserObjectName>("crack_front_definition"));
 }
@@ -64,19 +66,13 @@ CrackFrontNormalStress::initialSetup()
   const auto uo_name = getParam<UserObjectName>("crack_front_definition");
   _crack_front_definition =
       &(getUserObjectByName<CrackFrontDefinition>(uo_name, /*is_dependency = */ false));
-
-  _treat_as_2d = _crack_front_definition->treatAs2D();
-  _using_mesh_cutter = _crack_front_definition->usingMeshCutter();
 }
 
 void
 CrackFrontNormalStress::initialize()
 {
-  std::size_t num_pts;
-  if (_treat_as_2d && _using_mesh_cutter == false)
-    num_pts = 1;
-  else
-    num_pts = _crack_front_definition->getNumCrackFrontPoints();
+  std::size_t num_pts = _crack_front_definition->getNumCrackFrontPoints();
+
   _volume.assign(num_pts, 0.0);
   _x.assign(num_pts, 0.0);
   _y.assign(num_pts, 0.0);
