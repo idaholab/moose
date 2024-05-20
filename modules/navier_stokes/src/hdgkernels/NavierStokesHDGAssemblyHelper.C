@@ -169,8 +169,8 @@ NavierStokesHDGAssemblyHelper::scalarVolumeJacobian(const unsigned int i_offset,
 {
   DiffusionHDGAssemblyHelper::scalarVolumeJacobian(i_offset, vel_gradient_j_offset, JxW, qrule);
 
-  for (const auto qp : make_range(qrule.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    for (const auto qp : make_range(qrule.n_points()))
     {
       // Scalar equation dependence on pressure dofs
       for (const auto j : make_range(_p_n_dofs))
@@ -326,9 +326,9 @@ NavierStokesHDGAssemblyHelper::pressureFaceJacobian(const unsigned int i_offset,
                                                     const QBase & qrule_face,
                                                     const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_p_n_dofs))
-      for (const auto j : make_range(_lm_n_dofs))
+  for (const auto i : make_range(_p_n_dofs))
+    for (const auto j : make_range(_lm_n_dofs))
+      for (const auto qp : make_range(qrule_face.n_points()))
       {
         {
           const Gradient phi(_lm_phi_face[j][qp], 0);
@@ -390,8 +390,8 @@ NavierStokesHDGAssemblyHelper::scalarFaceJacobian(const unsigned int i_offset,
   DiffusionHDGAssemblyHelper::scalarFaceJacobian(
       i_offset, vector_j_offset, scalar_j_offset, lm_j_offset, JxW_face, qrule_face, normals);
 
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       for (const auto j : make_range(_p_n_dofs))
       {
@@ -478,8 +478,8 @@ NavierStokesHDGAssemblyHelper::lmFaceJacobian(const unsigned int i_offset,
   DiffusionHDGAssemblyHelper::lmFaceJacobian(
       i_offset, vector_j_offset, scalar_j_offset, lm_j_offset, JxW_face, qrule_face, normals);
 
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_lm_n_dofs))
+  for (const auto i : make_range(_lm_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       for (const auto j : make_range(_p_n_dofs))
       {
@@ -598,9 +598,9 @@ NavierStokesHDGAssemblyHelper::scalarDirichletJacobian(const unsigned int i_offs
   DiffusionHDGAssemblyHelper::scalarDirichletJacobian(
       i_offset, vector_j_offset, scalar_j_offset, JxW_face, qrule_face, normals);
 
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
-      for (const auto j : make_range(_p_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    for (const auto j : make_range(_p_n_dofs))
+      for (const auto qp : make_range(qrule_face.n_points()))
       {
         Gradient p_phi;
         p_phi(vel_component) = _scalar_phi_face[j][qp];

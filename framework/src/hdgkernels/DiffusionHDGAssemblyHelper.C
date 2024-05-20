@@ -109,8 +109,8 @@ DiffusionHDGAssemblyHelper::vectorVolumeResidual(const unsigned int i_offset,
                                                  const MooseArray<Real> & JxW,
                                                  const QBase & qrule)
 {
-  for (const auto qp : make_range(qrule.n_points()))
-    for (const auto i : make_range(_vector_n_dofs))
+  for (const auto i : make_range(_vector_n_dofs))
+    for (const auto qp : make_range(qrule.n_points()))
     {
       // Vector equation dependence on vector dofs
       _PrimalVec(i_offset + i) += JxW[qp] * (_vector_phi[i][qp] * vector_sol[qp]);
@@ -127,8 +127,8 @@ DiffusionHDGAssemblyHelper::vectorVolumeJacobian(const unsigned int i_offset,
                                                  const MooseArray<Real> & JxW,
                                                  const QBase & qrule)
 {
-  for (const auto qp : make_range(qrule.n_points()))
-    for (const auto i : make_range(_vector_n_dofs))
+  for (const auto i : make_range(_vector_n_dofs))
+    for (const auto qp : make_range(qrule.n_points()))
     {
       // Vector equation dependence on vector dofs
       for (const auto j : make_range(_vector_n_dofs))
@@ -174,10 +174,10 @@ DiffusionHDGAssemblyHelper::scalarVolumeJacobian(const unsigned int i_offset,
                                                  const MooseArray<Real> & JxW,
                                                  const QBase & qrule)
 {
-  for (const auto qp : make_range(qrule.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
-      // Scalar equation dependence on vector dofs
-      for (const auto j : make_range(_vector_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    // Scalar equation dependence on vector dofs
+    for (const auto j : make_range(_vector_n_dofs))
+      for (const auto qp : make_range(qrule.n_points()))
         _PrimalMat(i_offset + i, vector_field_j_offset + j) +=
             JxW[qp] * _diff[qp] * (_grad_scalar_phi[i][qp] * _vector_phi[j][qp]);
 }
@@ -189,9 +189,9 @@ DiffusionHDGAssemblyHelper::vectorFaceResidual(const unsigned int i_offset,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    // Vector equation dependence on LM dofs
-    for (const auto i : make_range(_vector_n_dofs))
+  // Vector equation dependence on LM dofs
+  for (const auto i : make_range(_vector_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
       _PrimalVec(i_offset + i) -=
           JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * lm_sol[qp];
 }
@@ -203,10 +203,10 @@ DiffusionHDGAssemblyHelper::vectorFaceJacobian(const unsigned int i_offset,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    // Vector equation dependence on LM dofs
-    for (const auto i : make_range(_vector_n_dofs))
-      for (const auto j : make_range(_lm_n_dofs))
+  // Vector equation dependence on LM dofs
+  for (const auto i : make_range(_vector_n_dofs))
+    for (const auto j : make_range(_lm_n_dofs))
+      for (const auto qp : make_range(qrule_face.n_points()))
         _PrimalLM(i_offset + i, lm_j_offset + j) -=
             JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * _lm_phi_face[j][qp];
 }
@@ -220,8 +220,8 @@ DiffusionHDGAssemblyHelper::scalarFaceResidual(const unsigned int i_offset,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       // vector
       _PrimalVec(i_offset + i) -=
@@ -246,8 +246,8 @@ DiffusionHDGAssemblyHelper::scalarFaceJacobian(const unsigned int i_offset,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       for (const auto j : make_range(_vector_n_dofs))
         _PrimalMat(i_offset + i, vector_j_offset + j) -= JxW_face[qp] * _diff[qp] *
@@ -275,8 +275,8 @@ DiffusionHDGAssemblyHelper::lmFaceResidual(const unsigned int i_offset,
                                            const QBase & qrule_face,
                                            const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_lm_n_dofs))
+  for (const auto i : make_range(_lm_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       // vector
       _LMVec(i_offset + i) -=
@@ -301,8 +301,8 @@ DiffusionHDGAssemblyHelper::lmFaceJacobian(const unsigned int i_offset,
                                            const QBase & qrule_face,
                                            const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_lm_n_dofs))
+  for (const auto i : make_range(_lm_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       for (const auto j : make_range(_vector_n_dofs))
         _LMPrimal(i_offset + i, vector_j_offset + j) -= JxW_face[qp] * _diff[qp] *
@@ -387,8 +387,8 @@ DiffusionHDGAssemblyHelper::scalarDirichletJacobian(const unsigned int i_offset,
                                                     const QBase & qrule_face,
                                                     const MooseArray<Point> & normals)
 {
-  for (const auto qp : make_range(qrule_face.n_points()))
-    for (const auto i : make_range(_scalar_n_dofs))
+  for (const auto i : make_range(_scalar_n_dofs))
+    for (const auto qp : make_range(qrule_face.n_points()))
     {
       for (const auto j : make_range(_vector_n_dofs))
         _PrimalMat(i_offset + i, vector_j_offset + j) -= JxW_face[qp] * _diff[qp] *
