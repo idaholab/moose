@@ -86,17 +86,14 @@ class RunPBS(RunHPC):
                         'exit 1']
         qsub_command = '; '.join(qsub_command)
 
-        # Set what we've ran for this job so that we can
-        # potentially get the context in an error
-        command_ran = qsub_command
-        if self.ssh_host:
-            command_ran = f"ssh {self.ssh_host} '{qsub_command}'"
-        job.getTester().setCommandRan(command_ran)
-
         # Do the submission; this is thread safe
         # Eventually we might want to make this a pool so we can submit multiple
         # jobs at the same time
-        exit_code, result = self.callHPC(qsub_command)
+        exit_code, result, full_qsub_command = self.callHPC(qsub_command)
+
+        # Set what we've ran for this job so that we can
+        # potentially get the context in an error
+        job.getTester().setCommandRan(full_qsub_command)
 
         # Nonzero return code
         if exit_code != 0:
@@ -108,7 +105,7 @@ class RunPBS(RunHPC):
         if not search:
             raise self.CallHPCException(self, f'qsub has unexpected ID "{job_id}"', qsub_command)
 
-        return job_id
+        return job_id, full_qsub_command
 
     def updateJobs(self):
         # Obtain the IDs of jobs that are active that we need to poll for
@@ -119,7 +116,7 @@ class RunPBS(RunHPC):
 
         # Poll for all of the jobs within a single call
         cmd = ['qstat', '-xf', '-F', 'json'] + active_job_ids
-        exit_code, result = self.callHPC(' '.join(cmd))
+        exit_code, result, _ = self.callHPC(' '.join(cmd))
         if exit_code != 0:
             raise self.CallHPCException(self, 'Failed to get job status', cmd, result)
 
