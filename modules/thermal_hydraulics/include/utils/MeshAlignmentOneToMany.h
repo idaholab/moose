@@ -88,6 +88,19 @@ public:
   unsigned int getMaxCouplingSize() const { return _max_coupling_size; }
 
 protected:
+  /**
+   * Builds the mapping using the extracted mesh information
+   */
+  void buildMapping();
+
+  /**
+   * Checks the alignment and sets \c _mesh_alignment accordingly
+   *
+   * @param[in] axis_point  Any point on the axis of the 1D or 2D boundary
+   * @param[in] axis_direction  Direction of the axis for the 1D or 2D boundary
+   */
+  void checkAlignment(const Point & axis_point, const RealVectorValue & axis_direction);
+
   /// Map of primary element ID to coupled secondary element IDs
   std::map<dof_id_type, std::vector<dof_id_type>> _primary_elem_id_to_secondary_elem_ids;
   /// Map of secondary element ID to coupled primary element ID

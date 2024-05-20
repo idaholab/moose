@@ -47,10 +47,4 @@ public:
    * @param assembly   The assembly object
    */
   void buildCoupledElemQpIndexMap(Assembly & assembly);
-
-protected:
-  /**
-   * Builds the mapping using the extracted mesh information
-   */
-  void buildMapping();
 };

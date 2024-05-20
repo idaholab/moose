@@ -35,33 +35,6 @@ MeshAlignment1D3D::initialize(
 }
 
 void
-MeshAlignment1D3D::buildMapping()
-{
-  // Build the element mapping
-  if (_primary_elem_points.size() > 0 && _secondary_elem_points.size() > 0)
-  {
-    // find the primary elements that are nearest to the secondary elements
-    KDTree kd_tree(_primary_elem_points, _mesh.getMaxLeafSize());
-    for (std::size_t i_secondary = 0; i_secondary < _secondary_elem_points.size(); i_secondary++)
-    {
-      unsigned int patch_size = 1;
-      std::vector<std::size_t> return_index(patch_size);
-      kd_tree.neighborSearch(_secondary_elem_points[i_secondary], patch_size, return_index);
-      const std::size_t i_primary = return_index[0];
-
-      const auto primary_elem_id = _primary_elem_ids[i_primary];
-      const auto secondary_elem_id = _secondary_elem_ids[i_secondary];
-
-      auto it = _primary_elem_id_to_secondary_elem_ids.find(primary_elem_id);
-      if (it == _primary_elem_id_to_secondary_elem_ids.end())
-        _primary_elem_id_to_secondary_elem_ids.insert({primary_elem_id, {secondary_elem_id}});
-      else
-        it->second.push_back(secondary_elem_id);
-    }
-  }
-}
-
-void
 MeshAlignment1D3D::buildCoupledElemQpIndexMap(Assembly & assembly)
 {
   for (const auto & primary_elem_id : _primary_elem_ids)
