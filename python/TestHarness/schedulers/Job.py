@@ -280,7 +280,7 @@ class Job(object):
 
     def getOutput(self):
         """ Return the contents of output """
-        return self.__joined_out
+        return self.__joined_out if self.__joined_out else ''
 
     def getOutputFile(self):
         """ Return the output file path """
@@ -317,13 +317,13 @@ class Job(object):
 
     def getActiveTime(self):
         """ Return active time """
-        m = re.search(r"Active time=(\S+)", self.__joined_out)
+        m = re.search(r"Active time=(\S+)", self.getOutput())
         if m != None:
             return float(m.group(1))
 
     def getSolveTime(self):
         """ Return solve time """
-        m = re.search(r"solve().*", self.__joined_out)
+        m = re.search(r"solve().*", self.getOutput())
         if m != None:
             return m.group().split()[5]
 

@@ -291,7 +291,7 @@ class Tester(MooseObject):
         return self.specs['test_dir']
 
     def getSpecFile(self):
-        return os.path.join(self.getTestDir(), self.specs['spec_file'])
+        return os.path.join(self.specs['test_dir'], self.specs['spec_file'])
 
     def getMinReportTime(self):
         """ return minimum time elapse before reporting a 'long running' status """
