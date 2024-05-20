@@ -621,7 +621,7 @@ class TestHarness:
                 print(output)
         return output
 
-    def handleJobStatus(self, job):
+    def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
         The job may or may not be finished yet (RUNNING), or failing, passing, etc.
@@ -637,8 +637,9 @@ class TestHarness:
                 # perform printing of application output if so desired
                 self.printOutput(job, color)
 
-                # Print status with caveats
-                print((util.formatResult(job, self.options, caveats=True)))
+                # Print status with caveats (if caveats not overridden)
+                caveats = True if caveats is None else caveats
+                print((util.formatResult(job, self.options, caveats=caveats)))
 
                 timing = job.getTiming()
 
@@ -657,8 +658,8 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                # TODO: changed this caveats=True
-                print((util.formatResult(job, self.options, result=job.getStatus().status, caveats=True)))
+                caveats = False if caveats is None else caveats
+                print((util.formatResult(job, self.options, result=job.getStatus().status, caveats=caveats)))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
