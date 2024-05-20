@@ -41,10 +41,10 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   _pressure_var.computeCellGradients();
 }
 
-const MooseLinearVariableFV<Real> &
+MooseLinearVariableFV<Real> &
 LinearFVMomentumPressure::getPressureVariable(const std::string & vname)
 {
-  const auto * ptr = dynamic_cast<const MooseLinearVariableFV<Real> *>(
+  auto * ptr = dynamic_cast<MooseLinearVariableFV<Real> *>(
       &_fe_problem.getVariable(_tid, getParam<VariableName>(vname)));
 
   if (!ptr)

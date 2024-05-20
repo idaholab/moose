@@ -8,7 +8,6 @@
     method = '!dbg'
     min_parallel = 2
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
-    # TODO: We can make the pressure second order by doing linear extrapolation to the boundary
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808

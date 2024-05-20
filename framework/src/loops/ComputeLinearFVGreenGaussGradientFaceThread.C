@@ -19,7 +19,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _linear_system_number(linear_system_num),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
         _fe_problem.getLinearSystem(_linear_system_number).system())),
-    _global_system_number(_linear_system.number()),
+    _system_number(_linear_system.number()),
     _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newGradientContainer())
 {
 }
@@ -30,7 +30,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _dim(x._dim),
     _linear_system_number(x._linear_system_number),
     _linear_system(x._linear_system),
-    _global_system_number(x._global_system_number),
+    _system_number(x._system_number),
     // This will be the vector we work on since the old gradient might still be needed
     // to compute extrapolated boundary conditions for example.
     _new_gradient(x._new_gradient)
@@ -74,17 +74,16 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
           const auto & face_info = *face_iterator;
 
           const auto current_face_type =
-              face_info->faceType(std::make_pair(_current_var->number(), _global_system_number));
+              face_info->faceType(std::make_pair(_current_var->number(), _system_number));
 
           // First we check if this face is internal to the variable, if yes, contribute to both
           // sides
           if (current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
           {
             dof_indices_elem[face_i] =
-                face_info->elemInfo()->dofIndices()[_global_system_number][_current_var->number()];
+                face_info->elemInfo()->dofIndices()[_system_number][_current_var->number()];
             dof_indices_neighbor[face_i] =
-                face_info->neighborInfo()
-                    ->dofIndices()[_global_system_number][_current_var->number()];
+                face_info->neighborInfo()->dofIndices()[_system_number][_current_var->number()];
 
             const auto face_value =
                 Moose::FV::linearInterpolation(solution_reader(dof_indices_elem[face_i]),
@@ -111,7 +110,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
                 _current_var->getBoundaryCondition(*face_info->boundaryIDs().begin());
 
             if (bc_pointer)
-              bc_pointer->setCurrentFaceInfo(face_info, current_face_type);
+              bc_pointer->setupFaceData(face_info, current_face_type);
 
             const auto * const elem_info = current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                                ? face_info->elemInfo()
@@ -124,7 +123,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
                                                 : new_values_neighbor;
 
             dof_id_container[face_i] =
-                elem_info->dofIndices()[_global_system_number][_current_var->number()];
+                elem_info->dofIndices()[_system_number][_current_var->number()];
 
             // If we don't have a boundary condition, then it's a natural condition. We'll use a
             // one-term expansion approximation in that case

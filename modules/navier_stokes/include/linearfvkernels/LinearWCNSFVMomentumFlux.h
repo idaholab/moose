@@ -46,7 +46,7 @@ public:
    * contributions.
    * @param face_info The face info which will be used as current face info
    */
-  virtual void setCurrentFaceInfo(const FaceInfo * face_info) override;
+  virtual void setupFaceData(const FaceInfo * face_info) override;
 
 protected:
   /// Computes the matrix contribution of the advective flux on the element side of current face

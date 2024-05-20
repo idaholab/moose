@@ -87,7 +87,7 @@ public:
   virtual Real computeBoundaryNormalGradient() const = 0;
 
   /// Set current face info
-  void setCurrentFaceInfo(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type);
+  void setupFaceData(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type);
 
   const FaceInfo * currentFaceInfo() const { return _current_face_info; }
   FaceInfo::VarFaceNeighbors currentFaceType() const { return _current_face_type; }
@@ -151,8 +151,8 @@ protected:
 };
 
 inline void
-LinearFVBoundaryCondition::setCurrentFaceInfo(const FaceInfo * face_info,
-                                              const FaceInfo::VarFaceNeighbors face_type)
+LinearFVBoundaryCondition::setupFaceData(const FaceInfo * face_info,
+                                         const FaceInfo::VarFaceNeighbors face_type)
 {
   mooseAssert(
       face_info,

@@ -37,7 +37,7 @@ public:
    * Set the current FaceInfo object
    * @param face_info The face info which will be used as current face info
    */
-  virtual void setCurrentFaceInfo(const FaceInfo * face_info);
+  virtual void setupFaceData(const FaceInfo * face_info);
 
   /**
    * Set the coordinate system specific face area for the assembly

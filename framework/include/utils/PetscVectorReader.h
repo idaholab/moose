@@ -19,7 +19,7 @@ using libMesh::numeric_index_type;
 using libMesh::PetscVector;
 
 /**
- * A class which helps with repeated reading from a ghosted petsc vector.
+ * A class which helps with repeated reading from a petsc vector.
  * Its main purpose is to avoid unnecessary calls to the get_array() function
  * in the wrapper.
  */
@@ -39,13 +39,13 @@ public:
   /// Restore the array, usually upon going out of scope
   void restore();
 
-  /// Check if this vector is readable
-  bool readable() const { return _raw_value != nullptr; }
-
   /// Access a value in the petsc vector
   PetscScalar operator()(const numeric_index_type i) const;
 
 private:
+  /// Check if this vector is readable
+  bool readable() const { return _raw_value != nullptr; }
+
   /// Reference to the petsc vector whose values shall be read
   PetscVector<Number> & _vec;
 

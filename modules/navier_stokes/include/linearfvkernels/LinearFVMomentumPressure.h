@@ -31,13 +31,13 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
-  const MooseLinearVariableFV<Real> & getPressureVariable(const std::string & vname);
+  MooseLinearVariableFV<Real> & getPressureVariable(const std::string & vname);
 
   /// Index x|y|z of the momentum equation component
   const unsigned int _index;
 
   /// Pointer to the linear finite volume pressure variable
-  const MooseLinearVariableFV<Real> & _pressure_var;
+  MooseLinearVariableFV<Real> & _pressure_var;
 
   /// The pressure variable
   const std::vector<std::unique_ptr<NumericVector<Number>>> & _pressure_gradient;

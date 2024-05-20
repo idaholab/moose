@@ -62,7 +62,7 @@ MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInf
               "Advected quantity must be defined on one of the sides of the face!");
   mooseAssert((_adv_quant->hasFaceSide(*fi, true) == _density.hasFaceSide(*fi, true)) ||
                   (_adv_quant->hasFaceSide(*fi, false) == _density.hasFaceSide(*fi, false)),
-              "Density must be define at least on one of the sides where the advected quantity is "
+              "Density must be defined at least on one of the sides where the advected quantity is "
               "defined!");
 
   const auto face_arg =

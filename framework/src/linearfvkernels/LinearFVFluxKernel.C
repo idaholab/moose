@@ -79,7 +79,7 @@ LinearFVFluxKernel::addMatrixContribution()
     if (bc_pointer || _force_boundary_execution)
     {
       if (bc_pointer)
-        bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
+        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
       const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
 
       // We allow internal (for the mesh) boundaries too, so we have to check on which side we
@@ -136,7 +136,7 @@ LinearFVFluxKernel::addRightHandSideContribution()
     if (bc_pointer || _force_boundary_execution)
     {
       if (bc_pointer)
-        bc_pointer->setCurrentFaceInfo(_current_face_info, _current_face_type);
+        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
 
       const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
 
@@ -177,7 +177,7 @@ LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
 }
 
 void
-LinearFVFluxKernel::setCurrentFaceInfo(const FaceInfo * face_info)
+LinearFVFluxKernel::setupFaceData(const FaceInfo * face_info)
 {
   _cached_matrix_contribution = false;
   _cached_rhs_contribution = false;

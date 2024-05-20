@@ -113,7 +113,7 @@ std::pair<Real, Real>
 interpCoeffs(const InterpMethod m,
              const FaceInfo & fi,
              const bool one_is_elem,
-             const T face_flux = 0.0)
+             const T & face_flux = 0.0)
 {
   switch (m)
   {

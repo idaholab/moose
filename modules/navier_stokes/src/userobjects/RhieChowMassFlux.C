@@ -104,7 +104,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
 
 void
 RhieChowMassFlux::linkMomentumPressureSystems(
-    std::vector<LinearSystem *> momentum_systems,
+    const std::vector<LinearSystem *> & momentum_systems,
     const LinearSystem & pressure_system,
     const std::vector<unsigned int> & momentum_system_numbers)
 {
@@ -135,6 +135,8 @@ RhieChowMassFlux::meshChanged()
 void
 RhieChowMassFlux::initialSetup()
 {
+  // We fetch the pressure diffusion kernel to ensure that the face flux correction
+  // is consistent with the pressure discretization in the Poisson equation.
   std::vector<LinearFVFluxKernel *> flux_kernel;
   auto base_query = _fe_problem.theWarehouse()
                         .query()
@@ -150,12 +152,14 @@ RhieChowMassFlux::initialSetup()
   _p_diffusion_kernel = dynamic_cast<LinearFVAnisotropicDiffusion *>(flux_kernel[0]);
   if (!_p_diffusion_kernel)
     paramError("p_diffusion_kernel",
-               "The provided diffusion kernel should of type LinearFVDiffusion!");
+               "The provided diffusion kernel should of type LinearFVAnisotropicDiffusion!");
 }
 
 void
 RhieChowMassFlux::setupCellVolumes()
 {
+  // We cache the cell volumes into a petsc vector for corrections here so we can use
+  // the optimized petsc operations for the normalization
   _cell_volumes = _pressure_system->currentSolution()->zero_clone();
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
   {
@@ -182,9 +186,10 @@ RhieChowMassFlux::initFaceMassFlux()
 
   const auto time_arg = Moose::currentState();
 
+  // We loop through the faces and compute the resulting face fluxes from the
+  // initial conditions for velocity
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-
     RealVectorValue density_times_velocity;
 
     // On internal face we do a regular interpolation with geometric weights
@@ -236,10 +241,18 @@ RhieChowMassFlux::computeFaceMassFlux()
 
   const auto time_arg = Moose::currentState();
 
-  PetscVectorReader p_reader(*_p->sys().system().current_local_solution);
+  // Petsc vector reader to make the repeated reading from the vector faster
+  PetscVectorReader p_reader(*_pressure_system->system().current_local_solution);
+
+  // We loop through the faces and compute the face fluxes using the pressure gradient
+  // and the momentum matrix/right hand side
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    _p_diffusion_kernel->setCurrentFaceInfo(fi);
+    // Making sure the kernel knows which face we are on
+    _p_diffusion_kernel->setupFaceData(fi);
+
+    // We are setting this to 1.0 because we don't want to multiply the kernel contributions
+    // with the surface area yet. The surface area will be factored in in the advection kernels.
     _p_diffusion_kernel->setCurrentFaceArea(1.0);
 
     Real p_grad_flux = 0.0;
@@ -247,18 +260,23 @@ RhieChowMassFlux::computeFaceMassFlux()
     {
       const auto & elem_info = *fi->elemInfo();
       const auto & neighbor_info = *fi->neighborInfo();
+
+      // Fetching the dof indices for the pressure variable
       const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
       const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
 
+      // Fetching the values of the pressure for the element and the neighbor
       const auto p_elem_value = p_reader(elem_dof);
       const auto p_neighbor_value = p_reader(neighbor_dof);
 
+      // Compute the elem matrix contributions for the face
       const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
       const auto neighbor_matrix_contribution =
           _p_diffusion_kernel->computeNeighborMatrixContribution();
       const auto elem_rhs_contribution =
           _p_diffusion_kernel->computeElemRightHandSideContribution();
 
+      // Compute the face flux from the matrix and right hand side contributions
       p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
                      p_elem_value * elem_matrix_contribution) -
                     elem_rhs_contribution;
@@ -267,13 +285,18 @@ RhieChowMassFlux::computeFaceMassFlux()
     {
       mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
 
-      const auto p_elem_value = _p->getElemValue(*fi->elemInfo(), time_arg);
+      const ElemInfo & elem_info =
+          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+      const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
       const auto matrix_contribution =
           _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
       const auto rhs_contribution =
           _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
+
+      // On the boundary, only the element side has a constibution
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
     }
+    // Compute the new face flux
     _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
   }
 }
@@ -303,9 +326,12 @@ RhieChowMassFlux::populateCouplingFunctors(
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv)
 {
+  // We have the raw H/A and 1/A vectors in a petsc format. This function
+  // will create face functors from them
   using namespace Moose::FV;
   const auto time_arg = Moose::currentState();
 
+  // Create the petsc vector readers for faster repeated access
   std::vector<PetscVectorReader> hbya_reader;
   for (const auto dim_i : index_range(raw_hbya))
     hbya_reader.emplace_back(*raw_hbya[dim_i]);
@@ -314,23 +340,30 @@ RhieChowMassFlux::populateCouplingFunctors(
   for (const auto dim_i : index_range(raw_Ainv))
     ainv_reader.emplace_back(*raw_Ainv[dim_i]);
 
+  // We loop through the faces and populate the coupling fields (face H/A and 1/H)
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-
     Real face_rho = 0;
     RealVectorValue face_hbya;
+
+    // We do the lookup in advance
     auto & Ainv = _Ainv[fi->id()];
 
+    // If it is internal, we just interpolate (using geometric weights) to the face
     if (_vel[0]->isInternalFace(*fi))
     {
+      // Get the dof indices for the element and the neighbor
       const auto & elem_info = *fi->elemInfo();
       const auto & neighbor_info = *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
       const auto neighbor_dof = neighbor_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
+      // Get the density values for the element and neighbor. We need this multiplication to make
+      // the coupling fields mass fluxes.
       const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
       const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
 
+      // Now we do the interpolation to the face
       interpolate(Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
       for (const auto dim_i : index_range(raw_hbya))
       {
@@ -354,17 +387,19 @@ RhieChowMassFlux::populateCouplingFunctors(
           hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
+      // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
+      // is consistent
       if (_vel[0]->isDirichletBoundaryFace(*fi))
       {
         const Moose::FaceArg boundary_face{
             fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem()};
         face_rho = _rho(boundary_face, Moose::currentState());
+
         for (const auto dim_i : make_range(_dim))
-        {
           face_hbya(dim_i) =
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
-        }
       }
+      // Otherwise we just do a one-term expansion (so we just use the element value)
       else
       {
         const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
@@ -374,11 +409,12 @@ RhieChowMassFlux::populateCouplingFunctors(
           face_hbya(dim_i) = hbya_reader[dim_i](elem_dof);
       }
 
-      Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-
+      // We just do a one-term expansion for 1/A no matter what
+      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
       for (const auto dim_i : index_range(raw_Ainv))
         Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
     }
+    // Lastly, we populate the face flux resulted by H/A
     _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
   }
 }
@@ -430,6 +466,8 @@ RhieChowMassFlux::computeHbyA(bool verbose)
                 "to PetscVectors!");
 
     *working_vector_petsc = 1.0;
+
+    // We create element-wise 1/A-s based on the the diagonal of the momentum matrix
     Ainv.pointwise_divide(*working_vector_petsc, Ainv);
 
     if (verbose)
@@ -441,6 +479,8 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     _HbyA_raw.push_back(current_local_solution.zero_clone());
     NumericVector<Number> & HbyA = *(_HbyA_raw.back());
     HbyA = 0;
+
+    // We start creating H/A by adding the momentum right hand side contributions
     HbyA.add(-1.0, rhs);
 
     *working_vector_petsc = *pressure_gradient[system_i];

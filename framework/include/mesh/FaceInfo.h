@@ -115,12 +115,6 @@ public:
   /// face.
   VarFaceNeighbors & faceType(const std::pair<unsigned int, unsigned int> & var_sys);
 
-  /// Getter for the face type for every stored variable
-  std::vector<std::vector<VarFaceNeighbors>> & faceType() { return _face_types_by_var; }
-
-  /// Const getter for the face type for every stored variable
-  const std::vector<std::vector<VarFaceNeighbors>> & faceType() const { return _face_types_by_var; }
-
   /// Const getter for every associated boundary ID
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
@@ -173,6 +167,10 @@ public:
   void computeBoundaryCoefficients();
 
 private:
+  /// Getter for the face type for every stored variable.
+  /// This will be a friend of MooseMesh to make sure we can only access it from there.
+  std::vector<std::vector<VarFaceNeighbors>> & faceType() { return _face_types_by_var; }
+
   /// the elem and neighbor elems
   const ElemInfo * const _elem_info;
   const ElemInfo * _neighbor_info;
@@ -208,6 +206,9 @@ private:
 
   /// the set of boundary ids that this face is associated with
   std::set<BoundaryID> _boundary_ids;
+
+  /// Allows access to private members from moose mesh only
+  friend MooseMesh;
 };
 
 inline const Elem &
@@ -222,12 +223,18 @@ FaceInfo::neighbor() const
 inline FaceInfo::VarFaceNeighbors
 FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys) const
 {
+  mooseAssert(var_sys.second < _face_types_by_var.size(), "System number out of bounds!");
+  mooseAssert(var_sys.first < _face_types_by_var[var_sys.second].size(),
+              "Variable number out of bounds!");
   return _face_types_by_var[var_sys.second][var_sys.first];
 }
 
 inline FaceInfo::VarFaceNeighbors &
 FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys)
 {
+  mooseAssert(var_sys.second < _face_types_by_var.size(), "System number out of bounds!");
+  mooseAssert(var_sys.first < _face_types_by_var[var_sys.second].size(),
+              "Variable number out of bounds!");
   return _face_types_by_var[var_sys.second][var_sys.first];
 }
 

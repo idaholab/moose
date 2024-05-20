@@ -91,7 +91,7 @@ public:
   /**
    * Switch to request cell gradient computations.
    */
-  void computeCellGradients() const { _needs_cell_gradients = true; }
+  void computeCellGradients() { _needs_cell_gradients = true; }
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -177,7 +177,7 @@ protected:
   usingMooseVariableBaseMembers;
 
   /// Boolean to check if this variable needs gradient computations.
-  mutable bool _needs_cell_gradients;
+  bool _needs_cell_gradients;
 
   /// Temporary storage for the cell gradient to avoid unnecessary allocations.
   mutable RealVectorValue _cell_gradient;

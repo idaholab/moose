@@ -67,14 +67,14 @@ protected:
   /// The dimension of the domain
   const unsigned int _dim;
 
-  /// The number of the linear system on which this thread is acting
+  /// The number of the linear system on which this thread is acting.
   const unsigned int _linear_system_number;
 
   /// Reference to the linear system at libmesh level
   const libMesh::LinearImplicitSystem & _linear_system;
 
-  /// Global system number
-  const unsigned int _global_system_number;
+  /// Global system number (the number of this system in the libmesh equation system)
+  const unsigned int _system_number;
 
   /// Thread ID
   THREAD_ID _tid;

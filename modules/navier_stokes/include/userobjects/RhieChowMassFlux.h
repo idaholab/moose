@@ -67,17 +67,17 @@ public:
    * @param pressure_system Reference to the pressure system
    * @param momentum_system_numbers The numbers of these systems
    */
-  void linkMomentumPressureSystems(std::vector<LinearSystem *> momentum_systems,
+  void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
                                    const LinearSystem & pressure_system,
                                    const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
-   * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
+   * Computes the inverse of the diagonal (1/A) of the system matrix plus the H/A components for the
    * pressure equation plus Rhie-Chow interpolation.
    */
   void computeHbyA(bool verbose);
 
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   void setupCellVolumes();
@@ -94,7 +94,7 @@ protected:
   void checkBlocks(const VarType & var) const;
 
   /// The \p MooseMesh that this user object operates on
-  MooseMesh & _moose_mesh;
+  const MooseMesh & _moose_mesh;
 
   /// The \p libMesh mesh that this object acts on
   const libMesh::MeshBase & _mesh;
@@ -103,10 +103,10 @@ protected:
   const unsigned int _dim;
 
   /// The thread 0 copy of the pressure variable
-  MooseLinearVariableFVReal * const _p;
+  const MooseLinearVariableFVReal * const _p;
 
   /// The thread 0 copy of the x-velocity variable
-  std::vector<MooseLinearVariableFVReal *> _vel;
+  std::vector<const MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
   LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
@@ -147,7 +147,7 @@ protected:
    */
   const Moose::Functor<Real> & _rho;
 
-  /// Pointers to the nonlinear system(s) corresponding to the momentum equation(s)
+  /// Pointers to the linear system(s) in moose corresponding to the momentum equation(s)
   std::vector<LinearSystem *> _momentum_systems;
 
   /// Numbers of the momentum system(s)
@@ -156,7 +156,7 @@ protected:
   /// Global numbers of the momentum system(s)
   std::vector<unsigned int> _global_momentum_system_numbers;
 
-  /// Pointers to the momentum equation implicit system(s)
+  /// Pointers to the momentum equation implicit system(s) from libmesh
   std::vector<LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system

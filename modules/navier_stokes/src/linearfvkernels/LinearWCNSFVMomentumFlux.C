@@ -328,9 +328,9 @@ LinearWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
 }
 
 void
-LinearWCNSFVMomentumFlux::setCurrentFaceInfo(const FaceInfo * face_info)
+LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
 {
-  LinearFVFluxKernel::setCurrentFaceInfo(face_info);
+  LinearFVFluxKernel::setupFaceData(face_info);
 
   // Caching the mass flux on the face which will be reused in the advection term's matrix and right
   // hand side contributions
