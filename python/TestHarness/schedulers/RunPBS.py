@@ -143,7 +143,7 @@ class RunPBS(RunHPC):
                 # Get the job state, and report running if it switched to running
                 if state == 'R' and not pbs_job.running:
                     pbs_job.running = True
-                    self.setAndOutputJobStatus(job, job.running)
+                    self.setAndOutputJobStatus(job, job.running, caveats=True)
 
                 # If we were running but now we're done, we're not running anymore
                 if pbs_job.running and done:
