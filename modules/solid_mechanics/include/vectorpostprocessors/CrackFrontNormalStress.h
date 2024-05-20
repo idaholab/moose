@@ -14,9 +14,7 @@
 // Forward Declarations
 class CrackFrontDefinition;
 /**
- * This vectorpostprocessor computes the J-Integral, which is a measure of
- * the strain energy release rate at a crack tip, which can be used as a
- * criterion for fracture growth.
+ * This vectorpostprocessor computes the average stress scalar normal to the crack front.
  */
 class CrackFrontNormalStress : public ElementVectorPostprocessor
 {
@@ -32,9 +30,17 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+  /*** dimensions of the box in front of the crack tip that the stress is averaged over
+   * box is centered in front of the crack tip
+   * _box_length distance box extends in front of the crack tip
+   * _box_width is tangent to the crack tip, centered on the crack point
+   * _box_height is normal to the crack tip, centered on the crack point
+   */
+  ///@{
   Real _box_length;
   Real _box_width;
   Real _box_height;
+  ///@}
 
   /// something about this
   const CrackFrontDefinition * _crack_front_definition;
@@ -43,11 +49,6 @@ protected:
   const std::string _base_name;
   /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;
-
-  /// Whether to treat a 3D model as 2D for computation of fracture integrals
-  bool _treat_as_2d;
-  /// Whether the crack is defined by an XFEM cutter mesh
-  bool _using_mesh_cutter;
 
   // volume being integrated over for each crack front
   std::vector<Real> _volume;
