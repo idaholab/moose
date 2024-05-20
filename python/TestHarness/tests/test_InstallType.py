@@ -21,6 +21,7 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=mocked
+            os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
             harness = TestHarness.TestHarness(['', '-i', 'install_type', '-c'], MOOSE_DIR)
             if expect_fail:
                 with self.assertRaises(SystemExit):
@@ -34,15 +35,15 @@ class TestHarnessTester(unittest.TestCase):
         Test which only runs if binary is installed
         """
         out = self.mocked_output(set(['ALL', 'INSTALLED']), False)
-        self.assertRegex(out, r'.*?SKIP.*?in_tree_type.*?"IN_TREE" binary]')
-        self.assertRegex(out, r'.*?OK.*?installed_type')
-        self.assertRegex(out, r'.*?OK.*?all_type')
+        self.assertRegex(out, r'tests\/test_harness\.in_tree_type[\s.]+\[test requires "IN_TREE" binary\]\s+SKIP')
+        self.assertRegex(out, r'tests\/test_harness\.installed_type[\s.]+OK')
+        self.assertRegex(out, r'tests\/test_harness\.all_type[\s.]+OK')
 
     def testInTree(self):
         """
         Test which only runs if binary is in_tree
         """
         out = self.mocked_output(set(['ALL', 'IN_TREE']), False)
-        self.assertRegex(out, r'.*?SKIP.*?installed_type.*?"INSTALLED" binary]')
-        self.assertRegex(out, r'.*?OK.*?in_tree_type')
-        self.assertRegex(out, r'.*?OK.*?all_type')
+        self.assertRegex(out, r'tests\/test_harness\.in_tree_type[\s.]+OK')
+        self.assertRegex(out, r'tests\/test_harness\.installed_type[\s.]+\[test requires "INSTALLED" binary\]\s+SKIP')
+        self.assertRegex(out, r'tests\/test_harness\.all_type[\s.]+OK')

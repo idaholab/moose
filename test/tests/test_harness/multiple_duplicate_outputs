@@ -1,7 +1,0 @@
-[Tests]
-  [./a]
-    type = Exodiff
-    input = good.i
-    exodiff = 'foo.e foo.e'
-  [../]
-[]
