@@ -130,28 +130,36 @@ CovarianceFunctionBase::buildHyperParamMap(
     vec_map[iter.first] = iter.second;
 }
 
-void
+bool
 CovarianceFunctionBase::getTuningData(const std::string & name,
                                       unsigned int & size,
                                       Real & min,
                                       Real & max) const
 {
+  // First, check the dependent covariances
+  for (const auto dependent_covar : _covariance_functions)
+    if (dependent_covar->getTuningData(name, size, min, max))
+      return true;
+
   min = 1e-9;
   max = 1e9;
 
-  // First, check the dependent covariances
-  for (const auto dependent_covar : _covariance_functions)
-    dependent_covar->getTuningData(name, size, min, max);
-
   if (_hp_map_real.find(name) != _hp_map_real.end())
+  {
     size = 1;
+    return true;
+  }
   else if (_hp_map_vector_real.find(name) != _hp_map_vector_real.end())
   {
     const auto & vector_value = _hp_map_vector_real.find(name);
     size = vector_value->second.size();
+    return true;
   }
   else
+  {
     size = 0;
+    return false;
+  }
 }
 
 void

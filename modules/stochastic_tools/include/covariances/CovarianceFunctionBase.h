@@ -31,7 +31,7 @@ public:
   void buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                           std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
 
-  virtual void
+  virtual bool
   getTuningData(const std::string & name, unsigned int & size, Real & min, Real & max) const;
 
   /// New function that stores all the types of all the nested covariances

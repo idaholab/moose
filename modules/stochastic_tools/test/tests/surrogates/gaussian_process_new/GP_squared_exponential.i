@@ -17,7 +17,7 @@
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 10
+    num_rows = 20
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []

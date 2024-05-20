@@ -34,6 +34,7 @@ LMC::LMC(const InputParameters & parameters)
   MooseRandom generator_latent;
   generator_latent.seed(0, 1980);
 
+  // First add and initialize the a A coefficients in the (aa^T+lambda*I) matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string a_coeff_name = "acoeff_" + std::to_string(exp_i);
@@ -41,18 +42,22 @@ LMC::LMC(const InputParameters & parameters)
     _a_coeffs.push_back(
         &addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true));
 
-    auto & vector = _hp_map_vector_real[a_coeff_name_with_prefix];
+    auto & acoeff_vector = _hp_map_vector_real[a_coeff_name_with_prefix];
     for (const auto out_i : make_range(_num_outputs))
-      vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+      acoeff_vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+  }
 
+  // Then add and initialize the lambda coefficients in the (aa^T+lambda*I) matrix
+  for (const auto exp_i : make_range(_num_expansion_terms))
+  {
     const std::string lambda_name = "lambda_" + std::to_string(exp_i);
     const std::string lambda_name_with_prefix = _name + ":" + lambda_name;
     _lambdas.push_back(
         &addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true));
 
-    vector = _hp_map_vector_real[lambda_name_with_prefix];
+    auto & lambda_vector = _hp_map_vector_real[lambda_name_with_prefix];
     for (const auto out_i : make_range(_num_outputs))
-      vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+      lambda_vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
   }
 }
 
@@ -160,7 +165,8 @@ LMC::computeAGradient(RealEigenMatrix & grad,
   grad.setZero();
   for (const auto col_i : make_range(_num_outputs))
     grad(index, col_i) = a_coeffs[col_i];
-  grad += grad.transpose();
+  const RealEigenMatrix transpose = grad.transpose();
+  grad = grad + transpose;
 }
 
 void

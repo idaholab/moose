@@ -75,10 +75,12 @@ GaussianProcessGeneral::setupCovarianceMatrix(const RealEigenMatrix & training_p
   const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * batch_size, _num_outputs * batch_size);
 
+  std::cout << _tuning_data.size() << std::endl;
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
-  _K.resize(training_params.rows(), training_params.rows());
+  _K.resize(training_params.rows() * training_data.cols(),
+            training_params.rows() * training_data.cols());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
 
   RealEigenMatrix flattened_data =
@@ -110,13 +112,18 @@ GaussianProcessGeneral::generateTuningMap(const std::vector<std::string> & param
   for (const auto param_i : index_range(params_to_tune))
   {
     const auto & hp = params_to_tune[param_i];
+    std::cout << "hp " << hp << " is tunable " << _covariance_function->isTunable(hp) << std::endl;
     if (_covariance_function->isTunable(hp))
     {
       unsigned int size;
       Real min;
       Real max;
       // Get size and default min/max
-      _covariance_function->getTuningData(hp, size, min, max);
+      const bool found = _covariance_function->getTuningData(hp, size, min, max);
+
+      if (!found)
+        ::mooseError("The covariance parameter ", hp, " could not be found!");
+
       // Check for overridden min/max
       min = lower_bounds_specified ? min_vector[param_i] : min;
       max = upper_bounds_specified ? max_vector[param_i] : max;
@@ -151,12 +158,15 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
   std::vector<Real> theta(_num_tunable, 0.0);
   _batch_size = opts.batch_size;
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+
   mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
 
   // Internal params for Adam; set to the recommended values in the paper
   Real b1 = opts.b1;
   Real b2 = opts.b2;
   Real eps = opts.eps;
+
+  std::cout << "num tunable " << _num_tunable << std::endl;
 
   std::vector<Real> m0(_num_tunable, 0.0);
   std::vector<Real> v0(_num_tunable, 0.0);
@@ -171,7 +181,7 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
   std::vector<unsigned int> v_sequence(training_params.rows());
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   RealEigenMatrix inputs(_batch_size, training_params.cols());
-  RealEigenMatrix outputs(_batch_size, 1);
+  RealEigenMatrix outputs(_batch_size, training_data.cols());
   if (opts.show_optimization_details)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
@@ -185,7 +195,9 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
     {
       for (unsigned int jj = 0; jj < training_params.cols(); ++jj)
         inputs(ii, jj) = training_params(v_sequence[ii], jj);
-      outputs(ii, 0) = training_data(v_sequence[ii], 0);
+
+      for (unsigned int jj = 0; jj < training_data.cols(); ++jj)
+        outputs(ii, jj) = training_data(v_sequence[ii], jj);
     }
 
     store_loss = getLoss(inputs, outputs);
@@ -227,9 +239,13 @@ Real
 GaussianProcessGeneral::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
-  setupStoredMatrices(outputs);
+
+  RealEigenMatrix flattened_data = outputs.reshaped(outputs.rows() * outputs.cols(), 1);
+
+  setupStoredMatrices(flattened_data);
+
   Real log_likelihood = 0;
-  log_likelihood += -(outputs.transpose() * _K_results_solve)(0, 0);
+  log_likelihood += -(flattened_data.transpose() * _K_results_solve)(0, 0);
   log_likelihood += -std::log(_K.determinant());
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
