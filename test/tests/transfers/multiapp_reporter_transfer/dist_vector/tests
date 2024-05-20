@@ -13,25 +13,16 @@
       jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
       detail = "the number of procs per app is default,"
     []
-    [reporter_transfer_min_procs_2]
+    [reporter_transfer_limit_max_procs]
       type = 'JSONDiff'
-      cli_args = "MultiApps/sub/min_procs_per_app=2 Outputs/file_base=main_2_out"
+      cli_args = "MultiApps/sub/max_procs_per_app=2 Outputs/file_base=main_2_out"
       input = 'main.i'
       jsondiff = 'main_2_out.json main_2_out_sub0_out.json main_2_out_sub1_out.json main_2_out_sub2_out.json main_2_out_sub3_out.json'
-      min_parallel = 2
-      detail = "the number of procs per app is less than the number of apps,"
-    []
-    [reporter_transfer_min_procs_5]
-      type = 'JSONDiff'
-      cli_args = "MultiApps/sub/min_procs_per_app=5 Outputs/file_base=main_5_out"
-      input = 'main.i'
-      jsondiff = 'main_5_out.json main_5_out_sub0_out.json  main_5_out_sub1_out.json main_5_out_sub2_out.json  main_5_out_sub3_out.json'
-      min_parallel = 5
-      detail = "the number of procs per app is larger than the number of apps,"
+      detail = "the number of procs per app limited,"
     []
   []
   [bad_vec_reps]
-    requirement = 'The system shall error if the reporter being tranferred'
+    requirement = 'The system shall error if the reporter being transferred'
     [reporter_send_error]
       type = 'RunException'
       input = 'main_dist.i'
@@ -49,13 +40,12 @@
     []
   []
   [one_way_transfer]
-    requirement = 'The system shall support the ability to transfer reporter'
+    requirement = 'The system shall support the ability to transfer reporter in a scatter/gather fashion'
     [1_to_N]
       type = 'JSONDiff'
       cli_args = "Transfers/active=to_sub Outputs/file_base=1_to_N"
       input = 'main.i'
       jsondiff = '1_to_N_sub0_out.json 1_to_N_sub1_out.json 1_to_N_sub2_out.json 1_to_N_sub3_out.json'
-      max_parallel = 1
       detail = "from one main app to many subapps,"
     []
     [N_to_1]
@@ -63,7 +53,6 @@
       cli_args = "Transfers/active=from_sub Outputs/file_base=N_to_1"
       input = 'main.i'
       jsondiff = 'N_to_1.json'
-      max_parallel = 1
       detail = "or from many subapps to one main app,"
     []
   []

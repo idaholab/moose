@@ -1,13 +1,5 @@
 {
     "reporters": {
-        "elem": {
-            "type": "ElementCentroidPositions",
-            "values": {
-                "positions_1d": {
-                    "type": "std::vector<libMesh::Point>"
-                }
-            }
-        },
         "from_sub_rep": {
             "type": "ConstantReporter",
             "values": {
@@ -33,30 +25,6 @@
     },
     "time_steps": [
         {
-            "elem": {
-                "positions_1d": [
-                    {
-                        "x": 0.125,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    {
-                        "x": 0.375,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    {
-                        "x": 0.625,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    {
-                        "x": 0.875,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                ]
-            },
             "from_sub_rep": {
                 "rec_vec": [
                     -1.0,

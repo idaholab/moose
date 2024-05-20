@@ -189,7 +189,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
   for (const auto & ind : indices)
     if (getFromMultiApp()->hasLocalApp(ind) &&
         (!hasToMultiApp() || getToMultiApp()->hasLocalApp(ind)))
-      for (unsigned int n : make_range(_from_reporter_names.size()))
+      for (const auto n : index_range(_from_reporter_names))
       {
         if (_distribute_reporter_vector)
         {
@@ -209,7 +209,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
       }
 
   if (_distribute_reporter_vector)
-    for (unsigned int n : make_range(_to_reporter_names.size()))
+    for (const auto n : index_range(_to_reporter_names))
     {
       // Perform summing operation that makes sure all procs have the correct
       // Reporter values.
@@ -234,7 +234,7 @@ MultiAppReporterTransfer::checkSiblingsTransferSupported() const
 
   if (_distribute_reporter_vector)
     paramError("distribute_reporter_vector",
-               "Distributing reporter vectors is not compatible with sibling transfers.");
+               "Distributing reporter vectors is not implemented with sibling transfers.");
 
   // Check that we are in the supported configuration: same number of source and target apps
   // The allocation of the child apps on the processors must be the same

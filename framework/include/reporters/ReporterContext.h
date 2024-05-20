@@ -496,6 +496,7 @@ ReporterGeneralContext<T>::clear()
   else
     mooseError("Cannot clear non vector-type reporter values.");
 }
+
 template <typename T>
 void
 ReporterGeneralContext<T>::vectorSum()
@@ -556,6 +557,7 @@ ReporterGeneralContext<T>::vectorSum()
 
   mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
 }
+
 /**
  * A context that broadcasts the Reporter value from the root processor
  */
@@ -785,6 +787,14 @@ public:
       using ValueType = typename T::value_type;
       // Check if the ValueType is a vector
       if constexpr (std::is_arithmetic<ValueType>::value && !std::is_same<ValueType, bool>::value)
+      {
+#ifdef DEBUG
+        auto vec_size = this->_state.value().size();
+        this->comm().max(vec_size);
+        // Assert only passes on all ranks if they are all the same size.
+        mooseAssert(this->_state.value().size() == vec_size,
+                    "Reporter vector have different sizes on different ranks.");
+#endif
         for (auto & val_vec : this->_state.value())
         { //_state.value()-> vector<vector<R>
 
@@ -794,13 +804,15 @@ public:
           val_vec.resize(val_vec_size);
 
           this->comm().sum(val_vec);
-          return;
         }
+          return;
+      }
       else
         mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
     }
-    else
-      mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
+
+    // If we don't perform a summing operation, error out.
+    mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
   }
 
   virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }

@@ -36,6 +36,7 @@
   [elem]
     type = ElementCentroidPositions
     auto_sort = true
+    outputs = none
   []
 []
 
