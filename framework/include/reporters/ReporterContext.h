@@ -796,8 +796,7 @@ public:
                     "Reporter vector have different sizes on different ranks.");
 #endif
         for (auto & val_vec : this->_state.value())
-        { //_state.value()-> vector<vector<R>
-
+        {
           // Resize vector to max size
           dof_id_type val_vec_size = val_vec.size();
           this->comm().max(val_vec_size);
@@ -807,10 +806,7 @@ public:
         }
         return;
       }
-      else
-        mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
     }
-
     // If we don't perform a summing operation, error out.
     mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");
   }
