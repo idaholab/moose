@@ -13,7 +13,8 @@ using a finite volume discretization. Furthermore, the action is able to handle
 regular (clean fluid flow) or porous medium (flow within homogenized structures)
 formulations using incompressible and weakly-compressible approximations.
 This action is triggered with */Modules/NavierStokesFV* input syntax.
-For more information, visit [NavierStokesFV](/Modules/NavierStokesFV/index.md).
+For more information, visit [NavierStokesFV](/Modules/NavierStokesFV/index.md). For more information
+regarding the friction implemenation, visit [Friction Kernel](PINSFVMomentumFriction.md)
 
 ## Example Input File Syntax
 

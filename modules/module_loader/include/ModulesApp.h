@@ -134,6 +134,10 @@ ModulesApp::registerAllObjects(Factory & f, ActionFactory & af, Syntax & s)
   FsiApp::registerAll(f, af, s);
 #endif
 
+#ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
+  FunctionalExpansionToolsApp::registerAll(f, af, s);
+#endif
+
 #ifdef GEOCHEMISTRY_ENABLED
   GeochemistryApp::registerAll(f, af, s);
 #endif

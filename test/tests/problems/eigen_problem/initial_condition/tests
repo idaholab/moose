@@ -2,25 +2,27 @@
   design = "Eigenvalue.md"
   issues = "#15513  #12767 #14292"
 
-  [./newton_intial_guess]
+  [newton_intial_guess]
     type = 'CSVDiff'
     input = 'ne_ic.i'
     csvdiff = 'ne_ic_out_eigenvalues_0001.csv'
     absent_out = 'init_ solve'
+    # used in test 'restart'
+    cli_args = 'Outputs/checkpoint=True'
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an initial guess to Newton if users request."
-  [../]
+  []
 
-  [./newton_no_free_power]
+  [newton_no_free_power]
     type = 'CSVDiff'
     input = 'ne_ic_no_free.i'
     csvdiff = 'ne_ic_no_free_out_eigenvalues_0001.csv'
     issues = '#17026'
     requirement = "The system shall support eigenvalue execution without free power iterations."
     slepc = true
-  [../]
+  []
 
-  [./inverse_eigenvalue_postprocessor]
+  [inverse_eigenvalue_postprocessor]
     type = 'CSVDiff'
     input = 'ne_ic.i'
     csvdiff = 'ne_ic_out_inverse_eigenvalues_0001.csv'
@@ -28,31 +30,36 @@
     absent_out = 'init_ solve'
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an option to output the eigenvalue as its inverse."
-  [../]
+  []
 
-  [./output_inverse_eigenvalue]
+  [output_inverse_eigenvalue]
     type = 'RunApp'
     input = 'ne_ic.i'
-    cli_args = '--output-inverse-eigenvalue Outputs/file_base=ne_ic_dummy'
+    cli_args = '--output-inverse-eigenvalue
+                Outputs/csv=false'
     expect_out = 'Iteration\s+[0-9]\s+k-eigenvalue\s+=\s+5.00146'
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an option to output the eigenvalue on screen as its inverse."
-  [../]
+  []
 
-  [./extra_power_iterations]
+  [extra_power_iterations]
     type = 'Exodiff'
     input = 'ne_ic.i'
     exodiff = 'ne_ic_out_extra.e'
-    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra -eps_view'
+    cli_args = 'Executioner/extra_power_iterations=2
+                Outputs/exodus=true
+                Outputs/csv=false
+                Outputs/file_base=ne_ic_out_extra
+                -eps_view'
     slepc_version = '>=3.8.0'
     # Make sure we do not have an extra prefix
     absent_out = '(eps_power_)'
     # Make sure '-eps_view' actually work
     expect_out = 'SNES Object:'
     requirement = "The system shall support extra power iterations."
-  [../]
+  []
 
-  [./extra_power_iterations_csv]
+  [extra_power_iterations_csv]
     type = 'CSVDiff'
     input = 'ne_ic.i'
     csvdiff = 'ne_ic_out_extra_eigenvalues_0001.csv'
@@ -64,9 +71,9 @@
     # Make sure '-eps_view' actually work
     expect_out = 'SNES Object:'
     requirement = "The system shall support extra power iterations and check eigenvalue."
-  [../]
+  []
 
-  [./newton_with_exact_initialization]
+  [newton_with_exact_initialization]
     type = 'RunApp'
     input = 'ne_ic_no_free.i'
     cli_args = 'Executioner/initial_eigenvalue=0.1999416740 Postprocessors/niter/type=NumNonlinearIterations'
@@ -75,5 +82,20 @@
     expect_out = 'Iteration 0 eigenvalue = 0.1999416740'
     requirement = "The system shall support eigenvalue calculations with an initial condition including the initial solution vector and the initial eigenvalue."
     slepc = true
-  [../]
+  []
+
+  [restart]
+    type = 'RunApp'
+    input = 'ne_ic.i'
+    cli_args = 'Problem/restart_file_base=ne_ic_out_cp/LATEST
+                Executioner/initial_eigenvalue=0.1999416740
+                Postprocessors/niter/type=NumNonlinearIterations
+                Outputs/csv=false'
+    issues = '#27621'
+    slepc_version = '>=3.13.0'
+    expect_out = 'Iteration 0 eigenvalue = 0.1999416'
+    requirement = "The system shall support eigenvalue calculations with an initial condition set by restarting a checkpoint file."
+    slepc = true
+    prereq = newton_intial_guess
+  []
 []

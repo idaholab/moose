@@ -17,8 +17,7 @@
     cli_args = '--mesh-only'
     exodiff = 'offset_in.e'
     exodiff_opts = '-pedantic'
-    requirement = 'The system shall be able to use libmesh mesh generation tools and shift node/sideset '
-                  'ids by a constant offset.'
+    requirement = 'The system shall be able to use libmesh mesh generation tools and shift node/sideset ids by a constant offset.'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#11640'
     recover = false
@@ -27,8 +26,7 @@
   [prefix]
     issues = '#11640'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
-    requirement = 'The system shall include mesh generation tools and allow adding a name prefix to '
-                  'the node/sideset names and maintain the'
+    requirement = 'The system shall include mesh generation tools and allow adding a name prefix to the node/sideset names and maintain the'
 
     [id]
       type = 'Exodiff'
@@ -56,8 +54,7 @@
   [both]
     issues = '#11640'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
-    requirement = 'The system shall include mesh generation tools and shift node/sideset ids by a '
-                  'constant offset while also adding a name prefix to them and maintain the'
+    requirement = 'The system shall include mesh generation tools and shift node/sideset ids by a constant offset while also adding a name prefix to them and maintain the'
 
     [id]
       type = 'Exodiff'
@@ -88,10 +85,8 @@
     type = 'RunException'
     input = 'generated_mesh_generator.i'
     cli_args = '--mesh-only Mesh/type=GeneratedMesh'
-    expect_err = 'Mesh Generators present but the \[Mesh\] block is set to construct a '
-                 '"GeneratedMesh" mesh, which does not use Mesh Generators in constructing the mesh.'
-    requirement = 'The system shall generate a warning if Mesh Generators are used with a mesh type that '
-                  'does not accept them'
+    expect_err = 'Mesh Generators present but the \[Mesh\] block is set to construct a "GeneratedMesh" mesh, which does not use Mesh Generators in constructing the mesh.'
+    requirement = 'The system shall generate a warning if Mesh Generators are used with a mesh type that does not accept them'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#13959'
   []
@@ -105,6 +100,18 @@
     requirement = 'The system shall be able to assign subdomain IDs for the (cartesian) generated mesh generator.'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#19297'
+    recover = false
+  []
+
+  [with_subdomain_name]
+    type = 'Exodiff'
+    input = 'gmg_with_subdomain.i'
+    cli_args = 'Mesh/gmg/subdomain_ids=1 Mesh/gmg/subdomain_name=block --mesh-only single_subdomain.e'
+    exodiff = 'single_subdomain.e'
+    exodiff_opts = '-pedantic'
+    requirement = 'The system shall be able to assign a subdomain name for the (cartesian) generated mesh generator.'
+    issues = '#27646'
+    design = 'meshgenerators/GeneratedMeshGenerator.md'
     recover = false
   []
 []

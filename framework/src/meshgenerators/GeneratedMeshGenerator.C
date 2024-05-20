@@ -48,8 +48,12 @@ GeneratedMeshGenerator::validParams()
                              "The type of element from libMesh to "
                              "generate (default: linear element for "
                              "requested dimension)");
-  params.addParam<std::vector<SubdomainID>>("subdomain_ids",
-                                            "Subdomain IDs for each element, default to all zero");
+  params.addParam<std::vector<SubdomainID>>(
+      "subdomain_ids",
+      "Subdomain IDs for each element, default to all zero. If a single number is specified, that "
+      "subdomain id is used for all element.");
+  params.addParam<SubdomainName>("subdomain_name",
+                                 "If specified, single subdomain name for all elements");
 
   params.addParam<bool>(
       "gauss_lobatto_grid",
@@ -187,9 +191,9 @@ GeneratedMeshGenerator::generate()
   if (_has_subdomain_ids)
   {
     auto & bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
-    if (bids.size() != _nx * _ny * _nz)
+    if (bids.size() != _nx * _ny * _nz && bids.size() != 1)
       paramError("subdomain_ids",
-                 "Size must equal to the product of number of elements in all directions");
+                 "Size must equal to the product of number of elements in all directions, or one.");
     for (auto & elem : mesh->element_ptr_range())
     {
       const Point p = elem->vertex_average();
@@ -197,8 +201,28 @@ GeneratedMeshGenerator::generate()
       unsigned int iy = std::floor((p(1) - _ymin) / (_ymax - _ymin) * _ny);
       unsigned int iz = std::floor((p(2) - _zmin) / (_zmax - _zmin) * _nz);
       unsigned int i = iz * _nx * _ny + iy * _nx + ix;
-      elem->subdomain_id() = bids[i];
+      if (bids.size() == 1)
+        elem->subdomain_id() = bids[0];
+      else
+        elem->subdomain_id() = bids[i];
     }
+  }
+
+  if (isParamValid("subdomain_name"))
+  {
+    const auto & subdomain_name = getParam<SubdomainName>("subdomain_name");
+    if (isParamValid("subdomain_ids"))
+    {
+      const auto & bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
+      if (bids.size() > 1)
+        paramError(
+            "subdomain_ids",
+            "Specifying a subdomain_name is only supported for a single entry in subdomain_ids");
+      else
+        mesh->subdomain_name(bids[0]) = subdomain_name;
+    }
+    else
+      mesh->subdomain_name(0) = subdomain_name;
   }
 
   // rename and shift boundaries

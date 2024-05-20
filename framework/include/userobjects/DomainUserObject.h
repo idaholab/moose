@@ -72,6 +72,11 @@ public:
   virtual void executeOnInternalSide() {}
 
   /**
+   * execute method that is called during ComputeUserObjects::onExternalSide
+   */
+  virtual void executeOnExternalSide(const Elem * /*elem*/, unsigned int /*side*/) {}
+
+  /**
    * execute method that is called during ComputeUserObjects::onInterface
    */
   virtual void executeOnInterface() {}
