@@ -92,10 +92,6 @@ class JobDAG(object):
             # Remove edges for jobs that are skipped
             self._doSkippedDependencies()
 
-            # If there are race conditions, then there may be more skipped jobs
-            if self._doRaceConditions():
-                self._doSkippedDependencies()
-
         return self.__job_dag
 
     def _addEdge(self, child, parent):
@@ -246,38 +242,6 @@ class JobDAG(object):
                     print('  You can resolve this issue by setting the approprate prerequisites')
                     print('  between your tests with the "prereq" parameter')
                     sys.exit(1)
-
-    def _doRaceConditions(self):
-        """ Check for race condition errors within in the DAG"""
-        # Build output_file in relation to job dictionary
-        output_to_job = {}
-        for job in self.getJobs():
-            if job.getRunnable() and not job.isFinished():
-                for output_file in job.getOutputFiles(self.options):
-                    output_to_job[output_file] = output_to_job.get(output_file, [])
-                    output_to_job[output_file].append(job)
-
-        # Remove jobs which have accurate dependencies
-        for outfile, job_list in output_to_job.items():
-            for job in list(job_list):
-                for match_job in self.__job_dag.all_downstreams(job):
-                    if match_job in job_list:
-                        job_list.remove(match_job)
-
-        # Left over multiple items in job_list are problematic
-        for outfile, job_list in output_to_job.items():
-            # Same test has duplicate output files
-            if len(job_list) > 1 and len(set(job_list)) == 1:
-                job_list[0].setOutput('Duplicate output files:\n\t%s\n' % (outfile))
-                job_list[0].setStatus(job.error, 'DUPLICATE OUTFILES')
-
-            # Multiple tests will clobber eachothers output file
-            # Only check this with parallel_scheduling enabled because otherwise
-            # all of these jobs will be serialized
-            elif len(job_list) > 1 and self.canParallel():
-                for job in job_list:
-                    job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
-                    job.setStatus(job.error, 'OUTFILE RACE CONDITION')
 
     def _skipPrereqs(self):
         """
