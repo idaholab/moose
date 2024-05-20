@@ -16,6 +16,7 @@
 #include "libmesh/cell_prism18.h"
 #include "libmesh/cell_prism21.h"
 #include "libmesh/cell_hex8.h"
+#include "libmesh/cell_hex20.h"
 #include "libmesh/cell_hex27.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_quad9.h"
@@ -319,7 +320,7 @@ AdvancedExtruderGenerator::generate()
                  " of 'elem_integer_names_to_swap' in is not a valid extra element integer of the "
                  "input mesh.");
 
-  // prepare for transferring extra element integers from orignal mesh to the extruded mesh.
+  // prepare for transferring extra element integers from original mesh to the extruded mesh.
   const unsigned int num_extra_elem_integers = _input->n_elem_integers();
   std::vector<std::string> id_names;
 
@@ -361,13 +362,22 @@ AdvancedExtruderGenerator::generate()
   // We know a priori how many elements we'll need
   mesh->reserve_elem(total_num_layers * orig_elem);
 
-  // For straightforward meshes we need one or two additional layers per
-  // element.
-  if (input->elements_begin() != input->elements_end() &&
-      (*input->elements_begin())->default_order() == SECOND)
-    order = 2;
+  // Look for higher order elements which introduce an extra layer
+  std::set<ElemType> higher_orders = {EDGE3, EDGE4, TRI6, TRI7, QUAD8, QUAD9};
+  bool extruding_quad_eights = false;
+  std::vector<ElemType> types;
+  MeshTools::elem_types(*input, types);
+  for (const auto elem_type : types)
+  {
+    if (higher_orders.count(elem_type))
+      order = 2;
+    if (elem_type == QUAD8)
+      extruding_quad_eights = true;
+  }
   mesh->comm().max(order);
+  mesh->comm().max(extruding_quad_eights);
 
+  // Reserve for the max number possibly needed
   mesh->reserve_nodes((order * total_num_layers + 1) * orig_nodes);
 
   // Container to catch the boundary IDs handed back by the BoundaryInfo object
@@ -376,6 +386,7 @@ AdvancedExtruderGenerator::generate()
   Point old_distance;
   Point current_distance;
 
+  // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
     unsigned int current_node_layer = 0;
@@ -742,6 +753,74 @@ AdvancedExtruderGenerator::generate()
 
             break;
           }
+          case QUAD8:
+          {
+            new_elem = std::make_unique<Hex20>();
+            new_elem->set_node(0) =
+                mesh->node_ptr(elem->node_ptr(0)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(1) =
+                mesh->node_ptr(elem->node_ptr(1)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(2) =
+                mesh->node_ptr(elem->node_ptr(2)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(3) =
+                mesh->node_ptr(elem->node_ptr(3)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(4) =
+                mesh->node_ptr(elem->node_ptr(0)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(5) =
+                mesh->node_ptr(elem->node_ptr(1)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(6) =
+                mesh->node_ptr(elem->node_ptr(2)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(7) =
+                mesh->node_ptr(elem->node_ptr(3)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(8) =
+                mesh->node_ptr(elem->node_ptr(4)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(9) =
+                mesh->node_ptr(elem->node_ptr(5)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(10) =
+                mesh->node_ptr(elem->node_ptr(6)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(11) =
+                mesh->node_ptr(elem->node_ptr(7)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(12) =
+                mesh->node_ptr(elem->node_ptr(0)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(13) =
+                mesh->node_ptr(elem->node_ptr(1)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(14) =
+                mesh->node_ptr(elem->node_ptr(2)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(15) =
+                mesh->node_ptr(elem->node_ptr(3)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(16) =
+                mesh->node_ptr(elem->node_ptr(4)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(17) =
+                mesh->node_ptr(elem->node_ptr(5)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(18) =
+                mesh->node_ptr(elem->node_ptr(6)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(19) =
+                mesh->node_ptr(elem->node_ptr(7)->id() + ((2 * current_layer + 2) * orig_nodes));
+
+            if (elem->neighbor_ptr(0) == remote_elem)
+              new_elem->set_neighbor(1, const_cast<RemoteElem *>(remote_elem));
+            if (elem->neighbor_ptr(1) == remote_elem)
+              new_elem->set_neighbor(2, const_cast<RemoteElem *>(remote_elem));
+            if (elem->neighbor_ptr(2) == remote_elem)
+              new_elem->set_neighbor(3, const_cast<RemoteElem *>(remote_elem));
+            if (elem->neighbor_ptr(3) == remote_elem)
+              new_elem->set_neighbor(4, const_cast<RemoteElem *>(remote_elem));
+
+            if (new_elem->volume() < 0.0)
+            {
+              swapNodesInElem(*new_elem, 0, 4);
+              swapNodesInElem(*new_elem, 1, 5);
+              swapNodesInElem(*new_elem, 2, 6);
+              swapNodesInElem(*new_elem, 3, 7);
+              swapNodesInElem(*new_elem, 8, 16);
+              swapNodesInElem(*new_elem, 9, 17);
+              swapNodesInElem(*new_elem, 10, 18);
+              swapNodesInElem(*new_elem, 11, 19);
+              isFlipped = true;
+            }
+
+            break;
+          }
           case QUAD9:
           {
             new_elem = std::make_unique<Hex27>();
@@ -826,7 +905,7 @@ AdvancedExtruderGenerator::generate()
             break;
           }
           default:
-            libmesh_not_implemented();
+            mooseError("Extrusion is not implemented for element type " + Moose::stringify(etype));
         }
 
         new_elem->set_id(elem->id() + (current_layer * orig_elem));
@@ -993,6 +1072,10 @@ AdvancedExtruderGenerator::generate()
                                                             input_nodeset_map.end());
 
   mesh->set_isnt_prepared();
+  // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
+  // which will crash both paraview and trigger exodiff. Best to be safe.
+  if (extruding_quad_eights)
+    mesh->prepare_for_use();
 
   return mesh;
 }
