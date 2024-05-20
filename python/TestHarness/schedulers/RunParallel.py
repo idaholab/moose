@@ -48,7 +48,7 @@ class RunParallel(Scheduler):
             if caveats:
                 tester.addCaveats(caveats)
             job.setPreviousTime(job_results['TIMING'])
-            job.setOutput(job_results['OUTPUT'])
+            job.setOutput(job_results['OUTPUT'], force=True)
             return
 
         output = ''
