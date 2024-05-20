@@ -36,10 +36,13 @@ protected:
    */
   virtual std::set<const MooseVariableBase *> variables() const = 0;
 
-  /// Matrix data structures for on-diagonal coupling
-  EigenMatrix _PrimalMat, _LMMat;
-  /// Vector data structures
+  // Note that all primal equations use the same residual vector and Jacobian matrix, using
+  // different local indexes (offsets) to store both vectors / matrices
+
+  /// Residual vector data structures
   EigenVector _PrimalVec, _LMVec;
-  /// Matrix data structures for off-diagonal coupling
+  /// Jacobian matrix data structures for on-diagonal coupling
+  EigenMatrix _PrimalMat, _LMMat;
+  /// Jacobian matrix data structures for off-diagonal coupling
   EigenMatrix _PrimalLM, _LMPrimal;
 };

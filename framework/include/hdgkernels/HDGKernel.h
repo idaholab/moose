@@ -66,7 +66,7 @@ protected:
 
   /// The auxiliary system which holds the primal variables. We will update the primal variable
   /// degrees of freedom based off the Lagrange multiplier increment computed by the linear solve
-  /// (during the Newton iteration)
+  /// This update is performed on every nonlinear (for example Newton) iteration.
   SystemBase & _aux_sys;
 
   /**

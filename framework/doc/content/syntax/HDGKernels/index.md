@@ -32,6 +32,17 @@ mesh skeleton. We will refer to the variables that exist "before" the
 hybridization as primal variables and the variable(s) that live on the mesh
 skeleton as Lagrange multipliers (LMs) or dual variable(s).
 
+We note that some classes of HDG methods, such as the LDG method in
+[!citep](cockburn2008superconvergent), have the gradient as an independent
+primal variable. With these methods, for diffusion or diffusion-dominated
+problems, the primal gradient and primal scalar variable fields can be used to
+postprocess a scalar field that converges with order $k + 2$ in the $L^2$ norm,
+where $k$ is the polynomial order of the primal scalar variable. However, as
+advection becomes dominant, the higher order convergence is lost and
+consequently so is the value of having the gradient as an independent
+variable. In advection-dominated cases, interior penalty HDG methods, such as
+that outlined in [!citep](rhebergen2017analysis), may be a good choice.
+
 ## Implementation in MOOSE
 
 HDG kernels derive from [Kernels](Kernels/index.md). However, the methods

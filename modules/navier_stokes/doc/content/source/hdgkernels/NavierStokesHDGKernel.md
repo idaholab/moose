@@ -12,7 +12,9 @@ where $\vec{u}$ is the velocity and conservation of momentum:
 \nabla\vec{u}\right) + \nabla p = 0
 
 where $\rho$ is the density, $\mu$ is the dynamic viscosity and $p$ is the pressure. This class uses
-the hybridization laid out in [!citep](nguyen2011implicit).
+the hybridization laid out in [!citep](nguyen2011implicit). Note that, as shown
+in the reference, the pressure field is integrated by parts which has
+consequences for boundary conditions on momentum flux boundaries.
 
 !syntax parameters /HDGKernels/NavierStokesHDGKernel
 
