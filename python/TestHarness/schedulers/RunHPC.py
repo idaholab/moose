@@ -395,13 +395,8 @@ class RunHPC(RunParallel):
         """Gets the aboslute path for the qsub script for a HPC job"""
         return RunHPC.getHPCJobOutputPathPrefix(job) + '.qsub'
 
-    @staticmethod
-    def getOutputEndingComment() -> str:
-        """
-        Gets the text we append to the stderr+stdout file to desginate
-        that it is complete
-        """
-        return 'TESTHARNESS RUNHPC FILE TERMINATOR'
+    def getOutputEndingComment(self, job_id) -> str:
+        raise Exception('Unimplemented getOutputEndingComment()')
 
     @staticmethod
     def parseMPICommand(command) -> str:

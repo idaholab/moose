@@ -20,6 +20,9 @@ class HPCRunner(Runner):
         # The RunHPC object
         self.run_hpc = run_hpc
 
+        # The HPCJob object, updated in wait()
+        self.hpc_job = None
+
         # Interval in seconds for polling for job status
         self.job_status_poll_time = 0.1
 
@@ -44,11 +47,11 @@ class HPCRunner(Runner):
         # polling itself is only done on occasion within RunHPC
         while True:
             time.sleep(self.job_status_poll_time)
-            hpc_job = self.run_hpc.getHPCJob(self.job)
+            self.hpc_job = self.run_hpc.getHPCJob(self.job)
 
             # We're done
-            if hpc_job.done:
-                self.exit_code = hpc_job.exit_code
+            if self.hpc_job.done:
+                self.exit_code = self.hpc_job.exit_code
                 break
 
         timer.stop()
@@ -75,7 +78,7 @@ class HPCRunner(Runner):
 
         # We've actually ran something now and not just qsub, so update the
         # command to what was ran there
-        tester.setCommandRan(hpc_job.command)
+        tester.setCommandRan(self.hpc_job.command)
 
         # Determine the output files that we need to wait for to be complete
         wait_files = set([output_file])
@@ -194,7 +197,7 @@ class HPCRunner(Runner):
         if is_binary is None:
             return False
 
-        ending_comment = self.run_hpc.getOutputEndingComment()
+        ending_comment = self.run_hpc.getOutputEndingComment(self.hpc_job.id)
 
         # Binary file
         if is_binary:
