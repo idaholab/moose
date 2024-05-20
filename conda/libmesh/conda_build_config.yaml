@@ -1,22 +1,12 @@
 moose_petsc:
-  - moose-petsc 3.20.3 build_1
+  - moose-petsc 3.20.3 build_2
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.2.6 build_9
+  - moose-libmesh-vtk 9.2.6 build_10
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX10.15.sdk                                    # [not arm64 and osx]
-  - /opt/MacOSX11.3.sdk                                     # [arm64]
-
-macos_min_version:                                          # [osx]
-  - 10.15                                                   # [not arm64 and osx]
-  - 11.3                                                    # [arm64]
-
-macos_machine:                                              # [osx]
-  - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
-  - arm64-apple-darwin20.0.0                                # [arm64]
+  - /opt/MacOSX11.3.sdk                                     # [osx]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 10.15                                                   # [not arm64 and osx]
-  - 11.3                                                    # [arm64]
+  - 11.3                                                    # [osx]
