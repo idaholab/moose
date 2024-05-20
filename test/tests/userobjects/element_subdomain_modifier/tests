@@ -146,6 +146,7 @@
       input = 'tsm_direct.i'
       exodiff = 'tsm_direct_out.e-s006'
       detail = 'listed in the input file,'
+      exodiff_opts = '-pedantic'
     []
 
     [csv]
@@ -153,6 +154,7 @@
       input = 'tsm_csv.i'
       exodiff = 'tsm_csv_out.e'
       detail = 'listed in a CSV file.'
+      exodiff_opts = '-pedantic'
     []
   []
 []

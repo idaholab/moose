@@ -12,13 +12,12 @@ inactive_domain_block_ids = ${Box2_inactive_id}
 inactive_domain_block_names = ${Box2_inactive_name}
 
 [Mesh]
-
   [BaseMesh]
     type = GeneratedMeshGenerator
     elem_type = TET4
     dim = 3
     nx = 5
-    ny = 5
+    ny = 3
     nz = 2
     xmin = -10
     xmax = +10
@@ -48,77 +47,12 @@ inactive_domain_block_names = ${Box2_inactive_name}
 
   add_subdomain_ids = ${inactive_domain_block_ids}
   add_subdomain_names = ${inactive_domain_block_names}
-
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
-
-[Variables]
-  [disp_x]
-    order = SECOND
+[AuxVariables]
+  [dummy]
+    type = MooseVariableFVReal
   []
-  [disp_y]
-    order = SECOND
-  []
-  [disp_z]
-    order = SECOND
-  []
-[]
-
-# ===== Boundary Conditions: Fixies at XMin, XMax, YMin, YMax, ZMin =====
-[BCs]
-
-  [BoundaryXMin_DispX]
-    type = DirichletBC
-    boundary = 'left'
-    variable = disp_x
-    value = 0
-  []
-
-  [BoundaryXMax_DispX]
-    type = DirichletBC
-    boundary = 'right'
-    variable = disp_x
-    value = 0
-  []
-
-  [BoundaryYMin_DispY]
-    type = DirichletBC
-    boundary = 'bottom'
-    variable = disp_y
-    value = 0
-  []
-
-  [BoundaryYMax_DispY]
-    type = DirichletBC
-    boundary = 'top'
-    variable = disp_y
-    value = 0
-  []
-
-  [BoundaryZMin_DispX]
-    type = DirichletBC
-    boundary = 'back'
-    variable = disp_x
-    value = 0
-  []
-
-  [BoundaryZMin_DispY]
-    type = DirichletBC
-    boundary = 'back'
-    variable = disp_y
-    value = 0
-  []
-
-  [BoundaryZMin_DispZ]
-    type = DirichletBC
-    boundary = 'back'
-    variable = disp_z
-    value = 0
-  []
-
 []
 
 # move elements between subdomains back and forth
@@ -157,6 +91,5 @@ inactive_domain_block_names = ${Box2_inactive_name}
 []
 
 [Outputs]
-  perf_graph = true
   exodus = true
 []
