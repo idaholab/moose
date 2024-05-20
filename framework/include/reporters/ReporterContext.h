@@ -805,7 +805,7 @@ public:
 
           this->comm().sum(val_vec);
         }
-          return;
+        return;
       }
       else
         mooseError("Cannot perform sum operation on non-numeric or unsupported vector types.");

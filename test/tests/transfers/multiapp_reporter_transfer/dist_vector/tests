@@ -43,15 +43,13 @@
     requirement = 'The system shall support the ability to transfer reporter in a scatter/gather fashion'
     [1_to_N]
       type = 'JSONDiff'
-      cli_args = "Transfers/active=to_sub Outputs/file_base=1_to_N"
-      input = 'main.i'
+      input = 'main_send.i'
       jsondiff = '1_to_N_sub0_out.json 1_to_N_sub1_out.json 1_to_N_sub2_out.json 1_to_N_sub3_out.json'
       detail = "from one main app to many subapps,"
     []
     [N_to_1]
       type = 'JSONDiff'
-      cli_args = "Transfers/active=from_sub Outputs/file_base=N_to_1"
-      input = 'main.i'
+      input = 'main_rec.i'
       jsondiff = 'N_to_1.json'
       detail = "or from many subapps to one main app,"
     []
