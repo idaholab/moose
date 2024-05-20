@@ -129,4 +129,6 @@ private:
   std::unordered_map<RayID, std::pair<dof_id_type, dof_id_type>> _ray_starting_id_map;
   /// The max node ID for the ray tracing mesh for creating unique elem IDs
   dof_id_type _max_node_id;
+  /// Whether or not we have segmented rays
+  bool _segmented_rays;
 };

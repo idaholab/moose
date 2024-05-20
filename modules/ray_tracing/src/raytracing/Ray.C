@@ -113,7 +113,7 @@ Ray::reset(const Ray * const other, const ConstructRayKey &)
     if (!other->invalidDirection())
       setStartingDirection(other->_direction);
     if (other->maxDistanceSet())
-      setStartingMaxDistance(other->_max_distance);
+      _max_distance = other->_max_distance;
   }
 
   _data = other->_data;
@@ -330,6 +330,7 @@ Ray::setStationary()
   if (!invalidDirection())
     errorWhenInitializing("Cannot use Ray::setStationary() with Ray::setStartingDirection()");
   _max_distance = 0;
+  mooseAssert(stationary(), "Stationary not set");
 }
 
 void
