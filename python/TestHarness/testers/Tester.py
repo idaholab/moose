@@ -204,7 +204,7 @@ class Tester(MooseObject):
 
     def isOutputReady(self) -> bool:
         """Returns whether or not the output is ready for reading"""
-        return self._runner.isOutputReady()
+        return self._runner is not None and self._runner.isOutputReady()
 
     def getExitCode(self) -> int:
         """Gets the exit code of the command that was ran"""
