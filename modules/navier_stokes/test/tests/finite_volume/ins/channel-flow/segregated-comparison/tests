@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#27280'
+  design = 'SIMPLENonlinearAssembly.md SIMPLE.md'
+  [nonlinear]
+    type = 'Exodiff'
+    input = segregated-nonlinear.i
+    exodiff = segregated-nonlinear_out.e
+    requirement = "The system shall give back the correct results for a channel flow with the SIMPLE algorithm using nonlinear system assembly."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [linear]
+    type = 'Exodiff'
+    prereq = nonlinear
+    input = segregated-linear.i
+    exodiff = segregated-linear_out.e
+    requirement = "The system shall give back the correct results for a channel flow with the SIMPLE algorithm using linear system assembly."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]
