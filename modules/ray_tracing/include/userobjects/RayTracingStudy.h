@@ -790,7 +790,7 @@ protected:
    *
    * This is used internally when acquiring new Rays.
    */
-  RayID generateUniqueRayID(const THREAD_ID tid);
+  virtual RayID generateUniqueRayID(const THREAD_ID tid);
   /**
    * Generates a Ray ID that is replicated across all processors.
    */
