@@ -105,9 +105,10 @@ protected:
    */
   void pressureVolumeResidual(const unsigned int i_offset,
                               const unsigned int global_lm_i_offset,
-                              const Function & pressure_mms_forcing_function,
+                              const Moose::Functor<Real> & pressure_mms_forcing_function,
                               const MooseArray<Real> & JxW,
                               const QBase & qrule,
+                              const Elem * const current_elem,
                               const MooseArray<Point> & q_point);
 
   /**

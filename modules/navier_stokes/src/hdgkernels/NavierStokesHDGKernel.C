@@ -25,7 +25,7 @@ NavierStokesHDGKernel::validParams()
       "body_force_y", 0, "Body force for the momentum equation in the y-direction");
   params.addParam<MooseFunctorName>(
       "body_force_z", 0, "Body force for the momentum equation in the z-direction");
-  params.addParam<FunctionName>(
+  params.addParam<MooseFunctorName>(
       "pressure_mms_forcing_function",
       0,
       "A forcing function for the pressure (mass) equation for conducting MMS studies");
@@ -42,7 +42,7 @@ NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
     _body_force_x(getFunctor<Real>("body_force_x")),
     _body_force_y(getFunctor<Real>("body_force_y")),
     _body_force_z(getFunctor<Real>("body_force_z")),
-    _pressure_mms_forcing_function(getFunction("pressure_mms_forcing_function"))
+    _pressure_mms_forcing_function(getFunctor<Real>("pressure_mms_forcing_function"))
 {
   // This class handles residuals and Jacobians for multiple variables
   _fe_problem.setKernelCoverageCheck(false);
@@ -120,6 +120,7 @@ NavierStokesHDGKernel::onElement()
                          _pressure_mms_forcing_function,
                          _JxW,
                          *_qrule,
+                         _current_elem,
                          _q_point);
   pressureVolumeJacobian(2 * _lm_n_dofs,
                          _vector_n_dofs,

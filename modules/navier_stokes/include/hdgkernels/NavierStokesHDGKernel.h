@@ -14,8 +14,6 @@
 
 #include <vector>
 
-class Function;
-
 /**
  * Implements the steady incompressible Navier-Stokes equations for a hybridized discretization
  */
@@ -37,5 +35,5 @@ protected:
   const Moose::Functor<Real> & _body_force_y;
   const Moose::Functor<Real> & _body_force_z;
   std::vector<const Moose::Functor<Real> *> _body_forces;
-  const Function & _pressure_mms_forcing_function;
+  const Moose::Functor<Real> & _pressure_mms_forcing_function;
 };

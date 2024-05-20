@@ -205,15 +205,17 @@ void
 NavierStokesHDGAssemblyHelper::pressureVolumeResidual(
     const unsigned int i_offset,
     const unsigned int global_lm_i_offset,
-    const Function & pressure_mms_forcing_function,
+    const Moose::Functor<Real> & pressure_mms_forcing_function,
     const MooseArray<Real> & JxW,
     const QBase & qrule,
+    const Elem * const current_elem,
     const MooseArray<Point> & q_point)
 {
   for (const auto qp : make_range(qrule.n_points()))
   {
     // Prepare forcing function
-    const auto f = pressure_mms_forcing_function.value(_ti.time(), q_point[qp]);
+    const auto f = pressure_mms_forcing_function(
+        Moose::ElemQpArg{current_elem, qp, &qrule, q_point[qp]}, _ti.determineState());
 
     const Gradient vel(_u_sol[qp], _v_sol[qp]);
     for (const auto i : make_range(_p_n_dofs))
