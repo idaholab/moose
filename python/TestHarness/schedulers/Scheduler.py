@@ -498,7 +498,7 @@ class Scheduler(MooseObject):
                 except Exception:
                     with job.getLock():
                         job.setStatus(StatusSystem().error, 'JOB EXCEPTION')
-                        job.setOutput('Encountered an exception while running Job: %s' % (traceback.format_exc()))
+                        job.appendOutput('Encountered an exception while running Job: %s' % (traceback.format_exc()))
 
                 if timeout_timer:
                     timeout_timer.cancel()

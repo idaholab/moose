@@ -11,9 +11,7 @@ import re, os, sys, shutil
 import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
-from TestHarness.runners.Runner import Runner
 from FactorySystem.MooseObject import MooseObject
-from tempfile import TemporaryDirectory
 from pathlib import Path
 
 class Tester(MooseObject):
@@ -119,10 +117,6 @@ class Tester(MooseObject):
 
         return params
 
-    def __del__(self):
-        # Do any cleaning that we can (removes the temp dir for now if it exists)
-        self.cleanup()
-
     # This is what will be checked for when we look for valid testers
     IS_TESTER = True
 
@@ -158,57 +152,21 @@ class Tester(MooseObject):
         self.fail = self.test_status.fail
         self.diff = self.test_status.diff
         self.deleted = self.test_status.deleted
+        self.error = self.test_status.error
 
         self.__failed_statuses = self.test_status.getFailingStatuses()
         self.__skipped_statuses = [self.skip, self.silent]
-
-        # A temp directory for this Tester, if requested
-        self.tmp_dir = None
-
-        # The object that'll actually do the run
-        self._runner = None
 
         # The command that we actually ended up running; this may change
         # depending on the runner which might inject something
         self.command_ran = None
 
-    def getTempDirectory(self):
-        """
-        Gets a shared temp directory that will be cleaned up for this Tester
-        """
-        if self.tmp_dir is None:
-            self.tmp_dir = TemporaryDirectory(prefix='tester_')
-        return self.tmp_dir
-
-    def cleanup(self):
-        """
-        Entry point for doing any cleaning if necessary.
-
-        Currently just cleans up the temp directory
-        """
-        if self.tmp_dir is not None:
-            # Don't let this fail
-            try:
-                self.tmp_dir.cleanup()
-            except:
-                pass
-            self.tmp_dir = None
-
-    def setRunner(self, runner: Runner):
-        """Sets the underlying Runner object that will run the command"""
-        self._runner = runner
+        # The tester output
+        self.output = ''
 
     def getOutput(self) -> str:
-        """Return the combined contents of stdout and stderr of the command ran"""
-        return self._runner.getOutput()
-
-    def isOutputReady(self) -> bool:
-        """Returns whether or not the output is ready for reading"""
-        return self._runner is not None and self._runner.isOutputReady()
-
-    def getExitCode(self) -> int:
-        """Gets the exit code of the command that was ran"""
-        return self._runner.getExitCode()
+        """Return the Tester output"""
+        return self.output
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -254,6 +212,8 @@ class Tester(MooseObject):
         return self.getStatus() == self.diff
     def isDeleted(self):
         return self.getStatus() == self.deleted
+    def isError(self):
+        return self.getStatus() == self.error
 
     def getTestName(self):
         """ return test name """
@@ -431,50 +391,7 @@ class Tester(MooseObject):
         """
         return self.command_ran
 
-    def killCommand(self):
-        """
-        Kills any currently executing process started by the runCommand method.
-        """
-        return self._runner.kill()
-
-        # Try to clean up anything else that we can
-        self.cleanup()
-
-    def run(self, job, options, timer):
-        """
-        This is a method that is the tester's main execution code.  Subclasses can override this
-        method with custom code relevant to their specific testing needs.  By default this method
-        calls runCommand.  runCommand is provided as a helper for running (external) subprocesses
-        as part of the tester's execution and should be the *only* way subprocesses are executed
-        if needed. The run method is responsible to call the start+stop methods on timer to record
-        the time taken to run the actual test.  start+stop can be called multiple times.
-        """
-        # Verify that the working directory is available right before we execute
-        if not os.path.exists(self.getTestDir()):
-            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
-        # Getting the command can also cause a failure, so try that
-        self.getCommand(options)
-
-        # If we've failed already, nothing to do here
-        if job.isFail():
-            # Timers must be used since they are directly indexed in the Job class
-            timer.start()
-            timer.stop()
-            return
-
-        # Spawn the process
-        try:
-            self._runner.spawn(timer)
-        except Exception as e:
-            raise Exception('Failed to spawn process') from e
-
-        # Entry point for testers to do other things
-        self.postSpawn()
-
-        # And wait for it to complete
-        self._runner.wait(timer)
-
-    def postSpawn(self):
+    def postSpawn(self, runner):
         """
         Entry point for after the process has been spawned
         """
@@ -484,7 +401,7 @@ class Tester(MooseObject):
         """ method to return the commands (list) used for processing results """
         return []
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         """ method to process the results of a finished tester """
         return
 
@@ -514,7 +431,7 @@ class Tester(MooseObject):
         self.__caveats = set([])
         return self.getCaveats()
 
-    def mustOutputExist(self):
+    def mustOutputExist(self, exit_code):
         """ Whether or not we should check for the output once it has ran
 
         We need this because the PBS/slurm Runner objects, which use
@@ -522,7 +439,7 @@ class Tester(MooseObject):
         on the machine that submitted the jobs. A good example is RunException,
         where we should only look for output when we get a nonzero return
         code."""
-        return self.getExitCode() == 0
+        return exit_code == 0
 
     # need something that will tell  us if we should try to read the result
 
@@ -839,3 +756,23 @@ class Tester(MooseObject):
         when we're trying to read something from the output.
         """
         return False
+
+    def run(self, options, exit_code, runner_output):
+        self.output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
+
+        # If the tester requested to be skipped at the last minute, report that.
+        if self.isSkip():
+            self.output += '\n' + "#"*80 + '\nTester skipped, reason: ' + self.getStatusMessage() + '\n'
+        elif self.isFail():
+            self.output += '\n' + "#"*80 + '\nTester failed, reason: ' + self.getStatusMessage() + '\n'
+        # If the tester has not yet failed, append additional information to output
+        else:
+            # Read the output either from the temporary file or redirected files
+            if self.hasRedirectedOutput(options):
+                redirected_output = util.getOutputFromFiles(self, options)
+                self.output += redirected_output
+
+                # If we asked for redirected output but none was found, we'll call that a failure
+                if redirected_output == '':
+                    self.setStatus(self.fail, 'FILE TIMEOUT')
+                    self.output += '\n' + "#"*80 + '\nTester failed, reason: ' + self.getStatusMessage() + '\n'
