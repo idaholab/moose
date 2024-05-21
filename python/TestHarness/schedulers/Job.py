@@ -378,7 +378,7 @@ class Job(object):
         for object_output in object_outputs:
             if object_output:
                 # Append an extra line if we're missing one
-                if len(output) and output[-1] != '\n':
+                if output and output[-1] != '\n':
                     output += '\n'
                 output += object_output
 
