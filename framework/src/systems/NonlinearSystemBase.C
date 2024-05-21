@@ -890,14 +890,10 @@ NonlinearSystemBase::computeResidualAndJacobianTags(const std::set<TagID> & vect
     if (required_residual)
     {
       auto & residual = getVector(residualVectorTag());
-      auto & jac = getMatrix(systemMatrixTag());
       if (!_time_integrators.empty())
       {
         for (auto & ti : _time_integrators)
-        {
           ti->postResidual(residual);
-          ti->postJacobian(jac);
-        }
       }
       else
         residual += *_Re_non_time;

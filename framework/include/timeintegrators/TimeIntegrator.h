@@ -80,13 +80,6 @@ public:
   virtual void postResidual(NumericVector<Number> & /*residual*/) {}
 
   /**
-   * Callback to modify the Jacobian. This is useful in time integration schemes which do summations
-   * of residuals with non-unity coefficients (e.g. Crank-Nicolson in which we add half of the
-   * non-time residual)
-   */
-  virtual void postJacobian(SparseMatrix<Number> & /*jacobian*/) {}
-
-  /**
    * Callback to the TimeIntegrator called immediately after
    * TimeIntegrator::solve() (so the name does make sense!).  See
    * e.g. CrankNicolson for an example of what can be done in the

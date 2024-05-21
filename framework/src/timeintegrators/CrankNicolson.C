@@ -38,7 +38,7 @@ CrankNicolson::computeTimeDerivatives()
   computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
 
-  _du_dot_du = 1. / _dt;
+  _du_dot_du = 2. / _dt;
 }
 
 void
@@ -73,10 +73,6 @@ CrankNicolson::init()
   _nl.computeResidualTag(_nl.RHS(), _nl.nonTimeVectorTag());
   _fe_problem.clearCurrentResidualVectorTags();
 
-  // We multiplied the non-time residual by 0.5 in the postResidual method. We need to restore its
-  // value here
-  _nl.RHS() *= 2;
-
   copyVector(_nl.RHS(), _residual_old);
 }
 
@@ -104,8 +100,8 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
   if (!_var_restriction)
   {
     residual += _Re_time;
-    residual.add(0.5, _Re_non_time);
-    residual.add(0.5, _residual_old);
+    residual += _Re_non_time;
+    residual += _residual_old;
   }
   else
   {
@@ -114,8 +110,8 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
     auto re_non_time_sub = _Re_non_time.get_subvector(_local_indices);
     auto residual_old_sub = _residual_old.get_subvector(_local_indices);
     *residual_sub += *re_time_sub;
-    residual_sub->add(0.5, *re_non_time_sub);
-    residual_sub->add(0.5, *residual_old_sub);
+    *residual_sub += *re_non_time_sub;
+    *residual_sub += *residual_old_sub;
     residual.restore_subvector(std::move(*residual_sub), _local_indices);
     _Re_time.restore_subvector(std::move(*re_time_sub), _local_indices);
     _Re_non_time.restore_subvector(std::move(*re_non_time_sub), _local_indices);
