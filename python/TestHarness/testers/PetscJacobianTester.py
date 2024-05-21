@@ -96,18 +96,18 @@ class PetscJacobianTester(RunApp):
             return False
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
-        output = super().processResults(moose_dir, options, exit_code, runner_output)
+        output = ''
 
         if self.old_petsc:
             if self.specs['state'].lower() == 'user':
                 m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)",
-                              runner_output, re.MULTILINE | re.DOTALL);
+                              runner_output, re.MULTILINE | re.DOTALL)
             elif self.specs['state'].lower() == 'const_positive':
                 m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(constant state 1\.0\)",
-                              runner_output, re.MULTILINE | re.DOTALL);
+                              runner_output, re.MULTILINE | re.DOTALL)
             elif self.specs['state'].lower() == 'const_negative':
                 m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(constant state -1\.0\)",
-                              runner_output, re.MULTILINE | re.DOTALL);
+                              runner_output, re.MULTILINE | re.DOTALL)
             else:
                 self.setStatus("state must be either 'user', const_positive', or 'const_negative'",
                                self.bucket_fail)
