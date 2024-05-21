@@ -358,15 +358,15 @@ class Scheduler(MooseObject):
                 job.setStatus(job.timeout, 'TIMEOUT')
                 job.killProcess()
 
-    def handleJobStatus(self, job):
+    def handleJobStatus(self, job, caveats=None):
         """
         Possibly reports a job's status.
 
         Whether or not it actually gets reported... is not so intuitive.
         """
-        self.status_pool.apply_async(self.jobStatus, (job,))
+        self.status_pool.apply_async(self.jobStatus, (job,caveats,))
 
-    def jobStatus(self, job):
+    def jobStatus(self, job, caveats):
         """
         Instruct the TestHarness to print the status of job. This is a serial
         threaded operation, so as to prevent clobbering of text being printed
@@ -425,7 +425,7 @@ class Scheduler(MooseObject):
                         return
 
                 # Inform the TestHarness of job status
-                self.harness.handleJobStatus(job)
+                self.harness.handleJobStatus(job, caveats=caveats)
 
                 # Reset activity clock
                 if not job.isSilent():
