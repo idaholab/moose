@@ -18,8 +18,7 @@ class TestHarnessTestCase(unittest.TestCase):
     """
 
     def runExceptionTests(self, *args):
-        os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
-        cmd = ['./run_tests'] + list(args)
+        cmd = ['./run_tests'] + list(args) + ['--term-format', 'njCst']
         try:
             return subprocess.check_output(cmd, cwd=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
             raise RuntimeError('test failed to fail')
@@ -27,8 +26,7 @@ class TestHarnessTestCase(unittest.TestCase):
             return err.output
 
     def runTests(self, *args):
-        os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
-        cmd = ['./run_tests'] + list(args)
+        cmd = ['./run_tests'] + list(args) + ['--term-format', 'njCst']
         return subprocess.check_output(cmd, cwd=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
 
     def checkStatus(self, output, passed=0, skipped=0, pending=0, failed=0):
