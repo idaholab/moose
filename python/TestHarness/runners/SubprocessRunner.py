@@ -59,7 +59,7 @@ class SubprocessRunner(Runner):
         # Set this for OpenMPI so that we don't clobber state
         if tester.hasOpenMPI():
             popen_env = os.environ.copy()
-            popen_env['OMPI_MCA_orte_tmpdir_base'] = tester.getTempDirectory().name
+            popen_env['OMPI_MCA_orte_tmpdir_base'] = self.job.getTempDirectory().name
             process_kwargs['env'] = popen_env
 
         try:
