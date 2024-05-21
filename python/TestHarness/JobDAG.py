@@ -103,7 +103,7 @@ class JobDAG(object):
             err_output += ' %s <--> %s' % (parent.getTestName().split('.')[1],
                                            child.getTestName().split('.')[1])
 
-            parent.setOutput('Cyclic dependency error!\n\t' + err_output)
+            parent.appendOutput('Cyclic dependency error!\n\t' + err_output)
             parent.setStatus(parent.error, 'Cyclic or Invalid Dependency Detected!')
 
     def _setupPrereqs(self):
