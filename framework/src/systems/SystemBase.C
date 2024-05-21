@@ -29,6 +29,7 @@
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/fe_interface.h"
 
 /// Free function used for a libMesh callback
 void
@@ -353,10 +354,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElemFace(const Elem * /*elem*/,
-                           unsigned int /*side*/,
-                           BoundaryID /*bnd_id*/,
-                           THREAD_ID tid)
+SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID tid)
 {
   const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
@@ -364,10 +362,7 @@ SystemBase::reinitElemFace(const Elem * /*elem*/,
 }
 
 void
-SystemBase::reinitNeighborFace(const Elem * /*elem*/,
-                               unsigned int /*side*/,
-                               BoundaryID /*bnd_id*/,
-                               THREAD_ID tid)
+SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID tid)
 {
   const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
@@ -730,15 +725,16 @@ SystemBase::addVariable(const std::string & var_type,
     blocks.insert(blk_id);
   }
 
-  auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto fe_type =
+      FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
+             Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto fe_field_type = FEInterface::field_type(fe_type);
 
   unsigned int var_num;
 
   if (var_type == "ArrayMooseVariable")
   {
-    if (fe_type.family == NEDELEC_ONE || fe_type.family == LAGRANGE_VEC ||
-        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
+    if (fe_field_type == TYPE_VECTOR)
       mooseError("Vector family type cannot be used in an array variable");
 
     // Build up the variable names

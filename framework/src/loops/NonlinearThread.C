@@ -118,16 +118,13 @@ NonlinearThread::subdomainChanged()
 }
 
 void
-NonlinearThread::onElement(const Elem * elem)
+NonlinearThread::onElement(const Elem * const elem)
 {
-  _fe_problem.prepare(elem, _tid);
-  _fe_problem.reinitElem(elem, _tid);
-
-  // Set up Sentinel class so that, even if reinitMaterials() throws, we
+  // Set up Sentinel class so that, even if reinitMaterials() throws in prepareElement, we
   // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+  SwapBackSentinel sentinel(_fe_problem, &FEProblemBase::swapBackMaterials, this->_tid);
 
-  _fe_problem.reinitMaterials(_subdomain, _tid);
+  prepareElement(elem);
 
   if (dynamic_cast<ComputeJacobianThread *>(this))
     if (_nl.getScalarVariables(_tid).size() > 0)
@@ -152,26 +149,18 @@ NonlinearThread::computeOnElement()
 }
 
 void
-NonlinearThread::onBoundary(const Elem * elem,
-                            unsigned int side,
-                            BoundaryID bnd_id,
-                            const Elem * lower_d_elem /*=nullptr*/)
+NonlinearThread::onBoundary(const Elem * const elem,
+                            const unsigned int side,
+                            const BoundaryID bnd_id,
+                            const Elem * const lower_d_elem /*=nullptr*/)
 {
   if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-
-    // Needed to use lower-dimensional variables on Materials
-    if (lower_d_elem)
-      _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
-
     // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
     // still remember to swap back during stack unwinding.
     SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
-
+    prepareFace(_fe_problem, _tid, elem, side, bnd_id, lower_d_elem);
     computeOnBoundary(bnd_id, lower_d_elem);
 
     if (lower_d_elem)
@@ -313,8 +302,7 @@ NonlinearThread::postElement(const Elem * /*elem*/)
 void
 NonlinearThread::post()
 {
-  _fe_problem.clearActiveElementalMooseVariables(_tid);
-  _fe_problem.clearActiveMaterialProperties(_tid);
+  clearVarsAndMaterials();
 }
 
 void
@@ -411,4 +399,23 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
   }
 
   _boundaries_exec_printed.insert(bid);
+}
+
+void
+NonlinearThread::prepareFace(FEProblemBase & fe_problem,
+                             const THREAD_ID tid,
+                             const Elem * const elem,
+                             const unsigned int side,
+                             const BoundaryID bnd_id,
+                             const Elem * const lower_d_elem)
+{
+  fe_problem.reinitElemFace(elem, side, tid);
+
+  // Needed to use lower-dimensional variables on Materials
+  if (lower_d_elem)
+    fe_problem.reinitLowerDElem(lower_d_elem, tid);
+
+  fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
+  if (bnd_id != Moose::INVALID_BOUNDARY_ID)
+    fe_problem.reinitMaterialsBoundary(bnd_id, tid);
 }

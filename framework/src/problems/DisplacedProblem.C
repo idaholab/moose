@@ -730,17 +730,14 @@ DisplacedProblem::reinitElemPhys(const Elem * elem,
 }
 
 void
-DisplacedProblem::reinitElemFace(const Elem * elem,
-                                 unsigned int side,
-                                 BoundaryID bnd_id,
-                                 const THREAD_ID tid)
+DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   for (const auto nl_sys_num : index_range(_displaced_solver_systems))
   {
     _assembly[tid][nl_sys_num]->reinit(elem, side);
-    _displaced_solver_systems[nl_sys_num]->reinitElemFace(elem, side, bnd_id, tid);
+    _displaced_solver_systems[nl_sys_num]->reinitElemFace(elem, side, tid);
   }
-  _displaced_aux->reinitElemFace(elem, side, bnd_id, tid);
+  _displaced_aux->reinitElemFace(elem, side, tid);
 }
 
 void
@@ -808,14 +805,13 @@ DisplacedProblem::reinitNeighbor(const Elem * elem,
   }
   _displaced_aux->prepareNeighbor(tid);
 
-  BoundaryID bnd_id = 0; // some dummy number (it is not really used for anything, right now)
   for (auto & nl : _displaced_solver_systems)
   {
-    nl->reinitElemFace(elem, side, bnd_id, tid);
-    nl->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+    nl->reinitElemFace(elem, side, tid);
+    nl->reinitNeighborFace(neighbor, neighbor_side, tid);
   }
-  _displaced_aux->reinitElemFace(elem, side, bnd_id, tid);
-  _displaced_aux->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _displaced_aux->reinitElemFace(elem, side, tid);
+  _displaced_aux->reinitNeighborFace(neighbor, neighbor_side, tid);
 }
 
 void
@@ -841,8 +837,8 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
 
   // Compute values at the points
   for (auto & nl : _displaced_solver_systems)
-    nl->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
-  _displaced_aux->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
+    nl->reinitNeighborFace(neighbor, neighbor_side, tid);
+  _displaced_aux->reinitNeighborFace(neighbor, neighbor_side, tid);
 }
 
 void

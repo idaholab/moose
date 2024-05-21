@@ -26,6 +26,7 @@
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/explicit_system.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/fe_interface.h"
 
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
@@ -70,7 +71,8 @@ AddVariableAction::getNonlinearVariableFamilies()
 {
   return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
                    "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC "
-                   "RAVIART_THOMAS RATIONAL_BERNSTEIN SIDE_HIERARCHIC",
+                   "RAVIART_THOMAS RATIONAL_BERNSTEIN SIDE_HIERARCHIC L2_HIERARCHIC_VEC "
+                   "L2_LAGRANGE_VEC L2_RAVIART_THOMAS",
                    "LAGRANGE");
 }
 
@@ -178,8 +180,8 @@ AddVariableAction::createInitialConditionAction()
   // Associate all action and initial condition errors with "initial_condition"
   associateWithParameter("initial_condition", action_params);
 
-  bool is_vector = (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE ||
-                    _fe_type.family == MONOMIAL_VEC || _fe_type.family == RAVIART_THOMAS);
+  const auto fe_field_type = FEInterface::field_type(_fe_type);
+  const bool is_vector = fe_field_type == TYPE_VECTOR;
 
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
@@ -249,10 +251,11 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
   if (is_fv)
     return "MooseVariableFVReal";
 
+  const auto fe_field_type = FEInterface::field_type(fe_type);
+
   if (is_array)
   {
-    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
+    if (fe_field_type == TYPE_VECTOR)
       ::mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
@@ -261,8 +264,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
     return "MooseVariableConstMonomial";
   else if (fe_type.family == SCALAR)
     return "MooseVariableScalar";
-  else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-           fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
+  else if (fe_field_type == TYPE_VECTOR)
     return "VectorMooseVariable";
   else
     return "MooseVariable";

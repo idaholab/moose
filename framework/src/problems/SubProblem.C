@@ -842,7 +842,6 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
 void
 SubProblem::reinitElemFaceRef(const Elem * elem,
                               unsigned int side,
-                              BoundaryID bnd_id,
                               Real tolerance,
                               const std::vector<Point> * const pts,
                               const std::vector<Real> * const weights,
@@ -863,12 +862,12 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
     nl.prepare(tid);
 
     // Let's finally compute our variable values!
-    nl.reinitElemFace(elem, side, bnd_id, tid);
+    nl.reinitElemFace(elem, side, tid);
   }
 
   // do same for aux as for nl
   systemBaseAuxiliary().prepare(tid);
-  systemBaseAuxiliary().reinitElemFace(elem, side, bnd_id, tid);
+  systemBaseAuxiliary().reinitElemFace(elem, side, tid);
 
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
@@ -882,7 +881,6 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
 void
 SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                   unsigned int neighbor_side,
-                                  BoundaryID bnd_id,
                                   Real tolerance,
                                   const std::vector<Point> * const pts,
                                   const std::vector<Real> * const weights,
@@ -904,12 +902,12 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
     nl.prepareNeighbor(tid);
 
     // Let's finally compute our variable values!
-    nl.reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
+    nl.reinitNeighborFace(neighbor_elem, neighbor_side, tid);
   }
 
   // do same for aux as for nl
   systemBaseAuxiliary().prepareNeighbor(tid);
-  systemBaseAuxiliary().reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
+  systemBaseAuxiliary().reinitNeighborFace(neighbor_elem, neighbor_side, tid);
 
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
