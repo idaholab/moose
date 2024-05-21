@@ -30,7 +30,6 @@ class RunParallel(Scheduler):
 
     def run(self, job):
         """ Run a tester command """
-
         tester = job.getTester()
 
         # Build and set the runner that will actually run the commands
