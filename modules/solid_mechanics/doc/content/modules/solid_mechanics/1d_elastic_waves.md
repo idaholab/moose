@@ -112,8 +112,7 @@ true solutions. The results are similar to the frequency response function as
 long as the sweeps are granular enough. The second mode is visualized in
 [mode2], and the outline of the undeformed state is shown in black.
 
-!media solid_mechanics/beam_mode_2.mp4 style=float:right;width:100%
-caption=Cantilever Beam: Mode 2 id=mode2
+!media solid_mechanics/beam_mode_2.mp4 style=float:right;width:100% caption=Cantilever Beam: Mode 2 id=mode2
 
 ## Frequency Response Function
 
