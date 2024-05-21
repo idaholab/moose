@@ -59,7 +59,7 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     covariance_function = 'covar'             #Choose a squared exponential for the kernel
     standardize_params = 'true'               #Center and scale the training params

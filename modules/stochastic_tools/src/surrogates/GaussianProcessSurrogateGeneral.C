@@ -85,6 +85,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
   _gp.getParamStandardizer().getStandardized(test_points);
 
   RealEigenMatrix K_train_test(_training_params.rows() * _n_outputs, _n_outputs);
+
   _gp.getCovarFunction().computeCovarianceMatrix(
       K_train_test, _training_params, test_points, false);
   RealEigenMatrix K_test(_n_outputs, _n_outputs);

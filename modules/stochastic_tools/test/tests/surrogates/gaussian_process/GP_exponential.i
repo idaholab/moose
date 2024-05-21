@@ -81,7 +81,7 @@
 
 [VectorPostprocessors]
   [hyperparams]
-    type = GaussianProcessData
+    type = GaussianProcessDataGeneral
     gp_name = 'GP_avg'
     execute_on = final
   []
@@ -89,7 +89,7 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     covariance_function = 'covar' #Choose an exponential for the kernel
     standardize_params = 'true' #Center and scale the training params
@@ -101,7 +101,7 @@
 
 [Surrogates]
   [GP_avg]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = GP_avg_trainer
   []
 []

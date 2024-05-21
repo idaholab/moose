@@ -11,6 +11,7 @@
 
 #include "Action.h"
 class GaussianProcessSurrogate;
+class GaussianProcessSurrogateGeneral;
 
 class LoadCovarianceDataAction : public Action
 {
@@ -21,4 +22,5 @@ public:
 
 private:
   void load(GaussianProcessSurrogate & model);
+  void load(GaussianProcessSurrogateGeneral & model);
 };

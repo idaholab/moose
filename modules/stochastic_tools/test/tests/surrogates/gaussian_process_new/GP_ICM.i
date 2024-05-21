@@ -117,7 +117,7 @@
     tuning_max = '1e16 1e16 1e16  1e16'
     num_iters = 100000
     batch_size = 10
-    learning_rate = 0.002
+    learning_rate = 0.001
     show_optimization_details = true
   []
 []
