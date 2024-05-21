@@ -42,7 +42,7 @@ protected:
   Real _box_height;
   ///@}
 
-  /// something about this
+  /// used to transform local coordinates to crack front coordinates
   const CrackFrontDefinition * _crack_front_definition;
 
   /// Base name of the material system
@@ -54,13 +54,11 @@ protected:
   std::vector<Real> _volume;
 
   /// Vectors computed by this VectorPostprocessor:
-  /// x,y,z coordinates, position of nodes along crack front, and
-  /// crack tip principal stress
+  /// x,y,z coordinates, and crack tip principal stress
   ///@{
   VectorPostprocessorValue & _x;
   VectorPostprocessorValue & _y;
   VectorPostprocessorValue & _z;
-  VectorPostprocessorValue & _position;
   VectorPostprocessorValue & _avg_crack_tip_stress;
   ///@}
 

@@ -307,14 +307,8 @@ CrackFrontDefinition::initialSetup()
   }
   if (_crack_front_points_provider != nullptr)
   {
-    // TODO: For crack nucleation, should call a new method on the _crack_front_points_provider to
-    // get the number of crack front points IF the crack_front_points_provider's initialSetup has
-    // been called
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
-    if (_use_mesh_cutter)
-      _crack_plane_normals =
-          _crack_front_points_provider->getCrackPlaneNormals(_num_points_from_provider);
   }
 
   _crack_mouth_boundary_ids = _mesh.getBoundaryIDs(_crack_mouth_boundary_names, true);
@@ -366,8 +360,6 @@ CrackFrontDefinition::initialize()
   {
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
-    _crack_plane_normals =
-        _crack_front_points_provider->getCrackPlaneNormals(_num_points_from_provider);
     updateCrackFrontGeometry();
     std::size_t num_crack_front_points = getNumCrackFrontPoints();
     if (_q_function_type == "GEOMETRY")
@@ -799,6 +791,7 @@ CrackFrontDefinition::maxNodeCoor(std::vector<Node *> & nodes, unsigned int dir0
 void
 CrackFrontDefinition::updateCrackFrontGeometry()
 {
+  computeCrackMouthNodes();
   _segment_lengths.clear();
   _tangent_directions.clear();
   _crack_directions.clear();
@@ -815,6 +808,9 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     _segment_lengths.reserve(num_crack_front_points);
     _tangent_directions.reserve(num_crack_front_points);
     _crack_directions.reserve(num_crack_front_points);
+    if (_use_mesh_cutter)
+      _crack_plane_normals =
+          _crack_front_points_provider->getCrackPlaneNormals(num_crack_front_points);
 
     for (std::size_t i = 0; i < num_crack_front_points; ++i)
     {
@@ -823,6 +819,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       tangent_direction(_axis_2d) = 1.0;
       _tangent_directions.push_back(tangent_direction);
       const Point * crack_front_point = getCrackFrontPoint(i);
+
       crack_direction =
           calculateCrackFrontDirection(*crack_front_point, tangent_direction, MIDDLE_NODE, i);
       _crack_directions.push_back(crack_direction);
@@ -830,17 +827,11 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       RankTwoTensor rot_mat;
       rot_mat.fillRow(0, crack_direction);
       rot_mat(2, _axis_2d) = 1.0;
-      if (_use_mesh_cutter)
-      {
-        _crack_plane_normals =
-            _crack_front_points_provider->getCrackPlaneNormals(num_crack_front_points);
-        mooseAssert(!_crack_plane_normals.empty(), "_crack_plane_normals is empty.");
-      }
-      else
-      {
+
+      if (!_use_mesh_cutter)
         _crack_plane_normals.push_back(tangent_direction.cross(crack_direction));
-      }
-      mooseAssert(!_crack_plane_normals.size() < i, "_crack_plane_normals is the wrong size.");
+
+      mooseAssert(i <= _crack_plane_normals.size(), "_crack_plane_normals is the wrong size.");
       rot_mat.fillRow(1, _crack_plane_normals[i]);
       _rot_matrix.push_back(rot_mat);
 
@@ -851,7 +842,13 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   }
   else
   {
-    updateDataForCrackDirection();
+    // filling crack_plane_normals from mesh_cutter
+    if (_use_mesh_cutter)
+      _crack_plane_normals =
+          _crack_front_points_provider->getCrackPlaneNormals(_num_points_from_provider);
+    // else filling crack_plane_normals from curvedCrackFront
+    computeCurvedCrackFrontCrackPlaneNormals();
+
     std::size_t num_crack_front_points = getNumCrackFrontPoints();
     _segment_lengths.reserve(num_crack_front_points);
     _tangent_directions.reserve(num_crack_front_points);
@@ -932,8 +929,9 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       back_segment_len = forward_segment_len;
     }
 
-    // For CURVED_CRACK_FRONT, _crack_plane_normal gets computed in updateDataForCrackDirection
-    if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
+    // For CURVED_CRACK_FRONT, _crack_plane_normals gets computed in
+    // computeCurvedCrackFrontCrackPlaneNormals
+    if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT && !_use_mesh_cutter)
     {
       std::size_t mid_id = (num_crack_front_points - 1) / 2;
       _crack_plane_normals.assign(num_crack_front_points,
@@ -1030,7 +1028,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 }
 
 void
-CrackFrontDefinition::updateDataForCrackDirection()
+CrackFrontDefinition::computeCrackMouthNodes()
 {
   if (_crack_mouth_boundary_ids.size() > 0)
   {
@@ -1062,7 +1060,11 @@ CrackFrontDefinition::updateDataForCrackDirection()
     if (_has_symmetry_plane)
       _crack_mouth_coordinates(_symmetry_plane) = 0.0;
   }
+}
 
+void
+CrackFrontDefinition::computeCurvedCrackFrontCrackPlaneNormals()
+{
   if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT && !_use_mesh_cutter)
   {
     _crack_plane_normals.clear();
