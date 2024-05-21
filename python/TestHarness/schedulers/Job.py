@@ -373,7 +373,7 @@ class Job(object):
         # Concatenate output in order of Runner, Tester, Job
         output = ''
         object_outputs = [self.getRunner().getOutput() if self.getRunner() else '',
-                          self.getTester().getOutput() if self.getTester else '',
+                          self.getTester().getOutput() if self.getTester() else '',
                           self.output]
         for object_output in object_outputs:
             if object_output:
