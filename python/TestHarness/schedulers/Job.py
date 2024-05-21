@@ -365,16 +365,23 @@ class Job(object):
 
     def getOutput(self):
         """ Return the combined contents of output """
+        # Cached output is used when reading from a results file,
+        # when we don't run anything and just populate results
         if self.cached_output:
             return self.cached_output
 
+        # Concatenate output in order of Runner, Tester, Job
         output = ''
-        if self._runner and self._runner.getOutput():
-            output += self._runner.getOutput()
-        if self.__tester and self.__tester.getOutput():
-            output += self.__tester.getOutput()
-        if self.output:
-            output += self.output
+        object_outputs = [self.getRunner().getOutput() if self.getRunner() else '',
+                          self.getTester().getOutput() if self.getTester else '',
+                          self.output]
+        for object_output in object_outputs:
+            if object_output:
+                # Append an extra line if we're missing one
+                if len(output) and output[-1] != '\n':
+                    output += '\n'
+                output += object_output
+
         return output
 
     def getRunner(self):
