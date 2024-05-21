@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime
+import threading, os, re, sys, datetime, shlex
 import paramiko
 from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
@@ -85,6 +85,13 @@ class RunHPC(RunParallel):
                 default_pre_source =  os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_source')
                 self.options.hpc_pre_source = default_pre_source
                 print(f'INFO: Setting --hpc-pre-source={default_pre_source}')
+        else:
+            if self.options.hpc_apptainer_bindpath:
+                print('ERROR: --hpc-apptainer-bindpath is unused when not executing with apptainer')
+                sys.exit(1)
+            if self.options.hpc_apptainer_no_home:
+                print('ERROR: --hpc-apptainer-no-home is unused when not executing with apptainer')
+                sys.exit(1)
 
         if self.options.hpc_pre_source and not os.path.exists(self.options.hpc_pre_source):
             print(f'ERROR: --hpc-pre-source path {self.options.hpc_pre_source} does not exist')
@@ -158,7 +165,7 @@ class RunHPC(RunParallel):
 
             client_and_host = self.ssh_clients.get(process)
             if client_and_host is None:
-                raise Exception('Failed to connect to SSH host(s) ', ', '.join(self.ssh_hosts))
+                raise Exception(f'Failed to connect to SSH host(s) {", ".join(self.ssh_hosts)}')
             return client_and_host
 
     def _callSSH(self, command):
@@ -283,10 +290,17 @@ class RunHPC(RunParallel):
             job_data.command_printable = command_prefix
 
             # The root filesystem path that we're in so that we can be sure to bind
-            # it into the container
-            root_path = os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
+            # it into the container, if not already set
+            if self.options.hpc_apptainer_bindpath:
+                bindpath = self.options.hpc_apptainer_bindpath
+            else:
+                bindpath = '/' + os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
             # The apptainer command that will get sandwiched in the middle
-            apptainer_command = f'apptainer exec -B /{root_path} {APPTAINER_CONTAINER}'
+            apptainer_command = ['apptainer', 'exec', '-B', bindpath]
+            if self.options.hpc_apptainer_no_home:
+                apptainer_command.append('--no-home')
+            apptainer_command.append(APPTAINER_CONTAINER)
+            apptainer_command = shlex.join(apptainer_command)
             # Append the apptainer command along with the command to be ran
             job_data.command += f"{apptainer_command} '{command}'"
             job_data.command_printable += f"{apptainer_command} \'\\'\'{command}\'\\'\'"
