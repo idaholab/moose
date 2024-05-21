@@ -112,10 +112,6 @@ class Scheduler(MooseObject):
         # The last time the scheduler reported something
         self.last_reported_time = clock()
 
-        # True when scheduler.waitFinish() is called. This alerts the scheduler, no more jobs are
-        # to be scheduled. KeyboardInterrupts are then handled by the thread pools.
-        self.__waiting = False
-
         # Whether or not to report long running jobs as RUNNING
         self.report_long_jobs = True
         # Whether or not to enforce the timeout of jobs
@@ -210,8 +206,9 @@ class Scheduler(MooseObject):
         Inform the Scheduler to begin running. Block until all jobs finish.
         """
         self.__sortAndLaunch()
-        self.__waiting = True
         try:
+            error_state = False
+
             # wait until there is an error, or job_bank has emptied
             while True:
                 with self.__bank_lock:
