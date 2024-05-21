@@ -166,7 +166,7 @@ class RunApp(Tester):
 
         # Check for built application
         if shutil.which(specs['executable']) is None:
-            self.setStatus(self.fail, 'APPLICATION NOT FOUND')
+            self.setStatus(self.error, 'APPLICATION NOT FOUND')
 
         # If no_additional_cli_args is set to True, return early with a simplified command line ignoring
         # all other TestHarness supplied options.
@@ -239,7 +239,7 @@ class RunApp(Tester):
 
         return command
 
-    def testFileOutput(self, moose_dir, options, output):
+    def testFileOutput(self, moose_dir, options, runner_output):
         """ Set a failure status for expressions found in output """
         reason = ''
         errors = ''
@@ -255,15 +255,12 @@ class RunApp(Tester):
             custom_module = importlib.util.module_from_spec(custom_mod_spec)
             sys.modules['custom_module'] = custom_module
             custom_mod_spec.loader.exec_module(custom_module)
-            if custom_module.custom_evaluation(output):
+            if custom_module.custom_evaluation(runner_output):
                 return errors
             else:
                 errors += "#"*80 + "\n\n" + "Custom evaluation failed.\n"
                 self.setStatus(self.fail, "CUSTOM EVAL FAILED")
                 return errors
-
-
-
 
         params_and_msgs = {'expect_err':
                               {'error_missing': True,
@@ -291,10 +288,10 @@ class RunApp(Tester):
             if specs.isValid(param) and (options.method in attr['modes'] or attr['modes'] == ['ALL']):
                 match_type = ""
                 if specs['match_literal']:
-                    have_expected_out = util.checkOutputForLiteral(output, specs[param])
+                    have_expected_out = util.checkOutputForLiteral(runner_output, specs[param])
                     match_type = 'literal'
                 else:
-                    have_expected_out = util.checkOutputForPattern(output, specs[param])
+                    have_expected_out = util.checkOutputForPattern(runner_output, specs[param])
                     match_type = 'pattern'
 
                 # Exclusive OR test
@@ -308,7 +305,7 @@ class RunApp(Tester):
 
         return errors
 
-    def testExitCodes(self, moose_dir, options, output):
+    def testExitCodes(self, moose_dir, options, exit_code, runner_output):
         # Don't do anything if we already have a status set
         reason = ''
         if self.isNoStatus():
@@ -316,25 +313,25 @@ class RunApp(Tester):
             # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
-            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
+            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
                 reason = 'ERRMSG'
-            elif self.getExitCode() == 0 and specs['should_crash'] == True:
+            elif exit_code == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
-            elif self.getExitCode() != 0 and specs['should_crash'] == False and self.shouldExecute():
+            elif exit_code != 0 and specs['should_crash'] == False and self.shouldExecute():
                 # Let's look at the error code to see if we can perhaps further split this out later with a post exam
                 reason = 'CRASH'
             # Valgrind runs
-            elif self.getExitCode() == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+            elif exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in runner_output:
                 reason = 'MEMORY ERROR'
 
             if reason != '':
                 self.setStatus(self.fail, str(reason))
-                return "\n\nExit Code: " + str(self.getExitCode())
+                return "\n\nExit Code: " + str(exit_code)
 
         # Return anything extra here that we want to tack onto the Output for when it gets printed later
         return ''
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         """
         Wrapper method for testFileOutput.
 
@@ -348,15 +345,16 @@ class RunApp(Tester):
         # TODO: because RunParallel is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
-        output += self.testFileOutput(moose_dir, options, output)
-        output += self.testExitCodes(moose_dir, options, output)
+        output = ''
+        output += self.testFileOutput(moose_dir, options, runner_output)
+        output += self.testExitCodes(moose_dir, options, exit_code, output)
 
         return output
 
-    def mustOutputExist(self):
+    def mustOutputExist(self, exit_code):
         if self.specs['should_crash']:
-            return self.getExitCode() != 0
-        return self.getExitCode() == 0
+            return exit_code != 0
+        return exit_code == 0
 
     def needFullOutput(self, options):
         # We need the full output when we're trying to read from said output

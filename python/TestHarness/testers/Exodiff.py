@@ -72,8 +72,8 @@ class Exodiff(FileTester):
 
         return commands
 
-    def processResults(self, moose_dir, options, output):
-        FileTester.processResults(self, moose_dir, options, output)
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
 
         if self.isFail() or self.specs['skip_checks']:
             return output

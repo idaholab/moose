@@ -61,7 +61,7 @@ class SubprocessRunner(Runner):
             process_env = os.environ.copy()
 
             # Don't clobber state
-            process_env['OMPI_MCA_orte_tmpdir_base'] = tester.getTempDirectory().name
+            process_env['OMPI_MCA_orte_tmpdir_base'] = self.job.getTempDirectory().name
             # Allow oversubscription for hosts that don't have a hostfile
             process_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
 
