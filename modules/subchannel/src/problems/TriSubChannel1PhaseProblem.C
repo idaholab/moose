@@ -514,47 +514,35 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
 {
   auto dz = _z_grid[iz] - _z_grid[iz - 1];
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-  // If pin mesh exists, then project pin power to subchannel
+
   if (_pin_mesh_exist)
   {
-    auto heat_rate_in = 0.0;
-    auto heat_rate_out = 0.0;
-    if (subch_type == EChannelType::CENTER)
+    double factor;
+    switch (subch_type)
     {
-      for (unsigned int j = 0; j < 3; j++)
-      {
-        auto i_pin = _subchannel_mesh.getChannelPins(i_ch)[j];
-        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
-        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
-        heat_rate_out += (*_q_prime_soln)(node_out);
-        heat_rate_in += (*_q_prime_soln)(node_in);
-      }
-      return 1.0 / 6.0 * (heat_rate_in + heat_rate_out) * dz / 2.0;
+      case EChannelType::CENTER:
+        factor = 1.0 / 6.0;
+        break;
+      case EChannelType::EDGE:
+        factor = 1.0 / 4.0;
+        break;
+      case EChannelType::CORNER:
+        factor = 1.0 / 6.0;
+        break;
+      default:
+        return 0.0; // handle invalid subch_type if needed
     }
-    else if (subch_type == EChannelType::EDGE)
+    double heat_rate_in = 0.0;
+    double heat_rate_out = 0.0;
+    for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
     {
-      for (unsigned int j = 0; j < 2; j++)
-      {
-        auto i_pin = _subchannel_mesh.getChannelPins(i_ch)[j];
-        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
-        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
-        heat_rate_out += (*_q_prime_soln)(node_out);
-        heat_rate_in += (*_q_prime_soln)(node_in);
-      }
-      return 1.0 / 4.0 * (heat_rate_in + heat_rate_out) * dz / 2.0;
-    }
-    else
-    {
-      auto i_pin = _subchannel_mesh.getChannelPins(i_ch)[0];
       auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
       auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
-      heat_rate_out += (*_q_prime_soln)(node_out);
-      heat_rate_in += (*_q_prime_soln)(node_in);
-      return 1.0 / 6.0 * (heat_rate_in + heat_rate_out) * dz / 2.0;
+      heat_rate_out += factor * (*_q_prime_soln)(node_out);
+      heat_rate_in += factor * (*_q_prime_soln)(node_in);
     }
+    return (heat_rate_in + heat_rate_out) * dz / 2.0;
   }
-  // If pin mesh does not exist, then apply power to subchannel directly
-  // Note: this power was already set by  TriPowerIC
   else
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);

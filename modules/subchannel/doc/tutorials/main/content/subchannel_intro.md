@@ -1,4 +1,4 @@
-# Introduction to SubChannel
+# Introduction to SCM
 
 !---
 
@@ -78,7 +78,7 @@
 
 !---
 
-## Subchannel Model
+## SCM Model
 
 !row!
 
@@ -110,7 +110,7 @@
 
 !---
 
-## Subchannel Model 2
+## SCM Model 2
 
 !row!
 
@@ -137,7 +137,7 @@
 
 !---
 
-## Subchannel Model Governing Equations
+## SCM Model Governing Equations
 
 ### Mass conservation equation
 
@@ -171,7 +171,7 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 !---
 
-## Subchannel Model Closure Models
+## SCM Model Closure Models
 
 !row!
 
@@ -246,7 +246,7 @@ w'_{ij} = \beta S_{ij} \bar{G}, ~\frac{dw'_{ij}}{dz} = \frac{w'_{ij}}{\Delta Z}=
 
 !---
 
-## Subchannel Model Algorithm
+## SCM Model Algorithm
 
 !row!
 !col! width=50%
@@ -269,7 +269,7 @@ w'_{ij} = \beta S_{ij} \bar{G}, ~\frac{dw'_{ij}}{dz} = \frac{w'_{ij}}{\Delta Z}=
 
 !---
 
-## Subchannel Model Algorithm 2
+## SCM Model Algorithm 2
 
 There are three variations of the algorithm: explicit (default), implicit segregated and implicit monolithic.
 
