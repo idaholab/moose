@@ -134,5 +134,6 @@
 []
 
 [Outputs]
+  file_base = 'stress_check'
   csv = true
 []

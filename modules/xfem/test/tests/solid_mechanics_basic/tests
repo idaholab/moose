@@ -110,8 +110,8 @@
     []
     [stress_check]
       type = CSVDiff
-      input = crack_front_stress.i
-      csvdiff = 'crack_front_stress_out_CrackFrontNormalStress_0001.csv crack_front_stress_out_CrackFrontNormalStress_0002.csv crack_front_stress_out_CrackFrontNormalStress_0003.csv crack_front_stress_out_CrackFrontNormalStress_0004.csv'
+      input = crack_front_stress_function_growth.i
+      csvdiff = 'stress_check_CrackFrontNormalStress_0001.csv stress_check_CrackFrontNormalStress_0002.csv stress_check_CrackFrontNormalStress_0003.csv stress_check_CrackFrontNormalStress_0004.csv'
       # XFEM requires --enable-unique-ids in libmesh
       unique_id = true
       detail = ' and average crack tip stress changes with crack orientation and properly accounts averaging volume intersecting boundary.'

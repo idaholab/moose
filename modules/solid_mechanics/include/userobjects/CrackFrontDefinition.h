@@ -442,10 +442,15 @@ protected:
   void updateCrackFrontGeometry();
 
   /**
-   * Update the data structures used to determine the crack front direction
-   * vectors such as crack mouth coordinates.
+   * compute node and coordinate data for crack fronts defined by crack_mouth_boundary_ids sidesets
    */
-  void updateDataForCrackDirection();
+  void computeCrackMouthNodes();
+
+  /**
+   * Compute crack plane face normals for cracks that have a curved crack front but do not use a
+   * mesh cutter.
+   */
+  void computeCurvedCrackFrontCrackPlaneNormals();
 
   /**
    * Compute the direction of crack extension for a given point on the crack front.

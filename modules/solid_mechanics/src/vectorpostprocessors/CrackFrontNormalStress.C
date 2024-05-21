@@ -49,7 +49,6 @@ CrackFrontNormalStress::CrackFrontNormalStress(const InputParameters & parameter
     _x(declareVector("x")),
     _y(declareVector("y")),
     _z(declareVector("z")),
-    _position(declareVector("id")),
     _avg_crack_tip_stress(declareVector("crack_tip_stress"))
 {
   if (_mesh.dimension() == 3 && !isParamSetByUser("box_width"))
@@ -77,7 +76,6 @@ CrackFrontNormalStress::initialize()
   _x.assign(num_pts, 0.0);
   _y.assign(num_pts, 0.0);
   _z.assign(num_pts, 0.0);
-  _position.assign(num_pts, 0.0);
   _avg_crack_tip_stress.assign(num_pts, 0.0);
 }
 
@@ -118,9 +116,6 @@ CrackFrontNormalStress::finalize()
     _x[icfp] = (*cfp)(0);
     _y[icfp] = (*cfp)(1);
     _z[icfp] = (*cfp)(2);
-    // I think it should be this but I don't know if you can force it to be this.  It also doesn't
-    // really need an id.
-    _position[icfp] = _crack_front_definition->getDistanceAlongFront(icfp);
   }
 }
 
