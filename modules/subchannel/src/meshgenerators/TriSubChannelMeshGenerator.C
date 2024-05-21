@@ -345,8 +345,6 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
 
           // corner subchannel
           _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
-          // corner subchannel-dummy added to hinder array size violations
-          // _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
           _chan_to_gap_map[k].push_back(kgap - 1);
           _chan_to_gap_map[k].push_back(kgap);
           _subch_type[k] = EChannelType::CORNER;
