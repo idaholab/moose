@@ -63,6 +63,7 @@ inactive_domain_block_names = ${Box2_inactive_name}
     type = TimedSubdomainModifier
     header = ON
     data_file = 'tsm.csv'
+    comment = '#'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []

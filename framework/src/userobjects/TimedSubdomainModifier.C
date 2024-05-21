@@ -30,7 +30,7 @@ TimedSubdomainModifier::validParams()
   params.addParam<bool>("header",
                         "Indicates whether the file contains a header with the column names");
   params.addParam<std::string>("delimiter", ",", "Delimiter used to parse the file");
-  params.addParam<std::string>("comment", "#", "Comment character used to parse the file");
+  params.addParam<std::string>("comment", ";", "Comment character used to parse the file");
   params.addParam<size_t>(
       "time_column_index", 0, "Zero-based index of the time column. Default is '0'.");
   params.addParam<size_t>(

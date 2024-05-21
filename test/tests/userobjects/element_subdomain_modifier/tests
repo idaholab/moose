@@ -139,8 +139,8 @@
     recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
   []
 
-  requirement = 'The system shall be able to move elements between blocks at user specified times'
   [times]
+    requirement = 'The system shall be able to move elements between blocks at user specified times'
     [direct]
       type = 'Exodiff'
       input = 'tsm_direct.i'
