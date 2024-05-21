@@ -184,4 +184,12 @@
     issues = '#15048'
     requirement = 'The system shall be able to automatically scale a nonlinear eigen-solve based on entries in the non-eigen residual vector.'
   []
+
+  [error_eigen_non_generalized]
+    type = 'RunException'
+    input = 'dg_krylovschur.i'
+    expect_err = 'This object has been marked as contributing to B or Bx but the eigen problem type is not a generalized one'
+    requirement = "The system shall error if a user requests a standard eigenvalue solve when there are objects marked to contribute to the Bx vector or B matrix."
+    cli_args = "Kernels/inactive=''"
+  []
 []

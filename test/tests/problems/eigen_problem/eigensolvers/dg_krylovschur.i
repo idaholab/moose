@@ -27,6 +27,7 @@
 []
 
 [Kernels]
+  inactive = 'rhs'
   [./rhs]
     type = Reaction
     variable = u
