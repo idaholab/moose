@@ -89,7 +89,7 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     sampler = train_sample
     response = results/data:avg:value
@@ -110,7 +110,7 @@
 
 [Surrogates]
   [gauss_process_avg]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = 'GP_avg_trainer'
   []
 []

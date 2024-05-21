@@ -322,6 +322,25 @@ GaussianProcessGeneral::vecToMap(
 
 template <>
 void
+dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+{
+  // Store the L matrix as opposed to the full matrix to avoid compounding
+  // roundoff error and decomposition error
+  RealEigenMatrix L(decomp.matrixL());
+  dataStore(stream, L, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+{
+  RealEigenMatrix L;
+  dataLoad(stream, L, context);
+  decomp.compute(L * L.transpose());
+}
+
+template <>
+void
 dataStore(std::ostream & stream, StochasticTools::GaussianProcessGeneral & gp_utils, void * context)
 {
   dataStore(stream, gp_utils.hyperparamMap(), context);

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "SurrogateModel.h"
-#include "GaussianProcessTrainer.h"
 #include "Standardizer.h"
 #include <Eigen/Dense>
 #include "CovarianceInterface.h"

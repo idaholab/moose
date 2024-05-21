@@ -39,7 +39,7 @@
 
 [Surrogates]
   [GP_avg]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     filename = 'GP_training_normal_GP_avg.rd'
   []
 []

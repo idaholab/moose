@@ -86,17 +86,15 @@
     standardize_params = 'true'
     standardize_data = 'true'
     tune_parameters = 'covar:signal_variance covar:length_factor'
-    tao_options = '-tao_bncg_type ssml_bfgs'
     tuning_min = ' 1e-9 1e-9'
     tuning_max = ' 1e16  1e16'
-    tuning_algorithm = 'tao'
     # show_optimization_details = true
   []
 []
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = GP_al_trainer
   []
 []

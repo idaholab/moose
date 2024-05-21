@@ -12,8 +12,6 @@
 #include "Standardizer.h"
 #include <Eigen/Dense>
 
-#include "GaussianProcess.h"
-
 #include "CovarianceFunctionBase.h"
 #include "OutputCovarianceBase.h"
 

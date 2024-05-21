@@ -64,18 +64,19 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     covariance_function = 'rbf'
     standardize_params = 'true' #Center and scale the training params
     standardize_data = 'true' #Center and scale the training data
-    tao_options = '-tao_bncg_type kd'
     sampler = train_sample
     response = results/data:avg:value
     tune_parameters = 'rbf:signal_variance rbf:length_factor'
     tuning_min = ' 1e-9 1e-9'
     tuning_max = ' 1e16  1e16'
-    tuning_algorithm = 'tao'
+    batch_size = 50
+    num_iters = 5000
+    learning_rate = 5e-3
   []
 []
 
@@ -90,7 +91,7 @@
 
 [Surrogates]
   [GP_avg]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = 'GP_avg_trainer'
   []
 []

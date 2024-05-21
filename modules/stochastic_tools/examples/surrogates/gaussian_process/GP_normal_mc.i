@@ -68,7 +68,7 @@
 
 [Trainers]
   [GP_avg]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
@@ -76,10 +76,9 @@
     sampler = sample
     response = results/data:avg:value
     tune_parameters = 'rbf:signal_variance rbf:length_factor'
-    tuning_algorithm = 'adam'
     tuning_min = ' 1e-9 1e-3'
     tuning_max = ' 100  100'
-    iter_adam = 200
+    num_iters = 200
     learning_rate_adam = 0.005
   []
 []

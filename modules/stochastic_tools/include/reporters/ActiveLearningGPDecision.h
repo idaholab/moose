@@ -11,7 +11,7 @@
 
 #include "ActiveLearningReporterBase.h"
 #include "ActiveLearningGaussianProcess.h"
-#include "GaussianProcessSurrogate.h"
+#include "GaussianProcessSurrogateGeneral.h"
 #include "SurrogateModelInterface.h"
 
 class ActiveLearningGPDecision : public ActiveLearningReporterTempl<Real>,

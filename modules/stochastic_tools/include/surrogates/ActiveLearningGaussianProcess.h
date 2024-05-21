@@ -25,7 +25,7 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
-#include "GaussianProcess.h"
+#include "GaussianProcessGeneral.h"
 
 class ActiveLearningGaussianProcess : public SurrogateTrainerBase,
                                       public CovarianceInterface,
@@ -35,20 +35,20 @@ public:
   static InputParameters validParams();
   ActiveLearningGaussianProcess(const InputParameters & parameters);
 
-  virtual void initialize() final{};
-  virtual void execute() final{};
+  virtual void initialize() final {};
+  virtual void execute() final {};
   virtual void reTrain(const std::vector<std::vector<Real>> & inputs,
                        const std::vector<Real> & outputs) const final;
 
-  StochasticTools::GaussianProcess & gpHandler() { return _gp_handler; }
-  const StochasticTools::GaussianProcess & getGPHandler() const { return _gp_handler; }
+  StochasticTools::GaussianProcessGeneral & gp() { return _gp; }
+  const StochasticTools::GaussianProcessGeneral & getGP() const { return _gp; }
 
 private:
   /// Name for the meta data associated with training
   const std::string _model_meta_data_name;
 
   /// The GP handler
-  StochasticTools::GaussianProcess & _gp_handler;
+  StochasticTools::GaussianProcessGeneral & _gp;
 
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
@@ -60,5 +60,5 @@ private:
   bool _standardize_data;
 
   /// Struct holding parameters necessary for parameter tuning
-  const StochasticTools::GaussianProcess::GPOptimizerOptions _optimization_opts;
+  const StochasticTools::GaussianProcessGeneral::GPOptimizerOptions _optimization_opts;
 };

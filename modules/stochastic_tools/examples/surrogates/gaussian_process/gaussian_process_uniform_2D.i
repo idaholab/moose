@@ -80,7 +80,7 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainer
+    type = GaussianProcessTrainerGeneral
     execute_on = timestep_end
     covariance_function = 'rbf'
     standardize_params = 'true' #Center and scale the training params
@@ -101,7 +101,7 @@
 
 [Surrogates]
   [GP_avg]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = 'GP_avg_trainer'
   []
 []

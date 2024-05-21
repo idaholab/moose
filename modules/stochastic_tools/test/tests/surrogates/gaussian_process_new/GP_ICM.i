@@ -96,7 +96,7 @@
 
 [VectorPostprocessors]
   [hyperparams]
-    type = GaussianProcessDataGeneral
+    type = GaussianProcessData
     gp_name = 'surr'
     execute_on = final
   []

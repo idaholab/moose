@@ -98,16 +98,15 @@
     standardize_params = 'true'
     standardize_data = 'true'
     tune_parameters = 'covar:signal_variance covar:length_factor'
-    tuning_algorithm = 'adam'
-    iter_adam = 2000
-    learning_rate_adam = 0.005
+    num_iters = 2000
+    learning_rate = 0.005
     # show_optimization_details = true
   []
 []
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcessSurrogate
+    type = GaussianProcessSurrogateGeneral
     trainer = GP_al_trainer
   []
 []

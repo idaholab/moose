@@ -81,7 +81,7 @@
 
 [VectorPostprocessors]
   [hyperparams]
-    type = GaussianProcessDataGeneral
+    type = GaussianProcessData
     gp_name = 'GP_avg'
     execute_on = final
   []
