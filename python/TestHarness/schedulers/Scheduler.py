@@ -364,7 +364,12 @@ class Scheduler(MooseObject):
 
         Whether or not it actually gets reported... is not so intuitive.
         """
-        self.status_pool.apply_async(self.jobStatus, (job,caveats,))
+        # This try catch will get rid of the "Pool not running" errors
+        # when we're forced to exit
+        try:
+            self.status_pool.apply_async(self.jobStatus, (job,caveats,))
+        except ValueError:
+            pass
 
     def jobStatus(self, job, caveats):
         """
