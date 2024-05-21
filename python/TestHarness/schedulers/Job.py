@@ -11,6 +11,9 @@ import itertools, re, os, json, time, threading
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
+from TestHarness.runners.Runner import Runner
+from tempfile import TemporaryDirectory
+import traceback
 
 class Timer(object):
     """
@@ -103,13 +106,54 @@ class Job(object):
         # the next time report statuses
         self.force_report_status = False
 
+        # The object that'll actually do the run
+        self._runner = None
+
+        # Any additional output produced by the Job (not from the Tester or Runner)
+        self.output = ''
+
+        self.cached_output = None
+
+        # A temp directory for this Job, if requested
+        self.tmp_dir = None
+
+    def __del__(self):
+        # Do any cleaning that we can (removes the temp dir for now if it exists)
+        self.cleanup()
+
     def getID(self):
         """Returns the unique ID for the job"""
         return self.id
 
+    def setRunner(self, runner: Runner):
+        """Sets the underlying Runner object that will run the command"""
+        self._runner = runner
+
     def getLock(self):
         """ Get the lock associated with this job """
         return self.__j_lock
+
+    def getTempDirectory(self):
+        """
+        Gets a shared temp directory that will be cleaned up for this Tester
+        """
+        if self.tmp_dir is None:
+            self.tmp_dir = TemporaryDirectory(prefix='tester_')
+        return self.tmp_dir
+
+    def cleanup(self):
+        """
+        Entry point for doing any cleaning if necessary.
+
+        Currently just cleans up the temp directory
+        """
+        if self.tmp_dir is not None:
+            # Don't let this fail
+            try:
+                self.tmp_dir.cleanup()
+            except:
+                pass
+            self.tmp_dir = None
 
     def getUpstreams(self):
         """ Return a list of all the jobs that needed to be completed before this job """
@@ -232,9 +276,10 @@ class Job(object):
         A blocking method to handle the exit status of the process object while keeping track of the
         time the process was active. When the process exits, read the output and close the file.
         """
+        tester = self.__tester
 
         # Do not execute app, but allow processResults to commence
-        if not self.__tester.shouldExecute():
+        if not tester.shouldExecute():
             return
 
         if self.options.pedantic_checks and self.canParallel():
@@ -243,32 +288,72 @@ class Job(object):
             self.addCaveats('pedantic check')
             time.sleep(1)
 
-        self.__tester.prepare(self.options)
+        tester.prepare(self.options)
+
+        # Verify that the working directory is available right before we execute
+        if not os.path.exists(tester.getTestDir()):
+            self.setStatus(self.error, 'WORKING DIRECTORY NOT FOUND')
+            return
+        # Getting the command can also cause a failure, so try that
+        tester.getCommand(self.options)
+        if tester.isError():
+            return
+
+        self.timer.reset()
 
         self.__start_time = clock()
-        self.timer.reset()
-        self.__tester.run(self, self.options, self.timer)
+
+        # Helper for trying and catching
+        def try_catch(do, exception_name):
+            try:
+                do()
+            except:
+                self.cleanup()
+                self.setStatus(self.error, f'{exception_name} EXCEPTION')
+                self.output += '\n\nPython exception encountered:\n' + traceback.format_exc()
+                return False
+            return True
+
+        # Spawn the process
+        spawn = lambda: self._runner.spawn(self.timer)
+        if not try_catch(spawn, 'RUNNER SPAWN'):
+            return
+
+        # Entry point for testers to do other things
+        post_spawn = lambda: tester.postSpawn(self._runner)
+        if not try_catch(post_spawn, 'TESTER POST SPAWN'):
+            return
+
+        # And wait for it to complete
+        wait = lambda: self._runner.wait(self.timer)
+        if not try_catch(wait, 'RUNNER WAIT'):
+            return
+
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
-        self.__joined_out = self.__tester.getOutput()
-
-        # Remove NULL output and fail if it exists
-        if self.__joined_out:
-            null_chars = ['\0', '\x00']
-            for null_char in null_chars:
-                if null_char in self.__joined_out:
-                    self.__joined_out = self.__joined_out.replace(null_char, 'NULL')
-                    if not self.isFail():
-                        self.setStatus(self.error, f'NULL characters in output')
 
         if self.options.pedantic_checks and self.canParallel():
             # Check if the files we checked on earlier were modified.
             self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
             self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())
 
+        # Allow derived proccessResults to process the output and set a failing status (if it failed)
+        runner_output = self._runner.getOutput()
+        exit_code = self._runner.getExitCode()
+        run_tester = lambda: tester.run(self.options, exit_code, runner_output)
+        try_catch(run_tester, 'TESTER PROCESS')
+
+        # Run cleanup now that we're done
+        self.cleanup()
+
     def killProcess(self):
         """ Kill remaining process that may be running """
-        self.__tester.killCommand()
+        if self._runner:
+            try:
+                self._runner.kill()
+            except:
+                pass
+        self.cleanup()
 
     def getStartTime(self):
         """ Return the time the process started """
@@ -279,8 +364,22 @@ class Job(object):
         return self.__end_time
 
     def getOutput(self):
-        """ Return the contents of output """
-        return self.__joined_out if self.__joined_out else ''
+        """ Return the combined contents of output """
+        if self.cached_output:
+            return self.cached_output
+
+        output = ''
+        if self._runner and self._runner.getOutput():
+            output += self._runner.getOutput()
+        if self.__tester and self.__tester.getOutput():
+            output += self.__tester.getOutput()
+        if self.output:
+            output += self.output
+        return output
+
+    def getRunner(self):
+        """ Gets the Runner that actually runs the command """
+        return self._runner
 
     def getOutputFile(self):
         """ Return the output file path """
@@ -297,23 +396,8 @@ class Job(object):
                                                  'txt']))
             return os.path.join(output_dir, output_file)
 
-    def setOutput(self, output, force=False):
-        """ Method to allow schedulers to overwrite the output if certain conditions are met """
-        if not self.__tester.isOutputReady() and not force:
-            return
-
-        # Check for invalid unicode in output
-        try:
-            json.dumps(output)
-
-        except UnicodeDecodeError:
-            # convert invalid output to something json can handle
-            output = output.decode('utf-8','replace').encode('ascii', 'replace')
-
-            # Alert the user that output has invalid characters
-            self.addCaveats('invalid characters in stdout')
-
-        self.__joined_out = output
+    def appendOutput(self, output):
+        self.output += output
 
     def getActiveTime(self):
         """ Return active time """

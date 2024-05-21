@@ -71,17 +71,19 @@ class AnalyzeJacobian(FileTester):
         return command
 
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
+
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
-            out_ok = util.checkOutputForPattern(output, specs['expect_out'])
-            if (out_ok and self.getExitCode() != 0):
+            out_ok = util.checkOutputForPattern(runner_output, specs['expect_out'])
+            if (out_ok and exit_code != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         if reason == '':
-            if self.getExitCode() != 0 :
+            if exit_code != 0:
                 reason = 'CRASH'
 
         if reason != '':

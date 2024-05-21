@@ -30,11 +30,11 @@ class RunParallel(Scheduler):
 
     def run(self, job):
         """ Run a tester command """
-        tester = job.getTester()
-
         # Build and set the runner that will actually run the commands
         # This is abstracted away so we can support local runners and PBS/slurm runners
-        tester.setRunner(self.buildRunner(job, self.options))
+        job.setRunner(self.buildRunner(job, self.options))
+
+        tester = job.getTester()
 
         # Do not execute app, and do not processResults
         if self.options.dry_run:
@@ -47,7 +47,7 @@ class RunParallel(Scheduler):
             if caveats:
                 tester.addCaveats(caveats)
             job.setPreviousTime(job_results['TIMING'])
-            job.setOutput(job_results['OUTPUT'], force=True)
+            job.cached_output = job_results['OUTPUT']
             return
 
         output = ''
@@ -58,48 +58,15 @@ class RunParallel(Scheduler):
             # Launch and wait for the command to finish
             job.run()
 
-            # Was this job already considered finished? (Timeout, Crash, etc)
-            if job.isFinished():
-                tester.cleanup()
-                return
-
-            # Allow derived proccessResults to process the output and set a failing status (if it failed)
-            job_output = job.getOutput()
-            output = tester.processResults(tester.getMooseDir(), self.options, job_output)
-
-            # If the tester requested to be skipped at the last minute, report that.
-            if tester.isSkip():
-                output += '\n' + "#"*80 + '\nTester skipped, reason: ' + tester.getStatusMessage() + '\n'
-            elif tester.isFail():
-                output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
-            # If the tester has not yet failed, append additional information to output
-            else:
-                # Read the output either from the temporary file or redirected files
-                if tester.hasRedirectedOutput(self.options):
-                    redirected_output = util.getOutputFromFiles(tester, self.options)
-                    output += redirected_output
-
-                    # If we asked for redirected output but none was found, we'll call that a failure
-                    if redirected_output == '':
-                        tester.setStatus(tester.fail, 'FILE TIMEOUT')
-                        output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
-
+            # Set the successful message
+            if not tester.isSkip() and not tester.isFail():
                 self.setSuccessfulMessage(tester)
         except Exception:
-            output += 'Python exception encountered:\n\n' + traceback.format_exc()
-            tester.setStatus(StatusSystem().error, 'TESTER EXCEPTION')
-            # Forcefully set the output here because it might have not initialized
-            # because the job might not have even run
-            job.setOutput(output, force=True)
-
-        # Clean up now that we're done
-        tester.cleanup()
+            self.output += 'Python exception encountered:\n\n' + traceback.format_exc()
+            tester.setStatus(StatusSystem().error, 'JOB EXCEPTION')
 
         if job.getOutputFile():
             job.addMetaData(DIRTY_FILES=[job.getOutputFile()])
-
-        # Set testers output with modifications made above so it prints the way we want it
-        job.setOutput(output)
 
     def buildRunner(self, job, options) -> Runner:
         """Builds the runner for a given tester

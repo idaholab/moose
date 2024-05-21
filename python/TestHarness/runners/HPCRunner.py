@@ -83,7 +83,7 @@ class HPCRunner(Runner):
         # Determine the output files that we need to wait for to be complete
         wait_files = set([output_file])
         # Output files needed by the Tester, only if it says we should
-        if tester.mustOutputExist():
+        if tester.mustOutputExist(self.exit_code):
             for file in tester.getOutputFiles(self.options):
                 wait_files.add(os.path.join(tester.getTestDir(), file))
         # The files that we can read, but are incomplete (no terminator)
@@ -138,13 +138,6 @@ class HPCRunner(Runner):
 
         Returns whether or not the output was set.
         """
-        # self.output is originally set to None so that other objects
-        # cannot attempt to write to it before we have at least obtained
-        # some object, hence why we need to set it here because we're
-        # signaling that we're ready for output
-        if self.output is None:
-            self.output = ''
-
         # Whether or not we actually set it
         did_set = False
 

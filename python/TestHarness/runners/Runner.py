@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import json
+
 class Runner:
     """
     Base class for running a process via a command.
@@ -23,7 +25,7 @@ class Runner:
         # The job's exit code, should be set after wait()
         self.exit_code = None
         # The output the job produced; to be filled in wait()
-        self.output = None
+        self.output = ''
 
     def spawn(self, timer):
         """
@@ -54,22 +56,33 @@ class Runner:
     def getOutput(self):
         """
         Gets the combined output of the process.
-
-        Should be overridden.
         """
-        return self.output
+        output = self.output
+
+        # Check for invalid unicode in output
+        try:
+            json.dumps(output)
+        except UnicodeDecodeError:
+            # Convert invalid output to something json can handle
+            output = output.decode('utf-8','replace').encode('ascii', 'replace')
+            # Alert the user that output has invalid characters
+            self.job.addCaveats('invalid characters in stdout')
+
+        # Remove NULL output and fail if it exists
+        null_chars = ['\0', '\x00']
+        for null_char in null_chars:
+            if null_char in output:
+                output = output.replace(null_char, 'NULL')
+                if not self.job.isFail():
+                    self.job.setStatus(self.job.error, 'NULL characters in output')
+
+        return output
 
     def getExitCode(self):
         """
         Gets the error code of the process.
         """
         return self.exit_code
-
-    def isOutputReady(self):
-        """
-        Whether or not the output is ready for reading.
-        """
-        return self.output is not None
 
     def sendSignal(self, signal):
         """

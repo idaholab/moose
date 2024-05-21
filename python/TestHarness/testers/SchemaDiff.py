@@ -43,9 +43,9 @@ class SchemaDiff(RunApp):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
 
-    def processResults(self, moose_dir, options, output):
-        output += self.testFileOutput(moose_dir, options, output)
-        output += self.testExitCodes(moose_dir, options, output)
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
+
         specs = self.specs
 
         if self.isFail() or specs['skip_checks']:

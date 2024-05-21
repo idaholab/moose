@@ -48,5 +48,5 @@ class SignalTester(RunApp):
 
         return super().checkRunnable(options)
 
-    def postSpawn(self):
-        self._runner.sendSignal(self.signal)
+    def postSpawn(self, runner):
+        runner.sendSignal(self.signal)
