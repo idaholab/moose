@@ -149,8 +149,15 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 
   auto & vtags = object.getVectorTags({});
   auto & mtags = object.getMatrixTags({});
+
+  const bool eigen = (vtags.find(_Bx_tag) != vtags.end()) || (mtags.find(_B_tag) != mtags.end());
+
+  if (eigen && !_eigen_sys.generalized())
+    object.mooseError("This object has been marked as contributing to B or Bx but the eigen "
+                      "problem type is not a generalized one");
+
   // If it is an eigen kernel, mark its variable as eigen
-  if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
+  if (eigen)
   {
     // Note: the object may be on the displaced system
     auto sys = object.parameters().get<SystemBase *>("_sys");
@@ -159,12 +166,13 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
       sys->getScalarVariable(0, vname).eigen(true);
     else
       sys->getVariable(0, vname).eigen(true);
-  }
 
-  // If this is not an eigen kernel
-  // If there is no vector eigen tag and no matrix eigen tag,
-  // then we consider this as noneigen kernel
-  if (vtags.find(_Bx_tag) == vtags.end() && mtags.find(_B_tag) == mtags.end())
+    // Associate the eigen matrix tag and the vector tag
+    // if this is a eigen kernel
+    object.useMatrixTag(_B_tag, {});
+    object.useVectorTag(_Bx_tag, {});
+  }
+  else
   {
     // Noneigen Vector tag
     object.useVectorTag(_Ax_tag, {});
@@ -172,13 +180,6 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
     object.useMatrixTag(_A_tag, {});
     // Noneigen Kernels
     object.useMatrixTag(_precond_tag, {});
-  }
-  else
-  {
-    // Associate the eigen matrix tag and the vector tag
-    // if this is a eigen kernel
-    object.useMatrixTag(_B_tag, {});
-    object.useVectorTag(_Bx_tag, {});
   }
 }
 
@@ -188,15 +189,6 @@ NonlinearEigenSystem::solve()
   const bool presolve_succeeded = preSolve();
   if (!presolve_succeeded)
     return;
-
-// In DEBUG mode, Libmesh will check the residual automatically. This may cause
-// an error because B does not need to assembly by default.
-// When PETSc is older than 3.13, we always need to do an extra assembly,
-// so we do not do "close" here
-#if DEBUG && !PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  if (sys().has_matrix_B())
-    sys().get_matrix_B().close();
-#endif
 
   // We apply initial guess for only nonlinear solver
   if (_eigen_problem.isNonlinearEigenvalueSolver())
