@@ -265,8 +265,8 @@ class RunHPC(RunParallel):
         # that is quite bash like.
         command = tester.getCommand(options)
         command = command.replace('\n', ' ')
+        command = command.replace('"', "'")
         command = command.replace("'", "\'\\'\'")
-        command = command.replace('${', '\${')
 
         # Special logic for when we're running with apptainer, in which case
         # we need to manipulate the command like such
