@@ -449,11 +449,16 @@ class Tester(MooseObject):
         if needed. The run method is responsible to call the start+stop methods on timer to record
         the time taken to run the actual test.  start+stop can be called multiple times.
         """
-        # Verify that the working directory is available right before we execute.
+        # Verify that the working directory is available right before we execute
         if not os.path.exists(self.getTestDir()):
+            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
+        # Getting the command can also cause a failure, so try that
+        self.getCommand(options)
+
+        # If we've failed already, nothing to do here
+        if job.isFail():
             # Timers must be used since they are directly indexed in the Job class
             timer.start()
-            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
             timer.stop()
             return
 
