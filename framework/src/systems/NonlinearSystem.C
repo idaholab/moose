@@ -163,7 +163,7 @@ NonlinearSystem::solve()
     _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
   // reset solution invalid counter for the time step
-  if (_time_integrator)
+  if (!_time_integrators.empty())
     _app.solutionInvalidity().resetSolutionInvalidTimeStep();
 
   if (shouldEvaluatePreSMOResidual())
@@ -184,16 +184,32 @@ NonlinearSystem::solve()
 
   potentiallySetupFiniteDifferencing();
 
-  if (_time_integrator)
+  const bool time_integrator_solve = std::any_of(_time_integrators.begin(),
+                                                 _time_integrators.end(),
+                                                 [](auto & ti) { return ti->overridesSolve(); });
+  if (time_integrator_solve)
+    mooseAssert(_time_integrators.size() == 1,
+                "If solve is overridden, then there must be only one time integrator");
+
+  if (time_integrator_solve)
+    _time_integrators.front()->solve();
+  else
+    system().solve();
+
+  for (auto & ti : _time_integrators)
   {
-    _time_integrator->solve();
-    _time_integrator->postSolve();
-    _n_iters = _time_integrator->getNumNonlinearIterations();
-    _n_linear_iters = _time_integrator->getNumLinearIterations();
+    if (!ti->overridesSolve())
+      ti->setNumIterationsLastSolve();
+    ti->postSolve();
+  }
+
+  if (!_time_integrators.empty())
+  {
+    _n_iters = _time_integrators.front()->getNumNonlinearIterations();
+    _n_linear_iters = _time_integrators.front()->getNumLinearIterations();
   }
   else
   {
-    system().solve();
     _n_iters = _nl_implicit_sys.n_nonlinear_iterations();
     _n_linear_iters = _nl_implicit_sys.nonlinear_solver->get_total_linear_iterations();
   }

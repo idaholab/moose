@@ -77,7 +77,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
 
   _is_nodal = (_continuity == C_ZERO || _continuity == C_ONE);
 
-  _time_integrator = _sys.getTimeIntegrator();
+  _time_integrator = _sys.getPossiblyNullTimeIntegrator(_var_num);
 
   switch (_element_type)
   {

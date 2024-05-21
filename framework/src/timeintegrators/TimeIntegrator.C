@@ -7,18 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/petsc_nonlinear_solver.h"
-
 #include "TimeIntegrator.h"
 #include "FEProblem.h"
-#include "SystemBase.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
+
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/nonlinear_solver.h"
+#include "libmesh/dof_map.h"
 
 InputParameters
 TimeIntegrator::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params.addParam<std::vector<VariableName>>(
+      "variables", {}, "A subset of the variables that this time integrator should be applied to");
   params.registerBase("TimeIntegrator");
   return params;
 }
@@ -43,16 +45,61 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _n_linear_iterations(0),
     _is_lumped(false),
     _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
-    _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION))
+    _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION)),
+    _var_restriction(!getParam<std::vector<VariableName>>("variables").empty())
 {
   _fe_problem.setUDotRequested(true);
 }
 
 void
+TimeIntegrator::init()
+{
+  if (!_var_restriction)
+    return;
+
+  const auto & var_names = getParam<std::vector<VariableName>>("variables");
+  std::vector<unsigned int> var_num_vec;
+  auto & lm_sys = _sys.system();
+  lm_sys.get_all_variable_numbers(var_num_vec);
+  std::unordered_set<unsigned int> var_nums(var_num_vec.begin(), var_num_vec.end());
+  for (const auto & var_name : var_names)
+    if (lm_sys.has_variable(var_name))
+    {
+      const auto var_num = lm_sys.variable_number(var_name);
+      _vars.insert(var_num);
+      var_nums.erase(var_num);
+    }
+
+  // If var_nums is empty then that means the user has specified all the variables in this system
+  if (var_nums.empty())
+  {
+    _var_restriction = false;
+    return;
+  }
+
+  std::vector<dof_id_type> var_dof_indices, work_vec;
+  for (const auto var_num : _vars)
+  {
+    work_vec = _local_indices;
+    _local_indices.clear();
+    lm_sys.get_dof_map().local_variable_indices(var_dof_indices, lm_sys.get_mesh(), var_num);
+    std::merge(work_vec.begin(),
+               work_vec.end(),
+               var_dof_indices.begin(),
+               var_dof_indices.end(),
+               std::back_inserter(_local_indices));
+  }
+}
+
+void
 TimeIntegrator::solve()
 {
-  _nl.system().solve();
+  mooseError("Calling this method is no longer supported");
+}
 
+void
+TimeIntegrator::setNumIterationsLastSolve()
+{
   _n_nonlinear_iterations = getNumNonlinearIterationsLastSolve();
   _n_linear_iterations = getNumLinearIterationsLastSolve();
 }
@@ -66,8 +113,32 @@ TimeIntegrator::getNumNonlinearIterationsLastSolve() const
 unsigned int
 TimeIntegrator::getNumLinearIterationsLastSolve() const
 {
-  NonlinearSolver<Real> & nonlinear_solver =
-      static_cast<NonlinearSolver<Real> &>(*_nonlinear_implicit_system->nonlinear_solver);
+  auto & nonlinear_solver = _nonlinear_implicit_system->nonlinear_solver;
+  libmesh_assert(nonlinear_solver);
 
-  return nonlinear_solver.get_total_linear_iterations();
+  return nonlinear_solver->get_total_linear_iterations();
+}
+
+void
+TimeIntegrator::copyVector(NumericVector<Number> & from, NumericVector<Number> & to)
+{
+  if (!_var_restriction)
+    to = from;
+  else
+  {
+    auto to_sub = to.get_subvector(_local_indices);
+    auto from_sub = from.get_subvector(_local_indices);
+    *to_sub = *from_sub;
+    to.restore_subvector(std::move(*to_sub), _local_indices);
+    from.restore_subvector(std::move(*from_sub), _local_indices);
+  }
+}
+
+bool
+TimeIntegrator::integratesVar(const unsigned int var_num) const
+{
+  if (!_var_restriction)
+    return true;
+
+  return _vars.count(var_num);
 }

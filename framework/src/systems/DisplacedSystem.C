@@ -52,12 +52,6 @@ DisplacedSystem::getVector(const std::string & name) const
     return _undisplaced_system.getVector(name);
 }
 
-void
-DisplacedSystem::addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti)
-{
-  _time_integrator = ti;
-}
-
 System &
 DisplacedSystem::system()
 {

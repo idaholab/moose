@@ -40,11 +40,6 @@ public:
 
   virtual void solve() override;
 
-  virtual void addTimeIntegrator(const std::string & type,
-                                 const std::string & name,
-                                 InputParameters & parameters) override;
-  using SystemBase::addTimeIntegrator;
-
   virtual void initialSetup() override;
 
   // Overriding these to make sure the linear systems don't do anything during

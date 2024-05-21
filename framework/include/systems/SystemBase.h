@@ -878,18 +878,11 @@ public:
    */
   virtual void copySolutionsBackwards();
 
-  virtual void addTimeIntegrator(const std::string & /*type*/,
-                                 const std::string & /*name*/,
-                                 InputParameters & /*parameters*/)
-  {
-  }
+  void addTimeIntegrator(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters);
 
-  virtual void addTimeIntegrator(std::shared_ptr<TimeIntegrator> /*ti*/) {}
-
-  TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
-  const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
-
-  std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
+  // virtual void addTimeIntegrator(std::shared_ptr<TimeIntegrator> /*ti*/) {}
 
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
@@ -949,6 +942,28 @@ public:
    * @param type Our current execution stage
    */
   virtual void compute(ExecFlagType type) = 0;
+
+  /**
+   * Copy time integrators from another system
+   */
+  void copyTimeIntegrators(const SystemBase & other_sys);
+
+  /**
+   * Retrieve the time integrator that integrates the given variable's equation
+   */
+  const TimeIntegrator & getTimeIntegrator(const unsigned int var_num) const;
+
+  /**
+   * Retrieve the time integrator that integrates the given variable's equation. If no suitable time
+   * integrator is found (this could happen for instance if we're solving a non-transient problem),
+   * then a nullptr will be returned
+   */
+  const TimeIntegrator * getPossiblyNullTimeIntegrator(const unsigned int var_num) const;
+
+  /**
+   * @returns All the time integrators owned by this system
+   */
+  const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
 
 protected:
   /**
@@ -1020,7 +1035,7 @@ protected:
   size_t _max_var_n_dofs_per_node;
 
   /// Time integrator
-  std::shared_ptr<TimeIntegrator> _time_integrator;
+  std::vector<std::shared_ptr<TimeIntegrator>> _time_integrators;
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFieldBase *>> _numbered_vars;

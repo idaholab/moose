@@ -50,7 +50,21 @@ ImplicitEuler::computeADTimeDerivatives(ADReal & ad_u_dot,
 void
 ImplicitEuler::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
-  residual.close();
+  if (!_var_restriction)
+  {
+    residual += _Re_time;
+    residual += _Re_non_time;
+    residual.close();
+  }
+  else
+  {
+    auto residual_sub = residual.get_subvector(_local_indices);
+    auto re_time_sub = _Re_time.get_subvector(_local_indices);
+    auto re_non_time_sub = _Re_non_time.get_subvector(_local_indices);
+    *residual_sub += *re_time_sub;
+    *residual_sub += *re_non_time_sub;
+    residual.restore_subvector(std::move(*residual_sub), _local_indices);
+    _Re_time.restore_subvector(std::move(*re_time_sub), _local_indices);
+    _Re_non_time.restore_subvector(std::move(*re_non_time_sub), _local_indices);
+  }
 }

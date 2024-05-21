@@ -249,9 +249,6 @@ public:
   virtual System & system() override;
   virtual const System & system() const override;
 
-  using SystemBase::addTimeIntegrator;
-  void addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti) override;
-
   virtual void compute(ExecFlagType) override {}
 
 protected:

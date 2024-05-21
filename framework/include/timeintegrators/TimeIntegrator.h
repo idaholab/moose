@@ -60,7 +60,7 @@ public:
    * Called _only_ before the very first timestep (t_step = 0)
    * Never called again (not even during recover/restart)
    */
-  virtual void init() {}
+  virtual void init();
   virtual void preSolve() {}
   virtual void preStep() {}
 
@@ -153,6 +153,21 @@ public:
    */
   TagID uDotDotFactorTag() const { return _u_dotdot_factor_tag; }
 
+  /**
+   * @returns whether this integrator integrates the given variable
+   */
+  bool integratesVar(const unsigned int var_num) const;
+
+  /**
+   * Record the linear and nonlinear iterations from a just finished solve
+   */
+  void setNumIterationsLastSolve();
+
+  /**
+   * @returns Whether the virtual solve method is overridden
+   */
+  virtual bool overridesSolve() const { return false; }
+
 protected:
   /**
    * Gets the number of nonlinear iterations in the most recent solve.
@@ -163,6 +178,12 @@ protected:
    * Gets the number of linear iterations in the most recent solve.
    */
   unsigned int getNumLinearIterationsLastSolve() const;
+
+  /**
+   * Copy from one vector into another. If the time integrator has been restricted to a subset of
+   * variables, then this will selectively copy their dofs
+   */
+  void copyVector(NumericVector<Number> & from, NumericVector<Number> & to);
 
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
@@ -200,4 +221,14 @@ protected:
   const TagID _u_dot_factor_tag;
   /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
   const TagID _u_dotdot_factor_tag;
+
+  /// Whether the user has requested that the time integrator be applied to a subset of variables
+  bool _var_restriction;
+
+  /// The local degree of freedom indices this time integrator is being applied to. If this
+  /// container is empty then the time integrator is applied to all indices
+  std::vector<dof_id_type> _local_indices;
+
+  /// The variables that this time integrator integrates
+  std::unordered_set<unsigned int> _vars;
 };

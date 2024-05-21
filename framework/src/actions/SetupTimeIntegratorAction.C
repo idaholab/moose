@@ -12,6 +12,7 @@
 #include "Factory.h"
 
 registerMooseAction("MooseApp", SetupTimeIntegratorAction, "setup_time_integrator");
+registerMooseAction("MooseApp", SetupTimeIntegratorAction, "setup_time_integrators");
 
 InputParameters
 SetupTimeIntegratorAction::validParams()
@@ -29,5 +30,13 @@ SetupTimeIntegratorAction::SetupTimeIntegratorAction(const InputParameters & par
 void
 SetupTimeIntegratorAction::act()
 {
-  _problem->addTimeIntegrator(_type, _name, _moose_object_pars);
+  std::string name;
+  // Task: setup_time_integrator corresponding to [TimeIntegrator] block
+  if (_current_task == "setup_time_integrator")
+    name = _type;
+  // Task: setup_time_integrators corresponding to [TimeIntegrators] block
+  else
+    name = _name;
+
+  _problem->addTimeIntegrator(_type, name, _moose_object_pars);
 }

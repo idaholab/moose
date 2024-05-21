@@ -28,6 +28,7 @@ public:
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual int order() override { return _order; }
+  virtual bool overridesSolve() const override { return true; }
 
 protected:
   /**

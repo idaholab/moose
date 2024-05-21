@@ -194,9 +194,9 @@ void
 DisplacedProblem::addTimeIntegrator()
 {
   for (const auto nl_sys_num : make_range(_mproblem.numNonlinearSystems()))
-    _displaced_solver_systems[nl_sys_num]->addTimeIntegrator(
-        _mproblem.getNonlinearSystemBase(nl_sys_num).getSharedTimeIntegrator());
-  _displaced_aux->addTimeIntegrator(_mproblem.getAuxiliarySystem().getSharedTimeIntegrator());
+    _displaced_solver_systems[nl_sys_num]->copyTimeIntegrators(
+        _mproblem.getNonlinearSystemBase(nl_sys_num));
+  _displaced_aux->copyTimeIntegrators(_mproblem.getAuxiliarySystem());
 }
 
 void
