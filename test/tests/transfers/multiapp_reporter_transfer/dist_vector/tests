@@ -3,10 +3,7 @@
   design = 'MultiAppReporterTransfer.md'
   [vec_rep]
     requirement = "The system shall support the ability to transfer reporter
-    data in a N subapp to 1 parent app, and 1 parent app to N subapp fashion when"
-    # We only allow recover testing on a single example. During recover
-    # testing checkpoints are overwritten and used by the wrong test leading
-    # to an incorrect test failure.
+    data from N child apps to 1 parent app, and from 1 parent app to N child app when"
     [reporter_transfer]
       type = 'JSONDiff'
       input = 'main.i'
