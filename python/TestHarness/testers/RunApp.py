@@ -166,8 +166,7 @@ class RunApp(Tester):
 
         # Check for built application
         if shutil.which(specs['executable']) is None:
-            self.setStatus(self.fail, 'Application not found')
-            return ''
+            self.setStatus(self.fail, 'APPLICATION NOT FOUND')
 
         # If no_additional_cli_args is set to True, return early with a simplified command line ignoring
         # all other TestHarness supplied options.
