@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, io
+import os, io
 import unittest
 import mock
 import TestHarness
@@ -21,8 +21,8 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=mocked
-            os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
-            harness = TestHarness.TestHarness(['', '-i', 'always_ok', '-c'], MOOSE_DIR)
+            cmd = ['', '-i', 'always_ok', '-c', '--term-format', 'njCst']
+            harness = TestHarness.TestHarness(cmd, MOOSE_DIR)
             if expect_fail:
                 with self.assertRaises(SystemExit):
                     harness.findAndRunTests()
