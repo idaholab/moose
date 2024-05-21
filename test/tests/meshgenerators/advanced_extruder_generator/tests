@@ -65,6 +65,19 @@
     issues = '#21162'
     mesh_mode = 'REPLICATED'
   []
+  [elem_flip_second_order]
+    type = 'Exodiff'
+    input = elem_flip.i
+    cli_args = 'Mesh/gmg/elem_type=QUAD8 --mesh-only elem_flip_second.e'
+    exodiff = 'elem_flip_second.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+
+    requirement = 'The system shall be able to fix the negative-volume second order elements by flipping them during extrusion.'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#21162'
+    mesh_mode = 'REPLICATED'
+  []
   [extruder_then_parsed_gen_sideset]
     type = 'Exodiff'
     input = advanced_extruder_then_parsed_gen_sideset.i
@@ -92,8 +105,8 @@
     cli_args = 'Mesh/extrude/heights="1 2 -3" --mesh-only'
     expect_err = "Cannot have both positive and negative heights!"
 
-    requirement = "The system shall report an error if missing a consistent positive or negative extrusion "
-                  "direction."
+    requirement = "The system shall report an error if missing a consistent positive or negative "
+                  "extrusion direction."
     design = "AdvancedExtruderGenerator.md"
     issues = "#21273"
   []

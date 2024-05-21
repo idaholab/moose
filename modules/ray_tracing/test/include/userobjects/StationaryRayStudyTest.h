@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "RepeatableRayStudyBase.h"
+#include "RayTracingStudy.h"
 
-class StationaryRayStudyTest : public RepeatableRayStudyBase
+class StationaryRayStudyTest : public RayTracingStudy
 {
 public:
   static InputParameters validParams();
@@ -19,5 +19,8 @@ public:
   StationaryRayStudyTest(const InputParameters & parameters);
 
 protected:
-  virtual void defineRays() override;
+  virtual void generateRays() override;
+
+  std::vector<std::pair<RayDataIndex, const Function *>> _data_functions;
+  std::vector<std::pair<RayDataIndex, const Function *>> _aux_data_functions;
 };

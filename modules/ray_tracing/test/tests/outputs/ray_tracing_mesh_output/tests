@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16028 #16320 #25501 #26979'
+  issues = '#16028 #16320 #25501 #26604 #26979'
 
   [elem_type]
     requirement = 'The system shall support the mesh output of traced rays on meshes of element types '
@@ -276,5 +276,14 @@
 
     design = 'RayTracingMeshOutput.md'
     requirement = 'The system shall report a warning when rays are requested to be output in a mesh format but cached ray inforamtion is not found.'
+  []
+
+  [stationary]
+    type = Exodiff
+    input = 'stationary.i'
+    exodiff = 'stationary_rays.e stationary_rays.e-s0001 stationary_rays.e-s0002'
+    allow_test_objects = true
+    design = 'RayTracingMeshOutput.md'
+    requirement = 'The system shall support the mesh output of stationary rays'
   []
 []
