@@ -15,7 +15,7 @@ const std::string space = " \t";
 const std::string allspace = " \t\n\r";
 const std::string newline = "\n\r";
 const std::string alphanumeric = digits + alpha;
-const std::string identchars = alphanumeric + "_./:<>-+*";
+const std::string identchars = alphanumeric + "_./:<>-+*!";
 
 _LexFunc::_LexFunc(LexFunc pp) : p(pp) {}
 _LexFunc::operator LexFunc() { return p; }
