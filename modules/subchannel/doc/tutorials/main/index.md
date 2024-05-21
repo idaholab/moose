@@ -1,4 +1,4 @@
-# SubChannel Tutorial
+# SCM Tutorial
 
 !style halign=center fontsize=120%
 !datetime today format=%B %Y
@@ -14,14 +14,14 @@
   - Applications
   - Solving specific physics
 
-- SubChannel Introduction
+- SCM Introduction
 
   - Motivation
   - Overview
-  - SubChannel Model
-  - Subchannel Model Governing Equations
-  - Subchannel Model Closure Models
-  - Subchannel Model Algorithm
+  - SCM Model
+  - SCM Model Governing Equations
+  - SCM Model Closure Models
+  - SCM Model Algorithm
 
 - Examples
 

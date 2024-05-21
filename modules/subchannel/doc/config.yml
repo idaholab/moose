@@ -10,16 +10,16 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
 Extensions:
     MooseDocs.extensions.navigation:
-        name: SubChannel
+        name: SCM
         repo: https://github.inl.gov/ncrc/subchannel
         menu:
             Getting Started:
                 Installation: getting_started/installation.md
-                Using SubChannel: getting_started/using_SubChannel.md
+                Using SCM: getting_started/using_SubChannel.md
                 User Notes: getting_started/user_notes.md
                 SubChannel Theory: getting_started/subchannel_theory.md
             Documentation:
-                SubChannel-only Syntax: syntax/subchannel_only.md
+                SCM-only Syntax: syntax/subchannel_only.md
                 Complete Code Syntax: syntax/index.md
             V&V:
                 Verification & Validation: v&v/v&v-list.md

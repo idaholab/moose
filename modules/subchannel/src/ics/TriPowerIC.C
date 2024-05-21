@@ -146,49 +146,41 @@ TriPowerIC::value(const Point & p)
   {
     // project axial heat rate on pins
     auto i_pin = _mesh.getPinIndexFromPoint(p);
-    {
-      if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
-        return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-      else
-        return 0.0;
-    }
+    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    else
+      return 0.0;
   }
   else
   {
     // Determine which subchannel this point is in.
-    auto i = _mesh.getSubchannelIndexFromPoint(p);
-    auto subch_type = _mesh.getSubchannelType(i);
+    auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
+    auto subch_type = _mesh.getSubchannelType(i_ch);
     // project axial heat rate on subchannels
     if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
     {
-      if (subch_type == EChannelType::CENTER)
+      double factor;
+      switch (subch_type)
       {
-        for (unsigned int j = 0; j < 3; j++)
-        {
-          auto rod_idx = _mesh.getRodIndex(i, j);
-          heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
-                       _axial_heat_rate.value(_t, P);
-        }
-        return heat_rate;
+        case EChannelType::CENTER:
+          factor = 1.0 / 6.0;
+          break;
+        case EChannelType::EDGE:
+          factor = 1.0 / 4.0;
+          break;
+        case EChannelType::CORNER:
+          factor = 1.0 / 6.0;
+          break;
+        default:
+          return 0.0; // handle invalid subch_type if needed
       }
-      else if (subch_type == EChannelType::EDGE)
+      for (auto i_pin : _mesh.getChannelPins(i_ch))
       {
-        for (unsigned int j = 0; j < 2; j++)
-        {
-          auto rod_idx = _mesh.getRodIndex(i, j);
-          heat_rate += 1.0 / 4.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
-                       _axial_heat_rate.value(_t, P);
-        }
-        return heat_rate;
-      }
-      else if (subch_type == EChannelType::CORNER)
-      {
-        auto rod_idx = _mesh.getRodIndex(i, 0);
-        heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+        heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
                      _axial_heat_rate.value(_t, P);
-        return heat_rate;
       }
+      return heat_rate;
     }
-    return 0.;
   }
+  return 0.0;
 }

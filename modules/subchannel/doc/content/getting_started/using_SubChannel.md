@@ -1,11 +1,11 @@
-# Using SubChannel
+# Using SCM
 
 ## Running an Input File and Viewing Results
 
 !style halign=left
-After SubChannel is installed and tested, you should now be able to run input files
+After SCM is installed and tested, you should now be able to run input files
 using the `subchannel-opt` executable located at `~/projects/subchannel`. Input files
-demonstrating the capabilities of SubChannel can be found in `~/projects/subchannel/examples`.
+demonstrating the capabilities of SCM can be found in `~/projects/subchannel/examples`.
 Any input file (say, one called `example_input.i`) can be run with the following
 basic syntax:
 
@@ -30,14 +30,14 @@ Many test input files also create an output file with the name format
 selected for output. These results are best viewed using a visualization tool
 like [Paraview](http://www.paraview.org/download/).
 
-## SubChannel Examples and Tests
+## SCM Examples and Tests
 
 !style halign=left
-In general the validation examples located within the `test/tests` directory or the `examples` directory and are meant to be a showcase of "production" SubChannel capability. Users are encouraged to start there
-when learning SubChannel and setting up new simulations. Documentation for the validation
-examples can be found [on the SubChannel validation page](v&v/v&v-list.md). The
-`test/tests` directory also holds *all* SubChannel regression tests for both complete and in-progress capability. These files *should not* be modified, so that periodic tests of SubChannel function can be performed successfully. If modification of example inputs is desired, they should be copied and run elsewhere.
+In general the validation examples located within the `test/tests` directory or the `examples` directory and are meant to be a showcase of "production" SCM capability. Users are encouraged to start there
+when learning SCM and setting up new simulations. Documentation for the validation
+examples can be found [on the SCM validation page](v&v/v&v-list.md). The
+`test/tests` directory also holds *all* SCM regression tests for both complete and in-progress capability. These files *should not* be modified, so that periodic tests of SCM function can be performed successfully. If modification of example inputs is desired, they should be copied and run elsewhere.
 
-As SubChannel is developed and more capabilities are added, the tests directory will continue to
+As SCM is further developed and more capabilities are added, the tests directory will continue to
 grow. If you feel that you have added important new functionality, please create a test for
 it, such that any future changes will not break that capability.
