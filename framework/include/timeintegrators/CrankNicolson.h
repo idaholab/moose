@@ -50,5 +50,5 @@ void
 CrankNicolson::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
 {
   u_dot -= u_old;
-  u_dot *= 2. / _dt;
+  u_dot *= 1. / _dt;
 }
