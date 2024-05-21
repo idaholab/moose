@@ -657,18 +657,18 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if len(self.parse_errors) > 0:
-            print(('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS))))
+            print(('\n\nParser Errors:\n' + ('-' * (self.options.term_cols))))
             for err in self.parse_errors:
                 print((util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code)))
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print(('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS))))
+            print(('\n\nFinal Test Results:\n' + ('-' * (self.options.term_cols))))
             for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print((util.formatResult(job, self.options, caveats=True)))
 
         time = clock() - self.start_time
 
-        print(('-' * (util.TERM_COLS)))
+        print(('-' * (self.options.term_cols)))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
@@ -722,7 +722,7 @@ class TestHarness:
                 sorted_tups = sorted(self.test_table, key=lambda tup: float(tup[0].getTiming()), reverse=True)
 
                 print('\n%d longest running jobs:' % self.options.longest_jobs)
-                print(('-' * (util.TERM_COLS)))
+                print(('-' * (self.options.term_cols)))
 
                 # Copy the current options and force timing to be true so that
                 # we get times when we call formatResult() below
@@ -755,10 +755,10 @@ class TestHarness:
                 sorted_table = sorted(dag_table, key=lambda dag_table: float(dag_table[1]), reverse=True)
                 if sorted_table[0:self.options.longest_jobs]:
                     print(f'\n{self.options.longest_jobs} longest running folders:')
-                    print(('-' * (util.TERM_COLS)))
+                    print(('-' * (self.options.term_cols)))
                     # We can't use util.formatResults, as we are representing a group of testers
                     for group in sorted_table[0:self.options.longest_jobs]:
-                        print(str(group[0]).ljust((util.TERM_COLS - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
+                        print(str(group[0]).ljust((self.options.term_cols - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
                     print('\n')
 
             # Perform any write-to-disc operations
@@ -1058,6 +1058,24 @@ class TestHarness:
         hpcgroup.add_argument('--hpc-place', nargs=1, action='store', dest='hpc_place', choices=['free', 'pack', 'scatter'], default='free', help='The default placement method for HPC jobs')
         hpcgroup.add_argument('--pbs-project', nargs=1, action='store', dest='pbs_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
         hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
+
+        # Try to find the terminal size if we can
+        # Try/except here because the terminal size could fail w/o a display
+        term_cols = None
+        try:
+            term_cols = os.get_terminal_size().columns * 7/8
+        except:
+            term_cols = 110
+            pass
+
+        # Optionally load in the environment controlled values
+        term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
+        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
+
+        # Terminal options
+        termgroup = parser.add_argument_group('Terminal Options', 'Options for controlling the formatting of terminal output')
+        termgroup.add_argument('--term-cols', dest='term_cols', action='store', type=int, default=term_cols, help='The number columns to use in output')
+        termgroup.add_argument('--term-format', dest='term_format', action='store', type=str, default=term_format, help='The formatting to use when outputting job status')
 
         code = True
         if self.code.decode() in argv:
