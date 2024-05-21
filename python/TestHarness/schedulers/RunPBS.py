@@ -197,7 +197,7 @@ class RunPBS(RunHPC):
                 if not hpc_job.done:
                     hpc_job.killed = True
 
-        RunParallel.killRemaining(self, keyboard)
+        super().killRemaining(keyboard)
 
     def getOutputEndingComment(self, job_id):
         return f'TESTHARNESS RUNPBS FILE TERMINATOR FOR {job_id}'

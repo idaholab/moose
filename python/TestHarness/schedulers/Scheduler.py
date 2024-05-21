@@ -99,6 +99,9 @@ class Scheduler(MooseObject):
         # Allow threads to set a global exception
         self.__error_state = False
 
+        # Lock for __error_state
+        self.__error_state_lock = threading.Lock()
+
         # Private set of jobs currently running
         self.__active_jobs = set([])
 
@@ -134,7 +137,8 @@ class Scheduler(MooseObject):
         return available_slots, soft_limit
 
     def triggerErrorState(self):
-        self.__error_state = True
+        with self.__error_state_lock:
+            self.__error_state = True
         self.run_pool.close()
         self.status_pool.close()
 
@@ -143,11 +147,9 @@ class Scheduler(MooseObject):
         with self.activity_lock:
             for job in self.__active_jobs:
                 job.killProcess()
+        self.triggerErrorState()
         if keyboard:
-            self.triggerErrorState()
             self.harness.keyboard_interrupt()
-        else:
-            self.triggerErrorState()
 
     def retrieveJobs(self):
         """ return all the jobs the scheduler was tasked to perform work for """
@@ -159,7 +161,9 @@ class Scheduler(MooseObject):
 
     def schedulerError(self):
         """ boolean if the scheduler prematurely exited """
-        return self.__error_state and not self.maxFailures()
+        with self.__error_state_lock:
+            error_state = self.__error_state
+        return error_state and not self.maxFailures()
 
     def maxFailures(self):
         """ Boolean for hitting max failures """
@@ -213,13 +217,17 @@ class Scheduler(MooseObject):
                 with self.__bank_lock:
                     if not self.__job_bank:
                         break
+                with self.__error_state_lock:
+                    error_state = self.__error_state
+                    if error_state:
+                        break
                 sleep(0.1)
 
             # Completed all jobs sanity check
-            if not self.__error_state and self.__job_bank:
+            if not error_state and self.__job_bank:
                 raise SchedulerError('Scheduler exiting with different amount of work than what was initially tasked!')
 
-            if not self.__error_state:
+            if not error_state:
                 self.run_pool.close()
                 self.run_pool.join()
                 self.status_pool.close()
@@ -246,8 +254,9 @@ class Scheduler(MooseObject):
         This process is serial.
         """
         # If we are not to schedule any more jobs for some reason, return now
-        if self.__error_state:
-            return
+        with self.__error_state_lock:
+            if self.__error_state:
+                return
         # Nothing to do if there aren't any testers
         if not testers:
             return
@@ -461,8 +470,9 @@ class Scheduler(MooseObject):
         """ Method the run_pool calls when an available thread becomes ready """
         # Its possible, the queue is just trying to empty. Allow it to do so
         # with out generating overhead
-        if self.__error_state:
-            return
+        with self.__error_state_lock:
+            if self.__error_state:
+                return
 
         try:
             # see if we have enough slots to start this job
@@ -497,7 +507,7 @@ class Scheduler(MooseObject):
                     self.run(job) # Hand execution over to derived scheduler
                 except Exception:
                     with job.getLock():
-                        job.setStatus(StatusSystem().error, 'JOB EXCEPTION')
+                        job.setStatus(StatusSystem().error, 'JOB RUN EXCEPTION')
                         job.appendOutput('Encountered an exception while running Job: %s' % (traceback.format_exc()))
 
                 if timeout_timer:
