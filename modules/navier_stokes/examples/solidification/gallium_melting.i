@@ -1,5 +1,5 @@
 ##########################################################
-# Simulation of Galium Melting Experiment
+# Simulation of Gallium Melting Experiment
 # Ref: Gau, C., & Viskanta, R. (1986). Melting and solidification of a pure metal on a vertical wall.
 # Key physics: melting/solidification, convective heat transfer, natural convection
 ##########################################################

@@ -235,8 +235,10 @@ FEProblemBase::validParams()
                         "(default: false)");
 
   MooseEnum verbosity("false true extra", "false");
-  params.addParam<MooseEnum>(
-      "verbose_setup", verbosity, "Set to True to have the problem report on any object created");
+  params.addParam<MooseEnum>("verbose_setup",
+                             verbosity,
+                             "Set to 'true' to have the problem report on any object created. Set "
+                             "to 'extra' to also display all parameters.");
   params.addParam<bool>("verbose_multiapps",
                         false,
                         "Set to True to enable verbose screen printing related to MultiApps");
@@ -3837,7 +3839,7 @@ FEProblemBase::logAdd(const std::string & system,
                       const std::string & type,
                       const InputParameters & params) const
 {
-  if (_verbose_setup == "true" || _verbose_setup == "extra")
+  if (_verbose_setup != "false")
     _console << "[DBG] Adding " << system << " '" << name << "' of type " << type << std::endl;
   if (_verbose_setup == "extra")
     _console << params << std::endl;

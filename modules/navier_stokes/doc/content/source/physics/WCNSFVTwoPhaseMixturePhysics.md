@@ -20,7 +20,7 @@ The phase advection-diffusion equation is:
 where:
 
 - $\phi$ is the phase fraction
-- \mathbf{v} is the advecting velocity
+- $\mathbf{v}$ is the advecting velocity
 - $k$ the phase diffusivity
 - $\alpha$ is the phase exchange coefficient
 
@@ -29,17 +29,17 @@ The kernels created are:
 - [FVFunctorTimeKernel.md] for the time derivative for a transient solve
 - [INSFVScalarFieldAdvection.md] for the scalar advection term
 - [FVDiffusion.md] for the scalar diffusion term
+- [NSFVMixturePhaseInterface.md] for the phase exchange term if a phase exchange coefficient is specified
 
 The momentum equations, if defined using a [WCNSFVFlowPhysics.md], are modified in the presence of a two-phase
 mixture. Density and viscosity should be set to their mixture values, see [#materials] for more information.
-
 If specified with the [!param](/Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics/add_drift_flux_momentum_terms) parameter,
-a drift flux term is added to the momentum equations with the [WCNSFV2PMomentumDriftFlux.md] kernels.
-
-If specified with the [!param](/Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics/add_advection_slip_term) parameter,
+a drift flux term is added to the momentum equations with the [WCNSFV2PMomentumDriftFlux.md] kernels. If specified with the [!param](/Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics/add_advection_slip_term) parameter,
 an advection slip term is added to the momentum equations with the [WCNSFV2PMomentumAdvectionSlip.md] kernels.
 
-If specified with the [!param](/Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics/add_phase_change_energy_term) parameter,
+The fluid energy equation, if defined using a [WCNSFVFluidHeatTransferPhysics.md], is modified in the presence of
+a two-phase mixture. If specified with the
+[!param](/Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics/add_phase_change_energy_term) parameter,
 a phase change source term is added to the fluid phase energy equation with the [NSFVPhaseChangeSource.md] kernel.
 
 ## Mixture fluid properties id=materials
@@ -50,8 +50,8 @@ This material is defined by default by the `WCNSFVTwoPhaseMixturePhysics` unless
 [!param](/Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics/use_external_mixture_properties)
 is set to true.
 
-The gas mixture models defined in the fluid properties module cannot currently be used with
-[WCNSFVTwoPhaseMixturePhysics.md] without additional development.
+The gas mixture models defined in the fluid properties module cannot currently be used by this physics
+without additional development.
 
 !syntax parameters /Physics/NavierStokes/TwoPhaseMixture/WCNSFVTwoPhaseMixturePhysics
 

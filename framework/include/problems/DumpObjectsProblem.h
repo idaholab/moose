@@ -77,7 +77,7 @@ protected:
 
   std::shared_ptr<DumpObjectsNonlinearSystem> _nl_sys;
 
-  /// Whether to include all user-specified parameters in the dump
+  /// Whether to include all user-specified parameters in the dump or only parameters that differ from the default value
   const bool _include_all_user_specified_params;
 
 public:

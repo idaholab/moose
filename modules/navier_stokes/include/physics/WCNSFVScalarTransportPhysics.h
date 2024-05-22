@@ -39,12 +39,13 @@ public:
   bool hasScalarEquations() const { return _has_scalar_equation; }
 
 protected:
-  void addFVKernels() override;
-  void addFVBCs() override;
+  virtual void addFVKernels() override;
+  virtual void addFVBCs() override;
 
   /// Names of the passive scalar variables
   std::vector<NonlinearVariableName> _passive_scalar_names;
   /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
+  /// or to deliberately skip adding the equations (for example for mixtures with a stationary phase)
   const bool _has_scalar_equation;
 
   /// Passive scalar inlet boundary types

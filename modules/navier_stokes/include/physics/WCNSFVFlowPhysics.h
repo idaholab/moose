@@ -26,9 +26,9 @@ public:
   bool hasFlowEquations() const { return _has_flow_equations; }
 
   /// To interface with other Physics
-  std::vector<std::string> getVelocityNames() const { return _velocity_names; }
-  NonlinearVariableName getPressureName() const { return _pressure_name; }
-  NonlinearVariableName getFluidTemperatureName() const { return _fluid_temperature_name; }
+  const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
+  const NonlinearVariableName & getPressureName() const { return _pressure_name; }
+  const NonlinearVariableName & getFluidTemperatureName() const { return _fluid_temperature_name; }
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
   // Getters to interact with other WCNSFVPhysics classes
@@ -57,7 +57,7 @@ public:
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
   /// Get the inlet flux postprocessor if using a flux inlet
   const std::vector<PostprocessorName> & getFluxInletPPs() const { return _flux_inlet_pps; }
-  /// Get the name of the linear friction coefficient
+  /// Get the name of the linear friction coefficient. Returns an empty string if no friction.
   MooseFunctorName getLinearFrictionCoefName() const;
   /// Return the name of the Rhie Chow user object
   UserObjectName rhieChowUOName() const;

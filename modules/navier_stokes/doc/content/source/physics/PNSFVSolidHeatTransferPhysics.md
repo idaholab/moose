@@ -24,7 +24,7 @@ where:
 The enthalpy is used in lieu of $\rho c_p T$ to be able to model solids with temperature dependent
 specific heat.
 
-The kernels created for this equation are:
+The kernels potentially created for this equation are:
 
 - [INSFVEnergyTimeDerivative.md] for the time derivative of the energy
 - [PINSFVEnergyDiffusion.md] for energy diffusion with an isotropic thermal diffusivity

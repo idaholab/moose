@@ -31,8 +31,8 @@ public:
   /// It is important to forward to the Physics so we do not get the smoothing status wrong
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
-  MooseFunctorName densityName() const { return _density_name; }
-  MooseFunctorName dynamicViscosityName() const { return _dynamic_viscosity_name; }
+  const MooseFunctorName & densityName() const { return _density_name; }
+  const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
 
 protected:
   /// The Physics class using this helper

@@ -1403,11 +1403,11 @@ SubProblem::addFunctor(const std::string & name,
       // Functor was emplaced but the cast failed. This could be a double definition with
       // different types, or it could be a request with one type then a definition with another
       // type. Either way it is going to error later, but it is cleaner to catch it now
-      mooseError("Functor ''",
+      mooseError("Functor '",
                  name,
-                 "'' is being added with return type ''",
+                 "' is being added with return type '",
                  MooseUtils::prettyCppType<T>(),
-                 "'' but it has already been defined or requested with return type ''",
+                 "' but it has already been defined or requested with return type '",
                  existing_wrapper_base->returnType(),
                  "'.");
     }

@@ -93,7 +93,7 @@ g = -9.81
     momentum_component = 'x'
     gravity = '0 ${g} 0'
   []
-  # NOTE: the friction terms for u and v are missings
+  # NOTE: the friction terms for u and v are missing
 
   [v_time]
     type = INSFVMomentumTimeDerivative

@@ -17,7 +17,7 @@ The following kernels are then added:
 - [INSFVMixingLengthScalarDiffusion.md] to the scalar transport equations if the scalar transport is being solved
 
 !alert note
-These kernels are only added if each of these equations are being defined using a `Physics`.
+These kernels are only added if each of these equations are being defined using their respective `Physics`.
 
 ## Coupling with other Physics
 

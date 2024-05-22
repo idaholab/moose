@@ -25,18 +25,18 @@ public:
   WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
   /// Get the name of the fluid temperature variable
-  const MooseFunctorName getFluidTemperatureName() const { return _fluid_temperature_name; }
+  const NonlinearVariableName & getFluidTemperatureName() const { return _fluid_temperature_name; }
 
   /// Get the name of the specific heat material property
-  const MooseFunctorName getSpecificHeatName() const { return _specific_heat_name; }
-  const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
+  const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
+  MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
   /// Get the ambient convection parameters for parameter checking
-  std::vector<std::vector<SubdomainName>> getAmbientConvectionBlocks() const
+  const std::vector<std::vector<SubdomainName>> & getAmbientConvectionBlocks() const
   {
     return _ambient_convection_blocks;
   }
   /// Name of the ambient convection heat transfer coefficients for each block-group
-  std::vector<MooseFunctorName> getAmbientConvectionHTCs() const
+  const std::vector<MooseFunctorName> & getAmbientConvectionHTCs() const
   {
     return _ambient_convection_alpha;
   }

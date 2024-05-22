@@ -25,10 +25,9 @@ public:
 
   WCNSFVTwoPhaseMixturePhysics(const InputParameters & parameters);
 
-protected:
 private:
-  void addFVKernels() override;
-  void addMaterials() override;
+  virtual void addFVKernels() override;
+  virtual void addMaterials() override;
 
   /// Adds the slip velocity parameters
   virtual void setSlipVelocityParams(InputParameters & params) const override;

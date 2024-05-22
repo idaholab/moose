@@ -6,7 +6,7 @@
 
 This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the advection-diffusion
 equation for the fluid temperature.
-For clean flow in a non-porous media:
+For free flow in a non-porous media:
 
 !equation
 \dfrac{\partial \rho h}{\partial t} + \nabla \cdot (\rho h \mathbf{v}) - \nabla \cdot (k_f \nabla T_f) - Q + \alpha (T_f - T_{ambient}) = 0

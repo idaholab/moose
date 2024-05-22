@@ -57,7 +57,7 @@ WCNSFV2PMomentumDriftFlux::WCNSFV2PMomentumDriftFlux(const InputParameters & par
         "In three dimensions, the w_slip velocity must be supplied using the 'w_slip' parameter");
 
   // Phase fraction could be a nonlinear variable
-  const auto fraction_name = getParam<MooseFunctorName>("fraction_dispersed");
+  const auto & fraction_name = getParam<MooseFunctorName>("fraction_dispersed");
   if (isParamValid("fraction_dispersed") && _fe_problem.hasVariable(fraction_name))
     addMooseVariableDependency(&_fe_problem.getVariable(0, fraction_name));
 }

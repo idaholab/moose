@@ -138,7 +138,7 @@ static const std::string sound_speed = "sound_speed";
 static const std::string latent_heat = "latent_heat";
 static const std::string T_liquidus = "T_liquidus";
 static const std::string T_solidus = "T_solidus";
-static const std::string alpha_exc = "alpha_exc";
+static const std::string alpha_exchange = "alpha_exchange";
 
 // other Navier-Stokes terms
 static const std::string component = "component";

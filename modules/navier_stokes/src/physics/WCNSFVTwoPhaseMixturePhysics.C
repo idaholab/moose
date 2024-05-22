@@ -53,8 +53,8 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                      "Functor names for the diffusivities used for the main phase fraction.");
 
   // Phase change parameters
-  params.addParam<MaterialPropertyName>(
-      NS::alpha_exc, 0, "Name of the volumetric phase exchange coefficient");
+  params.addParam<MooseFunctorName>(
+      NS::alpha_exchange, 0, "Name of the volumetric phase exchange coefficient");
   params.addParam<bool>("add_phase_change_energy_term",
                         false,
                         "Whether to add a phase change term based on the latent heat of fusion in "
@@ -154,7 +154,7 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
       "use_external_mixture_properties",
       "Mixture material properties");
 
-  params.addParamNamesToGroup("fluid_heat_transfer_physics " + NS::alpha_exc +
+  params.addParamNamesToGroup("fluid_heat_transfer_physics " + NS::alpha_exchange +
                                   " add_phase_change_energy_term",
                               "Phase change");
   params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method",
@@ -242,8 +242,8 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
 
   // Parameter checking
   // The two models are not consistent
-  if (isParamSetByUser("alpha_exc") && getParam<bool>("add_phase_change_energy_term"))
-    paramError("alpha_exc",
+  if (isParamSetByUser("alpha_exchange") && getParam<bool>("add_phase_change_energy_term"))
+    paramError("alpha_exchange",
                "A phase exchange coefficient cannot be specified if the phase change is handled "
                "with a phase change heat loss model");
   if (_liquid_phase_fraction == _other_phase_fraction_name)
@@ -263,7 +263,7 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
 {
   WCNSFVScalarTransportPhysics::addFVKernels();
 
-  if (_add_phase_equation && isParamSetByUser("alpha_exc"))
+  if (_add_phase_equation && isParamSetByUser("alpha_exchange"))
     addPhaseInterfaceTerm();
 
   if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation() &&
@@ -293,7 +293,7 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _other_phase_fraction_name;
   params.set<MooseFunctorName>("phase_coupled") = _liquid_phase_fraction;
-  params.set<MaterialPropertyName>("alpha") = getParam<MaterialPropertyName>(NS::alpha_exc);
+  params.set<MooseFunctorName>("alpha") = getParam<MooseFunctorName>(NS::alpha_exchange);
   getProblem().addFVKernel("NSFVMixturePhaseInterface", prefix() + "phase_interface", params);
 }
 
@@ -431,6 +431,14 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
             getParam<MooseFunctorName>("slip_linear_friction_name");
       else if (getParam<bool>("use_dispersed_phase_drag_model"))
         params.set<MooseFunctorName>("linear_coef_name") = "Darcy_coefficient";
+      else if (_flow_equations_physics)
+      {
+        if (!_flow_equations_physics->getLinearFrictionCoefName().empty())
+          params.set<MooseFunctorName>("linear_coef_name") =
+              _flow_equations_physics->getLinearFrictionCoefName();
+        else
+          params.set<MooseFunctorName>("linear_coef_name") = "0";
+      }
       else
         paramError("slip_linear_friction_name",
                    "WCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "

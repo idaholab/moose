@@ -45,7 +45,7 @@ WCNSFVFlowPhysics::validParams()
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
-      "density_gravity",
+      "density_for_gravity_terms",
       "If specified, replaces the 'density' for the Boussinesq and gravity momentum kernels");
 
   // Most downstream physics implementations are valid for porous media too
@@ -1164,7 +1164,7 @@ bool
 WCNSFVFlowPhysics::hasForchheimerFriction() const
 {
   for (const auto block_i : index_range(_friction_types))
-    for (const auto & type_i : index_range(_friction_types[0]))
+    for (const auto type_i : index_range(_friction_types[block_i]))
       if (MooseUtils::toUpper(_friction_types[block_i][type_i]) == "FORCHHEIMER")
         return true;
   return false;
@@ -1407,7 +1407,7 @@ WCNSFVFlowPhysics::getLinearFrictionCoefName() const
   // Check all blocks. If more than one block, they would need to be consolidated #include in
   // a single functor material. We won't implement this for now
   if (_friction_types.empty())
-    return "0";
+    return "";
   else if (_friction_types.size() == 1)
   {
     for (const auto & type_i : index_range(_friction_types[0]))
@@ -1417,14 +1417,14 @@ WCNSFVFlowPhysics::getLinearFrictionCoefName() const
         return _friction_coeffs[0][type_i];
     }
     // No linear type found
-    return "0";
+    return "";
   }
   else if (_friction_types.size() > 1)
   {
     bool linear_friction_factor_found = false;
     MooseFunctorName linear_friction_factor;
     for (const auto block_i : index_range(_friction_types))
-      for (const auto & type_i : index_range(_friction_types[0]))
+      for (const auto type_i : index_range(_friction_types[block_i]))
       {
         const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
         if (upper_name == "DARCY" && !linear_friction_factor_found)
@@ -1441,7 +1441,7 @@ WCNSFVFlowPhysics::getLinearFrictionCoefName() const
     if (linear_friction_factor_found)
       return linear_friction_factor;
     else
-      return "0";
+      return "";
   }
   mooseError("Should not get here");
 }
