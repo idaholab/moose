@@ -152,7 +152,8 @@ public:
   virtual ~FunctorBase() = default;
   FunctorBase(const MooseFunctorName & name,
               const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS})
-    : _functor_name(name)
+    : _always_evaluate(true), _functor_name(name)
+
   {
     setCacheClearanceSchedule(clearance_schedule);
   }
