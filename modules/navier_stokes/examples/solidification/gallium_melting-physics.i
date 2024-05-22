@@ -88,7 +88,7 @@ Ny = 50
         ref_temperature = ${T_cold}
         thermal_expansion = 'alpha_b'
         # Solid phase is not moving
-        density_gravity = ${rho_liquid}
+        density_for_gravity_terms = ${rho_liquid}
 
         mass_advection_interpolation = '${advected_interp_method}'
         momentum_advection_interpolation = '${advected_interp_method}'

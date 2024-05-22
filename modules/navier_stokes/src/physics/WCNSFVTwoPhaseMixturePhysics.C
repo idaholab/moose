@@ -365,7 +365,7 @@ WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
 void
 WCNSFVTwoPhaseMixturePhysics::addMaterials()
 {
-  // Add other phase fraction, for output purposes mostly
+  // Add the phase fraction variable, for output purposes mostly
   if (!getProblem().hasFunctor(_phase_1_fraction_name, /*thread_id=*/0))
   {
     auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
@@ -374,6 +374,22 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
     params.set<std::vector<std::string>>("functor_names") = {_phase_2_fraction_name};
     params.set<std::string>("property_name") = _phase_1_fraction_name;
     params.set<std::vector<std::string>>("output_properties") = {_phase_1_fraction_name};
+    params.set<std::vector<OutputName>>("outputs") = {"all"};
+    getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "phase_1_fraction", params);
+
+    // One of the phase fraction should exist though (either as a variable or set by a
+    // NSLiquidFractionAux)
+    if (!getProblem().hasFunctor(_phase_2_fraction_name, /*thread_id=*/0))
+      paramError("Phase 2 fraction should be defined as a variable or auxiliary variable");
+  }
+  if (!getProblem().hasFunctor(_phase_2_fraction_name, /*thread_id=*/0))
+  {
+    auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<std::string>("expression") = "1 - " + _phase_1_fraction_name;
+    params.set<std::vector<std::string>>("functor_names") = {_phase_1_fraction_name};
+    params.set<std::string>("property_name") = _phase_2_fraction_name;
+    params.set<std::vector<std::string>>("output_properties") = {_phase_2_fraction_name};
     params.set<std::vector<OutputName>>("outputs") = {"all"};
     getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "phase_2_fraction", params);
   }
@@ -386,7 +402,8 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
     params.set<std::vector<MooseFunctorName>>("prop_names") = {
         "rho_mixture", "mu_mixture", "cp_mixture", "k_mixture"};
     // The phase_1 and phase_2 assignments are only local to this object.
-    // We use the advected phase variable to save a functor evaluation
+    // We use the phase 2 variable to save a functor evaluation as we expect
+    // the phase 2 variable to be a nonlinear variable in the phase transport equation
     params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_phase_1_density,
                                                                   _phase_1_viscosity,
                                                                   _phase_1_specific_heat,
@@ -398,7 +415,7 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
     params.set<MooseFunctorName>("phase_1_fraction") = _phase_2_fraction_name;
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial("NSFVMixtureFunctorMaterial", prefix() + "mixture", params);
+    getProblem().addMaterial("NSFVMixtureFunctorMaterial", prefix() + "mixture_material", params);
   }
 
   // Compute slip terms as functors, used by the drift flux kernels
