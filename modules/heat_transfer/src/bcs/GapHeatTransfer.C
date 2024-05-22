@@ -81,13 +81,15 @@ GapHeatTransfer::validParams()
 
   params.addRelationshipManager(
       "GhostBoundary",
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      Moose::RelationshipManagerType::GEOMETRIC,
       [](const InputParameters & obj_params, InputParameters & rm_params)
       {
-        rm_params.set<BoundaryName>("boundary") = obj_params.get<BoundaryName>("primary");
-        rm_params.set<BoundaryName>("paired_boundary") = obj_params.get<BoundaryName>("secondary");
+        auto & boundary = rm_params.set<std::vector<BoundaryName>>("boundary");
+        boundary = obj_params.get<std::vector<BoundaryName>>("boundary");
+        boundary.push_back(obj_params.get<BoundaryName>("paired_boundary"));
       });
 
+  // Moose::out << "Obj "<< obj_params.get<BoundaryName>("secondary") << std::endl;
   return params;
 }
 
