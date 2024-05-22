@@ -62,7 +62,7 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 # capabilities python bindings
 #
 CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/capabilities
-capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C $(MOOSE_DIR)/framework/src/utils/CapabilityUtils.C $(MOOSE_DIR)/framework/src/utils/MooseUtilsStandalone.C
+capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C
 
 #
 # Dynamic library suffix

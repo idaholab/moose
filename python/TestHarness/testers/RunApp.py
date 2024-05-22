@@ -176,7 +176,7 @@ class RunApp(Tester):
 
         # add required capabilities
         if specs['capabilities']:
-            cli_args.append('--required-capabilities' + quote(' '.join(specs['capabilities'])))
+            cli_args.append('--required-capabilities="' + quote(specs['capabilities'])+'"')
 
         if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
             # The user has passed the parallel-mesh option to the test harness
@@ -319,7 +319,7 @@ class RunApp(Tester):
             # in the derived class.
             if self.exit_code == 77:
                 self.setStatus(self.skip, "ABORT")
-                self.addCaveats(' '.join(specs['capabilities']))
+                self.addCaveats(specs['capabilities'])
                 return ''
 
             elif options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
