@@ -7,11 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, re, os, json, time, threading
+import itertools, re, os, time, threading
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
+from TestHarness import util
 from tempfile import TemporaryDirectory
 import traceback
 
@@ -310,7 +311,8 @@ class Job(object):
             except:
                 self.cleanup()
                 self.setStatus(self.error, f'{exception_name} EXCEPTION')
-                self.output += '\n\nPython exception encountered:\n' + traceback.format_exc()
+                self.output += util.outputHeader('Python exception encountered')
+                self.output += traceback.format_exc()
                 return False
             return True
 
@@ -337,6 +339,9 @@ class Job(object):
         if self.isError():
             self.cleanup()
             return
+
+        # And do finalize (really just cleans up output)
+        self._runner.finalize()
 
         if self.options.pedantic_checks and self.canParallel():
             # Check if the files we checked on earlier were modified.

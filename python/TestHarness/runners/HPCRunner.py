@@ -7,8 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from TestHarness.runners.Runner import Runner
 import re, time, os, subprocess
+from TestHarness.runners.Runner import Runner
+from TestHarness import util
 
 class HPCRunner(Runner):
     """
@@ -116,10 +117,8 @@ class HPCRunner(Runner):
                     self.trySetOutput()
                 def print_files(files, type):
                     if files:
-                        self.output += '#' * 80 + f'\n{type} output file(s)\n' + '#' * 80 + '\n'
-                        for file in files:
-                            self.output += file + '\n'
-                        self.output += '\n'
+                        self.output += util.outputHeader(f'{type} output file(s)')
+                        self.output += f'{"\n".join(files)}\n'
                 print_files(wait_files, 'Unavailable')
                 print_files(incomplete_files, 'Incomplete')
                 break
@@ -324,7 +323,7 @@ class HPCRunner(Runner):
         # Form the combined output
         output = head
         if truncated:
-            output += f'{"#" * 80}\nOUTPUT TRIMMED\n{"#" * 80}\n'
+            output += util.outputHeader('OUTPUT TRIMMED')
         if tail:
             tail.reverse()
             output += '\n'.join(tail)
