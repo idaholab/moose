@@ -67,12 +67,12 @@ k_d = 1
     []
     [TwoPhaseMixture]
       [mixture]
-        liquid_phase_fraction_name = 'phase_1'
-        dispersed_phase_fraction_name = 'phase_2'
+        phase_1_fraction_name = 'phase_1'
+        phase_2_fraction_name = 'phase_2'
 
         # Phase transport equation
         add_phase_transport_equation = true
-        alpha_exc = 0.1
+        alpha_exchange = 0.1
         phase_advection_interpolation = 'upwind'
         # see flow for inlet boundaries
         phase_fraction_inlet_type = 'fixed-value'
@@ -87,19 +87,19 @@ k_d = 1
         slip_linear_friction_name = 'Darcy'
 
         # Base phase material properties
-        first_phase_density_name = ${rho}
-        first_phase_viscosity_name = ${mu}
-        first_phase_specific_heat_name = ${cp}
-        first_phase_thermal_conductivity_name = ${k}
+        phase_1_density_name = ${rho}
+        phase_1_viscosity_name = ${mu}
+        phase_1_specific_heat_name = ${cp}
+        phase_1_thermal_conductivity_name = ${k}
 
         use_dispersed_phase_drag_model = true
         particle_diameter = 0.01
 
         # Other phase material properties
-        other_phase_density_name = ${rho_d}
-        other_phase_viscosity_name = ${mu_d}
-        other_phase_specific_heat_name = ${cp_d}
-        other_phase_thermal_conductivity_name = ${k_d}
+        phase_2_density_name = ${rho_d}
+        phase_2_viscosity_name = ${mu_d}
+        phase_2_specific_heat_name = ${cp_d}
+        phase_2_thermal_conductivity_name = ${k_d}
         output_all_properties = true
       []
     []

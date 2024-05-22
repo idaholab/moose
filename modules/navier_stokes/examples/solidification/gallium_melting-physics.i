@@ -36,7 +36,7 @@ Ny = 50
 []
 
 [AuxVariables]
-  [fl]
+  [liquid_fraction]
     type = MooseVariableFVReal
     initial_condition = 0.0
   []
@@ -47,7 +47,7 @@ Ny = 50
   # the phase fractions are constant over each time step
   [compute_fl]
     type = NSLiquidFractionAux
-    variable = fl
+    variable = 'liquid_fraction'
     temperature = T_fluid
     T_liquidus = '${T_liquidus}'
     T_solidus = '${T_solidus}'
@@ -114,25 +114,25 @@ Ny = 50
     [TwoPhaseMixture]
       [mixture]
         add_phase_transport_equation = false
-        liquid_phase_fraction_name = 'phase_1'
-        dispersed_phase_fraction_name = 'fl'
+        phase_1_fraction_name = 'liquid_fraction'
+        phase_2_fraction_name = 'solid_fraction'
 
         fluid_heat_transfer_physics = energy
         add_phase_change_energy_term = true
         use_dispersed_phase_drag_model = false
 
         # Base phase material properties
-        first_phase_density_name = ${rho_liquid}
-        first_phase_viscosity_name = ${mu}
-        first_phase_specific_heat_name = ${cp_liquid}
-        first_phase_thermal_conductivity_name = ${k_liquid}
+        phase_1_density_name = ${rho_liquid}
+        phase_1_viscosity_name = ${mu}
+        phase_1_specific_heat_name = ${cp_liquid}
+        phase_1_thermal_conductivity_name = ${k_liquid}
         output_all_properties = true
 
         # Other phase material properties
-        other_phase_density_name = ${rho_solid}
-        other_phase_viscosity_name = ${mu}
-        other_phase_specific_heat_name = ${cp_solid}
-        other_phase_thermal_conductivity_name = ${k_solid}
+        phase_2_density_name = ${rho_solid}
+        phase_2_viscosity_name = ${mu}
+        phase_2_specific_heat_name = ${cp_solid}
+        phase_2_thermal_conductivity_name = ${k_solid}
       []
     []
   []
@@ -141,7 +141,7 @@ Ny = 50
 [FunctorMaterials]
   [mushy_zone_resistance]
     type = INSFVMushyPorousFrictionFunctorMaterial
-    liquid_fraction = 'fl'
+    liquid_fraction = 'liquid_fraction'
     mu = '${mu}'
     rho_l = '${rho_liquid}'
     dendrite_spacing_scaling = 1e-1
@@ -201,7 +201,7 @@ Ny = 50
   []
   [ave_fl]
     type = ElementAverageValue
-    variable = 'fl'
+    variable = 'liquid_fraction'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [ave_T]
@@ -214,7 +214,7 @@ Ny = 50
 [VectorPostprocessors]
   [vel_x_pp]
     type = ElementValueSampler
-    variable = 'vel_x fl'
+    variable = 'vel_x liquid_fraction'
     sort_by = 'x'
   []
 []

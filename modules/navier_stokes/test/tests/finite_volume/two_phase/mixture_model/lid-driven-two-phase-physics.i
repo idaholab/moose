@@ -58,8 +58,8 @@ cp_d = 1
     []
     [TwoPhaseMixture]
       [mixture]
-        liquid_phase_fraction_name = 'phase_1'
-        dispersed_phase_fraction_name = 'phase_2'
+        phase_1_fraction_name = 'phase_1'
+        phase_2_fraction_name = 'phase_2'
 
         add_phase_transport_equation = true
         phase_advection_interpolation = '${advected_interp_method}'
@@ -69,16 +69,16 @@ cp_d = 1
         # boundary conditions to the TwoPhaseMixture physics
 
         # Base phase material properties
-        first_phase_density_name = ${rho}
-        first_phase_viscosity_name = ${mu}
-        first_phase_specific_heat_name = ${cp}
-        first_phase_thermal_conductivity_name = ${k}
+        phase_1_density_name = ${rho}
+        phase_1_viscosity_name = ${mu}
+        phase_1_specific_heat_name = ${cp}
+        phase_1_thermal_conductivity_name = ${k}
 
         # Other phase material properties
-        other_phase_density_name = ${rho_d}
-        other_phase_viscosity_name = ${mu_d}
-        other_phase_specific_heat_name = ${cp_d}
-        other_phase_thermal_conductivity_name = ${k_d}
+        phase_2_density_name = ${rho_d}
+        phase_2_viscosity_name = ${mu_d}
+        phase_2_specific_heat_name = ${cp_d}
+        phase_2_thermal_conductivity_name = ${k_d}
         output_all_properties = true
 
         # Friction model, not actually used!
