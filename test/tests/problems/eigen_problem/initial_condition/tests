@@ -8,6 +8,7 @@
     csvdiff = 'ne_ic_out_eigenvalues_0001.csv'
     absent_out = 'init_ solve'
     capabilities = 'slepc>=3.8.0'
+    cli_args = 'Outputs/checkpoint=True'
     requirement = "The system shall provide an initial guess to Newton if users request."
   []
 

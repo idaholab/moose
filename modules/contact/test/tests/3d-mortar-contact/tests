@@ -190,7 +190,7 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     valgrind = none
-    capabilities = 'ad_size>=200 method=opt'
+    capabilities = 'ad_size>=200 & method=opt'
     heavy = true
     max_time = 1000
   []

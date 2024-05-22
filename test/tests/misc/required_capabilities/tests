@@ -18,19 +18,19 @@
     requirement = 'The system shall start a simulation if a capability requested to not be present is registered as false.'
   []
   [false_compare_registered]
-    type = RunException
+    type = RunApp
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco>10'
-    expect_err = 'Cannot compare capability chaco to a number\.'
+    expect_out = 'Required capabilities \'chaco>10\' not fulfilled\.'
     requirement = 'The system shall not start a simulation if a requested capability is not registered.'
   []
   [negative_false_compare_registered]
-    type = RunException
+    type = RunApp
     input = input.i
     chaco = false
     cli_args = '--required-capabilities !(chaco>10)'
-    expect_err = 'Cannot compare capability chaco to a number\.'
+    expect_out = 'Solve Converged!'
     requirement = 'The system shall start a simulation if a capability in a negate comparison is not registered.'
   []
   [not_supported_not_registered]
