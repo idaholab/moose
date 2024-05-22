@@ -1,5 +1,6 @@
 [Tests]
   issues = '#27295'
+  design = '1d_elastic_waves.md'
   [modal]
     type = Exodiff
     input = 'modal.i'
