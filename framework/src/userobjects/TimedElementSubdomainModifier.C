@@ -32,7 +32,7 @@ TimedElementSubdomainModifier::initialize()
 {
   // state variables
   _current_timespan_start = -1;
-  _current_step = _t_step - 1;
+  _current_step = std::numeric_limits<unsigned int>::max();
 
   // ask for all times (must NOT be sorted)
   const auto _times = onGetTimes();

@@ -59,7 +59,7 @@ protected:
 
 private:
   /// Local variable for the current step (to be able to determine incrementation)
-  int _current_step;
+  unsigned int _current_step;
 
   /// Local variable for the end of the timespan to apply changes of the subdomain
   Real _current_timespan_end;

@@ -6,7 +6,7 @@
 
 The `TimedElementSubdomainModifier` is a base class to be inherited by other user objects. It inherits 
 from [CoupledVarThresholdElementSubdomainModifier.md] and additionally provides the ability to move elements
-at pre-given points in time.
+at given times.
 
 This base class is inherited by
 
