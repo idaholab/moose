@@ -61,6 +61,12 @@ protected:
   /// Modified value of model output by this reporter class
   std::vector<Real> & _output_comm;
 
+  /// Model output value from SubApp
+  const std::vector<Real> & _output_value1;
+
+  /// Modified value of model output by this reporter class
+  std::vector<Real> & _output_comm1;
+
 private:
   // StochasticTools::GaussianProcessHandler & _gp_handler;
 
