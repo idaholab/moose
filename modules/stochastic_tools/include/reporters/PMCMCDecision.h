@@ -68,6 +68,12 @@ protected:
   /// Transfer the right outputs to the file
   std::vector<Real> & _outputs_required;
 
+  /// Model output value from SubApp
+  const std::vector<Real> & _output_value1;
+
+  /// Transfer the right outputs to the file
+  std::vector<Real> & _outputs_required1;
+
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
 
@@ -118,6 +124,9 @@ protected:
 
   /// Storage for previous outputs
   std::vector<Real> _outputs_prev;
+
+  /// Storage for previous outputs
+  std::vector<Real> _outputs_prev1;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;

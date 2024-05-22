@@ -22,10 +22,16 @@ PMCMCDecision::validParams()
                              "sample in parallel Markov chain Monte Carlo type of algorithms.");
   params.addRequiredParam<ReporterName>("output_value",
                                         "Value of the model output from the SubApp.");
+  params.addRequiredParam<ReporterName>("output_value1",
+                                        "Value of the model output1 from the SubApp.");
   params.addParam<ReporterValueName>(
       "outputs_required",
       "outputs_required",
       "Modified value of the model output from this reporter class.");
+  params.addParam<ReporterValueName>(
+      "outputs_required1",
+      "outputs_required1",
+      "Modified value of the model output1 from this reporter class.");
   params.addParam<ReporterValueName>("inputs", "inputs", "Uncertain inputs to the model.");
   params.addParam<ReporterValueName>("tpm", "tpm", "The transition probability matrix.");
   params.addParam<ReporterValueName>("variance", "variance", "Model variance term.");
@@ -39,8 +45,12 @@ PMCMCDecision::validParams()
 PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value")), // , REPORTER_MODE_DISTRIBUTED
+    _output_value(
+        getReporterValue<std::vector<Real>>("output_value")), // , REPORTER_MODE_DISTRIBUTED
     _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
+    _output_value1(
+        getReporterValue<std::vector<Real>>("output_value1")), // , REPORTER_MODE_DISTRIBUTED
+    _outputs_required1(declareValue<std::vector<Real>>("outputs_required1")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
     _variance(declareValue<std::vector<Real>>("variance")),
@@ -72,6 +82,7 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   for (unsigned int i = 0; i < _props; ++i)
     _inputs[i].resize(_sampler.getNumberOfCols() - _num_confg_params);
   _outputs_required.resize(_sampler.getNumberOfRows());
+  _outputs_required1.resize(_sampler.getNumberOfRows());
   _tpm.resize(_props);
   _variance.resize(_props);
 }
@@ -80,7 +91,9 @@ void
 PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<Real> & input_matrix)
 {
   std::vector<Real> out1(_num_confg_values);
+  std::vector<Real> out11(_num_confg_values);
   std::vector<Real> out2(_num_confg_values);
+  std::vector<Real> out21(_num_confg_values);
   for (unsigned int i = 0; i < evidence.size(); ++i)
   {
     evidence[i] = 0.0;
@@ -90,18 +103,20 @@ PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<R
     for (unsigned int j = 0; j < _num_confg_values; ++j)
     {
       out1[j] = _outputs_required[j * _props + i];
+      out11[j] = _outputs_required1[j * _props + i];
       out2[j] = _outputs_prev[j * _props + i];
+      out21[j] = _outputs_prev1[j * _props + i];
     }
     if (_var_prior)
     {
       evidence[i] += (std::log(_var_prior->pdf(_new_var_samples[i])) -
                       std::log(_var_prior->pdf(_var_prev[i])));
       _noise = std::sqrt(_new_var_samples[i]);
-      for (unsigned int j = 0; j < _likelihoods.size(); ++j)
-        evidence[i] += _likelihoods[j]->function(out1);
+      evidence[i] += _likelihoods[0]->function(out1);
+      evidence[i] += _likelihoods[1]->function(out11);
       _noise = std::sqrt(_var_prev[i]);
-      for (unsigned int j = 0; j < _likelihoods.size(); ++j)
-        evidence[i] -= _likelihoods[j]->function(out2);
+      evidence[i] -= _likelihoods[0]->function(out2);
+      evidence[i] -= _likelihoods[1]->function(out21);
     }
     else
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
@@ -138,7 +153,10 @@ PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
     if (_var_prior)
       _variance[parallel_index] = _var_prev[parallel_index];
     for (unsigned int k = 0; k < _num_confg_values; ++k)
+    {
       _outputs_required[k * _props + parallel_index] = _outputs_prev[k * _props + parallel_index];
+      _outputs_required1[k * _props + parallel_index] = _outputs_prev1[k * _props + parallel_index];
+    }
   }
 }
 
@@ -161,7 +179,9 @@ PMCMCDecision::execute()
   }
   _local_comm.sum(data_in.get_values());
   _outputs_required = _output_value;
+  _outputs_required1 = _output_value1;
   _local_comm.allgather(_outputs_required);
+  _local_comm.allgather(_outputs_required1);
 
   // Compute the evidence and transition vectors
   std::vector<Real> evidence(_props);
@@ -187,6 +207,7 @@ PMCMCDecision::execute()
   // Store data from previous step
   _data_prev = data_in;
   _outputs_prev = _outputs_required;
+  _outputs_prev1 = _outputs_required1;
   _var_prev = _variance;
 
   // Track the current step
