@@ -10,7 +10,6 @@
 import traceback
 
 from TestHarness.schedulers.Scheduler import Scheduler
-from TestHarness.StatusSystem import StatusSystem
 from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
 from TestHarness.testers.Tester import Tester
@@ -50,8 +49,6 @@ class RunParallel(Scheduler):
             job.cached_output = job_results['OUTPUT']
             return
 
-        output = ''
-
         # Anything that throws while running or processing a job should be caught
         # and the job should fail
         try:
@@ -62,8 +59,9 @@ class RunParallel(Scheduler):
             if not tester.isSkip() and not tester.isFail():
                 self.setSuccessfulMessage(tester)
         except Exception:
-            self.output += 'Python exception encountered:\n\n' + traceback.format_exc()
-            tester.setStatus(StatusSystem().error, 'JOB EXCEPTION')
+            job.appendOutput(util.outputHeader('Python exception encountered in Job'))
+            job.appendOutput(traceback.format_exc())
+            job.setStatus(job.error, 'JOB EXCEPTION')
 
         if job.getOutputFile():
             job.addMetaData(DIRTY_FILES=[job.getOutputFile()])

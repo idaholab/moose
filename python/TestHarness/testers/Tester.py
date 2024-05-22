@@ -411,7 +411,9 @@ class Tester(MooseObject):
 
     def getRedirectedOutputFiles(self, options):
         """ return a list of redirected output """
-        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
+        if self.hasRedirectedOutput(options):
+            return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
+        return []
 
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
@@ -765,14 +767,3 @@ class Tester(MooseObject):
             self.output += '\n' + "#"*80 + '\nTester skipped, reason: ' + self.getStatusMessage() + '\n'
         elif self.isFail():
             self.output += '\n' + "#"*80 + '\nTester failed, reason: ' + self.getStatusMessage() + '\n'
-        # If the tester has not yet failed, append additional information to output
-        else:
-            # Read the output either from the temporary file or redirected files
-            if self.hasRedirectedOutput(options):
-                redirected_output = util.getOutputFromFiles(self, options)
-                self.output += redirected_output
-
-                # If we asked for redirected output but none was found, we'll call that a failure
-                if redirected_output == '':
-                    self.setStatus(self.fail, 'FILE TIMEOUT')
-                    self.output += '\n' + "#"*80 + '\nTester failed, reason: ' + self.getStatusMessage() + '\n'
