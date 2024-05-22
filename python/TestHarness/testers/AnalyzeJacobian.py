@@ -72,8 +72,6 @@ class AnalyzeJacobian(FileTester):
 
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
-        output = super().processResults(moose_dir, options, exit_code, runner_output)
-
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
@@ -89,7 +87,7 @@ class AnalyzeJacobian(FileTester):
         if reason != '':
             self.setStatus(self.fail, reason)
 
-        return output
+        return ''
 
     def checkRunnable(self, options):
         # We cannot rely on an external script running things within HPC
