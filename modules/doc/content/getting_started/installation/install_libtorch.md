@@ -18,20 +18,30 @@ ldd --version
 
 ## Setting up the environment
 
-For Mac workstations, the user needs to create a conda environment using the
-instructions [here](installation/conda.md). On Linux machines, however,
-we cannot use the conda packages due to the mismatch between `libc` versions.
-For this reason, given that the system `libc` version allows the linking between
-the two libraries, we need to install `PETSc` and `libMesh` manually. For instructions
-on the installation of these, see [installation/hpc_install_moose.md].
-
-In situations when the `libc` version allows the linking but the compiler stack
-has been compiled with an older `libc` version (HPC machines potentially), we need to build the
-compiler from scratch. For instructions in this process, visit [installation/manual_installation_gcc.md]
+For both Mac and Linux workstations, the user needs to create a conda environment using the
+instructions [here](installation/conda.md).
 
 ## Installing Libtorch
 
-The user can choose from two alternatives when it comes to installing `libtorch`:
+The user can choose from three alternatives when it comes to installing `libtorch`:
+
+- +Install using conda:+
+
+  For ARM and Intel Mac workstations the user can install libtorch using conda together
+  with the MOOSE packages:
+
+  ```bash
+  conda create -n moose-torch moose-dev pytorch
+  ```
+
+  This will provide the headers and libraries needed to use libtorch.
+
+  !alert! note
+
+  The same process works for Linux workstations if the user requires CPU support only.
+  For notes on the GPU support, navigate to the bottom of this site.
+
+  !alert-end!
 
 - +Install using the script provided in MOOSE:+
 
@@ -42,10 +52,18 @@ The user can choose from two alternatives when it comes to installing `libtorch`
   ```
 
   which downloads `libtorch` from the official site and sets it up in the `framework\contrib`
-  directory. The script checks for operating system and `libc` version and throws errors
-  if the system is not suitable for the coupling.
+  directory.
 
   !alert! note
+
+  The script checks for operating system and `libc` version (on Linux workstations)
+  and throws errors if the system is not suitable for the coupling. If there is a mismatch
+  between the detected `GLIBC` version and the one used to compile libtorch, the user needs
+  to install `libMesh` and `PETSc` manually with a compatible compiler.
+  !alert-end!
+
+  !alert! note
+
   The desired version of libtorch can be set by the following argument:
 
   ```bash
@@ -62,9 +80,10 @@ The user can choose from two alternatives when it comes to installing `libtorch`
   [official website](https://github.com/pytorch/pytorch/blob/master/docs/libtorch.rst).
 
 
-## Configure and compile MOOSE with libtorch
+## Configure and MOOSE with libtorch
 
 To achieve this, first configure MOOSE with `libtorch` support (along with any other desired configure options)
+from within the `moose` folder:
 
 ```bash
 ./configure --with-libtorch
@@ -85,6 +104,23 @@ by the `setup_libtorch.sh` script.
 
 !alert-end!
 
+For conda-based installations the user can link to the conda-based libtorch libraries
+using the approach above (using a typical installation path within conda):
+
+
+./configure --with-libtorch=/yourcondadirector/mambaforge3/envs/moose-torch/lib/python3.10/site-packages/torch
+
+```bash
+./configure --with-libtorch=${CONDA_PREFIX}/lib/python3.10/site-packages/torch
+```
+
+!alert! note
+The python version can be different depending on the distribution, so make sure you double-check if
+the directory you point to actually exists!
+!alert-end!
+
+## Build MOOSE with libtorch
+
 The last step is to compile MOOSE with libtorch support:
 
 ```bash
@@ -98,5 +134,17 @@ Due to namespace conflicts between MOOSE and `libtorch`, the folders of source f
 containing libtorch includes need to be excluded from the unit build directories.
 The makefile of the [Stochastic Tools Module](stochastic_tools/stochastic_tools.mk)
 serves as a good example on how to achieve this for applications.
+
+!alert-end!
+
+## GPU Support
+
+When using ARM Macs the conda-based installation supports both CPU and GPU devices.
+For GPU acceleration through Metal, users need to select MPS as a device when writing source code.
+
+!alert! warning
+
+GPU devices on Linux machines are not officially supported yet. If you have questions regarding
+this path, feel free to ask them on out Discussion forum!
 
 !alert-end!
