@@ -48,28 +48,28 @@ private:
   /// Convenience boolean to keep track of whether the fluid energy equation is present
   bool _has_energy_equation;
 
-  /// Name of the liquid phase fraction (variable)
-  const MooseFunctorName _liquid_phase_fraction;
+  /// Name of the first phase fraction (usually, liquid)
+  const MooseFunctorName _phase_1_fraction_name;
+  /// Name of the second phase fraction (usually, dispersed or advected by the liquid)
+  const MooseFunctorName _phase_2_fraction_name;
 
   /// Name of the density of the other phase
-  const MooseFunctorName _first_phase_density;
+  const MooseFunctorName _phase_1_density;
   /// Name of the dyanmic viscosity of the other phase
-  const MooseFunctorName _first_phase_viscosity;
+  const MooseFunctorName _phase_1_viscosity;
   /// Name of the specific heat of the other phase
-  const MooseFunctorName _first_phase_specific_heat;
+  const MooseFunctorName _phase_1_specific_heat;
   /// Name of the thermal conductivity of the other phase
-  const MooseFunctorName _first_phase_thermal_conductivity;
+  const MooseFunctorName _phase_1_thermal_conductivity;
 
-  /// Name of the other phase fraction
-  const MooseFunctorName _other_phase_fraction_name;
   /// Name of the density of the other phase
-  const MooseFunctorName _other_phase_density;
-  /// Name of the dyanmic viscosity of the other phase
-  const MooseFunctorName _other_phase_viscosity;
+  const MooseFunctorName _phase_2_density;
+  /// Name of the dynamic viscosity of the other phase
+  const MooseFunctorName _phase_2_viscosity;
   /// Name of the specific heat of the other phase
-  const MooseFunctorName _other_phase_specific_heat;
+  const MooseFunctorName _phase_2_specific_heat;
   /// Name of the thermal conductivity of the other phase
-  const MooseFunctorName _other_phase_thermal_conductivity;
+  const MooseFunctorName _phase_2_thermal_conductivity;
 
   /// Whether to define the mixture model internally or use fluid properties instead
   const bool _use_external_mixture_properties;

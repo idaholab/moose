@@ -76,32 +76,30 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 
   // Properties of the first phase (can be a liquid or a gas)
   params.addRequiredParam<MooseFunctorName>(
-      "liquid_phase_fraction_name",
-      "Name of the liquid phase fraction variable, it will be created as a functor material "
-      "property if it does not exist already");
-  params.addRequiredParam<MooseFunctorName>("first_phase_density_name",
-                                            "Name of the density functor for the other phase");
-  params.addRequiredParam<MooseFunctorName>("first_phase_viscosity_name",
-                                            "Name of the viscosity functor for the other phase");
-  params.addRequiredParam<MooseFunctorName>(
-      "first_phase_specific_heat_name", "Name of the specific heat functor for the other phase");
-  params.addRequiredParam<MooseFunctorName>(
-      "first_phase_thermal_conductivity_name",
-      "Name of the thermal conductivity functor for the other phase");
+      "phase_1_fraction_name",
+      "Name of the first phase fraction variable, it will be created as a functor material "
+      "property if it does not exist already.");
+  params.addRequiredParam<MooseFunctorName>("phase_1_density_name",
+                                            "Name of the density functor for phase 1");
+  params.addRequiredParam<MooseFunctorName>("phase_1_viscosity_name",
+                                            "Name of the viscosity functor for phase 1");
+  params.addRequiredParam<MooseFunctorName>("phase_1_specific_heat_name",
+                                            "Name of the specific heat functor for phase 1");
+  params.addRequiredParam<MooseFunctorName>("phase_1_thermal_conductivity_name",
+                                            "Name of the thermal conductivity functor for phase 1");
 
-  // Properties of the other phase (can be solid, another liquid, or gaseous)
+  // Properties of phase 2 (can be solid, another liquid, or gaseous)
   params.renameParam("passive_scalar_names",
-                     "dispersed_phase_fraction_name",
-                     "Name of the dispersed phase fraction variable");
-  params.addRequiredParam<MooseFunctorName>("other_phase_density_name",
-                                            "Name of the density functor for the other phase");
-  params.addRequiredParam<MooseFunctorName>("other_phase_viscosity_name",
-                                            "Name of the viscosity functor for the other phase");
-  params.addRequiredParam<MooseFunctorName>(
-      "other_phase_specific_heat_name", "Name of the specific heat functor for the other phase");
-  params.addRequiredParam<MooseFunctorName>(
-      "other_phase_thermal_conductivity_name",
-      "Name of the thermal conductivity functor for the other phase");
+                     "phase_2_fraction_name",
+                     "Name of the second phase fraction variable (can be a dispersed phase)");
+  params.addRequiredParam<MooseFunctorName>("phase_2_density_name",
+                                            "Name of the density functor for phase 2");
+  params.addRequiredParam<MooseFunctorName>("phase_2_viscosity_name",
+                                            "Name of the viscosity functor for phase 2");
+  params.addRequiredParam<MooseFunctorName>("phase_2_specific_heat_name",
+                                            "Name of the specific heat functor for phase 2");
+  params.addRequiredParam<MooseFunctorName>("phase_2_thermal_conductivity_name",
+                                            "Name of the thermal conductivity functor for phase 2");
 
   // Dispersed phase properties
   params.addParam<MooseFunctorName>(
@@ -146,13 +144,12 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 
   // Parameter groups
   params.renameParameterGroup("Passive scalar control", "Mixture transport control");
-  params.addParamNamesToGroup(
-      "first_phase_density_name first_phase_viscosity_name "
-      "first_phase_specific_heat_name first_phase_thermal_conductivity_name "
-      "other_phase_density_name other_phase_viscosity_name "
-      "other_phase_specific_heat_name other_phase_thermal_conductivity_name "
-      "use_external_mixture_properties",
-      "Mixture material properties");
+  params.addParamNamesToGroup("phase_1_density_name phase_1_viscosity_name "
+                              "phase_1_specific_heat_name phase_1_thermal_conductivity_name "
+                              "phase_2_density_name phase_2_viscosity_name "
+                              "phase_2_specific_heat_name phase_2_thermal_conductivity_name "
+                              "use_external_mixture_properties",
+                              "Mixture material properties");
 
   params.addParamNamesToGroup("fluid_heat_transfer_physics " + NS::alpha_exchange +
                                   " add_phase_change_energy_term",
@@ -167,18 +164,16 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters & parameters)
   : WCNSFVScalarTransportPhysics(parameters),
     _add_phase_equation(_has_scalar_equation),
-    _liquid_phase_fraction(getParam<MooseFunctorName>("liquid_phase_fraction_name")),
-    _first_phase_density(getParam<MooseFunctorName>("first_phase_density_name")),
-    _first_phase_viscosity(getParam<MooseFunctorName>("first_phase_viscosity_name")),
-    _first_phase_specific_heat(getParam<MooseFunctorName>("first_phase_specific_heat_name")),
-    _first_phase_thermal_conductivity(
-        getParam<MooseFunctorName>("first_phase_thermal_conductivity_name")),
-    _other_phase_fraction_name(_passive_scalar_names[0]),
-    _other_phase_density(getParam<MooseFunctorName>("other_phase_density_name")),
-    _other_phase_viscosity(getParam<MooseFunctorName>("other_phase_viscosity_name")),
-    _other_phase_specific_heat(getParam<MooseFunctorName>("other_phase_specific_heat_name")),
-    _other_phase_thermal_conductivity(
-        getParam<MooseFunctorName>("other_phase_thermal_conductivity_name")),
+    _phase_1_fraction_name(getParam<MooseFunctorName>("phase_1_fraction_name")),
+    _phase_2_fraction_name(_passive_scalar_names[0]),
+    _phase_1_density(getParam<MooseFunctorName>("phase_1_density_name")),
+    _phase_1_viscosity(getParam<MooseFunctorName>("phase_1_viscosity_name")),
+    _phase_1_specific_heat(getParam<MooseFunctorName>("phase_1_specific_heat_name")),
+    _phase_1_thermal_conductivity(getParam<MooseFunctorName>("phase_1_thermal_conductivity_name")),
+    _phase_2_density(getParam<MooseFunctorName>("phase_2_density_name")),
+    _phase_2_viscosity(getParam<MooseFunctorName>("phase_2_viscosity_name")),
+    _phase_2_specific_heat(getParam<MooseFunctorName>("phase_2_specific_heat_name")),
+    _phase_2_thermal_conductivity(getParam<MooseFunctorName>("phase_2_thermal_conductivity_name")),
     _use_external_mixture_properties(getParam<bool>("use_external_mixture_properties")),
     _use_drift_flux(getParam<bool>("add_drift_flux_momentum_terms")),
     _use_advection_slip(getParam<bool>("add_advection_slip_term"))
@@ -246,9 +241,9 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
     paramError("alpha_exchange",
                "A phase exchange coefficient cannot be specified if the phase change is handled "
                "with a phase change heat loss model");
-  if (_liquid_phase_fraction == _other_phase_fraction_name)
-    paramError("liquid_phase_fraction_name",
-               "Liquid phase fraction name should be different from the other phase fraction name");
+  if (_phase_1_fraction_name == _phase_2_fraction_name)
+    paramError("phase_1_fraction_name",
+               "First phase fraction name should be different from second phase fraction name");
   if (_use_drift_flux && _use_advection_slip)
     paramError("add_drift_flux_momentum_terms",
                "Drift flux model cannot be used at the same time as the advection slip model");
@@ -291,8 +286,8 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 {
   auto params = getFactory().getValidParams("NSFVMixturePhaseInterface");
   assignBlocks(params, _blocks);
-  params.set<NonlinearVariableName>("variable") = _other_phase_fraction_name;
-  params.set<MooseFunctorName>("phase_coupled") = _liquid_phase_fraction;
+  params.set<NonlinearVariableName>("variable") = _phase_2_fraction_name;
+  params.set<MooseFunctorName>("phase_coupled") = _phase_1_fraction_name;
   params.set<MooseFunctorName>("alpha") = getParam<MooseFunctorName>(NS::alpha_exchange);
   getProblem().addFVKernel("NSFVMixturePhaseInterface", prefix() + "phase_interface", params);
 }
@@ -303,7 +298,7 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
   auto params = getFactory().getValidParams("NSFVPhaseChangeSource");
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _fluid_energy_physics->getFluidTemperatureName();
-  params.set<MooseFunctorName>("liquid_fraction") = _liquid_phase_fraction;
+  params.set<MooseFunctorName>("liquid_fraction") = _phase_1_fraction_name;
   params.set<MooseFunctorName>("L") = NS::latent_heat;
   params.set<MooseFunctorName>(NS::density) = "rho_mixture";
   params.set<MooseFunctorName>("T_solidus") = NS::T_solidus;
@@ -328,8 +323,8 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
       params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
-    params.set<MooseFunctorName>("rho_d") = _other_phase_density;
-    params.set<MooseFunctorName>("fraction_dispersed") = _other_phase_fraction_name;
+    params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+    params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
     params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
@@ -353,9 +348,9 @@ WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
       params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
-    params.set<MooseFunctorName>(NS::density) = _first_phase_density;
-    params.set<MooseFunctorName>("rho_d") = _other_phase_density;
-    params.set<MooseFunctorName>("fraction_dispersed") = _other_phase_fraction_name;
+    params.set<MooseFunctorName>(NS::density) = _phase_1_density;
+    params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+    params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("advected_interp_method") =
         _flow_equations_physics->getMomentumFaceInterpolationMethod();
@@ -371,16 +366,16 @@ void
 WCNSFVTwoPhaseMixturePhysics::addMaterials()
 {
   // Add other phase fraction, for output purposes mostly
-  if (!getProblem().hasFunctor(_liquid_phase_fraction, /*thread_id=*/0))
+  if (!getProblem().hasFunctor(_phase_1_fraction_name, /*thread_id=*/0))
   {
     auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
     assignBlocks(params, _blocks);
-    params.set<std::string>("expression") = "1 - " + _other_phase_fraction_name;
-    params.set<std::vector<std::string>>("functor_names") = {_other_phase_fraction_name};
-    params.set<std::string>("property_name") = _liquid_phase_fraction;
-    params.set<std::vector<std::string>>("output_properties") = {_liquid_phase_fraction};
+    params.set<std::string>("expression") = "1 - " + _phase_2_fraction_name;
+    params.set<std::vector<std::string>>("functor_names") = {_phase_2_fraction_name};
+    params.set<std::string>("property_name") = _phase_1_fraction_name;
+    params.set<std::vector<std::string>>("output_properties") = {_phase_1_fraction_name};
     params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "other_phase_fraction", params);
+    getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "phase_2_fraction", params);
   }
 
   // Compute mixture properties
@@ -392,17 +387,15 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
         "rho_mixture", "mu_mixture", "cp_mixture", "k_mixture"};
     // The phase_1 and phase_2 assignments are only local to this object.
     // We use the advected phase variable to save a functor evaluation
-    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {
-        _first_phase_density,
-        _first_phase_viscosity,
-        _first_phase_specific_heat,
-        _first_phase_thermal_conductivity};
-    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {
-        _other_phase_density,
-        _other_phase_viscosity,
-        _other_phase_specific_heat,
-        _other_phase_thermal_conductivity};
-    params.set<MooseFunctorName>("phase_1_fraction") = _other_phase_fraction_name;
+    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_phase_1_density,
+                                                                  _phase_1_viscosity,
+                                                                  _phase_1_specific_heat,
+                                                                  _phase_1_thermal_conductivity};
+    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_phase_2_density,
+                                                                  _phase_2_viscosity,
+                                                                  _phase_2_specific_heat,
+                                                                  _phase_2_thermal_conductivity};
+    params.set<MooseFunctorName>("phase_1_fraction") = _phase_2_fraction_name;
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
     getProblem().addMaterial("NSFVMixtureFunctorMaterial", prefix() + "mixture", params);
@@ -422,9 +415,9 @@ WCNSFVTwoPhaseMixturePhysics::addMaterials()
       for (const auto j : make_range(dimension()))
         params.set<std::vector<VariableName>>(vel_components[j]) = {
             _flow_equations_physics->getVelocityNames()[j]};
-      params.set<MooseFunctorName>(NS::density) = _first_phase_density;
+      params.set<MooseFunctorName>(NS::density) = _phase_1_density;
       params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
-      params.set<MooseFunctorName>("rho_d") = _other_phase_density;
+      params.set<MooseFunctorName>("rho_d") = _phase_2_density;
       params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
       if (isParamValid("slip_linear_friction_name"))
         params.set<MooseFunctorName>("linear_coef_name") =
