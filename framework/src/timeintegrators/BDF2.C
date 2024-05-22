@@ -52,12 +52,16 @@ BDF2::computeTimeDerivatives()
   if (_t_step == 1)
   {
     u_dot = *_solution;
-    _du_dot_du = 1. / _dt;
+    for (const auto i : index_range(_du_dot_du))
+      if (integratesVar(i))
+        _du_dot_du[i] = 1. / _dt;
   }
   else
   {
     u_dot.zero();
-    _du_dot_du = _weight[0] / _dt;
+    for (const auto i : index_range(_du_dot_du))
+      if (integratesVar(i))
+        _du_dot_du[i] = _weight[0] / _dt;
   }
   computeTimeDerivativeHelper(u_dot, *_solution, _solution_old, _solution_older);
   u_dot.close();

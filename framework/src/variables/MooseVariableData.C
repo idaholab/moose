@@ -1022,7 +1022,7 @@ MooseVariableData<OutputType>::computeMonomialValues()
   Real u_dotdot = 0;
   Real u_dot_old = 0;
   Real u_dotdot_old = 0;
-  const Real & du_dot_du = _sys.duDotDu();
+  const Real & du_dot_du = _sys.duDotDu(_var_num);
   const Real & du_dotdot_du = _sys.duDotDotDu();
 
   if (is_transient)

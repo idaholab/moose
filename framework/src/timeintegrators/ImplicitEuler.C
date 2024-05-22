@@ -32,11 +32,26 @@ ImplicitEuler::computeTimeDerivatives()
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
-  u_dot = *_solution;
-  computeTimeDerivativeHelper(u_dot, _solution_old);
-  u_dot.close();
+  if (!_var_restriction)
+  {
+    u_dot = *_solution;
+    computeTimeDerivativeHelper(u_dot, _solution_old);
+  }
+  else
+  {
+    auto u_dot_sub = u_dot.get_subvector(_local_indices);
+    _solution->create_subvector(*_solution_sub, _local_indices, false);
+    _solution_old.create_subvector(*_solution_old_sub, _local_indices, false);
+    *u_dot_sub = *_solution_sub;
+    computeTimeDerivativeHelper(*u_dot_sub, *_solution_old_sub);
+    u_dot.restore_subvector(std::move(*u_dot_sub), _local_indices);
+    // Scatter info needed for ghosts
+    u_dot.close();
+  }
 
-  _du_dot_du = 1.0 / _dt;
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = 1.0 / _dt;
 }
 
 void

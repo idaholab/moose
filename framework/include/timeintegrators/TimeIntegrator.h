@@ -198,11 +198,15 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> & _Re_non_time;
 
-  /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$
-  Real & _du_dot_du;
+  /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$ for
+  /// the different variables. We will only modify the elements in this vector corresponding to the
+  /// variables that we integrate
+  std::vector<Real> & _du_dot_du;
   /// solution vectors
   const NumericVector<Number> * const & _solution;
   const NumericVector<Number> & _solution_old;
+  std::unique_ptr<NumericVector<Number>> _solution_sub;
+  std::unique_ptr<NumericVector<Number>> _solution_old_sub;
   //
   int & _t_step;
   //

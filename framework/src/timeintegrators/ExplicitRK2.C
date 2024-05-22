@@ -54,7 +54,9 @@ ExplicitRK2::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old, _solution_older);
 
-  _du_dot_du = 1. / _dt;
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = 1. / _dt;
   u_dot.close();
 }
 

@@ -796,6 +796,7 @@ SystemBase::addVariable(const std::string & var_type,
   // getMaxVariableNumber is an API method used in Rattlesnake
   if (var_num > _max_var_number)
     _max_var_number = var_num;
+  _du_dot_du.resize(var_num + 1);
 }
 
 bool

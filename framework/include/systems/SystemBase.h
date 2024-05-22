@@ -244,9 +244,9 @@ public:
    */
   virtual void addDotVectors();
 
-  virtual Number & duDotDu() { return _du_dot_du; }
+  virtual std::vector<Number> & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
-  virtual const Number & duDotDu() const { return _du_dot_du; }
+  virtual const Number & duDotDu(const unsigned int var_num) const { return _du_dot_du[var_num]; }
   virtual const Number & duDotDotDu() const { return _du_dotdot_du; }
 
   virtual NumericVector<Number> * solutionUDot() { return _u_dot; }
@@ -1005,7 +1005,9 @@ protected:
   /// old solution vector for u^dotdot
   NumericVector<Number> * _u_dotdot_old;
 
-  Real _du_dot_du;
+  /// Derivative of time derivative of u with respect to uj. This depends on the time integration
+  /// scheme
+  std::vector<Real> _du_dot_du;
   Real _du_dotdot_du;
 
   /// Tagged vectors (pointer)

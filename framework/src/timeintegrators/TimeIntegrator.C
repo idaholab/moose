@@ -89,6 +89,9 @@ TimeIntegrator::init()
                var_dof_indices.end(),
                std::back_inserter(_local_indices));
   }
+
+  _solution_sub = NumericVector<Number>::build(_solution->comm());
+  _solution_old_sub = NumericVector<Number>::build(_solution_old.comm());
 }
 
 void
