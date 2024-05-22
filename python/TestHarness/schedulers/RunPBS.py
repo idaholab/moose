@@ -118,7 +118,7 @@ class RunPBS(RunHPC):
         cmd = ['qstat', '-xf', '-F', 'json'] + active_job_ids
         exit_code, result, _ = self.callHPC(' '.join(cmd))
         if exit_code != 0:
-            raise self.CallHPCException(self, 'Failed to get job status', cmd, result)
+            return False
 
         # Attempt to parse the status from the jobs
         try:
@@ -167,6 +167,9 @@ class RunPBS(RunHPC):
                     job.setStatus(job.error, 'PBS JOB TERMINATED')
         except Exception as e:
             raise self.CallHPCException(self, f'Failed to parse collective job status', cmd, result) from e
+
+        # Success
+        return True
 
     def killJob(self, job):
         """Kills a PBS job"""

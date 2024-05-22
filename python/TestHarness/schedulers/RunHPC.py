@@ -40,6 +40,9 @@ class RunHPC(RunParallel):
         # Map of Job -> HPCJob
         self.hpc_jobs = {}
 
+        # Whether or not the last job status command failed. We let it
+        # fail once if it passes the second time for some redundancy
+        self.update_jobs_failed = False
         # The jump hostname for running commands, if any
         self.ssh_hosts = self.options.hpc_host
         # The SSH key to use for connections
@@ -359,7 +362,14 @@ class RunHPC(RunParallel):
 
             # Only update the statues periodically as this is called across threads
             if self.hpc_jobs_status_timer is None or ((clock() - self.hpc_jobs_status_timer) > self.hpc_jobs_update_interval):
-                self.updateJobs()
+                success = self.updateJobs()
+                if not success:
+                    if self.update_jobs_failed:
+                        raise Exception('Failed to get job status')
+                    self.update_jobs_failed = True
+                else:
+                    self.update_jobs_failed = False
+
                 self.hpc_jobs_status_timer = clock()
 
             return self.hpc_jobs.get(job)
@@ -368,7 +378,8 @@ class RunHPC(RunParallel):
         """
         Updates the underlying jobs.
 
-        Should be overridden.
+        Should be overridden and should return True or False
+        depending on whether or not the update succeeded.
         """
         raise Exception('Unimplemented updateJobs()')
 
