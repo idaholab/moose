@@ -127,6 +127,10 @@ class RunApp(Tester):
         return True
 
     def getThreads(self, options):
+        # This disables additional arguments
+        if self.specs['no_additional_cli_args']:
+            return 1
+
         #Set number of threads to be used lower bound
         nthreads = max(options.nthreads, int(self.specs['min_threads']))
         #Set number of threads to be used upper bound
@@ -140,6 +144,10 @@ class RunApp(Tester):
         return nthreads
 
     def getProcs(self, options):
+        # This disables additional arguments
+        if self.specs['no_additional_cli_args']:
+            return 1
+
         if options.parallel == None:
             default_ncpus = 1
         else:
