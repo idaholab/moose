@@ -26,15 +26,12 @@ InputParameters
 GhostBoundary::validParams()
 {
   InputParameters params = RelationshipManager::validParams();
-  params.addRequiredParam<BoundaryName>("boundary", "The name of the primary boundary sideset.");
-  params.addRequiredParam<BoundaryName>("paired_boundary",
-                                        "The name of the primary boundary sideset.");
-  params.addParam<bool>(
-      "ghost_point_neighbors",
-      false,
-      "Whether we should ghost point neighbors of secondary lower-dimensional elements and "
-      "also their mortar interface couples for applications such as mortar nodal auxiliary "
-      "kernels.");
+  params.addRequiredParam<std::vector<BoundaryName>>("boundary",
+                                                     "The name of the primary boundary sideset.");
+
+  params.addParam<bool>("ghost_point_neighbors",
+                        false,
+                        "Whether we should ghost point neighbors of the paired boundary.");
 
   // We want to wait until our mortar mesh has been built before trying to delete remote elements.
   // And our mortar mesh cannot be built until the entire mesh has been generated. By setting this
@@ -42,15 +39,13 @@ GhostBoundary::validParams()
   // phase will not delete remote elements *and* we will set a flag on the moose mesh saying that we
   // need to delete remote elements after the addition of late geometric ghosting functors
   // (including this ghosting functor)
-  params.set<bool>("attach_geometric_early") = false;
   return params;
 }
 
 GhostBoundary::GhostBoundary(const InputParameters & params)
   : RelationshipManager(params),
-    _boundary_name(getParam<BoundaryName>("boundary")),
-    _paired_boundary_name(getParam<BoundaryName>("paired_boundary")),
-    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING)),
+    _boundary_name(getParam<std::vector<BoundaryName>>("boundary")),
+    _is_coupling_functor(isType(Moose::RelationshipManagerType::GEOMETRIC)),
     _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors"))
 {
 }
@@ -58,7 +53,6 @@ GhostBoundary::GhostBoundary(const InputParameters & params)
 GhostBoundary::GhostBoundary(const GhostBoundary & other)
   : RelationshipManager(other),
     _boundary_name(other._boundary_name),
-    _paired_boundary_name(other._paired_boundary_name),
     _is_coupling_functor(other._is_coupling_functor),
     _ghost_point_neighbors(other._ghost_point_neighbors)
 {
@@ -87,9 +81,10 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & range_begin,
   // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
   // to the MooseMesh
   const bool generating_mesh = !_moose_mesh->getMeshPtr();
-  const auto boundary_id =
-      generating_mesh ? Moose::INVALID_BOUNDARY_ID : _moose_mesh->getBoundaryID(_boundary_name);
+  const auto boundary_ids = generating_mesh ? std::vector<BoundaryID>{Moose::INVALID_BOUNDARY_ID}
+                                            : _moose_mesh->getBoundaryIDs(_boundary_name);
 
+  Moose::out << "Mesh type " << _moose_mesh->isSplit() << std::endl;
   for (const Elem * const elem : _mesh->active_element_ptr_range())
   {
     if (generating_mesh)
@@ -109,14 +104,16 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & range_begin,
     {
       // We've finished generating our mesh so we can be selective and only ghost elements lying
       // in our lower-dimensional subdomains and their interior parents
-      mooseAssert(boundary_id != Moose::INVALID_BOUNDARY_ID, "Boundary id should exist by now");
+
+      // mooseAssert(boundary_ids != Moose::INVALID_BOUNDARY_ID, "Boundary id should exist by now");
 
       // Higher-dimensional boundary elements
       const BoundaryInfo & binfo = _mesh->get_boundary_info();
 
       for (auto side : elem->side_index_range())
-        if ((elem->processor_id() != p) && (binfo.has_boundary_id(elem, side, boundary_id)))
-          coupled_elements.insert(std::make_pair(elem, _null_mat));
+        for (auto boundary_id : boundary_ids)
+          if ((elem->processor_id() != p) && (binfo.has_boundary_id(elem, side, boundary_id)))
+            coupled_elements.insert(std::make_pair(elem, _null_mat));
     }
   }
 }
@@ -127,7 +124,6 @@ GhostBoundary::operator>=(const RelationshipManager & other) const
   if (auto asoi = dynamic_cast<const GhostBoundary *>(&other))
   {
     if (_boundary_name == asoi->_boundary_name &&
-        _paired_boundary_name == asoi->_paired_boundary_name &&
         _ghost_point_neighbors >= asoi->_ghost_point_neighbors)
       return true;
   }

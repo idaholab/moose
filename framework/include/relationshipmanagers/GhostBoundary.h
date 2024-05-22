@@ -61,9 +61,7 @@ public:
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
-  const BoundaryName _boundary_name;
-
-  const BoundaryName _paired_boundary_name;
+  const std::vector<BoundaryName> _boundary_name;
 
   /// Whether this relationship manager is called when coupling functors are called when building
   /// the matrix sparsity pattern
