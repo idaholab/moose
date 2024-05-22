@@ -332,6 +332,12 @@ class Job(object):
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
 
+        # Job error occurred, which means the Runner didn't complete
+        # so don't process anything else
+        if self.isError():
+            self.cleanup()
+            return
+
         if self.options.pedantic_checks and self.canParallel():
             # Check if the files we checked on earlier were modified.
             self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
