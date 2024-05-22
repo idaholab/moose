@@ -279,8 +279,24 @@ class Job(object):
         """
         tester = self.__tester
 
-        # Do not execute app, but allow processResults to commence
+        # Helper for trying and catching
+        def try_catch(do, exception_name):
+            try:
+                do()
+            except:
+                self.cleanup()
+                self.setStatus(self.error, f'{exception_name} EXCEPTION')
+                self.output += util.outputHeader('Python exception encountered')
+                self.output += traceback.format_exc()
+                return False
+            return True
+
+        # Do not execute app, but still run the tester
+        # This is truly awful and I really hate that it got put in here,
+        # please remove it if you can.
         if not tester.shouldExecute():
+            run_tester = lambda: tester.run(self.options, 0, '')
+            try_catch(run_tester, 'TESTER RUN')
             return
 
         if self.options.pedantic_checks and self.canParallel():
@@ -303,18 +319,6 @@ class Job(object):
         self.timer.reset()
 
         self.__start_time = clock()
-
-        # Helper for trying and catching
-        def try_catch(do, exception_name):
-            try:
-                do()
-            except:
-                self.cleanup()
-                self.setStatus(self.error, f'{exception_name} EXCEPTION')
-                self.output += util.outputHeader('Python exception encountered')
-                self.output += traceback.format_exc()
-                return False
-            return True
 
         # Spawn the process
         spawn = lambda: self._runner.spawn(self.timer)
@@ -352,7 +356,7 @@ class Job(object):
         runner_output = self._runner.getOutput()
         exit_code = self._runner.getExitCode()
         run_tester = lambda: tester.run(self.options, exit_code, runner_output)
-        try_catch(run_tester, 'TESTER PROCESS')
+        try_catch(run_tester, 'TESTER RUN')
 
         # Run cleanup now that we're done
         self.cleanup()
