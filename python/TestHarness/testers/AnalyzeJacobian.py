@@ -96,4 +96,10 @@ class AnalyzeJacobian(FileTester):
             self.setStatus(self.skip)
             return False
 
+        # This doesn't pass valgrind arguments
+        if options.valgrind_mode:
+            self.addCaveats('valgrind=false')
+            self.setStatus(self.skip)
+            return False
+
         return FileTester.checkRunnable(self, options)
