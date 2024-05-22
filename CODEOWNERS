@@ -77,6 +77,7 @@
 
 /python/MooseDocs @cticenhour
 /python/moosesqa @cticenhour
+/python/TestHarness @loganharbour @milljm
 
 /scripts/hpc_proxy.pac @loganharbour
 /scripts/configure_petsc.sh @cticenhour @milljm @loganharbour
