@@ -5,7 +5,7 @@
     type = RunApp
     input = test.i
     requirement = 'The system shall be able to tolerate projection of quadrature points into an area very slightly outside of the reference element.'
-    capabilities = 'ad_size>=100 method=opt'
+    capabilities = 'ad_size>=100 & method=opt'
     cli_args = 'Executioner/num_steps=2'
     valgrind = 'none'
   []

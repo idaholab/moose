@@ -18,20 +18,22 @@
 namespace CapabilityUtils
 {
 
-enum class CapState
-{
-  FALSE,
-  MAYBE_FALSE,
-  UNKNOWN,
-  MAYBE_TRUE,
-  TRUE
-};
-
 Result
-check(const std::string & requirements, const Registry & app_capabilities)
+check(std::string requirements, const Registry & app_capabilities)
 {
   using namespace peg;
-  if (requirements == "")
+
+  // unquote
+  while (true)
+  {
+    const auto len = requirements.length();
+    if (len >= 2 && ((requirements[0] == '\'' && requirements[len - 1] == '\'') ||
+                     (requirements[0] == '"' && requirements[len - 1] == '"')))
+      requirements = requirements.substr(1, len - 2);
+    else
+      break;
+  }
+  if (requirements.length() == 0)
     return {CapabilityUtils::CERTAIN_PASS, "Empty requirements", ""};
 
   parser parser(R"(
@@ -128,10 +130,14 @@ check(const std::string & requirements, const Registry & app_capabilities)
     if (it == app_capabilities.end())
       // return an unknown if the capability does not exist, this is important as it
       // stays unknown upon negation
-      return CapState::UNKNOWN;
+      return CheckState::UNKNOWN;
 
     // capability is registered by the app
     const auto & [app_value, doc] = it->second;
+
+    // explicitly false causes any comparison to fail
+    if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
+      return CheckState::CERTAIN_FAIL;
 
     // comparator
     auto comp = [](int i, auto a, auto b)
@@ -165,7 +171,8 @@ check(const std::string & requirements, const Registry & app_capabilities)
           if (right.size() != 1)
             mooseError("Expected an integer value in comparison");
 
-          return comp(op, std::get<int>(app_value), right[0]) ? CapState::TRUE : CapState::FALSE;
+          return comp(op, std::get<int>(app_value), right[0]) ? CheckState::CERTAIN_PASS
+                                                              : CheckState::CERTAIN_FAIL;
         }
 
         // version comparison
@@ -181,7 +188,8 @@ check(const std::string & requirements, const Registry & app_capabilities)
           mooseError("Expected a version number.");
 
         // compare versions
-        return comp(op, app_value_version, right) ? CapState::TRUE : CapState::FALSE;
+        return comp(op, app_value_version, right) ? CheckState::CERTAIN_PASS
+                                                  : CheckState::CERTAIN_FAIL;
       }
 
       case 1: // Identifier _ Operator _ String
@@ -192,8 +200,8 @@ check(const std::string & requirements, const Registry & app_capabilities)
           mooseError("Unexpected comparison to a string.");
 
         return comp(op, std::get<std::string>(app_value), MooseUtils::toLower(right))
-                   ? CapState::TRUE
-                   : CapState::FALSE;
+                   ? CheckState::CERTAIN_PASS
+                   : CheckState::CERTAIN_FAIL;
       }
     }
 
@@ -206,21 +214,21 @@ check(const std::string & requirements, const Registry & app_capabilities)
     {
       case 0: // Comparison
       case 4: // '(' _ Expression _ ')'
-        return std::any_cast<CapState>(vs[0]);
+        return std::any_cast<CheckState>(vs[0]);
 
       case 1: // '!' Bool
-        switch (std::any_cast<CapState>(vs[0]))
+        switch (std::any_cast<CheckState>(vs[0]))
         {
-          case CapState::FALSE:
-            return CapState::TRUE;
-          case CapState::TRUE:
-            return CapState::FALSE;
-          case CapState::MAYBE_FALSE:
-            return CapState::MAYBE_TRUE;
-          case CapState::MAYBE_TRUE:
-            return CapState::MAYBE_FALSE;
+          case CheckState::CERTAIN_FAIL:
+            return CheckState::CERTAIN_PASS;
+          case CheckState::CERTAIN_PASS:
+            return CheckState::CERTAIN_FAIL;
+          case CheckState::POSSIBLE_FAIL:
+            return CheckState::POSSIBLE_PASS;
+          case CheckState::POSSIBLE_PASS:
+            return CheckState::POSSIBLE_FAIL;
           default:
-            return CapState::UNKNOWN;
+            return CheckState::UNKNOWN;
         }
 
       case 2: // '!' Identifier
@@ -230,10 +238,10 @@ check(const std::string & requirements, const Registry & app_capabilities)
         {
           const auto app_value = it->second.first;
           if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
-            return CapState::TRUE;
-          return CapState::FALSE;
+            return CheckState::CERTAIN_PASS;
+          return CheckState::CERTAIN_FAIL;
         }
-        return CapState::MAYBE_TRUE;
+        return CheckState::POSSIBLE_PASS;
       }
 
       case 3: // Identifier
@@ -243,10 +251,10 @@ check(const std::string & requirements, const Registry & app_capabilities)
         {
           const auto app_value = it->second.first;
           if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
-            return CapState::FALSE;
-          return CapState::TRUE;
+            return CheckState::CERTAIN_FAIL;
+          return CheckState::CERTAIN_PASS;
         }
-        return CapState::MAYBE_FALSE;
+        return CheckState::POSSIBLE_FAIL;
       }
 
       default:
@@ -260,28 +268,28 @@ check(const std::string & requirements, const Registry & app_capabilities)
     {
       case 0: // Bool _ LogicOperator _ Expression
       {
-        const auto left = std::any_cast<CapState>(vs[0]);
+        const auto left = std::any_cast<CheckState>(vs[0]);
         const auto op = std::any_cast<LogicOperator>(vs[1]);
-        const auto right = std::any_cast<CapState>(vs[2]);
+        const auto right = std::any_cast<CheckState>(vs[2]);
 
         switch (op)
         {
           case OP_AND:
-            for (const auto state : {CapState::FALSE,
-                                     CapState::MAYBE_FALSE,
-                                     CapState::UNKNOWN,
-                                     CapState::MAYBE_TRUE,
-                                     CapState::TRUE})
+            for (const auto state : {CheckState::CERTAIN_FAIL,
+                                     CheckState::POSSIBLE_FAIL,
+                                     CheckState::UNKNOWN,
+                                     CheckState::POSSIBLE_PASS,
+                                     CheckState::CERTAIN_PASS})
               if (left == state || right == state)
                 return state;
             mooseError("Conjunction failure");
 
           case OP_OR:
-            for (const auto state : {CapState::TRUE,
-                                     CapState::MAYBE_TRUE,
-                                     CapState::UNKNOWN,
-                                     CapState::MAYBE_FALSE,
-                                     CapState::FALSE})
+            for (const auto state : {CheckState::CERTAIN_PASS,
+                                     CheckState::POSSIBLE_PASS,
+                                     CheckState::UNKNOWN,
+                                     CheckState::POSSIBLE_FAIL,
+                                     CheckState::CERTAIN_FAIL})
               if (left == state || right == state)
                 return state;
             mooseError("Conjunction failure");
@@ -292,7 +300,7 @@ check(const std::string & requirements, const Registry & app_capabilities)
       }
 
       case 1: // Bool
-        return std::any_cast<CapState>(vs[0]);
+        return std::any_cast<CheckState>(vs[0]);
 
       default:
         mooseError("Unknown choice in Expression non-terminal");
@@ -302,12 +310,10 @@ check(const std::string & requirements, const Registry & app_capabilities)
   // (4) Parse
   parser.enable_packrat_parsing(); // Enable packrat parsing.
 
-  CapState val;
-  if (!parser.parse(requirements, val))
+  CheckState state = CheckState::CERTAIN_FAIL;
+  if (!parser.parse(requirements, state))
     mooseError("Unable to parse requirements '", requirements, "'.");
 
-  // CheckState state = static_cast<CheckState>(result.value());
-  CheckState state = static_cast<CheckState>(val);
   std::string reason;
   std::string doc;
 
