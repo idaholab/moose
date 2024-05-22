@@ -118,7 +118,7 @@ class HPCRunner(Runner):
                 def print_files(files, type):
                     if files:
                         self.output += util.outputHeader(f'{type} output file(s)')
-                        self.output += f'{"\n".join(files)}\n'
+                        self.output += '\n'.join(files) + '\n'
                 print_files(wait_files, 'Unavailable')
                 print_files(incomplete_files, 'Incomplete')
                 break
