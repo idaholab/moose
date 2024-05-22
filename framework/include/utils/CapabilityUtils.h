@@ -44,6 +44,6 @@ typedef std::tuple<CheckState, std::string, std::string> Result;
 typedef std::map<std::string, std::pair<Type, std::string>> Registry;
 
 /// Check a requirement against a capabilities registry
-Result check(const std::string & requirements, const Registry & capabilities);
+Result check(std::string requirements, const Registry & capabilities);
 
 } // namespace CapabilityUtils

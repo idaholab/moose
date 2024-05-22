@@ -224,6 +224,6 @@
     requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on '
                   'inactive nodes.'
     valgrind = 'heavy'
-    capabilities = 'ad_size>=100 method!=dbg'
+    capabilities = 'ad_size>=100 & method!=dbg'
   []
 []

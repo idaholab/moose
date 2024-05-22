@@ -2,6 +2,7 @@
 #include <Python.h>
 
 #include "CapabilityUtils.h"
+#include "Moose.h"
 #include <map>
 #include <string>
 #include <variant>
@@ -17,14 +18,14 @@ capabilities_check(PyObject *self, PyObject *args)
     PyErr_SetString(PyExc_ValueError,
                     "capabilities.check requires two arguments, a requirements string and a "
                     "dictionary with string keys and tuple values.");
-    return NULL;
+    return nullptr;
   }
 
   // make sure argument 2 is a dictionary
   if (!PyDict_Check(capdict))
   {
     PyErr_SetString(PyExc_ValueError, "The second argument must be a dictionary.");
-    return NULL;
+    return nullptr;
   }
 
   // map to be populated
@@ -41,7 +42,7 @@ capabilities_check(PyObject *self, PyObject *args)
     {
       PyErr_SetString(PyExc_ValueError,
                       "Items of the capability dictionary myst be tuples (internal error).");
-      return NULL;
+      return nullptr;
     }
 
     PyObject *key_obj = PyTuple_GetItem(item, 0);
@@ -51,7 +52,7 @@ capabilities_check(PyObject *self, PyObject *args)
     if (!PyUnicode_Check(key_obj))
     {
       PyErr_SetString(PyExc_ValueError, "The dictionary keys must be strings.");
-      return NULL;
+      return nullptr;
     }
     const std::string key(PyUnicode_AsUTF8(key_obj));
 
@@ -59,7 +60,7 @@ capabilities_check(PyObject *self, PyObject *args)
     if (!PyList_Check(value_doc) || PyList_Size(value_doc) != 2)
     {
       PyErr_SetString(PyExc_ValueError, "The dictionary values must be lists of length two.");
-      return NULL;
+      return nullptr;
     }
     PyObject * value = PyList_GetItem(value_doc, 0);
     PyObject * doc_obj = PyList_GetItem(value_doc, 1);
@@ -70,7 +71,7 @@ capabilities_check(PyObject *self, PyObject *args)
       PyErr_SetString(
           PyExc_ValueError,
           "The second list item in the dictionary values must be strings (documentation).");
-      return NULL;
+      return nullptr;
     }
     const std::string doc = PyUnicode_AsUTF8(doc_obj);
 
@@ -86,29 +87,42 @@ capabilities_check(PyObject *self, PyObject *args)
     else
     {
       PyErr_SetString(PyExc_ValueError, "The capability values must be Bool, Number, or Str.");
-      return NULL;
+      return nullptr;
     }
   }
 
-  // call capabilities C++ code with capabilities map
-  auto [status, message, doc] = CapabilityUtils::check(requirement, capabilities);
-  return Py_BuildValue("(NNN)",
-                       PyLong_FromLong(status),
-                       PyUnicode_FromString(message.c_str()),
-                       PyUnicode_FromString(doc.c_str()));
+  // throw on errors to properly report the failure back to python
+  Moose::_throw_on_error = true;
+
+  try
+  {
+    // call capabilities C++ code with capabilities map
+    auto [status, message, doc] = CapabilityUtils::check(requirement, capabilities);
+    return Py_BuildValue("(NNN)",
+                         PyLong_FromLong(status),
+                         PyUnicode_FromString(message.c_str()),
+                         PyUnicode_FromString(doc.c_str()));
+  }
+  catch (const std::exception & e)
+  {
+    PyErr_SetString(PyExc_ValueError, e.what());
+    return nullptr;
+  }
 }
 
 static PyMethodDef CapabilitiesMethods[] = {
-    {"check", capabilities_check, METH_VARARGS,
+    {"check",
+     capabilities_check,
+     METH_VARARGS,
      "Check a requirement against a capabilities dictionary."},
-    {NULL, NULL, 0, NULL}};
+    {nullptr, nullptr, 0, nullptr}};
 
 PyDoc_STRVAR(capabilities_doc, "Interface to the Moose::Capabilities system.");
 
 static struct PyModuleDef capabilitiesmodule = {
     PyModuleDef_HEAD_INIT,
     "capabilities",   /* name of module */
-    capabilities_doc, /* module documentation, may be NULL */
+    capabilities_doc, /* module documentation, may be nullptr */
     -1,               /* size of per-interpreter state of the module,
                          or -1 if the module keeps state in global variables. */
     CapabilitiesMethods};

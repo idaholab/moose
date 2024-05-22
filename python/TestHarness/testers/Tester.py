@@ -625,9 +625,9 @@ class Tester(MooseObject, OutputInterface):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # Check for supported capabilities
-        (capabilities_present, reason) = util.checkCapabilities(capabilities, self.specs)
+        capabilities_present = util.checkCapabilities(capabilities, self.specs)[0]
         if not capabilities_present:
-            reasons['missing_capabilities'] = reason
+            reasons['missing_capabilities'] = 'Needs: ' + self.specs['capabilities']
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
