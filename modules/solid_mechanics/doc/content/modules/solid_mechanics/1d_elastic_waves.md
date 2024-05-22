@@ -139,7 +139,7 @@ To convert to the frequency domain, we consider that a plane wave given by
   \label{eq2}
 \end{equation}
 is a solution to [eq1] where $B$ is in general a complex number depending on the boundary conditions, $k^2=\omega^2\rho/E$ is the wave number, $\omega=2 \pi f$ where $f$ is the frequency, and $i=\sqrt{-1}$.
-By assuming [eq2] is a a solution to [eq1] we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
+By assuming [eq2] is a solution to [eq1], we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
 \begin{equation}
     E\frac{\partial^2 U}{\partial x^2}-\rho\omega^2 U=0.
 \label{eq3}
