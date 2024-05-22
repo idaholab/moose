@@ -34,7 +34,7 @@ To read the data on the subdomains and times from an CSV file, the following par
 
 - [!param](/UserObjects/TimedSubdomainModifier/data_file): Name of the file in which the data is read.
 - [!param](/UserObjects/TimedSubdomainModifier/delimiter): Optional CSV delimiter character. Defaults to comma (`,`).
-- [!param](/UserObjects/TimedSubdomainModifier/comment): Optional CSV comment character. Defaults to hash character (`#`).
+- [!param](/UserObjects/TimedSubdomainModifier/comment): Optional CSV comment character. Defaults to hash character (`;`).
 - [!param](/UserObjects/TimedSubdomainModifier/header): This parameter must be set to True, if the columns are to be found via header ([!param](/UserObjects/TimedSubdomainModifier/time_column_text), [!param](/UserObjects/TimedSubdomainModifier/blocks_from_column_text), and [!param](/UserObjects/TimedSubdomainModifier/blocks_to_column_text)). See following parameters.
 - [!param](/UserObjects/TimedSubdomainModifier/time_column_index) -or- [!param](/UserObjects/TimedSubdomainModifier/time_column_text): Zero-based index or name of the column defining the times.
 - [!param](/UserObjects/TimedSubdomainModifier/blocks_from_column_index) -or- [!param](/UserObjects/TimedSubdomainModifier/blocks_from_column_text): Zero-based index or name of the column defining the subdomains/blocks to move all elements from.
