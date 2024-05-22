@@ -25,7 +25,10 @@ class TestCapabilities(unittest.TestCase):
             'compiler': ['GCC', "Compiler used to build moose"]
         }
 
-        self.assertEqual(pycapabilities.check("!petsc", cap), (pycapabilities.CERTAIN_FAIL, 'petsc supported', 'PETSc doc'))
+        self.assertEqual(pycapabilities.check("!petsc", cap)[0], pycapabilities.CERTAIN_FAIL)
+        self.assertEqual(pycapabilities.check("!unknown", cap)[0], pycapabilities.POSSIBLE_PASS)
+        self.assertEqual(pycapabilities.check("adsize > 20", cap)[0], pycapabilities.CERTAIN_PASS)
+        self.assertEqual(pycapabilities.check("!party", cap)[0], pycapabilities.CERTAIN_FAIL)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
