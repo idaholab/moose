@@ -75,7 +75,7 @@ SubdomainID
 TimedElementSubdomainModifier::computeSubdomainID()
 {
   // did we advance to the next step?
-  if (_current_step != _t_step)
+  if (_current_step != unsigned(_t_step))
   {
     _current_timespan_start = _current_timespan_end;
     _current_timespan_end = _t;
