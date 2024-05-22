@@ -26,8 +26,6 @@ class SubprocessRunner(Runner):
         self.errfile = None
         # The underlying subprocess
         self.process = None
-        # The joined output
-        self.output = None
 
     def spawn(self, timer):
         tester = self.job.getTester()
@@ -80,13 +78,11 @@ class SubprocessRunner(Runner):
         timer.stop()
 
         self.exit_code = self.process.poll()
-        self.outfile.flush()
-        self.errfile.flush()
 
-        # store the contents of output, and close the file
-        self.output = util.readOutput(self.outfile, self.errfile, self.job.getTester())
-        self.outfile.close()
-        self.errfile.close()
+        for file in [self.outfile, self.errfile]:
+            file.flush()
+            self.output += self.readOutput(file)
+            file.close()
 
     def kill(self):
         if self.process is not None:
@@ -102,9 +98,6 @@ class SubprocessRunner(Runner):
                     os.killpg(pgid, SIGTERM)
             except OSError: # Process already terminated
                 pass
-
-    def getOutput(self):
-        return self.output
 
     def sendSignal(self, signal):
         # process.poll() returns the process's exit code if it has completed,

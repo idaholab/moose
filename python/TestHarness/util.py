@@ -869,42 +869,6 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     # TL;DR; Just pass...
                     pass
 
-# Check if test has any redirected output, and if its ready to be read
-def checkOutputReady(tester, options):
-    checked_files = []
-    for redirected_file in tester.getRedirectedOutputFiles(options):
-        file_path = os.path.join(tester.getTestDir(), redirected_file)
-        if os.access(file_path, os.R_OK):
-            checked_files.append(file_path)
-    return checked_files
-
-# return concatenated output from tests with redirected output
-def getOutputFromFiles(tester, options):
-    file_output = ''
-    output_files = checkOutputReady(tester, options)
-    for file_path in output_files:
-        with open(file_path, 'r+b') as f:
-            file_output += "#"*80 + "\nOutput from " + file_path \
-                           + "\n" + "#"*80 + "\n" + readOutput(f, None, tester)
-    return file_output
-
-# Read stdout and stderr file objects, append error and return the string
-def readOutput(stdout, stderr, tester):
-    output = ''
-    try:
-        if stdout:
-            stdout.seek(0)
-            output += stdout.read().decode('utf-8')
-        if stderr:
-            stderr.seek(0)
-            output += stderr.read().decode('utf-8')
-    except UnicodeDecodeError:
-        tester.setStatus(tester.fail, 'non-unicode characters in output')
-    except:
-        tester.setStatus(tester.fail, 'error while attempting to read output files')
-
-    return output
-
 # Trimming routines for job output
 def trimOutput(job, options):
     output = job.getOutput()
@@ -926,3 +890,13 @@ def trimOutput(job, options):
                                                    "#"*80,
                                                    "#"*80,
                                                    output[-second_part:])
+
+def outputHeader(header):
+    """
+    Returns text for output with a visual separator, i.e.:
+    ##############################...
+    <header>
+    ##############################...
+    """
+    sep = '#' * 80
+    return f'{sep}\n{header}\n{sep}\n'

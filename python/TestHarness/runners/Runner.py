@@ -7,7 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import json
+import os, json
+from TestHarness import util
 
 class Runner:
     """
@@ -53,30 +54,41 @@ class Runner:
         """
         pass
 
-    def getOutput(self):
+    def finalize(self):
         """
-        Gets the combined output of the process.
+        Finalizes the output, which should be called at the end of wait()
         """
-        output = self.output
+        # Load the redirected output files, if any
+        for file_path in self.job.getTester().getRedirectedOutputFiles(self.options):
+            self.output += util.outputHeader(f'Redirected output {file_path}')
+            if os.access(file_path, os.R_OK):
+                with open(file_path, 'r+b') as f:
+                    self.output += self.readOutput(f)
+            else:
+                self.job.setStatus(self.job.error, 'FILE TIMEOUT')
+                self.output += 'FILE UNAVAILABLE\n'
 
         # Check for invalid unicode in output
         try:
-            json.dumps(output)
+            json.dumps(self.output)
         except UnicodeDecodeError:
             # Convert invalid output to something json can handle
-            output = output.decode('utf-8','replace').encode('ascii', 'replace')
+            self.output = self.output.decode('utf-8','replace').encode('ascii', 'replace')
             # Alert the user that output has invalid characters
-            self.job.addCaveats('invalid characters in stdout')
+            self.job.addCaveats('invalid characters in output')
 
         # Remove NULL output and fail if it exists
         null_chars = ['\0', '\x00']
         for null_char in null_chars:
-            if null_char in output:
-                output = output.replace(null_char, 'NULL')
-                if not self.job.isFail():
-                    self.job.setStatus(self.job.error, 'NULL characters in output')
+            if null_char in self.output:
+                self.output = self.output.replace(null_char, 'NULL')
+                self.job.setStatus(self.job.error, 'NULL characters in output')
 
-        return output
+    def getOutput(self):
+        """
+        Gets the combined output of the process.
+        """
+        return self.output
 
     def getExitCode(self):
         """
@@ -91,3 +103,20 @@ class Runner:
         Can be overridden.
         """
         raise Exception('sendSignal not supported for this Runner')
+
+    def readOutput(self, stream):
+        """
+        Helper for reading output from a stream, and setting an error state
+        if the read failed.
+        """
+        output = ''
+        try:
+            stream.seek(0)
+            output = stream.read().decode('utf-8')
+        except UnicodeDecodeError:
+            self.job.setStatus(self.job.error, 'non-unicode characters in output')
+        except:
+            self.job.setStatus(self.job.error, 'error reading output')
+        if output and output[-1] != '\n':
+            output += '\n'
+        return output

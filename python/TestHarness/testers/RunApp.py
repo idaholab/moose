@@ -347,7 +347,7 @@ class RunApp(Tester):
         """
         output = ''
         output += self.testFileOutput(moose_dir, options, runner_output)
-        output += self.testExitCodes(moose_dir, options, exit_code, output)
+        output += self.testExitCodes(moose_dir, options, exit_code, runner_output)
 
         return output
 

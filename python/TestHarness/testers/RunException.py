@@ -62,15 +62,3 @@ class RunException(RunApp):
             self.addCaveats('hpc max_cpus=1')
             return 1
         return procs
-
-    def processResults(self, moose_dir, options, exit_code, runner_output):
-        output = ''
-
-        # Exceptions are written to stderr, which can be interleaved so we normally redirect these
-        # separate files. Here we must gather those file outputs before processing
-        if self.hasRedirectedOutput(options):
-            runner_output = util.getOutputFromFiles(self, options)
-
-        output += super().processResults(moose_dir, options, exit_code, runner_output)
-
-        return output
