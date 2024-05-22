@@ -45,7 +45,10 @@ TimedSubdomainModifier::validParams()
       "blocks_to_column_index time_column_text blocks_from_column_text blocks_to_column_text",
       "Subdomain change data from CSV file");
 
-  params.addClassDescription("Renames entire blocks at user-specified times.");
+  params.addClassDescription(
+      "Modify element subdomain ID of entire subdomains for given points "
+      "in time. This userobject only runs on the undisplaced mesh, and it will "
+      "modify both the undisplaced and the displaced mesh.");
 
   return params;
 }

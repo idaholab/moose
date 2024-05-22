@@ -66,7 +66,6 @@ inactive_domain_block_names = ${Box2_inactive_name}
   []
 []
 
-# ===== Executioner =====
 [Executioner]
   type = Transient
 

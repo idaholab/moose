@@ -26,7 +26,17 @@ public:
 protected:
   virtual SubdomainID computeSubdomainID() override;
 
+  /**
+   * Requests a vector of all points in time from the inheriting class
+   * (these do not have to be sorted).
+   * @returns Unsorted vector of points in time.
+   */
   virtual std::vector<Real> onGetTimes();
+
+  /**
+   * Determines the new subdomain-id for the current element.
+   * @returns New subdomain id to move the element to.
+   */
   virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive);
 
   /// storage for the times including their original index.
@@ -38,13 +48,9 @@ protected:
     bool operator<(const timeIndexPair & a) const
     {
       if (time == a.time)
-      {
         return index < a.index;
-      }
       else
-      {
         return time < a.time;
-      };
     }
   };
 
@@ -56,8 +62,8 @@ private:
   int _current_step;
 
   /// Local variable for the end of the timespan to apply changes of the subdomain
-  Real _current_t;
+  Real _current_timespan_end;
 
   /// Local variable for the start of the timespan to apply changes of the subdomain
-  Real _last_t;
+  Real _current_timespan_start;
 };

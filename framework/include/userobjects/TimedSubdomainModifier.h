@@ -26,17 +26,8 @@ public:
   virtual void initialize() override;
 
 protected:
-  /**
-   * Requests a vector of all points in time from the inheriting class
-   * (these do not have to be sorted).
-   * @returns Unsorted vector of points in time.
-   */
   virtual std::vector<Real> onGetTimes() override;
 
-  /**
-   * Determines the new subdomain-id for the current element.
-   * @returns New subdomain id to move the element to.
-   */
   virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive) override;
 
 private:

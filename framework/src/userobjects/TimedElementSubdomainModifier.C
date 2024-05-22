@@ -31,7 +31,7 @@ void
 TimedElementSubdomainModifier::initialize()
 {
   // state variables
-  _last_t = -1;
+  _current_timespan_start = -1;
   _current_step = _t_step - 1;
 
   // ask for all times (must NOT be sorted)
@@ -40,7 +40,7 @@ TimedElementSubdomainModifier::initialize()
 
   // copy data to local storage
   _times_and_indices.resize(n);
-  for (size_t i = 0; i < n; ++i)
+  for (auto i : make_range(n))
   {
     _times_and_indices[i].time = _times[i];
     _times_and_indices[i].index = i;
@@ -53,7 +53,13 @@ TimedElementSubdomainModifier::initialize()
 std::vector<Real>
 TimedElementSubdomainModifier::onGetTimes()
 {
+  const auto n = _times_and_indices.size();
   std::vector<Real> _times;
+  _times.resize(n);
+  for (auto i : make_range(n))
+  {
+    _times[i] = _times_and_indices[i].time;
+  };
   return _times;
 }
 
@@ -71,13 +77,13 @@ TimedElementSubdomainModifier::computeSubdomainID()
   // did we advance to the next step?
   if (_current_step != _t_step)
   {
-    _last_t = _current_t;
-    _current_t = _t;
+    _current_timespan_start = _current_timespan_end;
+    _current_timespan_end = _t;
     _current_step = _t_step;
   }
 
   // get the new subdomain-id of the current element; provide the timespan to be considered
-  const auto _subdomain_id = onComputeSubdomainID(_last_t, _current_t);
+  const auto _subdomain_id = onComputeSubdomainID(_current_timespan_start, _current_timespan_end);
 
   return _subdomain_id;
 }
