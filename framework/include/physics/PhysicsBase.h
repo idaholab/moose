@@ -12,13 +12,12 @@
 #include "Action.h"
 #include "ActionWarehouse.h"
 #include "InputParametersChecksUtils.h"
+#include "ComponentAction.h"
 
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
 #include "Factory.h"
 #include "MultiMooseEnum.h"
-
-class ComponentAction;
 
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
   registerMooseAction(app_name, derived_name, "init_physics");                                     \
@@ -35,6 +34,10 @@ public:
 
   PhysicsBase(const InputParameters & parameters);
 
+  /// Provide additional parameters for the relationship managers
+  virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
+
+  // Responding to tasks //
   /// Forwards from the action tasks to the implemented addXYZ() in the derived classes
   /// If you need more than these:
   /// - register your action to the new task using
@@ -45,6 +48,7 @@ public:
   /// Routine to add additional setup work on additional registered tasks to a Physics
   virtual void actOnAdditionalTasks() {}
 
+  // Block restriction //
   /**
    * @brief Add new blocks to the Physics
    * @param blocks list of blocks to add to the physics
@@ -65,9 +69,7 @@ public:
                                       const std::vector<SubdomainName> & blocks,
                                       const bool error_if_not_identical = true) const;
 
-  /// Provide additional parameters for the relationship managers
-  virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
-
+  // Coupling with Physics //
   /**
    * @brief Get a Physics from the ActionWarehouse with the requested type and name
    * @param phys_name name of the Physics to retrieve
@@ -82,11 +84,12 @@ public:
   /// Return the maximum dimension of the blocks the Physics is active on
   unsigned int dimension() const;
 
+  // Coupling with Components //
   /// Get a component with the requested name
-  const ComponentAction & getComponent(const ComponentName & comp_name)
-  {
-    return _awh.getAction<ComponentAction>(comp_name);
-  }
+  const ComponentAction & getComponent(const ComponentName & comp_name);
+  /// Check that the component is of the desired type
+  template <typename T>
+  void checkComponentType(const ComponentAction & component) const;
 
 protected:
   /// Return whether the Physics is solved using a transient
@@ -127,6 +130,7 @@ protected:
   const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
   /// Return the list of aux variables in this physics
   const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
+
   /// Keep track of the name of a nonlinear variable defined in the Physics
   void saveNonlinearVariableName(const VariableName & var_name)
   {
@@ -268,4 +272,15 @@ PhysicsBase::getCoupledPhysics(const bool allow_fail) const
     mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
   else
     return all_T_physics;
+}
+
+template <typename T>
+void
+PhysicsBase::checkComponentType(const ComponentAction & component) const
+{
+  // TODO figure out why dynamic_cast is not enough
+  if (!dynamic_cast<const T *>(&component) && MooseUtils::prettyCppType<T>() != component.type())
+    mooseError("Component '" + component.name() + "' must be of type '" +
+               MooseUtils::prettyCppType<T>() + "'.\nIt is currently of type '" + component.type() +
+               "'");
 }
