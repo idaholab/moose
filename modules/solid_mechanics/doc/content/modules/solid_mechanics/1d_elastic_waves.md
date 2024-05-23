@@ -19,7 +19,7 @@ The general eigenvalue problem that needs to be solved for modal analysis is giv
 (\mathbf{A} - \omega^2 \mathbf{B})\mathbf{u} = 0
 \end{equation}
 where $\mathbf{A}$ holds the "noneigen" kernels, $\mathbf{B}$ holds the "eigen" kernels, $\omega$ are the natural frequencies, and $\mathbf{u}$ are the mode shapes.
-In MOOSE, modal analysis is set up using the Eigenvalue Executioner. The
+In MOOSE, modal analysis is set up using the [Eigenvalue.md] Executioner. The
 Eigenvalue System allows you to define which kernels go into which matrix. It's important
 to note that in modal analysis, Neumann boundary conditions are
 ignored since we are interested in the free vibration response of the structure.
@@ -42,7 +42,7 @@ The cantilever beam shown in [cantilever] is subjected to a time harmonic force 
 
 !media media/solid_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
 
-The analytic solution for the free vibration of a cantilever [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
+The analytic solution for the free vibration of a cantilever is known, see [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
 \begin{equation}
   \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
 \end{equation}
@@ -70,7 +70,7 @@ represent the mass terms and contribute to the "B" matrix. The
 to a negative value which corresponds to a positive density. The
 `extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels
 contribute to "B" matrix. In other literature the A matrix would be the
-stiffness matrix (K) and B would be the Mass matrix(M).
+stiffness matrix (K) and B would be the Mass matrix (M).
 
 !listing test/tests/modal_analysis/modal.i block=Kernels id=m_kernel caption=
 Kernels for A and B
@@ -100,7 +100,7 @@ To output all the eigenvalues solved in the system we can use the
 [vectorpostprocessors/Eigenvalues.md] vectorpostprocessor. While we have solved for the two smallest
 eigenvalues, currently MOOSE only has the ability to output a single eigenvector. To
 change which eigenvector is outputted adjust the index in
-[!param](/Problem/EigenProblem/active_eigen_index)and rerun the simulation.
+[!param](/Problem/EigenProblem/active_eigen_index) and rerun the simulation.
 
 !listing test/tests/modal_analysis/modal.i block=VectorPostprocessors Problem
 id=m_prob caption=Eigenvalues
