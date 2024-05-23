@@ -893,6 +893,8 @@ class TestHarness:
 
         if self.options.hpc == 'pbs':
             scheduler_plugin = 'RunPBS'
+        elif self.options.hpc == 'slurm':
+            scheduler_plugin = 'RunSlurm'
         # The default scheduler plugin
         else:
             scheduler_plugin = 'RunParallel'
@@ -1051,14 +1053,14 @@ class TestHarness:
 
         # Options for HPC execution
         hpcgroup = parser.add_argument_group('HPC Options', 'Options controlling HPC execution')
-        hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs'], help='Launch tests using a HPC scheduler')
+        hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
         hpcgroup.add_argument('--hpc-host', nargs='+', action='store', dest='hpc_host', metavar='', help='The host(s) to use for submitting HPC jobs')
         hpcgroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='hpc_pre_source', metavar='', help='Source specified file before launching HPC tests')
         hpcgroup.add_argument('--hpc-file-timeout', nargs=1, type=int, action='store', dest='hpc_file_timeout', default=120, help='The time in seconds to wait for HPC output')
         hpcgroup.add_argument('--hpc-place', nargs=1, action='store', dest='hpc_place', choices=['free', 'pack', 'scatter'], default='free', help='The default placement method for HPC jobs')
         hpcgroup.add_argument('--hpc-apptainer-bindpath', nargs=1, action='store', type=str, dest='hpc_apptainer_bindpath', help='Sets the apptainer bindpath for HPC jobs')
         hpcgroup.add_argument('--hpc-apptainer-no-home', action='store_true', dest='hpc_apptainer_no_home', help='Passes --no-home to apptainer for HPC jobs')
-        hpcgroup.add_argument('--pbs-project', nargs=1, action='store', dest='pbs_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
+        hpcgroup.add_argument('--hpc-project', nargs=1, action='store', dest='hpc_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
         hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
 
         # Try to find the terminal size if we can
