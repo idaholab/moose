@@ -21,8 +21,10 @@ class HPCRunner(Runner):
         # The RunHPC object
         self.run_hpc = run_hpc
 
-        # The HPCJob object, updated in wait()
-        self.hpc_job = None
+        # The HPC job id, used for the file terminator
+        self.hpc_job_id = None
+        # The command ran in the HPC job, used to set later
+        self.hpc_job_command = None
 
         # Interval in seconds for polling for job status
         self.job_status_poll_time = 0.1
@@ -35,7 +37,7 @@ class HPCRunner(Runner):
 
     def spawn(self, timer):
         # Rely on the RunHPC object to submit the job
-        self.run_hpc.submitJob(self.job)
+        self.hpc_job_id, self.hpc_job_command = self.run_hpc.submitJob(self.job)
 
         timer.start()
 
@@ -48,11 +50,10 @@ class HPCRunner(Runner):
         # polling itself is only done on occasion within RunHPC
         while True:
             time.sleep(self.job_status_poll_time)
-            self.hpc_job = self.run_hpc.getHPCJob(self.job)
+            self.exit_code = self.run_hpc.getHPCJobStatus(self.job)
 
             # We're done
-            if self.hpc_job.done:
-                self.exit_code = self.hpc_job.exit_code
+            if self.exit_code is not None:
                 break
 
         timer.stop()
@@ -63,9 +64,6 @@ class HPCRunner(Runner):
         # If the Job is already finished, something happened in PBS
         # so we have an invalid state for processing in the Tester
         if self.job.isFinished():
-            if self.exit_code is None:
-                self.exit_code = -1
-
             # If we have _some_ output, at least try to load it.
             for i in range(int(self.options.hpc_file_timeout / self.file_completion_poll_time)):
                 if self.trySetOutput():
@@ -79,7 +77,7 @@ class HPCRunner(Runner):
 
         # We've actually ran something now and not just qsub, so update the
         # command to what was ran there
-        tester.setCommandRan(self.hpc_job.command)
+        tester.setCommandRan(self.hpc_job_command)
 
         # Determine the output files that we need to wait for to be complete
         wait_files = set([output_file])
@@ -151,12 +149,6 @@ class HPCRunner(Runner):
                 else:
                     self.output = self.readTruncated(output_file)
 
-                # If we can parse the exit code here, do it. Sometimes PBS
-                # will do screwy stuff with not capturing the actual exit code...
-                find_exit_code = re.search('Completed TestHarness RunHPC test execution; exit code = (\d+)', self.output)
-                if find_exit_code:
-                    self.exit_code = int(find_exit_code.group(1))
-
                 did_set = True
             except:
                 pass
@@ -189,7 +181,7 @@ class HPCRunner(Runner):
         if is_binary is None:
             return False
 
-        ending_comment = self.run_hpc.getOutputEndingComment(self.hpc_job.id)
+        ending_comment = self.run_hpc.getOutputEndingComment(self.hpc_job_id)
 
         # Binary file
         if is_binary:

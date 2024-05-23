@@ -1,6 +1,7 @@
 #!/bin/bash
+{%- if SCHEDULER_NAME == "pbs" %}
 #PBS -N {{ NAME }}
-#PBS -l select={{ SELECT }}
+#PBS -l select={{ NUM_PROCS }}:mpiprocs=1:ncpus={{ NUM_THREADS }}
 #PBS -l walltime={{ WALLTIME }}
 #PBS -P {{ PROJECT }}
 {%- if QUEUE is defined %}
@@ -9,6 +10,14 @@
 #PBS -j oe
 #PBS -o {{ OUTPUT }}
 #PBS -l place={{ PLACE }}
+{%- elif SCHEDULER_NAME == "slurm" %}
+#SBATCH --job-name={{ NAME }}
+#SBATCH --ntasks={{ NUM_PROCS }}
+#SBATCH --cpus-per-task={{ NUM_THREADS }}
+#SBATCH --time={{ WALLTIME }}
+#SBATCH --wckey={{ PROJECT }}
+#SBATCH --output={{ OUTPUT }}
+{%- endif %}
 
 # Exit on failure
 set -e
@@ -23,7 +32,8 @@ export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 
 # Print a useful header
 echo "################################################################################"
-echo "TestHarness RunPBS job on $(hostname) in job ${PBS_JOBID}"
+echo "TestHarness {{ SCHEDULER_NAME }} job on $(hostname) in job ${{ JOB_ID_VARIABLE }}"
+echo "################################################################################"
 echo "Time: $(date)"
 echo 'Test: {{ TEST_SPEC }}:{{ TEST_NAME }}'
 echo 'Directory: {{ CWD }}'
@@ -32,8 +42,9 @@ echo 'Submitted hostname: {{ SUBMITTED_HOSTNAME }}'
 echo 'Submission script: {{ SUBMISSION_SCRIPT }}'
 echo 'Output: {{ OUTPUT }}'
 module list
+
 echo "################################################################################"
-echo "Beginning TestHarness RunHPC test execution"
+echo "Beginning TestHarness {{ SCHEDULER_NAME }} test execution"
 echo "################################################################################"
 
 # Move into the test directory
@@ -53,7 +64,7 @@ set -e
 # We will read this output later on to try to capture the return code
 # in the event that PBS doesn't get it to us correctly
 echo "################################################################################"
-echo "Completed TestHarness RunHPC test execution; exit code = $return_code"
+echo "Completed TestHarness {{ SCHEDULER_NAME }} test execution; exit code = $return_code"
 
 # Append a terminator to all of the output files for file syncing across NFS
 ADDITIONAL_OUTPUT_FILES=({{ ADDITIONAL_OUTPUT_FILES }})
