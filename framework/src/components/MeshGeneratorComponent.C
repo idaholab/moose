@@ -29,7 +29,7 @@ MeshGeneratorComponent::validParams()
 }
 
 MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
-  : ComponentAction(params)
+  : ComponentAction(params), PhysicsComponentHelper(params)
 {
 }
 
@@ -41,11 +41,8 @@ MeshGeneratorComponent::addMeshGenerators()
 }
 
 void
-MeshGeneratorComponent::addPhysics()
+MeshGeneratorComponent::initComponentPhysics()
 {
-  for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
-    _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
-
   // Get list of blocks from the saved mesh
   const auto saved_mesh =
       _app.getMeshGeneratorSystem().getSavedMesh(getParam<std::string>("saved_mesh_name"));
