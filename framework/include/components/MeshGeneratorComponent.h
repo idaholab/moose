@@ -11,11 +11,12 @@
 
 // MOOSE includes
 #include "ComponentAction.h"
+#include "PhysicsComponentHelper.h"
 
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
  */
-class MeshGeneratorComponent : public ComponentAction
+class MeshGeneratorComponent : public virtual ComponentAction, public PhysicsComponentHelper
 {
 public:
   /**
@@ -27,5 +28,5 @@ public:
 
 protected:
   virtual void addMeshGenerators() override;
-  virtual void addPhysics() override;
+  virtual void initComponentPhysics() override;
 };
