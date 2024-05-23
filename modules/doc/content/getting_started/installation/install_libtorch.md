@@ -4,8 +4,8 @@ The way one enables LibTorch [!cite](paszke2019pytorch) capabilities in MOOSE de
 the operating system (Linux or Mac) and if we use HPC or just a local workstation.
 
 !alert! note
-Before trying to install MOOSE with libtorch make sure to check out the [compatibility matrix]
-(https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix)
+Before trying to install MOOSE with libtorch make sure to check out the
+[compatibility matrix](https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix)
 which will tell you if the required packages are compatible with the ones required by MOOSE.
 
 Furthermore, it is important to emphasize that
@@ -20,12 +20,12 @@ ldd --version
 
 !alert-end!
 
-## Setting up the environment
+## Setup Environment
 
-For both Mac and Linux workstations, the user needs to create a conda environment using the
-instructions [here](installation/conda.md).
+For both Mac and Linux workstations, the user needs to follow the
+[Conda MOOSE Environment](installation/conda.md) instructions.
 
-## Installing Libtorch
+## Install Libtorch
 
 The user can choose from three alternatives when it comes to installing `libtorch`:
 
@@ -42,7 +42,7 @@ The user can choose from three alternatives when it comes to installing `libtorc
   !alert! note
 
   The same process works for Linux workstations if the user requires CPU support only.
-  For notes on the GPU support, [click here](gpu-notes).
+  For notes on the GPU support, visit the [notes below](install_libtorch.md#gpu-notes).
 
   !alert-end!
 
@@ -83,7 +83,7 @@ The user can choose from three alternatives when it comes to installing `libtorc
   [official website](https://github.com/pytorch/pytorch/blob/master/docs/libtorch.rst).
 
 
-## Configure and MOOSE with libtorch
+## Configure MOOSE
 
 To achieve this, first configure MOOSE with `libtorch` support (along with any other desired configure options)
 from within the `moose` folder:
@@ -110,9 +110,11 @@ by the `setup_libtorch.sh` script.
 For conda-based installations the user can link to the conda-based libtorch libraries
 using the approach above (using a typical installation path within conda):
 
+
 ```bash
-./configure --with-libtorch=${CONDA_PREFIX}/lib/python[!package!minimum_python]/site-packages/torch
+./configure --with-libtorch=${CONDA_PREFIX}/lib/python3.10/site-packages/torch
 ```
+
 
 !alert! note
 
@@ -126,7 +128,7 @@ find ${CONDA_PREFIX} -type d -name torch
 
 !alert-end!
 
-## Build MOOSE with libtorch
+## Build MOOSE
 
 The last step is to compile MOOSE with libtorch support:
 
