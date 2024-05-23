@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#27295'
+  design = '1d_elastic_waves.md'
+  [modal]
+    type = Exodiff
+    input = 'modal.i'
+    exodiff = 'modal_out.e'
+    exodiff_opts = '-eigen_relative'
+    abs_zero = 1e-10
+    requirement = "The module shall be able to perform modal analysis with the Eigenvalue Executioner."
+  []
+[]
