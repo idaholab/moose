@@ -42,7 +42,8 @@ Cylinder::validParams()
   return params;
 }
 
-Cylinder::Cylinder(const InputParameters & params) : ComponentAction(params)
+Cylinder::Cylinder(const InputParameters & params)
+  : ComponentAction(params), _radius(getParam<Real>("radius")), _height(getParam<Real>("height"))
 {
   _dimension = getParam<MooseEnum>("dimension");
 }

@@ -29,4 +29,18 @@ protected:
   virtual void addMeshGenerators() override;
   virtual void addPositionsObject() override;
   virtual void addPhysics() override;
+
+  /// Radius of the cylinder
+  const Real _radius;
+  /// Height of the cylinder
+  const Real _height;
+
+  /// Pointers to the Physics defined on the component
+  std::vector<PhysicsBase *> _physics;
+
+  virtual Real volume() const override { return _height * libMesh::pi * Utility::pow<2>(_radius); }
+  virtual Real outerSurfaceArea() const override
+  {
+    return 2 * libMesh::pi * (Utility::pow<2>(_radius) + _radius * _height);
+  }
 };
