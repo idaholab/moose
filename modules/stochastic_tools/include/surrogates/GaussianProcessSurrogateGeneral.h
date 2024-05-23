@@ -42,10 +42,4 @@ private:
 
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
-
-  /// Number of input parameters
-  const unsigned int & _n_dims;
-
-  /// The number of outputs
-  const unsigned int & _n_outputs;
 };

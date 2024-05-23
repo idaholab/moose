@@ -71,9 +71,9 @@ GaussianProcessGeneral::setupCovarianceMatrix(const RealEigenMatrix & training_p
                                               const RealEigenMatrix & training_data,
                                               const GPOptimizerOptions & opts)
 {
-  const bool batch_decision = opts.batch_size > 0 && opts.batch_size <= training_params.rows();
-  const unsigned int batch_size = batch_decision ? opts.batch_size : training_params.rows();
-  _K.resize(_num_outputs * batch_size, _num_outputs * batch_size);
+  const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= training_params.rows());
+  _batch_size = batch_decision ? opts.batch_size : training_params.rows();
+  _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
   std::cout << _tuning_data.size() << std::endl;
   if (_tuning_data.size())
@@ -156,7 +156,6 @@ GaussianProcessGeneral::tuneHyperParamsAdam(const RealEigenMatrix & training_par
                                             const GPOptimizerOptions & opts)
 {
   std::vector<Real> theta(_num_tunable, 0.0);
-  _batch_size = opts.batch_size;
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
   mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);

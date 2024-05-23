@@ -26,9 +26,7 @@ GaussianProcessSurrogateGeneral::GaussianProcessSurrogateGeneral(const InputPara
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
     _gp(declareModelData<StochasticTools::GaussianProcessGeneral>("_gp")),
-    _training_params(getModelData<RealEigenMatrix>("_training_params")),
-    _n_dims(getModelData<unsigned int>("_n_dims")),
-    _n_outputs(getModelData<unsigned int>("_n_outputs"))
+    _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {
 }
 
@@ -71,24 +69,27 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
                                           std::vector<Real> & y,
                                           std::vector<Real> & std) const
 {
+  const unsigned int n_dims = _training_params.cols();
 
-  mooseAssert(x.size() == _n_dims,
+  mooseAssert(x.size() == n_dims,
               "Number of parameters provided for evaluation does not match number of parameters "
               "used for training.");
-  y = std::vector<Real>(_n_outputs, 0.0);
-  std = std::vector<Real>(_n_outputs, 0.0);
+  const unsigned int n_outputs = _gp.getCovarFunction().numOutputs();
 
-  RealEigenMatrix test_points(1, _n_dims);
-  for (unsigned int ii = 0; ii < _n_dims; ++ii)
+  y = std::vector<Real>(n_outputs, 0.0);
+  std = std::vector<Real>(n_outputs, 0.0);
+
+  RealEigenMatrix test_points(1, n_dims);
+  for (unsigned int ii = 0; ii < n_dims; ++ii)
     test_points(0, ii) = x[ii];
 
   _gp.getParamStandardizer().getStandardized(test_points);
 
-  RealEigenMatrix K_train_test(_training_params.rows() * _n_outputs, _n_outputs);
+  RealEigenMatrix K_train_test(_training_params.rows() * n_outputs, n_outputs);
 
   _gp.getCovarFunction().computeCovarianceMatrix(
       K_train_test, _training_params, test_points, false);
-  RealEigenMatrix K_test(_n_outputs, _n_outputs);
+  RealEigenMatrix K_test(n_outputs, n_outputs);
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
@@ -103,7 +104,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
   RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
   _gp.getDataStandardizer().getDescaled(std_dev_mat);
 
-  for (const auto output_i : make_range(_n_outputs))
+  for (const auto output_i : make_range(n_outputs))
   {
     y[output_i] = pred_value(0, output_i);
     std[output_i] = std_dev_mat(output_i, output_i);

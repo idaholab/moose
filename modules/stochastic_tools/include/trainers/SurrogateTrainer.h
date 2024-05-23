@@ -60,7 +60,7 @@ public:
 
   virtual void initialize() final;
   virtual void execute() final;
-  virtual void finalize() final{};
+  virtual void finalize() final {};
 
 protected:
   /*
@@ -130,7 +130,7 @@ protected:
   /// Columns from sampler for predictors
   std::vector<unsigned int> _pcols;
   /// Dimension of predictor data - either _sampler.getNumberOfCols() or _pvals.size() + _pcols.size().
-  unsigned int & _n_dims;
+  unsigned int _n_dims;
   /// The number of outputs
   unsigned int & _n_outputs;
   ///@}
