@@ -44,6 +44,10 @@ LowerDIntegralSideUserObject::execute()
       upwind_elem ? _fe_problem.mesh().getLowerDElem(_current_elem, _current_side)
                   : _fe_problem.mesh().getLowerDElem(neighbor,
                                                      neighbor->which_neighbor_am_i(_current_elem));
+  if (!current_lower_d_elem)
+    mooseError("Cannot find lower-d element");
+  if (_mesh.getHigherDSide(current_lower_d_elem) == libMesh::invalid_uint)
+    mooseError("Error in getting side id of a lower-d element with respect to higher-d element");
   _fe_problem.reinitLowerDElem(current_lower_d_elem, _tid);
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
   {
@@ -62,4 +66,5 @@ LowerDIntegralSideUserObject::threadJoin(const UserObject & y)
 void
 LowerDIntegralSideUserObject::finalize()
 {
+  gatherSum(_integral_value);
 }

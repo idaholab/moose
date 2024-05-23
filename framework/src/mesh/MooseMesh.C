@@ -1237,6 +1237,7 @@ MooseMesh::cacheInfo()
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
   _higher_d_elem_side_to_lower_d_elem.clear();
+  _lower_d_elem_to_higher_d_elem_side.clear();
 
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
@@ -1255,6 +1256,8 @@ MooseMesh::cacheInfo()
         auto pair = std::make_pair(ip_elem, ip_side);
         _higher_d_elem_side_to_lower_d_elem.insert(
             std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
+        _lower_d_elem_to_higher_d_elem_side.insert(
+            std::pair<const Elem *, unsigned short int>(elem, ip_side));
       }
     }
 
