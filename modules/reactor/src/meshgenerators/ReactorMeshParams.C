@@ -43,7 +43,7 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
-  params.addParam<bool>("region_id_as_block_name", false, "Set block name based on region id");
+  params.addParam<bool>("region_id_as_block_name", false, "Set block names based on region id");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
 

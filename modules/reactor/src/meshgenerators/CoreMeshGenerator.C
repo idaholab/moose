@@ -677,7 +677,7 @@ CoreMeshGenerator::generate()
       auto elem_block_name = default_block_name;
       if (has_block_names)
         elem_block_name += "_" + _pin_block_name_map[pin_type_id][z_id][radial_idx];
-      if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+      else if (getReactorParam<bool>(RGMB::region_id_as_block_name))
         elem_block_name += "_REG" + std::to_string(elem_rid);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";
@@ -713,20 +713,24 @@ CoreMeshGenerator::generate()
 
       // Set element block name and block id
       auto elem_block_name = default_block_name;
-      if (is_background_region)
-      {
-        bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
-        if (has_background_block_name)
-          elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
-      }
-      else
-      {
-        bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
-        if (has_duct_block_names)
-          elem_block_name += "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
-      }
       if (getReactorParam<bool>(RGMB::region_id_as_block_name))
         elem_block_name += "_REG" + std::to_string(elem_rid);
+      else
+      {
+        if (is_background_region)
+        {
+          bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
+          if (has_background_block_name)
+            elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
+        }
+        else
+        {
+          bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
+          if (has_duct_block_names)
+            elem_block_name +=
+                "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
+        }
+      }
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";
       updateElementBlockNameId(

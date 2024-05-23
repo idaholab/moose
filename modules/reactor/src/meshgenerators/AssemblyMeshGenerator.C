@@ -594,9 +594,9 @@ AssemblyMeshGenerator::generate()
       auto elem_block_name = default_block_name;
       if (getReactorParam<bool>(RGMB::region_id_as_block_name))
         elem_block_name += "_REG" + std::to_string(elem_rid);
-      if (is_background_region && _has_background_block_name)
+      else if (is_background_region && _has_background_block_name)
         elem_block_name += "_" + _background_block_name[z_id];
-      if (!is_background_region && _has_duct_block_names)
+      else if (!is_background_region && _has_duct_block_names)
         elem_block_name += "_" + _duct_block_names[z_id][peripheral_idx - 1];
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);

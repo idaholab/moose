@@ -278,7 +278,7 @@
     recover = false
   []
   [periphery_rid_as_block_name_err]
-    requirement = 'The system shall throw an error when generating a core mesh with manually defined periphery block name and setting option to automatically define block names based on region IDs'
+    requirement = 'The system shall throw an error when generating a core mesh with a manually defined periphery block name and being set to automatically define block names based on region IDs'
     type = 'RunException'
     input = 'core_periphery_ptmg_vol.i'
     cli_args = "Mesh/rmp/region_id_as_block_name=true"

@@ -41,7 +41,7 @@
     recover = false
   []
   [hex_rid_as_block_name]
-    requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types, with separate block names for each region ID in the mesh'
+    requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types, with separate block names assigned based on region IDs in the mesh'
     type = 'Exodiff'
     input = 'assembly_hex.i'
     cli_args = "Mesh/rmp/region_id_as_block_name=true
@@ -50,7 +50,7 @@
     recover = false
   []
   [hex_rid_as_block_name_err]
-    requirement = 'The system shall throw an error when generating an assembly mesh with manually defined block names and setting option to automatically define block names based on region IDs'
+    requirement = 'The system shall throw an error when generating an assembly mesh with manually defined block names and being set to automatically define block names based on region IDs'
     type = 'RunException'
     input = 'assembly_hex.i'
     cli_args = "Mesh/rmp/region_id_as_block_name=true
