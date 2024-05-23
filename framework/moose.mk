@@ -161,7 +161,8 @@ hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
-capabilities_LIB          := $(CAPABILITIES_DIR)/capabilities.$(PYMOD_EXTENSION)
+capabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)
+capabilities_LIB          := $(CAPABILITIES_DIR)/$(capabilities_LIBNAME)
 capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS)
 capabilities_LDFLAGS      := -Wl,-rpath,$(HIT_DIR) -L$(HIT_DIR) -lhit-$(METHOD) -Wl,-rpath,$(FRAMEWORK_DIR) -L$(FRAMEWORK_DIR) -lmoose-$(METHOD) $(DYNAMIC_LOOKUP)
 
@@ -502,6 +503,24 @@ share_dir = $(PREFIX)/share
 moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
+lib_install_suffix = lib/$(APPLICATION_NAME)
+lib_install_dir = $(PREFIX)/$(lib_install_suffix)
+
+libname_framework = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/libmoose-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)
+libname_pcre = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/pcre/libpcre-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
+libname_hit = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/hit/libhit-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_hit = $(MOOSE_DIR)/framework/contrib/hit/$(libname_hit)
+
+ifneq (,$(findstring darwin,$(libmesh_HOST)))
+  patch_relink = install_name_tool -change $(2) @rpath/$(3) $(1)
+  patch_rpath = install_name_tool -add_rpath @executable_path/$(2) $(1)
+else
+  patch_relink = :
+  patch_rpath = patchelf --set-rpath '$$ORIGIN'/$(2):$$(patchelf --print-rpath $(1)) $(1)
+endif
+patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
 
 install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_testers
 
@@ -528,7 +547,8 @@ install_python: $(pyhit_LIB) $(capabilities_LIB)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
 	@cp -f $(pyhit_LIB) $(python_install_dir)/
 	@cp -f $(capabilities_LIB) $(python_install_dir)/
-
+	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),../../../$(lib_install_suffix)/)
+	@$(call patch_rpath,$(lib_install_dir)/$(libname_framework),./)
 
 install_harness: install_python
 	@echo "Installing TestHarness"
