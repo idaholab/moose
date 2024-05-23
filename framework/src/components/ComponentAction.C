@@ -43,7 +43,7 @@ ComponentAction::act()
     addUserObjects();
   else if (_current_task == "setup_component")
     setupComponent();
-  // If we define the Physics in a Physics block
+  // If we define the Physics in a Physics block. See PhysicsComponentHelper
   else if (_current_task == "init_component_physics")
     addPhysics();
   // These tasks are there to match what the current combined Physics + Component do

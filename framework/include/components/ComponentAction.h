@@ -34,6 +34,9 @@ public:
   /// Get the name of the mesh generator created by this component that generates the mesh for it
   const MeshGeneratorName & meshName() const { return _mg_name; }
 
+  /// Returns the subdomains for the component mesh, if any
+  const std::vector<SubdomainName> & blocks() const { return _blocks; }
+
   /// Return the outer surface boundaries
   virtual const std::vector<BoundaryName> & outerSurfaceBoundaries() const
   {
@@ -59,9 +62,9 @@ protected:
   virtual void addNonlinearVariables() {}
 
   /// Use this if registering a new task to the derived ComponentAction
-  virtual void actOnAdditionalTasks() {};
+  virtual void actOnAdditionalTasks() {}
 
-  virtual void addPhysics() {};
+  virtual void addPhysics() {}
 
   /// Get problem from action warehouse
   FEProblem & getProblem()
@@ -75,6 +78,9 @@ protected:
 
   /// Name of the final mesh generator creating the mesh for the component
   MeshGeneratorName _mg_name;
+
+  /// Names of the blocks the component is comprised of
+  std::vector<SubdomainName> _blocks;
 
   /// Names of the boundaries on the component outer surface
   std::vector<BoundaryName> _outer_boundaries;
