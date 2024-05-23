@@ -24,7 +24,7 @@ public:
   {
     FIRST_ORDER,
     SECOND_ORDER_NONFULL,
-    SECOND_ORDER_FULL,
+    SECOND_ORDER,
     COMPLETE_ORDER
   };
 

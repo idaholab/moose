@@ -252,8 +252,10 @@ XYDelaunayGenerator::generate()
     triangulator_hole_ptrs[hole_i] = &meshed_holes.back();
   }
   if (stitch_second_order_holes && (_tri_elem_type == "TRI3" || _tri_elem_type == "DEFAULT"))
-    paramError("tri_element_type",
-               "Cannot use first order elements with stitched quadratic element holes.");
+    paramError(
+        "tri_element_type",
+        "Cannot use first order elements with stitched quadratic element holes. Please try "
+        "to specify a higher-order tri_element_type or reduce the order of the hole inputs.");
 
   if (!triangulator_hole_ptrs.empty())
     poly2tri.attach_hole_list(&triangulator_hole_ptrs);
@@ -314,7 +316,8 @@ XYDelaunayGenerator::generate()
     {
       mooseAssert(elem->type() ==
                       (_tri_elem_type == "TRI6" ? TRI6 : (_tri_elem_type == "TRI7" ? TRI7 : TRI3)),
-                  "Unexpected non-Tri found in triangulation");
+                  "Unexpected element type " << Utility::enum_to_string(elem->type())
+                                             << " found in triangulation");
 
       elem->subdomain_id() = _output_subdomain_id;
 

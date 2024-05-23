@@ -23,7 +23,7 @@
     input = 'order_conversion.i'
     exodiff = 'full_second_order.e'
     cli_args = '--mesh-only full_second_order.e 
-                Mesh/order_conversion/conversion_type=SECOND_ORDER_FULL'
+                Mesh/order_conversion/conversion_type=SECOND_ORDER'
     requirement = 'The system shall convert all the input elements into full-second-order elements.'
     recover = false
   []

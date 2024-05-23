@@ -21,7 +21,7 @@ ElementOrderConversionGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum conversion_type("FIRST_ORDER SECOND_ORDER_NONFULL SECOND_ORDER_FULL COMPLETE_ORDER",
+  MooseEnum conversion_type("FIRST_ORDER SECOND_ORDER_NONFULL SECOND_ORDER COMPLETE_ORDER",
                             "FIRST_ORDER");
 
   params.addClassDescription("Mesh generator which converts orders of elements");
@@ -52,7 +52,7 @@ ElementOrderConversionGenerator::generate()
     case OrderConversionType::SECOND_ORDER_NONFULL:
       mesh->all_second_order(false);
       break;
-    case OrderConversionType::SECOND_ORDER_FULL:
+    case OrderConversionType::SECOND_ORDER:
       mesh->all_second_order();
       break;
     case OrderConversionType::COMPLETE_ORDER:
