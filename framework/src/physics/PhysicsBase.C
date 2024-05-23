@@ -14,6 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
+#include "ComponentAction.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -207,6 +208,12 @@ PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_typ
   Action::addRelationshipManagers(input_rm_type, params);
 }
 
+const ComponentAction &
+PhysicsBase::getComponent(const ComponentName & comp_name)
+{
+  return _awh.getAction<ComponentAction>(comp_name);
+}
+
 void
 PhysicsBase::initializePhysics()
 {
@@ -300,8 +307,8 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
   if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
   if (blocks.empty())
-    _console << "Empty block restriction assigned to an object created by " << name()
-             << " did you mean to do this?" << std::endl;
+    mooseInfoRepeated("Empty block restriction assigned to an object created by Physics '" +
+                      name() + "'.\n Did you mean to do this?");
 }
 
 bool
