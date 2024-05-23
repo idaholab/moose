@@ -160,6 +160,10 @@ MeshGeneratorSystem::createAddedMeshGenerators()
 
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
 
+  // If there is no mesh
+  if (!moose_mesh.get())
+    mooseError("No mesh created. Either add a Mesh or a Components block");
+
   // If we're using data-driven generation, find that requirement now
   mooseAssert(!_data_driven_generator_name, "Should not be set");
   if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
