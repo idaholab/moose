@@ -8,8 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex
+import threading, os, re, sys, datetime, shlex, socket
 import paramiko
+import jinja2
 from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
 
@@ -110,6 +111,10 @@ class RunHPC(RunParallel):
         self.source_contents = None
         if self.options.hpc_pre_source:
             self.source_contents = open(self.options.hpc_pre_source, 'r').read()
+
+        # Load the submission template
+        template_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_template')
+        self.submission_template = open(template_path, 'r').read()
 
     class HPCJob:
         """
@@ -217,49 +222,46 @@ class RunHPC(RunParallel):
         # Support managing 250 HPC jobs concurrently
         return 250, False
 
-    class JobData:
-        """
-        Helper struct for storing the information to generate a job
-        """
-        def __init__(self):
-            # The command to be ran in the job
-            self.command = None
-            # self.command but escaped so that it can be printed
-            self.command_printable = None
-            # The name of the job
-            self.name = None
-            # The number of procs to run the job with
-            self.num_procs = None
-            # The number of threads to run the job with
-            self.num_threads = None
-            # The combined stdout+stderr output file
-            self.output_file = None
-            # The additonal output files to be read (csv, exodus, etc)
-            self.additional_output_files = None
-            # The path to the submission script
-            self.submission_script = None
-            # The walltime to run the job with
-            self.walltime = None
-
     def submitJob(self, job):
         """
         Method for submitting an HPC job for the given Job.
 
-        Should be overridden.
+        Returns the job's ID and the command to be ran in the job.
         """
         tester = job.getTester()
         options = self.options
 
-        job_data = self.JobData()
+        submission_script = self.getHPCJobSubmissionPath(job)
+        output_file = self.getHPCJobOutputPath(job)
 
-        # The submission script we're going to write to
-        job_data.submission_script = self.getHPCJobSubmissionPath(job)
-        # The combined stdout+stderr from the job
-        job_data.output_file = self.getHPCJobOutputPath(job)
         # Clean these two files
-        for file in [job_data.submission_script, job_data.output_file]:
+        for file in [submission_script, output_file]:
             if os.path.exists(file):
                 os.remove(file)
+
+        # Add MOOSE's python path for python scripts
+        moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..'))
+
+        # Start building the jinja environment for the submission script
+        submission_env = {'SCHEDULER_NAME': self.getHPCSchedulerName(),
+                          'NAME': self.getHPCJobName(job),
+                          'CWD': tester.getTestDir(),
+                          'OUTPUT': output_file,
+                          'SUBMISSION_SCRIPT': submission_script,
+                          'WALLTIME': str(datetime.timedelta(seconds=tester.getMaxTime())),
+                          'PROJECT': self.options.hpc_project,
+                          'TEST_SPEC': tester.getSpecFile(),
+                          'TEST_NAME': tester.getTestNameShort(),
+                          'SUBMITTED_HOSTNAME': socket.gethostname(),
+                          'MOOSE_PYTHONPATH': moose_python,
+                          'NUM_PROCS': tester.getProcs(options),
+                          'NUM_THREADS': tester.getThreads(options),
+                          'ENDING_COMMENT': self.getOutputEndingComment(f'${self.getHPCJobIDVariable()}'),
+                          'JOB_ID_VARIABLE': self.getHPCJobIDVariable()}
+        if self.options.hpc_pre_source:
+            submission_env['SOURCE_FILE'] = options.hpc_pre_source
+        if self.source_contents:
+            submission_env['SOURCE_CONTENTS'] = self.source_contents
 
         # The command to be ran. We're going to wrap this command in single quotes
         # so that we don't bash evaluate anything, hence the replacement of a
@@ -275,7 +277,7 @@ class RunHPC(RunParallel):
         # we need to manipulate the command like such
         # Original command: <mpiexec ...> </path/to/binary ...>
         # New command: <mpiexec ...> apptainer exec /path/to/image '</path/to/binary ...>'
-        # This is also the reason why we have to form job_data.command_printable;
+        # This is also the reason why we have to form job_command_printable;
         # the extra quotes around </path/to/binary ...> need to be escaped.
         APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
@@ -289,8 +291,8 @@ class RunHPC(RunParallel):
             else:
                 command_prefix = ''
 
-            job_data.command = command_prefix
-            job_data.command_printable = command_prefix
+            job_command = command_prefix
+            job_command_printable = command_prefix
 
             # The root filesystem path that we're in so that we can be sure to bind
             # it into the container, if not already set
@@ -305,17 +307,15 @@ class RunHPC(RunParallel):
             apptainer_command.append(APPTAINER_CONTAINER)
             apptainer_command = shlex.join(apptainer_command)
             # Append the apptainer command along with the command to be ran
-            job_data.command += f"{apptainer_command} '{command}'"
-            job_data.command_printable += f"{apptainer_command} \'\\'\'{command}\'\\'\'"
+            job_command += f"{apptainer_command} '{command}'"
+            job_command_printable += f"{apptainer_command} \'\\'\'{command}\'\\'\'"
         # Not in apptainer, so we can just use the escaped command as is
         else:
-            job_data.command = f"'{command}'"
-            job_data.command_printable += f"\'\\'\'{command}\'\\'\'"
+            job_command = f"'{command}'"
+            job_command_printable += f"\'\\'\'{command}\'\\'\'"
 
-        job_data.name = self.getHPCJobName(job)
-        job_data.num_procs = tester.getProcs(options)
-        job_data.num_threads = tester.getThreads(options)
-        job_data.walltime = str(datetime.timedelta(seconds=tester.getMaxTime()))
+        submission_env['COMMAND'] = job_command
+        submission_env['COMMAND_PRINTABLE'] = job_command_printable
 
         # The output files that we're expected to generate so that the
         # HPC job can add a terminator for them so that we can verify
@@ -323,35 +323,75 @@ class RunHPC(RunParallel):
         additional_output = []
         for file in tester.getOutputFiles(options):
             additional_output.append(f'"{os.path.join(tester.getTestDir(), file)}"')
-        job_data.additional_output_files = ' '.join(additional_output)
+        submission_env['ADDITIONAL_OUTPUT_FILES'] = ' '.join(additional_output)
 
-        # Let the derived class actually submit the job
-        job_id, submit_command = self._submitJob(job, job_data)
+        # Let the derived scheduler add additional variables
+        self.augmentJobSubmission(submission_env)
+
+        # Build the script
+        jinja_env = jinja2.Environment()
+        definition_template = jinja_env.from_string(self.submission_template)
+        jinja_env.trim_blocks = True
+        jinja_env.lstrip_blocks = True
+        script = definition_template.render(**submission_env)
+
+        # Write the script
+        open(submission_script, 'w').write(script)
+
+        # Submission command. Here we have a simple bash loop
+        # that will try to wait for the file if it doesn't exist yet
+        submission_command = self.getHPCSubmissionCommand()
+        cmd = [f'cd {tester.getTestDir()}',
+               f'FILE="{submission_script}"',
+                'for i in {1..40}',
+                    'do if [ -e "$FILE" ]',
+                       f'then {self.getHPCSubmissionCommand()} $FILE',
+                             'exit $?',
+                        'else sleep 0.25',
+                    'fi',
+                'done',
+                'exit 1']
+        cmd = '; '.join(cmd)
+
+        # Do the submission; this is thread safe
+        exit_code, result, full_cmd = self.callHPC(cmd)
+
+        # Set what we've ran for this job so that we can
+        # potentially get the context in an error
+        tester.setCommandRan(full_cmd)
+
+        # Nonzero return code
+        if exit_code != 0:
+            raise self.CallHPCException(self, f'{submission_command} failed', full_cmd, result)
+
+        # Parse the job ID from the command
+        job_id = self.parseHPCSubmissionJobID(result)
 
         # Job has been submitted, so set it as queued
-        job.addCaveats(job_id)
+        # Here we append job_id if the ID is just a number so that it's more
+        # obvious what it is
+        job.addCaveats(f'job={job_id}' if job_id.isdigit() else job_id)
         self.setAndOutputJobStatus(job, job.queued, caveats=True)
 
         # Setup the job in the status map
         with self.hpc_jobs_lock:
             if job in self.hpc_jobs:
                 raise Exception('Job has already been submitted')
-            self.hpc_jobs[job] = self.HPCJob(job_id, job_data.command)
+            self.hpc_jobs[job] = self.HPCJob(job_id, job_command)
 
-        return submit_command
+        return job_id, job_command
 
-    def _submitJob(self, job, job_data):
+    def augmentJobSubmission(self, submission_env):
         """
-        Submits a given job.
-
-        Should be overridden. This is where the derived classes
-        will specialize how to submit the job.
+        Entry point for derived schedulers to append to the
+        submission environment, which is used to populate
+        the submission jinja template.
         """
-        raise Exception('Unimplemented createJobScript()')
+        return
 
-    def getHPCJob(self, job):
+    def getHPCJobStatus(self, job):
         """
-        Gets the HPCJob object given a Job
+        Gets a job's status, which is None if it is pending or running
 
         This will periodically update statues given a timer.
         """
@@ -362,7 +402,13 @@ class RunHPC(RunParallel):
 
             # Only update the statues periodically as this is called across threads
             if self.hpc_jobs_status_timer is None or ((clock() - self.hpc_jobs_status_timer) > self.hpc_jobs_update_interval):
-                success = self.updateJobs()
+                # Obtain the IDs of jobs that are active that we need to poll for
+                active_job_ids = []
+                for job, hpc_job in self.hpc_jobs.items():
+                    if not hpc_job.done:
+                        active_job_ids.append(hpc_job.id)
+
+                success = self.updateJobs(active_job_ids)
                 if not success:
                     if self.update_jobs_failed:
                         raise Exception('Failed to get job status')
@@ -372,7 +418,7 @@ class RunHPC(RunParallel):
 
                 self.hpc_jobs_status_timer = clock()
 
-            return self.hpc_jobs.get(job)
+            return self.hpc_jobs.get(job).exit_code
 
     def updateJobs(self):
         """
@@ -398,6 +444,82 @@ class RunHPC(RunParallel):
             if max_time == tester.getDefaultMaxTime():
                 tester.setMaxTime(max_time * 2)
 
+    def killJob(self, job):
+        """Kills a HPC job"""
+        with self.hpc_jobs_lock:
+            if job not in self.hpc_jobs:
+                return
+            hpc_job = self.hpc_jobs[job]
+            if hpc_job.done or hpc_job.killed:
+                return
+            job_id = self.hpc_jobs[job].id
+
+        # Don't care about whether or not this failed
+        self.callHPC(f'{self.getHPCCancelCommand()} {job_id}')
+
+    def killRemaining(self, keyboard=False):
+        """Kills all currently running HPC jobs"""
+        job_ids = []
+        with self.hpc_jobs_lock:
+            for hpc_job in self.hpc_jobs.values():
+                if not hpc_job.done:
+                    job_ids.append(hpc_job.id)
+
+        # Don't care about whether or not this failed
+        self.callHPC(f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
+
+        with self.hpc_jobs_lock:
+            for hpc_job in self.hpc_jobs.values():
+                if not hpc_job.done:
+                    hpc_job.killed = True
+
+        super().killRemaining(keyboard)
+
+    def getHPCSchedulerName(self):
+        """
+        Returns the name of the HPC scheduler in a simple shorthand.
+
+        Used to produce files with a prefix of the scheduler type, i.e.,
+        pbs_something or slurm_something.
+
+        Should be overridden.
+        """
+        raise Exception('Unimplemented getHPCSchedulerName()')
+
+    def getHPCSubmissionCommand(self):
+        """
+        Returns command used for submitting jobs.
+
+        Should be overridden.
+        """
+        raise Exception('Unimplemented getHPCSchedulerName()')
+
+    def getHPCCancelCommand(self):
+        """
+        Returns comamnd used for cancelling jobs.
+
+        Should be overridden.
+        """
+        raise Exception('Unimplemented getHPCCancelCommand()')
+
+    def getHPCJobIDVariable(self):
+        """
+        Returns the environment variable name that contains the job ID
+        when within a job (i.e., on a compute node).
+
+        Should be overridden.
+        """
+        raise Exception('Unimplemented getHPCJobIDVariable()')
+
+    def parseHPCSubmissionJobID(self, result):
+        """
+        Returns the job ID from the result of the submission command
+        (from qsub or sbatch).
+
+        Should be overridden.
+        """
+        raise Exception('Unimplemented parseHPCSubmissionJobID()')
+
     @staticmethod
     def getHPCJobName(job) -> str:
         """Gets the name of the HPC job given a tester
@@ -406,23 +528,27 @@ class RunHPC(RunParallel):
         """
         return job.getTestName().replace(':', '.').replace('/', '.')
 
-    @staticmethod
-    def getHPCJobOutputPathPrefix(job):
+    def getHPCJobOutputPathPrefix(self, job):
         """Gets the absolute path prefix for a HPC job"""
-        return os.path.join(job.getTestDir(), "pbs_" + job.getTestNameShort().replace('/', '.'))
+        scheduler_name = self.getHPCSchedulerName()
+        return os.path.join(job.getTestDir(), f"{scheduler_name}_" + job.getTestNameShort().replace('/', '.'))
 
-    @staticmethod
-    def getHPCJobOutputPath(job):
+    def getHPCJobOutputPath(self, job):
         """Gets the absolute path for stdout/stderr for a HPC job"""
-        return RunHPC.getHPCJobOutputPathPrefix(job) + '.out'
+        return self.getHPCJobOutputPathPrefix(job) + '.out'
+
+    def getHPCJobSubmissionPath(self, job):
+        """Gets the aboslute path for the qsub script for a HPC job"""
+        return self.getHPCJobOutputPathPrefix(job) + f'.{self.getHPCSubmissionCommand()}'
 
     @staticmethod
-    def getHPCJobSubmissionPath(job):
-        """Gets the aboslute path for the qsub script for a HPC job"""
-        return RunHPC.getHPCJobOutputPathPrefix(job) + '.qsub'
-
-    def getOutputEndingComment(self, job_id) -> str:
-        raise Exception('Unimplemented getOutputEndingComment()')
+    def getOutputEndingComment(job_id) -> str:
+        """
+        Get the ending comment that is applied to all output files
+        that are read in order to verify that the files are fully
+        synced when reading during postprocessing.
+        """
+        return f'TESTHARNESS RUNHPC FILE TERMINATOR FOR {job_id}\n'
 
     @staticmethod
     def parseMPICommand(command) -> str:
