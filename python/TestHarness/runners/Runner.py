@@ -60,13 +60,14 @@ class Runner:
         """
         # Load the redirected output files, if any
         for file_path in self.job.getTester().getRedirectedOutputFiles(self.options):
-            self.output += util.outputHeader(f'Redirected output {file_path}')
+            self.output += util.outputHeader(f'Begin redirected output {file_path}')
             if os.access(file_path, os.R_OK):
                 with open(file_path, 'r+b') as f:
                     self.output += self.readOutput(f)
             else:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
                 self.output += 'FILE UNAVAILABLE\n'
+            self.output += util.outputHeader(f'End redirected output {file_path}')
 
         # Check for invalid unicode in output
         try:
