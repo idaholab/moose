@@ -98,6 +98,8 @@ private:
 
   /// Add material to define the local speed in porous medium flows
   void addPorousMediumSpeedMaterial();
+  /// Add material to define the local speed with no porous medium treatment
+  void addNonPorousMediumSpeedMaterial();
 
   /// Function which adds the RhieChow interpolator user objects for weakly and incompressible formulations
   void addRhieChowUserObjects();

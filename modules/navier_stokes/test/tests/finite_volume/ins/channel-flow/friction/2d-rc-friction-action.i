@@ -49,14 +49,6 @@ rho = 1.1
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
   []
-  [speed_material]
-    type = PINSFVSpeedFunctorMaterial
-    superficial_vel_x = vel_x
-    superficial_vel_y = vel_y
-    porosity = 1
-    vel_x = vel_x_mat
-    vel_y = vel_y_mat
-  []
   [Re_material]
     type = ReynoldsNumberFunctorMaterial
     speed = speed
