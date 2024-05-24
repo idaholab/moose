@@ -21,51 +21,54 @@ class RunSlurm(RunHPC):
         # Slurm is quite a bit faster at updating
         self.hpc_jobs_update_interval = 5
 
-    def updateJobs(self, active_job_ids):
+    def updateHPCJobs(self, active_hpc_jobs):
         # Poll for all of the jobs within a single call
-        cmd = ['sacct', '-j', ','.join(active_job_ids), '--parsable2', '--noheader', '-o', 'jobid,exitcode,state,reason']
+        active_job_ids = ','.join([x.id for x in active_hpc_jobs])
+        cmd = ['sacct', '-j', active_job_ids, '--parsable2', '--noheader',
+               '-o', 'jobid,exitcode,state,reason']
         exit_code, result, _ = self.callHPC(' '.join(cmd))
         if exit_code != 0:
             return False
 
-        # Attempt to parse the status from the jobs
-        try:
-            statuses = {}
-            for status in result.splitlines():
-                # jobid,exitcode,state,reason are split by |
-                status_split = status.split('|')
-                # Slurm has sub jobs under each job, and we only care about the top-level job
-                id = status_split[0]
-                if not id.isdigit():
-                    continue
-                # exitcode is <val>:<val>, where the first value is the
-                # exit code of the process, the second is a slurm internal code
-                statuses[id] = {'exitcode': int(status_split[1].split(':')[0]),
-                                'state': status_split[2],
-                                'reason': status_split[3]}
+        # Parse the status from the jobs
+        statuses = {}
+        for status in result.splitlines():
+            # jobid,exitcode,state,reason are split by |
+            status_split = status.split('|')
+            # Slurm has sub jobs under each job, and we only care about the top-level job
+            id = status_split[0]
+            if not id.isdigit():
+                continue
+            # exitcode is <val>:<val>, where the first value is the
+            # exit code of the process, the second is a slurm internal code
+            statuses[id] = {'exitcode': int(status_split[1].split(':')[0]),
+                            'state': status_split[2],
+                            'reason': status_split[3]}
 
-            # Update the jobs that we can
-            for job, hpc_job in self.hpc_jobs.items():
-                # We're only updating jobs that aren't done yet
-                if hpc_job.done:
-                    continue
-                # Slurm jobs are sometimes not immediately available
-                status = statuses.get(hpc_job.id)
-                if status is None:
-                    continue
+        # Update the jobs that we can
+        for hpc_job in active_hpc_jobs:
+            # Slurm jobs are sometimes not immediately available
+            status = statuses.get(hpc_job.id)
+            if status is None:
+                continue
 
-                state = status['state']
-                if state != 'PENDING' and not hpc_job.running:
-                    hpc_job.running = True
-                    self.setAndOutputJobStatus(job, job.running, caveats=True)
-                if hpc_job.running and state not in ['RUNNING', 'COMPLETING']:
-                    hpc_job.running = False
-                    hpc_job.done = True
-                    hpc_job.exit_code = status['exitcode']
-                    if state not in ['FAILED', 'COMPLETED']:
-                        job.setStatus(job.error, f'SLURM ERROR: {state}')
-        except Exception as e:
-            raise self.CallHPCException(self, f'Failed to parse collective job status', cmd, result) from e
+            # The slurm job state; see slurm.schedmd.com/squeue.html#lbAG
+            state = status['state']
+
+            # Job wasn't running and it's no longer pending, so it
+            # is running or has at least ran
+            if state != 'PENDING' and not hpc_job.getRunning():
+                self.setHPCJobRunning(hpc_job)
+
+            # Job was running and isn't running anymore, so it's done
+            if hpc_job.getRunning() and state not in ['RUNNING', 'COMPLETING']:
+                # If a job COMPLETED, it's done with exit code 0 so everything
+                # went well. If it FAILED, it finished but returned with a
+                # non-zero exit code, which will be handled by the Tester.
+                if state not in ['FAILED', 'COMPLETED']:
+                    hpc_job.job.setStatus(hpc_job.job.error, f'SLURM ERROR: {state}')
+
+                self.setHPCJobDone(hpc_job, int(status['exitcode']))
 
         # Success
         return True
