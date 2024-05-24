@@ -56,7 +56,15 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
-    _likelihoods.push_back(getLikelihoodFunctionByName(name));
+  {
+    if (queryLikelihoodFunctionType(name) == LikelihoodFunctionTypes::SCALAR)
+      _likelihoods.push_back(getLikelihoodFunctionByName(name));
+    else if (queryLikelihoodFunctionType(name) == LikelihoodFunctionTypes::VECTOR)
+      _likelihood_vectors.push_back(getLikelihoodVectorFunctionByName(name));
+  }
+  if (_likelihoods.size() > 0 && _likelihood_vectors.size() > 0)
+    mooseError(
+        "Currently unable to simultaneously handle vector and scalar likelihoods simultaneously");
 
   // Check whether the selected sampler is an MCMC sampler or not
   if (!_pmcmc)
@@ -104,8 +112,41 @@ PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<R
         evidence[i] -= _likelihoods[j]->function(out2);
     }
     else
+    {
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
         evidence[i] += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(out2));
+    }
+  }
+  std::vector<std::vector<Real>> out1v(_num_confg_values);
+  std::vector<std::vector<Real>> out2v(_num_confg_values);
+  for (unsigned int i = 0; i < evidence.size(); ++i)
+  {
+    evidence[i] = 0.0;
+    for (unsigned int j = 0; j < _priors.size(); ++j)
+      evidence[i] += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
+                      std::log(_priors[j]->pdf(_data_prev(i, j))));
+    for (unsigned int j = 0; j < _num_confg_values; ++j)
+    {
+      out1v[i][j] = _outputs_required[j * _props + i];
+      out2v[i][j] = _outputs_prev[j * _props + i];
+    }
+    if (_var_prior)
+    {
+      evidence[i] += (std::log(_var_prior->pdf(_new_var_samples[i])) -
+                      std::log(_var_prior->pdf(_var_prev[i])));
+      _noise = std::sqrt(_new_var_samples[i]);
+      for (unsigned int j = 0; j < _likelihood_vectors.size(); ++j)
+        evidence[i] += _likelihood_vectors[j]->function(out1v);
+      _noise = std::sqrt(_var_prev[i]);
+      for (unsigned int j = 0; j < _likelihood_vectors.size(); ++j)
+        evidence[i] -= _likelihood_vectors[j]->function(out2v);
+    }
+    else
+    {
+      for (unsigned int j = 0; j < _likelihood_vectors.size(); ++j)
+        evidence[i] +=
+            (_likelihood_vectors[j]->function(out1v) - _likelihood_vectors[j]->function(out2v));
+    }
   }
 }
 

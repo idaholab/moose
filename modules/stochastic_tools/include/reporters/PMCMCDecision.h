@@ -82,6 +82,7 @@ protected:
 
   /// Storage for the likelihood objects to be utilized
   std::vector<const LikelihoodFunctionBase *> _likelihoods;
+  std::vector<const LikelihoodFunctionBaseVector *> _likelihood_vectors;
 
   /// The MCMC sampler
   Sampler & _sampler;

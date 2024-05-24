@@ -7,28 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AddLikelihoodAction.h"
+#include "AddLikelihoodVectorAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
-#include "LikelihoodFunctionBase.h"
+#include "LikelihoodFunctionBaseVector.h"
 
-registerMooseAction("StochasticToolsApp", AddLikelihoodAction, "add_likelihood");
+registerMooseAction("StochasticToolsApp", AddLikelihoodVectorAction, "add_vector_likelihood");
 
 InputParameters
-AddLikelihoodAction::validParams()
+AddLikelihoodVectorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Adds Likelihood objects.");
+  params.addClassDescription(
+      "Adds Likelihood objects allowing multiple measurements per simulation.");
   return params;
 }
 
-AddLikelihoodAction::AddLikelihoodAction(const InputParameters & params) : MooseObjectAction(params)
+AddLikelihoodVectorAction::AddLikelihoodVectorAction(const InputParameters & params)
+  : MooseObjectAction(params)
 {
 }
 
 void
-AddLikelihoodAction::act()
+AddLikelihoodVectorAction::act()
 {
-  _problem->addObject<LikelihoodFunctionBase>(
+  _problem->addObject<LikelihoodFunctionBaseVector>(
       _type, _name, _moose_object_pars, /* threaded = */ false);
 }
