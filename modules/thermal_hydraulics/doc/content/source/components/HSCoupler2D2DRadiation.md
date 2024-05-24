@@ -71,6 +71,7 @@ The following restrictions apply for this component:
 
 - Only cylindrical heat structures such as [HeatStructureCylindrical.md] are supported.
 - The axial discretizations of the coupled heat structures must match exactly.
+- Exactly one boundary must be provided for each heat structure.
 
 The heat structures are provided via [!param](/Components/HSCoupler2D2DRadiation/heat_structures),
 and their boundaries are provided via [!param](/Components/HSCoupler2D2DRadiation/boundaries),

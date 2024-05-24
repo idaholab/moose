@@ -1,6 +1,8 @@
 # This input file is used to test that HSCoupler2D2DRadiation conserves
 # energy for a problem where 3 cylindrical heat structures (surfaces 1, 2, and 3)
-# are enclosed by an annular heat structure (surface 4).
+# are enclosed by an annular heat structure (surface 4). Note that the mesh
+# positions used in this input file do not reflect the real positions for this
+# configuration, for convenience of viewing solutions.
 
 emissivity1 = 0.8
 emissivity2 = 0.5
