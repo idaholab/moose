@@ -444,12 +444,11 @@ class RunHPC(RunParallel):
     def killJob(self, job):
         """Kills a HPC job"""
         with self.hpc_jobs_lock:
-            if job not in self.hpc_jobs:
+            hpc_job = self.hpc_jobs.get(job)
+            if hpc_job is None or hpc_job.done or hpc_job.killed:
                 return
-            hpc_job = self.hpc_jobs[job]
-            if hpc_job.done or hpc_job.killed:
-                return
-            job_id = self.hpc_jobs[job].id
+            job_id = hpc_job.id
+            hpc_job.killed = True
 
         # Don't care about whether or not this failed
         self.callHPC(f'{self.getHPCCancelCommand()} {job_id}')
@@ -461,14 +460,10 @@ class RunHPC(RunParallel):
             for hpc_job in self.hpc_jobs.values():
                 if not hpc_job.done:
                     job_ids.append(hpc_job.id)
+                    hpc_job.killed = True
 
         # Don't care about whether or not this failed
         self.callHPC(f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
-
-        with self.hpc_jobs_lock:
-            for hpc_job in self.hpc_jobs.values():
-                if not hpc_job.done:
-                    hpc_job.killed = True
 
         super().killRemaining(keyboard)
 
