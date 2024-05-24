@@ -187,7 +187,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   if constexpr (is_ad)
   {
     // We have the option of using dual numbers to compute the newton solve derivatives. In those
-    // cases we cannot simply switch of derivative calculation, or teh Newton iterations will never
+    // cases we cannot simply switch off derivative calculation, or the Newton iterations will never
     // converge.
     if (!_ad_derivative)
       ADReal::do_derivatives = false;
@@ -274,7 +274,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
             if (scalar_upper_bound != max_permissible_scalar &&
                 scalar_lower_bound != min_permissible_scalar)
             {
-              const Real frac = 0.5;
+              constexpr Real frac = 0.5;
               scalar_increment =
                   (1.0 - frac) * scalar_lower_bound + frac * scalar_upper_bound - scalar_old;
               modified_increment = true;
@@ -324,8 +324,6 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     ADReal::do_derivatives = did_derivatives;
     if (did_derivatives && !_ad_derivative)
     {
-      // computeResidualAndDerivativeHelper(effective_trial_stress, scalar_old);
-      // scalar = scalar_old - _residual / _derivative;
       computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
       if (_derivative != 0.0)
         scalar = scalar - _residual / _derivative;
