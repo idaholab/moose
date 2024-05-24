@@ -22,10 +22,9 @@ class RunPBS(RunHPC):
         if self.options.hpc_queue:
             submission_env['QUEUE'] = self.options.hpc_queue
 
-    def updateJobs(self, active_hpc_jobs):
+    def updateHPCJobs(self, active_hpc_jobs):
         # Poll for all of the jobs within a single call
-        active_job_ids = ','.join([x.id for x in active_hpc_jobs])
-        cmd = ['qstat', '-xf', '-F', 'json'] + active_job_ids
+        cmd = ['qstat', '-xf', '-F', 'json'] + [x.id for x in active_hpc_jobs]
         exit_code, result, _ = self.callHPC(' '.join(cmd))
         if exit_code != 0:
             return False
