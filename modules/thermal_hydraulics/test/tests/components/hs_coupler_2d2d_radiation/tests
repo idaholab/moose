@@ -3,7 +3,7 @@
   issues = '#27651'
 
   [test]
-    requirement = 'The system shall be able to couple two 2D, cylindrical heat structures via radiation using a general formulation'
+    requirement = 'The system shall be able to couple an arbitrary number cylindrical heat structures via radiation using a general formulation'
 
     [concentric_cylinders]
       type = CSVDiff

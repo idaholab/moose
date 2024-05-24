@@ -177,7 +177,7 @@ HSCoupler2D2DRadiation::addMooseObjects()
     getTHMProblem().addUserObject(class_name, temperature_uo_name, params);
   }
 
-  // add side UO on 3D boundary to compute heat fluxes across each 3D boundary
+  // add side UO to compute heat fluxes across each boundary
   const UserObjectName hs_coupler_2d2d_uo_name = genName(name(), "uo");
   {
     const std::string class_name = "HSCoupler2D2DRadiationUserObject";

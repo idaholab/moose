@@ -28,9 +28,9 @@ protected:
   virtual void setupMesh() override;
   virtual void check() const override;
 
-  /// Primary and secondary heat structure names
+  /// Heat structure names
   const std::vector<std::string> _hs_names;
-  /// Primary and secondary heat structure boundaries
+  /// Heat structure boundary names
   const std::vector<BoundaryName> _hs_boundaries;
   /// Whether or not to include an environment surrounding all of the surfaces
   const bool _include_environment;

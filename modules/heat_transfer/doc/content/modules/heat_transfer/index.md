@@ -18,7 +18,7 @@ The heat conduction equation describes the diffusion of heat in a solid or stati
   \rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q} ~\text{for}~\vec{x} \in \Omega,
 \end{equation}
 
-where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source density, and $\Omega$ is the domain. It should be emphasized that for solids the isobaric and isochoric heat capacities, $c_p$ and $c_v$ respectively, are almost identical, while for stagnant fluids $c_v$ should be used.
+where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source density, and $\Omega$ is the domain. It should be emphasized that for solids the isobaric and isochoric heat capacities, $c_p$ and $c_v$ respectively, are almost identical, while for stagnant fluids $c_p$ should be used.
 
 Boundary conditions for the heat equation are defined on the boundary of the domain $\partial \Omega$. The boundary is divided into Dirichlet boundaries $\partial \Omega_D$ and Robin boundaries $\partial \Omega_R$ such that $\partial \Omega = \partial \Omega_D \cup \partial \Omega_R$:
 
@@ -150,7 +150,7 @@ area $dA$ at $\vec{x}$, during time interval $dt$ at time $t$, along direction w
 \end{equation}
 
 where $\vec{n}$ is the normal on face $dA$.
-The intensity is computed by a code that solves the radiative transfer equation, e.g., [Rattlesnake](https://rattlesnake.inl.gov/SitePages/Home.aspx) within the MOOSE framework. The solution of the radiative transfer equation is coupled to heat conduction within solid domains
+The intensity is computed by a code that solves the radiative transfer equation, e.g., [Griffin](https://inlsoftware.inl.gov/product/griffin) within the MOOSE framework. The solution of the radiative transfer equation is coupled to heat conduction within solid domains
 through the balance at the surface [eq:heat_balance], but now we evaluate the net heat flux from the spectral intensity:
 
 \begin{equation}
