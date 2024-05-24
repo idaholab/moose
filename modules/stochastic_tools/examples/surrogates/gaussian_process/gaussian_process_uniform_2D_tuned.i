@@ -23,8 +23,8 @@
   []
   [cart_sample]
     type = CartesianProduct
-    linear_space_items = '1 0.09 100
-                          9000 20 100 '
+    linear_space_items = '1 0.09 10
+                          9000 20 10 '
     execute_on = initial
   []
 []
@@ -72,8 +72,8 @@
     sampler = train_sample
     response = results/data:avg:value
     tune_parameters = 'rbf:signal_variance rbf:length_factor'
-    tuning_min = ' 1e-9 1e-9'
-    tuning_max = ' 1e16  1e16'
+    tuning_min = '1e-9 1e-9'
+    tuning_max = '1e16  1e16'
     batch_size = 50
     num_iters = 5000
     learning_rate = 5e-3

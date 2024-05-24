@@ -79,7 +79,7 @@
     tuning_min = ' 1e-9 1e-3'
     tuning_max = ' 100  100'
     num_iters = 200
-    learning_rate_adam = 0.005
+    learning_rate = 0.005
   []
 []
 
