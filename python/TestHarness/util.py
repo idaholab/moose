@@ -891,12 +891,13 @@ def trimOutput(job, options):
                                                    "#"*80,
                                                    output[-second_part:])
 
-def outputHeader(header):
+def outputHeader(header, ending=True):
     """
     Returns text for output with a visual separator, i.e.:
     ##############################...
     <header>
     ##############################...
     """
-    sep = '#' * 80
-    return f'{sep}\n{header}\n{sep}\n'
+    begin_sep = '#' * 80
+    end_sep = f'{begin_sep}\n' if ending else ''
+    return f'{begin_sep}\n{header}\n{end_sep}'
