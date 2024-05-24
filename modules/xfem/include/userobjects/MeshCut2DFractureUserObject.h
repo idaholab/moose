@@ -11,8 +11,6 @@
 
 #include "MeshCut2DUserObjectBase.h"
 
-class CrackFrontDefinition;
-
 /**
  * MeshCut2DFractureUserObject:
  * (1) reads in a mesh describing the crack surface

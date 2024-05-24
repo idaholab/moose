@@ -15,8 +15,8 @@
     dim = 2
     nx = 45
     ny = 15
-    xmin = -1.5
-    xmax = 1.5
+    xmin = -1
+    xmax = 0.49
     ymin = 0.0
     ymax = 1.0
     elem_type = QUAD4
@@ -46,30 +46,51 @@
   used_by_xfem_to_grow_crack = true
 []
 
+[VectorPostprocessors]
+  [CrackFrontNormalStressVpp]
+    type = CrackFrontNormalStress
+    crack_front_definition = crackFrontDefinition
+    box_length = 0.05
+    box_height = 0.1
+    execute_on = NONLINEAR
+  []
+[]
 [UserObjects]
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
     mesh_file = make_edge_crack_in.e
-    k_critical = 80
-    growth_increment = 0.1
+    growth_increment = 0.05
+    ki_vectorpostprocessor = "II_KI_1"
+    kii_vectorpostprocessor = "II_KII_1"
+    k_critical = 100
+    # stress_vectorpostprocessor = "CrackFrontNormalStressVpp"
+    # stress_threshold = 120
   []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
-    strain = FINITE
+    strain = SMALL
+    incremental = true
     planar_formulation = plane_strain
     add_variables = true
-    generate_output = 'stress_xx stress_yy vonmises_stress'
+    generate_output = 'stress_xx stress_yy'
+  []
+[]
+
+[Functions]
+  [pull_func]
+    type = ParsedFunction
+    expression = 0.00025*(1+t)
   []
 []
 
 [BCs]
   [top_y]
-    type = DirichletBC
+    type = FunctionDirichletBC
     boundary = pull_set
     variable = disp_y
-    value = 0.001
+    function = pull_func
   []
   [bottom_x]
     type = DirichletBC
@@ -90,52 +111,35 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-    block = 0
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   []
 []
 
 [Executioner]
   type = Transient
-
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      8'
-
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' lu       superlu_dist                 NONZERO               1e-20'
   line_search = 'none'
-
   [Predictor]
     type = SimplePredictor
     scale = 1.0
   []
-
-  # controls for linear iterations
-  l_max_its = 100
-  l_tol = 1e-2
-
-  # controls for nonlinear iterations
-  nl_max_its = 15
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-9
-
   # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 1
+  end_time = 3
   max_xfem_update = 100
 []
 
 [Outputs]
   exodus = true
-  execute_on = TIMESTEP_END
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh2
   []
-  # console = false
   [console]
     type = Console
     output_linear = false
