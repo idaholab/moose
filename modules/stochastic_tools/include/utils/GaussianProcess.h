@@ -13,20 +13,19 @@
 #include <Eigen/Dense>
 
 #include "CovarianceFunctionBase.h"
-#include "OutputCovarianceBase.h"
 
 namespace StochasticTools
 {
 
 /**
- * Utility class dedicated to hold structures and functions common to
- * Multi Output Gaussian Processes. It can be used to standardize parameters, manipulate
+ * Utility class dedicated to hold structures and functions commont to
+ * Gaussian Processes. It can be used to standardize parameters, manipulate
  * covariance data and compute additional stored matrices.
  */
-class MultiOutputGaussianProcess
+class GaussianProcess
 {
 public:
-  MultiOutputGaussianProcess() {}
+  GaussianProcess();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -34,12 +33,14 @@ public:
    * parameter tuning.
    * @param covariance_function Pointer to the covariance function that
    *                            needs to be used for the Gaussian Process.
+   * @param params_to_tune List of parameters which need to be tuned.
+   * @param min List of lower bounds for the parameter tuning.
+   * @param max List of upper bounds for parameter tuning.
    */
-  void initialize(OutputCovarianceBase * output_covariance,
-                  CovarianceFunctionBase * covariance_function,
-                  const std::vector<std::string> params_to_tune,
-                  std::vector<Real> min = std::vector<Real>(),
-                  std::vector<Real> max = std::vector<Real>());
+  void initialize(CovarianceFunctionBase * covariance_function,
+                  const std::vector<std::string> & params_to_tune,
+                  const std::vector<Real> & min = std::vector<Real>(),
+                  const std::vector<Real> & max = std::vector<Real>());
 
   /// Structure containing the optimization options for
   /// hyperparameter-tuning
@@ -49,18 +50,30 @@ public:
     GPOptimizerOptions();
     /// Construct using user-input
     GPOptimizerOptions(const bool inp_show_optimization_details,
-                       const unsigned int inp_iter = 1000,
+                       const unsigned int inp_num_iter = 1000,
                        const unsigned int inp_batch_size = 0,
-                       const Real inp_learning_rate = 1e-3);
+                       const Real inp_learning_rate = 1e-3,
+                       const Real inp_b1 = 0.9,
+                       const Real inp_b2 = 0.999,
+                       const Real inp_eps = 1e-7,
+                       const Real inp_lambda = 0.0);
 
     /// Switch to enable verbose output for parameter tuning
-    bool show_optimization_details = false;
+    const bool show_optimization_details = false;
     /// The number of iterations for Adam optimizer
-    unsigned int iter = 1000;
+    const unsigned int num_iter = 1000;
     /// The batch isize for Adam optimizer
-    unsigned int batch_size = 0;
+    const unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
-    Real learning_rate = 1e-3;
+    const Real learning_rate = 1e-3;
+    /// Tuning parameter from the paper
+    const Real b1 = 0.9;
+    /// Tuning parameter from the paper
+    const Real b2 = 0.999;
+    /// Tuning parameter from the paper
+    const Real eps = 1e-7;
+    /// Tuning parameter from the paper
+    const Real lambda = 0.0;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -86,8 +99,7 @@ public:
    * @param covariance_function Pointer to the covariance function that
    *                            needs to be used for the Gaussian Process.
    */
-  void linkCovarianceFunction(OutputCovarianceBase * output_covariance,
-                              CovarianceFunctionBase * covariance_function);
+  void linkCovarianceFunction(CovarianceFunctionBase * covariance_function);
 
   /**
    * Sets up the tuning map which is used if the user requires parameter tuning.
@@ -95,52 +107,51 @@ public:
    * @param min List of lower bounds for the parameter tuning.
    * @param max List of upper bounds for parameter tuning.
    */
-  void generateTuningMap(const std::vector<std::string> params_to_tune,
-                         std::vector<Real> min = std::vector<Real>(),
-                         std::vector<Real> max = std::vector<Real>());
+  void generateTuningMap(const std::vector<std::string> & params_to_tune,
+                         const std::vector<Real> & min = std::vector<Real>(),
+                         const std::vector<Real> & max = std::vector<Real>());
 
   /**
    * Standardizes the vector of input parameters (x values).
    * @param parameters The vector/matrix of input data.
+   * @param keep_moments If previously computed or new moments are to be used.
    */
-  void standardizeParameters(RealEigenMatrix & parameters);
+  void standardizeParameters(RealEigenMatrix & parameters, bool keep_moments = false);
 
   /**
    * Standardizes the vector of responses (y values).
    * @param data The vector/matrix of input data.
+   * @param keep_moments If previously computed or new moments are to be used.
    */
-  void standardizeData(RealEigenMatrix & data);
+  void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
 
   // Tune hyperparameters using Adam
   void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                            const RealEigenMatrix & training_data,
-                           unsigned int iter,
-                           const unsigned int & batch_size,
-                           const Real & learning_rate,
-                           const bool & verbose);
+                           const GPOptimizerOptions & opts);
 
-  // Computes the loss function for Adam usage
+  // Computes the loss function
   Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
-  // Computes Gradient of the loss function for Adam usage
-  std::vector<Real> getGradient(RealEigenMatrix & inputs); // , RealEigenMatrix & outputs
+  // Computes Gradient of the loss function
+  std::vector<Real> getGradient(RealEigenMatrix & inputs);
 
   /// Function used to convert the hyperparameter maps in this object to
-  /// Petsc vectors
-  void mapToPetscVec(
+  /// vectors
+  void mapToVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
       const std::unordered_map<std::string, Real> & scalar_map,
       const std::unordered_map<std::string, std::vector<Real>> & vector_map,
-      libMesh::PetscVector<Number> & petsc_vec);
+      std::vector<Real> & vec);
 
-  /// Function used to convert the PETSc vectors back to hyperparameter maps
-  void petscVecToMap(
+  /// Function used to convert the vectors back to hyperparameter maps
+  void vecToMap(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
       std::unordered_map<std::string, Real> & scalar_map,
       std::unordered_map<std::string, std::vector<Real>> & vector_map,
-      const libMesh::PetscVector<Number> & petsc_vec);
+      const std::vector<Real> & vec);
 
   /// @{
   /**
@@ -149,21 +160,22 @@ public:
   const StochasticTools::Standardizer & getParamStandardizer() const { return _param_standardizer; }
   const StochasticTools::Standardizer & getDataStandardizer() const { return _data_standardizer; }
   const RealEigenMatrix & getK() const { return _K; }
-  const RealEigenMatrix & getB() const { return _B; }
-  const RealEigenMatrix & getKappa() const { return _kappa; }
-  const std::vector<Real> & getLatent() const { return _latent; }
-  const RealEigenMatrix & getKappaResultsSolve() const { return _kappa_results_solve; }
-  const Eigen::LDLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
-  const RealEigenMatrix & getBatchInputs() const { return _batch_inputs; }
-  const RealEigenMatrix & getBatchOutputs() const { return _batch_outputs; }
+  const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
+  const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
-  const OutputCovarianceBase & getOutputCovar() const { return *_output_covariance; }
-  const OutputCovarianceBase * getOutputCovarPtr() const { return _output_covariance; }
   const std::string & getCovarType() const { return _covar_type; }
-  const std::string & getOutputCovarType() const { return _output_covar_type; }
-  const unsigned int & getNumTunableParamsInp() const { return _num_tunable_inp; }
-  const unsigned int & getNumTunableParamsOut() const { return _num_tunable_out; }
+  const std::string & getCovarName() const { return _covar_name; }
+  const std::vector<UserObjectName> & getDependentCovarNames() const
+  {
+    return _dependent_covar_names;
+  }
+  const std::map<UserObjectName, std::string> & getDependentCovarTypes() const
+  {
+    return _dependent_covar_types;
+  }
+  const unsigned int & getCovarNumOutputs() const { return _num_outputs; }
+  const unsigned int & getNumTunableParams() const { return _num_tunable; }
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
   const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
   {
@@ -179,19 +191,15 @@ public:
   StochasticTools::Standardizer & paramStandardizer() { return _param_standardizer; }
   StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
   RealEigenMatrix & K() { return _K; }
-  RealEigenMatrix & B() { return _B; }
-  RealEigenMatrix & kappa() { return _kappa; }
-  std::vector<Real> & latent() { return _latent; }
-  RealEigenMatrix & kappaResultsSolve() { return _kappa_results_solve; }
-  Eigen::LDLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
-  RealEigenMatrix & batchInputs() { return _batch_inputs; }
-  RealEigenMatrix & batchOutputs() { return _batch_outputs; }
+  RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
+  Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
-  OutputCovarianceBase * outputCovarPtr() { return _output_covariance; }
-  OutputCovarianceBase & outputCovar() { return *_output_covariance; }
   std::string & covarType() { return _covar_type; }
-  std::string & outputCovarType() { return _output_covar_type; }
+  std::string & covarName() { return _covar_name; }
+  std::map<UserObjectName, std::string> & dependentCovarTypes() { return _dependent_covar_types; }
+  std::vector<UserObjectName> & dependentCovarNames() { return _dependent_covar_names; }
+  unsigned int & covarNumOutputs() { return _num_outputs; }
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> & tuningData()
   {
     return _tuning_data;
@@ -207,26 +215,22 @@ protected:
   /// Covariance function object
   CovarianceFunctionBase * _covariance_function = nullptr;
 
-  /// Output covariance object
-  OutputCovarianceBase * _output_covariance = nullptr;
-
   /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 
-  /// Number of tunable hyperparameters (input covariance)
-  unsigned int _num_tunable_inp;
-
-  /// Number of tunable hyperparameters (output covariance)
-  unsigned int _num_tunable_out;
+  /// Number of tunable hyperparameters
+  unsigned int _num_tunable;
 
   /// Type of covariance function used for this surrogate
   std::string _covar_type;
 
-  /// Type of output covariance used for this surrogate
-  std::string _output_covar_type;
+  std::string _covar_name;
 
-  /// Tao Communicator
-  Parallel::Communicator _tao_comm;
+  std::vector<UserObjectName> _dependent_covar_names;
+
+  std::map<UserObjectName, std::string> _dependent_covar_types;
+
+  unsigned int _num_outputs;
 
   /// Scalar hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, Real> _hyperparam_map;
@@ -243,20 +247,11 @@ protected:
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
   RealEigenMatrix _K;
 
-  /// An _n_output by _n_output covariance matrix constructed from the selected output kernel
-  RealEigenMatrix _B;
-
-  /// An _n_output*_n_sample by _n_output*_n_sample covariance matrix
-  RealEigenMatrix _kappa;
-
-  /// A vector of latent params to capture output covariances
-  std::vector<Real> _latent;
-
   /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix _kappa_results_solve;
+  RealEigenMatrix _K_results_solve;
 
   /// Cholesky decomposition Eigen object
-  Eigen::LDLT<RealEigenMatrix> _kappa_cho_decomp;
+  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
   const RealEigenMatrix * _training_params;
@@ -266,21 +261,16 @@ protected:
 
   /// The batch size for Adam optimization
   unsigned int _batch_size;
-
-  /// The random batch of inputs
-  RealEigenMatrix _batch_inputs;
-
-  /// The random batch of outputs
-  RealEigenMatrix _batch_outputs;
 };
 
-} // StochasticTools namespace
+} // StochasticTools namespac
 
 template <>
-void dataStore(std::ostream & stream,
-               StochasticTools::MultiOutputGaussianProcess & gp_utils,
-               void * context);
+void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 template <>
-void dataLoad(std::istream & stream,
-              StochasticTools::MultiOutputGaussianProcess & gp_utils,
-              void * context);
+void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+
+template <>
+void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+template <>
+void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);

@@ -104,7 +104,7 @@
 
 [Trainers]
   [trainer]
-    type = GaussianProcessTrainerGeneral
+    type = GaussianProcessTrainer
     execute_on = timestep_end
     covariance_function = 'lmc' #Choose a squared exponential for the kernel
     standardize_params = 'true' #Center and scale the training params
@@ -124,7 +124,7 @@
 
 [Surrogates]
   [surr]
-    type = GaussianProcessSurrogateGeneral
+    type = GaussianProcessSurrogate
     trainer = trainer
   []
 []

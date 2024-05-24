@@ -45,11 +45,11 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
   : SurrogateTrainerBase(parameters),
     CovarianceInterface(parameters),
     SurrogateModelInterface(this),
-    _gp(declareModelData<StochasticTools::GaussianProcessGeneral>("_gp")),
+    _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    _optimization_opts(StochasticTools::GaussianProcessGeneral::GPOptimizerOptions(
+    _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),

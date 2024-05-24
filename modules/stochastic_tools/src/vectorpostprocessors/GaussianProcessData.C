@@ -27,7 +27,7 @@ GaussianProcessData::validParams()
 GaussianProcessData::GaussianProcessData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SurrogateModelInterface(this),
-    _gp_uo(getSurrogateModel<GaussianProcessSurrogateGeneral>("gp_name"))
+    _gp_uo(getSurrogateModel<GaussianProcessSurrogate>("gp_name"))
 {
 }
 

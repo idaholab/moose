@@ -7,31 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianProcessSurrogateGeneral.h"
+#include "GaussianProcessSurrogate.h"
 #include "Sampler.h"
 
 #include "CovarianceFunctionBase.h"
 
-registerMooseObject("StochasticToolsApp", GaussianProcessSurrogateGeneral);
+registerMooseObject("StochasticToolsApp", GaussianProcessSurrogate);
 
 InputParameters
-GaussianProcessSurrogateGeneral::validParams()
+GaussianProcessSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
   return params;
 }
 
-GaussianProcessSurrogateGeneral::GaussianProcessSurrogateGeneral(const InputParameters & parameters)
+GaussianProcessSurrogate::GaussianProcessSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
-    _gp(declareModelData<StochasticTools::GaussianProcessGeneral>("_gp")),
+    _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
     _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {
 }
 
 void
-GaussianProcessSurrogateGeneral::setupCovariance(UserObjectName covar_name)
+GaussianProcessSurrogate::setupCovariance(UserObjectName covar_name)
 {
   if (_gp.getCovarFunctionPtr() != nullptr)
     ::mooseError("Attempting to redefine covariance function using setupCovariance.");
@@ -39,7 +39,7 @@ GaussianProcessSurrogateGeneral::setupCovariance(UserObjectName covar_name)
 }
 
 Real
-GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x) const
+GaussianProcessSurrogate::evaluate(const std::vector<Real> & x) const
 {
   // Overlaod for evaluate to maintain general compatibility. Only returns mean
   Real dummy = 0;
@@ -47,7 +47,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x) const
 }
 
 Real
-GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x, Real & std_dev) const
+GaussianProcessSurrogate::evaluate(const std::vector<Real> & x, Real & std_dev) const
 {
   std::vector<Real> y;
   std::vector<Real> std;
@@ -57,7 +57,7 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x, Real & st
 }
 
 void
-GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x, std::vector<Real> & y) const
+GaussianProcessSurrogate::evaluate(const std::vector<Real> & x, std::vector<Real> & y) const
 {
   // Overlaod for evaluate to maintain general compatibility. Only returns mean
   std::vector<Real> std_dummy;
@@ -65,9 +65,9 @@ GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x, std::vect
 }
 
 void
-GaussianProcessSurrogateGeneral::evaluate(const std::vector<Real> & x,
-                                          std::vector<Real> & y,
-                                          std::vector<Real> & std) const
+GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
+                                   std::vector<Real> & y,
+                                   std::vector<Real> & std) const
 {
   const unsigned int n_dims = _training_params.cols();
 

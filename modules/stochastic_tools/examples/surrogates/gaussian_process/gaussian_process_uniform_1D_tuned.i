@@ -73,7 +73,7 @@
 
 [Trainers]
   [GP_avg_trainer]
-    type = GaussianProcessTrainerGeneral
+    type = GaussianProcessTrainer
     execute_on = timestep_end
     response = results/data:avg:value
     covariance_function = 'rbf'
@@ -101,7 +101,7 @@
 
 [Surrogates]
   [gauss_process_avg]
-    type = GaussianProcessSurrogateGeneral
+    type = GaussianProcessSurrogate
     trainer = 'GP_avg_trainer'
   []
 []

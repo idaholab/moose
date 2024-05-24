@@ -13,13 +13,13 @@
 #include "Standardizer.h"
 #include <Eigen/Dense>
 #include "CovarianceInterface.h"
-#include "GaussianProcessGeneral.h"
+#include "GaussianProcess.h"
 
-class GaussianProcessSurrogateGeneral : public SurrogateModel, public CovarianceInterface
+class GaussianProcessSurrogate : public SurrogateModel, public CovarianceInterface
 {
 public:
   static InputParameters validParams();
-  GaussianProcessSurrogateGeneral(const InputParameters & parameters);
+  GaussianProcessSurrogate(const InputParameters & parameters);
   using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const;
   virtual void evaluate(const std::vector<Real> & x, std::vector<Real> & y) const;
@@ -34,11 +34,11 @@ public:
    */
   virtual void setupCovariance(UserObjectName _covar_name);
 
-  StochasticTools::GaussianProcessGeneral & gp() { return _gp; }
-  const StochasticTools::GaussianProcessGeneral & getGP() const { return _gp; }
+  StochasticTools::GaussianProcess & gp() { return _gp; }
+  const StochasticTools::GaussianProcess & getGP() const { return _gp; }
 
 private:
-  StochasticTools::GaussianProcessGeneral & _gp;
+  StochasticTools::GaussianProcess & _gp;
 
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;

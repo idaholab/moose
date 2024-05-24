@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LoadCovarianceDataAction.h"
-#include "GaussianProcessSurrogateGeneral.h"
+#include "GaussianProcessSurrogate.h"
 #include "FEProblem.h"
 #include "StochasticToolsApp.h"
 
@@ -34,14 +34,14 @@ LoadCovarianceDataAction::act()
   _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
   for (auto model_ptr : objects)
   {
-    auto * gp_gen = dynamic_cast<GaussianProcessSurrogateGeneral *>(model_ptr);
+    auto * gp_gen = dynamic_cast<GaussianProcessSurrogate *>(model_ptr);
     if (gp_gen && model_ptr->isParamValid("filename"))
       load(*gp_gen);
   }
 }
 
 void
-LoadCovarianceDataAction::load(GaussianProcessSurrogateGeneral & model)
+LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
 {
   const std::string & covar_type = model.getGP().getCovarType();
   const std::string & covar_name = model.getGP().getCovarName();

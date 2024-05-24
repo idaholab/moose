@@ -106,7 +106,7 @@
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcessSurrogateGeneral
+    type = GaussianProcessSurrogate
     trainer = GP_al_trainer
   []
 []

@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "GaussianProcessSurrogateGeneral.h"
+#include "GaussianProcessSurrogate.h"
 #include "SurrogateModelInterface.h"
 
 class GaussianProcessData : public GeneralVectorPostprocessor, public SurrogateModelInterface
@@ -27,7 +27,7 @@ public:
 
 protected:
   /// Reference to GaussianProcess
-  const GaussianProcessSurrogateGeneral & _gp_uo;
+  const GaussianProcessSurrogate & _gp_uo;
 
   /// Vector of hyperparamater values
   std::vector<VectorPostprocessorValue *> _hp_vector;

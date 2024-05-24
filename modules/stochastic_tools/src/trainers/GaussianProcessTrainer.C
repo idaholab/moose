@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianProcessTrainerGeneral.h"
+#include "GaussianProcessTrainer.h"
 #include "Sampler.h"
 #include "CartesianProduct.h"
 
@@ -19,10 +19,10 @@
 
 #include <cmath>
 
-registerMooseObject("StochasticToolsApp", GaussianProcessTrainerGeneral);
+registerMooseObject("StochasticToolsApp", GaussianProcessTrainer);
 
 InputParameters
-GaussianProcessTrainerGeneral::validParams()
+GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
   params.addClassDescription("Provides data preperation and training for a single- or multi-output "
@@ -45,16 +45,16 @@ GaussianProcessTrainerGeneral::validParams()
   return params;
 }
 
-GaussianProcessTrainerGeneral::GaussianProcessTrainerGeneral(const InputParameters & parameters)
+GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    _gp(declareModelData<StochasticTools::GaussianProcessGeneral>("_gp")),
+    _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
-    _optimization_opts(StochasticTools::GaussianProcessGeneral::GPOptimizerOptions(
+    _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
@@ -92,7 +92,7 @@ GaussianProcessTrainerGeneral::GaussianProcessTrainerGeneral(const InputParamete
 }
 
 void
-GaussianProcessTrainerGeneral::preTrain()
+GaussianProcessTrainer::preTrain()
 {
   _params_buffer.clear();
   _data_buffer.clear();
@@ -101,7 +101,7 @@ GaussianProcessTrainerGeneral::preTrain()
 }
 
 void
-GaussianProcessTrainerGeneral::train()
+GaussianProcessTrainer::train()
 {
   _params_buffer.push_back(_predictor_row);
 
@@ -116,7 +116,7 @@ GaussianProcessTrainerGeneral::train()
 }
 
 void
-GaussianProcessTrainerGeneral::postTrain()
+GaussianProcessTrainer::postTrain()
 {
   // Instead of gatherSum, we have to allgather.
   _communicator.allgather(_params_buffer);

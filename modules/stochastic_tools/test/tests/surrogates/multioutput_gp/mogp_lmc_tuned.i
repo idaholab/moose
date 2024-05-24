@@ -76,7 +76,7 @@
 
 [Trainers]
   [mogp_trainer]
-    type = GaussianProcessTrainerGeneral
+    type = GaussianProcessTrainer
     execute_on = timestep_end
     covariance_function = 'lmc'
     standardize_params = 'true'
@@ -111,7 +111,7 @@
 
 [Surrogates]
   [mogp]
-    type = GaussianProcessSurrogateGeneral
+    type = GaussianProcessSurrogate
     trainer = mogp_trainer
   []
 []

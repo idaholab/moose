@@ -99,7 +99,7 @@
     execute_on = timestep_end
   []
   [gp_max]
-    type = GaussianProcessTrainerGeneral
+    type = GaussianProcessTrainer
     covariance_function = 'rbf'
     standardize_params = 'true'
     standardize_data = 'true'
@@ -146,7 +146,7 @@
     trainer = np_max
   []
   [gp_surr]
-    type = GaussianProcessSurrogateGeneral
+    type = GaussianProcessSurrogate
     trainer = gp_max
   []
   [ann_surr]

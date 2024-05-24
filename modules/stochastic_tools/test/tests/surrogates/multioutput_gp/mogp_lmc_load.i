@@ -37,7 +37,7 @@
 
 [Surrogates]
   [mogp]
-    type = GaussianProcessSurrogateGeneral
+    type = GaussianProcessSurrogate
     filename = "mogp_lmc_tuned_surr_mogp_trainer.rd"
   []
 []
