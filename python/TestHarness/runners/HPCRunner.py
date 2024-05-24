@@ -21,10 +21,8 @@ class HPCRunner(Runner):
         # The RunHPC object
         self.run_hpc = run_hpc
 
-        # The HPC job id, used for the file terminator
-        self.hpc_job_id = None
-        # The command ran in the HPC job, used to set later
-        self.hpc_job_command = None
+        # The HPC job, set during spawn()
+        self.hpc_job = None
 
         # Interval in seconds for polling for job status
         self.job_status_poll_time = 0.1
@@ -37,7 +35,7 @@ class HPCRunner(Runner):
 
     def spawn(self, timer):
         # Rely on the RunHPC object to submit the job
-        self.hpc_job_id, self.hpc_job_command = self.run_hpc.submitJob(self.job)
+        self.hpc_job = self.run_hpc.submitJob(self.job)
 
         timer.start()
 
@@ -47,7 +45,7 @@ class HPCRunner(Runner):
         # polling itself is only done on occasion within RunHPC
         while True:
             time.sleep(self.job_status_poll_time)
-            self.exit_code = self.run_hpc.getHPCJobStatus(self.job)
+            self.exit_code = self.hpc_job.getExitCode()
 
             # We're done
             if self.exit_code is not None:
@@ -71,10 +69,6 @@ class HPCRunner(Runner):
             return
 
         tester = self.job.getTester()
-
-        # We've actually ran something now and not just qsub, so update the
-        # command to what was ran there
-        tester.setCommandRan(self.hpc_job_command)
 
         # Determine the output files that we need to wait for to be complete
         wait_files = set([output_file])
@@ -138,7 +132,7 @@ class HPCRunner(Runner):
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
-                header = f'{self.run_hpc.getHPCSchedulerName()} job {self.hpc_job_id} output'
+                header = f'{self.run_hpc.getHPCSchedulerName()} job {self.hpc_job.id} output'
                 self.output = util.outputHeader(f'Begin {header}')
                 # If we're trying to parse output, we can't truncate it
                 # because it might appear in the truncated portion
@@ -181,7 +175,7 @@ class HPCRunner(Runner):
         if is_binary is None:
             return False
 
-        ending_comment = self.run_hpc.getOutputEndingComment(self.hpc_job_id)
+        ending_comment = self.run_hpc.getOutputEndingComment(self.hpc_job.id)
 
         # Binary file
         if is_binary:

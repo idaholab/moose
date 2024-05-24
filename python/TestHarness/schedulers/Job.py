@@ -283,7 +283,7 @@ class Job(object):
         def try_catch(do, exception_name):
             try:
                 do()
-            except:
+            except Exception:
                 self.cleanup()
                 self.setStatus(self.error, f'{exception_name} EXCEPTION')
                 self.output += util.outputHeader('Python exception encountered')

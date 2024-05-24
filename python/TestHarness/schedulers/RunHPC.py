@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex, socket
+import threading, os, re, sys, datetime, shlex, socket, threading, time
 import paramiko
 import jinja2
 from multiprocessing.pool import ThreadPool
@@ -18,9 +18,13 @@ class HPCJob:
     """
     Structure that represents the cached information about an HPC job
     """
-    def __init__(self, id, command):
-        # The job identifier
+    def __init__(self, job, id, command):
+        # The underlying Job (only set on init, _should_ be thread safe)
+        self.job = job
+        # The job identifier (only set on init, _should_ be thread safe)
         self.id = id
+        # The command that was ran within the job
+        self.command = command
         # Whether or not this job is done; here done doesn't mean if it
         # was successful or not, just if it is not running/queued anymore
         self.done = False
@@ -31,6 +35,55 @@ class HPCJob:
         self.killed = False
         # Whether or not the job is currently running
         self.running = False
+        # Lock for accessing this object
+        self.lock = threading.Lock()
+
+    def getLock(self):
+        """
+        Gets the lock for this object.
+        """
+        return self.lock
+
+    def set(self, **kwargs):
+        """
+        Thread-safe setter.
+        """
+        with self.getLock():
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+
+    def getExitCode(self):
+        """
+        Gets the thread-safe exit code.
+
+        This exit code is what is read by the HPCRunner,
+        which means that it needs to be locked as we're
+        also updating it at the same time.
+        """
+        with self.getLock():
+            return self.exit_code
+
+    def getRunning(self):
+        """
+        Gets the thread-safe running state.
+        """
+        with self.getLock():
+            return self.running
+
+    def getKilled(self):
+        """
+        Gets the thread-safe killed state.
+        """
+        with self.getLock():
+            return self.killed
+
+    def getDone(self):
+        """
+        Gets the thread-safe done state.
+        """
+        with self.getLock():
+            return self.done
+
 class RunHPC(RunParallel):
     """
     Base scheduler for jobs that are ran on HPC.
@@ -51,16 +104,13 @@ class RunHPC(RunParallel):
 
         # Lock for accessing self.hpc_jobs
         self.hpc_jobs_lock = threading.Lock()
-        # The last time statues were updated in getHPCJob() (if any)
-        self.hpc_jobs_status_timer = None
         # How often to poll for status updates in getHPCJob()
         self.hpc_jobs_update_interval = 10
         # Map of Job -> HPCJob
         self.hpc_jobs = {}
+        # The thread that will update the HPCJobs
+        self.hpc_jobs_updater = None
 
-        # Whether or not the last job status command failed. We let it
-        # fail once if it passes the second time for some redundancy
-        self.update_jobs_failed = False
         # The jump hostname for running commands, if any
         self.ssh_hosts = self.options.hpc_host
         # The SSH key to use for connections
@@ -374,9 +424,18 @@ class RunHPC(RunParallel):
         with self.hpc_jobs_lock:
             if job in self.hpc_jobs:
                 raise Exception('Job has already been submitted')
-            self.hpc_jobs[job] = HPCJob(job_id, job_command)
+            hpc_job = HPCJob(job, job_id, job_command)
+            self.hpc_jobs[job] = hpc_job
 
-        return job_id, job_command
+            # If the updater hasn't been started yet, start it.
+            # We do this here because it's locked within hpc_jobs_lock
+            # and it means that we won't start looking for jobs until
+            # we have at least one job
+            if not self.hpc_jobs_updater:
+                self.hpc_jobs_updater = threading.Thread(target=self._updateHPCJobs)
+                self.hpc_jobs_updater.start()
+
+        return hpc_job
 
     def augmentJobSubmission(self, submission_env):
         """
@@ -386,45 +445,80 @@ class RunHPC(RunParallel):
         """
         return
 
-    def getHPCJobStatus(self, job):
+    def _updateHPCJobs(self):
         """
-        Gets a job's status, which is None if it is pending or running
-
-        This will periodically update statues given a timer.
+        Function that is called in a separate thread to update the job
+        status given some interval.
         """
-        with self.hpc_jobs_lock:
-            # If this is the first time seeing this job, initialize it in the list
-            if job not in self.hpc_jobs:
-                raise Exception('Failed to get status for unsubmitted job')
+        # We want to allow failure to happen once, just not twice in a row.
+        # This is a good sanity check for when occasionally the login
+        # node doesn't respod as expected
+        update_jobs_failed = False
 
-            # Only update the statues periodically as this is called across threads
-            if self.hpc_jobs_status_timer is None or ((clock() - self.hpc_jobs_status_timer) > self.hpc_jobs_update_interval):
-                # Obtain the IDs of jobs that are active that we need to poll for
-                active_job_ids = []
-                for job, hpc_job in self.hpc_jobs.items():
-                    if not hpc_job.done:
-                        active_job_ids.append(hpc_job.id)
+        try:
+            while True:
+                with self.hpc_jobs_lock:
+                    active_hpc_jobs = [x for x in self.hpc_jobs.values() if not x.done]
+                    if active_hpc_jobs:
+                        success = self.updateHPCJobs(active_hpc_jobs)
+                        if not success:
+                            if update_jobs_failed:
+                                self.triggerErrorState()
+                                print('ERROR: Failed to get HPC job status')
+                                return
+                            update_jobs_failed = True
+                        else:
+                            update_jobs_failed = False
 
-                success = self.updateJobs(active_job_ids)
-                if not success:
-                    if self.update_jobs_failed:
-                        raise Exception('Failed to get job status')
-                    self.update_jobs_failed = True
-                else:
-                    self.update_jobs_failed = False
+                # Update on the interval requested, but also make sure
+                # that we're still running
+                poll_time = 0.1
+                for i in range(int(self.hpc_jobs_update_interval / poll_time)):
+                    if not self.isRunning():
+                        return
+                    time.sleep(poll_time)
+        except:
+            self.triggerErrorState()
+            raise
 
-                self.hpc_jobs_status_timer = clock()
-
-            return self.hpc_jobs.get(job).exit_code
-
-    def updateJobs(self):
+    def updateHPCJobs(self, active_hpc_jobs):
         """
         Updates the underlying jobs.
 
         Should be overridden and should return True or False
         depending on whether or not the update succeeded.
+
+        Should use setHPCJobRunning() and setHPCJobDone()
+        to trigger changes in HPC job state.
         """
-        raise Exception('Unimplemented updateJobs()')
+        raise Exception('Unimplemented updateHPCJobs()')
+
+    def setHPCJobRunning(self, hpc_job):
+        """
+        Sets the given HPC job as running.
+
+        This should be called within the overridden updateHPCJobs().
+        """
+        # This is currently thread safe because we only ever change
+        # it within updateJobs(), which is only ever executed serially
+        # within the thread the calls _updateHPCJobs()
+        hpc_job.set(running=True)
+        # Print out that the job is now running
+        self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.running, caveats=True)
+
+    def setHPCJobDone(seflf, hpc_job, exit_code):
+        """
+        Sets the given HPC job as done.
+
+        This should be called within the overridden updateHPCJobs().
+        """
+        hpc_job.set(running=False, done=True, exit_code=exit_code)
+
+        # We've actually ran something now that didn't fail, so update
+        # the command to what was ran there
+        job = hpc_job.job
+        if not job.isError():
+            job.getTester().setCommandRan(hpc_job.command)
 
     def buildRunner(self, job, options):
         from TestHarness.runners.HPCRunner import HPCRunner
@@ -445,10 +539,10 @@ class RunHPC(RunParallel):
         """Kills a HPC job"""
         with self.hpc_jobs_lock:
             hpc_job = self.hpc_jobs.get(job)
-            if hpc_job is None or hpc_job.done or hpc_job.killed:
+            if hpc_job is None or hpc_job.getDone() or hpc_job.getKilled():
                 return
             job_id = hpc_job.id
-            hpc_job.killed = True
+            hpc_job.set(killed=True)
 
         # Don't care about whether or not this failed
         self.callHPC(f'{self.getHPCCancelCommand()} {job_id}')
@@ -458,9 +552,9 @@ class RunHPC(RunParallel):
         job_ids = []
         with self.hpc_jobs_lock:
             for hpc_job in self.hpc_jobs.values():
-                if not hpc_job.done:
+                if not hpc_job.getDone() and not hpc_job.getKilled():
                     job_ids.append(hpc_job.id)
-                    hpc_job.killed = True
+                    hpc_job.set(killed=True)
 
         # Don't care about whether or not this failed
         self.callHPC(f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
