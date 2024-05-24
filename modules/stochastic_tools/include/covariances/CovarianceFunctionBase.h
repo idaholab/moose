@@ -35,7 +35,13 @@ public:
   getTuningData(const std::string & name, unsigned int & size, Real & min, Real & max) const;
 
   /// New function that stores all the types of all the nested covariances
-  void dependentCovarianceTypes(std::map<UserObjectName, std::string> name_type_map) const;
+  void dependentCovarianceTypes(std::map<UserObjectName, std::string> & name_type_map) const;
+
+  /// Hyper parameter names
+  const std::vector<UserObjectName> & dependentCovarianceNames() const
+  {
+    return _dependent_covariance_names;
+  }
 
   /// Redirect dK/dhp for hyperparameter "hp"
   virtual bool computedKdhyper(RealEigenMatrix & dKdhp,

@@ -166,6 +166,10 @@ public:
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
   const std::string & getCovarName() const { return _covar_name; }
+  const std::vector<UserObjectName> & getDependentCovarNames() const
+  {
+    return _dependent_covar_names;
+  }
   const std::map<UserObjectName, std::string> & getDependentCovarTypes() const
   {
     return _dependent_covar_types;
@@ -194,6 +198,7 @@ public:
   std::string & covarType() { return _covar_type; }
   std::string & covarName() { return _covar_name; }
   std::map<UserObjectName, std::string> & dependentCovarTypes() { return _dependent_covar_types; }
+  std::vector<UserObjectName> & dependentCovarNames() { return _dependent_covar_names; }
   unsigned int & covarNumOutputs() { return _num_outputs; }
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> & tuningData()
   {
@@ -220,6 +225,8 @@ protected:
   std::string _covar_type;
 
   std::string _covar_name;
+
+  std::vector<UserObjectName> _dependent_covar_names;
 
   std::map<UserObjectName, std::string> _dependent_covar_types;
 

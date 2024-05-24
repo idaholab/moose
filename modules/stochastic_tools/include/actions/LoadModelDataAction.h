@@ -71,13 +71,13 @@ LoadModelDataAction<T>::load(const T & object)
 
   // Read the supplied file
   const std::string filename = object.getModelDataFileName();
-  try
-  {
-    reader.setInput(filename);
-    reader.restore();
-  }
-  catch (...)
-  {
-    paramError("filename", "The supplied file '", filename, "' failed to load.");
-  }
+  // try
+  // {
+  reader.setInput(filename);
+  reader.restore();
+  // }
+  // catch (...)
+  // {
+  //   paramError("filename", "The supplied file '", filename, "' failed to load.");
+  // }
 }

@@ -164,7 +164,7 @@ CovarianceFunctionBase::getTuningData(const std::string & name,
 
 void
 CovarianceFunctionBase::dependentCovarianceTypes(
-    std::map<UserObjectName, std::string> name_type_map) const
+    std::map<UserObjectName, std::string> & name_type_map) const
 {
   for (const auto dependent_covar : _covariance_functions)
   {

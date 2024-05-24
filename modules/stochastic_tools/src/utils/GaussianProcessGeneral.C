@@ -63,6 +63,7 @@ GaussianProcessGeneral::linkCovarianceFunction(CovarianceFunctionBase * covarian
   _covar_type = _covariance_function->type();
   _covar_name = _covariance_function->name();
   _covariance_function->dependentCovarianceTypes(_dependent_covar_types);
+  _dependent_covar_names = _covariance_function->dependentCovarianceNames();
   _num_outputs = _covariance_function->numOutputs();
 }
 
@@ -347,6 +348,7 @@ dataStore(std::ostream & stream, StochasticTools::GaussianProcessGeneral & gp_ut
   dataStore(stream, gp_utils.covarType(), context);
   dataStore(stream, gp_utils.covarName(), context);
   dataStore(stream, gp_utils.covarNumOutputs(), context);
+  dataStore(stream, gp_utils.dependentCovarNames(), context);
   dataStore(stream, gp_utils.dependentCovarTypes(), context);
   dataStore(stream, gp_utils.K(), context);
   dataStore(stream, gp_utils.KResultsSolve(), context);
@@ -364,6 +366,7 @@ dataLoad(std::istream & stream, StochasticTools::GaussianProcessGeneral & gp_uti
   dataLoad(stream, gp_utils.covarType(), context);
   dataLoad(stream, gp_utils.covarName(), context);
   dataLoad(stream, gp_utils.covarNumOutputs(), context);
+  dataLoad(stream, gp_utils.dependentCovarNames(), context);
   dataLoad(stream, gp_utils.dependentCovarTypes(), context);
   dataLoad(stream, gp_utils.K(), context);
   dataLoad(stream, gp_utils.KResultsSolve(), context);

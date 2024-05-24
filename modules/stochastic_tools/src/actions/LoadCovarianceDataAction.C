@@ -47,6 +47,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogateGeneral & model)
   const std::string & covar_name = model.getGP().getCovarName();
   const std::map<UserObjectName, std::string> & dep_covar_types =
       model.getGP().getDependentCovarTypes();
+  const std::vector<UserObjectName> dep_covar_names = model.getGP().getDependentCovarNames();
   const unsigned int num_outputs = model.getGP().getCovarNumOutputs();
 
   const std::unordered_map<std::string, Real> & map = model.getGP().getHyperParamMap();
@@ -87,6 +88,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogateGeneral & model)
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
   covar_params.set<unsigned int>("num_outputs") = num_outputs;
+  covar_params.set<std::vector<UserObjectName>>("covariance_functions") = dep_covar_names;
 
   const auto param_list = covar_params.getParametersList();
   for (const auto & param : param_list)
