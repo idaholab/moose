@@ -887,23 +887,13 @@ class TestHarness:
             sys.exit(1)
 
     def determineScheduler(self):
-        # Try to figure out a HPC scheduler if we can
-        hpc = self.options.hpc
-        hpc_host = self.options.hpc_host
-        if hpc_host and not hpc:
-            if 'sawtooth' in hpc_host or 'lemhi' in hpc_host:
-                hpc = 'pbs'
-            elif 'bitterroot' in hpc_host:
-                hpc = 'slurm'
-            if hpc:
-                print(f'INFO: Setting --hpc={hpc} for known host {hpc_host}')
-            else:
-                print(f'ERROR: --hpc must be set with --hpc-host for an unknown host')
-                sys.exit(1)
+        if self.options.hpc_host and not self.options.hpc:
+            print(f'ERROR: --hpc must be set with --hpc-host for an unknown host')
+            sys.exit(1)
 
-        if hpc == 'pbs':
+        if self.options.hpc == 'pbs':
             return 'RunPBS'
-        elif hpc == 'slurm':
+        elif self.options.hpc == 'slurm':
             return 'RunSlurm'
         # The default scheduler plugin
         return 'RunParallel'
@@ -1103,6 +1093,16 @@ class TestHarness:
             code = False
         self.options = parser.parse_args(argv[1:])
         self.options.code = code
+
+        # Try to guess the --hpc option if --hpc-host is set
+        if self.options.hpc_host and not self.options.hpc:
+            hpc_host = self.options.hpc_host[0]
+            if 'sawtooth' in hpc_host or 'lemhi' in hpc_host:
+                self.options.hpc = 'pbs'
+            elif 'bitterroot' in hpc_host:
+                self.options.hpc = 'slurm'
+            if self.options.hpc:
+                print(f'INFO: Setting --hpc={self.options.hpc} for known host {hpc_host}')
 
         self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
 
