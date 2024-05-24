@@ -9,7 +9,7 @@
       input = 'internal_sidesets_1d.i'
       csvdiff = 'internal_sidesets_1d_kill_out.csv'
       cli_args = 'Outputs/file_base=internal_sidesets_1d_kill_out
-                  RayBCs/active=\'kill_internal\''
+                  RayBCs/active=kill_internal'
       allow_test_objects = true
 
       detail = 'one-dimensional meshes, '
@@ -19,7 +19,7 @@
       input = 'internal_sidesets_2d.i'
       csvdiff = 'internal_sidesets_2d_kill_out.csv'
       cli_args = 'Outputs/file_base=internal_sidesets_2d_kill_out
-                  RayBCs/active=\'kill_internal\''
+                  RayBCs/active=kill_internal'
       allow_test_objects = true
 
       detail = 'two-dimensional meshes, '
@@ -29,7 +29,7 @@
       input = 'internal_sidesets_3d.i'
       csvdiff = 'internal_sidesets_3d_kill_out.csv'
       cli_args = 'Outputs/file_base=internal_sidesets_3d_kill_out
-                  RayBCs/active=\'kill_internal\''
+                  RayBCs/active=kill_internal'
       allow_test_objects = true
 
       detail = 'and three-dimensional meshes.'
@@ -43,7 +43,7 @@
       input = 'internal_sidesets_1d.i'
       csvdiff = 'internal_sidesets_1d_reflect_out.csv'
       cli_args = 'Outputs/file_base=internal_sidesets_1d_reflect_out
-                  "RayBCs/active=\'kill_external reflect_internal\'"'
+                  RayBCs/active="kill_external reflect_internal"'
       allow_test_objects = true
 
       detail = 'one-dimensional meshes, '
@@ -54,7 +54,7 @@
       input = 'internal_sidesets_2d.i'
       csvdiff = 'internal_sidesets_2d_reflect_out.csv'
       cli_args = 'Outputs/file_base=internal_sidesets_2d_reflect_out
-                  "RayBCs/active=\'kill_external reflect_internal\'"'
+                  RayBCs/active="kill_external reflect_internal"'
       allow_test_objects = true
 
       detail = 'two-dimensional meshes, '
@@ -65,7 +65,7 @@
       input = 'internal_sidesets_3d.i'
       csvdiff = 'internal_sidesets_3d_reflect_out.csv'
       cli_args = 'Outputs/file_base=internal_sidesets_3d_reflect_out
-                  "RayBCs/active=\'kill_external reflect_internal\'"'
+                  RayBCs/active="kill_external reflect_internal"'
       allow_test_objects = true
 
       detail = 'and three-dimensional meshes.'
@@ -76,7 +76,7 @@
     type = RunException
     input = 'internal_sidesets_1d.i'
     cli_args = 'UserObjects/study/use_internal_sidesets=false
-                RayBCs/active=\'kill_internal\''
+                RayBCs/active=kill_internal'
     expect_err = 'RayBCs are defined on internal sidesets, but the study is not set to use internal sidesets during tracing.'
     allow_test_objects = true
 

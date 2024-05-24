@@ -19,7 +19,7 @@
       allow_test_objects = true
       cli_args = 'Outputs/file_base=bc_create_ray_3d_out
                   Mesh/active=gmg_3d
-                  "RayBCs/active=\'kill_3d create_3d\'"'
+                  RayBCs/active="kill_3d create_3d"'
       detail = 'and in three-dimensional meshes.'
     []
   []
