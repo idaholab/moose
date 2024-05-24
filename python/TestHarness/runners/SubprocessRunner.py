@@ -79,10 +79,12 @@ class SubprocessRunner(Runner):
 
         self.exit_code = self.process.poll()
 
+        self.output = util.outputHeader('Begin combined stdout+stderr output')
         for file in [self.outfile, self.errfile]:
             file.flush()
             self.output += self.readOutput(file)
             file.close()
+        self.output += util.outputHeader('End combined stderr+stdout output')
 
     def kill(self):
         if self.process is not None:
