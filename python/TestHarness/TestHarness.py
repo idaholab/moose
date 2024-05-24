@@ -886,18 +886,34 @@ class TestHarness:
             print('Error while writing results to disc')
             sys.exit(1)
 
+    def determineScheduler(self):
+        # Try to figure out a HPC scheduler if we can
+        hpc = self.options.hpc
+        hpc_host = self.options.hpc_host
+        if hpc_host and not hpc:
+            if 'sawtooth' in hpc_host or 'lemhi' in hpc_host:
+                hpc = 'pbs'
+            elif 'bitterroot' in hpc_host:
+                hpc = 'slurm'
+            if hpc:
+                print(f'INFO: Setting --hpc={hpc} for known host {hpc_host}')
+            else:
+                print(f'ERROR: --hpc must be set with --hpc-host for an unknown host')
+                sys.exit(1)
+
+        if hpc == 'pbs':
+            return 'RunPBS'
+        elif hpc == 'slurm':
+            return 'RunSlurm'
+        # The default scheduler plugin
+        return 'RunParallel'
+
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
         self.factory.loadPlugins(plugin_paths, 'schedulers', "IS_SCHEDULER")
 
-        if self.options.hpc == 'pbs':
-            scheduler_plugin = 'RunPBS'
-        elif self.options.hpc == 'slurm':
-            scheduler_plugin = 'RunSlurm'
-        # The default scheduler plugin
-        else:
-            scheduler_plugin = 'RunParallel'
+        scheduler_plugin = self.determineScheduler()
 
         # Augment the Scheduler params with plugin params
         plugin_params = self.factory.validParams(scheduler_plugin)
