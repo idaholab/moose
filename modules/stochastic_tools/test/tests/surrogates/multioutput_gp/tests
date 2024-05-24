@@ -1,24 +1,37 @@
 [Tests]
   issues = '#25438'
-  design = 'MultiOutputGaussianProcessTrainer.md MultiOutputGaussianProcess.md'
-  [mogp_tuning]
-    requirement = 'The system shall be be able to tune hyperparameters of a Multi-Output Gaussian process surrogate with '
-    [squared_exponential_ICM]
+  design = 'GaussianProcessTrainer.md LMC.md GaussianProcessSurrogate.md'
+
+  [lmc]
+    requirement = "The system shall be able to train a multi-output Gaussian process using Linear Model of Coregionalization "
+    [untuned]
       type = 'JSONDiff'
-      input = mogp.i
-      allow_test_objects = true
-      jsondiff = 'mogp_out.json'
-      detail = 'a squared exponential input kernel and ICM output kernel. '
-      abs_zero = 1.0e-7
+      input = mogp_lmc.i
+      jsondiff = "mogp_lmc_out.json"
+      detail = "without tuning the hyperparameters."
+    []
+    [tuned]
+      type = 'JSONDiff'
+      input = mogp_lmc_tuned.i
+      jsondiff = "mogp_lmc_tuned_out.json"
+      detail = "with tuning the hyperparameters."
+    []
+    [load]
+      type = 'JSONDiff'
+      input = mogp_lmc_load.i
+      jsondiff = "mogp_lmc_load_out.json"
+      detail = "and load the trained surrogate from a file."
+      prereq = lmc/tuned
+      skip_keys = "reporters train_params"
     []
   []
-  [mogp_errors]
-    requirement = 'The system shall throw an error when '
+  [errors]
+    requirement = "The system shall throw an error when "
     [optimization_adam_batch_size]
       type = RunException
-      input = mogp.i
-      cli_args = "Trainers/mogp/batch_size='100'"
-      detail = 'the batch size is greater than the training data set size for Adam optimization. '
+      input = mogp_lmc_tuned.i
+      cli_args = "Trainers/mogp_trainer/batch_size='100'"
+      detail = "the batch size is greater than the training data set size for Adam optimization. "
       expect_err = "Batch size cannot be greater than the training data set size."
     []
   []

@@ -5,7 +5,7 @@
   [k_dist]
     type = Normal
     mean = 15.0
-    standard_deviation = 5.0
+    standard_deviation = 2.0
   []
   [bc_dist]
     type = Normal
@@ -15,23 +15,19 @@
 []
 
 [Samplers]
-  [sample]
+  [train]
     type = LatinHypercube
-    num_rows = 20 # 200
+    num_rows = 10
     distributions = 'k_dist bc_dist'
     execute_on = PRE_MULTIAPP_SETUP
     seed = 100
   []
   [test]
     type = LatinHypercube
-    num_rows = 10 # 100
+    num_rows = 5
     distributions = 'k_dist bc_dist'
     seed = 101
   []
-[]
-
-[GlobalParams]
-  sampler = sample
 []
 
 [MultiApps]
@@ -39,8 +35,7 @@
     type = SamplerFullSolveMultiApp
     input_files = sub.i
     mode = batch-reset
-    execute_on = initial
-    # min_procs_per_app = 2
+    sampler = train
   []
 []
 
@@ -48,6 +43,7 @@
   [cmdline]
     type = MultiAppSamplerControl
     multi_app = sub
+    sampler = train
     param_names = 'Materials/conductivity/prop_values BCs/right/value'
   []
 []
@@ -56,6 +52,7 @@
   [data]
     type = SamplerReporterTransfer
     from_multi_app = sub
+    sampler = train
     stochastic_reporter = results
     from_reporter = 'T_vec/T'
   []
@@ -68,27 +65,31 @@
   []
   [eval_test]
     type = EvaluateSurrogate
-    model = mogp_surrogate
+    model = mogp
     response_type = vector_real
     parallel_type = ROOT
     execute_on = timestep_end
     sampler = test
+    evaluate_std = true
   []
 []
 
 [Trainers]
-  [mogp]
-    type = MultiOutputGaussianProcessTrainer
-    response = results/data:T_vec:T
+  [mogp_trainer]
+    type = GaussianProcessTrainerGeneral
+    execute_on = timestep_end
+    covariance_function = 'lmc'
+    standardize_params = 'true'
+    standardize_data = 'true'
+    sampler = train
     response_type = vector_real
-    execute_on = initial
-    covariance_function = 'covar'
-    output_covariance = 'outcovar'
-    sampler = sample
-    tune_parameters = 'covar:signal_variance covar:length_factor'
-    iterations = 10000
-    batch_size = 20
-    learning_rate = 5e-4
+    response = results/data:T_vec:T
+    tune_parameters = 'lmc:acoeff_0 lmc:lambda_0 covar:signal_variance covar:length_factor'
+    tuning_min = '1e-9 1e-9 1e-9 1e-9'
+    tuning_max = '1e16 1e16 1e16  1e16'
+    num_iters = 10000
+    batch_size = 10
+    learning_rate = 0.0005
     show_optimization_details = true
   []
 []
@@ -100,44 +101,49 @@
     noise_variance = 0.0
     length_factor = '3.67866381 2.63421705'
   []
-[]
-
-[OutputCovariance]
-  [outcovar]
-    type = IntrinsicCoregionalizationModel
+  [lmc]
+    type = LMC
+    covariance_functions = covar
+    num_outputs = 2
+    num_latent_funcs = 1
   []
 []
 
 [Surrogates]
-  [mogp_surrogate]
-    type = MultiOutputGaussianProcessSurrogate
-    trainer = mogp
+  [mogp]
+    type = GaussianProcessSurrogateGeneral
+    trainer = mogp_trainer
   []
 []
 
 [VectorPostprocessors]
-  [train_data]
+  [train_params]
     type = SamplerData
-    sampler = sample
-    execute_on = 'timestep_end'
+    sampler = train
+    execute_on = final
   []
-  [data]
+  [test_params]
     type = SamplerData
     sampler = test
-    execute_on = 'timestep_end'
+    execute_on = final
+  []
+  [hyperparams]
+    type = GaussianProcessData
+    gp_name = mogp
+    execute_on = final
   []
 []
 
 [Outputs]
-  # csv = true
   [out]
     type = JSON
-    execute_on = timestep_end
+    execute_on = final
     vectorpostprocessors_as_reporters = true
     execute_system_information_on = NONE
   []
-  # [out1]
-  #   type = CSV
-  #   execute_on = timestep_end
-  # []
+  [surr]
+    type = SurrogateTrainerOutput
+    execute_on = FINAL
+    trainers = "mogp_trainer"
+  []
 []
