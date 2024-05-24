@@ -42,9 +42,6 @@ class HPCRunner(Runner):
         timer.start()
 
     def wait(self, timer):
-        # Need to import here to avoid cyclic includes
-        from TestHarness.schedulers.RunHPC import RunHPC
-
         # Poll loop waiting for the job to be finished
         # This gets a structure that represents the job, and the
         # polling itself is only done on occasion within RunHPC
