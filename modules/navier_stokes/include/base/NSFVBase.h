@@ -157,6 +157,8 @@ protected:
   void addEnthalpyMaterial();
   /// Add material to define the local speed in porous medium flows
   void addPorousMediumSpeedMaterial();
+  /// Add material to define the local speed with no porous medium treatment
+  void addNonPorousMediumSpeedMaterial();
   /// Add mixing length material for turbulence handling
   void addMixingLengthMaterial();
 
@@ -1310,8 +1312,12 @@ NSFVBase<BaseType>::addNSMaterials()
   {
     if (_has_energy_equation && !_use_external_enthalpy_material)
       addEnthalpyMaterial();
+
     if (_porous_medium_treatment)
       addPorousMediumSpeedMaterial();
+    else
+      addNonPorousMediumSpeedMaterial();
+
     if (_turbulence_handling == "mixing-length")
       addMixingLengthMaterial();
   }
@@ -2961,6 +2967,22 @@ NSFVBase<BaseType>::addPorousMediumSpeedMaterial()
   params.template set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   getProblem().addMaterial("PINSFVSpeedFunctorMaterial", prefix() + "pins_speed_material", params);
+}
+
+template <class BaseType>
+void
+NSFVBase<BaseType>::addNonPorousMediumSpeedMaterial()
+{
+  const std::string class_name = "ADVectorMagnitudeFunctorMaterial";
+  InputParameters params = getFactory().getValidParams(class_name);
+  assignBlocks(params, _blocks);
+
+  const std::vector<std::string> param_names{"x_functor", "y_functor", "z_functor"};
+  for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    params.template set<MooseFunctorName>(param_names[dim_i]) = _velocity_name[dim_i];
+  params.template set<MooseFunctorName>("vector_magnitude_name") = NS::speed;
+
+  getProblem().addMaterial(class_name, prefix() + "ins_speed_material", params);
 }
 
 template <class BaseType>
