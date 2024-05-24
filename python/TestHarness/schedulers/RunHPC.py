@@ -14,6 +14,23 @@ import jinja2
 from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
 
+class HPCJob:
+    """
+    Structure that represents the cached information about an HPC job
+    """
+    def __init__(self, id, command):
+        # The job identifier
+        self.id = id
+        # Whether or not this job is done; here done doesn't mean if it
+        # was successful or not, just if it is not running/queued anymore
+        self.done = False
+        # The exit code of the command that was ran (if any)
+        self.exit_code = None
+        # Whether or not this job was killed; used so what we don't
+        # bother killing a job multiple times
+        self.killed = False
+        # Whether or not the job is currently running
+        self.running = False
 class RunHPC(RunParallel):
     """
     Base scheduler for jobs that are ran on HPC.
@@ -115,26 +132,6 @@ class RunHPC(RunParallel):
         # Load the submission template
         template_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_template')
         self.submission_template = open(template_path, 'r').read()
-
-    class HPCJob:
-        """
-        Structure that represents the cached information about an HPC job
-        """
-        def __init__(self, id, command):
-            # The job identifier
-            self.id = id
-            # Whether or not this job is done; here done doesn't mean if it
-            # was successful or not, just if it is not running/queued anymore
-            self.done = False
-            # The exit code of the command that was ran (if any)
-            self.exit_code = None
-            # The command that was ran within the submission script
-            self.command = command
-            # Whether or not this job was killed; used so what we don't
-            # bother killing a job multiple times
-            self.killed = False
-            # Whether or not the job is currently running
-            self.running = False
 
     class CallHPCException(Exception):
         """
@@ -377,7 +374,7 @@ class RunHPC(RunParallel):
         with self.hpc_jobs_lock:
             if job in self.hpc_jobs:
                 raise Exception('Job has already been submitted')
-            self.hpc_jobs[job] = self.HPCJob(job_id, job_command)
+            self.hpc_jobs[job] = HPCJob(job_id, job_command)
 
         return job_id, job_command
 
