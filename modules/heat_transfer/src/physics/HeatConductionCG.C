@@ -62,6 +62,22 @@ HeatConductionCG::addFEKernels()
           getParam<std::vector<SubdomainName>>("heat_source_blocks");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
+  if (isParamValid("heat_source_functor"))
+  {
+    const std::string kernel_type = "BodyForce";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+    const auto functor_name = getParam<MooseFunctorName>("heat_source_functor");
+    if (MooseUtils::parsesToReal(functor_name))
+      params.set<Real>("value") = std::stod(functor_name);
+    else if (getProblem().hasFunction(functor_name))
+      params.set<FunctionName>("function") = functor_name;
+    else if (getProblem().hasPostprocessorValueByName(functor_name))
+      params.set<PostprocessorName>("postprocessor") = functor_name;
+    else
+      paramError("heat_source_functor", "Unsupported functor type. Consider using 'heat_source_var'.");
+    getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
+  }
   if (isTransient())
   {
     const std::string kernel_type = "ADHeatConductionTimeDerivative";

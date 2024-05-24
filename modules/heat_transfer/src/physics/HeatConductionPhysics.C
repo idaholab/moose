@@ -19,6 +19,7 @@ HeatConductionPhysics::validParams()
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
   params.addParam<std::vector<SubdomainName>>("heat_source_blocks",
                                               "Block restriction of the heat source");
+  params.addParam<MooseFunctorName>("heat_source_functor", "Functor providing the heat source");
 
   params.addParam<FunctionName>(
       "initial_temperature", 300, "Initial value of the temperature variable");
@@ -26,14 +27,14 @@ HeatConductionPhysics::validParams()
   // Boundary conditions
   params.addParam<std::vector<BoundaryName>>(
       "heat_flux_boundaries", {}, "Boundaries on which to apply a heat flux");
-  params.addParam<std::vector<BoundaryName>>(
-      "insulated_boundaries", {}, "Boundaries on which to apply a zero heat flux");
-  params.addParam<std::vector<BoundaryName>>(
-      "fixed_temperature_boundaries", {}, "Boundaries on which to apply a fixed temperature");
   params.addParam<std::vector<MooseFunctorName>>(
       "boundary_heat_fluxes",
       {},
       "Functors to compute the heat flux on each boundary in 'heat_flux_boundaries'");
+  params.addParam<std::vector<BoundaryName>>(
+      "insulated_boundaries", {}, "Boundaries on which to apply a zero heat flux");
+  params.addParam<std::vector<BoundaryName>>(
+      "fixed_temperature_boundaries", {}, "Boundaries on which to apply a fixed temperature");
   params.addParam<std::vector<MooseFunctorName>>(
       "boundary_temperatures",
       {},
