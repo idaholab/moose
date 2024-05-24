@@ -39,6 +39,12 @@ HeatConductionPhysics::validParams()
       "boundary_temperatures",
       {},
       "Functors to compute the heat flux on each boundary in 'fixed_temperature_boundaries'");
+  params.addParam<std::vector<BoundaryName>>(
+      "fixed_convection_boundaries", {}, "Boundaries on which to apply convection with an infinite medium");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "fixed_convection_T_infinity", {}, "Temperature at an infinite distance from the convective boundary conditions");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "fixed_convection_htc", {}, "Heat transfer coefficient for convection with infinite medium");
   params.addParamNamesToGroup(
       "heat_flux_boundaries insulated_boundaries fixed_temperature_boundaries boundary_heat_fluxes "
       "boundary_temperatures",
@@ -61,7 +67,7 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("fixed_temperature_boundaries",
                                                               "boundary_temperatures");
   checkVectorParamsNoOverlap<BoundaryName>(
-      {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries"});
+      {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries", "fixed_convection_boundaries"});
 
   addRequiredPhysicsTask("add_preconditioning");
 }

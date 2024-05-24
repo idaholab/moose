@@ -27,6 +27,11 @@ PNSFVSolidHeatTransferPhysics::validParams()
   InputParameters params = HeatConductionFV::validParams();
   params.addClassDescription("Define the Navier Stokes porous media solid energy equation");
 
+  // These boundary conditions parameters are not implemented yet
+  params.suppressParameter<std::vector<BoundaryName>>("fixed_convection_boundaries");
+  params.suppressParameter<std::vector<MooseFunctorName>>("fixed_convection_T_fluid");
+  params.suppressParameter<std::vector<MooseFunctorName>>("fixed_convection_htc");
+
   // Swap out some parameters, base class is not specific to porous media
   // Variables
   params.renameParam("temperature_name",

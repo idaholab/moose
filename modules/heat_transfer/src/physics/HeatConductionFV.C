@@ -167,6 +167,45 @@ HeatConductionFV::addFVBCs()
       }
     }
   }
+  if (isParamValid("fixed_convection_boundaries"))
+  {
+    const std::string bc_type = "FVConvectiveHeatFluxBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+
+    const auto & convective_boundaries =
+        getParam<std::vector<BoundaryName>>("fixed_convection_boundaries");
+    const auto & boundary_T_infinity =
+        getParam<std::vector<MooseFunctorName>>("fixed_convection_T_infinity");
+    const auto & boundary_htc =
+        getParam<std::vector<MooseFunctorName>>("fixed_convection_htc");
+    // Optimization if all the same
+    if (std::set<MooseFunctorName>(boundary_T_infinity.begin(), boundary_T_infinity.end())
+                .size() == 1 &&
+        std::set<MooseFunctorName>(boundary_htc.begin(), boundary_htc.end())
+                .size() == 1 &&
+        convective_boundaries.size() > 1)
+    {
+      params.set<std::vector<BoundaryName>>("boundary") = convective_boundaries;
+      params.set<MooseFunctorName>("T_infinity") = boundary_T_infinity[0];
+      params.set<MooseFunctorName>("heat_transfer_coefficient") = boundary_htc[0];
+      getProblem().addBoundaryCondition(
+          bc_type, prefix() + _temperature_name + "_fixed_convection_bc_all", params);
+    }
+    else
+    {
+      for (const auto i : index_range(convective_boundaries))
+      {
+        params.set<std::vector<BoundaryName>>("boundary") = {convective_boundaries[i]};
+        params.set<MooseFunctorName>("T_infinity") = boundary_T_infinity[i];
+        params.set<MooseFunctorName>("heat_transfer_coefficient") = boundary_htc[i];
+        getProblem().addBoundaryCondition(bc_type,
+                                          prefix() + _temperature_name + "_fixed_convection_bc_" +
+                                              convective_boundaries[i],
+                                          params);
+      }
+    }
+  }
 }
 
 void
