@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#26405'
+  design = 'NavierStokesHDGKernel.md'
+  [lid]
+    type = Exodiff
+    input = lid.i
+    exodiff = lid_out.e
+    requirement = 'The system shall be able to solve a lid-driven cavity problem using a hybridized discontinuous Galerkin discretization.'
+  []
+  [channel]
+    type = Exodiff
+    input = channel.i
+    exodiff = channel_out.e
+    requirement = 'The system shall be able to solve a channel flow problem using a hybridized discontinuous Galerkin discretization.'
+  []
+  [stokes_symmetric]
+    requirement = 'The system shall produce a symmetric matrix for a hybridizable discontinuous Galerkin discretization of the Stokes equation for a'
+    [lid]
+      type = CSVDiff
+      input = stokes-lid.i
+      csvdiff = stokes-lid_out.csv
+      detail = 'lid driven cavity problem, and'
+    []
+    [channel]
+      type = CSVDiff
+      input = stokes-channel.i
+      csvdiff = stokes-channel_out.csv
+      detail = 'channel flow problem.'
+    []
+  []
+  [mismatching_physics]
+    requirement = 'The system shall error if hybridized discontinuous Galerkin kernels and boundary conditions implement different physics.'
+    type = RunException
+    input = lid.i
+    expect_err = "'walls' implements 'diffusion' physics, which doesn't match our 'incompressible Navier-Stokes' physics"
+    cli_args = 'HDGBCs/walls/type=DiffusionHDGDirichletBC HDGBCs/walls/diffusivity=1'
+  []
+[]

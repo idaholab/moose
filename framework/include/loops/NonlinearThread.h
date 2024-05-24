@@ -49,6 +49,23 @@ public:
   virtual void postElement(const Elem * /*elem*/) override;
   virtual void post() override;
 
+  /**
+   * Reinitialize variables and materials on a face
+   * @param fe_problem The finite element problem to call reinit methods on
+   * @param tid The thread ID for which we should reinit variables and materials
+   * @param elem The element we are reiniting
+   * @param side The element side corresponding to the face we are reiniting
+   * @param bnd_id If provided, materials associated with this boundary ID will be reinit'd
+   * @param lower_d_elem If provided, lower dimensional variables coincident with the element face
+   * will be reinit'd
+   */
+  static void prepareFace(FEProblemBase & fe_problem,
+                          THREAD_ID tid,
+                          const Elem * elem,
+                          unsigned int side,
+                          BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
+                          const Elem * lower_d_elem = nullptr);
+
 protected:
   ///@{
   /// Base class version just calls compute on each object for the element
