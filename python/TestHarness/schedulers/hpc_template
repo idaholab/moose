@@ -31,9 +31,7 @@ set -e
 export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 
 # Print a useful header
-echo "################################################################################"
 echo "TestHarness {{ SCHEDULER_NAME }} job on $(hostname) in job ${{ JOB_ID_VARIABLE }}"
-echo "################################################################################"
 echo "Time: $(date)"
 echo 'Test: {{ TEST_SPEC }}:{{ TEST_NAME }}'
 echo 'Directory: {{ CWD }}'
@@ -45,7 +43,6 @@ module list
 
 echo "################################################################################"
 echo "Beginning TestHarness {{ SCHEDULER_NAME }} test execution"
-echo "################################################################################"
 
 # Move into the test directory
 cd {{ CWD }}
@@ -83,8 +80,6 @@ for file in ${ADDITIONAL_OUTPUT_FILES[@]}; do
     fi
     echo "Finalized output $file"
 done
-
-echo "################################################################################"
 
 # Append a recognizable string at the end of the output. We look
 # for this string when parsing the output so that we can be sure

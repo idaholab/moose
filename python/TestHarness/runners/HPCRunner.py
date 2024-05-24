@@ -141,13 +141,16 @@ class HPCRunner(Runner):
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
+                header = f'{self.run_hpc.getHPCSchedulerName()} job {self.hpc_job_id} output'
+                self.output = util.outputHeader(f'Begin {header}')
                 # If we're trying to parse output, we can't truncate it
                 # because it might appear in the truncated portion
                 if self.job.getTester().needFullOutput(self.options):
-                    self.output = open(output_file, 'r').read()
+                    self.output += open(output_file, 'r').read()
                 # Not parsing the output, so just read it truncated
                 else:
-                    self.output = self.readTruncated(output_file)
+                    self.output += self.readTruncated(output_file)
+                self.output += util.outputHeader(f'End {header}')
 
                 did_set = True
             except:
