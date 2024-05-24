@@ -84,39 +84,6 @@
       detail = ' growth directions determined by an parsed function.'
     []
   []
-  [mesh_cutter_2d]
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFunctionUserObject'
-    issues = '#23572 #27659'
-    design = 'MeshCut2DFunctionUserObject.md'
-    [function_growth]
-      type = Exodiff
-      input = edge_crack_2d_propagation.i
-      exodiff = 'edge_crack_2d_propagation_xfemcutter.e-s0002 edge_crack_2d_propagation_out.e-s002'
-      abs_zero = 1e-8
-      map = false
-      # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
-      detail = ' and crack growth is defined by a user provided function.'
-    []
-    [k_growth]
-      type = Exodiff
-      input = edge_crack_2d_propagation_mhs.i
-      exodiff = 'edge_crack_2d_propagation_mhs_xfemcutter.e edge_crack_2d_propagation_mhs_out.e'
-      abs_zero = 1e-8
-      map = false
-      # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
-      detail = ' and crack growth and direction is computed by a fracture integral.'
-    []
-    [stress_check]
-      type = CSVDiff
-      input = crack_front_stress_function_growth.i
-      csvdiff = 'stress_check_CrackFrontNormalStress_0001.csv stress_check_CrackFrontNormalStress_0002.csv stress_check_CrackFrontNormalStress_0003.csv stress_check_CrackFrontNormalStress_0004.csv'
-      # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
-      detail = ' and average crack tip stress changes with crack orientation and properly accounts averaging volume intersecting boundary.'
-    []
-  []
   [penny_crack]
     requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics problems where a stationary embedded circular crack is defined by a cutting plane geometry and points along the crack front for the  the domain integral'
     design = 'DomainIntegral/index.md CircleCutUserObject.md'

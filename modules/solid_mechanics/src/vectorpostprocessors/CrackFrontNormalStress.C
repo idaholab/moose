@@ -37,7 +37,7 @@ CrackFrontNormalStress::validParams()
                                "block, i.e. for multiple phases");
   params.set<bool>("use_displaced_mesh") = false;
   // EXEC_NONLINEAR to work with xfem_udpates
-  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_BEGIN, EXEC_NONLINEAR};
   params.addClassDescription("Computes the average stress normal to the crack face.");
   return params;
 }

@@ -9,6 +9,7 @@
 
 #include "MeshCut2DUserObjectBase.h"
 #include "MeshCut2DNucleationBase.h"
+#include "CrackFrontDefinition.h"
 
 #include "XFEMFuncs.h"
 #include "MooseError.h"

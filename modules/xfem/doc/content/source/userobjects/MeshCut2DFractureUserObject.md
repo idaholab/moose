@@ -26,7 +26,9 @@ Quasistatic behavior is assumed, and an iterative approach is taken to repeatedl
 
 ## Example Input Syntax
 
-!listing test/tests/solid_mechanics_basic/edge_crack_2d_propagation_mhs.i block=UserObjects
+The following input file provides an example of a `MeshCut2DFractureUserObject` that uses fracture integrals to propagate the crack.  In this example, crack growth stops before the crack grows through the right boundary due to the fracture integral q-function intersecting the boundary.  A stress based crack growth criterion is used in conjunction with the fracture integrals by uncommenting the two lines containing `stress_vectorpostprocessor` and `stress_threshold` in the `MeshCut2DFractureUserObject`.  The stress based growth criterion causes the crack to continue to grow through the right boundary, as expected.
+
+!listing test/tests/mesh_cut_2D_fracture/edge_crack_2d_propagation.i block=UserObjects
 
 !syntax parameters /UserObjects/MeshCut2DFractureUserObject
 

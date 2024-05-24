@@ -8,7 +8,7 @@ This class is used to define an evolving cutting plane for 2D XFEM simulations b
 
 ## Example Input Syntax
 
-!listing test/tests/solid_mechanics_basic/edge_crack_2d_propagation.i block=UserObjects
+!listing test/tests/mesh_cut_2D_fracture/crack_front_stress_function_growth.i block=UserObjects
 
 !syntax parameters /UserObjects/MeshCut2DFunctionUserObject
 
