@@ -391,6 +391,14 @@ dataLoad(std::istream & stream, VariableName & v, void * context)
 
 template <>
 void
+dataLoad(std::istream & stream, UserObjectName & v, void * context)
+{
+  auto & name = static_cast<std::string &>(v);
+  dataLoad(stream, name, context);
+}
+
+template <>
+void
 dataLoad(std::istream & stream, bool & v, void * /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
