@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYDelaunayGenerator.md'
-  issues = '#20192 #26776'
+  issues = '#20192 #26776 #27545'
   [xydelaunay]
     requirement = "The system shall have the capability of triangulating a polyline boundary"
     [basic]
@@ -111,6 +111,53 @@
       recover = false
       detail = "with optional non-uniform refinement based on an automatically generated function."
     []
+    [quadratic_hole_tri3]
+      type = 'Exodiff'
+      input = 'xydelaunay_quadratic.i'
+      cli_args = '--mesh-only xydelaunay_quadratic_hole_tri3.e
+                  Mesh/xyd/tri_element_type=TRI3
+                  Mesh/xyd/stitch_holes=false'
+      exodiff = 'xydelaunay_quadratic_hole_tri3.e'
+      recover = false
+      detail = "with quadratic TRI3 elements using a non-stitched quadratic hole mesh."
+    []
+    [quadratic_tri6]
+      type = 'Exodiff'
+      input = 'xydelaunay_quadratic.i'
+      cli_args = '--mesh-only xydelaunay_quadratic_tri6.e'
+      exodiff = 'xydelaunay_quadratic_tri6.e'
+      recover = false
+      detail = "with quadratic TRI6 elements."
+    []
+    [quadratic_tri7]
+      type = 'Exodiff'
+      input = 'xydelaunay_quadratic.i'
+      cli_args = '--mesh-only xydelaunay_quadratic_tri7.e
+                  Mesh/xyd/tri_element_type=TRI7'
+      exodiff = 'xydelaunay_quadratic_tri7.e'
+      recover = false
+      detail = "with quadratic TRI7 elements."
+    []
+    [quadratic_tri6_stitching_linear_hole]
+      type = 'Exodiff'
+      input = 'xydelaunay_stitching.i'
+      cli_args = 'Mesh/final_generator=triang
+                  Mesh/triang/tri_element_type=TRI6
+                  --mesh-only xydelaunay_stitching_tri6.e'
+      exodiff = 'xydelaunay_stitching_tri6.e'
+      recover = false
+      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI6 mesh after increasing the hole mesh element order"
+    []
+    [quadratic_tri7_stitching_linear_hole]
+      type = 'Exodiff'
+      input = 'xydelaunay_stitching.i'
+      cli_args = 'Mesh/final_generator=triang
+                  Mesh/triang/tri_element_type=TRI7
+                  --mesh-only xydelaunay_stitching_tri7.e'
+      exodiff = 'xydelaunay_stitching_tri7.e'
+      recover = false
+      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order" 
+    []
   []
   [errors]
     requirement = "The system shall throw an error when triangulating a polyline boundary"
@@ -138,6 +185,14 @@
                   Mesh/triang/auto_area_function_power=2'
       expect_err = "the following parameters should not be set"
       detail = "if the user specifies parameters for the auto area function when it is not used"
+    []
+    [err_stiching_quadratic_holes]
+      type = RunException
+      input = 'xydelaunay_quadratic.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/xyd/tri_element_type=TRI3'
+      expect_err = "Cannot use first order elements with stitched quadratic element holes."
+      detail = "if the input hole meshes"
     []
   []
 []
