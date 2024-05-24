@@ -22,8 +22,8 @@ public:
   GaussianProcessData(const InputParameters & parameters);
 
   virtual void initialize() override;
-  virtual void execute() override {};
-  virtual void finalize() override {};
+  virtual void execute() override {}
+  virtual void finalize() override {}
 
 protected:
   /// Reference to GaussianProcess

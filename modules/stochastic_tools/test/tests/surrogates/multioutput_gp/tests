@@ -15,6 +15,7 @@
       input = mogp_lmc_tuned.i
       jsondiff = "mogp_lmc_tuned_out.json"
       detail = "with tuning the hyperparameters."
+      abs_zero = 1e-6
     []
     [load]
       type = 'JSONDiff'

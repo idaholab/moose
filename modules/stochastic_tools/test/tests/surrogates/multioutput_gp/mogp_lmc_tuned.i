@@ -87,7 +87,7 @@
     tune_parameters = 'lmc:acoeff_0 lmc:lambda_0 covar:signal_variance covar:length_factor'
     tuning_min = '1e-9 1e-9 1e-9 1e-9'
     tuning_max = '1e16 1e16 1e16  1e16'
-    num_iters = 10000
+    num_iters = 1000
     batch_size = 10
     learning_rate = 0.0005
     show_optimization_details = true

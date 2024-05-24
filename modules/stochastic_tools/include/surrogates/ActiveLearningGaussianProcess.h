@@ -35,8 +35,8 @@ public:
   static InputParameters validParams();
   ActiveLearningGaussianProcess(const InputParameters & parameters);
 
-  virtual void initialize() final {};
-  virtual void execute() final {};
+  virtual void initialize() final {}
+  virtual void execute() final {}
   virtual void reTrain(const std::vector<std::vector<Real>> & inputs,
                        const std::vector<Real> & outputs) const final;
 

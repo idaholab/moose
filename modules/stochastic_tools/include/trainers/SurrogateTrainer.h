@@ -60,7 +60,7 @@ public:
 
   virtual void initialize() final;
   virtual void execute() final;
-  virtual void finalize() final {};
+  virtual void finalize() final {}
 
 protected:
   /*
