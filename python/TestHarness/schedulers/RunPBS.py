@@ -10,6 +10,7 @@
 import re, json
 from RunHPC import RunHPC
 from PBScodes import PBS_User_EXITCODES
+from TestHarness import util
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(RunHPC):
@@ -44,8 +45,6 @@ class RunPBS(RunHPC):
                 if exit_code is not None:
                     exit_code = int(exit_code)
                 state = job_result.get('job_state')
-                substate = job_result.get('substate')
-                terminated = int(substate) == 91 if substate else False
 
                 # Get the job state, and report running if it switched to running
                 if state == 'R' and not hpc_job.running:
@@ -53,23 +52,19 @@ class RunPBS(RunHPC):
                     self.setAndOutputJobStatus(job, job.running, caveats=True)
 
                 # If we were running but now we're done, we're not running anymore
-                if exit_code is not None or terminated:
+                if exit_code is not None:
                     hpc_job.running = False
                     hpc_job.done = True
-                    hpc_job.exit_code = exit_code if exit_code is not None else 1
+                    hpc_job.exit_code = exit_code
 
-                    # Negative exit code, means PBS killed it for some reason
-                    # Try to find it in our pbs exit code list to return something useful
+                    # Negative exit code, means PBS set a reason
                     if exit_code < 0:
-                        name_reason_tup = PBS_User_EXITCODES.get(exit_code)
-                        if name_reason_tup is not None:
-                            name, _ = name_reason_tup
-                            job.setStatus(job.error, f'PBS ERROR: {name}')
-                        else:
-                            terminated = True
-                    # Fallback for all other terminations
-                    if terminated:
-                        job.setStatus(job.error, 'PBS JOB TERMINATED')
+                        name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
+                        job.setStatus(job.error, f'PBS ERROR: {name}')
+                        job.appendOutput(util.outputHeader(f'PBS terminated job with reason: {reason}'))
+                    # Job was killed with a signal
+                    elif exit_code >= 128:
+                        job.setStatus(job.error, f'PBS JOB KILLED')
         except Exception as e:
             raise self.CallHPCException(self, f'Failed to parse collective job status', cmd, result) from e
 
