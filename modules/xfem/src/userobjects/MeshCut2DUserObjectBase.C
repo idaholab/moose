@@ -325,7 +325,8 @@ MeshCut2DUserObjectBase::growFront()
       Point new_node_offset = direction_iter->second;
       Point x = this_point + new_node_offset;
 
-      // FIXME LYNN check if line between this_point and x crosses an element in the mesh.
+      // FIXME LYNN check if line between this_point and x crosses an element in the cutter mesh or
+      // solid mesh boundary
       // use MeshCut2DRankTwoTensorNucleation::lineLineIntersect2D
 
       // add node to front
