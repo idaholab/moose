@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrackFrontNormalStress.h"
+#include "Moose.h"
 #include "MooseEnum.h"
 #include "RankTwoTensor.h"
 #include "Conversion.h"
@@ -35,6 +36,8 @@ CrackFrontNormalStress::validParams()
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
   params.set<bool>("use_displaced_mesh") = false;
+  // EXEC_NONLINEAR to work with xfem_udpates
+  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
   params.addClassDescription("Computes the average stress normal to the crack face.");
   return params;
 }
@@ -105,8 +108,6 @@ CrackFrontNormalStress::finalize()
 
   for (std::size_t icfp = 0; icfp < _avg_crack_tip_stress.size(); ++icfp)
   {
-    mooseAssert((_volume[icfp] >= 0), "Volume is negative at crackfront.");
-
     if (_volume[icfp] != 0)
       _avg_crack_tip_stress[icfp] = _avg_crack_tip_stress[icfp] / _volume[icfp];
     else
@@ -138,16 +139,18 @@ CrackFrontNormalStress::CrackFrontBox(std::size_t crack_front_point_index,
   const Point * cf_pt = _crack_front_definition->getCrackFrontPoint(crack_front_point_index);
   RealVectorValue crack_node_to_current_node = qp_coord - *cf_pt;
 
+  // crackfront coordinates are:
+  // crack_node_to_current_node_rot[0]= crack direction
+  // crack_node_to_current_node_rot[0]= normal to crack face
+  // crack_node_to_current_node_rot[0]= tangent to crack face along crack front (not used in 2D)
   RealVectorValue crack_node_to_current_node_rot =
       _crack_front_definition->rotateToCrackFrontCoords(crack_node_to_current_node,
                                                         crack_front_point_index);
-
   Real q = 0.0;
-
   if ((crack_node_to_current_node_rot(0) > 0) &&
       (crack_node_to_current_node_rot(0) <= _box_length) &&
-      (std::abs(crack_node_to_current_node_rot(1)) <= _box_width / 2) &&
-      (std::abs(crack_node_to_current_node_rot(2)) <= _box_height / 2))
+      (std::abs(crack_node_to_current_node_rot(1)) <= _box_height / 2) &&
+      (std::abs(crack_node_to_current_node_rot(2)) <= _box_width / 2))
   {
     q = 1.0;
   }
