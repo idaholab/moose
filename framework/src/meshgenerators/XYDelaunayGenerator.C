@@ -112,7 +112,10 @@ XYDelaunayGenerator::validParams()
       "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
-
+  params.addParam<std::vector<Point>>("interior_points",
+                                      {},
+                                      "Interior node locations, if no smoothing is used. Any point "
+                                      "outside the surface will not be meshed.");
   params.addClassDescription("Triangulates meshes within boundaries defined by input meshes.");
 
   params.addParamNamesToGroup(
@@ -142,7 +145,8 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
-    _verbose_stitching(parameters.get<bool>("verbose_stitching"))
+    _verbose_stitching(parameters.get<bool>("verbose_stitching")),
+    _interior_points(getParam<std::vector<Point>>("interior_points"))
 {
   if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
       (_desired_area > 0.0 && _use_auto_area_func) ||
@@ -291,6 +295,10 @@ XYDelaunayGenerator::generate()
     poly2tri.elem_type() = libMesh::ElemType::TRI6;
   else if (_tri_elem_type == "TRI7")
     poly2tri.elem_type() = libMesh::ElemType::TRI7;
+  // Add interior points before triangulating. Only points inside the boundaries
+  // will be meshed.
+  for (auto & point : _interior_points)
+    mesh->add_point(point);
 
   poly2tri.triangulate();
 
