@@ -106,6 +106,14 @@
       recover = false
       detail = "a hexagonal mesh with the input mesh's default external boundary being deleted."
     []
+    [quadratic_elems]
+      type = Exodiff
+      input = quadratic_elems.i
+      cli_args = "--mesh-only"
+      exodiff = quadratic_elems_in.e
+      recover = false
+      detail = "an assembly mesh with quadratic elements."
+    []
   []
   [error]
     requirement = 'The system shall throw an error '

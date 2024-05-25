@@ -1,0 +1,39 @@
+[Tests]
+  design = 'meshgenerators/ElementOrderConversionGenerator.md'
+  issues = '#27545'
+  [firsrt_order]
+    type = 'Exodiff'
+    input = 'order_conversion.i'
+    exodiff = 'firsrt_order.e'
+    cli_args = '--mesh-only firsrt_order.e'
+    requirement = 'The system shall convert all the input elements into first-order elements.'
+    recover = false
+  []
+  [complete_order]
+    type = 'Exodiff'
+    input = 'order_conversion.i'
+    exodiff = 'complete_order.e'
+    cli_args = '--mesh-only complete_order.e 
+                Mesh/order_conversion/conversion_type=COMPLETE_ORDER'
+    requirement = 'The system shall convert all the input elements into complete-order elements.'
+    recover = false
+  []
+  [full_second_order]
+    type = 'Exodiff'
+    input = 'order_conversion.i'
+    exodiff = 'full_second_order.e'
+    cli_args = '--mesh-only full_second_order.e 
+                Mesh/order_conversion/conversion_type=SECOND_ORDER'
+    requirement = 'The system shall convert all the input elements into full-second-order elements.'
+    recover = false
+  []
+  [nonfull_second_order]
+    type = 'Exodiff'
+    input = 'order_conversion.i'
+    exodiff = 'nonfull_second_order.e'
+    cli_args = '--mesh-only nonfull_second_order.e 
+                Mesh/order_conversion/conversion_type=SECOND_ORDER_NONFULL'
+    requirement = 'The system shall convert all the input elements into second-order (nonfull) elements.'
+    recover = false
+  []
+[]
