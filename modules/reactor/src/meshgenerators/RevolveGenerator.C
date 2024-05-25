@@ -233,6 +233,11 @@ RevolveGenerator::generate()
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 
+  // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
+  // around
+  if (!input->is_serial())
+    mesh->delete_remote_elements();
+
   // Subdomain IDs for on-axis elements must be new
   std::set<subdomain_id_type> subdomain_ids_set;
   input->subdomain_ids(subdomain_ids_set);

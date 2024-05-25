@@ -1,6 +1,6 @@
 [Tests]
-  # design = 'meshgenerators/RevolveGenerator.md'
-  # issues = '#18628 #19352 #23369'
+  design = 'meshgenerators/RevolveGenerator.md'
+  issues = '#27699'
   [test]
     requirement = 'The system shall '
     [simple_tri]
@@ -9,7 +9,7 @@
       cli_args = '--mesh-only simple_revolve_tri.e'
       exodiff = 'simple_revolve_tri.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with TRI3 elements'
     []
     [simple_tri6]
       type = 'Exodiff'
@@ -18,7 +18,7 @@
                   Mesh/gmg/elem_type=TRI6'
       exodiff = 'revolve_2d_tri6.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with TRI6 elements'
     []
     [simple_tri7]
       type = 'Exodiff'
@@ -27,7 +27,7 @@
                   Mesh/gmg/elem_type=TRI7'
       exodiff = 'revolve_2d_tri7.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with TRI7 elements'
     []
     [simple_quad8_1]
       type = 'Exodiff'
@@ -36,7 +36,7 @@
                   Mesh/gmg/elem_type=QUAD8'
       exodiff = 'revolve_2d_quad8_1.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD8 elements along an axis overlapped with edges of some elements'
     []
     [simple_quad8_2]
       type = 'Exodiff'
@@ -46,7 +46,7 @@
                   Mesh/rg/axis_direction="-1.0 1.0 0.0"'
       exodiff = 'revolve_2d_quad8_2.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD8 elements along an axis overlapped with a node of the 2D mesh'
     []
     [simple_quad9_1]
       type = 'Exodiff'
@@ -55,7 +55,7 @@
                   Mesh/gmg/elem_type=QUAD9'
       exodiff = 'revolve_2d_quad9_1.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD9 elements along an axis overlapped with edges of some elements'
     []
     [simple_quad9_2]
       type = 'Exodiff'
@@ -65,7 +65,7 @@
                   Mesh/rg/axis_direction="-1.0 1.0 0.0"'
       exodiff = 'revolve_2d_quad9_2.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD9 elements along an axis overlapped with a node of the 2D mesh'
     []
     [simple_tri_270]
       type = 'Exodiff'
@@ -77,7 +77,7 @@
                   Mesh/rg/preserve_volumes=true'
       exodiff = 'simple_revolve_tri_270.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by partially revolving a simple 2D mesh with TRI3 elements clockwise'
     []
     [simple_tri_-270]
       type = 'Exodiff'
@@ -87,7 +87,7 @@
                   Mesh/rg/clockwise=false'
       exodiff = 'simple_revolve_tri_-270.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by partially revolving a simple 2D mesh with TRI3 elements counterclockwise'
     []
     [simple_tri_vol_preserve]
       type = 'Exodiff'
@@ -96,7 +96,7 @@
                   Mesh/rg/preserve_volumes=true'
       exodiff = 'simple_revolve_tri_vp.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with TRI3 elements using radius correction to preserve volumes'
     []
     [simple_tri_on_axis_1]
       type = 'Exodiff'
@@ -106,7 +106,7 @@
                   Mesh/rg/axis_direction="1.0 0.0 0.0"'
       exodiff = 'simple_revolve_tri_oa.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with TRI3 elements along an axis overlapped with a node of the 2D mesh'
     []
     [simple_tri_on_axis_2]
       type = 'Exodiff'
@@ -116,7 +116,7 @@
                   Mesh/rg/axis_direction="0.0 1.0 0.0"'
       exodiff = 'simple_revolve_tri_oa_2.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with TRI3 elements along an axis overlapped with an edge of an element of the 2D mesh'
     []
     [simple_quad]
       type = 'Exodiff'
@@ -125,7 +125,7 @@
                   Mesh/shg/element_type=QUAD'
       exodiff = 'simple_revolve_quad.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD4 elements'
     []
     [simple_quad_on_axis_1]
       type = 'Exodiff'
@@ -136,7 +136,7 @@
                   Mesh/shg/element_type=QUAD'
       exodiff = 'simple_revolve_quad_oa.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD4 elements along an axis overlapped with a node of the 2D mesh'
     []
     [simple_quad_on_axis_2]
       type = 'Exodiff'
@@ -147,7 +147,7 @@
                   Mesh/shg/element_type=QUAD'
       exodiff = 'simple_revolve_quad_oa_2.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with QUAD4 elements along an axis overlapped with an edge of an element of the 2D mesh'
     []
     [simple_hybrid]
       type = 'Exodiff'
@@ -159,7 +159,7 @@
                   Mesh/shg/radial_intervals=2'
       exodiff = 'simple_revolve_hybrid.e'
       recover = false
-      detail = 'simple'
+      detail = 'generate a 3D mesh by fully revolving a simple 2D mesh with mixed TRI3 and QUAD4 elements'
     []
     [multi_tri]
       type = 'Exodiff'
@@ -167,7 +167,7 @@
       cli_args = '--mesh-only multi_revolve_tri.e'
       exodiff = 'multi_revolve_tri.e'
       recover = false
-      detail = 'multi'
+      detail = 'generate a 3D mesh that consists multiple azimuthal sections by fully revolving a simple 2D mesh with TRI3 elements'
     []
     [multi_tri_partial]
       type = 'Exodiff'
@@ -176,14 +176,14 @@
                   Mesh/rg/revolving_angles="120 180"'
       exodiff = 'multi_revolve_tri_partial.e'
       recover = false
-      detail = 'multi'
+      detail = 'generate a 3D mesh that consists multiple azimuthal sections by partially revolving a simple 2D mesh with TRI3 elements'
     []
     [ei_swap]
       type = 'Exodiff'
       input = 'ei_swap.i'
       exodiff = 'ei_swap_out.e'
       recover = false
-      detail = 'multi'
+      detail = 'generate a 3D mesh by revolving a 2D mesh with the original element extra integers retained and swapped'
     []
     [revolve_1d]
       type = 'Exodiff'
@@ -191,7 +191,7 @@
       cli_args = '--mesh-only revolve_1d_in.e'
       exodiff = 'revolve_1d_in.e'
       recover = false
-      detail = '1d'
+      detail = 'generate a 2D mesh by revolving a simple 1D mesh with EDGE2 elements'
     []
     [revolve_1d_single]
       type = 'Exodiff'
@@ -200,7 +200,9 @@
                   Mesh/gmg/nx=1'
       exodiff = 'revolve_1d_s_in.e'
       recover = false
-      detail = '1d'
+      detail = 'generate a 2D mesh by revolving a simple 1D mesh with a single EDGE2 element'
+      # Only one element
+      max_parallel = 1
     []
     [revolve_1d_second]
       type = 'Exodiff'
@@ -209,7 +211,7 @@
                   Mesh/gmg/elem_type=EDGE3'
       exodiff = 'revolve_1d_sec_in.e'
       recover = false
-      detail = '1d'
+      detail = 'generate a 2D mesh by revolving a simple 1D mesh with EDGE3 elements'
     []
     [revolve_1d_single_second]
       type = 'Exodiff'
@@ -219,7 +221,9 @@
                   Mesh/gmg/elem_type=EDGE3'
       exodiff = 'revolve_1d_s_sec_in.e'
       recover = false
-      detail = '1d'
+      detail = 'generate a 2D mesh by revolving a simple 1D mesh with a single EDGE3 element'
+      # Only one element
+      max_parallel = 1
     []
   []
   [error]
@@ -230,7 +234,7 @@
       cli_args = '--mesh-only err_revolve_1d.e 
                   Mesh/rg/axis_direction="-1.0 1.0 0.0"'
       expect_err = 'The 1D input mesh is not perpendicular to the rotation axis'
-      detail = "1d."
+      detail = "if input 1D mesh is not perpendicular to the rotation axis."
     []
     [err_input_centroid_on_axis]
       type = 'RunException'
@@ -238,7 +242,7 @@
       cli_args = '--mesh-only err_revolve_1d.e 
                   Mesh/rg/axis_point="0.5 0.0 0.0"'
       expect_err = 'The input mesh is either across the axis or overlapped with the axis'
-      detail = "1d."
+      detail = "if the input 1D mesh has its centroid overlapped with the rotation axis."
     []
     [err_input_across_axis]
       type = 'RunException'
@@ -246,7 +250,7 @@
       cli_args = '--mesh-only err_revolve_1d.e 
                   Mesh/rg/axis_point="0.3 0.0 0.0"'
       expect_err = 'The input mesh is across the axis'
-      detail = "1d."
+      detail = "if the input 1D mesh is across the rotation axis."
     []
     [err_input_off_plane]
       type = 'RunException'
@@ -254,7 +258,7 @@
       cli_args = '--mesh-only err_revolve_1d.e 
                   Mesh/rg/axis_point="0.0 0.0 1.0"'
       expect_err = 'The input mesh is not in the same plane with the rotation axis'
-      detail = "1d."
+      detail = "the input 1D mesh is not in the same plane with the rotation axis."
     []
   []  
 []
