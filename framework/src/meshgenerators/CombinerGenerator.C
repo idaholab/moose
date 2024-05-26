@@ -47,13 +47,13 @@ CombinerGenerator::validParams()
   params.addParam<bool>("avoid_merging_subdomains",
                         false,
                         "Whether to prevent merging subdomains by offsetting ids. The first mesh "
-                        "in the input will conserve the same subdomains ids, the others will have "
+                        "in the input will keep the same subdomains ids, the others will have "
                         "offsets. All subdomain names will remain valid");
   params.addParam<bool>("avoid_merging_boundaries",
                         false,
                         "Whether to prevent merging sidesets by offsetting ids. The first mesh "
-                        "in the input will conserve the same sideset ids, the others will have "
-                        "offsets. All sideset names will remain valid");
+                        "in the input will keep the same boundary ids, the others will have "
+                        "offsets. All boundary names will remain valid");
 
   return params;
 }
@@ -321,13 +321,22 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
   // Check for the case with two boundary ids sharing the same name
   if (_avoid_merging_boundaries)
   {
-    // We only check with sidesets
     for (const auto & [b_id, b_name] : other_boundary.get_sideset_name_map())
       for (const auto & [source_id, source_name] : boundary.get_sideset_name_map())
         if (b_name == source_name)
           paramWarning(
               "avoid_merging_boundaries",
-              "Not merging boundaries is creating two boundaries with the same name '" + b_name +
+              "Not merging boundaries is creating two sidesets with the same name '" + b_name +
+                  "' but different ids: " + std::to_string(source_id) + " & " +
+                  std::to_string(b_id + bid_offset) +
+                  ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
+                  "will get errors reading the Exodus output later.");
+    for (const auto & [b_id, b_name] : other_boundary.get_nodeset_name_map())
+      for (const auto & [source_id, source_name] : boundary.get_nodeset_name_map())
+        if (b_name == source_name)
+          paramWarning(
+              "avoid_merging_boundaries",
+              "Not merging boundaries is creating two nodesets with the same name '" + b_name +
                   "' but different ids: " + std::to_string(source_id) + " & " +
                   std::to_string(b_id + bid_offset) +
                   ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
