@@ -161,7 +161,7 @@
                   --mesh-only xydelaunay_stitching_tri7.e'
       exodiff = 'xydelaunay_stitching_tri7.e'
       recover = false
-      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order" 
+      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order"
     []
   []
   [errors]
@@ -198,6 +198,14 @@
                   Mesh/xyd/tri_element_type=TRI3'
       expect_err = "Cannot use first order elements with stitched quadratic element holes."
       detail = "if the input hole meshes"
+    []
+    [interior_points]
+      type = 'Exodiff'
+      input = 'xydelaunay_interior_pts.i'
+      cli_args = '--mesh-only xydelaunay_interior_pts.e'
+      exodiff = 'xydelaunay_interior_pts.e'
+      recover = false
+      detail = "with the ability to specify interior nodes."
     []
   []
 []

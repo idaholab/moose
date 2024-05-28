@@ -15,7 +15,7 @@
               0.0 0.5 0.0'
     loop = true
   []
-  [triang]
+  [triangulate]
     type = XYDelaunayGenerator
     boundary = 'outer_bdy'
     interior_points = '0.5 0.5 0
@@ -33,11 +33,6 @@
     normals = '0 1 0 0 -1 0 -1 0 0 1 0 0'
   []
 []
-[AuxVariables]
-  [empty]
-
-  []
-[]
 
 [Problem]
   solve = false
@@ -52,6 +47,3 @@
   execute_on = TIMESTEP_END
 []
 
-[VectorPostprocessors]
-
-[]
