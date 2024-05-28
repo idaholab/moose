@@ -1,6 +1,6 @@
 [Tests]
-  design = 'source/bcs/GapHeatTransfer.md'
-  issues = '#18585'
+  design = 'source/fvkernels/FVThermalRadiationSourceSink.md'
+  issues = '#27725'
   [1d_P1_rad_heat_trasfer]
     type = CSVDiff
     input = 'radiation_istothermal_medium_1d.i'

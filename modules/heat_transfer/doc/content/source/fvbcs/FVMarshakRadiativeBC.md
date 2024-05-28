@@ -11,6 +11,7 @@ F_G = (G - 4 \sigma T_{b, rad}^4) \frac{\epsilon_b}{2 \Gamma (2 - \epsilon_b)}
 \end{equation}
 
 where:
+
 - $F_G$ is the normal space derivative of the radiation heat flux at the boundaries defined by the `boundary` parameter
 - $G$ is the ratiative heat flux (SI units $W/m2$)
 - $\sigma T_{b, rad}$ is the radiation temperature at the boundary (SI units $K$)

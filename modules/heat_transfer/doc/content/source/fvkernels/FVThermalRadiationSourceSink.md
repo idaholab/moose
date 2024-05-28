@@ -11,6 +11,7 @@ The term added reads as follows:
 \end{equation}
 
 where:
+
 -  $G$ is the radiation heat flux (SI units $W/m^2$)
 -  $\kappa$ is the oppacity (SI units $1/m$)
 -  $\sigma$ is the Stefan-Boltzmann constant

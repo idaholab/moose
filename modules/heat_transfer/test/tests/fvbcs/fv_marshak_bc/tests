@@ -1,6 +1,6 @@
 [Tests]
-  design = 'source/bcs/GapHeatTransfer.md'
-  issues = '#18585'
+  design = 'source/fvbcs/FVMarshakRadiativeBC.md'
+  issues = '#27725'
   [P1_marshak_bcs]
     requirement = 'The system shall be able to preserve the contant solution for radiative heat transfer, '
     [1D]
