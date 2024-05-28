@@ -926,7 +926,7 @@ public:
    * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
    * Mainly used for finite volume systems.
    */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer()
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() const
   {
     return _raw_grad_container;
   }

@@ -57,7 +57,7 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
 
     for (auto kernel : _fv_flux_kernels)
     {
-      kernel->setCurrentFaceInfo(face_info);
+      kernel->setupFaceData(face_info);
       kernel->setCurrentFaceArea(face_area);
       if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
           _mode == Moose::FV::LinearFVComputationMode::FullSystem)

@@ -91,7 +91,8 @@ TEST(ContainerFunctors, Test)
   for (const auto limiter_type : limiter_types)
     for (const auto * const face : faces)
     {
-      const auto face_arg = Moose::FaceArg({face, limiter_type, true, false, nullptr});
+      const auto elem = vector_functor.isInternalFace(*face) ? nullptr : face->elemPtr();
+      const auto face_arg = Moose::FaceArg({face, limiter_type, true, false, elem});
       const auto current_time = Moose::currentState();
       EXPECT_TRUE(vector_functor(face_arg, current_time)[0] == 1.);
       EXPECT_TRUE(array_functor(face_arg, current_time)[0] == 1.);

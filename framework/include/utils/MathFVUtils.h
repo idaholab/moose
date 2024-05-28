@@ -100,18 +100,20 @@ bool setInterpolationMethod(const MooseObject & obj,
  * upwind interpolation with the velocity facing outward from the F1 element,
  * then the pair will be (1.0, 0.0).
  *
+ * The template is needed in case the face flux carries derivatives in an AD setting.
+ *
  * @param m The interpolation method
  * @param fi The face information
  * @param one_is_elem Whether fi.elem() == F1
- * @param advector The advecting velocity. Not relevant for an Average interpolation
+ * @param face_flux The advecting face flux. Not relevant for an Average interpolation
  * @return a pair where the first Real is c_1 and the second Real is c_2
  */
-template <typename Vector = RealVectorValue>
+template <typename T = Real>
 std::pair<Real, Real>
 interpCoeffs(const InterpMethod m,
              const FaceInfo & fi,
              const bool one_is_elem,
-             const Vector & advector = Vector())
+             const T & face_flux = 0.0)
 {
   switch (m)
   {
@@ -126,7 +128,7 @@ interpCoeffs(const InterpMethod m,
 
     case InterpMethod::Upwind:
     {
-      if ((advector * fi.normal() > 0) == one_is_elem)
+      if ((face_flux > 0) == one_is_elem)
         return std::make_pair(1., 0.);
       else
         return std::make_pair(0., 1.);
@@ -404,7 +406,7 @@ interpolate(InterpMethod m,
             const FaceInfo & fi,
             const bool one_is_elem)
 {
-  const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector);
+  const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector * fi.normal());
   result = coeffs.first * value1 + coeffs.second * value2;
 }
 

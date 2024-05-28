@@ -344,7 +344,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
 []
 
 [Executioner]
-  type = SIMPLE
+  type = SIMPLENonlinearAssembly
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'

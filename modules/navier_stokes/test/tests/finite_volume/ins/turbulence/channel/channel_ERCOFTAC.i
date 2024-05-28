@@ -244,7 +244,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
   []
-
 []
 
 [FVBCs]
@@ -368,7 +367,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [Executioner]
-  type = SIMPLE
+  type = SIMPLENonlinearAssembly
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'

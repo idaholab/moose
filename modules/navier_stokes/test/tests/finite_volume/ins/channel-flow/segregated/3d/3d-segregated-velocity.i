@@ -195,7 +195,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Executioner]
-  type = SIMPLE
+  type = SIMPLENonlinearAssembly
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system w_system'
   pressure_system = 'pressure_system'
@@ -211,7 +211,6 @@ pressure_tag = "pressure_grad"
   momentum_l_tol = 0
   pressure_l_tol = 0
   print_fields = false
-
 []
 
 [Outputs]

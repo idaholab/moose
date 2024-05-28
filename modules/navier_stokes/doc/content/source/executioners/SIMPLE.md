@@ -9,11 +9,11 @@ is based on the splitting of operators and successive correction for the momentu
 The formulation implemented in MOOSE has been presented in [!cite](jasak1996error) and [!cite](juretic2005error).
 See also the examples and derivations in [!cite](moukalled2016finite).
 The concept relies on deriving a pressure equation using the discretized form of the momentum
-equations together with the incompressibility constraint. Let's take the steady-state incompressible Navier-Stokes equations
+equations together with the continuity constraint. Let's take the steady-state incompressible Navier-Stokes equations
 in the following form:
 
 !equation id=momentum-eq
-\nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}\right) = -\nabla p + \vec{G}.
+\nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right) - \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u} +\nabla \vec{u}^T \right)\right) = -\nabla p + \vec{G}.
 
 !equation id=continuity-eq
 \nabla \cdot \left(\rho \vec{u}\right) = 0.
@@ -21,12 +21,12 @@ in the following form:
 Where $\vec{u}$ denotes the velocity, $p$ the pressure, $\rho$ the density, and $\mu_\text{eff}$ the effective dynamic viscosity
 which potentially includes the contributions of eddy viscosity derived from turbulence models.
 Term $\vec{G}$ expresses a volumetric source term which can be potentially velocity-dependent.
-As a first step, we assume that we have a guess for the pressure field therefore the gradient is known. Furthermore, we assume that
+As a first step, we assume that we have a guess for the pressure field, therefore the gradient is known. Furthermore, we assume that
 the advecting velocity field is known from the previous iteration. By explicitly showing the iteration index,
 [!eqref](momentum-eq) and [!eqref](continuity-eq) become:
 
 !equation id=momentum-eq-iteration
-\nabla \cdot \left(\rho \vec{u}^{n-1} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}^n\right) = -\nabla p^{n-1} + \vec{G}(\vec{u}^{n-1},\vec{u}^{n}).
+\nabla \cdot \left(\rho \vec{u}^{n-1} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u}^n +\nabla \vec{u}^{n,T}\right)\right) = -\nabla p^{n-1} + \vec{G}(\vec{u}^{n-1},\vec{u}^{n}).
 
 !equation id=continuity-eq-iteration
 \nabla \cdot \left(\rho \vec{u}^n\right) = 0.
@@ -40,7 +40,7 @@ later, due to this behavior, the iteration between pressure and velocity will in
 pressure and face velocity. Nevertheless, to keep this in mind we add a subscript to the advecting velocity in our formulation:
 
 !equation id=momentum-eq-rc
-\nabla \cdot \left(\rho \vec{u}^{n-1}_{RC} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}^n\right) = -\nabla p^{n-1} + \vec{G}(\vec{u}^{n-1},\vec{u}^{n}).
+\nabla \cdot \left(\rho \vec{u}^{n-1}_{RC} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u}^n +\nabla \vec{u}^{n,T}\right)\right) = -\nabla p^{n-1} + \vec{G}(\vec{u}^{n-1},\vec{u}^{n}).
 
 !equation id=continuity-eq-rc
 \nabla \cdot \left(\rho \vec{u}^n_{RC}\right) = 0.
@@ -52,7 +52,7 @@ everything else. With this in mind, we can rewrite the equation the following, s
 !equation id=momentum-eq-semi-discretized
 A(\vec{u}^{n-1})\vec{u}^n + H(\vec{u}^{n}) = -\nabla p^{n-1},
 
-where $A(\vec{u}^{n-1})$ is the diagonal contribution, and $H(\vec{u}^{n})$ includes the off-diagonal contributions
+where $A(\vec{u}^{n-1})$ is the diagonal contribution, and $H(\vec{u}^{n-1})$ includes the off-diagonal contributions
 multiplied by the solution together with any additional volumetric source and sink terms (i.e. the discretized forms of $\vec{G}$).
 One can solve this equation to obtain a new guess for the velocity field. This guess, however, will not respect the
 continuity equation, therefore we need to correct it. For this, a pressure equation is derived from the following formulation:
@@ -117,38 +117,34 @@ Currently, this solver only respects the following `execute_on` flags: `INITAL`,
 
 The setup of a problem with the segregated solver in MOOSE is slightly different compared to
 conventional monolithic solvers. In this section, we highlight the main differences.
-For setting up a 2D simulation with the SIMPLE algorithms, we need three systems in MOOSE:
+For setting up a 2D simulation with the SIMPLE algorithm, we need three linear systems in MOOSE:
 one for each momentum component and another for the pressure. The different systems
 can be created within the `Problem` block:
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=Problem
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i block=Problem
 
 It is visible that we requested that MOOSE keeps previous solution iterates as well. This is necessary to
-facilitate the relaxation processes mentioned in the overview. Next, we create variables and assign them to the
+facilitate the relaxation processes mentioned in the overview. Next, we create linear FV variables and assign them to the
 given systems.
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=Variables
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i i block=Variables
 
-The kernels are then created as usual, with the exception that now the kernels acting on pressure are
-slightly different:
+The kernels are then created within the `LinearFVKernels` block. The fundamental terms that contribute to the
+face fluxes in the momentum equation (stress and advection terms) are lumped into one kernel. Furthermore,
+instead of adding contribution from the continuity equation, we build an anisotropic diffusion (Poisson) equation for
+pressure:
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=p_diffusion p_source
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i block=LinearFVKernels
 
-By default, the coupling fields corresponding to $A^{-1}H$ and $A^{-1}$ are called `HbyA` and `Ainv`, respectively. These
-fields are generated by [INSFVRhieChowInterpolatorSegregated.md] under the hood. This means that we need to add the
-user object responsible for generating these fields:
+By default, the coupling fields corresponding to $A^{-1}H$ and $A^{-1}$ are handled by functor
+called `HbyA` and `Ainv`, respectively. These fields are generated by [RhieChowMassFlux.md] under the hood.
+This means that we need to add the user object responsible for generating these fields:
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=UserObjects
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i block=UserObjects
 
-Next, we add the SIMPLE executioner:
+As a last step, we add the SIMPLE executioner:
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=Executioner
-
-We see that it has a parameter called [!param](/Executioner/SIMPLE/pressure_gradient_tag). This tag needs to be added to the
-pressure gradient kernels to enable the separation of terms needed in $A^{-1}H$. This can be easily done as follows in the `FVKernels`:
-
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=u_pressure v_pressure
-
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i block=Executioner
 
 !syntax parameters /Executioner/SIMPLE
 

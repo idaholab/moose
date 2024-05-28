@@ -166,7 +166,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Executioner]
-  type = SIMPLE
+  type = SIMPLENonlinearAssembly
   momentum_l_abs_tol = 1e-14
   pressure_l_abs_tol = 1e-14
   momentum_l_tol = 0

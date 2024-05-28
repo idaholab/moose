@@ -58,11 +58,19 @@ MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInf
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 
-  const auto face_arg = Moose::FaceArg({fi,
-                                        Moose::FV::limiterType(_advected_interp_method),
-                                        MetaPhysicL::raw_value(vel) * fi->normal() > 0,
-                                        correct_skewness,
-                                        nullptr});
+  mooseAssert(_adv_quant->hasFaceSide(*fi, true) || _adv_quant->hasFaceSide(*fi, true),
+              "Advected quantity must be defined on one of the sides of the face!");
+  mooseAssert((_adv_quant->hasFaceSide(*fi, true) == _density.hasFaceSide(*fi, true)) ||
+                  (_adv_quant->hasFaceSide(*fi, false) == _density.hasFaceSide(*fi, false)),
+              "Density must be defined at least on one of the sides where the advected quantity is "
+              "defined!");
+
+  const auto face_arg =
+      Moose::FaceArg({fi,
+                      Moose::FV::limiterType(_advected_interp_method),
+                      MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                      correct_skewness,
+                      _adv_quant->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr()});
   auto dens = _density(face_arg, state);
   const auto adv_quant_face = MetaPhysicL::raw_value(dens * (*_adv_quant)(face_arg, state));
   _mdot += fi->faceArea() * fi->faceCoord() * MetaPhysicL::raw_value(dens) * fi->normal() * vel;

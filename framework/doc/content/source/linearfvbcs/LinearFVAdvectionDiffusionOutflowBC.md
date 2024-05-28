@@ -27,6 +27,8 @@ approximation is used:
 !equation
 u_f = u_C.
 
+This boundary condition assumes zero normal gradient contribution to the diffusion terms.
+
 !alert note
 This boundary condition should only be used for problems which involve advection and/or diffusion
 problems.

@@ -1,0 +1,22 @@
+[Tests]
+  design = 'LinearFVAnisotropicDiffusion.md'
+  issues = '#27280'
+  [mms-anisotropic-diffusion-2d-orthogonal]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAnisotropicDiffusion2DOrthogonal
+    requirement = 'The system shall display second-order convergence for anisotropic diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [mms-anisotropic-diffusion-2d-nonorthogonal]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAnisotropicDiffusion2DNonorthogonal
+    requirement = 'The system shall display second-order convergence for anisotropic diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]
