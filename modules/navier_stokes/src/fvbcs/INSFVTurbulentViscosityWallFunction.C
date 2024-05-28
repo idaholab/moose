@@ -99,7 +99,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     // Linearized approximation to the wall function to find the near-wall quantities faster
     const ADReal a_c = 1 / NS::von_karman_constant;
     const ADReal b_c =
-        1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * wall_dist / mu) + 1.0);
+        1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * y_plus / mu) + 1.0);
     const ADReal c_c = parallel_speed;
     u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;

@@ -174,7 +174,7 @@ kEpsilonViscosityAux::computeValue()
                std::pow(_k(current_argument, state), 0.5) * min_wall_dist /
                _mu(current_argument, state);
       const auto von_karman_value =
-          (1 / NS::von_karman_constant + std::log(NS::E_turb_constant * y_plus));
+          (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus));
       u_tau = std::sqrt(std::pow(_C_mu, 0.25) * std::pow(_k(current_argument, state), 0.5) *
                         parallel_speed / von_karman_value);
     }
