@@ -31,6 +31,9 @@ ThermocoupleSensorPostprocessor::validParams()
 ThermocoupleSensorPostprocessor::ThermocoupleSensorPostprocessor(const InputParameters & parameters)
   : GeneralSensorPostprocessor(parameters), _method(getParam<string>("method"))
 {
+  if (isParamSetByUser("R_function"))
+    mooseError("In thermocouple postprocessor R function is fixed. If you want to change it, use "
+               "GeneralSensorPostprocessor.");
 }
 
 void
