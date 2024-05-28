@@ -1,6 +1,6 @@
 [Tests]
-  design = 'source/bcs/GapHeatTransfer.md'
-  issues = '#18585'
+  design = 'source/functormaterials/RadiativeP1DiffusionCoefficientMaterial.md'
+  issues = '#27725'
   [P1_radiation_material_test]
     type = CSVDiff
     input = 'P1_radiation_material_test.i'
