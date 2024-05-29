@@ -52,6 +52,7 @@ CrackFrontNonlocalStress::CrackFrontNonlocalStress(const InputParameters & param
     _x(declareVector("x")),
     _y(declareVector("y")),
     _z(declareVector("z")),
+    _position(declareVector("id")),
     _avg_crack_tip_stress(declareVector("crack_tip_stress"))
 {
   if (_mesh.dimension() == 3 && !isParamSetByUser("box_width"))
@@ -79,6 +80,7 @@ CrackFrontNonlocalStress::initialize()
   _x.assign(num_pts, 0.0);
   _y.assign(num_pts, 0.0);
   _z.assign(num_pts, 0.0);
+  _position.assign(num_pts, 0.0);
   _avg_crack_tip_stress.assign(num_pts, 0.0);
 }
 
@@ -92,7 +94,7 @@ CrackFrontNonlocalStress::execute()
     RankTwoTensor stress_avg;
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     {
-      Real q = CrackFrontBox(icfp, _q_point[qp]);
+      Real q = BoxWeightingFunction(icfp, _q_point[qp]);
       Real normal_stress = RankTwoScalarTools::directionValueTensor(_stress[qp], crack_face_normal);
       _avg_crack_tip_stress[icfp] += _JxW[qp] * _coord[qp] * normal_stress * q;
       _volume[icfp] += _JxW[qp] * _coord[qp] * q;
@@ -117,6 +119,7 @@ CrackFrontNonlocalStress::finalize()
     _x[icfp] = (*cfp)(0);
     _y[icfp] = (*cfp)(1);
     _z[icfp] = (*cfp)(2);
+    _position[icfp] = _crack_front_definition->getDistanceAlongFront(icfp);
   }
 }
 
@@ -133,8 +136,8 @@ CrackFrontNonlocalStress::threadJoin(const UserObject & y)
 }
 
 Real
-CrackFrontNonlocalStress::CrackFrontBox(std::size_t crack_front_point_index,
-                                      const Point & qp_coord) const
+CrackFrontNonlocalStress::BoxWeightingFunction(std::size_t crack_front_point_index,
+                                               const Point & qp_coord) const
 {
   const Point * cf_pt = _crack_front_definition->getCrackFrontPoint(crack_front_point_index);
   RealVectorValue crack_node_to_current_node = qp_coord - *cf_pt;
