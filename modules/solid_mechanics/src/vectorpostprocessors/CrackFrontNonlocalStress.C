@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrackFrontNormalStress.h"
+#include "CrackFrontNonlocalStress.h"
 #include "Moose.h"
 #include "MooseEnum.h"
 #include "RankTwoTensor.h"
@@ -19,10 +19,10 @@
 #include "RankTwoScalarTools.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("SolidMechanicsApp", CrackFrontNormalStress);
+registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalStress);
 
 InputParameters
-CrackFrontNormalStress::validParams()
+CrackFrontNonlocalStress::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("crack_front_definition",
@@ -42,7 +42,7 @@ CrackFrontNormalStress::validParams()
   return params;
 }
 
-CrackFrontNormalStress::CrackFrontNormalStress(const InputParameters & parameters)
+CrackFrontNonlocalStress::CrackFrontNonlocalStress(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _box_length(getParam<Real>("box_length")),
     _box_width(getParam<Real>("box_width")),
@@ -61,7 +61,7 @@ CrackFrontNormalStress::CrackFrontNormalStress(const InputParameters & parameter
 }
 
 void
-CrackFrontNormalStress::initialSetup()
+CrackFrontNonlocalStress::initialSetup()
 {
   // gather coupled user objects late to ensure they are constructed. Do not add them as
   // dependencies (that's already done in the constructor).
@@ -71,7 +71,7 @@ CrackFrontNormalStress::initialSetup()
 }
 
 void
-CrackFrontNormalStress::initialize()
+CrackFrontNonlocalStress::initialize()
 {
   std::size_t num_pts = _crack_front_definition->getNumCrackFrontPoints();
 
@@ -83,7 +83,7 @@ CrackFrontNormalStress::initialize()
 }
 
 void
-CrackFrontNormalStress::execute()
+CrackFrontNonlocalStress::execute()
 {
   // icfp crack front point index
   for (std::size_t icfp = 0; icfp < _avg_crack_tip_stress.size(); icfp++)
@@ -101,7 +101,7 @@ CrackFrontNormalStress::execute()
 }
 
 void
-CrackFrontNormalStress::finalize()
+CrackFrontNonlocalStress::finalize()
 {
   gatherSum(_avg_crack_tip_stress);
   gatherSum(_volume);
@@ -121,9 +121,9 @@ CrackFrontNormalStress::finalize()
 }
 
 void
-CrackFrontNormalStress::threadJoin(const UserObject & y)
+CrackFrontNonlocalStress::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const CrackFrontNormalStress &>(y);
+  const auto & uo = static_cast<const CrackFrontNonlocalStress &>(y);
 
   for (auto i = beginIndex(_avg_crack_tip_stress); i < _avg_crack_tip_stress.size(); ++i)
   {
@@ -133,7 +133,7 @@ CrackFrontNormalStress::threadJoin(const UserObject & y)
 }
 
 Real
-CrackFrontNormalStress::CrackFrontBox(std::size_t crack_front_point_index,
+CrackFrontNonlocalStress::CrackFrontBox(std::size_t crack_front_point_index,
                                       const Point & qp_coord) const
 {
   const Point * cf_pt = _crack_front_definition->getCrackFrontPoint(crack_front_point_index);

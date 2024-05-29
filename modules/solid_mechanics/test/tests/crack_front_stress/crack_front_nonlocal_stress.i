@@ -38,8 +38,8 @@
 []
 
 [VectorPostprocessors]
-  [CrackFrontNormalStress]
-    type = CrackFrontNormalStress
+  [CrackFrontNonlocalStress]
+    type = CrackFrontNonlocalStress
     base_name = generic
     crack_front_definition = crack
     box_length = 0.1

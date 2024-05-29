@@ -17,12 +17,12 @@ class CrackFrontDefinition;
  * This vectorpostprocessor computes the average stress scalar normal to the crack front at points
  * along the crack front.
  */
-class CrackFrontNormalStress : public ElementVectorPostprocessor
+class CrackFrontNonlocalStress : public ElementVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  CrackFrontNormalStress(const InputParameters & parameters);
+  CrackFrontNonlocalStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initialize() override;

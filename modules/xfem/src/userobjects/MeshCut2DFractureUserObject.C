@@ -100,7 +100,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
 
   if (_use_stress && ((_stress_vpp.size() != _original_and_current_front_node_ids.size())))
     mooseError("stress_vectorpostprocessor should have the same number of crack front points as "
-               "CrackFrontDefinition.  If it is empty, check that CrackFrontNormalStress "
+               "CrackFrontDefinition.  If it is empty, check that CrackFrontNonlocalStress "
                "vectorpostprocess has execute_on = TIMESTEP_BEGIN",
                "\n  stress_vectorpostprocessor size = ",
                _stress_vpp.size(),

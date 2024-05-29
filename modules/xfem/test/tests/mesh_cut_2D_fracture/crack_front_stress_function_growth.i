@@ -1,4 +1,4 @@
-# checks that the stress averages computed by CrackFrontNormalStress are correct
+# checks that the stress averages computed by CrackFrontNonlocalStress are correct
 
 # Left Crack Tip: moves in y with stress_11=y and crackFrontNormalStress is equal to y_pos+box_length/2
 # At boundary when the crackFrontNormalStress box intersects the boundary, crackFrontNormalStress is properly scaled
@@ -116,8 +116,8 @@
 []
 
 [VectorPostprocessors]
-  [CrackFrontNormalStress]
-    type = CrackFrontNormalStress
+  [CrackFrontNonlocalStress]
+    type = CrackFrontNonlocalStress
     base_name = generic
     crack_front_definition = crack_tip
     box_length = 0.1

@@ -47,8 +47,8 @@
 []
 
 [VectorPostprocessors]
-  [CrackFrontNormalStressVpp]
-    type = CrackFrontNormalStress
+  [CrackFrontNonlocalStressVpp]
+    type = CrackFrontNonlocalStress
     crack_front_definition = crackFrontDefinition
     box_length = 0.05
     box_height = 0.1
@@ -63,7 +63,7 @@
     ki_vectorpostprocessor = "II_KI_1"
     kii_vectorpostprocessor = "II_KII_1"
     k_critical = 100
-    # stress_vectorpostprocessor = "CrackFrontNormalStressVpp"
+    # stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
     # stress_threshold = 120
   []
 []
