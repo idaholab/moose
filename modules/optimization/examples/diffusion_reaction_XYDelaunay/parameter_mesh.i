@@ -28,7 +28,7 @@
   []
   [side_sets]
     type = SideSetsFromNormalsGenerator
-    input = triang
+    input = triangulate
     new_boundary = ' top bottom left right'
     normals = '0 1 0 0 -1 0 -1 0 0 1 0 0'
   []
@@ -36,6 +36,12 @@
 
 [Problem]
   solve = false
+[]
+
+[AuxVariables]
+  # To allow for exodus outputting.
+  [dummy]
+  []
 []
 
 [Executioner]
