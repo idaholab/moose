@@ -728,7 +728,11 @@ FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
 
 template <typename T>
 void
-FunctorBase<T>::checkFace(const Moose::FaceArg & libmesh_dbg_var(face)) const
+FunctorBase<T>::checkFace(const Moose::FaceArg &
+#if DEBUG
+                              face
+#endif
+) const
 {
 #if DEBUG
   const Elem * const elem = face.face_side;
