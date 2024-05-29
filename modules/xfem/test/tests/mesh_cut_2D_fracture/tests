@@ -3,7 +3,7 @@
   design = 'MeshCut2DFunctionUserObject.md'
   [2D]
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, '
-    'where the crack is defined using a topologically surface cutting mesh by MeshCut2DFunctionUserObject'
+    'where the crack is defined using a topologically defined surface cutting mesh by MeshCut2DFunctionUserObject'
     [k_growth]
       type = Exodiff
       input = edge_crack_2d_propagation.i
