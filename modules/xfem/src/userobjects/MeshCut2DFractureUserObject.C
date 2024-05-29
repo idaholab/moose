@@ -99,7 +99,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
                _original_and_current_front_node_ids.size());
 
   if (_use_stress && ((_stress_vpp.size() != _original_and_current_front_node_ids.size())))
-    mooseError("stress_vectorpostprocessor should have the same number of crack tips as "
+    mooseError("stress_vectorpostprocessor should have the same number of crack front points as "
                "CrackFrontDefinition.  If it is empty, check that CrackFrontNormalStress "
                "vectorpostprocess has execute_on = TIMESTEP_BEGIN",
                "\n  stress_vectorpostprocessor size = ",
