@@ -62,7 +62,29 @@
       cli_args = '--mesh-only'
       recover = false
 
-      detail = 'while keeping name(s) of sidesets intact.'
+      detail = 'while keeping name(s) of sidesets intact, and'
+    []
+
+    [no_merge_subdomains]
+      type = 'Exodiff'
+      input = 'combiner_merge_names.i'
+      cli_args = 'Mesh/Combine/avoid_merging_subdomains=true --mesh-only no_merge_blocks.e'
+      exodiff = 'no_merge_blocks.e'
+      recover = false
+      exodiff_opts = '-pedantic'
+
+      detail = 'not merging subdomains, and'
+    []
+
+    [no_merge_boundaries]
+      type = 'Exodiff'
+      input = 'combiner_merge_names.i'
+      cli_args = 'Mesh/Top_Block/boundary_id_offset=0 Mesh/Combine/avoid_merging_boundaries=true --mesh-only no_merge_boundaries.e'
+      exodiff = 'no_merge_boundaries.e'
+      recover = false
+      exodiff_opts = '-pedantic'
+
+      detail = 'not merging boundaries.'
     []
   []
 
