@@ -12,7 +12,7 @@
 #include "FileMeshComponent.h"
 
 /**
- * Create a component with a single Physics object active on it
+ * Create a component with user-selected Physics active on it
  */
 class FileMeshPhysicsComponent : public FileMeshComponent
 {
@@ -29,31 +29,16 @@ public:
 protected:
   virtual void init() override;
 
+  /// Return the blocks this component defines (assuming the ids do not overlap with other components)
   virtual std::vector<SubdomainName> getBlocks() const { return getSubdomainNames(); }
   virtual Factory & getFactory() { return getMooseApp().getFactory(); }
   virtual FEProblemBase & getProblem() { return getMooseApp().feProblem(); }
+  /// Returns the mesh, which also contains other components
   virtual const MooseMesh & getMesh() const { return constMesh(); }
-  // virtual void addNSNonlinearVariable(const std::string & var_type,
-  //                                     const std::string & var_name,
-  //                                     InputParameters & params)
-  // {
-  //   getTHMProblem().addSimVariable(true, var_type, var_name, params);
-  // }
-  // virtual void addNSAuxVariable(const std::string & var_type,
-  //                               const std::string & var_name,
-  //                               InputParameters & params)
-  // {
-  //   getTHMProblem().addSimVariable(false, var_type, var_name, params);
-  // }
-  // virtual void addNSInitialCondition(const std::string & type,
-  //                                    const std::string & name,
-  //                                    InputParameters & params)
-  // {
-  //   getTHMProblem().addSimInitialCondition(type, name, params);
-  // }
+  /// Returns a useful prefix for logs
   virtual std::string prefix() const { return name() + ":"; }
 
 private:
-  /// Physics object that creates the equations on this component
+  /// Physics that creates the equations on this component
   std::vector<PhysicsBase *> _physics;
 };

@@ -17,7 +17,8 @@ FileMeshPhysicsComponent::validParams()
 {
   InputParameters params = FileMeshComponent::validParams();
 
-  params.addClassDescription("Component with a single physics active on it.");
+  params.addClassDescription(
+      "Component using a mesh from a file with one or more Physics active on it.");
   params.addParam<std::vector<PhysicsName>>("physics", "Physics object(s) active on the Component");
   return params;
 }
@@ -43,10 +44,8 @@ FileMeshPhysicsComponent::init()
 
   // Before this point, we did not have a problem, so we could not retrieve the physics
   for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
-    _physics.push_back(getProblem().getPhysics(physics_name));
+    _physics.push_back(_app.actionWarehouse().getPhysics<PhysicsBase>(physics_name));
 
   for (auto physics : _physics)
-  {
     physics->addBlocks(getSubdomainNames());
-  }
 }

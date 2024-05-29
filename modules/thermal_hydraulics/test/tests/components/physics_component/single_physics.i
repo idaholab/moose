@@ -14,7 +14,7 @@ p_outlet = 0
 
 [Physics]
   [NavierStokes]
-    [WCNSFVFlowPhysics]
+    [Flow]
       [flow]
         compressibility = 'incompressible'
         porous_medium_treatment = true
