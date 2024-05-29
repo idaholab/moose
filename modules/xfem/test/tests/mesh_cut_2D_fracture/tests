@@ -18,7 +18,7 @@
       type = Exodiff
       input = edge_crack_2d_propagation.i
       cli_args = 'Outputs/file_base=k_stress_growth '
-                 'UserObjects/cut_mesh2/stress_vectorpostprocessor=CrackFrontNormalStressVpp '
+                 'UserObjects/cut_mesh2/stress_vectorpostprocessor=CrackFrontNonlocalStressVpp '
                  'UserObjects/cut_mesh2/stress_threshold=120'
       exodiff = 'k_stress_growth.e-s003 k_stress_growth_XFEMCutMeshOutput.e-s0004'
       abs_zero = 1e-8
@@ -30,10 +30,10 @@
     [stress_check]
       type = CSVDiff
       input = crack_front_stress_function_growth.i
-      csvdiff = 'stress_check_CrackFrontNormalStress_0001.csv '
-                'stress_check_CrackFrontNormalStress_0002.csv '
-                'stress_check_CrackFrontNormalStress_0003.csv '
-                'stress_check_CrackFrontNormalStress_0004.csv'
+      csvdiff = 'stress_check_CrackFrontNonlocalStress_0001.csv '
+                'stress_check_CrackFrontNonlocalStress_0002.csv '
+                'stress_check_CrackFrontNonlocalStress_0003.csv '
+                'stress_check_CrackFrontNonlocalStress_0004.csv'
       # XFEM requires --enable-unique-ids in libmesh
       unique_id = true
       detail = ' and crack growth is defined by a function with the average crack tip stress changes with crack orientation '
