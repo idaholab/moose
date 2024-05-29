@@ -1666,7 +1666,7 @@ CrackFrontDefinition::createQFunctionRings()
                                                             connected_nodes_this_cfn.end());
     }
   }
-  else // _use_mesh_cutter: The q-function defines one integral domain around each crack front node
+  else // The q-function defines one integral domain around each crack front node
   {
     std::size_t num_crack_front_points = _ordered_crack_front_nodes.size();
     std::vector<std::vector<const Elem *>> nodes_to_elem_map;

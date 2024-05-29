@@ -55,11 +55,12 @@ protected:
   std::vector<Real> _volume;
 
   /// Vectors computed by this VectorPostprocessor:
-  /// x,y,z coordinates, and crack tip principal stress
+  /// x,y,z coordinates, and position of nodes along crack front, and crack tip average scalar stress
   ///@{
   VectorPostprocessorValue & _x;
   VectorPostprocessorValue & _y;
   VectorPostprocessorValue & _z;
+  VectorPostprocessorValue & _position;
   VectorPostprocessorValue & _avg_crack_tip_stress;
   ///@}
 
@@ -69,5 +70,5 @@ protected:
    * @param qp_coord Point object to determine whether it is inside the box
    * @return  1 if point is within the box, 0 otherwise
    */
-  Real CrackFrontBox(std::size_t crack_front_point_index, const Point & qp_coord) const;
+  Real BoxWeightingFunction(std::size_t crack_front_point_index, const Point & qp_coord) const;
 };

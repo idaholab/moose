@@ -36,8 +36,8 @@
                 'stress_check_CrackFrontNonlocalStress_0004.csv'
       # XFEM requires --enable-unique-ids in libmesh
       unique_id = true
-      detail = ' and crack growth is defined by a function with the average crack tip stress changes with crack orientation '
-               'and properly accounts averaging volume intersecting boundary.'
+      detail = ' and crack growth is defined by a function.  The average crack tip stress changes with crack orientation '
+               'and properly accounts volume averaging near surfaces.'
     []
   []
 []
