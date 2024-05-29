@@ -9,6 +9,15 @@
     exodiff = 'core_in.e'
     recover = false
   []
+  [square_rid_as_block_name]
+    requirement = 'The system shall generate a 3D core mesh with 3 pin types and 2 assembly types, with separate block names for each region ID in the mesh'
+    type = 'Exodiff'
+    input = 'core_square.i'
+    cli_args = "Mesh/rmp/region_id_as_block_name=true
+                Outputs/file_base=core_rid_as_block_name"
+    exodiff = 'core_rid_as_block_name.e'
+    recover = false
+  []
   [square_metadata]
     requirement = 'The system shall print out reactor-related metadata to console output for a full 3D square core mesh with 3 pin types and 2 assembly types'
     type = 'RunApp'
@@ -267,6 +276,13 @@
     input = 'core_periphery_ptmg_vol.i'
     csvdiff = 'core_periphery_ptmg_in.csv'
     recover = false
+  []
+  [periphery_rid_as_block_name_err]
+    requirement = 'The system shall throw an error when generating a core mesh with a manually defined periphery block name and being set to automatically define block names based on region IDs'
+    type = 'RunException'
+    input = 'core_periphery_ptmg_vol.i'
+    cli_args = "Mesh/rmp/region_id_as_block_name=true"
+    expect_err = 'periphery_block_name should not be specified in CoreMeshGenerator'
   []
   [prmg_periphery]
     requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a quadrilateral element ring pattern.'

@@ -43,6 +43,7 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
+  params.addParam<bool>("region_id_as_block_name", false, "Set block names based on region id");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
 
@@ -80,6 +81,8 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::mesh_dimensions, int(_dim));
   this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
+  this->declareMeshProperty(RGMB::region_id_as_block_name,
+                            getParam<bool>(RGMB::region_id_as_block_name));
 
   // Option to bypass mesh generation is controlled by presence of Mesh/data_driven_generator
   // and whether the current generator is in data only mode

@@ -417,6 +417,10 @@
                         "type": "short",
                         "value": 200
                     },
+                    "MeshMetaData/rmp/region_id_as_block_name": {
+                        "type": "bool",
+                        "value": false
+                    },
                     "MeshMetaData/rmp/top_boundary_id": {
                         "type": "short",
                         "value": 201

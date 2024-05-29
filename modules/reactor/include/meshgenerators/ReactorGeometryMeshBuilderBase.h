@@ -52,6 +52,7 @@ static const std::string background_block_name = "background_block_name";
 static const std::string duct_region_ids = "duct_region_ids";
 static const std::string duct_block_names = "duct_block_names";
 static const std::string peripheral_ring_region_id = "peripheral_ring_region_id";
+static const std::string region_id_as_block_name = "region_id_as_block_name";
 
 // Name of a boolean metadata that indicates whether or not we skipped mesh generation in favor of
 // only generating the mesh metadata
