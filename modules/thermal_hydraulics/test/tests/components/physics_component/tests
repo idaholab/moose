@@ -1,6 +1,6 @@
 [Tests]
-  design = 'FlowComponentNS.md'
-  issues = '#23794'
+  design = 'FileMeshPhysicsComponent.md'
+  issues = '#23794 #24103'
 
   [generate_mesh]
     type = RunApp
@@ -18,6 +18,6 @@
     method = "!dbg"
     installation_type = in_tree
     max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
-    requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component, abstracting the flow equation definitions using the Physics system.'
+    requirement = 'The system shall be able to create a component leveraging the Physics syntax to define equations.'
   []
 []
