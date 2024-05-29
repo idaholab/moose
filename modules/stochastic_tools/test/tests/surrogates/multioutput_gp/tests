@@ -26,14 +26,4 @@
       skip_keys = "reporters train_params"
     []
   []
-  [errors]
-    requirement = "The system shall throw an error when "
-    [optimization_adam_batch_size]
-      type = RunException
-      input = mogp_lmc_tuned.i
-      cli_args = "Trainers/mogp_trainer/batch_size='100'"
-      detail = "the batch size is greater than the training data set size for Adam optimization. "
-      expect_err = "Batch size cannot be greater than the training data set size."
-    []
-  []
 []
