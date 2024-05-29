@@ -9,6 +9,12 @@ A desirable aspect of Gaussian process modeling is that in addition to returning
 
 !listing surrogates/GaussianProcessSurrogate.C line=GaussianProcessSurrogate::evaluate(const std::vector<Real> & x, Real & std_dev)
 
+## Evaluation of multi-output Gaussian Processes
+
+For Gaussian Processes that predict multiple outputs the user can evaluate the
+the mean and standard deviation estimates using the following function:
+
+!listing surrogates/GaussianProcessSurrogate.C re=void\sGaussianProcessSurrogate::evaluate\(const std::vector<Real> & x,\s*?std::vector<Real> & y,.*?\) const
 
 !syntax parameters /Surrogates/GaussianProcessSurrogate
 
