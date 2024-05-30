@@ -365,9 +365,6 @@ CrackFrontDefinition::initialize()
     if (_q_function_type == "GEOMETRY")
       for (std::size_t i = 0; i < num_crack_front_points; ++i)
       {
-        // FIXME LYNN is this ever true?  How can a crack front point ever be a boundary node?
-        // I also don't see _is_point_on_intersecting_boundary ever being cleared so this push_back
-        //  could make it get huge, way bigger than the number of crack front points.
         bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
         _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
       }

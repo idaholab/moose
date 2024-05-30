@@ -41,8 +41,6 @@ MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & paramet
                      : nullptr),
     _is_mesh_modified(false)
 {
-  // add user object dependencies by name (the UOs do not need to exist yet for this)
-  // fixme Lynn do I need this????
   _depend_uo.insert(getParam<UserObjectName>("crack_front_definition"));
 
   // only the Exodus type is currently supported

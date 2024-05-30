@@ -53,13 +53,10 @@ private:
   /// Maximum stress criterion threshold for crack growth.
   const Real _stress_threshold;
 
-  /// dummy vectors for vpps to point to if not defined(these are not const because reporters can change their size)
-  std::vector<Real> _zeros_vec;
-
-  /// References fracture integral ki if input
-  const std::vector<Real> & _ki_vpp;
-  /// References fracture integral kii if input
-  const std::vector<Real> & _kii_vpp;
-  /// References crack front stress if input
-  const std::vector<Real> & _stress_vpp;
+  /// Pointer fracture integral ki if available
+  const std::vector<Real> * const _ki_vpp;
+  /// Pointer fracture integral kii if available
+  const std::vector<Real> * const _kii_vpp;
+  /// Pointer to crack front stress if available
+  const std::vector<Real> * const _stress_vpp;
 };
