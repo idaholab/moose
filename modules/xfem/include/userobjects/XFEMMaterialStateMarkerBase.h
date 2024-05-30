@@ -39,12 +39,6 @@ protected:
    * @return bool true if element cracks
    */
   virtual bool doesElementCrack(RealVectorValue & direction);
-  /**
-   * Determine whether the current element should have the crack split into two cracks.
-   * @param direction Normal direction of crack if it is cracked used to create two 45 degree cracks
-   * @return bool true if element has a branched crack
-   */
-  virtual bool doesCrackBranch(RealVectorValue & direction);
 
 private:
   MooseMesh & _mesh;

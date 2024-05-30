@@ -81,69 +81,17 @@ XFEMMaterialStateMarkerBase::execute()
 
   if (isCTE && doesElementCrack(direction))
   {
-    if (doesCrackBranch(direction))
-    {
-      //      _marked_elems[_current_eid] = direction;//+-45 degrees off
-      // TODO: update this for 3D rotational matrix, currently only rotating in Z plane for 2D
-      Real angle = 45.0;
-      RealVectorValue upperBranchDirection;
-      upperBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
-      upperBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
-      upperBranchDirection(2) = direction(2);
-
-      RealVectorValue lowerBranchDirection;
-      angle = 315.0;
-      lowerBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
-      lowerBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
-      lowerBranchDirection(2) = direction(2);
-
-      _marked_elems[_current_eid].push_back(upperBranchDirection);
-      _marked_elems[_current_eid].push_back(lowerBranchDirection);
-    }
-    else
-      _marked_elems[_current_eid].push_back(direction);
+    _marked_elems[_current_eid].push_back(direction);
   }
   else if (isOnBoundary && doesElementCrack(direction))
   {
-    // No Branching here since at the edge it wouldn't continue
     _marked_elems[_current_eid].push_back(direction);
     _marked_elem_sides[_current_eid] = boundarySide;
   }
   else if (isCut && _secondary_cracks && doesElementCrack(direction))
   {
-    if (doesCrackBranch(direction))
-    {
-      // TODO: update this for 3D rotational matrix, currently only rotating in Z plane for 2D
-      Real angle = 45.0;
-      RealVectorValue upperBranchDirection;
-      upperBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
-      upperBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
-      upperBranchDirection(2) = direction(2);
-
-      RealVectorValue lowerBranchDirection;
-      angle = 315.0;
-      lowerBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
-      lowerBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
-                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
-      lowerBranchDirection(2) = direction(2);
-
-      _marked_elems[_current_eid].push_back(upperBranchDirection);
-      _marked_elems[_current_eid].push_back(lowerBranchDirection);
-      _marked_frags.insert(_current_eid);
-    }
-    else
-    {
-
-      _marked_elems[_current_eid].push_back(direction);
-      _marked_frags.insert(_current_eid);
-    }
+    _marked_elems[_current_eid].push_back(direction);
+    _marked_frags.insert(_current_eid);
   }
 }
 
@@ -213,13 +161,6 @@ XFEMMaterialStateMarkerBase::finalize()
 
 bool
 XFEMMaterialStateMarkerBase::doesElementCrack(RealVectorValue & direction)
-{
-  direction(1) = 1.0;
-  return true;
-}
-
-bool
-XFEMMaterialStateMarkerBase::doesCrackBranch(RealVectorValue & direction)
 {
   direction(1) = 1.0;
   return true;

@@ -48,5 +48,4 @@ protected:
   Real _branch_threshold;
 
   virtual bool doesElementCrack(RealVectorValue & direction) override;
-  virtual bool doesCrackBranch(RealVectorValue & direction) override;
 };
