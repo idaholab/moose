@@ -113,8 +113,6 @@
     output_value = constant_x/reporter_transfer_x:log_x:value
     output_value1 = constant_y/reporter_transfer_y:log_y:value
     sampler = sample
-    al_nn = train
-    nn_evaluator = surr
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
     likelihoods = 'gaussianx gaussiany'
@@ -122,20 +120,6 @@
 []
 
 [Trainers]
-  [train]
-    type = ActiveLearningLibtorchNN
-    num_epochs = 10
-    num_batches = 250
-    num_neurons_per_layer = '40 40 40'
-    learning_rate = 0.0001
-    nn_filename = classifier_net.pt
-    print_epoch_loss = 10
-    max_processes = 1
-    standardize_input = true
-    standardize_output = false
-    classify = true
-    activation_function = 'relu'
-  []
   [GP_al_trainer]
     type = ActiveLearningGaussianProcess
     covariance_function = 'covar'
@@ -151,11 +135,6 @@
 []
 
 [Surrogates]
-  [surr]
-    type = LibtorchANNSurrogate
-    trainer = train
-    classify = true
-  []
   [GP_eval]
     type = GaussianProcess
     trainer = GP_al_trainer
@@ -180,11 +159,6 @@
   csv = false
   execute_on = TIMESTEP_END
   perf_graph = true
-  [out]
-    type = SurrogateTrainerOutput
-    trainers = 'train'
-    execute_on = FINAL
-  []
   [out1]
     type = JSON
     execute_system_information_on = NONE

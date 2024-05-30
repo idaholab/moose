@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
-
 #include "BayesianGPryLearner.h"
 #include "Sampler.h"
 #include "DenseMatrix.h"
@@ -33,8 +31,6 @@ BayesianGPryLearner::validParams()
   params.addParam<ReporterValueName>(
       "output_comm1", "output_comm1", "Modified value of the model output from this reporter class.");
   params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
-  params.addRequiredParam<UserObjectName>("al_nn", "Active learning NN trainer.");
-  params.addRequiredParam<UserObjectName>("nn_evaluator", "Evaluate the trained NN.");
   params.addRequiredParam<UserObjectName>("al_gp", "Active learning GP trainer.");
   params.addRequiredParam<UserObjectName>("gp_evaluator", "Evaluate the trained GP.");
   params.addParam<ReporterValueName>(
@@ -69,8 +65,6 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
                                   0))), // _sampler.getNumberOfRows()
     _inputs_all(_gpry_sampler->getSampleTries()),
     _var_all(_gpry_sampler->getVarSampleTries()),
-    _al_nn(getUserObject<ActiveLearningLibtorchNN>("al_nn")),
-    _nn_eval(getSurrogateModel<LibtorchANNSurrogate>("nn_evaluator")),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
     _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
     _new_var_samples(_gpry_sampler->getVarSamples()),
@@ -95,7 +89,6 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
   _num_confg_values = _gpry_sampler->getNumberOfConfigValues();
   _num_confg_params = _gpry_sampler->getNumberOfConfigParams();
 
-  _nn_outputs_try.resize(_inputs_all.size());
   _gp_outputs_try.resize(_inputs_all.size());
   _gp_std_try.resize(_inputs_all.size());
   _acquisition_function.resize(_inputs_all.size());
@@ -125,15 +118,11 @@ BayesianGPryLearner::setupNNGPData(const std::vector<Real> & log_posterior,
       tmp[j] = data_in(i, j);
     if (_var_prior)
       tmp[_priors.size()] = _new_var_samples[i];
-    _nn_inputs.push_back(tmp);
     if (std::exp(log_posterior[i]) > 0.0)
     {
-      _nn_outputs.push_back(1.0);
       _gp_inputs.push_back(tmp);
       _gp_outputs.push_back(log_posterior[i]);
     }
-    else
-      _nn_outputs.push_back(0.0);
   }
 }
 
@@ -231,10 +220,6 @@ BayesianGPryLearner::execute()
   {
     setupNNGPData(log_posterior, data_in);
 
-    bool read_nn = false;
-    //   if (_t_step > 1)
-    //     read_nn = true;
-    _al_nn.reTrain(_nn_inputs, _nn_outputs, read_nn);
     _al_gp.reTrain(_gp_inputs, _gp_outputs);
 
     _al_gp.getLengthScales(_length_scales);
@@ -245,13 +230,12 @@ BayesianGPryLearner::execute()
       tmp.resize(_priors.size() + 1);
     else
       tmp.resize(_priors.size());
-    for (unsigned int i = 0; i < _nn_outputs_try.size(); ++i)
+    for (unsigned int i = 0; i < _gp_outputs_try.size(); ++i)
     {
       for (unsigned int j = 0; j < _priors.size(); ++j)
         tmp[j] = _inputs_all[i][j];
       if (_var_prior)
         tmp[_priors.size()] = _var_all[i];
-      _nn_outputs_try[i] = _nn_eval.evaluate(tmp);
       _gp_outputs_try[i] = _gp_eval.evaluate(tmp, _gp_std_try[i]);
     }
 
@@ -267,18 +251,6 @@ BayesianGPryLearner::execute()
     {
       gp_mean = _gp_outputs_try[i];
       gp_std = _gp_std_try[i];
-      // if (_nn_outputs_try[i] > 0.5)
-      // {
-      //   gp_mean = _gp_outputs_try[i];
-      //   gp_std = _gp_std_try[i];
-      // }
-      // else
-      // {
-      //   gp_mean = -100000.0;
-      //   gp_std = 0.0;
-      // }
-        // std::cout << "gp_mean " << gp_mean << std::endl;
-        // std::cout << "gp_std " << gp_std << std::endl;
       acq[i] = -std::exp(2.0 * psi * gp_mean) * (std::exp(gp_std) - 1.0);
       // _acquisition_function[i] = -acq[i];
     }
@@ -295,5 +267,3 @@ BayesianGPryLearner::execute()
   // Track the current step
   _check_step = _t_step;
 }
-
-#endif

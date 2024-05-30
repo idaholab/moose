@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
-
 #pragma once
 
 #include "PMCMCDecision.h"
@@ -44,13 +42,8 @@ protected:
   /// The GP evaluator object
   const SurrogateModel & _gp_eval;
 
-  /// The libtorch classifer neural network
-  // const LibtorchANNSurrogate & _nn_eval;
-
   /// Storage for new proposed samples
   const std::vector<std::vector<Real>> & _new_samples;
 
 private:
 };
-
-#endif

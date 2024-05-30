@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
-
 #include "BayesianGPrySampler.h"
 #include "Normal.h"
 #include "Uniform.h"
@@ -156,5 +154,3 @@ BayesianGPrySampler::proposeSamples(const unsigned int seed_value)
   //   std::cout << "Here final **** " << std::endl;
   // }
 }
-
-#endif
