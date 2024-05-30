@@ -7,16 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
-
 #pragma once
 
-#include <torch/torch.h>
 #include "GeneralReporter.h"
 #include "Sampler.h"
 #include "BayesianGPrySampler.h"
-#include "ActiveLearningLibtorchNN.h"
-#include "LibtorchANNSurrogate.h"
 #include "ActiveLearningGaussianProcess.h"
 #include "GaussianProcess.h"
 #include "SurrogateModel.h"
@@ -25,8 +20,6 @@
 #include "GaussianProcess.h"
 #include "LikelihoodFunctionBase.h"
 #include "LikelihoodInterface.h"
-// #include "CovarianceInterface.h"
-// #include "GaussianProcessHandler.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: NN and GP training step
@@ -119,11 +112,6 @@ private:
   /// Storage for all the proposed variance samples
   const std::vector<Real> & _var_all;
 
-  /// The active learning NN trainer that permits re-training
-  const ActiveLearningLibtorchNN & _al_nn;
-  /// Get the libtorch classifer neural network
-  const LibtorchANNSurrogate & _nn_eval;
-
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
   /// The GP evaluator object that permits re-evaluations
@@ -150,12 +138,6 @@ private:
   /// Communicator that was split based on samples that have rows
   libMesh::Parallel::Communicator & _local_comm;
 
-  /// SubApp inputs for neural network model
-  std::vector<std::vector<Real>> _nn_inputs;
-
-  /// SubApp outputs for neural network model
-  std::vector<Real> _nn_outputs;
-
   /// SubApp inputs for GP model
   std::vector<std::vector<Real>> _gp_inputs;
 
@@ -164,9 +146,6 @@ private:
 
   /// Maximum number of subApp calls in each iteration
   unsigned int _num_samples;
-
-  /// Outputs for neural network model for the try samples
-  std::vector<Real> _nn_outputs_try;
 
   /// Outputs for GP model for the try samples
   std::vector<Real> _gp_outputs_try;
@@ -186,5 +165,3 @@ private:
   /// Storage for the length scales after the GP training 
   std::vector<Real> _length_scales;
 };
-
-#endif
