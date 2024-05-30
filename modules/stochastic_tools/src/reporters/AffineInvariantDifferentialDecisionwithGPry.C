@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
-
 #include "AffineInvariantDifferentialDecisionwithGPry.h"
 
 registerMooseObject("StochasticToolsApp", AffineInvariantDifferentialDecisionwithGPry);
@@ -19,7 +17,6 @@ AffineInvariantDifferentialDecisionwithGPry::validParams()
   InputParameters params = PMCMCDecision::validParams();
   params.addClassDescription("Perform decision making for Affine Invariant differential MCMC with GPry surrogate.");
   params.addRequiredParam<UserObjectName>("gp_evaluator", "Evaluate the trained GP.");
-  // params.addRequiredParam<UserObjectName>("nn_evaluator", "Evaluate the trained NN.");
   return params;
 }
 
@@ -28,7 +25,6 @@ AffineInvariantDifferentialDecisionwithGPry::AffineInvariantDifferentialDecision
   : PMCMCDecision(parameters),
     SurrogateModelInterface(this),
     _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
-    // _nn_eval(getSurrogateModel<LibtorchANNSurrogate>("nn_evaluator")),
     _new_samples(_pmcmc->getSamples())
 {
 }
@@ -53,7 +49,6 @@ AffineInvariantDifferentialDecisionwithGPry::computeEvidence(std::vector<Real> &
       tmp[j] = input_matrix(i, j);
     if (_var_prior)
       tmp[_priors.size()] = _new_var_samples[i];
-    // estimated_class = _nn_eval.evaluate(tmp);
     estimated_evidence +=
         _gp_eval.evaluate(tmp); // (estimated_class > 0.5) ? _gp_eval.evaluate(tmp) : -10000.0;
 
@@ -61,7 +56,6 @@ AffineInvariantDifferentialDecisionwithGPry::computeEvidence(std::vector<Real> &
       tmp[j] = _data_prev(i, j);
     if (_var_prior)
       tmp[_priors.size()] = _var_prev[i];
-    // estimated_class = _nn_eval.evaluate(tmp);
     estimated_evidence -=
         _gp_eval.evaluate(tmp); // (estimated_class > 0.5) ? _gp_eval.evaluate(tmp) : -10000.0;
 
@@ -160,5 +154,3 @@ AffineInvariantDifferentialDecisionwithGPry::execute()
   // Track the current step
   _check_step = _t_step;
 }
-
-#endif
