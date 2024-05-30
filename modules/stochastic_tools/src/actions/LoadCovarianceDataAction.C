@@ -43,28 +43,36 @@ LoadCovarianceDataAction::act()
 void
 LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
 {
+  // We grab all the necessary information that is needed to reconstruct the
+  // covariance structure for the GP
   const std::string & covar_type = model.getGP().getCovarType();
   const std::string & covar_name = model.getGP().getCovarName();
   const std::map<UserObjectName, std::string> & dep_covar_types =
       model.getGP().getDependentCovarTypes();
-  const std::vector<UserObjectName> dep_covar_names = model.getGP().getDependentCovarNames();
-  const unsigned int num_outputs = model.getGP().getCovarNumOutputs();
+  const std::vector<UserObjectName> & dep_covar_names = model.getGP().getDependentCovarNames();
 
+  // This is for the covariance on the very top, the lower-level covariances are
+  // all assumed to have num_outputs=1.
+  const unsigned int num_outputs = model.getGP().getCovarNumOutputs();
   const std::unordered_map<std::string, Real> & map = model.getGP().getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & vec_map =
       model.getGP().getHyperParamVectorMap();
 
-  // We start by creating and loading the dependency function
+  // We start by creating and loading the lower-level covariances if they need
+  // to be present. Right now we can only load a complex covariance which has
+  // a one-level dependency depth.
+  // TODO: Extend this to arbitrary dependency depths. Maybe we could use a graph.
   for (const auto & it : dep_covar_types)
   {
     const auto & name = it.first;
     const auto & type = it.second;
     InputParameters covar_params = _factory.getValidParams(type);
-    covar_params.set<unsigned int>("num_outputs") = num_outputs;
 
+    // We make sure that every required parameter is added so that the object
+    // can be constructed. The non-required hyperparameters (if present in the
+    // parameter maps) will be inserted later.
     const auto param_list = covar_params.getParametersList();
     for (const auto & param : param_list)
-    {
       if (covar_params.isParamRequired(param))
       {
         const std::string expected_name = name + ":" + param;
@@ -80,8 +88,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
           if (pos != std::string::npos)
             covar_params.set<std::vector<Real>>(param) = it_map.second;
         }
-      };
-    }
+      }
 
     _problem->addObject<CovarianceFunctionBase>(type, name, covar_params, /*threaded=*/false);
   }
@@ -92,7 +99,9 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
 
   const auto param_list = covar_params.getParametersList();
   for (const auto & param : param_list)
-  {
+    // We make sure that every required parameter is added so that the object
+    // can be constructed. The non-required hyperparameters (if present in the
+    // parameter maps) will be inserted later.
     if (covar_params.isParamRequired(param))
     {
       const std::string expected_name = covar_name + ":" + param;
@@ -105,7 +114,6 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
       if (vec_map_it != vec_map.end())
         covar_params.set<std::vector<Real>>(param) = vec_map_it->second;
     }
-  }
 
   auto covar_object = _problem->addObject<CovarianceFunctionBase>(
       covar_type, covar_name, covar_params, /* threaded = */ false);

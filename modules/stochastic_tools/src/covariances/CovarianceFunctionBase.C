@@ -30,6 +30,7 @@ CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameter
     _dependent_covariance_names(getParam<std::vector<UserObjectName>>("covariance_functions"))
 
 {
+  // Fetch the dependent covariance functions
   for (const auto & name : _dependent_covariance_names)
   {
     _covariance_functions.push_back(getCovarianceFunctionByName(name));

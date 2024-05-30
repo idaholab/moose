@@ -31,6 +31,8 @@ LMC::LMC(const InputParameters & parameters)
     _num_expansion_terms(getParam<unsigned int>("num_latent_funcs")),
     _num_outputs(getParam<unsigned int>("num_outputs"))
 {
+  // We use a random number generator to obtain the initial guess for the
+  // hyperparams
   MooseRandom generator_latent;
   generator_latent.seed(0, 1980);
 
@@ -67,14 +69,20 @@ LMC::computeCovarianceMatrix(RealEigenMatrix & K,
                              const RealEigenMatrix & xp,
                              const bool is_self_covariance) const
 {
+  // Create temporary vectors for constructing the covariance matrix
   RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), xp.rows());
   RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
+  RealEigenMatrix K = RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
+  RealEigenMatrix K_working =
+      RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
 
+  // For every expansion term we add the contribution to the covariance matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     _covariance_functions[exp_i]->computeCovarianceMatrix(K_params, x, xp, is_self_covariance);
     computeBMatrix(B, exp_i);
-    MathUtils::kron(K, B, K_params);
+    MathUtils::kron(K_working, B, K_params);
+    K += K_working;
   }
 }
 
@@ -84,26 +92,34 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
                      const std::string & hyper_param_name,
                      unsigned int ind) const
 {
+  // Early return in the paramter name is longer than the expected [name] prefix.
+  // We prefix the parameter names with the name of the covariance function.
   if (name().length() + 1 > hyper_param_name.length())
     return false;
 
+  // Strip the prefix from the given parameter name
   const std::string name_without_prefix = hyper_param_name.substr(name().length() + 1);
 
+  // Check if the parameter is tunable
   if (_tunable_hp.find(hyper_param_name) != _tunable_hp.end())
   {
     const std::string acoeff_prefix = "acoeff_";
     const std::string lambda_prefix = "lambda_";
+
+    // Allocate storage for the factors of the total gradient matrix
     RealEigenMatrix dBdhp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
     RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), x.rows());
 
     if (name_without_prefix.find(acoeff_prefix) != std::string::npos)
     {
+      // Automatically grab the expansion index
       const int number = std::stoi(name_without_prefix.substr(acoeff_prefix.length()));
       computeAGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
     }
     else if (name_without_prefix.find(lambda_prefix) != std::string::npos)
     {
+      // Automatically grab the expansion index
       const int number = std::stoi(name_without_prefix.substr(lambda_prefix.length()));
       computeLambdaGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
@@ -113,15 +129,10 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
   }
   else
   {
+    // Allocate storage for the matrix factors
     RealEigenMatrix B_tmp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
     RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
     RealEigenMatrix dKdhp_sub = RealEigenMatrix::Zero(x.rows(), x.rows());
-
-    for (const auto exp_i : make_range(_num_expansion_terms))
-    {
-      computeBMatrix(B_tmp, exp_i);
-      B += B_tmp;
-    }
 
     // First, check the dependent covariances
     bool found = false;
@@ -131,6 +142,13 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
 
     if (!found)
       mooseError("Hyperparameter ", hyper_param_name, "not found!");
+
+    // Then we compute the output covariance
+    for (const auto exp_i : make_range(_num_expansion_terms))
+    {
+      computeBMatrix(B_tmp, exp_i);
+      B += B_tmp;
+    }
 
     MathUtils::kron(dKdhp, B, dKdhp_sub);
 
