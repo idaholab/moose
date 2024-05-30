@@ -102,16 +102,10 @@
     sampler = sample
     likelihoods = 'gaussian'
     gp_evaluator = GP_eval
-    # nn_evaluator = surr
   []
 []
 
 [Surrogates]
-  # [surr]
-  #   type = LibtorchANNSurrogate
-  #   filename = 'test_nn_gp_subapp_out_train.rd'
-  #   classify = true
-  # []
   [GP_eval]
     type = GaussianProcess
     filename = 'gpry_train_predprey_out2_GP_al_trainer.rd'
@@ -125,7 +119,7 @@
 
 [Outputs]
   execute_on = TIMESTEP_END
-  file_base = 'des_gpry_predprey' # 'test' # 'des_gpry'
+  file_base = 'des_gpry_predprey'
   perf_graph = true
   [out]
     type = JSON
