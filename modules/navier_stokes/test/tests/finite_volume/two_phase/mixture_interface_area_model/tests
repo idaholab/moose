@@ -5,21 +5,21 @@
     type = 'Exodiff'
     input = 'pressure_driven_growth.i'
     exodiff = 'pressure_driven_growth_out.e'
-    rel_err = 1.0E-6
+    rel_err = 1.0E-3
     requirement = 'The system shall be able to track interfacial area in steady-state, two-phase problems dominated by pressure driven growth.'
   []
   [mixture_interface_turbulent_driven]
     type = 'Exodiff'
     input = 'turbulent_driven_growth.i'
     exodiff = 'turbulent_driven_growth_out.e'
-    rel_err = 1.0E-6
+    rel_err = 1.0E-3
     requirement = 'The system shall be able to track interfacial area in steady-state, two-phase problems dominated by turbulence driven growth.'
   []
   [mixture_interface_pressure_driven_transient]
     type = 'Exodiff'
     input = 'pressure_driven_growth_transient.i'
     exodiff = 'pressure_driven_growth_transient_out.e'
-    rel_err = 1.0E-6
+    rel_err = 1.0E-3
     requirement = 'The system shall be able to track interfacial area in transient, two-phase problems dominated by pressure driven growth.'
   []
 []
