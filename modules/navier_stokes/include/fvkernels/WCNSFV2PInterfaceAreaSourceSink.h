@@ -55,7 +55,7 @@ protected:
   const Moose::Functor<ADReal> & _f_d;
 
   /// Maximum Void Fraction
-  const Real  _f_d_max;
+  const Real _f_d_max;
 
   /// Surface Tension
   const Moose::Functor<ADReal> & _sigma;
@@ -67,9 +67,9 @@ protected:
   const Real _cutoff_fraction;
 
   /// Internal closure coefficients
-  Real _gamma_c;
-  Real _Kc;
-  Real _gamma_b;
-  Real _Kb;
-  Real _shape_factor;
+  static constexpr Real _gamma_c = 0.188;
+  static constexpr Real _Kc = 0.129;
+  static constexpr Real _gamma_b = 0.264;
+  static constexpr Real _Kb = 1.37;
+  static constexpr Real _shape_factor = 6.0;
 };

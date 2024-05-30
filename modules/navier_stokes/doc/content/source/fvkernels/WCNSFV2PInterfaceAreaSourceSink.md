@@ -88,7 +88,7 @@ The increase in interface area concentration due to breakage of the dispersed ph
 
 \begin{equation}
 S_B = \left( \frac{\alpha_d}{\xi_p} \right)^2 \frac{\Gamma_B \alpha_d (1 - \alpha_d) u_{\epsilon}}{\tilde{d_p}^{11/3} (\alpha_d^{max}- \alpha_d)}
-\operatorname{exp} \left( -K_B \frac{\sigma}{\rho_b \tilde{d_p}^{5/6} u_{\epsilon}^{2/3}} \right)\,,
+\operatorname{exp} \left( -K_B \frac{\sigma}{\rho_b \tilde{d_p}^{5/3} u_{\epsilon}^{2/3}} \right)\,,
 \end{equation}
 
 where:
