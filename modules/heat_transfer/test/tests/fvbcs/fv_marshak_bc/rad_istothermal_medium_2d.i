@@ -63,7 +63,7 @@ sigma = 5.670374419e-8
     functor = G
   []
   [max_value]
-    type = ADElementExtremeFunctorValue
+    type = ElementExtremeFunctorValue
     functor = G
   []
   [relative_difference]

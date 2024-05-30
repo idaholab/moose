@@ -8,14 +8,14 @@
       input = 'rad_istothermal_medium_1d.i'
       csvdiff = 'rad_istothermal_medium_1d_out.csv'
       abs_zero = 1e-10
-      requirement = " in 1D."
+      detail = " in 1D."
     []
     [2D]
       type = CSVDiff
       input = 'rad_istothermal_medium_2d.i'
       csvdiff = 'rad_istothermal_medium_2d_out.csv'
       abs_zero = 1e-10
-      requirement = " in 2D."
+      detail = " in 2D."
     []
   []
 []

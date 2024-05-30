@@ -31,19 +31,17 @@ FVMarshakRadiativeBC::FVMarshakRadiativeBC(const InputParameters & parameters)
     _coeff_diffusion(getFunctor<ADReal>("coeff_diffusion")),
     _eps_boundary(getParam<Real>("boundary_emissivity"))
 {
-  if (!isParamValid("temperature"))
-    _var.requireQpComputations();
 }
 
 ADReal
 FVMarshakRadiativeBC::computeQpResidual()
 {
-  const auto corrected_dif_coef =
+  const auto corrected_diff_coef =
       _eps_boundary / (2.0 * _coeff_diffusion(singleSidedFaceArg(_face_info), determineState()) *
                        (2.0 - _eps_boundary));
   const auto ground_flux =
       4.0 * HeatConduction::Constants::sigma *
       Utility::pow<4>(_temperature_radiation(singleSidedFaceArg(_face_info), determineState()));
-  return -corrected_dif_coef *
+  return -corrected_diff_coef *
          (_var(singleSidedFaceArg(_face_info), determineState()) - ground_flux);
 }

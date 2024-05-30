@@ -9,7 +9,7 @@ P1_sigma_scattering = 1.0
 
 [FunctorMaterials]
   [diff_coef_non_AD]
-    type = ADRadiativeP1DiffusionCoefficientMaterial
+    type = RadiativeP1DiffusionCoefficientMaterial
     opacity = ${opacity}
     sigma_scat_eff = ${P1_sigma_scattering}
     P1_diff_coef_name = 'diff_coef_non_AD'
@@ -24,7 +24,7 @@ P1_sigma_scattering = 1.0
 
 [Postprocessors]
   [value_non_AD]
-    type = ADElementExtremeFunctorValue
+    type = ElementExtremeFunctorValue
     functor = 'diff_coef_non_AD'
     execute_on = 'initial'
   []
