@@ -12,7 +12,7 @@
 #include "FVElementalKernel.h"
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * Class to define the thermal radiative transfer source and sink.
  */
 class FVThermalRadiationSourceSink : public FVElementalKernel
 {
@@ -25,7 +25,7 @@ protected:
   ADReal computeQpResidual() override;
 
 protected:
-  /// The coupled functor applying the force
+  /// The coupled functor applying the radiation temperature
   const Moose::Functor<ADReal> & _temperature_radiation;
 
   /// The opacity field

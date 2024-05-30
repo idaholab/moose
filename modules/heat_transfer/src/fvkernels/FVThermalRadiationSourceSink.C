@@ -18,7 +18,8 @@ FVThermalRadiationSourceSink::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
 
-  params.addClassDescription("Implements a source and the sink term for radiation heat transfer.");
+  params.addClassDescription(
+      "Implements the source and the sink terms for radiation heat transfer.");
   params.addRequiredParam<MooseFunctorName>("temperature_radiation", "The radiation temperature.");
   params.addParam<MooseFunctorName>("opacity", 1.0, "The opacity field.");
 

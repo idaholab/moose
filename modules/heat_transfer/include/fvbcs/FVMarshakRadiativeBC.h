@@ -25,7 +25,7 @@ public:
 protected:
   virtual ADReal computeQpResidual();
 
-  /// The coupled functor applying the force
+  /// The coupled functor applying the radiation temperature
   const Moose::Functor<ADReal> & _temperature_radiation;
 
   /// Diffusion coefficient
