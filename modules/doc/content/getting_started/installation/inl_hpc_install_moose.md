@@ -3,7 +3,8 @@
 The following instructions are for those operating on [!ac](INL) [!ac](HPC) machines.
 
 Requesting access (shell account) to [!ac](INL) [!ac](HPC) machines is handled by the
-[NCRC](https://inl.gov/ncrc/) group.
+[NCRC](https://inl.gov/ncrc/) group. Once access has been granted, one can use
+[HPC Ondemand](hpc_ondemand.md) services to gain access to a shell.
 
 For information on developing or running MOOSE-based NCRC applications (not the scope of this
 document), please head over to [NCRC Applications](help/inl/applications.md) instead, and choose the
@@ -16,11 +17,18 @@ While operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load
 modules to obtain a proper developer environment:
 !style-end!
 
-- +[!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+- +[!ac](HPC) Sawtooth1 or Lemhi1+ (required each time you log in):
 
   ```bash
   module load use.moose moose-dev
   ```
+
+!alert! warning title=Do not use [!ac](HPC) Visualization machines to build or run MOOSE
+Visualization machines are intended to be used for viewing results created by MOOSE-based
+applications. An [!ac](HPC) Visualization machine can be obtained through
+[HPC Ondemand](hpc_ondemand.md), Interactive Apps, Linux Desktop (and Linux Desktop with
+visualization)
+!alert-end!
 
 If you would prefer not having to perform the above step each time you log in, you can append the
 above command to your shell initialization file:
