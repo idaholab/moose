@@ -84,7 +84,7 @@
     type = ADMatInterfaceReaction
     variable = u
     neighbor_var = 'v'
-    boundary = 'right'
+    boundary = 'primary0_interface'
     forward_rate = forward_rate
     backward_rate = backward_rate
   [../]
@@ -107,16 +107,28 @@
 
 [Materials]
   [./block0]
-    type = ADGenericConstantMaterial
+    type = 'ADGenericConstantMaterial'
     block = '0'
-    prop_names = 'D forward_rate backward_rate'
-    prop_values = '4 1.0 2.0'
+    prop_names = 'forward_rate backward_rate'
+    prop_values = '1.0 2.0'
+  [../]
+  [./block01]
+    type = 'GenericConstantMaterial'
+    block = '0'
+    prop_names = 'D'
+    prop_values = '4'
   [../]
   [./block1]
-    type = GenericConstantMaterial
+    type = 'ADGenericConstantMaterial'
+    block = '1'
+    prop_names = 'forward_rate backward_rate'
+    prop_values = '1.0 2.0'
+  [../]
+  [./block11]
+    type = 'GenericConstantMaterial'
     block = '1'
     prop_names = 'D'
-    prop_values = '2'
+    prop_values = '4'
   [../]
 []
 
