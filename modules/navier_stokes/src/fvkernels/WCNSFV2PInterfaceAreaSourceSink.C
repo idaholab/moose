@@ -77,7 +77,6 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
 
   // Useful Arguments
   const auto state = determineState();
-  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto elem_arg = makeElemArg(_current_elem);
   const bool is_transient = _subproblem.isTransient();
 
