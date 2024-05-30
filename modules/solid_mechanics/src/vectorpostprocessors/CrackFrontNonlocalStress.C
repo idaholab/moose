@@ -37,7 +37,7 @@ CrackFrontNonlocalStress::validParams()
                                "block, i.e. for multiple phases");
   params.set<bool>("use_displaced_mesh") = false;
   // EXEC_NONLINEAR to work with xfem_udpates
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_BEGIN, EXEC_NONLINEAR};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_BEGIN};
   params.addClassDescription("Computes the average stress normal to the crack face.");
   return params;
 }
@@ -95,6 +95,9 @@ CrackFrontNonlocalStress::execute()
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     {
       Real q = BoxWeightingFunction(icfp, _q_point[qp]);
+      if (q == 0)
+        continue;
+
       Real normal_stress = RankTwoScalarTools::directionValueTensor(_stress[qp], crack_face_normal);
       _avg_crack_tip_stress[icfp] += _JxW[qp] * _coord[qp] * normal_stress * q;
       _volume[icfp] += _JxW[qp] * _coord[qp] * q;

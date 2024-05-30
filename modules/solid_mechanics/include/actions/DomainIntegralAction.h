@@ -154,10 +154,4 @@ protected:
   MaterialPropertyName _functionally_graded_youngs_modulus;
   /// Whether to create automatic differentiation objects from the action
   const bool _use_ad;
-  /**
-   * This determines if fracture integrals should be executed on nonlinear in
-   * order to grow the crack when num_xfem_updates in the executioner block
-   * is greater than 1
-   */
-  const bool _used_by_xfem_to_grow_crack;
 };

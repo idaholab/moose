@@ -15,7 +15,7 @@ Data produced by this VectorPostprocessor is used in conjunction with the [Inter
 
 In the following input file example, the mesh consists of a 3D plate with a hole in the middle. The CrackFrontDefinition defines crack points around the center line of the hole, `boundary=1001`. This `CrackFrontNonlocalStress` integrates a generic stress field set-up in the input file over the box dimensions shown.
 
-!listing crack_front_normal_stress.i block=UserObjects VectorPostprocessors
+!listing crack_front_nonlocal_stress.i block=UserObjects VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/CrackFrontNonlocalStress
 
