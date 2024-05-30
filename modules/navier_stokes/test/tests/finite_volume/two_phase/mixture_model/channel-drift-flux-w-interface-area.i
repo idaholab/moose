@@ -8,7 +8,7 @@ dp = 0.01
 inlet_phase_2 = 0.0
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
-mass_exchange_coeff = 0.1
+mass_exchange_coeff = 0.01
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -37,8 +37,8 @@ mass_exchange_coeff = 0.1
     xmax = '${fparse l * 5}'
     ymin = '${fparse -l / 2}'
     ymax = '${fparse l / 2}'
-    nx = 100
-    ny = 20
+    nx = 20
+    ny = 5
   []
   uniform_refine = 0
 []
