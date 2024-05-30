@@ -31,7 +31,7 @@ protected:
   /// The permeability. Note that this is declared as a \p MaterialProperty. This means that if
   /// calculation of this property in the producing \p Material depends on non-linear variables, the
   /// derivative information will be lost here in the consumer and the non-linear solve will suffer
-  const ADMaterialProperty<Real> & _permeability;
+  const MaterialProperty<Real> & _permeability;
 
   /// The viscosity. This is declared as an \p ADMaterialProperty, meaning any derivative
   /// information coming from the producing \p Material will be preserved and the integrity of the
