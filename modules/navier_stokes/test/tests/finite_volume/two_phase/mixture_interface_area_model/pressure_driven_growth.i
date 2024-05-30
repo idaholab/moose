@@ -27,6 +27,7 @@ outlet_pressure = 1e5
 
 [Problem]
   identify_variable_groups_in_nl = false
+  previous_nl_solution_required = true
 []
 
 [UserObjects]
@@ -191,6 +192,7 @@ outlet_pressure = 1e5
     k_c = '${fparse mass_exchange_coeff}'
     fd = 'phase_2'
     sigma = 1e-3
+    cutoff_fraction = 0.0
   []
 []
 
@@ -372,6 +374,7 @@ outlet_pressure = 1e5
   type = Steady
   solve_type = 'NEWTON'
   nl_rel_tol = 1e-10
+  line_search = 'none'
 []
 
 [Debug]

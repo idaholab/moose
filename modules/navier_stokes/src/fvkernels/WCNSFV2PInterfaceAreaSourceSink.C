@@ -62,12 +62,7 @@ WCNSFV2PInterfaceAreaSourceSink::WCNSFV2PInterfaceAreaSourceSink(const InputPara
     _f_d_max(getParam<Real>("fd_max")),
     _sigma(getFunctor<ADReal>("sigma")),
     _particle_diameter(getFunctor<ADReal>("particle_diameter")),
-    _cutoff_fraction(getParam<Real>("cutoff_fraction")),
-    _gamma_c(0.188),   // Model parameter - should not be tunable
-    _Kc(0.129),        // Model parameter - should not be tunable
-    _gamma_b(0.264),   // Model parameter - should not be tunable
-    _Kb(1.37),         // Model parameter - should not be tunable
-    _shape_factor(6.0) // Model parameter - should not be tunable
+    _cutoff_fraction(getParam<Real>("cutoff_fraction"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -98,7 +93,7 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
   const auto complement_fd = std::max(_f_d_max - f_d, libMesh::TOLERANCE);
   const auto f_d_o_xi = f_d / (_var(elem_arg, state) + libMesh::TOLERANCE) + libMesh::TOLERANCE;
   const auto f_d_o_xi_old =
-      f_d / (_var(elem_arg, old_state) + libMesh::TOLERANCE) + libMesh::TOLERANCE;
+      f_d / (raw_value(_var(elem_arg, state)) + libMesh::TOLERANCE) + libMesh::TOLERANCE;
 
   // Adding bubble compressibility term
   ADReal material_time_derivative_rho_d = u * rho_d_grad(0);
@@ -112,13 +107,14 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
   }
   if (is_transient)
     material_time_derivative_rho_d +=
-        (_rho_d(elem_arg, state) - _rho_d(elem_arg, Moose::oldState())) / _dt;
+        raw_value(_rho_d(elem_arg, state) - _rho_d(elem_arg, Moose::oldState())) / _dt;
   const auto bubble_compressibility = material_time_derivative_rho_d * xi / 3.0;
 
   // Adding area growth due to added mass
   ADReal bubble_added_mass;
   if (f_d < _cutoff_fraction)
-    bubble_added_mass = f_d * 6.0 / _particle_diameter(elem_arg, state) - _var(elem_arg, old_state);
+    bubble_added_mass = raw_value(_rho_d(elem_arg, state)) *
+                        (f_d * 6.0 / _particle_diameter(elem_arg, state) - _var(elem_arg, state));
   else
     bubble_added_mass = 2. / 3. * _mass_exchange_coefficient(elem_arg, state) *
                         (1.0 / (f_d + libMesh::TOLERANCE) - 2.0);
@@ -134,7 +130,7 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
 
   const ADReal velocity_norm = NS::computeSpeed(velocity);
   const auto pressure_gradient = raw_value(_pressure.gradient(elem_arg, state));
-  const ADReal pressure_grad_norm =
+  const Real pressure_grad_norm =
       MooseUtils::isZero(pressure_gradient) ? 1e-42 : pressure_gradient.norm();
 
   const auto u_eps =

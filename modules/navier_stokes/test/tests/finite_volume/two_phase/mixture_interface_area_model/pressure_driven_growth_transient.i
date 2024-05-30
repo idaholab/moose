@@ -213,6 +213,7 @@ outlet_pressure = 1e6
     k_c = '${fparse mass_exchange_coeff}'
     fd = 'phase_2'
     sigma = 1e-3
+    cutoff_fraction = 0.0
   []
 []
 
@@ -397,6 +398,7 @@ outlet_pressure = 1e6
   dt = 0.1
   end_time = 1.0
   nl_max_its = 10
+  line_search = 'none'
 []
 
 [Debug]
