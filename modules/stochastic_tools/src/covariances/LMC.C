@@ -28,8 +28,7 @@ LMC::validParams()
 
 LMC::LMC(const InputParameters & parameters)
   : CovarianceFunctionBase(parameters),
-    _num_expansion_terms(getParam<unsigned int>("num_latent_funcs")),
-    _num_outputs(getParam<unsigned int>("num_outputs"))
+    _num_expansion_terms(getParam<unsigned int>("num_latent_funcs"))
 {
   // We use a random number generator to obtain the initial guess for the
   // hyperparams
@@ -72,7 +71,7 @@ LMC::computeCovarianceMatrix(RealEigenMatrix & K,
   // Create temporary vectors for constructing the covariance matrix
   RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), xp.rows());
   RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-  RealEigenMatrix K = RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
+  K = RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
   RealEigenMatrix K_working =
       RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
 
