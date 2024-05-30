@@ -64,7 +64,7 @@ The reduction in interface area concentration due to coalescence of the disperse
 
 \begin{equation}
 S_C = -\left( \frac{\alpha_d}{\xi_p} \right)^2 \frac{\Gamma_C \alpha_d^2 u_{\epsilon}}{\tilde{d_p}^{11/3} (\alpha_d^{max}- \alpha_d)}
-\operatorname{exp} \left( -K_C \frac{\tilde{d_p}^{5/6} \rho_b^{1/2} u_{\epsilon}^{1/3}}{\sigma^{1/2}} \right)\,,
+\operatorname{exp} \left( -K_C \frac{\tilde{d_p}^{5/3} \rho_b^{1/2} u_{\epsilon}^{1/3}}{\sigma^{1/2}} \right)\,,
 \end{equation}
 
 where:
