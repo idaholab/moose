@@ -502,9 +502,9 @@ extraElemIntegerSwapParametersProcessor(
     std::vector<std::unordered_map<unsigned int, unsigned int>> & elem_integers_swap_pairs)
 {
   elem_integers_swap_pairs.resize(num_sections * num_integers);
-  for (unsigned int i = 0; i < num_integers; i++)
+  for (const auto i : make_range(num_integers))
   {
-    for (unsigned int j = 0; j < num_sections; j++)
+    for (const auto j : make_range(num_sections))
     {
       const auto & extra_swaps = elem_integers_swaps[i][j];
       auto & extra_swap_pairs = elem_integers_swap_pairs[i * num_sections + j];

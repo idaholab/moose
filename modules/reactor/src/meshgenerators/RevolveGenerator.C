@@ -215,7 +215,7 @@ RevolveGenerator::generate()
                  " of 'elem_integer_names_to_swap' in is not a valid extra element integer of the "
                  "input mesh.");
 
-  // prepare for transferring extra element integers from orignal mesh to the extruded mesh.
+  // prepare for transferring extra element integers from original mesh to the revolved mesh.
   const unsigned int num_extra_elem_integers = _input->n_elem_integers();
   std::vector<std::string> id_names;
 
@@ -313,7 +313,7 @@ RevolveGenerator::generate()
   {
     // Sort the vector for using set_intersection
     std::sort(node_ids_on_axis.begin(), node_ids_on_axis.end());
-    // For QUAD8 elements with one vetex on the axis, we need to replace it with a QUAD9 element
+    // For QUAD8 elements with one vertex on the axis, we need to replace it with a QUAD9 element
     std::set<subdomain_id_type> converted_quad8_subdomain_ids;
     for (const auto & elem : input->element_ptr_range())
     {
@@ -374,8 +374,6 @@ RevolveGenerator::generate()
   mesh->reserve_elem(total_num_azimuthal_intervals * orig_elem * 2);
   const dof_id_type elem_id_shift = total_num_azimuthal_intervals * orig_elem;
 
-  // For straightforward meshes we need one or two additional layers per
-  // element.
   if (input->elements_begin() != input->elements_end() &&
       ((*input->elements_begin())->default_order() == SECOND ||
        (*input->elements_begin())->default_order() == THIRD))
@@ -386,6 +384,7 @@ RevolveGenerator::generate()
       orig_unique_ids + total_num_azimuthal_intervals * order * (orig_elem + orig_nodes);
 #endif
 
+  // Collect azimuthal angles and use them to calculate the correction factor if applicable
   std::vector<Real> azi_array;
   for (const auto & i : index_range(_revolving_angles))
   {
@@ -398,12 +397,11 @@ RevolveGenerator::generate()
   if (_preserve_volumes)
   {
     _radius_correction_factor = radiusCorrectionFactor(azi_array, _full_circle_revolving);
-  }
 
-  // In the meanwhile, modify the input mesh for radius correction if applicable
-  if (_preserve_volumes)
+    // In the meanwhile, modify the input mesh for radius correction if applicable
     for (const auto & node : input->node_ptr_range())
       nodeModification(*node);
+  }
 
   mesh->comm().max(order);
 
@@ -531,7 +529,7 @@ RevolveGenerator::generate()
   {
     const ElemType etype = elem->type();
 
-    // build_extrusion currently only works on coarse meshes
+    // revolving currently only works on coarse meshes
     libmesh_assert(!elem->parent());
 
     unsigned int current_layer = 0;
@@ -960,7 +958,7 @@ RevolveGenerator::generate()
         }
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-        // Let's give the base elements of the extruded mesh the same
+        // Let's give the base elements of the revolved mesh the same
         // unique_ids as the source mesh, in case anyone finds that
         // a useful map to preserve.
         const unique_id_type uid = (current_layer == 0)
@@ -1429,7 +1427,7 @@ RevolveGenerator::generate()
     }
   }
 
-  // Copy all the subdomain/sideset/nodeset name maps to the extruded mesh
+  // Copy all the subdomain/sideset/nodeset name maps to the revolved mesh
   if (!input_subdomain_map.empty())
     mesh->set_subdomain_name_map().insert(input_subdomain_map.begin(), input_subdomain_map.end());
   if (!input_sideset_map.empty())
@@ -1455,7 +1453,7 @@ RevolveGenerator::getRototionCenterAndRadius(const Point & p_ext,
   // external point on the axis
   const Real dist = (p_ext - p_axis) * dir_axis.unit();
   const Point center_pt = p_axis + dist * dir_axis.unit();
-  // Then get thr radius
+  // Then get the radius
   const Real radius = (p_ext - center_pt).norm();
   return std::make_pair(radius, center_pt);
 }

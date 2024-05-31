@@ -11,7 +11,8 @@
 #include "PolygonMeshGeneratorBase.h"
 
 /**
- * This RevolveGenerator object is designed to.
+ * This RevolveGenerator object is designed to revolve a 1D mesh into 2D, or a 2D mesh into 3D based
+ * on an axis.
  */
 class RevolveGenerator : public PolygonMeshGeneratorBase
 {

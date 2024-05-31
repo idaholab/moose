@@ -340,10 +340,10 @@ idSwapParametersProcessor(const std::string & class_name,
                           std::vector<std::unordered_map<T, T>> & id_swap_pairs)
 {
   id_swap_pairs.resize(id_swaps.size());
-  for (unsigned int i = 0; i < id_swaps.size(); i++)
+  for (const auto i : index_range(id_swaps))
   {
-    const std::vector<T> & swaps = id_swaps[i];
-    std::unordered_map<T, T> & swap_pairs = id_swap_pairs[i];
+    const auto & swaps = id_swaps[i];
+    auto & swap_pairs = id_swap_pairs[i];
 
     if (swaps.size() % 2)
       throw MooseException("Row ",
@@ -362,6 +362,11 @@ idSwapParametersProcessor(const std::string & class_name,
 
 /**
  *  Reprocess the elem_integers_swaps to make pairs out of them so they are easier to use
+ * @param class_name name of the mesh generator class used for exception messages
+ * @param num_sections number of sections in the mesh
+ * @param num_integers number of extra element integers in the mesh
+ * @param elem_integers_swaps vector of vectors of vectors of extra element ids to be swapped
+ * @param elem_integers_swap_pairs vector of maps of the swapped pairs
  */
 void extraElemIntegerSwapParametersProcessor(
     const std::string & class_name,
