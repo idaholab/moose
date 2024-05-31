@@ -26,8 +26,14 @@ public:
   LinearFVScalarSymmetryBC(const InputParameters & parameters);
 
   /// Overriding all of these
+  virtual Real computeBoundaryValue() const override;
+  virtual Real computeBoundaryNormalGradient() const override;
   virtual Real computeBoundaryValueMatrixContribution() const override;
   virtual Real computeBoundaryValueRHSContribution() const override;
   virtual Real computeBoundaryGradientMatrixContribution() const override;
   virtual Real computeBoundaryGradientRHSContribution() const override;
+
+protected:
+  /// Switch for enabling linear extrapolation for the boundary face value
+  const bool _two_term_expansion;
 };
