@@ -115,6 +115,11 @@ PhysicsBase::act()
   else if (_current_task == "add_functor_material")
     addFunctorMaterials();
 
+  else if (_current_task == "add_multi_app")
+    addMultiApps();
+  else if (_current_task == "add_transfer")
+    addTransfers();
+
   else if (_current_task == "add_postprocessor")
     addPostprocessors();
   else if (_current_task == "add_vector_postprocessor")
