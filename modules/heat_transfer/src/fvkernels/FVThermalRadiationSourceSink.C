@@ -11,7 +11,7 @@
 #include "MathUtils.h"
 #include "HeatConductionNames.h"
 
-registerMooseObject("MooseApp", FVThermalRadiationSourceSink);
+registerMooseObject("HeatTransferApp", FVThermalRadiationSourceSink);
 
 InputParameters
 FVThermalRadiationSourceSink::validParams()
