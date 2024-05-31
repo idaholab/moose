@@ -78,6 +78,11 @@ LinearFVScalarSymmetryBC::computeBoundaryValueRHSContribution() const
   Real boundary_value_rhs;
   if (_two_term_expansion)
   {
+    // We allow internal boundaries too so we need to check which side we are on
+    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+
     const auto cell_gradient = _var.gradSln(*elem_info);
     const auto & normal = _current_face_info->normal();
     boundary_value_rhs +=
