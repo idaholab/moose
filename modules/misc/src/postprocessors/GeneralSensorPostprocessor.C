@@ -68,7 +68,8 @@ GeneralSensorPostprocessor::GeneralSensorPostprocessor(const InputParameters & p
     _input_signal_values(declareRestartableData<std::vector<Real>>("input_signal_values")),
     _integrand(declareRestartableData<std::vector<Real>>("integrand")),
     _R_function_values(declareRestartableData<std::vector<Real>>("R_function_values")),
-    _seed(getParam<unsigned int>("seed"))
+    _seed(getParam<unsigned int>("seed")),
+    _delay_value(0)
 {
 }
 
