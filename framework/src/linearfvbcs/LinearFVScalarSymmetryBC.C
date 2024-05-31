@@ -75,7 +75,7 @@ LinearFVScalarSymmetryBC::computeBoundaryValueRHSContribution() const
 {
   // If we request linear extrapolation, we add the gradient term to the right hand
   // side.
-  Real boundary_value_rhs;
+  Real boundary_value_rhs = 0;
   if (_two_term_expansion)
   {
     // We allow internal boundaries too so we need to check which side we are on
