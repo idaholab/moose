@@ -26,6 +26,8 @@ public:
   LinearFVVelocitySymmetryBC(const InputParameters & parameters);
 
   /// Overriding all of these
+  virtual Real computeBoundaryValue() const override;
+  virtual Real computeBoundaryNormalGradient() const override;
   virtual Real computeBoundaryValueMatrixContribution() const override;
   virtual Real computeBoundaryValueRHSContribution() const override;
   virtual Real computeBoundaryGradientMatrixContribution() const override;
@@ -48,4 +50,4 @@ protected:
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term
   const unsigned int _index;
-}
+};
