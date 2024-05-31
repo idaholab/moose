@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SIMPLE.md'
+  design = 'SIMPLENonlinearAssembly.md'
   issues = '#22356'
   [momentum-pressure]
     type = 'Exodiff'

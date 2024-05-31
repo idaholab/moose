@@ -13,6 +13,31 @@
     exodiff = 'pin_only_in.e'
     recover = false
   []
+  [square_rid_as_block_name]
+    requirement = 'The system shall generate a 2D square pin mesh with fuel, gap, clad, background regions, with separate block names assigned based on region IDs in the mesh'
+    type = 'Exodiff'
+    input = 'pin_square.i'
+    cli_args = "Mesh/rmp/region_id_as_block_name=true
+                Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
+                Mesh/pin1/mesh_intervals='1 1 1 1'
+                Mesh/pin1/region_ids='1 2 3 4'
+                Mesh/pin1/num_sectors='4'
+                Outputs/file_base=pin_rid_as_block_name"
+    exodiff = 'pin_rid_as_block_name.e'
+    recover = false
+  []
+  [square_rid_as_block_name_err]
+    requirement = 'The system shall throw an error when generating a pin mesh with manually defined block names and being set to automatically define block names based on region IDs'
+    type = 'RunException'
+    input = 'pin_square.i'
+    cli_args = "Mesh/rmp/region_id_as_block_name=true
+                Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
+                Mesh/pin1/mesh_intervals='1 1 1 1'
+                Mesh/pin1/region_ids='1 2 3 4'
+                Mesh/pin1/num_sectors='4'
+                Mesh/pin1/block_names='1 2 3 4'"
+    expect_err = 'block_names should not be specified in PinMeshGenerator'
+  []
   [2d_square_w_3d_info]
     requirement = 'The system shall throw an error if 3d info is provided to a 2d mesh'
     type = 'RunException'

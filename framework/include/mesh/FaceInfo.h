@@ -115,6 +115,7 @@ public:
   /// face.
   VarFaceNeighbors & faceType(const std::pair<unsigned int, unsigned int> & var_sys);
 
+  /// Const getter for every associated boundary ID
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
   /// Returns the set of boundary ids for all boundaries that include this face.
@@ -166,6 +167,10 @@ public:
   void computeBoundaryCoefficients();
 
 private:
+  /// Getter for the face type for every stored variable.
+  /// This will be a friend of MooseMesh to make sure we can only access it from there.
+  std::vector<std::vector<VarFaceNeighbors>> & faceType() { return _face_types_by_var; }
+
   /// the elem and neighbor elems
   const ElemInfo * const _elem_info;
   const ElemInfo * _neighbor_info;
@@ -194,13 +199,16 @@ private:
   /// Geometric weighting factor for face value interpolation
   Real _gc;
 
-  /// a map that provides the information about what face type this is for each variable. The first
-  /// member of the key is the variable number; the second member of the key is the number of the
-  /// system that the variable lives in
-  std::map<std::pair<unsigned int, unsigned int>, VarFaceNeighbors> _face_types_by_var;
+  /// A vector that provides the information about what face type this is for each variable. The first
+  /// index is the system number; the second index of the key is the variable number within the
+  /// system.
+  std::vector<std::vector<VarFaceNeighbors>> _face_types_by_var;
 
   /// the set of boundary ids that this face is associated with
   std::set<BoundaryID> _boundary_ids;
+
+  /// Allows access to private members from moose mesh only
+  friend MooseMesh;
 };
 
 inline const Elem &
@@ -215,20 +223,19 @@ FaceInfo::neighbor() const
 inline FaceInfo::VarFaceNeighbors
 FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys) const
 {
-  auto it = _face_types_by_var.find(var_sys);
-  if (it == _face_types_by_var.end())
-    mooseError("Variable number ",
-               var_sys.first,
-               " in system number ",
-               var_sys.second,
-               " not found in variable to VarFaceNeighbors map");
-  return it->second;
+  mooseAssert(var_sys.second < _face_types_by_var.size(), "System number out of bounds!");
+  mooseAssert(var_sys.first < _face_types_by_var[var_sys.second].size(),
+              "Variable number out of bounds!");
+  return _face_types_by_var[var_sys.second][var_sys.first];
 }
 
 inline FaceInfo::VarFaceNeighbors &
 FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys)
 {
-  return _face_types_by_var[var_sys];
+  mooseAssert(var_sys.second < _face_types_by_var.size(), "System number out of bounds!");
+  mooseAssert(var_sys.first < _face_types_by_var[var_sys.second].size(),
+              "Variable number out of bounds!");
+  return _face_types_by_var[var_sys.second][var_sys.first];
 }
 
 inline const Point &

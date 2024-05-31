@@ -17,7 +17,7 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
-#include "SIMPLE.h"
+#include "SIMPLENonlinearAssembly.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -40,7 +40,7 @@ INSFVRhieChowInterpolatorSegregated::validParams()
                              "momentum-pressure equations.");
 
   // We disable the execution of this, should only provide functions
-  // for the SIMPLE executioner
+  // for the SIMPLENonlinearAssembly executioner
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_NONE);
   exec_enum = {EXEC_NONE};
@@ -86,7 +86,7 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
     paramError("velocity_interp_method",
                "Segregated momentum-pressure solvers do not allow average interpolation methods!");
 
-  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()))
+  if (!dynamic_cast<SIMPLENonlinearAssembly *>(getMooseApp().getExecutioner()))
     mooseError(this->name(), " should only be used with a segregated thermal-hydraulics solver!");
 }
 

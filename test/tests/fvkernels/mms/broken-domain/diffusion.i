@@ -103,7 +103,7 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [block0]
     type = ADGenericFunctorMaterial
     block = '0'
@@ -138,11 +138,11 @@
 [Functions]
   [exact]
     type = ParsedFunction
-    value = '3*x^2 + 2*x + 1'
+    expression = '3*x^2 + 2*x + 1'
   []
   [forcing]
     type = ParsedFunction
-    value = '-6'
+    expression = '-6'
   []
 []
 

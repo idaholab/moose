@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22356'
-  design = 'SIMPLE.md'
+  design = 'SIMPLENonlinearAssembly.md'
   [2d-momentum-pressure]
     type = 'Exodiff'
     input = 2d-momentum.i

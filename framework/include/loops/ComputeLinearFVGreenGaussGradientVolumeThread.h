@@ -75,6 +75,9 @@ protected:
   /// Reference to the linear system at libmesh level
   const libMesh::LinearImplicitSystem & _linear_system;
 
+  /// Global system number
+  const unsigned int _system_number;
+
   /// Thread ID
   THREAD_ID _tid;
 

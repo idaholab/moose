@@ -62,9 +62,12 @@ public:
    * @param vector_tags The IDs of the vector tags whose right hand side contribution should be
    * included
    * @param matrix_tags The IDs of the matrix tags whose matrix contribution should be included
+   * @param compute_gradients A flag to disable the computation of new gradients during the
+   * assembly, can be used to lag gradients
    */
   void computeLinearSystemTags(const std::set<TagID> & vector_tags,
-                               const std::set<TagID> & matrix_tags);
+                               const std::set<TagID> & matrix_tags,
+                               const bool compute_gradients = true);
 
   /**
    * Return a reference to the stored linear implicit system
@@ -119,9 +122,12 @@ protected:
    * Compute the right hand side and system matrix for given tags
    * @param vector_tags The tags of kernels for which the right hand side is to be computed.
    * @param matrix_tags The tags of kernels for which the system matrix is to be computed.
+   * @param compute_gradients A flag to disable the computation of new gradients during the
+   * assembly, can be used to lag gradients
    */
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                   const std::set<TagID> & matrix_tags);
+                                   const std::set<TagID> & matrix_tags,
+                                   const bool compute_gradients = true);
 
   /// Base class reference to the libmesh system
   System & _sys;

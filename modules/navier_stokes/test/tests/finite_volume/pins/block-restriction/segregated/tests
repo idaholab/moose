@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22356'
-  design = 'SIMPLE.md'
+  design = 'SIMPLENonlinearAssembly.md'
   [porous_block_restricted_simple]
     type = 'Exodiff'
     input = empty-block-segregated.i

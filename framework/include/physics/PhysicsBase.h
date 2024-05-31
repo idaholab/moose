@@ -181,6 +181,8 @@ private:
   virtual void addMaterials() {}
   virtual void addFunctorMaterials() {}
   virtual void addUserObjects() {}
+  virtual void addMultiApps() {}
+  virtual void addTransfers() {}
   virtual void addPostprocessors() {}
   virtual void addVectorPostprocessors() {}
   virtual void addReporters() {}

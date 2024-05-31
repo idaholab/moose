@@ -44,17 +44,19 @@ LinearFVAdvection::initialSetup()
 Real
 LinearFVAdvection::computeElemMatrixContribution()
 {
+  const Real face_flux = _velocity * _current_face_info->normal();
   const auto interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
-  return interp_coeffs.first * (_velocity * _current_face_info->normal()) * _current_face_area;
+      interpCoeffs(_advected_interp_method, *_current_face_info, true, face_flux);
+  return interp_coeffs.first * face_flux * _current_face_area;
 }
 
 Real
 LinearFVAdvection::computeNeighborMatrixContribution()
 {
+  const Real face_flux = _velocity * _current_face_info->normal();
   const auto interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
-  return interp_coeffs.second * (_velocity * _current_face_info->normal()) * _current_face_area;
+      interpCoeffs(_advected_interp_method, *_current_face_info, true, face_flux);
+  return interp_coeffs.second * face_flux * _current_face_area;
 }
 
 Real
