@@ -120,13 +120,13 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  Real boundary_value_rhs = 1.0;
+  Real boundary_value_rhs = 0.0;
   auto scaled_normal = _current_face_info->normal();
   scaled_normal *= scaled_normal(_index);
 
   for (const auto dim_i : make_range(_dim))
     if (dim_i != _index)
-      boundary_value_rhs -=
+      boundary_value_rhs +=
           scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
 
   return boundary_value_rhs;
@@ -153,7 +153,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryGradientRHSContribution() const
 
   for (const auto dim_i : make_range(_dim))
     if (dim_i != _index)
-      boundary_grad_rhs +=
+      boundary_grad_rhs -=
           scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
 
   return boundary_grad_rhs / computeCellToFaceDistance();
