@@ -73,6 +73,8 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:init_simulation", "THM:add_component");
     syntax.addDependency("add_mesh_generator", "THM:add_component");
     syntax.addDependency("THM:identify_loops", "THM:add_component");
+    // Components must specify their blocks to the Physics before it gets initialized
+    syntax.addDependency("init_physics", "THM:init_components");
     syntax.addDependency("THM:identify_loops", "add_fluid_properties");
     syntax.addDependency("THM:integrity_check", "THM:init_components");
     syntax.addDependency("THM:integrity_check", "THM:identify_loops");

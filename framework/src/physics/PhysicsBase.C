@@ -199,6 +199,18 @@ PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_typ
 void
 PhysicsBase::initializePhysics()
 {
+  // Annoying edge case. We cannot use ANY_BLOCK_ID for kernels and variables since errors got added
+  // downstream for using it, we cannot leave it empty as that sets all objects to not live on any
+  // block
+  if (isParamSetByUser("block") && _blocks.empty())
+    paramError("block",
+               "Empty block restriction is not supported. Comment out the Physics if you are "
+               "trying to disable it.");
+
+  // Components should have added their blocks already.
+  if (_blocks.empty())
+    _blocks.push_back("ANY_BLOCK_ID");
+
   mooseAssert(_mesh, "We should have a mesh to find the dimension");
   if (_blocks.size())
     _dim = _mesh->getBlocksMaxDimension(_blocks);
