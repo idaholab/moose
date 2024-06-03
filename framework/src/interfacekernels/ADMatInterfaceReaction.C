@@ -16,8 +16,7 @@ ADMatInterfaceReaction::validParams()
 
 {
   InputParameters params = ADInterfaceKernel::validParams();
-  params.addParam<MaterialPropertyName>(
-      "forward_rate", "kf", "Forward reaction rate coefficient.");
+  params.addParam<MaterialPropertyName>("forward_rate", "kf", "Forward reaction rate coefficient.");
   params.addParam<MaterialPropertyName>(
       "backward_rate", "kb", "Backward reaction rate coefficient.");
   params.addClassDescription("Implements a reaction to establish ReactionRate=k_f*u-k_b*v "
@@ -26,7 +25,8 @@ ADMatInterfaceReaction::validParams()
 }
 
 ADMatInterfaceReaction::ADMatInterfaceReaction(const InputParameters & parameters)
-  : ADInterfaceKernel(parameters), _kf(getADMaterialProperty<Real>("forward_rate")),
+  : ADInterfaceKernel(parameters),
+    _kf(getADMaterialProperty<Real>("forward_rate")),
     _kb(getADMaterialProperty<Real>("backward_rate"))
 {
 }

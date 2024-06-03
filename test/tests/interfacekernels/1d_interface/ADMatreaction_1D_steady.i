@@ -128,7 +128,7 @@
     type = 'GenericConstantMaterial'
     block = '1'
     prop_names = 'D'
-    prop_values = '4'
+    prop_values = '2'
   [../]
 []
 
