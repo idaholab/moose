@@ -75,6 +75,10 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:identify_loops", "THM:add_component");
     // Components must specify their blocks to the Physics before it gets initialized
     syntax.addDependency("init_physics", "THM:init_components");
+    // Fluid properties are retrieved during component initialization
+    syntax.addDependency("THM:init_components", "add_fluid_properties");
+    // Solid material property used in a component needs a function
+    syntax.addDependency("THM:init_components", "add_function");
     syntax.addDependency("THM:identify_loops", "add_fluid_properties");
     syntax.addDependency("THM:integrity_check", "THM:init_components");
     syntax.addDependency("THM:integrity_check", "THM:identify_loops");

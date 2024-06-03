@@ -45,7 +45,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
   registerMooseObjectTask("add_fp_output", Output, false);
 
-  syntax.addDependency("add_fluid_properties", "init_displaced_problem");
+  // Fluid properties depend on variables
   syntax.addDependency("add_aux_variable", "add_fluid_properties");
   syntax.addDependency("add_variable", "add_fluid_properties");
   syntax.addDependency("add_elemental_field_variable", "add_fluid_properties");
