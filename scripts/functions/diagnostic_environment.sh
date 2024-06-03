@@ -142,10 +142,10 @@ function conda_test()
         printf "Unable to run Conda tests due to missing Python modules\n\n"
         return 1
     fi
-    if [[ -n "${CONDA_PREFIX}" ]] && [[ -n "${MOOSE_NO_CODESIGN}" ]]; then
+    if [[ -n "${CONDA_EXE}" ]] && [[ -n "${MOOSE_NO_CODESIGN}" ]]; then
         # right to left dependency
         moose_packages=(dev wasp libmesh petsc)
-        conda_list=`conda list | grep 'moose-'`
+        conda_list=`${CONDA_EXE} list | grep 'moose-'`
 
         # iterate over and break on the top-most level we find installed
         for package in ${moose_packages[@]}; do
