@@ -175,7 +175,7 @@ class PreMake:
             self._checkCondaPackage('moose-dev')
             self._checkCondaPackage('moose-libmesh', 'libmesh')
             self._checkCondaPackage('moose-petsc', 'petsc')
-            self._checkCondaPackage('moose-mpich', 'mpich')
+            self._checkCondaPackage('moose-mpi', 'mpi')
             self._checkCondaPackage('moose-wasp', 'wasp')
 
 if __name__ == '__main__':
