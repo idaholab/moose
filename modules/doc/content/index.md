@@ -2,27 +2,27 @@
 
 # HOME style=visibility:hidden;
 
-!media media/moose_logo.png style=display:block;margin-left:auto;margin-right:auto;width:60%;
+!media large_media/organization_logos/2025-conference-webbanner.png style=display:block;margin-left:auto;margin-right:auto;width:80%;
 
+!style! halign=center fontsize=140%
+[Abstract submission form](https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1zeoLEagiVVm9wO)
+| *International workshop registration link coming soon!*
+!style-end!
+
+<!-- disable while condference banner is in place
+!media media/moose_logo.png style=display:block;margin-left:auto;margin-right:auto;width:60%;
+-->
+
+<!-- disable while condference banner is in place
 !style halign=center fontsize=120% color=0.5 0.5 0.5
 Multiphysics Object-Oriented Simulation Environment
+-->
 
 # An open-source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
 <!-- disable while conference banner is in place
 !media large_media/gallery/twist_white.webm quicktime=large_media/gallery/twist_white.mp4 style=width:100%; controls=False autoplay=True loop=True
- -->
-
-!media large_media/organization_logos/23-50052_webbanner_R1-03.jpg dark_src=large_media/organization_logos/23-50052_webbanner_R1-03_dark.jpg style=width:100%;display:block;
-
-!style! halign=center fontsize=130%
-Abstract submission is now open. Click
-[here](https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1zeoLEagiVVm9wO) to submit your abstract.
-!style-end!
-
-!style! halign=center fontsize=130%
-*Conference registration link coming soon!*
-!style-end!
+-->
 
 !row!
 !col! small=12 medium=4 large=4 icon=computer
@@ -54,7 +54,7 @@ Abstract submission is now open. Click
 !style halign=center
 
 - Active [discussion forum](https://github.com/idaholab/moose/discussions)
-- Over 100 contributors
+- Over 200 contributors
 - Over 500 publications
 - Over 10 million tests run per week
 
