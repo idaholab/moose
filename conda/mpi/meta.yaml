@@ -34,6 +34,7 @@ requirements:
     - {{ mpi }}-mpicxx
     - {{ mpi }}-mpifort
     - {{ moose_libgfortran5 }}
+    - {{ moose_libzlib }}
     - {{ moose_clangcc }}                     # [osx]
     - {{ moose_clangxx }}                     # [osx]
     - {{ moose_gcc }}                         # [linux]
@@ -45,6 +46,7 @@ requirements:
     - {{ mpi }}-mpicxx
     - {{ mpi }}-mpifort
     - {{ moose_libgfortran5 }}
+    - {{ moose_libzlib }}
     - {{ moose_clangcc }}                     # [osx]
     - {{ moose_clangxx }}                     # [osx]
     - {{ moose_gcc }}                         # [linux]
