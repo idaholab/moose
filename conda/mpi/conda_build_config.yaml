@@ -25,6 +25,9 @@ zip_keys:
   - mpi_website
   - mpi_dev_website
 
+moose_libzlib:
+  - libzlib 1.2.13
+
 moose_libgfortran5:
   - libgfortran5 13.2.0 ha4646dd_5                          # [linux]
   - libgfortran5 13.2.0 h2873a65_3                          # [not arm64 and osx]
