@@ -87,8 +87,7 @@ public:
                        InputParameters & parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
-  virtual void
-  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid) override;
 
   const NumericVector<Number> * const & currentSolution() const override
   {

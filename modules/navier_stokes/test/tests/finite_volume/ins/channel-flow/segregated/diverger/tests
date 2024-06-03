@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22356'
-  design = 'SIMPLE.md'
+  design = 'SIMPLENonlinearAssembly.md'
   [nonorthogonal-mesh]
     type = 'Exodiff'
     input = diverger.i

@@ -240,7 +240,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Executioner]
-  type = SIMPLE
+  type = SIMPLENonlinearAssembly
   # petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
   # petsc_options_value = 'hypre boomeramg NONZERO'
   rhie_chow_user_object = 'rc'

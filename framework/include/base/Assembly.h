@@ -1712,7 +1712,6 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiDivergence & feDivPhi(FEType type) const
   {
-    _need_div[type] = true;
     buildFE(type);
     return _fe_shape_data[type]->_div_phi;
   }
@@ -1720,7 +1719,6 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiDivergence & feDivPhiFace(FEType type) const
   {
-    _need_div[type] = true;
     buildFaceFE(type);
     return _fe_shape_data_face[type]->_div_phi;
   }
@@ -1729,7 +1727,6 @@ public:
   const typename OutputTools<OutputType>::VariablePhiDivergence &
   feDivPhiNeighbor(FEType type) const
   {
-    _need_div[type] = true;
     buildNeighborFE(type);
     return _fe_shape_data_neighbor[type]->_div_phi;
   }
@@ -1738,7 +1735,6 @@ public:
   const typename OutputTools<OutputType>::VariablePhiDivergence &
   feDivPhiFaceNeighbor(FEType type) const
   {
-    _need_div[type] = true;
     buildFaceNeighborFE(type);
     return _fe_shape_data_face_neighbor[type]->_div_phi;
   }
@@ -2817,6 +2813,9 @@ protected:
   mutable std::map<FEType, bool> _need_second_derivative_neighbor;
   mutable std::map<FEType, bool> _need_curl;
   mutable std::map<FEType, bool> _need_div;
+  mutable std::map<FEType, bool> _need_face_div;
+  mutable std::map<FEType, bool> _need_neighbor_div;
+  mutable std::map<FEType, bool> _need_face_neighbor_div;
 
   /// The map from global index to variable scaling factor
   const NumericVector<Real> * _scaling_vector = nullptr;

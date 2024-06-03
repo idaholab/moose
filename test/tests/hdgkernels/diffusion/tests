@@ -1,0 +1,77 @@
+[Tests]
+  design = 'DiffusionHDGKernel.md DiffusionHDGDirichletBC.md DiffusionHDGPrescribedGradientBC.md'
+  issues = '#26406'
+  [diffusion]
+    requirement = 'The system shall be to solve a simple diffusion problem using a hybridized discontinuous Galerkin discretization.'
+    input = 'diffusion.i'
+    csvdiff = 'diffusion_out.csv'
+    type = CSVDiff
+  []
+  [mms]
+    requirement = 'The system shall show second order convergence in the L2 norm of the scalar field with a first order basis using a hybridized discontinuous Galerkin discretization on'
+    [tri]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestLagrangeTri
+      method = "!dbg"
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree
+      valgrind = 'none'
+      detail = 'simplex elements and'
+    []
+    [quad]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestLagrangeQuad
+      method = "!dbg"
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree
+      valgrind = 'none'
+      detail = 'tensor-product elements.'
+    []
+  []
+  [rt_mms]
+    requirement = 'The system shall show first order convergence in the L2 norm of the scalar field when using constants for the scalar basis and first order L2 Raviart-Thomas basis functions for the vector field in a hybridized mixed method on'
+    [tri]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestRTTri
+      method = "!dbg"
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree
+      valgrind = 'none'
+      detail = 'simplex elements and'
+    []
+    [quad]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestRTQuad
+      method = "!dbg"
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree
+      valgrind = 'none'
+      detail = 'tensor-product elements.'
+    []
+  []
+  [prescribed_nonzero_flux]
+    requirement = 'The system shall be able to apply a non-zero normal gradient boundary condition for the primal scalar field.'
+    input = 'diffusion.i'
+    csvdiff = 'prescribed_gradient.csv'
+    type = CSVDiff
+    cli_args = "HDGBCs/inactive='right' Outputs/file_base=prescribed_gradient"
+  []
+  [different_vars]
+    requirement = 'The system shall error if hybridized discontinuous Galerkin kernels and boundary conditions operate on a different variable set.'
+    input = diffusion.i
+    type = RunException
+    expect_err = "Different variables are being used in the boundary condition 'left'\. HDG kernels and boundary conditions must all operate on the same variables"
+    cli_args = 'AuxVariables/v/family=L2_LAGRANGE HDGBCs/left/u=v'
+  []
+  [bad_scaling_factor]
+    requirement = 'The system shall error if a user attempts to use a non-unity scaling factor for a variable in a hybridized Discontinuous Galerkin discretization.'
+    input = diffusion.i
+    type = RunException
+    expect_err = "Scaling factors disrupt the relationship between Lagrange multiplier and primal solution increments\. 'face_u' has a non-unity scaling factor"
+    cli_args = 'Variables/face_u/scaling=2'
+  []
+[]

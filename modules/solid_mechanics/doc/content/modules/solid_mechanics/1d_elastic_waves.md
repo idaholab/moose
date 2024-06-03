@@ -1,5 +1,121 @@
 # Frequency Domain Analysis
 
+The MOOSE Solid Mechanics module performs frequency domain analysis using modal analysis and frequency response functions. The following example will go
+through both options.
+
+
+## Modal Analysis
+
+Modal analysis is a technique used in structural dynamics to determine the
+natural frequencies (eigenvalues) and mode shapes (eigenvectors) of a structure.
+The natural frequencies represent the frequencies at which the structure tends
+to vibrate when subjected to a disturbance, while the mode shapes describe the
+corresponding deformed shape of the structure at each natural frequency. Modal
+analysis provides valuable insights into the dynamic behavior of a structure and
+is often used for design, optimization, and troubleshooting purposes.
+
+The general eigenvalue problem that needs to be solved for modal analysis is given by:
+\begin{equation}
+(\mathbf{A} - \omega^2 \mathbf{B})\mathbf{u} = 0
+\end{equation}
+where $\mathbf{A}$ holds the "noneigen" kernels, $\mathbf{B}$ holds the "eigen" kernels, $\omega$ are the natural frequencies, and $\mathbf{u}$ are the mode shapes.
+In MOOSE, modal analysis is set up using the [Eigenvalue.md] Executioner. The
+Eigenvalue System allows you to define which kernels go into which matrix. It's important
+to note that in modal analysis, Neumann boundary conditions are
+ignored since we are interested in the free vibration response of the structure.
+Only Dirichlet boundary conditions are considered.
+
+To demonstrate modal analysis in MOOSE, we will visit the cantilever beam example that will be discussed in more detail in the next section on frequency response functions. The goal here is to calculate the first few natural frequencies and visualize the corresponding mode shapes of the cantilever beam.
+The strong form for the modal analysis of the cantilever beam is:
+\begin{equation}
+\nabla \cdot \boldsymbol{\sigma}(\mathbf{u}) = -\rho \omega^2 \mathbf{u}
+\end{equation}
+This equation represents the generalized eigenvalue problem for modal analysis.
+The terms on the left side, which involve the stress divergence, will contribute
+to the "A" matrix, and the terms on the right side, which are the mass terms, will contribute
+to the "B" matrix.
+
+
+## Cantilever Beam Example
+
+The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Frequencies corresponding to the displacement peaks in the FRF indicate natural frequencies/modes.
+
+!media media/solid_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
+
+The analytic solution for the free vibration of a cantilever is known, see [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
+\begin{equation}
+  \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
+\end{equation}
+where $I$ is the moment of inertia, $A$ the cross sectional area, $L$ the beam length, and $k_n$ are the wave numbers.
+For a cantilever beam, the first three wave numbers, $k_n$, given for the Euler Bernoulli beam dimensions given as the dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m are\\
+$k_1=1.875$\\
+$k_2=4.694$\\
+$k_3=7.855$\\
+The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.
+
+For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.
+The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
+$\omega_{1a}=$509Hz\\
+$\omega_{1b}=$763Hz\\
+Both of these frequencies use the same value of $k_1$, but with the moment of inertia recomputed for bending about the different widths, where the lower frequency is the first bending mode about the thin direction ($h=a=$0.1m) and the next higher frequency is the first bending mode about the thicker direction ($h=b=$0.15m).
+
+
+## Modal Analysis: Cantilever Beam Example
+
+In the Kernels block, we define the kernels that contribute to the "A" and "B"
+matrices in the eigenvalue problem. The StressDivergenceTensor kernels represent the stress divergence terms and contribute to the "A"
+matrix. The ADCoefReaction kernels
+represent the mass terms and contribute to the "B" matrix. The
+[!param](/Kernels/CoefReaction/coefficient) in [kernels/CoefReaction.md] is set
+to a negative value which corresponds to a positive density. The
+`extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels
+contribute to "B" matrix. In other literature the A matrix would be the
+stiffness matrix (K) and B would be the Mass matrix (M).
+
+!listing test/tests/modal_analysis/modal.i block=Kernels id=m_kernel caption=
+Kernels for A and B
+
+The BCs block defines the boundary conditions for the problem. In this example,
+we have Dirichlet boundary conditions applied to the left boundary for all
+displacement components. The [DirichletBC.md] is used for the "A" matrix, while
+the [EigenDirichletBC.md] is used for the "B" matrix. Where ever a
+[DirichletBC.md] is used, an [EigenDirichletBC.md] should be set also.
+
+!listing test/tests/modal_analysis/modal.i block=BCs id=m_bc caption=BCs for
+matrix A and B.
+
+The Executioner block specifies the eigenvalue solver settings. The `type =
+Eigenvalue` indicates that we are solving an eigenvalue problem. Since we are
+solving a linear eigenvalue problem we can use a
+[!param](/Executioner/Eigenvalue/solve_type) that can get multiple eigenvalues
+at once, in this case that is `KRYLOVSCHUR`. The
+[!param](/Executioner/Eigenvalue/which_eigen_pairs) parameter determines which
+eigenvalues to compute and for modal analysis the smallest eigenvalues are usually of interest. The
+[!param](/Executioner/Eigenvalue/n_eigen_pairs) parameter sets the number of eigenvalue pairs to compute.
+
+!listing test/tests/modal_analysis/modal.i block=Executioner id=m_exec
+caption=Eigenvalue Executioner
+
+To output all the eigenvalues solved in the system we can use the
+[vectorpostprocessors/Eigenvalues.md] vectorpostprocessor. While we have solved for the two smallest
+eigenvalues, currently MOOSE only has the ability to output a single eigenvector. To
+change which eigenvector is outputted adjust the index in
+[!param](/Problem/EigenProblem/active_eigen_index) and rerun the simulation.
+
+!listing test/tests/modal_analysis/modal.i block=VectorPostprocessors Problem
+id=m_prob caption=Eigenvalues
+
+For this coarse mesh example, we were able to determine the first two
+$\omega$'s: 645.1 Hz and 855 Hz. Which are close to the theoretical result of
+509 Hz and 763 Hz, and as the mesh is refined the results would converge on to the
+true solutions. The results are similar to the frequency response function as
+long as the sweeps are granular enough. The second mode is visualized in
+[mode2], and the outline of the undeformed state is shown in black.
+
+!media solid_mechanics/beam_mode_2.mp4 style=float:right;width:100% caption=Cantilever Beam: Mode 2 id=mode2
+
+## Frequency Response Function
+
 The following example presents two frequency domain analysis of a cantilever beam done in the MOOSE Solid Mechanics module. The first example computes a frequency response function of the cantilever beam and identifies the first two eigenvalues of beam.  The second analysis computes the dynamic response at a single frequency (time-harmonic problem).
 A frequency domain analysis provides the structural response at a discrete set of frequencies. At each frequency, an independent steady state simulation is performed. This document provides an example of modeling a dynamic problem at a single frequency (time-harmonic problem).
 
@@ -9,21 +125,21 @@ Other applications of frequency domain dynamics are: (1) computation of band str
 
 Frequency domain analyses can be advantageous over its time domain counterpart in several cases, for example, when the frequency spectrum of a signal consists of a few frequencies, or, when it is needed to have a better control of the numerical dispersion.
 
-# Problem Description
+## Problem Description
 
 The equations of motion for a one dimensional isotropic elastic solid is given by the following partial differential equation:
 \begin{equation}
     -E\frac{\partial^2 u}{\partial x^2}+\rho \frac{\partial^2 u}{\partial t^2}=0
 \label{eq1}
 \end{equation}
-where $E$ is the modulus of elasticity, and $\rho$ is the density.  
+where $E$ is the modulus of elasticity, and $\rho$ is the density.
 To convert to the frequency domain, we consider that a plane wave given by
 \begin{equation}
   u(x,t)= B e^{i(\omega t - k x)}
   \label{eq2}
 \end{equation}
-is a solution to [eq1] where $B$ is in general a complex number depending on the boundary conditions, $k^2=\omega^2\rho/E$ is the wave number, $\omega=2 \pi f$ where $f$ is the frequency, and $i=\sqrt{-1}$.  
-By assuming [eq2] is a solution to [eq1] we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
+is a solution to [eq1] where $B$ is in general a complex number depending on the boundary conditions, $k^2=\omega^2\rho/E$ is the wave number, $\omega=2 \pi f$ where $f$ is the frequency, and $i=\sqrt{-1}$.
+By assuming [eq2] is a solution to [eq1], we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
 \begin{equation}
     E\frac{\partial^2 U}{\partial x^2}-\rho\omega^2 U=0.
 \label{eq3}
@@ -41,32 +157,11 @@ with amplitude $A$ and frequency $f$, is transformed to
     \label{eq5}
 \end{equation}
 
-# Cantilever Beam Example
 
-The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Frequencies corresponding to the displacement peaks in the FRF indicate natural frequencies/modes.
-
-!media media/solid_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
-
-The analytic solution for the free vibration of a cantilever [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
-\begin{equation}
-  \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
-\end{equation}
-where $I$ is the moment of inertia, $A$ the cross sectional area, $L$ the beam length, and $k_n$ are the wave numbers.
-For a cantilever beam, the first three wave numbers, $k_n$, given for the Euler Bernoulli beam dimensions given as the dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m are\\
-$k_1=1.875$\\
-$k_2=4.694$\\
-$k_3=7.855$\\
-The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.  
-
-For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.  
-The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
-$\omega_{1a}=$509Hz\\
-$\omega_{1b}=$763Hz\\
-Both of these frequencies use the same value of $k_1$, but with the moment of inertia recomputed for bending about the different widths, where the lower frequency is the first bending mode about the thin direction ($h=a=$0.1m) and the next higher frequency is the first bending mode about the thicker direction ($h=b=$0.15m).
 The simulated natural frequencies given by peaks in the FRF for a coarse mesh are:\\
-$\omega_{1a}=$600Hz\\
-$\omega_{1b}=$800Hz\\
-where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
+$\omega_{1a}=$650Hz\\
+$\omega_{1b}=$850Hz\\
+where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
 The simulations will fail if they are run at the natural frequencies because the solution will become singular,
 i.e the displacements blow-up as shown by the asymptotes in [cantileverfrf].
 
@@ -80,9 +175,9 @@ The input file for the coarse simulation shown in [cantileverfrfmag] and [cantil
 
 This uses the [SolidMechanics QuasiStatic Physics](Physics/SolidMechanics/QuasiStatic/index.md) to setup the StressDivergence Kernels because this simulation only includes real displacements.  A `Transient` executioner with a `ConstantDT` timestepper is used to sweep over frequencies where the time is substituted for the frequency.  The time is converted to the frequency dependent `Reaction` `rate` using a `ParsedFunction` and is applied to the `rate` using the `RealFunctionControl`.
 
-In the next example, imaginary displacements will be introduced by including an absorbing boundary condition.  Imaginary displacement represent a phase shift in the problem and often result from damping.  
+In the next example, imaginary displacements will be introduced by including an absorbing boundary condition.  Imaginary displacement represent a phase shift in the problem and often result from damping.
 
-# Uniaxial Beam Example
+## Uniaxial Beam Example
 
 In the Fourier domain, The displacement field $U$ is in general a complex number.  In the previous example, only the real part of the displacement field was accounted for.  In this example, an absorbing boundary condition will introduce a coupling between the real and imaginary displacement fields.  This example uses the uniaxial beam shown in [cantilever] which is subjected to time-harmonic displacement on right and has an absorbing boundary condition on left.
 

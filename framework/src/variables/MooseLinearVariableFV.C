@@ -22,6 +22,7 @@
 #include "FVDirichletBCBase.h"
 #include "GreenGaussGradient.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -48,6 +49,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
   : MooseVariableField<OutputType>(parameters),
     _needs_cell_gradients(false),
     _grad_container(this->_sys.gradientContainer()),
+    _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
     // auxiliary systems
@@ -106,7 +108,7 @@ MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo & elem_info,
                                  ? *this->_sys.currentSolution()
                                  : this->_sys.solutionState(state.state, state.iteration_type);
 
-  return global_soln(elem_info.dofIndices()[this->_sys.number()][this->number()]);
+  return global_soln(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
 }
 
 template <typename OutputType>
@@ -118,7 +120,7 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
     _cell_gradient.zero();
     for (const auto i : make_range(this->_mesh.dimension()))
       _cell_gradient(i) =
-          (*_grad_container[i])(elem_info.dofIndices()[this->_sys.number()][this->number()]);
+          (*_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
   }
 
   return _cell_gradient;
@@ -160,20 +162,21 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
 
   mooseAssert(fi, "The face information must be non-null");
 
-  const auto face_type = fi->faceType(std::make_pair(this->number(), this->sys().number()));
+  const auto face_type = fi->faceType(std::make_pair(this->_var_num, this->_sys_num));
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
     return Moose::FV::interpolate(*this, face, state);
   else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))
   {
     mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
-
-    const auto * const original_face_info = bc_pointer->currentFaceInfo();
-    if (fi != original_face_info)
-      bc_pointer->setCurrentFaceInfo(fi, face_type);
-
-    const auto boundary_value = bc_pointer->computeBoundaryValue();
-
-    return boundary_value;
+    bc_pointer->setupFaceData(fi, face_type);
+    return bc_pointer->computeBoundaryValue();
+  }
+  // If no boundary condition is defined but we are evaluating on a boundary, just return the
+  // element value
+  else if (face.face_side)
+  {
+    const auto & elem_info = this->_mesh.elemInfo(face.face_side->id());
+    return getElemValue(elem_info, state);
   }
   else
     mooseError("We should never get here!");
@@ -250,6 +253,18 @@ MooseLinearVariableFV<OutputType>::currentElem() const
   return this->_assembly.elem();
 }
 
+template <typename OutputType>
+bool
+MooseLinearVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi) const
+{
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto it = _boundary_id_to_bc.find(bnd_id); it != _boundary_id_to_bc.end())
+      if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(it->second))
+        return true;
+
+  return false;
+}
+
 // ****************************************************************************
 // The functions below are used for interfacing the auxiliary and
 // postprocessor/userobject systems. Most of the postprocessors/
@@ -264,7 +279,7 @@ MooseLinearVariableFV<OutputType>::getDofIndices(const Elem * elem,
 {
   dof_indices.clear();
   const auto & elem_info = this->_mesh.elemInfo(elem->id());
-  dof_indices.push_back(elem_info.dofIndices()[this->sys().number()][this->number()]);
+  dof_indices.push_back(elem_info.dofIndices()[this->_sys_num][this->number()]);
 }
 
 template <typename OutputType>

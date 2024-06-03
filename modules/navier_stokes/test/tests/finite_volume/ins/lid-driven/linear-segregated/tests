@@ -1,0 +1,14 @@
+[Tests]
+  design = 'SIMPLE.md'
+  issues = '#27280'
+  [momentum-pressure]
+    type = 'Exodiff'
+    input = 'lid-driven-segregated.i'
+    exodiff = 'lid-driven-segregated_out.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm and the linear finite volume system.'
+    recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
+    method = '!dbg'
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

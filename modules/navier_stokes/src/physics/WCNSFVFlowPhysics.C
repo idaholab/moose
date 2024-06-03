@@ -1135,6 +1135,8 @@ WCNSFVFlowPhysics::addMaterials()
 {
   if (_porous_medium_treatment)
     addPorousMediumSpeedMaterial();
+  else
+    addNonPorousMediumSpeedMaterial();
 }
 
 void
@@ -1148,6 +1150,21 @@ WCNSFVFlowPhysics::addPorousMediumSpeedMaterial()
   params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   getProblem().addMaterial("PINSFVSpeedFunctorMaterial", prefix() + "pins_speed_material", params);
+}
+
+void
+WCNSFVFlowPhysics::addNonPorousMediumSpeedMaterial()
+{
+  const std::string class_name = "ADVectorMagnitudeFunctorMaterial";
+  InputParameters params = getFactory().getValidParams(class_name);
+  assignBlocks(params, _blocks);
+
+  const std::vector<std::string> param_names{"x_functor", "y_functor", "z_functor"};
+  for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
+    params.set<MooseFunctorName>(param_names[dim_i]) = _velocity_names[dim_i];
+  params.set<MooseFunctorName>("vector_magnitude_name") = NS::speed;
+
+  getProblem().addMaterial(class_name, prefix() + "ins_speed_material", params);
 }
 
 void

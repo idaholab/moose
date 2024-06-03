@@ -222,6 +222,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   // Check whether block names are defined properly
   if (isParamValid("background_block_name"))
   {
+    if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+      paramError("background_block_name",
+                 "If ReactorMeshParams/region_id_as_block_name is set, background_block_name "
+                 "should not be specified in AssemblyMeshGenerator");
     _has_background_block_name = true;
     _background_block_name = getParam<std::vector<std::string>>("background_block_name");
     if (_background_region_id.size() != _background_block_name.size())
@@ -232,6 +236,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
   if (isParamValid("duct_block_names"))
   {
+    if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+      paramError("duct_block_names",
+                 "If ReactorMeshParams/region_id_as_block_name is set, duct_block_names should not "
+                 "be specified in AssemblyMeshGenerator");
     _has_duct_block_names = true;
     _duct_block_names = getParam<std::vector<std::vector<std::string>>>("duct_block_names");
     if (_duct_region_ids.size() != _duct_block_names.size())
@@ -551,6 +559,8 @@ AssemblyMeshGenerator::generate()
       auto elem_block_name = default_block_name;
       if (has_block_names)
         elem_block_name += "_" + _pin_block_name_map[pin_type_id][z_id][radial_idx];
+      else if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+        elem_block_name += "_REG" + std::to_string(elem_rid);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";
       updateElementBlockNameId(
@@ -582,9 +592,11 @@ AssemblyMeshGenerator::generate()
 
       // Set element block name and block id
       auto elem_block_name = default_block_name;
-      if (is_background_region && _has_background_block_name)
+      if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+        elem_block_name += "_REG" + std::to_string(elem_rid);
+      else if (is_background_region && _has_background_block_name)
         elem_block_name += "_" + _background_block_name[z_id];
-      if (!is_background_region && _has_duct_block_names)
+      else if (!is_background_region && _has_duct_block_names)
         elem_block_name += "_" + _duct_block_names[z_id][peripheral_idx - 1];
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);

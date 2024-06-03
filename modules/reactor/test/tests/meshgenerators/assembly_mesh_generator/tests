@@ -40,6 +40,23 @@
     exodiff = assembly_ductIDs_conflict.e
     recover = false
   []
+  [hex_rid_as_block_name]
+    requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types, with separate block names assigned based on region IDs in the mesh'
+    type = 'Exodiff'
+    input = 'assembly_hex.i'
+    cli_args = "Mesh/rmp/region_id_as_block_name=true
+                Outputs/file_base=assembly_rid_as_block_name"
+    exodiff = 'assembly_rid_as_block_name.e'
+    recover = false
+  []
+  [hex_rid_as_block_name_err]
+    requirement = 'The system shall throw an error when generating an assembly mesh with manually defined block names and being set to automatically define block names based on region IDs'
+    type = 'RunException'
+    input = 'assembly_hex.i'
+    cli_args = "Mesh/rmp/region_id_as_block_name=true
+                Mesh/amg/background_block_name='1 2'"
+    expect_err = 'background_block_name should not be specified in AssemblyMeshGenerator'
+  []
   [hex_ductIDs]
     requirement = 'The system shall generate a 3D hexagonal assembly mesh with duct regions with assigned IDs'
     type = 'Exodiff'

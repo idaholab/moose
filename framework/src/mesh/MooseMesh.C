@@ -1237,6 +1237,7 @@ MooseMesh::cacheInfo()
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
   _higher_d_elem_side_to_lower_d_elem.clear();
+  _lower_d_elem_to_higher_d_elem_side.clear();
 
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
@@ -1255,6 +1256,8 @@ MooseMesh::cacheInfo()
         auto pair = std::make_pair(ip_elem, ip_side);
         _higher_d_elem_side_to_lower_d_elem.insert(
             std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
+        _lower_d_elem_to_higher_d_elem_side.insert(
+            std::pair<const Elem *, unsigned short int>(elem, ip_side));
       }
     }
 
@@ -3710,43 +3713,21 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
       !Threads::in_threads,
       "Performing writes to faceInfo variable association maps. This must be done unthreaded!");
 
-  std::vector<const MooseVariableFieldBase *> moose_vars;
+  const unsigned int num_eqs = _app.feProblem().es().n_systems();
 
-  for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
+  auto face_lambda = [this](const SubdomainID elem_subdomain_id,
+                            const SubdomainID neighbor_subdomain_id,
+                            SystemBase & sys,
+                            std::vector<std::vector<FaceInfo::VarFaceNeighbors>> & face_type_vector)
   {
-    const auto & nl_variables = _app.feProblem().getNonlinearSystemBase(i).getVariables(0);
-    for (const auto & var : nl_variables)
-      if (var->fieldType() == Moose::VAR_FIELD_STANDARD)
-        moose_vars.push_back(var);
-  }
+    face_type_vector[sys.number()].resize(sys.nVariables(), FaceInfo::VarFaceNeighbors::NEITHER);
+    const auto & variables = sys.getVariables(0);
 
-  for (const auto i : make_range(_app.feProblem().numLinearSystems()))
-  {
-    const auto & variables = _app.feProblem().getLinearSystem(i).getVariables(0);
     for (const auto & var : variables)
-      if (var->fieldType() == Moose::VAR_FIELD_STANDARD)
-        moose_vars.push_back(var);
-  }
-
-  const auto & aux_variables = _app.feProblem().getAuxiliarySystem().getVariables(0);
-  for (const auto & var : aux_variables)
-    if (var->fieldType() == Moose::VAR_FIELD_STANDARD)
-      moose_vars.push_back(var);
-
-  for (FaceInfo & face : _all_face_info)
-  {
-    const SubdomainID elem_subdomain_id = face.elemSubdomainID();
-    const SubdomainID neighbor_subdomain_id = face.neighborSubdomainID();
-
-    // loop through vars
-    for (unsigned int j = 0; j < moose_vars.size(); ++j)
     {
-      // get the variable, its name, and its domain of definition
-      const MooseVariableFieldBase * const var = moose_vars[j];
-      const std::pair<unsigned int, unsigned int> var_sys =
-          std::make_pair(var->number(), var->sys().number());
+      const unsigned int var_num = var->number();
+      const unsigned int sys_num = var->sys().number();
       std::set<SubdomainID> var_subdomains = var->blockIDs();
-
       /**
        * The following paragraph of code assigns the VarFaceNeighbors
        * 1. The face is an internal face of this variable if it is defined on
@@ -3760,20 +3741,46 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
       bool var_defined_neighbor =
           var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
       if (var_defined_elem && var_defined_neighbor)
-        face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::BOTH;
+        face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::BOTH;
       else if (!var_defined_elem && !var_defined_neighbor)
-        face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::NEITHER;
+        face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::NEITHER;
       else
       {
         // this is a boundary face for this variable, set elem or neighbor
         if (var_defined_elem)
-          face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::ELEM;
+          face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::ELEM;
         else if (var_defined_neighbor)
-          face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+          face_type_vector[sys_num][var_num] = FaceInfo::VarFaceNeighbors::NEIGHBOR;
         else
           mooseError("Should never get here");
       }
     }
+  };
+
+  // We loop through the faces and check if they are internal, boundary or external to
+  // the variables in the problem
+  for (FaceInfo & face : _all_face_info)
+  {
+    const SubdomainID elem_subdomain_id = face.elemSubdomainID();
+    const SubdomainID neighbor_subdomain_id = face.neighborSubdomainID();
+
+    auto & face_type_vector = face.faceType();
+
+    face_type_vector.clear();
+    face_type_vector.resize(num_eqs);
+
+    // First, we check the variables in the solver systems (linear/nonlinear)
+    for (const auto i : make_range(_app.feProblem().numSolverSystems()))
+      face_lambda(elem_subdomain_id,
+                  neighbor_subdomain_id,
+                  _app.feProblem().getSolverSystem(i),
+                  face_type_vector);
+
+    // Then we check the variables in the auxiliary system
+    face_lambda(elem_subdomain_id,
+                neighbor_subdomain_id,
+                _app.feProblem().getAuxiliarySystem(),
+                face_type_vector);
   }
 }
 
@@ -3783,77 +3790,50 @@ MooseMesh::cacheFVElementalDoFs() const
   mooseAssert(!Threads::in_threads,
               "Performing writes to elemInfo dof indices. This must be done unthreaded!");
 
+  auto elem_lambda = [](const ElemInfo & elem_info,
+                        SystemBase & sys,
+                        std::vector<std::vector<dof_id_type>> & dof_vector)
+  {
+    if (sys.nFVVariables())
+    {
+      dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
+      const auto & variables = sys.getVariables(0);
+
+      for (const auto & var : variables)
+        if (var->isFV())
+        {
+          const auto & var_subdomains = var->blockIDs();
+
+          // We will only cache for FV variables and if they live on the current subdomain
+          if (var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
+          {
+            std::vector<dof_id_type> indices;
+            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
+            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            dof_vector[sys.number()][var->number()] = indices[0];
+          }
+        }
+    }
+  };
+
   const unsigned int num_eqs = _app.feProblem().es().n_systems();
 
-  for (auto & elem_info_pair : _elem_to_elem_info)
+  // We loop through the elements in the mesh and cache the dof indices
+  // for the corresponding variables.
+  for (auto & ei_pair : _elem_to_elem_info)
   {
-    ElemInfo & elem_info = elem_info_pair.second;
+    auto & elem_info = ei_pair.second;
     auto & dof_vector = elem_info.dofIndices();
 
     dof_vector.clear();
     dof_vector.resize(num_eqs);
 
-    for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
-      if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
-      {
-        auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
-        const auto & variables = sys.getVariables(0);
-        for (const auto & var : variables)
-        {
-          const auto & var_subdomains = var->blockIDs();
+    // First, we cache the dof indices for the variables in the solver systems (linear, nonlinear)
+    for (const auto i : make_range(_app.feProblem().numSolverSystems()))
+      elem_lambda(elem_info, _app.feProblem().getSolverSystem(i), dof_vector);
 
-          // We will only cache for FV variables and if they live on the current subdomain
-          if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
-          {
-            std::vector<dof_id_type> indices;
-            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
-            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-            dof_vector[sys.number()][var->number()] = indices[0];
-          }
-        }
-      }
-
-    for (const auto i : make_range(_app.feProblem().numLinearSystems()))
-      if (_app.feProblem().getLinearSystem(i).nFVVariables())
-      {
-        auto & sys = _app.feProblem().getLinearSystem(i);
-        dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
-        const auto & variables = sys.getVariables(0);
-        for (const auto & var : variables)
-        {
-          const auto & var_subdomains = var->blockIDs();
-
-          // We will only cache for FV variables and if they live on the current subdomain
-          if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
-          {
-            std::vector<dof_id_type> indices;
-            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
-            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-            dof_vector[sys.number()][var->number()] = indices[0];
-          }
-        }
-      }
-
-    if (_app.feProblem().getAuxiliarySystem().nFVVariables())
-    {
-      auto & sys = _app.feProblem().getAuxiliarySystem();
-      dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
-      const auto & aux_variables = sys.getVariables(0);
-      for (const auto & var : aux_variables)
-      {
-        const auto & var_subdomains = var->blockIDs();
-
-        // We will only cache for FV variables and if they live on the current subdomain
-        if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
-        {
-          std::vector<dof_id_type> indices;
-          var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
-          mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-          dof_vector[sys.number()][var->number()] = indices[0];
-        }
-      }
-    }
+    // Then we cache the dof indices for the auxvariables
+    elem_lambda(elem_info, _app.feProblem().getAuxiliarySystem(), dof_vector);
   }
 }
 

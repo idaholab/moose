@@ -30,6 +30,7 @@ XYDelaunayGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
+  MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
 
   params.addRequiredParam<MeshGeneratorName>(
       "boundary",
@@ -103,6 +104,8 @@ XYDelaunayGenerator::validParams()
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addParam<MooseEnum>(
+      "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
 
@@ -134,6 +137,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _auto_area_function_num_points(getParam<unsigned int>("auto_area_function_num_points")),
     _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
+    _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
   if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
@@ -228,6 +232,10 @@ XYDelaunayGenerator::generate()
   std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
   std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
   std::vector<std::unique_ptr<MeshBase>> hole_ptrs(_hole_ptrs.size());
+  // This tells us the element orders of the hole meshes
+  // For the boundary meshes, it can be access through poly2tri.segment_midpoints.
+  std::vector<bool> holes_with_midpoints(_hole_ptrs.size());
+  bool stitch_second_order_holes(false);
 
   // Make sure pointers here aren't invalidated by a resize
   meshed_holes.reserve(_hole_ptrs.size());
@@ -235,11 +243,19 @@ XYDelaunayGenerator::generate()
   {
     hole_ptrs[hole_i] = std::move(*_hole_ptrs[hole_i]);
     meshed_holes.emplace_back(*hole_ptrs[hole_i]);
+    holes_with_midpoints[hole_i] = meshed_holes.back().n_midpoints();
+    stitch_second_order_holes =
+        (holes_with_midpoints.back() && _stitch_holes[hole_i]) || stitch_second_order_holes;
     if (hole_i < _refine_holes.size())
       meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
 
     triangulator_hole_ptrs[hole_i] = &meshed_holes.back();
   }
+  if (stitch_second_order_holes && (_tri_elem_type == "TRI3" || _tri_elem_type == "DEFAULT"))
+    paramError(
+        "tri_element_type",
+        "Cannot use first order elements with stitched quadratic element holes. Please try "
+        "to specify a higher-order tri_element_type or reduce the order of the hole inputs.");
 
   if (!triangulator_hole_ptrs.empty())
     poly2tri.attach_hole_list(&triangulator_hole_ptrs);
@@ -259,6 +275,11 @@ XYDelaunayGenerator::generate()
         _auto_area_func_default_size > 0.0 ? _auto_area_func_default_size : 0.0,
         _auto_area_func_default_size_dist > 0.0 ? _auto_area_func_default_size_dist : -1.0);
   }
+
+  if (_tri_elem_type == "TRI6")
+    poly2tri.elem_type() = libMesh::ElemType::TRI6;
+  else if (_tri_elem_type == "TRI7")
+    poly2tri.elem_type() = libMesh::ElemType::TRI7;
 
   poly2tri.triangulate();
 
@@ -293,7 +314,10 @@ XYDelaunayGenerator::generate()
   if (_smooth_tri || _output_subdomain_id)
     for (auto elem : mesh->element_ptr_range())
     {
-      mooseAssert(elem->type() == TRI3, "Unexpected non-Tri3 found in triangulation");
+      mooseAssert(elem->type() ==
+                      (_tri_elem_type == "TRI6" ? TRI6 : (_tri_elem_type == "TRI7" ? TRI7 : TRI3)),
+                  "Unexpected element type " << Utility::enum_to_string(elem->type())
+                                             << " found in triangulation");
 
       elem->subdomain_id() = _output_subdomain_id;
 
@@ -400,6 +424,14 @@ XYDelaunayGenerator::generate()
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
     {
       UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*hole_ptrs[hole_i]);
+      // increase hole mesh order if the triangulation mesh has higher order
+      if (!holes_with_midpoints[hole_i])
+      {
+        if (_tri_elem_type == "TRI6")
+          hole_mesh.all_second_order();
+        else if (_tri_elem_type == "TRI7")
+          hole_mesh.all_complete_order();
+      }
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
 
       // Our algorithm here requires a serialized Mesh.  To avoid

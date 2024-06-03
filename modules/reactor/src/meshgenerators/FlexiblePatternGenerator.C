@@ -115,6 +115,9 @@ FlexiblePatternGenerator::validParams()
   params.addParam<SubdomainName>(
       "background_subdomain_name",
       "Subdomain name to set on the background area meshed by Delaunay algorithm.");
+  MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
+  params.addParam<MooseEnum>(
+      "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
 
   params.addParam<boundary_id_type>(
       "external_boundary_id",
@@ -518,6 +521,7 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
   if (isParamSetByUser("auto_area_function_power"))
     params.set<Real>("auto_area_function_power") = getParam<Real>("auto_area_function_power");
   params.set<BoundaryName>("output_boundary") = std::to_string(OUTER_SIDESET_ID);
+  params.set<MooseEnum>("tri_element_type") = getParam<MooseEnum>("tri_element_type");
   addMeshSubgenerator("XYDelaunayGenerator", name() + "_pattern", params);
 
   MeshGeneratorName final_mg_name(name() + "_pattern");

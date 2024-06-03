@@ -244,6 +244,12 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   if (!hasReactorParam<boundary_id_type>(RGMB::radial_boundary_id))
     mooseError("radial_boundary_id must be provided in ReactorMeshParams for CoreMeshGenerators");
 
+  if (parameters.isParamSetByUser("periphery_block_name") &&
+      getReactorParam<bool>(RGMB::region_id_as_block_name))
+    paramError("periphery_block_name",
+               "If ReactorMeshParams/region_id_as_block_name is set, periphery_block_name should "
+               "not be specified in CoreMeshGenerator");
+
   std::size_t empty_pattern_loc = 0;
   bool make_empty = false;
   for (auto assembly : _inputs)
@@ -671,6 +677,8 @@ CoreMeshGenerator::generate()
       auto elem_block_name = default_block_name;
       if (has_block_names)
         elem_block_name += "_" + _pin_block_name_map[pin_type_id][z_id][radial_idx];
+      else if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+        elem_block_name += "_REG" + std::to_string(elem_rid);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";
       updateElementBlockNameId(
@@ -683,6 +691,8 @@ CoreMeshGenerator::generate()
       elem->set_extra_integer(region_id_int, _periphery_region_id);
       // set block name and block name of core periphery element
       auto elem_block_name = _periphery_block_name;
+      if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+        elem_block_name += "_REG" + std::to_string(_periphery_region_id);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";
       updateElementBlockNameId(
@@ -703,17 +713,23 @@ CoreMeshGenerator::generate()
 
       // Set element block name and block id
       auto elem_block_name = default_block_name;
-      if (is_background_region)
-      {
-        bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
-        if (has_background_block_name)
-          elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
-      }
+      if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+        elem_block_name += "_REG" + std::to_string(elem_rid);
       else
       {
-        bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
-        if (has_duct_block_names)
-          elem_block_name += "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
+        if (is_background_region)
+        {
+          bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
+          if (has_background_block_name)
+            elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
+        }
+        else
+        {
+          bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
+          if (has_duct_block_names)
+            elem_block_name +=
+                "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
+        }
       }
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";

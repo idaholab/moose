@@ -84,6 +84,11 @@ public:
   virtual bool isFV() const override { return true; }
 
   /**
+   * If the variable has a dirichlet boundary condition at face described by \p fi .
+   */
+  virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
+
+  /**
    * Switch to request cell gradient computations.
    */
   void computeCellGradients() { _needs_cell_gradients = true; }
@@ -193,6 +198,9 @@ protected:
   /// Map for easily accessing the boundary conditions based on the boundary IDs.
   /// We assume that each boundary has one boundary condition only.
   std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
+
+  /// Cache the number of the system this variable belongs to
+  const unsigned int _sys_num;
 
   friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
 

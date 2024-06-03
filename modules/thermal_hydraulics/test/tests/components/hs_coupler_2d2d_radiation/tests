@@ -1,0 +1,44 @@
+[Tests]
+  design = 'HSCoupler2D2DRadiation.md'
+  issues = '#27651'
+
+  [test]
+    requirement = 'The system shall be able to couple an arbitrary number cylindrical heat structures via radiation using a general formulation'
+
+    [concentric_cylinders]
+      type = CSVDiff
+      input = 'concentric_cylinders.i'
+      csvdiff = 'concentric_cylinders.csv'
+      abs_zero = 1e-7
+      detail = 'and for a concentric cylinder problem produce an identical solution to the solution obtained using concentric cylinder assumptions.'
+    []
+    [adjacent_cylinders]
+      type = Exodiff
+      input = 'adjacent_cylinders.i'
+      exodiff = 'adjacent_cylinders.e'
+      detail = 'and be able to include the environment.'
+    []
+    [energy_conservation]
+      type = CSVDiff
+      input = 'energy_conservation.i'
+      csvdiff = 'energy_conservation.csv'
+      abs_zero = 1e-6
+      detail = 'and conserve energy.'
+    []
+
+    [invalid_view_factor_size]
+      type = RunException
+      input = 'concentric_cylinders.i'
+      cli_args = "Components/hs_couplerA/view_factors='0 1; 1'"
+      expect_err = "The parameter 'view_factors' must be a square matrix"
+      detail = 'and shall report an error when the view factors are provided incorrectly.'
+    []
+    [invalid_view_factor_row_sum]
+      type = RunException
+      input = 'concentric_cylinders.i'
+      cli_args = "Components/hs_couplerA/view_factors='0 0.5; 1 0'"
+      expect_err = "All rows in 'view_factors' must sum to one"
+      detail = 'and shall report an error when the view factor matrix rows do not sum to one.'
+    []
+  []
+[]

@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionExtrapolatedBC.h"
 
 /**
  * Class implementing an outflow boundary condition for linear finite
  * volume variables. This is compatible with advection-diffusion problems.
  */
-class LinearFVAdvectionDiffusionOutflowBC : public LinearFVAdvectionDiffusionBC
+class LinearFVAdvectionDiffusionOutflowBC : public LinearFVAdvectionDiffusionExtrapolatedBC
 {
 public:
   static InputParameters validParams();
@@ -26,19 +26,13 @@ public:
    */
   LinearFVAdvectionDiffusionOutflowBC(const InputParameters & parameters);
 
-  virtual Real computeBoundaryValue() const override;
-
+  /**
+   * We assume zero normal gradient for outflow boundary conditions so these
+   * need to be changed
+   */
+  ///@{
   virtual Real computeBoundaryNormalGradient() const override;
-
-  virtual Real computeBoundaryValueMatrixContribution() const override;
-
-  virtual Real computeBoundaryValueRHSContribution() const override;
-
   virtual Real computeBoundaryGradientMatrixContribution() const override;
-
   virtual Real computeBoundaryGradientRHSContribution() const override;
-
-protected:
-  /// Switch for enabling linear extrapolation for the boundary face value
-  const bool _two_term_expansion;
+  ///@}
 };

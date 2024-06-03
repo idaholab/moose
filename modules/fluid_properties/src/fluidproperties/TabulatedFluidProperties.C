@@ -1111,7 +1111,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
     std::ofstream file_out(file_name.c_str());
 
     // Write out date and fluid type
-    time_t now = time(&now);
+    time_t now = std::time(&now);
     if (_fp)
       file_out << "# " << _fp->fluidName() << " properties created by TabulatedFluidProperties on "
                << ctime(&now) << "\n";

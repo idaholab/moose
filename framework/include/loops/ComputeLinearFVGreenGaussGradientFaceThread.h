@@ -61,29 +61,20 @@ public:
   void join(const ComputeLinearFVGreenGaussGradientFaceThread & y);
 
 protected:
-  /**
-   * Compute contributions to the gradient sum on an internal face.
-   * @param face_info The FaceInfo object that contains orientation information.
-   */
-  void onInternalFace(const FaceInfo & face_info);
-
-  /**
-   * Compute contributions to the gradient sum on a boundary face.
-   * @param face_info The FaceInfo object that contains orientation information.
-   */
-  void onBoundaryFace(const FaceInfo & face_info);
-
   /// Reference to the problem
   FEProblemBase & _fe_problem;
 
   /// The dimension of the domain
   const unsigned int _dim;
 
-  /// The number of the linear system on which this thread is acting
+  /// The number of the linear system on which this thread is acting.
   const unsigned int _linear_system_number;
 
   /// Reference to the linear system at libmesh level
   const libMesh::LinearImplicitSystem & _linear_system;
+
+  /// Global system number (the number of this system in the libmesh equation system)
+  const unsigned int _system_number;
 
   /// Thread ID
   THREAD_ID _tid;

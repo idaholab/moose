@@ -38,4 +38,10 @@ public:
 protected:
   /// Reference to the linear finite volume variable
   MooseLinearVariableFV<Real> & _var;
+
+  /// Cache for the variable number
+  const unsigned int _var_num;
+
+  /// Cache for the system number
+  const unsigned int _sys_num;
 };

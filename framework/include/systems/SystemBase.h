@@ -667,17 +667,14 @@ public:
    * Reinit assembly info for a side of an element
    * @param elem The element
    * @param side Side of of the element
-   * @param bnd_id Boundary id on that side
    * @param tid Thread ID
    */
-  virtual void
-  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid);
 
   /**
    * Compute the values of the variables at all the current points.
    */
-  virtual void
-  reinitNeighborFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
+  virtual void reinitNeighborFace(const Elem * elem, unsigned int side, THREAD_ID tid);
 
   /**
    * Compute the values of the variables at all the current points.
@@ -929,7 +926,7 @@ public:
    * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
    * Mainly used for finite volume systems.
    */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer()
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() const
   {
     return _raw_grad_container;
   }

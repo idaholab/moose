@@ -137,12 +137,17 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 
+  mooseAssert(_adv_quant->hasFaceSide(*fi, true) || _adv_quant->hasFaceSide(*fi, false),
+              "Advected quantity should be defined on one side of the face!");
+
+  const auto * elem = _adv_quant->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr();
+
   const auto adv_quant_face = MetaPhysicL::raw_value(
       (*_adv_quant)(Moose::FaceArg({fi,
                                     Moose::FV::limiterType(_advected_interp_method),
                                     MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                                     correct_skewness,
-                                    nullptr}),
+                                    elem}),
                     state));
   return fi->normal() * adv_quant_face * vel;
 }

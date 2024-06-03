@@ -13,6 +13,7 @@
 #include "FEProblemBase.h"
 #include "ThreadedElementLoopBase.h"
 #include "ConsoleUtils.h"
+#include "SwapBackSentinel.h"
 
 // Forward declarations
 class SystemBase;
@@ -55,6 +56,9 @@ public:
   virtual void neighborSubdomainChanged() override;
 
 protected:
+  void prepareElement(const Elem * elem);
+  void clearVarsAndMaterials();
+
   FEProblemBase & _fe_problem;
 
   /**
@@ -175,4 +179,21 @@ ThreadedElementLoop<RangeType>::printExecutionOrdering(
   for (auto shared_ptr : objs_ptrs)
     regular_ptrs.push_back(shared_ptr.get());
   printExecutionOrdering<T>(regular_ptrs, print_header, line_prefix);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::prepareElement(const Elem * const elem)
+{
+  _fe_problem.prepare(elem, this->_tid);
+  _fe_problem.reinitElem(elem, this->_tid);
+  _fe_problem.reinitMaterials(this->_subdomain, this->_tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::clearVarsAndMaterials()
+{
+  _fe_problem.clearActiveElementalMooseVariables(this->_tid);
+  _fe_problem.clearActiveMaterialProperties(this->_tid);
 }
