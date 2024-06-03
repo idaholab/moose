@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FileMeshComponent.h"
+#include "THMMesh.h"
 
 /**
  * Create a component with user-selected Physics active on it

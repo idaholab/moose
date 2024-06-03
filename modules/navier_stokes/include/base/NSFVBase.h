@@ -1171,6 +1171,9 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::addNSVariables()
 {
+  // We use finite volume variables
+  getProblem().needFV();
+
   // Determine which variables to add
   processVariables();
 
@@ -3051,8 +3054,6 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::processMesh()
 {
-  getProblem().needFV();
-
   _blocks = getBlocks();
 
   // If the user doesn't define a block name we go with the default

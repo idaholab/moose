@@ -306,7 +306,9 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
-                           "(init_physics)"
+                           "(add_function)"  // Functions can depend on scalar variables, but this dependence can be
+                                             // added on initialSetup() rather than construction
+                           "(init_physics)"  // Components add their blocks to Physics, and components need functions at initialization
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
@@ -322,7 +324,6 @@ addActionTypes(Syntax & syntax)
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
-                           "(add_function)"
                            "(add_periodic_bc)"
                            "(add_user_object)"
                            "(add_distribution)"

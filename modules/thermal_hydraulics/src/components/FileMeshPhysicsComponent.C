@@ -29,7 +29,7 @@ FileMeshPhysicsComponent::FileMeshPhysicsComponent(const InputParameters & param
 }
 
 void
-FileMeshPhysicsComponent::addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/)
+FileMeshPhysicsComponent::addRelationshipManagers(Moose::RelationshipManagerType /*in_rm_type*/)
 {
   // TODO: We ll just add late relationship managers
   // At this point in the setup, we do not have a problem, so we cannot retrieve a Physics. We can
