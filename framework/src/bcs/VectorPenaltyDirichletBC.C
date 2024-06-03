@@ -33,7 +33,7 @@ VectorPenaltyDirichletBC::VectorPenaltyDirichletBC(const InputParameters & param
     _penalty(getParam<Real>("penalty")),
     _exact_x(getFunction("x_exact_sln")),
     _exact_y(getFunction("y_exact_sln")),
-    _exact_z(getFunction("y_exact_sln")),
+    _exact_z(getFunction("z_exact_sln")),
     _linear(getParam<bool>("linear"))
 {
 }
@@ -51,5 +51,8 @@ VectorPenaltyDirichletBC::computeQpResidual()
 Real
 VectorPenaltyDirichletBC::computeQpJacobian()
 {
-  return _penalty * _test[_i][_qp] * _phi[_j][_qp];
+  if (_linear)
+    return 0;
+  else
+    return _penalty * _test[_i][_qp] * _phi[_j][_qp];
 }
