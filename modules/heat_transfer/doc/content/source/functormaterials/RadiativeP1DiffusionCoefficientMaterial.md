@@ -14,7 +14,7 @@ where
 
 !alert warning
 If scattering in the medium can be assumed isotropic,
-then $\sigma_{s, eff} \approx 0$ is a good approximation [!citep](incropera2002).
+then $\sigma_{s, eff} \approx 3 \sigma_{s}$ is a good approximation [!citep](incropera2002).
 
 !syntax parameters /FunctorMaterials/RadiativeP1DiffusionCoefficientMaterial
 
