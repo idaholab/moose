@@ -121,6 +121,8 @@
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 3D."
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
 
   [./pl_test4q]
@@ -132,6 +134,8 @@
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 3D using second order elements."
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
 
   [./pl_test4tt]
@@ -142,5 +146,7 @@
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 3D using a tangential tolerance of for the distance."
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
 []

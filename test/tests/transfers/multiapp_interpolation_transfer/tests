@@ -26,5 +26,7 @@
     design = 'transfers/MultiAppGeometricInterpolationTransfer.md'
     issues = '#1879 #12618'
     requirement = "The system shall allow to interpolate block restricted variables from the sub apps to the parent app"
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   []
 []
