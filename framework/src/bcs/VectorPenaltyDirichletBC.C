@@ -20,7 +20,6 @@ VectorPenaltyDirichletBC::validParams()
   params.addParam<FunctionName>("x_exact_sln", 0, "The exact solution for the x component");
   params.addParam<FunctionName>("y_exact_sln", 0, "The exact solution for the y component");
   params.addParam<FunctionName>("z_exact_sln", 0, "The exact solution for the z component");
-  params.addParam<bool>("linear", false, "Whether this is formulated as a linear problem");
   params.addClassDescription("Enforces a Dirichlet boundary condition for "
                              "vector nonlinear variables in a weak sense by "
                              "applying a penalty to the difference in the "
@@ -33,8 +32,7 @@ VectorPenaltyDirichletBC::VectorPenaltyDirichletBC(const InputParameters & param
     _penalty(getParam<Real>("penalty")),
     _exact_x(getFunction("x_exact_sln")),
     _exact_y(getFunction("y_exact_sln")),
-    _exact_z(getFunction("y_exact_sln")),
-    _linear(getParam<bool>("linear"))
+    _exact_z(getFunction("z_exact_sln"))
 {
 }
 
@@ -45,7 +43,7 @@ VectorPenaltyDirichletBC::computeQpResidual()
                              _exact_y.value(_t, _q_point[_qp]),
                              _exact_z.value(_t, _q_point[_qp])};
 
-  return _penalty * _test[_i][_qp] * ((_linear ? 0. : _u[_qp]) - u_exact);
+  return _penalty * _test[_i][_qp] * (_u[_qp] - u_exact);
 }
 
 Real

@@ -1,0 +1,10 @@
+[Tests]
+  design = 'VectorPenaltyDirichletBC.md'
+  issues = '#27772'
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to apply penalty Dirichlet boundary conditions to all three components of a vector variable in a three-dimensional diffusion simulation.'
+  []
+[]
