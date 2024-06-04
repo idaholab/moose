@@ -237,7 +237,7 @@ class RunApp(Tester):
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
-        if self.force_mpi or options.parallel or ncpus > 1:
+        if self.force_mpi or ncpus > 1:
             command = f'{self.mpi_command} -n {ncpus} {command}'
 
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
