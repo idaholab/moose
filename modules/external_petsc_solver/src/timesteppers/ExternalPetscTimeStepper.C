@@ -10,6 +10,8 @@
 #include "ExternalPetscTimeStepper.h"
 #include "ExternalPETScProblem.h"
 
+#include "libmesh/petsc_solver_exception.h"
+
 registerMooseObject("ExternalPetscSolverApp", ExternalPetscTimeStepper);
 
 InputParameters
@@ -34,7 +36,8 @@ ExternalPetscTimeStepper::computeInitialDT()
 {
   // Query the time step size of PETSc solver
   PetscReal dt;
-  TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
+  auto ierr = TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
+  LIBMESH_CHKERR(ierr);
   return dt;
 }
 
@@ -43,6 +46,7 @@ ExternalPetscTimeStepper::computeDT()
 {
   // Query the time step size of PETSc solver
   PetscReal dt;
-  TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
+  auto ierr = TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
+  LIBMESH_CHKERR(ierr);
   return dt;
 }

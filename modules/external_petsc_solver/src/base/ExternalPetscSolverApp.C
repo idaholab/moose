@@ -16,6 +16,8 @@
 #include "ExternalPETScProblem.h"
 #include "Executioner.h"
 
+#include "libmesh/petsc_solver_exception.h"
+
 InputParameters
 ExternalPetscSolverApp::validParams()
 {
@@ -38,7 +40,8 @@ ExternalPetscSolverApp::getPetscTS()
   if (!_ts)
   {
     // Create an external PETSc solver
-    PETScExternalSolverCreate(_comm->get(), &_ts);
+    auto ierr = PETScExternalSolverCreate(_comm->get(), &_ts);
+    LIBMESH_CHKERR(ierr);
     _is_petsc_app = true;
   }
   return _ts;
@@ -47,7 +50,8 @@ ExternalPetscSolverApp::getPetscTS()
 ExternalPetscSolverApp::~ExternalPetscSolverApp()
 {
   // Destroy PETSc solver
-  PETScExternalSolverDestroy(_ts);
+  auto ierr = PETScExternalSolverDestroy(_ts);
+  libmesh_ignore(ierr);
 }
 
 void
