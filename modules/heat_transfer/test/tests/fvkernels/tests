@@ -1,0 +1,11 @@
+[Tests]
+  design = 'source/fvkernels/FVThermalRadiationSourceSink.md'
+  issues = '#27725'
+  [1d_P1_rad_heat_trasfer]
+    type = CSVDiff
+    input = 'radiation_istothermal_medium_1d.i'
+    csvdiff = 'radiation_istothermal_medium_1d_out.csv'
+    abs_zero = 1e-4
+    requirement = "P1 Radiation heat transfer should match an analytical solution in 1D."
+  []
+[]
