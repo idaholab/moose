@@ -52,13 +52,3 @@ class RunException(RunApp):
         if self.hasRedirectedOutput(options):
             return self.getRedirectedOutputFiles(options)
         return []
-
-    def getProcs(self, options):
-        procs = super().getProcs(options)
-        # We seem to have issues with --redirect-output causing
-        # "Inappropriate ioctl for device (25)" errors, so if this test
-        # doesn't require more procs, just set it to zero
-        if options.hpc and int(self.specs['min_parallel']) == 1 and procs != 1:
-            self.addCaveats('hpc max_cpus=1')
-            return 1
-        return procs
