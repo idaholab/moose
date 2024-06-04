@@ -1,4 +1,9 @@
-CXX ?= g++
+hit_CXX := $(libmesh_CXX)
+
+ifeq ($(hit_CXX),)
+  hit_CXX := g++
+endif
+
 UNAME := $(shell uname)
 
 pyconfig := python3-config
@@ -47,12 +52,12 @@ wasp_CXXFLAGS  += -I$(WASP_DIR)/include
 wasp_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 
 hit: $(hit_srcdir)/main.cc $(hit_srcfiles) include/hit/braceexpr.h include/hit/lex.h include/hit/parse.h
-	$(CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -g $(CXXFLAGS) $< $(hit_srcfiles) -o $@ $(wasp_LDFLAGS)
+	$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -g $(CXXFLAGS) $< $(hit_srcfiles) -o $@ $(wasp_LDFLAGS)
 
 bindings: hit.so
 
 hit.so: $(hit_srcfiles)
-	$(CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@ $(wasp_LDFLAGS)
+	$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@ $(wasp_LDFLAGS)
 
 $(HITCPP): hit.pyx chit.pxd
 	$(cython) -o $@ --cplus $<
