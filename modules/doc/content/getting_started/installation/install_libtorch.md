@@ -42,6 +42,12 @@ The user can choose from three alternatives when it comes to installing `libtorc
   !alert! note
 
   The same process works for Linux workstations if the user requires CPU support only.
+  To ensure this, add the `cpuonly` package to the installation line:
+
+  ```bash
+  conda install pytorch cpuonly -c pytorch
+  ```
+
   For notes on the GPU support, visit the [notes below](install_libtorch.md#gpu-notes).
 
   !alert-end!
@@ -153,7 +159,14 @@ For GPU acceleration through Metal, users need to select MPS as a device when wr
 
 !alert! warning
 
-GPU devices on Linux machines are not officially supported yet. If you have questions regarding
-this path, feel free to ask them on out Discussion forum!
+GPU devices on Linux machines are not +officially+ supported yet.
+
+However, on Linux machines with existing CUDA and CUDA-enabled compiler support, one can
+compile MOOSE with a GPU-based Libtorch library without using the MOOSE conda environment.
+This means that the dependencies (PETSc, libMesh, WASP) need to be compiled
+manually. Following this, one can download an officially supported, CUDA-based
+precompiled library from the Libtorch website and supply that to the configure script
+before compiling MOOSE. If you have questions regarding this path,
+feel free to ask them on out Discussion forum!
 
 !alert-end!
