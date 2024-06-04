@@ -12,9 +12,9 @@
 #include "VectorIntegratedBC.h"
 
 /**
- *  Enforces a Dirichlet boundary condition for vector nonlinear variables in a
- *  weak sense by applying a penalty to the difference in the current solution and
- *  the Dirichlet data.
+ * Enforces a Dirichlet boundary condition for vector nonlinear variables in a
+ * weak sense by applying a penalty to the difference in the current solution and
+ * the Dirichlet data.
  */
 class VectorPenaltyDirichletBC : public VectorIntegratedBC
 {
@@ -39,7 +39,4 @@ private:
 
   /// The exact solution for the z component
   const Function & _exact_z;
-
-  /// Whether this is formulated as a linear problem
-  const bool _linear;
 };
