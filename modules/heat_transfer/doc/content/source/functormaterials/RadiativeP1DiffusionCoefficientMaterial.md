@@ -9,8 +9,8 @@ P1 radiative heat transfer coefficient as follows:
 
 where
 
-- $\kappa$ is the opacity (SI units (m))
-- $\sigma_{s, eff}$ is the P1 effective scattering cross section (SI units $m$), e.g., $3 \sigma_{tr}$ with $\sigma_{tr}$ being the transport cross section.
+- $\kappa$ is the opacity (SI units $m^{-1}$)
+- $\sigma_{s, eff}$ is the P1 effective scattering cross section (SI units $m^{-1}$), e.g., $3 \sigma_{tr}$ with $\sigma_{tr}$ being the transport cross section.
 
 !alert warning
 If scattering in the medium can be assumed isotropic,
