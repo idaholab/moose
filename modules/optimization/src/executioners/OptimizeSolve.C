@@ -345,7 +345,7 @@ OptimizeSolve::monitor(Tao tao, void * ctx)
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   solver->setTaoSolutionStatus((double)f, (int)its, (double)gnorm, (double)cnorm, (double)xdiff);
 
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -357,7 +357,7 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
   *solver->_parameters = param;
 
   (*objective) = solver->objectiveFunction();
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -374,7 +374,7 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
 
   solver->gradientFunction(grad);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -387,7 +387,7 @@ OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /
   PetscErrorCode ierr = MatShellSetOperation(
       solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
   CHKERRQ(ierr);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -486,7 +486,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
 
   _obj_function->computeGradient(Hs);
   _hess_iterate++;
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -518,7 +518,7 @@ OptimizeSolve::equalityFunctionWrapper(Tao /*tao*/, Vec /*x*/, Vec ce, void * ct
   // use the OptimizationReporterBase class to actually compute equality constraints
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeEqualityConstraints(eq_con);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -532,7 +532,7 @@ OptimizeSolve::equalityGradientFunctionWrapper(
   // constraints gradient
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeEqualityGradient(grad_eq);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -544,7 +544,7 @@ OptimizeSolve::inequalityFunctionWrapper(Tao /*tao*/, Vec /*x*/, Vec ci, void * 
   // use the OptimizationReporterBase class to actually compute equality constraints
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeInequalityConstraints(ineq_con);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -558,7 +558,7 @@ OptimizeSolve::inequalityGradientFunctionWrapper(
   // constraints gradient
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeInequalityGradient(grad_ineq);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -633,7 +633,7 @@ OptimizeSolve::taoALCreate()
         _tao, _gradient_i, _gradient_i, inequalityGradientFunctionWrapper, this);
     CHKERRQ(ierr);
   }
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -656,5 +656,5 @@ OptimizeSolve::taoALDestroy()
     CHKERRQ(ierr);
   }
 
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }

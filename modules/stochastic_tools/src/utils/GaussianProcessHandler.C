@@ -213,7 +213,7 @@ GaussianProcessHandler::tuneHyperParamsTAO(const RealEigenMatrix & training_para
   ierr = TaoDestroy(&tao);
   CHKERRQ(ierr);
 
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -222,7 +222,7 @@ GaussianProcessHandler::formInitialGuessTAO(Vec theta_vec)
   libMesh::PetscVector<Number> theta(theta_vec, _tao_comm);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   mapToPetscVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 void
@@ -245,7 +245,7 @@ GaussianProcessHandler::formFunctionGradientWrapper(
 {
   GaussianProcessHandler * GP_ptr = (GaussianProcessHandler *)ptr;
   GP_ptr->formFunctionGradient(tao, theta_vec, f, grad_vec);
-  return PetscErrorCode(0);
+  return PETSC_SUCCESS;
 }
 
 void
