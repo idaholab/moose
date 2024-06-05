@@ -53,7 +53,7 @@ nodal auxiliary variables
 
 ### Nodal Auxiliary Variables
 
-Element auxiliary variables are computed at each node and are stored as linear Lagrange variables
+Nodal auxiliary variables are computed at each node and are stored as linear Lagrange variables
 
 AuxKernel objects computing nodal values can +only+ couple to nodal nonlinear variables and
 other nodal auxiliary variables
