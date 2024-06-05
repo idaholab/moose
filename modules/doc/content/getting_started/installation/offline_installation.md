@@ -54,7 +54,9 @@ your MPI wrapper:
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 ```
 
-Exporting variables is only temporary in the session you executed them in.
+Note that PETSc ignores such environment variables unless explicitly passed its corresponding
+configure arguments. libMesh honors them. Exporting variables is only temporary in the session you
+execute them in.
 
 !include installation/start_up_profile.md
 
@@ -95,7 +97,7 @@ obtain a list of contributions we will need to download manually (`--with-packag
 
 ```bash
 cd ~/projects/moose
-./scripts/update_and_rebuild_petsc.sh  --with-packages-download-dir=~/projects/downloads
+./scripts/update_and_rebuild_petsc.sh --CC=$CC --CXX=$CXX --FC=$FC --with-packages-download-dir=~/projects/downloads
 ```
 
 As an example, the above command should return something like the following:
