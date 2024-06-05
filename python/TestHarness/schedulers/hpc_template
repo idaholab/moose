@@ -61,6 +61,17 @@ set -e
 # We will read this output later on to try to capture the return code
 # in the event that PBS doesn't get it to us correctly
 echo "################################################################################"
+{%- if USING_APPTAINER is defined %}
+# We have a special case with exit codes when we run within apptainer. Sometimes when
+# codes are received when running in a container, the container will return with exit code
+# 128 + <code>. Capture that here because we don't wanna exit code a code > 128, which
+# are special exit codes for the schedulers.
+if ((return_code > 128)); then
+    new_return_code=$((return_code - 128))
+    echo "Apptainer exited with code $return_code, using $new_return_code instead"
+    return_code=$new_return_code
+fi
+{%- endif %}
 echo "Completed TestHarness {{ SCHEDULER_NAME }} test execution; exit code = $return_code"
 
 # Append a terminator to all of the output files for file syncing across NFS
