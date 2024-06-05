@@ -57,6 +57,8 @@
       input = 'open_gap_pressure_dependent.i'
       csvdiff = 'open_gap_pressure_dependent_out.csv'
       detail = 'in an open gap geometry such that no heat transfer occurs between the two blocks.'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [multi_component_mortar_thermal_conduction]
       type = CSVDiff

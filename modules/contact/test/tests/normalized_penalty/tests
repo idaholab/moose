@@ -16,6 +16,8 @@
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Penalty contact.'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
   [./normalized_penalty_kin]
     type = Exodiff
