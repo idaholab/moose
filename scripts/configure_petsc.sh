@@ -101,9 +101,11 @@ function configure_petsc()
       --with-fortran-bindings=0 \
       --with-mpi=1 \
       --with-openmp=1 \
+      --with-strict-petscerrorcode=1 \
       --with-shared-libraries=1 \
       --with-sowing=0 \
       --download-fblaslapack=1 \
+      --download-hpddm=1 \
       --download-hypre=1 \
       --download-metis=1 \
       --download-mumps=1 \
