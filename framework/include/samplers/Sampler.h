@@ -136,6 +136,26 @@ public:
    */
   libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
 
+  /**
+   * Get the next random number from the generator.
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRequiedRandomSeeds method.
+   *
+   * @return A double for the random number, this is double because MooseRandom class uses double.
+   */
+  Real getRand(unsigned int index = 0);
+
+  /**
+   * Get the next random integer from the generator within the specified range [lower, upper)
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRequiedRandomSeeds method.
+   * @param lower Lower bounds
+   * @param upper Upper bounds
+   *
+   * @return A integer for the random number
+   */
+  uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
+
 protected:
   /**
    * Enum describing the type of parallel communication to perform.
@@ -172,26 +192,6 @@ protected:
    * @param number The required number of random seeds, by default this is called with 1.
    */
   void setNumberOfRandomSeeds(std::size_t number);
-
-  /**
-   * Get the next random number from the generator.
-   * @param index The index of the seed, by default this is zero. To add additional seeds
-   *              indices call the setNumberOfRequiedRandomSeeds method.
-   *
-   * @return A double for the random number, this is double because MooseRandom class uses double.
-   */
-  Real getRand(unsigned int index = 0);
-
-  /**
-   * Get the next random integer from the generator within the specified range [lower, upper)
-   * @param index The index of the seed, by default this is zero. To add additional seeds
-   *              indices call the setNumberOfRequiedRandomSeeds method.
-   * @param lower Lower bounds
-   * @param upper Upper bounds
-   *
-   * @return A integer for the random number
-   */
-  uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
   /**
    * Base class must override this method to supply the sample distribution data.

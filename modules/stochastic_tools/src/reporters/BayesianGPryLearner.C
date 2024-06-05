@@ -43,6 +43,9 @@ BayesianGPryLearner::validParams()
       "acquisition_function",
       "acquisition_function",
       "The values of the acquistion function in the current iteration.");
+  params.addParam<ReporterValueName>("convergence_value",
+                                     "convergence_value",
+                                     "Value to measure convergence of the GPry algorithm.");
   params.addRequiredParam<std::vector<UserObjectName>>("likelihoods", "Names of likelihoods.");
   return params;
 }
@@ -72,6 +75,7 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
     _var_prior(_gpry_sampler->getVarPrior()),
     _noise(declareValue<Real>("noise")),
     _acquisition_function(declareValue<std::vector<Real>>("acquisition_function")),
+    _convergence_value(declareValue<Real>("convergence_value")),
     _check_step(std::numeric_limits<int>::max()),
     _local_comm(_sampler.getLocalComm())
 {
@@ -91,8 +95,16 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
 
   _gp_outputs_try.resize(_inputs_all.size());
   _gp_std_try.resize(_inputs_all.size());
-  _acquisition_function.resize(_inputs_all.size());
+  _acquisition_function.resize(_props); // 
   _length_scales.resize(_priors.size());
+
+  _eval_points = 10000;
+  _eval_outputs_current.resize(_eval_points);
+  _eval_outputs_previous.resize(_eval_points);
+  if (_var_prior)
+    _eval_inputs.resize(_eval_points, std::vector<Real>(_priors.size() + 1, 0.0));
+  else
+    _eval_inputs.resize(_eval_points, std::vector<Real>(_priors.size(), 0.0));
 }
 
 // void
@@ -135,8 +147,8 @@ BayesianGPryLearner::computeLogPosterior(std::vector<Real> & log_posterior,
   for (unsigned int i = 0; i < _props; ++i)
   {
     log_posterior[i] = 0.0;
-    for (unsigned int j = 0; j < _priors.size(); ++j)
-      log_posterior[i] += std::log(_priors[j]->pdf(input_matrix(i, j)));
+    // for (unsigned int j = 0; j < _priors.size(); ++j)
+    //   log_posterior[i] += std::log(_priors[j]->pdf(input_matrix(i, j)));
     for (unsigned int j = 0; j < _num_confg_values; ++j)
     {
       out1[j] = _output_comm[j * _props + i];
@@ -144,7 +156,7 @@ BayesianGPryLearner::computeLogPosterior(std::vector<Real> & log_posterior,
     }
     if (_var_prior)
     {
-      log_posterior[i] += std::log(_var_prior->pdf(_new_var_samples[i]));
+      // log_posterior[i] += std::log(_var_prior->pdf(_new_var_samples[i]));
       _noise = std::sqrt(_new_var_samples[i]);
       log_posterior[i] += std::log(_likelihoods[0]->function(out1));
       log_posterior[i] += std::log(_likelihoods[1]->function(out11));
@@ -159,14 +171,16 @@ BayesianGPryLearner::computeLogPosterior(std::vector<Real> & log_posterior,
 
 void
 BayesianGPryLearner::acqWithCorrelations(std::vector<Real> & acq,
-                                         std::vector<unsigned int> & sorted)
+                                         std::vector<unsigned int> & sorted,
+                                         std::vector<Real> & acq_new)
 {
   Real correlation = 0.0;
   std::vector<size_t> ind;
   Moose::indirectSort(acq.begin(), acq.end(), ind);
   sorted[0] = ind[0];
-  _acquisition_function[0] = -acq[ind[0]];
-  for (unsigned int i = 0; i < _inputs_all.size()-1; ++i)
+  acq_new[0] = -acq[ind[0]];
+  // _acquisition_function[0] = -acq[ind[0]];
+  for (unsigned int i = 0; i < _inputs_all.size() - 1; ++i)
   {
     for (unsigned int j = 0; j < _inputs_all.size(); ++j)
     {
@@ -175,8 +189,11 @@ BayesianGPryLearner::acqWithCorrelations(std::vector<Real> & acq,
     }
     Moose::indirectSort(acq.begin(), acq.end(), ind);
     sorted[i+1] = ind[0];
-    _acquisition_function[i+1] = -acq[ind[0]];
+    acq_new[i + 1] = -acq[ind[0]];
+    // _acquisition_function[i+1] = -acq[ind[0]];
+    // std::cout << Moose::stringify(acq) << std::endl;
   }
+  
 }
 
 void
@@ -187,7 +204,42 @@ BayesianGPryLearner::computeCorrelation(const std::vector<Real> & input1,
   corr = 0.0;
   for (unsigned int i = 0; i < input1.size(); ++i)
     corr -= Utility::pow<2>(input1[i] - input2[i]) / (2 * Utility::pow<2>(_length_scales[i]));
-  corr = 1.0 - std::exp(corr);
+  corr = 1.0 - std::exp(corr); // 1.0 - std::exp(corr);
+}
+
+void
+BayesianGPryLearner::computeGPOutput(std::vector<Real> & eval_outputs,
+                                     const std::vector<std::vector<Real>> & eval_inputs)
+{
+  for (unsigned int i = 0; i < eval_outputs.size(); ++i)
+    eval_outputs[i] = _gp_eval.evaluate(eval_inputs[i]);
+}
+
+void
+BayesianGPryLearner::fillVector(std::vector<Real> & vector)
+{
+  for (unsigned int i = 0; i < _priors.size(); ++i)
+    vector[i] = _priors[i]->quantile(_sampler.getRand(_seed));
+}
+
+void
+BayesianGPryLearner::computeDistance(const std::vector<Real> & current_input,
+                                     unsigned int & req_index)
+{
+  Real ref_distance = 1e10;
+  Real distance;
+  req_index = 0;
+  for (unsigned int i = 0; i < _gp_outputs.size(); ++i)
+  {
+    distance = 0.0;
+    for (unsigned int j = 0; j < current_input.size(); ++j)
+      distance += std::abs(current_input[j] - _gp_inputs[i][j]);
+    if (distance <= ref_distance)
+    {
+      ref_distance = distance;
+      req_index = i;
+    }
+  }
 }
 
 void
@@ -216,14 +268,15 @@ BayesianGPryLearner::execute()
   std::vector<Real> log_posterior(_props);
   computeLogPosterior(log_posterior, data_in);
 
-  if (_t_step > 2)
+  if (_t_step > 1)
   {
     setupNNGPData(log_posterior, data_in);
 
     _al_gp.reTrain(_gp_inputs, _gp_outputs);
 
     _al_gp.getLengthScales(_length_scales);
-    // std::cout << Moose::stringify(_length_scales) << std::endl;
+
+    std::cout << "Num training points " << Moose::stringify(_gp_outputs.size()) << std::endl;
 
     std::vector<Real> tmp;
     if (_var_prior)
@@ -239,12 +292,13 @@ BayesianGPryLearner::execute()
       _gp_outputs_try[i] = _gp_eval.evaluate(tmp, _gp_std_try[i]);
     }
 
-    // std::cout << "_gp_outputs_try " << Moose::stringify(_gp_outputs_try) << std::endl;
+    // std::cout << "_gp_outputs " << Moose::stringify(_gp_outputs) << std::endl;
 
-    // std::cout << "log_posterior " << Moose::stringify(log_posterior) << std::endl;
+    // Paper acquisition function
     Real psi = std::pow(_priors.size(), -0.85);
-    std::vector<Real> acq;
+    std::vector<Real> acq, acq_new;
     acq.resize(_inputs_all.size());
+    acq_new.resize(_inputs_all.size());
     Real gp_mean;
     Real gp_std;
     for (unsigned int i = 0; i < _inputs_all.size(); ++i)
@@ -252,17 +306,67 @@ BayesianGPryLearner::execute()
       gp_mean = _gp_outputs_try[i];
       gp_std = _gp_std_try[i];
       acq[i] = -std::exp(2.0 * psi * gp_mean) * (std::exp(gp_std) - 1.0);
-      // _acquisition_function[i] = -acq[i];
     }
+
+    // Expected improvement in global fit
+    // std::vector<Real> acq, acq_new;
+    // acq.resize(_inputs_all.size());
+    // acq_new.resize(_inputs_all.size());
+    // Real gp_mean;
+    // Real gp_std;
+    // unsigned int ref_ind;
+    // for (unsigned int i = 0; i < _inputs_all.size(); ++i)
+    // {
+    //   gp_mean = _gp_outputs_try[i];
+    //   gp_std = _gp_std_try[i];
+    //   for (unsigned int j = 0; j < _priors.size(); ++j)
+    //     tmp[j] = _inputs_all[i][j];
+    //   if (_var_prior)
+    //     tmp[_priors.size()] = _var_all[i];
+    //   computeDistance(tmp, ref_ind);
+    //   acq[i] = -(std::pow((gp_mean - _gp_outputs[ref_ind]), 2) + std::pow(gp_std, 2));
+    // }
+
+    // std::vector<size_t> ind;
+    // Moose::indirectSort(acq.begin(), acq.end(), ind);
+    // for (unsigned int i = 0; i < _props; ++i)
+    // {
+    //   _sorted_indices[i] = ind[i];
+    //   _acquisition_function[i] = -acq[ind[i]];
+    // }
+
     std::vector<unsigned int> tmp_indices;
     tmp_indices.resize(_inputs_all.size());
-    acqWithCorrelations(acq, tmp_indices);
+    acqWithCorrelations(acq, tmp_indices, acq_new);
     for (unsigned int i = 0; i < _props; ++i)
+    {
       _sorted_indices[i] = tmp_indices[i];
+      _acquisition_function[i] = acq_new[i];
+    }
+    
+    computeGPOutput(_eval_outputs_current, _eval_inputs);
+    if (_t_step > 1)
+    {
+      _convergence_value = 0.0;
+      for (unsigned int ii = 0; ii < _eval_points; ++ii)
+        _convergence_value +=
+            std::abs(_eval_outputs_previous[ii] - _eval_outputs_current[ii]) /
+            (_eval_points); // std::log(_eval_inputs_density[ii])
+    }
+    std::cout << "_convergence_value " << _convergence_value << std::endl;
+    _eval_outputs_previous = _eval_outputs_current;
   }
   else
+  {
     for (unsigned int i = 0; i < _props; ++i)
       _sorted_indices[i] = i;
+    for (unsigned int i = 0; i < _eval_points; ++i)
+    {
+      fillVector(_eval_inputs[i]);
+      if (_var_prior)
+        _eval_inputs[i][_priors.size()] = _var_prior->quantile(_sampler.getRand(_seed));
+    }
+  }
 
   // Track the current step
   _check_step = _t_step;

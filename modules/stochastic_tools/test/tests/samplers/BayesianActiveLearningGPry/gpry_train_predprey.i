@@ -30,25 +30,27 @@
     lower_bound = 0.0
     upper_bound = 2.0
   []
-  [prior_variance]
-    type = Uniform
-    lower_bound = 0.0
-    upper_bound = 0.5
-  []
+  # [prior_variance]
+  #   type = Uniform
+  #   lower_bound = 0.0
+  #   upper_bound = 0.5
+  # []
 []
 
 [Likelihood]
   [gaussianx]
-    type = Gaussian
-    noise = 'conditional/noise'
-    file_name = 'exp_lnx_noise.csv'
-    log_likelihood=false
+    type = Linear
+    # noise = 'conditional/noise'
+    noise = 'noise_specified/noise_specified'
+    file_name = 'exp_lnx_noise_reduced.csv'
+    # log_likelihood=false
   []
   [gaussiany]
-    type = Gaussian
-    noise = 'conditional/noise'
-    file_name = 'exp_lny_noise.csv'
-    log_likelihood=false
+    type = Linear
+    # noise = 'conditional/noise'
+    noise = 'noise_specified/noise_specified'
+    file_name = 'exp_lny_noise_reduced.csv'
+    # log_likelihood=false
   []
 []
 
@@ -57,13 +59,13 @@
     type = BayesianGPrySampler
     prior_distributions = 'a b c d'
     sorted_indices = 'conditional/sorted_indices'
-    num_parallel_proposals = 50
-    file_name = 'confg_predprey.csv'
+    num_parallel_proposals = 20
+    file_name = 'confg_predprey_reduced.csv'
     execute_on = PRE_MULTIAPP_SETUP
-    num_tries = 1000
+    num_tries = 50000
     seed = 2547
-    initial_values = '0.5 0.5 0.5 0.5'
-    prior_variance = 'prior_variance'
+    initial_values = '0.8 0.5 0.5 0.25'
+    # prior_variance = 'prior_variance'
   []
 []
 
@@ -108,6 +110,11 @@
   [constant_y]
     type = StochasticReporter
   []
+  [noise_specified]
+    type = ConstantReporter
+    real_names = 'noise_specified'
+    real_values = '0.25'
+  []
   [conditional]
     type = BayesianGPryLearner
     output_value = constant_x/reporter_transfer_x:log_x:value
@@ -127,10 +134,10 @@
     standardize_data = 'true'
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    iter_adam = 2000
-    learning_rate_adam = 0.0005
+    iter_adam = 20000
+    learning_rate_adam = 0.005 # 0.0001 # 
     show_optimization_details = true
-    batch_size = 250
+    batch_size = 100
   []
 []
 
@@ -145,25 +152,25 @@
   [covar]
     type = SquaredExponentialCovariance
     signal_variance = 10.0
-    noise_variance = 1e-8 # 1e-8
-    length_factor = '10.0 10.0 10.0 10.0 10.0'
+    noise_variance = 1e-6 # 1e-8
+    length_factor = '10.0 10.0 10.0 10.0' # 10.0
   []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 50
+  num_steps = 40
 []
 
 [Outputs]
   csv = false
   execute_on = TIMESTEP_END
   perf_graph = true
-  [out1]
+  [out1_new]
     type = JSON
     execute_system_information_on = NONE
   []
-  [out2]
+  [out2_EIGF_new]
     type = SurrogateTrainerOutput
     trainers = 'GP_al_trainer'
     # execute_on = FINAL

@@ -50,11 +50,11 @@
   [sample]
     type = AffineInvariantDES
     prior_distributions = 'a b c d'
-    num_parallel_proposals = 50
+    num_parallel_proposals = 20
     file_name = 'confg_reduced.csv'
     execute_on =  PRE_MULTIAPP_SETUP
     seed = 100
-    initial_values = '0.5 0.5 0.5 0.5'
+    initial_values = '0.8 0.5 0.5 0.25'
     previous_state = 'mcmc_reporter/inputs'
     previous_state_var = 'mcmc_reporter/variance'
     prior_variance = 'prior_variance'

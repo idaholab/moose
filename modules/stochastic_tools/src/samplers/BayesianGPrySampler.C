@@ -80,7 +80,7 @@ BayesianGPrySampler::proposeSamples(const unsigned int seed_value)
   // Else, generate the samples informed by the GP and NN combo from the reporter "sorted_indices"
   for (dof_id_type i = 0; i < _num_parallel_proposals; ++i)
   {
-    if (_t_step <= 2)
+    if (_t_step <= 1)
     {
       fillVector(_sample_vector, seed_value);
       _new_samples[i] = _sample_vector;

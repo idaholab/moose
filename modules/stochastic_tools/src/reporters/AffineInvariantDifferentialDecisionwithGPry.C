@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AffineInvariantDifferentialDecisionwithGPry.h"
+#include <math.h>
 
 registerMooseObject("StochasticToolsApp", AffineInvariantDifferentialDecisionwithGPry);
 
@@ -38,33 +39,98 @@ AffineInvariantDifferentialDecisionwithGPry::computeEvidence(std::vector<Real> &
     tmp.resize(_priors.size() + 1);
   else
     tmp.resize(_priors.size());
-
   Real estimated_evidence;
+  Real std_dev1;
 //   Real estimated_class;
   for (unsigned int i = 0; i < evidence.size(); ++i)
   {
     estimated_evidence = 0.0;
+    for (unsigned int j = 0; j < _priors.size(); ++j)
+      estimated_evidence += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
+                                std::log(_priors[j]->pdf(_data_prev(i, j))));
 
     for (unsigned int j = 0; j < _priors.size(); ++j)
       tmp[j] = input_matrix(i, j);
     if (_var_prior)
+    {
       tmp[_priors.size()] = _new_var_samples[i];
+      estimated_evidence += (std::log(_var_prior->pdf(_new_var_samples[i])) -
+                             std::log(_var_prior->pdf(_var_prev[i])));
+    }
     estimated_evidence +=
-        _gp_eval.evaluate(tmp); // (estimated_class > 0.5) ? _gp_eval.evaluate(tmp) : -10000.0;
-
+        -0.5 * _gp_eval.evaluate(tmp, std_dev1) +
+        20.0 * std::log(1.0 / std::sqrt(2.0 * M_PI *
+                                        _new_var_samples[i])); // (estimated_class > 0.5) ?
+                                                               // _gp_eval.evaluate(tmp) : -10000.0;
+    std::cout << "Est. val " << _gp_eval.evaluate(tmp) << std::endl;
+    // std::cout << "std_dev " << std_dev1 << std::endl;
     for (unsigned int j = 0; j < _priors.size(); ++j)
       tmp[j] = _data_prev(i, j);
     if (_var_prior)
       tmp[_priors.size()] = _var_prev[i];
     estimated_evidence -=
-        _gp_eval.evaluate(tmp); // (estimated_class > 0.5) ? _gp_eval.evaluate(tmp) : -10000.0;
-
-    // for (unsigned int j = 0; j < _priors.size(); ++j)
-    //   estimated_evidence += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
-    //                          std::log(_priors[j]->pdf(_data_prev(i, j))));
-
+        -0.5 * _gp_eval.evaluate(tmp) +
+        20.0 * std::log(1.0 /
+                        std::sqrt(2.0 * M_PI * _var_prev[i])); // (estimated_class > 0.5) ?
+                                                               // _gp_eval.evaluate(tmp) : -10000.0;
     evidence[i] = estimated_evidence;
   }
+  // std::cout << "GP EVIDENCE" << std::endl;
+  // std::cout << Moose::stringify(evidence) << std::endl;
+  
+  // TRUE COMPUTATIONS  
+  std::vector<Real> out1(_num_confg_values);
+  std::vector<Real> out11(_num_confg_values);
+  std::vector<Real> out2(_num_confg_values);
+  std::vector<Real> out21(_num_confg_values);
+  for (unsigned int i = 0; i < evidence.size(); ++i)
+  {
+    evidence[i] = 0.0;
+    for (unsigned int j = 0; j < _priors.size(); ++j)
+      evidence[i] += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
+                      std::log(_priors[j]->pdf(_data_prev(i, j))));
+      
+    for (unsigned int j = 0; j < _num_confg_values; ++j)
+    {
+      out1[j] = _outputs_required[j * _props + i];
+      out11[j] = _outputs_required1[j * _props + i];
+      out2[j] = _outputs_prev[j * _props + i];
+      out21[j] = _outputs_prev1[j * _props + i];
+    }
+    if (_var_prior)
+    {
+      evidence[i] += (std::log(_var_prior->pdf(_new_var_samples[i])) -
+                      std::log(_var_prior->pdf(_var_prev[i])));
+      _noise = std::sqrt(_new_var_samples[i]);
+      evidence[i] += _likelihoods[0]->function(out1);
+      evidence[i] += _likelihoods[1]->function(out11);
+      // std::cout << "True val " << _likelihoods[0]->function(out1) + _likelihoods[1]->function(out11)
+      //           << std::endl;
+      // std::cout << "Est. val "
+      //           << -0.5 * _likelihoods[2]->function(out1) - 0.5 * _likelihoods[3]->function(out11) +
+      //                  20.0 * std::log(1.0 / std::sqrt(2.0 * M_PI * _new_var_samples[i]))
+      //           << std::endl;
+      
+      std::cout << "True val " << std::log(_likelihoods[2]->function(out1)) + std::log(_likelihoods[3]->function(out11))
+                << std::endl;
+      _noise = std::sqrt(_var_prev[i]);
+      evidence[i] -= _likelihoods[0]->function(out2);
+      evidence[i] -= _likelihoods[1]->function(out21);
+    }
+    else
+    {
+      evidence[i] += _likelihoods[0]->function(out1);
+      evidence[i] += _likelihoods[1]->function(out11);
+      std::cout << "True val "
+                << std::log(_likelihoods[2]->function(out1)) +
+                       std::log(_likelihoods[3]->function(out11))
+                << std::endl;
+      evidence[i] -= _likelihoods[0]->function(out2);
+      evidence[i] -= _likelihoods[1]->function(out21);
+    }
+  }
+  // std::cout << "TRUE EVIDENCE" << std::endl;
+  // std::cout << Moose::stringify(evidence) << std::endl;
 }
 
 void
@@ -107,22 +173,36 @@ AffineInvariantDifferentialDecisionwithGPry::execute()
     _check_step = _t_step;
     return;
   }
-  
+
   // Gather inputs and outputs from the sampler and subApps
-//   DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
-//   for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
-//   {
-//     const auto data = _sampler.getNextLocalRow();
-//     for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-//       data_in(ss, j) = data[j];
-//   }
-//   _local_comm.sum(data_in.get_values());
-  DenseMatrix<Real> data_in(_props, _priors.size());
-  for (dof_id_type ss = 0; ss < _props; ++ss)
+  DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
+  for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
   {
-    for (unsigned int j = 0; j < _priors.size(); ++j)
-      data_in(ss, j) = _new_samples[ss][j];
+    const auto data = _sampler.getNextLocalRow();
+    for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+      data_in(ss, j) = data[j];
   }
+  _local_comm.sum(data_in.get_values());
+  _outputs_required = _output_value;
+  _outputs_required1 = _output_value1;
+  _local_comm.allgather(_outputs_required);
+  _local_comm.allgather(_outputs_required1);
+
+  //   // Gather inputs and outputs from the sampler and subApps
+  // //   DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
+  // //   for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
+  // //   {
+  // //     const auto data = _sampler.getNextLocalRow();
+  // //     for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+  // //       data_in(ss, j) = data[j];
+  // //   }
+  // //   _local_comm.sum(data_in.get_values());
+  //   DenseMatrix<Real> data_in(_props, _priors.size());
+  //   for (dof_id_type ss = 0; ss < _props; ++ss)
+  //   {
+  //     for (unsigned int j = 0; j < _priors.size(); ++j)
+  //       data_in(ss, j) = _new_samples[ss][j];
+  //   }
 
   // Compute the evidence and transition vectors
   std::vector<Real> evidence(_props);
@@ -130,7 +210,7 @@ AffineInvariantDifferentialDecisionwithGPry::execute()
   {
     // std::cout << Moose::stringify(_new_samples) << std::endl;
     computeEvidence(evidence, data_in);
-    std::cout << Moose::stringify(evidence) << std::endl;
+    // std::cout << Moose::stringify(evidence) << std::endl;
     computeTransitionVector(_tpm, evidence);
   }
   else
@@ -149,6 +229,8 @@ AffineInvariantDifferentialDecisionwithGPry::execute()
 
   // Store data from previous step
   _data_prev = data_in;
+  _outputs_prev = _outputs_required;
+  _outputs_prev1 = _outputs_required1;
   _var_prev = _variance;
 
   // Track the current step
