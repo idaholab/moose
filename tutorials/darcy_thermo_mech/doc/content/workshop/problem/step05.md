@@ -56,7 +56,7 @@ prop_values = '0.01         200'
 
 !---
 
-## Step 5b: Running Input File
+## Step 5a: Running Input File
 
 ```bash
 cd ~/projects/moose/tutorials/darcy_thermo_mech/step5_heat_conduction
