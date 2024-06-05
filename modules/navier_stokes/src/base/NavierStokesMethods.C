@@ -114,7 +114,7 @@ findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   {
     yPlusLast = yPlus;
     yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(NS::E_turb_constant * yPlus));
-  } while (rev_yPlusLam * (yPlus - yPlusLast) > REL_TOLERANCE && ++iters < MAX_ITERS);
+  } while (std::abs(rev_yPlusLam * (yPlus - yPlusLast)) > REL_TOLERANCE && ++iters < MAX_ITERS);
 
   return std::max(0.0, yPlus);
 }
