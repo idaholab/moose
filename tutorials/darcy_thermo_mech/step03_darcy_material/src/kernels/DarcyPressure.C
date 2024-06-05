@@ -22,7 +22,7 @@ DarcyPressure::validParams()
 
 DarcyPressure::DarcyPressure(const InputParameters & parameters)
   : ADKernel(parameters),
-    _permeability(getMaterialProperty<Real>("permeability")),
+    _permeability(getADMaterialProperty<Real>("permeability")),
     _viscosity(getADMaterialProperty<Real>("viscosity"))
 {
 }
