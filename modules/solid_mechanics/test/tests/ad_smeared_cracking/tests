@@ -51,6 +51,8 @@
     input = cracking_multiple_softening.i
     exodiff = cracking_multiple_softening_out.e
     requirement = 'The MOOSE SolidMechanics module shall demonstrate the prescribed softening laws in three directions, power law (x), exponential (y), and abrupt (z) using AD and match non-AD methods.'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   []
   [xyz]
     type = Exodiff
