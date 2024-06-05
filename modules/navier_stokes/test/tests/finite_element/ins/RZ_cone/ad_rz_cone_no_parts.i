@@ -88,7 +88,7 @@
     variable = p
   [../]
   [./velocity_out]
-    type = INSADMomentumNoBCBC
+    type = INSADMomentumImplicitStressBC
     boundary = top
     variable = velocity
     pressure = p

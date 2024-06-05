@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADMomentumNoBCBC.h"
+#include "INSADMomentumImplicitStressBC.h"
 #include "MooseMesh.h"
 #include "INSADObjectTracker.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", INSADMomentumNoBCBC);
+registerMooseObject("NavierStokesApp", INSADMomentumImplicitStressBC);
 
 InputParameters
-INSADMomentumNoBCBC::validParams()
+INSADMomentumImplicitStressBC::validParams()
 {
   InputParameters params = ADVectorIntegratedBC::validParams();
 
@@ -35,7 +35,7 @@ INSADMomentumNoBCBC::validParams()
   return params;
 }
 
-INSADMomentumNoBCBC::INSADMomentumNoBCBC(const InputParameters & parameters)
+INSADMomentumImplicitStressBC::INSADMomentumImplicitStressBC(const InputParameters & parameters)
   : ADVectorIntegratedBC(parameters),
     _p(adCoupledValue(NS::pressure)),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
@@ -58,15 +58,19 @@ INSADMomentumNoBCBC::INSADMomentumNoBCBC(const InputParameters & parameters)
 }
 
 ADReal
-INSADMomentumNoBCBC::computeQpResidual()
+INSADMomentumImplicitStressBC::viscousStress()
+{
+  if (_form == "laplace")
+    return -_mu[_qp] * (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
+  else
+    return -_mu[_qp] * ((_grad_u[_qp] + _grad_u[_qp].transpose()) * _normals[_qp]) * _test[_i][_qp];
+}
+
+ADReal
+INSADMomentumImplicitStressBC::computeQpResidual()
 {
   // The viscous term
-  ADReal residual;
-  if (_form == "laplace")
-    residual = -_mu[_qp] * (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
-  else
-    residual =
-        -_mu[_qp] * ((_grad_u[_qp] + _grad_u[_qp].transpose()) * _normals[_qp]) * _test[_i][_qp];
+  ADReal residual = viscousStress();
 
   if (_integrate_p_by_parts)
     // pIn * test

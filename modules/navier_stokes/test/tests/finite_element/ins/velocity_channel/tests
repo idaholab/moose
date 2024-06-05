@@ -35,4 +35,10 @@
       detail = 'using an automatic differentiation computed Jacobian and compute identical results, indicating the traction implementations with second order derivatives for the viscous term in the stabilization term are identical.'
     []
   []
+  [conservative]
+    type = Exodiff
+    input = conservative-velocity-channel-with-symm-bc.i
+    exodiff = conservative-velocity-channel-with-symm-bc_out.e
+    requirement = 'The system shall be able to solve a channel flow problem with a symmetry boundary condition using Taylor-Hood finite elements in which the mass and momentum advection terms are integrated by parts.'
+  []
 []
