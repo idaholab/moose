@@ -16,6 +16,8 @@
 #include "SlepcSupport.h"
 #include "UserObject.h"
 
+#include "libmesh/petsc_solver_exception.h"
+
 registerMooseObject("MooseApp", Eigenvalue);
 
 InputParameters
@@ -192,10 +194,16 @@ Eigenvalue::prepareSolverOptions()
   {
     // Master app has the default data base
     if (!_app.isUltimateMaster())
-      PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+    {
+      auto ierr = PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+      LIBMESH_CHKERR(ierr);
+    }
     Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
     if (!_app.isUltimateMaster())
-      PetscOptionsPop();
+    {
+      auto ierr = PetscOptionsPop();
+      LIBMESH_CHKERR(ierr);
+    }
     _eigen_problem.petscOptionsInserted() = true;
   }
 #endif

@@ -522,7 +522,10 @@ EigenProblem::solve(const unsigned int nl_sys_num)
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
   if (!_app.isUltimateMaster())
-    PetscOptionsPush(_petsc_option_data_base);
+  {
+    auto ierr = PetscOptionsPush(_petsc_option_data_base);
+    LIBMESH_CHKERR(ierr);
+  }
 #endif
 
   setCurrentNonlinearSystem(nl_sys_num);
@@ -594,7 +597,10 @@ EigenProblem::solve(const unsigned int nl_sys_num)
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-    PetscOptionsPop();
+  {
+    auto ierr = PetscOptionsPop();
+    LIBMESH_CHKERR(ierr);
+  }
 #endif
 
   // sync solutions in displaced problem

@@ -526,7 +526,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Main app should hold the default database to handle system petsc options
   if (!_app.isUltimateMaster())
-    PetscOptionsCreate(&_petsc_option_data_base);
+  {
+    auto ierr = PetscOptionsCreate(&_petsc_option_data_base);
+    LIBMESH_CHKERR(ierr);
+  }
 #endif
 
   if (!_solve)
@@ -683,7 +686,11 @@ FEProblemBase::~FEProblemBase()
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-    PetscOptionsDestroy(&_petsc_option_data_base);
+  {
+    auto ierr = PetscOptionsDestroy(&_petsc_option_data_base);
+    // Don't throw on destruction
+    CHKERRABORT(this->comm().get(), ierr);
+  }
 #endif
 }
 
@@ -5937,7 +5944,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
-    PetscOptionsPush(_petsc_option_data_base);
+  {
+    auto ierr = PetscOptionsPush(_petsc_option_data_base);
+    LIBMESH_CHKERR(ierr);
+  }
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
@@ -5974,7 +5984,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-    PetscOptionsPop();
+  {
+    auto ierr = PetscOptionsPop();
+    LIBMESH_CHKERR(ierr);
+  }
 #endif
 }
 
@@ -6087,13 +6100,17 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   solver_params._line_search = Moose::LineSearchType::LS_NONE;
 
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(
+  auto ierr = Moose::PetscSupport::petscSetOptions(
       options, solver_params); // Make sure the PETSc options are setup for this app
+  LIBMESH_CHKERR(ierr);
 #else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
-    PetscOptionsPush(_petsc_option_data_base);
+  {
+    auto ierr = PetscOptionsPush(_petsc_option_data_base);
+    LIBMESH_CHKERR(ierr);
+  }
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
@@ -6107,7 +6124,10 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-    PetscOptionsPop();
+  {
+    auto ierr = PetscOptionsPop();
+    LIBMESH_CHKERR(ierr);
+  }
 #endif
 }
 

@@ -69,15 +69,15 @@ POD::computePOD(const VariableName & vname,
   _communicator.max(snapshot_size);
 
   // Generally snapshot matrices are dense.
-  PetscErrorCode ierr = MatCreateDense(
-      _communicator.get(), local_rows, PETSC_DECIDE, global_rows, snapshot_size, NULL, &mat);
-  LIBMESH_CHKERR(ierr);
+  LIBMESH_CHKERR(MatCreateDense(
+      _communicator.get(), local_rows, PETSC_DECIDE, global_rows, snapshot_size, NULL, &mat));
 
   // Check where the local rows begin in the matrix, we use these to convert from local to
   // global indices
   dof_id_type local_beg = 0;
   dof_id_type local_end = 0;
-  MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end));
+  LIBMESH_CHKERR(
+      MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end)));
 
   unsigned int counter = 0;
   if (local_rows)
@@ -107,7 +107,6 @@ POD::computePOD(const VariableName & vname,
   LIBMESH_CHKERR(MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY));
   LIBMESH_CHKERR(MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY));
 
-  LIBMESH_CHKERR(ierr);
   SVD svd;
   LIBMESH_CHKERR(SVDCreate(_communicator.get(), &svd));
   // Now we set the operators for our SVD objects
@@ -126,8 +125,7 @@ POD::computePOD(const VariableName & vname,
   // computationally but better for storage
   LIBMESH_CHKERR(SVDSetImplicitTranspose(svd, PETSC_TRUE));
 
-  ierr = PetscOptionsInsertString(NULL, _extra_slepc_options.c_str());
-  LIBMESH_CHKERR(ierr);
+  LIBMESH_CHKERR(PetscOptionsInsertString(NULL, _extra_slepc_options.c_str()));
 
   // Set the subspace size for the Lanczos method, we take twice as many
   // basis vectors as the requested number of POD modes. This guarantees in most of the case the
@@ -139,13 +137,11 @@ POD::computePOD(const VariableName & vname,
   LIBMESH_CHKERR(SVDSetFromOptions(svd));
 
   // Compute the singular value triplets
-  ierr = SVDSolve(svd);
-  LIBMESH_CHKERR(ierr);
+  LIBMESH_CHKERR(SVDSolve(svd));
 
   // Check how many singular triplets converged
   PetscInt nconv;
-  ierr = SVDGetConverged(svd, &nconv);
-  LIBMESH_CHKERR(ierr);
+  LIBMESH_CHKERR(SVDGetConverged(svd, &nconv));
 
   // We start extracting the basis functions and the singular values.
 
@@ -166,10 +162,8 @@ POD::computePOD(const VariableName & vname,
   singular_values.resize(nconv);
   // Fetch the singular value triplet and immediately save the singular value
   for (PetscInt j = 0; j < nconv; ++j)
-  {
-    ierr = SVDGetSingularTriplet(svd, j, &singular_values[j], NULL, NULL);
-    LIBMESH_CHKERR(ierr);
-  }
+    LIBMESH_CHKERR(SVDGetSingularTriplet(svd, j, &singular_values[j], NULL, NULL));
+
   // Determine how many modes we need
   unsigned int num_requested_modes = determineNumberOfModes(singular_values, num_modes, energy);
   // Only save the basis functions which are needed. We serialize the modes
@@ -182,8 +176,8 @@ POD::computePOD(const VariableName & vname,
     u.localize(left_basis_functions[j].get_values());
     v.localize(right_basis_functions[j].get_values());
   }
-  MatDestroy(&mat);
-  SVDDestroy(&svd);
+  LIBMESH_CHKERR(MatDestroy(&mat));
+  LIBMESH_CHKERR(SVDDestroy(&svd));
 #else
   // These variables would otherwise be unused
   libmesh_ignore(vname);

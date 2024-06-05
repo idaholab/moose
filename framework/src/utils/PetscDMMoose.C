@@ -140,7 +140,7 @@ DMMooseValidityCheck(DM dm)
                      "Got DM of type %s, not of type %s",
                      ((PetscObject)dm)->type_name,
                      DMMOOSE);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -159,7 +159,7 @@ DMMooseGetContacts(DM dm,
     contact_names.push_back(it.second);
     displaced.push_back((*dmm->_contact_displaced)[it.second]);
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -178,7 +178,7 @@ DMMooseGetUnContacts(DM dm,
     uncontact_names.push_back(it.second);
     displaced.push_back((*dmm->_uncontact_displaced)[it.second]);
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -192,7 +192,7 @@ DMMooseGetSides(DM dm, std::vector<std::string> & side_names)
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_side_ids))
     side_names.push_back(it.first);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -206,7 +206,7 @@ DMMooseGetUnSides(DM dm, std::vector<std::string> & side_names)
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_unside_ids))
     side_names.push_back(it.first);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -220,7 +220,7 @@ DMMooseGetBlocks(DM dm, std::vector<std::string> & block_names)
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_block_ids))
     block_names.push_back(it.first);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -234,7 +234,7 @@ DMMooseGetVariables(DM dm, std::vector<std::string> & var_names)
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   for (const auto & it : *(dmm->_var_ids))
     var_names.push_back(it.first);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -251,7 +251,7 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
             "Cannot reset the NonlinearSystem after DM has been set up.");
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   dmm->_nl = &nl;
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -268,7 +268,7 @@ DMMooseSetName(DM dm, const std::string & dm_name)
             "Cannot reset the MOOSE DM name after DM has been set up.");
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   *dmm->_name = dm_name;
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -286,7 +286,7 @@ DMMooseSetParentDM(DM dm, DM_Moose * parent)
 
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   dmm->_parent = parent;
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -317,7 +317,7 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
   }
 
   dmm->_vars = new std::set<std::string>(std::move(processed_vars));
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -334,7 +334,7 @@ DMMooseSetBlocks(DM dm, const std::set<std::string> & blocks)
   if (dmm->_blocks)
     delete dmm->_blocks;
   dmm->_blocks = new std::set<std::string>(blocks);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -351,7 +351,7 @@ DMMooseSetSides(DM dm, const std::set<std::string> & sides)
   if (dmm->_sides)
     delete dmm->_sides;
   dmm->_sides = new std::set<std::string>(sides);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -368,7 +368,7 @@ DMMooseSetUnSides(DM dm, const std::set<std::string> & unsides)
   if (dmm->_unsides)
     delete dmm->_unsides;
   dmm->_unsides = new std::set<std::string>(unsides);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -385,7 +385,7 @@ DMMooseSetUnSideByVar(DM dm, const std::set<std::string> & unside_by_var)
   if (dmm->_unside_by_var)
     delete dmm->_unside_by_var;
   dmm->_unside_by_var = new std::set<std::string>(unside_by_var);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -417,7 +417,7 @@ DMMooseSetContacts(DM dm,
     dmm->_contacts->insert(contacts[i]);
     dmm->_contact_displaced->insert(std::make_pair(contacts[i], displaced[i]));
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -450,7 +450,7 @@ DMMooseSetUnContacts(DM dm,
     dmm->_uncontacts->insert(uncontacts[i]);
     dmm->_uncontact_displaced->insert(std::make_pair(uncontacts[i], displaced[i]));
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -463,7 +463,7 @@ DMMooseGetNonlinearSystem(DM dm, NonlinearSystemBase *& nl)
   CHKERRQ(ierr);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   nl = dmm->_nl;
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -504,7 +504,7 @@ DMMooseSetSplitNames(DM dm, const std::vector<std::string> & split_names)
     (*dmm->_splits)[name] = info;
     dmm->_splitlocs->insert(std::make_pair(name, i));
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -527,7 +527,7 @@ DMMooseGetSplitNames(DM dm, std::vector<std::string> & split_names)
       unsigned int sloc = lit.second;
       split_names[sloc] = sname;
     }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -538,7 +538,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
   PetscFunctionBegin;
   if (!embedding)
-    PetscFunctionReturn(0);
+    return PETSC_SUCCESS;
   if (!dmm->_embedding)
   {
     // The rules interpreting the coexistence of blocks (un)sides/(un)contacts are these
@@ -870,7 +870,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
   CHKERRQ(ierr);
   *embedding = dmm->_embedding;
 
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -886,7 +886,7 @@ DMCreateFieldDecomposition_Moose(
 
   /* Only called after DMSetUp(). */
   if (!dmm->_splitlocs)
-    PetscFunctionReturn(0);
+    return PETSC_SUCCESS;
   *len = dmm->_splitlocs->size();
   if (namelist)
   {
@@ -966,17 +966,16 @@ DMCreateFieldDecomposition_Moose(
           ierr = ISGetLocalSize(dmm->_embedding, &len);
           CHKERRQ(ierr);
 
-          ierr = MPI_Scan(&len,
-                          &off,
-                          1,
+          MPI_Scan(&len,
+                   &off,
+                   1,
 #ifdef PETSC_USE_64BIT_INDICES
-                          MPI_LONG_LONG_INT,
+                   MPI_LONG_LONG_INT,
 #else
-                          MPI_INT,
+                   MPI_INT,
 #endif
-                          MPI_SUM,
-                          ((PetscObject)dm)->comm);
-          CHKERRQ(ierr);
+                   MPI_SUM,
+                   ((PetscObject)dm)->comm);
 
           off -= len;
           for (i = 0; i < llen; ++i)
@@ -994,7 +993,8 @@ DMCreateFieldDecomposition_Moose(
       CHKERRQ(ierr);
       (*islist)[d] = dinfo._rembedding;
       PetscInt is_size;
-      ISGetLocalSize(dinfo._rembedding, &is_size);
+      ierr = ISGetLocalSize(dinfo._rembedding, &is_size);
+      CHKERRQ(ierr);
       split_size_sum += is_size;
     }
     if (dmlist)
@@ -1014,7 +1014,7 @@ DMCreateFieldDecomposition_Moose(
               split_size_sum,
               dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m());
 
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1030,7 +1030,7 @@ DMCreateDomainDecomposition_Moose(
     *outerislist = LIBMESH_PETSC_NULLPTR; /* FIX: allow mesh-based overlap. */
   ierr = DMCreateFieldDecomposition_Moose(dm, len, namelist, innerislist, dmlist);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1102,7 +1102,7 @@ DMMooseFunction(DM dm, Vec x, Vec r)
     mooseError(err.str());
   }
   R.close();
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1114,7 +1114,7 @@ SNESFunction_DMMoose(SNES, Vec x, Vec r, void * ctx)
   PetscFunctionBegin;
   ierr = DMMooseFunction(dm, x, r);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1196,7 +1196,7 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   }
   the_pc.close();
   Jac.close();
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1208,7 +1208,7 @@ SNESJacobian_DMMoose(SNES, Vec x, Mat jac, Mat pc, void * ctx)
   PetscFunctionBegin;
   ierr = DMMooseJacobian(dm, x, jac, pc);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1235,7 +1235,7 @@ DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
   else
     SETERRQ(
         ((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "No bounds calculation in this Moose object");
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1285,7 +1285,7 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
   ierr = VecSetDM(*x, dm);
   CHKERRQ(ierr);
 #endif
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1342,7 +1342,7 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
    * settings made here. */
   ierr = MatSetUp(*A);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1475,7 +1475,7 @@ DMView_Moose(DM dm, PetscViewer viewer)
   else
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_SUP, "Non-ASCII viewers are not supported");
 
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1498,7 +1498,7 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
     blocks.insert(elem->subdomain_id());
   // Some subdomains may only live on other processors
   mesh.comm().set_union(blocks);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1757,7 +1757,7 @@ DMSetUp_Moose_Pre(DM dm)
   }
   ierr = PetscObjectSetName((PetscObject)dm, name.c_str());
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -1771,7 +1771,7 @@ DMMooseReset(DM dm)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    PetscFunctionReturn(0);
+    return PETSC_SUCCESS;
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   ierr = ISDestroy(&dmm->_embedding);
@@ -1788,7 +1788,7 @@ DMMooseReset(DM dm)
     }
   }
   dm->setupcalled = PETSC_FALSE;
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -1851,7 +1851,7 @@ DMSetUp_Moose(DM dm)
       ierr = DMSetVariableBounds(dm, DMVariableBounds_Moose);
     CHKERRQ(ierr);
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 #if !PETSC_VERSION_LESS_THAN(3, 18, 0)
@@ -2236,7 +2236,7 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
   ierr = DMSetUp_Moose_Pre(dm);
   CHKERRQ(ierr); /* Need some preliminary set up because, strangely enough, DMView() is called in
                     DMSetFromOptions(). */
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 static PetscErrorCode
@@ -2291,7 +2291,7 @@ DMDestroy_Moose(DM dm)
   CHKERRQ(ierr);
   ierr = PetscFree(dm->data);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -2308,7 +2308,7 @@ DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, const std::string & dm_na
   CHKERRQ(ierr);
   ierr = DMMooseSetName(*dm, dm_name);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 EXTERN_C_BEGIN
@@ -2370,7 +2370,7 @@ DMCreate_Moose(DM dm)
   dm->ops->view = DMView_Moose;
   dm->ops->setfromoptions = DMSetFromOptions_Moose;
   dm->ops->setup = DMSetUp_Moose;
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 EXTERN_C_END
 
@@ -2425,7 +2425,7 @@ SNESUpdateDMMoose(SNES snes, PetscInt iteration)
     ierr = PCDestroy(&pc);
     CHKERRQ(ierr);
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }
 
 PetscErrorCode
@@ -2441,5 +2441,5 @@ DMMooseRegisterAll()
     CHKERRQ(ierr);
     DMMooseRegisterAllCalled = PETSC_TRUE;
   }
-  PetscFunctionReturn(0);
+  return PETSC_SUCCESS;
 }

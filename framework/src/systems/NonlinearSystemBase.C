@@ -99,6 +99,7 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
 
@@ -1934,11 +1935,15 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
     // Necessary for speed
     if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
     {
-      MatSetOption(petsc_matrix->mat(),
-                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                   PETSC_TRUE);
+      auto ierr = MatSetOption(petsc_matrix->mat(),
+                               MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                               PETSC_TRUE);
+      LIBMESH_CHKERR(ierr);
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+      {
+        ierr = MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+        LIBMESH_CHKERR(ierr);
+      }
     }
   }
 
@@ -2274,13 +2279,20 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   auto & jacobian = getMatrix(systemMatrixTag());
 
+  auto ierr = (PetscErrorCode)0;
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_NEW_NONZERO_ALLOCATION_ERR,
-                 PETSC_FALSE);
+  {
+    ierr = MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                        MAT_NEW_NONZERO_ALLOCATION_ERR,
+                        PETSC_FALSE);
+    LIBMESH_CHKERR(ierr);
+  }
   if (_fe_problem.ignoreZerosInJacobian())
-    MatSetOption(
+  {
+    ierr = MatSetOption(
         static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
+    LIBMESH_CHKERR(ierr);
+  }
 
   std::vector<numeric_index_type> zero_rows;
 
@@ -2461,9 +2473,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
       if (constraints_applied)
       {
-        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                     MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                     PETSC_TRUE);
+        auto ierr = MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                                 PETSC_TRUE);
+        LIBMESH_CHKERR(ierr);
 
         jacobian.close();
         jacobian.zero_rows(zero_rows, 0.0);
@@ -2480,9 +2493,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
     if (constraints_applied)
     {
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                   PETSC_TRUE);
+      auto ierr = MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                               MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                               PETSC_TRUE);
+      LIBMESH_CHKERR(ierr);
 
       jacobian.close();
       jacobian.zero_rows(zero_rows, 0.0);
@@ -2664,9 +2678,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   if (constraints_applied)
   {
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                 PETSC_TRUE);
+    auto ierr = MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                             MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                             PETSC_TRUE);
+    LIBMESH_CHKERR(ierr);
 
     jacobian.close();
     jacobian.zero_rows(zero_rows, 0.0);
@@ -2769,11 +2784,15 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Necessary for speed
     if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
     {
-      MatSetOption(petsc_matrix->mat(),
-                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                   PETSC_TRUE);
+      auto ierr = MatSetOption(petsc_matrix->mat(),
+                               MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                               PETSC_TRUE);
+      LIBMESH_CHKERR(ierr);
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+      {
+        ierr = MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+        LIBMESH_CHKERR(ierr);
+      }
     }
   }
 
@@ -3158,13 +3177,17 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
   {
     SparseMatrix<Number> & jacobian = blocks[i]->_jacobian;
 
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                 PETSC_TRUE);
+    auto ierr = MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                             MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                             PETSC_TRUE);
+    LIBMESH_CHKERR(ierr);
     if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                   MAT_NEW_NONZERO_ALLOCATION_ERR,
-                   PETSC_TRUE);
+    {
+      ierr = MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                          MAT_NEW_NONZERO_ALLOCATION_ERR,
+                          PETSC_TRUE);
+      LIBMESH_CHKERR(ierr);
+    }
 
     jacobian.zero();
   }
