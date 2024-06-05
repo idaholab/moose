@@ -32,7 +32,7 @@ tests/
       my_kernel_test.i   [input file]
       tests              [test specification file]
       gold/              [gold standard folder for validated solution]
-      out.e              [solution]
+        out.e            [solution]
 ```
 
 !---
