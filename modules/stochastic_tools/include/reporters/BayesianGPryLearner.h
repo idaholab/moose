@@ -82,7 +82,9 @@ private:
    * @param acq The current values of the acquistion function
    * @param sorted The sorted indices in the order of importance
    */
-  void acqWithCorrelations(std::vector<Real> & acq, std::vector<unsigned int> & sorted);
+  void acqWithCorrelations(std::vector<Real> & acq,
+                           std::vector<unsigned int> & sorted,
+                           std::vector<Real> & acq_new);
 
   /**
    * Compute the correlations between the given inputs
@@ -93,6 +95,18 @@ private:
   void computeCorrelation(const std::vector<Real> & input1,
                           const std::vector<Real> & input2,
                           Real & corr);
+
+  void computeGPOutput(std::vector<Real> & eval_outputs,
+                       const std::vector<std::vector<Real>> & eval_inputs);
+
+  void computeDistance(const std::vector<Real> & current_input,
+                       unsigned int & req_index);
+
+  /**
+   * Fill in the provided vector with random samples given the distributions
+   * @param vector The vector to be filled
+   */
+  void fillVector(std::vector<Real> & vector);
 
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
@@ -132,6 +146,8 @@ private:
   /// The maximum value of the acquistion function in the current iteration
   std::vector<Real> & _acquisition_function;
 
+  Real & _convergence_value;
+
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
 
@@ -164,4 +180,11 @@ private:
 
   /// Storage for the length scales after the GP training 
   std::vector<Real> _length_scales;
+
+  unsigned int _seed;
+  unsigned int _eval_points;
+  std::vector<std::vector<Real>> _eval_inputs;
+  // std::vector<Real> _eval_inputs_density;
+  std::vector<Real> _eval_outputs_current;
+  std::vector<Real> _eval_outputs_previous;
 };
