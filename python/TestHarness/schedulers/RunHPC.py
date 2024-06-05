@@ -356,6 +356,9 @@ class RunHPC(RunParallel):
             # Append the apptainer command along with the command to be ran
             job_command += f"{apptainer_command} '{command}'"
             job_command_printable += f"{apptainer_command} \'\\'\'{command}\'\\'\'"
+
+            # Set that we're using apptainer
+            submission_env['USING_APPTAINER'] = '1'
         # Not in apptainer, so we can just use the escaped command as is
         else:
             job_command = f"'{command}'"
