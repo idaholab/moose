@@ -12,7 +12,7 @@ Upcoming MOOSE related training in chronological order:
 Upcoming MOOSE related Conferences:
 !style-end!
 
-- [MOOSE Internation Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)
+- [MOOSE International Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)
 
 #### Past Training:
 
