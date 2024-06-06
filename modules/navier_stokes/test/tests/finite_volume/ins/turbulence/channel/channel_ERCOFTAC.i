@@ -395,10 +395,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
   print_fields = false
-
-  pin_pressure = true
-  pressure_pin_value = 0.0
-  pressure_pin_point = '0.01 0.099 0.0'
 []
 
 [Outputs]

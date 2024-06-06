@@ -1,0 +1,10 @@
+[Tests]
+  design = 'source/functormaterials/RadiativeP1DiffusionCoefficientMaterial.md'
+  issues = '#27725'
+  [P1_radiation_material_test]
+    type = CSVDiff
+    input = 'P1_radiation_material_test.i'
+    csvdiff = 'P1_radiation_material_test_out.csv'
+    requirement = 'The system shall be able to compute a P1 diffusion coefficient from opacity and effective scattering.'
+  []
+[]

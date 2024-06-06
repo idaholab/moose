@@ -25,6 +25,8 @@
   [heat_conduction_time_derivative]
     type = ADHeatConductionTimeDerivative
     variable = temperature
+    specific_heat = specific_heat
+    density_name = density
   []
 []
 

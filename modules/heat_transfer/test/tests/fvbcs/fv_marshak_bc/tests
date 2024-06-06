@@ -1,0 +1,21 @@
+[Tests]
+  design = 'source/fvbcs/FVMarshakRadiativeBC.md'
+  issues = '#27725'
+  [P1_marshak_bcs]
+    requirement = 'The system shall be able to preserve the contant solution for radiative heat transfer, '
+    [1D]
+      type = CSVDiff
+      input = 'rad_istothermal_medium_1d.i'
+      csvdiff = 'rad_istothermal_medium_1d_out.csv'
+      abs_zero = 1e-10
+      detail = " in 1D."
+    []
+    [2D]
+      type = CSVDiff
+      input = 'rad_istothermal_medium_2d.i'
+      csvdiff = 'rad_istothermal_medium_2d_out.csv'
+      abs_zero = 1e-10
+      detail = " in 2D."
+    []
+  []
+[]
