@@ -24,8 +24,8 @@
 [Executioner]
   type = Optimize
   tao_solver = taobqnktr
-  petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
-  petsc_options_value = '1e-7 50 none cg'
+  petsc_options_iname = '-tao_gttol -tao_max_it'
+  petsc_options_value = '1e-7 500 '
   verbose = true
 []
 

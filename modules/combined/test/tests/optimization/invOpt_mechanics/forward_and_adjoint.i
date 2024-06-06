@@ -28,12 +28,6 @@
     []
   []
 []
-# [Kernels]
-#   [TensorMechanics]
-#     use_displaced_mesh = false
-#     displacements = 'disp_x disp_y'
-#   []
-# []
 
 [BCs]
   [left_ux]
@@ -83,10 +77,6 @@
     youngs_modulus = 10e3
     poissons_ratio = 0.3
   []
-  # [strain]
-  #   type = ComputeSmallStrain
-  #   displacements = 'disp_x disp_y'
-  # []
   [stress]
     type = ComputeLinearElasticStress
   []
@@ -117,14 +107,14 @@
     objective_name = objective_value
     variable = disp_x
     measurement_points = '5.0 1.0 0.0'
-    measurement_values = '-13.'
+    measurement_values = '-13.00873469088'
   []
   [measure_data_y]
     type = OptimizationData
     objective_name = objective_value
     variable = disp_y
     measurement_points = '5.0 1.0 0.0'
-    measurement_values = '85.'
+    measurement_values = '85.008027719915'
   []
   [params]
     type = ConstantReporter
@@ -156,10 +146,11 @@
 
 [Outputs]
   csv = false
-  console = true
+  console = false
   exodus = false
   file_base = 'forward'
   execute_on = 'FINAL'
+  json = false
 []
 
 [Problem]
@@ -174,7 +165,6 @@
     solver_sys = adjoint
     outputs = none
   []
-
   [adjoint_y]
     initial_condition = 0
     solver_sys = adjoint
