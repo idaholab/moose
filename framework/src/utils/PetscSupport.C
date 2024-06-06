@@ -278,7 +278,7 @@ petscSetupOutput(CommandLine * cmd_line)
       break;
     }
   }
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -346,7 +346,7 @@ petscNonlinearConverged(SNES snes,
   if (domainerror)
   {
     *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   // Error message that will be set by the FEProblemBase.
@@ -418,7 +418,7 @@ petscNonlinearConverged(SNES snes,
       break;
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PCSide

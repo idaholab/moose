@@ -520,13 +520,13 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
   PetscFunctionBegin;
 
   if (eigen_problem.constantMatrices() && eigen_problem.wereMatricesFormed())
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
 
   if (eigen_problem.onLinearSolver())
     // We reach here during linear iteration when solve type is PJFNKMO.
     // We will use the matrices assembled at the beginning of this Newton
     // iteration for the following residual evaluation.
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
 
   NonlinearEigenSystem & eigen_nl = eigen_problem.getCurrentNonlinearEigenSystem();
   SNES snes = eigen_nl.getSNES();
@@ -552,7 +552,7 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
   moosePetscSNESFormMatricesTags(
       snes, x, mats, ctx, {eigen_nl.nonEigenMatrixTag(), eigen_nl.eigenMatrixTag()});
   eigen_problem.wereMatricesFormed(true);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void
@@ -644,7 +644,7 @@ mooseSlepcEigenFormFunctionMFFD(void * ctx, Vec x, Vec r)
 
   eigen_problem->onLinearSolver(false);
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -683,7 +683,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
       ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
       CHKERRQ(ierr);
     }
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pisshell);
@@ -700,7 +700,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
     CHKERRQ(ierr);
 
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   // Jacobian and precond matrix are the same
@@ -709,7 +709,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     if (!pisshell)
       moosePetscSNESFormMatrixTag(snes, x, pc, ctx, eigen_nl.precondMatrixTag());
 
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   else
   {
@@ -718,7 +718,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
       std::vector<Mat> mats = {jac, pc};
       moosePetscSNESFormMatricesTags(
           snes, x, mats, ctx, {eigen_nl.nonEigenMatrixTag(), eigen_nl.precondMatrixTag()});
-      return PETSC_SUCCESS;
+      PetscFunctionReturn(PETSC_SUCCESS);
     }
     if (!pisshell) // We need to form only precond matrix
     {
@@ -727,7 +727,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
       CHKERRQ(ierr);
       ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
       CHKERRQ(ierr);
-      return PETSC_SUCCESS;
+      PetscFunctionReturn(PETSC_SUCCESS);
     }
     if (!jisshell && !jismffd) // We need to form only Jacobian matrix
     {
@@ -736,10 +736,10 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
       CHKERRQ(ierr);
       ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
       CHKERRQ(ierr);
-      return PETSC_SUCCESS;
+      PetscFunctionReturn(PETSC_SUCCESS);
     }
   }
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -774,7 +774,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
     CHKERRQ(ierr);
 
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   if (jac != pc && (!jshell && !jshell))
@@ -790,7 +790,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     CHKERRQ(ierr);
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void
@@ -850,12 +850,12 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
     ierr = MatMult(A, x, r);
     CHKERRQ(ierr);
 
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.nonEigenVectorTag());
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -898,7 +898,7 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
     CHKERRQ(ierr);
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -942,7 +942,7 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
       CHKERRQ(ierr);
     }
 
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   PetscVector<Number> X_global(x, sys.comm()), AX(Ax, sys.comm()), BX(Bx, sys.comm());
@@ -978,7 +978,7 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     CHKERRQ(ierr);
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -987,7 +987,7 @@ mooseSlepcEigenFormNorm(SNES /*snes*/, Vec /*Bx*/, PetscReal * norm, void * ctx)
   PetscFunctionBegin;
   auto * const eigen_problem = static_cast<EigenProblem *>(ctx);
   *norm = eigen_problem->formNorm();
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void
@@ -1098,7 +1098,7 @@ mooseMatMult_Eigen(Mat mat, Vec x, Vec r)
     CHKERRQ(ierr);
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1117,7 +1117,7 @@ mooseMatMult_NonEigen(Mat mat, Vec x, Vec r)
 
   mooseMatMult(*eigen_problem, x, r, eigen_nl.nonEigenVectorTag());
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void
@@ -1141,7 +1141,7 @@ registerPCToPETSc()
   ierr = PCRegister("moosepc", PCCreate_MoosePC);
   CHKERRQ(ierr);
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PETSC_EXTERN PetscErrorCode
@@ -1154,7 +1154,7 @@ PCCreate_MoosePC(PC pc)
   pc->ops->setup = PCSetUp_MoosePC;
   pc->ops->apply = PCApply_MoosePC;
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1163,7 +1163,7 @@ PCDestroy_MoosePC(PC /*pc*/)
   PetscFunctionBegin;
   /* We do not need to do anything right now, but later we may have some data we need to free here
    */
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1180,7 +1180,7 @@ PCView_MoosePC(PC /*pc*/, PetscViewer viewer)
     ierr = PetscViewerASCIIPrintf(viewer, "  %s\n", "moosepc");
     CHKERRQ(ierr);
   }
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1217,7 +1217,7 @@ PCApply_MoosePC(PC pc, Vec x, Vec y)
 
   preconditioner->apply(x_vec, y_vec);
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1253,7 +1253,7 @@ PCSetUp_MoosePC(PC pc)
 
   preconditioner->setup();
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1282,7 +1282,7 @@ mooseSlepcStoppingTest(EPS eps,
     *reason = EPS_CONVERGED_USER;
     eps->nconv = 1;
   }
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1306,7 +1306,7 @@ mooseSlepcEPSGetSNES(EPS eps, SNES * snes)
   ierr = EPSPowerGetSNES(eps, snes);
   LIBMESH_CHKERR(ierr);
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1327,7 +1327,7 @@ mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps)
   ierr = SNESSetOptionsPrefix(snes, prefix);
   LIBMESH_CHKERR(ierr);
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1350,7 +1350,7 @@ mooseSlepcEPSSNESSetCustomizePC(EPS eps)
   // Set PC type
   ierr = PCSetType(pc, "moosepc");
   LIBMESH_CHKERR(ierr);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1370,7 +1370,7 @@ mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
   Moose::PetscSupport::petscSetDefaultPCSide(problem, ksp);
 
   Moose::PetscSupport::petscSetDefaultKSPNormType(problem, ksp);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -1405,7 +1405,7 @@ mooseSlepcEPSMonitor(EPS eps,
   console << " Iteration " << its << std::setprecision(10) << std::fixed
           << (inverse ? " k-eigenvalue = " : " eigenvalue = ") << eigenvalue << std::endl;
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 } // namespace SlepcSupport
