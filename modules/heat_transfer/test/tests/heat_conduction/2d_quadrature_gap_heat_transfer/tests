@@ -76,4 +76,17 @@
     design = "/actions/ThermalContactAction.md"
     issues = "#13043"
   [../]
+
+  [./perfect_split_mesh]
+      type = 'Exodiff'
+      prereq = perfect
+      input = 'perfect_split.i'
+      exodiff = 'perfect_out.e'
+      cli_args = 'Outputs/file_base=perfect_out'
+      requirement = "The system shall read in parallel a mesh split across 2 processes."
+      design = "Mesh/splitting.md"
+      min_parallel = 2
+      max_parallel = 2
+      issues = "#27203"
+  [../]
 []

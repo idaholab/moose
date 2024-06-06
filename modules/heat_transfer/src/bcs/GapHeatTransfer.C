@@ -89,7 +89,6 @@ GapHeatTransfer::validParams()
         boundary.push_back(obj_params.get<BoundaryName>("paired_boundary"));
       });
 
-  // Moose::out << "Obj "<< obj_params.get<BoundaryName>("secondary") << std::endl;
   return params;
 }
 

@@ -37,8 +37,8 @@ public:
    * required elements from (range_begin, range_end) to the
    * coupled_elements map.
    */
-  virtual void operator()(const MeshBase::const_element_iterator & range_begin,
-                          const MeshBase::const_element_iterator & range_end,
+  virtual void operator()(const MeshBase::const_element_iterator & /*range_begin*/,
+                          const MeshBase::const_element_iterator & /*range_end*/,
                           processor_id_type p,
                           map_type & coupled_elements) override;
 

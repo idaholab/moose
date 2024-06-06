@@ -72,8 +72,8 @@ GhostBoundary::getInfo() const
 }
 
 void
-GhostBoundary::operator()(const MeshBase::const_element_iterator & range_begin,
-                          const MeshBase::const_element_iterator & range_end,
+GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin*/,
+                          const MeshBase::const_element_iterator & /*range_end*/,
                           const processor_id_type p,
                           map_type & coupled_elements)
 {
@@ -84,12 +84,10 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & range_begin,
   const auto boundary_ids = generating_mesh ? std::vector<BoundaryID>{Moose::INVALID_BOUNDARY_ID}
                                             : _moose_mesh->getBoundaryIDs(_boundary_name);
 
-  Moose::out << "Mesh type " << _moose_mesh->isSplit() << std::endl;
   for (const Elem * const elem : _mesh->active_element_ptr_range())
   {
     if (generating_mesh)
-    {
-      // We are still generating the mesh, so it's possible we don't even have the right boundary
+    { // We are still generating the mesh, so it's possible we don't even have the right boundary
       // ids created yet! So we actually ghost all boundary elements and all lower dimensional
       // elements who have parents on a boundary
       if (elem->on_boundary())
